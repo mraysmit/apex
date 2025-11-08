@@ -100,7 +100,7 @@ public class FluentBuilderExecutor extends PatternExecutor {
             return resultBuilder.successful(true).build();
 
         } catch (Exception e) {
-            logger.severe("Error executing fluent builder: " + e.getMessage());
+            logger.error("Error executing fluent builder: " + e.getMessage());
             return resultBuilder.errorMessage("Execution error: " + e.getMessage()).build();
         }
     }
@@ -165,7 +165,7 @@ public class FluentBuilderExecutor extends PatternExecutor {
             }
 
         } catch (Exception e) {
-            logger.severe("Error executing fluent rule node at depth " + depth + ": " + e.getMessage());
+            logger.error("Error executing fluent rule node at depth " + depth + ": " + e.getMessage());
             return SeverityConstants.ERROR;
         }
     }
@@ -173,19 +173,19 @@ public class FluentBuilderExecutor extends PatternExecutor {
     @Override
     public boolean validateConfiguration(Map<String, Object> configuration) {
         if (configuration == null) {
-            logger.warning("Configuration is null");
+            logger.warn("Configuration is null");
             return false;
         }
 
         // Validate root-rule configuration
         if (!hasRequiredKey(configuration, "root-rule")) {
-            logger.warning("Missing required key: root-rule");
+            logger.warn("Missing required key: root-rule");
             return false;
         }
 
         Map<String, Object> rootRuleConfig = getMapValue(configuration, "root-rule");
         if (rootRuleConfig == null) {
-            logger.warning("root-rule must be a map");
+            logger.warn("root-rule must be a map");
             return false;
         }
 
@@ -204,13 +204,13 @@ public class FluentBuilderExecutor extends PatternExecutor {
     private boolean validateFluentRuleNode(Map<String, Object> ruleConfig, String nodeName, int depth) {
         // Prevent infinite recursion
         if (depth > 20) {
-            logger.warning("Rule tree too deep (max depth 20) at node: " + nodeName);
+            logger.warn("Rule tree too deep (max depth 20) at node: " + nodeName);
             return false;
         }
 
         // Validate required condition
         if (!hasRequiredKey(ruleConfig, "condition")) {
-            logger.warning("Rule node '" + nodeName + "' missing required condition");
+            logger.warn("Rule node '" + nodeName + "' missing required condition");
             return false;
         }
 
@@ -218,14 +218,14 @@ public class FluentBuilderExecutor extends PatternExecutor {
         if (ruleConfig.containsKey("on-success")) {
             Map<String, Object> onSuccess = getMapValue(ruleConfig, "on-success");
             if (onSuccess == null) {
-                logger.warning("Rule node '" + nodeName + "' on-success must be a map");
+                logger.warn("Rule node '" + nodeName + "' on-success must be a map");
                 return false;
             }
 
             if (onSuccess.containsKey("rule")) {
                 Map<String, Object> successRule = getMapValue(onSuccess, "rule");
                 if (successRule == null) {
-                    logger.warning("Rule node '" + nodeName + "' on-success rule must be a map");
+                    logger.warn("Rule node '" + nodeName + "' on-success rule must be a map");
                     return false;
                 }
 
@@ -239,14 +239,14 @@ public class FluentBuilderExecutor extends PatternExecutor {
         if (ruleConfig.containsKey("on-failure")) {
             Map<String, Object> onFailure = getMapValue(ruleConfig, "on-failure");
             if (onFailure == null) {
-                logger.warning("Rule node '" + nodeName + "' on-failure must be a map");
+                logger.warn("Rule node '" + nodeName + "' on-failure must be a map");
                 return false;
             }
 
             if (onFailure.containsKey("rule")) {
                 Map<String, Object> failureRule = getMapValue(onFailure, "rule");
                 if (failureRule == null) {
-                    logger.warning("Rule node '" + nodeName + "' on-failure rule must be a map");
+                    logger.warn("Rule node '" + nodeName + "' on-failure rule must be a map");
                     return false;
                 }
 

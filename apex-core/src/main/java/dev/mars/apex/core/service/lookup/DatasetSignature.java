@@ -17,12 +17,15 @@ package dev.mars.apex.core.service.lookup;
  */
 
 import dev.mars.apex.core.config.yaml.YamlEnrichment.LookupDataset;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.security.MessageDigest;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generates unique signatures for datasets to enable caching and deduplication.
@@ -51,7 +54,7 @@ import java.util.logging.Logger;
  */
 public class DatasetSignature {
     
-    private static final Logger LOGGER = Logger.getLogger(DatasetSignature.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(DatasetSignature.class);
     
     private final String type;           // Dataset type: inline, file, database, rest-api
     private final String contentHash;    // Hash of dataset content
@@ -85,7 +88,7 @@ public class DatasetSignature {
         
         String keyField = dataset.getKeyField();
         if (keyField == null || keyField.trim().isEmpty()) {
-            LOGGER.warning("Dataset key field is null or empty - signature may not be unique");
+            logger.warn("Dataset key field is null or empty - signature may not be unique");
             keyField = "unknown";
         }
         
@@ -116,7 +119,7 @@ public class DatasetSignature {
                 return hashRestApiConfig(dataset);
                 
             default:
-                LOGGER.warning("Unknown dataset type: " + type + ". Using type as hash.");
+                logger.warn("Unknown dataset type: " + type + ". Using type as hash.");
                 return type;
         }
     }
@@ -145,7 +148,7 @@ public class DatasetSignature {
             return hexHash.substring(0, Math.min(8, hexHash.length()));
             
         } catch (Exception e) {
-            LOGGER.warning("Failed to hash inline data: " + e.getMessage());
+            logger.warn("Failed to hash inline data: " + e.getMessage());
             return "hash-error-" + data.size();
         }
     }
@@ -204,7 +207,7 @@ public class DatasetSignature {
             String hexHash = bytesToHex(hash);
             return hexHash.substring(0, Math.min(8, hexHash.length()));
         } catch (Exception e) {
-            LOGGER.warning("Failed to hash database config: " + e.getMessage());
+            logger.warn("Failed to hash database config: " + e.getMessage());
             return "db-hash-error";
         }
     }
@@ -242,7 +245,7 @@ public class DatasetSignature {
             String hexHash = bytesToHex(hash);
             return hexHash.substring(0, Math.min(8, hexHash.length()));
         } catch (Exception e) {
-            LOGGER.warning("Failed to hash REST API config: " + e.getMessage());
+            logger.warn("Failed to hash REST API config: " + e.getMessage());
             return "api-hash-error";
         }
     }

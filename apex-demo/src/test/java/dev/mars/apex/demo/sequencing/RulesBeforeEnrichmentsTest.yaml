@@ -83,7 +83,7 @@ enrichments:
     field-mappings:
       - source-field: "optionType"
         target-field: "productCategory"
-        transformation: "#optionType == 'CALL' ? 'EQUITY_CALL_OPTION' : 'EQUITY_PUT_OPTION'"
+        expression: "#optionType == 'CALL' ? 'EQUITY_CALL_OPTION' : 'EQUITY_PUT_OPTION'"
 
 # PHASE 6: Inline enrichment group (EG3) - references enrichment defined above
 enrichment-groups:

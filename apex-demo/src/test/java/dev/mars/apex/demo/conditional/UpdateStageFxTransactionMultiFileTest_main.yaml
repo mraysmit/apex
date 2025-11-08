@@ -106,7 +106,7 @@ enrichments:
     field-mappings:
       - source-field: "BUY_CURRENCY_REGION"
         target-field: "CROSS_REGION"
-        transformation: "#BUY_CURRENCY_REGION != #SELL_CURRENCY_REGION"
+        expression: "#BUY_CURRENCY_REGION != #SELL_CURRENCY_REGION"
 
 # Lookup datasets removed - now inline in enrichments
 

@@ -1,9 +1,12 @@
 package dev.mars.apex.core.service.lookup;
 
 import dev.mars.apex.core.config.yaml.YamlEnrichment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.stream.Collectors;
 
 /*
@@ -33,7 +36,7 @@ import java.util.stream.Collectors;
  */
 public class DatasetLookupService extends LookupService {
     
-    private static final Logger LOGGER = Logger.getLogger(DatasetLookupService.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(DatasetLookupService.class);
     
     private final Map<String, Map<String, Object>> datasetMap;
     private final String keyField;
@@ -55,7 +58,7 @@ public class DatasetLookupService extends LookupService {
                            new HashMap<>(dataset.getDefaultValues()) : new HashMap<>();
         this.datasetMap = buildDatasetMap(dataset);
         
-        LOGGER.info("Created DatasetLookupService '" + serviceName + "' with " + 
+        logger.info("Created DatasetLookupService '" + serviceName + "' with " + 
                    datasetMap.size() + " records, key field: " + keyField);
     }
     
@@ -92,7 +95,7 @@ public class DatasetLookupService extends LookupService {
         Map<String, Map<String, Object>> map = new HashMap<>();
         
         if (dataset.getData() == null || dataset.getData().isEmpty()) {
-            LOGGER.warning("Dataset has no data records");
+            logger.warn("Dataset has no data records");
             return map;
         }
         
@@ -110,9 +113,9 @@ public class DatasetLookupService extends LookupService {
                 Map<String, Object> recordData = new HashMap<>(record);
                 
                 map.put(key, recordData);
-                LOGGER.finest("Added dataset record: " + key + " -> " + recordData);
+                logger.trace("Added dataset record: " + key + " -> " + recordData);
             } else {
-                LOGGER.warning("Record missing key field '" + keyField + "': " + record);
+                logger.warn("Record missing key field '" + keyField + "': " + record);
             }
         }
         
@@ -122,7 +125,7 @@ public class DatasetLookupService extends LookupService {
     @Override
     public Object transform(Object key) {
         if (key == null) {
-            LOGGER.fine("Lookup key is null, returning default values");
+            logger.debug("Lookup key is null, returning default values");
             return defaultValues.isEmpty() ? null : new HashMap<>(defaultValues);
         }
         
@@ -134,10 +137,10 @@ public class DatasetLookupService extends LookupService {
             Map<String, Object> result = new HashMap<>(defaultValues);
             result.putAll(record);
             
-            LOGGER.finest("Dataset lookup successful for key '" + keyString + "': " + result);
+            logger.trace("Dataset lookup successful for key '" + keyString + "': " + result);
             return result;
         } else {
-            LOGGER.fine("No dataset record found for key '" + keyString + "', returning default values");
+            logger.debug("No dataset record found for key '" + keyString + "', returning default values");
             return defaultValues.isEmpty() ? null : new HashMap<>(defaultValues);
         }
     }
@@ -151,7 +154,7 @@ public class DatasetLookupService extends LookupService {
         String keyString = value.toString();
         boolean isValid = datasetMap.containsKey(keyString);
         
-        LOGGER.finest("Dataset validation for key '" + keyString + "': " + isValid);
+        logger.trace("Dataset validation for key '" + keyString + "': " + isValid);
         return isValid;
     }
     

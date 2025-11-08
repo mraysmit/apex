@@ -2,7 +2,10 @@ package dev.mars.apex.core.service.data.external.database;
 
 import java.sql.SQLException;
 import java.util.Set;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility class for classifying SQL errors and determining appropriate handling strategies.
@@ -15,7 +18,7 @@ import java.util.logging.Logger;
  */
 public class SqlErrorClassifier {
     
-    private static final Logger LOGGER = Logger.getLogger(SqlErrorClassifier.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(SqlErrorClassifier.class);
     
     /**
      * SQL State codes for constraint violations that should be handled gracefully.
@@ -115,29 +118,29 @@ public class SqlErrorClassifier {
         int errorCode = e.getErrorCode();
         String message = e.getMessage();
         
-        LOGGER.fine(String.format("Classifying SQL error: SQLState=%s, ErrorCode=%d, Message=%s", 
+        logger.debug(String.format("Classifying SQL error: SQLState=%s, ErrorCode=%d, Message=%s", 
                                  sqlState, errorCode, message));
         
         // Check for constraint violations first (most common case for graceful handling)
         if (isConstraintViolation(sqlState, errorCode, message)) {
-            LOGGER.fine("Classified as DATA_INTEGRITY_VIOLATION");
+            logger.debug("Classified as DATA_INTEGRITY_VIOLATION");
             return SqlErrorType.DATA_INTEGRITY_VIOLATION;
         }
         
         // Check for transient errors
         if (isTransientError(sqlState, errorCode, message)) {
-            LOGGER.fine("Classified as TRANSIENT_ERROR");
+            logger.debug("Classified as TRANSIENT_ERROR");
             return SqlErrorType.TRANSIENT_ERROR;
         }
         
         // Check for configuration errors
         if (isConfigurationError(sqlState, errorCode, message)) {
-            LOGGER.fine("Classified as CONFIGURATION_ERROR");
+            logger.debug("Classified as CONFIGURATION_ERROR");
             return SqlErrorType.CONFIGURATION_ERROR;
         }
         
         // Default to fatal error for unknown cases
-        LOGGER.fine("Classified as FATAL_ERROR (unknown error type)");
+        logger.debug("Classified as FATAL_ERROR (unknown error type)");
         return SqlErrorType.FATAL_ERROR;
     }
     

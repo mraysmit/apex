@@ -5,7 +5,10 @@ import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -34,7 +37,7 @@ import java.util.logging.Logger;
  */
 public class YamlRulesEngineService {
     
-    private static final Logger LOGGER = Logger.getLogger(YamlRulesEngineService.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(YamlRulesEngineService.class);
     
     private final YamlConfigurationLoader configLoader;
     private final YamlRuleFactory ruleFactory;
@@ -70,8 +73,8 @@ public class YamlRulesEngineService {
      */
     @Deprecated(since = "2.0", forRemoval = true)
     public RulesEngine createRulesEngineWithGenericArchitecture(String filePath) throws YamlConfigurationException {
-        LOGGER.warning("DEPRECATED: createRulesEngineWithGenericArchitecture() is deprecated. Use createRulesEngineFromYamlConfig() with YamlConfigurationLoader.loadFromFile() instead.");
-        LOGGER.info("Creating rules engine with generic architecture from YAML file: " + filePath);
+        logger.warn("DEPRECATED: createRulesEngineWithGenericArchitecture() is deprecated. Use createRulesEngineFromYamlConfig() with YamlConfigurationLoader.loadFromFile() instead.");
+        logger.info("Creating rules engine with generic architecture from YAML file: " + filePath);
 
         YamlRuleConfiguration yamlConfig = configLoader.loadFromFile(filePath);
         return createRulesEngineFromYamlConfig(yamlConfig);
@@ -89,7 +92,7 @@ public class YamlRulesEngineService {
      */
     @Deprecated(since = "3.0", forRemoval = true)
     public RulesEngine createRulesEngineFromYamlConfig(YamlRuleConfiguration yamlConfig) throws YamlConfigurationException {
-        LOGGER.warning("DEPRECATED: createRulesEngineFromYamlConfig() is deprecated. Use new RulesEngine(ruleFactory.createRulesEngineConfiguration(yamlConfig)) instead.");
+        logger.warn("DEPRECATED: createRulesEngineFromYamlConfig() is deprecated. Use new RulesEngine(ruleFactory.createRulesEngineConfiguration(yamlConfig)) instead.");
         try {
             // Use the factory's method which has proper category metadata inheritance
             RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
@@ -113,15 +116,15 @@ public class YamlRulesEngineService {
      */
     @Deprecated(since = "3.0", forRemoval = true)
     public RulesEngine createRulesEngineFromFile(String filePath) throws YamlConfigurationException {
-        LOGGER.warning("DEPRECATED: createRulesEngineFromFile(String) is deprecated. Use YamlConfigurationLoader + new RulesEngine() instead.");
-        LOGGER.info("Creating rules engine from YAML file (legacy): " + filePath);
+        logger.warn("DEPRECATED: createRulesEngineFromFile(String) is deprecated. Use YamlConfigurationLoader + new RulesEngine() instead.");
+        logger.info("Creating rules engine from YAML file (legacy): " + filePath);
 
         YamlRuleConfiguration yamlConfig = configLoader.loadFromFile(filePath);
         RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
 
         RulesEngine engine = new RulesEngine(config);
 
-        LOGGER.info("Successfully created rules engine from file: " + filePath);
+        logger.info("Successfully created rules engine from file: " + filePath);
         return engine;
     }
     
@@ -136,15 +139,15 @@ public class YamlRulesEngineService {
      */
     @Deprecated(since = "2.0", forRemoval = true)
     public RulesEngine createRulesEngineFromFile(File file) throws YamlConfigurationException {
-        LOGGER.warning("DEPRECATED: createRulesEngineFromFile(File) is deprecated. Use createRulesEngineFromYamlConfig() with YamlConfigurationLoader.loadFromFile() instead.");
-        LOGGER.info("Creating rules engine from YAML file: " + file.getAbsolutePath());
+        logger.warn("DEPRECATED: createRulesEngineFromFile(File) is deprecated. Use createRulesEngineFromYamlConfig() with YamlConfigurationLoader.loadFromFile() instead.");
+        logger.info("Creating rules engine from YAML file: " + file.getAbsolutePath());
 
         YamlRuleConfiguration yamlConfig = configLoader.loadFromFile(file);
         RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
 
         RulesEngine engine = new RulesEngine(config);
 
-        LOGGER.info("Successfully created rules engine from file: " + file.getAbsolutePath());
+        logger.info("Successfully created rules engine from file: " + file.getAbsolutePath());
         return engine;
     }
     
@@ -156,14 +159,14 @@ public class YamlRulesEngineService {
      * @throws YamlConfigurationException if configuration loading or processing fails
      */
     public RulesEngine createRulesEngineFromClasspath(String resourcePath) throws YamlConfigurationException {
-        LOGGER.info("Creating rules engine from classpath resource: " + resourcePath);
+        logger.info("Creating rules engine from classpath resource: " + resourcePath);
 
         YamlRuleConfiguration yamlConfig = configLoader.loadFromClasspath(resourcePath);
         RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
 
         RulesEngine engine = new RulesEngine(config);
 
-        LOGGER.info("Successfully created rules engine from classpath resource: " + resourcePath);
+        logger.info("Successfully created rules engine from classpath resource: " + resourcePath);
         return engine;
     }
     
@@ -175,14 +178,14 @@ public class YamlRulesEngineService {
      * @throws YamlConfigurationException if configuration loading or processing fails
      */
     public RulesEngine createRulesEngineFromStream(InputStream inputStream) throws YamlConfigurationException {
-        LOGGER.info("Creating rules engine from input stream");
+        logger.info("Creating rules engine from input stream");
         
         YamlRuleConfiguration yamlConfig = configLoader.loadFromStream(inputStream);
         RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
 
         RulesEngine engine = new RulesEngine(config);
 
-        LOGGER.info("Successfully created rules engine from input stream");
+        logger.info("Successfully created rules engine from input stream");
         return engine;
     }
 
@@ -194,14 +197,14 @@ public class YamlRulesEngineService {
      * @throws YamlConfigurationException if configuration parsing or processing fails
      */
     public RulesEngine createRulesEngineFromString(String yamlString) throws YamlConfigurationException {
-        LOGGER.info("Creating rules engine from YAML string");
+        logger.info("Creating rules engine from YAML string");
 
         YamlRuleConfiguration yamlConfig = configLoader.fromYamlString(yamlString);
         RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
 
         RulesEngine engine = new RulesEngine(config);
 
-        LOGGER.info("Successfully created rules engine from YAML string");
+        logger.info("Successfully created rules engine from YAML string");
         return engine;
     }
     
@@ -216,14 +219,14 @@ public class YamlRulesEngineService {
      */
     @Deprecated(since = "3.0", forRemoval = true)
     public RulesEngine createRulesEngineFromMultipleFiles(String... filePaths) throws YamlConfigurationException {
-        LOGGER.warning("DEPRECATED: createRulesEngineFromMultipleFiles() is deprecated. Load and merge YAML configs manually, then use new RulesEngine().");
-        LOGGER.info("Creating rules engine from multiple YAML files: " + String.join(", ", filePaths));
+        logger.warn("DEPRECATED: createRulesEngineFromMultipleFiles() is deprecated. Load and merge YAML configs manually, then use new RulesEngine().");
+        logger.info("Creating rules engine from multiple YAML files: " + String.join(", ", filePaths));
 
         // First, load all YAML files without validation and merge them
         YamlRuleConfiguration mergedYamlConfig = new YamlRuleConfiguration();
 
         for (String filePath : filePaths) {
-            LOGGER.fine("Loading file without validation: " + filePath);
+            logger.debug("Loading file without validation: " + filePath);
             YamlRuleConfiguration yamlConfig = configLoader.loadFromFileWithoutValidation(filePath);
 
             // Merge YAML configurations
@@ -238,7 +241,7 @@ public class YamlRulesEngineService {
 
         RulesEngine engine = new RulesEngine(config);
 
-        LOGGER.info("Successfully created rules engine from " + filePaths.length + " YAML files");
+        logger.info("Successfully created rules engine from " + filePaths.length + " YAML files");
         return engine;
     }
     
@@ -251,7 +254,7 @@ public class YamlRulesEngineService {
      * @throws YamlConfigurationException if configuration loading or processing fails
      */
     public RulesEngine updateRulesEngineFromFile(RulesEngine engine, String filePath) throws YamlConfigurationException {
-        LOGGER.info("Updating rules engine from YAML file: " + filePath);
+        logger.info("Updating rules engine from YAML file: " + filePath);
         
         YamlRuleConfiguration yamlConfig = configLoader.loadFromFile(filePath);
         RulesEngineConfiguration newConfig = ruleFactory.createRulesEngineConfiguration(yamlConfig);
@@ -259,7 +262,7 @@ public class YamlRulesEngineService {
         // Merge new configuration with existing
         mergeConfigurations(engine.getConfiguration(), newConfig);
         
-        LOGGER.info("Successfully updated rules engine from file: " + filePath);
+        logger.info("Successfully updated rules engine from file: " + filePath);
         return engine;
     }
     
@@ -271,13 +274,13 @@ public class YamlRulesEngineService {
      * @throws YamlConfigurationException if export fails
      */
     public void exportRulesEngineToFile(RulesEngine engine, String filePath) throws YamlConfigurationException {
-        LOGGER.info("Exporting rules engine to YAML file: " + filePath);
+        logger.info("Exporting rules engine to YAML file: " + filePath);
         
         // Convert RulesEngineConfiguration back to YAML format
         YamlRuleConfiguration yamlConfig = convertToYamlConfiguration(engine.getConfiguration());
         configLoader.saveToFile(yamlConfig, filePath);
         
-        LOGGER.info("Successfully exported rules engine to file: " + filePath);
+        logger.info("Successfully exported rules engine to file: " + filePath);
     }
     
     /**
@@ -308,7 +311,7 @@ public class YamlRulesEngineService {
         // Add all rule groups from source to target
         source.getAllRuleGroups().forEach(target::registerRuleGroup);
         
-        LOGGER.fine("Merged configuration with " + source.getAllRules().size() +
+        logger.debug("Merged configuration with " + source.getAllRules().size() +
                    " rules and " + source.getAllRuleGroups().size() + " rule groups");
     }
 
@@ -345,7 +348,7 @@ public class YamlRulesEngineService {
 
         // Note: Full rule conversion would require complex mapping from Rule objects back to YAML format
         // This basic implementation provides the configuration structure with metadata
-        LOGGER.info("Basic configuration export completed. Rule details not included in this implementation.");
+        logger.info("Basic configuration export completed. Rule details not included in this implementation.");
 
         return yamlConfig;
     }

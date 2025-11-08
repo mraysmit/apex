@@ -37,7 +37,7 @@ enrichments:
         field-mappings:
           - source-field: "testField"
             target-field: "result"
-            transformation: "'OR_MATCHED'"
+            expression: "'OR_MATCHED'"
             
       # Condition 2: AND logic test
       - conditions:
@@ -50,7 +50,7 @@ enrichments:
         field-mappings:
           - source-field: "testField"
             target-field: "result"
-            transformation: "'AND_MATCHED'"
+            expression: "'AND_MATCHED'"
           - source-field: "systemCode"
             target-field: "system"
-            transformation: "#systemCode"
+            expression: "#systemCode"

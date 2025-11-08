@@ -5,9 +5,12 @@ import dev.mars.apex.core.engine.context.ChainedEvaluationContext;
 import dev.mars.apex.core.engine.model.RuleChainResult;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.engine.RuleEngineService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -42,7 +45,7 @@ import java.util.logging.Logger;
  */
 public class RuleChainExecutor {
     
-    private static final Logger LOGGER = Logger.getLogger(RuleChainExecutor.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(RuleChainExecutor.class);
     
     // Pattern-specific executors
     private final ConditionalChainingExecutor conditionalChainingExecutor;
@@ -82,7 +85,7 @@ public class RuleChainExecutor {
         }
         
         if (!ruleChain.isEnabled()) {
-            LOGGER.info("Rule chain '" + ruleChain.getId() + "' is disabled, skipping execution");
+            logger.info("Rule chain '" + ruleChain.getId() + "' is disabled, skipping execution");
             return RuleChainResult.builder(ruleChain.getId(), ruleChain.getPattern())
                     .ruleChainName(ruleChain.getName())
                     .finalOutcome("SKIPPED")
@@ -96,7 +99,7 @@ public class RuleChainExecutor {
             return RuleChainResult.failure(ruleChain.getId(), "unknown", "Rule chain pattern is not specified");
         }
         
-        LOGGER.info("Executing rule chain '" + ruleChain.getId() + "' with pattern '" + pattern + "'");
+        logger.info("Executing rule chain '" + ruleChain.getId() + "' with pattern '" + pattern + "'");
         
         try {
             // Set chain metadata in context
@@ -107,11 +110,11 @@ public class RuleChainExecutor {
             // Route to appropriate pattern executor
             RuleChainResult result = executeByPattern(ruleChain, context);
             
-            LOGGER.info("Rule chain '" + ruleChain.getId() + "' completed with outcome: " + result.getFinalOutcome());
+            logger.info("Rule chain '" + ruleChain.getId() + "' completed with outcome: " + result.getFinalOutcome());
             return result;
             
         } catch (Exception e) {
-            LOGGER.severe("Error executing rule chain '" + ruleChain.getId() + "': " + e.getMessage());
+            logger.error("Error executing rule chain '" + ruleChain.getId() + "': " + e.getMessage());
             return RuleChainResult.failure(ruleChain.getId(), pattern, "Execution error: " + e.getMessage());
         }
     }
@@ -165,28 +168,28 @@ public class RuleChainExecutor {
      */
     public boolean validateRuleChain(YamlRuleChain ruleChain) {
         if (ruleChain == null) {
-            LOGGER.warning("Rule chain is null");
+            logger.warn("Rule chain is null");
             return false;
         }
         
         if (ruleChain.getId() == null || ruleChain.getId().trim().isEmpty()) {
-            LOGGER.warning("Rule chain ID is missing or empty");
+            logger.warn("Rule chain ID is missing or empty");
             return false;
         }
         
         if (ruleChain.getPattern() == null || ruleChain.getPattern().trim().isEmpty()) {
-            LOGGER.warning("Rule chain pattern is missing or empty for chain: " + ruleChain.getId());
+            logger.warn("Rule chain pattern is missing or empty for chain: " + ruleChain.getId());
             return false;
         }
         
         String pattern = ruleChain.getPattern().toLowerCase();
         if (!isSupportedPattern(pattern)) {
-            LOGGER.warning("Unsupported rule chain pattern '" + pattern + "' for chain: " + ruleChain.getId());
+            logger.warn("Unsupported rule chain pattern '" + pattern + "' for chain: " + ruleChain.getId());
             return false;
         }
         
         if (ruleChain.getConfiguration() == null) {
-            LOGGER.warning("Rule chain configuration is missing for chain: " + ruleChain.getId());
+            logger.warn("Rule chain configuration is missing for chain: " + ruleChain.getId());
             return false;
         }
         

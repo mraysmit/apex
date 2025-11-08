@@ -4,9 +4,12 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -39,7 +42,7 @@ import java.util.regex.Pattern;
  * and analyzing performance patterns.
  */
 public class RulePerformanceMonitor {
-    private static final Logger LOGGER = Logger.getLogger(RulePerformanceMonitor.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(RulePerformanceMonitor.class);
     
     // Thread-local storage for current evaluation context (per instance)
     private final ThreadLocal<EvaluationContext> currentContext = new ThreadLocal<>();
@@ -111,7 +114,7 @@ public class RulePerformanceMonitor {
                     .evaluationPhase(phase);
         }
 
-        LOGGER.finest("Started monitoring rule evaluation: " + ruleName + " (phase: " + phase + ")");
+        logger.trace("Started monitoring rule evaluation: " + ruleName + " (phase: " + phase + ")");
 
         return new RulePerformanceMetrics.Builder(ruleName)
                 .startTime(context.startTime)
@@ -143,7 +146,7 @@ public class RulePerformanceMonitor {
 
         EvaluationContext context = currentContext.get();
         if (context == null) {
-            LOGGER.warning("No evaluation context found for rule completion");
+            logger.warn("No evaluation context found for rule completion");
             // Even without context, provide basic timing and update global counters
             RulePerformanceMetrics metrics = builder.endTime(endTime).build();
             storeMetrics(metrics);
@@ -191,7 +194,7 @@ public class RulePerformanceMonitor {
             totalEvaluations.incrementAndGet();
             totalEvaluationTime.addAndGet(metrics.getEvaluationTimeNanos());
             
-            LOGGER.finest("Completed monitoring rule evaluation: " + context.ruleName + 
+            logger.trace("Completed monitoring rule evaluation: " + context.ruleName + 
                          " (time: " + metrics.getEvaluationTimeMillis() + "ms)");
             
             return metrics;
@@ -379,7 +382,7 @@ public class RulePerformanceMonitor {
         totalEvaluationTime.set(0);
         // Clear the thread-local context to ensure clean state
         currentContext.remove();
-        LOGGER.info("Performance metrics cleared");
+        logger.info("Performance metrics cleared");
     }
 
     /**
@@ -389,7 +392,7 @@ public class RulePerformanceMonitor {
      */
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
-        LOGGER.info("Performance monitoring " + (enabled ? "enabled" : "disabled"));
+        logger.info("Performance monitoring " + (enabled ? "enabled" : "disabled"));
     }
 
     /**

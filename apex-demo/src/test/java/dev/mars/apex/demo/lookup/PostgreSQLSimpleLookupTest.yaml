@@ -194,11 +194,11 @@ enrichments:
       - source-field: "employee_count"
         target-field: "customerEmployeeCount"
         required: false
-        transformation: "#value != null ? T(java.lang.Integer).parseInt(#value.toString()) : 0"
+        expression: "#value != null ? T(java.lang.Integer).parseInt(#value.toString()) : 0"
       - source-field: "financial_value"
         target-field: "customerFinancialValue"
         required: false
-        transformation: "#value != null ? T(java.lang.Long).parseLong(#value.toString()) : 0L"
+        expression: "#value != null ? T(java.lang.Long).parseLong(#value.toString()) : 0L"
       - source-field: "tag_list"
         target-field: "customerTagList"
         required: false

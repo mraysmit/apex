@@ -6,6 +6,8 @@ import dev.mars.apex.core.service.data.external.file.CsvDataLoader;
 import dev.mars.apex.core.service.data.external.file.JsonDataLoader;
 import dev.mars.apex.core.service.data.external.file.XmlDataLoader;
 import dev.mars.apex.core.config.datasource.FileFormatConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -13,7 +15,8 @@ import java.nio.file.Files;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -42,7 +45,7 @@ import java.util.logging.Logger;
  */
 public class DatasetLookupServiceFactory {
     
-    private static final Logger LOGGER = Logger.getLogger(DatasetLookupServiceFactory.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(DatasetLookupServiceFactory.class);
     
     /**
      * Create a DatasetLookupService from a LookupDataset configuration.
@@ -84,7 +87,7 @@ public class DatasetLookupServiceFactory {
             throw new EnrichmentException("Dataset type must be specified");
         }
         
-        LOGGER.info("Creating DatasetLookupService '" + serviceName + "' with type: " + datasetType);
+        logger.info("Creating DatasetLookupService '" + serviceName + "' with type: " + datasetType);
         System.out.println("DEBUG: 3-parameter createDatasetLookupService called with type: " + datasetType + ", configuration: " + (configuration != null ? "NOT NULL" : "NULL"));
         
         switch (datasetType.toLowerCase()) {
@@ -127,7 +130,7 @@ public class DatasetLookupServiceFactory {
      */
     private static DatasetLookupService createInlineDatasetService(String serviceName, 
                                                                    YamlEnrichment.LookupDataset dataset) {
-        LOGGER.fine("Creating inline dataset service: " + serviceName);
+        logger.debug("Creating inline dataset service: " + serviceName);
         
         if (dataset.getData() == null || dataset.getData().isEmpty()) {
             throw new EnrichmentException("Inline dataset must have data records");
@@ -149,7 +152,7 @@ public class DatasetLookupServiceFactory {
      */
     private static DatasetLookupService createYamlFileDatasetService(String serviceName, 
                                                                      YamlEnrichment.LookupDataset dataset) {
-        LOGGER.fine("Creating YAML file dataset service: " + serviceName);
+        logger.debug("Creating YAML file dataset service: " + serviceName);
         
         if (dataset.getFilePath() == null || dataset.getFilePath().trim().isEmpty()) {
             throw new EnrichmentException("YAML file dataset must specify a file path");
@@ -173,7 +176,7 @@ public class DatasetLookupServiceFactory {
      */
     private static DatasetLookupService createCsvFileDatasetService(String serviceName, 
                                                                     YamlEnrichment.LookupDataset dataset) {
-        LOGGER.fine("Creating CSV file dataset service: " + serviceName);
+        logger.debug("Creating CSV file dataset service: " + serviceName);
         
         if (dataset.getFilePath() == null || dataset.getFilePath().trim().isEmpty()) {
             throw new EnrichmentException("CSV file dataset must specify a file path");
@@ -199,7 +202,7 @@ public class DatasetLookupServiceFactory {
     private static DatasetLookupService createDatabaseDatasetService(String serviceName,
                                                                      YamlEnrichment.LookupDataset dataset,
                                                                      dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
-        LOGGER.fine("Creating database dataset service: " + serviceName);
+        logger.debug("Creating database dataset service: " + serviceName);
 
         // Validate database-specific configuration
         // Support both connection-name (traditional) and data-source-ref (external reference)
@@ -301,7 +304,7 @@ public class DatasetLookupServiceFactory {
      */
     private static YamlEnrichment.LookupDataset loadFromYamlFile(YamlEnrichment.LookupDataset dataset) {
         try {
-            LOGGER.info("Loading YAML dataset from file: " + dataset.getFilePath());
+            logger.info("Loading YAML dataset from file: " + dataset.getFilePath());
 
             // Create a copy of the dataset
             YamlEnrichment.LookupDataset fileDataset = new YamlEnrichment.LookupDataset();
@@ -315,7 +318,7 @@ public class DatasetLookupServiceFactory {
             // Load actual data from YAML file
             Path yamlFilePath = Paths.get(dataset.getFilePath());
             if (!Files.exists(yamlFilePath)) {
-                LOGGER.warning("YAML file not found: " + dataset.getFilePath() + ". Using empty dataset.");
+                logger.warn("YAML file not found: " + dataset.getFilePath() + ". Using empty dataset.");
                 fileDataset.setData(Collections.emptyList());
                 return fileDataset;
             }
@@ -325,18 +328,18 @@ public class DatasetLookupServiceFactory {
             try {
                 // For now, return empty data as YAML parsing would require additional dependencies
                 // In a full implementation, this would use a YAML parser like SnakeYAML to parse Files.readString(yamlFilePath)
-                LOGGER.info("YAML file found but parsing not fully implemented. Using empty dataset for: " + dataset.getFilePath());
+                logger.info("YAML file found but parsing not fully implemented. Using empty dataset for: " + dataset.getFilePath());
                 fileDataset.setData(Collections.emptyList());
 
             } catch (Exception e) {
-                LOGGER.warning("Failed to read YAML file: " + dataset.getFilePath() + ". Error: " + e.getMessage());
+                logger.warn("Failed to read YAML file: " + dataset.getFilePath() + ". Error: " + e.getMessage());
                 fileDataset.setData(Collections.emptyList());
             }
 
             return fileDataset;
 
         } catch (Exception e) {
-            LOGGER.severe("Failed to load YAML dataset from file: " + dataset.getFilePath() + ". Error: " + e.getMessage());
+            logger.error("Failed to load YAML dataset from file: " + dataset.getFilePath() + ". Error: " + e.getMessage());
 
             // Return dataset with empty data on error
             YamlEnrichment.LookupDataset errorDataset = new YamlEnrichment.LookupDataset();
@@ -360,7 +363,7 @@ public class DatasetLookupServiceFactory {
      */
     private static YamlEnrichment.LookupDataset loadFromCsvFile(YamlEnrichment.LookupDataset dataset) {
         try {
-            LOGGER.info("Loading CSV dataset from file: " + dataset.getFilePath());
+            logger.info("Loading CSV dataset from file: " + dataset.getFilePath());
 
             // Create a copy of the dataset
             YamlEnrichment.LookupDataset csvDataset = new YamlEnrichment.LookupDataset();
@@ -374,7 +377,7 @@ public class DatasetLookupServiceFactory {
             // Load actual data from CSV file using CsvDataLoader
             Path csvFilePath = Paths.get(dataset.getFilePath());
             if (!Files.exists(csvFilePath)) {
-                LOGGER.warning("CSV file not found: " + dataset.getFilePath() + ". Using empty dataset.");
+                logger.warn("CSV file not found: " + dataset.getFilePath() + ". Using empty dataset.");
                 csvDataset.setData(Collections.emptyList());
                 return csvDataset;
             }
@@ -395,12 +398,12 @@ public class DatasetLookupServiceFactory {
             List<Map<String, Object>> mapData = (List<Map<String, Object>>) (List<?>) loadedData;
             csvDataset.setData(mapData);
 
-            LOGGER.info("Successfully loaded " + loadedData.size() + " records from CSV file: " + dataset.getFilePath());
+            logger.info("Successfully loaded " + loadedData.size() + " records from CSV file: " + dataset.getFilePath());
 
             return csvDataset;
 
         } catch (Exception e) {
-            LOGGER.severe("Failed to load CSV dataset from file: " + dataset.getFilePath() + ". Error: " + e.getMessage());
+            logger.error("Failed to load CSV dataset from file: " + dataset.getFilePath() + ". Error: " + e.getMessage());
 
             // Return dataset with empty data on error
             YamlEnrichment.LookupDataset errorDataset = new YamlEnrichment.LookupDataset();
@@ -425,8 +428,8 @@ public class DatasetLookupServiceFactory {
      */
     private static DatasetLookupService createFileSystemDatasetService(String serviceName,
                                                                        YamlEnrichment.LookupDataset dataset) {
-        LOGGER.info("Creating file-system dataset lookup service: " + serviceName);
-        LOGGER.info("DEBUG: About to call loadFromFileSystem with dataset: " + dataset.getFilePath());
+        logger.info("Creating file-system dataset lookup service: " + serviceName);
+        logger.info("DEBUG: About to call loadFromFileSystem with dataset: " + dataset.getFilePath());
 
         // Load data from file system
         YamlEnrichment.LookupDataset fileDataset = loadFromFileSystem(dataset);
@@ -443,8 +446,8 @@ public class DatasetLookupServiceFactory {
      */
     private static YamlEnrichment.LookupDataset loadFromFileSystem(YamlEnrichment.LookupDataset dataset) {
         try {
-            LOGGER.info("Loading file-system dataset from file: " + dataset.getFilePath());
-            LOGGER.info("Dataset format config: " + dataset.getFormatConfig());
+            logger.info("Loading file-system dataset from file: " + dataset.getFilePath());
+            logger.info("Dataset format config: " + dataset.getFormatConfig());
 
             // Create a copy of the dataset
             YamlEnrichment.LookupDataset fileDataset = new YamlEnrichment.LookupDataset();
@@ -458,7 +461,7 @@ public class DatasetLookupServiceFactory {
             // Load actual data from file
             Path filePath = Paths.get(dataset.getFilePath());
             if (!Files.exists(filePath)) {
-                LOGGER.warning("File not found: " + dataset.getFilePath() + ". Using empty dataset.");
+                logger.warn("File not found: " + dataset.getFilePath() + ". Using empty dataset.");
                 fileDataset.setData(Collections.emptyList());
                 return fileDataset;
             }
@@ -470,10 +473,10 @@ public class DatasetLookupServiceFactory {
             if (fileName.endsWith(".json")) {
                 loadedData = loadJsonFile(filePath);
             } else if (fileName.endsWith(".xml")) {
-                LOGGER.info("Loading XML file with dataset configuration...");
+                logger.info("Loading XML file with dataset configuration...");
                 loadedData = loadXmlFile(filePath, dataset);
             } else if (fileName.endsWith(".csv")) {
-                LOGGER.info("Loading CSV file with dataset configuration...");
+                logger.info("Loading CSV file with dataset configuration...");
                 loadedData = loadCsvFile(filePath, dataset);
             } else {
                 throw new EnrichmentException("Unsupported file format for file-system dataset: " + fileName +
@@ -481,12 +484,12 @@ public class DatasetLookupServiceFactory {
             }
 
             fileDataset.setData(loadedData);
-            LOGGER.info("Successfully loaded " + loadedData.size() + " records from file: " + dataset.getFilePath());
+            logger.info("Successfully loaded " + loadedData.size() + " records from file: " + dataset.getFilePath());
 
             return fileDataset;
 
         } catch (Exception e) {
-            LOGGER.severe("Failed to load file-system dataset from file: " + dataset.getFilePath() + ". Error: " + e.getMessage());
+            logger.error("Failed to load file-system dataset from file: " + dataset.getFilePath() + ". Error: " + e.getMessage());
 
             // Return dataset with empty data on error
             YamlEnrichment.LookupDataset errorDataset = new YamlEnrichment.LookupDataset();
@@ -510,7 +513,7 @@ public class DatasetLookupServiceFactory {
      * @throws Exception if loading fails
      */
     private static List<Map<String, Object>> loadJsonFile(Path filePath) throws Exception {
-        LOGGER.fine("Loading JSON file: " + filePath);
+        logger.debug("Loading JSON file: " + filePath);
 
         // Use JsonDataLoader if available, otherwise use simple JSON parsing
         try {
@@ -527,7 +530,7 @@ public class DatasetLookupServiceFactory {
             return mapData;
 
         } catch (Exception e) {
-            LOGGER.warning("JsonDataLoader failed, falling back to simple JSON parsing: " + e.getMessage());
+            logger.warn("JsonDataLoader failed, falling back to simple JSON parsing: " + e.getMessage());
             return loadJsonFileSimple(filePath);
         }
     }
@@ -552,7 +555,7 @@ public class DatasetLookupServiceFactory {
      * @throws Exception if loading fails
      */
     private static List<Map<String, Object>> loadXmlFile(Path filePath, YamlEnrichment.LookupDataset dataset) throws Exception {
-        LOGGER.fine("Loading XML file: " + filePath);
+        logger.debug("Loading XML file: " + filePath);
 
         // Use XmlDataLoader if available, otherwise use simple XML parsing
         try {
@@ -565,7 +568,7 @@ public class DatasetLookupServiceFactory {
             if (filePath.toString().contains("products.xml")) {
                 formatConfig.setRecordElement("product");
                 formatConfig.setRootElement("products");
-                LOGGER.info("Applied hardcoded XML format config for products.xml - recordElement: product, rootElement: products");
+                logger.info("Applied hardcoded XML format config for products.xml - recordElement: product, rootElement: products");
             }
 
             XmlDataLoader xmlLoader = new XmlDataLoader();
@@ -577,7 +580,7 @@ public class DatasetLookupServiceFactory {
             return mapData;
 
         } catch (Exception e) {
-            LOGGER.warning("XmlDataLoader failed, falling back to simple XML parsing: " + e.getMessage());
+            logger.warn("XmlDataLoader failed, falling back to simple XML parsing: " + e.getMessage());
             return loadXmlFileSimple(filePath);
         }
     }
@@ -591,7 +594,7 @@ public class DatasetLookupServiceFactory {
      * @throws Exception if loading fails
      */
     private static List<Map<String, Object>> loadCsvFile(Path filePath, YamlEnrichment.LookupDataset dataset) throws Exception {
-        LOGGER.fine("Loading CSV file: " + filePath);
+        logger.debug("Loading CSV file: " + filePath);
 
         try {
             FileFormatConfig formatConfig = new FileFormatConfig();
@@ -603,7 +606,7 @@ public class DatasetLookupServiceFactory {
             // Apply format configuration from dataset if available
             if (dataset != null && dataset.getFormatConfig() != null) {
                 Map<String, Object> formatConfigMap = dataset.getFormatConfig();
-                LOGGER.info("Applying CSV format config from dataset: " + formatConfigMap);
+                logger.info("Applying CSV format config from dataset: " + formatConfigMap);
 
                 // Set delimiter if specified
                 if (formatConfigMap.containsKey("delimiter")) {
@@ -630,7 +633,7 @@ public class DatasetLookupServiceFactory {
             return mapData;
 
         } catch (Exception e) {
-            LOGGER.warning("CsvDataLoader failed: " + e.getMessage());
+            logger.warn("CsvDataLoader failed: " + e.getMessage());
             throw e;
         }
     }
@@ -640,7 +643,7 @@ public class DatasetLookupServiceFactory {
      */
     private static List<Map<String, Object>> loadJsonFileSimple(Path filePath) throws Exception {
         // For now, return empty list - this can be enhanced later
-        LOGGER.warning("Simple JSON parsing not yet implemented for: " + filePath);
+        logger.warn("Simple JSON parsing not yet implemented for: " + filePath);
         return Collections.emptyList();
     }
 
@@ -649,7 +652,7 @@ public class DatasetLookupServiceFactory {
      */
     private static List<Map<String, Object>> loadXmlFileSimple(Path filePath) throws Exception {
         // For now, return empty list - this can be enhanced later
-        LOGGER.warning("Simple XML parsing not yet implemented for: " + filePath);
+        logger.warn("Simple XML parsing not yet implemented for: " + filePath);
         return Collections.emptyList();
     }
 
@@ -704,7 +707,7 @@ public class DatasetLookupServiceFactory {
                 throw new EnrichmentException("Unsupported dataset type: " + type);
         }
         
-        LOGGER.fine("Dataset configuration validation passed for type: " + type);
+        logger.debug("Dataset configuration validation passed for type: " + type);
     }
 
     /**
@@ -718,7 +721,7 @@ public class DatasetLookupServiceFactory {
      */
     private static String resolveNamedQuery(String connectionName, String queryRef,
                                           dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
-        LOGGER.fine("Resolving named query '" + queryRef + "' from data-source '" + connectionName + "'");
+        logger.debug("Resolving named query '" + queryRef + "' from data-source '" + connectionName + "'");
 
         // Find the data source configuration
         dev.mars.apex.core.config.yaml.YamlDataSource dataSourceConfig = null;
@@ -748,7 +751,7 @@ public class DatasetLookupServiceFactory {
                                         connectionName + "'. Available queries: " + availableQueries);
         }
 
-        LOGGER.fine("Successfully resolved named query '" + queryRef + "' to: " +
+        logger.debug("Successfully resolved named query '" + queryRef + "' to: " +
                    (resolvedQuery.length() > 100 ? resolvedQuery.substring(0, 100) + "..." : resolvedQuery));
 
         return resolvedQuery;
@@ -765,7 +768,7 @@ public class DatasetLookupServiceFactory {
     private static DatasetLookupService createRestApiDatasetService(String serviceName,
                                                                    YamlEnrichment.LookupDataset dataset,
                                                                    dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
-        LOGGER.fine("Creating REST API dataset service: " + serviceName);
+        logger.debug("Creating REST API dataset service: " + serviceName);
 
         // Validate REST API-specific configuration
         // Support both connection-name (traditional) and data-source-ref (external reference)

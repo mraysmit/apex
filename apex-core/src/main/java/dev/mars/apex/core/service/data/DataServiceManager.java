@@ -2,7 +2,10 @@ package dev.mars.apex.core.service.data;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -35,7 +38,7 @@ import java.util.logging.Logger;
  * methods to load, register, and request data from them.
  */
 public class DataServiceManager {
-    private static final Logger LOGGER = Logger.getLogger(DataServiceManager.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(DataServiceManager.class);
 
     // Map of data sources by name
     private final Map<String, DataSource> dataSourcesByName = new HashMap<>();
@@ -60,7 +63,7 @@ public class DataServiceManager {
     public DataServiceManager loadDataSource(DataSource dataSource) {
         if (dataSource == null) {
             // Log at WARNING level - serious enough to notice but not SEVERE/FATAL
-            LOGGER.warning("Attempted to load null data source - this indicates a programming error");
+            logger.warn("Attempted to load null data source - this indicates a programming error");
             throw new IllegalArgumentException("Data source cannot be null");
         }
 
@@ -68,12 +71,12 @@ public class DataServiceManager {
         String dataType = dataSource.getDataType();
 
         if (name == null || name.isEmpty()) {
-            LOGGER.warning("Data source has no name - this indicates a programming error");
+            logger.warn("Data source has no name - this indicates a programming error");
             throw new IllegalArgumentException("Data source name cannot be null or empty");
         }
 
         if (dataType == null || dataType.isEmpty()) {
-            LOGGER.warning("Data source has no data type - this indicates a programming error");
+            logger.warn("Data source has no data type - this indicates a programming error");
             throw new IllegalArgumentException("Data source data type cannot be null or empty");
         }
 
@@ -81,7 +84,7 @@ public class DataServiceManager {
         dataSourcesByName.put(name, dataSource);
         dataSourcesByType.put(dataType, dataSource);
 
-        LOGGER.info("Loaded data source: " + name + " (type: " + dataType + ")");
+        logger.info("Loaded data source: " + name + " (type: " + dataType + ")");
         return this;
     }
 
@@ -94,7 +97,7 @@ public class DataServiceManager {
      */
     public DataServiceManager loadDataSources(DataSource... dataSources) {
         if (dataSources == null) {
-            LOGGER.warning("Attempted to load null data sources array - this indicates a programming error");
+            logger.warn("Attempted to load null data sources array - this indicates a programming error");
             throw new IllegalArgumentException("Data sources array cannot be null");
         }
 
@@ -137,12 +140,12 @@ public class DataServiceManager {
     public <T> T requestDataByName(String sourceName, String dataType, Object... parameters) {
         DataSource dataSource = getDataSourceByName(sourceName);
         if (dataSource == null) {
-            LOGGER.warning("Data source not found: " + sourceName);
+            logger.warn("Data source not found: " + sourceName);
             return null;
         }
 
         if (!dataSource.supportsDataType(dataType)) {
-            LOGGER.warning("Data source " + sourceName + " does not support data type: " + dataType);
+            logger.warn("Data source " + sourceName + " does not support data type: " + dataType);
             return null;
         }
 
@@ -160,7 +163,7 @@ public class DataServiceManager {
     public <T> T requestData(String dataType, Object... parameters) {
         DataSource dataSource = getDataSourceByType(dataType);
         if (dataSource == null) {
-            LOGGER.warning("No data source found for data type: " + dataType);
+            logger.warn("No data source found for data type: " + dataType);
             return null;
         }
 

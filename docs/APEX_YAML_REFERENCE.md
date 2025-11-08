@@ -130,7 +130,7 @@ This section provides a definitive reference for all 72 supported APEX YAML keyw
 | **target-field** | FieldMapping | Yes | String | Target field name in field mappings |
 | **target-type** | Enrichment | No | String | Target object type for enrichment |
 | **topics** | DataSource | No | Map | Kafka topic definitions |
-| **transformation** | FieldMapping | No | String | SpEL expression for field transformation |
+| **expression** | FieldMapping | No | String | SpEL expression for field transformation |
 | **transformation-rules** | Transformation | No | List | Transformation rule definitions |
 | **transformations** | Document | No | List | Data transformation configurations |
 | **type** | Metadata | Yes | String | Document type (rule-config, enrichment, dataset, etc.) |
@@ -624,7 +624,7 @@ enrichments:
     condition: "#ruleResults['high-value-rule'] == true"
     field-mappings:
       - target-field: "processingPriority"
-        transformation: "'HIGH'"
+        expression: "'HIGH'"
 
   # Multiple rule results in complex conditions
   - id: "priority-calculation"
@@ -632,7 +632,7 @@ enrichments:
     condition: "#ruleResults != null"
     field-mappings:
       - target-field: "processingPriority"
-        transformation: |
+        expression: |
           #ruleResults['premium-customer-rule'] == true && #ruleResults['high-value-rule'] == true ? 'IMMEDIATE' :
           #ruleResults['high-value-rule'] == true ? 'HIGH' :
           #ruleResults['premium-customer-rule'] == true ? 'ELEVATED' :
@@ -664,7 +664,7 @@ enrichments:
     condition: "#ruleGroupResults['validation-group']['passed'] == true"
     field-mappings:
       - target-field: "validationStatus"
-        transformation: "'VALIDATED'"
+        expression: "'VALIDATED'"
 
   # Access failed rules from group
   - id: "failure-handling"
@@ -672,7 +672,7 @@ enrichments:
     condition: "#ruleGroupResults['validation-group']['passed'] == false"
     field-mappings:
       - target-field: "failedValidations"
-        transformation: "#ruleGroupResults['validation-group']['failedRules']"
+        expression: "#ruleGroupResults['validation-group']['failedRules']"
 ```
 
 **Available Properties:**
@@ -2165,7 +2165,7 @@ field-mappings:
   # Combination with transformations
   - source-field: "#data.amount"
     target-field: "adjusted_amount"
-    transformation: "#value * 1.1"
+    expression: "#value * 1.1"
 ```
 
 **Backward Compatibility:**
@@ -2248,7 +2248,7 @@ enrichments:
     field-mappings:
       - source-field: "counterpartyRating"
         target-field: "counterpartyRating"
-        transformation: "'UNRATED'"
+        expression: "'UNRATED'"
 ```
 
 **Example - Field Enrichment Result Field:**
@@ -2262,7 +2262,7 @@ enrichments:
     field-mappings:
       - source-field: "notionalAmount"
         target-field: "tradeCategory"
-        transformation: "'HIGH_VALUE'"
+        expression: "'HIGH_VALUE'"
 
   # Use the result in a subsequent enrichment
   - id: "set-approval-required"
@@ -2271,7 +2271,7 @@ enrichments:
     field-mappings:
       - source-field: "requiresApproval"
         target-field: "requiresApproval"
-        transformation: "true"
+        expression: "true"
 ```
 
 **Example - Conditional Mapping Result Field:**
@@ -2291,7 +2291,7 @@ enrichments:
             - condition: "#notionalAmount > 10000000"
         mapping:
           type: "direct"
-          transformation: "'HIGH'"
+          expression: "'HIGH'"
 
   # Use the result in a subsequent enrichment
   - id: "set-default-risk"
@@ -2300,7 +2300,7 @@ enrichments:
     field-mappings:
       - source-field: "riskClass"
         target-field: "riskClass"
-        transformation: "'NORMAL'"
+        expression: "'NORMAL'"
 ```
 
 **Best Practices:**
@@ -2405,17 +2405,17 @@ enrichments:
     field-mappings:
       - source-field: "statusCode"
         target-field: "status"
-        transformation: |
+        expression: |
           #statusCode == 'A' ? 'ACTIVE' :
           #statusCode == 'I' ? 'INACTIVE' :
           #statusCode == 'P' ? 'PENDING' : 'UNKNOWN'
 
       - target-field: "processedAt"
-        transformation: "T(java.time.LocalDateTime).now()"
+        expression: "T(java.time.LocalDateTime).now()"
 
       - source-field: "amount"
         target-field: "formattedAmount"
-        transformation: "T(java.lang.String).format('$%,.2f', #amount)"
+        expression: "T(java.lang.String).format('$%,.2f', #amount)"
 ```
 
 #### SpEL in Field Mappings (New in v2.3)
@@ -2454,7 +2454,7 @@ enrichments:
       # Combine SpEL source-field with transformation
       - source-field: "#data.amount"
         target-field: "adjusted_amount"
-        transformation: "#value * 1.1"  # Apply 10% markup
+        expression: "#value * 1.1"  # Apply 10% markup
 ```
 
 **Backward Compatibility:**
@@ -2495,9 +2495,9 @@ field-mappings:
 
 | Property | Required | Description |
 |----------|----------|-------------|
-| `source-field` | No | Source field name (optional if using transformation only) |
+| `source-field` | No | Source field name (optional if using expression only) |
 | `target-field` | Yes | Target field name where value will be stored |
-| `transformation` | No | SpEL expression to transform the value |
+| `expression` | No | SpEL expression to transform the value |
 | `required` | No | Whether this mapping is mandatory (default: false) |
 
 #### Field Enrichment with Rule Results
@@ -2518,18 +2518,18 @@ enrichments:
     field-mappings:
       # Apply different processing based on rule results
       - target-field: "processingPriority"
-        transformation: |
+        expression: |
           #ruleResults['premium-customer-rule'] == true && #ruleResults['high-value-rule'] == true ? 'IMMEDIATE' :
           #ruleResults['high-value-rule'] == true ? 'HIGH' :
           #ruleResults['premium-customer-rule'] == true ? 'ELEVATED' : 'STANDARD'
 
       # Conditional fee calculation
       - target-field: "processingFee"
-        transformation: "#ruleResults['high-value-rule'] == true ? #amount * 0.05 : #amount * 0.02"
+        expression: "#ruleResults['high-value-rule'] == true ? #amount * 0.05 : #amount * 0.02"
 
       # Set flags based on rule results
       - target-field: "requiresApproval"
-        transformation: "#ruleResults['high-value-rule'] == true"
+        expression: "#ruleResults['high-value-rule'] == true"
 ```
 
 #### Conditional Mappings
@@ -2544,23 +2544,23 @@ enrichments:
       - condition: "#status == 'A'"
         field-mappings:
           - target-field: "displayStatus"
-            transformation: "'Active'"
+            expression: "'Active'"
           - target-field: "canTransact"
-            transformation: "true"
+            expression: "true"
 
       - condition: "#status == 'I'"
         field-mappings:
           - target-field: "displayStatus"
-            transformation: "'Inactive'"
+            expression: "'Inactive'"
           - target-field: "canTransact"
-            transformation: "false"
+            expression: "false"
 
       - default: true
         field-mappings:
           - target-field: "displayStatus"
-            transformation: "'Unknown'"
+            expression: "'Unknown'"
           - target-field: "canTransact"
-            transformation: "false"
+            expression: "false"
 ```
 
 #### When to Use Field Enrichment
@@ -2599,7 +2599,7 @@ enrichments:
             - condition: "#amount > 100000"
         mapping:
           type: "direct"
-          transformation: "'IMMEDIATE_PROCESSING_QUEUE'"
+          expression: "'IMMEDIATE_PROCESSING_QUEUE'"
 
       # Rule 2: Medium priority
       - id: "high-value"
@@ -2610,14 +2610,14 @@ enrichments:
             - condition: "#amount > 100000"
         mapping:
           type: "direct"
-          transformation: "'HIGH_VALUE_QUEUE'"
+          expression: "'HIGH_VALUE_QUEUE'"
 
       # Rule 3: Default (lowest priority)
       - id: "standard"
         priority: 999
         mapping:
           type: "direct"
-          transformation: "'STANDARD_QUEUE'"
+          expression: "'STANDARD_QUEUE'"
 
     execution-settings:
       stop-on-first-match: true
@@ -2649,8 +2649,8 @@ enrichments:
 
 | Property | Required | Description |
 |----------|----------|-------------|
-| `type` | Yes | Mapping type: "direct", "lookup", or "transformation" |
-| `transformation` | Yes* | SpEL expression for direct mappings |
+| `type` | Yes | Mapping type: "direct" or "lookup" |
+| `expression` | Yes* | SpEL expression for direct mappings |
 | `source-field` | No | Source field for the mapping |
 
 #### Execution Settings
@@ -4132,7 +4132,7 @@ enrichments:
     condition: "#ruleResults['high-value-rule'] == true"
     field-mappings:
       - target-field: "processingFee"
-        transformation: "#amount * 0.05"
+        expression: "#amount * 0.05"
 
   # Multiple rule results in complex condition
   - id: "priority-enrichment"
@@ -4140,7 +4140,7 @@ enrichments:
     condition: "#ruleResults != null"
     field-mappings:
       - target-field: "processingPriority"
-        transformation: |
+        expression: |
           #ruleResults['urgent-processing-rule'] == true ? 'IMMEDIATE' :
           #ruleResults['high-value-rule'] == true ? 'HIGH' :
           #ruleResults['premium-customer-rule'] == true ? 'ELEVATED' :
@@ -4152,9 +4152,9 @@ enrichments:
     condition: "#ruleGroupResults['validation-group']['passed'] == true"
     field-mappings:
       - target-field: "validationStatus"
-        transformation: "'VALIDATED'"
+        expression: "'VALIDATED'"
       - target-field: "validatedBy"
-        transformation: "'APEX_VALIDATION_GROUP'"
+        expression: "'APEX_VALIDATION_GROUP'"
 
   # Fallback logic when validation fails
   - id: "validation-failure-enrichment"
@@ -4162,9 +4162,9 @@ enrichments:
     condition: "#ruleGroupResults['validation-group']['passed'] == false"
     field-mappings:
       - target-field: "validationStatus"
-        transformation: "'FAILED'"
+        expression: "'FAILED'"
       - target-field: "failedRules"
-        transformation: "#ruleGroupResults['validation-group']['failedRules']"
+        expression: "#ruleGroupResults['validation-group']['failedRules']"
 ```
 
 **Key Patterns:**
@@ -4186,7 +4186,7 @@ enrichments:
 
 4. **Failed Rules Access**: Get list of failed rules from group
    ```yaml
-   transformation: "#ruleGroupResults['group-id']['failedRules']"
+   expression: "#ruleGroupResults['group-id']['failedRules']"
    ```
 
 5. **Null-Safe Access**: Check if rule was evaluated

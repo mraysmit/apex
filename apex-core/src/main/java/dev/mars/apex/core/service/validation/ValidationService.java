@@ -5,12 +5,15 @@ import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.LoggerFactory;
 
 /*
@@ -39,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * @version 1.0
  */
 public class ValidationService {
-    private static final Logger LOGGER = Logger.getLogger(ValidationService.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(ValidationService.class);
     private static final org.slf4j.Logger SLF4J_LOGGER = LoggerFactory.getLogger(ValidationService.class);
     private final LookupServiceRegistry registry;
     private final RulesEngine rulesEngine;
@@ -54,7 +57,7 @@ public class ValidationService {
         this.registry = registry;
         // Create RulesEngine with simple constructor - no enrichment needed for validation
         this.rulesEngine = new RulesEngine(new RulesEngineConfiguration());
-        LOGGER.info("ValidationService initialized with default RulesEngine");
+        logger.info("ValidationService initialized with default RulesEngine");
     }
 
     /**
@@ -66,7 +69,7 @@ public class ValidationService {
     public ValidationService(LookupServiceRegistry registry, RulesEngine rulesEngine) {
         this.registry = registry;
         this.rulesEngine = rulesEngine;
-        LOGGER.info("ValidationService initialized with custom RulesEngine");
+        logger.info("ValidationService initialized with custom RulesEngine");
     }
 
     /**
@@ -96,13 +99,13 @@ public class ValidationService {
     public <T> RuleResult validateWithResult(String validatorName, T value) {
         SLF4J_LOGGER.debug("TRACE: ValidationService.validateWithResult() called - validator: '{}', value type: {}",
             validatorName, value != null ? value.getClass().getSimpleName() : "null");
-        LOGGER.fine("Validating value using validation: " + validatorName);
+        logger.debug("Validating value using validation: " + validatorName);
 
         // First, check if the validation exists
         Validator<?> validator = registry.getService(validatorName, Validator.class);
         if (validator == null) {
             SLF4J_LOGGER.debug("Validator not found: '{}'", validatorName);
-            LOGGER.warning("Validator not found: " + validatorName);
+            logger.warn("Validator not found: " + validatorName);
             return RuleResult.error("Validation", "Validator not found: " + validatorName);
         }
         SLF4J_LOGGER.debug("Found validator '{}' of type: {}", validatorName, validator.getClass().getSimpleName());
@@ -111,7 +114,7 @@ public class ValidationService {
         if (value != null && !validator.getType().isInstance(value)) {
             SLF4J_LOGGER.debug("Type mismatch - validator '{}' expects: {}, got: {}",
                 validatorName, validator.getType().getSimpleName(), value.getClass().getSimpleName());
-            LOGGER.warning("Validator " + validatorName + " cannot handle type: " + value.getClass().getName());
+            logger.warn("Validator " + validatorName + " cannot handle type: " + value.getClass().getName());
             return RuleResult.error("Validation", "Validator " + validatorName + " cannot handle type: " + value.getClass().getName());
         }
 

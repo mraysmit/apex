@@ -160,15 +160,15 @@ public class SpelFieldMappingIntegrationTest {
         System.out.println("=== Testing Consistency Across All APEX Features ===");
         System.out.println("Demonstrating that SpEL is now used consistently across:");
         System.out.println("- Conditions");
-        System.out.println("- Transformations");
+        System.out.println("- Expressions");
         System.out.println("- Field mappings (NEW!)");
         System.out.println();
-        
+
         String yamlConfig = """
             metadata:
               name: "Consistency Demo"
               version: "1.0.0"
-            
+
             enrichments:
               - id: "consistency-demo"
                 type: "field-enrichment"
@@ -178,12 +178,12 @@ public class SpelFieldMappingIntegrationTest {
                   # ✅ SpEL in source-field (NEW!)
                   - source-field: "#data.trade.counterparty"
                     target-field: "counterparty_name"
-                  
-                  # ✅ SpEL in source-field + transformation
+
+                  # ✅ SpEL in source-field + expression
                   - source-field: "#data.trade.amount"
                     target-field: "adjusted_amount"
-                    transformation: "#value * 1.1"  # ✅ SpEL in transformation
-                  
+                    expression: "#value * 1.1"  # ✅ SpEL in expression
+
                   # ✅ Complex SpEL expression in source-field
                   - source-field: "#data.trade.currency.toUpperCase()"
                     target-field: "currency_code"
@@ -215,11 +215,11 @@ public class SpelFieldMappingIntegrationTest {
         Map<String, Object> enrichedMap = (Map<String, Object>) enrichedData;
         
         // Verify all SpEL features work together
-        assertEquals("JP Morgan", enrichedMap.get("counterparty_name"), 
+        assertEquals("JP Morgan", enrichedMap.get("counterparty_name"),
                     "SpEL in source-field should work");
-        assertEquals(1100000.0, enrichedMap.get("adjusted_amount"), 
-                    "SpEL in source-field + transformation should work");
-        assertEquals("USD", enrichedMap.get("currency_code"), 
+        assertEquals(1100000.0, enrichedMap.get("adjusted_amount"),
+                    "SpEL in source-field + expression should work");
+        assertEquals("USD", enrichedMap.get("currency_code"),
                     "Complex SpEL expression in source-field should work");
         
         System.out.println();

@@ -5,9 +5,13 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -36,7 +40,7 @@ import java.util.logging.Level;
  * @version 1.0
  */
 public class ErrorRecoveryService {
-    private static final Logger LOGGER = Logger.getLogger(ErrorRecoveryService.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(ErrorRecoveryService.class);
     private static final ExpressionParser parser = new SpelExpressionParser();
     
     private final ErrorRecoveryStrategy defaultStrategy;
@@ -62,7 +66,7 @@ public class ErrorRecoveryService {
     public RecoveryResult attemptRecovery(String ruleName, String expression, 
                                         EvaluationContext context, Exception originalException,
                                         ErrorRecoveryStrategy strategy) {
-        LOGGER.info("Attempting error recovery for rule: " + ruleName);
+        logger.info("Attempting error recovery for rule: " + ruleName);
         
         try {
             switch (strategy) {
@@ -82,7 +86,7 @@ public class ErrorRecoveryService {
                     return handleContinueWithDefault(ruleName, originalException);
             }
         } catch (Exception recoveryException) {
-            LOGGER.log(Level.WARNING, "Error recovery failed for rule: " + ruleName, recoveryException);
+            logger.warn("Error recovery failed for rule: " + ruleName, recoveryException);
             return RecoveryResult.failed(ruleName, "Recovery attempt failed: " + recoveryException.getMessage());
         }
     }
@@ -96,14 +100,14 @@ public class ErrorRecoveryService {
     }
     
     private RecoveryResult handleContinueWithDefault(String ruleName, Exception originalException) {
-        LOGGER.info("Using default recovery for rule: " + ruleName);
+        logger.info("Using default recovery for rule: " + ruleName);
         RuleResult defaultResult = RuleResult.noMatch(ruleName, "No matching rules found", "INFO");
         return RecoveryResult.recovered(ruleName, defaultResult, "Continued with default result");
     }
     
     private RecoveryResult handleRetryWithSafeExpression(String ruleName, String expression, 
                                                        EvaluationContext context, Exception originalException) {
-        LOGGER.info("Attempting safe expression retry for rule: " + ruleName);
+        logger.info("Attempting safe expression retry for rule: " + ruleName);
         
         // Try to create a safer version of the expression
         String safeExpression = createSafeExpression(expression);
@@ -129,12 +133,12 @@ public class ErrorRecoveryService {
     }
     
     private RecoveryResult handleSkipRule(String ruleName, Exception originalException) {
-        LOGGER.info("Skipping rule due to error: " + ruleName);
+        logger.info("Skipping rule due to error: " + ruleName);
         return RecoveryResult.skipped(ruleName, "Rule skipped due to evaluation error");
     }
     
     private RecoveryResult handleFailFast(String ruleName, Exception originalException) {
-        LOGGER.severe("Failing fast for rule: " + ruleName);
+        logger.error("Failing fast for rule: " + ruleName);
         return RecoveryResult.failed(ruleName, "Fail-fast strategy: " + originalException.getMessage());
     }
     

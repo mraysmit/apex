@@ -61,9 +61,9 @@ public class ConditionalMappingEnrichmentTest {
         // Create mapping for rule 1
         YamlEnrichment.MappingConfig mapping1 = new YamlEnrichment.MappingConfig();
         mapping1.setType("direct");
-        mapping1.setTransformation("'HIGH_PRIORITY'");
+        mapping1.setExpression("'HIGH_PRIORITY'");
         rule1.setMapping(mapping1);
-        
+
         mappingRules.add(rule1);
 
         // Rule 2: Lower priority default rule
@@ -71,10 +71,10 @@ public class ConditionalMappingEnrichmentTest {
         rule2.setId("default-rule");
         rule2.setPriority(999);
         // No conditions = default rule
-        
+
         YamlEnrichment.MappingConfig mapping2 = new YamlEnrichment.MappingConfig();
         mapping2.setType("direct");
-        mapping2.setTransformation("'DEFAULT_VALUE'");
+        mapping2.setExpression("'DEFAULT_VALUE'");
         rule2.setMapping(mapping2);
         
         mappingRules.add(rule2);
@@ -192,22 +192,22 @@ public class ConditionalMappingEnrichmentTest {
         conditionRules.add(condRule);
         conditions.setRules(conditionRules);
         highPriorityRule.setConditions(conditions);
-        
+
         YamlEnrichment.MappingConfig mapping = new YamlEnrichment.MappingConfig();
         mapping.setType("direct");
-        mapping.setTransformation("'HIGH_PRIORITY'");
+        mapping.setExpression("'HIGH_PRIORITY'");
         highPriorityRule.setMapping(mapping);
-        
+
         mappingRules.add(highPriorityRule);
 
         // Default rule (no conditions)
         YamlEnrichment.MappingRule defaultRule = new YamlEnrichment.MappingRule();
         defaultRule.setId("default");
         defaultRule.setPriority(999);
-        
+
         YamlEnrichment.MappingConfig defaultMapping = new YamlEnrichment.MappingConfig();
         defaultMapping.setType("direct");
-        defaultMapping.setTransformation("'DEFAULT_VALUE'");
+        defaultMapping.setExpression("'DEFAULT_VALUE'");
         defaultRule.setMapping(defaultMapping);
         
         mappingRules.add(defaultRule);
@@ -245,10 +245,10 @@ public class ConditionalMappingEnrichmentTest {
         conditionRules1.add(condRule1);
         conditions1.setRules(conditionRules1);
         rule1.setConditions(conditions1);
-        
+
         YamlEnrichment.MappingConfig mapping1 = new YamlEnrichment.MappingConfig();
         mapping1.setType("direct");
-        mapping1.setTransformation("'FIRST_MATCH'");
+        mapping1.setExpression("'FIRST_MATCH'");
         rule1.setMapping(mapping1);
         
         mappingRules.add(rule1);
@@ -266,10 +266,10 @@ public class ConditionalMappingEnrichmentTest {
         conditionRules2.add(condRule2);
         conditions2.setRules(conditionRules2);
         rule2.setConditions(conditions2);
-        
+
         YamlEnrichment.MappingConfig mapping2 = new YamlEnrichment.MappingConfig();
         mapping2.setType("direct");
-        mapping2.setTransformation("'SECOND_MATCH'");
+        mapping2.setExpression("'SECOND_MATCH'");
         rule2.setMapping(mapping2);
         
         mappingRules.add(rule2);

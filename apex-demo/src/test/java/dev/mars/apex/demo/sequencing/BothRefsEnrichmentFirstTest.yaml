@@ -37,7 +37,7 @@ enrichments:
     field-mappings:
       - source-field: "underlying"
         target-field: "productType"
-        transformation: "'OTC_OPTION'"
+        expression: "'OTC_OPTION'"
     enabled: true
 
 # CRITICAL: rule-refs appears AFTER enrichments (after enrichment-refs + inline enrichments)

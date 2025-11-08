@@ -63,7 +63,7 @@ public class StageExecutionResult {
         this.stageName = stageName;
         this.resultType = resultType;
         this.successful = successful;
-        this.stageOutputs = new HashMap<>();
+        this.stageOutputs = new java.util.concurrent.ConcurrentHashMap<>();
         this.startTime = System.currentTimeMillis();
     }
     
@@ -179,12 +179,26 @@ public class StageExecutionResult {
         this.endTime = startTime + executionTimeMs;
     }
     
+    /**
+     * Adds a stage output. Thread-safe using ConcurrentHashMap.
+     *
+     * @param key the output key
+     * @param value the output value
+     */
     public void addStageOutput(String key, Object value) {
         stageOutputs.put(key, value);
     }
-    
+
+    /**
+     * Sets all stage outputs. Thread-safe using ConcurrentHashMap.
+     *
+     * @param outputs the outputs to set
+     */
     public void setStageOutputs(Map<String, Object> outputs) {
-        this.stageOutputs = outputs != null ? new HashMap<>(outputs) : new HashMap<>();
+        this.stageOutputs.clear();
+        if (outputs != null) {
+            this.stageOutputs.putAll(outputs);
+        }
     }
     
     /**

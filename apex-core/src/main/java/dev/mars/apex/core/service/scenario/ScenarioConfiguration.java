@@ -19,7 +19,8 @@ package dev.mars.apex.core.service.scenario;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -58,7 +59,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
  */
 public class ScenarioConfiguration {
 
-    private static final Logger logger = Logger.getLogger(ScenarioConfiguration.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(ScenarioConfiguration.class);
     private static final ExpressionParser parser = new SpelExpressionParser();
 
     private String scenarioId;
@@ -360,7 +361,7 @@ public class ScenarioConfiguration {
         }
 
         if (data == null) {
-            logger.fine("Cannot evaluate classification rule against null data for scenario: " + scenarioId);
+            logger.debug("Cannot evaluate classification rule against null data for scenario: " + scenarioId);
             return false;
         }
 
@@ -373,7 +374,7 @@ public class ScenarioConfiguration {
             return result != null && result;
 
         } catch (Exception e) {
-            logger.warning("Failed to evaluate classification rule for scenario '" + scenarioId + "': " + e.getMessage());
+            logger.warn("Failed to evaluate classification rule for scenario '" + scenarioId + "': " + e.getMessage());
             return false;
         }
     }

@@ -1,9 +1,12 @@
 package dev.mars.apex.core.config.yaml;
 
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Deferred dependency resolver for sequential YAML processing.
@@ -30,7 +33,7 @@ import java.util.regex.Pattern;
  */
 public class DeferredDependencyResolver {
     
-    private static final Logger LOGGER = Logger.getLogger(DeferredDependencyResolver.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(DeferredDependencyResolver.class);
     
     // Patterns for detecting references in YAML content
     private static final Pattern FIELD_REFERENCE_PATTERN = Pattern.compile("#([a-zA-Z_][a-zA-Z0-9_.]*)");
@@ -51,7 +54,7 @@ public class DeferredDependencyResolver {
         this.deferredQueue = new LinkedList<>();
         this.availableIds = new HashSet<>();
         
-        LOGGER.info("DeferredDependencyResolver initialized for forward reference handling");
+        logger.info("DeferredDependencyResolver initialized for forward reference handling");
     }
     
     /**
@@ -62,7 +65,7 @@ public class DeferredDependencyResolver {
      * @return Dependency analysis result
      */
     public DependencyAnalysis analyzeDependencies(String sectionName, Object sectionContent) {
-        LOGGER.fine("Analyzing dependencies for section: " + sectionName);
+        logger.debug("Analyzing dependencies for section: " + sectionName);
         
         Set<String> requiredIds = extractRequiredIds(sectionContent);
         Set<String> providedIds = extractProvidedIds(sectionName, sectionContent);
@@ -90,7 +93,7 @@ public class DeferredDependencyResolver {
             sectionName, requiredIds, providedIds, unresolvedDependencies
         );
         
-        LOGGER.fine("Dependency analysis for " + sectionName + ": " + analysis);
+        logger.debug("Dependency analysis for " + sectionName + ": " + analysis);
         
         return analysis;
     }
@@ -116,7 +119,7 @@ public class DeferredDependencyResolver {
         DeferredSection deferred = new DeferredSection(sectionName, sectionContent, analysis);
         deferredQueue.offer(deferred);
         
-        LOGGER.info("Deferred section '" + sectionName + "' due to unresolved dependencies: " + 
+        logger.info("Deferred section '" + sectionName + "' due to unresolved dependencies: " + 
                    analysis.getUnresolvedDependencies());
     }
     
@@ -131,7 +134,7 @@ public class DeferredDependencyResolver {
         processedSections.add(sectionName);
         availableIds.addAll(providedIds);
         
-        LOGGER.fine("Section '" + sectionName + "' processed, provided IDs: " + providedIds);
+        logger.debug("Section '" + sectionName + "' processed, provided IDs: " + providedIds);
         
         // Check deferred queue for sections that can now be processed
         List<DeferredSection> readySections = new ArrayList<>();
@@ -152,7 +155,7 @@ public class DeferredDependencyResolver {
                 // All dependencies resolved
                 readySections.add(deferred);
                 iterator.remove();
-                LOGGER.info("Section '" + deferred.getSectionName() + "' dependencies resolved, ready for processing");
+                logger.info("Section '" + deferred.getSectionName() + "' dependencies resolved, ready for processing");
             } else {
                 // Update unresolved dependencies
                 deferred.getAnalysis().setUnresolvedDependencies(stillUnresolved);
@@ -168,7 +171,7 @@ public class DeferredDependencyResolver {
      * @return Circular dependency detection result
      */
     public CircularDependencyResult detectCircularDependencies() {
-        LOGGER.fine("Checking for circular dependencies...");
+        logger.debug("Checking for circular dependencies...");
         
         Set<String> visited = new HashSet<>();
         Set<String> recursionStack = new HashSet<>();
@@ -177,7 +180,7 @@ public class DeferredDependencyResolver {
         for (String section : dependencies.keySet()) {
             if (!visited.contains(section)) {
                 if (hasCircularDependency(section, visited, recursionStack, circularPath)) {
-                    LOGGER.warning("Circular dependency detected: " + circularPath);
+                    logger.warn("Circular dependency detected: " + circularPath);
                     return new CircularDependencyResult(true, new ArrayList<>(circularPath));
                 }
             }

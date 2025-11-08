@@ -85,7 +85,7 @@ enrichments:
       - source-field: "IS_NDF"
         target-field: "IS_NDF"
         condition: "#ruleResults['swift-valid-ndf-rule'].passed || #ruleResults['swift-y-flag-rule'].passed"
-        transformation: "#IS_NDF"
+        expression: "#IS_NDF"
         
       # Translation mapping for complex cases
       - source-field: "lookup"
@@ -103,4 +103,4 @@ enrichments:
               - field: "SYSTEM_CODE"
               - field: "EXTERNAL_CODE"
                 value: "#IS_NDF"
-        transformation: "#lookup.internal_code ?: #IS_NDF"
+        expression: "#lookup.internal_code ?: #IS_NDF"

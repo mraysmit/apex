@@ -49,7 +49,7 @@ enrichments:
     field-mappings:
       - source-field: "constant"
         target-field: "output"
-        transformation: "'FIRST'"
+        expression: "'FIRST'"
         
   # Rule 2: input='B' -> output='SECOND'  
   - id: "mapping-2"
@@ -58,7 +58,7 @@ enrichments:
     field-mappings:
       - source-field: "constant"
         target-field: "output"
-        transformation: "'SECOND'"
+        expression: "'SECOND'"
         
   # Rule 3: input='C' -> output='THIRD'
   - id: "mapping-3"
@@ -67,4 +67,4 @@ enrichments:
     field-mappings:
       - source-field: "constant"
         target-field: "output"
-        transformation: "'THIRD'"
+        expression: "'THIRD'"

@@ -2,6 +2,8 @@ package dev.mars.apex.core.util;
 
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleGroup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,7 +11,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -42,7 +45,7 @@ import java.util.logging.Logger;
  * and match them against a facts map.
  */
 public class RuleParameterExtractor {
-    private static final Logger LOGGER = Logger.getLogger(RuleParameterExtractor.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(RuleParameterExtractor.class);
     private static final Pattern PARAMETER_PATTERN = Pattern.compile("#([a-zA-Z0-9_]+)(?![a-zA-Z0-9_])");
 
     /**
@@ -184,7 +187,7 @@ public class RuleParameterExtractor {
         
         for (String parameter : parameters) {
             if (!updatedFacts.containsKey(parameter)) {
-                LOGGER.warning("Adding missing parameter to facts map: " + parameter);
+                logger.warn("Adding missing parameter to facts map: " + parameter);
                 updatedFacts.put(parameter, null);
             }
         }

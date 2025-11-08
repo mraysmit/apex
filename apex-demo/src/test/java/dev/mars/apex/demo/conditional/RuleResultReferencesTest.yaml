@@ -68,7 +68,7 @@ enrichments:
     field-mappings:
       - source-field: "amount"
         target-field: "processedAmount"
-        transformation: "#amount * 1.05"  # Add 5% processing fee
+        expression: "#amount * 1.05"  # Add 5% processing fee
         
   # 2. Rule group result reference
   - id: "rule-group-reference"
@@ -79,7 +79,7 @@ enrichments:
     field-mappings:
       - source-field: "customerType"
         target-field: "validationStatus"
-        transformation: "'VALIDATED'"
+        expression: "'VALIDATED'"
         
   # 3. Complex conditional mapping using multiple rule results
   - id: "complex-conditional-mapping"
@@ -91,7 +91,7 @@ enrichments:
       # Processing priority based on rule results
       - source-field: "priority"
         target-field: "processingPriority"
-        transformation: |
+        expression: |
           #ruleResults['urgent-processing-rule'] == true ? 'IMMEDIATE' :
           #ruleResults['high-value-rule'] == true ? 'HIGH' :
           #ruleResults['premium-customer-rule'] == true ? 'ELEVATED' :
@@ -100,7 +100,7 @@ enrichments:
       # Processing fee based on validation results
       - source-field: "amount"
         target-field: "processingFee"
-        transformation: |
+        expression: |
           #ruleGroupResults['validation-group']['passed'] == true ?
             (#ruleResults['high-value-rule'] == true ? (#amount * 0.02) : (#amount * 0.01)) :
             (#amount * 0.05)
@@ -108,7 +108,7 @@ enrichments:
       # Service level based on multiple conditions
       - source-field: "customerType"
         target-field: "serviceLevel"
-        transformation: |
+        expression: |
           #ruleGroupResults['processing-group']['passed'] == true ? 'PREMIUM_PLUS' :
           #ruleResults['premium-customer-rule'] == true ? 'PREMIUM' :
           #ruleResults['high-value-rule'] == true ? 'ENHANCED' :
@@ -124,7 +124,7 @@ enrichments:
       # Status mapping with comprehensive fallback logic
       - source-field: "status"
         target-field: "finalStatus"
-        transformation: |
+        expression: |
           #ruleGroupResults.containsKey('validation-group') && #ruleGroupResults['validation-group']['passed'] == true ?
             'APPROVED' :
           #ruleResults.containsKey('high-value-rule') && #ruleResults['high-value-rule'] == true ?
@@ -134,7 +134,7 @@ enrichments:
       # Notification level based on rule combinations
       - source-field: "customerType"
         target-field: "notificationLevel"
-        transformation: |
+        expression: |
           (#ruleResults.get('urgent-processing-rule') == true && #ruleResults.get('premium-customer-rule') == true) ? 'IMMEDIATE' :
           #ruleResults.get('urgent-processing-rule') == true ? 'HIGH' :
           #ruleResults.get('premium-customer-rule') == true ? 'MEDIUM' :
@@ -150,4 +150,4 @@ enrichments:
       # Access the passedRules list from rule group results
       - source-field: "customerType"
         target-field: "passedRulesList"
-        transformation: "#ruleGroupResults != null && #ruleGroupResults.containsKey('validation-group') ? #ruleGroupResults['validation-group']['passedRules'] : null"
+        expression: "#ruleGroupResults != null && #ruleGroupResults.containsKey('validation-group') ? #ruleGroupResults['validation-group']['passedRules'] : null"

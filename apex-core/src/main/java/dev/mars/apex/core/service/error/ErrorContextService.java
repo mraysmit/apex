@@ -2,9 +2,12 @@ package dev.mars.apex.core.service.error;
 
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -33,7 +36,7 @@ import java.util.logging.Logger;
  * @version 1.0
  */
 public class ErrorContextService {
-    private static final Logger LOGGER = Logger.getLogger(ErrorContextService.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(ErrorContextService.class);
     
     /**
      * Generate detailed error context for a rule evaluation failure.
@@ -46,7 +49,7 @@ public class ErrorContextService {
      */
     public ErrorContext generateErrorContext(String ruleName, String expression, 
                                            EvaluationContext context, Exception exception) {
-        LOGGER.fine("Generating error context for rule: " + ruleName);
+        logger.debug("Generating error context for rule: " + ruleName);
         
         ErrorContext.Builder builder = new ErrorContext.Builder(ruleName, expression, exception);
         
@@ -94,7 +97,7 @@ public class ErrorContextService {
             // We can only get what we can access through reflection
             
         } catch (Exception e) {
-            LOGGER.fine("Could not extract all variable information: " + e.getMessage());
+            logger.debug("Could not extract all variable information: " + e.getMessage());
         }
         
         return variables;

@@ -43,7 +43,7 @@ SpEL is now supported consistently across ALL APEX features:
 | Feature | SpEL Support | Example |
 |---------|--------------|---------|
 | **Conditions** | ✅ Yes | `condition: '#data.currency != null'` |
-| **Transformations** | ✅ Yes | `transformation: '#data.currency'` |
+| **Transformations** | ✅ Yes | `expression: '#data.currency'` |
 | **Lookup Keys** | ✅ Yes | `lookup-key: '#symbol'` |
 | **Calculations** | ✅ Yes | `expression: '#amount * 0.01'` |
 | **Field Mappings** | ✅ **NEW (v2.3)** | `source-field: '#data.currency'` |
@@ -135,7 +135,7 @@ field-mappings:
 field-mappings:
   - source-field: "#data.amount"
     target-field: "adjusted_amount"
-    transformation: "#value * 1.1"
+    expression: "#value * 1.1"
 ```
 
 ### Backward Compatibility

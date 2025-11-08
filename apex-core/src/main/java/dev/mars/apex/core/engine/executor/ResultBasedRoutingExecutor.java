@@ -96,7 +96,7 @@ public class ResultBasedRoutingExecutor extends PatternExecutor {
             return resultBuilder.successful(true).build();
             
         } catch (Exception e) {
-            logger.severe("Error executing result-based routing: " + e.getMessage());
+            logger.error("Error executing result-based routing: " + e.getMessage());
             return resultBuilder.errorMessage("Execution error: " + e.getMessage()).build();
         }
     }
@@ -114,7 +114,7 @@ public class ResultBasedRoutingExecutor extends PatternExecutor {
         try {
             Map<String, Object> routerRuleConfig = getMapValue(configuration, "router-rule");
             if (routerRuleConfig == null) {
-                logger.warning("router-rule configuration is missing");
+                logger.warn("router-rule configuration is missing");
                 return null;
             }
             
@@ -128,7 +128,7 @@ public class ResultBasedRoutingExecutor extends PatternExecutor {
             Object routeResult = evaluatorService.evaluate(condition, context, Object.class);
             
             if (routeResult == null) {
-                logger.warning("Router rule returned null result");
+                logger.warn("Router rule returned null result");
                 return null;
             }
             
@@ -148,7 +148,7 @@ public class ResultBasedRoutingExecutor extends PatternExecutor {
             return routeKey;
             
         } catch (Exception e) {
-            logger.severe("Error executing router rule: " + e.getMessage());
+            logger.error("Error executing router rule: " + e.getMessage());
             return null;
         }
     }
@@ -167,13 +167,13 @@ public class ResultBasedRoutingExecutor extends PatternExecutor {
         try {
             Map<String, Object> routesConfig = getMapValue(configuration, "routes");
             if (routesConfig == null) {
-                logger.warning("routes configuration is missing");
+                logger.warn("routes configuration is missing");
                 return false;
             }
             
             Map<String, Object> routeConfig = getMapValue(routesConfig, routeKey);
             if (routeConfig == null) {
-                logger.warning("No route configuration found for key: " + routeKey);
+                logger.warn("No route configuration found for key: " + routeKey);
                 // This might be acceptable - some routes might not have specific rules
                 context.addStageResult("routeExecutionResult", "NO_RULES_FOR_ROUTE");
                 resultBuilder.addStageResult("routeExecutionResult", "NO_RULES_FOR_ROUTE");
@@ -229,7 +229,7 @@ public class ResultBasedRoutingExecutor extends PatternExecutor {
             return true;
             
         } catch (Exception e) {
-            logger.severe("Error executing route " + routeKey + ": " + e.getMessage());
+            logger.error("Error executing route " + routeKey + ": " + e.getMessage());
             return false;
         }
     }
@@ -237,41 +237,41 @@ public class ResultBasedRoutingExecutor extends PatternExecutor {
     @Override
     public boolean validateConfiguration(Map<String, Object> configuration) {
         if (configuration == null) {
-            logger.warning("Configuration is null");
+            logger.warn("Configuration is null");
             return false;
         }
         
         // Validate router-rule configuration
         if (!hasRequiredKey(configuration, "router-rule")) {
-            logger.warning("Missing required key: router-rule");
+            logger.warn("Missing required key: router-rule");
             return false;
         }
         
         Map<String, Object> routerRuleConfig = getMapValue(configuration, "router-rule");
         if (routerRuleConfig == null) {
-            logger.warning("router-rule must be a map");
+            logger.warn("router-rule must be a map");
             return false;
         }
         
         if (!hasRequiredKey(routerRuleConfig, "condition")) {
-            logger.warning("router-rule missing required condition");
+            logger.warn("router-rule missing required condition");
             return false;
         }
         
         // Validate routes configuration
         if (!hasRequiredKey(configuration, "routes")) {
-            logger.warning("Missing required key: routes");
+            logger.warn("Missing required key: routes");
             return false;
         }
         
         Map<String, Object> routesConfig = getMapValue(configuration, "routes");
         if (routesConfig == null) {
-            logger.warning("routes must be a map");
+            logger.warn("routes must be a map");
             return false;
         }
         
         if (routesConfig.isEmpty()) {
-            logger.warning("routes map cannot be empty");
+            logger.warn("routes map cannot be empty");
             return false;
         }
         
@@ -281,7 +281,7 @@ public class ResultBasedRoutingExecutor extends PatternExecutor {
             Object routeValue = routeEntry.getValue();
             
             if (!(routeValue instanceof Map)) {
-                logger.warning("Route '" + routeKey + "' configuration must be a map");
+                logger.warn("Route '" + routeKey + "' configuration must be a map");
                 return false;
             }
             
@@ -292,7 +292,7 @@ public class ResultBasedRoutingExecutor extends PatternExecutor {
             if (routeConfig.containsKey("rules")) {
                 List<Object> routeRules = getListValue(routeConfig, "rules");
                 if (routeRules == null) {
-                    logger.warning("Route '" + routeKey + "' rules must be a list");
+                    logger.warn("Route '" + routeKey + "' rules must be a list");
                     return false;
                 }
                 
@@ -300,7 +300,7 @@ public class ResultBasedRoutingExecutor extends PatternExecutor {
                 for (int i = 0; i < routeRules.size(); i++) {
                     Object ruleObj = routeRules.get(i);
                     if (!(ruleObj instanceof Map)) {
-                        logger.warning("Route '" + routeKey + "' rule at index " + i + " must be a map");
+                        logger.warn("Route '" + routeKey + "' rule at index " + i + " must be a map");
                         return false;
                     }
                     
@@ -308,7 +308,7 @@ public class ResultBasedRoutingExecutor extends PatternExecutor {
                     Map<String, Object> ruleConfig = (Map<String, Object>) ruleObj;
                     
                     if (!hasRequiredKey(ruleConfig, "condition")) {
-                        logger.warning("Route '" + routeKey + "' rule at index " + i + " missing required condition");
+                        logger.warn("Route '" + routeKey + "' rule at index " + i + " missing required condition");
                         return false;
                     }
                 }

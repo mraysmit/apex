@@ -254,24 +254,45 @@ class ScenarioConcurrentAccessTest {
             
             try {
                 List<Future<?>> futures = new ArrayList<>();
-                
+                List<String> errors = new java.util.concurrent.CopyOnWriteArrayList<>();
+
                 for (int t = 0; t < threadCount; t++) {
                     futures.add(executorService.submit(() -> {
                         for (int i = 0; i < executionsPerThread; i++) {
-                            Map<String, Object> testData = new HashMap<>();
-                            testData.put("type", "OTC");
-                            
-                            ScenarioExecutionResult result = executor.executeStages(scenario, testData);
-                            if (result.isSuccessful() || result.requiresReview()) {
-                                successCount.incrementAndGet();
+                            try {
+                                Map<String, Object> testData = new HashMap<>();
+                                testData.put("type", "OTC");
+
+                                ScenarioExecutionResult result = executor.executeStages(scenario, testData);
+                                if (result.isSuccessful() || result.requiresReview()) {
+                                    successCount.incrementAndGet();
+                                } else {
+                                    String errorMsg = String.format("Execution failed: %s | Successful=%s, RequiresReview=%s, Terminated=%s, Warnings=%s, StageResults=%d",
+                                        result.getExecutionSummary(),
+                                        result.isSuccessful(),
+                                        result.requiresReview(),
+                                        result.isTerminated(),
+                                        result.getWarnings(),
+                                        result.getStageResults().size());
+                                    errors.add(errorMsg);
+                                    logger.error("Concurrent execution failed: {}", errorMsg);
+                                }
+                            } catch (Exception e) {
+                                errors.add("Exception during execution: " + e.getMessage());
+                                logger.error("Exception in concurrent execution", e);
                             }
                         }
                     }));
                 }
-                
+
                 // Wait for all to complete
                 for (Future<?> future : futures) {
                     future.get();
+                }
+
+                // Log any errors
+                if (!errors.isEmpty()) {
+                    logger.error("Errors during concurrent execution: {}", errors);
                 }
                 
                 // Then: Verify all cache accesses succeeded

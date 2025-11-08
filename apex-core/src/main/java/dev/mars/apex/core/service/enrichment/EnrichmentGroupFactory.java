@@ -6,9 +6,12 @@ import dev.mars.apex.core.config.yaml.YamlEnrichmentGroup;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.model.Category;
 import dev.mars.apex.core.engine.model.EnrichmentGroup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Factory to build runtime EnrichmentGroup models from YAML configuration.
@@ -16,7 +19,7 @@ import java.util.logging.Logger;
  */
 public class EnrichmentGroupFactory {
 
-    private static final Logger LOGGER = Logger.getLogger(EnrichmentGroupFactory.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(EnrichmentGroupFactory.class);
 
     /**
      * Build enrichment groups from a rule configuration.
@@ -49,7 +52,7 @@ public class EnrichmentGroupFactory {
 
             // Look up category metadata from cache for inheritance
             YamlCategory yamlCategory = yamlCategoryCache.get(categoryName);
-            LOGGER.fine("Found category '" + categoryName + "' for enrichment group '" + yg.getId() +
+            logger.debug("Found category '" + categoryName + "' for enrichment group '" + yg.getId() +
                        "'. YamlCategory found: " + (yamlCategory != null) +
                        (yamlCategory != null ? ", businessOwner: " + yamlCategory.getBusinessOwner() : ""));
 
@@ -73,7 +76,7 @@ public class EnrichmentGroupFactory {
                     if (id == null) continue;
                     YamlEnrichment e = enrichmentById.get(id);
                     if (e == null) {
-                        LOGGER.warning("Enrichment id not found: " + id + " in group " + yg.getId());
+                        logger.warn("Enrichment id not found: " + id + " in group " + yg.getId());
                         continue;
                     }
                     g.addEnrichment(sequence++, e);
@@ -88,7 +91,7 @@ public class EnrichmentGroupFactory {
                     int sequence = ref.getSequence() != null ? ref.getSequence() : 1;
                     YamlEnrichment e = enrichmentById.get(ref.getEnrichmentId());
                     if (e == null) {
-                        LOGGER.warning("Enrichment reference not found: " + ref.getEnrichmentId() + " in group " + yg.getId());
+                        logger.warn("Enrichment reference not found: " + ref.getEnrichmentId() + " in group " + yg.getId());
                         continue;
                     }
                     // Note: override-priority is not applied here; priority is part of enrichment itself
@@ -106,7 +109,7 @@ public class EnrichmentGroupFactory {
 
             EnrichmentGroup targetGroup = groupsById.get(yg.getId());
             if (targetGroup == null) {
-                LOGGER.warning("Target enrichment group not found: " + yg.getId());
+                logger.warn("Target enrichment group not found: " + yg.getId());
                 continue;
             }
 
@@ -119,7 +122,7 @@ public class EnrichmentGroupFactory {
                     }
                 } else {
                     String errorMsg = "Referenced enrichment group not found: " + referencedGroupId + " in group: " + yg.getId();
-                    LOGGER.severe(errorMsg);
+                    logger.error(errorMsg);
                     throw new RuntimeException(errorMsg);
                 }
             }
@@ -133,7 +136,7 @@ public class EnrichmentGroupFactory {
         String op = operator.trim().toUpperCase();
         if ("AND".equals(op)) return true;
         if ("OR".equals(op)) return false;
-        LOGGER.warning("Invalid operator '" + operator + "' for enrichment group. Using AND as default.");
+        logger.warn("Invalid operator '" + operator + "' for enrichment group. Using AND as default.");
         return true;
     }
 
@@ -166,7 +169,7 @@ public class EnrichmentGroupFactory {
                     categoryCache.put(category.getName(), category);
                     // Also cache the YAML category for metadata inheritance
                     yamlCategoryCache.put(yamlCategory.getName(), yamlCategory);
-                    LOGGER.fine("Cached category '" + yamlCategory.getName() +
+                    logger.debug("Cached category '" + yamlCategory.getName() +
                                "' with businessOwner: " + yamlCategory.getBusinessOwner() +
                                ", businessDomain: " + yamlCategory.getBusinessDomain());
                 }
@@ -184,7 +187,7 @@ public class EnrichmentGroupFactory {
         String name = yamlCategory.getName();
         int priority = yamlCategory.getPriority() != null ? yamlCategory.getPriority() : 100;
 
-        LOGGER.fine("Creating category: " + name + " with priority: " + priority);
+        logger.debug("Creating category: " + name + " with priority: " + priority);
 
         return new Category(name, priority);
     }
@@ -199,7 +202,7 @@ public class EnrichmentGroupFactory {
      */
     private static Category getOrCreateCategory(String categoryName, int defaultPriority, Map<String, Category> categoryCache) {
         return categoryCache.computeIfAbsent(categoryName, name -> {
-            LOGGER.fine("Creating new category: " + name + " with priority: " + defaultPriority);
+            logger.debug("Creating new category: " + name + " with priority: " + defaultPriority);
             return new Category(name, defaultPriority);
         });
     }
@@ -257,7 +260,7 @@ public class EnrichmentGroupFactory {
             group.setExpirationDate(expirationDate);
         }
 
-        LOGGER.fine("Applied metadata inheritance to enrichment group '" + yamlGroup.getId() + "': " +
+        logger.debug("Applied metadata inheritance to enrichment group '" + yamlGroup.getId() + "': " +
                    "createdBy=" + group.getCreatedBy() + ", " +
                    "businessDomain=" + group.getBusinessDomain() + ", " +
                    "businessOwner=" + group.getBusinessOwner());

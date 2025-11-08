@@ -108,7 +108,7 @@ public class ComplexWorkflowExecutor extends PatternExecutor {
                         return resultBuilder.errorMessage("Stage '" + stageName + "' failed with terminate action").build();
                     }
                     // Continue with other stages if failure action is not terminate
-                    logger.warning("Stage '" + stageName + "' failed but continuing execution");
+                    logger.warn("Stage '" + stageName + "' failed but continuing execution");
                 }
             }
 
@@ -116,7 +116,7 @@ public class ComplexWorkflowExecutor extends PatternExecutor {
             return resultBuilder.successful(true).build();
 
         } catch (Exception e) {
-            logger.severe("Error executing complex workflow: " + e.getMessage());
+            logger.error("Error executing complex workflow: " + e.getMessage());
             return resultBuilder.errorMessage("Execution error: " + e.getMessage()).build();
         }
     }
@@ -239,7 +239,7 @@ public class ComplexWorkflowExecutor extends PatternExecutor {
             }
 
         } catch (Exception e) {
-            logger.severe("Error executing workflow stage '" + stage.getName() + "': " + e.getMessage());
+            logger.error("Error executing workflow stage '" + stage.getName() + "': " + e.getMessage());
             return false;
         }
     }
@@ -277,7 +277,7 @@ public class ComplexWorkflowExecutor extends PatternExecutor {
             return true;
 
         } catch (Exception e) {
-            logger.severe("Error evaluating conditional stage '" + stage.getName() + "': " + e.getMessage());
+            logger.error("Error evaluating conditional stage '" + stage.getName() + "': " + e.getMessage());
             return false;
         }
     }
@@ -301,7 +301,7 @@ public class ComplexWorkflowExecutor extends PatternExecutor {
             if (!ruleResult.isTriggered()) {
                 allPassed = false;
                 if ("terminate".equals(stage.getFailureAction())) {
-                    logger.warning("Rule '" + rule.getName() + "' failed in stage '" + stage.getName() + "' with terminate action");
+                    logger.warn("Rule '" + rule.getName() + "' failed in stage '" + stage.getName() + "' with terminate action");
                     return false;
                 }
             } else {
@@ -310,7 +310,7 @@ public class ComplexWorkflowExecutor extends PatternExecutor {
                     try {
                         stageResult = evaluateExpression(rule.getCondition(), context, Object.class);
                     } catch (Exception e) {
-                        logger.warning("Could not evaluate rule condition as output for stage '" + stage.getName() + "'");
+                        logger.warn("Could not evaluate rule condition as output for stage '" + stage.getName() + "'");
                     }
                 }
             }
@@ -361,24 +361,24 @@ public class ComplexWorkflowExecutor extends PatternExecutor {
     @Override
     public boolean validateConfiguration(Map<String, Object> configuration) {
         if (configuration == null) {
-            logger.warning("Configuration is null");
+            logger.warn("Configuration is null");
             return false;
         }
 
         // Validate stages configuration
         if (!hasRequiredKey(configuration, "stages")) {
-            logger.warning("Missing required key: stages");
+            logger.warn("Missing required key: stages");
             return false;
         }
 
         List<Object> stagesConfig = getListValue(configuration, "stages");
         if (stagesConfig == null) {
-            logger.warning("stages must be a list");
+            logger.warn("stages must be a list");
             return false;
         }
 
         if (stagesConfig.isEmpty()) {
-            logger.warning("stages list cannot be empty");
+            logger.warn("stages list cannot be empty");
             return false;
         }
 
@@ -387,7 +387,7 @@ public class ComplexWorkflowExecutor extends PatternExecutor {
         for (int i = 0; i < stagesConfig.size(); i++) {
             Object stageObj = stagesConfig.get(i);
             if (!(stageObj instanceof Map)) {
-                logger.warning("Stage at index " + i + " must be a map");
+                logger.warn("Stage at index " + i + " must be a map");
                 return false;
             }
 
@@ -408,18 +408,18 @@ public class ComplexWorkflowExecutor extends PatternExecutor {
     private boolean validateStageConfiguration(Map<String, Object> stageConfig, int stageIndex, Set<String> stageIds) {
         // Validate stage ID
         if (!hasRequiredKey(stageConfig, "stage")) {
-            logger.warning("Stage at index " + stageIndex + " missing required key: stage");
+            logger.warn("Stage at index " + stageIndex + " missing required key: stage");
             return false;
         }
 
         String stageId = getStringValue(stageConfig, "stage", null);
         if (stageId == null || stageId.trim().isEmpty()) {
-            logger.warning("Stage at index " + stageIndex + " has empty stage ID");
+            logger.warn("Stage at index " + stageIndex + " has empty stage ID");
             return false;
         }
 
         if (stageIds.contains(stageId)) {
-            logger.warning("Duplicate stage ID: " + stageId);
+            logger.warn("Duplicate stage ID: " + stageId);
             return false;
         }
         stageIds.add(stageId);
@@ -428,7 +428,7 @@ public class ComplexWorkflowExecutor extends PatternExecutor {
         if (stageConfig.containsKey("failure-action")) {
             String failureAction = getStringValue(stageConfig, "failure-action", "continue");
             if (!"terminate".equals(failureAction) && !"continue".equals(failureAction)) {
-                logger.warning("Stage '" + stageId + "' has invalid failure-action: " + failureAction +
+                logger.warn("Stage '" + stageId + "' has invalid failure-action: " + failureAction +
                              " (must be 'terminate' or 'continue')");
                 return false;
             }
@@ -438,7 +438,7 @@ public class ComplexWorkflowExecutor extends PatternExecutor {
         if (stageConfig.containsKey("depends-on")) {
             List<Object> dependsOn = getListValue(stageConfig, "depends-on");
             if (dependsOn == null) {
-                logger.warning("Stage '" + stageId + "' depends-on must be a list");
+                logger.warn("Stage '" + stageId + "' depends-on must be a list");
                 return false;
             }
         }
@@ -447,14 +447,14 @@ public class ComplexWorkflowExecutor extends PatternExecutor {
         if (stageConfig.containsKey("rules")) {
             List<Object> rules = getListValue(stageConfig, "rules");
             if (rules == null) {
-                logger.warning("Stage '" + stageId + "' rules must be a list");
+                logger.warn("Stage '" + stageId + "' rules must be a list");
                 return false;
             }
 
             for (int i = 0; i < rules.size(); i++) {
                 Object ruleObj = rules.get(i);
                 if (!(ruleObj instanceof Map)) {
-                    logger.warning("Stage '" + stageId + "' rule at index " + i + " must be a map");
+                    logger.warn("Stage '" + stageId + "' rule at index " + i + " must be a map");
                     return false;
                 }
 
@@ -462,7 +462,7 @@ public class ComplexWorkflowExecutor extends PatternExecutor {
                 Map<String, Object> ruleConfig = (Map<String, Object>) ruleObj;
 
                 if (!hasRequiredKey(ruleConfig, "condition")) {
-                    logger.warning("Stage '" + stageId + "' rule at index " + i + " missing required condition");
+                    logger.warn("Stage '" + stageId + "' rule at index " + i + " missing required condition");
                     return false;
                 }
             }
@@ -472,12 +472,12 @@ public class ComplexWorkflowExecutor extends PatternExecutor {
         if (stageConfig.containsKey("conditional-execution")) {
             Map<String, Object> conditionalExecution = getMapValue(stageConfig, "conditional-execution");
             if (conditionalExecution == null) {
-                logger.warning("Stage '" + stageId + "' conditional-execution must be a map");
+                logger.warn("Stage '" + stageId + "' conditional-execution must be a map");
                 return false;
             }
 
             if (!hasRequiredKey(conditionalExecution, "condition")) {
-                logger.warning("Stage '" + stageId + "' conditional-execution missing required condition");
+                logger.warn("Stage '" + stageId + "' conditional-execution missing required condition");
                 return false;
             }
         }

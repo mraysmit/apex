@@ -26,7 +26,7 @@ enrichments:
     field-mappings:
       - source-field: "riskScore"
         target-field: "approvalLevel"
-        transformation: |
+        expression: |
           #riskScore < 0.3 ? 'AUTO_APPROVE' :
           #riskScore >= 0.3 && #riskScore < 0.8 ? 'STANDARD' :
           'MANUAL_REVIEW'

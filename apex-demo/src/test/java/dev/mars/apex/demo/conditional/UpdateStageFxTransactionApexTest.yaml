@@ -102,7 +102,7 @@ enrichments:
       # Main NDF processing with complex conditional logic
       - source-field: "IS_NDF"
         target-field: "PROCESSED_NDF"
-        transformation: |
+        expression: |
           #SYSTEM_CODE == 'SWIFT' ?
             (({'0', '1'}.contains(#IS_NDF)) ? #IS_NDF :
              (#IS_NDF == 'Y') ? '1' :
@@ -117,7 +117,7 @@ enrichments:
       # Processing status indicator
       - source-field: "SYSTEM_CODE"
         target-field: "PROCESSING_STATUS"
-        transformation: |
+        expression: |
           #SYSTEM_CODE == 'SWIFT' ? 'SWIFT_PROCESSED' :
           #SYSTEM_CODE == 'REUTERS' ? 'REUTERS_PROCESSED' :
           'UNKNOWN_SYSTEM'
@@ -125,7 +125,7 @@ enrichments:
       # Translation requirement flag
       - source-field: "IS_NDF"
         target-field: "REQUIRES_TRANSLATION"
-        transformation: |
+        expression: |
           (#SYSTEM_CODE == 'SWIFT' && !({'0', '1', 'Y', 'N'}.contains(#IS_NDF))) ||
           (#SYSTEM_CODE == 'REUTERS' && !({'TRUE', 'FALSE'}.contains(#IS_NDF?.toUpperCase()))) ||
           (#SYSTEM_CODE != 'SWIFT' && #SYSTEM_CODE != 'REUTERS')
@@ -141,7 +141,7 @@ enrichments:
       # Risk level calculation
       - source-field: "BUY_CURRENCY_RANK"
         target-field: "RISK_LEVEL"
-        transformation: |
+        expression: |
           (#BUY_CURRENCY_RANK <= 2 && #SELL_CURRENCY_RANK <= 2) ? 'LOW' :
           (#BUY_CURRENCY_RANK <= 3 && #SELL_CURRENCY_RANK <= 3) ? 'MEDIUM' :
           'HIGH'
@@ -149,7 +149,7 @@ enrichments:
       # Cross-region indicator
       - source-field: "BUY_CURRENCY_REGION"
         target-field: "CROSS_REGION"
-        transformation: "#BUY_CURRENCY_REGION != #SELL_CURRENCY_REGION"
+        expression: "#BUY_CURRENCY_REGION != #SELL_CURRENCY_REGION"
 
   # 5. Final validation and audit trail
   - id: "validation-and-audit"
@@ -162,7 +162,7 @@ enrichments:
       # Validation status
       - source-field: "PROCESSED_NDF"
         target-field: "VALIDATION_STATUS"
-        transformation: |
+        expression: |
           #PROCESSED_NDF == 'REQUIRES_TRANSLATION' ? 'NEEDS_TRANSLATION' :
           #PROCESSED_NDF == 'UNSUPPORTED_SYSTEM' ? 'SYSTEM_ERROR' :
           ({'0', '1'}.contains(#PROCESSED_NDF)) ? 'VALIDATED' :
@@ -171,7 +171,7 @@ enrichments:
       # Processing summary
       - source-field: "SYSTEM_CODE"
         target-field: "PROCESSING_SUMMARY"
-        transformation: |
+        expression: |
           'System: ' + #SYSTEM_CODE + 
           ', NDF: ' + (#IS_NDF ?: 'null') + 
           ' -> ' + (#PROCESSED_NDF ?: 'null') +

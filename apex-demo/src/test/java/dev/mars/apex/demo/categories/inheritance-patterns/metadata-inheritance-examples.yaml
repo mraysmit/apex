@@ -177,7 +177,7 @@ enrichments:
     field-mappings:
       - source: "rawStatus"
         target: "processedStatus"
-        transformation: "#rawStatus.toUpperCase()"
+        expression: "#rawStatus.toUpperCase()"
     # Override specific metadata
     business-owner: "Senior Operations Analyst"
     created-by: "Operations Enhancement Team"

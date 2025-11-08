@@ -70,7 +70,7 @@ enrichments:
     field-mappings:
       - source-field: "amount"
         target-field: "optimizationLevel"
-        transformation: "'OPTIMIZED'"
+        expression: "'OPTIMIZED'"
 
   - id: "unoptimized-path-enrichment"
     type: "field-enrichment"
@@ -78,14 +78,14 @@ enrichments:
     field-mappings:
       - source-field: "amount"
         target-field: "optimizationLevel"
-        transformation: "'UNOPTIMIZED'"
+        expression: "'UNOPTIMIZED'"
 
   - id: "default-optimization-enrichment"
     type: "field-enrichment"
     field-mappings:
       - source-field: "amount"
         target-field: "optimizationLevel"
-        transformation: "#ruleGroupResults['optimized-and-group']['passed'] ? 'OPTIMIZED' : 'UNOPTIMIZED'"
+        expression: "#ruleGroupResults['optimized-and-group']['passed'] ? 'OPTIMIZED' : 'UNOPTIMIZED'"
 
   # AND operator stop-on-first-failure test
   - id: "and-group-result-enrichment"
@@ -93,7 +93,7 @@ enrichments:
     field-mappings:
       - source-field: "amount"
         target-field: "andGroupResult"
-        transformation: "#ruleGroupResults['optimized-and-group']['passed'] ? 'PASSED' : 'FAILED_EARLY'"
+        expression: "#ruleGroupResults['optimized-and-group']['passed'] ? 'PASSED' : 'FAILED_EARLY'"
 
   # OR operator first-match-wins test
   - id: "or-group-result-enrichment"
@@ -101,7 +101,7 @@ enrichments:
     field-mappings:
       - source-field: "amount"
         target-field: "orGroupResult"
-        transformation: "#ruleGroupResults['or-group-first-match']['passed'] ? 'MATCHED_FIRST' : 'NO_MATCH'"
+        expression: "#ruleGroupResults['or-group-first-match']['passed'] ? 'MATCHED_FIRST' : 'NO_MATCH'"
 
   # Caching test enrichment
   - id: "caching-level-enrichment"
@@ -109,5 +109,5 @@ enrichments:
     field-mappings:
       - source-field: "amount"
         target-field: "cachingLevel"
-        transformation: "#ruleGroupResults['optimized-and-group']['passed'] ? 'CACHED' : 'EVALUATED'"
+        expression: "#ruleGroupResults['optimized-and-group']['passed'] ? 'CACHED' : 'EVALUATED'"
 

@@ -6,6 +6,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.service.data.external.DataSourceResolver;
 import dev.mars.apex.core.service.data.external.ExternalDataSourceConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,7 +16,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,7 +52,7 @@ import java.util.regex.Pattern;
  */
 public class YamlConfigurationLoader {
 
-    private static final Logger LOGGER = Logger.getLogger(YamlConfigurationLoader.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(YamlConfigurationLoader.class);
 
     private final ObjectMapper yamlMapper;
     private final DataSourceResolver dataSourceResolver;
@@ -78,7 +81,7 @@ public class YamlConfigurationLoader {
                 throw new YamlConfigurationException("Configuration file not found: " + filePath);
             }
 
-            LOGGER.info("Loading YAML configuration from file: " + filePath);
+            logger.info("Loading YAML configuration from file: " + filePath);
 
             // Read raw content and resolve properties before parsing
             String rawContent = Files.readString(path);
@@ -91,11 +94,11 @@ public class YamlConfigurationLoader {
             // Copy section order and item order into the configuration
             List<String> sectionOrder = orderedConfig.getSectionOrder();
             config.setSectionOrder(sectionOrder);
-            LOGGER.fine("Section order from YAML: " + sectionOrder);
+            logger.debug("Section order from YAML: " + sectionOrder);
 
             List<ProcessingItem> itemOrder = orderedConfig.getItemOrder();
             config.setItemOrder(itemOrder);
-            LOGGER.fine("Item order from YAML: " + itemOrder.size() + " items");
+            logger.debug("Item order from YAML: " + itemOrder.size() + " items");
 
             // Apply groups-only logic to filter itemOrder for main file
             // This must be called BEFORE processing external references
@@ -115,7 +118,7 @@ public class YamlConfigurationLoader {
             expandReferencePlaceholders(config);
 
             validateConfiguration(config);
-            LOGGER.info("Successfully loaded configuration: " +
+            logger.info("Successfully loaded configuration: " +
                        (config.getMetadata() != null ? config.getMetadata().getName() : "unnamed"));
 
             return config;
@@ -138,7 +141,7 @@ public class YamlConfigurationLoader {
                 throw new YamlConfigurationException("Configuration file not found: " + file.getAbsolutePath());
             }
 
-            LOGGER.info("Loading YAML configuration from file: " + file.getAbsolutePath());
+            logger.info("Loading YAML configuration from file: " + file.getAbsolutePath());
 
             // Read raw content and resolve properties before parsing
             String rawContent = Files.readString(file.toPath());
@@ -168,7 +171,7 @@ public class YamlConfigurationLoader {
             expandReferencePlaceholders(config);
 
             validateConfiguration(config);
-            LOGGER.info("Successfully loaded configuration: " +
+            logger.info("Successfully loaded configuration: " +
                        (config.getMetadata() != null ? config.getMetadata().getName() : "unnamed"));
 
             return config;
@@ -187,7 +190,7 @@ public class YamlConfigurationLoader {
      */
     public YamlRuleConfiguration loadFromStream(InputStream inputStream) throws YamlConfigurationException {
         try {
-            LOGGER.info("Loading YAML configuration from input stream");
+            logger.info("Loading YAML configuration from input stream");
 
             // Read raw content and resolve properties before parsing
             String rawContent = new String(inputStream.readAllBytes());
@@ -217,7 +220,7 @@ public class YamlConfigurationLoader {
             expandReferencePlaceholders(config);
 
             validateConfiguration(config);
-            LOGGER.info("Successfully loaded configuration: " +
+            logger.info("Successfully loaded configuration: " +
                        (config.getMetadata() != null ? config.getMetadata().getName() : "unnamed"));
 
             return config;
@@ -240,7 +243,7 @@ public class YamlConfigurationLoader {
                 throw new YamlConfigurationException("Configuration resource not found: " + resourcePath);
             }
 
-            LOGGER.info("Loading YAML configuration from classpath: " + resourcePath);
+            logger.info("Loading YAML configuration from classpath: " + resourcePath);
             return loadFromStream(inputStream);
 
         } catch (IOException e) {
@@ -260,9 +263,9 @@ public class YamlConfigurationLoader {
             Path path = Paths.get(filePath);
             Files.createDirectories(path.getParent());
 
-            LOGGER.info("Saving YAML configuration to file: " + filePath);
+            logger.info("Saving YAML configuration to file: " + filePath);
             yamlMapper.writeValue(path.toFile(), configuration);
-            LOGGER.info("Successfully saved configuration to: " + filePath);
+            logger.info("Successfully saved configuration to: " + filePath);
 
         } catch (IOException e) {
             throw new YamlConfigurationException("Failed to save configuration to file: " + filePath, e);
@@ -299,7 +302,7 @@ public class YamlConfigurationLoader {
                 throw new YamlConfigurationException("Configuration file not found: " + filePath);
             }
 
-            LOGGER.info("Loading YAML file as Map: " + filePath);
+            logger.info("Loading YAML file as Map: " + filePath);
             Map<String, Object> yamlContent = yamlMapper.readValue(path.toFile(), Map.class);
 
             // Validate metadata if present
@@ -323,7 +326,7 @@ public class YamlConfigurationLoader {
     private void validateMetadata(Map<String, Object> yamlContent, String filePath) throws YamlConfigurationException {
         Object metadataObj = yamlContent.get("metadata");
         if (metadataObj == null) {
-            LOGGER.warning("YAML file missing metadata section: " + filePath);
+            logger.warn("YAML file missing metadata section: " + filePath);
             return; // Don't fail for missing metadata, just warn
         }
 
@@ -344,7 +347,7 @@ public class YamlConfigurationLoader {
         }
 
         String type = (String) typeObj;
-        LOGGER.fine("Validated YAML file type '" + type + "' for file: " + filePath);
+        logger.debug("Validated YAML file type '" + type + "' for file: " + filePath);
     }
 
     /**
@@ -401,11 +404,11 @@ public class YamlConfigurationLoader {
      */
     private void processDataSourceReferences(YamlRuleConfiguration config) throws YamlConfigurationException {
         if (config.getDataSourceRefs() == null || config.getDataSourceRefs().isEmpty()) {
-            LOGGER.fine("No external data-source references to process");
+            logger.debug("No external data-source references to process");
             return;
         }
 
-        LOGGER.info("Processing " + config.getDataSourceRefs().size() + " external data-source references");
+        logger.info("Processing " + config.getDataSourceRefs().size() + " external data-source references");
 
         // Initialize data-sources list if it doesn't exist
         if (config.getDataSources() == null) {
@@ -415,12 +418,12 @@ public class YamlConfigurationLoader {
         // Process each data-source reference
         for (YamlDataSourceRef ref : config.getDataSourceRefs()) {
             if (!ref.isEnabled()) {
-                LOGGER.info("Skipping disabled data-source reference: " + ref.getName());
+                logger.info("Skipping disabled data-source reference: " + ref.getName());
                 continue;
             }
 
             try {
-                LOGGER.info("Resolving external data-source reference: " + ref.getName() + " from " + ref.getSource());
+                logger.info("Resolving external data-source reference: " + ref.getName() + " from " + ref.getSource());
 
                 // Resolve the external configuration
                 ExternalDataSourceConfig externalConfig = dataSourceResolver.resolveDataSource(ref.getSource());
@@ -431,7 +434,7 @@ public class YamlConfigurationLoader {
                 // Add to the configuration
                 config.getDataSources().add(yamlDataSource);
 
-                LOGGER.info("Successfully resolved and added data-source: " + ref.getName());
+                logger.info("Successfully resolved and added data-source: " + ref.getName());
 
             } catch (Exception e) {
                 throw new YamlConfigurationException(
@@ -439,7 +442,7 @@ public class YamlConfigurationLoader {
             }
         }
 
-        LOGGER.info("Successfully processed all external data-source references");
+        logger.info("Successfully processed all external data-source references");
     }
 
     /**
@@ -453,11 +456,11 @@ public class YamlConfigurationLoader {
      */
     private void processRuleReferences(YamlRuleConfiguration config) throws YamlConfigurationException {
         if (config.getRuleRefs() == null || config.getRuleRefs().isEmpty()) {
-            LOGGER.fine("No external rule references to process");
+            logger.debug("No external rule references to process");
             return;
         }
 
-        LOGGER.info("Processing " + config.getRuleRefs().size() + " external rule references");
+        logger.info("Processing " + config.getRuleRefs().size() + " external rule references");
 
         // Track referenced rule IDs and rule group IDs (use LinkedHashSet to preserve order)
         Set<String> referencedRuleIds = new LinkedHashSet<>();
@@ -469,12 +472,12 @@ public class YamlConfigurationLoader {
         // Process each rule reference
         for (YamlRuleRef ref : config.getRuleRefs()) {
             if (!ref.isEnabled()) {
-                LOGGER.info("Skipping disabled rule reference: " + ref.getName());
+                logger.info("Skipping disabled rule reference: " + ref.getName());
                 continue;
             }
 
             try {
-                LOGGER.info("Resolving external rule reference: " + ref.getName() + " from " + ref.getSource());
+                logger.info("Resolving external rule reference: " + ref.getName() + " from " + ref.getSource());
 
                 // Load the referenced rule file recursively with shared loadedFiles set
                 YamlRuleConfiguration referencedConfig = loadRuleFileRecursive(ref.getSource(), loadedFiles);
@@ -498,13 +501,13 @@ public class YamlConfigurationLoader {
                                 referencedRuleIds.add(rule.getId());
                             }
                         }
-                        LOGGER.info("Tracked " + referencedConfig.getRules().size() + " rule IDs for execution (no groups present)");
+                        logger.info("Tracked " + referencedConfig.getRules().size() + " rule IDs for execution (no groups present)");
                     } else {
-                        LOGGER.info("Skipped tracking rule IDs (rule-groups present - rules are definitions only)");
+                        logger.info("Skipped tracking rule IDs (rule-groups present - rules are definitions only)");
                     }
 
                     config.getRules().addAll(referencedConfig.getRules());
-                    LOGGER.info("Merged " + referencedConfig.getRules().size() + " rules from: " + ref.getName());
+                    logger.info("Merged " + referencedConfig.getRules().size() + " rules from: " + ref.getName());
                 }
 
                 // Merge rule groups from referenced file
@@ -522,10 +525,10 @@ public class YamlConfigurationLoader {
                     }
 
                     config.getRuleGroups().addAll(referencedConfig.getRuleGroups());
-                    LOGGER.info("Merged " + referencedConfig.getRuleGroups().size() + " rule groups from: " + ref.getName());
+                    logger.info("Merged " + referencedConfig.getRuleGroups().size() + " rule groups from: " + ref.getName());
                 }
 
-                LOGGER.info("Successfully resolved and merged rules from: " + ref.getName());
+                logger.info("Successfully resolved and merged rules from: " + ref.getName());
 
             } catch (Exception e) {
                 throw new YamlConfigurationException(
@@ -537,7 +540,7 @@ public class YamlConfigurationLoader {
         config.setReferencedRuleIds(referencedRuleIds);
         config.setReferencedRuleGroupIds(referencedRuleGroupIds);
 
-        LOGGER.info("Successfully processed all external rule references (tracked " +
+        logger.info("Successfully processed all external rule references (tracked " +
                    referencedRuleIds.size() + " rules, " + referencedRuleGroupIds.size() + " rule groups)");
     }
 
@@ -554,11 +557,11 @@ public class YamlConfigurationLoader {
      */
     private void processRuleReferencesRecursive(YamlRuleConfiguration config, Set<String> loadedFiles) throws YamlConfigurationException {
         if (config.getRuleRefs() == null || config.getRuleRefs().isEmpty()) {
-            LOGGER.fine("No external rule references to process");
+            logger.debug("No external rule references to process");
             return;
         }
 
-        LOGGER.fine("Processing " + config.getRuleRefs().size() + " external rule references (recursive)");
+        logger.debug("Processing " + config.getRuleRefs().size() + " external rule references (recursive)");
 
         // Track referenced rule IDs and rule group IDs (use LinkedHashSet to preserve order)
         Set<String> referencedRuleIds = new LinkedHashSet<>();
@@ -567,12 +570,12 @@ public class YamlConfigurationLoader {
         // Process each rule reference
         for (YamlRuleRef ref : config.getRuleRefs()) {
             if (!ref.isEnabled()) {
-                LOGGER.fine("Skipping disabled rule reference: " + ref.getName());
+                logger.debug("Skipping disabled rule reference: " + ref.getName());
                 continue;
             }
 
             try {
-                LOGGER.fine("Resolving external rule reference (recursive): " + ref.getName() + " from " + ref.getSource());
+                logger.debug("Resolving external rule reference (recursive): " + ref.getName() + " from " + ref.getSource());
 
                 // Load the referenced rule file recursively
                 YamlRuleConfiguration referencedConfig = loadRuleFileRecursive(ref.getSource(), loadedFiles);
@@ -596,13 +599,13 @@ public class YamlConfigurationLoader {
                                 referencedRuleIds.add(rule.getId());
                             }
                         }
-                        LOGGER.fine("Tracked " + referencedConfig.getRules().size() + " rule IDs for execution (no groups present)");
+                        logger.debug("Tracked " + referencedConfig.getRules().size() + " rule IDs for execution (no groups present)");
                     } else {
-                        LOGGER.fine("Skipped tracking rule IDs (rule-groups present - rules are definitions only)");
+                        logger.debug("Skipped tracking rule IDs (rule-groups present - rules are definitions only)");
                     }
 
                     config.getRules().addAll(referencedConfig.getRules());
-                    LOGGER.fine("Merged " + referencedConfig.getRules().size() + " rules from: " + ref.getName());
+                    logger.debug("Merged " + referencedConfig.getRules().size() + " rules from: " + ref.getName());
                 }
 
                 // Merge rule groups from referenced file
@@ -620,10 +623,10 @@ public class YamlConfigurationLoader {
                     }
 
                     config.getRuleGroups().addAll(referencedConfig.getRuleGroups());
-                    LOGGER.fine("Merged " + referencedConfig.getRuleGroups().size() + " rule groups from: " + ref.getName());
+                    logger.debug("Merged " + referencedConfig.getRuleGroups().size() + " rule groups from: " + ref.getName());
                 }
 
-                LOGGER.fine("Successfully resolved and merged rules from: " + ref.getName());
+                logger.debug("Successfully resolved and merged rules from: " + ref.getName());
 
             } catch (Exception e) {
                 throw new YamlConfigurationException(
@@ -635,7 +638,7 @@ public class YamlConfigurationLoader {
         config.setReferencedRuleIds(referencedRuleIds);
         config.setReferencedRuleGroupIds(referencedRuleGroupIds);
 
-        LOGGER.fine("Successfully processed all external rule references (recursive) (tracked " +
+        logger.debug("Successfully processed all external rule references (recursive) (tracked " +
                    referencedRuleIds.size() + " rules, " + referencedRuleGroupIds.size() + " rule groups)");
     }
 
@@ -650,11 +653,11 @@ public class YamlConfigurationLoader {
      */
     private void processEnrichmentReferences(YamlRuleConfiguration config) throws YamlConfigurationException {
         if (config.getEnrichmentRefs() == null || config.getEnrichmentRefs().isEmpty()) {
-            LOGGER.fine("No external enrichment references to process");
+            logger.debug("No external enrichment references to process");
             return;
         }
 
-        LOGGER.info("Processing " + config.getEnrichmentRefs().size() + " external enrichment references");
+        logger.info("Processing " + config.getEnrichmentRefs().size() + " external enrichment references");
 
         // Track referenced enrichment IDs and enrichment group IDs (use LinkedHashSet to preserve order)
         Set<String> referencedEnrichmentIds = new LinkedHashSet<>();
@@ -666,12 +669,12 @@ public class YamlConfigurationLoader {
         // Process each enrichment reference
         for (YamlEnrichmentRef ref : config.getEnrichmentRefs()) {
             if (!ref.isEnabled()) {
-                LOGGER.info("Skipping disabled enrichment reference: " + ref.getName());
+                logger.info("Skipping disabled enrichment reference: " + ref.getName());
                 continue;
             }
 
             try {
-                LOGGER.info("Resolving external enrichment reference: " + ref.getName() + " from " + ref.getSource());
+                logger.info("Resolving external enrichment reference: " + ref.getName() + " from " + ref.getSource());
 
                 // Load the referenced enrichment file recursively with shared loadedFiles set
                 YamlRuleConfiguration referencedConfig = loadRuleFileRecursive(ref.getSource(), loadedFiles);
@@ -688,7 +691,7 @@ public class YamlConfigurationLoader {
                             referencedByGroups.addAll(group.getEnrichmentIds());
                         }
                     }
-                    LOGGER.fine("Found " + referencedByGroups.size() + " enrichment IDs referenced by groups: " + referencedByGroups);
+                    logger.debug("Found " + referencedByGroups.size() + " enrichment IDs referenced by groups: " + referencedByGroups);
                 }
 
                 // Merge enrichments from referenced file
@@ -717,14 +720,14 @@ public class YamlConfigurationLoader {
                     }
 
                     if (hasEnrichmentGroups) {
-                        LOGGER.info("Tracked " + trackedCount + " standalone enrichments for execution, " +
+                        logger.info("Tracked " + trackedCount + " standalone enrichments for execution, " +
                                    "skipped " + skippedCount + " enrichments (referenced by groups - definitions only)");
                     } else {
-                        LOGGER.info("Tracked " + trackedCount + " enrichment IDs for execution (no groups present)");
+                        logger.info("Tracked " + trackedCount + " enrichment IDs for execution (no groups present)");
                     }
 
                     config.getEnrichments().addAll(referencedConfig.getEnrichments());
-                    LOGGER.info("Merged " + referencedConfig.getEnrichments().size() + " enrichments from: " + ref.getName());
+                    logger.info("Merged " + referencedConfig.getEnrichments().size() + " enrichments from: " + ref.getName());
                 }
 
                 // Merge enrichment groups from referenced file
@@ -742,10 +745,10 @@ public class YamlConfigurationLoader {
                     }
 
                     config.getEnrichmentGroups().addAll(referencedConfig.getEnrichmentGroups());
-                    LOGGER.info("Merged " + referencedConfig.getEnrichmentGroups().size() + " enrichment groups from: " + ref.getName());
+                    logger.info("Merged " + referencedConfig.getEnrichmentGroups().size() + " enrichment groups from: " + ref.getName());
                 }
 
-                LOGGER.info("Successfully resolved and merged enrichments from: " + ref.getName());
+                logger.info("Successfully resolved and merged enrichments from: " + ref.getName());
 
             } catch (Exception e) {
                 throw new YamlConfigurationException(
@@ -757,7 +760,7 @@ public class YamlConfigurationLoader {
         config.setReferencedEnrichmentIds(referencedEnrichmentIds);
         config.setReferencedEnrichmentGroupIds(referencedEnrichmentGroupIds);
 
-        LOGGER.info("Successfully processed all external enrichment references (tracked " +
+        logger.info("Successfully processed all external enrichment references (tracked " +
                    referencedEnrichmentIds.size() + " enrichments, " + referencedEnrichmentGroupIds.size() + " enrichment groups)");
     }
 
@@ -774,11 +777,11 @@ public class YamlConfigurationLoader {
      */
     private void processEnrichmentReferencesRecursive(YamlRuleConfiguration config, Set<String> loadedFiles) throws YamlConfigurationException {
         if (config.getEnrichmentRefs() == null || config.getEnrichmentRefs().isEmpty()) {
-            LOGGER.fine("No external enrichment references to process");
+            logger.debug("No external enrichment references to process");
             return;
         }
 
-        LOGGER.fine("Processing " + config.getEnrichmentRefs().size() + " external enrichment references (recursive)");
+        logger.debug("Processing " + config.getEnrichmentRefs().size() + " external enrichment references (recursive)");
 
         // Track referenced enrichment IDs and enrichment group IDs (use LinkedHashSet to preserve order)
         Set<String> referencedEnrichmentIds = new LinkedHashSet<>();
@@ -787,12 +790,12 @@ public class YamlConfigurationLoader {
         // Process each enrichment reference
         for (YamlEnrichmentRef ref : config.getEnrichmentRefs()) {
             if (!ref.isEnabled()) {
-                LOGGER.fine("Skipping disabled enrichment reference: " + ref.getName());
+                logger.debug("Skipping disabled enrichment reference: " + ref.getName());
                 continue;
             }
 
             try {
-                LOGGER.fine("Resolving external enrichment reference (recursive): " + ref.getName() + " from " + ref.getSource());
+                logger.debug("Resolving external enrichment reference (recursive): " + ref.getName() + " from " + ref.getSource());
 
                 // Load the referenced enrichment file recursively
                 YamlRuleConfiguration referencedConfig = loadRuleFileRecursive(ref.getSource(), loadedFiles);
@@ -809,7 +812,7 @@ public class YamlConfigurationLoader {
                             referencedByGroups.addAll(group.getEnrichmentIds());
                         }
                     }
-                    LOGGER.fine("Found " + referencedByGroups.size() + " enrichment IDs referenced by groups: " + referencedByGroups);
+                    logger.debug("Found " + referencedByGroups.size() + " enrichment IDs referenced by groups: " + referencedByGroups);
                 }
 
                 // Merge enrichments from referenced file
@@ -838,14 +841,14 @@ public class YamlConfigurationLoader {
                     }
 
                     if (hasEnrichmentGroups) {
-                        LOGGER.fine("Tracked " + trackedCount + " standalone enrichments for execution, " +
+                        logger.debug("Tracked " + trackedCount + " standalone enrichments for execution, " +
                                    "skipped " + skippedCount + " enrichments (referenced by groups - definitions only)");
                     } else {
-                        LOGGER.fine("Tracked " + trackedCount + " enrichment IDs for execution (no groups present)");
+                        logger.debug("Tracked " + trackedCount + " enrichment IDs for execution (no groups present)");
                     }
 
                     config.getEnrichments().addAll(referencedConfig.getEnrichments());
-                    LOGGER.fine("Merged " + referencedConfig.getEnrichments().size() + " enrichments from: " + ref.getName());
+                    logger.debug("Merged " + referencedConfig.getEnrichments().size() + " enrichments from: " + ref.getName());
                 }
 
                 // Merge enrichment groups from referenced file
@@ -863,10 +866,10 @@ public class YamlConfigurationLoader {
                     }
 
                     config.getEnrichmentGroups().addAll(referencedConfig.getEnrichmentGroups());
-                    LOGGER.fine("Merged " + referencedConfig.getEnrichmentGroups().size() + " enrichment groups from: " + ref.getName());
+                    logger.debug("Merged " + referencedConfig.getEnrichmentGroups().size() + " enrichment groups from: " + ref.getName());
                 }
 
-                LOGGER.fine("Successfully resolved and merged enrichments from: " + ref.getName());
+                logger.debug("Successfully resolved and merged enrichments from: " + ref.getName());
 
             } catch (Exception e) {
                 throw new YamlConfigurationException(
@@ -878,7 +881,7 @@ public class YamlConfigurationLoader {
         config.setReferencedEnrichmentIds(referencedEnrichmentIds);
         config.setReferencedEnrichmentGroupIds(referencedEnrichmentGroupIds);
 
-        LOGGER.fine("Successfully processed all external enrichment references (recursive) (tracked " +
+        logger.debug("Successfully processed all external enrichment references (recursive) (tracked " +
                    referencedEnrichmentIds.size() + " enrichments, " + referencedEnrichmentGroupIds.size() + " enrichment groups)");
     }
 
@@ -900,14 +903,14 @@ public class YamlConfigurationLoader {
      * @param config The configuration with itemOrder to filter
      */
     private void applyGroupsOnlyLogic(YamlRuleConfiguration config) {
-        LOGGER.info("=== APPLYING GROUPS-ONLY LOGIC ===");
+        logger.info("=== APPLYING GROUPS-ONLY LOGIC ===");
 
         if (config.getItemOrder() == null || config.getItemOrder().isEmpty()) {
-            LOGGER.info("No item order to filter - skipping groups-only logic");
+            logger.info("No item order to filter - skipping groups-only logic");
             return;
         }
 
-        LOGGER.info("Item order size BEFORE filtering: " + config.getItemOrder().size());
+        logger.info("Item order size BEFORE filtering: " + config.getItemOrder().size());
 
         // Collect enrichment IDs referenced by enrichment-groups (use LinkedHashSet to preserve order)
         Set<String> referencedEnrichmentIds = new LinkedHashSet<>();
@@ -917,7 +920,7 @@ public class YamlConfigurationLoader {
                     referencedEnrichmentIds.addAll(group.getEnrichmentIds());
                 }
             }
-            LOGGER.info("Found " + referencedEnrichmentIds.size() + " enrichment IDs referenced by groups: " + referencedEnrichmentIds);
+            logger.info("Found " + referencedEnrichmentIds.size() + " enrichment IDs referenced by groups: " + referencedEnrichmentIds);
         }
 
         // Collect rule IDs referenced by rule-groups (use LinkedHashSet to preserve order)
@@ -928,12 +931,12 @@ public class YamlConfigurationLoader {
                     referencedRuleIds.addAll(group.getRuleIds());
                 }
             }
-            LOGGER.info("Found " + referencedRuleIds.size() + " rule IDs referenced by groups: " + referencedRuleIds);
+            logger.info("Found " + referencedRuleIds.size() + " rule IDs referenced by groups: " + referencedRuleIds);
         }
 
         // If no groups exist, no filtering needed
         if (referencedEnrichmentIds.isEmpty() && referencedRuleIds.isEmpty()) {
-            LOGGER.info("No groups found - skipping groups-only logic (all items execute at definition position)");
+            logger.info("No groups found - skipping groups-only logic (all items execute at definition position)");
             return;
         }
 
@@ -950,12 +953,12 @@ public class YamlConfigurationLoader {
                 referencedEnrichmentIds.contains(item.getItemId())) {
                 shouldRemove = true;  // Skip - will execute via enrichment-group
                 enrichmentsFiltered++;
-                LOGGER.fine("Filtering enrichment '" + item.getItemId() + "' from itemOrder (referenced by group - definition only)");
+                logger.debug("Filtering enrichment '" + item.getItemId() + "' from itemOrder (referenced by group - definition only)");
             } else if ("rules".equals(item.getSectionType()) &&
                        referencedRuleIds.contains(item.getItemId())) {
                 shouldRemove = true;  // Skip - will execute via rule-group
                 rulesFiltered++;
-                LOGGER.fine("Filtering rule '" + item.getItemId() + "' from itemOrder (referenced by group - definition only)");
+                logger.debug("Filtering rule '" + item.getItemId() + "' from itemOrder (referenced by group - definition only)");
             }
 
             if (!shouldRemove) {
@@ -966,7 +969,7 @@ public class YamlConfigurationLoader {
         // Update configuration with filtered order
         config.setItemOrder(filteredOrder);
 
-        LOGGER.info("Applied groups-only logic: filtered " + enrichmentsFiltered + " enrichments and " +
+        logger.info("Applied groups-only logic: filtered " + enrichmentsFiltered + " enrichments and " +
                    rulesFiltered + " rules from itemOrder (original: " + originalOrder.size() +
                    " items, filtered: " + filteredOrder.size() + " items)");
     }
@@ -980,7 +983,7 @@ public class YamlConfigurationLoader {
      */
     private void expandReferencePlaceholders(YamlRuleConfiguration config) {
         if (config.getItemOrder() == null || config.getItemOrder().isEmpty()) {
-            LOGGER.fine("No item order to expand");
+            logger.debug("No item order to expand");
             return;
         }
 
@@ -993,36 +996,36 @@ public class YamlConfigurationLoader {
 
             if (sectionType.equals("enrichment-refs") && itemId.equals("*")) {
                 // Expand enrichment references
-                LOGGER.fine("Expanding enrichment-refs placeholder");
+                logger.debug("Expanding enrichment-refs placeholder");
 
                 if (config.getReferencedEnrichmentIds() != null) {
                     for (String enrichmentId : config.getReferencedEnrichmentIds()) {
                         expandedOrder.add(new ProcessingItem("enrichments", enrichmentId));
-                        LOGGER.fine("  Added enrichment: " + enrichmentId);
+                        logger.debug("  Added enrichment: " + enrichmentId);
                     }
                 }
 
                 if (config.getReferencedEnrichmentGroupIds() != null) {
                     for (String groupId : config.getReferencedEnrichmentGroupIds()) {
                         expandedOrder.add(new ProcessingItem("enrichment-groups", groupId));
-                        LOGGER.fine("  Added enrichment-group: " + groupId);
+                        logger.debug("  Added enrichment-group: " + groupId);
                     }
                 }
             } else if (sectionType.equals("rule-refs") && itemId.equals("*")) {
                 // Expand rule references
-                LOGGER.fine("Expanding rule-refs placeholder");
+                logger.debug("Expanding rule-refs placeholder");
 
                 if (config.getReferencedRuleIds() != null) {
                     for (String ruleId : config.getReferencedRuleIds()) {
                         expandedOrder.add(new ProcessingItem("rules", ruleId));
-                        LOGGER.fine("  Added rule: " + ruleId);
+                        logger.debug("  Added rule: " + ruleId);
                     }
                 }
 
                 if (config.getReferencedRuleGroupIds() != null) {
                     for (String groupId : config.getReferencedRuleGroupIds()) {
                         expandedOrder.add(new ProcessingItem("rule-groups", groupId));
-                        LOGGER.fine("  Added rule-group: " + groupId);
+                        logger.debug("  Added rule-group: " + groupId);
                     }
                 }
             } else {
@@ -1032,7 +1035,7 @@ public class YamlConfigurationLoader {
         }
 
         config.setItemOrder(expandedOrder);
-        LOGGER.info("Expanded item order from " + originalSize + " to " + expandedOrder.size() + " items");
+        logger.info("Expanded item order from " + originalSize + " to " + expandedOrder.size() + " items");
     }
 
     /**
@@ -1049,7 +1052,7 @@ public class YamlConfigurationLoader {
 
         // Check if already loaded - if so, return empty config to avoid duplicates
         if (loadedFiles.contains(normalizedSource)) {
-            LOGGER.fine("Skipping already loaded file: " + source);
+            logger.debug("Skipping already loaded file: " + source);
             // Return empty config - rules/enrichments from this file were already merged
             YamlRuleConfiguration emptyConfig = new YamlRuleConfiguration();
             emptyConfig.setRules(new ArrayList<>());
@@ -1069,23 +1072,23 @@ public class YamlConfigurationLoader {
 
             if (Files.exists(path)) {
                 // Load from file system
-                LOGGER.fine("Loading rule file from file system: " + source);
+                logger.debug("Loading rule file from file system: " + source);
                 config = loadFromFileWithoutProcessing(path.toFile());
             } else {
                 // Load from classpath
-                LOGGER.fine("Loading rule file from classpath: " + source);
+                logger.debug("Loading rule file from classpath: " + source);
                 config = loadFromClasspathWithoutProcessing(source);
             }
 
             // Recursively process rule-refs in the loaded file
             if (config.getRuleRefs() != null && !config.getRuleRefs().isEmpty()) {
-                LOGGER.fine("Processing " + config.getRuleRefs().size() + " nested rule-refs in: " + source);
+                logger.debug("Processing " + config.getRuleRefs().size() + " nested rule-refs in: " + source);
                 processRuleReferencesRecursive(config, loadedFiles);
             }
 
             // Recursively process enrichment-refs in the loaded file
             if (config.getEnrichmentRefs() != null && !config.getEnrichmentRefs().isEmpty()) {
-                LOGGER.fine("Processing " + config.getEnrichmentRefs().size() + " nested enrichment-refs in: " + source);
+                logger.debug("Processing " + config.getEnrichmentRefs().size() + " nested enrichment-refs in: " + source);
                 processEnrichmentReferencesRecursive(config, loadedFiles);
             }
 
@@ -1111,7 +1114,7 @@ public class YamlConfigurationLoader {
                 throw new YamlConfigurationException("Configuration file not found: " + file.getAbsolutePath());
             }
 
-            LOGGER.fine("Loading YAML configuration from file (without processing): " + file.getAbsolutePath());
+            logger.debug("Loading YAML configuration from file (without processing): " + file.getAbsolutePath());
 
             // Read raw content and resolve properties before parsing
             String rawContent = Files.readString(file.toPath());
@@ -1122,7 +1125,7 @@ public class YamlConfigurationLoader {
             // Skip processRuleReferences() and processDataSourceReferences() to avoid recursion
             // Skip validateConfiguration() as this will be done on the merged configuration
 
-            LOGGER.fine("Successfully loaded configuration (without processing): " +
+            logger.debug("Successfully loaded configuration (without processing): " +
                        (config.getMetadata() != null ? config.getMetadata().getName() : "unnamed"));
 
             return config;
@@ -1147,7 +1150,7 @@ public class YamlConfigurationLoader {
                 throw new YamlConfigurationException("Configuration resource not found: " + resourcePath);
             }
 
-            LOGGER.fine("Loading YAML configuration from classpath (without processing): " + resourcePath);
+            logger.debug("Loading YAML configuration from classpath (without processing): " + resourcePath);
 
             // Read raw content and resolve properties before parsing
             String rawContent = new String(inputStream.readAllBytes());
@@ -1158,7 +1161,7 @@ public class YamlConfigurationLoader {
             // Skip processRuleReferences() and processDataSourceReferences() to avoid recursion
             // Skip validateConfiguration() as this will be done on the merged configuration
 
-            LOGGER.fine("Successfully loaded configuration (without processing): " +
+            logger.debug("Successfully loaded configuration (without processing): " +
                        (config.getMetadata() != null ? config.getMetadata().getName() : "unnamed"));
 
             return config;
@@ -1206,7 +1209,7 @@ public class YamlConfigurationLoader {
         // Validate the complete merged configuration
         validateConfiguration(config);
 
-        LOGGER.info("Successfully processed references and validated merged configuration: " +
+        logger.info("Successfully processed references and validated merged configuration: " +
                    (config.getMetadata() != null ? config.getMetadata().getName() : "unnamed"));
     }
 
@@ -1280,7 +1283,7 @@ public class YamlConfigurationLoader {
         // Step 4: Validate no unresolved property placeholders remain
         validateNoUnresolvedPlaceholdersInConfiguration(config);
 
-        LOGGER.fine("Configuration validation completed successfully");
+        logger.debug("Configuration validation completed successfully");
     }
 
     /**
@@ -1346,7 +1349,7 @@ public class YamlConfigurationLoader {
      */
     private void validateEnrichmentGroups(YamlRuleConfiguration config) throws YamlConfigurationException {
         if (config.getEnrichmentGroups() == null || config.getEnrichmentGroups().isEmpty()) {
-            LOGGER.fine("No enrichment groups to validate");
+            logger.debug("No enrichment groups to validate");
             return;
         }
 
@@ -1463,7 +1466,7 @@ public class YamlConfigurationLoader {
             throw new YamlConfigurationException("Cyclic enrichment-group-references detected");
         }
 
-        LOGGER.fine("Enrichment group validation completed successfully");
+        logger.debug("Enrichment group validation completed successfully");
     }
 
     /**
@@ -1645,7 +1648,7 @@ public class YamlConfigurationLoader {
                 validateFluentBuilderPattern(config, chainId);
                 break;
             default:
-                LOGGER.warning("Unknown rule chain pattern '" + pattern + "' for chain: " + chainId);
+                logger.warn("Unknown rule chain pattern '" + pattern + "' for chain: " + chainId);
         }
     }
 
@@ -1740,17 +1743,17 @@ public class YamlConfigurationLoader {
      */
     private void validateEnrichments(YamlRuleConfiguration config) throws YamlConfigurationException {
         if (config.getEnrichments() == null || config.getEnrichments().isEmpty()) {
-            LOGGER.fine("No enrichments to validate");
+            logger.debug("No enrichments to validate");
             return;
         }
 
-        LOGGER.fine("Validating " + config.getEnrichments().size() + " enrichments");
+        logger.debug("Validating " + config.getEnrichments().size() + " enrichments");
 
         for (YamlEnrichment enrichment : config.getEnrichments()) {
             validateEnrichment(enrichment);
         }
 
-        LOGGER.fine("Enrichment validation completed successfully");
+        logger.debug("Enrichment validation completed successfully");
     }
 
     /**
@@ -1777,7 +1780,7 @@ public class YamlConfigurationLoader {
         // Validate field mappings
         validateFieldMappings(enrichment.getFieldMappings(), enrichment.getId());
 
-        LOGGER.fine("Validated enrichment: " + enrichment.getId());
+        logger.debug("Validated enrichment: " + enrichment.getId());
     }
 
     /**
@@ -1840,7 +1843,7 @@ public class YamlConfigurationLoader {
                 // This allows processing to continue with warnings instead of failing configuration loading
                 if (enrichment.getFieldMappings() == null || enrichment.getFieldMappings().isEmpty()) {
                     String errorMsg = "calculation-enrichment type requires 'field-mappings' for enrichment: " + enrichmentId;
-                    LOGGER.warning("Configuration validation warning: " + errorMsg);
+                    logger.warn("Configuration validation warning: " + errorMsg);
                     // Don't throw exception - this is handled gracefully during processing
                 }
                 break;
@@ -2038,7 +2041,7 @@ public class YamlConfigurationLoader {
 
         // Check for nested ternary complexity (warn if too complex)
         if (questionMarkCount > 2) {
-            LOGGER.warning("Complex nested ternary expression in lookup-key for enrichment: " + enrichmentId + ". Consider simplifying for maintainability");
+            logger.warn("Complex nested ternary expression in lookup-key for enrichment: " + enrichmentId + ". Consider simplifying for maintainability");
         }
     }
 
@@ -2103,7 +2106,7 @@ public class YamlConfigurationLoader {
 
         // Warn about hash collision potential
         if (lookupKey.contains(".hashCode()")) {
-            LOGGER.warning("Hash-based lookup key in enrichment: " + enrichmentId + ". Be aware of potential hash collisions in production data");
+            logger.warn("Hash-based lookup key in enrichment: " + enrichmentId + ". Be aware of potential hash collisions in production data");
         }
     }
 
@@ -2114,12 +2117,12 @@ public class YamlConfigurationLoader {
         // Check for excessive nesting depth
         long dotCount = lookupKey.chars().filter(ch -> ch == '.').count();
         if (dotCount > 5) {
-            LOGGER.warning("Deep hierarchical field access in lookup-key for enrichment: " + enrichmentId + ". Consider flattening data structure for better performance");
+            logger.warn("Deep hierarchical field access in lookup-key for enrichment: " + enrichmentId + ". Consider flattening data structure for better performance");
         }
 
         // Check for field access on potentially null objects without safe navigation
         if (lookupKey.contains(".") && !lookupKey.contains("?.") && !lookupKey.contains("!= null")) {
-            LOGGER.info("Consider using safe navigation operator (?.) in lookup-key for enrichment: " + enrichmentId + " to handle null values gracefully");
+            logger.info("Consider using safe navigation operator (?.) in lookup-key for enrichment: " + enrichmentId + " to handle null values gracefully");
         }
     }
 
@@ -2134,7 +2137,7 @@ public class YamlConfigurationLoader {
 
         // Validate that safe navigation is used consistently
         if (lookupKey.contains("?.") && lookupKey.contains(".") && !lookupKey.contains("?:")) {
-            LOGGER.info("Mixed safe and unsafe navigation in lookup-key for enrichment: " + enrichmentId + ". Consider using consistent safe navigation or null checks");
+            logger.info("Mixed safe and unsafe navigation in lookup-key for enrichment: " + enrichmentId + ". Consider using consistent safe navigation or null checks");
         }
     }
 
@@ -2146,14 +2149,14 @@ public class YamlConfigurationLoader {
         if (condition.contains("!= null") || condition.contains("== null")) {
             // Good - explicit null checks
         } else if (condition.contains(".") && !condition.contains("?.")) {
-            LOGGER.info("Consider adding null checks in condition for enrichment: " + enrichmentId + " to prevent NullPointerException");
+            logger.info("Consider adding null checks in condition for enrichment: " + enrichmentId + " to prevent NullPointerException");
         }
 
         // Check for boolean logic complexity
         long andCount = condition.split("&&").length - 1;
         long orCount = condition.split("\\|\\|").length - 1;
         if (andCount + orCount > 3) {
-            LOGGER.warning("Complex boolean logic in condition for enrichment: " + enrichmentId + ". Consider simplifying for maintainability");
+            logger.warn("Complex boolean logic in condition for enrichment: " + enrichmentId + ". Consider simplifying for maintainability");
         }
     }
 
@@ -2242,11 +2245,11 @@ public class YamlConfigurationLoader {
         // Validate file extension matches type
         String filePath = dataset.getFilePath().toLowerCase();
         if ("yaml-file".equals(type) && !filePath.endsWith(".yaml") && !filePath.endsWith(".yml")) {
-            LOGGER.warning("YAML dataset file path should end with .yaml or .yml for enrichment: " + enrichmentId);
+            logger.warn("YAML dataset file path should end with .yaml or .yml for enrichment: " + enrichmentId);
         }
 
         if ("csv-file".equals(type) && !filePath.endsWith(".csv")) {
-            LOGGER.warning("CSV dataset file path should end with .csv for enrichment: " + enrichmentId);
+            logger.warn("CSV dataset file path should end with .csv for enrichment: " + enrichmentId);
         }
     }
 
@@ -2256,7 +2259,7 @@ public class YamlConfigurationLoader {
     private void validateDatabaseDataset(YamlEnrichment.LookupDataset dataset, String enrichmentId) throws YamlConfigurationException {
         // Database datasets typically don't use key-field (they use SQL queries)
         // This is a placeholder for future database-specific validation
-        LOGGER.fine("Database dataset validation for enrichment: " + enrichmentId);
+        logger.debug("Database dataset validation for enrichment: " + enrichmentId);
     }
 
     /**
@@ -2265,7 +2268,7 @@ public class YamlConfigurationLoader {
     private void validateRestApiDataset(YamlEnrichment.LookupDataset dataset, String enrichmentId) throws YamlConfigurationException {
         // REST API datasets typically don't use key-field (they use URL patterns)
         // This is a placeholder for future REST API-specific validation
-        LOGGER.fine("REST API dataset validation for enrichment: " + enrichmentId);
+        logger.debug("REST API dataset validation for enrichment: " + enrichmentId);
     }
 
     /**
@@ -2279,7 +2282,7 @@ public class YamlConfigurationLoader {
             }
 
             if (ttl > 86400) { // 24 hours
-                LOGGER.warning("Cache TTL is very long (" + ttl + " seconds) for enrichment: " + enrichmentId + ". Consider if this is appropriate for your use case");
+                logger.warn("Cache TTL is very long (" + ttl + " seconds) for enrichment: " + enrichmentId + ". Consider if this is appropriate for your use case");
             }
         }
     }
@@ -2313,15 +2316,15 @@ public class YamlConfigurationLoader {
                 throw new YamlConfigurationException("Duplicate target field '" + targetField + "' in field mappings for enrichment: " + enrichmentId);
             }
 
-            // Validate transformation expressions if present
-            if (mapping.getTransformation() != null && !mapping.getTransformation().trim().isEmpty()) {
-                String transformation = mapping.getTransformation();
-                if (!isValidSpELExpression(transformation)) {
-                    throw new YamlConfigurationException("Invalid transformation expression '" + transformation + "' in field mapping for enrichment: " + enrichmentId);
+            // Validate expression if present
+            if (mapping.getExpression() != null && !mapping.getExpression().trim().isEmpty()) {
+                String expression = mapping.getExpression();
+                if (!isValidSpELExpression(expression)) {
+                    throw new YamlConfigurationException("Invalid expression '" + expression + "' in field mapping for enrichment: " + enrichmentId);
                 }
 
-                // Validate transformation patterns
-                validateTransformationPatterns(transformation, enrichmentId, i);
+                // Validate expression patterns
+                validateExpressionPatterns(expression, enrichmentId, i);
             }
 
             // Validate conditional mappings if present
@@ -2330,22 +2333,22 @@ public class YamlConfigurationLoader {
     }
 
     /**
-     * Validate transformation patterns in field mappings.
+     * Validate expression patterns in field mappings.
      */
-    private void validateTransformationPatterns(String transformation, String enrichmentId, int mappingIndex) throws YamlConfigurationException {
-        // Check for common transformation patterns
-        if (transformation.contains("T(java.") && !transformation.contains("T(java.lang.") && !transformation.contains("T(java.time.") && !transformation.contains("T(java.math.")) {
-            LOGGER.warning("Transformation uses Java type reference in field mapping " + mappingIndex + " for enrichment: " + enrichmentId + ". Ensure the class is available at runtime");
+    private void validateExpressionPatterns(String expression, String enrichmentId, int mappingIndex) throws YamlConfigurationException {
+        // Check for common expression patterns
+        if (expression.contains("T(java.") && !expression.contains("T(java.lang.") && !expression.contains("T(java.time.") && !expression.contains("T(java.math.")) {
+            logger.warn("Expression uses Java type reference in field mapping " + mappingIndex + " for enrichment: " + enrichmentId + ". Ensure the class is available at runtime");
         }
 
         // Check for potentially unsafe operations
-        if (transformation.contains(".getClass()") || transformation.contains("T(java.lang.Class)")) {
-            LOGGER.warning("Transformation uses reflection in field mapping " + mappingIndex + " for enrichment: " + enrichmentId + ". This may have security implications");
+        if (expression.contains(".getClass()") || expression.contains("T(java.lang.Class)")) {
+            logger.warn("Expression uses reflection in field mapping " + mappingIndex + " for enrichment: " + enrichmentId + ". This may have security implications");
         }
 
         // Check for null safety
-        if (transformation.contains(".") && !transformation.contains("?.") && !transformation.contains("!= null")) {
-            LOGGER.info("Consider adding null safety to transformation in field mapping " + mappingIndex + " for enrichment: " + enrichmentId);
+        if (expression.contains(".") && !expression.contains("?.") && !expression.contains("!= null")) {
+            logger.info("Consider adding null safety to expression in field mapping " + mappingIndex + " for enrichment: " + enrichmentId);
         }
     }
 
@@ -2356,7 +2359,7 @@ public class YamlConfigurationLoader {
         // This is a placeholder for future conditional mapping validation
         // The current YamlEnrichment.FieldMapping class doesn't have conditional mapping support
         // but this method is here for future extensibility
-        LOGGER.finest("Conditional mapping validation for field mapping " + mappingIndex + " in enrichment: " + enrichmentId);
+        logger.trace("Conditional mapping validation for field mapping " + mappingIndex + " in enrichment: " + enrichmentId);
     }
 
     /**
@@ -2367,7 +2370,7 @@ public class YamlConfigurationLoader {
             return;
         }
 
-        LOGGER.fine("Validating " + conditionalMappings.size() + " conditional mappings for enrichment: " + enrichmentId);
+        logger.debug("Validating " + conditionalMappings.size() + " conditional mappings for enrichment: " + enrichmentId);
 
         for (int i = 0; i < conditionalMappings.size(); i++) {
             YamlEnrichment.ConditionalMapping conditionalMapping = conditionalMappings.get(i);
@@ -2429,7 +2432,7 @@ public class YamlConfigurationLoader {
             return;
         }
 
-        LOGGER.fine("Validating " + mappingRules.size() + " mapping rules for enrichment: " + enrichmentId);
+        logger.debug("Validating " + mappingRules.size() + " mapping rules for enrichment: " + enrichmentId);
 
         for (int i = 0; i < mappingRules.size(); i++) {
             YamlEnrichment.MappingRule rule = mappingRules.get(i);
@@ -2474,10 +2477,10 @@ public class YamlConfigurationLoader {
 
         // Type-specific validation
         if ("direct".equalsIgnoreCase(type)) {
-            // Direct mapping should have source-field or transformation
+            // Direct mapping should have source-field or expression
             if ((mappingConfig.getSourceField() == null || mappingConfig.getSourceField().trim().isEmpty()) &&
-                (mappingConfig.getTransformation() == null || mappingConfig.getTransformation().trim().isEmpty())) {
-                throw new YamlConfigurationException("Direct mapping requires either 'source-field' or 'transformation' for rule '" + ruleId + "' in enrichment: " + enrichmentId);
+                (mappingConfig.getExpression() == null || mappingConfig.getExpression().trim().isEmpty())) {
+                throw new YamlConfigurationException("Direct mapping requires either 'source-field' or 'expression' for rule '" + ruleId + "' in enrichment: " + enrichmentId);
             }
         } else if ("lookup".equalsIgnoreCase(type)) {
             // Lookup mapping should have lookup-config
@@ -2486,10 +2489,10 @@ public class YamlConfigurationLoader {
             }
         }
 
-        // Validate transformation expression if present
-        if (mappingConfig.getTransformation() != null && !mappingConfig.getTransformation().trim().isEmpty()) {
-            if (!isValidSpELExpression(mappingConfig.getTransformation())) {
-                throw new YamlConfigurationException("Invalid SpEL expression in transformation '" + mappingConfig.getTransformation() + "' for rule '" + ruleId + "' in enrichment: " + enrichmentId);
+        // Validate expression if present
+        if (mappingConfig.getExpression() != null && !mappingConfig.getExpression().trim().isEmpty()) {
+            if (!isValidSpELExpression(mappingConfig.getExpression())) {
+                throw new YamlConfigurationException("Invalid SpEL expression '" + mappingConfig.getExpression() + "' for rule '" + ruleId + "' in enrichment: " + enrichmentId);
             }
         }
     }
@@ -2509,7 +2512,7 @@ public class YamlConfigurationLoader {
             parser.parseExpression(expression);
             return true;
         } catch (Exception e) {
-            LOGGER.fine("Invalid SpEL expression: " + expression + " - " + e.getMessage());
+            logger.debug("Invalid SpEL expression: " + expression + " - " + e.getMessage());
             return false;
         }
     }
@@ -2532,7 +2535,7 @@ public class YamlConfigurationLoader {
 
             return true;
         } catch (Exception e) {
-            LOGGER.fine("Invalid template expression: " + template + " - " + e.getMessage());
+            logger.debug("Invalid template expression: " + template + " - " + e.getMessage());
             return false;
         }
     }
@@ -2591,7 +2594,7 @@ public class YamlConfigurationLoader {
             }
         }
 
-        LOGGER.fine("Enrichment reference validation completed successfully");
+        logger.debug("Enrichment reference validation completed successfully");
     }
 
     /**
@@ -2600,17 +2603,17 @@ public class YamlConfigurationLoader {
     private void validateFilePathReference(String filePath, String enrichmentId) throws YamlConfigurationException {
         // Check for absolute vs relative paths
         if (filePath.startsWith("/") || filePath.matches("^[A-Za-z]:.*")) {
-            LOGGER.warning("Enrichment '" + enrichmentId + "' uses absolute file path: " + filePath + ". Consider using relative paths for portability");
+            logger.warn("Enrichment '" + enrichmentId + "' uses absolute file path: " + filePath + ". Consider using relative paths for portability");
         }
 
         // Check for potentially problematic path patterns
         if (filePath.contains("..")) {
-            LOGGER.warning("Enrichment '" + enrichmentId + "' uses parent directory references in file path: " + filePath + ". This may cause security or portability issues");
+            logger.warn("Enrichment '" + enrichmentId + "' uses parent directory references in file path: " + filePath + ". This may cause security or portability issues");
         }
 
         // Check for common file path issues
         if (filePath.contains("\\")) {
-            LOGGER.info("Enrichment '" + enrichmentId + "' uses backslashes in file path: " + filePath + ". Consider using forward slashes for cross-platform compatibility");
+            logger.info("Enrichment '" + enrichmentId + "' uses backslashes in file path: " + filePath + ". Consider using forward slashes for cross-platform compatibility");
         }
     }
 
@@ -2983,7 +2986,7 @@ public class YamlConfigurationLoader {
             return value;
         }
 
-        LOGGER.fine("Resolving properties in value: " + maskSensitiveValue(value));
+        logger.debug("Resolving properties in value: " + maskSensitiveValue(value));
 
         String result = value;
 
@@ -3015,7 +3018,7 @@ public class YamlConfigurationLoader {
             result = parenResult.toString();
         }
 
-        LOGGER.fine("Property resolution completed: " + maskSensitiveValue(result));
+        logger.debug("Property resolution completed: " + maskSensitiveValue(result));
 
         return result;
     }
@@ -3048,7 +3051,7 @@ public class YamlConfigurationLoader {
 
         // Log resolution (mask sensitive values)
         String logValue = isSensitiveProperty(key) ? "[MASKED]" : value;
-        LOGGER.fine("Resolved property: ${" + placeholder + "} -> " + logValue);
+        logger.debug("Resolved property: ${" + placeholder + "} -> " + logValue);
 
         return value;
     }

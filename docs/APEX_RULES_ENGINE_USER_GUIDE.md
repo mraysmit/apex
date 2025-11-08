@@ -924,7 +924,7 @@ enrichments:
     field-mappings:
       - source-field: "counterpartyRating"
         target-field: "counterpartyRating"
-        transformation: "'UNRATED'"
+        expression: "'UNRATED'"
 ```
 
 **Field Enrichment Chaining Example:**
@@ -939,7 +939,7 @@ enrichments:
     field-mappings:
       - source-field: "notionalAmount"
         target-field: "tradeCategory"
-        transformation: "'HIGH_VALUE'"
+        expression: "'HIGH_VALUE'"
 
   # Second enrichment: Set approval requirement based on first enrichment
   - id: "set-approval-required"
@@ -948,7 +948,7 @@ enrichments:
     field-mappings:
       - source-field: "requiresApproval"
         target-field: "requiresApproval"
-        transformation: "true"
+        expression: "true"
 ```
 
 **Conditional Mapping Enrichment Chaining Example:**
@@ -969,7 +969,7 @@ enrichments:
             - condition: "#notionalAmount > 10000000"
         mapping:
           type: "direct"
-          transformation: "'HIGH'"
+          expression: "'HIGH'"
       - id: "medium-risk"
         priority: 2
         conditions:
@@ -978,7 +978,7 @@ enrichments:
             - condition: "#notionalAmount > 5000000"
         mapping:
           type: "direct"
-          transformation: "'MEDIUM'"
+          expression: "'MEDIUM'"
 
   # Second enrichment: Set default risk if no rule matched
   - id: "set-default-risk"
@@ -987,7 +987,7 @@ enrichments:
     field-mappings:
       - source-field: "riskClass"
         target-field: "riskClass"
-        transformation: "'NORMAL'"
+        expression: "'NORMAL'"
 ```
 
 **Java Usage Example:**
@@ -1018,7 +1018,7 @@ String yaml = """
         field-mappings:
           - source-field: "counterpartyRating"
             target-field: "counterpartyRating"
-            transformation: "'UNRATED'"
+            expression: "'UNRATED'"
 
     enrichment-groups:
       - id: "counterparty-enrichment"
@@ -1486,9 +1486,9 @@ enrichments:
     condition: "#ruleResults['high-value-rule'] == true"
     field-mappings:
       - target-field: "processingFee"
-        transformation: "#amount * 0.05"
+        expression: "#amount * 0.05"
       - target-field: "processingPriority"
-        transformation: "'HIGH'"
+        expression: "'HIGH'"
 
   # Apply premium customer discount only if premium rule passed
   - id: "premium-discount"
@@ -1496,9 +1496,9 @@ enrichments:
     condition: "#ruleResults['premium-customer-rule'] == true"
     field-mappings:
       - target-field: "discountRate"
-        transformation: "0.10"
+        expression: "0.10"
       - target-field: "serviceLevel"
-        transformation: "'PREMIUM'"
+        expression: "'PREMIUM'"
 
   # Complex priority calculation using multiple rule results
   - id: "priority-calculation"
@@ -1506,7 +1506,7 @@ enrichments:
     condition: "#ruleResults != null"
     field-mappings:
       - target-field: "finalPriority"
-        transformation: |
+        expression: |
           #ruleResults['premium-customer-rule'] == true && #ruleResults['high-value-rule'] == true ? 'IMMEDIATE' :
           #ruleResults['high-value-rule'] == true ? 'HIGH' :
           #ruleResults['premium-customer-rule'] == true ? 'ELEVATED' :
@@ -1562,9 +1562,9 @@ enrichments:
     condition: "#ruleGroupResults['validation-group']['passed'] == true"
     field-mappings:
       - target-field: "validationStatus"
-        transformation: "'VALIDATED'"
+        expression: "'VALIDATED'"
       - target-field: "readyForProcessing"
-        transformation: "true"
+        expression: "true"
 
   # Handle validation failures
   - id: "validation-failure"
@@ -1572,11 +1572,11 @@ enrichments:
     condition: "#ruleGroupResults['validation-group']['passed'] == false"
     field-mappings:
       - target-field: "validationStatus"
-        transformation: "'FAILED'"
+        expression: "'FAILED'"
       - target-field: "failedChecks"
-        transformation: "#ruleGroupResults['validation-group']['failedRules']"
+        expression: "#ruleGroupResults['validation-group']['failedRules']"
       - target-field: "readyForProcessing"
-        transformation: "false"
+        expression: "false"
 ```
 
 **Key Patterns:**
@@ -3522,7 +3522,7 @@ SpEL is now used consistently across ALL APEX features:
 | Feature | SpEL Support | Example |
 |---------|--------------|---------|
 | **Conditions** | ✅ Yes | `condition: '#data.currency != null'` |
-| **Transformations** | ✅ Yes | `transformation: '#data.currency'` |
+| **Transformations** | ✅ Yes | `expression: '#data.currency'` |
 | **Lookup Keys** | ✅ Yes | `lookup-key: '#symbol'` |
 | **Calculations** | ✅ Yes | `expression: '#amount * 0.01'` |
 | **Field Mappings** | ✅ **NEW!** | `source-field: '#data.currency'` |
@@ -3598,12 +3598,12 @@ field-mappings:
   # SpEL source-field + transformation
   - source-field: "#data.amount"
     target-field: "adjusted_amount"
-    transformation: "#value * 1.1"  # Apply 10% markup
+    expression: "#value * 1.1"  # Apply 10% markup
 
   # SpEL source-field + conditional transformation
   - source-field: "#data.trade.notional"
     target-field: "fee"
-    transformation: "#value > 1000000 ? #value * 0.001 : #value * 0.002"
+    expression: "#value > 1000000 ? #value * 0.001 : #value * 0.002"
 ```
 
 #### Lookup Enrichments with Nested Results
@@ -3689,19 +3689,19 @@ Use SpEL expressions for complex data transformations:
 field-mappings:
   - source-field: "firstName"
     target-field: "fullName"
-    transformation: "#{firstName} #{lastName}"
+    expression: "#{firstName} #{lastName}"
 
   - source-field: "amount"
     target-field: "formattedAmount"
-    transformation: "T(java.text.NumberFormat).getCurrencyInstance().format(#{amount})"
+    expression: "T(java.text.NumberFormat).getCurrencyInstance().format(#{amount})"
 
   - source-field: "timestamp"
     target-field: "businessDate"
-    transformation: "T(java.time.LocalDateTime).parse(#{timestamp}).toLocalDate()"
+    expression: "T(java.time.LocalDateTime).parse(#{timestamp}).toLocalDate()"
 
   - source-field: "riskScore"
     target-field: "riskCategory"
-    transformation: "#{riskScore} > 80 ? 'HIGH' : (#{riskScore} > 50 ? 'MEDIUM' : 'LOW')"
+    expression: "#{riskScore} > 80 ? 'HIGH' : (#{riskScore} > 50 ? 'MEDIUM' : 'LOW')"
 ```
 
 #### 2. Conditional Field Mapping
@@ -3726,11 +3726,11 @@ field-mappings:
     target-field: "processedAmount"
     conditional-mappings:
       - condition: "#{currency} == 'USD'"
-        transformation: "#{amount}"
+        expression: "#{amount}"
       - condition: "#{currency} == 'EUR'"
-        transformation: "#{amount} * 1.1"  # Example conversion
+        expression: "#{amount} * 1.1"  # Example conversion
       - condition: "#{currency} == 'GBP'"
-        transformation: "#{amount} * 1.25"
+        expression: "#{amount} * 1.25"
 ```
 
 #### 3. Nested Object Mapping
@@ -3754,10 +3754,10 @@ field-mappings:
     nested-mappings:
       - source-field: "email"
         target-field: "emailAddress"
-        transformation: "#{email}.toLowerCase()"
+        expression: "#{email}.toLowerCase()"
       - source-field: "phone"
         target-field: "phoneNumber"
-        transformation: "#{phone}.replaceAll('[^0-9]', '')"
+        expression: "#{phone}.replaceAll('[^0-9]', '')"
 ```
 
 ### Performance Optimization Strategies

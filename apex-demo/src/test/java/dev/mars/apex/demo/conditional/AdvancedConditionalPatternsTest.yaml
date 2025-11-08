@@ -50,7 +50,7 @@ enrichments:
     field-mappings:
       - source-field: "creditScore"
         target-field: "requiresManualReview"
-        transformation: "true"
+        expression: "true"
 
   # Priority-based routing using conditional-mapping-enrichment
   - id: "routing-decision"
@@ -69,7 +69,7 @@ enrichments:
             - condition: "#ruleResults['high-value-transaction'] == true"
         mapping:
           type: "direct"
-          transformation: "'EXECUTIVE_REVIEW_QUEUE'"
+          expression: "'EXECUTIVE_REVIEW_QUEUE'"
 
       # Priority 2: High-risk only
       - id: "high-risk"
@@ -80,7 +80,7 @@ enrichments:
             - condition: "#ruleResults['high-risk-customer'] == true"
         mapping:
           type: "direct"
-          transformation: "'COMPLIANCE_REVIEW_QUEUE'"
+          expression: "'COMPLIANCE_REVIEW_QUEUE'"
 
       # Priority 3: High-value only
       - id: "high-value"
@@ -91,14 +91,14 @@ enrichments:
             - condition: "#ruleResults['high-value-transaction'] == true"
         mapping:
           type: "direct"
-          transformation: "'SENIOR_APPROVAL_QUEUE'"
+          expression: "'SENIOR_APPROVAL_QUEUE'"
 
       # Priority 999: Default/standard processing
       - id: "standard"
         priority: 999
         mapping:
           type: "direct"
-          transformation: "'AUTO_PROCESSING_QUEUE'"
+          expression: "'AUTO_PROCESSING_QUEUE'"
     execution-settings:
       stop-on-first-match: true
 

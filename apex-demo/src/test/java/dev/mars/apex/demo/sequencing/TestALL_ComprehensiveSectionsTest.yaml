@@ -296,7 +296,7 @@ transformations:
     field-mappings:
       - source-field: "inputField1"
         target-field: "outputField1"
-        transformation: "uppercase"
+        expression: "uppercase"
     enabled: true
 
   - id: "transform-2"
@@ -306,7 +306,7 @@ transformations:
     field-mappings:
       - source-field: "inputField2"
         target-field: "outputField2"
-        transformation: "lowercase"
+        expression: "lowercase"
     enabled: true
 
   - id: "transform-3"
@@ -316,7 +316,7 @@ transformations:
     field-mappings:
       - source-field: "inputField3"
         target-field: "outputField3"
-        transformation: "trim"
+        expression: "trim"
     enabled: true
 
 # ============================================================================

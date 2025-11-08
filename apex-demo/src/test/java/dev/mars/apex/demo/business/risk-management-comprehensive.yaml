@@ -107,7 +107,7 @@ enrichments:
     field-mappings:
       - source-field: "limitUtilizationPercent"
         target-field: "riskAlertLevel"
-        transformation: "#limitUtilizationPercent > 90 ? 'CRITICAL' : (#limitUtilizationPercent > 75 ? 'HIGH' : (#limitUtilizationPercent > 50 ? 'MEDIUM' : 'LOW'))"
+        expression: "#limitUtilizationPercent > 90 ? 'CRITICAL' : (#limitUtilizationPercent > 75 ? 'HIGH' : (#limitUtilizationPercent > 50 ? 'MEDIUM' : 'LOW'))"
 
   # 6. REAL FIELD ENRICHMENT - VaR limit breach check
   - id: "var-limit-breach-check"
@@ -118,7 +118,7 @@ enrichments:
     field-mappings:
       - source-field: "portfolioVaR"
         target-field: "varBreachStatus"
-        transformation: "#portfolioVaR > #varLimit ? 'BREACH' : (#portfolioVaR > (#varLimit * 0.9) ? 'WARNING' : 'NORMAL')"
+        expression: "#portfolioVaR > #varLimit ? 'BREACH' : (#portfolioVaR > (#varLimit * 0.9) ? 'WARNING' : 'NORMAL')"
 
   # 7. REAL CALCULATION ENRICHMENT - Stress test scenario calculation
   - id: "stress-test-calculation"
@@ -155,7 +155,7 @@ enrichments:
     field-mappings:
       - source-field: "riskAlertLevel"
         target-field: "overallRiskStatus"
-        transformation: "#riskAlertLevel == 'CRITICAL' || #varBreachStatus == 'BREACH' ? 'RED' : (#riskAlertLevel == 'HIGH' || #varBreachStatus == 'WARNING' ? 'AMBER' : 'GREEN')"
+        expression: "#riskAlertLevel == 'CRITICAL' || #varBreachStatus == 'BREACH' ? 'RED' : (#riskAlertLevel == 'HIGH' || #varBreachStatus == 'WARNING' ? 'AMBER' : 'GREEN')"
 
   # 10. REAL LOOKUP ENRICHMENT - Risk mitigation actions lookup
   - id: "risk-mitigation-lookup"

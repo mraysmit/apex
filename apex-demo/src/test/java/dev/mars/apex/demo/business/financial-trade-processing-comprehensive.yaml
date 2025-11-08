@@ -174,7 +174,7 @@ enrichments:
     field-mappings:
       - source-field: "tradeDate"
         target-field: "settlementDate"
-        transformation: "T(java.time.LocalDate).parse(#tradeDate).plusDays(#standardSettlementDays).toString()"
+        expression: "T(java.time.LocalDate).parse(#tradeDate).plusDays(#standardSettlementDays).toString()"
 
   # 8. REAL FIELD ENRICHMENT - Trade status determination
   - id: "trade-status-determination"
@@ -185,7 +185,7 @@ enrichments:
     field-mappings:
       - source-field: "netSettlementAmount"
         target-field: "tradeStatus"
-        transformation: "#netSettlementAmount > 0 && #counterpartyRiskCategory != 'HIGH' ? 'APPROVED' : 'PENDING_REVIEW'"
+        expression: "#netSettlementAmount > 0 && #counterpartyRiskCategory != 'HIGH' ? 'APPROVED' : 'PENDING_REVIEW'"
 
   # 9. REAL CALCULATION ENRICHMENT - Regulatory capital calculation
   - id: "regulatory-capital-calculation"
@@ -209,4 +209,4 @@ enrichments:
     field-mappings:
       - source-field: "regulatoryCapital"
         target-field: "complianceStatus"
-        transformation: "#regulatoryCapital < 1000000 && #tradeStatus == 'APPROVED' ? 'COMPLIANT' : 'NON_COMPLIANT'"
+        expression: "#regulatoryCapital < 1000000 && #tradeStatus == 'APPROVED' ? 'COMPLIANT' : 'NON_COMPLIANT'"

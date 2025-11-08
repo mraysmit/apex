@@ -73,7 +73,7 @@ enrichments:
         mapping:
           type: "direct"
           source-field: "IS_NDF"
-          transformation: "#IS_NDF"
+          expression: "#IS_NDF"
           description: "Keep original NDF value"
           
       # Rule 2: SWIFT system with Y/N flags
@@ -89,7 +89,7 @@ enrichments:
         mapping:
           type: "transformation"
           source-field: "IS_NDF"
-          transformation: "#IS_NDF?.toUpperCase() in {'Y', 'YES'} ? '1' : '0'"
+          expression: "#IS_NDF?.toUpperCase() in {'Y', 'YES'} ? '1' : '0'"
           description: "Convert Y/N to 1/0"
           
       # Rule 3: Database translation for complex codes
@@ -114,7 +114,7 @@ enrichments:
               type: "database"
               data-source-ref: "fx-database"
               query-ref: "getInternalCodeWithoutSubcode"
-          transformation: "#lookup?.internal_code"
+          expression: "#lookup?.internal_code"
           fallback-value: "#IS_NDF"
           description: "Database lookup with fallback to original"
           
@@ -131,7 +131,7 @@ enrichments:
         mapping:
           type: "transformation"
           source-field: "IS_NDF"
-          transformation: |
+          expression: |
             #SYSTEM_CODE == 'REUTERS' ? 
               (#IS_NDF == 'TRUE' ? '1' : '0') :
             #SYSTEM_CODE == 'BLOOMBERG' ?
@@ -149,7 +149,7 @@ enrichments:
         mapping:
           type: "direct"
           source-field: "IS_NDF"
-          transformation: "#IS_NDF ?: '0'"
+          expression: "#IS_NDF ?: '0'"
           description: "Use original value or default to '0'"
           
     # Execution settings
@@ -179,7 +179,7 @@ enrichments:
             - condition: "#SELL_CURRENCY == 'USD'"
         mapping:
           type: "transformation"
-          transformation: "'FEDWIRE_' + (#COUNTERPARTY_REGION ?: 'US')"
+          expression: "'FEDWIRE_' + (#COUNTERPARTY_REGION ?: 'US')"
           
       # EUR transactions
       - id: "eur-settlement"
@@ -191,7 +191,7 @@ enrichments:
             - condition: "#SELL_CURRENCY == 'EUR'"
         mapping:
           type: "transformation"
-          transformation: "'TARGET2_' + (#COUNTERPARTY_REGION ?: 'EU')"
+          expression: "'TARGET2_' + (#COUNTERPARTY_REGION ?: 'EU')"
           
       # High value transactions (special handling)
       - id: "high-value-settlement"
@@ -209,7 +209,7 @@ enrichments:
               type: "database"
               data-source-ref: "fx-database"
               query-ref: "getHighValueSettlementInstructions"
-          transformation: "#lookup?.settlement_instruction"
+          expression: "#lookup?.settlement_instruction"
           fallback-value: "'MANUAL_REVIEW_REQUIRED'"
           
       # Default settlement
@@ -219,7 +219,7 @@ enrichments:
           default: true
         mapping:
           type: "transformation"
-          transformation: "'STANDARD_SETTLEMENT'"
+          expression: "'STANDARD_SETTLEMENT'"
           
     execution-settings:
       stop-on-first-match: true

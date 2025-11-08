@@ -5,6 +5,8 @@ import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.TransformerRule;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.common.NamedService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -12,8 +14,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -41,7 +45,7 @@ import java.util.logging.Logger;
  * @version 1.0
  */
 public class GenericTransformer<T> implements NamedService {
-    private static final Logger LOGGER = Logger.getLogger(GenericTransformer.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(GenericTransformer.class);
 
     private final String name;
     private final Class<T> type;
@@ -125,7 +129,7 @@ public class GenericTransformer<T> implements NamedService {
 
             return transformedValue;
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error transforming value: " + e.getMessage(), e);
+            logger.warn("Error transforming value: " + e.getMessage(), e);
             return value; // Return the original value if transformation fails
         }
     }
@@ -210,7 +214,7 @@ public class GenericTransformer<T> implements NamedService {
             // Set the new field value on the transformed object
             action.getFieldValueSetter().accept(transformedValue, newFieldValue);
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error applying field transformation action: " + e.getMessage(), e);
+            logger.warn("Error applying field transformation action: " + e.getMessage(), e);
         }
     }
 

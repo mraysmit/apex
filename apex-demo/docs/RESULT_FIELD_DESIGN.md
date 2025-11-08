@@ -530,7 +530,7 @@ enrichments:
     condition: "#statusIsActive == true"
     field-mappings:
       - target-field: "processingPath"
-        transformation: "'ACTIVE_PROCESSING'"
+        expression: "'ACTIVE_PROCESSING'"
 ```
 
 **Implementation:**
@@ -580,7 +580,7 @@ enrichments:
     condition: "#priorityMapped == false"
     field-mappings:
       - target-field: "priority"
-        transformation: "'DEFAULT'"
+        expression: "'DEFAULT'"
 ```
 
 **Implementation:**
@@ -736,7 +736,7 @@ condition: "#ageCheckPassed && #licenseCheckPassed"
 condition: "#validation.ageCheck == true"
 
 # Ternary expressions
-transformation: "#ageCheckPassed ? 'ELIGIBLE' : 'NOT_ELIGIBLE'"
+expression: "#ageCheckPassed ? 'ELIGIBLE' : 'NOT_ELIGIBLE'"
 ```
 
 ---

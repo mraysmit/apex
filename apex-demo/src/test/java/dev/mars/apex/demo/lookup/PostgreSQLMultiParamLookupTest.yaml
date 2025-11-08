@@ -259,7 +259,7 @@ enrichments:
       - source-field: "settlement_cycle"
         target-field: "settlementCycle"
         required: true
-        transformation: "#value != null ? T(java.lang.Integer).parseInt(#value.toString()) : 2"
+        expression: "#value != null ? T(java.lang.Integer).parseInt(#value.toString()) : 2"
       - source-field: "cut_off_time"
         target-field: "cutOffTime"
         required: false
@@ -337,15 +337,15 @@ enrichments:
       - source-field: "risk_score"
         target-field: "riskScore"
         required: true
-        transformation: "#value != null ? T(java.lang.Integer).parseInt(#value.toString()) : 0"
+        expression: "#value != null ? T(java.lang.Integer).parseInt(#value.toString()) : 0"
       - source-field: "max_exposure"
         target-field: "maxExposure"
         required: false
-        transformation: "#value != null ? new java.math.BigDecimal(#value.toString()) : null"
+        expression: "#value != null ? new java.math.BigDecimal(#value.toString()) : null"
       - source-field: "approval_required"
         target-field: "approvalRequired"
         required: true
-        transformation: "#value != null ? T(java.lang.Boolean).parseBoolean(#value.toString()) : false"
+        expression: "#value != null ? T(java.lang.Boolean).parseBoolean(#value.toString()) : false"
       - source-field: "monitoring_level"
         target-field: "monitoringLevel"
         required: true
@@ -355,7 +355,7 @@ enrichments:
       - source-field: "credit_limit"
         target-field: "counterpartyCreditLimit"
         required: false
-        transformation: "#value != null ? T(java.lang.Long).parseLong(#value.toString()) : 0L"
+        expression: "#value != null ? T(java.lang.Long).parseLong(#value.toString()) : 0L"
       - source-field: "volatility_rating"
         target-field: "marketVolatilityRating"
         required: false

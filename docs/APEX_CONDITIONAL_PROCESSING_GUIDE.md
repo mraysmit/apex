@@ -105,7 +105,7 @@ enrichments:
     field-mappings:
       - source-field: "statusCode"
         target-field: "statusName"
-        transformation: |
+        expression: |
           #statusCode == 'A' ? 'ACTIVE' :
           #statusCode == 'I' ? 'INACTIVE' :
           #statusCode == 'P' ? 'PENDING' : 'UNKNOWN'
@@ -121,17 +121,17 @@ enrichments:
     type: "field-enrichment"
     field-mappings:
       - target-field: "riskLevel"
-        transformation: |
+        expression: |
           #amount > 1000000 ? 'CRITICAL' :
           #amount > 100000 ? 'HIGH' :
           #amount > 10000 ? 'MEDIUM' :
           #amount > 1000 ? 'LOW' : 'MINIMAL'
       
       - target-field: "approvalRequired"
-        transformation: "#amount > 100000"
+        expression: "#amount > 100000"
       
       - target-field: "approverLevel"
-        transformation: |
+        expression: |
           #amount > 1000000 ? 'EXECUTIVE' :
           #amount > 100000 ? 'SENIOR_MANAGER' :
           #amount > 10000 ? 'MANAGER' : 'SUPERVISOR'
@@ -147,11 +147,11 @@ enrichments:
     type: "field-enrichment"
     field-mappings:
       - target-field: "canTrade"
-        transformation: |
+        expression: |
           #accountStatus == 'ACTIVE' && #creditRating >= 'BBB' && #balance > 10000
       
       - target-field: "tradingLimit"
-        transformation: |
+        expression: |
           #accountType == 'INSTITUTIONAL' && #netWorth > 10000000 ? 10000000 :
           #accountType == 'HIGH_NET_WORTH' && #netWorth > 1000000 ? 1000000 :
           #accountType == 'RETAIL' && #balance > 50000 ? 100000 : 10000
@@ -337,9 +337,9 @@ enrichments:
     condition: "#ruleResults['high-value-rule'] == true"
     field-mappings:
       - target-field: "processingFee"
-        transformation: "#amount * 0.05"
+        expression: "#amount * 0.05"
       - target-field: "requiresApproval"
-        transformation: "true"
+        expression: "true"
 ```
 
 ### Multiple Rule Results
@@ -361,7 +361,7 @@ enrichments:
     condition: "#ruleResults != null"
     field-mappings:
       - target-field: "processingPriority"
-        transformation: |
+        expression: |
           #ruleResults['urgent-processing-rule'] == true ? 'IMMEDIATE' :
           #ruleResults['high-value-rule'] == true && #ruleResults['premium-customer-rule'] == true ? 'VIP' :
           #ruleResults['high-value-rule'] == true ? 'HIGH' :
@@ -386,9 +386,9 @@ enrichments:
     condition: "#ruleGroupResults['validation-group']['passed'] == true"
     field-mappings:
       - target-field: "validationStatus"
-        transformation: "'VALIDATED'"
+        expression: "'VALIDATED'"
       - target-field: "readyForProcessing"
-        transformation: "true"
+        expression: "true"
   
   # Failure path
   - id: "validation-failure"
@@ -396,11 +396,11 @@ enrichments:
     condition: "#ruleGroupResults['validation-group']['passed'] == false"
     field-mappings:
       - target-field: "validationStatus"
-        transformation: "'FAILED'"
+        expression: "'FAILED'"
       - target-field: "failedChecks"
-        transformation: "#ruleGroupResults['validation-group']['failedRules']"
+        expression: "#ruleGroupResults['validation-group']['failedRules']"
       - target-field: "readyForProcessing"
-        transformation: "false"
+        expression: "false"
 ```
 
 ### When to Use Rule Result References
@@ -485,7 +485,7 @@ enrichments:
     condition: "true"
     field-mappings:
       - target-field: "processedAt"
-        transformation: "T(java.time.LocalDateTime).now()"
+        expression: "T(java.time.LocalDateTime).now()"
   
   # Stage 2: Only for high-value transactions
   - id: "high-value-enrichment"
@@ -493,9 +493,9 @@ enrichments:
     condition: "#amount > 100000"
     field-mappings:
       - target-field: "requiresExecutiveApproval"
-        transformation: "true"
+        expression: "true"
       - target-field: "approvalDeadline"
-        transformation: "T(java.time.LocalDateTime).now().plusHours(4)"
+        expression: "T(java.time.LocalDateTime).now().plusHours(4)"
   
   # Stage 3: Only for international transactions
   - id: "international-enrichment"
@@ -503,9 +503,9 @@ enrichments:
     condition: "#currency != 'USD'"
     field-mappings:
       - target-field: "requiresComplianceReview"
-        transformation: "true"
+        expression: "true"
       - target-field: "complianceDeadline"
-        transformation: "T(java.time.LocalDateTime).now().plusHours(24)"
+        expression: "T(java.time.LocalDateTime).now().plusHours(24)"
 ```
 
 ---
@@ -523,7 +523,7 @@ SpEL is now used consistently across ALL APEX features:
 | Feature | SpEL Support | Example |
 |---------|--------------|---------|
 | **Conditions** | ✅ Yes | `condition: '#data.currency != null'` |
-| **Transformations** | ✅ Yes | `transformation: '#data.currency'` |
+| **Transformations** | ✅ Yes | `expression: '#data.currency'` |
 | **Lookup Keys** | ✅ Yes | `lookup-key: '#symbol'` |
 | **Calculations** | ✅ Yes | `expression: '#amount * 0.01'` |
 | **Field Mappings** | ✅ **NEW!** | `source-field: '#data.currency'` |
@@ -599,12 +599,12 @@ field-mappings:
   # SpEL source-field + transformation
   - source-field: "#data.amount"
     target-field: "adjusted_amount"
-    transformation: "#value * 1.1"  # Apply 10% markup
+    expression: "#value * 1.1"  # Apply 10% markup
 
   # SpEL source-field + conditional transformation
   - source-field: "#data.trade.notional"
     target-field: "fee"
-    transformation: "#value > 1000000 ? #value * 0.001 : #value * 0.002"
+    expression: "#value > 1000000 ? #value * 0.001 : #value * 0.002"
 ```
 
 ### Conditional Enrichments with SpEL Field Mappings
@@ -699,7 +699,7 @@ enrichments:
             - condition: "#amount > 100000"
         mapping:
           type: "direct"
-          transformation: "'IMMEDIATE_PROCESSING'"
+          expression: "'IMMEDIATE_PROCESSING'"
       
       # Priority 2: High-value only
       - id: "high-value"
@@ -710,7 +710,7 @@ enrichments:
             - condition: "#amount > 100000"
         mapping:
           type: "direct"
-          transformation: "'HIGH_VALUE_QUEUE'"
+          expression: "'HIGH_VALUE_QUEUE'"
       
       # Priority 3: Urgent only
       - id: "urgent"
@@ -721,14 +721,14 @@ enrichments:
             - condition: "#priority == 'URGENT'"
         mapping:
           type: "direct"
-          transformation: "'URGENT_QUEUE'"
+          expression: "'URGENT_QUEUE'"
       
       # Priority 999: Default fallback
       - id: "standard"
         priority: 999
         mapping:
           type: "direct"
-          transformation: "'STANDARD_QUEUE'"
+          expression: "'STANDARD_QUEUE'"
     
     execution-settings:
       stop-on-first-match: true
@@ -755,7 +755,7 @@ enrichments:
             - condition: "#requestedSettlement == 'SAME_DAY'"
         mapping:
           type: "direct"
-          transformation: |
+          expression: |
             {
               'method': 'WIRE',
               'priority': 'IMMEDIATE',
@@ -773,7 +773,7 @@ enrichments:
             - condition: "#amount > 10000"
         mapping:
           type: "direct"
-          transformation: |
+          expression: |
             {
               'method': 'ACH_EXPEDITED',
               'priority': 'HIGH',
@@ -790,7 +790,7 @@ enrichments:
             - condition: "#requestedSettlement == 'NEXT_DAY'"
         mapping:
           type: "direct"
-          transformation: |
+          expression: |
             {
               'method': 'ACH',
               'priority': 'NORMAL',
@@ -803,7 +803,7 @@ enrichments:
         priority: 999
         mapping:
           type: "direct"
-          transformation: |
+          expression: |
             {
               'method': 'ACH',
               'priority': 'STANDARD',
@@ -867,9 +867,9 @@ enrichments:
     condition: "true"
     field-mappings:
       - target-field: "processedAt"
-        transformation: "T(java.time.LocalDateTime).now()"
+        expression: "T(java.time.LocalDateTime).now()"
       - target-field: "processingId"
-        transformation: "T(java.util.UUID).randomUUID().toString()"
+        expression: "T(java.util.UUID).randomUUID().toString()"
 
   # Risk-based enrichment
   - id: "risk-enrichment"
@@ -877,11 +877,11 @@ enrichments:
     condition: "#ruleGroupResults['risk-assessment']['passed'] == true"
     field-mappings:
       - target-field: "requiresManualReview"
-        transformation: "true"
+        expression: "true"
       - target-field: "riskFactors"
-        transformation: "#ruleGroupResults['risk-assessment']['passedRules']"
+        expression: "#ruleGroupResults['risk-assessment']['passedRules']"
       - target-field: "reviewDeadline"
-        transformation: "T(java.time.LocalDateTime).now().plusHours(2)"
+        expression: "T(java.time.LocalDateTime).now().plusHours(2)"
 
   # Priority-based routing
   - id: "routing-decision"
@@ -897,7 +897,7 @@ enrichments:
             - condition: "#ruleResults['high-value-transaction'] == true"
         mapping:
           type: "direct"
-          transformation: "'EXECUTIVE_REVIEW_QUEUE'"
+          expression: "'EXECUTIVE_REVIEW_QUEUE'"
 
       - id: "high-risk"
         priority: 2
@@ -907,7 +907,7 @@ enrichments:
             - condition: "#ruleResults['high-risk-customer'] == true"
         mapping:
           type: "direct"
-          transformation: "'COMPLIANCE_REVIEW_QUEUE'"
+          expression: "'COMPLIANCE_REVIEW_QUEUE'"
 
       - id: "high-value"
         priority: 3
@@ -917,13 +917,13 @@ enrichments:
             - condition: "#ruleResults['high-value-transaction'] == true"
         mapping:
           type: "direct"
-          transformation: "'SENIOR_APPROVAL_QUEUE'"
+          expression: "'SENIOR_APPROVAL_QUEUE'"
 
       - id: "standard"
         priority: 999
         mapping:
           type: "direct"
-          transformation: "'AUTO_PROCESSING_QUEUE'"
+          expression: "'AUTO_PROCESSING_QUEUE'"
     execution-settings:
       stop-on-first-match: true
 ```
@@ -997,9 +997,9 @@ enrichments:
       #ruleResults['secondary-data-source-available'] == false
     field-mappings:
       - target-field: "enrichedData"
-        transformation: "'DEFAULT_VALUE'"
+        expression: "'DEFAULT_VALUE'"
       - target-field: "dataSourceUsed"
-        transformation: "'FALLBACK'"
+        expression: "'FALLBACK'"
 ```
 
 ### Pattern 3: Dynamic Array Processing with Conditions
@@ -1013,22 +1013,22 @@ enrichments:
     field-mappings:
       # Filter high-value transactions
       - target-field: "highValueTransactions"
-        transformation: |
+        expression: |
           #transactions.?[amount > 100000]
 
       # Count by status
       - target-field: "pendingCount"
-        transformation: |
+        expression: |
           #transactions.?[status == 'PENDING'].size()
 
       # Calculate total for approved transactions
       - target-field: "approvedTotal"
-        transformation: |
+        expression: |
           #transactions.?[status == 'APPROVED'].![amount].stream().reduce(0.0, (a,b) -> a + b)
 
       # Get first urgent transaction
       - target-field: "firstUrgent"
-        transformation: |
+        expression: |
           #transactions.?[priority == 'URGENT'].isEmpty() ? null : #transactions.?[priority == 'URGENT'][0]
 ```
 
@@ -1069,7 +1069,7 @@ enrichments:
     type: "field-enrichment"
     field-mappings:
       - target-field: "finalFee"
-        transformation: "T(java.lang.Math).max(0.00, #baseFee - #volumeDiscount)"
+        expression: "T(java.lang.Math).max(0.00, #baseFee - #volumeDiscount)"
 ```
 
 ### Pattern 5: Conditional Validation with Error Handling
@@ -1110,11 +1110,11 @@ enrichments:
     condition: "#ruleGroupResults['validation-group']['passed'] == true"
     field-mappings:
       - target-field: "validationStatus"
-        transformation: "'PASSED'"
+        expression: "'PASSED'"
       - target-field: "processingStatus"
-        transformation: "'READY_FOR_PROCESSING'"
+        expression: "'READY_FOR_PROCESSING'"
       - target-field: "validatedAt"
-        transformation: "T(java.time.LocalDateTime).now()"
+        expression: "T(java.time.LocalDateTime).now()"
 
   # Failure path - capture errors
   - id: "validation-failure"
@@ -1122,13 +1122,13 @@ enrichments:
     condition: "#ruleGroupResults['validation-group']['passed'] == false"
     field-mappings:
       - target-field: "validationStatus"
-        transformation: "'FAILED'"
+        expression: "'FAILED'"
       - target-field: "processingStatus"
-        transformation: "'REJECTED'"
+        expression: "'REJECTED'"
       - target-field: "validationErrors"
-        transformation: "#ruleGroupResults['validation-group']['failedRules']"
+        expression: "#ruleGroupResults['validation-group']['failedRules']"
       - target-field: "errorCount"
-        transformation: "#ruleGroupResults['validation-group']['failedRules'].size()"
+        expression: "#ruleGroupResults['validation-group']['failedRules'].size()"
 ```
 
 ---
@@ -1171,7 +1171,7 @@ enrichments:
     condition: "#expensiveResult > threshold"
     field-mappings:
       - target-field: "processingPath"
-        transformation: "'SPECIAL_PROCESSING'"
+        expression: "'SPECIAL_PROCESSING'"
 ```
 
 #### 3. Use Rule Groups Efficiently
@@ -1209,9 +1209,9 @@ enrichments:
     type: "field-enrichment"
     field-mappings:
       - target-field: "field1"
-        transformation: "#ruleResults['expensive-rule'] == true ? 'A' : 'B'"
+        expression: "#ruleResults['expensive-rule'] == true ? 'A' : 'B'"
       - target-field: "field2"
-        transformation: "#ruleResults['expensive-rule'] == true ? 'X' : 'Y'"
+        expression: "#ruleResults['expensive-rule'] == true ? 'X' : 'Y'"
 
 # More efficient - single lookup with ternary
 enrichments:
@@ -1220,18 +1220,18 @@ enrichments:
     condition: "#ruleResults['expensive-rule'] == true"
     field-mappings:
       - target-field: "field1"
-        transformation: "'A'"
+        expression: "'A'"
       - target-field: "field2"
-        transformation: "'X'"
+        expression: "'X'"
 
   - id: "efficient-else"
     type: "field-enrichment"
     condition: "#ruleResults['expensive-rule'] == false"
     field-mappings:
       - target-field: "field1"
-        transformation: "'B'"
+        expression: "'B'"
       - target-field: "field2"
-        transformation: "'Y'"
+        expression: "'Y'"
 ```
 
 ### Performance Comparison
@@ -1252,7 +1252,7 @@ enrichments:
 
 ```yaml
 # ✅ Good - Simple ternary for simple mapping
-transformation: "#status == 'A' ? 'ACTIVE' : 'INACTIVE'"
+expression: "#status == 'A' ? 'ACTIVE' : 'INACTIVE'"
 
 # ❌ Bad - Overkill for simple mapping
 rules:
@@ -1262,7 +1262,7 @@ enrichments:
   - condition: "#ruleResults['status-active'] == true"
     field-mappings:
       - target-field: "statusName"
-        transformation: "'ACTIVE'"
+        expression: "'ACTIVE'"
 ```
 
 ### 2. Use Meaningful IDs and Names
@@ -1295,7 +1295,7 @@ enrichments:
     type: "field-enrichment"
     field-mappings:
       - target-field: "priority"
-        transformation: |
+        expression: |
           #urgent == true || #amount > 1000000 ? 'IMMEDIATE' :
           #amount > 100000 && #customerTier == 'PREMIUM' ? 'HIGH' :
           #customerTier == 'PREMIUM' ? 'ELEVATED' : 'STANDARD'
@@ -1320,7 +1320,7 @@ Ensure test coverage for all conditional paths:
 
 ```yaml
 # For this configuration:
-transformation: |
+expression: |
   #amount > 100000 ? 'HIGH' :
   #amount > 10000 ? 'MEDIUM' : 'LOW'
 
@@ -1529,7 +1529,7 @@ enrichments:
     type: "field-enrichment"
     field-mappings:
       - target-field: "processingVersion"
-        transformation: "'1.0.0'"
+        expression: "'1.0.0'"
 
   # Base fee calculation
   - id: "base-fee-calculation"
@@ -1564,7 +1564,7 @@ enrichments:
     type: "field-enrichment"
     field-mappings:
       - target-field: "finalFee"
-        transformation: "#baseFee - #tierDiscount"
+        expression: "#baseFee - #tierDiscount"
 
   # Premium customer enrichment - conditional based on rule result
   - id: "premium-customer-enrichment"
@@ -1572,7 +1572,7 @@ enrichments:
     condition: "#ruleResults['premium-customer'] == true"
     field-mappings:
       - target-field: "priorityProcessing"
-        transformation: "true"
+        expression: "true"
 
   # Routing decision - priority-based conditional mapping
   - id: "transaction-routing"
@@ -1589,7 +1589,7 @@ enrichments:
             - condition: "#ruleGroupResults['compliance-checks']['passed'] == false"
         mapping:
           type: "direct"
-          transformation: "'COMPLIANCE_HOLD_QUEUE'"
+          expression: "'COMPLIANCE_HOLD_QUEUE'"
 
       # Very high priority - executive review for very high value EDD
       - id: "executive-review"
@@ -1601,7 +1601,7 @@ enrichments:
             - condition: "#ruleResults['very-high-value'] == true"
         mapping:
           type: "direct"
-          transformation: "'EXECUTIVE_REVIEW_QUEUE'"
+          expression: "'EXECUTIVE_REVIEW_QUEUE'"
 
       # Medium-high priority - EDD required
       - id: "edd-required"
@@ -1612,7 +1612,7 @@ enrichments:
             - condition: "#ruleGroupResults['edd-triggers']['passed'] == true"
         mapping:
           type: "direct"
-          transformation: "'ENHANCED_DUE_DILIGENCE_QUEUE'"
+          expression: "'ENHANCED_DUE_DILIGENCE_QUEUE'"
 
       # Medium priority - risk indicators present
       - id: "risk-review"
@@ -1623,7 +1623,7 @@ enrichments:
             - condition: "#ruleGroupResults['risk-indicators']['passed'] == true"
         mapping:
           type: "direct"
-          transformation: "'RISK_REVIEW_QUEUE'"
+          expression: "'RISK_REVIEW_QUEUE'"
 
       # Low priority - high value but low risk
       - id: "high-value-auto"
@@ -1635,14 +1635,14 @@ enrichments:
             - condition: "#ruleResults['premium-customer'] == true"
         mapping:
           type: "direct"
-          transformation: "'PREMIUM_AUTO_PROCESSING_QUEUE'"
+          expression: "'PREMIUM_AUTO_PROCESSING_QUEUE'"
 
       # Standard processing
       - id: "standard"
         priority: 999
         mapping:
           type: "direct"
-          transformation: "'STANDARD_PROCESSING_QUEUE'"
+          expression: "'STANDARD_PROCESSING_QUEUE'"
 
     execution-settings:
       stop-on-first-match: true
@@ -1654,7 +1654,7 @@ enrichments:
     type: "field-enrichment"
     field-mappings:
       - target-field: "slaDeadline"
-        transformation: |
+        expression: |
           #processingQueue == 'COMPLIANCE_HOLD_QUEUE' ? T(java.time.LocalDateTime).now().plusHours(1) :
           #processingQueue == 'EXECUTIVE_REVIEW_QUEUE' ? T(java.time.LocalDateTime).now().plusHours(4) :
           #processingQueue == 'ENHANCED_DUE_DILIGENCE_QUEUE' ? T(java.time.LocalDateTime).now().plusHours(24) :

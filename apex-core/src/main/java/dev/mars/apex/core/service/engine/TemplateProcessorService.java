@@ -2,9 +2,13 @@ package dev.mars.apex.core.service.engine;
 
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -37,13 +41,13 @@ import java.util.logging.Logger;
  * Supports plain text, XML, and JSON formats.
  */
 public class TemplateProcessorService {
-    private static final Logger LOGGER = Logger.getLogger(TemplateProcessorService.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(TemplateProcessorService.class);
     private final ExpressionEvaluatorService evaluatorService;
 
     public TemplateProcessorService(ExpressionEvaluatorService evaluatorService) {
-        LOGGER.info("Initializing TemplateProcessorService");
+        logger.info("Initializing TemplateProcessorService");
         this.evaluatorService = evaluatorService;
-        LOGGER.fine("Using evaluator service: " + evaluatorService.getClass().getSimpleName());
+        logger.debug("Using evaluator service: " + evaluatorService.getClass().getSimpleName());
     }
 
     /**
@@ -55,8 +59,8 @@ public class TemplateProcessorService {
      * @return The processed template
      */
     public String processTemplate(String template, EvaluationContext context) {
-        LOGGER.info("Processing template with " + (template != null ? template.length() : 0) + " characters");
-        LOGGER.fine("Template type: plain text");
+        logger.info("Processing template with " + (template != null ? template.length() : 0) + " characters");
+        logger.debug("Template type: plain text");
 
         StringBuilder result = new StringBuilder();
         int pos = 0;
@@ -73,22 +77,22 @@ public class TemplateProcessorService {
             int endExpr = template.indexOf("}", startExpr);
             if (endExpr == -1) {
                 // Unclosed expression, append the rest as is
-                LOGGER.warning("Unclosed expression found at position " + startExpr + ", treating as plain text");
+                logger.warn("Unclosed expression found at position " + startExpr + ", treating as plain text");
                 result.append(template.substring(startExpr));
                 break;
             }
 
             // Extract and evaluate the expression
             String expr = template.substring(startExpr + 2, endExpr);
-            LOGGER.fine("Processing expression: " + expr);
+            logger.debug("Processing expression: " + expr);
             try {
                 Expression expression = evaluatorService.getParser().parseExpression(expr);
                 Object value = expression.getValue(context);
                 result.append(value != null ? value.toString() : "");
                 expressionsProcessed++;
-                LOGGER.finest("Expression '" + expr + "' evaluated to: " + value);
+                logger.trace("Expression '" + expr + "' evaluated to: " + value);
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Error evaluating expression '" + expr + "': " + e.getMessage(), e);
+                logger.warn("Error evaluating expression '" + expr + "': " + e.getMessage(), e);
                 // Keep the original expression on error
                 result.append("#{").append(expr).append("}");
             }
@@ -96,7 +100,7 @@ public class TemplateProcessorService {
             pos = endExpr + 1;
         }
 
-        LOGGER.info("Template processing completed, " + expressionsProcessed + " expressions processed");
+        logger.info("Template processing completed, " + expressionsProcessed + " expressions processed");
         return result.toString();
     }
 
@@ -110,8 +114,8 @@ public class TemplateProcessorService {
      * @return The processed XML template
      */
     public String processXmlTemplate(String xmlTemplate, EvaluationContext context) {
-        LOGGER.info("Processing XML template with " + (xmlTemplate != null ? xmlTemplate.length() : 0) + " characters");
-        LOGGER.fine("Template type: XML");
+        logger.info("Processing XML template with " + (xmlTemplate != null ? xmlTemplate.length() : 0) + " characters");
+        logger.debug("Template type: XML");
 
         StringBuilder result = new StringBuilder();
         int pos = 0;
@@ -128,23 +132,23 @@ public class TemplateProcessorService {
             int endExpr = xmlTemplate.indexOf("}", startExpr);
             if (endExpr == -1) {
                 // Unclosed expression, append the rest as is
-                LOGGER.warning("Unclosed expression found at position " + startExpr + " in XML template, treating as plain text");
+                logger.warn("Unclosed expression found at position " + startExpr + " in XML template, treating as plain text");
                 result.append(xmlTemplate.substring(startExpr));
                 break;
             }
 
             // Extract and evaluate the expression
             String expr = xmlTemplate.substring(startExpr + 2, endExpr);
-            LOGGER.fine("Processing XML expression: " + expr);
+            logger.debug("Processing XML expression: " + expr);
             try {
                 Expression expression = evaluatorService.getParser().parseExpression(expr);
                 Object value = expression.getValue(context);
                 String escapedValue = value != null ? escapeXml(value.toString()) : "";
                 result.append(escapedValue);
                 expressionsProcessed++;
-                LOGGER.finest("XML expression '" + expr + "' evaluated to: " + value + " (escaped: " + escapedValue + ")");
+                logger.trace("XML expression '" + expr + "' evaluated to: " + value + " (escaped: " + escapedValue + ")");
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Error evaluating XML expression '" + expr + "': " + e.getMessage(), e);
+                logger.warn("Error evaluating XML expression '" + expr + "': " + e.getMessage(), e);
                 // Keep the original expression on error
                 result.append("#{").append(expr).append("}");
             }
@@ -152,7 +156,7 @@ public class TemplateProcessorService {
             pos = endExpr + 1;
         }
 
-        LOGGER.info("XML template processing completed, " + expressionsProcessed + " expressions processed");
+        logger.info("XML template processing completed, " + expressionsProcessed + " expressions processed");
         return result.toString();
     }
 
@@ -166,8 +170,8 @@ public class TemplateProcessorService {
      * @return The processed JSON template
      */
     public String processJsonTemplate(String jsonTemplate, EvaluationContext context) {
-        LOGGER.info("Processing JSON template with " + (jsonTemplate != null ? jsonTemplate.length() : 0) + " characters");
-        LOGGER.fine("Template type: JSON");
+        logger.info("Processing JSON template with " + (jsonTemplate != null ? jsonTemplate.length() : 0) + " characters");
+        logger.debug("Template type: JSON");
 
         StringBuilder result = new StringBuilder();
         int pos = 0;
@@ -184,23 +188,23 @@ public class TemplateProcessorService {
             int endExpr = jsonTemplate.indexOf("}", startExpr);
             if (endExpr == -1) {
                 // Unclosed expression, append the rest as is
-                LOGGER.warning("Unclosed expression found at position " + startExpr + " in JSON template, treating as plain text");
+                logger.warn("Unclosed expression found at position " + startExpr + " in JSON template, treating as plain text");
                 result.append(jsonTemplate.substring(startExpr));
                 break;
             }
 
             // Extract and evaluate the expression
             String expr = jsonTemplate.substring(startExpr + 2, endExpr);
-            LOGGER.fine("Processing JSON expression: " + expr);
+            logger.debug("Processing JSON expression: " + expr);
             try {
                 Expression expression = evaluatorService.getParser().parseExpression(expr);
                 Object value = expression.getValue(context);
                 String escapedValue = value != null ? escapeJson(value.toString()) : "";
                 result.append(escapedValue);
                 expressionsProcessed++;
-                LOGGER.finest("JSON expression '" + expr + "' evaluated to: " + value + " (escaped: " + escapedValue + ")");
+                logger.trace("JSON expression '" + expr + "' evaluated to: " + value + " (escaped: " + escapedValue + ")");
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Error evaluating JSON expression '" + expr + "': " + e.getMessage(), e);
+                logger.warn("Error evaluating JSON expression '" + expr + "': " + e.getMessage(), e);
                 // Keep the original expression on error
                 result.append("#{").append(expr).append("}");
             }
@@ -208,7 +212,7 @@ public class TemplateProcessorService {
             pos = endExpr + 1;
         }
 
-        LOGGER.info("JSON template processing completed, " + expressionsProcessed + " expressions processed");
+        logger.info("JSON template processing completed, " + expressionsProcessed + " expressions processed");
         return result.toString();
     }
 
@@ -219,10 +223,10 @@ public class TemplateProcessorService {
      * @return The escaped string
      */
     private String escapeXml(String str) {
-        LOGGER.finest("Escaping XML string: " + (str != null ? str.length() + " chars" : "null"));
+        logger.trace("Escaping XML string: " + (str != null ? str.length() + " chars" : "null"));
 
         if (str == null) {
-            LOGGER.finest("Input string is null, returning empty string");
+            logger.trace("Input string is null, returning empty string");
             return "";
         }
 
@@ -258,7 +262,7 @@ public class TemplateProcessorService {
         }
 
         if (specialCharsEscaped > 0) {
-            LOGGER.finest("Escaped " + specialCharsEscaped + " special XML characters");
+            logger.trace("Escaped " + specialCharsEscaped + " special XML characters");
         }
 
         return sb.toString();
@@ -271,10 +275,10 @@ public class TemplateProcessorService {
      * @return The escaped string
      */
     private String escapeJson(String str) {
-        LOGGER.finest("Escaping JSON string: " + (str != null ? str.length() + " chars" : "null"));
+        logger.trace("Escaping JSON string: " + (str != null ? str.length() + " chars" : "null"));
 
         if (str == null) {
-            LOGGER.finest("Input string is null, returning empty string");
+            logger.trace("Input string is null, returning empty string");
             return "";
         }
 
@@ -322,7 +326,7 @@ public class TemplateProcessorService {
         }
 
         if (specialCharsEscaped > 0) {
-            LOGGER.finest("Escaped " + specialCharsEscaped + " special JSON characters");
+            logger.trace("Escaped " + specialCharsEscaped + " special JSON characters");
         }
 
         return sb.toString();

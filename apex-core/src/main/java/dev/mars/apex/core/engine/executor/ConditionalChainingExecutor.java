@@ -112,7 +112,7 @@ public class ConditionalChainingExecutor extends PatternExecutor {
             return resultBuilder.successful(true).build();
             
         } catch (Exception e) {
-            logger.severe("Error executing conditional chaining: " + e.getMessage());
+            logger.error("Error executing conditional chaining: " + e.getMessage());
             return resultBuilder.errorMessage("Execution error: " + e.getMessage()).build();
         }
     }
@@ -154,42 +154,42 @@ public class ConditionalChainingExecutor extends PatternExecutor {
     @Override
     public boolean validateConfiguration(Map<String, Object> configuration) {
         if (configuration == null) {
-            logger.warning("Configuration is null");
+            logger.warn("Configuration is null");
             return false;
         }
         
         // Validate trigger-rule configuration
         if (!hasRequiredKey(configuration, "trigger-rule")) {
-            logger.warning("Missing required key: trigger-rule");
+            logger.warn("Missing required key: trigger-rule");
             return false;
         }
         
         Map<String, Object> triggerRuleConfig = getMapValue(configuration, "trigger-rule");
         if (triggerRuleConfig == null) {
-            logger.warning("trigger-rule must be a map");
+            logger.warn("trigger-rule must be a map");
             return false;
         }
         
         if (!hasRequiredKey(triggerRuleConfig, "condition")) {
-            logger.warning("trigger-rule missing required condition");
+            logger.warn("trigger-rule missing required condition");
             return false;
         }
         
         // Validate conditional-rules configuration
         if (!hasRequiredKey(configuration, "conditional-rules")) {
-            logger.warning("Missing required key: conditional-rules");
+            logger.warn("Missing required key: conditional-rules");
             return false;
         }
         
         Map<String, Object> conditionalRulesConfig = getMapValue(configuration, "conditional-rules");
         if (conditionalRulesConfig == null) {
-            logger.warning("conditional-rules must be a map");
+            logger.warn("conditional-rules must be a map");
             return false;
         }
         
         // At least one of on-trigger or on-no-trigger should be present
         if (!conditionalRulesConfig.containsKey("on-trigger") && !conditionalRulesConfig.containsKey("on-no-trigger")) {
-            logger.warning("conditional-rules must contain at least one of 'on-trigger' or 'on-no-trigger'");
+            logger.warn("conditional-rules must contain at least one of 'on-trigger' or 'on-no-trigger'");
             return false;
         }
         
@@ -197,7 +197,7 @@ public class ConditionalChainingExecutor extends PatternExecutor {
         if (conditionalRulesConfig.containsKey("on-trigger")) {
             List<Object> onTriggerRules = getListValue(conditionalRulesConfig, "on-trigger");
             if (onTriggerRules == null) {
-                logger.warning("on-trigger must be a list");
+                logger.warn("on-trigger must be a list");
                 return false;
             }
             
@@ -209,7 +209,7 @@ public class ConditionalChainingExecutor extends PatternExecutor {
         if (conditionalRulesConfig.containsKey("on-no-trigger")) {
             List<Object> onNoTriggerRules = getListValue(conditionalRulesConfig, "on-no-trigger");
             if (onNoTriggerRules == null) {
-                logger.warning("on-no-trigger must be a list");
+                logger.warn("on-no-trigger must be a list");
                 return false;
             }
             
@@ -232,7 +232,7 @@ public class ConditionalChainingExecutor extends PatternExecutor {
         for (int i = 0; i < ruleList.size(); i++) {
             Object ruleObj = ruleList.get(i);
             if (!(ruleObj instanceof Map)) {
-                logger.warning(listName + " rule at index " + i + " must be a map");
+                logger.warn(listName + " rule at index " + i + " must be a map");
                 return false;
             }
             
@@ -240,7 +240,7 @@ public class ConditionalChainingExecutor extends PatternExecutor {
             Map<String, Object> ruleConfig = (Map<String, Object>) ruleObj;
             
             if (!hasRequiredKey(ruleConfig, "condition")) {
-                logger.warning(listName + " rule at index " + i + " missing required condition");
+                logger.warn(listName + " rule at index " + i + " missing required condition");
                 return false;
             }
         }

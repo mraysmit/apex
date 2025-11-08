@@ -1,7 +1,10 @@
 package dev.mars.apex.core.config.yaml;
 
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Wrapper for YamlRuleConfiguration that preserves the natural order of YAML sections
@@ -21,7 +24,7 @@ import java.util.logging.Logger;
  */
 public class OrderedYamlConfiguration {
     
-    private static final Logger LOGGER = Logger.getLogger(OrderedYamlConfiguration.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(OrderedYamlConfiguration.class);
     
     private final YamlRuleConfiguration configuration;
     private final List<String> sectionOrder;
@@ -53,7 +56,7 @@ public class OrderedYamlConfiguration {
         this.sectionPositions = createPositionMap(sectionOrder);
         this.itemOrder = new ArrayList<>(itemOrder);
 
-        LOGGER.fine("Created OrderedYamlConfiguration with " + sectionOrder.size() + " sections and " + itemOrder.size() + " items");
+        logger.debug("Created OrderedYamlConfiguration with " + sectionOrder.size() + " sections and " + itemOrder.size() + " items");
     }
     
     /**
@@ -170,7 +173,7 @@ public class OrderedYamlConfiguration {
             case "error-recovery":
                 return configuration.getErrorRecovery() != null;
             default:
-                LOGGER.warning("Unknown section for population check: " + sectionName);
+                logger.warn("Unknown section for population check: " + sectionName);
                 return false;
         }
     }

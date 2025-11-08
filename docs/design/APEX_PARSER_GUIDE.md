@@ -819,7 +819,7 @@ class CoverageAnalyzer {
 
 ##### **Categorical Semantics of APEX**
 
-The APEX language can be understood through **category theory**, providing a mathematical foundation for composition and transformation:
+The APEX language can be understood through **category theory**, providing a mathematical foundation for composition and expression:
 
 ```haskell
 -- Category of APEX Documents

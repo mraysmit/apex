@@ -108,7 +108,7 @@ public class AccumulativeChainingExecutor extends PatternExecutor {
             return resultBuilder.successful(true).build();
 
         } catch (Exception e) {
-            logger.severe("Error executing accumulative chaining: " + e.getMessage());
+            logger.error("Error executing accumulative chaining: " + e.getMessage());
             return resultBuilder.errorMessage("Execution error: " + e.getMessage()).build();
         }
     }
@@ -128,7 +128,7 @@ public class AccumulativeChainingExecutor extends PatternExecutor {
                                           double currentScore) {
         List<Object> accumulationRules = getListValue(configuration, "accumulation-rules");
         if (accumulationRules == null || accumulationRules.isEmpty()) {
-            logger.warning("No accumulation rules configured");
+            logger.warn("No accumulation rules configured");
             return currentScore;
         }
 
@@ -148,7 +148,7 @@ public class AccumulativeChainingExecutor extends PatternExecutor {
         for (int i = 0; i < selectedRules.size(); i++) {
             Object ruleObj = selectedRules.get(i);
             if (!(ruleObj instanceof Map)) {
-                logger.warning("Selected rule at index " + i + " is not a map, skipping");
+                logger.warn("Selected rule at index " + i + " is not a map, skipping");
                 continue;
             }
 
@@ -337,7 +337,7 @@ public class AccumulativeChainingExecutor extends PatternExecutor {
             // Evaluate the threshold expression using the current context
             Double dynamicThreshold = evaluateExpression(thresholdExpression, context, Double.class);
             if (dynamicThreshold == null) {
-                logger.warning("Dynamic threshold expression returned null, using default 0.5");
+                logger.warn("Dynamic threshold expression returned null, using default 0.5");
                 dynamicThreshold = 0.5;
             }
 
@@ -364,7 +364,7 @@ public class AccumulativeChainingExecutor extends PatternExecutor {
             return selectedRules;
 
         } catch (Exception e) {
-            logger.severe("Error evaluating dynamic threshold expression '" + thresholdExpression + "': " + e.getMessage());
+            logger.error("Error evaluating dynamic threshold expression '" + thresholdExpression + "': " + e.getMessage());
             logger.info("Falling back to executing all rules");
             return new ArrayList<>(allRules);
         }
@@ -413,7 +413,7 @@ public class AccumulativeChainingExecutor extends PatternExecutor {
                 try {
                     componentScore = Double.parseDouble(componentResult.toString());
                 } catch (NumberFormatException e) {
-                    logger.warning("Could not parse component result as number: " + componentResult + ", using 0");
+                    logger.warn("Could not parse component result as number: " + componentResult + ", using 0");
                     componentScore = 0.0;
                 }
             }
@@ -444,7 +444,7 @@ public class AccumulativeChainingExecutor extends PatternExecutor {
             return newScore;
 
         } catch (Exception e) {
-            logger.severe("Error executing accumulation rule " + ruleIndex + ": " + e.getMessage());
+            logger.error("Error executing accumulation rule " + ruleIndex + ": " + e.getMessage());
             return currentScore; // Return unchanged score on error
         }
     }
@@ -487,7 +487,7 @@ public class AccumulativeChainingExecutor extends PatternExecutor {
             return finalDecision;
 
         } catch (Exception e) {
-            logger.severe("Error executing final decision rule: " + e.getMessage());
+            logger.error("Error executing final decision rule: " + e.getMessage());
             return SeverityConstants.ERROR;
         }
     }
@@ -495,14 +495,14 @@ public class AccumulativeChainingExecutor extends PatternExecutor {
     @Override
     public boolean validateConfiguration(Map<String, Object> configuration) {
         if (configuration == null) {
-            logger.warning("Configuration is null");
+            logger.warn("Configuration is null");
             return false;
         }
 
         // Validate accumulator-variable (optional, has default)
         String accumulatorVariable = getStringValue(configuration, "accumulator-variable", "totalScore");
         if (accumulatorVariable.trim().isEmpty()) {
-            logger.warning("accumulator-variable cannot be empty");
+            logger.warn("accumulator-variable cannot be empty");
             return false;
         }
 
@@ -510,25 +510,25 @@ public class AccumulativeChainingExecutor extends PatternExecutor {
         if (configuration.containsKey("initial-value")) {
             Object initialValue = configuration.get("initial-value");
             if (!(initialValue instanceof Number)) {
-                logger.warning("initial-value must be a number");
+                logger.warn("initial-value must be a number");
                 return false;
             }
         }
 
         // Validate accumulation-rules (required)
         if (!hasRequiredKey(configuration, "accumulation-rules")) {
-            logger.warning("Missing required key: accumulation-rules");
+            logger.warn("Missing required key: accumulation-rules");
             return false;
         }
 
         List<Object> accumulationRules = getListValue(configuration, "accumulation-rules");
         if (accumulationRules == null) {
-            logger.warning("accumulation-rules must be a list");
+            logger.warn("accumulation-rules must be a list");
             return false;
         }
 
         if (accumulationRules.isEmpty()) {
-            logger.warning("accumulation-rules list cannot be empty");
+            logger.warn("accumulation-rules list cannot be empty");
             return false;
         }
 
@@ -536,7 +536,7 @@ public class AccumulativeChainingExecutor extends PatternExecutor {
         for (int i = 0; i < accumulationRules.size(); i++) {
             Object ruleObj = accumulationRules.get(i);
             if (!(ruleObj instanceof Map)) {
-                logger.warning("Accumulation rule at index " + i + " must be a map");
+                logger.warn("Accumulation rule at index " + i + " must be a map");
                 return false;
             }
 
@@ -552,12 +552,12 @@ public class AccumulativeChainingExecutor extends PatternExecutor {
         if (configuration.containsKey("final-decision-rule")) {
             Map<String, Object> finalDecisionConfig = getMapValue(configuration, "final-decision-rule");
             if (finalDecisionConfig == null) {
-                logger.warning("final-decision-rule must be a map");
+                logger.warn("final-decision-rule must be a map");
                 return false;
             }
 
             if (!hasRequiredKey(finalDecisionConfig, "condition")) {
-                logger.warning("final-decision-rule missing required condition");
+                logger.warn("final-decision-rule missing required condition");
                 return false;
             }
         }
@@ -582,7 +582,7 @@ public class AccumulativeChainingExecutor extends PatternExecutor {
     private boolean validateAccumulationRuleConfiguration(Map<String, Object> ruleConfig, int ruleIndex) {
         // Validate required condition
         if (!hasRequiredKey(ruleConfig, "condition")) {
-            logger.warning("Accumulation rule at index " + ruleIndex + " missing required condition");
+            logger.warn("Accumulation rule at index " + ruleIndex + " missing required condition");
             return false;
         }
 
@@ -590,7 +590,7 @@ public class AccumulativeChainingExecutor extends PatternExecutor {
         if (ruleConfig.containsKey("weight")) {
             Object weight = ruleConfig.get("weight");
             if (!(weight instanceof Number)) {
-                logger.warning("Accumulation rule at index " + ruleIndex + " weight must be a number");
+                logger.warn("Accumulation rule at index " + ruleIndex + " weight must be a number");
                 return false;
             }
         }
@@ -599,7 +599,7 @@ public class AccumulativeChainingExecutor extends PatternExecutor {
         if (ruleConfig.containsKey("priority")) {
             String priority = getStringValue(ruleConfig, "priority", "LOW");
             if (!priority.matches("(?i)(HIGH|MEDIUM|LOW)")) {
-                logger.warning("Accumulation rule at index " + ruleIndex + " priority must be HIGH, MEDIUM, or LOW");
+                logger.warn("Accumulation rule at index " + ruleIndex + " priority must be HIGH, MEDIUM, or LOW");
                 return false;
             }
         }
@@ -613,7 +613,7 @@ public class AccumulativeChainingExecutor extends PatternExecutor {
     private boolean validateRuleSelectionConfiguration(Map<String, Object> configuration) {
         Map<String, Object> ruleSelection = getMapValue(configuration, "rule-selection");
         if (ruleSelection == null) {
-            logger.warning("rule-selection must be a map");
+            logger.warn("rule-selection must be a map");
             return false;
         }
 
@@ -621,12 +621,12 @@ public class AccumulativeChainingExecutor extends PatternExecutor {
         switch (strategy.toLowerCase()) {
             case "weight-threshold":
                 if (!ruleSelection.containsKey("weight-threshold")) {
-                    logger.warning("weight-threshold strategy requires 'weight-threshold' parameter");
+                    logger.warn("weight-threshold strategy requires 'weight-threshold' parameter");
                     return false;
                 }
                 Object threshold = ruleSelection.get("weight-threshold");
                 if (!(threshold instanceof Number)) {
-                    logger.warning("weight-threshold must be a number");
+                    logger.warn("weight-threshold must be a number");
                     return false;
                 }
                 break;
@@ -635,7 +635,7 @@ public class AccumulativeChainingExecutor extends PatternExecutor {
                 if (ruleSelection.containsKey("max-rules")) {
                     Object maxRules = ruleSelection.get("max-rules");
                     if (!(maxRules instanceof Number) || ((Number) maxRules).intValue() <= 0) {
-                        logger.warning("max-rules must be a positive integer");
+                        logger.warn("max-rules must be a positive integer");
                         return false;
                     }
                 }
@@ -645,7 +645,7 @@ public class AccumulativeChainingExecutor extends PatternExecutor {
                 if (ruleSelection.containsKey("min-priority")) {
                     String minPriority = getStringValue(ruleSelection, "min-priority", "LOW");
                     if (!minPriority.matches("(?i)(HIGH|MEDIUM|LOW)")) {
-                        logger.warning("min-priority must be HIGH, MEDIUM, or LOW");
+                        logger.warn("min-priority must be HIGH, MEDIUM, or LOW");
                         return false;
                     }
                 }
@@ -653,7 +653,7 @@ public class AccumulativeChainingExecutor extends PatternExecutor {
 
             case "dynamic-threshold":
                 if (!hasRequiredKey(ruleSelection, "threshold-expression")) {
-                    logger.warning("dynamic-threshold strategy requires 'threshold-expression' parameter");
+                    logger.warn("dynamic-threshold strategy requires 'threshold-expression' parameter");
                     return false;
                 }
                 break;
@@ -663,7 +663,7 @@ public class AccumulativeChainingExecutor extends PatternExecutor {
                 break;
 
             default:
-                logger.warning("Unknown rule selection strategy: " + strategy);
+                logger.warn("Unknown rule selection strategy: " + strategy);
                 return false;
         }
 

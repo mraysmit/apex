@@ -9,6 +9,8 @@ import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.engine.model.metadata.RuleMetadata;
 import dev.mars.apex.core.service.enrichment.EnrichmentGroupFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -21,7 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.stream.Collectors;
 
 /*
@@ -55,12 +58,13 @@ import java.util.stream.Collectors;
  */
 public class YamlRuleFactory {
     
-    private static final Logger LOGGER = Logger.getLogger(YamlRuleFactory.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(YamlRuleFactory.class);
 
-    private final Map<String, Category> categoryCache = new HashMap<>();
+    // Thread-safe caches for concurrent access
+    private final Map<String, Category> categoryCache = new java.util.concurrent.ConcurrentHashMap<>();
 
-    // Cache for YAML categories to enable metadata inheritance
-    private final Map<String, YamlCategory> yamlCategoryCache = new HashMap<>();
+    // Cache for YAML categories to enable metadata inheritance (thread-safe)
+    private final Map<String, YamlCategory> yamlCategoryCache = new java.util.concurrent.ConcurrentHashMap<>();
     
     /**
      * Create a RulesEngineConfiguration from YAML configuration using the new generic architecture.
@@ -70,7 +74,7 @@ public class YamlRuleFactory {
      * @return A configured RulesEngineConfiguration
      */
     public RulesEngineConfiguration createRulesEngineConfiguration(YamlRuleConfiguration yamlConfig) throws YamlConfigurationException {
-        LOGGER.info("Creating RulesEngineConfiguration from YAML configuration using generic architecture");
+        logger.info("Creating RulesEngineConfiguration from YAML configuration using generic architecture");
 
         RulesEngineConfiguration config = new RulesEngineConfiguration();
 
@@ -82,7 +86,7 @@ public class YamlRuleFactory {
                     categoryCache.put(category.getName(), category);
                     // Also cache the YAML category for metadata inheritance
                     yamlCategoryCache.put(yamlCategory.getName(), yamlCategory);
-                    LOGGER.fine("Cached category '" + yamlCategory.getName() +
+                    logger.debug("Cached category '" + yamlCategory.getName() +
                                "' with businessOwner: " + yamlCategory.getBusinessOwner() +
                                ", businessDomain: " + yamlCategory.getBusinessDomain());
                 }
@@ -108,16 +112,16 @@ public class YamlRuleFactory {
                             Rule rule = createRuleWithMetadata(yamlRule);
                             config.registerRule(rule);
                         } catch (Exception ruleException) {
-                            LOGGER.warning("Failed to create rule '" + yamlRule.getId() +
+                            logger.warn("Failed to create rule '" + yamlRule.getId() +
                                           "': " + ruleException.getMessage());
                         }
                     }
 
-                    LOGGER.info("Created " + categoryRules.size() + " rules for category '" + categoryName +
+                    logger.info("Created " + categoryRules.size() + " rules for category '" + categoryName +
                                "' using enhanced metadata support");
 
                 } catch (Exception e) {
-                    LOGGER.warning("Failed to create rules for category '" + categoryName +
+                    logger.warn("Failed to create rules for category '" + categoryName +
                                   "': " + e.getMessage());
                 }
             }
@@ -125,49 +129,49 @@ public class YamlRuleFactory {
 
         // Process rule groups using two-phase approach (like enrichment groups)
         if (yamlConfig.getRuleGroups() != null) {
-            LOGGER.info("Processing " + yamlConfig.getRuleGroups().size() + " rule groups using two-phase approach");
+            logger.info("Processing " + yamlConfig.getRuleGroups().size() + " rule groups using two-phase approach");
 
             // Phase 1: Create all rule groups and register them (no cross-references yet)
             Map<String, RuleGroup> ruleGroupsById = new HashMap<>();
             for (YamlRuleGroup yamlGroup : yamlConfig.getRuleGroups()) {
-                LOGGER.info("Phase 1 - Creating rule group: " + yamlGroup.getId() + ", enabled: " + yamlGroup.getEnabled());
+                logger.info("Phase 1 - Creating rule group: " + yamlGroup.getId() + ", enabled: " + yamlGroup.getEnabled());
                 if (yamlGroup.getEnabled() == null || yamlGroup.getEnabled()) {
                     try {
-                        LOGGER.info("Creating rule group: " + yamlGroup.getId());
+                        logger.info("Creating rule group: " + yamlGroup.getId());
                         RuleGroup group = createRuleGroupWithoutReferences(yamlGroup, config);
                         config.registerRuleGroup(group);
                         ruleGroupsById.put(group.getId(), group);
-                        LOGGER.info("Successfully registered rule group: " + yamlGroup.getId());
+                        logger.info("Successfully registered rule group: " + yamlGroup.getId());
                     } catch (YamlConfigurationException e) {
                         // Re-throw configuration exceptions to fail fast
-                        LOGGER.severe("YamlConfigurationException for rule group " + yamlGroup.getId() + ": " + e.getMessage());
+                        logger.error("YamlConfigurationException for rule group " + yamlGroup.getId() + ": " + e.getMessage());
                         throw e;
                     } catch (Exception e) {
-                        LOGGER.warning("Failed to create rule group '" + yamlGroup.getId() +
+                        logger.warn("Failed to create rule group '" + yamlGroup.getId() +
                                       "': " + e.getMessage());
                     }
                 } else {
-                    LOGGER.info("Skipping disabled rule group: " + yamlGroup.getId());
+                    logger.info("Skipping disabled rule group: " + yamlGroup.getId());
                 }
             }
 
             // Phase 2: Process rule group references now that all rule groups are created and registered
-            LOGGER.info("Phase 2 - Processing rule group references with global registry");
+            logger.info("Phase 2 - Processing rule group references with global registry");
             processRuleGroupReferencesWithGlobalRegistry(yamlConfig, config, ruleGroupsById);
         }
 
         // Phase 3: Create and register enrichment groups
         if (yamlConfig.getEnrichmentGroups() != null && !yamlConfig.getEnrichmentGroups().isEmpty()) {
-            LOGGER.info("Creating enrichment groups from YAML configuration");
+            logger.info("Creating enrichment groups from YAML configuration");
             List<EnrichmentGroup> enrichmentGroups = EnrichmentGroupFactory.buildEnrichmentGroups(yamlConfig);
 
             for (EnrichmentGroup group : enrichmentGroups) {
                 config.registerEnrichmentGroup(group);
-                LOGGER.info("Registered enrichment group: " + group.getId());
+                logger.info("Registered enrichment group: " + group.getId());
             }
         }
 
-        LOGGER.info("Successfully created RulesEngineConfiguration with " +
+        logger.info("Successfully created RulesEngineConfiguration with " +
                    config.getAllRules().size() + " rules, " +
                    config.getAllRuleGroups().size() + " rule groups, and " +
                    config.getAllEnrichmentGroups().size() + " enrichment groups");
@@ -188,7 +192,7 @@ public class YamlRuleFactory {
      */
     @SuppressWarnings("unused") // Public API method for advanced users
     public RuleSet.GenericRuleSet createGenericRuleSet(String categoryName, List<YamlRule> yamlRules) {
-        LOGGER.fine("Creating GenericRuleSet for category: " + categoryName + " with " + yamlRules.size() + " rules");
+        logger.debug("Creating GenericRuleSet for category: " + categoryName + " with " + yamlRules.size() + " rules");
 
         // Validate category name using the same validation as the generic API
         if (categoryName == null || categoryName.trim().isEmpty()) {
@@ -220,7 +224,7 @@ public class YamlRuleFactory {
                 try {
                     ruleSet.withEffectiveDate(parseDate(firstRule.getEffectiveDate()));
                 } catch (DateTimeParseException e) {
-                    LOGGER.warning("Invalid effective date format for rule " + firstRule.getId() +
+                    logger.warn("Invalid effective date format for rule " + firstRule.getId() +
                                   ": " + firstRule.getEffectiveDate());
                 }
             }
@@ -228,7 +232,7 @@ public class YamlRuleFactory {
                 try {
                     ruleSet.withExpirationDate(parseDate(firstRule.getExpirationDate()));
                 } catch (DateTimeParseException e) {
-                    LOGGER.warning("Invalid expiration date format for rule " + firstRule.getId() +
+                    logger.warn("Invalid expiration date format for rule " + firstRule.getId() +
                                   ": " + firstRule.getExpirationDate());
                 }
             }
@@ -247,10 +251,10 @@ public class YamlRuleFactory {
 
                 ruleSet.customRuleWithSeverity(name, condition, message, description, severity);
 
-                LOGGER.fine("Added rule '" + name + "' with severity '" + severity + "' to GenericRuleSet for category: " + categoryName);
+                logger.debug("Added rule '" + name + "' with severity '" + severity + "' to GenericRuleSet for category: " + categoryName);
 
             } catch (Exception e) {
-                LOGGER.warning("Failed to add rule '" + yamlRule.getName() +
+                logger.warn("Failed to add rule '" + yamlRule.getName() +
                               "' to GenericRuleSet: " + e.getMessage());
                 throw new RuntimeException("Failed to create rule '" + yamlRule.getName() +
                                          "' in category '" + categoryName + "'", e);
@@ -278,7 +282,7 @@ public class YamlRuleFactory {
 
                 // Replace the rule in the list (this is a limitation of the current design)
                 // For now, we'll need to rebuild the rule set with updated rules
-                LOGGER.fine("Applied custom properties to rule '" + yamlRule.getName() + "'");
+                logger.debug("Applied custom properties to rule '" + yamlRule.getName() + "'");
             }
         }
 
@@ -295,7 +299,7 @@ public class YamlRuleFactory {
         String name = yamlCategory.getName();
         int priority = yamlCategory.getPriority() != null ? yamlCategory.getPriority() : 100;
 
-        LOGGER.fine("Creating category: " + name + " with priority: " + priority);
+        logger.debug("Creating category: " + name + " with priority: " + priority);
 
         return new Category(name, priority);
     }
@@ -309,7 +313,7 @@ public class YamlRuleFactory {
      * @return A Rule object with full metadata
      */
     public Rule createRuleWithMetadata(YamlRule yamlRule) {
-        LOGGER.fine("Creating rule with metadata: " + yamlRule.getId() + " (" + yamlRule.getName() + ")");
+        logger.debug("Creating rule with metadata: " + yamlRule.getId() + " (" + yamlRule.getName() + ")");
 
         // Determine category
         String categoryName = yamlRule.getCategory() != null ? yamlRule.getCategory() : "default";
@@ -320,11 +324,11 @@ public class YamlRuleFactory {
         if (category != null) {
             // Find the corresponding YamlCategory for metadata inheritance
             yamlCategory = findYamlCategoryByName(categoryName);
-            LOGGER.fine("Found category '" + categoryName + "' for rule '" + yamlRule.getId() +
+            logger.debug("Found category '" + categoryName + "' for rule '" + yamlRule.getId() +
                        "'. YamlCategory found: " + (yamlCategory != null) +
                        (yamlCategory != null ? ", businessOwner: " + yamlCategory.getBusinessOwner() : ""));
         } else {
-            LOGGER.fine("No category found for '" + categoryName + "' in cache. Available categories: " +
+            logger.debug("No category found for '" + categoryName + "' in cache. Available categories: " +
                        categoryCache.keySet());
         }
 
@@ -366,7 +370,7 @@ public class YamlRuleFactory {
             try {
                 tempRuleSet.withEffectiveDate(parseDate(yamlRule.getEffectiveDate()));
             } catch (DateTimeParseException e) {
-                LOGGER.warning("Invalid effective date format for rule " + yamlRule.getId() +
+                logger.warn("Invalid effective date format for rule " + yamlRule.getId() +
                               ": " + yamlRule.getEffectiveDate());
             }
         }
@@ -374,7 +378,7 @@ public class YamlRuleFactory {
             try {
                 tempRuleSet.withExpirationDate(parseDate(yamlRule.getExpirationDate()));
             } catch (DateTimeParseException e) {
-                LOGGER.warning("Invalid expiration date format for rule " + yamlRule.getId() +
+                logger.warn("Invalid expiration date format for rule " + yamlRule.getId() +
                               ": " + yamlRule.getExpirationDate());
             }
         }
@@ -415,7 +419,7 @@ public class YamlRuleFactory {
             try {
                 initialMetadataBuilder.effectiveDate(parseDate(effectiveDate));
             } catch (Exception e) {
-                LOGGER.warning("Invalid effective date format for rule " + yamlRule.getId() + ": " + effectiveDate);
+                logger.warn("Invalid effective date format for rule " + yamlRule.getId() + ": " + effectiveDate);
             }
         }
 
@@ -428,7 +432,7 @@ public class YamlRuleFactory {
             try {
                 initialMetadataBuilder.expirationDate(parseDate(expirationDate));
             } catch (Exception e) {
-                LOGGER.warning("Invalid expiration date format for rule " + yamlRule.getId() + ": " + expirationDate);
+                logger.warn("Invalid expiration date format for rule " + yamlRule.getId() + ": " + expirationDate);
             }
         }
 
@@ -478,13 +482,13 @@ public class YamlRuleFactory {
      */
     @Deprecated
     public Rule createRule(YamlRule yamlRule) {
-        LOGGER.fine("Creating rule (legacy): " + yamlRule.getId() + " (" + yamlRule.getName() + ")");
+        logger.debug("Creating rule (legacy): " + yamlRule.getId() + " (" + yamlRule.getName() + ")");
 
         // For backward compatibility, try to use the new method first
         try {
             return createRuleWithMetadata(yamlRule);
         } catch (Exception e) {
-            LOGGER.warning("Failed to create rule with metadata, falling back to legacy creation: " + e.getMessage());
+            logger.warn("Failed to create rule with metadata, falling back to legacy creation: " + e.getMessage());
 
             // Fallback to legacy creation
             String id = yamlRule.getId();
@@ -530,7 +534,7 @@ public class YamlRuleFactory {
         boolean parallelExecution = yamlGroup.getParallelExecution() != null ? yamlGroup.getParallelExecution() : false;
         boolean debugMode = yamlGroup.getDebugMode() != null ? yamlGroup.getDebugMode() : Boolean.parseBoolean(System.getProperty("apex.rulegroup.debug", "false"));
 
-        LOGGER.fine("Creating rule group: " + id + " (" + name + ") with stopOnFirstFailure=" + stopOnFirstFailure +
+        logger.debug("Creating rule group: " + id + " (" + name + ") with stopOnFirstFailure=" + stopOnFirstFailure +
                    ", parallelExecution=" + parallelExecution + ", debugMode=" + debugMode);
 
         // Determine category
@@ -539,7 +543,7 @@ public class YamlRuleFactory {
 
         // Look up category metadata from cache for inheritance
         YamlCategory yamlCategory = findYamlCategoryByName(categoryName);
-        LOGGER.fine("Found category '" + categoryName + "' for rule group '" + yamlGroup.getId() +
+        logger.debug("Found category '" + categoryName + "' for rule group '" + yamlGroup.getId() +
                    "'. YamlCategory found: " + (yamlCategory != null) +
                    (yamlCategory != null ? ", businessOwner: " + yamlCategory.getBusinessOwner() : ""));
 
@@ -550,7 +554,7 @@ public class YamlRuleFactory {
             if ("OR".equals(operator)) {
                 isAndOperator = false;
             } else if (!"AND".equals(operator)) {
-                LOGGER.warning("Invalid operator '" + yamlGroup.getOperator() + "' for rule group '" + id + "'. Using AND as default.");
+                logger.warn("Invalid operator '" + yamlGroup.getOperator() + "' for rule group '" + id + "'. Using AND as default.");
             }
         }
 
@@ -601,15 +605,15 @@ public class YamlRuleFactory {
             group.setExpirationDate(expirationDate);
         }
 
-        LOGGER.fine("Applied metadata inheritance to rule group '" + id + "': " +
+        logger.debug("Applied metadata inheritance to rule group '" + id + "': " +
                    "createdBy=" + group.getCreatedBy() + ", " +
                    "businessDomain=" + group.getBusinessDomain() + ", " +
                    "businessOwner=" + group.getBusinessOwner());
 
         // Add rules to the group (but NOT rule-group-references - that's Phase 2)
-        LOGGER.info("About to add rules to group: " + yamlGroup.getId());
+        logger.info("About to add rules to group: " + yamlGroup.getId());
         addRulesToGroupWithoutGroupReferences(yamlGroup, group, config);
-        LOGGER.info("Finished adding rules to group: " + yamlGroup.getId());
+        logger.info("Finished adding rules to group: " + yamlGroup.getId());
 
         return group;
     }
@@ -634,7 +638,7 @@ public class YamlRuleFactory {
         boolean debugMode = yamlGroup.getDebugMode() != null ? yamlGroup.getDebugMode() :
                            Boolean.parseBoolean(System.getProperty("apex.rulegroup.debug", "false"));
 
-        LOGGER.fine("Creating rule group: " + id + " (" + name + ") with stopOnFirstFailure=" + stopOnFirstFailure +
+        logger.debug("Creating rule group: " + id + " (" + name + ") with stopOnFirstFailure=" + stopOnFirstFailure +
                    ", parallelExecution=" + parallelExecution + ", debugMode=" + debugMode);
 
         // Determine category
@@ -643,7 +647,7 @@ public class YamlRuleFactory {
 
         // Look up category metadata from cache for inheritance
         YamlCategory yamlCategory = findYamlCategoryByName(categoryName);
-        LOGGER.fine("Found category '" + categoryName + "' for rule group '" + yamlGroup.getId() +
+        logger.debug("Found category '" + categoryName + "' for rule group '" + yamlGroup.getId() +
                    "'. YamlCategory found: " + (yamlCategory != null) +
                    (yamlCategory != null ? ", businessOwner: " + yamlCategory.getBusinessOwner() : ""));
 
@@ -654,7 +658,7 @@ public class YamlRuleFactory {
             if ("OR".equals(operator)) {
                 isAndOperator = false;
             } else if (!"AND".equals(operator)) {
-                LOGGER.warning("Invalid operator '" + yamlGroup.getOperator() + "' for rule group '" + id + "'. Using AND as default.");
+                logger.warn("Invalid operator '" + yamlGroup.getOperator() + "' for rule group '" + id + "'. Using AND as default.");
             }
         }
 
@@ -708,15 +712,15 @@ public class YamlRuleFactory {
             group.setExpirationDate(expirationDate);
         }
 
-        LOGGER.fine("Applied metadata inheritance to rule group '" + id + "': " +
+        logger.debug("Applied metadata inheritance to rule group '" + id + "': " +
                    "createdBy=" + group.getCreatedBy() + ", " +
                    "businessDomain=" + group.getBusinessDomain() + ", " +
                    "businessOwner=" + group.getBusinessOwner());
 
         // Add rules to the group
-        LOGGER.info("About to add rules to group: " + yamlGroup.getId());
+        logger.info("About to add rules to group: " + yamlGroup.getId());
         addRulesToGroup(yamlGroup, group, config);
-        LOGGER.info("Finished adding rules to group: " + yamlGroup.getId());
+        logger.info("Finished adding rules to group: " + yamlGroup.getId());
 
         return group;
     }
@@ -728,25 +732,25 @@ public class YamlRuleFactory {
     private void addRulesToGroupWithoutGroupReferences(YamlRuleGroup yamlGroup, RuleGroup group, RulesEngineConfiguration config) throws YamlConfigurationException {
         // Add rules by ID (simple list)
         if (yamlGroup.getRuleIds() != null) {
-            LOGGER.info("Processing " + yamlGroup.getRuleIds().size() + " rule IDs for group: " + yamlGroup.getId());
+            logger.info("Processing " + yamlGroup.getRuleIds().size() + " rule IDs for group: " + yamlGroup.getId());
             int sequence = 1;
             for (String ruleId : yamlGroup.getRuleIds()) {
-                LOGGER.info("Processing rule ID: " + ruleId);
+                logger.info("Processing rule ID: " + ruleId);
                 Rule rule = config.getRuleById(ruleId);
                 if (rule != null) {
                     group.addRule(rule, sequence++);
-                    LOGGER.fine("Added rule " + ruleId + " to group " + group.getId() + " with sequence " + sequence);
+                    logger.debug("Added rule " + ruleId + " to group " + group.getId() + " with sequence " + sequence);
                 } else {
-                    LOGGER.warning("Rule not found for ID: " + ruleId + " in group: " + group.getId());
+                    logger.warn("Rule not found for ID: " + ruleId + " in group: " + group.getId());
                 }
             }
         }
 
         // Add rules by reference (with more detailed configuration)
         if (yamlGroup.getRuleReferences() != null) {
-            LOGGER.info("Processing " + yamlGroup.getRuleReferences().size() + " rule references for group: " + yamlGroup.getId());
+            logger.info("Processing " + yamlGroup.getRuleReferences().size() + " rule references for group: " + yamlGroup.getId());
             for (YamlRuleGroup.RuleReference ref : yamlGroup.getRuleReferences()) {
-                LOGGER.info("Processing rule reference: " + ref.getRuleId() + ", enabled: " + ref.getEnabled() + ", override-priority: " + ref.getOverridePriority());
+                logger.info("Processing rule reference: " + ref.getRuleId() + ", enabled: " + ref.getEnabled() + ", override-priority: " + ref.getOverridePriority());
                 if (ref.getEnabled() == null || ref.getEnabled()) {
                     Rule originalRule = config.getRuleById(ref.getRuleId());
                     if (originalRule != null) {
@@ -757,22 +761,22 @@ public class YamlRuleFactory {
                         if (ref.getOverridePriority() != null) {
                             validatePriorityOverride(ref.getOverridePriority(), ref.getRuleId());
                             ruleToAdd = createRuleWithOverriddenPriority(originalRule, ref.getOverridePriority(), yamlGroup.getId());
-                            LOGGER.fine("Applied priority override " + ref.getOverridePriority() + " to rule " + ref.getRuleId() + " in group " + yamlGroup.getId());
+                            logger.debug("Applied priority override " + ref.getOverridePriority() + " to rule " + ref.getRuleId() + " in group " + yamlGroup.getId());
                         }
 
                         group.addRule(ruleToAdd, sequence);
-                        LOGGER.fine("Added rule " + ref.getRuleId() + " to group " + group.getId() + " with sequence " + sequence);
+                        logger.debug("Added rule " + ref.getRuleId() + " to group " + group.getId() + " with sequence " + sequence);
                     } else {
-                        LOGGER.warning("Rule not found for ID: " + ref.getRuleId() + " in group: " + group.getId());
+                        logger.warn("Rule not found for ID: " + ref.getRuleId() + " in group: " + group.getId());
                     }
                 } else {
-                    LOGGER.info("Skipping disabled rule: " + ref.getRuleId());
+                    logger.info("Skipping disabled rule: " + ref.getRuleId());
                 }
             }
         }
 
         // Note: Rule group references are NOT processed here - that's Phase 2
-        LOGGER.info("Phase 1 complete for group: " + yamlGroup.getId() + " (rule-group-references will be processed in Phase 2)");
+        logger.info("Phase 1 complete for group: " + yamlGroup.getId() + " (rule-group-references will be processed in Phase 2)");
     }
 
     /**
@@ -787,16 +791,16 @@ public class YamlRuleFactory {
                 Rule rule = config.getRuleByIdWithLogging(ruleId);
                 if (rule != null) {
                     group.addRule(rule, sequence++);
-                    LOGGER.fine("Added rule " + ruleId + " to group " + group.getId());
+                    logger.debug("Added rule " + ruleId + " to group " + group.getId());
                 }
             }
         }
         
         // Add rules by reference (with more detailed configuration)
         if (yamlGroup.getRuleReferences() != null) {
-            LOGGER.info("Processing " + yamlGroup.getRuleReferences().size() + " rule references for group: " + yamlGroup.getId());
+            logger.info("Processing " + yamlGroup.getRuleReferences().size() + " rule references for group: " + yamlGroup.getId());
             for (YamlRuleGroup.RuleReference ref : yamlGroup.getRuleReferences()) {
-                LOGGER.info("Processing rule reference: " + ref.getRuleId() + ", enabled: " + ref.getEnabled() + ", override-priority: " + ref.getOverridePriority());
+                logger.info("Processing rule reference: " + ref.getRuleId() + ", enabled: " + ref.getEnabled() + ", override-priority: " + ref.getOverridePriority());
                 if (ref.getEnabled() == null || ref.getEnabled()) {
                     Rule originalRule = config.getRuleById(ref.getRuleId());
                     if (originalRule != null) {
@@ -807,16 +811,16 @@ public class YamlRuleFactory {
                         if (ref.getOverridePriority() != null) {
                             validatePriorityOverride(ref.getOverridePriority(), ref.getRuleId());
                             ruleToAdd = createRuleWithOverriddenPriority(originalRule, ref.getOverridePriority(), yamlGroup.getId());
-                            LOGGER.fine("Applied priority override " + ref.getOverridePriority() + " to rule " + ref.getRuleId() + " in group " + yamlGroup.getId());
+                            logger.debug("Applied priority override " + ref.getOverridePriority() + " to rule " + ref.getRuleId() + " in group " + yamlGroup.getId());
                         }
 
                         group.addRule(ruleToAdd, sequence);
-                        LOGGER.fine("Added rule " + ref.getRuleId() + " to group " + group.getId() + " with sequence " + sequence);
+                        logger.debug("Added rule " + ref.getRuleId() + " to group " + group.getId() + " with sequence " + sequence);
                     } else {
-                        LOGGER.warning("Rule not found for ID: " + ref.getRuleId() + " in group: " + group.getId());
+                        logger.warn("Rule not found for ID: " + ref.getRuleId() + " in group: " + group.getId());
                     }
                 } else {
-                    LOGGER.info("Skipping disabled rule: " + ref.getRuleId());
+                    logger.info("Skipping disabled rule: " + ref.getRuleId());
                 }
             }
         }
@@ -834,15 +838,15 @@ public class YamlRuleFactory {
             return;
         }
 
-        LOGGER.info("Processing rule group references with global registry containing " + globalRuleGroupsById.size() + " groups");
+        logger.info("Processing rule group references with global registry containing " + globalRuleGroupsById.size() + " groups");
 
         for (YamlRuleGroup yamlGroup : yamlConfig.getRuleGroups()) {
             if ((yamlGroup.getEnabled() == null || yamlGroup.getEnabled()) && yamlGroup.getRuleGroupReferences() != null) {
-                LOGGER.info("Processing rule group references for group: " + yamlGroup.getId());
+                logger.info("Processing rule group references for group: " + yamlGroup.getId());
 
                 RuleGroup targetGroup = globalRuleGroupsById.get(yamlGroup.getId());
                 if (targetGroup == null) {
-                    LOGGER.warning("Target rule group not found in global registry: " + yamlGroup.getId());
+                    logger.warn("Target rule group not found in global registry: " + yamlGroup.getId());
                     continue;
                 }
 
@@ -860,13 +864,13 @@ public class YamlRuleFactory {
             return;
         }
 
-        LOGGER.info("Processing " + yamlGroup.getRuleGroupReferences().size() + " rule group references for group: " + yamlGroup.getId());
+        logger.info("Processing " + yamlGroup.getRuleGroupReferences().size() + " rule group references for group: " + yamlGroup.getId());
 
         // Calculate starting sequence number (after existing rules)
         int nextSequence = targetGroup.getRules().size() + 1;
 
         for (String referencedGroupId : yamlGroup.getRuleGroupReferences()) {
-            LOGGER.info("Processing rule group reference: " + referencedGroupId);
+            logger.info("Processing rule group reference: " + referencedGroupId);
 
             // Use global registry instead of config.getRuleGroupById() - this enables cross-file references!
             RuleGroup referencedGroup = globalRuleGroupsById.get(referencedGroupId);
@@ -874,12 +878,12 @@ public class YamlRuleFactory {
                 // Add all rules from the referenced group to the target group
                 for (Rule rule : referencedGroup.getRules()) {
                     targetGroup.addRule(rule, nextSequence++);
-                    LOGGER.fine("Added rule " + rule.getId() + " from group " + referencedGroupId + " to group " + targetGroup.getId());
+                    logger.debug("Added rule " + rule.getId() + " from group " + referencedGroupId + " to group " + targetGroup.getId());
                 }
-                LOGGER.info("Successfully added " + referencedGroup.getRules().size() + " rules from group " + referencedGroupId + " to group " + targetGroup.getId());
+                logger.info("Successfully added " + referencedGroup.getRules().size() + " rules from group " + referencedGroupId + " to group " + targetGroup.getId());
             } else {
                 String errorMsg = "Referenced rule group not found in global registry: " + referencedGroupId + " in group: " + yamlGroup.getId();
-                LOGGER.severe(errorMsg);
+                logger.error(errorMsg);
                 throw new YamlConfigurationException(errorMsg);
             }
         }
@@ -896,11 +900,11 @@ public class YamlRuleFactory {
 
         for (YamlRuleGroup yamlGroup : yamlConfig.getRuleGroups()) {
             if ((yamlGroup.getEnabled() == null || yamlGroup.getEnabled()) && yamlGroup.getRuleGroupReferences() != null) {
-                LOGGER.info("Processing rule group references for group: " + yamlGroup.getId());
+                logger.info("Processing rule group references for group: " + yamlGroup.getId());
 
                 RuleGroup targetGroup = config.getRuleGroupById(yamlGroup.getId());
                 if (targetGroup == null) {
-                    LOGGER.warning("Target rule group not found: " + yamlGroup.getId());
+                    logger.warn("Target rule group not found: " + yamlGroup.getId());
                     continue;
                 }
 
@@ -917,25 +921,25 @@ public class YamlRuleFactory {
             return;
         }
 
-        LOGGER.info("Processing " + yamlGroup.getRuleGroupReferences().size() + " rule group references for group: " + yamlGroup.getId());
+        logger.info("Processing " + yamlGroup.getRuleGroupReferences().size() + " rule group references for group: " + yamlGroup.getId());
 
         // Calculate starting sequence number (after existing rules)
         int nextSequence = targetGroup.getRules().size() + 1;
 
         for (String referencedGroupId : yamlGroup.getRuleGroupReferences()) {
-            LOGGER.info("Processing rule group reference: " + referencedGroupId);
+            logger.info("Processing rule group reference: " + referencedGroupId);
 
             RuleGroup referencedGroup = config.getRuleGroupById(referencedGroupId);
             if (referencedGroup != null) {
                 // Add all rules from the referenced group to the target group
                 for (Rule rule : referencedGroup.getRules()) {
                     targetGroup.addRule(rule, nextSequence++);
-                    LOGGER.fine("Added rule " + rule.getId() + " from group " + referencedGroupId + " to group " + targetGroup.getId());
+                    logger.debug("Added rule " + rule.getId() + " from group " + referencedGroupId + " to group " + targetGroup.getId());
                 }
-                LOGGER.info("Successfully added " + referencedGroup.getRules().size() + " rules from group " + referencedGroupId + " to group " + targetGroup.getId());
+                logger.info("Successfully added " + referencedGroup.getRules().size() + " rules from group " + referencedGroupId + " to group " + targetGroup.getId());
             } else {
                 String errorMsg = "Referenced rule group not found: " + referencedGroupId + " in group: " + yamlGroup.getId();
-                LOGGER.severe(errorMsg);
+                logger.error(errorMsg);
                 throw new YamlConfigurationException(errorMsg);
             }
         }
@@ -950,7 +954,7 @@ public class YamlRuleFactory {
      */
     private Category getOrCreateCategory(String categoryName, int defaultPriority) {
         return categoryCache.computeIfAbsent(categoryName, name -> {
-            LOGGER.fine("Creating new category: " + name + " with priority: " + defaultPriority);
+            logger.debug("Creating new category: " + name + " with priority: " + defaultPriority);
             return new Category(name, defaultPriority);
         });
     }
@@ -976,7 +980,7 @@ public class YamlRuleFactory {
                     categoryCache.put(category.getName(), category);
                     // Also cache the YAML category for metadata inheritance
                     yamlCategoryCache.put(yamlCategory.getName(), yamlCategory);
-                    LOGGER.fine("Cached category '" + yamlCategory.getName() +
+                    logger.debug("Cached category '" + yamlCategory.getName() +
                                "' with businessOwner: " + yamlCategory.getBusinessOwner() +
                                ", businessDomain: " + yamlCategory.getBusinessDomain());
                 }
@@ -1123,7 +1127,7 @@ public class YamlRuleFactory {
         }
 
         if (priority > 1000) {
-            LOGGER.warning("Very high priority override (" + priority + ") for rule: " + ruleId +
+            logger.warn("Very high priority override (" + priority + ") for rule: " + ruleId +
                           ". Consider using priorities between 1-100.");
         }
     }
@@ -1184,7 +1188,7 @@ public class YamlRuleFactory {
 
         // Look up category metadata from cache for inheritance
         YamlCategory yamlCategory = findYamlCategoryByName(categoryName);
-        LOGGER.fine("Found category '" + categoryName + "' for enrichment '" + yamlEnrichment.getId() +
+        logger.debug("Found category '" + categoryName + "' for enrichment '" + yamlEnrichment.getId() +
                    "'. YamlCategory found: " + (yamlCategory != null) +
                    (yamlCategory != null ? ", businessOwner: " + yamlCategory.getBusinessOwner() : ""));
 
@@ -1238,7 +1242,7 @@ public class YamlRuleFactory {
             enrichment.setExpirationDate(expirationDate);
         }
 
-        LOGGER.fine("Applied metadata inheritance to enrichment '" + id + "': " +
+        logger.debug("Applied metadata inheritance to enrichment '" + id + "': " +
                    "createdBy=" + enrichment.getCreatedBy() + ", " +
                    "businessDomain=" + enrichment.getBusinessDomain() + ", " +
                    "businessOwner=" + enrichment.getBusinessOwner());

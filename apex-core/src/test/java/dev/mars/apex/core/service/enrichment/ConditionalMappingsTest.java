@@ -66,7 +66,7 @@ public class ConditionalMappingsTest {
             YamlEnrichment.FieldMapping fieldMapping = conditionalMapping.getFieldMappings().get(0);
             assertEquals("testField", fieldMapping.getSourceField(), "Source field should match");
             assertEquals("result", fieldMapping.getTargetField(), "Target field should match");
-            assertEquals("'OR_MATCHED'", fieldMapping.getTransformation(), "Transformation should match");
+            assertEquals("'OR_MATCHED'", fieldMapping.getExpression(), "Expression should match");
 
             logger.info("✓ Conditional mappings structure creation successful");
 
@@ -198,7 +198,7 @@ public class ConditionalMappingsTest {
         YamlEnrichment.FieldMapping fieldMapping = new YamlEnrichment.FieldMapping();
         fieldMapping.setSourceField("testField");
         fieldMapping.setTargetField("result");
-        fieldMapping.setTransformation("'OR_MATCHED'");
+        fieldMapping.setExpression("'OR_MATCHED'");
         
         conditionalMapping.setFieldMappings(List.of(fieldMapping));
         enrichment.setConditionalMappings(List.of(conditionalMapping));
@@ -232,12 +232,12 @@ public class ConditionalMappingsTest {
         YamlEnrichment.FieldMapping fieldMapping1 = new YamlEnrichment.FieldMapping();
         fieldMapping1.setSourceField("testField");
         fieldMapping1.setTargetField("result");
-        fieldMapping1.setTransformation("'AND_MATCHED'");
-        
+        fieldMapping1.setExpression("'AND_MATCHED'");
+
         YamlEnrichment.FieldMapping fieldMapping2 = new YamlEnrichment.FieldMapping();
         fieldMapping2.setSourceField("systemCode");
         fieldMapping2.setTargetField("system");
-        fieldMapping2.setTransformation("#systemCode");
+        fieldMapping2.setExpression("#systemCode");
         
         conditionalMapping.setFieldMappings(List.of(fieldMapping1, fieldMapping2));
         enrichment.setConditionalMappings(List.of(conditionalMapping));

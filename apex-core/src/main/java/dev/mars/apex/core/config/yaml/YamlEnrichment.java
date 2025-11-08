@@ -385,33 +385,33 @@ public class YamlEnrichment {
     public static class FieldMapping {
         @JsonProperty("source-field")
         private String sourceField;
-        
+
         @JsonProperty("target-field")
         private String targetField;
-        
-        @JsonProperty("transformation")
-        private String transformation; // SpEL expression for field transformation
-        
+
+        @JsonProperty("expression")
+        private String expression; // SpEL expression for field transformation
+
         @JsonProperty("default-value")
         private Object defaultValue;
-        
+
         @JsonProperty("required")
         private Boolean required;
-        
+
         // Default constructor
         public FieldMapping() {
             this.required = false;
         }
-        
+
         // Getters and setters
         public String getSourceField() {
             return sourceField;
         }
-        
+
         public void setSourceField(String sourceField) {
             this.sourceField = sourceField;
         }
-        
+
         public String getTargetField() {
             return targetField;
         }
@@ -419,15 +419,15 @@ public class YamlEnrichment {
         public void setTargetField(String targetField) {
             this.targetField = targetField;
         }
-        
-        public String getTransformation() {
-            return transformation;
+
+        public String getExpression() {
+            return expression;
         }
-        
-        public void setTransformation(String transformation) {
-            this.transformation = transformation;
+
+        public void setExpression(String expression) {
+            this.expression = expression;
         }
-        
+
         public Object getDefaultValue() {
             return defaultValue;
         }
@@ -942,8 +942,8 @@ public class YamlEnrichment {
         @JsonProperty("source-field")
         private String sourceField;
 
-        @JsonProperty("transformation")
-        private String transformation;
+        @JsonProperty("expression")
+        private String expression;
 
         @JsonProperty("fallback-value")
         private String fallbackValue;
@@ -971,12 +971,12 @@ public class YamlEnrichment {
             this.sourceField = sourceField;
         }
 
-        public String getTransformation() {
-            return transformation;
+        public String getExpression() {
+            return expression;
         }
 
-        public void setTransformation(String transformation) {
-            this.transformation = transformation;
+        public void setExpression(String expression) {
+            this.expression = expression;
         }
 
         public String getFallbackValue() {

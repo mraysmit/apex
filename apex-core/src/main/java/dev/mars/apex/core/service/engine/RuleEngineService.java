@@ -3,11 +3,15 @@ package dev.mars.apex.core.service.engine;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.springframework.expression.EvaluationContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -39,14 +43,14 @@ import java.util.logging.Logger;
  * This class handles rule evaluation and result reporting.
  */
 public class RuleEngineService {
-    private static final Logger LOGGER = Logger.getLogger(RuleEngineService.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(RuleEngineService.class);
     private final ExpressionEvaluatorService evaluatorService;
     private boolean printResults = true;
 
     public RuleEngineService(ExpressionEvaluatorService evaluatorService) {
-        LOGGER.info("Initializing RuleEngineService");
+        logger.info("Initializing RuleEngineService");
         this.evaluatorService = evaluatorService;
-        LOGGER.fine("Using evaluator service: " + evaluatorService.getClass().getSimpleName());
+        logger.debug("Using evaluator service: " + evaluatorService.getClass().getSimpleName());
     }
 
     /**
@@ -56,7 +60,7 @@ public class RuleEngineService {
      * @return This service for method chaining
      */
     public RuleEngineService setPrintResults(boolean printResults) {
-        LOGGER.fine("Setting printResults to: " + printResults);
+        logger.debug("Setting printResults to: " + printResults);
         this.printResults = printResults;
         return this;
     }
@@ -69,16 +73,16 @@ public class RuleEngineService {
      * @return A list of RuleResult objects, one for each rule that was evaluated
      */
     public List<RuleResult> evaluateRules(List<Rule> rules, EvaluationContext context) {
-        LOGGER.info("Evaluating " + (rules != null ? rules.size() : 0) + " rules");
+        logger.info("Evaluating " + (rules != null ? rules.size() : 0) + " rules");
         List<RuleResult> results = new ArrayList<>();
 
         if (rules == null || rules.isEmpty()) {
-            LOGGER.info("No rules to evaluate");
+            logger.info("No rules to evaluate");
             return results;
         }
 
         for (Rule rule : rules) {
-            LOGGER.fine("Evaluating rule: " + rule.getName());
+            logger.debug("Evaluating rule: " + rule.getName());
             try {
                 // Use evaluateWithResult instead of evaluateQuietly for better error handling
                 RuleResult baseResult = evaluatorService.evaluateWithResult(rule.getCondition(), context, Object.class);
@@ -97,11 +101,11 @@ public class RuleEngineService {
                 }
 
                 results.add(ruleResult);
-                LOGGER.fine("Rule '" + rule.getName() + "' evaluated, result type: " + ruleResult.getResultType());
+                logger.debug("Rule '" + rule.getName() + "' evaluated, result type: " + ruleResult.getResultType());
 
                 if (printResults) {
-                    LOGGER.info(rule.getName() + ": " + rule.getMessage());
-                    LOGGER.info("Result type: " + ruleResult.getResultType());
+                    logger.info(rule.getName() + ": " + rule.getMessage());
+                    logger.info("Result type: " + ruleResult.getResultType());
                     // Also print to System.out for test verification
                     System.out.println(rule.getName() + ": " + rule.getMessage());
                     System.out.println("Result: " + (ruleResult.isTriggered() ? "true" : "false"));
@@ -115,19 +119,19 @@ public class RuleEngineService {
 
                 // Log error details at appropriate level based on severity (no stack traces in logs)
                 if ("CRITICAL".equalsIgnoreCase(severity)) {
-                    LOGGER.log(Level.SEVERE, "CRITICAL rule evaluation error for '" + rule.getName() + "': " + e.getMessage());
+                    logger.error("CRITICAL rule evaluation error for '" + rule.getName() + "': " + e.getMessage());
                 } else if ("WARNING".equalsIgnoreCase(severity)) {
-                    LOGGER.log(Level.INFO, "Rule evaluation warning for '" + rule.getName() + "': " + e.getMessage());
+                    logger.info("Rule evaluation warning for '" + rule.getName() + "': " + e.getMessage());
                 } else {
-                    LOGGER.log(Level.INFO, "Rule evaluation error for '" + rule.getName() + "': " + e.getMessage());
+                    logger.info("Rule evaluation error for '" + rule.getName() + "': " + e.getMessage());
                 }
 
                 // Log full exception details only at FINE level for debugging
-                LOGGER.log(Level.FINE, "Full exception details for rule '" + rule.getName() + "':", e);
+                logger.debug("Full exception details for rule '" + rule.getName() + "':", e);
             }
         }
 
-        LOGGER.info("Evaluated " + results.size() + " rules successfully");
+        logger.info("Evaluated " + results.size() + " rules successfully");
         return results;
     }
 }

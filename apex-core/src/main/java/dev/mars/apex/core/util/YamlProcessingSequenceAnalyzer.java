@@ -6,13 +6,16 @@ import dev.mars.apex.core.config.yaml.ProcessingItem;
 import dev.mars.apex.core.config.yaml.YamlEnrichmentGroup;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlRuleGroup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility for analyzing the processing sequence of YAML configuration files.
@@ -40,7 +43,7 @@ import java.util.logging.Logger;
  */
 public class YamlProcessingSequenceAnalyzer {
     
-    private static final Logger LOGGER = Logger.getLogger(YamlProcessingSequenceAnalyzer.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(YamlProcessingSequenceAnalyzer.class);
     
     private final OrderedYamlParser parser;
     
@@ -60,7 +63,7 @@ public class YamlProcessingSequenceAnalyzer {
      * @throws RuntimeException if YAML parsing fails
      */
     public ProcessingSequenceReport analyze(String yamlFilePath) {
-        LOGGER.info("Analyzing processing sequence for: " + yamlFilePath);
+        logger.info("Analyzing processing sequence for: " + yamlFilePath);
 
         // Validate file exists
         File file = new File(yamlFilePath);
@@ -78,20 +81,20 @@ public class YamlProcessingSequenceAnalyzer {
 
             // Extract configuration sections (processed at load time)
             List<String> configurationSections = extractConfigurationSections(orderedConfig);
-            LOGGER.info("Found " + configurationSections.size() + " configuration sections");
+            logger.info("Found " + configurationSections.size() + " configuration sections");
 
             // Get original item order
             List<ProcessingItem> originalSequence = new ArrayList<>(orderedConfig.getItemOrder());
-            LOGGER.info("Original sequence has " + originalSequence.size() + " items");
+            logger.info("Original sequence has " + originalSequence.size() + " items");
 
             // Apply groups-only logic to get planned sequence
             List<ProcessingItem> plannedSequence = applyGroupsOnlyLogic(config, originalSequence);
-            LOGGER.info("Planned sequence has " + plannedSequence.size() + " items");
+            logger.info("Planned sequence has " + plannedSequence.size() + " items");
 
             // Calculate filtered items
             List<ProcessingItem> filteredItems = new ArrayList<>(originalSequence);
             filteredItems.removeAll(plannedSequence);
-            LOGGER.info("Filtered " + filteredItems.size() + " items");
+            logger.info("Filtered " + filteredItems.size() + " items");
 
             return new ProcessingSequenceReport(yamlFilePath, configurationSections, originalSequence, plannedSequence, filteredItems);
         } catch (Exception e) {
@@ -118,7 +121,7 @@ public class YamlProcessingSequenceAnalyzer {
      * @throws RuntimeException if YAML parsing fails
      */
     public ProcessingSequenceReport analyzeYamlString(String yamlContent, String identifier) {
-        LOGGER.info("Analyzing processing sequence for: " + identifier);
+        logger.info("Analyzing processing sequence for: " + identifier);
 
         try {
             // Parse YAML using OrderedYamlParser
@@ -127,20 +130,20 @@ public class YamlProcessingSequenceAnalyzer {
 
             // Extract configuration sections (processed at load time)
             List<String> configurationSections = extractConfigurationSections(orderedConfig);
-            LOGGER.info("Found " + configurationSections.size() + " configuration sections");
+            logger.info("Found " + configurationSections.size() + " configuration sections");
 
             // Get original item order
             List<ProcessingItem> originalSequence = new ArrayList<>(orderedConfig.getItemOrder());
-            LOGGER.info("Original sequence has " + originalSequence.size() + " items");
+            logger.info("Original sequence has " + originalSequence.size() + " items");
 
             // Apply groups-only logic to get planned sequence
             List<ProcessingItem> plannedSequence = applyGroupsOnlyLogic(config, originalSequence);
-            LOGGER.info("Planned sequence has " + plannedSequence.size() + " items");
+            logger.info("Planned sequence has " + plannedSequence.size() + " items");
 
             // Calculate filtered items
             List<ProcessingItem> filteredItems = new ArrayList<>(originalSequence);
             filteredItems.removeAll(plannedSequence);
-            LOGGER.info("Filtered " + filteredItems.size() + " items");
+            logger.info("Filtered " + filteredItems.size() + " items");
 
             return new ProcessingSequenceReport(identifier, configurationSections, originalSequence, plannedSequence, filteredItems);
         } catch (Exception e) {
@@ -192,10 +195,10 @@ public class YamlProcessingSequenceAnalyzer {
      * @return Filtered item order (planned execution sequence)
      */
     private List<ProcessingItem> applyGroupsOnlyLogic(YamlRuleConfiguration config, List<ProcessingItem> originalOrder) {
-        LOGGER.fine("Applying groups-only logic");
+        logger.debug("Applying groups-only logic");
         
         if (originalOrder == null || originalOrder.isEmpty()) {
-            LOGGER.fine("No items to filter");
+            logger.debug("No items to filter");
             return new ArrayList<>();
         }
         
@@ -207,7 +210,7 @@ public class YamlProcessingSequenceAnalyzer {
                     referencedEnrichmentIds.addAll(group.getEnrichmentIds());
                 }
             }
-            LOGGER.fine("Found " + referencedEnrichmentIds.size() + " enrichment IDs referenced by groups");
+            logger.debug("Found " + referencedEnrichmentIds.size() + " enrichment IDs referenced by groups");
         }
         
         // Collect rule IDs referenced by rule-groups
@@ -218,12 +221,12 @@ public class YamlProcessingSequenceAnalyzer {
                     referencedRuleIds.addAll(group.getRuleIds());
                 }
             }
-            LOGGER.fine("Found " + referencedRuleIds.size() + " rule IDs referenced by groups");
+            logger.debug("Found " + referencedRuleIds.size() + " rule IDs referenced by groups");
         }
         
         // If no groups exist, no filtering needed
         if (referencedEnrichmentIds.isEmpty() && referencedRuleIds.isEmpty()) {
-            LOGGER.fine("No groups found - all items execute at definition position");
+            logger.debug("No groups found - all items execute at definition position");
             return new ArrayList<>(originalOrder);
         }
         
@@ -239,12 +242,12 @@ public class YamlProcessingSequenceAnalyzer {
                 referencedEnrichmentIds.contains(item.getItemId())) {
                 shouldRemove = true;  // Skip - will execute via enrichment-group
                 enrichmentsFiltered++;
-                LOGGER.fine("Filtering enrichment '" + item.getItemId() + "' (referenced by group)");
+                logger.debug("Filtering enrichment '" + item.getItemId() + "' (referenced by group)");
             } else if ("rules".equals(item.getSectionType()) &&
                        referencedRuleIds.contains(item.getItemId())) {
                 shouldRemove = true;  // Skip - will execute via rule-group
                 rulesFiltered++;
-                LOGGER.fine("Filtering rule '" + item.getItemId() + "' (referenced by group)");
+                logger.debug("Filtering rule '" + item.getItemId() + "' (referenced by group)");
             }
             
             if (!shouldRemove) {
@@ -252,8 +255,8 @@ public class YamlProcessingSequenceAnalyzer {
             }
         }
         
-        LOGGER.fine("Filtered " + enrichmentsFiltered + " enrichments and " + rulesFiltered + " rules");
-        LOGGER.fine("Original: " + originalOrder.size() + " items, Filtered: " + filteredOrder.size() + " items");
+        logger.debug("Filtered " + enrichmentsFiltered + " enrichments and " + rulesFiltered + " rules");
+        logger.debug("Original: " + originalOrder.size() + " items, Filtered: " + filteredOrder.size() + " items");
         
         return filteredOrder;
     }

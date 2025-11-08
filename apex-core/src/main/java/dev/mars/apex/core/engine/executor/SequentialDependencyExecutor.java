@@ -103,7 +103,7 @@ public class SequentialDependencyExecutor extends PatternExecutor {
             return resultBuilder.successful(true).build();
             
         } catch (Exception e) {
-            logger.severe("Error executing sequential dependency: " + e.getMessage());
+            logger.error("Error executing sequential dependency: " + e.getMessage());
             return resultBuilder.errorMessage("Execution error: " + e.getMessage()).build();
         }
     }
@@ -130,7 +130,7 @@ public class SequentialDependencyExecutor extends PatternExecutor {
             // Get rule configuration
             Map<String, Object> ruleConfig = getMapValue(stageConfig, "rule");
             if (ruleConfig == null) {
-                logger.warning("Stage " + stageNumber + " missing rule configuration");
+                logger.warn("Stage " + stageNumber + " missing rule configuration");
                 return false;
             }
             
@@ -151,7 +151,7 @@ public class SequentialDependencyExecutor extends PatternExecutor {
                 executeRule(stageRule, context, resultBuilder);
                 
             } catch (Exception e) {
-                logger.warning("Error evaluating stage " + stageNumber + " expression: " + e.getMessage());
+                logger.warn("Error evaluating stage " + stageNumber + " expression: " + e.getMessage());
                 return false;
             }
             
@@ -167,7 +167,7 @@ public class SequentialDependencyExecutor extends PatternExecutor {
             return true;
             
         } catch (Exception e) {
-            logger.severe("Error executing stage " + stageNumber + ": " + e.getMessage());
+            logger.error("Error executing stage " + stageNumber + ": " + e.getMessage());
             return false;
         }
     }
@@ -175,24 +175,24 @@ public class SequentialDependencyExecutor extends PatternExecutor {
     @Override
     public boolean validateConfiguration(Map<String, Object> configuration) {
         if (configuration == null) {
-            logger.warning("Configuration is null");
+            logger.warn("Configuration is null");
             return false;
         }
         
         // Validate stages configuration
         if (!hasRequiredKey(configuration, "stages")) {
-            logger.warning("Missing required key: stages");
+            logger.warn("Missing required key: stages");
             return false;
         }
         
         List<Object> stagesConfig = getListValue(configuration, "stages");
         if (stagesConfig == null) {
-            logger.warning("stages must be a list");
+            logger.warn("stages must be a list");
             return false;
         }
         
         if (stagesConfig.isEmpty()) {
-            logger.warning("stages list cannot be empty");
+            logger.warn("stages list cannot be empty");
             return false;
         }
         
@@ -200,7 +200,7 @@ public class SequentialDependencyExecutor extends PatternExecutor {
         for (int i = 0; i < stagesConfig.size(); i++) {
             Object stageObj = stagesConfig.get(i);
             if (!(stageObj instanceof Map)) {
-                logger.warning("Stage at index " + i + " must be a map");
+                logger.warn("Stage at index " + i + " must be a map");
                 return false;
             }
             
@@ -225,18 +225,18 @@ public class SequentialDependencyExecutor extends PatternExecutor {
     private boolean validateStageConfiguration(Map<String, Object> stageConfig, int stageIndex) {
         // Validate rule configuration
         if (!hasRequiredKey(stageConfig, "rule")) {
-            logger.warning("Stage at index " + stageIndex + " missing required key: rule");
+            logger.warn("Stage at index " + stageIndex + " missing required key: rule");
             return false;
         }
         
         Map<String, Object> ruleConfig = getMapValue(stageConfig, "rule");
         if (ruleConfig == null) {
-            logger.warning("Stage at index " + stageIndex + " rule must be a map");
+            logger.warn("Stage at index " + stageIndex + " rule must be a map");
             return false;
         }
         
         if (!hasRequiredKey(ruleConfig, "condition")) {
-            logger.warning("Stage at index " + stageIndex + " rule missing required condition");
+            logger.warn("Stage at index " + stageIndex + " rule missing required condition");
             return false;
         }
         
@@ -244,7 +244,7 @@ public class SequentialDependencyExecutor extends PatternExecutor {
         if (stageConfig.containsKey("stage")) {
             Object stageValue = stageConfig.get("stage");
             if (!(stageValue instanceof Number)) {
-                logger.warning("Stage at index " + stageIndex + " stage number must be a number");
+                logger.warn("Stage at index " + stageIndex + " stage number must be a number");
                 return false;
             }
         }

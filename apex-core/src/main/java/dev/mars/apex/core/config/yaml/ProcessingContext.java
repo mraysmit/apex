@@ -1,10 +1,13 @@
 package dev.mars.apex.core.config.yaml;
 
 import dev.mars.apex.core.config.yaml.OrderedYamlConfiguration.ProcessingMode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Processing context for sequential YAML processing.
@@ -26,7 +29,7 @@ import java.util.logging.Logger;
  */
 public class ProcessingContext {
     
-    private static final Logger LOGGER = Logger.getLogger(ProcessingContext.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(ProcessingContext.class);
     
     private final OrderedYamlConfiguration configuration;
     private final String source;
@@ -64,7 +67,7 @@ public class ProcessingContext {
         this.sectionsProcessed = 0;
         this.errorsEncountered = 0;
         
-        LOGGER.fine("ProcessingContext created for: " + source + " (mode: " + mode + ")");
+        logger.debug("ProcessingContext created for: " + source + " (mode: " + mode + ")");
     }
     
     /**
@@ -77,7 +80,7 @@ public class ProcessingContext {
         sectionTimestamps.put(sectionName, LocalDateTime.now());
         sectionsProcessed++;
         
-        LOGGER.fine("Section processed: " + sectionName + " (total: " + sectionsProcessed + ")");
+        logger.debug("Section processed: " + sectionName + " (total: " + sectionsProcessed + ")");
     }
     
     /**
@@ -92,9 +95,9 @@ public class ProcessingContext {
         errors.add(processingError);
         errorsEncountered++;
         
-        LOGGER.warning("Processing error in section '" + sectionName + "': " + error);
+        logger.warn("Processing error in section '" + sectionName + "': " + error);
         if (exception != null) {
-            LOGGER.warning("Exception details: " + exception.getMessage());
+            logger.warn("Exception details: " + exception.getMessage());
         }
     }
     
@@ -116,7 +119,7 @@ public class ProcessingContext {
      */
     public void setState(String key, Object value) {
         processingState.put(key, value);
-        LOGGER.fine("Processing state set: " + key + " = " + value);
+        logger.debug("Processing state set: " + key + " = " + value);
     }
     
     /**

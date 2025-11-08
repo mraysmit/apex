@@ -57,7 +57,7 @@ enrichments:
         field-mappings:
           - source-field: "IS_NDF"
             target-field: "IS_NDF"
-            transformation: "#IS_NDF"  # Keep original value
+            expression: "#IS_NDF"  # Keep original value
             
       # Condition 2: Translation required for other cases
       - conditions:
@@ -69,14 +69,14 @@ enrichments:
         field-mappings:
           - source-field: "IS_NDF"
             target-field: "TRANSLATION_TYPE"
-            transformation: "'IS_NDF'"
+            expression: "'IS_NDF'"
           - source-field: "IS_NDF"
             target-field: "EXTERNAL_CODE"
-            transformation: "#IS_NDF"
+            expression: "#IS_NDF"
           # Simple field mapping - translation will be handled by separate enrichment
           - source-field: "IS_NDF"
             target-field: "IS_NDF"
-            transformation: "#IS_NDF"  # Keep original value for now
+            expression: "#IS_NDF"  # Keep original value for now
             
       # Default case: No mapping needed
       - conditions:
@@ -87,7 +87,7 @@ enrichments:
         field-mappings:
           - source-field: "IS_NDF"
             target-field: "IS_NDF"
-            transformation: "#IS_NDF"
+            expression: "#IS_NDF"
 
   # Translation enrichment for non-standard values
   - id: "translation-lookup"

@@ -24,7 +24,7 @@ enrichments:
     field-mappings:
       - source-field: "input"
         target-field: "output"
-        transformation: |
+        expression: |
           #input == 'A' ? 'FIRST' :
           #input == 'B' ? 'SECOND' :
           #input == 'C' ? 'THIRD' :

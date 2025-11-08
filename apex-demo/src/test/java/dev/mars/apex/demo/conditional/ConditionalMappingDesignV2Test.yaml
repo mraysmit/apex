@@ -62,7 +62,7 @@ enrichments:
     field-mappings:
       - source-field: "IS_NDF"
         target-field: "IS_NDF"
-        transformation: "#IS_NDF"
+        expression: "#IS_NDF"
 
   # Y flag conversion (second rule)
   - id: "ndf-y-flag-conversion"
@@ -73,7 +73,7 @@ enrichments:
     field-mappings:
       - source-field: "constant"
         target-field: "IS_NDF"
-        transformation: "'1'"  # Convert Y to 1
+        expression: "'1'"  # Convert Y to 1
 
   # Default translation (third rule)
   - id: "ndf-default-translation"
@@ -84,4 +84,4 @@ enrichments:
     field-mappings:
       - source-field: "constant"
         target-field: "IS_NDF"
-        transformation: "'DEFAULT_TRANSLATION'"  # Default value
+        expression: "'DEFAULT_TRANSLATION'"  # Default value

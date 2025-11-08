@@ -48,5 +48,5 @@ enrichments:
     field-mappings:
       - source-field: "input"
         target-field: "output"
-        transformation: "#ruleGroupResults['simple-and-group']['passed'] ? 'ALL_PASSED' : 'FAILED'"
+        expression: "#ruleGroupResults['simple-and-group']['passed'] ? 'ALL_PASSED' : 'FAILED'"
 

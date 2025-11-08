@@ -1,7 +1,10 @@
 package dev.mars.apex.core.config.yaml;
 
 import java.util.ArrayList;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility class for merging YAML rule configurations.
@@ -13,7 +16,7 @@ import java.util.logging.Logger;
  */
 public class YamlConfigurationMerger {
     
-    private static final Logger LOGGER = Logger.getLogger(YamlConfigurationMerger.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(YamlConfigurationMerger.class);
     
     /**
      * Private constructor to prevent instantiation of utility class.
@@ -40,7 +43,7 @@ public class YamlConfigurationMerger {
             throw new IllegalArgumentException("Target configuration cannot be null");
         }
         if (source == null) {
-            LOGGER.fine("Source configuration is null, nothing to merge");
+            logger.debug("Source configuration is null, nothing to merge");
             return;
         }
         
@@ -129,7 +132,7 @@ public class YamlConfigurationMerger {
             target.getRuleChains().addAll(source.getRuleChains());
         }
 
-        LOGGER.fine("Merged YAML configuration with " +
+        logger.debug("Merged YAML configuration with " +
                    (source.getRules() != null ? source.getRules().size() : 0) + " rules, " +
                    (source.getRuleGroups() != null ? source.getRuleGroups().size() : 0) + " rule groups, and " +
                    (source.getEnrichments() != null ? source.getEnrichments().size() : 0) + " enrichments");

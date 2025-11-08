@@ -1265,7 +1265,7 @@ lookup-dataset:
 field-mappings:
   - source-field: "decimalPlaces"
     target-field: "currencyDecimalPlaces"
-    transformation: "#value != null ? #value : 2"
+    expression: "#value != null ? #value : 2"
 ```
 
 ## REST API

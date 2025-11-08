@@ -40,7 +40,7 @@ enrichments:
 
 This creates an inconsistency where:
 - ✅ **Conditions** use SpEL: `condition: '#data.currency != null'`
-- ✅ **Transformations** use SpEL: `transformation: '#data.currency'`
+- ✅ **Transformations** use SpEL: `expression: '#data.currency'`
 - ✅ **Lookup keys** use SpEL: `lookup-key: '#symbol'`
 - ✅ **Calculations** use SpEL: `expression: '#amount * 0.01'`
 - ❌ **Field mappings** don't support SpEL: `source-field: currency` (cannot use `#data.currency`)
@@ -148,7 +148,7 @@ enrichments:
     condition: '#data.currency != null'
     field-mappings:
       - target-field: buy_currency
-        transformation: '#data.currency'  # ✅ Workaround - use transformation instead
+        expression: '#data.currency'  # ✅ Workaround - use transformation instead
 ```
 
 **Limitation:** This workaround requires knowing SpEL and is not intuitive for simple field copying.
@@ -161,7 +161,7 @@ enrichments:
 
 **Consistency Across APEX:**
 - ✅ **Conditions** already use SpEL: `condition: '#data.currency != null'`
-- ✅ **Transformations** already use SpEL: `transformation: '#data.currency'`
+- ✅ **Transformations** already use SpEL: `expression: '#data.currency'`
 - ✅ **Lookup keys** already use SpEL: `lookup-key: '#symbol'`
 - ✅ **Calculations** already use SpEL: `expression: '#amount * 0.01'`
 
@@ -263,7 +263,7 @@ enrichments:
         target-field: buy_currency
       - source-field: '#data.amount'           # SpEL in source-field (NEW!)
         target-field: trade_amount
-        transformation: '#value * 1.1'         # SpEL in transformation (existing)
+        expression: '#value * 1.1'         # SpEL in transformation (existing)
 ```
 
 **3. Backward Compatible:**
@@ -296,7 +296,7 @@ field-mappings:
   # Can't use source-field for nested fields
   # Must use transformation instead
   - target-field: buy_currency
-    transformation: '#data.currency'  # Workaround - not intuitive
+    expression: '#data.currency'  # Workaround - not intuitive
 ```
 
 **After (With SpEL Support):**
@@ -309,7 +309,7 @@ field-mappings:
   # Can still use transformation for actual transformations
   - source-field: '#data.amount'
     target-field: adjusted_amount
-    transformation: '#value * 1.1'  # Transform the source value
+    expression: '#value * 1.1'  # Transform the source value
 ```
 
 ---
@@ -449,7 +449,7 @@ enrichments:
       # ✅ Combination with transformation
       - source-field: '#data.amount'
         target-field: adjusted_amount
-        transformation: '#value * 1.1'  # Apply 10% markup
+        expression: '#value * 1.1'  # Apply 10% markup
 ```
 
 ### Example 4: Your Original Use Case (SOLVED!)

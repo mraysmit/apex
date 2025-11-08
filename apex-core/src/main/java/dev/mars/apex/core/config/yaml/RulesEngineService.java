@@ -2,10 +2,13 @@ package dev.mars.apex.core.config.yaml;
 
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Universal YAML Rules Engine Service - the single recommended entry point for APEX.
@@ -35,7 +38,7 @@ import java.util.logging.Logger;
  */
 public class RulesEngineService {
 
-    private static final Logger LOGGER = Logger.getLogger(RulesEngineService.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(RulesEngineService.class);
 
     private final YamlConfigurationLoader configLoader;
     private final YamlRuleFactory ruleFactory;
@@ -49,7 +52,7 @@ public class RulesEngineService {
         this.ruleFactory = new YamlRuleFactory();
         this.standardService = new YamlRulesEngineService(configLoader, ruleFactory);
 
-        LOGGER.info("RulesEngineService initialized - Universal YAML processing active");
+        logger.info("RulesEngineService initialized - Universal YAML processing active");
     }
 
     /**
@@ -63,7 +66,7 @@ public class RulesEngineService {
         this.ruleFactory = ruleFactory != null ? ruleFactory : new YamlRuleFactory();
         this.standardService = new YamlRulesEngineService(this.configLoader, this.ruleFactory);
 
-        LOGGER.info("RulesEngineService initialized with custom services - Universal YAML processing active");
+        logger.info("RulesEngineService initialized with custom services - Universal YAML processing active");
     }
     
     // ========== ENHANCED RULES ENGINE CREATION METHODS ==========
@@ -80,7 +83,7 @@ public class RulesEngineService {
      * @throws YamlConfigurationException if configuration loading or processing fails
      */
     public RulesEngine createRulesEngineFromFile(File file) throws YamlConfigurationException {
-        LOGGER.info("Creating rules engine from file with sequential processing support: " + file.getAbsolutePath());
+        logger.info("Creating rules engine from file with sequential processing support: " + file.getAbsolutePath());
         
         // Load YAML configuration
         YamlRuleConfiguration yamlConfig = configLoader.loadFromFile(file);
@@ -96,7 +99,7 @@ public class RulesEngineService {
      * @throws YamlConfigurationException If the stream cannot be loaded or parsed
      */
     public RulesEngine createRulesEngineFromStream(InputStream inputStream) throws YamlConfigurationException {
-        LOGGER.info("Creating universal rules engine from stream");
+        logger.info("Creating universal rules engine from stream");
 
         // Load YAML configuration
         YamlRuleConfiguration yamlConfig = configLoader.loadFromStream(inputStream);
@@ -112,7 +115,7 @@ public class RulesEngineService {
      * @throws YamlConfigurationException if configuration parsing or processing fails
      */
     public RulesEngine createRulesEngineFromString(String yamlString) throws YamlConfigurationException {
-        LOGGER.info("Creating rules engine from string with sequential processing support");
+        logger.info("Creating rules engine from string with sequential processing support");
 
         // Load YAML configuration
         YamlRuleConfiguration yamlConfig = configLoader.fromYamlString(yamlString);
@@ -128,7 +131,7 @@ public class RulesEngineService {
      * @throws YamlConfigurationException If the configuration cannot be processed
      */
     public RulesEngine createRulesEngineFromConfig(YamlRuleConfiguration yamlConfig) throws YamlConfigurationException {
-        LOGGER.info("Creating universal rules engine from configuration");
+        logger.info("Creating universal rules engine from configuration");
 
         // Create RulesEngine configuration
         RulesEngineConfiguration rulesConfig = ruleFactory.createRulesEngineConfiguration(yamlConfig);
@@ -145,11 +148,11 @@ public class RulesEngineService {
      * @throws YamlConfigurationException if configuration processing fails
      */
     public RulesEngine createRulesEngineFromYamlConfig(YamlRuleConfiguration yamlConfig) throws YamlConfigurationException {
-        LOGGER.info("Creating rules engine from YAML config with sequential processing support");
+        logger.info("Creating rules engine from YAML config with sequential processing support");
 
         // Check if sequential processing is requested
         if (isSequentialMode(yamlConfig)) {
-            LOGGER.info("Sequential processing mode detected in YAML configuration");
+            logger.info("Sequential processing mode detected in YAML configuration");
             // For now, delegate to standard service since we have the parsed config
             // TODO: Implement sequential processing for pre-parsed configurations
             return standardService.createRulesEngineFromYamlConfig(yamlConfig);
@@ -169,14 +172,14 @@ public class RulesEngineService {
      * @throws YamlConfigurationException if any file fails to load or merge
      */
     public RulesEngine createRulesEngineFromFiles(String... filePaths) throws YamlConfigurationException {
-        LOGGER.info("Creating rules engine from " + filePaths.length + " files with sequential processing support");
+        logger.info("Creating rules engine from " + filePaths.length + " files with sequential processing support");
         
         try {
             // For multi-file scenarios, we use standard merging for now
             // TODO: Implement sequential processing for multi-file merging
             return standardService.createRulesEngineFromMultipleFiles(filePaths);
         } catch (Exception e) {
-            LOGGER.warning("Multi-file processing failed: " + e.getMessage());
+            logger.warn("Multi-file processing failed: " + e.getMessage());
             throw e;
         }
     }

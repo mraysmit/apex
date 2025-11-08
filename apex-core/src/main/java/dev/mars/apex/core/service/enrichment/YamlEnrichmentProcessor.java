@@ -21,6 +21,8 @@ import dev.mars.apex.core.service.data.external.cache.CacheStatistics;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -32,8 +34,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -73,7 +75,7 @@ import java.util.logging.Logger;
 @Deprecated(since = "3.0", forRemoval = true)
 public class YamlEnrichmentProcessor {
     
-    private static final Logger LOGGER = Logger.getLogger(YamlEnrichmentProcessor.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(YamlEnrichmentProcessor.class);
 
     private final LookupServiceRegistry serviceRegistry;
     @SuppressWarnings("unused") // Reserved for future expression evaluation enhancements
@@ -97,7 +99,7 @@ public class YamlEnrichmentProcessor {
         this.parser = new SpelExpressionParser();
         this.cacheManager = ApexCacheManager.getInstance();
 
-        LOGGER.info("YamlEnrichmentProcessor initialized with unified cache manager");
+        logger.info("YamlEnrichmentProcessor initialized with unified cache manager");
     }
     
     /**
@@ -131,16 +133,16 @@ public class YamlEnrichmentProcessor {
         // This method only processes the enrichments passed to it.
 
         if (enrichments == null || enrichments.isEmpty()) {
-            LOGGER.fine("No enrichments to process");
+            logger.debug("No enrichments to process");
             return targetObject;
         }
 
         // Defensive null check for targetObject
         if (targetObject != null) {
-            LOGGER.info("Processing " + enrichments.size() + " enrichments for object type: " +
+            logger.info("Processing " + enrichments.size() + " enrichments for object type: " +
                        targetObject.getClass().getSimpleName());
         } else {
-            LOGGER.info("Processing " + enrichments.size() + " enrichments for null object");
+            logger.info("Processing " + enrichments.size() + " enrichments for null object");
         }
         
         // Sort enrichments by priority (lower numbers = higher priority)
@@ -158,26 +160,26 @@ public class YamlEnrichmentProcessor {
                 if (shouldProcessEnrichment(enrichment, enrichedObject)) {
                     enrichedObject = processEnrichment(enrichment, enrichedObject);
                     processedCount++;
-                    LOGGER.fine("Successfully processed enrichment: " + enrichment.getId());
+                    logger.debug("Successfully processed enrichment: " + enrichment.getId());
                 } else {
-                    LOGGER.fine("Skipping enrichment (condition not met): " + enrichment.getId());
+                    logger.debug("Skipping enrichment (condition not met): " + enrichment.getId());
 
                     // Phase 5: Store result-field for field-enrichment (condition did not match)
                     if ("field-enrichment".equals(enrichment.getType()) && enrichment.getResultField() != null) {
                         setFieldValue(enrichedObject, enrichment.getResultField(), false);
-                        LOGGER.info("Phase 5: Stored field-enrichment result in field: " + enrichment.getResultField() + " = false");
+                        logger.info("Phase 5: Stored field-enrichment result in field: " + enrichment.getResultField() + " = false");
                     }
                 }
             } catch (Exception e) {
                 // CRITICAL: Enrichment processing failure is a serious configuration error
-                LOGGER.log(Level.SEVERE, "CRITICAL: Failed to process enrichment '" + enrichment.getId() +
+                logger.error("CRITICAL: Failed to process enrichment '" + enrichment.getId() +
                           "' - Error: " + e.getMessage(), e);
                 // Continue processing other enrichments for now (backward compatibility)
                 // TODO: Consider fail-fast behavior for critical enrichments
             }
         }
         
-        LOGGER.info("Completed processing enrichments. Processed: " + processedCount + 
+        logger.info("Completed processing enrichments. Processed: " + processedCount + 
                    " out of " + enrichments.size());
         
         return enrichedObject;
@@ -191,12 +193,12 @@ public class YamlEnrichmentProcessor {
      * @return The enriched object
      */
     public Object processEnrichment(YamlEnrichment enrichment, Object targetObject) {
-        LOGGER.fine("Processing enrichment: " + enrichment.getId() + " (type: " + enrichment.getType() + ")");
+        logger.debug("Processing enrichment: " + enrichment.getId() + " (type: " + enrichment.getType() + ")");
 
         // Check if enrichment should be processed
         boolean conditionMatched = shouldProcessEnrichment(enrichment, targetObject);
         if (!conditionMatched) {
-            LOGGER.fine("Enrichment " + enrichment.getId() + " should not be processed");
+            logger.debug("Enrichment " + enrichment.getId() + " should not be processed");
 
             // Phase 4: Evaluate error code when condition doesn't match
             if (enrichment.getErrorCode() != null) {
@@ -208,18 +210,18 @@ public class YamlEnrichmentProcessor {
                     applyCodeFieldMappings(enrichment.getMapToField(), context, targetObject, null, evaluatedErrorCode);
                 }
 
-                LOGGER.fine("Enrichment condition not met, error code evaluated: " + evaluatedErrorCode);
+                logger.debug("Enrichment condition not met, error code evaluated: " + evaluatedErrorCode);
             }
 
             return targetObject;
         }
 
-        LOGGER.fine("Enrichment " + enrichment.getId() + " passed conditions, proceeding with processing");
+        logger.debug("Enrichment " + enrichment.getId() + " passed conditions, proceeding with processing");
 
         // Phase 5: Store result-field for field-enrichment (condition matched)
         if ("field-enrichment".equals(enrichment.getType()) && enrichment.getResultField() != null) {
             setFieldValue(targetObject, enrichment.getResultField(), true);
-            LOGGER.info("Phase 5: Stored field-enrichment result in field: " + enrichment.getResultField() + " = true");
+            logger.info("Phase 5: Stored field-enrichment result in field: " + enrichment.getResultField() + " = true");
         }
 
         // Process the enrichment based on type
@@ -238,7 +240,7 @@ public class YamlEnrichmentProcessor {
                 result = processConditionalMappingEnrichment(enrichment, targetObject);
                 break;
             default:
-                LOGGER.warning("Unknown enrichment type: " + enrichment.getType());
+                logger.warn("Unknown enrichment type: " + enrichment.getType());
                 result = targetObject;
         }
 
@@ -252,7 +254,7 @@ public class YamlEnrichmentProcessor {
                 applyCodeFieldMappings(enrichment.getMapToField(), context, result, evaluatedSuccessCode, null);
             }
 
-            LOGGER.fine("Enrichment succeeded, success code evaluated: " + evaluatedSuccessCode);
+            logger.debug("Enrichment succeeded, success code evaluated: " + evaluatedSuccessCode);
         }
 
         return result;
@@ -268,7 +270,7 @@ public class YamlEnrichmentProcessor {
     private boolean shouldProcessEnrichment(YamlEnrichment enrichment, Object targetObject) {
         // Defensive null check - fail fast if targetObject is null
         if (targetObject == null) {
-            LOGGER.warning("Cannot process enrichment '" + enrichment.getId() +
+            logger.warn("Cannot process enrichment '" + enrichment.getId() +
                           "' - target object is null. Skipping enrichment.");
             return false;
         }
@@ -305,7 +307,7 @@ public class YamlEnrichmentProcessor {
                 return result != null && result;
             } catch (Exception e) {
                 // CRITICAL: Enrichment condition evaluation failure is a serious configuration error
-                LOGGER.log(Level.SEVERE, "CRITICAL: Enrichment condition evaluation failed for '" +
+                logger.error("CRITICAL: Enrichment condition evaluation failed for '" +
                           enrichment.getId() + "' - condition: '" + enrichment.getCondition() +
                           "' - Error: " + e.getMessage(), e);
 
@@ -328,14 +330,14 @@ public class YamlEnrichmentProcessor {
     private Object processLookupEnrichment(YamlEnrichment enrichment, Object targetObject) {
         YamlEnrichment.LookupConfig lookupConfig = enrichment.getLookupConfig();
         if (lookupConfig == null) {
-            LOGGER.warning("Lookup enrichment '" + enrichment.getId() + "' has no lookup configuration");
+            logger.warn("Lookup enrichment '" + enrichment.getId() + "' has no lookup configuration");
             return targetObject;
         }
         
         // 1. Resolve lookup service (either from registry or create from dataset)
         LookupService lookupService = resolveLookupService(enrichment.getId(), lookupConfig);
 
-        LOGGER.fine("Processing lookup enrichment with service: " + lookupService.getName());
+        logger.debug("Processing lookup enrichment with service: " + lookupService.getName());
         
         // 2. Extract lookup key using SpEL expression
         Object lookupKey;
@@ -345,11 +347,11 @@ public class YamlEnrichmentProcessor {
             lookupKey = keyExpr.getValue(context);
             
             if (lookupKey == null) {
-                LOGGER.fine("Lookup key evaluated to null for enrichment: " + enrichment.getId());
+                logger.debug("Lookup key evaluated to null for enrichment: " + enrichment.getId());
                 return targetObject;
             }
             
-            LOGGER.fine("Extracted lookup key: " + lookupKey);
+            logger.debug("Extracted lookup key: " + lookupKey);
         } catch (Exception e) {
             throw new EnrichmentException("Failed to extract lookup key using expression '" + 
                                         lookupConfig.getLookupKey() + "'", e);
@@ -358,18 +360,18 @@ public class YamlEnrichmentProcessor {
         // 3. Perform lookup (with caching if enabled)
         Object lookupResult = performLookup(lookupService, lookupKey, lookupConfig);
 
-        LOGGER.fine("Lookup result for key '" + lookupKey + "': " + lookupResult +
+        logger.debug("Lookup result for key '" + lookupKey + "': " + lookupResult +
                    " (type: " + (lookupResult != null ? lookupResult.getClass().getSimpleName() : "null") + ")");
 
         if (lookupResult == null) {
-            LOGGER.fine("Lookup returned null result for key: " + lookupKey + ", applying default values");
+            logger.debug("Lookup returned null result for key: " + lookupKey + ", applying default values");
         }
 
         // Phase 5: Store result-field if configured (boolean indicating lookup success)
         boolean lookupSucceeded = (lookupResult != null);
         if (enrichment.getResultField() != null) {
             setFieldValue(targetObject, enrichment.getResultField(), lookupSucceeded);
-            LOGGER.info("Phase 5: Stored lookup result in field: " + enrichment.getResultField() + " = " + lookupSucceeded);
+            logger.info("Phase 5: Stored lookup result in field: " + enrichment.getResultField() + " = " + lookupSucceeded);
         }
 
         // 4. Apply field mappings (even if lookup result is null, to apply default values)
@@ -377,7 +379,7 @@ public class YamlEnrichmentProcessor {
 
         // If applyFieldMappings returns null, it means a required field mapping failed
         if (result == null) {
-            LOGGER.warning("Enrichment '" + enrichment.getId() + "' failed due to required field mapping failure");
+            logger.warn("Enrichment '" + enrichment.getId() + "' failed due to required field mapping failure");
             // Return original target object to continue processing other enrichments
             return targetObject;
         }
@@ -395,7 +397,7 @@ public class YamlEnrichmentProcessor {
     private Object processCalculationEnrichment(YamlEnrichment enrichment, Object targetObject) {
         YamlEnrichment.CalculationConfig calcConfig = enrichment.getCalculationConfig();
         if (calcConfig == null) {
-            LOGGER.warning("Calculation enrichment '" + enrichment.getId() + "' has no calculation configuration");
+            logger.warn("Calculation enrichment '" + enrichment.getId() + "' has no calculation configuration");
             return targetObject;
         }
 
@@ -413,20 +415,20 @@ public class YamlEnrichmentProcessor {
             if (enrichment.getFieldMappings() != null && !enrichment.getFieldMappings().isEmpty()) {
                 Object mappedResult = applyFieldMappings(enrichment.getFieldMappings(), targetObject, targetObject);
                 if (mappedResult == null) {
-                    LOGGER.warning("Calculation enrichment '" + enrichment.getId() + "' failed due to required field mapping failure");
+                    logger.warn("Calculation enrichment '" + enrichment.getId() + "' failed due to required field mapping failure");
                     // Return original target object to continue processing other enrichments
                     return targetObject;
                 }
                 targetObject = mappedResult;
             }
 
-            LOGGER.fine("Calculation enrichment completed. Result: " + result);
+            logger.debug("Calculation enrichment completed. Result: " + result);
             return targetObject;
 
         } catch (Exception e) {
             // Phase 3A Enhancement: Check if calculation has a default-value for error recovery
             if (calcConfig.getDefaultValue() != null) {
-                LOGGER.info("Using calculation default value for recovery: enrichment='" + enrichment.getId() +
+                logger.info("Using calculation default value for recovery: enrichment='" + enrichment.getId() +
                     "', defaultValue='" + calcConfig.getDefaultValue() + "'");
 
                 // Set the default value in the result field
@@ -478,21 +480,21 @@ public class YamlEnrichmentProcessor {
      * @return The enriched object
      */
     private Object processConditionalMappings(List<YamlEnrichment.ConditionalMapping> conditionalMappings, Object targetObject) {
-        LOGGER.fine("Processing " + conditionalMappings.size() + " conditional mappings");
+        logger.debug("Processing " + conditionalMappings.size() + " conditional mappings");
 
         for (YamlEnrichment.ConditionalMapping conditionalMapping : conditionalMappings) {
             try {
                 // Evaluate condition group
                 if (evaluateConditionGroup(conditionalMapping.getConditions(), targetObject)) {
-                    LOGGER.fine("Conditional mapping conditions met, applying field mappings");
+                    logger.debug("Conditional mapping conditions met, applying field mappings");
                     // Apply field mappings for this conditional mapping
                     targetObject = applyFieldMappings(conditionalMapping.getFieldMappings(), targetObject, targetObject);
                     // Continue to next conditional mapping (don't break - multiple can apply)
                 } else {
-                    LOGGER.finest("Conditional mapping conditions not met, skipping");
+                    logger.trace("Conditional mapping conditions not met, skipping");
                 }
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Failed to process conditional mapping: " + e.getMessage(), e);
+                logger.warn("Failed to process conditional mapping: " + e.getMessage(), e);
             }
         }
 
@@ -513,16 +515,16 @@ public class YamlEnrichmentProcessor {
         YamlEnrichment.ExecutionSettings executionSettings = enrichment.getExecutionSettings();
 
         if (targetField == null || targetField.trim().isEmpty()) {
-            LOGGER.warning("Conditional mapping enrichment '" + enrichment.getId() + "' has no target field");
+            logger.warn("Conditional mapping enrichment '" + enrichment.getId() + "' has no target field");
             return targetObject;
         }
 
         if (mappingRules == null || mappingRules.isEmpty()) {
-            LOGGER.warning("Conditional mapping enrichment '" + enrichment.getId() + "' has no mapping rules");
+            logger.warn("Conditional mapping enrichment '" + enrichment.getId() + "' has no mapping rules");
             return targetObject;
         }
 
-        LOGGER.fine("Processing conditional mapping enrichment for target field: " + targetField);
+        logger.debug("Processing conditional mapping enrichment for target field: " + targetField);
 
         // Sort mapping rules by priority (lower numbers = higher priority)
         mappingRules.sort((r1, r2) -> {
@@ -548,7 +550,7 @@ public class YamlEnrichmentProcessor {
                     anyRuleMatched = true;  // Phase 5: Track that a rule matched
 
                     if (logMatchedRule) {
-                        LOGGER.info("Matched mapping rule: " + rule.getId() + " (priority: " + rule.getPriority() + ")");
+                        logger.info("Matched mapping rule: " + rule.getId() + " (priority: " + rule.getPriority() + ")");
                     }
 
                     // Apply the mapping
@@ -557,25 +559,25 @@ public class YamlEnrichmentProcessor {
                     // Set the target field
                     setFieldValue(targetObject, targetField, mappedValue);
 
-                    LOGGER.fine("Applied mapping rule '" + rule.getId() + "' to field '" + targetField + "' with value: " + mappedValue);
+                    logger.debug("Applied mapping rule '" + rule.getId() + "' to field '" + targetField + "' with value: " + mappedValue);
 
                     // Stop on first match if configured to do so
                     if (stopOnFirstMatch) {
-                        LOGGER.fine("Stopping after first match as configured");
+                        logger.debug("Stopping after first match as configured");
                         break;
                     }
                 } else {
-                    LOGGER.finest("Mapping rule '" + rule.getId() + "' conditions not met, skipping");
+                    logger.trace("Mapping rule '" + rule.getId() + "' conditions not met, skipping");
                 }
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Failed to process mapping rule '" + rule.getId() + "': " + e.getMessage(), e);
+                logger.warn("Failed to process mapping rule '" + rule.getId() + "': " + e.getMessage(), e);
             }
         }
 
         // Phase 5: Store result-field if configured (boolean indicating if any mapping matched)
         if (enrichment.getResultField() != null) {
             setFieldValue(targetObject, enrichment.getResultField(), anyRuleMatched);
-            LOGGER.info("Phase 5: Stored conditional-mapping result in field: " + enrichment.getResultField() + " = " + anyRuleMatched);
+            logger.info("Phase 5: Stored conditional-mapping result in field: " + enrichment.getResultField() + " = " + anyRuleMatched);
         }
 
         return targetObject;
@@ -590,7 +592,7 @@ public class YamlEnrichmentProcessor {
      */
     private boolean evaluateConditionGroup(YamlEnrichment.ConditionGroup conditionGroup, Object targetObject) {
         if (conditionGroup == null || conditionGroup.getRules() == null || conditionGroup.getRules().isEmpty()) {
-            LOGGER.fine("No conditions to evaluate, returning true");
+            logger.debug("No conditions to evaluate, returning true");
             return true;
         }
 
@@ -599,7 +601,7 @@ public class YamlEnrichmentProcessor {
             operator = "AND"; // Default to AND if not specified
         }
 
-        LOGGER.finest("Evaluating condition group with operator: " + operator);
+        logger.trace("Evaluating condition group with operator: " + operator);
 
         StandardEvaluationContext context = createEvaluationContext(targetObject);
 
@@ -609,11 +611,11 @@ public class YamlEnrichmentProcessor {
         } else if ("AND".equalsIgnoreCase(operator)) {
             result = evaluateAndConditions(conditionGroup.getRules(), context);
         } else {
-            LOGGER.warning("Unknown condition operator: " + operator + ", defaulting to AND");
+            logger.warn("Unknown condition operator: " + operator + ", defaulting to AND");
             result = evaluateAndConditions(conditionGroup.getRules(), context);
         }
 
-        LOGGER.fine("Condition group evaluation result: " + result);
+        logger.debug("Condition group evaluation result: " + result);
         return result;
     }
 
@@ -624,12 +626,12 @@ public class YamlEnrichmentProcessor {
         for (YamlEnrichment.ConditionRule rule : rules) {
             try {
                 if (evaluateConditionRule(rule, context)) {
-                    LOGGER.finest("OR condition met: " + rule.getCondition());
+                    logger.trace("OR condition met: " + rule.getCondition());
                     return true; // Short-circuit on first true condition
                 }
             } catch (Exception e) {
                 // ERROR: OR condition evaluation failure indicates configuration problem
-                LOGGER.log(Level.SEVERE, "ERROR: Failed to evaluate OR condition: '" + rule.getCondition() +
+                logger.error("ERROR: Failed to evaluate OR condition: '" + rule.getCondition() +
                           "' - Error: " + e.getMessage(), e);
             }
         }
@@ -643,12 +645,12 @@ public class YamlEnrichmentProcessor {
         for (YamlEnrichment.ConditionRule rule : rules) {
             try {
                 if (!evaluateConditionRule(rule, context)) {
-                    LOGGER.finest("AND condition failed: " + rule.getCondition());
+                    logger.trace("AND condition failed: " + rule.getCondition());
                     return false; // Short-circuit on first false condition
                 }
             } catch (Exception e) {
                 // ERROR: AND condition evaluation failure indicates configuration problem
-                LOGGER.log(Level.SEVERE, "ERROR: Failed to evaluate AND condition: '" + rule.getCondition() +
+                logger.error("ERROR: Failed to evaluate AND condition: '" + rule.getCondition() +
                           "' - Error: " + e.getMessage(), e);
                 return false; // Treat evaluation errors as false for AND logic
             }
@@ -679,7 +681,7 @@ public class YamlEnrichmentProcessor {
             }
         } catch (Exception e) {
             // ERROR: Condition evaluation failure indicates configuration problem
-            LOGGER.log(Level.SEVERE, "ERROR: Failed to evaluate condition: '" + rule.getCondition() +
+            logger.error("ERROR: Failed to evaluate condition: '" + rule.getCondition() +
                       "' - Error: " + e.getMessage(), e);
             return false;
         }
@@ -702,7 +704,7 @@ public class YamlEnrichmentProcessor {
         if (lookupConfig.getCacheEnabled() != null && lookupConfig.getCacheEnabled()) {
             Object cached = cacheManager.get(ApexCacheManager.LOOKUP_RESULT_CACHE, cacheKey);
             if (cached != null) {
-                LOGGER.finest("Cache hit for lookup key: " + lookupKey);
+                logger.trace("Cache hit for lookup key: " + lookupKey);
                 return cached;
             }
         }
@@ -715,7 +717,7 @@ public class YamlEnrichmentProcessor {
             long ttlSeconds = lookupConfig.getCacheTtlSeconds() != null ?
                            lookupConfig.getCacheTtlSeconds() : 300L;
             cacheManager.put(ApexCacheManager.LOOKUP_RESULT_CACHE, cacheKey, result, ttlSeconds);
-            LOGGER.finest("Cached lookup result for key: " + lookupKey);
+            logger.trace("Cached lookup result for key: " + lookupKey);
         }
 
         return result;
@@ -732,7 +734,7 @@ public class YamlEnrichmentProcessor {
     private Object applyFieldMappings(List<YamlEnrichment.FieldMapping> fieldMappings,
                                      Object sourceObject, Object targetObject) {
         if (fieldMappings == null || fieldMappings.isEmpty()) {
-            LOGGER.fine("No field mappings to apply");
+            logger.debug("No field mappings to apply");
             return targetObject;
         }
 
@@ -744,27 +746,27 @@ public class YamlEnrichmentProcessor {
         boolean hasRequiredFieldFailure = false;
 
         if (isFailedLookup) {
-            LOGGER.fine("Source object is a simple value (likely failed lookup), applying only default values");
+            logger.debug("Source object is a simple value (likely failed lookup), applying only default values");
         }
 
-        LOGGER.fine("Applying " + fieldMappings.size() + " field mappings from " +
+        logger.debug("Applying " + fieldMappings.size() + " field mappings from " +
                    (sourceObject != null ? sourceObject.getClass().getSimpleName() : "null") +
                    " to " + targetObject.getClass().getSimpleName());
 
         for (YamlEnrichment.FieldMapping mapping : fieldMappings) {
             try {
-                LOGGER.finest("Processing field mapping: " + mapping.getSourceField() + " -> " + mapping.getTargetField());
+                logger.trace("Processing field mapping: " + mapping.getSourceField() + " -> " + mapping.getTargetField());
 
                 Object sourceValue = null;
 
                 // For failed lookups, don't try to extract source values
                 if (!isFailedLookup) {
                     sourceValue = getFieldValue(sourceObject, mapping.getSourceField());
-                    LOGGER.finest("Source value for '" + mapping.getSourceField() + "': " + sourceValue);
+                    logger.trace("Source value for '" + mapping.getSourceField() + "': " + sourceValue);
 
                     // Handle missing required fields (only for successful lookups)
                     if (sourceValue == null && mapping.getRequired() != null && mapping.getRequired()) {
-                        LOGGER.severe("CRITICAL ERROR: Required field '" + mapping.getSourceField() +
+                        logger.error("CRITICAL ERROR: Required field '" + mapping.getSourceField() +
                                     "' is missing from lookup result");
                         hasRequiredFieldFailure = true;
                         // Skip this mapping and continue with next one
@@ -774,23 +776,23 @@ public class YamlEnrichmentProcessor {
 
                 // Use default value if source value is null (or for failed lookups)
                 Object valueToSet = sourceValue != null ? sourceValue : mapping.getDefaultValue();
-                LOGGER.finest("Value to set (after defaults): " + valueToSet);
+                logger.trace("Value to set (after defaults): " + valueToSet);
 
-                // Apply transformation if specified
-                if (mapping.getTransformation() != null && !mapping.getTransformation().trim().isEmpty()) {
-                    valueToSet = applyTransformation(mapping.getTransformation(), valueToSet, targetObject);
-                    LOGGER.finest("Value after transformation: " + valueToSet);
+                // Apply expression if specified
+                if (mapping.getExpression() != null && !mapping.getExpression().trim().isEmpty()) {
+                    valueToSet = applyExpression(mapping.getExpression(), valueToSet, targetObject);
+                    logger.trace("Value after expression: " + valueToSet);
                 }
 
                 // Set the target field only if we have a value to set
                 if (valueToSet != null) {
                     setFieldValue(targetObject, mapping.getTargetField(), valueToSet);
-                    LOGGER.fine("Successfully mapped field: " + mapping.getSourceField() + " -> " +
+                    logger.debug("Successfully mapped field: " + mapping.getSourceField() + " -> " +
                                mapping.getTargetField() + " (value: " + valueToSet + ")");
                 }
 
             } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Failed to apply field mapping: " +
+                logger.warn("Failed to apply field mapping: " +
                           mapping.getSourceField() + " -> " + mapping.getTargetField() +
                           ": " + e.getMessage(), e);
             }
@@ -805,25 +807,25 @@ public class YamlEnrichmentProcessor {
     }
 
     /**
-     * Apply transformation expression to a value.
+     * Apply expression to a value.
      *
-     * @param transformation The SpEL transformation expression
+     * @param expression The SpEL expression
      * @param value The value to transform
      * @param context The context object
      * @return The transformed value
      */
-    private Object applyTransformation(String transformation, Object value, Object context) {
+    private Object applyExpression(String expression, Object value, Object context) {
         try {
             StandardEvaluationContext evalContext = createEvaluationContext(context);
             evalContext.setVariable("value", value);
 
-            Expression transformExpr = getOrCompileExpression(transformation);
-            return transformExpr.getValue(evalContext);
+            Expression expr = getOrCompileExpression(expression);
+            return expr.getValue(evalContext);
 
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Failed to apply transformation '" + transformation +
+            logger.warn("Failed to apply expression '" + expression +
                       "' to value: " + value, e);
-            return value; // Return original value on transformation failure
+            return value; // Return original value on expression failure
         }
     }
 
@@ -836,32 +838,32 @@ public class YamlEnrichmentProcessor {
      */
     private Object getFieldValue(Object object, String fieldName) {
         if (object == null || fieldName == null) {
-            LOGGER.fine("getFieldValue called with null object or fieldName");
+            logger.debug("getFieldValue called with null object or fieldName");
             return null;
         }
 
         // NEW: If fieldName starts with #, treat it as a SpEL expression
         if (fieldName.startsWith("#")) {
             try {
-                LOGGER.finest("Evaluating SpEL expression for field: " + fieldName);
+                logger.trace("Evaluating SpEL expression for field: " + fieldName);
                 StandardEvaluationContext context = createEvaluationContext(object);
                 Expression expr = getOrCompileExpression(fieldName);
                 Object value = expr.getValue(context);
-                LOGGER.finest("SpEL expression '" + fieldName + "' evaluated to: " + value);
+                logger.trace("SpEL expression '" + fieldName + "' evaluated to: " + value);
                 return value;
             } catch (Exception e) {
-                LOGGER.warning("Failed to evaluate SpEL expression '" + fieldName + "': " + e.getMessage());
+                logger.warn("Failed to evaluate SpEL expression '" + fieldName + "': " + e.getMessage());
                 return null;
             }
         }
 
         // EXISTING: Simple field lookup for non-SpEL field names
-        LOGGER.finest("Getting field '" + fieldName + "' from object of type: " + object.getClass().getSimpleName());
+        logger.trace("Getting field '" + fieldName + "' from object of type: " + object.getClass().getSimpleName());
 
         // Handle Map objects
         if (object instanceof Map) {
             Object value = ((Map<?, ?>) object).get(fieldName);
-            LOGGER.finest("Map lookup for '" + fieldName + "' returned: " + value);
+            logger.trace("Map lookup for '" + fieldName + "' returned: " + value);
             return value;
         }
 
@@ -871,7 +873,7 @@ public class YamlEnrichmentProcessor {
             String getterName = "get" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
             Method getter = object.getClass().getMethod(getterName);
             Object value = getter.invoke(object);
-            LOGGER.finest("Getter method lookup for '" + fieldName + "' returned: " + value);
+            logger.trace("Getter method lookup for '" + fieldName + "' returned: " + value);
             return value;
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             // Try boolean getter (isXxx)
@@ -879,10 +881,10 @@ public class YamlEnrichmentProcessor {
                 String booleanGetterName = "is" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
                 Method booleanGetter = object.getClass().getMethod(booleanGetterName);
                 Object value = booleanGetter.invoke(object);
-                LOGGER.finest("Boolean getter method lookup for '" + fieldName + "' returned: " + value);
+                logger.trace("Boolean getter method lookup for '" + fieldName + "' returned: " + value);
                 return value;
             } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e2) {
-                LOGGER.fine("No getter method found for field '" + fieldName + "' on object of type " +
+                logger.debug("No getter method found for field '" + fieldName + "' on object of type " +
                            object.getClass().getSimpleName());
                 return null;
             }
@@ -898,27 +900,27 @@ public class YamlEnrichmentProcessor {
      */
     private void setFieldValue(Object object, String fieldName, Object value) {
         if (object == null || fieldName == null) {
-            LOGGER.fine("setFieldValue called with null object or fieldName");
+            logger.debug("setFieldValue called with null object or fieldName");
             return;
         }
 
         // NEW: If fieldName starts with #, treat it as a SpEL expression for setting
         if (fieldName.startsWith("#")) {
             try {
-                LOGGER.finest("Setting value via SpEL expression: " + fieldName);
+                logger.trace("Setting value via SpEL expression: " + fieldName);
                 StandardEvaluationContext context = createEvaluationContext(object);
                 Expression expr = getOrCompileExpression(fieldName);
                 expr.setValue(context, value);
-                LOGGER.finest("Successfully set field via SpEL '" + fieldName + "' to: " + value);
+                logger.trace("Successfully set field via SpEL '" + fieldName + "' to: " + value);
                 return;
             } catch (Exception e) {
-                LOGGER.warning("Failed to set field via SpEL expression '" + fieldName + "': " + e.getMessage());
+                logger.warn("Failed to set field via SpEL expression '" + fieldName + "': " + e.getMessage());
                 return;
             }
         }
 
         // EXISTING: Simple field setting for non-SpEL field names
-        LOGGER.finest("Setting field '" + fieldName + "' to value: " + value +
+        logger.trace("Setting field '" + fieldName + "' to value: " + value +
                      " on object of type: " + object.getClass().getSimpleName());
 
         // Handle Map objects
@@ -926,7 +928,7 @@ public class YamlEnrichmentProcessor {
             @SuppressWarnings("unchecked")
             Map<String, Object> map = (Map<String, Object>) object;
             map.put(fieldName, value);
-            LOGGER.finest("Successfully set map key '" + fieldName + "' to: " + value);
+            logger.trace("Successfully set map key '" + fieldName + "' to: " + value);
             return;
         }
 
@@ -936,7 +938,7 @@ public class YamlEnrichmentProcessor {
             String setterName = "set" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
             Method setter = object.getClass().getMethod(setterName, value.getClass());
             setter.invoke(object, value);
-            LOGGER.finest("Successfully set field '" + fieldName + "' to: " + value);
+            logger.trace("Successfully set field '" + fieldName + "' to: " + value);
         } catch (NoSuchMethodException e) {
             // Try with different parameter types if exact match fails
             try {
@@ -947,19 +949,19 @@ public class YamlEnrichmentProcessor {
                         Class<?> paramType = method.getParameterTypes()[0];
                         if (paramType.isAssignableFrom(value.getClass())) {
                             method.invoke(object, value);
-                            LOGGER.finest("Successfully set field '" + fieldName + "' to: " + value);
+                            logger.trace("Successfully set field '" + fieldName + "' to: " + value);
                             return;
                         }
                     }
                 }
-                LOGGER.warning("No suitable setter method found for field '" + fieldName + "' on object of type " +
+                logger.warn("No suitable setter method found for field '" + fieldName + "' on object of type " +
                               object.getClass().getSimpleName());
             } catch (IllegalAccessException | InvocationTargetException e2) {
-                LOGGER.log(Level.WARNING, "Could not invoke setter for field '" + fieldName + "' on object of type " +
+                logger.warn("Could not invoke setter for field '" + fieldName + "' on object of type " +
                           object.getClass().getSimpleName() + ": " + e2.getMessage(), e2);
             }
         } catch (IllegalAccessException | InvocationTargetException e) {
-            LOGGER.log(Level.WARNING, "Could not invoke setter for field '" + fieldName + "' on object of type " +
+            logger.warn("Could not invoke setter for field '" + fieldName + "' on object of type " +
                       object.getClass().getSimpleName() + ": " + e.getMessage(), e);
         }
     }
@@ -1026,7 +1028,7 @@ public class YamlEnrichmentProcessor {
         cacheManager.clearScope(ApexCacheManager.LOOKUP_RESULT_CACHE);
         cacheManager.clearScope(ApexCacheManager.EXPRESSION_CACHE);
         cacheManager.clearScope(ApexCacheManager.DATASET_CACHE);
-        LOGGER.info("All caches cleared");
+        logger.info("All caches cleared");
     }
 
     /**
@@ -1081,7 +1083,7 @@ public class YamlEnrichmentProcessor {
                 throw new EnrichmentException("Lookup service not found: " + serviceName);
             }
 
-            LOGGER.fine("Resolved external lookup service: " + serviceName);
+            logger.debug("Resolved external lookup service: " + serviceName);
             return service;
         }
 
@@ -1096,7 +1098,7 @@ public class YamlEnrichmentProcessor {
             // Check cache first
             Object cached = cacheManager.get(ApexCacheManager.DATASET_CACHE, cacheKey);
             if (cached instanceof DatasetLookupService) {
-                LOGGER.info("✅ Dataset cache HIT for signature: " + signature.toShortString());
+                logger.info("✅ Dataset cache HIT for signature: " + signature.toShortString());
                 return (DatasetLookupService) cached;
             }
 
@@ -1110,7 +1112,7 @@ public class YamlEnrichmentProcessor {
                 // Cache the dataset service
                 cacheManager.put(ApexCacheManager.DATASET_CACHE, cacheKey, datasetService);
 
-                LOGGER.info("❌ Dataset cache MISS - Created and cached dataset lookup service: " + datasetServiceName +
+                logger.info("❌ Dataset cache MISS - Created and cached dataset lookup service: " + datasetServiceName +
                            " (type: " + dataset.getType() + ", records: " +
                            datasetService.getAllRecords().size() + ", signature: " + signature.toShortString() + ")");
 
@@ -1168,12 +1170,12 @@ public class YamlEnrichmentProcessor {
             // This allows enrichments to reference #ruleResults['rule-id'] in document order mode
             for (Map.Entry<String, Boolean> entry : ruleResults.entrySet()) {
                 individualRuleResults.put(entry.getKey(), entry.getValue());
-                LOGGER.fine("Stored individual rule result from group: " + entry.getKey() + " -> passed=" + entry.getValue());
+                logger.debug("Stored individual rule result from group: " + entry.getKey() + " -> passed=" + entry.getValue());
             }
         }
 
         ruleGroupResults.put(ruleGroupId, groupRuleResults);
-        LOGGER.fine("Stored rule group result: " + ruleGroupId + " -> passed=" + passed);
+        logger.debug("Stored rule group result: " + ruleGroupId + " -> passed=" + passed);
     }
 
     /**
@@ -1185,7 +1187,7 @@ public class YamlEnrichmentProcessor {
      */
     public void storeIndividualRuleResult(String ruleId, boolean passed) {
         individualRuleResults.put(ruleId, passed);
-        LOGGER.fine("Stored individual rule result: " + ruleId + " -> passed=" + passed);
+        logger.debug("Stored individual rule result: " + ruleId + " -> passed=" + passed);
     }
 
     /**
@@ -1199,14 +1201,14 @@ public class YamlEnrichmentProcessor {
         ruleGroupResults.clear();
         individualRuleResults.clear();
 
-        LOGGER.fine("Processing rules and rule groups for conditional mapping...");
+        logger.debug("Processing rules and rule groups for conditional mapping...");
 
         try {
             StandardEvaluationContext context = createEvaluationContext(targetObject);
 
             // Process individual rules first
             if (configuration.getRules() != null) {
-                LOGGER.fine("Processing " + configuration.getRules().size() + " individual rules...");
+                logger.debug("Processing " + configuration.getRules().size() + " individual rules...");
                 for (YamlRule yamlRule : configuration.getRules()) {
                     try {
                         // Create Rule object from YAML configuration
@@ -1225,11 +1227,11 @@ public class YamlEnrichmentProcessor {
                         // Store individual rule result using YAML rule ID
                         individualRuleResults.put(yamlRule.getId(), result);
 
-                        LOGGER.fine("Rule '" + yamlRule.getId() + "' evaluated to: " + result);
+                        logger.debug("Rule '" + yamlRule.getId() + "' evaluated to: " + result);
 
                     } catch (Exception e) {
                         // CRITICAL: Rule evaluation failure is a serious configuration error
-                        LOGGER.log(Level.SEVERE, "CRITICAL: Rule evaluation failed for '" + yamlRule.getId() +
+                        logger.error("CRITICAL: Rule evaluation failed for '" + yamlRule.getId() +
                                   "' - condition: '" + yamlRule.getCondition() + "' - Error: " + e.getMessage(), e);
                         individualRuleResults.put(yamlRule.getId(), false);
                     }
@@ -1238,7 +1240,7 @@ public class YamlEnrichmentProcessor {
 
             // Process rule groups
             if (configuration.getRuleGroups() != null) {
-                LOGGER.fine("Processing " + configuration.getRuleGroups().size() + " rule groups...");
+                logger.debug("Processing " + configuration.getRuleGroups().size() + " rule groups...");
                 for (YamlRuleGroup yamlRuleGroup : configuration.getRuleGroups()) {
                     try {
                         // Create RuleGroup object from YAML configuration
@@ -1293,11 +1295,11 @@ public class YamlEnrichmentProcessor {
 
                         ruleGroupResults.put(yamlRuleGroup.getId(), groupRuleResults);
 
-                        LOGGER.fine("Rule group '" + yamlRuleGroup.getId() + "' evaluated to: " + groupResult);
+                        logger.debug("Rule group '" + yamlRuleGroup.getId() + "' evaluated to: " + groupResult);
 
                     } catch (Exception e) {
                         // CRITICAL: Rule group evaluation failure is a serious configuration error
-                        LOGGER.log(Level.SEVERE, "CRITICAL: Rule group evaluation failed for '" + yamlRuleGroup.getId() +
+                        logger.error("CRITICAL: Rule group evaluation failed for '" + yamlRuleGroup.getId() +
                                   "' - Error: " + e.getMessage(), e);
                         Map<String, Object> failedResult = new HashMap<>();
                         failedResult.put("passed", false);
@@ -1310,7 +1312,7 @@ public class YamlEnrichmentProcessor {
 
         } catch (Exception e) {
             // CRITICAL: General rules/rule groups processing failure is a serious system error
-            LOGGER.log(Level.SEVERE, "CRITICAL: Error processing rules and rule groups - System Error: " + e.getMessage(), e);
+            logger.error("CRITICAL: Error processing rules and rule groups - System Error: " + e.getMessage(), e);
         }
     }
 
@@ -1344,7 +1346,7 @@ public class YamlEnrichmentProcessor {
 
         // If no conditions specified, this is a default rule that always matches
         if (conditions == null) {
-            LOGGER.finest("No conditions specified for rule '" + rule.getId() + "', treating as default rule");
+            logger.trace("No conditions specified for rule '" + rule.getId() + "', treating as default rule");
             return true;
         }
 
@@ -1363,7 +1365,7 @@ public class YamlEnrichmentProcessor {
         YamlEnrichment.MappingConfig mapping = rule.getMapping();
 
         if (mapping == null) {
-            LOGGER.warning("Mapping rule '" + rule.getId() + "' has no mapping configuration");
+            logger.warn("Mapping rule '" + rule.getId() + "' has no mapping configuration");
             return null;
         }
 
@@ -1378,11 +1380,11 @@ public class YamlEnrichmentProcessor {
             } else if ("lookup".equalsIgnoreCase(mappingType)) {
                 return applyLookupMapping(mapping, targetObject);
             } else {
-                LOGGER.warning("Unknown mapping type '" + mappingType + "' for rule: " + rule.getId());
+                logger.warn("Unknown mapping type '" + mappingType + "' for rule: " + rule.getId());
                 return null;
             }
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Failed to apply mapping for rule '" + rule.getId() + "': " + e.getMessage(), e);
+            logger.warn("Failed to apply mapping for rule '" + rule.getId() + "': " + e.getMessage(), e);
 
             // Try fallback value if available
             if (mapping.getFallbackValue() != null && !mapping.getFallbackValue().trim().isEmpty()) {
@@ -1391,7 +1393,7 @@ public class YamlEnrichmentProcessor {
                     Expression fallbackExpr = getOrCompileExpression(mapping.getFallbackValue());
                     return fallbackExpr.getValue(context);
                 } catch (Exception fallbackException) {
-                    LOGGER.log(Level.WARNING, "Failed to apply fallback value: " + fallbackException.getMessage(), fallbackException);
+                    logger.warn("Failed to apply fallback value: " + fallbackException.getMessage(), fallbackException);
                 }
             }
 
@@ -1405,10 +1407,10 @@ public class YamlEnrichmentProcessor {
     private Object applyDirectMapping(YamlEnrichment.MappingConfig mapping, Object targetObject) {
         StandardEvaluationContext context = createEvaluationContext(targetObject);
 
-        // If transformation is specified, use it
-        if (mapping.getTransformation() != null && !mapping.getTransformation().trim().isEmpty()) {
-            Expression transformExpr = getOrCompileExpression(mapping.getTransformation());
-            return transformExpr.getValue(context);
+        // If expression is specified, use it
+        if (mapping.getExpression() != null && !mapping.getExpression().trim().isEmpty()) {
+            Expression expr = getOrCompileExpression(mapping.getExpression());
+            return expr.getValue(context);
         }
 
         // Otherwise, use source field directly
@@ -1417,23 +1419,23 @@ public class YamlEnrichmentProcessor {
             return sourceExpr.getValue(context);
         }
 
-        LOGGER.warning("Direct mapping has neither transformation nor source-field");
+        logger.warn("Direct mapping has neither expression nor source-field");
         return null;
     }
 
     /**
-     * Apply lookup mapping (database/external lookup with transformation).
+     * Apply lookup mapping (database/external lookup with expression).
      */
     private Object applyLookupMapping(YamlEnrichment.MappingConfig mapping, Object targetObject) {
         // This is a simplified implementation - in a full implementation,
         // you would use the lookup-config to perform the actual lookup
-        LOGGER.warning("Lookup mapping not fully implemented yet for conditional-mapping-enrichment");
+        logger.warn("Lookup mapping not fully implemented yet for conditional-mapping-enrichment");
 
-        // For now, fall back to transformation if available
-        if (mapping.getTransformation() != null && !mapping.getTransformation().trim().isEmpty()) {
+        // For now, fall back to expression if available
+        if (mapping.getExpression() != null && !mapping.getExpression().trim().isEmpty()) {
             StandardEvaluationContext context = createEvaluationContext(targetObject);
-            Expression transformExpr = getOrCompileExpression(mapping.getTransformation());
-            return transformExpr.getValue(context);
+            Expression expr = getOrCompileExpression(mapping.getExpression());
+            return expr.getValue(context);
         }
 
         return null;
@@ -1466,7 +1468,7 @@ public class YamlEnrichmentProcessor {
      */
     public RuleResult processEnrichmentsWithResult(List<YamlEnrichment> enrichments, Object targetObject,
                                                   dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
-        LOGGER.fine("Processing enrichments with result tracking for " + (enrichments != null ? enrichments.size() : 0) + " enrichments");
+        logger.debug("Processing enrichments with result tracking for " + (enrichments != null ? enrichments.size() : 0) + " enrichments");
 
         // Convert target object to Map for consistent handling
         Map<String, Object> originalData = convertToMap(targetObject);
@@ -1487,7 +1489,7 @@ public class YamlEnrichmentProcessor {
                 if (enrichmentFailed) {
                     overallSuccess = false;
                     failureMessages.add("Required field enrichment failed - check logs for CRITICAL ERROR details");
-                    LOGGER.warning("Enrichment failed due to required field mapping failures");
+                    logger.warn("Enrichment failed due to required field mapping failures");
                 }
             }
 
@@ -1496,15 +1498,15 @@ public class YamlEnrichmentProcessor {
 
             // Return appropriate RuleResult with aggregated severity
             if (overallSuccess) {
-                LOGGER.fine("Enrichment processing completed successfully with severity: " + aggregatedSeverity);
+                logger.debug("Enrichment processing completed successfully with severity: " + aggregatedSeverity);
                 return RuleResult.enrichmentSuccess(enrichedData, aggregatedSeverity);
             } else {
-                LOGGER.warning("Enrichment processing completed with failures, severity: " + aggregatedSeverity);
+                logger.warn("Enrichment processing completed with failures, severity: " + aggregatedSeverity);
                 return RuleResult.enrichmentFailure(failureMessages, enrichedData, aggregatedSeverity);
             }
 
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Exception during enrichment processing: " + e.getMessage(), e);
+            logger.error("Exception during enrichment processing: " + e.getMessage(), e);
             failureMessages.add("Enrichment processing exception: " + e.getMessage());
             return RuleResult.enrichmentFailure(failureMessages, originalData, SeverityConstants.ERROR);
         }
@@ -1535,7 +1537,7 @@ public class YamlEnrichmentProcessor {
     public RuleResult processEnrichmentWithResult(YamlEnrichment enrichment, Object targetObject,
                                                   dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
         if (enrichment == null) {
-            LOGGER.fine("No enrichment provided");
+            logger.debug("No enrichment provided");
             Map<String, Object> resultData = convertToMap(targetObject);
             return RuleResult.enrichmentSuccess(resultData);
         }
@@ -1570,7 +1572,7 @@ public class YamlEnrichmentProcessor {
 
                         // Check if the required target field is missing or null in enriched data
                         if (!enrichedData.containsKey(targetField) || enrichedData.get(targetField) == null) {
-                            LOGGER.fine("Required field '" + targetField + "' is missing from enriched data");
+                            logger.debug("Required field '" + targetField + "' is missing from enriched data");
                             hasFailures = true;
                         }
                     }
@@ -1636,7 +1638,7 @@ public class YamlEnrichmentProcessor {
             }
         }
 
-        LOGGER.fine("Aggregated enrichment severity: " + highestSeverity + " from " + enrichments.size() + " enrichments");
+        logger.debug("Aggregated enrichment severity: " + highestSeverity + " from " + enrichments.size() + " enrichments");
         return highestSeverity;
     }
 
@@ -1791,7 +1793,7 @@ public class YamlEnrichmentProcessor {
                 return codeExpression;
             }
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error evaluating code expression '" + codeExpression + "': " + e.getMessage(), e);
+            logger.warn("Error evaluating code expression '" + codeExpression + "': " + e.getMessage(), e);
             return null;
         }
     }
@@ -1829,7 +1831,7 @@ public class YamlEnrichmentProcessor {
                     }
                 }
             } catch (Exception e) {
-                LOGGER.warning("Failed to copy variables from original context: " + e.getMessage());
+                logger.warn("Failed to copy variables from original context: " + e.getMessage());
                 // Fallback: copy only the "this" variable
                 if (context.lookupVariable("this") != null) {
                     mappingContext.setVariable("this", context.lookupVariable("this"));
@@ -1862,7 +1864,7 @@ public class YamlEnrichmentProcessor {
                 applyCodeFieldMapping(mapping, mappingContext, targetObject);
             }
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error applying field mappings: " + e.getMessage(), e);
+            logger.warn("Error applying field mappings: " + e.getMessage(), e);
         }
     }
 
@@ -1879,7 +1881,7 @@ public class YamlEnrichmentProcessor {
             // Parse the mapping: "fieldName = expression"
             String[] parts = mapping.split("=", 2);
             if (parts.length != 2) {
-                LOGGER.warning("Invalid field mapping format: " + mapping + ". Expected 'fieldName = expression'");
+                logger.warn("Invalid field mapping format: " + mapping + ". Expected 'fieldName = expression'");
                 return;
             }
 
@@ -1892,9 +1894,9 @@ public class YamlEnrichmentProcessor {
 
             // Store the mapped value in the target object
             setFieldValue(targetObject, fieldName, value);
-            LOGGER.info("Applied field mapping: " + fieldName + " = " + value);
+            logger.info("Applied field mapping: " + fieldName + " = " + value);
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error applying field mapping '" + mapping + "': " + e.getMessage(), e);
+            logger.warn("Error applying field mapping '" + mapping + "': " + e.getMessage(), e);
         }
     }
 }

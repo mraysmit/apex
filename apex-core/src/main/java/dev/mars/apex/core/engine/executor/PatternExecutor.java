@@ -7,11 +7,12 @@ import dev.mars.apex.core.engine.model.RuleChainResult;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.engine.RuleEngineService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -50,7 +51,7 @@ public abstract class PatternExecutor {
      * @param evaluatorService The expression evaluator service for evaluating SpEL expressions
      */
     protected PatternExecutor(RuleEngineService ruleEngineService, ExpressionEvaluatorService evaluatorService) {
-        this.logger = Logger.getLogger(this.getClass().getName());
+        this.logger = LoggerFactory.getLogger(this.getClass());
         this.ruleEngineService = ruleEngineService;
         this.evaluatorService = evaluatorService;
     }
@@ -92,21 +93,21 @@ public abstract class PatternExecutor {
         try {
             context.setCurrentRule(rule.getName());
             context.addToExecutionPath(rule.getName());
-            
-            logger.fine("Executing rule: " + rule.getName());
-            
+
+            logger.debug("Executing rule: " + rule.getName());
+
             List<RuleResult> results = ruleEngineService.evaluateRules(Arrays.asList(rule), context);
             RuleResult result = results.isEmpty() ? RuleResult.noMatch() : results.get(0);
-            
+
             resultBuilder.addRuleResult(result);
             resultBuilder.addToExecutionPath(rule.getName());
-            
-            logger.fine("Rule '" + rule.getName() + "' result: " + (result.isTriggered() ? "TRIGGERED" : "NOT TRIGGERED"));
-            
+
+            logger.debug("Rule '" + rule.getName() + "' result: " + (result.isTriggered() ? "TRIGGERED" : "NOT TRIGGERED"));
+
             return result;
-            
+
         } catch (Exception e) {
-            logger.warning("Error executing rule '" + rule.getName() + "': " + e.getMessage());
+            logger.warn("Error executing rule '" + rule.getName() + "': " + e.getMessage());
             RuleResult errorResult = RuleResult.error(rule.getName(), "Execution error: " + e.getMessage());
             resultBuilder.addRuleResult(errorResult);
             return errorResult;
@@ -126,7 +127,7 @@ public abstract class PatternExecutor {
         try {
             return evaluatorService.evaluate(expression, context, resultType);
         } catch (Exception e) {
-            logger.warning("Error evaluating expression '" + expression + "': " + e.getMessage());
+            logger.warn("Error evaluating expression '" + expression + "': " + e.getMessage());
             throw new RuntimeException("Expression evaluation failed: " + expression, e);
         }
     }
@@ -177,7 +178,7 @@ public abstract class PatternExecutor {
             try {
                 return Integer.parseInt((String) value);
             } catch (NumberFormatException e) {
-                logger.warning("Invalid integer value for key '" + key + "': " + value);
+                logger.warn("Invalid integer value for key '" + key + "': " + value);
                 return defaultValue;
             }
         }

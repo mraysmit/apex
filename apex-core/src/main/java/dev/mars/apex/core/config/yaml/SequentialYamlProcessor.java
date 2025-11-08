@@ -1,9 +1,12 @@
 package dev.mars.apex.core.config.yaml;
 
 import dev.mars.apex.core.config.yaml.OrderedYamlConfiguration.ProcessingMode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Sequential YAML processor that respects document order.
@@ -29,7 +32,7 @@ import java.util.logging.Logger;
  */
 public class SequentialYamlProcessor {
     
-    private static final Logger LOGGER = Logger.getLogger(SequentialYamlProcessor.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(SequentialYamlProcessor.class);
 
     private final OrderedYamlParser orderedParser;
     /**
@@ -39,7 +42,7 @@ public class SequentialYamlProcessor {
         this.orderedParser = new OrderedYamlParser();
         new DeferredDependencyResolver();
 
-        LOGGER.info("SequentialYamlProcessor initialized - ready to fix APEX's fundamental design flaw");
+        logger.info("SequentialYamlProcessor initialized - ready to fix APEX's fundamental design flaw");
     }
     
     /**
@@ -50,7 +53,7 @@ public class SequentialYamlProcessor {
      * @throws YamlConfigurationException if processing fails
      */
     public SequentialProcessingResult processFile(String filePath) throws YamlConfigurationException {
-        LOGGER.info("Starting sequential processing of file: " + filePath);
+        logger.info("Starting sequential processing of file: " + filePath);
         
         // Step 1: Parse YAML with preserved order
         OrderedYamlConfiguration orderedConfig = orderedParser.parseFile(filePath);
@@ -79,7 +82,7 @@ public class SequentialYamlProcessor {
      * @throws YamlConfigurationException if processing fails
      */
     public SequentialProcessingResult processYamlString(String yamlContent, String source) throws YamlConfigurationException {
-        LOGGER.info("Starting sequential processing of YAML string from: " + source);
+        logger.info("Starting sequential processing of YAML string from: " + source);
         
         // Step 1: Parse YAML with preserved order
         OrderedYamlConfiguration orderedConfig = orderedParser.parseYamlString(yamlContent, source);
@@ -100,7 +103,7 @@ public class SequentialYamlProcessor {
             throws YamlConfigurationException {
         
         ProcessingMode mode = orderedConfig.getProcessingMode();
-        LOGGER.info("Processing mode detected: " + mode + " for source: " + source);
+        logger.info("Processing mode detected: " + mode + " for source: " + source);
         
         if (mode == ProcessingMode.STANDARD) {
             return processStandardMode(orderedConfig, source);
@@ -116,7 +119,7 @@ public class SequentialYamlProcessor {
     private SequentialProcessingResult processStandardMode(OrderedYamlConfiguration orderedConfig, String source) 
             throws YamlConfigurationException {
         
-        LOGGER.info("Processing in STANDARD mode (backward compatible) for: " + source);
+        logger.info("Processing in STANDARD mode (backward compatible) for: " + source);
         
         ProcessingContext context = new ProcessingContext(orderedConfig, source, ProcessingMode.STANDARD);
         
@@ -142,16 +145,16 @@ public class SequentialYamlProcessor {
     private SequentialProcessingResult processSequentialMode(OrderedYamlConfiguration orderedConfig, String source) 
             throws YamlConfigurationException {
         
-        LOGGER.info("Processing in SEQUENTIAL mode (respects document order) for: " + source);
+        logger.info("Processing in SEQUENTIAL mode (respects document order) for: " + source);
         
         ProcessingContext context = new ProcessingContext(orderedConfig, source, ProcessingMode.SEQUENTIAL);
         List<String> sectionOrder = orderedConfig.getSectionOrder();
         
-        LOGGER.info("Document section order: " + sectionOrder);
+        logger.info("Document section order: " + sectionOrder);
         
         // Process each section in document order - THIS IS THE FIX!
         for (String sectionName : sectionOrder) {
-            LOGGER.fine("Processing section in document order: " + sectionName);
+            logger.debug("Processing section in document order: " + sectionName);
             
             switch (sectionName) {
                 case "metadata" -> processMetadata(context);
@@ -169,11 +172,11 @@ public class SequentialYamlProcessor {
                 case "data-sinks" -> processDataSinks(context);
                 case "categories" -> processCategories(context);
                 case "error-recovery" -> processErrorRecovery(context);
-                default -> LOGGER.warning("Unknown section encountered: " + sectionName + " in " + source);
+                default -> logger.warn("Unknown section encountered: " + sectionName + " in " + source);
             }
         }
         
-        LOGGER.info("Sequential processing completed for: " + source + " (processed " + sectionOrder.size() + " sections)");
+        logger.info("Sequential processing completed for: " + source + " (processed " + sectionOrder.size() + " sections)");
         
         return new SequentialProcessingResult(context);
     }
@@ -224,7 +227,7 @@ public class SequentialYamlProcessor {
             case "data-sinks" -> processDataSinks(context);
             case "categories" -> processCategories(context);
             case "error-recovery" -> processErrorRecovery(context);
-            default -> LOGGER.warning("Unknown section encountered: " + sectionName + " in " + context.getSource());
+            default -> logger.warn("Unknown section encountered: " + sectionName + " in " + context.getSource());
         }
     }
 
@@ -232,14 +235,14 @@ public class SequentialYamlProcessor {
     
     private void processMetadata(ProcessingContext context) throws YamlConfigurationException {
         if (context.getConfiguration().getConfiguration().getMetadata() != null) {
-            LOGGER.fine("Processing metadata section");
+            logger.debug("Processing metadata section");
             context.recordSectionProcessed("metadata");
         }
     }
     
     private void processDataSources(ProcessingContext context) throws YamlConfigurationException {
         if (context.getConfiguration().getConfiguration().getDataSources() != null) {
-            LOGGER.fine("Processing data-sources section");
+            logger.debug("Processing data-sources section");
             // TODO: Integrate with YamlDataSourceProcessor
             context.recordSectionProcessed("data-sources");
         }
@@ -247,14 +250,14 @@ public class SequentialYamlProcessor {
     
     private void processDataSourceRefs(ProcessingContext context) throws YamlConfigurationException {
         if (context.getConfiguration().getConfiguration().getDataSourceRefs() != null) {
-            LOGGER.fine("Processing data-source-refs section");
+            logger.debug("Processing data-source-refs section");
             context.recordSectionProcessed("data-source-refs");
         }
     }
     
     private void processEnrichments(ProcessingContext context) throws YamlConfigurationException {
         if (context.getConfiguration().getConfiguration().getEnrichments() != null) {
-            LOGGER.fine("Processing enrichments section");
+            logger.debug("Processing enrichments section");
             // TODO: Integrate with YamlEnrichmentProcessor
             context.recordSectionProcessed("enrichments");
         }
@@ -262,14 +265,14 @@ public class SequentialYamlProcessor {
     
     private void processEnrichmentRefs(ProcessingContext context) throws YamlConfigurationException {
         if (context.getConfiguration().getConfiguration().getEnrichmentRefs() != null) {
-            LOGGER.fine("Processing enrichment-refs section");
+            logger.debug("Processing enrichment-refs section");
             context.recordSectionProcessed("enrichment-refs");
         }
     }
     
     private void processRules(ProcessingContext context) throws YamlConfigurationException {
         if (context.getConfiguration().getConfiguration().getRules() != null) {
-            LOGGER.fine("Processing rules section");
+            logger.debug("Processing rules section");
             // TODO: Integrate with YamlRuleProcessor
             context.recordSectionProcessed("rules");
         }
@@ -277,28 +280,28 @@ public class SequentialYamlProcessor {
     
     private void processRuleRefs(ProcessingContext context) throws YamlConfigurationException {
         if (context.getConfiguration().getConfiguration().getRuleRefs() != null) {
-            LOGGER.fine("Processing rule-refs section");
+            logger.debug("Processing rule-refs section");
             context.recordSectionProcessed("rule-refs");
         }
     }
     
     private void processRuleGroups(ProcessingContext context) throws YamlConfigurationException {
         if (context.getConfiguration().getConfiguration().getRuleGroups() != null) {
-            LOGGER.fine("Processing rule-groups section");
+            logger.debug("Processing rule-groups section");
             context.recordSectionProcessed("rule-groups");
         }
     }
     
     private void processEnrichmentGroups(ProcessingContext context) throws YamlConfigurationException {
         if (context.getConfiguration().getConfiguration().getEnrichmentGroups() != null) {
-            LOGGER.fine("Processing enrichment-groups section");
+            logger.debug("Processing enrichment-groups section");
             context.recordSectionProcessed("enrichment-groups");
         }
     }
     
     private void processTransformations(ProcessingContext context) throws YamlConfigurationException {
         if (context.getConfiguration().getConfiguration().getTransformations() != null) {
-            LOGGER.fine("Processing transformations section");
+            logger.debug("Processing transformations section");
             // TODO: Integrate with YamlTransformationProcessor
             context.recordSectionProcessed("transformations");
         }
@@ -306,35 +309,35 @@ public class SequentialYamlProcessor {
     
     private void processRuleChains(ProcessingContext context) throws YamlConfigurationException {
         if (context.getConfiguration().getConfiguration().getRuleChains() != null) {
-            LOGGER.fine("Processing rule-chains section");
+            logger.debug("Processing rule-chains section");
             context.recordSectionProcessed("rule-chains");
         }
     }
     
     private void processPipeline(ProcessingContext context) throws YamlConfigurationException {
         if (context.getConfiguration().getConfiguration().getPipeline() != null) {
-            LOGGER.fine("Processing pipeline section");
+            logger.debug("Processing pipeline section");
             context.recordSectionProcessed("pipeline");
         }
     }
     
     private void processDataSinks(ProcessingContext context) throws YamlConfigurationException {
         if (context.getConfiguration().getConfiguration().getDataSinks() != null) {
-            LOGGER.fine("Processing data-sinks section");
+            logger.debug("Processing data-sinks section");
             context.recordSectionProcessed("data-sinks");
         }
     }
     
     private void processCategories(ProcessingContext context) throws YamlConfigurationException {
         if (context.getConfiguration().getConfiguration().getCategories() != null) {
-            LOGGER.fine("Processing categories section");
+            logger.debug("Processing categories section");
             context.recordSectionProcessed("categories");
         }
     }
     
     private void processErrorRecovery(ProcessingContext context) throws YamlConfigurationException {
         if (context.getConfiguration().getConfiguration().getErrorRecovery() != null) {
-            LOGGER.fine("Processing error-recovery section");
+            logger.debug("Processing error-recovery section");
             context.recordSectionProcessed("error-recovery");
         }
     }

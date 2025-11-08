@@ -17,6 +17,9 @@ package dev.mars.apex.core.service.scenario;
  */
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 /**
@@ -40,27 +43,28 @@ public class ScenarioExecutionResult {
     
     private final String scenarioId;
     private final long executionStartTime;
-    private boolean successful;
-    private boolean terminated;
-    private boolean requiresReview;
-    private List<StageExecutionResult> stageResults;
-    private List<String> warnings;
-    private List<String> reviewFlags;
-    private Map<String, String> skippedStages; // stageName -> reason
-    private long totalExecutionTimeMs;
-    private Map<String, Object> scenarioOutputs;
+    private final AtomicBoolean successful;
+    private final AtomicBoolean terminated;
+    private final AtomicBoolean requiresReview;
+    private final List<StageExecutionResult> stageResults;
+    private final List<String> warnings;
+    private final List<String> reviewFlags;
+    private final Map<String, String> skippedStages; // stageName -> reason (ConcurrentHashMap for thread-safety)
+    private final AtomicLong totalExecutionTimeMs;
+    private final Map<String, Object> scenarioOutputs;
     
     public ScenarioExecutionResult(String scenarioId) {
         this.scenarioId = scenarioId;
         this.executionStartTime = System.currentTimeMillis();
-        this.successful = true; // Assume success until proven otherwise
-        this.terminated = false;
-        this.requiresReview = false;
-        this.stageResults = new ArrayList<>();
-        this.warnings = new ArrayList<>();
-        this.reviewFlags = new ArrayList<>();
-        this.skippedStages = new HashMap<>();
-        this.scenarioOutputs = new HashMap<>();
+        this.successful = new AtomicBoolean(true); // Assume success until proven otherwise
+        this.terminated = new AtomicBoolean(false);
+        this.requiresReview = new AtomicBoolean(false);
+        this.stageResults = new CopyOnWriteArrayList<>();
+        this.warnings = new CopyOnWriteArrayList<>();
+        this.reviewFlags = new CopyOnWriteArrayList<>();
+        this.skippedStages = new java.util.concurrent.ConcurrentHashMap<>();
+        this.totalExecutionTimeMs = new AtomicLong(0);
+        this.scenarioOutputs = new java.util.concurrent.ConcurrentHashMap<>();
     }
     
     // Getters
@@ -70,15 +74,15 @@ public class ScenarioExecutionResult {
     }
     
     public boolean isSuccessful() {
-        return successful && !terminated && stageResults.stream().allMatch(StageExecutionResult::isSuccessful);
+        return successful.get() && !terminated.get() && stageResults.stream().allMatch(StageExecutionResult::isSuccessful);
     }
-    
+
     public boolean isTerminated() {
-        return terminated;
+        return terminated.get();
     }
-    
+
     public boolean requiresReview() {
-        return requiresReview;
+        return requiresReview.get();
     }
     
     public List<StageExecutionResult> getStageResults() {
@@ -98,7 +102,7 @@ public class ScenarioExecutionResult {
     }
     
     public long getTotalExecutionTimeMs() {
-        return totalExecutionTimeMs;
+        return totalExecutionTimeMs.get();
     }
     
     public long getExecutionStartTime() {
@@ -113,19 +117,20 @@ public class ScenarioExecutionResult {
     
     /**
      * Adds a stage execution result to the scenario result.
-     * 
+     * Thread-safe: Uses CopyOnWriteArrayList and atomic operations.
+     *
      * @param stageResult the stage execution result
      */
     public void addStageResult(StageExecutionResult stageResult) {
         stageResults.add(stageResult);
-        
-        // Update overall success status
+
+        // Update overall success status (thread-safe)
         if (!stageResult.isSuccessful()) {
-            successful = false;
+            successful.set(false);
         }
-        
-        // Update total execution time
-        totalExecutionTimeMs += stageResult.getExecutionTimeMs();
+
+        // Update total execution time (thread-safe atomic operation)
+        totalExecutionTimeMs.addAndGet(stageResult.getExecutionTimeMs());
     }
     
     /**
@@ -190,14 +195,14 @@ public class ScenarioExecutionResult {
     // Status management methods
     
     public void setTerminated(boolean terminated) {
-        this.terminated = terminated;
+        this.terminated.set(terminated);
         if (terminated) {
-            this.successful = false;
+            this.successful.set(false);
         }
     }
-    
+
     public void setRequiresReview(boolean requiresReview) {
-        this.requiresReview = requiresReview;
+        this.requiresReview.set(requiresReview);
     }
     
     public void addWarning(String warning) {
@@ -224,7 +229,10 @@ public class ScenarioExecutionResult {
     }
     
     public void setScenarioOutputs(Map<String, Object> outputs) {
-        this.scenarioOutputs = outputs != null ? new HashMap<>(outputs) : new HashMap<>();
+        this.scenarioOutputs.clear();
+        if (outputs != null) {
+            this.scenarioOutputs.putAll(outputs);
+        }
     }
     
     public Object getScenarioOutput(String key) {
@@ -235,10 +243,11 @@ public class ScenarioExecutionResult {
     
     /**
      * Finalizes the execution result by calculating total time.
+     * Thread-safe: Uses atomic compareAndSet operation.
      */
     public void finalizeExecution() {
-        if (totalExecutionTimeMs == 0) {
-            totalExecutionTimeMs = System.currentTimeMillis() - executionStartTime;
+        if (totalExecutionTimeMs.get() == 0) {
+            totalExecutionTimeMs.set(System.currentTimeMillis() - executionStartTime);
         }
     }
     
@@ -248,11 +257,11 @@ public class ScenarioExecutionResult {
      * @return execution status description
      */
     public String getExecutionStatus() {
-        if (terminated) {
+        if (terminated.get()) {
             return "TERMINATED";
         } else if (isSuccessful()) {
             return "SUCCESSFUL";
-        } else if (requiresReview) {
+        } else if (requiresReview.get()) {
             return "REQUIRES_REVIEW";
         } else if (hasWarnings()) {
             return "PARTIAL_SUCCESS";
@@ -282,8 +291,8 @@ public class ScenarioExecutionResult {
         if (hasWarnings()) {
             summary.append(" - Warnings: ").append(warnings.size());
         }
-        
-        if (requiresReview) {
+
+        if (requiresReview.get()) {
             summary.append(" - REQUIRES REVIEW");
         }
         

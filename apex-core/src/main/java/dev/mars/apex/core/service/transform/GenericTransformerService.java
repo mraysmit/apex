@@ -5,6 +5,8 @@ import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.engine.model.TransformerRule;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -15,8 +17,10 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -44,7 +48,7 @@ import java.util.logging.Logger;
  * @version 1.0
  */
 public class GenericTransformerService {
-    private static final Logger LOGGER = Logger.getLogger(GenericTransformerService.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(GenericTransformerService.class);
     private final LookupServiceRegistry registry;
     private final RulesEngine rulesEngine;
     /**
@@ -56,7 +60,7 @@ public class GenericTransformerService {
     public GenericTransformerService(LookupServiceRegistry registry, RulesEngine rulesEngine) {
         this.registry = registry;
         this.rulesEngine = rulesEngine;
-        LOGGER.info("GenericTransformerService initialized with custom RulesEngine");
+        logger.info("GenericTransformerService initialized with custom RulesEngine");
     }
 
     /**
@@ -69,7 +73,7 @@ public class GenericTransformerService {
      * @return The created transformer
      */
     public <T> GenericTransformer<T> createTransformer(String name, Class<T> type, List<TransformerRule<T>> transformerRules) {
-        LOGGER.fine("Creating transformer: " + name);
+        logger.debug("Creating transformer: " + name);
         GenericTransformer<T> transformer = new GenericTransformer<>(name, type, rulesEngine, transformerRules);
         registry.registerService(transformer);
         return transformer;
@@ -93,7 +97,7 @@ public class GenericTransformerService {
             List<FieldTransformerAction<T>> positiveActions, 
             List<FieldTransformerAction<T>> negativeActions) {
 
-        LOGGER.fine("Creating transformer with single rule: " + name);
+        logger.debug("Creating transformer with single rule: " + name);
 
         List<TransformerRule<T>> transformerRules = new ArrayList<>();
         transformerRules.add(new TransformerRule<>(rule, positiveActions, negativeActions));
@@ -121,7 +125,7 @@ public class GenericTransformerService {
             List<FieldTransformerAction<T>> negativeActions,
             Map<String, Object> additionalFacts) {
 
-        LOGGER.fine("Creating transformer with single rule and additional facts: " + name);
+        logger.debug("Creating transformer with single rule and additional facts: " + name);
 
         List<TransformerRule<T>> transformerRules = new ArrayList<>();
         transformerRules.add(new TransformerRule<>(rule, positiveActions, negativeActions, additionalFacts));
@@ -142,7 +146,7 @@ public class GenericTransformerService {
             return null;
         }
 
-        LOGGER.fine("Transforming value using dynamic transformer");
+        logger.debug("Transforming value using dynamic transformer");
 
         @SuppressWarnings("unchecked")
         Class<T> type = (Class<T>) value.getClass();
@@ -165,7 +169,7 @@ public class GenericTransformerService {
             return RuleResult.error("DynamicTransformer", "Value is null");
         }
 
-        LOGGER.fine("Transforming value using dynamic transformer with result");
+        logger.debug("Transforming value using dynamic transformer with result");
 
         @SuppressWarnings("unchecked")
         Class<T> type = (Class<T>) value.getClass();
@@ -185,18 +189,18 @@ public class GenericTransformerService {
      */
     @SuppressWarnings("unchecked")
     public <T> T transform(String transformerName, T value) {
-        LOGGER.fine("Transforming value using transformer: " + transformerName);
+        logger.debug("Transforming value using transformer: " + transformerName);
 
         // Get the transformer from the registry
         GenericTransformer<?> transformer = registry.getService(transformerName, GenericTransformer.class);
         if (transformer == null) {
-            LOGGER.warning("Transformer not found: " + transformerName);
+            logger.warn("Transformer not found: " + transformerName);
             return value;
         }
 
         // Check if the transformer can handle this type
         if (value != null && !transformer.getType().isInstance(value)) {
-            LOGGER.warning("Transformer " + transformerName + " cannot handle type: " + value.getClass().getName());
+            logger.warn("Transformer " + transformerName + " cannot handle type: " + value.getClass().getName());
             return value;
         }
 
@@ -214,18 +218,18 @@ public class GenericTransformerService {
      * @return A RuleResult containing the transformation outcome
      */
     public <T> RuleResult transformWithResult(String transformerName, T value) {
-        LOGGER.fine("Transforming value using transformer with result: " + transformerName);
+        logger.debug("Transforming value using transformer with result: " + transformerName);
 
         // Get the transformer from the registry
         GenericTransformer<?> transformer = registry.getService(transformerName, GenericTransformer.class);
         if (transformer == null) {
-            LOGGER.warning("Transformer not found: " + transformerName);
+            logger.warn("Transformer not found: " + transformerName);
             return RuleResult.error(transformerName, "Transformer not found");
         }
 
         // Check if the transformer can handle this type
         if (value != null && !transformer.getType().isInstance(value)) {
-            LOGGER.warning("Transformer " + transformerName + " cannot handle type: " + value.getClass().getName());
+            logger.warn("Transformer " + transformerName + " cannot handle type: " + value.getClass().getName());
             return RuleResult.error(transformerName, "Transformer cannot handle type: " + value.getClass().getName());
         }
 
@@ -235,7 +239,7 @@ public class GenericTransformerService {
             GenericTransformer<T> typedTransformer = (GenericTransformer<T>) transformer;
             return typedTransformer.transformWithResult(value);
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error transforming value: " + e.getMessage(), e);
+            logger.warn("Error transforming value: " + e.getMessage(), e);
             return RuleResult.error(transformerName, "Error transforming value: " + e.getMessage());
         }
     }
@@ -252,18 +256,18 @@ public class GenericTransformerService {
      * @return The transformed value if the rule evaluates to true, otherwise the original value
      */
     public <T> T applyRule(Rule rule, T value, Map<String, Object> additionalFacts, String transformerName) {
-        LOGGER.fine("Applying rule to value: " + rule.getName());
+        logger.debug("Applying rule to value: " + rule.getName());
 
         // Get the transformer from the registry
         GenericTransformer<?> transformer = registry.getService(transformerName, GenericTransformer.class);
         if (transformer == null) {
-            LOGGER.warning("Transformer not found: " + transformerName);
+            logger.warn("Transformer not found: " + transformerName);
             return value;
         }
 
         // Check if the transformer can handle this type
         if (value != null && !transformer.getType().isInstance(value)) {
-            LOGGER.warning("Transformer " + transformerName + " cannot handle type: " + value.getClass().getName());
+            logger.warn("Transformer " + transformerName + " cannot handle type: " + value.getClass().getName());
             return value;
         }
 
@@ -285,12 +289,12 @@ public class GenericTransformerService {
 
         // If the rule was triggered, transform the value
         if (result.isTriggered()) {
-            LOGGER.fine("Rule triggered, transforming value");
+            logger.debug("Rule triggered, transforming value");
             @SuppressWarnings("unchecked")
             GenericTransformer<T> typedTransformer = (GenericTransformer<T>) transformer;
             return typedTransformer.transform(value);
         } else {
-            LOGGER.fine("Rule not triggered, returning original value");
+            logger.debug("Rule not triggered, returning original value");
             return value;
         }
     }
@@ -307,7 +311,7 @@ public class GenericTransformerService {
      * @return The transformed value if the rule condition evaluates to true, otherwise the original value
      */
     public <T> T applyRuleCondition(String ruleCondition, T value, Map<String, Object> additionalFacts, String transformerName) {
-        LOGGER.fine("Applying rule condition to value: " + ruleCondition);
+        logger.debug("Applying rule condition to value: " + ruleCondition);
 
         // Create a rule from the condition
         Rule rule = new Rule(
@@ -333,7 +337,7 @@ public class GenericTransformerService {
      * @return The transformed value if the rule condition evaluates to true, otherwise the original value
      */
     public <T> T applyRuleCondition(String ruleCondition, T value, Object lookupData, String transformerName) {
-        LOGGER.fine("Applying rule condition to value with lookup data: " + ruleCondition);
+        logger.debug("Applying rule condition to value with lookup data: " + ruleCondition);
 
         // Create a map of additional facts with the lookup data
         Map<String, Object> additionalFacts = new HashMap<>();

@@ -4,13 +4,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import org.yaml.snakeyaml.Yaml;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Order-preserving YAML parser that maintains the natural sequence of YAML sections
@@ -30,7 +33,7 @@ import java.util.logging.Logger;
  */
 public class OrderedYamlParser {
     
-    private static final Logger LOGGER = Logger.getLogger(OrderedYamlParser.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(OrderedYamlParser.class);
     
     // Known YAML section names in APEX
     private static final Set<String> KNOWN_SECTIONS = Set.of(
@@ -67,7 +70,7 @@ public class OrderedYamlParser {
                 throw new YamlConfigurationException("Configuration file not found: " + filePath);
             }
             
-            LOGGER.info("Parsing YAML file with order preservation: " + filePath);
+            logger.info("Parsing YAML file with order preservation: " + filePath);
             
             String rawContent = Files.readString(path);
             return parseYamlString(rawContent, filePath);
@@ -98,7 +101,7 @@ public class OrderedYamlParser {
      */
     public OrderedYamlConfiguration parseYamlString(String yamlContent, String source) throws YamlConfigurationException {
         try {
-            LOGGER.fine("Parsing YAML content with order preservation from: " + source);
+            logger.debug("Parsing YAML content with order preservation from: " + source);
 
             // Step 1: Parse with SnakeYAML to get ordered structure
             Map<String, Object> orderedMap = snakeYaml.load(yamlContent);
@@ -108,11 +111,11 @@ public class OrderedYamlParser {
 
             // Step 2: Extract section order from the ordered map
             List<String> sectionOrder = extractSectionOrder(orderedMap);
-            LOGGER.fine("Detected section order: " + sectionOrder);
+            logger.debug("Detected section order: " + sectionOrder);
 
             // Step 3: Extract item-level order from the ordered map
             List<ProcessingItem> itemOrder = extractItemOrder(orderedMap);
-            LOGGER.fine("Detected item order: " + itemOrder.size() + " items");
+            logger.debug("Detected item order: " + itemOrder.size() + " items");
 
             // Step 4: Parse with Jackson for full object mapping
             YamlRuleConfiguration config = yamlMapper.readValue(yamlContent, YamlRuleConfiguration.class);
@@ -123,7 +126,7 @@ public class OrderedYamlParser {
             // Step 5: Create ordered configuration with both section and item order
             OrderedYamlConfiguration orderedConfig = new OrderedYamlConfiguration(config, sectionOrder, itemOrder);
 
-            LOGGER.info("Successfully parsed YAML with preserved order from: " + source +
+            logger.info("Successfully parsed YAML with preserved order from: " + source +
                        " (sections: " + sectionOrder.size() + ", items: " + itemOrder.size() + ")");
 
             return orderedConfig;
@@ -156,7 +159,7 @@ public class OrderedYamlParser {
             String baseName = sectionName.replaceAll("-\\d+$", "");
             // Only normalize if the base name is a known section that supports numbering
             if (NUMBERED_SUFFIX_SECTIONS.contains(baseName)) {
-                LOGGER.fine("Normalized section name: " + sectionName + " -> " + baseName);
+                logger.debug("Normalized section name: " + sectionName + " -> " + baseName);
                 return baseName;
             }
         }
@@ -188,7 +191,7 @@ public class OrderedYamlParser {
                     itemsToMerge.computeIfAbsent(normalizedName, k -> new ArrayList<>())
                                .addAll((List<?>) sectionValue);
 
-                    LOGGER.info("Found numbered section '" + sectionName + "' with " +
+                    logger.info("Found numbered section '" + sectionName + "' with " +
                                ((List<?>) sectionValue).size() + " items to merge into '" + normalizedName + "'");
                 }
             }
@@ -203,7 +206,7 @@ public class OrderedYamlParser {
                 continue;
             }
 
-            LOGGER.info("Merging " + itemsToAdd.size() + " items into section '" + baseSectionName + "'");
+            logger.info("Merging " + itemsToAdd.size() + " items into section '" + baseSectionName + "'");
 
             // Use Jackson to convert raw objects to typed objects and merge
             switch (baseSectionName) {
@@ -232,7 +235,7 @@ public class OrderedYamlParser {
                     mergeRuleRefs(config, itemsToAdd);
                     break;
                 default:
-                    LOGGER.warning("Unknown base section for merging: " + baseSectionName);
+                    logger.warn("Unknown base section for merging: " + baseSectionName);
             }
         }
     }
@@ -261,9 +264,9 @@ public class OrderedYamlParser {
         for (String key : yamlMap.keySet()) {
             if (isKnownSection(key)) {
                 sectionOrder.add(key);
-                LOGGER.fine("Found section in order: " + key);
+                logger.debug("Found section in order: " + key);
             } else {
-                LOGGER.warning("Unknown YAML section encountered: " + key);
+                logger.warn("Unknown YAML section encountered: " + key);
                 // Still include unknown sections to preserve complete order
                 sectionOrder.add(key);
             }
@@ -331,11 +334,11 @@ public class OrderedYamlParser {
 
                             // Use normalized section name so ProcessingItem always has base type
                             itemOrder.add(new ProcessingItem(normalizedSectionName, itemId, itemType, itemName));
-                            LOGGER.fine("Found item in order: " + sectionName + " (normalized: " +
+                            logger.debug("Found item in order: " + sectionName + " (normalized: " +
                                        normalizedSectionName + ") -> " + itemId +
                                        (itemType != null ? " [" + itemType + "]" : ""));
                         } else {
-                            LOGGER.warning("Item in section '" + sectionName + "' has no ID");
+                            logger.warn("Item in section '" + sectionName + "' has no ID");
                         }
                     }
                 }
@@ -343,13 +346,13 @@ public class OrderedYamlParser {
                 // Insert placeholder for reference sections
                 // These will be expanded later by YamlConfigurationLoader after loading referenced files
                 itemOrder.add(new ProcessingItem(normalizedSectionName, "*"));
-                LOGGER.fine("Added placeholder for reference section: " + sectionName);
+                logger.debug("Added placeholder for reference section: " + sectionName);
             }
             // Single-object sections (like 'pipeline') are not included in item order
             // They are processed at section-level only
         }
 
-        LOGGER.info("Extracted " + itemOrder.size() + " items in document order");
+        logger.info("Extracted " + itemOrder.size() + " items in document order");
         return itemOrder;
     }
     
@@ -390,7 +393,7 @@ public class OrderedYamlParser {
             existingEnrichments.add(enrichment);
         }
 
-        LOGGER.info("Merged " + itemsToAdd.size() + " enrichments (total now: " + existingEnrichments.size() + ")");
+        logger.info("Merged " + itemsToAdd.size() + " enrichments (total now: " + existingEnrichments.size() + ")");
     }
 
     /**
@@ -409,7 +412,7 @@ public class OrderedYamlParser {
             existingRules.add(rule);
         }
 
-        LOGGER.info("Merged " + itemsToAdd.size() + " rules (total now: " + existingRules.size() + ")");
+        logger.info("Merged " + itemsToAdd.size() + " rules (total now: " + existingRules.size() + ")");
     }
 
     /**
@@ -428,7 +431,7 @@ public class OrderedYamlParser {
             existingGroups.add(group);
         }
 
-        LOGGER.info("Merged " + itemsToAdd.size() + " enrichment-groups (total now: " + existingGroups.size() + ")");
+        logger.info("Merged " + itemsToAdd.size() + " enrichment-groups (total now: " + existingGroups.size() + ")");
     }
 
     /**
@@ -447,7 +450,7 @@ public class OrderedYamlParser {
             existingGroups.add(group);
         }
 
-        LOGGER.info("Merged " + itemsToAdd.size() + " rule-groups (total now: " + existingGroups.size() + ")");
+        logger.info("Merged " + itemsToAdd.size() + " rule-groups (total now: " + existingGroups.size() + ")");
     }
 
     /**
@@ -466,7 +469,7 @@ public class OrderedYamlParser {
             existingTransformations.add(transformation);
         }
 
-        LOGGER.info("Merged " + itemsToAdd.size() + " transformations (total now: " + existingTransformations.size() + ")");
+        logger.info("Merged " + itemsToAdd.size() + " transformations (total now: " + existingTransformations.size() + ")");
     }
 
     /**
@@ -485,7 +488,7 @@ public class OrderedYamlParser {
             existingChains.add(chain);
         }
 
-        LOGGER.info("Merged " + itemsToAdd.size() + " rule-chains (total now: " + existingChains.size() + ")");
+        logger.info("Merged " + itemsToAdd.size() + " rule-chains (total now: " + existingChains.size() + ")");
     }
 
     /**
@@ -504,7 +507,7 @@ public class OrderedYamlParser {
             existingRefs.add(ref);
         }
 
-        LOGGER.info("Merged " + itemsToAdd.size() + " enrichment-refs (total now: " + existingRefs.size() + ")");
+        logger.info("Merged " + itemsToAdd.size() + " enrichment-refs (total now: " + existingRefs.size() + ")");
     }
 
     /**
@@ -523,6 +526,6 @@ public class OrderedYamlParser {
             existingRefs.add(ref);
         }
 
-        LOGGER.info("Merged " + itemsToAdd.size() + " rule-refs (total now: " + existingRefs.size() + ")");
+        logger.info("Merged " + itemsToAdd.size() + " rule-refs (total now: " + existingRefs.size() + ")");
     }
 }

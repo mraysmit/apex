@@ -5292,7 +5292,7 @@ enrichments:
     type: "field-enrichment"
     field-mappings:
       - target-field: "currentRate"
-        transformation: |
+        expression: |
           #effectiveDate.isBefore(T(java.time.LocalDate).parse('2024-07-01')) ? 0.05 : 0.055
 ```
 
@@ -5783,9 +5783,9 @@ operations:
     # Transform response data
     response-transformations:
       - field: "customer-status"
-        transformation: "toUpperCase()"
+        expression: "toUpperCase()"
       - field: "customer-email"
-        transformation: "toLowerCase()"
+        expression: "toLowerCase()"
 ```
 
 #### Complex Response Processing

@@ -25,10 +25,14 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Service for evaluating SpEL expressions with enhanced functionality.
@@ -40,7 +44,7 @@ import java.util.logging.Logger;
 @Service
 public class ExpressionEvaluationService {
     
-    private static final Logger LOGGER = Logger.getLogger(ExpressionEvaluationService.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(ExpressionEvaluationService.class);
     
     private final ExpressionEvaluatorService expressionEvaluatorService;
     private final ExpressionParser parser;
@@ -61,14 +65,14 @@ public class ExpressionEvaluationService {
      * @return The result of the evaluation
      */
     public Object evaluate(String expression, Map<String, Object> context) {
-        LOGGER.info("Evaluating expression: " + expression);
-        LOGGER.fine("Context variables: " + (context != null ? context.keySet() : "none"));
+        logger.info("Evaluating expression: " + expression);
+        logger.debug("Context variables: " + (context != null ? context.keySet() : "none"));
         
         try {
             EvaluationContext evalContext = createEvaluationContext(context);
             return expressionEvaluatorService.evaluate(expression, evalContext, Object.class);
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error evaluating expression '" + expression + "': " + e.getMessage(), e);
+            logger.warn("Error evaluating expression '" + expression + "': " + e.getMessage(), e);
             throw new RuntimeException("Failed to evaluate expression: " + expression, e);
         }
     }
@@ -81,13 +85,13 @@ public class ExpressionEvaluationService {
      * @return A RuleResult containing detailed evaluation information
      */
     public RuleResult evaluateWithResult(String expression, Map<String, Object> context) {
-        LOGGER.info("Evaluating expression with result tracking: " + expression);
+        logger.info("Evaluating expression with result tracking: " + expression);
         
         try {
             EvaluationContext evalContext = createEvaluationContext(context);
             return expressionEvaluatorService.evaluateWithResult(expression, evalContext, Object.class);
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error evaluating expression with result '" + expression + "': " + e.getMessage(), e);
+            logger.warn("Error evaluating expression with result '" + expression + "': " + e.getMessage(), e);
             return RuleResult.error("Expression", "Error evaluating expression: " + e.getMessage());
         }
     }
@@ -99,14 +103,14 @@ public class ExpressionEvaluationService {
      * @return true if the expression syntax is valid, false otherwise
      */
     public boolean validateSyntax(String expression) {
-        LOGGER.fine("Validating expression syntax: " + expression);
+        logger.debug("Validating expression syntax: " + expression);
         
         try {
             parser.parseExpression(expression);
-            LOGGER.fine("Expression syntax is valid");
+            logger.debug("Expression syntax is valid");
             return true;
         } catch (Exception e) {
-            LOGGER.fine("Expression syntax is invalid: " + e.getMessage());
+            logger.debug("Expression syntax is invalid: " + e.getMessage());
             return false;
         }
     }
@@ -119,14 +123,14 @@ public class ExpressionEvaluationService {
      * @return The boolean result of the evaluation
      */
     public boolean evaluateAsBoolean(String expression, Map<String, Object> context) {
-        LOGGER.fine("Evaluating expression as boolean: " + expression);
+        logger.debug("Evaluating expression as boolean: " + expression);
         
         try {
             EvaluationContext evalContext = createEvaluationContext(context);
             Boolean result = expressionEvaluatorService.evaluate(expression, evalContext, Boolean.class);
             return result != null && result;
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error evaluating boolean expression '" + expression + "': " + e.getMessage(), e);
+            logger.warn("Error evaluating boolean expression '" + expression + "': " + e.getMessage(), e);
             return false;
         }
     }
@@ -139,14 +143,14 @@ public class ExpressionEvaluationService {
      * @return The string result of the evaluation
      */
     public String evaluateAsString(String expression, Map<String, Object> context) {
-        LOGGER.fine("Evaluating expression as string: " + expression);
+        logger.debug("Evaluating expression as string: " + expression);
         
         try {
             EvaluationContext evalContext = createEvaluationContext(context);
             Object result = expressionEvaluatorService.evaluate(expression, evalContext, Object.class);
             return result != null ? result.toString() : null;
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error evaluating string expression '" + expression + "': " + e.getMessage(), e);
+            logger.warn("Error evaluating string expression '" + expression + "': " + e.getMessage(), e);
             return null;
         }
     }
@@ -159,13 +163,13 @@ public class ExpressionEvaluationService {
      * @return The numeric result of the evaluation
      */
     public Number evaluateAsNumber(String expression, Map<String, Object> context) {
-        LOGGER.fine("Evaluating expression as number: " + expression);
+        logger.debug("Evaluating expression as number: " + expression);
         
         try {
             EvaluationContext evalContext = createEvaluationContext(context);
             return expressionEvaluatorService.evaluate(expression, evalContext, Number.class);
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error evaluating numeric expression '" + expression + "': " + e.getMessage(), e);
+            logger.warn("Error evaluating numeric expression '" + expression + "': " + e.getMessage(), e);
             return null;
         }
     }
@@ -180,13 +184,13 @@ public class ExpressionEvaluationService {
      * @return The typed result of the evaluation
      */
     public <T> T evaluate(String expression, Map<String, Object> context, Class<T> resultType) {
-        LOGGER.fine("Evaluating expression with type " + resultType.getSimpleName() + ": " + expression);
+        logger.debug("Evaluating expression with type " + resultType.getSimpleName() + ": " + expression);
         
         try {
             EvaluationContext evalContext = createEvaluationContext(context);
             return expressionEvaluatorService.evaluate(expression, evalContext, resultType);
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error evaluating typed expression '" + expression + "': " + e.getMessage(), e);
+            logger.warn("Error evaluating typed expression '" + expression + "': " + e.getMessage(), e);
             return null;
         }
     }
@@ -215,7 +219,7 @@ public class ExpressionEvaluationService {
      * @return true if all variables are defined, false otherwise
      */
     public boolean areAllVariablesDefined(String expression, Map<String, Object> context) {
-        LOGGER.fine("Checking variable definitions for expression: " + expression);
+        logger.debug("Checking variable definitions for expression: " + expression);
         
         try {
             // Try to evaluate the expression - if it fails due to undefined variables, return false
@@ -226,7 +230,7 @@ public class ExpressionEvaluationService {
             // Check if the error is related to undefined variables
             String errorMessage = e.getMessage();
             if (errorMessage != null && (errorMessage.contains("undefined") || errorMessage.contains("not found"))) {
-                LOGGER.fine("Expression contains undefined variables: " + errorMessage);
+                logger.debug("Expression contains undefined variables: " + errorMessage);
                 return false;
             }
             // Other errors don't necessarily mean undefined variables

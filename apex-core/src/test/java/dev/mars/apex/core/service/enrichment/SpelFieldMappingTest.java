@@ -412,21 +412,21 @@ public class SpelFieldMappingTest {
 
     @Test
     void testSpelWithTransformation() throws Exception {
-        System.out.println("=== Testing SpEL with Transformation ===");
+        System.out.println("=== Testing SpEL with Expression ===");
 
         String yamlConfig = """
             metadata:
-              name: "SpEL with Transformation Test"
+              name: "SpEL with Expression Test"
               version: "1.0.0"
 
             enrichments:
-              - id: "spel-transformation-enrichment"
+              - id: "spel-expression-enrichment"
                 type: "field-enrichment"
                 condition: "true"
                 field-mappings:
                   - source-field: "#data.amount"
                     target-field: "adjusted_amount"
-                    transformation: "#value * 1.1"
+                    expression: "#value * 1.1"
             """;
 
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
@@ -448,11 +448,11 @@ public class SpelFieldMappingTest {
         @SuppressWarnings("unchecked")
         Map<String, Object> enrichedMap = (Map<String, Object>) enrichedData;
 
-        // Verify SpEL source-field combined with transformation
+        // Verify SpEL source-field combined with expression
         assertEquals(1100.0, enrichedMap.get("adjusted_amount"),
-                    "Should extract nested field and apply transformation");
+                    "Should extract nested field and apply expression");
 
-        System.out.println("✓ SpEL with transformation test passed!");
+        System.out.println("✓ SpEL with expression test passed!");
     }
 
     @Test

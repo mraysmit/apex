@@ -7,9 +7,12 @@ import dev.mars.apex.core.engine.model.RuleBase;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -47,7 +50,7 @@ import java.util.logging.Logger;
  * 4. Enrichment groups by ID - for quick lookup of enrichment groups
  */
 public class RulesEngineConfiguration {
-    private static final Logger LOGGER = Logger.getLogger(RulesEngineConfiguration.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(RulesEngineConfiguration.class);
     static final ExpressionParser parser = new SpelExpressionParser();
 
     private final Map<Category, List<RuleBase>> rulesByCategory = new HashMap<>();
@@ -130,13 +133,13 @@ public class RulesEngineConfiguration {
     public boolean addRuleToGroup(String groupId, String ruleId, int sequenceNumber) {
         RuleGroup group = ruleGroupsById.get(groupId);
         if (group == null) {
-            LOGGER.warning("Rule group with ID '" + groupId + "' not found");
+            logger.warn("Rule group with ID '" + groupId + "' not found");
             return false;
         }
 
         Rule rule = rulesById.get(ruleId);
         if (rule == null) {
-            LOGGER.warning("Rule with ID '" + ruleId + "' not found");
+            logger.warn("Rule with ID '" + ruleId + "' not found");
             return false;
         }
 
@@ -173,7 +176,7 @@ public class RulesEngineConfiguration {
     public Rule combineWithAnd(String id, Category category, String name, List<Rule> rules,
                                String message, String description, int priority) {
         if (rules == null || rules.isEmpty()) {
-            LOGGER.warning("No rules to combine");
+            logger.warn("No rules to combine");
             return null;
         }
 
@@ -228,7 +231,7 @@ public class RulesEngineConfiguration {
     public Rule combineWithOr(String id, Category category, String name, List<Rule> rules,
                               String message, String description, int priority) {
         if (rules == null || rules.isEmpty()) {
-            LOGGER.warning("No rules to combine");
+            logger.warn("No rules to combine");
             return null;
         }
 
@@ -348,7 +351,7 @@ public class RulesEngineConfiguration {
     public Rule getRuleByIdWithLogging(String id) {
         Rule rule = rulesById.get(id);
         if (rule == null) {
-            LOGGER.warning("Rule with ID '" + id + "' not found");
+            logger.warn("Rule with ID '" + id + "' not found");
         }
         return rule;
     }
@@ -362,7 +365,7 @@ public class RulesEngineConfiguration {
     public RuleGroup getRuleGroupById(String id) {
         RuleGroup group = ruleGroupsById.get(id);
         if (group == null) {
-            LOGGER.warning("Rule group with ID '" + id + "' not found");
+            logger.warn("Rule group with ID '" + id + "' not found");
         }
         return group;
     }
@@ -392,7 +395,7 @@ public class RulesEngineConfiguration {
      */
     public void registerEnrichmentGroup(EnrichmentGroup group) {
         enrichmentGroupsById.put(group.getId(), group);
-        LOGGER.fine("Registered enrichment group: " + group.getId());
+        logger.debug("Registered enrichment group: " + group.getId());
     }
 
     /**
@@ -566,7 +569,7 @@ public class RulesEngineConfiguration {
     public String combineRulesWithAnd(String id, Category category, String name, List<String> ruleIds,
                                      String message, String description, int priority) {
         if (ruleIds == null || ruleIds.isEmpty()) {
-            LOGGER.warning("No rule IDs to combine");
+            logger.warn("No rule IDs to combine");
             return null;
         }
 
@@ -621,7 +624,7 @@ public class RulesEngineConfiguration {
     public String combineRulesWithOr(String id, Category category, String name, List<String> ruleIds,
                                     String message, String description, int priority) {
         if (ruleIds == null || ruleIds.isEmpty()) {
-            LOGGER.warning("No rule IDs to combine");
+            logger.warn("No rule IDs to combine");
             return null;
         }
 
