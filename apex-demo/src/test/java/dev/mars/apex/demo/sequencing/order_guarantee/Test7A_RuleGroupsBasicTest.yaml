@@ -1,0 +1,43 @@
+name: "Test 7A: Rule Groups with Groups-Only Logic"
+description: "Tests that rule-groups work correctly with groups-only logic"
+
+# Rules: Mix of standalone and grouped
+rules:
+  - id: "standalone-rule-1"
+    name: "Standalone Rule 1"
+    condition: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('standalone-rule-1', true)"
+    message: "Standalone Rule 1 executed"
+    result-field: "result1"
+    enabled: true
+
+  - id: "grouped-rule-1"
+    name: "Grouped Rule 1"
+    condition: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('grouped-rule-1', true)"
+    message: "Grouped Rule 1 executed"
+    result-field: "result2"
+    enabled: true
+
+  - id: "standalone-rule-2"
+    name: "Standalone Rule 2"
+    condition: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('standalone-rule-2', true)"
+    message: "Standalone Rule 2 executed"
+    result-field: "result3"
+    enabled: true
+
+  - id: "grouped-rule-2"
+    name: "Grouped Rule 2"
+    condition: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('grouped-rule-2', true)"
+    message: "Grouped Rule 2 executed"
+    result-field: "result4"
+    enabled: true
+
+# Rule group that references grouped rules
+rule-groups:
+  - id: "rule-group-A"
+    name: "Rule Group A"
+    description: "Group that references grouped rules"
+    rule-ids:
+      - "grouped-rule-1"
+      - "grouped-rule-2"
+    enabled: true
+

@@ -1,0 +1,20 @@
+name: "Edge Case Test 5 - Forward Reference to External Enrichments"
+description: "Tests that groups can reference external enrichments loaded later in the file"
+
+# Test: enrichment-groups comes BEFORE enrichment-refs
+# Question: Does reference resolution happen before group validation?
+
+# Group references "external-1" which is NOT loaded yet
+enrichment-groups:
+  - id: "group-A"
+    name: "Group A"
+    enrichment-ids:
+      - "external-1"  # ❓ Not loaded yet - will this work?
+    enabled: true
+
+# External reference that loads "external-1"
+enrichment-refs:
+  - name: "External Enrichments"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/edge_cases/TestEdge5_ForwardReferenceToExternalTest_external.yaml"
+    enabled: true
+

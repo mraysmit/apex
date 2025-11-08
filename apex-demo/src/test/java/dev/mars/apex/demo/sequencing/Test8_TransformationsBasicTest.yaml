@@ -1,0 +1,31 @@
+name: "Test 8: Transformations Basic Test"
+description: "Test transformations in document order - transformations should execute in exact YAML order"
+
+# Test Case: Verify transformations execute in document order
+# Expected execution order: transform-1, transform-2, transform-3
+
+transformations:
+  - id: "transform-1"
+    name: "First Transformation"
+    type: "field-transformation"
+    source-field: "value"
+    target-field: "result1"
+    expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('transform-1', #value + '-T1')"
+    enabled: true
+
+  - id: "transform-2"
+    name: "Second Transformation"
+    type: "field-transformation"
+    source-field: "value"
+    target-field: "result2"
+    expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('transform-2', #value + '-T2')"
+    enabled: true
+
+  - id: "transform-3"
+    name: "Third Transformation"
+    type: "field-transformation"
+    source-field: "value"
+    target-field: "result3"
+    expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('transform-3', #value + '-T3')"
+    enabled: true
+

@@ -1,0 +1,422 @@
+name: "Test ALL: Comprehensive All-Sections Test"
+description: "Tests ALL APEX section keywords with multiple items in each section"
+
+# ============================================================================
+# METADATA SECTION (single object - not a list)
+# ============================================================================
+metadata:
+  id: "test-all-comprehensive"
+  name: "Comprehensive All-Sections Test"
+  version: "1.0.0"
+  type: "rule-config"
+  author: "apex.test@company.com"
+  created-date: "2025-11-07"
+  business-domain: "Testing"
+  owner: "test.team@company.com"
+  tags: ["test", "comprehensive", "all-sections"]
+
+# ============================================================================
+# CATEGORIES SECTION (list of items - but NOT in itemOrder)
+# ============================================================================
+categories:
+  - name: "validation-category"
+    description: "Data validation category"
+    priority: 10
+    enabled: true
+    business-domain: "Data Quality"
+    business-owner: "validation-team@company.com"
+    created-by: "test.user@company.com"
+
+  - name: "enrichment-category"
+    description: "Data enrichment category"
+    priority: 20
+    enabled: true
+    business-domain: "Data Processing"
+    business-owner: "enrichment-team@company.com"
+    created-by: "test.user@company.com"
+
+  - name: "compliance-category"
+    description: "Compliance checks category"
+    priority: 30
+    enabled: true
+    business-domain: "Compliance"
+    business-owner: "compliance-team@company.com"
+    created-by: "test.user@company.com"
+
+# ============================================================================
+# DATA-SOURCES SECTION (list of items - but NOT in itemOrder)
+# ============================================================================
+data-sources:
+  - name: "test-database-source"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "Test H2 database source"
+    connection:
+      database: "./target/test/test_data"
+      username: "sa"
+      password: ""
+    operations:
+      getCustomer: "SELECT * FROM customers WHERE id = :id"
+      getAllCustomers: "SELECT * FROM customers"
+
+  - name: "test-file-source"
+    type: "file-system"
+    source-type: "csv"
+    enabled: true
+    description: "Test CSV file source"
+    connection:
+      base-path: "./target/test/data"
+      file-pattern: "test_*.csv"
+      encoding: "UTF-8"
+
+  - name: "test-api-source"
+    type: "rest-api"
+    enabled: true
+    description: "Test REST API source"
+    connection:
+      base-url: "http://localhost:8080/api"
+      timeout: 5000
+
+# ============================================================================
+# DATA-SOURCE-REFS SECTION (reference section - placeholder in itemOrder)
+# ============================================================================
+data-source-refs:
+  - name: "external-data-config-1"
+    source: "external-data-config-1.yaml"
+    enabled: true
+  - name: "external-data-config-2"
+    source: "external-data-config-2.yaml"
+    enabled: true
+  - name: "external-data-config-3"
+    source: "external-data-config-3.yaml"
+    enabled: true
+
+# ============================================================================
+# DATA-SINKS SECTION (list of items - but NOT in itemOrder)
+# ============================================================================
+data-sinks:
+  - name: "test-database-sink"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "Test H2 database sink"
+    connection:
+      database: "./target/test/output_data"
+      username: "sa"
+      password: ""
+    operations:
+      insertRecord: "INSERT INTO output_table (id, name, value) VALUES (:id, :name, :value)"
+      updateRecord: "UPDATE output_table SET name = :name WHERE id = :id"
+
+  - name: "test-file-sink"
+    type: "file-system"
+    enabled: true
+    description: "Test file output sink"
+    connection:
+      base-path: "./target/test/output"
+      file-pattern: "output_*.json"
+
+  - name: "test-kafka-sink"
+    type: "kafka"
+    enabled: true
+    description: "Test Kafka topic sink"
+    connection:
+      bootstrap-servers: "localhost:9092"
+      topic: "test-output-topic"
+
+# ============================================================================
+# ENRICHMENTS SECTION (list of items - IN itemOrder)
+# ============================================================================
+enrichments:
+  - id: "enrich-1"
+    type: "calculation-enrichment"
+    category: "enrichment-category"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('enrich-1', 'value1')"
+      result-field: "value1"
+    field-mappings:
+      - source-field: "value1"
+        target-field: "enrichedValue1"
+    enabled: true
+
+  - id: "enrich-2"
+    type: "lookup-enrichment"
+    category: "enrichment-category"
+    lookup-config:
+      data-source: "test-database-source"
+      query: "getCustomer"
+      key-field: "customerId"
+    field-mappings:
+      - source-field: "customerName"
+        target-field: "enrichedCustomerName"
+    enabled: true
+
+  - id: "enrich-3"
+    type: "calculation-enrichment"
+    category: "enrichment-category"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('enrich-3', 'value3')"
+      result-field: "value3"
+    field-mappings:
+      - source-field: "value3"
+        target-field: "enrichedValue3"
+    enabled: true
+
+# ============================================================================
+# ENRICHMENT-GROUPS SECTION (list of items - IN itemOrder)
+# ============================================================================
+enrichment-groups:
+  - id: "enrichment-group-1"
+    name: "Enrichment Group 1"
+    description: "First enrichment group"
+    operator: "AND"
+    enrichment-ids:
+      - "enrich-1"
+      - "enrich-2"
+    enabled: true
+
+  - id: "enrichment-group-2"
+    name: "Enrichment Group 2"
+    description: "Second enrichment group"
+    operator: "OR"
+    enrichment-ids:
+      - "enrich-3"
+    enabled: true
+
+  - id: "enrichment-group-3"
+    name: "Enrichment Group 3"
+    description: "Third enrichment group"
+    operator: "AND"
+    enrichment-ids:
+      - "enrich-1"
+    enabled: true
+
+# ============================================================================
+# ENRICHMENT-REFS SECTION (reference section - placeholder in itemOrder)
+# ============================================================================
+enrichment-refs:
+  - name: "external-enrichments-1"
+    source: "external-enrichments-1.yaml"
+    enabled: true
+  - name: "external-enrichments-2"
+    source: "external-enrichments-2.yaml"
+    enabled: true
+  - name: "external-enrichments-3"
+    source: "external-enrichments-3.yaml"
+    enabled: true
+
+# ============================================================================
+# RULES SECTION (list of items - IN itemOrder)
+# ============================================================================
+rules:
+  - id: "rule-1"
+    type: "simple-rule"
+    category: "validation-category"
+    name: "Rule 1"
+    condition: "#value1 != null"
+    message: "Value1 must not be null"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "rule-2"
+    type: "simple-rule"
+    category: "validation-category"
+    name: "Rule 2"
+    condition: "#value2 > 0"
+    message: "Value2 must be positive"
+    severity: "WARNING"
+    enabled: true
+
+  - id: "rule-3"
+    type: "composite-rule"
+    category: "compliance-category"
+    name: "Rule 3"
+    operator: "AND"
+    sub-rules:
+      - condition: "#value3 != null"
+        message: "Value3 required"
+    severity: "ERROR"
+    enabled: true
+
+# ============================================================================
+# RULE-GROUPS SECTION (list of items - IN itemOrder)
+# ============================================================================
+rule-groups:
+  - id: "rule-group-1"
+    name: "Rule Group 1"
+    description: "First rule group"
+    operator: "AND"
+    stop-on-first-failure: true
+    rule-ids:
+      - "rule-1"
+      - "rule-2"
+    enabled: true
+
+  - id: "rule-group-2"
+    name: "Rule Group 2"
+    description: "Second rule group"
+    operator: "OR"
+    stop-on-first-failure: false
+    rule-ids:
+      - "rule-3"
+    enabled: true
+
+  - id: "rule-group-3"
+    name: "Rule Group 3"
+    description: "Third rule group"
+    operator: "AND"
+    stop-on-first-failure: true
+    rule-ids:
+      - "rule-1"
+    enabled: true
+
+# ============================================================================
+# RULE-REFS SECTION (reference section - placeholder in itemOrder)
+# ============================================================================
+rule-refs:
+  - name: "external-rules-1"
+    source: "external-rules-1.yaml"
+    enabled: true
+  - name: "external-rules-2"
+    source: "external-rules-2.yaml"
+    enabled: true
+  - name: "external-rules-3"
+    source: "external-rules-3.yaml"
+    enabled: true
+
+# ============================================================================
+# TRANSFORMATIONS SECTION (list of items - IN itemOrder)
+# ============================================================================
+transformations:
+  - id: "transform-1"
+    type: "field-transformation"
+    name: "Transform 1"
+    description: "First transformation"
+    field-mappings:
+      - source-field: "inputField1"
+        target-field: "outputField1"
+        transformation: "uppercase"
+    enabled: true
+
+  - id: "transform-2"
+    type: "field-transformation"
+    name: "Transform 2"
+    description: "Second transformation"
+    field-mappings:
+      - source-field: "inputField2"
+        target-field: "outputField2"
+        transformation: "lowercase"
+    enabled: true
+
+  - id: "transform-3"
+    type: "field-transformation"
+    name: "Transform 3"
+    description: "Third transformation"
+    field-mappings:
+      - source-field: "inputField3"
+        target-field: "outputField3"
+        transformation: "trim"
+    enabled: true
+
+# ============================================================================
+# RULE-CHAINS SECTION (list of items - IN itemOrder)
+# ============================================================================
+rule-chains:
+  - id: "chain-1"
+    name: "Rule Chain 1"
+    description: "First rule chain"
+    chain-type: "sequential"
+    steps:
+      - rule-id: "rule-1"
+        on-success: "continue"
+        on-failure: "stop"
+      - rule-id: "rule-2"
+        on-success: "continue"
+        on-failure: "continue"
+    enabled: true
+
+  - id: "chain-2"
+    name: "Rule Chain 2"
+    description: "Second rule chain"
+    chain-type: "parallel"
+    steps:
+      - rule-id: "rule-3"
+        on-success: "continue"
+        on-failure: "stop"
+    enabled: true
+
+  - id: "chain-3"
+    name: "Rule Chain 3"
+    description: "Third rule chain"
+    chain-type: "sequential"
+    steps:
+      - rule-id: "rule-1"
+        on-success: "continue"
+        on-failure: "continue"
+    enabled: true
+
+# ============================================================================
+# PIPELINE SECTION (single object - NOT in itemOrder)
+# ============================================================================
+pipeline:
+  name: "test-comprehensive-pipeline"
+  description: "Comprehensive test pipeline with all stages"
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+    max-retries: 3
+  steps:
+    - name: "extract-data"
+      type: "extract"
+      description: "Extract data from source"
+      execution-order: 1
+      source: "test-database-source"
+      operation: "getAllCustomers"
+
+    - name: "validate-data"
+      type: "validate"
+      description: "Validate extracted data"
+      execution-order: 2
+      depends-on: ["extract-data"]
+
+    - name: "transform-data"
+      type: "transform"
+      description: "Transform validated data"
+      execution-order: 3
+      depends-on: ["validate-data"]
+
+    - name: "load-data"
+      type: "load"
+      description: "Load transformed data to sink"
+      execution-order: 4
+      depends-on: ["transform-data"]
+      sink: "test-database-sink"
+      operation: "insertRecord"
+
+# ============================================================================
+# ERROR-RECOVERY SECTION (single object - NOT in itemOrder)
+# ============================================================================
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+  metrics-enabled: true
+  default-strategy: "CONTINUE_WITH_DEFAULT"
+
+  severity-policies:
+    ERROR:
+      recovery-enabled: false
+      strategy: "FAIL_FAST"
+
+    WARNING:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 1
+      retry-delay: 100
+
+    INFO:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
+      retry-delay: 50
+

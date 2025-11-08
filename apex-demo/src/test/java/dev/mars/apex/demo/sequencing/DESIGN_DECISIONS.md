@@ -206,7 +206,6 @@ enrichments-2:
 - `enrichment-groups-1`, `enrichment-groups-2`, ...
 - `rule-groups-1`, `rule-groups-2`, ...
 - `transformations-1`, `transformations-2`, ...
-- `rule-chains-1`, `rule-chains-2`, ...
 
 ### Key Question: How to Apply Groups-Only Logic?
 
@@ -1080,43 +1079,19 @@ applyGroupsOnlyLogic(config);  // ← ADD THIS LINE
 - ✅ External groups do not affect main file enrichments
 - ✅ All previous tests (1-6) still pass
 
-### Phase 5: Rules and Rule-Groups (AFTER Phase 4 Complete)
-
-**Goal**: Prove same logic works for rules
-
-#### Step 5.1: Create Test 8 (Rules and Rule-Groups)
-**Actions**:
-1. Create `Test8_RulesAndRuleGroupsTest.java`
-2. Create `test8-main.yaml` with standalone rules + grouped rules + rule-groups
-3. Use `ExecutionTracker` to prove order
-4. Run test and read logs carefully
-
-**Success Criteria for Phase 5**:
-- ✅ Test 8 passes with correct execution order
-- ✅ Standalone rules execute directly
-- ✅ Grouped rules only execute via rule-groups
-- ✅ All previous tests (1-7) still pass
-
-### Phase 6: Final Validation (AFTER Phase 5 Complete)
+### Phase 5: Final Validation (AFTER Phase 4 Complete)
 
 **Goal**: Prove YAML document order is fully respected
 
-#### Step 6.1: Run All Tests
+#### Step 5.1: Run All Tests
 **Actions**:
-1. Run all 8 tests: `mvn test -Dtest=Test*_* -pl apex-demo`
+1. Run all tests: `mvn test -Dtest="Test4*,Test5*,Test6*,Test7*" -pl apex-demo`
 2. **Read logs carefully** for each test
 3. Verify execution order is correct for all tests
 4. Verify no warnings or errors in logs
 
-#### Step 6.2: Update Test 1 and Test 2 to Use Numbered Suffixes
-**Actions**:
-1. Update `test1-main.yaml` to use `enrichments-1`, `enrichments-2`
-2. Update `test2-main.yaml` to use `enrichments-1`, `enrichments-2`
-3. Re-run tests and verify they still pass
-4. Remove duplicate key warnings from logs
-
-**Success Criteria for Phase 6**:
-- ✅ All 8 tests pass
+**Success Criteria for Phase 5**:
+- ✅ All tests pass (Test 4A-4F, Test 5, Test 6A-6B, Test 7A-7B)
 - ✅ No duplicate key warnings in logs
 - ✅ Execution order is correct for all tests
 - ✅ YAML document order is fully respected
@@ -1143,10 +1118,9 @@ applyGroupsOnlyLogic(config);  // ← ADD THIS LINE
 - **Phase 2**: 2-3 hours (parser changes)
 - **Phase 3**: 1 hour (test creation)
 - **Phase 4**: 1 hour (test creation)
-- **Phase 5**: 1 hour (test creation)
-- **Phase 6**: 1 hour (final validation)
+- **Phase 5**: 1 hour (final validation)
 
-**Total**: 7-9 hours of focused, incremental work
+**Total**: 6-8 hours of focused, incremental work
 
 ### Key Success Factors
 
@@ -1832,68 +1806,6 @@ assertTrue(executionLog.contains("ext-standalone"),
 
 ---
 
-## Phase 5 Definitive Tests: Rules and Rule-Groups
-
-### Test 8A: Rules with Groups-Only Logic (NEW - CRITICAL)
-
-**Purpose**: Prove same logic works for rules and rule-groups
-
-**YAML Structure**:
-```yaml
-rules:
-  - id: "standalone-rule"  # Position 1 - NOT in group
-    name: "Standalone Rule"
-    condition: "true"
-    message: "Standalone"
-    severity: "INFO"
-    priority: 1
-
-  - id: "grouped-rule"     # Position 2 - IN group-A (should skip)
-    name: "Grouped Rule"
-    condition: "true"
-    message: "Grouped"
-    severity: "INFO"
-    priority: 2
-
-rule-groups:
-  - id: "group-A"          # Position 3
-    name: "Group A"
-    operator: "AND"
-    rule-ids: ["grouped-rule"]
-```
-
-**Definitive Assertions**:
-```java
-// 1. EXACT execution count
-assertEquals(2, executionLog.size(),
-    "Should execute EXACTLY 2 items: 1 standalone rule + 1 via group");
-
-// 2. EXACT execution order
-List<String> expected = List.of("standalone-rule", "grouped-rule");
-assertEquals(expected, executionLog,
-    "Execution order MUST be: standalone-rule, grouped-rule (via group-A)");
-
-// 3. Verify NO double execution
-assertEquals(1, Collections.frequency(executionLog, "grouped-rule"),
-    "grouped-rule MUST execute EXACTLY ONCE (via group-A only, NOT at position 2)");
-
-// 4. Verify standalone rule executes
-assertTrue(executionLog.contains("standalone-rule"),
-    "standalone-rule MUST execute at position 1");
-
-// 5. Verify grouped rule executes via group
-assertEquals("grouped-rule", executionLog.get(1),
-    "Position 1 MUST be grouped-rule (via group-A)");
-```
-
-**What This Proves**:
-- ✅ Groups-only logic works for rules (not just enrichments)
-- ✅ Standalone rules execute at definition position
-- ✅ Grouped rules skip definition position and execute via group
-- ✅ No double execution for rules
-
----
-
 ## Complete Test Matrix
 
 ### Phase 1: Groups-Only Logic (6 tests)
@@ -1904,26 +1816,22 @@ assertEquals("grouped-rule", executionLog.get(1),
 - ✅ Test 4E: Missing reference
 - ✅ Test 4F: Complex interleaving
 
-### Phase 2: Numbered Suffixes (3 tests)
-- ✅ Test 5A: Basic numbered suffixes
-- ✅ Test 5B: Out of order suffixes
-- ✅ Test 5C: Mixed numbered and non-numbered
+### Phase 2: Numbered Suffixes (1 test)
+- ✅ Test 5: Basic numbered suffixes
 
-### Phase 3: Numbered Suffixes + Groups (2 tests)
+### Phase 3: Numbered Suffixes + Enrichment Groups (2 tests)
 - ✅ Test 6A: Numbered suffixes with groups
-- ✅ Test 6B: Cross-section group references
+- ✅ Test 6B: Complex numbered with multiple groups
 
-### Phase 4: Cross-File Scoping (1 test)
-- ✅ Test 7A: Per-file scoping
+### Phase 4: Rule Groups (2 tests)
+- ✅ Test 7A: Rule groups basic
+- ✅ Test 7B: Numbered suffixes with rule groups
 
-### Phase 5: Rules and Rule-Groups (1 test)
-- ✅ Test 8A: Rules with groups-only logic
-
-**Total: 13 Definitive Tests**
+**Total: 11 Test Classes, 22 Test Methods**
 
 ### Success Criteria for Complete Implementation
 
-**ALL 13 tests MUST pass with**:
+**ALL tests MUST pass with**:
 - ✅ EXACT execution count assertions
 - ✅ EXACT execution order assertions
 - ✅ NO double execution assertions

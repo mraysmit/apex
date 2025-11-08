@@ -23,6 +23,7 @@ import dev.mars.apex.core.service.data.external.ExternalDataSource;
 import dev.mars.apex.core.service.data.external.factory.DataSinkFactory;
 import dev.mars.apex.core.service.data.external.factory.DataSourceFactory;
 import dev.mars.apex.core.service.data.external.manager.ExternalDataSourceManager;
+import dev.mars.apex.core.service.enrichment.EnrichmentGroupFactory;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
@@ -978,7 +979,83 @@ public class RulesEngine {
         boolean overallSuccess = true;
 
         try {
-            // Phase 1: Process enrichments if available and YamlEnrichmentProcessor is configured
+            // Phase 1: Process individual rules if available
+            // Use rules from yamlConfig if available, otherwise fall back to engine's configuration
+            List<Rule> allRules = null;
+            if (yamlConfig.getRules() != null && !yamlConfig.getRules().isEmpty()) {
+                logger.info("Using rules from yamlConfig parameter");
+                YamlRuleFactory ruleFactory = new YamlRuleFactory();
+                allRules = ruleFactory.createRules(yamlConfig);
+            } else if (configuration.getAllRules() != null && !configuration.getAllRules().isEmpty()) {
+                logger.info("Using rules from engine's internal configuration");
+                allRules = configuration.getAllRules();
+            }
+
+            if (allRules != null && !allRules.isEmpty()) {
+                logger.info("Processing {} individual rules", allRules.size());
+                RuleResult ruleResult = executeRulesList(allRules, enrichedData);
+
+                // Check for ERROR result type (actual system errors)
+                // NOTE: According to APEX design principles, validation rules triggering should NOT
+                // cause the stage to fail. They should be reported, but evaluation should still succeed.
+                // Only actual system errors (ResultType.ERROR) should cause failure.
+                if (ruleResult.getResultType() == RuleResult.ResultType.ERROR) {
+                    overallSuccess = false;
+                    failureMessages.add("Rule evaluation error: " + ruleResult.getMessage());
+                } else if (ruleResult.isTriggered() &&
+                          SeverityConstants.ERROR.equalsIgnoreCase(ruleResult.getSeverity())) {
+                    // Log the validation rule trigger, but don't treat it as a failure
+                    logger.warn("Validation failure: rules '{}' triggered with ERROR severity: {}",
+                               ruleResult.getRuleName(), ruleResult.getMessage());
+                }
+
+                // Update enriched data with results from rules (field mappings)
+                if (ruleResult.getEnrichedData() != null) {
+                    enrichedData.putAll(ruleResult.getEnrichedData());
+                }
+            }
+
+            // Phase 2: Process rule groups if available
+            // Use rule groups from yamlConfig if available, otherwise fall back to engine's configuration
+            List<RuleGroup> allRuleGroups = null;
+            if (yamlConfig.getRuleGroups() != null && !yamlConfig.getRuleGroups().isEmpty()) {
+                logger.info("Using rule groups from yamlConfig parameter");
+                YamlRuleFactory ruleFactory = new YamlRuleFactory();
+                // Need to create a temporary config to resolve rule references
+                RulesEngineConfiguration tempConfig = new RulesEngineConfiguration();
+                // First create rules and register them
+                List<Rule> rules = ruleFactory.createRules(yamlConfig);
+                for (Rule rule : rules) {
+                    tempConfig.registerRule(rule);
+                }
+                // Then create rule groups
+                allRuleGroups = ruleFactory.createRuleGroups(yamlConfig, tempConfig);
+            } else if (configuration.getAllRuleGroups() != null && !configuration.getAllRuleGroups().isEmpty()) {
+                logger.info("Using rule groups from engine's internal configuration");
+                allRuleGroups = configuration.getAllRuleGroups();
+            }
+
+            if (allRuleGroups != null && !allRuleGroups.isEmpty()) {
+                logger.info("Processing {} rule groups", allRuleGroups.size());
+                RuleResult ruleGroupResult = executeRuleGroupsList(allRuleGroups, enrichedData);
+
+                // Check for ERROR result type (actual system errors)
+                // NOTE: According to APEX design principles, validation rules triggering should NOT
+                // cause the stage to fail. They should be reported, but evaluation should still succeed.
+                if (ruleGroupResult.getResultType() == RuleResult.ResultType.ERROR) {
+                    overallSuccess = false;
+                    failureMessages.add("Rule group evaluation error: " + ruleGroupResult.getMessage());
+                } else if (ruleGroupResult.isTriggered() &&
+                          SeverityConstants.ERROR.equalsIgnoreCase(ruleGroupResult.getSeverity())) {
+                    // Log the validation rule group trigger, but don't treat it as a failure
+                    logger.warn("Validation failure: rule-groups '{}' triggered with ERROR severity: {}",
+                               ruleGroupResult.getRuleName(), ruleGroupResult.getMessage());
+                }
+            }
+
+            // Phase 3: Process enrichments if available and YamlEnrichmentProcessor is configured
+            // NOTE: Enrichments are processed AFTER rules and rule groups so that enrichments can reference
+            // rule results via #ruleGroupResults and #ruleResults context variables
             if (enrichmentProcessor != null && yamlConfig.getEnrichments() != null && !yamlConfig.getEnrichments().isEmpty()) {
                 logger.info("Processing {} enrichments", yamlConfig.getEnrichments().size());
 
@@ -1021,31 +1098,17 @@ public class RulesEngine {
                 failureMessages.add("Enrichments defined but no YamlEnrichmentProcessor configured");
             }
 
-            // Phase 2: Process individual rules if available
-            List<Rule> allRules = configuration.getAllRules();
-            if (allRules != null && !allRules.isEmpty()) {
-                logger.info("Processing {} individual rules", allRules.size());
-                RuleResult ruleResult = executeRulesList(allRules, enrichedData);
-
-                // Check for ERROR result type OR ERROR severity on matched rules
-                if (ruleResult.getResultType() == RuleResult.ResultType.ERROR) {
-                    overallSuccess = false;
-                    failureMessages.add("Rule evaluation error: " + ruleResult.getMessage());
-                } else if (ruleResult.isTriggered() &&
-                          SeverityConstants.ERROR.equalsIgnoreCase(ruleResult.getSeverity())) {
-                    overallSuccess = false;
-                    failureMessages.add("Rule validation failed: " + ruleResult.getMessage());
-                    logger.warn("Rule validation failure: {} with ERROR severity", ruleResult.getRuleName());
-                }
-
-                // Update enriched data with results from rules (field mappings)
-                if (ruleResult.getEnrichedData() != null) {
-                    enrichedData.putAll(ruleResult.getEnrichedData());
-                }
+            // Phase 4: Process enrichment groups if available
+            // Use enrichment groups from yamlConfig if available, otherwise fall back to engine's configuration
+            List<EnrichmentGroup> allEnrichmentGroups = null;
+            if (yamlConfig.getEnrichmentGroups() != null && !yamlConfig.getEnrichmentGroups().isEmpty()) {
+                logger.info("Using enrichment groups from yamlConfig parameter");
+                allEnrichmentGroups = EnrichmentGroupFactory.buildEnrichmentGroups(yamlConfig);
+            } else if (configuration.getAllEnrichmentGroups() != null && !configuration.getAllEnrichmentGroups().isEmpty()) {
+                logger.info("Using enrichment groups from engine's internal configuration");
+                allEnrichmentGroups = configuration.getAllEnrichmentGroups();
             }
 
-            // Phase 2.5: Process enrichment groups if available
-            List<EnrichmentGroup> allEnrichmentGroups = configuration.getAllEnrichmentGroups();
             if (allEnrichmentGroups != null && !allEnrichmentGroups.isEmpty()) {
                 logger.info("Processing {} enrichment groups", allEnrichmentGroups.size());
                 RuleResult enrichmentGroupResult = executeEnrichmentGroupsList(allEnrichmentGroups, enrichedData);
@@ -1058,24 +1121,6 @@ public class RulesEngine {
                 // Update enriched data with results from enrichment groups
                 if (enrichmentGroupResult.getEnrichedData() != null) {
                     enrichedData.putAll(enrichmentGroupResult.getEnrichedData());
-                }
-            }
-
-            // Phase 3: Process rule groups if available
-            List<RuleGroup> allRuleGroups = configuration.getAllRuleGroups();
-            if (allRuleGroups != null && !allRuleGroups.isEmpty()) {
-                logger.info("Processing {} rule groups", allRuleGroups.size());
-                RuleResult ruleGroupResult = executeRuleGroupsList(allRuleGroups, enrichedData);
-
-                // Check for ERROR result type OR ERROR severity on matched rule groups
-                if (ruleGroupResult.getResultType() == RuleResult.ResultType.ERROR) {
-                    overallSuccess = false;
-                    failureMessages.add("Rule group evaluation error: " + ruleGroupResult.getMessage());
-                } else if (ruleGroupResult.isTriggered() &&
-                          SeverityConstants.ERROR.equalsIgnoreCase(ruleGroupResult.getSeverity())) {
-                    overallSuccess = false;
-                    failureMessages.add("Rule group validation failed: " + ruleGroupResult.getMessage());
-                    logger.warn("Rule group validation failure: {} with ERROR severity", ruleGroupResult.getRuleName());
                 }
             }
 
@@ -1121,17 +1166,18 @@ public class RulesEngine {
 
                     RuleResult itemResult = processItem(item, yamlConfig, enrichedData);
 
-                    // Check for ERROR result type OR ERROR severity on matched rules
+                    // Check for ERROR result type (actual system errors)
+                    // NOTE: According to APEX design principles, validation rules triggering should NOT
+                    // cause the stage to fail. They should be reported, but evaluation should still succeed.
                     if (itemResult.getResultType() == RuleResult.ResultType.ERROR) {
                         overallSuccess = false;
                         failureMessages.add(item.getSectionType() + " '" + item.getItemId() + "' error: " + itemResult.getMessage());
                     } else if (itemResult.isTriggered() &&
                               SeverityConstants.ERROR.equalsIgnoreCase(itemResult.getSeverity())) {
-                        // Rule matched with ERROR severity - this is a validation failure
-                        overallSuccess = false;
-                        failureMessages.add(item.getSectionType() + " '" + item.getItemId() + "' validation failed: " + itemResult.getMessage());
-                        logger.warn("Validation failure: {} '{}' triggered with {} severity: {}",
-                                   item.getSectionType(), item.getItemId(), itemResult.getSeverity(), itemResult.getMessage());
+                        // Log the validation rule trigger, but don't treat it as a failure
+                        // This applies to both rules and rule-groups
+                        logger.warn("Validation failure: {} '{}' triggered with ERROR severity: {}",
+                                   item.getSectionType(), item.getItemId(), itemResult.getMessage());
                     }
 
                     // Update enriched data with results
@@ -1185,20 +1231,32 @@ public class RulesEngine {
                         break;
 
                     case "rules":
-                        List<Rule> allRules = configuration.getAllRules();
+                        // Use rules from yamlConfig if available, otherwise fall back to engine's configuration
+                        List<Rule> allRules = null;
+                        if (yamlConfig.getRules() != null && !yamlConfig.getRules().isEmpty()) {
+                            logger.info("Using rules from yamlConfig parameter");
+                            YamlRuleFactory ruleFactory = new YamlRuleFactory();
+                            allRules = ruleFactory.createRules(yamlConfig);
+                        } else if (configuration.getAllRules() != null && !configuration.getAllRules().isEmpty()) {
+                            logger.info("Using rules from engine's internal configuration");
+                            allRules = configuration.getAllRules();
+                        }
+
                         if (allRules != null && !allRules.isEmpty()) {
                             logger.info("Processing {} individual rules", allRules.size());
                             RuleResult ruleResult = executeRulesList(allRules, enrichedData);
 
-                            // Check for ERROR result type OR ERROR severity on matched rules
+                            // Check for ERROR result type (actual system errors)
+                            // NOTE: According to APEX design principles, validation rules triggering should NOT
+                            // cause the stage to fail. They should be reported, but evaluation should still succeed.
                             if (ruleResult.getResultType() == RuleResult.ResultType.ERROR) {
                                 overallSuccess = false;
                                 failureMessages.add("Rule evaluation error: " + ruleResult.getMessage());
                             } else if (ruleResult.isTriggered() &&
                                       SeverityConstants.ERROR.equalsIgnoreCase(ruleResult.getSeverity())) {
-                                overallSuccess = false;
-                                failureMessages.add("Rule validation failed: " + ruleResult.getMessage());
-                                logger.warn("Rule validation failure: {} with ERROR severity", ruleResult.getRuleName());
+                                // Log the validation rule trigger, but don't treat it as a failure
+                                logger.warn("Validation failure: rules '{}' triggered with ERROR severity: {}",
+                                           ruleResult.getRuleName(), ruleResult.getMessage());
                             }
 
                             // Update enriched data with results from rules (field mappings)
@@ -1209,26 +1267,55 @@ public class RulesEngine {
                         break;
 
                     case "rule-groups":
-                        List<RuleGroup> allRuleGroups = configuration.getAllRuleGroups();
+                        // Use rule groups from yamlConfig if available, otherwise fall back to engine's configuration
+                        List<RuleGroup> allRuleGroups = null;
+                        if (yamlConfig.getRuleGroups() != null && !yamlConfig.getRuleGroups().isEmpty()) {
+                            logger.info("Using rule groups from yamlConfig parameter");
+                            YamlRuleFactory ruleFactory = new YamlRuleFactory();
+                            // Need to create a temporary config to resolve rule references
+                            RulesEngineConfiguration tempConfig = new RulesEngineConfiguration();
+                            // First create rules and register them
+                            List<Rule> rules = ruleFactory.createRules(yamlConfig);
+                            for (Rule rule : rules) {
+                                tempConfig.registerRule(rule);
+                            }
+                            // Then create rule groups
+                            allRuleGroups = ruleFactory.createRuleGroups(yamlConfig, tempConfig);
+                        } else if (configuration.getAllRuleGroups() != null && !configuration.getAllRuleGroups().isEmpty()) {
+                            logger.info("Using rule groups from engine's internal configuration");
+                            allRuleGroups = configuration.getAllRuleGroups();
+                        }
+
                         if (allRuleGroups != null && !allRuleGroups.isEmpty()) {
                             logger.info("Processing {} rule groups", allRuleGroups.size());
                             RuleResult ruleGroupResult = executeRuleGroupsList(allRuleGroups, enrichedData);
 
-                            // Check for ERROR result type OR ERROR severity on matched rule groups
+                            // Check for ERROR result type (actual system errors)
+                            // NOTE: According to APEX design principles, validation rules triggering should NOT
+                            // cause the stage to fail. They should be reported, but evaluation should still succeed.
                             if (ruleGroupResult.getResultType() == RuleResult.ResultType.ERROR) {
                                 overallSuccess = false;
                                 failureMessages.add("Rule group evaluation error: " + ruleGroupResult.getMessage());
                             } else if (ruleGroupResult.isTriggered() &&
                                       SeverityConstants.ERROR.equalsIgnoreCase(ruleGroupResult.getSeverity())) {
-                                overallSuccess = false;
-                                failureMessages.add("Rule group validation failed: " + ruleGroupResult.getMessage());
-                                logger.warn("Rule group validation failure: {} with ERROR severity", ruleGroupResult.getRuleName());
+                                // Log the validation rule group trigger, but don't treat it as a failure
+                                logger.warn("Validation failure: rule-groups '{}' triggered with ERROR severity: {}",
+                                           ruleGroupResult.getRuleName(), ruleGroupResult.getMessage());
                             }
                         }
                         break;
 
                     case "enrichment-groups":
-                        List<EnrichmentGroup> allEnrichmentGroups = configuration.getAllEnrichmentGroups();
+                        // Use enrichment groups from yamlConfig if available, otherwise fall back to engine's configuration
+                        List<EnrichmentGroup> allEnrichmentGroups = null;
+                        if (yamlConfig.getEnrichmentGroups() != null && !yamlConfig.getEnrichmentGroups().isEmpty()) {
+                            logger.info("Using enrichment groups from yamlConfig parameter");
+                            allEnrichmentGroups = EnrichmentGroupFactory.buildEnrichmentGroups(yamlConfig);
+                        } else if (configuration.getAllEnrichmentGroups() != null && !configuration.getAllEnrichmentGroups().isEmpty()) {
+                            logger.info("Using enrichment groups from engine's internal configuration");
+                            allEnrichmentGroups = configuration.getAllEnrichmentGroups();
+                        }
+
                         if (allEnrichmentGroups != null && !allEnrichmentGroups.isEmpty()) {
                             logger.info("Processing {} enrichment groups", allEnrichmentGroups.size());
                             RuleResult enrichmentGroupResult = executeEnrichmentGroupsList(allEnrichmentGroups, enrichedData);
@@ -1344,41 +1431,92 @@ public class RulesEngine {
         }
 
         // Process single enrichment using YamlEnrichmentProcessor.processEnrichmentWithResult()
+        // Pass yamlConfig so that enrichments can access #ruleGroupResults context variable
         // This method returns RuleResult directly (unlike processEnrichment() which returns Object)
-        return enrichmentProcessor.processEnrichmentWithResult(enrichment, data);
+        // NOTE: We do NOT need to skip rule processing here because processEnrichmentWithResult()
+        // no longer calls processRulesAndRuleGroups() - APEX processes YAML in STRICT DOCUMENT ORDER ONLY
+        return enrichmentProcessor.processEnrichmentWithResult(enrichment, data, yamlConfig);
     }
 
     /**
      * Process a single rule by ID.
      *
      * @param ruleId The rule ID to process
-     * @param yamlConfig The YAML configuration (unused but kept for consistency)
+     * @param yamlConfig The YAML configuration
      * @param data The data to evaluate
      * @return RuleResult from processing the rule
      */
     private RuleResult processRuleItem(String ruleId, YamlRuleConfiguration yamlConfig, Map<String, Object> data) {
-        // Look up rule in configuration.getRuleById()
-        Rule rule = configuration.getRuleById(ruleId);
+        // First try to find rule in yamlConfig
+        Rule rule = null;
+        if (yamlConfig != null && yamlConfig.getRules() != null) {
+            for (YamlRule yamlRule : yamlConfig.getRules()) {
+                if (ruleId.equals(yamlRule.getId())) {
+                    // Convert YamlRule to Rule using factory
+                    YamlRuleFactory ruleFactory = new YamlRuleFactory();
+                    rule = ruleFactory.createRuleWithMetadata(yamlRule);
+                    break;
+                }
+            }
+        }
+
+        // Fall back to engine's internal configuration if not found in yamlConfig
+        if (rule == null) {
+            rule = configuration.getRuleById(ruleId);
+        }
+
         if (rule == null) {
             logger.warn("Rule not found: {}", ruleId);
             return RuleResult.error("rule:" + ruleId, "Rule not found");
         }
 
         // Execute single rule using executeRulesList()
-        return executeRulesList(List.of(rule), data);
+        RuleResult result = executeRulesList(List.of(rule), data);
+
+        // Store individual rule result for conditional mapping in enrichments
+        // This allows enrichments to reference #ruleResults in document order mode
+        if (enrichmentProcessor != null) {
+            boolean passed = result.isSuccess() && result.isTriggered();
+            enrichmentProcessor.storeIndividualRuleResult(ruleId, passed);
+            logger.debug("Stored individual rule result for '{}': passed={}", ruleId, passed);
+        }
+
+        return result;
     }
 
     /**
      * Process a single enrichment group by ID.
      *
      * @param groupId The enrichment group ID to process
-     * @param yamlConfig The YAML configuration (unused but kept for consistency)
+     * @param yamlConfig The YAML configuration
      * @param data The data to enrich
      * @return RuleResult from processing the enrichment group
      */
     private RuleResult processEnrichmentGroupItem(String groupId, YamlRuleConfiguration yamlConfig, Map<String, Object> data) {
-        // Look up enrichment group in configuration.getEnrichmentGroupById()
-        EnrichmentGroup group = configuration.getEnrichmentGroupById(groupId);
+        // First try to find enrichment group in yamlConfig
+        EnrichmentGroup group = null;
+        if (yamlConfig != null && yamlConfig.getEnrichmentGroups() != null) {
+            for (YamlEnrichmentGroup yamlGroup : yamlConfig.getEnrichmentGroups()) {
+                if (groupId.equals(yamlGroup.getId())) {
+                    // Convert YamlEnrichmentGroup to EnrichmentGroup using factory
+                    List<EnrichmentGroup> groups = EnrichmentGroupFactory.buildEnrichmentGroups(yamlConfig);
+                    // Find the specific group we need
+                    for (EnrichmentGroup g : groups) {
+                        if (groupId.equals(g.getId())) {
+                            group = g;
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+
+        // Fall back to engine's internal configuration if not found in yamlConfig
+        if (group == null) {
+            group = configuration.getEnrichmentGroupById(groupId);
+        }
+
         if (group == null) {
             logger.warn("Enrichment group not found: {}", groupId);
             return RuleResult.error("enrichment-group:" + groupId, "Enrichment group not found");
@@ -1392,20 +1530,67 @@ public class RulesEngine {
      * Process a single rule group by ID.
      *
      * @param groupId The rule group ID to process
-     * @param yamlConfig The YAML configuration (unused but kept for consistency)
+     * @param yamlConfig The YAML configuration
      * @param data The data to evaluate
      * @return RuleResult from processing the rule group
      */
     private RuleResult processRuleGroupItem(String groupId, YamlRuleConfiguration yamlConfig, Map<String, Object> data) {
-        // Look up rule group in configuration.getRuleGroupById()
-        RuleGroup group = configuration.getRuleGroupById(groupId);
+        // First try to find rule group in yamlConfig
+        RuleGroup group = null;
+        if (yamlConfig != null && yamlConfig.getRuleGroups() != null) {
+            for (YamlRuleGroup yamlGroup : yamlConfig.getRuleGroups()) {
+                if (groupId.equals(yamlGroup.getId())) {
+                    try {
+                        // Convert YamlRuleGroup to RuleGroup using factory
+                        YamlRuleFactory ruleFactory = new YamlRuleFactory();
+                        // Need to create a temporary config to resolve rule references
+                        RulesEngineConfiguration tempConfig = new RulesEngineConfiguration();
+                        // First create rules and register them
+                        List<Rule> rules = ruleFactory.createRules(yamlConfig);
+                        for (Rule rule : rules) {
+                            tempConfig.registerRule(rule);
+                        }
+                        // Then create rule groups
+                        List<RuleGroup> groups = ruleFactory.createRuleGroups(yamlConfig, tempConfig);
+                        // Find the specific group we need
+                        for (RuleGroup g : groups) {
+                            if (groupId.equals(g.getId())) {
+                                group = g;
+                                break;
+                            }
+                        }
+                    } catch (YamlConfigurationException e) {
+                        logger.error("Failed to create rule group from YAML: {}", groupId, e);
+                        return RuleResult.error("rule-group:" + groupId, "Failed to create rule group: " + e.getMessage());
+                    }
+                    break;
+                }
+            }
+        }
+
+        // Fall back to engine's internal configuration if not found in yamlConfig
+        if (group == null) {
+            group = configuration.getRuleGroupById(groupId);
+        }
+
         if (group == null) {
             logger.warn("Rule group not found: {}", groupId);
             return RuleResult.error("rule-group:" + groupId, "Rule group not found");
         }
 
         // Execute single rule group using executeRuleGroupsList()
-        return executeRuleGroupsList(List.of(group), data);
+        RuleResult result = executeRuleGroupsList(List.of(group), data);
+
+        // Store rule group results for conditional mapping in enrichments
+        // This allows enrichments to reference #ruleGroupResults in document order mode
+        if (enrichmentProcessor != null) {
+            boolean passed = result.isSuccess() && result.isTriggered();
+            Map<String, Boolean> ruleResults = group.getRuleResults();
+            enrichmentProcessor.storeRuleGroupResult(groupId, passed, ruleResults);
+            logger.debug("Stored rule group result for '{}': passed={}, ruleResults={}", groupId, passed, ruleResults);
+        }
+
+        return result;
     }
 
     /**

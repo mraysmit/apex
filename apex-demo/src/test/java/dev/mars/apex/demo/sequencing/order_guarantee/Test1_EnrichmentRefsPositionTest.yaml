@@ -1,5 +1,5 @@
-name: "Test 2: Enrichment-Groups ONLY Guarantee"
-description: "Proves that ONLY enrichment-groups execute (not individual enrichments)"
+name: "Test 1: enrichment-refs Position Guarantee"
+description: "Proves that enrichment-refs executes at EXACT reference position in YAML document"
 
 # Position 1: Inline enrichment BEFORE enrichment-refs
 enrichments:
@@ -12,13 +12,13 @@ enrichments:
       - source-field: "valueBefore"
         target-field: "valueBefore"
 
-# Position 2: Reference to external file with BOTH enrichments and enrichment-groups
-# ONLY enrichment-groups should execute
+# Position 2: Reference to external enrichments
+# MUST execute at THIS EXACT POSITION
 enrichment-refs:
-  - name: "external-with-groups"
-    source: "src/test/java/dev/mars/apex/demo/sequencing/order_guarantee/test2-external.yaml"
+  - name: "external-enrichments"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/order_guarantee/Test1_EnrichmentRefsPositionTest-external.yaml"
 
-# Position 3: Rule AFTER enrichment-refs
+# Position 3: Rule AFTER enrichment-refs (to verify order)
 rules:
   - id: "inline-after"
     name: "Inline After Rule"

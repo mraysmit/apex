@@ -125,12 +125,10 @@ public class YamlEnrichmentProcessor {
         // Set current configuration for database lookups
         this.currentConfiguration = configuration;
 
-
-
-        // Process rules and rule groups first to populate rule results
-        if (configuration != null && (configuration.getRules() != null || configuration.getRuleGroups() != null)) {
-            processRulesAndRuleGroups(configuration, targetObject);
-        }
+        // NOTE: We do NOT process rules/rule-groups here anymore.
+        // APEX processes YAML files in STRICT DOCUMENT ORDER ONLY.
+        // Rules and rule groups are processed at their document position by RulesEngine.evaluateInDocumentOrder()
+        // This method only processes the enrichments passed to it.
 
         if (enrichments == null || enrichments.isEmpty()) {
             LOGGER.fine("No enrichments to process");
@@ -1139,6 +1137,58 @@ public class YamlEnrichmentProcessor {
 
 
     /**
+     * Store a rule group result for use in conditional mapping expressions.
+     * This method is called by RulesEngine when processing rule groups in document order mode.
+     *
+     * @param ruleGroupId The ID of the rule group
+     * @param passed Whether the rule group passed
+     * @param ruleResults Map of individual rule results within the group
+     */
+    public void storeRuleGroupResult(String ruleGroupId, boolean passed, Map<String, Boolean> ruleResults) {
+        Map<String, Object> groupRuleResults = new HashMap<>();
+        groupRuleResults.put("passed", passed);
+
+        if (ruleResults != null) {
+            groupRuleResults.putAll(ruleResults);
+
+            // Add passedRules and failedRules lists
+            List<String> passedRules = new ArrayList<>();
+            List<String> failedRules = new ArrayList<>();
+            for (Map.Entry<String, Boolean> entry : ruleResults.entrySet()) {
+                if (entry.getValue()) {
+                    passedRules.add(entry.getKey());
+                } else {
+                    failedRules.add(entry.getKey());
+                }
+            }
+            groupRuleResults.put("passedRules", passedRules);
+            groupRuleResults.put("failedRules", failedRules);
+
+            // ALSO store individual rule results in the individualRuleResults map
+            // This allows enrichments to reference #ruleResults['rule-id'] in document order mode
+            for (Map.Entry<String, Boolean> entry : ruleResults.entrySet()) {
+                individualRuleResults.put(entry.getKey(), entry.getValue());
+                LOGGER.fine("Stored individual rule result from group: " + entry.getKey() + " -> passed=" + entry.getValue());
+            }
+        }
+
+        ruleGroupResults.put(ruleGroupId, groupRuleResults);
+        LOGGER.fine("Stored rule group result: " + ruleGroupId + " -> passed=" + passed);
+    }
+
+    /**
+     * Store individual rule result for conditional mapping in enrichments.
+     * This allows enrichments to reference #ruleResults in document order mode.
+     *
+     * @param ruleId The ID of the rule
+     * @param passed Whether the rule passed
+     */
+    public void storeIndividualRuleResult(String ruleId, boolean passed) {
+        individualRuleResults.put(ruleId, passed);
+        LOGGER.fine("Stored individual rule result: " + ruleId + " -> passed=" + passed);
+    }
+
+    /**
      * Process rules and rule groups to populate rule results for conditional mapping.
      *
      * @param configuration The YAML configuration containing rules and rule groups
@@ -1469,6 +1519,21 @@ public class YamlEnrichmentProcessor {
      * @return A RuleResult containing success status, enriched data, and failure messages
      */
     public RuleResult processEnrichmentWithResult(YamlEnrichment enrichment, Object targetObject) {
+        return processEnrichmentWithResult(enrichment, targetObject, null);
+    }
+
+    /**
+     * Process a single enrichment on a target object with full configuration context and return detailed results.
+     * This method provides programmatic access to enrichment success/failure status and detailed error information.
+     * The configuration parameter is required for enrichments that reference rules or rule groups via #ruleGroupResults.
+     *
+     * @param enrichment The enrichment to apply
+     * @param targetObject The object to enrich
+     * @param configuration The full YAML configuration (required for conditional mapping with rule group results)
+     * @return A RuleResult containing success status, enriched data, and failure messages
+     */
+    public RuleResult processEnrichmentWithResult(YamlEnrichment enrichment, Object targetObject,
+                                                  dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
         if (enrichment == null) {
             LOGGER.fine("No enrichment provided");
             Map<String, Object> resultData = convertToMap(targetObject);
@@ -1477,7 +1542,7 @@ public class YamlEnrichmentProcessor {
 
         List<YamlEnrichment> enrichmentList = new ArrayList<>();
         enrichmentList.add(enrichment);
-        return processEnrichmentsWithResult(enrichmentList, targetObject, null);
+        return processEnrichmentsWithResult(enrichmentList, targetObject, configuration);
     }
 
     /**

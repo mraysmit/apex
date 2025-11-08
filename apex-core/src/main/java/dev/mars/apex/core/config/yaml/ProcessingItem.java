@@ -37,27 +37,44 @@ package dev.mars.apex.core.config.yaml;
  * @since 1.0.0
  */
 public class ProcessingItem {
-    
+
     private final String sectionType;  // e.g., "enrichments", "rules", "enrichment-groups"
     private final String itemId;       // e.g., "enrich-1", "rule-1", "group-1"
-    
+    private final String itemType;     // e.g., "calculation-enrichment", "lookup-enrichment", "simple-rule"
+    private final String itemName;     // e.g., "Group A", "Validate Credit Limit"
+
     /**
-     * Creates a new processing item.
-     * 
+     * Creates a new processing item with full metadata.
+     *
      * @param sectionType The type of section this item belongs to (e.g., "enrichments", "rules")
      * @param itemId The unique identifier of the item within its section
+     * @param itemType The type of the item (e.g., "calculation-enrichment", "lookup-enrichment")
+     * @param itemName The human-readable name of the item (can be null)
      * @throws IllegalArgumentException if sectionType or itemId is null or empty
      */
-    public ProcessingItem(String sectionType, String itemId) {
+    public ProcessingItem(String sectionType, String itemId, String itemType, String itemName) {
         if (sectionType == null || sectionType.trim().isEmpty()) {
             throw new IllegalArgumentException("Section type cannot be null or empty");
         }
         if (itemId == null || itemId.trim().isEmpty()) {
             throw new IllegalArgumentException("Item ID cannot be null or empty");
         }
-        
+
         this.sectionType = sectionType;
         this.itemId = itemId;
+        this.itemType = itemType;
+        this.itemName = itemName;
+    }
+
+    /**
+     * Creates a new processing item without metadata (for backward compatibility).
+     *
+     * @param sectionType The type of section this item belongs to (e.g., "enrichments", "rules")
+     * @param itemId The unique identifier of the item within its section
+     * @throws IllegalArgumentException if sectionType or itemId is null or empty
+     */
+    public ProcessingItem(String sectionType, String itemId) {
+        this(sectionType, itemId, null, null);
     }
     
     /**
@@ -71,16 +88,34 @@ public class ProcessingItem {
     
     /**
      * Gets the unique identifier of this item.
-     * 
+     *
      * @return The item ID (e.g., "enrich-1", "rule-1")
      */
     public String getItemId() {
         return itemId;
     }
-    
+
+    /**
+     * Gets the type of this item (e.g., "calculation-enrichment", "lookup-enrichment").
+     *
+     * @return The item type, or null if not available
+     */
+    public String getItemType() {
+        return itemType;
+    }
+
+    /**
+     * Gets the human-readable name of this item.
+     *
+     * @return The item name, or null if not available
+     */
+    public String getItemName() {
+        return itemName;
+    }
+
     /**
      * Checks if this item is an enrichment.
-     * 
+     *
      * @return true if this is an enrichment item
      */
     public boolean isEnrichment() {

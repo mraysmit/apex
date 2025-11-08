@@ -1,0 +1,13 @@
+name: "External Enrichments 2 for Edge Case Test 6"
+
+enrichments:
+  - id: "external-2-item-1"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "'value-from-external-2'"
+      result-field: "result2"
+    field-mappings:
+      - source-field: "result2"
+        target-field: "result2"
+    enabled: true
+

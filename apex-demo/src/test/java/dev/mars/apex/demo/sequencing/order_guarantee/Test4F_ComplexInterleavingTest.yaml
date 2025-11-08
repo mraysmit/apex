@@ -1,0 +1,78 @@
+name: "Test 4F - Complex Interleaving"
+description: "Proves complex patterns of standalone and grouped items work correctly"
+
+enrichments:
+  - id: "standalone-1"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('standalone-1', 'value1')"
+      result-field: "field1"
+    field-mappings:
+      - source-field: "field1"
+        target-field: "field1"
+    enabled: true
+
+  - id: "grouped-1"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('grouped-1', 'value2')"
+      result-field: "field2"
+    field-mappings:
+      - source-field: "field2"
+        target-field: "field2"
+    enabled: true
+
+  - id: "standalone-2"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('standalone-2', 'value3')"
+      result-field: "field3"
+    field-mappings:
+      - source-field: "field3"
+        target-field: "field3"
+    enabled: true
+
+  - id: "grouped-2"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('grouped-2', 'value4')"
+      result-field: "field4"
+    field-mappings:
+      - source-field: "field4"
+        target-field: "field4"
+    enabled: true
+
+  - id: "standalone-3"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('standalone-3', 'value5')"
+      result-field: "field5"
+    field-mappings:
+      - source-field: "field5"
+        target-field: "field5"
+    enabled: true
+
+  - id: "grouped-3"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('grouped-3', 'value6')"
+      result-field: "field6"
+    field-mappings:
+      - source-field: "field6"
+        target-field: "field6"
+    enabled: true
+
+enrichment-groups:
+  - id: "group-A"
+    name: "Group A"
+    operator: "AND"
+    enrichment-ids:
+      - "grouped-1"
+      - "grouped-2"
+
+  - id: "group-B"
+    name: "Group B"
+    operator: "AND"
+    enrichment-ids:
+      - "grouped-3"
+

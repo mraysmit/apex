@@ -1,0 +1,25 @@
+name: "External Enrichments for Edge Case Test 4"
+description: "External file with enrichment ID that collides with main file"
+
+# External enrichment with ID "collision-id" (SAME as in main file!)
+enrichments:
+  - id: "collision-id"  # ❌ COLLISION! Same ID as in main file
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "'value-from-external'"
+      result-field: "externalResult"
+    field-mappings:
+      - source-field: "externalResult"
+        target-field: "externalResult"
+    enabled: true
+
+  - id: "unique-external-id"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "'value-unique-external'"
+      result-field: "uniqueExternal"
+    field-mappings:
+      - source-field: "uniqueExternal"
+        target-field: "uniqueExternal"
+    enabled: true
+

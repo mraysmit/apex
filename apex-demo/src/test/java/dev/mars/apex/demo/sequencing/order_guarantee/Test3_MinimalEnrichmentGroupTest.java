@@ -29,7 +29,7 @@ public class Test3_MinimalEnrichmentGroupTest extends DemoTestBase {
         LOGGER.info("=== TEST 3: Minimal Enrichment-Group Test ===");
 
         // Arrange
-        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/order_guarantee/test3-main.yaml";
+        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/order_guarantee/Test3_MinimalEnrichmentGroupTest.yaml";
         RulesEngine engine = RulesEngine.fromFile(yamlPath);
 
         // Test data with underlying field

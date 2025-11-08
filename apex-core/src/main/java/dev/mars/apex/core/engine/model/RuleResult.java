@@ -488,7 +488,7 @@ public class RuleResult implements Serializable {
      * @return A new RuleResult instance representing failed enrichment
      */
     public static RuleResult enrichmentFailure(List<String> failureMessages, Map<String, Object> enrichedData, String severity) {
-        return new RuleResult("enrichment", "Enrichment failed",
+        return new RuleResult("enrichment", "Required field enrichment failed",
                              severity, false, ResultType.ERROR, null, enrichedData, failureMessages, false);
     }
 
@@ -519,6 +519,24 @@ public class RuleResult implements Serializable {
     public static RuleResult evaluationFailure(List<String> failureMessages, Map<String, Object> enrichedData,
                                               String ruleName, String errorMessage) {
         return new RuleResult(ruleName, errorMessage,
+                             false, ResultType.ERROR, null, enrichedData, failureMessages, false);
+    }
+
+    /**
+     * Create a new rule result for failed complete evaluation (enrichments + rules) with severity.
+     * This method is used when either enrichments or rules fail during evaluation and we want to preserve
+     * the original rule's severity.
+     *
+     * @param failureMessages List of failure messages from enrichments and rules
+     * @param enrichedData The enriched data map (may be partial if enrichments failed)
+     * @param ruleName The name of the rule or enrichment that failed
+     * @param errorMessage The primary error message
+     * @param severity The severity level to preserve (ERROR, WARNING, INFO)
+     * @return A new RuleResult instance representing failed complete evaluation with preserved severity
+     */
+    public static RuleResult evaluationFailure(List<String> failureMessages, Map<String, Object> enrichedData,
+                                              String ruleName, String errorMessage, String severity) {
+        return new RuleResult(ruleName, errorMessage, severity,
                              false, ResultType.ERROR, null, enrichedData, failureMessages, false);
     }
 

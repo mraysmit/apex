@@ -1,0 +1,40 @@
+name: "Test 7B: Numbered Suffixes with Rule Groups"
+description: "Tests that rule-groups work correctly with numbered suffixes"
+
+# First batch of rules
+rules-1:
+  - id: "standalone-rule-1"
+    name: "Standalone Rule 1"
+    condition: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('standalone-rule-1', true)"
+    message: "Standalone Rule 1 executed"
+    enabled: true
+
+  - id: "grouped-rule-1"
+    name: "Grouped Rule 1"
+    condition: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('grouped-rule-1', true)"
+    message: "Grouped Rule 1 executed"
+    enabled: true
+
+# Rule group
+rule-groups-1:
+  - id: "rule-group-A"
+    name: "Rule Group A"
+    rule-ids:
+      - "grouped-rule-1"
+      - "grouped-rule-2"
+    enabled: true
+
+# Second batch of rules
+rules-2:
+  - id: "standalone-rule-2"
+    name: "Standalone Rule 2"
+    condition: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('standalone-rule-2', true)"
+    message: "Standalone Rule 2 executed"
+    enabled: true
+
+  - id: "grouped-rule-2"
+    name: "Grouped Rule 2"
+    condition: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('grouped-rule-2', true)"
+    message: "Grouped Rule 2 executed"
+    enabled: true
+

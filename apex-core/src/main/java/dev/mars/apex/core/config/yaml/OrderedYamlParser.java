@@ -42,7 +42,7 @@ public class OrderedYamlParser {
     // Sections that support numbered suffixes (e.g., enrichments-1, enrichments-2)
     private static final Set<String> NUMBERED_SUFFIX_SECTIONS = Set.of(
         "enrichments", "rules", "enrichment-groups", "rule-groups",
-        "transformations", "rule-chains"
+        "transformations", "rule-chains", "enrichment-refs", "rule-refs"
     );
     
     private final ObjectMapper yamlMapper;
@@ -117,6 +117,9 @@ public class OrderedYamlParser {
             // Step 4: Parse with Jackson for full object mapping
             YamlRuleConfiguration config = yamlMapper.readValue(yamlContent, YamlRuleConfiguration.class);
 
+            // Step 4.5: Merge numbered suffix sections into base sections
+            mergeNumberedSections(orderedMap, config);
+
             // Step 5: Create ordered configuration with both section and item order
             OrderedYamlConfiguration orderedConfig = new OrderedYamlConfiguration(config, sectionOrder, itemOrder);
 
@@ -159,6 +162,79 @@ public class OrderedYamlParser {
         }
 
         return sectionName;
+    }
+
+    /**
+     * Merge numbered suffix sections into base sections in document order.
+     * For example, merge enrichments-1, enrichments-2, enrichments-3 into enrichments list.
+     *
+     * @param orderedMap The ordered YAML map from SnakeYAML
+     * @param config The configuration object to update
+     */
+    private void mergeNumberedSections(Map<String, Object> orderedMap, YamlRuleConfiguration config) {
+        // Track items to merge for each base section
+        Map<String, List<Object>> itemsToMerge = new LinkedHashMap<>();
+
+        // Iterate through YAML sections in document order
+        for (String sectionName : orderedMap.keySet()) {
+            String normalizedName = normalizeSectionName(sectionName);
+
+            // Check if this is a numbered section
+            if (!sectionName.equals(normalizedName) && NUMBERED_SUFFIX_SECTIONS.contains(normalizedName)) {
+                Object sectionValue = orderedMap.get(sectionName);
+
+                if (sectionValue instanceof List) {
+                    // Add items to merge list for this base section
+                    itemsToMerge.computeIfAbsent(normalizedName, k -> new ArrayList<>())
+                               .addAll((List<?>) sectionValue);
+
+                    LOGGER.info("Found numbered section '" + sectionName + "' with " +
+                               ((List<?>) sectionValue).size() + " items to merge into '" + normalizedName + "'");
+                }
+            }
+        }
+
+        // Now merge the collected items into the config object
+        for (Map.Entry<String, List<Object>> entry : itemsToMerge.entrySet()) {
+            String baseSectionName = entry.getKey();
+            List<Object> itemsToAdd = entry.getValue();
+
+            if (itemsToAdd.isEmpty()) {
+                continue;
+            }
+
+            LOGGER.info("Merging " + itemsToAdd.size() + " items into section '" + baseSectionName + "'");
+
+            // Use Jackson to convert raw objects to typed objects and merge
+            switch (baseSectionName) {
+                case "enrichments":
+                    mergeEnrichments(config, itemsToAdd);
+                    break;
+                case "rules":
+                    mergeRules(config, itemsToAdd);
+                    break;
+                case "enrichment-groups":
+                    mergeEnrichmentGroups(config, itemsToAdd);
+                    break;
+                case "rule-groups":
+                    mergeRuleGroups(config, itemsToAdd);
+                    break;
+                case "transformations":
+                    mergeTransformations(config, itemsToAdd);
+                    break;
+                case "rule-chains":
+                    mergeRuleChains(config, itemsToAdd);
+                    break;
+                case "enrichment-refs":
+                    mergeEnrichmentRefs(config, itemsToAdd);
+                    break;
+                case "rule-refs":
+                    mergeRuleRefs(config, itemsToAdd);
+                    break;
+                default:
+                    LOGGER.warning("Unknown base section for merging: " + baseSectionName);
+            }
+        }
     }
 
     /**
@@ -231,31 +307,42 @@ public class OrderedYamlParser {
 
         // LinkedHashMap from SnakeYAML preserves insertion order
         for (String sectionName : yamlMap.keySet()) {
-            if (!KNOWN_SECTIONS.contains(sectionName)) {
+            // Normalize section name to handle numbered suffixes (e.g., enrichments-1 -> enrichments)
+            String normalizedSectionName = normalizeSectionName(sectionName);
+
+            if (!KNOWN_SECTIONS.contains(normalizedSectionName)) {
                 continue; // Skip unknown sections
             }
 
             Object sectionValue = yamlMap.get(sectionName);
 
-            if (LIST_SECTIONS.contains(sectionName) && sectionValue instanceof List) {
+            if (LIST_SECTIONS.contains(normalizedSectionName) && sectionValue instanceof List) {
                 // Process list sections (enrichments, rules, etc.)
+                // Store normalized section type in ProcessingItem for consistency
                 List<?> items = (List<?>) sectionValue;
                 for (Object item : items) {
                     if (item instanceof Map) {
                         Map<?, ?> itemMap = (Map<?, ?>) item;
                         String itemId = (String) itemMap.get("id");
                         if (itemId != null) {
-                            itemOrder.add(new ProcessingItem(sectionName, itemId));
-                            LOGGER.fine("Found item in order: " + sectionName + " -> " + itemId);
+                            // Extract metadata for better reporting
+                            String itemType = (String) itemMap.get("type");
+                            String itemName = (String) itemMap.get("name");
+
+                            // Use normalized section name so ProcessingItem always has base type
+                            itemOrder.add(new ProcessingItem(normalizedSectionName, itemId, itemType, itemName));
+                            LOGGER.fine("Found item in order: " + sectionName + " (normalized: " +
+                                       normalizedSectionName + ") -> " + itemId +
+                                       (itemType != null ? " [" + itemType + "]" : ""));
                         } else {
                             LOGGER.warning("Item in section '" + sectionName + "' has no ID");
                         }
                     }
                 }
-            } else if (REFERENCE_SECTIONS.contains(sectionName) && sectionValue instanceof List) {
+            } else if (REFERENCE_SECTIONS.contains(normalizedSectionName) && sectionValue instanceof List) {
                 // Insert placeholder for reference sections
                 // These will be expanded later by YamlConfigurationLoader after loading referenced files
-                itemOrder.add(new ProcessingItem(sectionName, "*"));
+                itemOrder.add(new ProcessingItem(normalizedSectionName, "*"));
                 LOGGER.fine("Added placeholder for reference section: " + sectionName);
             }
             // Single-object sections (like 'pipeline') are not included in item order
@@ -269,7 +356,7 @@ public class OrderedYamlParser {
     /**
      * Create and configure the YAML ObjectMapper.
      * Uses same configuration as YamlConfigurationLoader for compatibility.
-     * 
+     *
      * @return Configured ObjectMapper for YAML processing
      */
     private ObjectMapper createYamlMapper() {
@@ -285,5 +372,157 @@ public class OrderedYamlParser {
         mapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
 
         return mapper;
+    }
+
+    /**
+     * Merge enrichments from numbered sections into the main enrichments list.
+     */
+    private void mergeEnrichments(YamlRuleConfiguration config, List<Object> itemsToAdd) {
+        ObjectMapper mapper = createYamlMapper();
+        List<YamlEnrichment> existingEnrichments = config.getEnrichments();
+        if (existingEnrichments == null) {
+            existingEnrichments = new ArrayList<>();
+            config.setEnrichments(existingEnrichments);
+        }
+
+        for (Object item : itemsToAdd) {
+            YamlEnrichment enrichment = mapper.convertValue(item, YamlEnrichment.class);
+            existingEnrichments.add(enrichment);
+        }
+
+        LOGGER.info("Merged " + itemsToAdd.size() + " enrichments (total now: " + existingEnrichments.size() + ")");
+    }
+
+    /**
+     * Merge rules from numbered sections into the main rules list.
+     */
+    private void mergeRules(YamlRuleConfiguration config, List<Object> itemsToAdd) {
+        ObjectMapper mapper = createYamlMapper();
+        List<YamlRule> existingRules = config.getRules();
+        if (existingRules == null) {
+            existingRules = new ArrayList<>();
+            config.setRules(existingRules);
+        }
+
+        for (Object item : itemsToAdd) {
+            YamlRule rule = mapper.convertValue(item, YamlRule.class);
+            existingRules.add(rule);
+        }
+
+        LOGGER.info("Merged " + itemsToAdd.size() + " rules (total now: " + existingRules.size() + ")");
+    }
+
+    /**
+     * Merge enrichment-groups from numbered sections into the main enrichment-groups list.
+     */
+    private void mergeEnrichmentGroups(YamlRuleConfiguration config, List<Object> itemsToAdd) {
+        ObjectMapper mapper = createYamlMapper();
+        List<YamlEnrichmentGroup> existingGroups = config.getEnrichmentGroups();
+        if (existingGroups == null) {
+            existingGroups = new ArrayList<>();
+            config.setEnrichmentGroups(existingGroups);
+        }
+
+        for (Object item : itemsToAdd) {
+            YamlEnrichmentGroup group = mapper.convertValue(item, YamlEnrichmentGroup.class);
+            existingGroups.add(group);
+        }
+
+        LOGGER.info("Merged " + itemsToAdd.size() + " enrichment-groups (total now: " + existingGroups.size() + ")");
+    }
+
+    /**
+     * Merge rule-groups from numbered sections into the main rule-groups list.
+     */
+    private void mergeRuleGroups(YamlRuleConfiguration config, List<Object> itemsToAdd) {
+        ObjectMapper mapper = createYamlMapper();
+        List<YamlRuleGroup> existingGroups = config.getRuleGroups();
+        if (existingGroups == null) {
+            existingGroups = new ArrayList<>();
+            config.setRuleGroups(existingGroups);
+        }
+
+        for (Object item : itemsToAdd) {
+            YamlRuleGroup group = mapper.convertValue(item, YamlRuleGroup.class);
+            existingGroups.add(group);
+        }
+
+        LOGGER.info("Merged " + itemsToAdd.size() + " rule-groups (total now: " + existingGroups.size() + ")");
+    }
+
+    /**
+     * Merge transformations from numbered sections into the main transformations list.
+     */
+    private void mergeTransformations(YamlRuleConfiguration config, List<Object> itemsToAdd) {
+        ObjectMapper mapper = createYamlMapper();
+        List<YamlTransformation> existingTransformations = config.getTransformations();
+        if (existingTransformations == null) {
+            existingTransformations = new ArrayList<>();
+            config.setTransformations(existingTransformations);
+        }
+
+        for (Object item : itemsToAdd) {
+            YamlTransformation transformation = mapper.convertValue(item, YamlTransformation.class);
+            existingTransformations.add(transformation);
+        }
+
+        LOGGER.info("Merged " + itemsToAdd.size() + " transformations (total now: " + existingTransformations.size() + ")");
+    }
+
+    /**
+     * Merge rule-chains from numbered sections into the main rule-chains list.
+     */
+    private void mergeRuleChains(YamlRuleConfiguration config, List<Object> itemsToAdd) {
+        ObjectMapper mapper = createYamlMapper();
+        List<YamlRuleChain> existingChains = config.getRuleChains();
+        if (existingChains == null) {
+            existingChains = new ArrayList<>();
+            config.setRuleChains(existingChains);
+        }
+
+        for (Object item : itemsToAdd) {
+            YamlRuleChain chain = mapper.convertValue(item, YamlRuleChain.class);
+            existingChains.add(chain);
+        }
+
+        LOGGER.info("Merged " + itemsToAdd.size() + " rule-chains (total now: " + existingChains.size() + ")");
+    }
+
+    /**
+     * Merge enrichment-refs from numbered sections into the main enrichment-refs list.
+     */
+    private void mergeEnrichmentRefs(YamlRuleConfiguration config, List<Object> itemsToAdd) {
+        ObjectMapper mapper = createYamlMapper();
+        List<YamlEnrichmentRef> existingRefs = config.getEnrichmentRefs();
+        if (existingRefs == null) {
+            existingRefs = new ArrayList<>();
+            config.setEnrichmentRefs(existingRefs);
+        }
+
+        for (Object item : itemsToAdd) {
+            YamlEnrichmentRef ref = mapper.convertValue(item, YamlEnrichmentRef.class);
+            existingRefs.add(ref);
+        }
+
+        LOGGER.info("Merged " + itemsToAdd.size() + " enrichment-refs (total now: " + existingRefs.size() + ")");
+    }
+
+    /**
+     * Merge rule-refs from numbered sections into the main rule-refs list.
+     */
+    private void mergeRuleRefs(YamlRuleConfiguration config, List<Object> itemsToAdd) {
+        ObjectMapper mapper = createYamlMapper();
+        List<YamlRuleRef> existingRefs = config.getRuleRefs();
+        if (existingRefs == null) {
+            existingRefs = new ArrayList<>();
+            config.setRuleRefs(existingRefs);
+        }
+
+        for (Object item : itemsToAdd) {
+            YamlRuleRef ref = mapper.convertValue(item, YamlRuleRef.class);
+            existingRefs.add(ref);
+        }
+
+        LOGGER.info("Merged " + itemsToAdd.size() + " rule-refs (total now: " + existingRefs.size() + ")");
     }
 }

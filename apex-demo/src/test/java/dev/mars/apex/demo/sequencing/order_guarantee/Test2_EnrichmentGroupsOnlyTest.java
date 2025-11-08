@@ -63,7 +63,7 @@ public class Test2_EnrichmentGroupsOnlyTest extends DemoTestBase {
         LOGGER.info("=== TEST 2: Enrichment-Groups ONLY Guarantee ===");
         
         // Load YAML configuration
-        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/order_guarantee/test2-main.yaml";
+        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/order_guarantee/Test2_EnrichmentGroupsOnlyTest.yaml";
         RulesEngine engine = RulesEngine.fromFile(yamlPath);
         YamlRuleConfiguration config = yamlLoader.loadFromFile(yamlPath);
 

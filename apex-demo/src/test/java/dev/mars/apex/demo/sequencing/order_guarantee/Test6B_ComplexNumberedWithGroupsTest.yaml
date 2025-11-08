@@ -1,0 +1,86 @@
+name: "Test 6B: Complex Numbered Suffixes with Multiple Groups"
+description: "Tests complex interleaving of numbered sections and multiple groups"
+
+# First batch
+enrichments-1:
+  - id: "standalone-1"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('standalone-1', 'v1')"
+      result-field: "v1"
+    field-mappings:
+      - source-field: "v1"
+        target-field: "v1"
+    enabled: true
+
+  - id: "grouped-A1"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('grouped-A1', 'v2')"
+      result-field: "v2"
+    field-mappings:
+      - source-field: "v2"
+        target-field: "v2"
+    enabled: true
+
+# First group
+enrichment-groups-1:
+  - id: "group-A"
+    name: "Group A"
+    enrichment-ids:
+      - "grouped-A1"
+      - "grouped-A2"
+    enabled: true
+
+# Second batch
+enrichments-2:
+  - id: "standalone-2"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('standalone-2', 'v3')"
+      result-field: "v3"
+    field-mappings:
+      - source-field: "v3"
+        target-field: "v3"
+    enabled: true
+
+  - id: "grouped-A2"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('grouped-A2', 'v4')"
+      result-field: "v4"
+    field-mappings:
+      - source-field: "v4"
+        target-field: "v4"
+    enabled: true
+
+  - id: "grouped-B1"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('grouped-B1', 'v5')"
+      result-field: "v5"
+    field-mappings:
+      - source-field: "v5"
+        target-field: "v5"
+    enabled: true
+
+# Second group
+enrichment-groups-2:
+  - id: "group-B"
+    name: "Group B"
+    enrichment-ids:
+      - "grouped-B1"
+    enabled: true
+
+# Third batch
+enrichments-3:
+  - id: "standalone-3"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('standalone-3', 'v6')"
+      result-field: "v6"
+    field-mappings:
+      - source-field: "v6"
+        target-field: "v6"
+    enabled: true
+

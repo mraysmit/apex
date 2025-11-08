@@ -2,6 +2,7 @@ package dev.mars.apex.core.service.engine;
 
 import dev.mars.apex.core.config.error.ErrorRecoveryConfig;
 import dev.mars.apex.core.config.error.SeverityRecoveryPolicy;
+import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
@@ -20,6 +21,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -213,8 +215,12 @@ public class UnifiedRuleEvaluator {
         Set<String> missingParameters = RuleParameterExtractor.validateParameters(rule, facts);
         if (!missingParameters.isEmpty()) {
             TestAwareLogger.warn(rulesLogger, "Missing parameters for rule '{}': {}", rule.getName(), missingParameters);
-            // Return NO_MATCH instead of ERROR - missing parameters mean the rule doesn't apply to this data
-            return RuleResult.noMatch(rule.getName(), "Missing parameters: " + missingParameters, rule.getSeverity());
+            // Return ERROR - missing required parameters is a failure condition
+            // Preserve the original rule's severity
+            List<String> failureMessages = List.of("Missing parameters: " + missingParameters);
+            String severity = rule.getSeverity() != null ? rule.getSeverity() : SeverityConstants.INFO;
+            return RuleResult.evaluationFailure(failureMessages, new HashMap<String, Object>(),
+                rule.getName(), "Missing parameters: " + missingParameters, severity);
         }
 
         // Create evaluation context

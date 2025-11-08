@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +51,7 @@ public class Test4_StandaloneEnrichmentsTest extends DemoTestBase {
         LOGGER.info("=== TEST 4: Standalone Enrichments with Groups ===");
 
         // Arrange
-        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/order_guarantee/test4-main.yaml";
+        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/order_guarantee/Test4_StandaloneEnrichmentsTest.yaml";
         RulesEngine engine = RulesEngine.fromFile(yamlPath);
 
         Map<String, Object> testData = new HashMap<>();
@@ -61,23 +62,45 @@ public class Test4_StandaloneEnrichmentsTest extends DemoTestBase {
 
         // Assert
         assertTrue(result.isSuccess(), "Should succeed");
-        
+
         List<String> executionLog = ExecutionTracker.getExecutionLog();
         LOGGER.info("Execution Log ({} items): {}", executionLog.size(), executionLog);
 
-        // Expected execution order:
-        // 1. standalone-1 (executes directly - not in any group)
-        // 2. standalone-2 (executes directly - not in any group)
-        // 3. grouped-1 (executed by group-A)
-        // 4. grouped-2 (executed by group-A)
-        
-        assertEquals(4, executionLog.size(), "Should execute 4 enrichments");
-        assertEquals("standalone-1", executionLog.get(0), "Position 1: standalone-1 executes directly");
-        assertEquals("standalone-2", executionLog.get(1), "Position 2: standalone-2 executes directly");
-        assertEquals("grouped-1", executionLog.get(2), "Position 3: grouped-1 executed by group-A");
-        assertEquals("grouped-2", executionLog.get(3), "Position 4: grouped-2 executed by group-A");
-        
-        LOGGER.info("✅ TEST 4 PASSED: Standalone enrichments execute directly, grouped enrichments execute via group");
+        // ===== DEFINITIVE ASSERTIONS (5 types) =====
+
+        // 1. EXACT execution count
+        assertEquals(4, executionLog.size(),
+            "Should execute EXACTLY 4 items: 2 standalone + 2 via group");
+
+        // 2. EXACT execution order
+        List<String> expected = List.of("standalone-1", "standalone-2", "grouped-1", "grouped-2");
+        assertEquals(expected, executionLog,
+            "Execution order MUST be: standalone-1, standalone-2, grouped-1 (via group), grouped-2 (via group)");
+
+        // 3. Verify what executed
+        assertTrue(executionLog.contains("standalone-1"), "standalone-1 MUST execute at position 1");
+        assertTrue(executionLog.contains("standalone-2"), "standalone-2 MUST execute at position 3");
+        assertTrue(executionLog.contains("grouped-1"), "grouped-1 MUST execute via group-A");
+        assertTrue(executionLog.contains("grouped-2"), "grouped-2 MUST execute via group-A");
+
+        // 4. Verify NO double execution
+        assertEquals(1, Collections.frequency(executionLog, "grouped-1"),
+            "grouped-1 MUST execute EXACTLY ONCE (via group only, NOT at position 2)");
+        assertEquals(1, Collections.frequency(executionLog, "grouped-2"),
+            "grouped-2 MUST execute EXACTLY ONCE (via group only, NOT at position 4)");
+
+        // 5. Verify execution positions
+        assertEquals("standalone-1", executionLog.get(0), "Position 0 MUST be standalone-1");
+        assertEquals("standalone-2", executionLog.get(1), "Position 1 MUST be standalone-2");
+        assertEquals("grouped-1", executionLog.get(2), "Position 2 MUST be grouped-1 (from group-A)");
+        assertEquals("grouped-2", executionLog.get(3), "Position 3 MUST be grouped-2 (from group-A)");
+
+        LOGGER.info("✅ TEST 4A PASSED: All 5 definitive assertion types verified");
+        LOGGER.info("  ✓ Exact count: 4 items");
+        LOGGER.info("  ✓ Exact order: standalone-1, standalone-2, grouped-1, grouped-2");
+        LOGGER.info("  ✓ What executed: All 4 items present");
+        LOGGER.info("  ✓ No double execution: Each item executes exactly once");
+        LOGGER.info("  ✓ Position verification: All items at correct positions");
     }
 }
 
