@@ -1,4 +1,4 @@
-package dev.mars.apex.demo.sequencing.order_guarantee;
+package dev.mars.apex.demo.sequencing;
 
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
@@ -29,7 +29,7 @@ public class Test3_MinimalEnrichmentGroupTest extends DemoTestBase {
         LOGGER.info("=== TEST 3: Minimal Enrichment-Group Test ===");
 
         // Arrange
-        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/order_guarantee/Test3_MinimalEnrichmentGroupTest.yaml";
+        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/Test3_MinimalEnrichmentGroupTest.yaml";
         RulesEngine engine = RulesEngine.fromFile(yamlPath);
 
         // Test data with underlying field

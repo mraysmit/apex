@@ -7,12 +7,12 @@ description: "Tests that multiple enrichment-refs sections with numbered suffixe
 # First reference section
 enrichment-refs:
   - name: "External Enrichments 1"
-    source: "src/test/java/dev/mars/apex/demo/sequencing/edge_cases/TestEdge6_MultipleRefsWithNumberedSuffixesTest_external1.yaml"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/TestEdge6_MultipleRefsWithNumberedSuffixesTest_external1.yaml"
     enabled: true
 
 # Second reference section with numbered suffix
 enrichment-refs-1:
   - name: "External Enrichments 2"
-    source: "src/test/java/dev/mars/apex/demo/sequencing/edge_cases/TestEdge6_MultipleRefsWithNumberedSuffixesTest_external2.yaml"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/TestEdge6_MultipleRefsWithNumberedSuffixesTest_external2.yaml"
     enabled: true
 

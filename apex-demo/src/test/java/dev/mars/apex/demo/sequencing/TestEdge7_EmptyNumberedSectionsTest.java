@@ -1,4 +1,4 @@
-package dev.mars.apex.demo.sequencing.edge_cases;
+package dev.mars.apex.demo.sequencing;
 
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.demo.DemoTestBase;
@@ -38,7 +38,7 @@ public class TestEdge7_EmptyNumberedSectionsTest extends DemoTestBase {
         try {
             // Attempt to load YAML with empty numbered sections
             RulesEngine engine = RulesEngine.fromFile(
-                "src/test/java/dev/mars/apex/demo/sequencing/edge_cases/TestEdge7_EmptyNumberedSectionsTest.yaml"
+                "src/test/java/dev/mars/apex/demo/sequencing/TestEdge7_EmptyNumberedSectionsTest.yaml"
             );
 
             LOGGER.info("✅ EDGE CASE TEST 7 PASSED: Empty numbered sections handled correctly");

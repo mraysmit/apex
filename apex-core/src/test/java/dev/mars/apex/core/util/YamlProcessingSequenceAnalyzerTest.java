@@ -289,8 +289,8 @@ class YamlProcessingSequenceAnalyzerTest {
         String formatted = report.getFormattedReport();
 
         // Verify report contains key sections
-        assertTrue(formatted.contains("YAML Processing Sequence Analysis"));
-        assertTrue(formatted.contains("ORIGINAL SEQUENCE"));
+        assertTrue(formatted.contains("YAML PROCESSING SEQUENCE ANALYSIS"));
+        assertTrue(formatted.contains("EXECUTION SEQUENCE"));
         assertTrue(formatted.contains("PLANNED EXECUTION SEQUENCE"));
         assertTrue(formatted.contains("SUMMARY"));
         assertTrue(formatted.contains("test5"));

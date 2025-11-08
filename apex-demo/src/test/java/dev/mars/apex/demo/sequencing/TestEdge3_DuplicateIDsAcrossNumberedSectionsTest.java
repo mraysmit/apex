@@ -1,4 +1,4 @@
-package dev.mars.apex.demo.sequencing.edge_cases;
+package dev.mars.apex.demo.sequencing;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
 import dev.mars.apex.core.engine.config.RulesEngine;
@@ -39,7 +39,7 @@ public class TestEdge3_DuplicateIDsAcrossNumberedSectionsTest extends DemoTestBa
         // Attempt to load YAML with duplicate IDs
         YamlConfigurationException exception = assertThrows(
             YamlConfigurationException.class,
-            () -> RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/sequencing/edge_cases/TestEdge3_DuplicateIDsAcrossNumberedSectionsTest.yaml"),
+            () -> RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/sequencing/TestEdge3_DuplicateIDsAcrossNumberedSectionsTest.yaml"),
             "Should throw YamlConfigurationException for duplicate IDs"
         );
 

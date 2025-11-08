@@ -90,10 +90,10 @@ class RuleResultExtensionTest {
         partialData.put("id", "123");
         
         RuleResult result = RuleResult.enrichmentFailure(failureMessages, partialData);
-        
+
         assertNotNull(result);
         assertEquals("enrichment", result.getRuleName());
-        assertEquals("Enrichment failed", result.getMessage());
+        assertEquals("Required field enrichment failed", result.getMessage());
         assertFalse(result.isTriggered());
         assertEquals(RuleResult.ResultType.ERROR, result.getResultType());
         

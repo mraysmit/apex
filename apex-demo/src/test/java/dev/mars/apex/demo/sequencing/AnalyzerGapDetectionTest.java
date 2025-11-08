@@ -161,7 +161,7 @@ public class AnalyzerGapDetectionTest extends DemoTestBase {
     @DisplayName("CRITICAL: Analyzer shows MULTIPLE items in SAME section")
     void testAnalyzerShowsMultipleItemsInSameSection() {
         // Test4B has 4 enrichment items in ONE enrichments section
-        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/order_guarantee/Test4B_AllStandaloneTest.yaml";
+        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/Test4B_AllStandaloneTest.yaml";
 
         ProcessingSequenceReport report = analyzer.analyze(yamlPath);
 
@@ -187,7 +187,7 @@ public class AnalyzerGapDetectionTest extends DemoTestBase {
         // - enrichments section with 4 items (standalone-1, grouped-1, standalone-2, grouped-2)
         // - enrichment-groups section with 1 item (group-A)
         // - Groups-only logic: grouped-1 and grouped-2 should be FILTERED (execute via group only)
-        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/order_guarantee/Test4_StandaloneEnrichmentsTest.yaml";
+        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/Test4_StandaloneEnrichmentsTest.yaml";
 
         ProcessingSequenceReport report = analyzer.analyze(yamlPath);
 
@@ -232,7 +232,7 @@ public class AnalyzerGapDetectionTest extends DemoTestBase {
         // - enrichment-groups-2 (1 item: group-B)
         // - enrichments-3 (1 item: standalone-3)
         // Total: 8 items across 5 sections with complex groups-only logic
-        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/order_guarantee/Test6B_ComplexNumberedWithGroupsTest.yaml";
+        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/Test6B_ComplexNumberedWithGroupsTest.yaml";
 
         ProcessingSequenceReport report = analyzer.analyze(yamlPath);
 

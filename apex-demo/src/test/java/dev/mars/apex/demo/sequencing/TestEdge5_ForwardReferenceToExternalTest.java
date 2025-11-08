@@ -1,4 +1,4 @@
-package dev.mars.apex.demo.sequencing.edge_cases;
+package dev.mars.apex.demo.sequencing;
 
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.demo.DemoTestBase;
@@ -38,7 +38,7 @@ public class TestEdge5_ForwardReferenceToExternalTest extends DemoTestBase {
         try {
             // Attempt to load YAML with forward reference
             RulesEngine engine = RulesEngine.fromFile(
-                "src/test/java/dev/mars/apex/demo/sequencing/edge_cases/TestEdge5_ForwardReferenceToExternalTest.yaml"
+                "src/test/java/dev/mars/apex/demo/sequencing/TestEdge5_ForwardReferenceToExternalTest.yaml"
             );
 
             LOGGER.info("✅ EDGE CASE TEST 5 PASSED: Forward references work correctly");

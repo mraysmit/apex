@@ -1,8 +1,7 @@
-package dev.mars.apex.demo.sequencing.order_guarantee;
+package dev.mars.apex.demo.sequencing;
 
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.demo.DemoTestBase;
-import dev.mars.apex.demo.sequencing.ExecutionTracker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -53,7 +52,7 @@ public class Test4F_ComplexInterleavingTest extends DemoTestBase {
         LOGGER.info("=== TEST 4F: Complex Interleaving ===");
 
         // Create RulesEngine from YAML
-        RulesEngine engine = RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/sequencing/order_guarantee/Test4F_ComplexInterleavingTest.yaml");
+        RulesEngine engine = RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/sequencing/Test4F_ComplexInterleavingTest.yaml");
 
         // Create test data
         Map<String, Object> data = new HashMap<>();

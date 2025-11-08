@@ -1,4 +1,4 @@
-package dev.mars.apex.demo.sequencing.edge_cases;
+package dev.mars.apex.demo.sequencing;
 
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.demo.DemoTestBase;
@@ -41,7 +41,7 @@ public class TestEdge6_MultipleRefsWithNumberedSuffixesTest extends DemoTestBase
         // 2. enrichment-refs-1 is recognized and processed (NOT treated as unknown section)
         // 3. Both external files are loaded and merged
         RulesEngine engine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/demo/sequencing/edge_cases/TestEdge6_MultipleRefsWithNumberedSuffixesTest.yaml"
+            "src/test/java/dev/mars/apex/demo/sequencing/TestEdge6_MultipleRefsWithNumberedSuffixesTest.yaml"
         );
 
         assertNotNull(engine, "RulesEngine should be created successfully");

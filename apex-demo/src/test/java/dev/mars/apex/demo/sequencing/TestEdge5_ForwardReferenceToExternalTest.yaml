@@ -15,6 +15,6 @@ enrichment-groups:
 # External reference that loads "external-1"
 enrichment-refs:
   - name: "External Enrichments"
-    source: "src/test/java/dev/mars/apex/demo/sequencing/edge_cases/TestEdge5_ForwardReferenceToExternalTest_external.yaml"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/TestEdge5_ForwardReferenceToExternalTest_external.yaml"
     enabled: true
 

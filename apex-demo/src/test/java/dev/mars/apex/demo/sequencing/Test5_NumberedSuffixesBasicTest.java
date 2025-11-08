@@ -1,8 +1,7 @@
-package dev.mars.apex.demo.sequencing.order_guarantee;
+package dev.mars.apex.demo.sequencing;
 
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.demo.DemoTestBase;
-import dev.mars.apex.demo.sequencing.ExecutionTracker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -45,7 +44,7 @@ public class Test5_NumberedSuffixesBasicTest extends DemoTestBase {
         LOGGER.info("=== TEST 5: Numbered Suffixes Basic ===");
 
         // Create RulesEngine from YAML
-        RulesEngine engine = RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/sequencing/order_guarantee/Test5_NumberedSuffixesBasicTest.yaml");
+        RulesEngine engine = RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/sequencing/Test5_NumberedSuffixesBasicTest.yaml");
 
         // Create test data
         Map<String, Object> data = new HashMap<>();

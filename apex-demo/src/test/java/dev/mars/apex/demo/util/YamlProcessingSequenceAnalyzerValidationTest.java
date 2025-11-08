@@ -54,7 +54,7 @@ public class YamlProcessingSequenceAnalyzerValidationTest extends DemoTestBase {
     void testValidation_Test4_StandaloneEnrichments() throws Exception {
         // This test PROVES the analyzer is 100% accurate by comparing against actual execution
 
-        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/order_guarantee/Test4_StandaloneEnrichmentsTest.yaml";
+        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/Test4_StandaloneEnrichmentsTest.yaml";
         
         // 1. Use analyzer to predict sequence
         ProcessingSequenceReport report = analyzer.analyze(yamlPath);
@@ -107,7 +107,7 @@ public class YamlProcessingSequenceAnalyzerValidationTest extends DemoTestBase {
     @Test
     @DisplayName("VALIDATION 2: Analyzer matches actual execution - Test4B All Standalone")
     void testValidation_Test4B_AllStandalone() throws Exception {
-        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/order_guarantee/Test4B_AllStandaloneTest.yaml";
+        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/Test4B_AllStandaloneTest.yaml";
         
         // 1. Analyzer prediction
         ProcessingSequenceReport report = analyzer.analyze(yamlPath);
@@ -142,7 +142,7 @@ public class YamlProcessingSequenceAnalyzerValidationTest extends DemoTestBase {
     @Test
     @DisplayName("VALIDATION 3: Analyzer matches actual execution - Test4C All Grouped")
     void testValidation_Test4C_AllGrouped() throws Exception {
-        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/order_guarantee/Test4C_AllGroupedTest.yaml";
+        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/Test4C_AllGroupedTest.yaml";
         
         // 1. Analyzer prediction
         ProcessingSequenceReport report = analyzer.analyze(yamlPath);
@@ -181,7 +181,7 @@ public class YamlProcessingSequenceAnalyzerValidationTest extends DemoTestBase {
     @Test
     @DisplayName("VALIDATION 4: Analyzer matches actual execution - Test7A Rule Groups")
     void testValidation_Test7A_RuleGroups() throws Exception {
-        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/order_guarantee/Test7A_RuleGroupsBasicTest.yaml";
+        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/Test7A_RuleGroupsBasicTest.yaml";
         
         // 1. Analyzer prediction
         ProcessingSequenceReport report = analyzer.analyze(yamlPath);
@@ -216,7 +216,7 @@ public class YamlProcessingSequenceAnalyzerValidationTest extends DemoTestBase {
     @Test
     @DisplayName("VALIDATION 5: Analyzer matches actual execution - Test5 Numbered Suffixes")
     void testValidation_Test5_NumberedSuffixes() throws Exception {
-        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/order_guarantee/Test5_NumberedSuffixesBasicTest.yaml";
+        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/Test5_NumberedSuffixesBasicTest.yaml";
         
         // 1. Analyzer prediction
         ProcessingSequenceReport report = analyzer.analyze(yamlPath);
@@ -249,7 +249,7 @@ public class YamlProcessingSequenceAnalyzerValidationTest extends DemoTestBase {
     @Test
     @DisplayName("VALIDATION 6: Analyzer report formatting is accurate")
     void testValidation_ReportFormatting() throws Exception {
-        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/order_guarantee/Test4_StandaloneEnrichmentsTest.yaml";
+        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/Test4_StandaloneEnrichmentsTest.yaml";
         
         ProcessingSequenceReport report = analyzer.analyze(yamlPath);
         String formatted = report.getFormattedReport();

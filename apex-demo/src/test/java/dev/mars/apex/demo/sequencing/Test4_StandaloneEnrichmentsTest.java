@@ -1,9 +1,8 @@
-package dev.mars.apex.demo.sequencing.order_guarantee;
+package dev.mars.apex.demo.sequencing;
 
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
-import dev.mars.apex.demo.sequencing.ExecutionTracker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,7 +50,7 @@ public class Test4_StandaloneEnrichmentsTest extends DemoTestBase {
         LOGGER.info("=== TEST 4: Standalone Enrichments with Groups ===");
 
         // Arrange
-        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/order_guarantee/Test4_StandaloneEnrichmentsTest.yaml";
+        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/Test4_StandaloneEnrichmentsTest.yaml";
         RulesEngine engine = RulesEngine.fromFile(yamlPath);
 
         Map<String, Object> testData = new HashMap<>();

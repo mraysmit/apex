@@ -1,10 +1,9 @@
-package dev.mars.apex.demo.sequencing.order_guarantee;
+package dev.mars.apex.demo.sequencing;
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
-import dev.mars.apex.demo.sequencing.ExecutionTracker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,7 +50,7 @@ public class Test1_EnrichmentRefsPositionTest extends DemoTestBase {
         LOGGER.info("=== TEST 1: enrichment-refs Position Guarantee ===");
         
         // Load YAML configuration
-        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/order_guarantee/Test1_EnrichmentRefsPositionTest.yaml";
+        String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/Test1_EnrichmentRefsPositionTest.yaml";
         RulesEngine engine = RulesEngine.fromFile(yamlPath);
         YamlRuleConfiguration config = yamlLoader.loadFromFile(yamlPath);
 

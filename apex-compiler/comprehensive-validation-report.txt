@@ -29,7 +29,7 @@ SAMPLE VALID FILES:
   • test-config-with-properties.yaml
 
 SAMPLE INVALID FILES:
-  • customer-validation-groups.yaml - ..\apex-core\src\test\resources\rulegroups\customer-validation-groups.yaml: Document type 'rule-config' requires at least one of: [rules, enrichments]
+  • customer-validation-groups.yaml - ..\apex-core\src\test\resources\rulegroups\customer-validation-groups.yaml: Document type 'rule-config' requires at least one of: [enrichments, rules]
   • application.yml - ..\apex-rest-api\src\main\resources\application.yml: YAML syntax error: expected a single document in the stream
  in 'string', line 2, column 1:
     spring:

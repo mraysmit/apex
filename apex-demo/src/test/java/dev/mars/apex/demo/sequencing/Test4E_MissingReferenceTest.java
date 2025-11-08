@@ -1,8 +1,7 @@
-package dev.mars.apex.demo.sequencing.order_guarantee;
+package dev.mars.apex.demo.sequencing;
 
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.demo.DemoTestBase;
-import dev.mars.apex.demo.sequencing.ExecutionTracker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -47,7 +46,7 @@ public class Test4E_MissingReferenceTest extends DemoTestBase {
         // This is CORRECT behavior - validation should catch configuration errors
 
         Exception exception = assertThrows(Exception.class, () -> {
-            RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/sequencing/order_guarantee/Test4E_MissingReferenceTest.yaml");
+            RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/sequencing/Test4E_MissingReferenceTest.yaml");
         });
 
         // Verify the error message mentions the missing enrichment
