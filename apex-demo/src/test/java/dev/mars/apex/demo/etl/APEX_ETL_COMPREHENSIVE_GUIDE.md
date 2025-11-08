@@ -9,9 +9,22 @@
 >
 > **Quick Migration:**
 > ```java
-> // OLD: DataPipelineEngine pipelineEngine = new DataPipelineEngine();
-> // NEW: RulesEngine rulesEngine = RulesEngine.fromFile("pipeline.yaml");
+> // OLD (Deprecated):
+> DataPipelineEngine pipelineEngine = new DataPipelineEngine();
+> pipelineEngine.initialize(config);
+> YamlPipelineExecutionResult result = pipelineEngine.executePipeline("my-pipeline");
+>
+> // NEW (Current):
+> RulesEngine rulesEngine = RulesEngine.fromFile("src/test/java/path/to/pipeline.yaml");
+> Map<String, Object> inputData = new HashMap<>();
+> RuleResult result = rulesEngine.evaluate(inputData);
 > ```
+>
+> **Key Changes:**
+> - Use `RulesEngine.fromFile()` to load pipeline configuration
+> - Call `evaluate(inputData)` to execute the pipeline
+> - Check `result.getResultType() == RuleResult.ResultType.MATCH` for success
+> - Validate data by querying the target database/file system directly
 >
 > See the [Migration Guide](#migration-guide) section for complete details.
 
@@ -936,46 +949,45 @@ data-sources:
 ```java
 @Test
 void shouldExtractDataFromJsonFile() throws Exception {
-    // Load pipeline configuration
-    String configPath = "PipelineEtlExecutionTestExtractJson.yaml";
-    YamlRuleConfiguration config = yamlLoader.loadFromFile(configPath);
+    // Load pipeline configuration and create RulesEngine
+    String yamlPath = "src/test/java/dev/mars/apex/demo/etl/JsonExtractTest.yaml";
+    RulesEngine rulesEngine = RulesEngine.fromFile(yamlPath);
 
-    // Initialize and execute pipeline
-    pipelineEngine.initialize(config);
-    YamlPipelineExecutionResult result = pipelineEngine.executePipeline("json-otc-extract-pipeline");
+    // Execute the pipeline
+    Map<String, Object> inputData = new HashMap<>();
+    RuleResult result = rulesEngine.evaluate(inputData);
 
-    // Verify extraction results
-    assertTrue(result.isSuccess(), "Pipeline should execute successfully");
+    // Verify pipeline execution
+    assertNotNull(result, "Pipeline execution result should not be null");
+    assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+        "Pipeline should execute successfully");
 
-    var extractResult = result.getStepResults().get(0);
-    assertEquals("extract-otc-options", extractResult.getStepName());
+    // For ETL pipelines, extracted data is available through the pipeline context
+    // Access the data through your data sink or validation logic
 
-    // Access extracted data
-    @SuppressWarnings("unchecked")
-    List<Object> trades = (List<Object>) extractResult.getData();
-    assertEquals(6, trades.size(), "Should extract 6 OTC option trades");
+    // Example: Validate data was loaded to database
+    validateDatabaseContents();
+}
 
-    // Access first trade
-    @SuppressWarnings("unchecked")
-    Map<String, Object> firstTrade = (Map<String, Object>) trades.get(0);
-    assertEquals("OTC-2025-001", firstTrade.get("tradeId"));
-    assertEquals("GOLDMAN_SACHS", firstTrade.get("buyerParty"));
-    assertEquals("JP_MORGAN", firstTrade.get("sellerParty"));
-    assertEquals("Call", firstTrade.get("optionType"));
+private void validateDatabaseContents() throws Exception {
+    String jdbcUrl = "jdbc:h2:./target/test/json_extract_db";
+    try (Connection conn = DriverManager.getConnection(jdbcUrl, "sa", "")) {
+        Statement stmt = conn.createStatement();
 
-    // Access nested underlying asset
-    @SuppressWarnings("unchecked")
-    Map<String, Object> underlying = (Map<String, Object>) firstTrade.get("underlyingAsset");
-    assertNotNull(underlying, "Trade should have underlyingAsset");
-    assertEquals("Natural Gas", underlying.get("commodity"));
-    assertEquals("MMBtu", underlying.get("unit"));
-    assertEquals("NG", underlying.get("ticker"));
+        // Verify record count
+        ResultSet countRs = stmt.executeQuery("SELECT COUNT(*) as cnt FROM otc_trades");
+        assertTrue(countRs.next());
+        assertEquals(6, countRs.getInt("cnt"), "Should have loaded 6 OTC option trades");
 
-    // Access tags array
-    @SuppressWarnings("unchecked")
-    List<String> tags = (List<String>) firstTrade.get("tags");
-    assertNotNull(tags, "Trade should have tags");
-    assertTrue(tags.contains("otc-derivative"));
+        // Verify first trade data
+        ResultSet dataRs = stmt.executeQuery(
+            "SELECT trade_id, buyer_party, seller_party, option_type FROM otc_trades ORDER BY trade_id");
+        assertTrue(dataRs.next());
+        assertEquals("OTC-2025-001", dataRs.getString("trade_id"));
+        assertEquals("GOLDMAN_SACHS", dataRs.getString("buyer_party"));
+        assertEquals("JP_MORGAN", dataRs.getString("seller_party"));
+        assertEquals("Call", dataRs.getString("option_type"));
+    }
 }
 ```
 
@@ -1106,53 +1118,53 @@ data-sources:
 ```java
 @Test
 void shouldExtractDataFromXmlFile() throws Exception {
-    // Load pipeline configuration
-    String configPath = "PipelineEtlExecutionTestExtractXml.yaml";
-    YamlRuleConfiguration config = yamlLoader.loadFromFile(configPath);
+    // Load pipeline configuration and create RulesEngine
+    String yamlPath = "src/test/java/dev/mars/apex/demo/etl/XmlExtractTest.yaml";
+    RulesEngine rulesEngine = RulesEngine.fromFile(yamlPath);
 
-    // Initialize and execute pipeline
-    pipelineEngine.initialize(config);
-    YamlPipelineExecutionResult result = pipelineEngine.executePipeline("xml-otc-extract-pipeline");
+    // Execute the pipeline
+    Map<String, Object> inputData = new HashMap<>();
+    RuleResult result = rulesEngine.evaluate(inputData);
 
-    // Verify extraction results
-    assertTrue(result.isSuccess(), "Pipeline should execute successfully");
+    // Verify pipeline execution
+    assertNotNull(result, "Pipeline execution result should not be null");
+    assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+        "Pipeline should execute successfully");
 
-    var extractResult = result.getStepResults().get(0);
-    assertEquals("extract-otc-trades", extractResult.getStepName());
+    // Validate data was loaded to database
+    validateDatabaseContents();
+}
 
-    // Access extracted data
-    @SuppressWarnings("unchecked")
-    List<Object> trades = (List<Object>) extractResult.getData();
-    assertEquals(4, trades.size(), "Should extract 4 OTC trades");
+private void validateDatabaseContents() throws Exception {
+    String jdbcUrl = "jdbc:h2:./target/test/xml_extract_db";
+    try (Connection conn = DriverManager.getConnection(jdbcUrl, "sa", "")) {
+        Statement stmt = conn.createStatement();
 
-    // Access first trade
-    @SuppressWarnings("unchecked")
-    Map<String, Object> firstTrade = (Map<String, Object>) trades.get(0);
+        // Verify record count
+        ResultSet countRs = stmt.executeQuery("SELECT COUNT(*) as cnt FROM otc_trades");
+        assertTrue(countRs.next());
+        assertEquals(4, countRs.getInt("cnt"), "Should have loaded 4 OTC trades");
 
-    // XML attributes are prefixed with @
-    assertEquals("OTC-2025-001", firstTrade.get("@id"));
-    assertEquals("CONFIRMED", firstTrade.get("@status"));
+        // Verify first trade data (XML attributes and nested elements)
+        ResultSet dataRs = stmt.executeQuery(
+            "SELECT trade_id, status, buyer_party_id, buyer_lei, commodity, delta " +
+            "FROM otc_trades ORDER BY trade_id");
+        assertTrue(dataRs.next());
 
-    // Access nested counterparties object
-    @SuppressWarnings("unchecked")
-    Map<String, Object> counterparties = (Map<String, Object>) firstTrade.get("counterparties");
-    @SuppressWarnings("unchecked")
-    Map<String, Object> buyer = (Map<String, Object>) counterparties.get("buyer");
-    assertEquals("GOLDMAN_SACHS", buyer.get("partyId"));
-    assertEquals("W22LROWP2IHZNBB6K528", buyer.get("lei"));
+        // XML attributes
+        assertEquals("OTC-2025-001", dataRs.getString("trade_id"));
+        assertEquals("CONFIRMED", dataRs.getString("status"));
 
-    // Access deeply nested option details and underlying asset
-    @SuppressWarnings("unchecked")
-    Map<String, Object> optionDetails = (Map<String, Object>) firstTrade.get("optionDetails");
-    @SuppressWarnings("unchecked")
-    Map<String, Object> underlyingAsset = (Map<String, Object>) optionDetails.get("underlyingAsset");
-    assertEquals("Natural Gas", underlyingAsset.get("commodity"));
-    assertEquals("NG", underlyingAsset.get("ticker"));
+        // Nested counterparty data
+        assertEquals("GOLDMAN_SACHS", dataRs.getString("buyer_party_id"));
+        assertEquals("W22LROWP2IHZNBB6K528", dataRs.getString("buyer_lei"));
 
-    // Access risk metrics
-    @SuppressWarnings("unchecked")
-    Map<String, Object> riskMetrics = (Map<String, Object>) firstTrade.get("riskMetrics");
-    assertEquals("0.65", riskMetrics.get("delta"));
+        // Deeply nested underlying asset
+        assertEquals("Natural Gas", dataRs.getString("commodity"));
+
+        // Risk metrics
+        assertEquals(0.65, dataRs.getDouble("delta"), 0.01);
+    }
 }
 ```
 
@@ -1348,40 +1360,44 @@ void shouldExtractCounterpartyExposure() throws Exception {
     // Setup database with test data
     setupAdvancedOtcDatabase();
 
-    // Load pipeline configuration
-    String configPath = "PipelineEtlExecutionTestExtractDatabaseAdvanced.yaml";
-    YamlRuleConfiguration config = yamlLoader.loadFromFile(configPath);
+    // Load pipeline configuration and create RulesEngine
+    String yamlPath = "src/test/java/dev/mars/apex/demo/etl/AdvancedDatabaseExtractTest.yaml";
+    RulesEngine rulesEngine = RulesEngine.fromFile(yamlPath);
 
-    // Initialize and execute pipeline
-    pipelineEngine.initialize(config);
-    YamlPipelineExecutionResult result = pipelineEngine.executePipeline("advanced-otc-database-extract-pipeline");
+    // Execute the pipeline
+    Map<String, Object> inputData = new HashMap<>();
+    RuleResult result = rulesEngine.evaluate(inputData);
 
-    // Verify extraction results
-    assertTrue(result.isSuccess(), "Pipeline should execute successfully");
+    // Verify pipeline execution
+    assertNotNull(result, "Pipeline execution result should not be null");
+    assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+        "Pipeline should execute successfully");
 
-    var extractResult = result.getStepResults().get(0);
-    assertEquals("extract-counterparty-exposure", extractResult.getStepName());
+    // Validate extracted data was loaded to target database
+    validateCounterpartyExposure();
+}
 
-    // Access extracted data
-    @SuppressWarnings("unchecked")
-    List<Object> exposureSummaries = (List<Object>) extractResult.getData();
-    assertTrue(exposureSummaries.size() > 0, "Should extract counterparty exposure summaries");
+private void validateCounterpartyExposure() throws Exception {
+    String jdbcUrl = "jdbc:h2:./target/test/exposure_db";
+    try (Connection conn = DriverManager.getConnection(jdbcUrl, "sa", "")) {
+        Statement stmt = conn.createStatement();
 
-    // Verify aggregated data
-    @SuppressWarnings("unchecked")
-    Map<String, Object> firstCounterparty = (Map<String, Object>) exposureSummaries.get(0);
+        // Verify counterparty exposure data
+        ResultSet rs = stmt.executeQuery(
+            "SELECT counterparty_id, party_id, legal_name, lei, " +
+            "total_trades, total_notional, buy_side_notional, sell_side_notional " +
+            "FROM counterparty_exposure ORDER BY total_notional DESC");
 
-    assertNotNull(firstCounterparty.get("counterparty_id"));
-    assertNotNull(firstCounterparty.get("party_id"));
-    assertNotNull(firstCounterparty.get("legal_name"));
-    assertNotNull(firstCounterparty.get("lei"));
-    assertNotNull(firstCounterparty.get("total_trades"));
-    assertNotNull(firstCounterparty.get("total_notional"));
-    assertNotNull(firstCounterparty.get("buy_side_notional"));
-    assertNotNull(firstCounterparty.get("sell_side_notional"));
+        assertTrue(rs.next(), "Should have counterparty exposure records");
 
-    // Verify aggregation calculations
-    int totalTrades = ((Number) firstCounterparty.get("total_trades")).intValue();
+        // Verify aggregated data fields
+        assertNotNull(rs.getInt("counterparty_id"));
+        assertNotNull(rs.getString("party_id"));
+        assertNotNull(rs.getString("legal_name"));
+        assertNotNull(rs.getString("lei"));
+
+        // Verify aggregation calculations
+        int totalTrades = rs.getInt("total_trades");
     double totalNotional = ((Number) firstCounterparty.get("total_notional")).doubleValue();
     double avgTradeSize = ((Number) firstCounterparty.get("avg_trade_size")).doubleValue();
 
@@ -2033,25 +2049,68 @@ if (result.isSuccess()) {
 ### After (Recommended):
 ```java
 import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.model.RuleResult;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
-RulesEngine rulesEngine = RulesEngine.fromFile("pipeline.yaml");
-RuleResult result = rulesEngine.evaluate(new HashMap<>());
+// Load pipeline configuration and create RulesEngine
+RulesEngine rulesEngine = RulesEngine.fromFile("src/test/java/path/to/pipeline.yaml");
 
+// Execute the pipeline
+Map<String, Object> inputData = new HashMap<>();
+RuleResult result = rulesEngine.evaluate(inputData);
+
+// Verify pipeline execution
 if (result.getResultType() == RuleResult.ResultType.MATCH) {
-    System.out.println("Success!");
+    System.out.println("Pipeline executed successfully");
+    System.out.println("Message: " + result.getMessage());
+
+    // Validate data was loaded by querying the target database
+    validateDatabaseContents();
 }
 
 rulesEngine.shutdown();
+
+private void validateDatabaseContents() throws Exception {
+    String jdbcUrl = "jdbc:h2:./target/database/mydb";
+    try (Connection conn = DriverManager.getConnection(jdbcUrl, "sa", "")) {
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT COUNT(*) as cnt FROM my_table");
+        if (rs.next()) {
+            System.out.println("Records loaded: " + rs.getInt("cnt"));
+        }
+    }
+}
 ```
 
 ### Migration Steps
 
-1. Replace `DataPipelineEngine` with `RulesEngine`
-2. Change `executePipeline()` to `evaluate()`
-3. Update result type from `YamlPipelineExecutionResult` to `RuleResult`
-4. Change success checks from `isSuccess()` to `getResultType() == MATCH`
-5. Add `rulesEngine.shutdown()` in cleanup code
+1. **Replace `DataPipelineEngine` with `RulesEngine`**
+   - Old: `DataPipelineEngine pipelineEngine = new DataPipelineEngine();`
+   - New: `RulesEngine rulesEngine = RulesEngine.fromFile("pipeline.yaml");`
+
+2. **Change `executePipeline()` to `evaluate()`**
+   - Old: `YamlPipelineExecutionResult result = pipelineEngine.executePipeline("my-pipeline");`
+   - New: `RuleResult result = rulesEngine.evaluate(inputData);`
+
+3. **Update result type from `YamlPipelineExecutionResult` to `RuleResult`**
+   - Old: `if (result.isSuccess())`
+   - New: `if (result.getResultType() == RuleResult.ResultType.MATCH)`
+
+4. **Access pipeline results through `RuleResult` methods**
+   - `result.getResultType()` - Returns MATCH (success) or NO_MATCH (failure)
+   - `result.getMessage()` - Returns execution message
+   - `result.getEnrichedData()` - Returns enriched data map
+
+5. **Validate data through target data sink**
+   - For database sinks: Query the target database directly using JDBC
+   - For file sinks: Read and validate the output files
+   - ETL pipelines focus on data movement, not intermediate data access
+
+6. **Add `rulesEngine.shutdown()` in cleanup code**
+   - Ensures proper resource cleanup and connection pool shutdown
 
 ### Example Migrations
 

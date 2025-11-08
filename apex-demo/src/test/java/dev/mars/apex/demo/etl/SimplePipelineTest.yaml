@@ -73,6 +73,12 @@ pipeline:
       operation: "testOperation"      # Calls the "testOperation" defined in the data source
       description: "Test step"        # Human-readable description for this processing step
 
+    - name: "load-step"               # Second step: load extracted data to database
+      type: "load"                    # Step type: "load" writes data to a sink
+      sink: "test-sink"               # References the data-sink named "test-sink" below
+      operation: "testWrite"          # Calls the "testWrite" operation defined in the data sink
+      description: "Load test data"   # Human-readable description for this processing step
+
   # Pipeline execution configuration - controls how the pipeline runs and handles failures
   execution:
     mode: "sequential"              # Execute pipeline steps one after another in order (vs "parallel")

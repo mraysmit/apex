@@ -4,7 +4,6 @@
  */
 package dev.mars.apex.demo.scenario;
 
-import dev.mars.apex.core.engine.ApexEngine;
 import dev.mars.apex.core.service.classification.*;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -57,7 +58,6 @@ public class InputDataClassificationPhase1Test extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(InputDataClassificationPhase1Test.class);
 
-    private ApexEngine apexEngine;
     private EnhancedDataTypeScenarioService scenarioService;
 
     @BeforeEach
@@ -69,18 +69,19 @@ public class InputDataClassificationPhase1Test extends DemoTestBase {
 
         // Create enhanced scenario service
         scenarioService = new EnhancedDataTypeScenarioService();
-        
-        // Create APEX engine with enhanced service
-        apexEngine = new ApexEngine(scenarioService);
-        
+
         // Load test scenarios
-        String registryPath = "src/test/java/dev/mars/apex/demo/scenario/InputDataClassificationPhase1Test.yaml";
-        apexEngine.loadScenarios(registryPath);
-        
+        try {
+            String registryPath = "src/test/java/dev/mars/apex/demo/scenario/InputDataClassificationPhase1Test.yaml";
+            scenarioService.loadScenarios(registryPath);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load test scenarios", e);
+        }
+
         // Clear cache for clean test state
         scenarioService.clearClassificationCache();
-        
-        logger.info("APEX Engine initialized with {} format detectors", 
+
+        logger.info("Enhanced scenario service initialized with {} format detectors",
                    scenarioService.getFormatDetectors().size());
     }
 
@@ -88,7 +89,7 @@ public class InputDataClassificationPhase1Test extends DemoTestBase {
     @DisplayName("Should detect JSON content with message type classification")
     void testJsonContentClassification() {
         logger.info("=== Testing JSON content classification ===");
-        
+
         // Create financial message JSON
         String jsonData = """
             {
@@ -104,34 +105,29 @@ public class InputDataClassificationPhase1Test extends DemoTestBase {
                 "currency": "USD"
             }
             """;
-        
-        ApexProcessingContext context = ApexProcessingContext.builder()
-            .source("test")
-            .fileName("trade_message.json")
-            .fileSize((long) jsonData.length())
-            .addMetadata("region", "US")
-            .build();
-        
+
         // Test classification
-        ApexProcessingResult result = apexEngine.classifyAndProcessData(jsonData, context);
-        
+        ClassificationResult classification = scenarioService.classifyInputData(
+            jsonData,
+            "test",
+            "trade_message.json",
+            (long) jsonData.length(),
+            Map.of("region", "US")
+        );
+
         // Validate results
-        assertNotNull(result, "Processing result should not be null");
-        assertTrue(result.isSuccess(), "Processing should succeed");
-        
-        ClassificationResult classification = result.getClassification();
         assertNotNull(classification, "Classification result should not be null");
         assertTrue(classification.isSuccessful(), "Classification should succeed");
         assertEquals("json", classification.getFileFormat(), "Should detect JSON format");
-        
+
         // Phase 1.2 enhancement: Content type should be classified
         assertNotNull(classification.getContentType(), "Content type should be classified");
         assertNotEquals("unknown", classification.getContentType(), "Content type should not be unknown");
-        
+
         // Phase 1.2 enhancement: Enhanced confidence scoring
         assertTrue(classification.getConfidence() > 0.6, "Should have good confidence with content analysis");
-        
-        logger.info("JSON content classification successful: format={}, contentType={}, confidence={}", 
+
+        logger.info("JSON content classification successful: format={}, contentType={}, confidence={}",
                    classification.getFileFormat(), classification.getContentType(), classification.getConfidence());
     }
 
@@ -139,7 +135,7 @@ public class InputDataClassificationPhase1Test extends DemoTestBase {
     @DisplayName("Should demonstrate content-based detection vs extension-based")
     void testContentBasedVsExtensionBased() {
         logger.info("=== Testing content-based vs extension-based detection ===");
-        
+
         // JSON content with misleading extension
         String jsonData = """
             {
@@ -149,29 +145,27 @@ public class InputDataClassificationPhase1Test extends DemoTestBase {
                 "currency": "EUR"
             }
             """;
-        
-        ApexProcessingContext context = ApexProcessingContext.builder()
-            .source("test")
-            .fileName("data.txt") // Misleading extension
-            .fileSize((long) jsonData.length())
-            .build();
-        
+
         // Test classification
-        ApexProcessingResult result = apexEngine.classifyAndProcessData(jsonData, context);
-        
+        ClassificationResult classification = scenarioService.classifyInputData(
+            jsonData,
+            "test",
+            "data.txt", // Misleading extension
+            (long) jsonData.length(),
+            Map.of()
+        );
+
         // Validate that content-based detection overrides extension
-        assertNotNull(result, "Processing result should not be null");
-        assertTrue(result.isSuccess(), "Processing should succeed");
-        
-        ClassificationResult classification = result.getClassification();
-        assertEquals("json", classification.getFileFormat(), 
+        assertNotNull(classification, "Classification result should not be null");
+        assertTrue(classification.isSuccessful(), "Classification should succeed");
+        assertEquals("json", classification.getFileFormat(),
                     "Content-based detection should identify JSON despite .txt extension");
-        
+
         // Should have reasonable confidence from content analysis
-        assertTrue(classification.getConfidence() > 0.5, 
+        assertTrue(classification.getConfidence() > 0.5,
                   "Content-based detection should provide reasonable confidence");
-        
-        logger.info("Content-based detection successful: detected {} despite .txt extension", 
+
+        logger.info("Content-based detection successful: detected {} despite .txt extension",
                    classification.getFileFormat());
     }
 
@@ -192,44 +186,35 @@ public class InputDataClassificationPhase1Test extends DemoTestBase {
             }
             """;
 
-        ApexProcessingContext context = ApexProcessingContext.builder()
-            .source("test")
-            .fileName("position.json")
-            .fileSize((long) jsonData.length())
-            .build();
-
         // Warm-up a different key to stabilize JIT and thread scheduling without priming this specific cache entry
         try {
-            ApexProcessingContext warmupCtx = ApexProcessingContext.builder()
-                .source("test")
-                .fileName("warmup.json")
-                .fileSize((long) jsonData.length())
-                .build();
-            apexEngine.classifyAndProcessData(jsonData, warmupCtx);
+            scenarioService.classifyInputData(jsonData, "test", "warmup.json", (long) jsonData.length(), Map.of());
         } catch (Exception ignore) {
             // best-effort warm-up only
         }
 
         // First call - should be cache miss for this key
         long startTime1 = System.nanoTime();
-        ApexProcessingResult result1 = apexEngine.classifyAndProcessData(jsonData, context);
+        ClassificationResult result1 = scenarioService.classifyInputData(
+            jsonData, "test", "position.json", (long) jsonData.length(), Map.of()
+        );
         long time1 = java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime1);
 
         // Second call - should be cache hit for this key
         long startTime2 = System.nanoTime();
-        ApexProcessingResult result2 = apexEngine.classifyAndProcessData(jsonData, context);
+        ClassificationResult result2 = scenarioService.classifyInputData(
+            jsonData, "test", "position.json", (long) jsonData.length(), Map.of()
+        );
         long time2 = java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime2);
 
         // Validate both results are successful
-        assertTrue(result1.isSuccess(), "First call should succeed");
-        assertTrue(result2.isSuccess(), "Second call should succeed");
+        assertTrue(result1.isSuccessful(), "First call should succeed");
+        assertTrue(result2.isSuccessful(), "Second call should succeed");
 
         // Results should be equivalent
-        assertEquals(result1.getClassification().getFileFormat(),
-                    result2.getClassification().getFileFormat(),
+        assertEquals(result1.getFileFormat(), result2.getFileFormat(),
                     "Cached result should match original");
-        assertEquals(result1.getClassification().getContentType(),
-                    result2.getClassification().getContentType(),
+        assertEquals(result1.getContentType(), result2.getContentType(),
                     "Cached content type should match original");
 
         // Second call should be faster (cache hit)
@@ -247,7 +232,7 @@ public class InputDataClassificationPhase1Test extends DemoTestBase {
     @DisplayName("Should handle XML content classification")
     void testXmlContentClassification() {
         logger.info("=== Testing XML content classification ===");
-        
+
         String xmlData = """
             <?xml version="1.0" encoding="UTF-8"?>
             <trade>
@@ -260,26 +245,24 @@ public class InputDataClassificationPhase1Test extends DemoTestBase {
                 <notional>2000000</notional>
             </trade>
             """;
-        
-        ApexProcessingContext context = ApexProcessingContext.builder()
-            .source("test")
-            .fileName("trade.xml")
-            .fileSize((long) xmlData.length())
-            .build();
-        
+
         // Test classification
-        ApexProcessingResult result = apexEngine.classifyAndProcessData(xmlData, context);
-        
+        ClassificationResult classification = scenarioService.classifyInputData(
+            xmlData,
+            "test",
+            "trade.xml",
+            (long) xmlData.length(),
+            Map.of()
+        );
+
         // Validate results
-        assertNotNull(result, "Processing result should not be null");
-        assertTrue(result.isSuccess(), "Processing should succeed");
-        
-        ClassificationResult classification = result.getClassification();
+        assertNotNull(classification, "Classification result should not be null");
+        assertTrue(classification.isSuccessful(), "Classification should succeed");
         assertEquals("xml", classification.getFileFormat(), "Should detect XML format");
         assertNotNull(classification.getContentType(), "Content type should be classified");
         assertTrue(classification.getConfidence() > 0.5, "Should have reasonable confidence");
-        
-        logger.info("XML content classification successful: format={}, contentType={}, confidence={}", 
+
+        logger.info("XML content classification successful: format={}, contentType={}, confidence={}",
                    classification.getFileFormat(), classification.getContentType(), classification.getConfidence());
     }
 
@@ -287,33 +270,31 @@ public class InputDataClassificationPhase1Test extends DemoTestBase {
     @DisplayName("Should handle CSV content classification")
     void testCsvContentClassification() {
         logger.info("=== Testing CSV content classification ===");
-        
+
         String csvData = """
             tradeId,counterparty,amount,currency,timestamp
             T98765,Deutsche Bank,750000,EUR,2024-12-28T10:30:00Z
             T98766,Credit Suisse,1200000,USD,2024-12-28T10:31:00Z
             T98767,UBS,900000,GBP,2024-12-28T10:32:00Z
             """;
-        
-        ApexProcessingContext context = ApexProcessingContext.builder()
-            .source("test")
-            .fileName("trades.csv")
-            .fileSize((long) csvData.length())
-            .build();
-        
+
         // Test classification
-        ApexProcessingResult result = apexEngine.classifyAndProcessData(csvData, context);
-        
+        ClassificationResult classification = scenarioService.classifyInputData(
+            csvData,
+            "test",
+            "trades.csv",
+            (long) csvData.length(),
+            Map.of()
+        );
+
         // Validate results
-        assertNotNull(result, "Processing result should not be null");
-        assertTrue(result.isSuccess(), "Processing should succeed");
-        
-        ClassificationResult classification = result.getClassification();
+        assertNotNull(classification, "Classification result should not be null");
+        assertTrue(classification.isSuccessful(), "Classification should succeed");
         assertEquals("csv", classification.getFileFormat(), "Should detect CSV format");
         assertNotNull(classification.getContentType(), "Content type should be classified");
         assertTrue(classification.getConfidence() > 0.5, "Should have reasonable confidence");
-        
-        logger.info("CSV content classification successful: format={}, contentType={}, confidence={}", 
+
+        logger.info("CSV content classification successful: format={}, contentType={}, confidence={}",
                    classification.getFileFormat(), classification.getContentType(), classification.getConfidence());
     }
 
@@ -321,7 +302,7 @@ public class InputDataClassificationPhase1Test extends DemoTestBase {
     @DisplayName("Should validate enhanced confidence scoring")
     void testEnhancedConfidenceScoring() {
         logger.info("=== Testing enhanced confidence scoring ===");
-        
+
         // High-confidence case: JSON with clear message type
         String highConfidenceData = """
             {
@@ -330,7 +311,7 @@ public class InputDataClassificationPhase1Test extends DemoTestBase {
                 "instrument": {"type": "OTC_OPTION"}
             }
             """;
-        
+
         // Lower-confidence case: Generic JSON without clear patterns
         String lowerConfidenceData = """
             {
@@ -339,24 +320,23 @@ public class InputDataClassificationPhase1Test extends DemoTestBase {
                 "flag": true
             }
             """;
-        
-        ApexProcessingContext context1 = ApexProcessingContext.builder()
-            .fileName("trade.json").build();
-        ApexProcessingContext context2 = ApexProcessingContext.builder()
-            .fileName("generic.json").build();
-        
-        ApexProcessingResult result1 = apexEngine.classifyAndProcessData(highConfidenceData, context1);
-        ApexProcessingResult result2 = apexEngine.classifyAndProcessData(lowerConfidenceData, context2);
-        
-        assertTrue(result1.isSuccess() && result2.isSuccess(), "Both classifications should succeed");
-        
-        double confidence1 = result1.getClassification().getConfidence();
-        double confidence2 = result2.getClassification().getConfidence();
-        
+
+        ClassificationResult result1 = scenarioService.classifyInputData(
+            highConfidenceData, "test", "trade.json", (long) highConfidenceData.length(), Map.of()
+        );
+        ClassificationResult result2 = scenarioService.classifyInputData(
+            lowerConfidenceData, "test", "generic.json", (long) lowerConfidenceData.length(), Map.of()
+        );
+
+        assertTrue(result1.isSuccessful() && result2.isSuccessful(), "Both classifications should succeed");
+
+        double confidence1 = result1.getConfidence();
+        double confidence2 = result2.getConfidence();
+
         // High-confidence case should have higher confidence
-        assertTrue(confidence1 > confidence2, 
+        assertTrue(confidence1 > confidence2,
                   "Trade message should have higher confidence than generic JSON");
-        
+
         logger.info("Enhanced confidence scoring: trade={}, generic={}", confidence1, confidence2);
     }
 
@@ -364,26 +344,28 @@ public class InputDataClassificationPhase1Test extends DemoTestBase {
     @DisplayName("Should validate cache management operations")
     void testCacheManagement() {
         logger.info("=== Testing cache management operations ===");
-        
+
         String testData = "{\"test\": \"data\"}";
-        ApexProcessingContext context = ApexProcessingContext.builder()
-            .fileName("test.json").build();
-        
+
         // Perform classification to populate cache
-        ApexProcessingResult result1 = apexEngine.classifyAndProcessData(testData, context);
-        assertTrue(result1.isSuccess(), "Initial classification should succeed");
-        
+        ClassificationResult result1 = scenarioService.classifyInputData(
+            testData, "test", "test.json", (long) testData.length(), Map.of()
+        );
+        assertTrue(result1.isSuccessful(), "Initial classification should succeed");
+
         // Verify cache has content
         assertTrue(scenarioService.getClassificationCache().size() > 0, "Cache should have entries");
-        
+
         // Clear cache
         scenarioService.clearClassificationCache();
         assertEquals(0, scenarioService.getClassificationCache().size(), "Cache should be empty after clear");
-        
+
         // Verify classification still works after cache clear
-        ApexProcessingResult result2 = apexEngine.classifyAndProcessData(testData, context);
-        assertTrue(result2.isSuccess(), "Classification should work after cache clear");
-        
+        ClassificationResult result2 = scenarioService.classifyInputData(
+            testData, "test", "test.json", (long) testData.length(), Map.of()
+        );
+        assertTrue(result2.isSuccessful(), "Classification should work after cache clear");
+
         logger.info("Cache management validation successful");
     }
 }

@@ -1,0 +1,58 @@
+metadata:
+  name: "Retry Test"
+  description: "Tests retry mechanism with max-retries configuration"
+  version: "1.0"
+  author: "APEX Demo"
+
+pipeline:
+  name: "retry-pipeline"
+  description: "Pipeline that tests retry mechanism"
+  
+  steps:
+    - name: "step-1-extract"
+      type: "extract"
+      source: "test-source"
+      operation: "getData"
+      description: "Extract data from CSV"
+    
+    - name: "step-2-load-with-retry"
+      type: "load"
+      sink: "test-sink"
+      operation: "writeData"
+      description: "Load data with retry support"
+  
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+    max-retries: 3
+    retry-delay-ms: 100
+
+data-sources:
+  - name: "test-source"
+    type: "file-system"
+    enabled: true
+    connection:
+      base-path: "./target/demo/etl/execution-tests"
+      file-pattern: "sample.csv"
+    operations:
+      getData: "SELECT * FROM csv"
+
+data-sinks:
+  - name: "test-sink"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "./target/demo/etl/execution-tests/output/retry_db"
+      username: "sa"
+      password: ""
+    schema:
+      auto-create: true
+      init-script: |
+        CREATE TABLE IF NOT EXISTS test_data (
+          id INTEGER PRIMARY KEY,
+          name VARCHAR(255),
+          val INTEGER
+        );
+    operations:
+      writeData: "INSERT INTO test_data (id, name, val) VALUES (:column_1, :column_2, :column_3)"
+

@@ -1,0 +1,65 @@
+metadata:
+  name: "Continue On Error Test"
+  description: "Tests continue-on-error behavior where pipeline continues despite step failures"
+  version: "1.0"
+  author: "APEX Demo"
+
+pipeline:
+  name: "continue-on-error-pipeline"
+  description: "Pipeline that continues execution even when a step fails"
+  
+  steps:
+    - name: "step-1-extract-valid"
+      type: "extract"
+      source: "valid-source"
+      operation: "getData"
+      description: "First step - should succeed"
+    
+    - name: "step-2-load-invalid"
+      type: "load"
+      sink: "nonexistent-sink"
+      operation: "writeData"
+      optional: true
+      description: "Second step - should fail but pipeline continues (marked optional)"
+    
+    - name: "step-3-load-valid"
+      type: "load"
+      sink: "test-sink"
+      operation: "writeData"
+      description: "Third step - should execute despite step 2 failure"
+  
+  execution:
+    mode: "sequential"
+    error-handling: "continue-on-error"
+    max-retries: 0
+    retry-delay-ms: 0
+
+data-sources:
+  - name: "valid-source"
+    type: "file-system"
+    enabled: true
+    connection:
+      base-path: "./target/demo/etl/execution-tests"
+      file-pattern: "sample.csv"
+    operations:
+      getData: "SELECT * FROM csv"
+
+data-sinks:
+  - name: "test-sink"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "./target/demo/etl/execution-tests/output/continue_on_error_db"
+      username: "sa"
+      password: ""
+    schema:
+      auto-create: true
+      init-script: |
+        CREATE TABLE IF NOT EXISTS test_data (
+          id INTEGER PRIMARY KEY,
+          name VARCHAR(255),
+          val INTEGER
+        );
+    operations:
+      writeData: "INSERT INTO test_data (id, name, val) VALUES (:column_1, :column_2, :column_3)"
+

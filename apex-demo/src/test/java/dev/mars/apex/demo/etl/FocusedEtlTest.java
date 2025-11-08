@@ -31,7 +31,10 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -104,12 +107,29 @@ public class FocusedEtlTest extends DemoTestBase {
         logger.info("  - Output file: {}", outputFile.toAbsolutePath());
     }
 
-    // Database test temporarily disabled due to SQL comment syntax issues in YAML
-    // @Test
-    // @DisplayName("Should load data from CSV to H2 database")
-    // void shouldLoadDataFromCsvToH2Database() throws Exception {
-    //     // This test is disabled until SQL comments in YAML are fixed
-    // }
+    @Test
+    @DisplayName("Should load data from CSV to H2 database")
+    void shouldLoadDataFromCsvToH2Database() throws Exception {
+        logger.info("=== Testing CSV to H2 Database Load ===");
+
+        // Create RulesEngine and execute pipeline
+        rulesEngine = RulesEngine.fromFile(
+            "src/test/java/dev/mars/apex/demo/etl/PipelineEtlExecutionTestLoadDatabase.yaml");
+
+        java.util.Map<String, Object> inputData = new java.util.HashMap<>();
+        RuleResult result = rulesEngine.evaluate(inputData);
+
+        // Validate pipeline execution
+        assertNotNull(result, "Pipeline execution result should not be null");
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+            "Pipeline should execute successfully");
+        logger.info("✓ Pipeline executed successfully");
+
+        // Validate data was actually loaded into database
+        validateDatabaseContents();
+
+        logger.info("✓ CSV to H2 database load test completed successfully");
+    }
 
     @Test
     @DisplayName("Should extract data from CSV file only")
@@ -212,5 +232,52 @@ public class FocusedEtlTest extends DemoTestBase {
         }
     }
 
-    // Database verification method removed - not needed for current tests
+    /**
+     * Validate that data was correctly loaded into the H2 database.
+     * Follows coding principles: validate actual business results, not YAML syntax.
+     */
+    private void validateDatabaseContents() throws Exception {
+        logger.info("Validating database contents");
+
+        // Connect to H2 database
+        String jdbcUrl = "jdbc:h2:./target/test/etl/output/database/output_db";
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, "sa", "")) {
+            Statement stmt = conn.createStatement();
+
+            // Verify table exists
+            ResultSet tables = conn.getMetaData().getTables(null, null, "CUSTOMER_OUTPUT", null);
+            assertTrue(tables.next(), "Table 'customer_output' should exist in database");
+            logger.info("✓ Table 'customer_output' exists");
+
+            // Verify record count
+            ResultSet countRs = stmt.executeQuery("SELECT COUNT(*) as cnt FROM customer_output");
+            assertTrue(countRs.next(), "Should have count result");
+            int recordCount = countRs.getInt("cnt");
+            assertEquals(3, recordCount, "Should have loaded 3 customer records");
+            logger.info("✓ Database contains {} records", recordCount);
+
+            // Verify specific data values
+            ResultSet dataRs = stmt.executeQuery(
+                "SELECT id, name, email, status FROM customer_output ORDER BY id");
+
+            // Verify record 1
+            assertTrue(dataRs.next(), "Should have first record");
+            assertEquals(1, dataRs.getInt("id"), "First record ID should be 1");
+            assertEquals("John Doe", dataRs.getString("name"), "First record name should match");
+            assertEquals("john@example.com", dataRs.getString("email"), "First record email should match");
+            assertEquals("ACTIVE", dataRs.getString("status"), "First record status should match");
+
+            // Verify record 2
+            assertTrue(dataRs.next(), "Should have second record");
+            assertEquals(2, dataRs.getInt("id"), "Second record ID should be 2");
+            assertEquals("Jane Smith", dataRs.getString("name"), "Second record name should match");
+
+            // Verify record 3
+            assertTrue(dataRs.next(), "Should have third record");
+            assertEquals(3, dataRs.getInt("id"), "Third record ID should be 3");
+            assertEquals("Bob Johnson", dataRs.getString("name"), "Third record name should match");
+
+            logger.info("✓ All {} records verified successfully", recordCount);
+        }
+    }
 }

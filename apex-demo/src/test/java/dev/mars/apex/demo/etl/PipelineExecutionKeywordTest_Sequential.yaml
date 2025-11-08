@@ -1,0 +1,63 @@
+# APEX ETL Pipeline - Sequential Execution Mode Test
+# Tests that steps execute one after another in strict order
+
+metadata:
+  id: "pipeline-execution-sequential-test"
+  name: "Sequential Execution Test"
+  version: "1.0.0"
+  description: "Test sequential execution mode with multiple steps"
+  type: "pipeline-config"
+
+pipeline:
+  name: "sequential-execution-pipeline"
+  description: "Pipeline with sequential step execution"
+
+  steps:
+    - name: "step-1-extract"
+      type: "extract"
+      source: "test-source"
+      operation: "getData"
+      description: "First step - extract data"
+
+    - name: "step-2-load"
+      type: "load"
+      sink: "test-sink"
+      operation: "writeData"
+      description: "Second step - load data"
+
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+    max-retries: 0
+    retry-delay-ms: 0
+
+data-sources:
+  - name: "test-source"
+    type: "file-system"
+    enabled: true
+    connection:
+      base-path: "./target/demo/etl/execution-tests"
+      file-pattern: "sample.csv"
+    operations:
+      getData: "SELECT * FROM csv"
+
+data-sinks:
+  - name: "test-sink"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    connection:
+      database: "./target/demo/etl/execution-tests/output/sequential_db"
+      username: "sa"
+      password: ""
+    schema:
+      auto-create: true
+      init-script: |
+        CREATE TABLE IF NOT EXISTS test_data (
+          id INTEGER PRIMARY KEY,
+          name VARCHAR(255),
+          val INTEGER
+        );
+    operations:
+      writeData: "INSERT INTO test_data (id, name, val) VALUES (:column_1, :column_2, :column_3)"
+

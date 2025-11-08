@@ -29,6 +29,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -94,11 +98,65 @@ public class CsvToH2PipelineTest extends DemoTestBase {
             logger.info("  - Result type: " + result.getResultType());
             logger.info("  - Message: " + result.getMessage());
 
-            logger.info(" CSV to H2 pipeline execution test completed successfully");
+            // Validate actual data was loaded into H2 database
+            validateDatabaseContents();
+
+            logger.info("✓ CSV to H2 pipeline execution test completed successfully");
 
         } catch (Exception e) {
             logger.error("Pipeline execution test failed: " + e.getMessage(), e);
             fail("Pipeline execution should not throw exceptions: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Validate that customer data was correctly loaded into the H2 database.
+     * Follows coding principles: validate actual business results, not YAML syntax.
+     */
+    private void validateDatabaseContents() throws Exception {
+        logger.info("Validating database contents");
+
+        // Connect to H2 database (path from CsvToH2PipelineTest.yaml line 113)
+        String jdbcUrl = "jdbc:h2:./target/demo/etl/output/customer_database";
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, "sa", "")) {
+            Statement stmt = conn.createStatement();
+
+            // Verify table exists
+            ResultSet tables = conn.getMetaData().getTables(null, null, "CUSTOMERS", null);
+            assertTrue(tables.next(), "Table 'customers' should exist in database");
+            logger.info("✓ Table 'customers' exists");
+
+            // Verify record count (should be 3 data rows, excluding CSV header)
+            ResultSet countRs = stmt.executeQuery("SELECT COUNT(*) as cnt FROM customers");
+            assertTrue(countRs.next(), "Should have count result");
+            int recordCount = countRs.getInt("cnt");
+            assertEquals(3, recordCount, "Should have loaded 3 customer records from CSV");
+            logger.info("✓ Database contains {} customer records", recordCount);
+
+            // Verify specific customer data values (column names from YAML line 122-123)
+            ResultSet dataRs = stmt.executeQuery(
+                "SELECT customer_id, customer_name, email, status FROM customers ORDER BY customer_id");
+
+            // Verify customer 1
+            assertTrue(dataRs.next(), "Should have first customer record");
+            assertEquals(1, dataRs.getInt("customer_id"), "First customer ID should be 1");
+            assertEquals("John Doe", dataRs.getString("customer_name"), "First customer name should match");
+            assertEquals("john.doe@example.com", dataRs.getString("email"), "First customer email should match");
+            assertEquals("ACTIVE", dataRs.getString("status"), "First customer status should be ACTIVE");
+
+            // Verify customer 2
+            assertTrue(dataRs.next(), "Should have second customer record");
+            assertEquals(2, dataRs.getInt("customer_id"), "Second customer ID should be 2");
+            assertEquals("Jane Smith", dataRs.getString("customer_name"), "Second customer name should match");
+            assertEquals("ACTIVE", dataRs.getString("status"), "Second customer status should be ACTIVE");
+
+            // Verify customer 3
+            assertTrue(dataRs.next(), "Should have third customer record");
+            assertEquals(3, dataRs.getInt("customer_id"), "Third customer ID should be 3");
+            assertEquals("Bob Johnson", dataRs.getString("customer_name"), "Third customer name should match");
+            assertEquals("INACTIVE", dataRs.getString("status"), "Third customer status should be INACTIVE");
+
+            logger.info("✓ All {} customer records verified successfully", recordCount);
         }
     }
 

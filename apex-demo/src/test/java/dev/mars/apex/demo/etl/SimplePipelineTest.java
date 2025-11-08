@@ -16,64 +16,58 @@ package dev.mars.apex.demo.etl;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.junit.jupiter.api.AfterEach;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * JUnit 5 test for Simple Pipeline functionality using APEX RulesEngine.
+ * Test for Simple ETL Pipeline functionality using APEX RulesEngine.
  *
- * This test validates the SimplePipelineTest.yaml configuration file and demonstrates:
- * - YAML configuration parsing and validation
- * - Basic pipeline structure validation
- * - Data source and data sink configuration validation
- * - Pipeline execution via RulesEngine.evaluate()
- * - Simple extract operation testing
- *
- * PIPELINE VALIDATION CHECKLIST:
- * ✅ Load simple pipeline YAML configuration
- * ✅ Validate metadata structure and content
- * ✅ Validate pipeline definition and steps
- * ✅ Validate data source configuration
- * ✅ Validate data sink configuration
- * ✅ Execute pipeline via RulesEngine.evaluate()
- * ✅ Test basic pipeline execution (if supported)
+ * FOLLOWS CODING PRINCIPLES FROM prompts.txt:
+ * ✅ Never validate YAML syntax - test actual pipeline execution
+ * ✅ Execute real APEX pipeline operations using RulesEngine.evaluate()
+ * ✅ Set up real data sources (CSV files) and sinks (H2 database)
+ * ✅ Validate functional results with specific assertions on processed data
+ * ✅ Test end-to-end workflows from data setup through pipeline execution to result validation
  *
  * BUSINESS LOGIC VALIDATION:
  * - Extract step: Read test data from CSV file using file-system data source
- * - Pipeline orchestration: Single step execution with proper configuration
- * - Error handling: Graceful handling of missing files or configuration issues
- * 
+ * - Load step: Insert extracted data into H2 database
+ * - Validate actual data was loaded into database with correct values
+ * - Verify pipeline execution completes successfully
+ *
  * @author APEX Demo Team
  * @since 2025-09-28
  * @version 1.0.0
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@DisplayName("Simple Pipeline Test")
+@DisplayName("Simple Pipeline Test - ETL Functionality")
 public class SimplePipelineTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(SimplePipelineTest.class);
 
-    private YamlRuleConfiguration pipelineConfig;
     private RulesEngine rulesEngine;
 
     @BeforeEach
     public void setUp() {
         super.setUp();
         logger.info("=== Setting up Simple Pipeline Test ===");
+        setupTestData();
     }
 
     @AfterEach
@@ -92,281 +86,162 @@ public class SimplePipelineTest extends DemoTestBase {
 
     @Test
     @Order(1)
-    @DisplayName("Should load and validate simple pipeline YAML configuration")
-    void testLoadSimplePipelineConfiguration() {
-        logger.info("=== Testing Simple Pipeline YAML Configuration Loading ===");
+    @DisplayName("Should extract data from CSV file and load into H2 database")
+    void testCsvToH2PipelineExecution() throws Exception {
+        logger.info("=== Testing CSV to H2 Pipeline Execution ===");
 
-        try {
-            // Load the simple pipeline configuration
-            String yamlPath = "src/test/java/dev/mars/apex/demo/etl/SimplePipelineTest.yaml";
-            pipelineConfig = yamlLoader.loadFromFile(yamlPath);
-            
-            assertNotNull(pipelineConfig, "Pipeline configuration should not be null");
-            logger.info("✓ Simple pipeline configuration loaded successfully");
+        // Initialize RulesEngine from YAML file
+        rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/etl/SimplePipelineTest.yaml");
+        assertNotNull(rulesEngine, "Rules engine should be created");
+        logger.info("✓ RulesEngine initialized successfully");
 
-            // Validate metadata
-            assertNotNull(pipelineConfig.getMetadata(), "Metadata should not be null");
-            assertEquals("simple-pipeline-test", pipelineConfig.getMetadata().getId());
-            assertEquals("Simple Pipeline Test", pipelineConfig.getMetadata().getName());
-            assertEquals("1.0.0", pipelineConfig.getMetadata().getVersion());
-            assertEquals("pipeline-config", pipelineConfig.getMetadata().getType());
-            assertEquals("APEX Demo Team", pipelineConfig.getMetadata().getAuthor());
-            
-            logger.info("✓ Metadata validation passed");
-            logger.info("  - ID: {}", pipelineConfig.getMetadata().getId());
-            logger.info("  - Name: {}", pipelineConfig.getMetadata().getName());
-            logger.info("  - Version: {}", pipelineConfig.getMetadata().getVersion());
-            logger.info("  - Type: {}", pipelineConfig.getMetadata().getType());
+        // Execute the pipeline
+        java.util.Map<String, Object> inputData = new java.util.HashMap<>();
+        RuleResult result = rulesEngine.evaluate(inputData);
 
-            // Validate tags
-            assertNotNull(pipelineConfig.getMetadata().getTags(), "Tags should not be null");
-            assertTrue(pipelineConfig.getMetadata().getTags().contains("demo"));
-            assertTrue(pipelineConfig.getMetadata().getTags().contains("test"));
-            assertTrue(pipelineConfig.getMetadata().getTags().contains("pipeline"));
-            
-            logger.info("✓ Tags validation passed: {}", pipelineConfig.getMetadata().getTags());
+        // Validate pipeline execution results
+        assertNotNull(result, "Pipeline execution result should not be null");
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+            "Pipeline should execute successfully");
+        logger.info("✓ Pipeline executed successfully");
+        logger.info("  - Result type: {}", result.getResultType());
+        logger.info("  - Message: {}", result.getMessage());
 
-        } catch (Exception e) {
-            logger.error("❌ Simple pipeline configuration loading failed: {}", e.getMessage(), e);
-            fail("Simple pipeline configuration should load successfully: " + e.getMessage());
-        }
+        // Validate actual data was loaded into H2 database
+        validateDatabaseContents();
+
+        logger.info("✓ CSV to H2 pipeline execution test completed successfully");
     }
 
     @Test
     @Order(2)
-    @DisplayName("Should validate pipeline structure and steps")
-    void testValidatePipelineStructure() {
-        logger.info("=== Testing Pipeline Structure Validation ===");
+    @DisplayName("Should verify data transformation during pipeline execution")
+    void testDataTransformationInPipeline() throws Exception {
+        logger.info("=== Testing Data Transformation in Pipeline ===");
 
-        try {
-            // Load configuration if not already loaded
-            if (pipelineConfig == null) {
-                testLoadSimplePipelineConfiguration();
-            }
+        // Initialize RulesEngine from YAML file
+        rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/etl/SimplePipelineTest.yaml");
 
-            // Validate pipeline structure
-            assertNotNull(pipelineConfig.getPipeline(), "Pipeline definition should not be null");
-            assertEquals("simple-test-pipeline", pipelineConfig.getPipeline().getName());
-            assertEquals("Simple test pipeline", pipelineConfig.getPipeline().getDescription());
-            
-            logger.info("✓ Pipeline structure validation passed");
-            logger.info("  - Pipeline name: {}", pipelineConfig.getPipeline().getName());
-            logger.info("  - Pipeline description: {}", pipelineConfig.getPipeline().getDescription());
+        // Execute the pipeline
+        java.util.Map<String, Object> inputData = new java.util.HashMap<>();
+        RuleResult result = rulesEngine.evaluate(inputData);
 
-            // Validate pipeline steps
-            assertNotNull(pipelineConfig.getPipeline().getSteps(), "Pipeline steps should not be null");
-            assertEquals(1, pipelineConfig.getPipeline().getSteps().size(), "Should have exactly 1 pipeline step");
-            
-            var step = pipelineConfig.getPipeline().getSteps().get(0);
-            assertEquals("test-step", step.getName());
-            assertEquals("extract", step.getType());
-            assertEquals("test-source", step.getSource());
-            assertEquals("testOperation", step.getOperation());
-            assertEquals("Test step", step.getDescription());
-            
-            logger.info("✓ Pipeline steps validation passed");
-            logger.info("  - Step name: {}", step.getName());
-            logger.info("  - Step type: {}", step.getType());
-            logger.info("  - Step source: {}", step.getSource());
-            logger.info("  - Step operation: {}", step.getOperation());
+        // Validate pipeline execution
+        assertNotNull(result, "Pipeline execution result should not be null");
+        assertTrue(result.isSuccess(), "Pipeline should execute successfully");
+        logger.info("✓ Pipeline executed successfully");
 
-        } catch (Exception e) {
-            logger.error("❌ Pipeline structure validation failed: {}", e.getMessage(), e);
-            fail("Pipeline structure validation should pass: " + e.getMessage());
+        // Validate specific data was transformed and loaded correctly
+        try (Connection conn = getH2Connection()) {
+            Statement stmt = conn.createStatement();
+
+            // Verify record count
+            ResultSet countRs = stmt.executeQuery("SELECT COUNT(*) as cnt FROM test");
+            assertTrue(countRs.next(), "Should have count result");
+            int recordCount = countRs.getInt("cnt");
+            assertEquals(3, recordCount, "Should have loaded 3 records from CSV");
+            logger.info("✓ Verified {} records loaded into database", recordCount);
+
+            // Verify specific record values
+            ResultSet dataRs = stmt.executeQuery("SELECT id, data FROM test ORDER BY id");
+
+            // Record 1
+            assertTrue(dataRs.next(), "Should have first record");
+            assertEquals(1, dataRs.getInt("id"), "First record ID should be 1");
+            assertEquals("test-data-1", dataRs.getString("data"), "First record data should match");
+
+            // Record 2
+            assertTrue(dataRs.next(), "Should have second record");
+            assertEquals(2, dataRs.getInt("id"), "Second record ID should be 2");
+            assertEquals("test-data-2", dataRs.getString("data"), "Second record data should match");
+
+            // Record 3
+            assertTrue(dataRs.next(), "Should have third record");
+            assertEquals(3, dataRs.getInt("id"), "Third record ID should be 3");
+            assertEquals("test-data-3", dataRs.getString("data"), "Third record data should match");
+
+            logger.info("✓ All record values verified successfully");
         }
+
+        logger.info("✓ Data transformation test completed successfully");
     }
 
-    @Test
-    @Order(3)
-    @DisplayName("Should validate data sources configuration")
-    void testValidateDataSourcesConfiguration() {
-        logger.info("=== Testing Data Sources Configuration Validation ===");
+    // ========================================
+    // Helper Methods
+    // ========================================
 
+    /**
+     * Set up test data for pipeline execution.
+     * Creates CSV file with test records.
+     */
+    private void setupTestData() {
         try {
-            // Load configuration if not already loaded
-            if (pipelineConfig == null) {
-                testLoadSimplePipelineConfiguration();
+            logger.info("Setting up test data");
+
+            // Create test directory
+            Path testDir = Paths.get("./target/test");
+            Files.createDirectories(testDir);
+
+            // Create test CSV file with data
+            Path csvFile = testDir.resolve("test.csv");
+            try (FileWriter writer = new FileWriter(csvFile.toFile())) {
+                writer.write("id,data\n");
+                writer.write("1,test-data-1\n");
+                writer.write("2,test-data-2\n");
+                writer.write("3,test-data-3\n");
             }
 
-            // Validate data sources
-            assertNotNull(pipelineConfig.getDataSources(), "Data sources should not be null");
-            assertEquals(1, pipelineConfig.getDataSources().size(), "Should have exactly 1 data source");
-            
-            var dataSource = pipelineConfig.getDataSources().get(0);
-            assertEquals("test-source", dataSource.getName());
-            assertEquals("file-system", dataSource.getType());
-            assertTrue(dataSource.getEnabled() != null ? dataSource.getEnabled() : true);
-            assertEquals("Test data source", dataSource.getDescription());
-
-            logger.info("✓ Data source basic properties validation passed");
-            logger.info("  - Name: {}", dataSource.getName());
-            logger.info("  - Type: {}", dataSource.getType());
-            logger.info("  - Enabled: {}", dataSource.getEnabled());
-
-            // Validate connection properties
-            assertNotNull(dataSource.getConnection(), "Data source connection should not be null");
-            assertEquals("./target/test", dataSource.getConnection().get("base-path"));
-            assertEquals("test.csv", dataSource.getConnection().get("file-pattern"));
-            
-            logger.info("✓ Data source connection validation passed");
-            logger.info("  - Base path: {}", dataSource.getConnection().get("base-path"));
-            logger.info("  - File pattern: {}", dataSource.getConnection().get("file-pattern"));
-
-            // Validate operations
-            assertNotNull(dataSource.getOperations(), "Data source operations should not be null");
-            assertEquals("SELECT * FROM csv", dataSource.getOperations().get("testOperation"));
-            
-            logger.info("✓ Data source operations validation passed");
-            logger.info("  - testOperation: {}", dataSource.getOperations().get("testOperation"));
-
-        } catch (Exception e) {
-            logger.error("❌ Data sources configuration validation failed: {}", e.getMessage(), e);
-            fail("Data sources configuration validation should pass: " + e.getMessage());
-        }
-    }
-
-    @Test
-    @Order(4)
-    @DisplayName("Should validate data sinks configuration")
-    void testValidateDataSinksConfiguration() {
-        logger.info("=== Testing Data Sinks Configuration Validation ===");
-
-        try {
-            // Load configuration if not already loaded
-            if (pipelineConfig == null) {
-                testLoadSimplePipelineConfiguration();
-            }
-
-            // Validate data sinks
-            assertNotNull(pipelineConfig.getDataSinks(), "Data sinks should not be null");
-            assertEquals(1, pipelineConfig.getDataSinks().size(), "Should have exactly 1 data sink");
-            
-            var dataSink = pipelineConfig.getDataSinks().get(0);
-            assertEquals("test-sink", dataSink.getName());
-            assertEquals("database", dataSink.getType());
-            assertTrue(dataSink.getEnabled() != null ? dataSink.getEnabled() : true);
-            assertEquals("Test data sink", dataSink.getDescription());
-
-            logger.info("✓ Data sink basic properties validation passed");
-            logger.info("  - Name: {}", dataSink.getName());
-            logger.info("  - Type: {}", dataSink.getType());
-            logger.info("  - Enabled: {}", dataSink.getEnabled());
-
-            // Validate connection properties
-            assertNotNull(dataSink.getConnection(), "Data sink connection should not be null");
-            assertEquals("./target/test/db", dataSink.getConnection().get("database"));
-            assertEquals("sa", dataSink.getConnection().get("username"));
-            assertEquals("", dataSink.getConnection().get("password"));
-            
-            logger.info("✓ Data sink connection validation passed");
-            logger.info("  - Database: {}", dataSink.getConnection().get("database"));
-            logger.info("  - Username: {}", dataSink.getConnection().get("username"));
-
-            // Validate operations
-            assertNotNull(dataSink.getOperations(), "Data sink operations should not be null");
-            assertEquals("INSERT INTO test (id, data) VALUES (:column_1, :column_2)", dataSink.getOperations().get("testWrite"));
-
-            logger.info("✓ Data sink operations validation passed");
-            logger.info("  - testWrite: {}", dataSink.getOperations().get("testWrite"));
-
-        } catch (Exception e) {
-            logger.error("❌ Data sinks configuration validation failed: {}", e.getMessage(), e);
-            fail("Data sinks configuration validation should pass: " + e.getMessage());
-        }
-    }
-
-    @Test
-    @Order(5)
-    @DisplayName("Should initialize RulesEngine with simple configuration")
-    void testInitializeRulesEngine() {
-        logger.info("=== Testing RulesEngine Initialization ===");
-
-        try {
-            // Load configuration if not already loaded
-            if (pipelineConfig == null) {
-                testLoadSimplePipelineConfiguration();
-            }
-
-            // Initialize RulesEngine from YAML file
-            rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/etl/SimplePipelineTest.yaml");
-            assertNotNull(rulesEngine, "Rules engine should be created");
-
-            logger.info("✓ RulesEngine initialized successfully");
-
-            // Validate engine state
-            logger.info("✓ Rules engine initialization completed");
-
-        } catch (Exception e) {
-            logger.error("❌ RulesEngine initialization failed: {}", e.getMessage(), e);
-            fail("RulesEngine initialization should succeed: " + e.getMessage());
-        }
-    }
-
-    @Test
-    @Order(6)
-    @DisplayName("Should test basic pipeline execution with test data")
-    void testBasicPipelineExecution() {
-        logger.info("=== Testing Basic Pipeline Execution ===");
-
-        try {
-            // Setup test data first
-            setupSimpleTestData();
-
-            // Initialize engine if not already done
-            if (rulesEngine == null) {
-                testInitializeRulesEngine();
-            }
-
-            // Execute the pipeline via RulesEngine.evaluate()
-            logger.info("Executing pipeline via RulesEngine.evaluate()");
-
-            java.util.Map<String, Object> inputData = new java.util.HashMap<>();
-            RuleResult result = rulesEngine.evaluate(inputData);
-
-            // Validate execution results
-            assertNotNull(result, "Pipeline execution result should not be null");
-            logger.info("✓ Pipeline execution completed");
-            logger.info("Pipeline Execution Results:");
-            logger.info("  - Result Type: {}", result.getResultType());
-            logger.info("  - Message: {}", result.getMessage());
-            logger.info("  - Success: {}", result.isSuccess());
-
-            // Basic validation - pipeline should execute successfully
-            assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
-                "Pipeline should execute successfully");
-            assertTrue(result.getMessage().contains("Sequential evaluation completed successfully"),
-                "Result message should indicate successful evaluation");
-
-            logger.info("✓ Basic pipeline execution test completed");
-
-        } catch (Exception e) {
-            logger.error("❌ Basic pipeline execution failed: {}", e.getMessage(), e);
-            // Don't fail the test if pipeline execution fails - this is expected for a simple test
-            logger.warn("Pipeline execution failure is acceptable for this simple test configuration");
+            logger.info("✓ Test data setup completed");
+            logger.info("  - Test directory: {}", testDir.toAbsolutePath());
+            logger.info("  - CSV file: {}", csvFile.toAbsolutePath());
+        } catch (IOException e) {
+            logger.error("Failed to setup test data", e);
+            throw new RuntimeException("Failed to setup test data", e);
         }
     }
 
     /**
-     * Set up simple test data for pipeline execution.
+     * Get H2 database connection for validation.
      */
-    private void setupSimpleTestData() throws IOException {
-        logger.info("Setting up simple test data");
+    private Connection getH2Connection() throws Exception {
+        String jdbcUrl = "jdbc:h2:./target/test/db";
+        return DriverManager.getConnection(jdbcUrl, "sa", "");
+    }
 
-        // Create test directory
-        Path testDir = Paths.get("./target/test");
-        Files.createDirectories(testDir);
+    /**
+     * Validate that data was correctly loaded into the H2 database.
+     */
+    private void validateDatabaseContents() throws Exception {
+        logger.info("Validating database contents");
 
-        // Create simple test CSV file
-        Path csvFile = testDir.resolve("test.csv");
-        try (FileWriter writer = new FileWriter(csvFile.toFile())) {
-            writer.write("id,name,value\n");
-            writer.write("1,Test Item 1,100\n");
-            writer.write("2,Test Item 2,200\n");
-            writer.write("3,Test Item 3,300\n");
+        try (Connection conn = getH2Connection()) {
+            Statement stmt = conn.createStatement();
+
+            // Verify table exists
+            ResultSet tables = conn.getMetaData().getTables(null, null, "TEST", null);
+            assertTrue(tables.next(), "Table 'test' should exist in database");
+            logger.info("✓ Table 'test' exists");
+
+            // Verify record count
+            ResultSet countRs = stmt.executeQuery("SELECT COUNT(*) as cnt FROM test");
+            assertTrue(countRs.next(), "Should have count result");
+            int recordCount = countRs.getInt("cnt");
+            assertTrue(recordCount > 0, "Should have loaded at least one record");
+            logger.info("✓ Database contains {} records", recordCount);
+
+            // Verify data integrity
+            ResultSet dataRs = stmt.executeQuery("SELECT id, data FROM test ORDER BY id");
+            int verifiedRecords = 0;
+            while (dataRs.next()) {
+                int id = dataRs.getInt("id");
+                String data = dataRs.getString("data");
+                assertNotNull(data, "Data field should not be null for record " + id);
+                verifiedRecords++;
+                logger.info("  - Record {}: id={}, data={}", verifiedRecords, id, data);
+            }
+
+            assertEquals(recordCount, verifiedRecords, "Should verify all records");
+            logger.info("✓ All {} records verified successfully", verifiedRecords);
         }
-
-        logger.info("✓ Simple test data setup completed");
-        logger.info("  - Test directory: {}", testDir.toAbsolutePath());
-        logger.info("  - CSV file: {}", csvFile.toAbsolutePath());
     }
 }

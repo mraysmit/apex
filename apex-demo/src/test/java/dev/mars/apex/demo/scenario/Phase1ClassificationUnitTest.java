@@ -23,9 +23,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * These tests validate the core logic and can run independently.
  *
  * TESTING SCOPE:
- * - ApexProcessingContext creation and usage
+ * - ClassificationContext creation and usage
  * - ClassificationResult construction and validation
- * - ApexProcessingResult handling
  * - FileFormatDetector interface and implementations
  * - ExtensionBasedFileFormatDetector logic
  *
@@ -44,66 +43,70 @@ public class Phase1ClassificationUnitTest {
     private static final Logger logger = LoggerFactory.getLogger(Phase1ClassificationUnitTest.class);
 
     @Test
-    @DisplayName("Should create ApexProcessingContext with builder pattern")
-    void testApexProcessingContextBuilder() {
-        logger.info("=== Testing ApexProcessingContext builder pattern ===");
-        
+    @DisplayName("Should create ClassificationContext with builder pattern")
+    void testClassificationContextBuilder() {
+        logger.info("=== Testing ClassificationContext builder pattern ===");
+
         // Test builder pattern
-        ApexProcessingContext context = ApexProcessingContext.builder()
+        ClassificationContext context = ClassificationContext.builder()
             .source("test-source")
             .fileName("test.json")
             .fileSize(1024L)
-            .addMetadata("region", "US")
-            .addMetadata("priority", "HIGH")
+            .metadata(Map.of("region", "US", "priority", "HIGH"))
             .correlationId("test-123")
+            .inputData("test-data")
             .build();
-        
+
         // Validate properties
         assertNotNull(context, "Context should not be null");
         assertEquals("test-source", context.getSource(), "Source should match");
         assertEquals("test.json", context.getFileName(), "File name should match");
         assertEquals(1024L, context.getFileSize(), "File size should match");
         assertEquals("test-123", context.getCorrelationId(), "Correlation ID should match");
-        
+
         // Validate metadata
         Map<String, Object> metadata = context.getMetadata();
         assertNotNull(metadata, "Metadata should not be null");
         assertEquals("US", metadata.get("region"), "Region metadata should match");
         assertEquals("HIGH", metadata.get("priority"), "Priority metadata should match");
-        
+
         // Validate immutability
         Map<String, Object> originalMetadata = context.getMetadata();
-        originalMetadata.put("test", "value");
-        assertFalse(context.getMetadata().containsKey("test"), "Metadata should be immutable");
-        
-        logger.info("ApexProcessingContext validation successful: {}", context);
+        try {
+            originalMetadata.put("test", "value");
+            fail("Metadata should be immutable");
+        } catch (UnsupportedOperationException e) {
+            // Expected - metadata is immutable
+        }
+
+        logger.info("ClassificationContext validation successful: {}", context);
     }
 
     @Test
-    @DisplayName("Should create default ApexProcessingContext")
-    void testDefaultApexProcessingContext() {
-        logger.info("=== Testing default ApexProcessingContext ===");
-        
-        ApexProcessingContext context = ApexProcessingContext.defaultContext();
-        
-        assertNotNull(context, "Default context should not be null");
-        assertEquals("unknown", context.getSource(), "Default source should be 'unknown'");
+    @DisplayName("Should create ClassificationContext with minimal properties")
+    void testMinimalClassificationContext() {
+        logger.info("=== Testing minimal ClassificationContext ===");
+
+        ClassificationContext context = ClassificationContext.builder()
+            .inputData("test-data")
+            .build();
+
+        assertNotNull(context, "Context should not be null");
         assertNotNull(context.getMetadata(), "Metadata should not be null");
         assertTrue(context.getMetadata().isEmpty(), "Default metadata should be empty");
-        assertTrue(context.getStartTime() > 0, "Start time should be set");
-        
-        logger.info("Default context validation successful: {}", context);
+
+        logger.info("Minimal context validation successful: {}", context);
     }
 
     @Test
     @DisplayName("Should create successful ClassificationResult")
     void testSuccessfulClassificationResult() {
         logger.info("=== Testing successful ClassificationResult ===");
-        
+
         ClassificationResult result = ClassificationResult.successful(
             "json", "trade-message", "otc-option", "test-scenario", null, "test-data"
         );
-        
+
         assertNotNull(result, "Result should not be null");
         assertTrue(result.isSuccessful(), "Result should be successful");
         assertFalse(result.failed(), "Result should not be failed");
@@ -114,7 +117,7 @@ public class Phase1ClassificationUnitTest {
         assertEquals("test-data", result.getParsedData(), "Parsed data should match");
         assertTrue(result.getConfidence() > 0.8, "Confidence should be high");
         assertTrue(result.isCacheable(), "Result should be cacheable");
-        
+
         logger.info("Successful classification result validation: {}", result);
     }
 
@@ -122,74 +125,47 @@ public class Phase1ClassificationUnitTest {
     @DisplayName("Should create failed ClassificationResult")
     void testFailedClassificationResult() {
         logger.info("=== Testing failed ClassificationResult ===");
-        
+
         String errorMessage = "Classification failed due to invalid format";
         ClassificationResult result = ClassificationResult.failed(errorMessage);
-        
+
         assertNotNull(result, "Result should not be null");
         assertFalse(result.isSuccessful(), "Result should not be successful");
         assertTrue(result.failed(), "Result should be failed");
         assertEquals(errorMessage, result.getErrorMessage(), "Error message should match");
         assertEquals(0.0, result.getConfidence(), "Failed result should have zero confidence");
         assertFalse(result.isCacheable(), "Failed result should not be cacheable");
-        
-        logger.info("Failed classification result validation: {}", result);
-    }
 
-    @Test
-    @DisplayName("Should create ApexProcessingResult with classification")
-    void testApexProcessingResult() {
-        logger.info("=== Testing ApexProcessingResult ===");
-        
-        ClassificationResult classification = ClassificationResult.successful(
-            "json", "trade", "option", "scenario-1", null, "data"
-        );
-        
-        ApexProcessingResult result = ApexProcessingResult.successful(
-            classification, "processing-output", 150L
-        );
-        
-        assertNotNull(result, "Result should not be null");
-        assertTrue(result.isSuccess(), "Result should be successful");
-        assertFalse(result.isFailed(), "Result should not be failed");
-        assertEquals(classification, result.getClassification(), "Classification should match");
-        assertEquals("processing-output", result.getProcessingResult(), "Processing result should match");
-        assertEquals(150L, result.getExecutionTime(), "Execution time should match");
-        assertTrue(result.getTimestamp() > 0, "Timestamp should be set");
-        
-        logger.info("ApexProcessingResult validation successful: {}", result);
+        logger.info("Failed classification result validation: {}", result);
     }
 
     @Test
     @DisplayName("Should detect JSON format from extension")
     void testExtensionBasedDetectorJson() {
         logger.info("=== Testing ExtensionBasedFileFormatDetector for JSON ===");
-        
+
         ExtensionBasedFileFormatDetector detector = new ExtensionBasedFileFormatDetector();
-        
+
         // Test JSON extensions
         String[] jsonFiles = {"data.json", "trades.jsonl", "messages.ndjson", "DATA.JSON"};
-        
+
         for (String fileName : jsonFiles) {
-            ApexProcessingContext context = ApexProcessingContext.builder()
-                .fileName(fileName)
-                .build();
-            
             ClassificationContext classContext = ClassificationContext.builder()
-                .processingContext(context)
+                .fileName(fileName)
+                .inputData("test-data")
                 .build();
-            
-            assertTrue(detector.canDetect(classContext), 
+
+            assertTrue(detector.canDetect(classContext),
                       "Should be able to detect format for: " + fileName);
-            
+
             FileFormatResult result = detector.detect(classContext);
-            
+
             assertNotNull(result, "Result should not be null for: " + fileName);
             assertTrue(result.isSuccessful(), "Detection should succeed for: " + fileName);
             assertEquals("json", result.getFormat(), "Should detect JSON format for: " + fileName);
             assertTrue(result.isConfident(), "Should have high confidence for: " + fileName);
             assertEquals("EXTENSION", result.getDetectionMethod(), "Detection method should match");
-            
+
             logger.info("JSON detection successful for {}: {}", fileName, result);
         }
     }
@@ -198,22 +174,19 @@ public class Phase1ClassificationUnitTest {
     @DisplayName("Should detect XML format from extension")
     void testExtensionBasedDetectorXml() {
         logger.info("=== Testing ExtensionBasedFileFormatDetector for XML ===");
-        
+
         ExtensionBasedFileFormatDetector detector = new ExtensionBasedFileFormatDetector();
-        
+
         String[] xmlFiles = {"data.xml", "schema.xsd", "service.soap", "config.wsdl"};
-        
+
         for (String fileName : xmlFiles) {
-            ApexProcessingContext context = ApexProcessingContext.builder()
-                .fileName(fileName)
-                .build();
-            
             ClassificationContext classContext = ClassificationContext.builder()
-                .processingContext(context)
+                .fileName(fileName)
+                .inputData("test-data")
                 .build();
-            
+
             FileFormatResult result = detector.detect(classContext);
-            
+
             assertTrue(result.isSuccessful(), "Detection should succeed for: " + fileName);
             assertEquals("xml", result.getFormat(), "Should detect XML format for: " + fileName);
             assertTrue(result.isConfident(), "Should have high confidence for: " + fileName);
@@ -226,27 +199,24 @@ public class Phase1ClassificationUnitTest {
     @DisplayName("Should detect CSV format from extension")
     void testExtensionBasedDetectorCsv() {
         logger.info("=== Testing ExtensionBasedFileFormatDetector for CSV ===");
-        
+
         ExtensionBasedFileFormatDetector detector = new ExtensionBasedFileFormatDetector();
-        
+
         String[] csvFiles = {"data.csv", "trades.tsv", "prices.psv", "report.tab"};
-        
+
         for (String fileName : csvFiles) {
-            ApexProcessingContext context = ApexProcessingContext.builder()
-                .fileName(fileName)
-                .build();
-            
             ClassificationContext classContext = ClassificationContext.builder()
-                .processingContext(context)
+                .fileName(fileName)
+                .inputData("test-data")
                 .build();
-            
+
             FileFormatResult result = detector.detect(classContext);
-            
+
             assertTrue(result.isSuccessful(), "Detection should succeed for: " + fileName);
             assertEquals("csv", result.getFormat(), "Should detect CSV format for: " + fileName);
             assertTrue(result.isConfident(), "Should have high confidence for: " + fileName);
         }
-        
+
         logger.info("CSV detection validation completed");
     }
 
@@ -254,33 +224,30 @@ public class Phase1ClassificationUnitTest {
     @DisplayName("Should handle unknown extensions gracefully")
     void testExtensionBasedDetectorUnknown() {
         logger.info("=== Testing ExtensionBasedFileFormatDetector for unknown extensions ===");
-        
+
         ExtensionBasedFileFormatDetector detector = new ExtensionBasedFileFormatDetector();
-        
+
         String[] unknownFiles = {"data.unknown", "file.xyz", "test.binary", "noextension"};
-        
+
         for (String fileName : unknownFiles) {
-            ApexProcessingContext context = ApexProcessingContext.builder()
-                .fileName(fileName)
-                .build();
-            
             ClassificationContext classContext = ClassificationContext.builder()
-                .processingContext(context)
+                .fileName(fileName)
+                .inputData("test-data")
                 .build();
-            
+
             if (fileName.contains(".")) {
-                assertTrue(detector.canDetect(classContext), 
+                assertTrue(detector.canDetect(classContext),
                           "Should be able to attempt detection for: " + fileName);
-                
+
                 FileFormatResult result = detector.detect(classContext);
-                assertFalse(result.isSuccessful(), 
+                assertFalse(result.isSuccessful(),
                            "Detection should fail for unknown extension: " + fileName);
             } else {
-                assertFalse(detector.canDetect(classContext), 
+                assertFalse(detector.canDetect(classContext),
                            "Should not be able to detect format for file without extension: " + fileName);
             }
         }
-        
+
         logger.info("Unknown extension handling validation completed");
     }
 

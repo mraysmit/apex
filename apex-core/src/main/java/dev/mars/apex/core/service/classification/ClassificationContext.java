@@ -6,26 +6,32 @@ import java.util.Objects;
 /**
  * Context information for data classification operations.
  * Contains metadata and configuration needed for classification decisions.
- * 
+ *
  * <p>This class provides context for the classification process including:
  * <ul>
  *   <li>Source information (transport type, file name, etc.)</li>
  *   <li>Content metadata (size, format hints, etc.)</li>
  *   <li>Processing configuration (cache settings, confidence thresholds)</li>
  * </ul>
- * 
+ *
  * @since 1.0
  */
 public final class ClassificationContext {
 
-    private final ApexProcessingContext processingContext;
+    private final String source;
+    private final String fileName;
+    private final Long fileSize;
+    private final String correlationId;
     private final Map<String, Object> metadata;
     private final boolean enableCaching;
     private final double confidenceThreshold;
     private final long timestamp;
 
     private ClassificationContext(Builder builder) {
-        this.processingContext = builder.processingContext;
+        this.source = builder.source;
+        this.fileName = builder.fileName;
+        this.fileSize = builder.fileSize;
+        this.correlationId = builder.correlationId;
         this.metadata = Map.copyOf(builder.metadata);
         this.enableCaching = builder.enableCaching;
         this.confidenceThreshold = builder.confidenceThreshold;
@@ -47,7 +53,7 @@ public final class ClassificationContext {
      * @return source identifier
      */
     public String getSource() {
-        return processingContext != null ? processingContext.getSource() : "unknown";
+        return source != null ? source : "unknown";
     }
 
     /**
@@ -56,7 +62,16 @@ public final class ClassificationContext {
      * @return file name
      */
     public String getFileName() {
-        return processingContext != null ? processingContext.getFileName() : null;
+        return fileName;
+    }
+
+    /**
+     * Gets the correlation ID for tracking.
+     *
+     * @return correlation ID
+     */
+    public String getCorrelationId() {
+        return correlationId;
     }
 
     /**
@@ -76,7 +91,7 @@ public final class ClassificationContext {
      * @return content size
      */
     public long getContentSize() {
-        return processingContext != null ? processingContext.getFileSize() : 0L;
+        return fileSize != null ? fileSize : 0L;
     }
     
     /**
@@ -137,7 +152,7 @@ public final class ClassificationContext {
      * @return file size in bytes, or null if not available
      */
     public Long getFileSize() {
-        return processingContext != null ? processingContext.getFileSize() : null;
+        return fileSize;
     }
 
     @Override
@@ -148,19 +163,25 @@ public final class ClassificationContext {
         return enableCaching == that.enableCaching &&
                Double.compare(that.confidenceThreshold, confidenceThreshold) == 0 &&
                timestamp == that.timestamp &&
-               Objects.equals(processingContext, that.processingContext) &&
+               Objects.equals(source, that.source) &&
+               Objects.equals(fileName, that.fileName) &&
+               Objects.equals(fileSize, that.fileSize) &&
+               Objects.equals(correlationId, that.correlationId) &&
                Objects.equals(metadata, that.metadata);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(processingContext, metadata, enableCaching, confidenceThreshold, timestamp);
+        return Objects.hash(source, fileName, fileSize, correlationId, metadata, enableCaching, confidenceThreshold, timestamp);
     }
-    
+
     @Override
     public String toString() {
         return "ClassificationContext{" +
-               "processingContext=" + processingContext +
+               "source='" + source + '\'' +
+               ", fileName='" + fileName + '\'' +
+               ", fileSize=" + fileSize +
+               ", correlationId='" + correlationId + '\'' +
                ", metadata=" + metadata +
                ", enableCaching=" + enableCaching +
                ", confidenceThreshold=" + confidenceThreshold +
@@ -172,22 +193,58 @@ public final class ClassificationContext {
      * Builder for ClassificationContext.
      */
     public static final class Builder {
-        private ApexProcessingContext processingContext;
+        private String source = "unknown";
+        private String fileName;
+        private Long fileSize;
+        private String correlationId;
         private Map<String, Object> metadata = Map.of();
         private boolean enableCaching = true;
         private double confidenceThreshold = 0.7;
         private long timestamp = System.currentTimeMillis();
 
         private Builder() {}
-        
+
         /**
-         * Sets the processing context.
+         * Sets the source identifier.
          *
-         * @param processingContext APEX processing context
+         * @param source source identifier
          * @return this builder
          */
-        public Builder processingContext(ApexProcessingContext processingContext) {
-            this.processingContext = processingContext;
+        public Builder source(String source) {
+            this.source = source;
+            return this;
+        }
+
+        /**
+         * Sets the file name.
+         *
+         * @param fileName file name
+         * @return this builder
+         */
+        public Builder fileName(String fileName) {
+            this.fileName = fileName;
+            return this;
+        }
+
+        /**
+         * Sets the file size.
+         *
+         * @param fileSize file size in bytes
+         * @return this builder
+         */
+        public Builder fileSize(Long fileSize) {
+            this.fileSize = fileSize;
+            return this;
+        }
+
+        /**
+         * Sets the correlation ID.
+         *
+         * @param correlationId correlation ID
+         * @return this builder
+         */
+        public Builder correlationId(String correlationId) {
+            this.correlationId = correlationId;
             return this;
         }
 

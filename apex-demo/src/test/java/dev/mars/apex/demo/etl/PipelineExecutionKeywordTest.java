@@ -13,6 +13,10 @@ import org.slf4j.LoggerFactory;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -78,10 +82,23 @@ public class PipelineExecutionKeywordTest extends DemoTestBase {
     void shouldExecuteSequentialMode() throws Exception {
         LOGGER.info("=== Testing Sequential Execution Mode ===");
 
-        // NOTE: This test is simplified during migration to RulesEngine.evaluate()
-        // The original test created dynamic YAML configurations
-        // For now, we just validate that a basic pipeline executes
-        LOGGER.info("✓ Sequential execution test - simplified during migration");
+        // Load pipeline with sequential execution mode
+        String yamlPath = "src/test/java/dev/mars/apex/demo/etl/PipelineExecutionKeywordTest_Sequential.yaml";
+        rulesEngine = RulesEngine.fromFile(yamlPath);
+
+        // Execute the pipeline
+        java.util.Map<String, Object> inputData = new java.util.HashMap<>();
+        RuleResult result = rulesEngine.evaluate(inputData);
+
+        // Verify pipeline executed successfully
+        assertNotNull(result, "Pipeline execution result should not be null");
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+            "Pipeline should execute successfully in sequential mode");
+
+        // Validate data was loaded to database (proving all steps executed)
+        validateSequentialExecution();
+
+        LOGGER.info("✓ Sequential execution test completed successfully");
     }
 
     @Test
@@ -89,8 +106,32 @@ public class PipelineExecutionKeywordTest extends DemoTestBase {
     void shouldExecuteParallelMode() throws Exception {
         LOGGER.info("=== Testing Parallel Execution Mode ===");
 
-        // NOTE: This test is simplified during migration to RulesEngine.evaluate()
-        LOGGER.info("✓ Parallel execution test - simplified during migration");
+        String yamlPath = "src/test/java/dev/mars/apex/demo/etl/PipelineExecutionKeywordTest_Parallel.yaml";
+        rulesEngine = RulesEngine.fromFile(yamlPath);
+
+        java.util.Map<String, Object> inputData = new java.util.HashMap<>();
+        RuleResult result = rulesEngine.evaluate(inputData);
+
+        // Verify pipeline executed successfully
+        // Note: PipelineExecutor.java line 235 shows parallel mode currently executes as sequential
+        assertNotNull(result, "Pipeline execution result should not be null");
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+            "Pipeline should execute successfully in parallel mode");
+
+        // Verify data was loaded successfully (2 records, 1 header row skipped)
+        String jdbcUrl = "jdbc:h2:./target/demo/etl/execution-tests/output/parallel_db";
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, "sa", "")) {
+            try (Statement stmt = conn.createStatement()) {
+                ResultSet rs = stmt.executeQuery("SELECT COUNT(*) as count FROM test_data");
+                assertTrue(rs.next(), "Should have count result");
+                int recordCount = rs.getInt("count");
+                assertEquals(2, recordCount, "Should have 2 records (header row skipped)");
+                LOGGER.info("✓ Verified {} records loaded successfully in parallel mode", recordCount);
+            }
+        }
+
+        LOGGER.info("✓ Parallel execution test completed - pipeline executed successfully");
+        LOGGER.info("Note: Current implementation executes parallel mode as sequential (PipelineExecutor.java:235)");
     }
 
     @Test
@@ -98,8 +139,31 @@ public class PipelineExecutionKeywordTest extends DemoTestBase {
     void shouldHandleInvalidExecutionMode() throws Exception {
         LOGGER.info("=== Testing Invalid Execution Mode ===");
 
-        // NOTE: This test is simplified during migration to RulesEngine.evaluate()
-        LOGGER.info("✓ Invalid execution mode test - simplified during migration");
+        String yamlPath = "src/test/java/dev/mars/apex/demo/etl/PipelineExecutionKeywordTest_InvalidMode.yaml";
+        rulesEngine = RulesEngine.fromFile(yamlPath);
+
+        java.util.Map<String, Object> inputData = new java.util.HashMap<>();
+        RuleResult result = rulesEngine.evaluate(inputData);
+
+        // Verify pipeline executed successfully - invalid mode defaults to sequential
+        // PipelineExecutor.java line 72-76: if not "parallel", defaults to sequential
+        assertNotNull(result, "Pipeline execution result should not be null");
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+            "Pipeline should succeed - invalid mode should default to sequential");
+
+        // Verify data was loaded successfully (2 records, 1 header row skipped)
+        String jdbcUrl = "jdbc:h2:./target/demo/etl/execution-tests/output/invalid_mode_db";
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, "sa", "")) {
+            try (Statement stmt = conn.createStatement()) {
+                ResultSet rs = stmt.executeQuery("SELECT COUNT(*) as count FROM test_data");
+                assertTrue(rs.next(), "Should have count result");
+                int recordCount = rs.getInt("count");
+                assertEquals(2, recordCount, "Should have 2 records (header row skipped)");
+                LOGGER.info("✓ Verified {} records loaded successfully with invalid mode defaulting to sequential", recordCount);
+            }
+        }
+
+        LOGGER.info("✓ Invalid execution mode test completed - system defaulted to sequential mode");
     }
 
     @Test
@@ -107,8 +171,20 @@ public class PipelineExecutionKeywordTest extends DemoTestBase {
     void shouldStopOnError() throws Exception {
         LOGGER.info("=== Testing Stop-On-Error Behavior ===");
 
-        // NOTE: This test is simplified during migration to RulesEngine.evaluate()
-        LOGGER.info("✓ Stop-on-error test - simplified during migration");
+        // Load pipeline with stop-on-error configuration
+        String yamlPath = "src/test/java/dev/mars/apex/demo/etl/PipelineExecutionKeywordTest_StopOnError.yaml";
+        rulesEngine = RulesEngine.fromFile(yamlPath);
+
+        // Execute the pipeline - should fail on step 2
+        java.util.Map<String, Object> inputData = new java.util.HashMap<>();
+        RuleResult result = rulesEngine.evaluate(inputData);
+
+        // Verify pipeline stopped on error (ERROR indicates failure)
+        assertNotNull(result, "Pipeline execution result should not be null");
+        assertEquals(RuleResult.ResultType.ERROR, result.getResultType(),
+            "Pipeline should stop and return ERROR when error occurs with stop-on-error mode");
+
+        LOGGER.info("✓ Stop-on-error test completed - pipeline correctly stopped on error");
     }
 
     @Test
@@ -116,8 +192,37 @@ public class PipelineExecutionKeywordTest extends DemoTestBase {
     void shouldContinueOnError() throws Exception {
         LOGGER.info("=== Testing Continue-On-Error Behavior ===");
 
-        // NOTE: This test is simplified during migration to RulesEngine.evaluate()
-        LOGGER.info("✓ Continue-on-error test - simplified during migration");
+        String yamlPath = "src/test/java/dev/mars/apex/demo/etl/PipelineExecutionKeywordTest_ContinueOnError.yaml";
+        rulesEngine = RulesEngine.fromFile(yamlPath);
+
+        java.util.Map<String, Object> inputData = new java.util.HashMap<>();
+        RuleResult result = rulesEngine.evaluate(inputData);
+
+        // Verify pipeline continued despite error (MATCH indicates overall success)
+        assertNotNull(result, "Pipeline execution result should not be null");
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+            "Pipeline should continue and return MATCH when error occurs with continue-on-error mode");
+
+        // Verify step 3 executed successfully by checking database
+        validateContinueOnErrorExecution();
+
+        LOGGER.info("✓ Continue-on-error test completed - pipeline correctly continued after error");
+    }
+
+    private void validateContinueOnErrorExecution() throws Exception {
+        String jdbcUrl = "jdbc:h2:./target/demo/etl/execution-tests/output/continue_on_error_db";
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, "sa", "")) {
+            Statement stmt = conn.createStatement();
+
+            // Verify table exists and has data from step 3
+            ResultSet countRs = stmt.executeQuery("SELECT COUNT(*) as cnt FROM test_data");
+            assertTrue(countRs.next(), "Should have count result");
+            int recordCount = countRs.getInt("cnt");
+            assertTrue(recordCount > 0,
+                "Should have loaded records from step 3 despite step 2 failure - found " + recordCount + " records");
+
+            LOGGER.info("✓ Verified step 3 executed successfully with {} records despite step 2 failure", recordCount);
+        }
     }
 
     @Test
@@ -125,8 +230,37 @@ public class PipelineExecutionKeywordTest extends DemoTestBase {
     void shouldRetryFailedOperations() throws Exception {
         LOGGER.info("=== Testing Max-Retries Behavior ===");
 
-        // NOTE: This test is simplified during migration to RulesEngine.evaluate()
-        LOGGER.info("✓ Retry test - simplified during migration");
+        String yamlPath = "src/test/java/dev/mars/apex/demo/etl/PipelineExecutionKeywordTest_Retry.yaml";
+        rulesEngine = RulesEngine.fromFile(yamlPath);
+
+        java.util.Map<String, Object> inputData = new java.util.HashMap<>();
+        RuleResult result = rulesEngine.evaluate(inputData);
+
+        // Verify pipeline executed successfully (with or without retries)
+        assertNotNull(result, "Pipeline execution result should not be null");
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+            "Pipeline should complete successfully with retry configuration");
+
+        // Verify data was loaded successfully
+        validateRetryExecution();
+
+        LOGGER.info("✓ Retry test completed - pipeline executed with retry configuration");
+    }
+
+    private void validateRetryExecution() throws Exception {
+        String jdbcUrl = "jdbc:h2:./target/demo/etl/execution-tests/output/retry_db";
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, "sa", "")) {
+            Statement stmt = conn.createStatement();
+
+            // Verify table exists and has data
+            ResultSet countRs = stmt.executeQuery("SELECT COUNT(*) as cnt FROM test_data");
+            assertTrue(countRs.next(), "Should have count result");
+            int recordCount = countRs.getInt("cnt");
+            assertTrue(recordCount > 0,
+                "Should have loaded records - found " + recordCount + " records");
+
+            LOGGER.info("✓ Verified retry pipeline executed successfully with {} records", recordCount);
+        }
     }
 
     @Test
@@ -134,8 +268,38 @@ public class PipelineExecutionKeywordTest extends DemoTestBase {
     void shouldRespectRetryDelay() throws Exception {
         LOGGER.info("=== Testing Retry-Delay-Ms Behavior ===");
 
-        // NOTE: This test is simplified during migration to RulesEngine.evaluate()
-        LOGGER.info("✓ Retry delay test - simplified during migration");
+        String yamlPath = "src/test/java/dev/mars/apex/demo/etl/PipelineExecutionKeywordTest_RetryDelay.yaml";
+        rulesEngine = RulesEngine.fromFile(yamlPath);
+
+        java.util.Map<String, Object> inputData = new java.util.HashMap<>();
+
+        // Measure execution time - should include retry delays
+        long startTime = System.currentTimeMillis();
+        RuleResult result = rulesEngine.evaluate(inputData);
+        long totalTime = System.currentTimeMillis() - startTime;
+
+        // Verify pipeline failed (nonexistent sink)
+        assertNotNull(result, "Pipeline execution result should not be null");
+        assertEquals(RuleResult.ResultType.ERROR, result.getResultType(),
+            "Pipeline should fail when all retries are exhausted");
+
+        // With max-retries: 2 and retry-delay-ms: 1000:
+        // - Initial attempt (no delay)
+        // - Retry 1 (1000ms delay before)
+        // - Retry 2 (1000ms delay before)
+        // Total expected delay: ~2000ms (plus execution overhead)
+
+        LOGGER.info("Total execution time: {}ms (expected ~2000ms for 2 retries with 1000ms delay)", totalTime);
+
+        // Allow for execution overhead - verify at least 1800ms (90% of expected 2000ms)
+        assertTrue(totalTime >= 1800,
+            String.format("Total time (%dms) should be at least 1800ms for 2 retries with 1000ms delay", totalTime));
+
+        // Also verify it's not too long (less than 3000ms to account for overhead)
+        assertTrue(totalTime < 3000,
+            String.format("Total time (%dms) should be less than 3000ms (2000ms + reasonable overhead)", totalTime));
+
+        LOGGER.info("✓ Retry delay test completed - verified ~1000ms delay between retry attempts");
     }
 
     @Test
@@ -143,16 +307,74 @@ public class PipelineExecutionKeywordTest extends DemoTestBase {
     void shouldHandleZeroRetries() throws Exception {
         LOGGER.info("=== Testing Zero Retries Behavior ===");
 
-        // NOTE: This test is simplified during migration to RulesEngine.evaluate()
-        LOGGER.info("✓ Zero retries test - simplified during migration");
+        String yamlPath = "src/test/java/dev/mars/apex/demo/etl/PipelineExecutionKeywordTest_ZeroRetries.yaml";
+        rulesEngine = RulesEngine.fromFile(yamlPath);
+
+        java.util.Map<String, Object> inputData = new java.util.HashMap<>();
+        RuleResult result = rulesEngine.evaluate(inputData);
+
+        // Verify pipeline failed immediately (no retries with max-retries: 0)
+        assertNotNull(result, "Pipeline execution result should not be null");
+        assertEquals(RuleResult.ResultType.ERROR, result.getResultType(),
+            "Pipeline should fail immediately with zero retries when step fails");
+
+        LOGGER.info("✓ Zero retries test completed - pipeline failed immediately without retry attempts");
     }
 
     @Test
-    @DisplayName("NEGATIVE: Should handle invalid retry parameters")
+    @DisplayName("NEGATIVE: Should handle invalid retry parameters gracefully")
     void shouldHandleInvalidRetryParameters() throws Exception {
         LOGGER.info("=== Testing Invalid Retry Parameters ===");
 
-        // NOTE: This test is simplified during migration to RulesEngine.evaluate()
-        LOGGER.info("✓ Invalid retry parameters test - simplified during migration");
+        String yamlPath = "src/test/java/dev/mars/apex/demo/etl/PipelineExecutionKeywordTest_InvalidRetry.yaml";
+        rulesEngine = RulesEngine.fromFile(yamlPath);
+
+        java.util.Map<String, Object> inputData = new java.util.HashMap<>();
+        RuleResult result = rulesEngine.evaluate(inputData);
+
+        // Verify pipeline executed successfully despite invalid retry parameters
+        // PipelineExecutor.java lines 252-259 validate and correct invalid values to 0
+        assertNotNull(result, "Pipeline execution result should not be null");
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
+            "Pipeline should succeed - invalid retry params should be corrected to defaults");
+
+        // Verify data was loaded successfully (2 records, 1 header row skipped)
+        String jdbcUrl = "jdbc:h2:./target/demo/etl/execution-tests/output/invalid_retry_db";
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, "sa", "")) {
+            try (Statement stmt = conn.createStatement()) {
+                ResultSet rs = stmt.executeQuery("SELECT COUNT(*) as count FROM test_data");
+                assertTrue(rs.next(), "Should have count result");
+                int recordCount = rs.getInt("count");
+                assertEquals(2, recordCount, "Should have 2 records (header row skipped)");
+                LOGGER.info("✓ Verified {} records loaded successfully despite invalid retry parameters", recordCount);
+            }
+        }
+
+        LOGGER.info("✓ Invalid retry parameters test completed - system handled invalid values gracefully");
+    }
+
+    // ========================================================================
+    // Helper Methods
+    // ========================================================================
+
+    private void validateSequentialExecution() throws Exception {
+        LOGGER.info("Validating sequential execution results in database");
+
+        String jdbcUrl = "jdbc:h2:./target/demo/etl/execution-tests/output/sequential_db";
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, "sa", "")) {
+            Statement stmt = conn.createStatement();
+
+            // Verify table exists
+            ResultSet tables = conn.getMetaData().getTables(null, null, "TEST_DATA", null);
+            assertTrue(tables.next(), "Table 'test_data' should exist");
+            LOGGER.info("✓ Table 'test_data' exists");
+
+            // Verify records were loaded (proving both extract and load steps executed)
+            ResultSet countRs = stmt.executeQuery("SELECT COUNT(*) as cnt FROM test_data");
+            assertTrue(countRs.next(), "Should have count result");
+            int recordCount = countRs.getInt("cnt");
+            assertTrue(recordCount > 0, "Should have loaded records from CSV");
+            LOGGER.info("✓ Database contains {} records (steps executed sequentially)", recordCount);
+        }
     }
 }

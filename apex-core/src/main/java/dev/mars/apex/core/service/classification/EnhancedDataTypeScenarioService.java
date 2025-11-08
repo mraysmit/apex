@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Enhanced DataTypeScenarioService with integrated input data classification capabilities.
@@ -108,10 +109,13 @@ public class EnhancedDataTypeScenarioService extends DataTypeScenarioService {
      * - Cache successful results for performance
      *
      * @param inputData the raw input data to classify
-     * @param context processing context with metadata
+     * @param source source identifier (e.g., "rabbitmq", "rest-api", "file-system")
+     * @param fileName file name or identifier
+     * @param fileSize file size in bytes
+     * @param metadata additional metadata
      * @return classification result with scenario routing decision
      */
-    public ClassificationResult classifyInputData(Object inputData, ApexProcessingContext context) {
+    public ClassificationResult classifyInputData(Object inputData, String source, String fileName, Long fileSize, Map<String, Object> metadata) {
         if (inputData == null) {
             return ClassificationResult.failed("Input data cannot be null");
         }
@@ -119,19 +123,22 @@ public class EnhancedDataTypeScenarioService extends DataTypeScenarioService {
         long startTime = System.currentTimeMillis();
 
         try {
-            logger.debug("Starting Phase 1.2 classification for input data from source: {}", context.getSource());
+            logger.debug("Starting Phase 1.2 classification for input data from source: {}", source);
 
             // Create classification context
             ClassificationContext classificationContext = ClassificationContext.builder()
                 .inputData(inputData)
-                .processingContext(context)
+                .source(source)
+                .fileName(fileName)
+                .fileSize(fileSize)
+                .metadata(metadata != null ? metadata : Map.of())
                 .timestamp(startTime)
                 .build();
 
             // Check cache first for performance
             ClassificationResult cachedResult = classificationCache.get(classificationContext);
             if (cachedResult != null) {
-                logger.debug("Cache hit for classification from source: {}", context.getSource());
+                logger.debug("Cache hit for classification from source: {}", source);
                 return cachedResult;
             }
 
@@ -153,8 +160,10 @@ public class EnhancedDataTypeScenarioService extends DataTypeScenarioService {
 
             // Get scenario using classification-based routing
             ClassificationContext routingContext = ClassificationContext.builder()
-                .processingContext(context)
-                .metadata(context.getMetadata())
+                .source(source)
+                .fileName(fileName)
+                .fileSize(fileSize)
+                .metadata(metadata != null ? metadata : Map.of())
                 .build();
             ScenarioConfiguration scenario = getScenarioForClassification(routingContext, formatResult, contentResult);
 
@@ -186,7 +195,7 @@ public class EnhancedDataTypeScenarioService extends DataTypeScenarioService {
             return result;
 
         } catch (Exception e) {
-            logger.error("Classification failed for input data from source: {}", context.getSource(), e);
+            logger.error("Classification failed for input data from source: {}", source, e);
             return ClassificationResult.failed(e);
         }
     }
