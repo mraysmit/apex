@@ -310,7 +310,6 @@ public class ScenarioRegistryLoader {
                 scenario.setClassificationRuleCondition((String) classificationRuleObj);
             } else if (classificationRuleObj instanceof Map) {
                 // Object format with condition and description
-                @SuppressWarnings("unchecked")
                 Map<String, Object> classificationRuleMap = (Map<String, Object>) classificationRuleObj;
                 String condition = (String) classificationRuleMap.get("condition");
                 if (condition != null) {
@@ -399,7 +398,6 @@ public class ScenarioRegistryLoader {
         // Set description - try both direct "description" and nested "stage-metadata.description"
         String description = (String) stageData.get("description");
         if (description == null) {
-            @SuppressWarnings("unchecked")
             Map<String, Object> stageMetadata = (Map<String, Object>) stageData.get("stage-metadata");
             if (stageMetadata != null) {
                 description = (String) stageMetadata.get("description");

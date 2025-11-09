@@ -22,8 +22,7 @@ import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.PrintStream;
-import dev.mars.apex.yaml.manager.model.YamlContentSummary;
+
 
 /**
  * Unit tests for TreeNode model.

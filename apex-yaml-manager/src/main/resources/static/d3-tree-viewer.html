@@ -6,7 +6,7 @@
     <title>D3.js YAML Dependency Tree Viewer</title>
     
     <!-- External CSS -->
-    <link rel="stylesheet" href="css/d3-tree-viewer.css">
+    <link rel="stylesheet" href="css/d3-tree-viewer.css?v=2">
     
     <!-- External Libraries -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -16,7 +16,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-regex.min.js"></script>
     
     <!-- Application JavaScript -->
-    <script src="js/d3-tree-viewer.js" defer></script>
+    <script src="js/d3-tree-viewer.js?v=2" defer></script>
 </head>
 <body>
     <div class="main-container">
@@ -53,20 +53,6 @@
                     </div>
                     <div class="accordion-content" id="accordion-search">
                         <input type="text" id="search-input" class="sidebar-input" placeholder="Search files...">
-                    </div>
-                </div>
-
-                <!-- Display Options Accordion -->
-                <div class="accordion-section">
-                    <div class="accordion-header" data-section="display">
-                        <span>Display Options</span>
-                        <span class="accordion-icon">▼</span>
-                    </div>
-                    <div class="accordion-content" id="accordion-display">
-                        <label class="sidebar-checkbox">
-                            <input type="checkbox" id="tooltip-toggle" checked>
-                            Show Hover Tooltips
-                        </label>
                     </div>
                 </div>
 
@@ -112,6 +98,24 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Display Options Accordion -->
+                <div class="accordion-section">
+                    <div class="accordion-header" data-section="display">
+                        <span>Display Options</span>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content" id="accordion-display">
+                        <label class="sidebar-checkbox">
+                            <input type="checkbox" id="tooltip-toggle" checked>
+                            Show Hover Tooltips
+                        </label>
+                        <label class="sidebar-checkbox">
+                            <input type="checkbox" id="show-path-toggle" checked>
+                            Show Directory Path
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -124,7 +128,10 @@
         <div class="tree-panel">
             <!-- Tree Header with Toolbar -->
             <div class="tree-header">
-                <h2>Dependency Tree</h2>
+                <div class="tree-title-container">
+                    <h2>Dependency Tree</h2>
+                    <span class="tree-path" id="tree-path" style="display: none;"></span>
+                </div>
                 <div class="tree-toolbar">
                     <button class="toolbar-btn" id="zoom-in-btn" title="Zoom In">Zoom In</button>
                     <button class="toolbar-btn" id="zoom-out-btn" title="Zoom Out">Zoom Out</button>
@@ -156,25 +163,51 @@
         <!-- Resizer -->
         <div class="resizer" id="resizer"></div>
 
+        <!-- Content Panel Toggle Button (when panel is closed) -->
+        <button class="content-toggle-btn" id="content-toggle-btn" title="Open Content Panel">
+            ☰
+        </button>
+
         <!-- Right Panel: File Content -->
-        <div class="content-panel">
+        <div class="content-panel" id="content-panel">
             <div class="content-header">
-                <h3>File Content</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <h3>File Content</h3>
+                    <button class="content-close-btn" id="content-close-btn" title="Close Panel">×</button>
+                </div>
             </div>
 
             <div class="content-body">
-                <!-- File Metadata Section -->
-                <div class="file-metadata" id="file-metadata" style="display: none;">
-                    <div class="metadata-grid" id="metadata-grid">
-                        <!-- Metadata items will be populated by JavaScript -->
-                    </div>
-                </div>
-
                 <div class="placeholder-content" id="placeholder-content">
                     Click on any node in the tree to view its YAML content here.
                 </div>
-                <div class="yaml-content" id="yaml-content" style="display: none;">
-                    <pre><code class="language-yaml" id="yaml-code"></code></pre>
+
+                <!-- Metadata Accordion -->
+                <div class="content-accordion-section" id="metadata-section" style="display: none;">
+                    <div class="content-accordion-header" data-section="metadata">
+                        <span>File Metadata</span>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="content-accordion-content" id="content-accordion-metadata">
+                        <div class="file-metadata" id="file-metadata">
+                            <div class="metadata-grid" id="metadata-grid">
+                                <!-- Metadata items will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- YAML Content Accordion -->
+                <div class="content-accordion-section" id="yaml-section" style="display: none;">
+                    <div class="content-accordion-header" data-section="yaml">
+                        <span>YAML Content</span>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="content-accordion-content" id="content-accordion-yaml">
+                        <div class="yaml-content" id="yaml-content">
+                            <pre><code class="language-yaml" id="yaml-code"></code></pre>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

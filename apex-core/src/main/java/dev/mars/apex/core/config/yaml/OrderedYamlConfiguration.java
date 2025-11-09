@@ -3,8 +3,6 @@ package dev.mars.apex.core.config.yaml;
 import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Wrapper for YamlRuleConfiguration that preserves the natural order of YAML sections

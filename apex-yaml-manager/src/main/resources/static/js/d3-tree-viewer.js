@@ -51,6 +51,9 @@ function loadTreeData() {
     const basePath = `C:/Users/${currentUser}/dev/idea-projects/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100`;
     const rootFile = `${basePath}/00-scenario-registry.yaml`;
 
+    // Update the tree path display
+    updateTreePath(basePath);
+
     // Use apex-yaml-manager API (port 8082)
     const apiUrl = `http://localhost:8082/yaml-manager/api/dependencies/tree?rootFile=${encodeURIComponent(rootFile)}`;
 
@@ -326,6 +329,12 @@ function clickText(event, d) {
     // Hide tooltip if visible
     hideTooltipSimple();
 
+    // Update selected node
+    selectedNode = d;
+
+    // Update all node styles to reflect selection
+    updateNodeSelection();
+
     // Load file content in right panel
     loadFileContent(d.data.path, d.data);
 }
@@ -333,6 +342,26 @@ function clickText(event, d) {
 // Tooltip delay timer
 let tooltipTimer = null;
 let tooltipEnabled = true;
+
+// Track selected node
+let selectedNode = null;
+
+// Update node selection styling
+function updateNodeSelection() {
+    // Remove selection from all nodes
+    d3.selectAll('.label-background')
+        .style('stroke', '#000000')
+        .style('stroke-width', '1px');
+
+    // Add selection to the selected node
+    if (selectedNode) {
+        d3.selectAll('.node')
+            .filter(d => d === selectedNode)
+            .select('.label-background')
+            .style('stroke', '#4299e1')
+            .style('stroke-width', '3px');
+    }
+}
 
 // Simple tooltip - show with delay on hover
 function showTooltipSimple(event, d) {
@@ -429,9 +458,10 @@ function loadFileContent(filePath, nodeData) {
 
 // Display information using tree node data
 function displayNodeData(filePath, fullPath, nodeData) {
-    // Hide placeholder and show content
+    // Hide placeholder and show accordion sections
     document.getElementById('placeholder-content').style.display = 'none';
-    document.getElementById('yaml-content').style.display = 'block';
+    document.getElementById('metadata-section').style.display = 'block';
+    document.getElementById('yaml-section').style.display = 'block';
 
     // Show actual YAML file content
     const contentSummary = nodeData.contentSummary || {};
@@ -469,8 +499,7 @@ function formatDate(timestamp) {
 
 // Load and display file metadata
 function loadFileMetadata(fullPath, fileData, nodeData) {
-    // Show metadata section
-    document.getElementById('file-metadata').style.display = 'block';
+    // Metadata is now always visible in accordion, no need to toggle display
 
     const contentSummary = nodeData.contentSummary || {};
 
@@ -921,6 +950,14 @@ function initializeSidebar() {
             hideTooltipSimple();
         }
     });
+
+    // Show path toggle functionality
+    const showPathToggle = document.getElementById('show-path-toggle');
+    showPathToggle.addEventListener('change', function() {
+        const treePath = document.getElementById('tree-path');
+        treePath.style.display = this.checked ? 'inline' : 'none';
+        console.log('Directory path', this.checked ? 'shown' : 'hidden');
+    });
 }
 
 // Initialize accordion functionality
@@ -931,6 +968,45 @@ function initializeAccordion() {
         header.addEventListener('click', function() {
             const section = this.getAttribute('data-section');
             const content = document.getElementById('accordion-' + section);
+
+            // Toggle collapsed state
+            this.classList.toggle('collapsed');
+            content.classList.toggle('collapsed');
+        });
+    });
+}
+
+// Initialize content panel functionality
+function initializeContentPanel() {
+    const contentPanel = document.getElementById('content-panel');
+    const contentCloseBtn = document.getElementById('content-close-btn');
+    const contentToggleBtn = document.getElementById('content-toggle-btn');
+    const resizer = document.getElementById('resizer');
+    const treePanel = document.querySelector('.tree-panel');
+
+    // Close content panel
+    contentCloseBtn.addEventListener('click', function() {
+        contentPanel.classList.add('collapsed');
+        contentToggleBtn.classList.add('visible');
+        resizer.classList.add('hidden');
+        treePanel.classList.add('expanded');
+    });
+
+    // Open content panel
+    contentToggleBtn.addEventListener('click', function() {
+        contentPanel.classList.remove('collapsed');
+        contentToggleBtn.classList.remove('visible');
+        resizer.classList.remove('hidden');
+        treePanel.classList.remove('expanded');
+    });
+
+    // Initialize content panel accordion
+    const contentAccordionHeaders = document.querySelectorAll('.content-accordion-header');
+
+    contentAccordionHeaders.forEach(header => {
+        header.addEventListener('click', function() {
+            const section = this.getAttribute('data-section');
+            const content = document.getElementById('content-accordion-' + section);
 
             // Toggle collapsed state
             this.classList.toggle('collapsed');
@@ -1030,12 +1106,25 @@ function initializeTooltip() {
     });
 }
 
+// Update tree path display
+function updateTreePath(path) {
+    const treePathElement = document.getElementById('tree-path');
+    treePathElement.textContent = path;
+
+    // Show path if checkbox is checked
+    const showPathToggle = document.getElementById('show-path-toggle');
+    if (showPathToggle && showPathToggle.checked) {
+        treePathElement.style.display = 'inline';
+    }
+}
+
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
     initializeTree();
     initializeResizer();
     initializeToolbar();
     initializeSidebar();
+    initializeContentPanel();
     initializeTooltip();
 
     // Debug: Log actual header heights

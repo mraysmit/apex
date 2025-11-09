@@ -256,6 +256,11 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    transition: width 0.3s ease;
+}
+
+.tree-panel.expanded {
+    width: 100%;
 }
 
 .tree-header {
@@ -268,9 +273,26 @@ body {
     border-bottom: 1px solid #ddd;
 }
 
+.tree-title-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
 .tree-header h2 {
     margin: 0;
     font-size: 16px;
+}
+
+.tree-path {
+    position: absolute;
+    left: 0;
+    top: 22px;
+    font-size: 10px;
+    color: #bdc3c7;
+    font-family: 'Courier New', monospace;
+    font-weight: normal;
+    white-space: nowrap;
 }
 
 .tree-toolbar {
@@ -309,8 +331,13 @@ body {
     background-color: #ddd;
     cursor: col-resize;
     position: relative;
-    transition: background-color 0.2s ease;
     user-select: none;
+    flex-shrink: 0;
+    transition: background-color 0.2s ease;
+}
+
+.resizer.hidden {
+    display: none !important;
 }
 
 .resizer:hover {
@@ -334,12 +361,47 @@ body {
     opacity: 0.6;
 }
 
+/* Content Panel Toggle Button (when panel is closed) */
+.content-toggle-btn {
+    position: fixed;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 20px;
+    padding: 10px 15px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s;
+}
+
+.content-toggle-btn:hover {
+    background-color: #34495e;
+}
+
+.content-toggle-btn.visible {
+    display: flex;
+}
+
 .content-panel {
     flex: 1;
     background-color: #e8e8e8;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    transition: width 0.3s ease, opacity 0.3s ease;
+    width: 40%;
+}
+
+.content-panel.collapsed {
+    display: none;
 }
 
 .content-header {
@@ -358,6 +420,25 @@ body {
     font-size: 16px;
 }
 
+.content-close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.content-close-btn:hover {
+    color: #e74c3c;
+}
+
 .content-header .file-path {
     font-size: 12px;
     color: #bdc3c7;
@@ -365,11 +446,55 @@ body {
     word-break: break-all;
 }
 
+/* Content Panel Accordion */
+.content-accordion-section {
+    border-bottom: 1px solid #bdc3c7;
+}
+
+.content-accordion-section:last-child {
+    border-bottom: none;
+}
+
+.content-accordion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    cursor: pointer;
+    background-color: #34495e;
+    transition: background-color 0.2s;
+    user-select: none;
+}
+
+.content-accordion-header:hover {
+    background-color: #3d566e;
+}
+
+.content-accordion-header span:first-child {
+    font-size: 13px;
+    font-weight: 600;
+    color: #ecf0f1;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.content-accordion-header.collapsed .accordion-icon {
+    transform: rotate(-90deg);
+}
+
+.content-accordion-content {
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    max-height: 2000px;
+}
+
+.content-accordion-content.collapsed {
+    max-height: 0;
+}
+
 .file-metadata {
-    margin-top: 10px;
-    padding: 10px;
-    background-color: #e8e8e8;
-    border-radius: 4px;
+    padding: 15px;
+    background-color: #2d3748;
     border-left: 4px solid #4299e1;
 }
 
@@ -383,8 +508,8 @@ body {
 .metadata-item {
     display: flex;
     justify-content: flex-start;
-    padding: 4px 0;
-    border-bottom: 1px solid #e2e8f0;
+    padding: 1px 0;
+    border-bottom: 1px solid #4a5568;
     gap: 8px;
 }
 
@@ -396,7 +521,7 @@ body {
 
 .metadata-label {
     font-weight: 600;
-    color: #4a5568;
+    color: #a0aec0;
     font-size: 12px;
 }
 
@@ -405,7 +530,7 @@ body {
 }
 
 .metadata-value {
-    color: #2d3748;
+    color: #e2e8f0;
     font-size: 12px;
     font-family: 'Courier New', monospace;
     text-align: left;
@@ -431,9 +556,11 @@ body {
 
 .content-body {
     flex: 1;
-    overflow: auto;
+    overflow: hidden;
     padding: 0;
     background-color: #e8e8e8;
+    display: flex;
+    flex-direction: column;
 }
 
 .yaml-content {
@@ -442,7 +569,7 @@ body {
     line-height: 1.6;
     padding: 15px;
     margin: 0;
-    height: 100%;
+    flex: 1;
     box-sizing: border-box;
     overflow: auto;
     background: #2d3748 !important;
@@ -620,7 +747,7 @@ body {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     z-index: 10000;
     max-width: 500px;
-    max-height: 400px;
+    max-height: 600px;
     display: flex;
     flex-direction: column;
     overflow: hidden;

@@ -3,8 +3,6 @@ package dev.mars.apex.core.config.yaml;
 import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Utility class for merging YAML rule configurations.
