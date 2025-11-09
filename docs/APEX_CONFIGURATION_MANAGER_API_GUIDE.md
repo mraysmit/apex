@@ -79,6 +79,15 @@ curl http://localhost:8082/yaml-manager/api/health
 ### GET /api/health
 **Purpose**: Basic health check to verify service is running
 
+**Why Use This?**
+- **Monitoring & Alerting**: Integrate with monitoring tools (Prometheus, Nagios, Datadog) to track service availability
+- **Load Balancer Health Checks**: Configure load balancers to verify service instances are responsive
+- **CI/CD Pipeline Validation**: Verify service started successfully after deployment
+- **Quick Status Check**: Fast, lightweight endpoint for manual verification during troubleshooting
+- **Kubernetes Liveness Probe**: Use as a liveness probe to detect when the service needs to be restarted
+
+**When to Use**: Use this endpoint when you need a simple UP/DOWN status without detailed information. Perfect for automated health checks that run every few seconds.
+
 ```bash
 curl -X GET "http://localhost:8082/yaml-manager/api/health"
 ```
@@ -93,8 +102,26 @@ curl -X GET "http://localhost:8082/yaml-manager/api/health"
 }
 ```
 
+**Response Fields Explained**:
+- **`status`**: Service health status. `UP` = service is running and accepting requests, `DOWN` = service is not responding
+- **`service`**: Service identifier. Always returns `"apex-yaml-manager"` to confirm you're connected to the correct service
+- **`version`**: Semantic version of the deployed service (e.g., `"1.0.0"`). Use this to verify compatibility with your client
+- **`timestamp`**: Unix epoch timestamp (milliseconds) when the health check was performed. Use this to detect stale responses or caching issues
+
+---
+
 ### GET /api/health/status
 **Purpose**: Detailed system status with capabilities
+
+**Why Use This?**
+- **Feature Discovery**: Identify which capabilities are available in the deployed version
+- **Version Compatibility**: Verify the service version supports required features before making API calls
+- **Operational Dashboard**: Display service capabilities and status in admin/operations dashboards
+- **Integration Planning**: Determine which features to integrate with based on available capabilities
+- **Troubleshooting**: Verify all expected capabilities are enabled when debugging integration issues
+- **Documentation Validation**: Confirm the running service matches the documented feature set
+
+**When to Use**: Use this endpoint during initial integration, version upgrades, or when you need to verify specific capabilities are available. This is more detailed than the basic health check and provides actionable information about what the service can do.
 
 ```bash
 curl -X GET "http://localhost:8082/yaml-manager/api/health/status"
@@ -117,6 +144,18 @@ curl -X GET "http://localhost:8082/yaml-manager/api/health/status"
 }
 ```
 
+**Response Fields Explained**:
+- **`status`**: Operational status. `OPERATIONAL` = all features working, `DEGRADED` = some features unavailable, `DOWN` = service not responding
+- **`service`**: Service identifier confirming this is the APEX YAML Manager service
+- **`version`**: Semantic version number. Check this before using version-specific features
+- **`capabilities`**: Array of feature flags indicating which capabilities are enabled in this deployment:
+  - `"dependency-analysis"` - Dependency analysis and metrics calculation available
+  - `"catalog-discovery"` - Catalog scanning and discovery features available
+  - `"health-checks"` - Health monitoring endpoints available
+  - `"refactoring-tools"` - Refactoring and code quality tools available
+  - `"visualization"` - D3.js visualization generation available
+- **`timestamp`**: Unix epoch timestamp (milliseconds) when the status was checked
+
 ---
 
 ## 🔍 Dependency Analysis Controller
@@ -125,6 +164,23 @@ curl -X GET "http://localhost:8082/yaml-manager/api/health/status"
 
 ### POST /api/dependencies/analyze
 **Purpose**: Analyze YAML file dependencies and calculate comprehensive metrics
+
+**Why Use This?**
+- **Impact Analysis**: Before modifying a YAML file, understand how many other files depend on it and will be affected
+- **Complexity Assessment**: Evaluate the complexity of your configuration structure to identify refactoring opportunities
+- **Circular Dependency Detection**: Identify circular dependencies that could cause infinite loops or processing issues
+- **Orphaned File Discovery**: Find YAML files that are defined but never referenced, indicating dead code
+- **Critical File Identification**: Discover which files are most heavily used and require extra care during changes
+- **Refactoring Planning**: Use metrics to prioritize which configurations need simplification or restructuring
+- **Documentation**: Generate dependency reports for technical documentation and architecture reviews
+- **Risk Assessment**: Understand the blast radius of changes before making modifications to production configurations
+
+**When to Use**:
+- Before making changes to any YAML file to understand downstream impact
+- During code reviews to assess the complexity of new configurations
+- When planning refactoring efforts to identify high-risk areas
+- As part of CI/CD pipelines to detect configuration quality issues
+- When onboarding new team members to help them understand configuration structure
 
 **Using Graph-100 Root File**:
 ```bash
@@ -165,8 +221,47 @@ curl -X POST "http://localhost:8082/yaml-manager/api/dependencies/analyze" \
 }
 ```
 
+**Response Fields Explained**:
+- **`status`**: Analysis result status. `"success"` = analysis completed, `"error"` = analysis failed
+- **`rootFile`**: Name of the root YAML file that was analyzed (entry point)
+- **`totalFiles`**: Total number of YAML files discovered in the dependency tree (including root)
+- **`maxDepth`**: Maximum depth of the dependency tree (how many levels deep the dependencies go)
+- **`metrics`**: Comprehensive dependency metrics object:
+  - **`totalFiles`**: Same as top-level `totalFiles` (redundant for consistency)
+  - **`maxDepth`**: Same as top-level `maxDepth` (redundant for consistency)
+  - **`averageDepth`**: Average depth of all files in the tree. Lower = flatter structure, higher = deeper nesting
+  - **`totalDependencies`**: Total number of dependency relationships (file A depends on file B)
+  - **`totalDependents`**: Total number of dependent relationships (file B is depended on by file A)
+  - **`complexityScore`**: Calculated complexity score (0-100). Higher = more complex. Based on depth, dependencies, and structure
+  - **`complexityLevel`**: Human-readable complexity level: `"LOW"` (0-33), `"MEDIUM"` (34-66), `"HIGH"` (67-100)
+  - **`circularDependencies`**: Array of file names involved in circular dependency cycles. Empty array = no cycles (good!)
+  - **`orphanedFiles`**: Array of files that exist but are not referenced by any other file. May indicate unused files
+  - **`criticalFiles`**: Array of files that are heavily depended upon. Changes to these files have high impact
+  - **`warningCount`**: Number of warnings detected (e.g., orphaned files, high complexity)
+  - **`errorCount`**: Number of errors detected (e.g., circular dependencies, missing files)
+- **`timestamp`**: Unix epoch timestamp (milliseconds) when the analysis was performed
+
+---
+
 ### GET /api/dependencies/tree
 **Purpose**: Generate D3.js-compatible hierarchical dependency tree
+
+**Why Use This?**
+- **Visual Dependency Mapping**: Create interactive visualizations showing how YAML files relate to each other
+- **Architecture Documentation**: Generate visual diagrams for technical documentation and presentations
+- **Onboarding**: Help new team members understand the configuration structure through visual exploration
+- **Debugging**: Trace dependency chains visually to understand why a particular file is being loaded
+- **Refactoring Planning**: Visualize the current structure before planning reorganization efforts
+- **D3.js Integration**: Direct integration with D3.js tree visualization libraries for custom dashboards
+- **Hierarchy Analysis**: Understand the depth and breadth of your configuration hierarchy
+- **Health Visualization**: Color-code nodes by health score to quickly identify problematic areas
+
+**When to Use**:
+- When building custom visualization dashboards or tools
+- During architecture reviews to present configuration structure
+- When debugging complex dependency chains that are hard to understand from text
+- To generate documentation diagrams automatically
+- When you need programmatic access to the dependency tree structure
 
 **Generate Tree for Graph-100 Dataset**:
 ```bash
@@ -218,8 +313,60 @@ curl -X GET "http://localhost:8082/yaml-manager/api/dependencies/tree?rootFile=C
 }
 ```
 
+**Response Fields Explained**:
+- **`status`**: Tree generation status. `"success"` = tree generated successfully
+- **`rootFile`**: Name of the root file used as the tree starting point
+- **`totalFiles`**: Total number of files in the entire dependency tree
+- **`maxDepth`**: Maximum depth of the tree (longest path from root to leaf)
+- **`tree`**: Hierarchical tree structure (D3.js compatible) with nested nodes:
+  - **`name`**: File name (e.g., `"00-scenario-registry.yaml"`)
+  - **`id`**: Unique identifier for the node (typically same as name)
+  - **`path`**: Full file system path to the YAML file
+  - **`type`**: YAML file type (e.g., `"scenario-registry"`, `"scenario"`, `"rule-config"`, `"enrichment"`)
+  - **`depth`**: Depth level in the tree (0 = root, 1 = direct child, etc.)
+  - **`height`**: Height of this subtree (maximum depth from this node to any leaf)
+  - **`childCount`**: Number of direct children (files this file directly depends on)
+  - **`healthScore`**: Health score (0-100) for this file. Higher = better quality
+  - **`circular`**: Boolean indicating if this file is part of a circular dependency cycle
+  - **`dependencies`**: Array of file names this file directly depends on
+  - **`contentSummary`**: Summary of what's inside this YAML file:
+    - **`filePath`**: File name
+    - **`fileType`**: Type of YAML configuration
+    - **`ruleCount`**: Number of rules defined in this file
+    - **`ruleGroupCount`**: Number of rule groups defined
+    - **`enrichmentCount`**: Number of enrichments defined
+    - **`configFileCount`**: Number of configuration files referenced
+    - **`referenceCount`**: Total number of references to other files
+  - **`children`**: Array of child nodes (recursive structure). Each child has the same structure as the parent
+
+**How to Use the Tree**:
+- Use D3.js tree layout to visualize the hierarchy
+- Color nodes by `healthScore` to highlight problem areas
+- Highlight nodes where `circular: true` to show dependency cycles
+- Use `depth` to control tree layout and indentation
+- Filter by `type` to show only specific configuration types
+
+---
+
 ### GET /api/dependencies/content
 **Purpose**: Retrieve file content and metadata for a specific YAML file
+
+**Why Use This?**
+- **File Inspection**: View the complete content of a YAML file without accessing the file system directly
+- **Metadata Extraction**: Get structured metadata (author, dates, type) along with raw content
+- **Dependency Context**: See both what a file depends on and what depends on it in a single call
+- **Content Analysis**: Retrieve content for parsing, validation, or transformation in external tools
+- **Audit Trail**: Access file content with metadata for compliance and audit purposes
+- **Remote Access**: Retrieve file content from a centralized service without direct file system access
+- **Health Assessment**: Get health score and issues for a specific file
+- **Integration**: Fetch YAML content for processing in external systems or custom tools
+
+**When to Use**:
+- When you need to inspect a specific file's content and metadata together
+- Building custom editors or viewers that need both content and context
+- Implementing audit or compliance tools that need to track file content
+- When debugging issues with a specific YAML file
+- For remote access to YAML content without file system permissions
 
 **Get Content for Scenario Registry**:
 ```bash
@@ -259,6 +406,30 @@ curl -X GET "http://localhost:8082/yaml-manager/api/dependencies/content?filePat
 }
 ```
 
+**Response Fields Explained**:
+- **`status`**: Content retrieval status. `"success"` = file found and content retrieved
+- **`data`**: File content and metadata object:
+  - **`name`**: File name (e.g., `"30-rules-a.yaml"`)
+  - **`path`**: Full file system path to the YAML file
+  - **`type`**: YAML file type (e.g., `"rule-config"`, `"enrichment"`, `"scenario"`)
+  - **`healthScore`**: Health score (0-100) for this file. Higher = better quality
+  - **`dependencies`**: Array of file names this file directly depends on (files it references)
+  - **`dependents`**: Array of file names that depend on this file (files that reference it)
+  - **`contentSummary`**: Detailed content analysis:
+    - **`filePath`**: File name
+    - **`fileType`**: Type of YAML configuration
+    - **`ruleCount`**: Number of rules defined in this file
+    - **`ruleGroupCount`**: Number of rule groups defined
+    - **`enrichmentCount`**: Number of enrichments defined
+    - **`configFileCount`**: Number of configuration files referenced
+    - **`referenceCount`**: Total number of references to other files
+    - **`rawContent`**: Complete YAML file content as a string. Use this to display or parse the file
+  - **`author`**: Email or identifier of the person who created this file (from metadata)
+  - **`created`**: ISO 8601 date when the file was created (from metadata)
+  - **`lastModified`**: ISO 8601 date when the file was last modified (from metadata)
+
+---
+
 ---
 
 ## 📚 Catalog Controller
@@ -267,6 +438,24 @@ curl -X GET "http://localhost:8082/yaml-manager/api/dependencies/content?filePat
 
 ### POST /api/catalog/scan
 **Purpose**: Scan directory and build comprehensive catalog index
+
+**Why Use This?**
+- **Catalog Initialization**: Build a searchable index of all YAML configurations in a directory tree
+- **Bulk Analysis**: Process hundreds of YAML files in a single operation for comprehensive analysis
+- **Configuration Discovery**: Automatically discover all YAML files without manual registration
+- **Validation at Scale**: Identify syntax errors and validation issues across entire configuration repositories
+- **Performance Optimization**: Index files once, then use fast catalog queries instead of repeated file system scans
+- **CI/CD Integration**: Scan configuration directories as part of build pipelines to validate all files
+- **Environment Setup**: Initialize the catalog when deploying to new environments
+- **Incremental Updates**: Re-scan directories after configuration changes to update the catalog
+
+**When to Use**:
+- On service startup to initialize the catalog
+- After deploying new or updated YAML configurations
+- As part of CI/CD pipelines to validate configuration repositories
+- When switching between different configuration directories
+- Before running catalog queries to ensure the index is up-to-date
+- When you need to process all configurations in a directory tree at once
 
 **Scan Graph-100 Directory**:
 ```bash
@@ -294,8 +483,46 @@ curl -X POST "http://localhost:8082/yaml-manager/api/catalog/scan" \
 }
 ```
 
+**Response Fields Explained**:
+- **`status`**: Scan operation status. `"success"` = scan completed (even if some files had errors), `"error"` = scan failed completely
+- **`message`**: Human-readable description of the scan result
+- **`scannedFiles`**: Total number of YAML files found and scanned in the directory tree
+- **`validFiles`**: Number of files that were successfully parsed and added to the catalog
+- **`invalidFiles`**: Number of files that had parsing or validation errors
+- **`processingTimeMs`**: Time taken to scan and process all files (in milliseconds). Use this to monitor performance
+- **`catalogSize`**: Total number of configurations now in the catalog (should equal `validFiles` after a fresh scan)
+- **`errors`**: Array of error objects for files that failed validation:
+  - **`file`**: Name of the file that had an error
+  - **`error`**: Description of what went wrong (e.g., syntax error, missing required fields)
+
+**What This Means**:
+- If `invalidFiles > 0`, check the `errors` array to see which files need fixing
+- `processingTimeMs` helps you understand scan performance for large directories
+- `catalogSize` tells you how many configurations are now available for querying
+- A successful scan with errors means the catalog was updated with valid files, but some files were skipped
+
+---
+
 ### GET /api/catalog/configurations
 **Purpose**: Get all configurations with optional field filtering
+
+**Why Use This?**
+- **Configuration Inventory**: Get a complete list of all YAML configurations in the catalog
+- **Dashboard Display**: Populate admin dashboards with configuration summaries
+- **Bulk Operations**: Retrieve all configurations for batch processing or analysis
+- **Field Filtering**: Request only specific fields (metadata, dependencies, health) to reduce payload size
+- **Configuration Management**: Build configuration management UIs that display all available configs
+- **Reporting**: Generate reports showing all configurations with their key attributes
+- **Search Foundation**: Get the full dataset for client-side filtering and searching
+- **Monitoring**: Track the total number and health of configurations over time
+
+**When to Use**:
+- Building configuration management dashboards or UIs
+- Generating inventory reports for documentation or compliance
+- When you need to process or analyze all configurations together
+- For client-side filtering when you want to avoid multiple API calls
+- When implementing custom search or filtering logic in your application
+- To get an overview of all configurations before drilling into specific ones
 
 **Get All Configurations (Full Details)**:
 ```bash
@@ -343,8 +570,28 @@ curl -X GET "http://localhost:8082/yaml-manager/api/catalog/configurations?field
 }
 ```
 
+---
+
 ### GET /api/catalog/metadata/{id}
 **Purpose**: Get detailed metadata for specific configuration
+
+**Why Use This?**
+- **Configuration Details**: Get complete metadata for a single configuration without retrieving all configs
+- **Dependency Inspection**: See both file-level dependencies and ID-level references in one call
+- **Health Diagnostics**: View health score and specific issues for troubleshooting
+- **Ownership Tracking**: Identify who owns and maintains a specific configuration
+- **Usage Analysis**: Understand how frequently a configuration is referenced by others
+- **Version Management**: Track version information and modification dates
+- **Audit Trail**: Access creation and modification metadata for compliance
+- **Quick Lookup**: Fast retrieval of metadata by ID without scanning the full catalog
+
+**When to Use**:
+- When displaying details for a specific configuration in a UI
+- Before modifying a configuration to understand its current state and dependencies
+- When investigating health issues with a particular file
+- For audit or compliance reporting on specific configurations
+- When you need detailed information about one config without the overhead of retrieving all configs
+- To check if a configuration exists and get its current metadata
 
 **Get Metadata for Scenario Registry**:
 ```bash
@@ -381,8 +628,28 @@ curl -X GET "http://localhost:8082/yaml-manager/api/catalog/metadata/graph100-ru
 }
 ```
 
+---
+
 ### GET /api/catalog/statistics
 **Purpose**: Get comprehensive catalog statistics
+
+**Why Use This?**
+- **Catalog Overview**: Get high-level metrics about your entire configuration catalog
+- **Health Monitoring**: Track average health score and identify problematic configurations
+- **Taxonomy Discovery**: Find all available tags, business domains, owners, and types for filtering
+- **Dashboard Metrics**: Display key statistics in monitoring dashboards
+- **Trend Analysis**: Track changes in catalog size, health, and complexity over time
+- **Quality Assessment**: Identify orphaned files and critical configurations that need attention
+- **Governance Reporting**: Generate reports on configuration ownership and organization
+- **Filter Options**: Discover available values for tags, domains, and owners to build dynamic filters
+
+**When to Use**:
+- Building dashboard summary views that show catalog health at a glance
+- Before implementing filters to discover available filter values
+- For periodic health checks and quality assessments
+- When generating executive reports on configuration management
+- To track catalog growth and complexity trends over time
+- When you need to understand the overall state of your configuration repository
 
 ```bash
 curl -X GET "http://localhost:8082/yaml-manager/api/catalog/statistics"
@@ -414,8 +681,28 @@ curl -X GET "http://localhost:8082/yaml-manager/api/catalog/statistics"
 }
 ```
 
+---
+
 ### GET /api/catalog/discovery/search
 **Purpose**: Full-text search across all configuration descriptions and metadata
+
+**Why Use This?**
+- **Quick Discovery**: Find configurations by searching names, descriptions, and metadata
+- **Relevance Ranking**: Results are scored by relevance to help you find the most relevant configs first
+- **Flexible Search**: Search across multiple fields without knowing exact IDs or file names
+- **User-Friendly**: Enable users to find configurations using natural language terms
+- **Documentation Search**: Find configurations related to specific business concepts or features
+- **Troubleshooting**: Quickly locate configurations related to a problem area
+- **Knowledge Discovery**: Explore configurations related to specific business domains or features
+- **Search UI**: Build search interfaces that let users find configurations by keywords
+
+**When to Use**:
+- Building search functionality in configuration management UIs
+- When you know what you're looking for conceptually but not the exact ID
+- For exploratory analysis to find configurations related to a topic
+- When troubleshooting issues and need to find all related configurations
+- To discover configurations in unfamiliar codebases
+- For documentation and knowledge management tools
 
 **Search for "trade" Related Configurations**:
 ```bash
@@ -449,8 +736,28 @@ curl -X GET "http://localhost:8082/yaml-manager/api/catalog/discovery/search?que
 }
 ```
 
+---
+
 ### GET /api/catalog/discovery/tags
 **Purpose**: Find configurations by specific tags
+
+**Why Use This?**
+- **Tag-Based Organization**: Find all configurations with specific classification tags
+- **Multi-Tag Filtering**: Combine multiple tags to narrow down results (AND logic)
+- **Category Discovery**: Explore configurations by functional categories (validation, enrichment, etc.)
+- **Consistent Classification**: Leverage tagging conventions to find related configurations
+- **Bulk Operations**: Identify groups of configurations for batch processing or updates
+- **Documentation**: Generate documentation organized by tags
+- **Team Organization**: Find configurations owned by specific teams or functional areas
+- **Feature Grouping**: Locate all configurations related to a specific feature or capability
+
+**When to Use**:
+- Building tag-based navigation in configuration management UIs
+- When you need to find all configurations in a specific category
+- For bulk operations on tagged configuration groups
+- To generate reports organized by tags
+- When implementing tag-based access control or workflows
+- For discovering configurations that follow tagging conventions
 
 **Find All Configurations with "validation" Tag**:
 ```bash
@@ -484,8 +791,28 @@ curl -X GET "http://localhost:8082/yaml-manager/api/catalog/discovery/tags?tags=
 }
 ```
 
+---
+
 ### GET /api/catalog/discovery/type
 **Purpose**: Find configurations by document type
+
+**Why Use This?**
+- **Type-Based Filtering**: Find all configurations of a specific type (rules, enrichments, scenarios, etc.)
+- **Architecture Analysis**: Understand the distribution of configuration types in your system
+- **Type-Specific Operations**: Perform operations on all configurations of a particular type
+- **Migration Planning**: Identify all configurations of a type that need to be migrated or updated
+- **Documentation Generation**: Create type-specific documentation (all rules, all enrichments, etc.)
+- **Validation**: Ensure type-specific validation rules are applied correctly
+- **Inventory Management**: Track how many configurations exist for each type
+- **Refactoring**: Find all configurations of a type that need refactoring
+
+**When to Use**:
+- Building type-specific views in configuration management UIs
+- When you need to process all configurations of a specific type
+- For type-based validation or migration operations
+- To generate type-specific reports or documentation
+- When analyzing the architecture and composition of your configuration repository
+- For implementing type-specific workflows or access controls
 
 **Find All Rule Configurations**:
 ```bash
@@ -517,8 +844,28 @@ curl -X GET "http://localhost:8082/yaml-manager/api/catalog/discovery/type?type=
 }
 ```
 
+---
+
 ### GET /api/catalog/discovery/author
 **Purpose**: Find configurations by author
+
+**Why Use This?**
+- **Ownership Tracking**: Find all configurations created by a specific author
+- **Accountability**: Identify who is responsible for specific configurations
+- **Knowledge Management**: Locate configurations created by subject matter experts
+- **Audit Trail**: Track configuration authorship for compliance and governance
+- **Team Workload**: Understand the distribution of configuration ownership across team members
+- **Handoff Planning**: Identify configurations that need ownership transfer when team members leave
+- **Code Review**: Find all configurations by an author for review or quality assessment
+- **Expertise Location**: Discover who has expertise in specific configuration areas
+
+**When to Use**:
+- For audit and compliance reporting on configuration ownership
+- When planning team transitions or knowledge transfer
+- To find configurations that need review by or from a specific author
+- For workload analysis and team capacity planning
+- When implementing author-based access controls or workflows
+- To locate subject matter experts for specific configurations
 
 **Find All Configurations by Demo Author**:
 ```bash
@@ -540,8 +887,28 @@ curl -X GET "http://localhost:8082/yaml-manager/api/catalog/discovery/author?aut
 }
 ```
 
+---
+
 ### GET /api/catalog/discovery/health
 **Purpose**: Find configurations by health score range
+
+**Why Use This?**
+- **Quality Monitoring**: Identify configurations with low health scores that need attention
+- **Prioritization**: Focus refactoring efforts on the lowest-scoring configurations first
+- **Quality Gates**: Enforce minimum health score requirements in CI/CD pipelines
+- **Health Dashboards**: Display configurations grouped by health score ranges
+- **Proactive Maintenance**: Find configurations approaching unhealthy states before they cause issues
+- **Success Tracking**: Monitor improvements in health scores over time
+- **Risk Assessment**: Identify high-risk configurations with poor health scores
+- **Best Practices**: Find high-scoring configurations to use as examples
+
+**When to Use**:
+- Building health monitoring dashboards that show configurations by health grade
+- When prioritizing technical debt and refactoring work
+- For quality gate enforcement in deployment pipelines
+- To identify configurations that need immediate attention
+- When generating health reports for management or stakeholders
+- For proactive maintenance and continuous improvement initiatives
 
 **Find Configurations with High Health Scores (80-100)**:
 ```bash
@@ -597,6 +964,24 @@ The Category Management Controller provides comprehensive REST API endpoints for
 ### GET /api/categories
 **Purpose**: Get all categories defined across all YAML files in the catalog
 
+**Why Use This?**
+- **Category Inventory**: Get a complete list of all rule categories across your configuration repository
+- **Governance Overview**: View all categories with their business ownership and domain assignments
+- **Metadata Inheritance**: Understand which categories provide metadata inheritance to rules and enrichments
+- **Lifecycle Management**: See effective and expiration dates for all categories
+- **Execution Control**: Review priority, parallel execution, and failure handling settings across categories
+- **Usage Tracking**: Identify which categories are actively used vs. defined but unused
+- **Dashboard Display**: Populate category management dashboards with complete category information
+- **Audit Reporting**: Generate governance reports showing all categories and their ownership
+
+**When to Use**:
+- Building category management UIs that display all available categories
+- For governance audits and compliance reporting
+- When you need to understand the complete category taxonomy
+- To identify unused or orphaned categories
+- For generating category documentation
+- When planning category consolidation or reorganization
+
 ```bash
 curl -X GET "http://localhost:8082/yaml-manager/api/categories"
 ```
@@ -635,8 +1020,60 @@ curl -X GET "http://localhost:8082/yaml-manager/api/categories"
 }
 ```
 
+**Response Fields Explained**:
+- **`total`**: Total number of categories found across all YAML files in the catalog
+- **`categories`**: Array of category objects, each containing:
+  - **`name`**: Unique category identifier (kebab-case, e.g., `"customer-validation"`)
+  - **`displayName`**: Human-readable category name for UI display
+  - **`description`**: Detailed description of the category's purpose and scope
+  - **`priority`**: Execution priority (1-100). Higher priority categories execute first
+  - **`enabled`**: Boolean indicating if the category is currently active
+  - **`businessDomain`**: Business domain this category belongs to (e.g., `"Customer Management"`)
+  - **`businessOwner`**: Team or individual responsible for this category (governance)
+  - **`createdBy`**: Person who created this category
+  - **`effectiveDate`**: ISO 8601 date when this category becomes active
+  - **`expirationDate`**: ISO 8601 date when this category expires (null = no expiration)
+  - **`stopOnFirstFailure`**: Boolean. If true, stop processing when first rule in this category fails
+  - **`parallelExecution`**: Boolean. If true, rules in this category can execute in parallel
+  - **`definedInFiles`**: Array of file paths where this category is defined
+  - **`usedByRules`**: Array of rule IDs that use this category
+  - **`usedByRuleGroups`**: Array of rule group IDs that use this category
+  - **`usedByEnrichments`**: Array of enrichment IDs that use this category
+  - **`usedByEnrichmentGroups`**: Array of enrichment group IDs that use this category
+  - **`totalUsageCount`**: Total number of rules/enrichments using this category
+  - **`tags`**: Array of tags for classification and search
+  - **`metadata`**: Additional custom metadata key-value pairs
+- **`timestamp`**: ISO 8601 timestamp when this response was generated
+
+**What This Means**:
+- Categories with `totalUsageCount: 0` are defined but not used (candidates for cleanup)
+- `effectiveDate` and `expirationDate` control category lifecycle (temporal governance)
+- `businessDomain` and `businessOwner` provide accountability and organization
+- `priority` controls execution order when multiple categories are involved
+- `stopOnFirstFailure` and `parallelExecution` control runtime behavior
+
+---
+
 ### GET /api/categories/{categoryName}
 **Purpose**: Get detailed information about a specific category
+
+**Why Use This?**
+- **Category Details**: Get complete information about a single category without retrieving all categories
+- **Usage Analysis**: See exactly which rules, rule groups, enrichments, and enrichment groups use this category
+- **Definition Tracking**: Identify which YAML files define this category
+- **Governance Verification**: Verify business ownership, domain, and lifecycle dates for a specific category
+- **Execution Settings**: Review priority, parallel execution, and failure handling configuration
+- **Impact Assessment**: Understand the scope of impact before modifying or deprecating a category
+- **Documentation**: Generate detailed documentation for specific categories
+- **Troubleshooting**: Investigate category-related issues by examining complete category configuration
+
+**When to Use**:
+- When displaying category details in a UI
+- Before modifying a category to understand its current usage
+- For impact analysis when planning category changes
+- To verify category configuration and governance metadata
+- When troubleshooting issues related to a specific category
+- For generating category-specific documentation
 
 ```bash
 # Get customer-validation category details
@@ -669,6 +1106,17 @@ curl -X GET "http://localhost:8082/yaml-manager/api/categories/customer-validati
 }
 ```
 
+**Response Fields Explained**:
+- **`category`**: Single category object with the same structure as in the `/api/categories` response (see above for field descriptions)
+- **`timestamp`**: ISO 8601 timestamp when this response was generated
+
+**What This Means**:
+- This endpoint returns detailed information for a single category
+- Use `totalUsageCount` to understand how widely this category is used
+- Check `definedInFiles` to find where to modify the category definition
+- Review `effectiveDate` and `expirationDate` to understand the category's lifecycle status
+- If the category doesn't exist, you'll receive a 404 error (see below)
+
 **Error Response (404)**:
 ```json
 {
@@ -677,8 +1125,32 @@ curl -X GET "http://localhost:8082/yaml-manager/api/categories/customer-validati
 }
 ```
 
+**Error Response Explained**:
+- **`error`**: Error message indicating the category name was not found in the catalog
+- **`timestamp`**: When the error occurred
+
+---
+
 ### GET /api/categories/search/business-domain/{businessDomain}
 **Purpose**: Search categories by business domain
+
+**Why Use This?**
+- **Domain Organization**: Find all categories within a specific business domain
+- **Domain Governance**: Review category ownership and organization within business domains
+- **Cross-Domain Analysis**: Compare categories across different business domains
+- **Domain-Specific Reporting**: Generate reports for specific business domains
+- **Access Control**: Implement domain-based access control for category management
+- **Team Coordination**: Help domain teams find and manage their categories
+- **Architecture Review**: Understand how categories are distributed across business domains
+- **Consolidation Planning**: Identify opportunities to consolidate categories within domains
+
+**When to Use**:
+- Building domain-specific views in category management UIs
+- For domain-based governance and compliance reporting
+- When implementing domain-based access controls
+- To help business domain teams find their categories
+- For architecture reviews focused on specific domains
+- When planning category consolidation within domains
 
 ```bash
 # Find all categories in Customer Management domain
@@ -706,8 +1178,28 @@ curl -X GET "http://localhost:8082/yaml-manager/api/categories/search/business-d
 }
 ```
 
+---
+
 ### GET /api/categories/search/business-owner/{businessOwner}
 **Purpose**: Search categories by business owner
+
+**Why Use This?**
+- **Ownership Management**: Find all categories owned by a specific team or individual
+- **Accountability Tracking**: Identify who is responsible for category governance
+- **Team Workload**: Understand the distribution of category ownership across teams
+- **Access Control**: Implement owner-based access control for category management
+- **Handoff Planning**: Identify categories that need ownership transfer during team changes
+- **Governance Reporting**: Generate reports showing category ownership distribution
+- **Contact Discovery**: Find the right team to contact about specific categories
+- **Capacity Planning**: Assess team capacity based on number of categories owned
+
+**When to Use**:
+- Building owner-specific views in category management UIs
+- For governance audits focused on ownership and accountability
+- When implementing owner-based access controls or workflows
+- To help teams find and manage their categories
+- For workload analysis and capacity planning
+- When planning ownership transfers or team reorganizations
 
 ```bash
 # Find all categories owned by Customer Operations Team
@@ -730,8 +1222,28 @@ curl -X GET "http://localhost:8082/yaml-manager/api/categories/search/business-o
 }
 ```
 
+---
+
 ### GET /api/categories/{categoryName}/definitions
 **Purpose**: Get all YAML files that define a specific category
+
+**Why Use This?**
+- **Definition Tracking**: Find all YAML files where a category is defined
+- **Duplicate Detection**: Identify if a category is defined in multiple files (potential issue)
+- **Source Location**: Locate the source file to modify category configuration
+- **Impact Analysis**: Understand which files need to be updated when changing a category
+- **Consistency Verification**: Ensure category definitions are consistent across files
+- **Refactoring**: Identify files that need updates during category consolidation
+- **Documentation**: Generate documentation showing where categories are defined
+- **Troubleshooting**: Debug category-related issues by finding definition sources
+
+**When to Use**:
+- Before modifying a category to find where it's defined
+- When investigating duplicate or inconsistent category definitions
+- For refactoring efforts that involve category consolidation
+- To generate documentation showing category sources
+- When troubleshooting category configuration issues
+- For impact analysis before making category changes
 
 ```bash
 # Find where customer-validation category is defined
@@ -751,8 +1263,28 @@ curl -X GET "http://localhost:8082/yaml-manager/api/categories/customer-validati
 }
 ```
 
+---
+
 ### GET /api/categories/{categoryName}/usage
 **Purpose**: Get usage statistics for a specific category
+
+**Why Use This?**
+- **Usage Analysis**: See exactly which rules, rule groups, enrichments, and enrichment groups use this category
+- **Impact Assessment**: Understand the scope of impact before modifying or deprecating a category
+- **Adoption Tracking**: Monitor how widely a category is being used across configurations
+- **Unused Category Detection**: Identify categories with zero usage that may be candidates for removal
+- **Dependency Mapping**: Map category dependencies to understand relationships
+- **Refactoring Planning**: Assess the effort required to refactor or consolidate categories
+- **Documentation**: Generate usage reports for category documentation
+- **Governance**: Track category adoption and usage patterns for governance reporting
+
+**When to Use**:
+- Before modifying or deprecating a category to understand impact
+- For adoption tracking and usage analysis
+- When identifying unused categories for cleanup
+- To generate category usage reports for stakeholders
+- For refactoring planning and effort estimation
+- When investigating why a category exists or is needed
 
 ```bash
 # Get usage statistics for customer-validation category
@@ -777,8 +1309,43 @@ curl -X GET "http://localhost:8082/yaml-manager/api/categories/customer-validati
 }
 ```
 
+**Response Fields Explained**:
+- **`categoryName`**: Name of the category being analyzed
+- **`totalUsageCount`**: Total number of rules, rule groups, enrichments, and enrichment groups using this category
+- **`usedByRules`**: Array of rule IDs that reference this category. These rules inherit metadata from the category
+- **`usedByRuleGroups`**: Array of rule group IDs that reference this category
+- **`usedByEnrichments`**: Array of enrichment IDs that reference this category
+- **`usedByEnrichmentGroups`**: Array of enrichment group IDs that reference this category
+- **`timestamp`**: ISO 8601 timestamp when this usage analysis was performed
+
+**What This Means**:
+- If `totalUsageCount: 0`, the category is defined but not used (candidate for removal)
+- The arrays show exactly which components depend on this category
+- Use this information to assess the impact of modifying or deprecating the category
+- Empty arrays indicate the category is not used by that component type
+
+---
+
 ### GET /api/categories/statistics
 **Purpose**: Get category statistics across the entire catalog
+
+**Why Use This?**
+- **Governance Metrics**: Get high-level metrics on category usage and organization
+- **Health Monitoring**: Track active vs. expired categories over time
+- **Usage Analysis**: Identify most-used categories and average usage patterns
+- **Taxonomy Overview**: Understand the breadth of business domains and owners
+- **Dashboard Metrics**: Display key category statistics in governance dashboards
+- **Trend Tracking**: Monitor changes in category count, usage, and lifecycle over time
+- **Capacity Planning**: Understand category growth and usage trends
+- **Quality Assessment**: Identify categories with low or no usage that may need review
+
+**When to Use**:
+- Building category governance dashboards
+- For periodic governance reviews and audits
+- When generating executive reports on category management
+- To track category lifecycle and usage trends
+- For capacity planning and taxonomy management
+- When assessing the overall health of your category taxonomy
 
 ```bash
 curl -X GET "http://localhost:8082/yaml-manager/api/categories/statistics"
@@ -799,8 +1366,51 @@ curl -X GET "http://localhost:8082/yaml-manager/api/categories/statistics"
 }
 ```
 
+**Response Fields Explained**:
+- **`totalCategories`**: Total number of categories defined across all YAML files in the catalog
+- **`totalBusinessDomains`**: Number of distinct business domains represented in categories. Shows the breadth of your taxonomy
+- **`totalBusinessOwners`**: Number of distinct business owners/teams responsible for categories. Shows ownership distribution
+- **`activeCategories`**: Number of categories that are currently active (not expired based on `expirationDate`)
+- **`expiredCategories`**: Number of categories that have passed their expiration date. These should be reviewed for removal
+- **`averageUsageCount`**: Average number of rules/enrichments using each category. Higher = better adoption
+- **`mostUsedCategory`**: Name of the category with the highest usage count. This is your most critical category
+- **`mostUsedCategoryCount`**: Number of rules/enrichments using the most-used category. Shows the impact of your most critical category
+- **`timestamp`**: ISO 8601 timestamp when these statistics were calculated
+
+**What This Means**:
+- **High `expiredCategories`**: Time to clean up old categories
+- **Low `averageUsageCount`**: Many categories are defined but not widely used (potential consolidation opportunity)
+- **`mostUsedCategory`**: This category is critical - changes to it have high impact
+- **High `totalBusinessDomains`**: Good domain coverage, but may indicate complexity
+- **Low `totalBusinessOwners`**: Ownership may be concentrated (potential risk)
+
+**Governance Insights**:
+- Track these metrics over time to monitor category taxonomy health
+- Compare `activeCategories` vs `expiredCategories` to assess lifecycle management
+- Use `averageUsageCount` to identify underutilized categories
+- Monitor `mostUsedCategory` for critical dependencies
+
+---
+
 ### GET /api/categories/business-domains
 **Purpose**: Get all distinct business domains from categories
+
+**Why Use This?**
+- **Domain Discovery**: Find all business domains that have categories defined
+- **Filter Options**: Populate domain filter dropdowns in UIs
+- **Taxonomy Overview**: Understand the business domain taxonomy across categories
+- **Governance Planning**: Identify domains that need category governance attention
+- **Organization Analysis**: Understand how categories are organized by business domain
+- **Documentation**: Generate domain-based category documentation
+- **Access Control**: Build domain-based access control lists
+- **Reporting**: Create domain-based governance reports
+
+**When to Use**:
+- Building domain filter dropdowns in category management UIs
+- For taxonomy discovery and organization analysis
+- When generating domain-based reports or documentation
+- To understand the scope of business domains in your system
+- For implementing domain-based access controls
 
 ```bash
 curl -X GET "http://localhost:8082/yaml-manager/api/categories/business-domains"
@@ -821,8 +1431,28 @@ curl -X GET "http://localhost:8082/yaml-manager/api/categories/business-domains"
 }
 ```
 
+---
+
 ### GET /api/categories/business-owners
 **Purpose**: Get all distinct business owners from categories
+
+**Why Use This?**
+- **Owner Discovery**: Find all teams/individuals who own categories
+- **Filter Options**: Populate owner filter dropdowns in UIs
+- **Accountability Mapping**: Understand the distribution of category ownership
+- **Contact Directory**: Build a directory of category owners for governance
+- **Workload Analysis**: Assess how category ownership is distributed across teams
+- **Access Control**: Build owner-based access control lists
+- **Reporting**: Create ownership-based governance reports
+- **Handoff Planning**: Identify all owners for transition planning
+
+**When to Use**:
+- Building owner filter dropdowns in category management UIs
+- For ownership discovery and accountability mapping
+- When generating ownership-based reports or documentation
+- To understand who owns categories in your system
+- For implementing owner-based access controls
+- When planning team transitions or reorganizations
 
 ```bash
 curl -X GET "http://localhost:8082/yaml-manager/api/categories/business-owners"
@@ -843,8 +1473,28 @@ curl -X GET "http://localhost:8082/yaml-manager/api/categories/business-owners"
 }
 ```
 
+---
+
 ### GET /api/categories/active
 **Purpose**: Get categories that are currently active (not expired)
+
+**Why Use This?**
+- **Active Category Inventory**: Get only categories that are currently in effect
+- **Lifecycle Management**: Focus on categories that are actively being used
+- **Effective Date Filtering**: Exclude expired or future categories from analysis
+- **Production View**: See only categories that should be active in production
+- **Governance Focus**: Prioritize governance efforts on active categories
+- **Documentation**: Generate documentation for currently active categories only
+- **Validation**: Ensure only active categories are being used in configurations
+- **Cleanup Planning**: Identify active categories before planning deprecation
+
+**When to Use**:
+- Building production-focused views that show only active categories
+- For lifecycle management and governance of current categories
+- When validating that configurations use only active categories
+- To generate documentation for currently effective categories
+- For operational dashboards that focus on active categories
+- When planning category deprecation or lifecycle changes
 
 ```bash
 curl -X GET "http://localhost:8082/yaml-manager/api/categories/active"
@@ -866,8 +1516,28 @@ curl -X GET "http://localhost:8082/yaml-manager/api/categories/active"
 }
 ```
 
+---
+
 ### GET /api/categories/expired
 **Purpose**: Get categories that are currently expired
+
+**Why Use This?**
+- **Expired Category Identification**: Find categories that have passed their expiration date
+- **Cleanup Planning**: Identify categories that can be removed or archived
+- **Legacy Detection**: Discover legacy categories that should no longer be used
+- **Compliance Verification**: Ensure expired categories are not being used in active configurations
+- **Lifecycle Management**: Track categories through their complete lifecycle including expiration
+- **Deprecation Tracking**: Monitor categories that have been deprecated and expired
+- **Audit Trail**: Maintain records of expired categories for compliance and audit purposes
+- **Migration Planning**: Identify expired categories that need to be migrated to new versions
+
+**When to Use**:
+- For cleanup and maintenance activities to remove expired categories
+- When auditing configurations to ensure expired categories are not in use
+- For lifecycle management and governance reporting
+- To generate reports on deprecated and expired categories
+- When planning category migrations or updates
+- For compliance audits that require tracking expired governance metadata
 
 ```bash
 curl -X GET "http://localhost:8082/yaml-manager/api/categories/expired"

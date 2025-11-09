@@ -886,7 +886,17 @@ class DependencyAnalysisControllerTest {
 
         // Skip HTML test for now, focus on API
         // 2. Test the exact API call the HTML makes (without double encoding)
-        String rootFile = "C:/Users/markr/dev/java/corejava/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100/00-scenario-registry.yaml";
+        // Use dynamic path based on classpath resource
+        String resourcePath = "apex-yaml-samples/graph-100/00-scenario-registry.yaml";
+        java.net.URL resourceUrl = getClass().getClassLoader().getResource(resourcePath);
+        assertNotNull(resourceUrl, "Test resource should exist: " + resourcePath);
+
+        String rootFile = resourceUrl.getPath();
+        // Remove leading slash on Windows (e.g., /C:/Users/... -> C:/Users/...)
+        if (rootFile.matches("^/[A-Za-z]:.*")) {
+            rootFile = rootFile.substring(1);
+        }
+
         String apiUrl = baseUrl + "/tree?rootFile=" + rootFile;
         System.out.println("Testing API URL: " + apiUrl);
 
