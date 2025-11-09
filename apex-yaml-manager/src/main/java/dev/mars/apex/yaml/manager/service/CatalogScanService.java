@@ -224,6 +224,11 @@ public class CatalogScanService {
             metadata.setTags(new HashSet<>(summary.getTags()));
         }
 
+        // Set categories
+        if (summary.getCategories() != null && !summary.getCategories().isEmpty()) {
+            metadata.setCategories(new HashSet<>(summary.getCategories()));
+        }
+
         // Set business domain and owner
         metadata.setBusinessDomain(summary.getBusinessDomain());
         metadata.setOwner(summary.getOwner());

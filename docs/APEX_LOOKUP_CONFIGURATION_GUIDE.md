@@ -1,14 +1,21 @@
 # APEX Lookup Configuration Guide
 
+**Version:** 2.0
+**Date:** 2025-11-09
+**Author:** Mark Andrew Ray-Smith Cityline Ltd
+
 This guide provides comprehensive documentation on APEX lookup configurations, including advanced patterns, implementation examples, and best practices.
 
 ## Table of Contents
 
 1. [What is "lookup-key"?](#what-is-lookup-key)
 2. [Basic Concepts](#basic-concepts)
-3. [Advanced Lookup Patterns](#advanced-lookup-patterns)
-4. [Implementation Plan](#implementation-plan)
-5. [Best Practices](#best-practices)
+3. [Dataset Types](#dataset-types)
+4. [Advanced Lookup Patterns](#advanced-lookup-patterns)
+5. [External Data Sources](#external-data-sources)
+6. [Handling Lookup Failures](#handling-lookup-failures)
+7. [Caching](#caching)
+8. [Best Practices](#best-practices)
 
 ---
 
@@ -23,74 +30,61 @@ This guide provides comprehensive documentation on APEX lookup configurations, i
 3. **Used in Lookup Enrichments**: It's specifically used in `lookup-enrichment` type enrichments
 4. **Dynamic Evaluation**: The expression is evaluated at runtime for each data record being processed
 
-### Where is it used?
+### YAML Configuration Structure:
 
-<augment_code_snippet path="apex-core/src/main/java/dev/mars/apex/core/config/yaml/YamlEnrichment.java" mode="EXCERPT">
-````java
-public static class LookupConfig {
-    @JsonProperty("lookup-service")
-    private String lookupService;
-
-    @JsonProperty("lookup-dataset")
-    private LookupDataset lookupDataset;
-
-    @JsonProperty("lookup-key")
-    private String lookupKey; // SpEL expression to extract lookup key
-````
-</augment_code_snippet>
+```yaml
+enrichments:
+  - id: "my-lookup"
+    type: "lookup-enrichment"
+    condition: "#customerId != null"
+    lookup-config:
+      lookup-key: "#customerId"  # ← SpEL expression to extract lookup key
+      lookup-dataset:
+        type: "inline"  # or "database", "file-system", "rest-api"
+        key-field: "id"
+        data:
+          - id: "CUST001"
+            name: "John Doe"
+    field-mappings:
+      - source-field: "name"
+        target-field: "customerName"
+```
 
 ### How it works:
 
-<augment_code_snippet path="apex-core/src/main/java/dev/mars/apex/core/service/enrichment/YamlEnrichmentProcessor.java" mode="EXCERPT">
-````java
-// 2. Extract lookup key using SpEL expression
-Object lookupKey;
-try {
-    StandardEvaluationContext context = createEvaluationContext(targetObject);
-    Expression keyExpr = getOrCompileExpression(lookupConfig.getLookupKey());
-    lookupKey = keyExpr.getValue(context);
-    
-    if (lookupKey == null) {
-        LOGGER.fine("Lookup key evaluated to null for enrichment: " + enrichment.getId());
-        return targetObject;
-    }
-    
-    LOGGER.fine("Extracted lookup key: " + lookupKey);
-} catch (Exception e) {
-    throw new EnrichmentException("Failed to extract lookup key using expression '" + 
-                                lookupConfig.getLookupKey() + "'", e);
-}
-````
-</augment_code_snippet>
+1. **Evaluation**: The `lookup-key` SpEL expression is evaluated against your input data
+2. **Extraction**: The result becomes the key to search for in the lookup dataset
+3. **Matching**: APEX finds the matching record in the dataset
+4. **Enrichment**: Field mappings copy data from the matched record to your output
 
 ---
 
 ## Basic Concepts
 
-### Examples from the codebase:
+### Simple Field Reference
 
-**1. Simple field reference:**
-<augment_code_snippet path="apex-demo/src/main/resources/bootstrap/otc-options-bootstrap.yaml" mode="EXCERPT">
-````yaml
-lookup-config:
-  lookup-service: "postgresLookupService"
-  lookup-key: "#sellerParty"  # Extract the sellerParty field value
-  cache-enabled: true
-````
-</augment_code_snippet>
+The most common pattern - extract a single field value from your input data:
 
-**2. Alternative approach using key-field (for inline datasets):**
-<augment_code_snippet path="apex-demo/src/main/resources/demo-rules/dataset-enrichment.yaml" mode="EXCERPT">
-````yaml
-lookup-config:
-  lookup-dataset:
-    type: "inline"
-    key-field: "code"  # This tells APEX which field in the dataset to match against
-    data:
-      - code: "USD"
-        name: "US Dollar"
-````
-</augment_code_snippet>
+```yaml
+enrichments:
+  - id: "currency-lookup"
+    type: "lookup-enrichment"
+    condition: "#currency != null"
+    lookup-config:
+      lookup-key: "#currency"  # Extract the currency field value
+      lookup-dataset:
+        type: "inline"
+        key-field: "code"
+        data:
+          - code: "USD"
+            name: "US Dollar"
+            symbol: "$"
+    field-mappings:
+      - source-field: "name"
+        target-field: "currencyName"
+      - source-field: "symbol"
+        target-field: "currencySymbol"
+```
 
 ### The difference between lookup-key and key-field:
 
@@ -215,6 +209,127 @@ database-config:
 - **`lookup-key`**: SpEL expression that extracts the lookup value **FROM your input data**
 - **`key-field`**: Specifies which field **IN the reference dataset** to match against
 - They work as a pair: `lookup-key` value gets compared to `key-field` values to find matches
+
+---
+
+## Dataset Types
+
+APEX supports multiple dataset types for lookup enrichments. Each type has specific configuration requirements.
+
+### 1. Inline Datasets
+
+**Use Case:** Small, static reference data embedded directly in YAML
+
+```yaml
+enrichments:
+  - id: "currency-lookup"                    # Unique identifier for this enrichment
+    type: "lookup-enrichment"                # Type: lookup-enrichment for lookup operations
+    lookup-config:                           # Configuration for the lookup operation
+      lookup-key: "#currency"                # SpEL expression: extract 'currency' field from input data
+      lookup-dataset:                        # Dataset configuration
+        type: "inline"                       # Dataset type: inline (embedded data)
+        key-field: "code"                    # Field in dataset to match against lookup-key value
+        data:                                # Inline dataset array
+          - code: "USD"                      # First record: code field (matches key-field)
+            name: "US Dollar"                # Additional field: currency name
+            symbol: "$"                      # Additional field: currency symbol
+          - code: "EUR"                      # Second record: code field
+            name: "Euro"                     # Additional field: currency name
+            symbol: "€"                      # Additional field: currency symbol
+    field-mappings:                          # Map lookup results to output fields
+      - source-field: "name"                 # Source: 'name' field from matched record
+        target-field: "currencyName"         # Target: copy to 'currencyName' in output
+```
+
+### 2. Database Datasets
+
+**Use Case:** Large, dynamic data from database queries
+
+```yaml
+enrichments:
+  - id: "customer-lookup"                              # Unique identifier for this enrichment
+    type: "lookup-enrichment"                          # Type: lookup-enrichment for lookup operations
+    condition: "#customerId != null"                   # Condition: only execute if customerId is not null
+    lookup-config:                                     # Configuration for the lookup operation
+      lookup-key: "#customerId"                        # SpEL expression: extract 'customerId' field from input data
+      lookup-dataset:                                  # Dataset configuration
+        type: "database"                               # Dataset type: database (SQL query)
+        data-source-ref: "customer-database"           # Reference to data source defined in data-sources section
+        query: "SELECT customer_name, tier, region 
+          FROM customers WHERE customer_id = :customerId" # SQL query with named parameter :customerId
+        parameters:                                    # Query parameters array
+          - field: "customerId"                        # Parameter name: matches :customerId in query
+            type: "string"                             # Parameter type: string
+        cache-enabled: true                            # Enable caching for this dataset
+        cache-ttl-seconds: 300                         # Cache TTL: 5 minutes (300 seconds)
+    field-mappings:                                    # Map query results to output fields
+      - source-field: "CUSTOMER_NAME"                  # Source: CUSTOMER_NAME column from query result
+        target-field: "customerName"                   # Target: copy to 'customerName' in output
+      - source-field: "TIER"                           # Source: TIER column from query result
+        target-field: "customerTier"                   # Target: copy to 'customerTier' in output
+```
+
+### 3. File-System Datasets
+
+**Use Case:** Reference data stored in JSON or XML files
+
+```yaml
+enrichments:
+  - id: "product-lookup"                            # Unique identifier for this enrichment
+    type: "lookup-enrichment"                       # Type: lookup-enrichment for lookup operations
+    condition: "#productId != null"                 # Condition: only execute if productId is not null
+    lookup-config:                                  # Configuration for the lookup operation
+      lookup-key: "#productId"                      # SpEL expression: extract 'productId' field from input data
+      lookup-dataset:                               # Dataset configuration
+        type: "file-system"                         # Dataset type: file-system (JSON/XML file)
+        key-field: "id"                             # Field in file data to match against lookup-key value
+        file-path: "demo-data/json/products.json"   # Path to JSON file (relative to project root)
+    field-mappings:                                 # Map file data to output fields
+      - source-field: "name"                        # Source: 'name' field from matched record in file
+        target-field: "productName"                 # Target: copy to 'productName' in output
+      - source-field: "price"                       # Source: 'price' field from matched record in file
+        target-field: "productPrice"                # Target: copy to 'productPrice' in output
+```
+
+### 4. REST API Datasets
+
+**Use Case:** Real-time data from external REST APIs
+
+```yaml
+enrichments:
+  - id: "currency-rate-lookup"                    # Unique identifier for this enrichment
+    type: "lookup-enrichment"                     # Type: lookup-enrichment for lookup operations
+    condition: "#currencyCode != null"            # Condition: only execute if currencyCode is not null
+    lookup-config:                                # Configuration for the lookup operation
+      lookup-key: "#currencyCode"                 # SpEL expression: extract 'currencyCode' field from input data
+      lookup-dataset:                             # Dataset configuration
+        type: "rest-api"                          # Dataset type: rest-api (external REST API call)
+        data-source-ref: "currency-api-server"    # Reference to REST API data source (defined below)
+        operation-ref: "currency-lookup"          # Reference to specific endpoint operation
+    field-mappings:                               # Map API response to output fields
+      - source-field: "name"                      # Source: 'name' field from API response JSON
+        target-field: "currencyName"              # Target: copy to 'currencyName' in output
+      - source-field: "rate"                      # Source: 'rate' field from API response JSON
+        target-field: "exchangeRate"              # Target: copy to 'exchangeRate' in output
+```
+
+**REST API Data Source Configuration:**
+
+```yaml
+data-sources:
+  - name: "currency-api-server"              # Data source name (referenced by data-source-ref above)
+    type: "rest-api"                         # Data source type: rest-api
+    enabled: true                            # Enable this data source
+    connection:                              # Connection configuration
+      base-url: "http://api.example.com"     # Base URL for all API calls
+      timeout: 5000                          # Request timeout in milliseconds (5 seconds)
+      max-retries: 3                         # Maximum number of retry attempts on failure
+    endpoints:                               # Named endpoint definitions
+      currency-lookup: "/api/currency/{key}" # Endpoint path with {key} placeholder for lookup-key value
+    cache:                                   # Cache configuration for this data source
+      enabled: true                          # Enable caching for API responses
+      ttl-seconds: 300                       # Cache TTL: 5 minutes (300 seconds)
+```
 
 ---
 
@@ -441,186 +556,372 @@ The key is that `lookup-key` can be any SpEL expression that evaluates to a valu
 
 ---
 
-## Implementation Plan
+## External Data Sources
 
-This section outlines a comprehensive plan for implementing self-contained examples in the apex-demo module for each YAML configuration use case.
+APEX supports separating data source configuration from enrichment logic using the `data-source-ref` pattern. This promotes reusability and cleaner configuration.
 
-### 🎯 Overview
+### Data Source Configuration
 
-Each example will include:
-- Complete YAML configuration files
-- Java demo classes with realistic data
-- Model classes representing real-world scenarios
-- Documentation explaining the use case
+Define reusable data sources in the `data-sources` section:
 
-### 📊 Planned Examples Structure
+```yaml
+data-sources:
+  - name: "customer-database"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "./target/h2-demo/apex_demo"
+      username: "sa"
+      password: ""
 
-#### 1. Simple Field Lookup Example
-**File**: `apex-demo/src/main/resources/examples/lookups/simple-field-lookup.yaml`
-**Demo**: `SimpleFieldLookupDemo.java`
-**Use Case**: Basic currency code to currency details lookup
-
-**Components**:
-- **Model**: `CurrencyTransaction.java` (amount, currencyCode, description)
-- **YAML Config**: Simple `lookup-key: "#currencyCode"` with inline currency dataset
-- **Demo Data**: Transactions in USD, EUR, GBP, JPY
-- **Enrichment**: Add currency name, symbol, decimal places
-
-#### 2. Compound String Concatenation Lookup
-**File**: `apex-demo/src/main/resources/examples/lookups/compound-key-lookup.yaml`
-**Demo**: `CompoundKeyLookupDemo.java`
-**Use Case**: Customer-region specific pricing lookup
-
-**Components**:
-- **Model**: `CustomerOrder.java` (customerId, region, productId, quantity)
-- **YAML Config**: `lookup-key: "#customerId + '-' + #region"`
-- **Demo Data**: Orders from different customers in different regions
-- **Enrichment**: Add customer tier, regional discount, special pricing
-
-#### 3. Complex SpEL Expression Lookup
-**File**: `apex-demo/src/main/resources/examples/lookups/complex-spel-lookup.yaml`
-**Demo**: `ComplexSpelLookupDemo.java`
-**Use Case**: Trading pair lookup with currency normalization
-
-**Components**:
-- **Model**: `CurrencyTrade.java` (baseCurrency, quoteCurrency, amount, tradeDate)
-- **YAML Config**: `lookup-key: "#baseCurrency.toUpperCase() + '/' + #quoteCurrency.toUpperCase()"`
-- **Demo Data**: Trades with mixed case currency codes
-- **Enrichment**: Add spread, minimum size, trading hours, market maker
-
-#### 4. Conditional Compound Key Lookup
-**File**: `apex-demo/src/main/resources/examples/lookups/conditional-lookup.yaml`
-**Demo**: `ConditionalLookupDemo.java`
-**Use Case**: Flexible counterparty lookup based on party type
-
-**Components**:
-- **Model**: `BusinessTransaction.java` (partyId, partyType, transactionType, amount)
-- **YAML Config**: `lookup-key: "#partyType == 'CUSTOMER' ? 'CUST-' + #partyId : (#partyType == 'VENDOR' ? 'VEND-' + #partyId : 'UNKN-' + #partyId)"`
-- **Demo Data**: Mixed transactions with customers, vendors, and unknown parties
-- **Enrichment**: Add legal name, credit rating, payment terms, risk category
-
-#### 5. Hierarchical/Nested Field Lookup
-**File**: `apex-demo/src/main/resources/examples/lookups/hierarchical-lookup.yaml`
-**Demo**: `HierarchicalLookupDemo.java`
-**Use Case**: Trade settlement instruction lookup
-
-**Components**:
-- **Model**: `FinancialTrade.java` with nested `Instrument.java` and `Counterparty.java`
-- **YAML Config**: `lookup-key: "#trade.instrument.symbol + ':' + #trade.counterparty.id + ':' + #settlementDate.toString()"`
-- **Demo Data**: Complex trade objects with nested structures
-- **Enrichment**: Add settlement instructions, custodian details, account numbers
-
-#### 6. Multi-Dimensional Product Lookup
-**File**: `apex-demo/src/main/resources/examples/lookups/multi-dimensional-lookup.yaml`
-**Demo**: `MultiDimensionalLookupDemo.java`
-**Use Case**: Product pricing based on multiple factors
-
-**Components**:
-- **Model**: `ProductOrder.java` with nested `Product.java` and `Customer.java`
-- **YAML Config**: `lookup-key: "#product.category + '|' + #product.id + '|' + #customer.tier + '|' + #customer.region"`
-- **Demo Data**: Orders with various product categories, customer tiers, and regions
-- **Enrichment**: Add base price, discount rate, minimum quantity, pricing currency
-
-#### 7. Hash-Based Complex Key Lookup
-**File**: `apex-demo/src/main/resources/examples/lookups/hash-based-lookup.yaml`
-**Demo**: `HashBasedLookupDemo.java`
-**Use Case**: Portfolio risk metrics lookup using computed hash
-
-**Components**:
-- **Model**: `PortfolioRiskRequest.java` (portfolioId, strategy, region, asOfDate)
-- **YAML Config**: `lookup-key: "T(java.lang.String).valueOf((#portfolioId + #strategy + #region + #asOfDate.toString()).hashCode())"`
-- **Demo Data**: Portfolio risk requests with various combinations
-- **Enrichment**: Add VaR 95%, expected shortfall, risk metrics
-
-#### 8. Database Lookup with Multiple Parameters
-**File**: `apex-demo/src/main/resources/examples/lookups/database-multi-param-lookup.yaml`
-**Demo**: `DatabaseMultiParamLookupDemo.java`
-**Use Case**: Portfolio position lookup with multiple query parameters
-
-**Components**:
-- **Model**: `PositionRequest.java` (portfolioId, instrumentId, asOfDate)
-- **YAML Config**: Database lookup with multiple parameters in query
-- **Demo Data**: Position requests for different portfolios and instruments
-- **Mock Database**: In-memory H2 database with sample position data
-- **Enrichment**: Add position quantity, market value, currency
-
-### 🏗️ Implementation Structure
-
-#### Directory Organization:
-```
-apex-demo/src/main/
-├── java/dev/mars/apex/demo/examples/lookups/
-│   ├── SimpleFieldLookupDemo.java
-│   ├── CompoundKeyLookupDemo.java
-│   ├── ComplexSpelLookupDemo.java
-│   ├── ConditionalLookupDemo.java
-│   ├── HierarchicalLookupDemo.java
-│   ├── MultiDimensionalLookupDemo.java
-│   ├── HashBasedLookupDemo.java
-│   └── DatabaseMultiParamLookupDemo.java
-├── java/dev/mars/apex/demo/model/lookups/
-│   ├── CurrencyTransaction.java
-│   ├── CustomerOrder.java
-│   ├── CurrencyTrade.java
-│   ├── BusinessTransaction.java
-│   ├── FinancialTrade.java (with nested classes)
-│   ├── ProductOrder.java (with nested classes)
-│   ├── PortfolioRiskRequest.java
-│   └── PositionRequest.java
-└── resources/examples/lookups/
-    ├── simple-field-lookup.yaml
-    ├── compound-key-lookup.yaml
-    ├── complex-spel-lookup.yaml
-    ├── conditional-lookup.yaml
-    ├── hierarchical-lookup.yaml
-    ├── multi-dimensional-lookup.yaml
-    ├── hash-based-lookup.yaml
-    └── database-multi-param-lookup.yaml
+  - name: "currency-api"
+    type: "rest-api"
+    enabled: true
+    connection:
+      base-url: "http://api.example.com"
+      timeout: 5000
+      max-retries: 3
+    endpoints:
+      currency-lookup: "/api/currency/{key}"
+    cache:
+      enabled: true
+      ttl-seconds: 300
 ```
 
-#### Common Features for All Examples:
+### Using data-source-ref
 
-1. **Self-Contained**: Each example runs independently with its own data
-2. **Realistic Data**: Business-relevant scenarios with meaningful test data
-3. **Comprehensive Logging**: Detailed output showing lookup process
-4. **Error Handling**: Demonstrate handling of missing keys, null values
-5. **Performance Metrics**: Show lookup timing and caching effects
-6. **Documentation**: Inline comments explaining SpEL expressions and patterns
+Reference external data sources in your enrichments:
 
-#### Shared Infrastructure:
+```yaml
+enrichments:
+  - id: "customer-profile-lookup"
+    type: "lookup-enrichment"
+    condition: "#customerId != null"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "customer-database"  # ← References data source by name
+        query: "SELECT customer_name, tier, region FROM customers WHERE customer_id = :customerId"
+        parameters:
+          - field: "customerId"
+            type: "string"
+    field-mappings:
+      - source-field: "CUSTOMER_NAME"
+        target-field: "customerName"
+      - source-field: "TIER"
+        target-field: "customerTier"
+```
 
-1. **Base Demo Class**: `AbstractLookupDemo.java` with common functionality
-2. **Test Data Generators**: Utility classes to create realistic test data
-3. **Result Formatters**: Pretty-print enriched results
-4. **Performance Monitors**: Measure and report lookup performance
+### Using query-ref
 
-#### Advanced Features to Demonstrate:
+For even cleaner configuration, define named queries:
 
-1. **Caching**: Show cache hits/misses and performance improvements
-2. **Error Scenarios**: Missing keys, malformed data, lookup failures
-3. **Conditional Logic**: Complex SpEL expressions with multiple conditions
-4. **Data Transformation**: String manipulation, case conversion, formatting
-5. **Null Handling**: Graceful handling of null values and missing fields
-6. **Performance Optimization**: Efficient lookup strategies for large datasets
+```yaml
+data-sources:
+  - name: "customer-database"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "./target/h2-demo/apex_demo"
+      username: "sa"
+      password: ""
+    queries:
+      getCustomerProfile: "SELECT customer_name, tier, region FROM customers WHERE customer_id = :customerId"
+      getCustomerOrders: "SELECT order_id, amount, status FROM orders WHERE customer_id = :customerId"
 
-#### Integration with Existing Demo Structure:
+enrichments:
+  - id: "customer-profile-lookup"
+    type: "lookup-enrichment"
+    condition: "#customerId != null"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "customer-database"
+        query-ref: "getCustomerProfile"  # ← References named query
+        parameters:
+          - field: "customerId"
+            type: "string"
+    field-mappings:
+      - source-field: "CUSTOMER_NAME"
+        target-field: "customerName"
+```
 
-1. **Main Runner**: Add to `AllDemosRunner.java` with new lookup examples section
-2. **Test Coverage**: Unit tests for each lookup pattern
-3. **Documentation**: README files explaining each pattern and use case
-4. **YAML Validation**: Ensure all examples pass the YAML validation tests
+### Benefits of External Data Sources
 
-### 🎯 Expected Outcomes
+1. **Reusability**: Define once, use in multiple enrichments
+2. **Maintainability**: Update connection details in one place
+3. **Separation of Concerns**: Keep data source configuration separate from business logic
+4. **Named Queries**: Centralize SQL queries for easier management
+5. **Environment Configuration**: Easier to override for different environments
 
-After implementation, users will have:
+---
 
-1. **8 Complete Lookup Examples** covering all advanced patterns
-2. **Realistic Business Scenarios** they can adapt to their own use cases
-3. **Performance Benchmarks** showing the efficiency of different lookup strategies
-4. **Best Practices Guide** through working examples and documentation
-5. **Error Handling Patterns** for robust production implementations
+## Handling Lookup Failures
 
-Each example will be fully functional, well-documented, and demonstrate real-world usage patterns that developers can immediately apply to their own projects.
+APEX provides several patterns for handling lookup failures and checking for non-existence in lookups.
+
+### Using result-field to Track Lookup Success
+
+The `result-field` property stores a boolean indicating whether the lookup succeeded:
+
+```yaml
+enrichments:
+  - id: "counterparty-lookup"                        # First enrichment: attempt lookup
+    type: "lookup-enrichment"                        # Type: lookup-enrichment
+    result-field: "counterpartyFound"                # Store lookup success/failure in this field
+    condition: "#counterparty != null"               # Only attempt if counterparty field exists
+    lookup-config:                                   # Lookup configuration
+      lookup-key: "#counterparty"                    # Extract counterparty ID from input
+      lookup-dataset:                                # Dataset to search
+        type: "inline"                               # Inline dataset type
+        key-field: "counterpartyId"                  # Field to match against
+        data:                                        # Dataset records
+          - counterpartyId: "BANK_A"                 # Record 1
+            rating: "AAA"                            # Rating field
+          - counterpartyId: "BANK_B"                 # Record 2
+            rating: "AA"                             # Rating field
+    field-mappings:                                  # Map matched data to output
+      - source-field: "rating"                       # Source field from matched record
+        target-field: "counterpartyRating"           # Target field in output
+
+  - id: "set-default-rating"                         # Second enrichment: handle failure
+    type: "field-enrichment"                         # Type: field-enrichment for setting values
+    condition: "#counterpartyFound == false"         # Only execute if lookup FAILED
+    field-mappings:                                  # Set default values
+      - source-field: "counterpartyRating"           # Target the same field
+        target-field: "counterpartyRating"           # Set default value
+        expression: "'UNRATED'"                      # Default value when lookup fails
+```
+
+**How it works:**
+1. First enrichment attempts lookup and stores result in `counterpartyFound` (true/false)
+2. Second enrichment only runs if `counterpartyFound == false`
+3. Sets a default value when lookup fails
+
+### Checking for Non-Existence (Negative Lookup)
+
+Use `result-field` to verify a value is NOT in a lookup dataset:
+
+```yaml
+enrichments:
+  - id: "check-blacklist"                            # Check if customer is blacklisted
+    type: "lookup-enrichment"                        # Type: lookup-enrichment
+    result-field: "isBlacklisted"                    # Store lookup result (true if found)
+    condition: "#customerId != null"                 # Only check if customerId exists
+    lookup-config:                                   # Lookup configuration
+      lookup-key: "#customerId"                      # Extract customer ID
+      lookup-dataset:                                # Blacklist dataset
+        type: "database"                             # Database lookup
+        data-source-ref: "compliance-database"       # Reference to compliance DB
+        query: "SELECT customer_id FROM blacklist WHERE customer_id = :customerId"  # Query blacklist
+        parameters:                                  # Query parameters
+          - field: "customerId"                      # Parameter: customerId
+            type: "string"                           # Type: string
+    field-mappings: []                               # No field mappings needed (just checking existence)
+
+  - id: "reject-blacklisted"                         # Reject if found in blacklist
+    type: "field-enrichment"                         # Type: field-enrichment
+    condition: "#isBlacklisted == true"              # Only execute if customer IS blacklisted
+    field-mappings:                                  # Set rejection fields
+      - source-field: "status"                       # Set status field
+        target-field: "status"                       # Target: status
+        expression: "'REJECTED'"                     # Value: REJECTED
+      - source-field: "rejectionReason"              # Set rejection reason
+        target-field: "rejectionReason"              # Target: rejectionReason
+        expression: "'Customer is blacklisted'"      # Reason message
+
+  - id: "approve-clean-customer"                     # Approve if NOT in blacklist
+    type: "field-enrichment"                         # Type: field-enrichment
+    condition: "#isBlacklisted == false"             # Only execute if customer is NOT blacklisted
+    field-mappings:                                  # Set approval fields
+      - source-field: "status"                       # Set status field
+        target-field: "status"                       # Target: status
+        expression: "'APPROVED'"                     # Value: APPROVED
+```
+
+**How it works:**
+1. First enrichment checks if customer exists in blacklist
+2. `isBlacklisted` is `true` if found, `false` if not found
+3. Subsequent enrichments branch based on the result
+
+### Validation Before Lookup
+
+Prevent lookup failures by validating input data first:
+
+```yaml
+enrichments:
+  - id: "validate-required-fields"                   # Validation enrichment
+    type: "calculation-enrichment"                   # Type: calculation-enrichment
+    condition: "true"                                # Always run validation
+    calculation-config:                              # Calculation configuration
+      expression: "(#customerId != null && #currencyCode != null) ? 'VALID' : 'MISSING_REQUIRED_FIELDS'"  # Check required fields
+      result-field: "validationResult"               # Store validation result
+    field-mappings:                                  # Map result to output
+      - source-field: "validationResult"             # Source: validation result
+        target-field: "validationStatus"             # Target: validation status
+
+  - id: "customer-lookup"                            # Lookup enrichment
+    type: "lookup-enrichment"                        # Type: lookup-enrichment
+    condition: "#validationStatus == 'VALID'"        # Only lookup if validation passed
+    lookup-config:                                   # Lookup configuration
+      lookup-key: "#customerId"                      # Extract customer ID
+      lookup-dataset:                                # Dataset configuration
+        type: "database"                             # Database lookup
+        data-source-ref: "customer-database"         # Reference to customer DB
+        query: "SELECT * FROM customers WHERE customer_id = :customerId"  # Query
+        parameters:                                  # Parameters
+          - field: "customerId"                      # Parameter: customerId
+    field-mappings:                                  # Field mappings
+      - source-field: "CUSTOMER_NAME"                # Map customer name
+        target-field: "customerName"                 # Target field
+```
+
+### Multiple Fallback Levels
+
+Chain multiple enrichments for sophisticated fallback logic:
+
+```yaml
+enrichments:
+  - id: "primary-lookup"                             # Try primary data source
+    type: "lookup-enrichment"                        # Type: lookup-enrichment
+    result-field: "primaryFound"                     # Track primary lookup result
+    condition: "#productId != null"                  # Only if productId exists
+    lookup-config:                                   # Primary lookup config
+      lookup-key: "#productId"                       # Extract product ID
+      lookup-dataset:                                # Primary dataset
+        type: "database"                             # Database type
+        data-source-ref: "primary-product-db"        # Primary database
+        query: "SELECT * FROM products WHERE product_id = :productId"  # Query
+        parameters:                                  # Parameters
+          - field: "productId"                       # Parameter: productId
+    field-mappings:                                  # Field mappings
+      - source-field: "PRODUCT_NAME"                 # Map product name
+        target-field: "productName"                  # Target field
+
+  - id: "secondary-lookup"                           # Try secondary data source if primary fails
+    type: "lookup-enrichment"                        # Type: lookup-enrichment
+    result-field: "secondaryFound"                   # Track secondary lookup result
+    condition: "#primaryFound == false && #productId != null"  # Only if primary failed
+    lookup-config:                                   # Secondary lookup config
+      lookup-key: "#productId"                       # Extract product ID
+      lookup-dataset:                                # Secondary dataset
+        type: "rest-api"                             # REST API type
+        data-source-ref: "backup-product-api"        # Backup API
+        operation-ref: "product-lookup"              # API operation
+    field-mappings:                                  # Field mappings
+      - source-field: "name"                         # Map product name from API
+        target-field: "productName"                  # Target field
+
+  - id: "default-fallback"                           # Set default if both fail
+    type: "field-enrichment"                         # Type: field-enrichment
+    condition: "#primaryFound == false && #secondaryFound == false"  # Only if both failed
+    field-mappings:                                  # Set defaults
+      - source-field: "productName"                  # Set product name
+        target-field: "productName"                  # Target field
+        expression: "'UNKNOWN_PRODUCT'"              # Default value
+      - source-field: "dataQuality"                  # Set data quality flag
+        target-field: "dataQuality"                  # Target field
+        expression: "'INCOMPLETE'"                   # Quality indicator
+```
+
+### Error Handling Configuration
+
+Configure error handling behavior at the data source level:
+
+```yaml
+data-sources:
+  - name: "external-api"                             # Data source name
+    type: "rest-api"                                 # Type: REST API
+    connection:                                      # Connection config
+      base-url: "http://api.example.com"             # API base URL
+      timeout: 5000                                  # Timeout: 5 seconds
+      max-retries: 3                                 # Retry up to 3 times
+      retry-delay-ms: 1000                           # Wait 1 second between retries
+    error-handling:                                  # Error handling configuration
+      on-error: "continue"                           # Continue processing on error (don't fail)
+      fallback-value: null                           # Return null on failure
+      log-errors: true                               # Log errors for monitoring
+```
+
+---
+
+## Caching
+
+APEX provides sophisticated two-level caching for lookup operations to optimize performance.
+
+### Cache Configuration
+
+Enable caching at the dataset level:
+
+```yaml
+enrichments:
+  - id: "customer-lookup"
+    type: "lookup-enrichment"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "customer-database"
+        query: "SELECT * FROM customers WHERE customer_id = :customerId"
+        parameters:
+          - field: "customerId"
+        cache-enabled: true        # ← Enable caching
+        cache-ttl-seconds: 300     # ← Cache for 5 minutes
+```
+
+### Two-Level Caching Architecture
+
+APEX uses two cache levels for optimal performance:
+
+#### 1. Dataset Cache
+- **Purpose**: Caches DatasetLookupService instances
+- **TTL**: 2 hours (default)
+- **Size**: 1000 entries (default)
+- **Benefit**: Prevents duplicate dataset loading for identical configurations
+
+#### 2. Lookup Result Cache
+- **Purpose**: Caches individual lookup results
+- **TTL**: 5 minutes (default)
+- **Size**: 10,000 entries (default)
+- **Benefit**: Avoids repeated lookups for the same key
+
+### Content-Based Deduplication
+
+APEX automatically deduplicates datasets using content-based signatures:
+
+- **Inline datasets**: MD5 hash of data content + key field
+- **File-based datasets**: File path + key field
+- **Database datasets**: Connection + query + parameters + key field
+- **REST API datasets**: Connection + endpoint + operation + key field
+
+**Example**: If two enrichments use identical inline datasets, they share one cached DatasetLookupService instance.
+
+### Cache Configuration in Data Sources
+
+Configure caching at the data source level:
+
+```yaml
+data-sources:
+  - name: "currency-api"
+    type: "rest-api"
+    connection:
+      base-url: "http://api.example.com"
+    cache:
+      enabled: true
+      ttl-seconds: 300
+      max-size: 100
+```
+
+### Performance Benefits
+
+| Scenario | Without Cache | With Cache | Improvement |
+|----------|--------------|------------|-------------|
+| Database lookup (1st call) | 50ms | 50ms | - |
+| Database lookup (2nd call) | 50ms | <1ms | 50x faster |
+| REST API lookup (1st call) | 200ms | 200ms | - |
+| REST API lookup (2nd call) | 200ms | <1ms | 200x faster |
 
 ---
 

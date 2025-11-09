@@ -3,7 +3,7 @@
 # APEX Funds and Custody Transaction Processing Business Requirements and Implementation_Guide
 
 **Version:** 2.0
-**Date:** 2025-09-06
+**Date:** 2025-11-09
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 
 ---
@@ -46,7 +46,7 @@
 - [4.7 Performance Characteristics](#47-performance-characteristics)
 - [4.8 Troubleshooting](#48-troubleshooting)
 
-### Section 5: APEX Commodity Swap Validation Bootstrap
+### Section 5: APEX Commodity Swap Validation Bootstrap Implementation
 - [5.1 Overview](#51-overview)
 - [5.2 What's New in Version 2.0](#52-whats-new-in-version-20)
 - [5.3 Complete Infrastructure Setup](#53-complete-infrastructure-setup)

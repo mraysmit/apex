@@ -1,8 +1,11 @@
-# APEX YAML Manager - Complete REST API Guide
+# APEX Configuration Manager - Complete REST API Guide
+
+**Version**: 2.0
+**Last Updated**: 2025-11-09
 
 ## Overview
 
-This comprehensive guide provides **copy-paste examples** for every REST API endpoint in the APEX YAML Manager. All examples use the **Graph-100 dataset** located in `apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100/` which contains 100+ interconnected YAML files designed to test complex dependency scenarios.
+This comprehensive guide provides **copy-paste examples** for every REST API endpoint in the APEX Configuration Manager. All examples use the **Graph-100 dataset** located in `apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100/` which contains 100+ interconnected YAML files designed to test complex dependency scenarios.
 
 ## 🚀 Quick Start
 
@@ -36,7 +39,7 @@ curl http://localhost:8080/actuator/health
 - Swagger: `http://localhost:8080/swagger-ui.html`
 - Health: `http://localhost:8080/actuator/health`
 
-#### Option 2: APEX YAML Manager (Configuration Management)
+#### Option 2: APEX Configuration Manager (YAML Configuration Management)
 **Port**: 8082 | **Purpose**: YAML Configuration Management & Dependency Analysis
 
 ```bash
@@ -48,7 +51,7 @@ mvn spring-boot:run
 mvn spring-boot:run -pl apex-yaml-manager
 ```
 
-**Verify YAML Manager:**
+**Verify Configuration Manager:**
 ```bash
 curl http://localhost:8082/yaml-manager/api/health
 ```
@@ -63,9 +66,9 @@ curl http://localhost:8082/yaml-manager/api/health
 | Service | Port | Purpose | Context Path | Documentation Focus |
 |---------|------|---------|--------------|-------------------|
 | **apex-rest-api** | 8080 | Core APEX Rules Engine API | `/` | Rules processing, evaluation, transformations |
-| **apex-yaml-manager** | 8082 | YAML Configuration Management | `/yaml-manager` | **This document** - Dependency analysis, health checks, catalog management |
+| **apex-yaml-manager** | 8082 | APEX Configuration Manager | `/yaml-manager` | **This document** - Dependency analysis, health checks, catalog management |
 
-> **Note**: This document focuses on the **APEX YAML Manager** endpoints. For core rules engine API documentation, see the apex-rest-api Swagger documentation.
+> **Note**: This document focuses on the **APEX Configuration Manager** endpoints. For core rules engine API documentation, see the apex-rest-api Swagger documentation.
 
 ---
 
@@ -571,6 +574,354 @@ curl -X GET "http://localhost:8082/yaml-manager/api/catalog/discovery/health?min
     }
   ]
 }
+```
+
+---
+
+## 🏷️ Category Management Controller
+
+**Base Path**: `/api/categories`
+
+### Overview
+
+The Category Management Controller provides comprehensive REST API endpoints for managing and querying APEX Rule Categories across your YAML configuration catalog. Categories provide an enterprise governance framework for organizing business rules with metadata inheritance, lifecycle management, and execution control.
+
+**Key Features**:
+- List all categories defined across YAML files
+- Get detailed category information including usage statistics
+- Search categories by business domain or owner
+- Track category definitions and usage across rules/enrichments
+- Monitor category lifecycle (active/expired)
+- Generate category governance reports
+
+### GET /api/categories
+**Purpose**: Get all categories defined across all YAML files in the catalog
+
+```bash
+curl -X GET "http://localhost:8082/yaml-manager/api/categories"
+```
+
+**Response**:
+```json
+{
+  "total": 5,
+  "categories": [
+    {
+      "name": "customer-validation",
+      "displayName": "Customer Validation Rules",
+      "description": "Customer data validation rules",
+      "priority": 10,
+      "enabled": true,
+      "businessDomain": "Customer Management",
+      "businessOwner": "Customer Operations Team",
+      "createdBy": "John Smith",
+      "effectiveDate": "2025-01-01",
+      "expirationDate": "2025-12-31",
+      "stopOnFirstFailure": false,
+      "parallelExecution": true,
+      "definedInFiles": [
+        "/path/to/customer-rules.yaml"
+      ],
+      "usedByRules": [],
+      "usedByRuleGroups": [],
+      "usedByEnrichments": [],
+      "usedByEnrichmentGroups": [],
+      "totalUsageCount": 0,
+      "tags": ["validation", "customer"],
+      "metadata": {}
+    }
+  ],
+  "timestamp": "2025-11-09T10:30:00Z"
+}
+```
+
+### GET /api/categories/{categoryName}
+**Purpose**: Get detailed information about a specific category
+
+```bash
+# Get customer-validation category details
+curl -X GET "http://localhost:8082/yaml-manager/api/categories/customer-validation"
+```
+
+**Response**:
+```json
+{
+  "category": {
+    "name": "customer-validation",
+    "displayName": "Customer Validation Rules",
+    "description": "Customer data validation rules",
+    "priority": 10,
+    "enabled": true,
+    "businessDomain": "Customer Management",
+    "businessOwner": "Customer Operations Team",
+    "createdBy": "John Smith",
+    "effectiveDate": "2025-01-01",
+    "expirationDate": "2025-12-31",
+    "stopOnFirstFailure": false,
+    "parallelExecution": true,
+    "definedInFiles": [
+      "/path/to/customer-rules.yaml"
+    ],
+    "totalUsageCount": 15,
+    "tags": ["validation", "customer"]
+  },
+  "timestamp": "2025-11-09T10:30:00Z"
+}
+```
+
+**Error Response (404)**:
+```json
+{
+  "error": "Category not found: invalid-category",
+  "timestamp": "2025-11-09T10:30:00Z"
+}
+```
+
+### GET /api/categories/search/business-domain/{businessDomain}
+**Purpose**: Search categories by business domain
+
+```bash
+# Find all categories in Customer Management domain
+curl -X GET "http://localhost:8082/yaml-manager/api/categories/search/business-domain/Customer%20Management"
+```
+
+**Response**:
+```json
+{
+  "businessDomain": "Customer Management",
+  "count": 3,
+  "categories": [
+    {
+      "name": "customer-validation",
+      "businessDomain": "Customer Management",
+      "businessOwner": "Customer Operations Team"
+    },
+    {
+      "name": "customer-enrichment",
+      "businessDomain": "Customer Management",
+      "businessOwner": "Customer Data Team"
+    }
+  ],
+  "timestamp": "2025-11-09T10:30:00Z"
+}
+```
+
+### GET /api/categories/search/business-owner/{businessOwner}
+**Purpose**: Search categories by business owner
+
+```bash
+# Find all categories owned by Customer Operations Team
+curl -X GET "http://localhost:8082/yaml-manager/api/categories/search/business-owner/Customer%20Operations%20Team"
+```
+
+**Response**:
+```json
+{
+  "businessOwner": "Customer Operations Team",
+  "count": 2,
+  "categories": [
+    {
+      "name": "customer-validation",
+      "businessDomain": "Customer Management",
+      "businessOwner": "Customer Operations Team"
+    }
+  ],
+  "timestamp": "2025-11-09T10:30:00Z"
+}
+```
+
+### GET /api/categories/{categoryName}/definitions
+**Purpose**: Get all YAML files that define a specific category
+
+```bash
+# Find where customer-validation category is defined
+curl -X GET "http://localhost:8082/yaml-manager/api/categories/customer-validation/definitions"
+```
+
+**Response**:
+```json
+{
+  "categoryName": "customer-validation",
+  "definedInFiles": [
+    "/path/to/customer-rules.yaml",
+    "/path/to/customer-categories.yaml"
+  ],
+  "count": 2,
+  "timestamp": "2025-11-09T10:30:00Z"
+}
+```
+
+### GET /api/categories/{categoryName}/usage
+**Purpose**: Get usage statistics for a specific category
+
+```bash
+# Get usage statistics for customer-validation category
+curl -X GET "http://localhost:8082/yaml-manager/api/categories/customer-validation/usage"
+```
+
+**Response**:
+```json
+{
+  "categoryName": "customer-validation",
+  "totalUsageCount": 15,
+  "usedByRules": [
+    "validate-customer-email",
+    "validate-customer-phone"
+  ],
+  "usedByRuleGroups": [
+    "customer-validation-group"
+  ],
+  "usedByEnrichments": [],
+  "usedByEnrichmentGroups": [],
+  "timestamp": "2025-11-09T10:30:00Z"
+}
+```
+
+### GET /api/categories/statistics
+**Purpose**: Get category statistics across the entire catalog
+
+```bash
+curl -X GET "http://localhost:8082/yaml-manager/api/categories/statistics"
+```
+
+**Response**:
+```json
+{
+  "totalCategories": 12,
+  "totalBusinessDomains": 5,
+  "totalBusinessOwners": 8,
+  "activeCategories": 10,
+  "expiredCategories": 2,
+  "averageUsageCount": 7.5,
+  "mostUsedCategory": "customer-validation",
+  "mostUsedCategoryCount": 25,
+  "timestamp": "2025-11-09T10:30:00Z"
+}
+```
+
+### GET /api/categories/business-domains
+**Purpose**: Get all distinct business domains from categories
+
+```bash
+curl -X GET "http://localhost:8082/yaml-manager/api/categories/business-domains"
+```
+
+**Response**:
+```json
+{
+  "businessDomains": [
+    "Customer Management",
+    "Order Processing",
+    "Payment Processing",
+    "Fraud Detection",
+    "Compliance"
+  ],
+  "count": 5,
+  "timestamp": "2025-11-09T10:30:00Z"
+}
+```
+
+### GET /api/categories/business-owners
+**Purpose**: Get all distinct business owners from categories
+
+```bash
+curl -X GET "http://localhost:8082/yaml-manager/api/categories/business-owners"
+```
+
+**Response**:
+```json
+{
+  "businessOwners": [
+    "Customer Operations Team",
+    "Order Management Team",
+    "Payment Team",
+    "Risk Management Team",
+    "Compliance Team"
+  ],
+  "count": 5,
+  "timestamp": "2025-11-09T10:30:00Z"
+}
+```
+
+### GET /api/categories/active
+**Purpose**: Get categories that are currently active (not expired)
+
+```bash
+curl -X GET "http://localhost:8082/yaml-manager/api/categories/active"
+```
+
+**Response**:
+```json
+{
+  "count": 10,
+  "categories": [
+    {
+      "name": "customer-validation",
+      "effectiveDate": "2025-01-01",
+      "expirationDate": "2025-12-31",
+      "enabled": true
+    }
+  ],
+  "timestamp": "2025-11-09T10:30:00Z"
+}
+```
+
+### GET /api/categories/expired
+**Purpose**: Get categories that are currently expired
+
+```bash
+curl -X GET "http://localhost:8082/yaml-manager/api/categories/expired"
+```
+
+**Response**:
+```json
+{
+  "count": 2,
+  "categories": [
+    {
+      "name": "legacy-validation",
+      "effectiveDate": "2024-01-01",
+      "expirationDate": "2024-12-31",
+      "enabled": false
+    }
+  ],
+  "timestamp": "2025-11-09T10:30:00Z"
+}
+```
+
+### Category Management Use Cases
+
+#### Use Case 1: Category Governance Audit
+```bash
+# Get all categories and their ownership
+curl -X GET "http://localhost:8082/yaml-manager/api/categories" | jq '.categories[] | {name, businessDomain, businessOwner}'
+
+# Get statistics
+curl -X GET "http://localhost:8082/yaml-manager/api/categories/statistics"
+```
+
+#### Use Case 2: Find Expired Categories
+```bash
+# Get all expired categories that need review
+curl -X GET "http://localhost:8082/yaml-manager/api/categories/expired"
+```
+
+#### Use Case 3: Domain-Based Category Management
+```bash
+# Get all business domains
+curl -X GET "http://localhost:8082/yaml-manager/api/categories/business-domains"
+
+# Get categories for specific domain
+curl -X GET "http://localhost:8082/yaml-manager/api/categories/search/business-domain/Customer%20Management"
+```
+
+#### Use Case 4: Category Usage Analysis
+```bash
+# Get usage statistics for a category
+curl -X GET "http://localhost:8082/yaml-manager/api/categories/customer-validation/usage"
+
+# Find where category is defined
+curl -X GET "http://localhost:8082/yaml-manager/api/categories/customer-validation/definitions"
 ```
 
 ---
@@ -1214,6 +1565,9 @@ curl -X POST "${API_BASE}/health-checks/report" -d "filePath=${FILE}"  # Too hea
 | **Validate File** | POST | `/api/validation/all` | Comprehensive validation |
 | **Health Check** | POST | `/api/health-checks/check` | File health scoring |
 | **Search Configs** | GET | `/api/catalog/discovery/search` | Find configurations |
+| **List Categories** | GET | `/api/categories` | Get all categories |
+| **Category Details** | GET | `/api/categories/{name}` | Get category information |
+| **Category Statistics** | GET | `/api/categories/statistics` | Category governance metrics |
 
 ### Graph-100 Sample Files
 

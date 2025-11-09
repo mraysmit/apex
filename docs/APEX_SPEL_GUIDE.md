@@ -2,8 +2,7 @@
 
 **Version:** 2.3
 **Last Updated:** 2025-10-13
-**Status:** Production Ready
-
+**Author:** Mark Andrew Ray-Smith Cityline Ltd
 ---
 
 ## Table of Contents

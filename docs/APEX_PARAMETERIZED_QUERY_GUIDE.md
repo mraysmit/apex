@@ -1,5 +1,9 @@
 # APEX Parameterized Query Support - Detailed Technical Guide
 
+**Version:** 2.0
+**Date:** 2025-09-06
+**Author:** Mark Andrew Ray-Smith Cityline Ltd
+
 ## Summary
 
 This document provides a comprehensive technical analysis of APEX's parameterized query support capabilities, based on detailed code examination and runtime debugging analysis. The investigation reveals a sophisticated, production-ready parameterized query system with comprehensive SQL injection protection, flexible parameter binding, and robust error handling.

@@ -40,10 +40,12 @@ public class YamlContentSummary {
     private String createdDate;
     private String lastModifiedDate;
     private List<String> tags;
+    private List<String> categories; // Category names defined in this file
     private List<String> dependencies; // Files this config depends on
     private int ruleCount;
     private int ruleGroupCount;
     private int enrichmentCount;
+    private int categoryCount;
     private int configFileCount;
     private int referenceCount;
     private Map<String, Integer> contentCounts;
@@ -52,6 +54,7 @@ public class YamlContentSummary {
     public YamlContentSummary() {
         this.contentCounts = new HashMap<>();
         this.tags = new ArrayList<>();
+        this.categories = new ArrayList<>();
         this.dependencies = new ArrayList<>();
     }
 
@@ -141,6 +144,14 @@ public class YamlContentSummary {
         this.tags = tags;
     }
 
+    public List<String> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(List<String> categories) {
+        this.categories = categories;
+    }
+
     public String getBusinessDomain() {
         return businessDomain;
     }
@@ -187,6 +198,14 @@ public class YamlContentSummary {
 
     public void setEnrichmentCount(int enrichmentCount) {
         this.enrichmentCount = enrichmentCount;
+    }
+
+    public int getCategoryCount() {
+        return categoryCount;
+    }
+
+    public void setCategoryCount(int categoryCount) {
+        this.categoryCount = categoryCount;
     }
 
     public int getConfigFileCount() {

@@ -4,7 +4,7 @@
 
 **Version:** 1.0  
 **Date:** 2025-10-30  
-**Author:** APEX Documentation Team  
+**Author:** Mark A Ray-Smith Cityline Ltd  
 **Status:** Implementation Complete - All Features Operational
 
 ---

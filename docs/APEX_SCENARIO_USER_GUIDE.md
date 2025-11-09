@@ -1,7 +1,7 @@
 # APEX Scenario Processing - User Guide
 
 **Version:** 2.0
-**Author:** APEX Development Team
+**Author:** Mark Andrew Ray-Smith Cityline Ltd
 **Date:** 2025-11-02
 
 ## Overview

@@ -14,8 +14,8 @@ A powerful expression processor for Java applications with comprehensive data so
 - **Enhanced Bootstrap Demos**: 4 complete financial services scenarios with infrastructure setup
 - **Advanced Lookup Patterns**: 4 comprehensive lookup pattern examples with real-world use cases
 - **8 Advanced Feature Demos**: Specialized demonstrations of sophisticated APEX capabilities
-- **Pipeline Orchestration**: YAML-driven data processing workflows with ETL capabilities **🆕 NEW**
-- **Data Sink Architecture**: Comprehensive output capabilities with database and file sinks **🆕 NEW**
+- **Pipeline Orchestration**: YAML-driven data processing workflows with ETL capabilities 
+- **Data Sink Architecture**: Comprehensive output capabilities with database and file sinks 
 - **Updated YAML Specification**: Modern syntax with enhanced validation and performance features
 - **Complete REST API**: Comprehensive HTTP API with OpenAPI/Swagger documentation
 - **100% Test Coverage**: Complete test coverage with cross-browser UI testing

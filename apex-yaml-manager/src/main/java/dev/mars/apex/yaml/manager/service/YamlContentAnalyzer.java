@@ -271,6 +271,22 @@ public class YamlContentAnalyzer {
             }
         }
 
+        // Extract and count categories
+        if (data.containsKey("categories")) {
+            List<Map<String, Object>> categories = (List<Map<String, Object>>) data.get("categories");
+            if (categories != null) {
+                summary.setCategoryCount(categories.size());
+                List<String> categoryNames = new ArrayList<>();
+                for (Map<String, Object> category : categories) {
+                    String categoryName = (String) category.get("name");
+                    if (categoryName != null) {
+                        categoryNames.add(categoryName);
+                    }
+                }
+                summary.setCategories(categoryNames);
+            }
+        }
+
         // Count config files (rule-configurations, config-files)
         int configCount = 0;
         if (data.containsKey("rule-configurations")) {

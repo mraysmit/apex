@@ -2,7 +2,7 @@
 
 **Date:** 2025-10-23
 **Version:** 2.0
-**Author:** APEX Development Team
+**Author:** Mark Andrew Ray-Smith Cityline Ltd
 
 ## Table of Contents
 1. [Business Overview](#business-overview)
@@ -56,15 +56,55 @@ APEX Rule Categories provide an **organisational framework** that transforms cha
 Before diving into rule categories, it's essential to understand how they fit within the broader APEX system architecture. APEX operates on two distinct but complementary layers:
 
 **Implementation Layer (Where Categories Apply)**:
-- **Rules** - Individual business logic units that evaluate conditions and produce outcomes
-- **Rule Groups** - Collections of related rules that execute together with specific operators (AND/OR)
-- **Enrichments** - Data enhancement operations that add or transform data fields
-- **Enrichment Groups** - Collections of related enrichments that execute together
+
+Categories can be assigned to any of the following implementation components:
+
+1. **Rules** - Individual business logic units that evaluate conditions and produce outcomes
+   - Validate data fields, business constraints, regulatory requirements
+   - Execute conditional logic with success/failure outcomes
+   - Support metadata inheritance from categories for governance
+
+2. **Rule Groups** - Collections of related rules that execute together with specific operators (AND/OR)
+   - Organize rules by business function or validation domain
+   - Control execution flow (sequential, parallel, stop-on-first-failure)
+   - Inherit category metadata for consistent governance
+
+3. **Enrichments** - Data enhancement operations that add or transform data fields
+   - Lookup enrichments: Retrieve data from external sources (databases, APIs, files)
+   - Transformation enrichments: Calculate, derive, or modify field values
+   - Conditional enrichments: Apply data enhancements based on business rules
+
+4. **Enrichment Groups** - Collections of related enrichments that execute together
+   - Organize enrichments by data domain or processing stage
+   - Support composite enrichment workflows
+   - Enable reusable data enhancement patterns
+
+5. **Transformations** - Field mapping and data transformation operations
+   - Map source fields to target fields with optional transformations
+   - Apply data type conversions, formatting, and calculations
+   - Support complex field derivations and business logic
+
+6. **Rule Chains** - Sequential execution of multiple rules with dependency management
+   - Define ordered rule execution with explicit dependencies
+   - Support complex validation workflows
+   - Enable conditional rule execution based on previous results
+
+7. **Data Sources** - Configuration for external data access
+   - Database connections (JDBC, connection pools)
+   - REST API endpoints with authentication
+   - File-based data sources (CSV, JSON, XML)
+   - In-memory datasets for testing and lookup
+
+8. **Data Source References** - Reusable references to external data source configurations
+   - Enable data source sharing across multiple configurations
+   - Support centralized data source management
+   - Facilitate environment-specific configuration
 
 **Orchestration Layer (Where Categories Do NOT Apply)**:
 - **Scenarios** - Business process workflows that define end-to-end processing logic
 - **Scenario Registry** - Enterprise catalog that routes business events to appropriate scenarios
 - **Processing Stages** - Workflow execution phases within scenarios
+- **Pipeline Configuration** - Orchestration of data flow through processing stages
 
 ### Key Architectural Principle
 

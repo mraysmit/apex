@@ -2,10 +2,10 @@
 
 # APEX Conditional Processing - Complete Guide
 
-**Version:** 1.0
-**Date:** 2025-10-09
-**Author:** APEX Documentation Team
-**Status:** Validated Against Implementation - All Examples Verified
+**Version:** 2.0
+**Date:** 2025-11-09
+**Author:** Mark Andrew Ray-Smith Cityline Ltd
+
 
 ---
 
@@ -22,13 +22,22 @@
 8. [Advanced Patterns](#8-advanced-patterns)
 9. [Performance Considerations](#9-performance-considerations)
 10. [Best Practices](#10-best-practices)
-11. [Complete Examples](#11-complete-examples)
+11. [Rule Chain Patterns](#11-rule-chain-patterns)
+    - 11.1 [Introduction to Rule Chains](#111-introduction-to-rule-chains)
+    - 11.2 [Pattern 1: Conditional Chaining](#112-pattern-1-conditional-chaining)
+    - 11.3 [Pattern 2: Accumulative Chaining](#113-pattern-2-accumulative-chaining)
+    - 11.4 [Pattern 3: Sequential Dependency](#114-pattern-3-sequential-dependency)
+    - 11.5 [Pattern 4: Result-Based Routing](#115-pattern-4-result-based-routing)
+    - 11.6 [Pattern 5: Complex Workflow](#116-pattern-5-complex-workflow)
+    - 11.7 [Pattern 6: Fluent Builder](#117-pattern-6-fluent-builder)
+    - 11.8 [Choosing the Right Pattern](#118-choosing-the-right-pattern)
+12. [Complete Examples](#12-complete-examples)
 
 ---
 
 ## 1. Introduction
 
-APEX provides a comprehensive conditional processing system that enables sophisticated business logic through multiple complementary approaches. This guide covers all conditional processing capabilities from simple ternary operators to complex rule-based decision trees.
+APEX provides a comprehensive conditional processing system that enables sophisticated business logic through multiple complementary approaches. This guide covers all conditional processing capabilities from simple ternary operators to complex rule chain patterns with weighted scoring and multi-stage workflows.
 
 ### What is Conditional Processing?
 
@@ -38,6 +47,9 @@ Conditional processing allows you to:
 - Apply enrichments conditionally
 - Make decisions based on rule evaluation results
 - Implement complex business logic declaratively
+- Orchestrate multi-stage workflows with dependencies
+- Build weighted scoring systems for decision making
+- Create branching logic with trigger-based execution
 
 ### When to Use Conditional Processing
 
@@ -47,12 +59,15 @@ Use conditional processing when you need to:
 - Calculate values differently based on business rules
 - Apply enrichments only when certain conditions are met
 - Make decisions based on multiple rule evaluations
+- Implement weighted scoring across multiple criteria
+- Execute multi-stage workflows with dependencies
+- Create eligibility checks with branching logic
 
 ---
 
 ## 2. Conditional Processing Approaches
 
-APEX provides **four distinct approaches** for conditional processing, each suited to different use cases:
+APEX provides **six distinct approaches** for conditional processing, each suited to different use cases:
 
 ### Approach Comparison
 
@@ -62,6 +77,8 @@ APEX provides **four distinct approaches** for conditional processing, each suit
 | **Rule Groups** | Medium | Multiple conditions with OR/AND logic | Fast |
 | **Rule Result References** | Advanced | Conditional enrichments based on rule outcomes | Medium |
 | **Conditional Mapping** | Advanced | Priority-based routing with complex conditions | Medium |
+| **Rule Chain Patterns** | Advanced | Multi-stage workflows, weighted scoring, branching logic | Medium |
+| **Enrichment-Level Conditions** | Simple-Medium | Apply enrichments conditionally | Fast |
 
 ### Decision Tree: Which Approach to Use?
 
@@ -671,6 +688,7 @@ field-mappings:
 
 - **[APEX SpEL Guide](APEX_SPEL_GUIDE.md)** - Comprehensive SpEL documentation
 - **[APEX YAML Reference](APEX_YAML_REFERENCE.md)** - Complete YAML configuration reference
+- **[APEX Funds and Custody Transaction Processing Guide](APEX%20Funds%20and%20Custody%20TransactionProcessing%20Business%20Requirements%20and%20Implementation%20Guide.md)** - Real-world examples of rule chain patterns in custody settlement auto-repair
 
 ---
 
@@ -1372,12 +1390,526 @@ rule-groups:
 
 ---
 
+## 11. Rule Chain Patterns
 
-## 11. Complete Examples
+### 11.1 Introduction to Rule Chains
+
+Rule chains provide advanced orchestration capabilities for complex multi-stage processing workflows. Unlike the enrichment-level conditional processing covered in previous sections, rule chains operate at a higher level, coordinating multiple rules and enrichments across different execution patterns.
+
+**Key Differences:**
+
+| Feature | Enrichment-Level Conditions | Rule Chain Patterns |
+|---------|----------------------------|---------------------|
+| **Scope** | Single enrichment | Multiple rules/enrichments |
+| **Complexity** | Simple conditions | Multi-stage workflows |
+| **Use Case** | "Apply this enrichment if..." | "Execute workflow A, then B, accumulate scores..." |
+| **Configuration** | `condition` property | `rule-chains` section |
+
+**When to Use Rule Chains:**
+
+- ✅ Multi-stage processing with dependencies between stages
+- ✅ Weighted scoring systems (accumulative decision making)
+- ✅ Eligibility checking with branching logic
+- ✅ Complex workflows with conditional routing
+- ✅ Sequential processing where each rule builds on previous results
+- ✅ Dynamic routing based on intermediate outcomes
+
+**APEX supports 6 rule chain patterns:**
+
+1. **Conditional Chaining** - Execute different rule sets based on trigger conditions
+2. **Accumulative Chaining** - Build up scores/results across multiple rules
+3. **Sequential Dependency** - Each rule builds upon previous results
+4. **Result-Based Routing** - Route to different rule sets based on outcomes
+5. **Complex Workflow** - Multi-stage processing with nested rules
+6. **Fluent Builder** - Compose rules with conditional execution paths
+
+---
+
+### 11.2 Pattern 1: Conditional Chaining
+
+**Purpose:** Execute different sets of rules based on whether a trigger condition is met (if-then-else logic at the workflow level).
+
+**Use Cases:**
+- Eligibility checking before processing
+- Exception handling for special cases
+- Pre-flight validation with branching
+- Opt-out/opt-in logic
+
+#### YAML Configuration
+
+```yaml
+metadata:
+  id: "eligibility-check-example"
+  name: "Auto-Repair Eligibility Check"
+  type: "rule-config"
+
+rule-chains:
+  - id: "eligibility-check-chain"
+    name: "Auto-Repair Eligibility Check"
+    pattern: "conditional-chaining"
+    description: "Determines if instruction qualifies for auto-repair processing"
+    configuration:
+      trigger-rule:
+        id: "eligibility-trigger"
+        name: "Auto-Repair Eligibility Trigger"
+        condition: "#instruction.requiresRepair && !#instruction.highValueTransaction && !#instruction.clientOptOut"
+        message: "Instruction must require repair, not be high-value, and client must not have opted out"
+
+      conditional-rules:
+        on-trigger:
+          - id: "confidence-check"
+            name: "Confidence Threshold Check"
+            condition: "#confidenceThreshold == null || #confidenceThreshold <= 0.7"
+            message: "Proceed if confidence threshold is acceptable"
+            action: "PROCEED_TO_AUTO_REPAIR"
+
+        on-no-trigger:
+          - id: "skip-auto-repair"
+            name: "Skip Auto-Repair"
+            condition: "true"
+            message: "Instruction not eligible for auto-repair"
+            action: "MANUAL_REVIEW_REQUIRED"
+```
+
+#### How It Works
+
+1. **Trigger Rule Evaluation**: The `trigger-rule` is evaluated first
+2. **Branching Logic**:
+   - If trigger fires → Execute `on-trigger` rules
+   - If trigger doesn't fire → Execute `on-no-trigger` rules
+3. **Context Tracking**: Trigger result stored in context for downstream use
+
+#### Real-World Example: High-Value Transaction Processing
+
+```yaml
+rule-chains:
+  - id: "high-value-processing"
+    pattern: "conditional-chaining"
+    configuration:
+      trigger-rule:
+        id: "high-value-check"
+        condition: "#customerType == 'PREMIUM' && #transactionAmount > 100000"
+        message: "High-value customer transaction detected"
+
+      conditional-rules:
+        on-trigger:
+          - id: "enhanced-due-diligence"
+            condition: "#accountAge >= 3"
+            message: "Enhanced due diligence check"
+          - id: "manager-approval"
+            condition: "#transactionAmount > 500000"
+            message: "Manager approval required for amounts over 500K"
+
+        on-no-trigger:
+          - id: "standard-processing"
+            condition: "true"
+            message: "Standard processing path"
+```
+
+#### Key Features
+
+- ✅ Clear if-then-else semantics
+- ✅ Multiple rules in each branch
+- ✅ Context variable tracking
+- ✅ Stage result management
+- ✅ Outcome tracking (TRIGGERED_PATH_COMPLETED / NON_TRIGGERED_PATH_COMPLETED)
+
+---
+
+### 11.3 Pattern 2: Accumulative Chaining
+
+**Purpose:** Build up a cumulative score or result across multiple rules, then make a decision based on the total.
+
+**Use Cases:**
+- Weighted decision making
+- Credit scoring systems
+- Risk assessment with multiple factors
+- Confidence scoring for auto-repair decisions
+- Multi-criteria evaluation
+
+#### YAML Configuration
+
+```yaml
+metadata:
+  id: "weighted-scoring-example"
+  name: "Standing Instruction Auto-Repair Weighted Scoring"
+  type: "rule-config"
+
+rule-chains:
+  - id: "si-auto-repair-chain"
+    name: "Standing Instruction Auto-Repair Chain"
+    pattern: "accumulative-chaining"
+    description: "Weighted rule evaluation for custody settlement auto-repair decisions"
+    configuration:
+      accumulator-variable: "repairScore"
+      initial-value: 0
+
+      accumulation-rules:
+        - id: "client-level-si-rule"
+          name: "Client-Level Standing Instruction Match"
+          condition: "#instruction.clientId != null && #availableClientSIs.containsKey(#instruction.clientId) ? 60 : 0"
+          message: "Client-specific standing instruction found"
+          weight: 0.6
+          business-justification: "Client-level SIs have highest confidence (60 points)"
+
+        - id: "market-level-si-rule"
+          name: "Market-Level Standing Instruction Match"
+          condition: "#instruction.market != null && #availableMarketSIs.containsKey(#instruction.market) ? 30 : 0"
+          message: "Market-level standing instruction found"
+          weight: 0.3
+          business-justification: "Market conventions provide medium confidence (30 points)"
+
+        - id: "instrument-level-si-rule"
+          name: "Instrument-Level Standing Instruction Match"
+          condition: "#instruction.instrumentType != null && #availableInstrumentSIs.containsKey(#instruction.instrumentType) ? 10 : 0"
+          message: "Instrument-level standing instruction found"
+          weight: 0.1
+          business-justification: "Instrument defaults provide baseline confidence (10 points)"
+
+      final-decision-rule:
+        id: "repair-decision"
+        name: "Auto-Repair Decision"
+        condition: "#repairScore >= 50 ? 'REPAIR_APPROVED' : (#repairScore >= 20 ? 'PARTIAL_REPAIR' : 'MANUAL_REVIEW_REQUIRED')"
+        message: "Final auto-repair decision based on weighted score"
+        business-justification: "Threshold-based decision making balances automation with risk management"
+```
+
+#### How It Works
+
+1. **Initialize Accumulator**: Set `repairScore = 0`
+2. **Evaluate Accumulation Rules**: Each rule evaluates and returns a score
+3. **Accumulate Scores**: Add each rule's score to the accumulator
+4. **Apply Weights**: Multiply scores by configured weights
+5. **Final Decision**: Evaluate final-decision-rule using accumulated score
+
+#### Scoring Example
+
+**Scenario:** Custody settlement instruction requiring repair
+
+| Rule | Condition Result | Score | Weight | Weighted Score |
+|------|-----------------|-------|--------|----------------|
+| Client-level SI | Match found | 60 | 0.6 | 60 |
+| Market-level SI | No match | 0 | 0.3 | 0 |
+| Instrument-level SI | Match found | 10 | 0.1 | 10 |
+| **Total** | | | | **70** |
+
+**Decision:** Score = 70 ≥ 50 → **REPAIR_APPROVED** ✅
+
+#### Advanced Features
+
+**Rule Selection Strategies:**
+
+```yaml
+configuration:
+  accumulator-variable: "totalScore"
+  initial-value: 0
+
+  rule-selection:
+    strategy: "weight-threshold"  # Options: all, weight-threshold, top-weighted, priority-based, dynamic-threshold
+    min-weight: 0.3               # Only execute rules with weight >= 0.3
+    max-rules: 5                  # Limit to top 5 weighted rules
+
+  accumulation-rules:
+    - id: "high-priority-rule"
+      condition: "#value > 1000"
+      weight: 0.8
+      priority: 100
+```
+
+**Supported Strategies:**
+- `all` - Execute all rules (default)
+- `weight-threshold` - Only rules above minimum weight
+- `top-weighted` - Top N rules by weight
+- `priority-based` - Rules above priority threshold
+- `dynamic-threshold` - Context-based rule selection
+
+---
+
+### 11.4 Pattern 3: Sequential Dependency
+
+**Purpose:** Each rule builds upon results from the previous rule, creating a processing pipeline.
+
+**Use Cases:**
+- Multi-stage validation where each stage depends on previous results
+- Progressive enrichment (enrich A, then use A to enrich B, then use B to enrich C)
+- Cascading calculations
+- Step-by-step data transformation
+
+#### YAML Configuration
+
+```yaml
+rule-chains:
+  - id: "progressive-enrichment"
+    pattern: "sequential-dependency"
+    configuration:
+      stages:
+        - stage: "customer-lookup"
+          name: "Customer Data Enrichment"
+          rules:
+            - id: "fetch-customer"
+              condition: "#customerId != null"
+              message: "Fetch customer details"
+              output-variable: "customerData"
+
+        - stage: "account-lookup"
+          name: "Account Data Enrichment"
+          depends-on: "customer-lookup"
+          rules:
+            - id: "fetch-accounts"
+              condition: "#customerData != null && #customerData.accountIds != null"
+              message: "Fetch customer accounts using customerData"
+              output-variable: "accountData"
+
+        - stage: "transaction-validation"
+          name: "Transaction Validation"
+          depends-on: "account-lookup"
+          rules:
+            - id: "validate-transaction"
+              condition: "#accountData != null && #accountData.balance >= #transactionAmount"
+              message: "Validate transaction against account balance"
+```
+
+#### Key Features
+
+- ✅ Explicit stage dependencies
+- ✅ Output variables passed between stages
+- ✅ Failure handling (terminate on stage failure)
+- ✅ Stage result tracking
+
+---
+
+### 11.5 Pattern 4: Result-Based Routing
+
+**Purpose:** Route to different rule sets based on previous results (switch/case logic).
+
+**Use Cases:**
+- Risk-based routing (high/medium/low risk paths)
+- Customer tier processing (VIP/Premium/Standard)
+- Transaction type routing
+- Dynamic workflow selection
+
+#### YAML Configuration
+
+```yaml
+rule-chains:
+  - id: "risk-based-routing"
+    pattern: "result-based-routing"
+    configuration:
+      router-rule:
+        id: "risk-assessment"
+        condition: "#riskScore > 70 ? 'HIGH_RISK' : (#riskScore > 30 ? 'MEDIUM_RISK' : 'LOW_RISK')"
+        message: "Risk level determined"
+        output-variable: "riskLevel"
+
+      routes:
+        HIGH_RISK:
+          rules:
+            - id: "manager-approval"
+              condition: "#transactionAmount > 100000"
+              message: "Manager approval required"
+            - id: "enhanced-monitoring"
+              condition: "true"
+              message: "Enable enhanced monitoring"
+
+        MEDIUM_RISK:
+          rules:
+            - id: "automated-checks"
+              condition: "#transactionAmount > 50000"
+              message: "Run automated compliance checks"
+
+        LOW_RISK:
+          rules:
+            - id: "standard-processing"
+              condition: "true"
+              message: "Standard processing path"
+
+        default:
+          rules:
+            - id: "fallback-processing"
+              condition: "true"
+              message: "Fallback to manual review"
+```
+
+#### How It Works
+
+1. **Router Rule Evaluation**: Evaluates condition and produces routing key
+2. **Route Selection**: Selects rule set based on routing key
+3. **Route Execution**: Executes rules in selected route
+4. **Default Fallback**: Uses default route if key doesn't match
+
+---
+
+### 11.6 Pattern 5: Complex Workflow
+
+**Purpose:** Real-world nested rule scenarios with multi-stage processing and complex dependencies.
+
+**Use Cases:**
+- Trade lifecycle processing
+- Order management workflows
+- Multi-phase approval processes
+- Complex business workflows
+
+#### YAML Configuration
+
+```yaml
+rule-chains:
+  - id: "trade-processing-workflow"
+    pattern: "complex-workflow"
+    configuration:
+      workflow-stages:
+        - stage: "trade-validation"
+          name: "Trade Data Validation"
+          rules:
+            - condition: "#tradeType != null && #notionalAmount != null && #counterparty != null"
+              message: "Basic trade data validation"
+          failure-action: "terminate"
+
+        - stage: "credit-check"
+          name: "Credit Limit Validation"
+          depends-on: ["trade-validation"]
+          rules:
+            - condition: "#counterpartyCredit.available >= #notionalAmount"
+              message: "Credit limit check"
+          failure-action: "escalate"
+
+        - stage: "compliance-check"
+          name: "Regulatory Compliance"
+          depends-on: ["trade-validation"]
+          parallel: true
+          rules:
+            - condition: "#counterparty.sanctioned == false"
+              message: "Sanctions screening"
+            - condition: "#trade.reportable == false || #trade.reported == true"
+              message: "Regulatory reporting check"
+          failure-action: "terminate"
+
+        - stage: "booking"
+          name: "Trade Booking"
+          depends-on: ["credit-check", "compliance-check"]
+          rules:
+            - condition: "true"
+              message: "Book trade to system"
+```
+
+#### Key Features
+
+- ✅ Multiple stages with dependencies
+- ✅ Parallel execution support
+- ✅ Failure action configuration (terminate, escalate, continue)
+- ✅ Complex dependency graphs
+
+---
+
+### 11.7 Pattern 6: Fluent Builder
+
+**Purpose:** Compose rules with conditional execution paths using a fluent API-style configuration.
+
+**Use Cases:**
+- Decision trees
+- Nested conditional logic
+- Hierarchical rule evaluation
+- Dynamic rule composition
+
+#### YAML Configuration
+
+```yaml
+rule-chains:
+  - id: "customer-processing-tree"
+    pattern: "fluent-builder"
+    configuration:
+      root-rule:
+        id: "customer-type-check"
+        condition: "#customerType == 'VIP' || #customerType == 'PREMIUM'"
+        message: "High-tier customer detected"
+        on-success:
+          rule:
+            id: "high-value-check"
+            condition: "#transactionAmount > 100000"
+            message: "High-value transaction detected"
+            on-success:
+              rule:
+                id: "final-approval"
+                condition: "true"
+                message: "VIP high-value transaction approved"
+                action: "APPROVE_WITH_PRIORITY"
+            on-failure:
+              rule:
+                id: "standard-approval"
+                condition: "true"
+                message: "VIP standard transaction approved"
+                action: "APPROVE"
+        on-failure:
+          rule:
+            id: "standard-customer-check"
+            condition: "#customerType == 'STANDARD'"
+            message: "Standard customer processing"
+            on-success:
+              rule:
+                id: "amount-check"
+                condition: "#transactionAmount <= 10000"
+                message: "Standard customer amount check"
+                action: "APPROVE"
+```
+
+#### Key Features
+
+- ✅ Nested rule composition
+- ✅ on-success / on-failure branching
+- ✅ Tree-like structure
+- ✅ Fluent configuration style
+
+---
+
+### 11.8 Choosing the Right Pattern
+
+Use this decision matrix to select the appropriate rule chain pattern:
+
+| Pattern | Best For | Complexity | When to Use |
+|---------|----------|------------|-------------|
+| **Conditional Chaining** | Eligibility checks, branching logic | Low | Need simple if-then-else at workflow level |
+| **Accumulative Chaining** | Weighted scoring, multi-criteria decisions | Medium | Need to combine multiple scores/factors |
+| **Sequential Dependency** | Progressive enrichment, pipelines | Medium | Each stage depends on previous results |
+| **Result-Based Routing** | Dynamic routing, switch/case logic | Medium | Route to different paths based on values |
+| **Complex Workflow** | Multi-stage processes, dependencies | High | Complex business workflows with multiple stages |
+| **Fluent Builder** | Decision trees, nested logic | High | Hierarchical conditional logic |
+
+**Decision Tree:**
+
+```
+Do you need weighted scoring?
+├─ YES → Use Accumulative Chaining
+└─ NO
+   └─ Do you need simple if-then-else branching?
+      ├─ YES → Use Conditional Chaining
+      └─ NO
+         └─ Do you need sequential stages with dependencies?
+            ├─ YES → Use Sequential Dependency or Complex Workflow
+            └─ NO
+               └─ Do you need routing based on values?
+                  ├─ YES → Use Result-Based Routing
+                  └─ NO → Use Fluent Builder for decision trees
+```
+
+**Comparison with Enrichment-Level Conditions:**
+
+| Scenario | Use Enrichment Condition | Use Rule Chain |
+|----------|-------------------------|----------------|
+| Apply single enrichment conditionally | ✅ | ❌ |
+| Multi-stage workflow | ❌ | ✅ |
+| Weighted scoring across rules | ❌ | ✅ |
+| Simple field-level condition | ✅ | ❌ |
+| Complex branching logic | ❌ | ✅ |
+| Progressive enrichment pipeline | ❌ | ✅ |
+
+---
+
+## 12. Complete Examples
 
 ### Example 1: Financial Transaction Processing
 
-This comprehensive example demonstrates all four conditional processing approaches working together in a real-world financial transaction processing scenario.
+This comprehensive example demonstrates enrichment-level conditional processing approaches (ternary operators, rule groups, rule result references, and conditional mapping) working together in a real-world financial transaction processing scenario.
+
+**Note:** For rule chain pattern examples, see Section 11 above.
 
 #### Business Scenario
 
@@ -1761,8 +2293,9 @@ This example demonstrates:
 
 ---
 
-**Document Version:** 1.0
-**Last Updated:** 2025-10-09
+**Document Version:** 2.0
+**Last Updated:** 2025-11-09
 **Status:** Validated Against Implementation - All Examples Verified
 **Owner:** APEX Documentation Team
+**Major Update:** Added Section 11 - Rule Chain Patterns (6 patterns: Conditional Chaining, Accumulative Chaining, Sequential Dependency, Result-Based Routing, Complex Workflow, Fluent Builder)
 
