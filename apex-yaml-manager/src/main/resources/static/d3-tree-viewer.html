@@ -20,6 +20,106 @@
 </head>
 <body>
     <div class="main-container">
+        <!-- Left Sidebar (Collapsible) -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3>File Browser</h3>
+                <button class="sidebar-close-btn" id="sidebar-close-btn" title="Close Sidebar">×</button>
+            </div>
+            <div class="sidebar-content">
+                <!-- Directory Accordion -->
+                <div class="accordion-section">
+                    <div class="accordion-header" data-section="directory">
+                        <span>Directory</span>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content" id="accordion-directory">
+                        <input type="text" id="directory-input" class="sidebar-input"
+                               placeholder="Enter directory path..."
+                               value="C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100">
+                        <button class="sidebar-btn" id="browse-btn">Browse</button>
+                        <label class="sidebar-checkbox">
+                            <input type="checkbox" id="include-subfolders" checked>
+                            Include Subfolders
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Search Accordion -->
+                <div class="accordion-section">
+                    <div class="accordion-header" data-section="search">
+                        <span>Search</span>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content" id="accordion-search">
+                        <input type="text" id="search-input" class="sidebar-input" placeholder="Search files...">
+                    </div>
+                </div>
+
+                <!-- Display Options Accordion -->
+                <div class="accordion-section">
+                    <div class="accordion-header" data-section="display">
+                        <span>Display Options</span>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content" id="accordion-display">
+                        <label class="sidebar-checkbox">
+                            <input type="checkbox" id="tooltip-toggle" checked>
+                            Show Hover Tooltips
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Filter by Type Accordion -->
+                <div class="accordion-section">
+                    <div class="accordion-header" data-section="filter">
+                        <span>Filter by Type</span>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content" id="accordion-filter">
+                        <label class="sidebar-checkbox">
+                            <input type="checkbox" class="file-type-filter" value="scenario" checked>
+                            Scenarios
+                        </label>
+                        <label class="sidebar-checkbox">
+                            <input type="checkbox" class="file-type-filter" value="rules" checked>
+                            Rules
+                        </label>
+                        <label class="sidebar-checkbox">
+                            <input type="checkbox" class="file-type-filter" value="enrichment" checked>
+                            Enrichments
+                        </label>
+                        <label class="sidebar-checkbox">
+                            <input type="checkbox" class="file-type-filter" value="other" checked>
+                            Other
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Statistics Accordion -->
+                <div class="accordion-section">
+                    <div class="accordion-header" data-section="statistics">
+                        <span>Statistics</span>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content" id="accordion-statistics">
+                        <div class="sidebar-stats" id="sidebar-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Total Files:</span>
+                                <span class="stat-value" id="stat-total">0</span>
+                            </div>
+                            <!-- Dynamic type statistics will be added here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Toggle Button (when sidebar is closed) -->
+        <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" title="Open Sidebar">
+            ☰
+        </button>
+
         <!-- Left Panel: Tree Viewer -->
         <div class="tree-panel">
             <!-- Tree Header with Toolbar -->
@@ -38,6 +138,18 @@
             <div id="tree-container">
                 <div id="loading">Loading tree data...</div>
                 <div id="error" style="display: none;"></div>
+            </div>
+
+            <!-- Floating Tooltip for File Preview -->
+            <div id="file-tooltip" class="file-tooltip" style="display: none;">
+                <div class="tooltip-header">
+                    <span class="tooltip-title" id="tooltip-title">File Preview</span>
+                    <span class="tooltip-close" id="tooltip-close">×</span>
+                </div>
+                <div class="tooltip-metadata" id="tooltip-metadata"></div>
+                <div class="tooltip-content">
+                    <pre><code class="language-yaml" id="tooltip-code"></code></pre>
+                </div>
             </div>
         </div>
 

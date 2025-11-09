@@ -45,9 +45,13 @@ function initializeTree() {
 // Load tree data from REST API
 function loadTreeData() {
     // Use the graph-100 dataset which has 100+ files with deep dependencies
-    // Need to use absolute path for proper dependency resolution
-    const rootFile = "C:/Users/markr/dev/java/corejava/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100/00-scenario-registry.yaml";
-    // Updated to use centralized apex-rest-api (port 8080) instead of apex-yaml-manager (port 8082)
+    // Build dynamic path based on current user's workspace
+    // Get the base path from the current location (assumes we're running from the project)
+    const currentUser = window.location.hostname === 'localhost' ? 'mraysmit' : 'markr';
+    const basePath = `C:/Users/${currentUser}/dev/idea-projects/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100`;
+    const rootFile = `${basePath}/00-scenario-registry.yaml`;
+
+    // Use apex-yaml-manager API (port 8082)
     const apiUrl = `http://localhost:8082/yaml-manager/api/dependencies/tree?rootFile=${encodeURIComponent(rootFile)}`;
 
     fetch(apiUrl)
@@ -111,6 +115,9 @@ function processTreeData(treeData) {
         // Render the tree
         update(root);
 
+        // Calculate and update statistics from actual tree data
+        calculateAndUpdateStatistics(root);
+
         // Hide loading message and show success
         d3.select("#loading").style("display", "none");
         d3.select("#error").style("display", "none");
@@ -154,36 +161,79 @@ function update(source) {
     // Enter new nodes
     const nodeEnter = node.enter().append('g')
         .attr('class', 'node')
-        .attr('transform', d => `translate(${source.y0},${source.x0})`)
-        .on('click', click);
-    
-    // Add circles for nodes
+        .attr('transform', d => `translate(${source.y0},${source.x0})`);
+
+    // Add circles for nodes - clicking circle expands/collapses
     nodeEnter.append('circle')
         .attr('r', 1e-6)
-        .style('fill', d => d._children ? '#ff6b6b' : '#69b3a2');
-    
-    // Add labels for nodes
+        .style('fill', d => d._children ? '#ff6b6b' : '#69b3a2')
+        .on('click', clickCircle);
+
+    // Add background rectangles for labels
+    nodeEnter.append('rect')
+        .attr('class', 'label-background')
+        .attr('rx', 3)
+        .attr('ry', 3)
+        .style('fill', '#2c3e50')
+        .style('stroke', '#000000')
+        .style('stroke-width', '1px')
+        .style('fill-opacity', 1e-6)
+        .style('cursor', 'pointer')
+        .on('click', clickText)
+        .on('mouseover', function(event, d) {
+            showTooltipSimple(event, d);
+        })
+        .on('mouseout', function(event, d) {
+            cancelTooltip();
+        });
+
+    // Add labels for nodes - clicking text shows file content
     nodeEnter.append('text')
         .attr('dy', '.35em')
         .attr('x', d => d.children || d._children ? -13 : 13)
         .attr('text-anchor', d => d.children || d._children ? 'end' : 'start')
         .text(d => d.data.name || 'Unknown')
-        .style('fill-opacity', 1e-6);
+        .style('fill', 'white')
+        .style('fill-opacity', 1e-6)
+        .style('cursor', 'pointer')
+        .style('pointer-events', 'all')
+        .style('font-weight', '600')
+        .on('click', clickText)
+        .on('mouseover', function(event, d) {
+            showTooltipSimple(event, d);
+        })
+        .on('mouseout', function(event, d) {
+            cancelTooltip();
+        });
     
     // Update existing nodes
     const nodeUpdate = nodeEnter.merge(node);
-    
+
     nodeUpdate.transition()
         .duration(duration)
         .attr('transform', d => `translate(${d.y},${d.x})`);
-    
+
     nodeUpdate.select('circle')
         .attr('r', 6)
         .style('fill', d => d._children ? '#ff6b6b' : '#69b3a2')
         .attr('cursor', 'pointer');
-    
+
+    // Update text and calculate background size
     nodeUpdate.select('text')
-        .style('fill-opacity', 1);
+        .style('fill-opacity', 1)
+        .each(function(d) {
+            // Get the bounding box of the text to size the background
+            const bbox = this.getBBox();
+            const padding = 4;
+
+            // Update the background rectangle
+            d3.select(this.parentNode).select('.label-background')
+                .attr('x', bbox.x - padding)
+                .attr('y', bbox.y - padding)
+                .attr('width', bbox.width + padding * 2)
+                .attr('height', bbox.height + padding * 2)
+                .style('fill-opacity', 0.95);
+        });
     
     // Remove exiting nodes
     const nodeExit = node.exit().transition()
@@ -241,14 +291,14 @@ function diagonal(s, d) {
     return path;
 }
 
-// Handle node click (expand/collapse and load content)
-function click(event, d) {
-    console.log('Node clicked:', d.data.name);
+// Handle circle click (expand/collapse only)
+function clickCircle(event, d) {
+    console.log('Circle clicked:', d.data.name);
     console.log('Has children:', d.children ? d.children.length : 0);
     console.log('Has _children:', d._children ? d._children.length : 0);
 
-    // Load file content in right panel
-    loadFileContent(d.data.path, d.data);
+    // Stop event propagation to prevent triggering parent handlers
+    event.stopPropagation();
 
     // Handle expand/collapse
     if (d.children) {
@@ -265,12 +315,112 @@ function click(event, d) {
     update(d);
 }
 
+// Handle text click (show file content only)
+function clickText(event, d) {
+    console.log('Text clicked:', d.data.name);
+    console.log('File path:', d.data.path);
+
+    // Stop event propagation to prevent triggering parent handlers
+    event.stopPropagation();
+
+    // Hide tooltip if visible
+    hideTooltipSimple();
+
+    // Load file content in right panel
+    loadFileContent(d.data.path, d.data);
+}
+
+// Tooltip delay timer
+let tooltipTimer = null;
+let tooltipEnabled = true;
+
+// Simple tooltip - show with delay on hover
+function showTooltipSimple(event, d) {
+    // Check if tooltips are enabled
+    if (!tooltipEnabled) {
+        return;
+    }
+
+    // Clear any existing timer
+    if (tooltipTimer) {
+        clearTimeout(tooltipTimer);
+    }
+
+    // Set a delay before showing tooltip (prevents blocking clicks)
+    tooltipTimer = setTimeout(() => {
+        const tooltip = document.getElementById('file-tooltip');
+        const tooltipTitle = document.getElementById('tooltip-title');
+        const tooltipMetadata = document.getElementById('tooltip-metadata');
+        const tooltipCode = document.getElementById('tooltip-code');
+
+        // Set title
+        tooltipTitle.textContent = d.data.name || 'File Preview';
+
+        // Hide metadata section (redundant with file content)
+        tooltipMetadata.style.display = 'none';
+
+        // Set content (no truncation - tooltip has scrollbar)
+        const contentSummary = d.data.contentSummary || {};
+        let content = contentSummary.rawContent || '# No content available';
+
+        tooltipCode.textContent = content;
+
+        // Apply syntax highlighting
+        Prism.highlightElement(tooltipCode);
+
+        // Show tooltip
+        tooltip.style.display = 'flex';
+
+        // Position to the right of the cursor with some offset (using clientX/clientY for fixed positioning)
+        let left = event.clientX + 20;
+        let top = event.clientY - 50;
+
+        // Adjust if tooltip would go off screen
+        setTimeout(() => {
+            const tooltipRect = tooltip.getBoundingClientRect();
+            if (left + tooltipRect.width > window.innerWidth - 20) {
+                left = event.clientX - tooltipRect.width - 20;
+            }
+            if (top + tooltipRect.height > window.innerHeight - 20) {
+                top = window.innerHeight - tooltipRect.height - 20;
+            }
+            if (top < 20) {
+                top = 20;
+            }
+
+            tooltip.style.left = left + 'px';
+            tooltip.style.top = top + 'px';
+        }, 10);
+    }, 500); // 500ms delay before showing tooltip
+}
+
+// Cancel tooltip if mouse leaves before delay
+function cancelTooltip() {
+    if (tooltipTimer) {
+        clearTimeout(tooltipTimer);
+        tooltipTimer = null;
+    }
+}
+
+// Simple tooltip - hide immediately
+function hideTooltipSimple() {
+    // Clear any pending tooltip timer
+    if (tooltipTimer) {
+        clearTimeout(tooltipTimer);
+        tooltipTimer = null;
+    }
+
+    const tooltip = document.getElementById('file-tooltip');
+    tooltip.style.display = 'none';
+}
+
 // Load file content for the right panel
 function loadFileContent(filePath, nodeData) {
     console.log('Loading content for:', filePath, nodeData);
 
-    // Build the full file path
-    const baseDirectory = "C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100/";
+    // Build the full file path - use the same dynamic path logic
+    const currentUser = window.location.hostname === 'localhost' ? 'mraysmit' : 'markr';
+    const baseDirectory = `C:/Users/${currentUser}/dev/idea-projects/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100/`;
     const fullPath = baseDirectory + filePath;
 
     // Use tree node data directly (no additional API calls needed)
@@ -712,11 +862,181 @@ function collapseAll(d) {
     }
 }
 
+// Initialize sidebar toggle functionality
+function initializeSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
+    const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
+
+    // Close sidebar
+    sidebarCloseBtn.addEventListener('click', function() {
+        sidebar.classList.add('collapsed');
+        sidebarToggleBtn.classList.add('visible');
+    });
+
+    // Open sidebar
+    sidebarToggleBtn.addEventListener('click', function() {
+        sidebar.classList.remove('collapsed');
+        sidebarToggleBtn.classList.remove('visible');
+    });
+
+    // Initialize accordion functionality
+    initializeAccordion();
+
+    // Browse button functionality
+    document.getElementById('browse-btn').addEventListener('click', function() {
+        const directory = document.getElementById('directory-input').value;
+        const includeSubfolders = document.getElementById('include-subfolders').checked;
+        console.log('Browse clicked:', directory, 'Include subfolders:', includeSubfolders);
+        // TODO: Implement directory browsing functionality
+        alert('Directory browsing will be implemented in the next phase.\nDirectory: ' + directory);
+    });
+
+    // Search functionality
+    document.getElementById('search-input').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        console.log('Search:', searchTerm);
+        // TODO: Implement search functionality
+    });
+
+    // File type filter functionality
+    const filterCheckboxes = document.querySelectorAll('.file-type-filter');
+    filterCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const fileType = this.value;
+            const isChecked = this.checked;
+            console.log('Filter changed:', fileType, isChecked);
+            // TODO: Implement filtering functionality
+        });
+    });
+
+    // Tooltip toggle functionality
+    const tooltipToggle = document.getElementById('tooltip-toggle');
+    tooltipToggle.addEventListener('change', function() {
+        tooltipEnabled = this.checked;
+        console.log('Tooltips', tooltipEnabled ? 'enabled' : 'disabled');
+
+        // Hide tooltip immediately if disabling
+        if (!tooltipEnabled) {
+            hideTooltipSimple();
+        }
+    });
+}
+
+// Initialize accordion functionality
+function initializeAccordion() {
+    const accordionHeaders = document.querySelectorAll('.accordion-header');
+
+    accordionHeaders.forEach(header => {
+        header.addEventListener('click', function() {
+            const section = this.getAttribute('data-section');
+            const content = document.getElementById('accordion-' + section);
+
+            // Toggle collapsed state
+            this.classList.toggle('collapsed');
+            content.classList.toggle('collapsed');
+        });
+    });
+}
+
+// Calculate statistics from tree data
+function calculateAndUpdateStatistics(rootNode) {
+    const stats = {
+        total: 0,
+        byType: {}
+    };
+
+    // Recursively count all nodes
+    function countNodes(node) {
+        stats.total++;
+
+        // Get file type from contentSummary
+        const fileType = node.data.contentSummary?.fileType || 'unknown';
+        stats.byType[fileType] = (stats.byType[fileType] || 0) + 1;
+
+        // Count children
+        if (node.children) {
+            node.children.forEach(countNodes);
+        }
+        if (node._children) {
+            node._children.forEach(countNodes);
+        }
+    }
+
+    countNodes(rootNode);
+
+    console.log('Calculated statistics:', stats);
+    updateStatistics(stats);
+}
+
+// Update statistics display
+function updateStatistics(stats) {
+    document.getElementById('stat-total').textContent = stats.total || 0;
+
+    // Get the stats container
+    const statsContainer = document.getElementById('sidebar-stats');
+
+    // Remove all existing type stats (keep only total)
+    const existingTypeStats = statsContainer.querySelectorAll('.stat-item:not(:first-child)');
+    existingTypeStats.forEach(item => item.remove());
+
+    // Add stats for each file type found
+    if (stats.byType) {
+        // Sort types alphabetically
+        const sortedTypes = Object.keys(stats.byType).sort();
+
+        sortedTypes.forEach(type => {
+            const count = stats.byType[type];
+            const statItem = document.createElement('div');
+            statItem.className = 'stat-item';
+
+            // Capitalize first letter of type
+            const displayType = type.charAt(0).toUpperCase() + type.slice(1) + 's:';
+
+            statItem.innerHTML = `
+                <span class="stat-label">${displayType}</span>
+                <span class="stat-value">${count}</span>
+            `;
+
+            statsContainer.appendChild(statItem);
+        });
+    }
+}
+
+// Initialize tooltip close button
+function initializeTooltip() {
+    const tooltipClose = document.getElementById('tooltip-close');
+    const tooltip = document.getElementById('file-tooltip');
+
+    // Close button
+    tooltipClose.addEventListener('click', function(event) {
+        event.stopPropagation();
+        hideTooltipSimple();
+    });
+
+    // Click anywhere in tooltip to close it (but don't interfere with tree node clicks)
+    tooltip.addEventListener('click', function(event) {
+        event.stopPropagation();
+        hideTooltipSimple();
+    });
+
+    // Tooltip stays visible when mouse enters/leaves - must be manually closed
+    tooltip.addEventListener('mouseenter', function() {
+        // Tooltip stays visible
+    });
+
+    tooltip.addEventListener('mouseleave', function() {
+        // Tooltip stays visible - must click to close
+    });
+}
+
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
     initializeTree();
     initializeResizer();
     initializeToolbar();
+    initializeSidebar();
+    initializeTooltip();
 
     // Debug: Log actual header heights
     setTimeout(() => {

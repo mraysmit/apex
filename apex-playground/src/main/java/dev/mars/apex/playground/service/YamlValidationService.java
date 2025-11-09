@@ -50,11 +50,9 @@ public class YamlValidationService {
     private static final Logger logger = LoggerFactory.getLogger(YamlValidationService.class);
 
     private final YamlConfigurationLoader configLoader;
-    private final YamlMetadataValidator metadataValidator;
-
     public YamlValidationService() {
         this.configLoader = new YamlConfigurationLoader();
-        this.metadataValidator = new YamlMetadataValidator();
+        new YamlMetadataValidator();
     }
 
     /**
