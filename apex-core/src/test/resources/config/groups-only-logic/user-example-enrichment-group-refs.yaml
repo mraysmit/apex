@@ -1,0 +1,56 @@
+metadata:
+  name: "User Example - Enrichment Group References"
+  description: "Test that precisely replicates the user's example with enrichment-group-references"
+  version: "1.0"
+
+enrichments:
+  - id: e1
+    name: "Enrichment 1"
+    type: calculation-enrichment
+    field-mappings:
+      - source-field: "'value1'"
+        target-field: result1
+
+  - id: e2
+    name: "Enrichment 2"
+    type: calculation-enrichment
+    field-mappings:
+      - source-field: "'value2'"
+        target-field: result2
+
+  - id: rbg1_enrichment
+    name: "RBG1 Enrichment"
+    type: calculation-enrichment
+    field-mappings:
+      - source-field: "'rbg1_value'"
+        target-field: rbg1Result
+
+enrichment-groups:
+  - id: rbg1
+    name: "Referenced Base Group 1"
+    operator: AND
+    stop-on-first-failure: true
+    enrichment-ids:
+      - rbg1_enrichment
+
+  - id: e1_eg
+    name: "e1 enrichment group 1"
+    operator: AND
+    stop-on-first-failure: true
+    enrichment-ids:
+      - e1
+
+  - id: e2_eg
+    name: "e2 enrichment group 2"
+    operator: AND
+    stop-on-first-failure: true
+    enrichment-group-references:
+      - rbg1
+
+  - id: e3_eg
+    name: "e3 enrichment group 3"
+    operator: AND
+    stop-on-first-failure: true
+    enrichment-ids:
+      - e2
+

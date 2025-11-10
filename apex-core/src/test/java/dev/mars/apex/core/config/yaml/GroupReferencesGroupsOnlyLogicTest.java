@@ -276,5 +276,67 @@ class GroupReferencesGroupsOnlyLogicTest {
         assertEquals("rule-groups", itemOrder.get(0).getSectionType(), "Item should be a rule-group");
         assertEquals("rg1", itemOrder.get(0).getItemId(), "Item should be 'rg1'");
     }
+
+    @Test
+    @DisplayName("User Example: enrichment-group-references should filter rbg1 from itemOrder")
+    void testUserExampleEnrichmentGroupReferences() throws Exception {
+        // Load the test YAML file that precisely replicates the user's example
+        File yamlFile = new File("src/test/resources/config/groups-only-logic/user-example-enrichment-group-refs.yaml");
+        YamlRuleConfiguration config = loader.loadFromFile(yamlFile);
+
+        // Get the filtered itemOrder
+        List<ProcessingItem> itemOrder = config.getItemOrder();
+
+        logger.info("=== USER EXAMPLE TEST ===");
+        logger.info("Item order after groups-only logic: {} items", itemOrder.size());
+        for (ProcessingItem item : itemOrder) {
+            logger.info("  - {} : {}", item.getSectionType(), item.getItemId());
+        }
+
+        // CRITICAL ASSERTION: rbg1 should NOT be in itemOrder because it's referenced by e2_eg
+        boolean rbg1InItemOrder = itemOrder.stream()
+                .anyMatch(item -> "enrichment-groups".equals(item.getSectionType()) && "rbg1".equals(item.getItemId()));
+
+        assertFalse(rbg1InItemOrder,
+                "CRITICAL BUG: enrichment-group 'rbg1' should be filtered from itemOrder because it's referenced by 'e2_eg' via enrichment-group-references");
+
+        // Verify that e1_eg, e2_eg, and e3_eg ARE in itemOrder (they are not referenced by other groups)
+        boolean e1_egInItemOrder = itemOrder.stream()
+                .anyMatch(item -> "enrichment-groups".equals(item.getSectionType()) && "e1_eg".equals(item.getItemId()));
+        boolean e2_egInItemOrder = itemOrder.stream()
+                .anyMatch(item -> "enrichment-groups".equals(item.getSectionType()) && "e2_eg".equals(item.getItemId()));
+        boolean e3_egInItemOrder = itemOrder.stream()
+                .anyMatch(item -> "enrichment-groups".equals(item.getSectionType()) && "e3_eg".equals(item.getItemId()));
+
+        assertTrue(e1_egInItemOrder, "e1_eg should be in itemOrder (not referenced by other groups)");
+        assertTrue(e2_egInItemOrder, "e2_eg should be in itemOrder (not referenced by other groups)");
+        assertTrue(e3_egInItemOrder, "e3_eg should be in itemOrder (not referenced by other groups)");
+
+        // Verify that enrichments e1, e2, rbg1_enrichment are NOT in itemOrder (referenced by groups)
+        boolean e1InItemOrder = itemOrder.stream()
+                .anyMatch(item -> "enrichments".equals(item.getSectionType()) && "e1".equals(item.getItemId()));
+        boolean e2InItemOrder = itemOrder.stream()
+                .anyMatch(item -> "enrichments".equals(item.getSectionType()) && "e2".equals(item.getItemId()));
+        boolean rbg1_enrichmentInItemOrder = itemOrder.stream()
+                .anyMatch(item -> "enrichments".equals(item.getSectionType()) && "rbg1_enrichment".equals(item.getItemId()));
+
+        assertFalse(e1InItemOrder, "e1 should be filtered from itemOrder (referenced by e1_eg)");
+        assertFalse(e2InItemOrder, "e2 should be filtered from itemOrder (referenced by e3_eg)");
+        assertFalse(rbg1_enrichmentInItemOrder, "rbg1_enrichment should be filtered from itemOrder (referenced by rbg1)");
+
+        // Verify final itemOrder size: should be 3 (e1_eg, e2_eg, e3_eg)
+        assertEquals(3, itemOrder.size(),
+                "itemOrder should contain exactly 3 items: e1_eg, e2_eg, e3_eg");
+
+        // Verify the exact order
+        assertEquals("e1_eg", itemOrder.get(0).getItemId(), "First item should be e1_eg");
+        assertEquals("e2_eg", itemOrder.get(1).getItemId(), "Second item should be e2_eg");
+        assertEquals("e3_eg", itemOrder.get(2).getItemId(), "Third item should be e3_eg");
+
+        logger.info("=== USER EXAMPLE TEST PASSED ===");
+        logger.info("✅ rbg1 correctly filtered from itemOrder");
+        logger.info("✅ e1_eg, e2_eg, e3_eg remain in itemOrder");
+        logger.info("✅ All enrichments (e1, e2, rbg1_enrichment) filtered from itemOrder");
+    }
 }
 

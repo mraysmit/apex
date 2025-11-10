@@ -906,17 +906,24 @@ function initializeSidebar() {
     const sidebar = document.getElementById('sidebar');
     const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
     const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
+    const mainContainer = document.querySelector('.main-container');
 
     // Close sidebar
     sidebarCloseBtn.addEventListener('click', function() {
         sidebar.classList.add('collapsed');
         sidebarToggleBtn.classList.add('visible');
+        if (mainContainer) {
+            mainContainer.style.paddingLeft = '0';
+        }
     });
 
     // Open sidebar
     sidebarToggleBtn.addEventListener('click', function() {
         sidebar.classList.remove('collapsed');
         sidebarToggleBtn.classList.remove('visible');
+        if (mainContainer) {
+            mainContainer.style.paddingLeft = '';
+        }
     });
 
     // Initialize accordion functionality

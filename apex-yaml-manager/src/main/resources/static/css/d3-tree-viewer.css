@@ -28,6 +28,7 @@ body {
     overflow: hidden;
     transition: margin-left 0.3s ease;
     z-index: 100;
+    flex-shrink: 0;
 }
 
 .sidebar.collapsed {
@@ -392,9 +393,9 @@ body {
 }
 
 .content-panel {
-    flex: 1 1 40%;
+    flex: 0 0 25%;
     min-width: 300px;
-    background-color: #e8e8e8;
+    background-color: #34495e;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -567,7 +568,7 @@ body {
     flex: 1;
     overflow: hidden;
     padding: 0;
-    background-color: #e8e8e8;
+    background-color: #34495e;
     display: grid;
     grid-template-rows: auto 1fr; /* Metadata auto-sized, YAML takes remaining */
     min-height: 0; /* Important for flex children to respect parent height */
