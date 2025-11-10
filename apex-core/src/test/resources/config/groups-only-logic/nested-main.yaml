@@ -1,0 +1,42 @@
+metadata:
+  id: nested-main-config
+  name: Nested Main Configuration
+  version: 1.0.0
+  description: Main config that references level 1 which references level 2 (nested refs)
+  type: external-data-config
+  author: APEX Core Team
+  created: '2025-11-10'
+  tags:
+    - test
+    - nested
+    - main
+
+# Reference level 1 file (which itself has enrichment-refs to level 2)
+enrichment-refs:
+  - name: "level1-enrichments"
+    source: "config/groups-only-logic/nested-level1.yaml"
+    enabled: true
+    description: "Load level 1 enrichments (which loads level 2)"
+
+# Local enrichment
+enrichments:
+  - id: main_enrichment
+    name: Main Enrichment
+    description: Local enrichment in main file
+    enabled: true
+    type: field-enrichment
+    field-mappings:
+      - source-field: "'main_value'"
+        target-field: 'mainField'
+
+# Local enrichment group that references level 1 group
+enrichment-groups:
+  - id: main_group
+    name: Main Group
+    operator: AND
+    stop-on-first-failure: false
+    enrichment-group-references:
+      - level1_group
+    enrichment-ids:
+      - main_enrichment
+

@@ -1,0 +1,32 @@
+metadata:
+  id: mixed-filesystem
+  name: Mixed References - File System File
+  version: 1.0.0
+  description: File loaded from file system (part of mixed reference test)
+  type: external-data-config
+  author: APEX Core Team
+  created: '2025-11-10'
+  tags:
+    - test
+    - mixed
+
+# Enrichment-group in file system file
+enrichment-groups:
+  - id: filesystem_group
+    name: File System Group
+    description: Enrichment group from file system
+    enabled: true
+    enrichment-ids:
+      - filesystem_enrichment
+
+# Enrichment in file system file
+enrichments:
+  - id: filesystem_enrichment
+    name: File System Enrichment
+    description: Enrichment from file system
+    enabled: true
+    type: field-enrichment
+    field-mappings:
+      - source-field: "'filesystem_value'"
+        target-field: 'filesystemField'
+

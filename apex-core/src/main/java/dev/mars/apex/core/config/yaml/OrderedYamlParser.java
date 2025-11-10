@@ -47,11 +47,9 @@ public class OrderedYamlParser {
     );
     
     private final ObjectMapper yamlMapper;
-    private final Yaml snakeYaml;
-    
+
     public OrderedYamlParser() {
         this.yamlMapper = createYamlMapper();
-        this.snakeYaml = new Yaml();
     }
     
     /**
@@ -102,6 +100,9 @@ public class OrderedYamlParser {
             logger.debug("Parsing YAML content with order preservation from: " + source);
 
             // Step 1: Parse with SnakeYAML to get ordered structure
+            // Create a new Yaml instance for each parse operation to ensure thread-safety
+            // SnakeYAML's Yaml class is not thread-safe and maintains mutable state
+            Yaml snakeYaml = new Yaml();
             Map<String, Object> orderedMap = snakeYaml.load(yamlContent);
             if (orderedMap == null) {
                 throw new YamlConfigurationException("Empty or invalid YAML content in: " + source);

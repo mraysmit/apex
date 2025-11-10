@@ -1,7 +1,10 @@
 metadata:
+  id: "enrichment-references-test"
   name: "Enrichment References Test"
   description: "Test that enrichments referenced via enrichment-references (structured objects) are filtered from itemOrder"
   version: "1.0"
+  type: "rule-config"
+  author: "Test Author"
 
 enrichments:
   - id: e1

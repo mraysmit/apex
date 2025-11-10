@@ -1,0 +1,42 @@
+metadata:
+  id: nested-level1-enrichments
+  name: Nested Level 1 Enrichments
+  version: 1.0.0
+  description: Level 1 external enrichments that references level 2
+  type: external-data-config
+  author: APEX Core Team
+  created: '2025-11-10'
+  tags:
+    - test
+    - nested
+    - level1
+
+# This file itself has enrichment-refs to another file (nested reference)
+enrichment-refs:
+  - name: "level2-enrichments"
+    source: "config/groups-only-logic/nested-level2.yaml"
+    enabled: true
+    description: "Load level 2 enrichments"
+
+# Enrichment at level 1
+enrichments:
+  - id: level1_enrichment
+    name: Level 1 Enrichment
+    description: Enrichment at level 1
+    enabled: true
+    type: field-enrichment
+    field-mappings:
+      - source-field: "'level1_value'"
+        target-field: 'level1Field'
+
+# Enrichment group at level 1 that references level 2 group
+enrichment-groups:
+  - id: level1_group
+    name: Level 1 Group
+    operator: AND
+    stop-on-first-failure: false
+    enrichment-group-references:
+      - level2_group
+    enrichment-ids:
+      - level1_enrichment
+

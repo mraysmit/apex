@@ -1,7 +1,10 @@
 metadata:
+  id: "rule-references-test"
   name: "Rule References Test"
   description: "Test that rules referenced via rule-references (structured objects) are filtered from itemOrder"
   version: "1.0"
+  type: "rule-config"
+  author: "Test Author"
 
 rules:
   - id: r1

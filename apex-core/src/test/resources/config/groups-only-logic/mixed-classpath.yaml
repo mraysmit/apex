@@ -1,0 +1,32 @@
+metadata:
+  id: mixed-classpath
+  name: Mixed References - Classpath File
+  version: 1.0.0
+  description: File loaded from classpath (part of mixed reference test)
+  type: external-data-config
+  author: APEX Core Team
+  created: '2025-11-10'
+  tags:
+    - test
+    - mixed
+
+# Enrichment-group in classpath file
+enrichment-groups:
+  - id: classpath_group
+    name: Classpath Group
+    description: Enrichment group from classpath
+    enabled: true
+    enrichment-ids:
+      - classpath_enrichment
+
+# Enrichment in classpath file
+enrichments:
+  - id: classpath_enrichment
+    name: Classpath Enrichment
+    description: Enrichment from classpath
+    enabled: true
+    type: field-enrichment
+    field-mappings:
+      - source-field: "'classpath_value'"
+        target-field: 'classpathField'
+

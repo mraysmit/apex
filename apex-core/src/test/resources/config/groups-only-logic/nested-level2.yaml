@@ -1,0 +1,33 @@
+metadata:
+  id: nested-level2-enrichments
+  name: Nested Level 2 Enrichments
+  version: 1.0.0
+  description: Level 2 external enrichments (deepest level)
+  type: external-data-config
+  author: APEX Core Team
+  created: '2025-11-10'
+  tags:
+    - test
+    - nested
+    - level2
+
+# Enrichment at level 2
+enrichments:
+  - id: level2_enrichment
+    name: Level 2 Enrichment
+    description: Enrichment at deepest level
+    enabled: true
+    type: field-enrichment
+    field-mappings:
+      - source-field: "'level2_value'"
+        target-field: 'level2Field'
+
+# Enrichment group at level 2
+enrichment-groups:
+  - id: level2_group
+    name: Level 2 Group
+    operator: AND
+    stop-on-first-failure: false
+    enrichment-ids:
+      - level2_enrichment
+

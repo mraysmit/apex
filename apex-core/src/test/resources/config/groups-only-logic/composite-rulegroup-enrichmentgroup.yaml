@@ -1,0 +1,79 @@
+metadata:
+  id: identify-source-master-message-control
+  name: Identify Source Master Message Control
+  version: 1.0.0
+  type: rule-config
+  description: Test configuration for enrichment-group-references with external files
+  author: Test Author
+  processing-mode: "sequential"
+
+enrichment-refs:
+  - name: rule builder
+    source: config/groups-only-logic/test.yaml
+    enabled: true
+    description: Map Currency Code
+
+enrichments:
+  - id: e1
+    name: rule builder parameter
+    description: e1
+    enabled: true
+    condition: true
+    type: field-enrichment
+    field-mappings:
+      - source-field: '''e1'''
+        target-field: '#data.a_field'
+  - id: e2
+    name: rule builder result mapping
+    description: e2
+    enabled: true
+    condition: true
+    type: field-enrichment
+    field-mappings:
+      - source-field: '#data.rbresult'
+        target-field: '#data.b_field'
+enrichment-groups:
+  - id: e1_eg
+    name: e1 enrichment group 1
+    operator: AND
+    stop-on-first-failure: true
+    enrichment-ids:
+      - e1
+  - id: e2_eg
+    name: e2 enrichment group 2
+    operator: AND
+    stop-on-first-failure: true
+    enrichment-group-references:
+      - rbg1
+  - id: e3_eg
+    name: e3 enrichment group 3
+    operator: AND
+    stop-on-first-failure: true
+    enrichment-ids:
+      - e2
+rules:
+  - id: is-source-identifier-populated
+    name: Is Source_Identifier Populated?
+    condition: '(#data.currency != null) && (#data.currency!= '''')'
+    message: 'Is Source_Identifier Populated? expected: (#SOURCE_IDENTIFIER != null) && (#SOURCE_IDENTIFIER != '''') values: SOURCE_IDENTIFIER={{#data.trade.source_identifier}}'
+    severity: ERROR
+    priority: 1
+  - id: is-source-identifier-valid
+    name: Is Source_Identifier valid
+    condition: '(#data.b_field != null) && (#data.b_field != '''')'
+    message: 'Is Source_Identifier Populated? expected: (#b_field != null)
+    && (#b_field != '''') values: b_field={{#data.b_field}}'
+    severity: ERROR
+    priority: 1
+rule-groups:
+  - id: identify-source-master-message-control-rule-group
+    name: Identify Source Master Message Control rule group
+    operator: AND
+    rule-ids:
+      - is-source-identifier-populated
+      - is-source-identifier-valid
+
+
+
+
+

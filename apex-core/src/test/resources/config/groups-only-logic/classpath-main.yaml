@@ -1,0 +1,42 @@
+metadata:
+  id: classpath-main-config
+  name: Classpath Main Configuration
+  version: 1.0.0
+  description: Main config that references external file from classpath
+  type: external-data-config
+  author: APEX Core Team
+  created: '2025-11-10'
+  tags:
+    - test
+    - classpath
+    - groups-only-logic
+
+# Reference external file using CLASSPATH path (not file system path)
+enrichment-refs:
+  - name: "classpath-external-enrichments"
+    source: "config/groups-only-logic/classpath-external.yaml"
+    enabled: true
+    description: "Load enrichments from classpath"
+
+# Local enrichment
+enrichments:
+  - id: local_enrichment_1
+    name: Local Enrichment 1
+    description: Local enrichment in main file
+    enabled: true
+    type: field-enrichment
+    field-mappings:
+      - source-field: "'local_value_1'"
+        target-field: 'localField1'
+
+# Local enrichment group that references the external group
+enrichment-groups:
+  - id: composite_group
+    name: Composite Group
+    operator: AND
+    stop-on-first-failure: false
+    enrichment-group-references:
+      - external_group_1
+    enrichment-ids:
+      - local_enrichment_1
+

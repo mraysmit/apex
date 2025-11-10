@@ -98,11 +98,6 @@ public class YamlConfigurationLoader {
             config.setItemOrder(itemOrder);
             logger.debug("Item order from YAML: " + itemOrder.size() + " items");
 
-            // Apply groups-only logic to filter itemOrder for main file
-            // This must be called BEFORE processing external references
-            // because groups-only logic applies per-file (main file groups only affect main file items)
-            applyGroupsOnlyLogic(config);
-
             // Process external rule references
             processRuleReferences(config);
 
@@ -114,6 +109,11 @@ public class YamlConfigurationLoader {
 
             // Expand reference placeholders in item order
             expandReferencePlaceholders(config);
+
+            // Apply groups-only logic to filter itemOrder AFTER expanding references
+            // This ensures that enrichment-groups/rule-groups loaded from external files
+            // are also subject to groups-only filtering if they're referenced by groups in the main file
+            applyGroupsOnlyLogic(config);
 
             validateConfiguration(config);
             logger.info("Successfully loaded configuration: " +
@@ -153,9 +153,6 @@ public class YamlConfigurationLoader {
             config.setSectionOrder(orderedConfig.getSectionOrder());
             config.setItemOrder(orderedConfig.getItemOrder());
 
-            // Apply groups-only logic to filter itemOrder for main file
-            applyGroupsOnlyLogic(config);
-
             // Process external rule references
             processRuleReferences(config);
 
@@ -167,6 +164,11 @@ public class YamlConfigurationLoader {
 
             // Expand reference placeholders in item order
             expandReferencePlaceholders(config);
+
+            // Apply groups-only logic to filter itemOrder AFTER expanding references
+            // This ensures that enrichment-groups/rule-groups loaded from external files
+            // are also subject to groups-only filtering if they're referenced by groups in the main file
+            applyGroupsOnlyLogic(config);
 
             validateConfiguration(config);
             logger.info("Successfully loaded configuration: " +
@@ -202,9 +204,6 @@ public class YamlConfigurationLoader {
             config.setSectionOrder(orderedConfig.getSectionOrder());
             config.setItemOrder(orderedConfig.getItemOrder());
 
-            // Apply groups-only logic to filter itemOrder for main file
-            applyGroupsOnlyLogic(config);
-
             // Process external rule references
             processRuleReferences(config);
 
@@ -216,6 +215,11 @@ public class YamlConfigurationLoader {
 
             // Expand reference placeholders in item order
             expandReferencePlaceholders(config);
+
+            // Apply groups-only logic to filter itemOrder AFTER expanding references
+            // This ensures that enrichment-groups/rule-groups loaded from external files
+            // are also subject to groups-only filtering if they're referenced by groups in the main file
+            applyGroupsOnlyLogic(config);
 
             validateConfiguration(config);
             logger.info("Successfully loaded configuration: " +
@@ -884,18 +888,17 @@ public class YamlConfigurationLoader {
     }
 
     /**
-     * Apply groups-only logic to filter itemOrder for the main file.
+     * Apply groups-only logic to filter itemOrder.
      * <p>
-     * When enrichments/rules and enrichment-groups/rule-groups coexist in the SAME file:
-     * - Enrichments/rules referenced by groups are definitions only (do NOT execute at their definition position)
-     * - Enrichments/rules NOT referenced by groups execute directly at their definition position
-     * - Enrichment-groups/rule-groups execute at their position in document order
+     * When enrichments/rules/groups are referenced by enrichment-groups/rule-groups,
+     * they should only execute via the group (via flattening), not at their definition position.
      * <p>
-     * This logic applies PER FILE (per-file scoping):
-     * - Groups in external files do NOT affect inline enrichments/rules in the main file
-     * - Groups in the main file only affect enrichments/rules in the main file
+     * This method must be called AFTER expandReferencePlaceholders() to ensure that:
+     * - Enrichment-groups/rule-groups loaded from external files are in itemOrder
+     * - Groups in the main file can reference and filter groups from external files
+     * - All referenced items (enrichments, rules, enrichment-groups, rule-groups) are properly filtered
      * <p>
-     * This method filters the itemOrder to remove enrichments/rules that are referenced by groups,
+     * This method filters the itemOrder to remove enrichments/rules/groups that are referenced by groups,
      * so they only execute via the group (not at their definition position).
      *
      * @param config The configuration with itemOrder to filter

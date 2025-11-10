@@ -1,7 +1,10 @@
 metadata:
+  id: "nested-group-references-test"
   name: "Nested Group References Test"
   description: "Test that multiple levels of group references are all filtered correctly"
   version: "1.0"
+  type: "rule-config"
+  author: "Test Author"
 
 enrichments:
   - id: level3_enrichment

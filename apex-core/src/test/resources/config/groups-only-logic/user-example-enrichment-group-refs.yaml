@@ -1,7 +1,10 @@
 metadata:
+  id: "user-example-enrichment-group-refs"
   name: "User Example - Enrichment Group References"
   description: "Test that precisely replicates the user's example with enrichment-group-references"
   version: "1.0"
+  type: "rule-config"
+  author: "Test Author"
 
 enrichments:
   - id: e1

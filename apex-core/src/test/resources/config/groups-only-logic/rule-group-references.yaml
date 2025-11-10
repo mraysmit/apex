@@ -1,7 +1,10 @@
 metadata:
+  id: "rule-group-references-test"
   name: "Rule Group References Test"
   description: "Test that rule-groups referenced by other rule-groups are filtered from itemOrder"
   version: "1.0"
+  type: "rule-config"
+  author: "Test Author"
 
 rules:
   - id: rule1

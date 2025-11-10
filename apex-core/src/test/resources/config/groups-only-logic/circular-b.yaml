@@ -1,0 +1,30 @@
+metadata:
+  id: circular-b
+  name: Circular Reference B
+  version: 1.0.0
+  description: File B that references File A (which references File B back)
+  type: external-data-config
+  author: APEX Core Team
+  created: '2025-11-10'
+  tags:
+    - test
+    - circular
+
+# This file references circular-a.yaml (CIRCULAR REFERENCE!)
+enrichment-refs:
+  - name: "circular-a-enrichments"
+    source: "config/groups-only-logic/circular-a.yaml"
+    enabled: true
+    description: "Load enrichments from file A (circular!)"
+
+# Enrichment in file B
+enrichments:
+  - id: enrichment_b
+    name: Enrichment B
+    description: Enrichment in file B
+    enabled: true
+    type: field-enrichment
+    field-mappings:
+      - source-field: "'value_b'"
+        target-field: 'fieldB'
+
