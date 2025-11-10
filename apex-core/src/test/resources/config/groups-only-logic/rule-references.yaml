@@ -1,0 +1,39 @@
+metadata:
+  name: "Rule References Test"
+  description: "Test that rules referenced via rule-references (structured objects) are filtered from itemOrder"
+  version: "1.0"
+
+rules:
+  - id: r1
+    name: "Rule 1"
+    condition: "#value > 0"
+    message: "Value is positive"
+    severity: "INFO"
+
+  - id: r2
+    name: "Rule 2"
+    condition: "#value < 100"
+    message: "Value is less than 100"
+    severity: "INFO"
+
+  - id: r3
+    name: "Rule 3"
+    condition: "#value != null"
+    message: "Value is not null"
+    severity: "INFO"
+
+rule-groups:
+  - id: rg1
+    name: "Rule Group 1 (uses rule-references)"
+    operator: AND
+    stop-on-first-failure: true
+    rule-references:
+      - rule-id: r2
+        sequence: 1
+        enabled: true
+      - rule-id: r3
+        sequence: 2
+        enabled: true
+    rule-ids:
+      - r1
+

@@ -914,8 +914,17 @@ public class YamlConfigurationLoader {
         Set<String> referencedEnrichmentIds = new LinkedHashSet<>();
         if (config.getEnrichmentGroups() != null && !config.getEnrichmentGroups().isEmpty()) {
             for (YamlEnrichmentGroup group : config.getEnrichmentGroups()) {
+                // Collect from enrichment-ids (simple string list)
                 if (group.getEnrichmentIds() != null) {
                     referencedEnrichmentIds.addAll(group.getEnrichmentIds());
+                }
+                // Collect from enrichment-references (structured objects with enrichment-id field)
+                if (group.getEnrichmentReferences() != null) {
+                    for (YamlEnrichmentGroup.EnrichmentReference ref : group.getEnrichmentReferences()) {
+                        if (ref.getEnrichmentId() != null) {
+                            referencedEnrichmentIds.add(ref.getEnrichmentId());
+                        }
+                    }
                 }
             }
             logger.info("Found " + referencedEnrichmentIds.size() + " enrichment IDs referenced by groups: " + referencedEnrichmentIds);
@@ -925,24 +934,58 @@ public class YamlConfigurationLoader {
         Set<String> referencedRuleIds = new LinkedHashSet<>();
         if (config.getRuleGroups() != null && !config.getRuleGroups().isEmpty()) {
             for (YamlRuleGroup group : config.getRuleGroups()) {
+                // Collect from rule-ids (simple string list)
                 if (group.getRuleIds() != null) {
                     referencedRuleIds.addAll(group.getRuleIds());
+                }
+                // Collect from rule-references (structured objects with rule-id field)
+                if (group.getRuleReferences() != null) {
+                    for (YamlRuleGroup.RuleReference ref : group.getRuleReferences()) {
+                        if (ref.getRuleId() != null) {
+                            referencedRuleIds.add(ref.getRuleId());
+                        }
+                    }
                 }
             }
             logger.info("Found " + referencedRuleIds.size() + " rule IDs referenced by groups: " + referencedRuleIds);
         }
 
+        // Collect enrichment-group IDs referenced by other enrichment-groups (use LinkedHashSet to preserve order)
+        Set<String> referencedEnrichmentGroupIds = new LinkedHashSet<>();
+        if (config.getEnrichmentGroups() != null && !config.getEnrichmentGroups().isEmpty()) {
+            for (YamlEnrichmentGroup group : config.getEnrichmentGroups()) {
+                if (group.getEnrichmentGroupReferences() != null) {
+                    referencedEnrichmentGroupIds.addAll(group.getEnrichmentGroupReferences());
+                }
+            }
+            logger.info("Found " + referencedEnrichmentGroupIds.size() + " enrichment-group IDs referenced by other groups: " + referencedEnrichmentGroupIds);
+        }
+
+        // Collect rule-group IDs referenced by other rule-groups (use LinkedHashSet to preserve order)
+        Set<String> referencedRuleGroupIds = new LinkedHashSet<>();
+        if (config.getRuleGroups() != null && !config.getRuleGroups().isEmpty()) {
+            for (YamlRuleGroup group : config.getRuleGroups()) {
+                if (group.getRuleGroupReferences() != null) {
+                    referencedRuleGroupIds.addAll(group.getRuleGroupReferences());
+                }
+            }
+            logger.info("Found " + referencedRuleGroupIds.size() + " rule-group IDs referenced by other groups: " + referencedRuleGroupIds);
+        }
+
         // If no groups exist, no filtering needed
-        if (referencedEnrichmentIds.isEmpty() && referencedRuleIds.isEmpty()) {
+        if (referencedEnrichmentIds.isEmpty() && referencedRuleIds.isEmpty() &&
+            referencedEnrichmentGroupIds.isEmpty() && referencedRuleGroupIds.isEmpty()) {
             logger.info("No groups found - skipping groups-only logic (all items execute at definition position)");
             return;
         }
 
-        // Filter itemOrder: Remove enrichments/rules referenced by groups
+        // Filter itemOrder: Remove enrichments/rules/groups referenced by groups
         List<ProcessingItem> originalOrder = new ArrayList<>(config.getItemOrder());
         List<ProcessingItem> filteredOrder = new ArrayList<>();
         int enrichmentsFiltered = 0;
         int rulesFiltered = 0;
+        int enrichmentGroupsFiltered = 0;
+        int ruleGroupsFiltered = 0;
 
         for (ProcessingItem item : originalOrder) {
             boolean shouldRemove = false;
@@ -957,6 +1000,16 @@ public class YamlConfigurationLoader {
                 shouldRemove = true;  // Skip - will execute via rule-group
                 rulesFiltered++;
                 logger.debug("Filtering rule '" + item.getItemId() + "' from itemOrder (referenced by group - definition only)");
+            } else if ("enrichment-groups".equals(item.getSectionType()) &&
+                       referencedEnrichmentGroupIds.contains(item.getItemId())) {
+                shouldRemove = true;  // Skip - will execute via parent enrichment-group
+                enrichmentGroupsFiltered++;
+                logger.debug("Filtering enrichment-group '" + item.getItemId() + "' from itemOrder (referenced by another group - definition only)");
+            } else if ("rule-groups".equals(item.getSectionType()) &&
+                       referencedRuleGroupIds.contains(item.getItemId())) {
+                shouldRemove = true;  // Skip - will execute via parent rule-group
+                ruleGroupsFiltered++;
+                logger.debug("Filtering rule-group '" + item.getItemId() + "' from itemOrder (referenced by another group - definition only)");
             }
 
             if (!shouldRemove) {
@@ -967,8 +1020,9 @@ public class YamlConfigurationLoader {
         // Update configuration with filtered order
         config.setItemOrder(filteredOrder);
 
-        logger.info("Applied groups-only logic: filtered " + enrichmentsFiltered + " enrichments and " +
-                   rulesFiltered + " rules from itemOrder (original: " + originalOrder.size() +
+        logger.info("Applied groups-only logic: filtered " + enrichmentsFiltered + " enrichments, " +
+                   rulesFiltered + " rules, " + enrichmentGroupsFiltered + " enrichment-groups, and " +
+                   ruleGroupsFiltered + " rule-groups from itemOrder (original: " + originalOrder.size() +
                    " items, filtered: " + filteredOrder.size() + " items)");
     }
 

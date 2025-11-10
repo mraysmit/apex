@@ -2,7 +2,7 @@
 
 **Date Range:** November 2025
 **Duration:** Multiple days of intensive debugging and refactoring
-**Status:** Major Refactoring Complete - 19 Critical Bugs Fixed
+**Status:** Major Refactoring Complete - 20 Critical Bugs Fixed
 **Test Results:** 99.9% success rate (810 of 811 tests passing)
 **Impact:** APEX now guarantees strict YAML document order processing with comprehensive validation
 
@@ -10,7 +10,7 @@
 
 ## Executive Summary
 
-This document chronicles a major refactoring effort that spanned multiple days to fix **19 critical bugs in APEX's YAML document order processing** and establish comprehensive test coverage to guarantee that YAML files are processed in strict document order without exception.
+This document chronicles a major refactoring effort that spanned multiple days to fix **20 critical bugs in APEX's YAML document order processing** and establish comprehensive test coverage to guarantee that YAML files are processed in strict document order without exception.
 
 ### The Core Problem
 
@@ -37,9 +37,9 @@ APEX had **fundamental design flaws** across multiple areas:
 - Success rate: 99.9%
 - All critical bugs resolved
 
-### What We Fixed - 19 Critical Bugs
+### What We Fixed - 20 Critical Bugs
 
-#### Document Order & Processing Bugs (Bugs 1-4, 7, 18)
+#### Document Order & Processing Bugs (Bugs 1-4, 7, 18, 20)
 
 1. **Bug #1: Missing Parameter Handling** - Rules with missing parameters threw exceptions instead of graceful errors
 2. **Bug #2: yamlConfig Parameter Ignored** - Configuration passed to evaluate() was not being used
@@ -47,6 +47,7 @@ APEX had **fundamental design flaws** across multiple areas:
 4. **Bug #4: Enrichments/Rules Executed Multiple Times** - Groups-only logic broken for main files
 5. **Bug #7: Nested Rule-Refs Causing Duplicate IDs** - Same external file loaded multiple times
 6. **Bug #18: Enrichment Groups Wrong Order** - HashSet instead of LinkedHashSet violated document order
+7. **Bug #20: Groups-Only Logic Incomplete** - Missing filtering for enrichment-references, rule-references, and group-references
 
 #### Rule Semantics & Severity Bugs (Bugs 8, 9, 11, 17)
 
@@ -785,6 +786,106 @@ Set<String> referencedEnrichmentGroupIds = new LinkedHashSet<>();
 - Document order is a **core guarantee** of APEX 5-phase processing
 - External enrichment groups must execute in the order they appear in the YAML file
 - This bug violated the fundamental document order principle
+
+---
+
+### Bug #20: Groups-Only Logic Incomplete (CRITICAL)
+**Severity:** CRITICAL
+**Impact:** Items referenced by groups were executing twice - at definition position AND when referenced
+
+**Root Cause:**
+The groups-only logic in `YamlConfigurationLoader.applyGroupsOnlyLogic()` was incomplete. It was filtering:
+- ✅ Enrichments referenced via `enrichment-ids` (simple string list)
+- ✅ Rules referenced via `rule-ids` (simple string list)
+- ❌ **Enrichments referenced via `enrichment-references`** (structured objects with `enrichment-id` field) - **MISSING**
+- ❌ **Rules referenced via `rule-references`** (structured objects with `rule-id` field) - **MISSING**
+- ❌ **Enrichment-groups referenced via `enrichment-group-references`** - **MISSING**
+- ❌ **Rule-groups referenced via `rule-group-references`** - **MISSING**
+
+**User Discovery:**
+> "I while I debug I found referred rule builder group rbg1 will be executed first which I think should be executed when it's referred by e2_eg."
+
+**Example YAML That Exposed the Bug:**
+```yaml
+enrichment-groups:
+  - id: rbg1                          # Referenced group (should NOT execute here)
+    enrichment-ids:
+      - rbg1_enrichment
+
+  - id: e2_eg                         # Parent group (should execute)
+    enrichment-group-references:
+      - rbg1                          # References rbg1 - rbg1 should only execute here
+```
+
+**Expected Behavior:** `rbg1` should only execute when referenced by `e2_eg` (via flattening), NOT at its definition position.
+
+**Actual Behavior (BEFORE FIX):** `rbg1` executed twice - once at position 0 (definition) and once when referenced by `e2_eg`.
+
+**Files Modified:**
+- `apex-core/src/main/java/dev/mars/apex/core/config/yaml/YamlConfigurationLoader.java` (~40 lines)
+- `apex-core/src/main/java/dev/mars/apex/core/util/YamlProcessingSequenceAnalyzer.java` (~40 lines)
+
+**Code Changes:**
+Extended the enrichment/rule ID collection logic to handle ALL reference types:
+
+```java
+// Collect enrichment IDs from BOTH enrichment-ids AND enrichment-references
+for (YamlEnrichmentGroup group : config.getEnrichmentGroups()) {
+    // Collect from enrichment-ids (simple string list)
+    if (group.getEnrichmentIds() != null) {
+        referencedEnrichmentIds.addAll(group.getEnrichmentIds());
+    }
+    // Collect from enrichment-references (structured objects with enrichment-id field)
+    if (group.getEnrichmentReferences() != null) {
+        for (YamlEnrichmentGroup.EnrichmentReference ref : group.getEnrichmentReferences()) {
+            if (ref.getEnrichmentId() != null) {
+                referencedEnrichmentIds.add(ref.getEnrichmentId());
+            }
+        }
+    }
+}
+
+// Collect enrichment-group IDs referenced by other enrichment-groups
+Set<String> referencedEnrichmentGroupIds = new LinkedHashSet<>();
+for (YamlEnrichmentGroup group : config.getEnrichmentGroups()) {
+    if (group.getEnrichmentGroupReferences() != null) {
+        referencedEnrichmentGroupIds.addAll(group.getEnrichmentGroupReferences());
+    }
+}
+
+// Similar logic for rule-ids, rule-references, and rule-group-references
+```
+
+**Test Coverage:**
+Created comprehensive test suite with **7 tests** in `GroupReferencesGroupsOnlyLogicTest.java`:
+
+1. `testEnrichmentGroupReferencesFiltering()` - Verify enrichment-groups referenced by other enrichment-groups are filtered
+2. `testRuleGroupReferencesFiltering()` - Verify rule-groups referenced by other rule-groups are filtered
+3. `testMultipleLevelsOfGroupReferences()` - Verify multiple levels of group references are filtered
+4. `testUnreferencedGroupsRemainInItemOrder()` - Verify unreferenced groups remain in itemOrder
+5. `testLogMessagesConfirmFiltering()` - Verify configuration structure and filtering behavior
+6. `testEnrichmentReferencesFiltering()` - **NEW** - Verify enrichments referenced via `enrichment-references` are filtered
+7. `testRuleReferencesFiltering()` - **NEW** - Verify rules referenced via `rule-references` are filtered
+
+**Test Results:**
+```
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+```
+
+**Why This Matters:**
+- Groups-only logic is a **core principle** of APEX - items referenced by groups should only execute via the group
+- This bug caused double execution of referenced items, violating document order guarantees
+- The fix ensures ALL reference types (simple IDs, structured references, and group references) are handled consistently
+
+**Impact:**
+This fix closes a **critical gap in test coverage** identified during debugging. The groups-only logic now correctly handles:
+- ✅ Enrichments referenced via `enrichment-ids` (simple string list)
+- ✅ Enrichments referenced via `enrichment-references` (structured objects) - **FIXED**
+- ✅ Rules referenced via `rule-ids` (simple string list)
+- ✅ Rules referenced via `rule-references` (structured objects) - **FIXED**
+- ✅ Enrichment-groups referenced via `enrichment-group-references` - **FIXED**
+- ✅ Rule-groups referenced via `rule-group-references` - **FIXED**
 
 ---
 

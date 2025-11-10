@@ -1,0 +1,42 @@
+metadata:
+  name: "Enrichment References Test"
+  description: "Test that enrichments referenced via enrichment-references (structured objects) are filtered from itemOrder"
+  version: "1.0"
+
+enrichments:
+  - id: e1
+    name: "Enrichment 1"
+    type: calculation-enrichment
+    field-mappings:
+      - source-field: "'value1'"
+        target-field: result1
+
+  - id: e2
+    name: "Enrichment 2"
+    type: calculation-enrichment
+    field-mappings:
+      - source-field: "'value2'"
+        target-field: result2
+
+  - id: e3
+    name: "Enrichment 3"
+    type: calculation-enrichment
+    field-mappings:
+      - source-field: "'value3'"
+        target-field: result3
+
+enrichment-groups:
+  - id: eg1
+    name: "Enrichment Group 1 (uses enrichment-references)"
+    operator: AND
+    stop-on-first-failure: true
+    enrichment-references:
+      - enrichment-id: e2
+        sequence: 1
+        enabled: true
+      - enrichment-id: e3
+        sequence: 2
+        enabled: true
+    enrichment-ids:
+      - e1
+

@@ -15,6 +15,7 @@ body {
     overflow: hidden;
     box-sizing: border-box;
     position: relative;
+    background-color: white;
 }
 
 /* Sidebar Styles */
@@ -251,16 +252,16 @@ body {
 }
 
 .tree-panel {
-    width: 60%;
+    flex: 1 1 60%;
+    min-width: 200px;
     background-color: white;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    transition: width 0.3s ease;
 }
 
 .tree-panel.expanded {
-    width: 100%;
+    flex: 1 1 100%;
 }
 
 .tree-header {
@@ -391,13 +392,12 @@ body {
 }
 
 .content-panel {
-    flex: 1;
+    flex: 1 1 40%;
+    min-width: 300px;
     background-color: #e8e8e8;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    transition: width 0.3s ease, opacity 0.3s ease;
-    width: 40%;
 }
 
 .content-panel.collapsed {
@@ -449,6 +449,10 @@ body {
 /* Content Panel Accordion */
 .content-accordion-section {
     border-bottom: 1px solid #bdc3c7;
+    display: grid;
+    grid-template-rows: auto 1fr; /* Header auto, content fills */
+    min-height: 0;
+    overflow: hidden;
 }
 
 .content-accordion-section:last-child {
@@ -483,19 +487,24 @@ body {
 }
 
 .content-accordion-content {
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-    max-height: 2000px;
+    min-height: 0 !important; /* Important for grid children */
+    max-height: 100% !important; /* Constrain to parent */
+    overflow: hidden !important; /* Hide overflow, let children handle scrolling */
+    display: flex !important;
+    flex-direction: column !important;
 }
 
 .content-accordion-content.collapsed {
-    max-height: 0;
+    display: none !important; /* Hide completely when collapsed */
 }
 
 .file-metadata {
     padding: 15px;
     background-color: #2d3748;
     border-left: 4px solid #4299e1;
+    height: 100% !important;
+    box-sizing: border-box;
+    overflow: auto;
 }
 
 .metadata-grid {
@@ -559,20 +568,33 @@ body {
     overflow: hidden;
     padding: 0;
     background-color: #e8e8e8;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: auto 1fr; /* Metadata auto-sized, YAML takes remaining */
+    min-height: 0; /* Important for flex children to respect parent height */
 }
 
 .yaml-content {
-    font-family: 'Courier New', monospace;
-    font-size: 12px;
-    line-height: 1.6;
-    padding: 15px;
-    margin: 0;
-    flex: 1;
-    box-sizing: border-box;
-    overflow: auto;
+    font-family: 'Courier New', monospace !important;
+    font-size: 12px !important;
+    line-height: 1.6 !important;
+    padding: 15px !important;
+    margin: 0 !important;
+    flex: 1 !important; /* Fill available space */
+    min-height: 0 !important; /* Important */
+    max-height: 100% !important; /* Constrain to parent */
+    overflow: auto !important; /* Scroll if content exceeds height */
     background: #2d3748 !important;
+    box-sizing: border-box !important;
+}
+
+.yaml-content pre {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-height: none !important; /* Don't constrain pre */
+}
+
+.yaml-content code {
+    display: block !important;
 }
 
 /* Override Prism theme for better contrast */
@@ -580,6 +602,9 @@ body {
 .yaml-content pre[class*="language-"] {
     background: #2d3748 !important;
     color: #e2e8f0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    max-height: none !important;
 }
 
 /* APEX Keyword Colorization */

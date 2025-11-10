@@ -792,11 +792,19 @@ function initializeResizer() {
     const treePanel = document.querySelector('.tree-panel');
     const contentPanel = document.querySelector('.content-panel');
     const container = document.querySelector('.main-container');
+    const sidebar = document.querySelector('.sidebar');
 
     let isResizing = false;
+    let startX = 0;
+    let startTreeWidth = 0;
+    let startContentWidth = 0;
 
     resizer.addEventListener('mousedown', function(e) {
         isResizing = true;
+        startX = e.clientX;
+        startTreeWidth = treePanel.offsetWidth;
+        startContentWidth = contentPanel.offsetWidth;
+
         document.body.style.cursor = 'col-resize';
         document.body.style.userSelect = 'none';
         e.preventDefault();
@@ -805,29 +813,31 @@ function initializeResizer() {
     document.addEventListener('mousemove', function(e) {
         if (!isResizing) return;
 
-        const containerRect = container.getBoundingClientRect();
-        const mouseX = e.clientX - containerRect.left;
-        const containerWidth = containerRect.width;
+        const deltaX = e.clientX - startX;
+        const newTreeWidth = startTreeWidth + deltaX;
+        const newContentWidth = startContentWidth - deltaX;
 
-        // Calculate new widths as percentages
-        const minWidth = 200; // Minimum width for tree panel
-        const maxWidth = containerWidth - 300; // Leave at least 300px for content panel
+        // Apply minimum width constraints
+        const minTreeWidth = 200;
+        const minContentWidth = 300;
 
-        let newTreeWidth = Math.max(minWidth, Math.min(maxWidth, mouseX));
-        let treeWidthPercent = (newTreeWidth / containerWidth) * 100;
+        if (newTreeWidth >= minTreeWidth && newContentWidth >= minContentWidth) {
+            treePanel.style.flexGrow = '0';
+            treePanel.style.flexShrink = '0';
+            treePanel.style.flexBasis = `${newTreeWidth}px`;
 
-        // Ensure reasonable bounds
-        treeWidthPercent = Math.max(20, Math.min(80, treeWidthPercent));
+            contentPanel.style.flexGrow = '0';
+            contentPanel.style.flexShrink = '0';
+            contentPanel.style.flexBasis = `${newContentWidth}px`;
 
-        treePanel.style.width = treeWidthPercent + '%';
-
-        // Update tree dimensions if it exists
-        if (svg) {
-            const newWidth = treePanel.offsetWidth - 20;
-            const newHeight = window.innerHeight;
-            svg.attr("width", newWidth).attr("height", newHeight);
-            tree.size([newHeight - 100, newWidth - 200]);
-            if (root) update(root);
+            // Update tree dimensions if it exists
+            if (svg) {
+                const newWidth = treePanel.offsetWidth - 20;
+                const newHeight = window.innerHeight;
+                svg.attr("width", newWidth).attr("height", newHeight);
+                tree.size([newHeight - 100, newWidth - 200]);
+                if (root) update(root);
+            }
         }
     });
 

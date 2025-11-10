@@ -204,19 +204,37 @@ public class YamlProcessingSequenceAnalyzer {
         Set<String> referencedEnrichmentIds = new HashSet<>();
         if (config.getEnrichmentGroups() != null && !config.getEnrichmentGroups().isEmpty()) {
             for (YamlEnrichmentGroup group : config.getEnrichmentGroups()) {
+                // Collect from enrichment-ids (simple string list)
                 if (group.getEnrichmentIds() != null) {
                     referencedEnrichmentIds.addAll(group.getEnrichmentIds());
+                }
+                // Collect from enrichment-references (structured objects with enrichment-id field)
+                if (group.getEnrichmentReferences() != null) {
+                    for (YamlEnrichmentGroup.EnrichmentReference ref : group.getEnrichmentReferences()) {
+                        if (ref.getEnrichmentId() != null) {
+                            referencedEnrichmentIds.add(ref.getEnrichmentId());
+                        }
+                    }
                 }
             }
             logger.debug("Found " + referencedEnrichmentIds.size() + " enrichment IDs referenced by groups");
         }
-        
+
         // Collect rule IDs referenced by rule-groups
         Set<String> referencedRuleIds = new HashSet<>();
         if (config.getRuleGroups() != null && !config.getRuleGroups().isEmpty()) {
             for (YamlRuleGroup group : config.getRuleGroups()) {
+                // Collect from rule-ids (simple string list)
                 if (group.getRuleIds() != null) {
                     referencedRuleIds.addAll(group.getRuleIds());
+                }
+                // Collect from rule-references (structured objects with rule-id field)
+                if (group.getRuleReferences() != null) {
+                    for (YamlRuleGroup.RuleReference ref : group.getRuleReferences()) {
+                        if (ref.getRuleId() != null) {
+                            referencedRuleIds.add(ref.getRuleId());
+                        }
+                    }
                 }
             }
             logger.debug("Found " + referencedRuleIds.size() + " rule IDs referenced by groups");

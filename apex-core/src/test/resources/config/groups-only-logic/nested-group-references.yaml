@@ -1,0 +1,53 @@
+metadata:
+  name: "Nested Group References Test"
+  description: "Test that multiple levels of group references are all filtered correctly"
+  version: "1.0"
+
+enrichments:
+  - id: level3_enrichment
+    name: "Level 3 Enrichment"
+    type: calculation-enrichment
+    field-mappings:
+      - source-field: "'level3'"
+        target-field: level3Result
+
+  - id: level2_enrichment
+    name: "Level 2 Enrichment"
+    type: calculation-enrichment
+    field-mappings:
+      - source-field: "'level2'"
+        target-field: level2Result
+
+  - id: level1_enrichment
+    name: "Level 1 Enrichment"
+    type: calculation-enrichment
+    field-mappings:
+      - source-field: "'level1'"
+        target-field: level1Result
+
+enrichment-groups:
+  - id: level3_group
+    name: "Level 3 Group"
+    operator: AND
+    stop-on-first-failure: true
+    enrichment-ids:
+      - level3_enrichment
+
+  - id: level2_group
+    name: "Level 2 Group (references level3_group)"
+    operator: AND
+    stop-on-first-failure: true
+    enrichment-ids:
+      - level2_enrichment
+    enrichment-group-references:
+      - level3_group
+
+  - id: level1_group
+    name: "Level 1 Group (references level2_group)"
+    operator: AND
+    stop-on-first-failure: true
+    enrichment-ids:
+      - level1_enrichment
+    enrichment-group-references:
+      - level2_group
+

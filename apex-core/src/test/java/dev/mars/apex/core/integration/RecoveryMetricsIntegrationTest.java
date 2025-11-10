@@ -52,9 +52,6 @@ class RecoveryMetricsIntegrationTest {
         // Create error recovery service
         ErrorRecoveryService errorRecoveryService = new ErrorRecoveryService();
         
-        // Create rules engine logger
-        RulesEngineLogger rulesLogger = new RulesEngineLogger(RecoveryMetricsIntegrationTest.class);
-        
         // Create unified rule evaluator
         evaluator = new UnifiedRuleEvaluator(new SpelExpressionParser(), errorRecoveryService, performanceMonitor, errorRecoveryConfig);
     }

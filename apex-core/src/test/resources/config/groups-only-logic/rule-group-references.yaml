@@ -1,0 +1,36 @@
+metadata:
+  name: "Rule Group References Test"
+  description: "Test that rule-groups referenced by other rule-groups are filtered from itemOrder"
+  version: "1.0"
+
+rules:
+  - id: rule1
+    name: "Rule 1"
+    description: "First validation rule"
+    condition: "#data.amount > 100"
+    severity: ERROR
+    message: "Amount must be greater than 100"
+
+  - id: rule2
+    name: "Rule 2"
+    description: "Second validation rule"
+    condition: "#data.status == 'ACTIVE'"
+    severity: WARNING
+    message: "Status must be ACTIVE"
+
+rule-groups:
+  - id: base_rule_group
+    name: "Base Rule Group"
+    operator: AND
+    stop-on-first-failure: false
+    rule-ids:
+      - rule1
+      - rule2
+
+  - id: composite_rule_group
+    name: "Composite Rule Group (references base_rule_group)"
+    operator: AND
+    stop-on-first-failure: false
+    rule-group-references:
+      - base_rule_group
+

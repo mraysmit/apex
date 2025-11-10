@@ -1,0 +1,56 @@
+metadata:
+  name: "Enrichment Group References Test"
+  description: "Test that enrichment-groups referenced by other enrichment-groups are filtered from itemOrder"
+  version: "1.0"
+
+enrichments:
+  - id: e1
+    name: "Enrichment 1"
+    type: calculation-enrichment
+    field-mappings:
+      - source-field: "'value1'"
+        target-field: result1
+
+  - id: e2
+    name: "Enrichment 2"
+    type: calculation-enrichment
+    field-mappings:
+      - source-field: "'value2'"
+        target-field: result2
+
+  - id: rbg1_enrichment
+    name: "RBG1 Enrichment"
+    type: calculation-enrichment
+    field-mappings:
+      - source-field: "'rbg1_value'"
+        target-field: rbg1Result
+
+enrichment-groups:
+  - id: rbg1
+    name: "Referenced Base Group 1"
+    operator: AND
+    stop-on-first-failure: true
+    enrichment-ids:
+      - rbg1_enrichment
+
+  - id: e1_eg
+    name: "E1 Enrichment Group"
+    operator: AND
+    stop-on-first-failure: true
+    enrichment-ids:
+      - e1
+
+  - id: e2_eg
+    name: "E2 Enrichment Group (references rbg1)"
+    operator: AND
+    stop-on-first-failure: true
+    enrichment-group-references:
+      - rbg1
+
+  - id: e3_eg
+    name: "E3 Enrichment Group"
+    operator: AND
+    stop-on-first-failure: true
+    enrichment-ids:
+      - e2
+
