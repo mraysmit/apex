@@ -87,8 +87,10 @@ public class DependencyAnalysisService {
                 analyzerRootArg = rootPath.getFileName().toString();
                 logger.info("Using dynamic basePath for analysis: {} with root {}", this.currentBasePath, analyzerRootArg);
             } else {
-                this.currentBasePath = null; // Use relative paths as-is
-                logger.info("Using relative path analysis");
+                // For relative paths, use current working directory as base path
+                this.currentBasePath = System.getProperty("user.dir");
+                analyzerToUse = new YamlDependencyAnalyzer(this.currentBasePath);
+                logger.info("Using relative path analysis with basePath: {}", this.currentBasePath);
             }
 
             // Use core analyzer to build basic graph
@@ -341,9 +343,13 @@ public class DependencyAnalysisService {
                                              int depth, Set<String> visited) {
         logger.debug("Building tree node: {} at depth {}", filePath, depth);
 
-        TreeNode node = new TreeNode(filePath, depth);
-        // Ensure path/name are available to UI and details endpoint lookups
+        // Extract just the filename from the path for display
+        String fileName = extractFileName(filePath);
+
+        TreeNode node = new TreeNode(fileName, depth);
+        // Store the full path separately for lookups
         node.setPath(filePath);
+        node.setId(filePath);
 
         // Get YAML content information from apex-core YamlNode (do this BEFORE circular dependency check)
         YamlNode yamlNode = graph.getNode(filePath);
@@ -544,6 +550,26 @@ public class DependencyAnalysisService {
             // Use the path as-is (could be relative or absolute)
             return filePath;
         }
+    }
+
+    /**
+     * Extract just the filename from a full file path.
+     * Handles both forward slashes (/) and backslashes (\).
+     */
+    private String extractFileName(String filePath) {
+        if (filePath == null || filePath.isEmpty()) {
+            return filePath;
+        }
+
+        // Find the last occurrence of either / or \
+        int lastSlash = Math.max(filePath.lastIndexOf('/'), filePath.lastIndexOf('\\'));
+
+        if (lastSlash >= 0 && lastSlash < filePath.length() - 1) {
+            return filePath.substring(lastSlash + 1);
+        }
+
+        // No path separator found, return the whole string
+        return filePath;
     }
 }
 

@@ -45,10 +45,9 @@ function initializeTree() {
 // Load tree data from REST API
 function loadTreeData() {
     // Use the graph-100 dataset which has 100+ files with deep dependencies
-    // Build dynamic path based on current user's workspace
-    // Get the base path from the current location (assumes we're running from the project)
-    const currentUser = window.location.hostname === 'localhost' ? 'mraysmit' : 'markr';
-    const basePath = `C:/Users/${currentUser}/dev/idea-projects/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100`;
+    // When running with mvn spring-boot:run -pl apex-yaml-manager, the working directory is apex-yaml-manager
+    // So paths are relative to apex-yaml-manager directory
+    const basePath = `src/test/resources/apex-yaml-samples/graph-100`;
     const rootFile = `${basePath}/00-scenario-registry.yaml`;
 
     // Update the tree path display
@@ -447,9 +446,8 @@ function hideTooltipSimple() {
 function loadFileContent(filePath, nodeData) {
     console.log('Loading content for:', filePath, nodeData);
 
-    // Build the full file path - use the same dynamic path logic
-    const currentUser = window.location.hostname === 'localhost' ? 'mraysmit' : 'markr';
-    const baseDirectory = `C:/Users/${currentUser}/dev/idea-projects/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100/`;
+    // Build the full file path - relative to apex-yaml-manager directory
+    const baseDirectory = `src/test/resources/apex-yaml-samples/graph-100/`;
     const fullPath = baseDirectory + filePath;
 
     // Use tree node data directly (no additional API calls needed)
@@ -774,17 +772,23 @@ function applyApexKeywordColorization(codeElement) {
     }, 10);
 }
 
-// Handle window resize
-window.addEventListener('resize', function() {
+// Function to resize the SVG based on tree panel size
+function resizeTreeSVG() {
     if (svg) {
         const treePanel = document.querySelector('.tree-panel');
-        const newWidth = treePanel.offsetWidth - 20;
+        // Force a reflow to get the actual computed width after CSS transitions
+        void treePanel.offsetHeight;
+        const newWidth = treePanel.offsetWidth;
         const newHeight = window.innerHeight;
+        console.log('resizeTreeSVG called - treePanel.offsetWidth:', treePanel.offsetWidth, 'newWidth:', newWidth);
         svg.attr("width", newWidth).attr("height", newHeight);
         tree.size([newHeight - 100, newWidth - 200]);
         if (root) update(root);
     }
-});
+}
+
+// Handle window resize
+window.addEventListener('resize', resizeTreeSVG);
 
 // Resizable divider functionality
 function initializeResizer() {
@@ -915,6 +919,9 @@ function initializeSidebar() {
         if (mainContainer) {
             mainContainer.style.paddingLeft = '0';
         }
+
+        // Resize the SVG to fill the expanded tree panel - wait for CSS transition (300ms) + buffer
+        setTimeout(resizeTreeSVG, 350);
     });
 
     // Open sidebar
@@ -924,6 +931,9 @@ function initializeSidebar() {
         if (mainContainer) {
             mainContainer.style.paddingLeft = '';
         }
+
+        // Resize the SVG to fit the reduced tree panel - wait for CSS transition (300ms) + buffer
+        setTimeout(resizeTreeSVG, 350);
     });
 
     // Initialize accordion functionality
@@ -1003,10 +1013,25 @@ function initializeContentPanel() {
 
     // Close content panel
     contentCloseBtn.addEventListener('click', function() {
+        console.log('Closing content panel...');
+        console.log('Before - contentPanel classes:', contentPanel.className);
+        console.log('Before - treePanel classes:', treePanel.className);
+
         contentPanel.classList.add('collapsed');
         contentToggleBtn.classList.add('visible');
         resizer.classList.add('hidden');
         treePanel.classList.add('expanded');
+
+        console.log('After - contentPanel classes:', contentPanel.className);
+        console.log('After - treePanel classes:', treePanel.className);
+        console.log('After - contentPanel display:', window.getComputedStyle(contentPanel).display);
+        console.log('After - treePanel flex:', window.getComputedStyle(treePanel).flex);
+
+        // Resize the SVG to fill the expanded tree panel
+        // Use multiple timeouts to ensure we catch the final state after CSS transitions
+        setTimeout(resizeTreeSVG, 50);
+        setTimeout(resizeTreeSVG, 200);
+        setTimeout(resizeTreeSVG, 400);
     });
 
     // Open content panel
@@ -1015,6 +1040,9 @@ function initializeContentPanel() {
         contentToggleBtn.classList.remove('visible');
         resizer.classList.remove('hidden');
         treePanel.classList.remove('expanded');
+
+        // Resize the SVG to fit the reduced tree panel
+        setTimeout(resizeTreeSVG, 100); // Small delay to allow CSS transition to complete
     });
 
     // Initialize content panel accordion

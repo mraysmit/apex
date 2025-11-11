@@ -415,7 +415,7 @@ public class YamlEnrichment {
         public String getTargetField() {
             return targetField;
         }
-        
+
         public void setTargetField(String targetField) {
             this.targetField = targetField;
         }
@@ -428,18 +428,27 @@ public class YamlEnrichment {
             this.expression = expression;
         }
 
+        /**
+         * Alias for setExpression to support legacy YAML configurations using "transformation".
+         * @param transformation The transformation expression (alias for expression)
+         */
+        @JsonProperty("transformation")
+        public void setTransformation(String transformation) {
+            this.expression = transformation;
+        }
+
         public Object getDefaultValue() {
             return defaultValue;
         }
-        
+
         public void setDefaultValue(Object defaultValue) {
             this.defaultValue = defaultValue;
         }
-        
+
         public Boolean getRequired() {
             return required;
         }
-        
+
         public void setRequired(Boolean required) {
             this.required = required;
         }
@@ -977,6 +986,15 @@ public class YamlEnrichment {
 
         public void setExpression(String expression) {
             this.expression = expression;
+        }
+
+        /**
+         * Alias for setExpression to support legacy YAML configurations using "transformation".
+         * @param transformation The transformation expression (alias for expression)
+         */
+        @JsonProperty("transformation")
+        public void setTransformation(String transformation) {
+            this.expression = transformation;
         }
 
         public String getFallbackValue() {

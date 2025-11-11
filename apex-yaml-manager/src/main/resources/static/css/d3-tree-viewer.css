@@ -255,14 +255,15 @@ body {
 .tree-panel {
     flex: 1 1 60%;
     min-width: 200px;
-    background-color: white;
+    background-color: #2c3e50;
     overflow: hidden;
     display: flex;
     flex-direction: column;
 }
 
 .tree-panel.expanded {
-    flex: 1 1 100%;
+    flex: 1 1 100% !important;
+    max-width: 100% !important;
 }
 
 .tree-header {
@@ -330,7 +331,7 @@ body {
 
 .resizer {
     width: 6px;
-    background-color: #ddd;
+    background-color: #34495e;
     cursor: col-resize;
     position: relative;
     user-select: none;
@@ -395,19 +396,39 @@ body {
 .content-panel {
     flex: 0 0 25%;
     min-width: 300px;
-    background-color: #34495e;
+    background-color: #2c3e50;
     display: flex;
     flex-direction: column;
     overflow: hidden;
 }
 
 .content-panel.collapsed {
-    display: none;
+    flex: 0 0 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    width: 0 !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+/* Hide child elements when content panel is collapsed */
+.content-panel.collapsed .content-header,
+.content-panel.collapsed .content-body {
+    display: none !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
 .content-header {
     padding: 15px;
-    background-color: #2c3e50;
+    background-color: #34495e;
     color: white;
     border-bottom: 1px solid #ddd;
     display: flex;
@@ -568,7 +589,7 @@ body {
     flex: 1;
     overflow: hidden;
     padding: 0;
-    background-color: #34495e;
+    background-color: #2c3e50;
     display: grid;
     grid-template-rows: auto 1fr; /* Metadata auto-sized, YAML takes remaining */
     min-height: 0; /* Important for flex children to respect parent height */

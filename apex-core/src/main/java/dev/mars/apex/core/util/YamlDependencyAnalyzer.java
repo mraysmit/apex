@@ -138,9 +138,8 @@ public class YamlDependencyAnalyzer {
         
         // Recursively analyze referenced files
         for (String referencedFile : referencedFiles) {
-            // For now, treat all references as relative to the base directory
-            // In a more sophisticated implementation, we could resolve relative to the referencing file
-            String resolvedPath = referencedFile;
+            // Resolve referenced file path relative to the parent file's directory
+            String resolvedPath = resolveReferencedFilePath(filePath, referencedFile);
 
             // Add dependency edge
             YamlDependency dependency = new YamlDependency(filePath, resolvedPath, "yaml-reference");
@@ -196,7 +195,32 @@ public class YamlDependencyAnalyzer {
         
         return references;
     }
-    
+
+    /**
+     * Resolves a referenced file path relative to the parent file's directory.
+     *
+     * @param parentFilePath The path of the file containing the reference
+     * @param referencedFile The referenced file (may be just a filename or a relative path)
+     * @return The resolved path relative to the base directory
+     */
+    private String resolveReferencedFilePath(String parentFilePath, String referencedFile) {
+        // If the referenced file is already an absolute path or contains directory separators,
+        // assume it's already properly resolved
+        if (referencedFile.contains("/") || referencedFile.contains("\\")) {
+            return referencedFile;
+        }
+
+        // Get the parent file's directory
+        int lastSeparator = Math.max(parentFilePath.lastIndexOf('/'), parentFilePath.lastIndexOf('\\'));
+        if (lastSeparator > 0) {
+            String parentDir = parentFilePath.substring(0, lastSeparator);
+            return parentDir + "/" + referencedFile;
+        }
+
+        // If parent file has no directory component, just return the referenced file as-is
+        return referencedFile;
+    }
+
     /**
      * Recursively extracts file references from a YAML configuration map.
      */
