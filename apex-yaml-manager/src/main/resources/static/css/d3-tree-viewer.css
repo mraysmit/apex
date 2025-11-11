@@ -12,6 +12,8 @@ body {
     position: relative;
     cursor: help;
     border-bottom: 1px dotted #4299e1;
+    --tooltip-left: 0px;
+    --tooltip-top: 0px;
 }
 
 .apex-keyword-tooltip:hover {
@@ -20,11 +22,9 @@ body {
 
 .apex-keyword-tooltip::after {
     content: attr(data-description);
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    margin-bottom: 8px;
+    position: fixed;
+    left: var(--tooltip-left);
+    top: var(--tooltip-top);
     padding: 8px 12px;
     background-color: #1a202c;
     color: #fff;
@@ -45,13 +45,11 @@ body {
 
 .apex-keyword-tooltip::before {
     content: '';
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    margin-bottom: 2px;
+    position: fixed;
+    left: calc(var(--tooltip-left) + 150px - 6px);
+    top: calc(var(--tooltip-top) - 6px);
     border: 6px solid transparent;
-    border-top-color: #1a202c;
+    border-bottom-color: #1a202c;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.2s, visibility 0.2s;
@@ -74,6 +72,70 @@ body {
     box-sizing: border-box;
     position: relative;
     background-color: white;
+}
+
+/* Main Panel Container */
+.main-panel-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: #ecf0f1;
+}
+
+/* View Tabs */
+.view-tabs {
+    display: flex;
+    background-color: #2c3e50;
+    border-bottom: 2px solid #34495e;
+    padding: 0;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.view-tab {
+    flex: 0 0 auto;
+    padding: 6px 20px;
+    background-color: #34495e;
+    color: #bdc3c7;
+    border: none;
+    border-right: 1px solid #2c3e50;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.view-tab:hover {
+    background-color: #3d5a73;
+    color: #ecf0f1;
+}
+
+.view-tab.active {
+    background-color: #ecf0f1;
+    color: #2c3e50;
+    border-bottom: 2px solid #3498db;
+    border-top-right-radius: 8px;
+}
+
+.view-tab .tab-label {
+    font-weight: 600;
+}
+
+/* View Panels */
+.view-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.view-panel:not(.active) {
+    display: none;
 }
 
 /* Sidebar Styles */
@@ -942,5 +1004,241 @@ body {
     font-family: 'Courier New', monospace;
     font-size: 12px;
     line-height: 1.6;
+}
+
+/* ========================================
+   LIST VIEW STYLES
+   ======================================== */
+
+/* List Header */
+.list-header {
+    background-color: #34495e;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #2c3e50;
+    flex-shrink: 0;
+}
+
+.list-title-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.list-title-container h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.list-count {
+    font-size: 14px;
+    color: #bdc3c7;
+    background-color: #2c3e50;
+    padding: 4px 12px;
+    border-radius: 12px;
+}
+
+.list-toolbar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.list-search {
+    padding: 8px 12px;
+    border: 1px solid #bdc3c7;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 250px;
+    background-color: white;
+    color: #2c3e50;
+}
+
+.list-search:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+/* List Container */
+#list-container {
+    flex: 1;
+    overflow: auto;
+    background-color: white;
+    padding: 20px;
+}
+
+#list-loading,
+#list-error {
+    text-align: center;
+    padding: 40px;
+    font-size: 16px;
+    color: #7f8c8d;
+}
+
+#list-error {
+    color: #e74c3c;
+}
+
+/* YAML Files Table */
+.yaml-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.yaml-table thead {
+    background-color: #34495e;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.yaml-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #2c3e50;
+    white-space: nowrap;
+}
+
+.yaml-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    padding-right: 30px;
+}
+
+.yaml-table th.sortable:hover {
+    background-color: #3d5a73;
+}
+
+.yaml-table th.sortable span {
+    display: inline-block;
+}
+
+.yaml-table th .sort-indicator {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    color: #bdc3c7;
+}
+
+.yaml-table th.sort-asc .sort-indicator::after {
+    content: '▲';
+    color: #3498db;
+}
+
+.yaml-table th.sort-desc .sort-indicator::after {
+    content: '▼';
+    color: #3498db;
+}
+
+.yaml-table tbody tr {
+    border-bottom: 1px solid #ecf0f1;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+}
+
+.yaml-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.yaml-table tbody tr.selected {
+    background-color: #e3f2fd;
+}
+
+.yaml-table td {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #2c3e50;
+    vertical-align: top;
+}
+
+.yaml-table td.filename {
+    font-weight: 600;
+    color: #3498db;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.yaml-table td.type {
+    font-weight: 500;
+}
+
+.yaml-table td.type-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.yaml-table td.type-badge.scenario {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.yaml-table td.type-badge.rule-config {
+    background-color: #e3f2fd;
+    color: #1565c0;
+}
+
+.yaml-table td.type-badge.enrichment {
+    background-color: #fff3e0;
+    color: #e65100;
+}
+
+.yaml-table td.type-badge.external-data-config {
+    background-color: #f3e5f5;
+    color: #6a1b9a;
+}
+
+.yaml-table td.type-badge.unknown {
+    background-color: #eceff1;
+    color: #546e7a;
+}
+
+.yaml-table td.description {
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #7f8c8d;
+}
+
+/* Empty state */
+.list-empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #7f8c8d;
+}
+
+.list-empty-state h3 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    color: #95a5a6;
+}
+
+.list-empty-state p {
+    margin: 0;
+    font-size: 14px;
 }
 

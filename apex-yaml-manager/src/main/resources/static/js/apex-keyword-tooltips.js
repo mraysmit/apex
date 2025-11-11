@@ -388,16 +388,16 @@ const APEX_KEYWORDS = {
  */
 function applyApexKeywordTooltips(codeElement) {
     if (!codeElement) return;
-    
+
     // Get all token elements created by Prism
     const tokens = codeElement.querySelectorAll('.token.key, .token.property');
-    
+
     tokens.forEach(token => {
         const keyword = token.textContent.trim().replace(/:$/, ''); // Remove trailing colon
-        
+
         if (APEX_KEYWORDS[keyword]) {
             const info = APEX_KEYWORDS[keyword];
-            
+
             // Wrap the token in a span with tooltip data
             const wrapper = document.createElement('span');
             wrapper.className = 'apex-keyword-tooltip';
@@ -405,11 +405,51 @@ function applyApexKeywordTooltips(codeElement) {
             wrapper.setAttribute('data-description', info.description);
             wrapper.setAttribute('data-category', info.category);
             wrapper.setAttribute('data-required', info.required);
-            
+
             // Replace the token with the wrapper
             token.parentNode.insertBefore(wrapper, token);
             wrapper.appendChild(token);
+
+            // Add mouse event listeners for dynamic positioning
+            wrapper.addEventListener('mouseenter', function(e) {
+                positionTooltip(wrapper);
+            });
+
+            wrapper.addEventListener('mousemove', function(e) {
+                positionTooltip(wrapper);
+            });
         }
     });
+}
+
+/**
+ * Position tooltip dynamically using fixed positioning
+ * @param {HTMLElement} tooltipElement - The tooltip wrapper element
+ */
+function positionTooltip(tooltipElement) {
+    const rect = tooltipElement.getBoundingClientRect();
+    const tooltipWidth = 300; // max-width from CSS
+    const tooltipHeight = 100; // estimated height
+    const margin = 8;
+
+    // Calculate position
+    let left = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+    let top = rect.top - tooltipHeight - margin;
+
+    // Adjust if tooltip would go off-screen
+    if (left < 10) {
+        left = 10;
+    } else if (left + tooltipWidth > window.innerWidth - 10) {
+        left = window.innerWidth - tooltipWidth - 10;
+    }
+
+    if (top < 10) {
+        // Show below if not enough space above
+        top = rect.bottom + margin;
+    }
+
+    // Set CSS custom properties for positioning
+    tooltipElement.style.setProperty('--tooltip-left', left + 'px');
+    tooltipElement.style.setProperty('--tooltip-top', top + 'px');
 }
 
