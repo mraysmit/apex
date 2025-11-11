@@ -7,6 +7,64 @@ body {
     box-sizing: border-box;
 }
 
+/* APEX Keyword Tooltip Styles */
+.apex-keyword-tooltip {
+    position: relative;
+    cursor: help;
+    border-bottom: 1px dotted #4299e1;
+}
+
+.apex-keyword-tooltip:hover {
+    background-color: rgba(66, 153, 225, 0.1);
+}
+
+.apex-keyword-tooltip::after {
+    content: attr(data-description);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 8px;
+    padding: 8px 12px;
+    background-color: #1a202c;
+    color: #fff;
+    font-size: 13px;
+    line-height: 1.4;
+    white-space: normal;
+    max-width: 300px;
+    width: max-content;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+    pointer-events: none;
+    z-index: 10000;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.apex-keyword-tooltip::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 2px;
+    border: 6px solid transparent;
+    border-top-color: #1a202c;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+    pointer-events: none;
+    z-index: 10000;
+}
+
+.apex-keyword-tooltip:hover::after,
+.apex-keyword-tooltip:hover::before {
+    opacity: 1;
+    visibility: visible;
+}
+
 .main-container {
     display: flex;
     height: calc(100vh - 4px);

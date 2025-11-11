@@ -6,6 +6,14 @@ const headerHeight = 47; // Height of the tree header (15px padding top + 16px f
 const height = window.innerHeight - headerHeight;
 const initialTreeTransform = d3.zoomIdentity.translate(200, 0);
 
+// Tooltip and selection state
+let tooltipTimer = null;
+let tooltipEnabled = true;
+let selectedNode = null;
+
+// Tooltip delay in milliseconds
+const TOOLTIP_DELAY_MS = 500;
+
 // Initialize the tree viewer
 function initializeTree() {
     // Show loading message initially
@@ -26,9 +34,21 @@ function initializeTree() {
         .scaleExtent([0.1, 3])
         .on("zoom", function(event) {
             g.attr("transform", event.transform);
+        })
+        .on("end", function(event) {
+            // Re-enable tooltips after zoom/drag ends
+            tooltipEnabled = true;
         });
 
     svg.call(zoom);
+
+    // Close tooltip when clicking on SVG background
+    svg.on("click", function(event) {
+        // Only close if clicking on the SVG itself, not on nodes
+        if (event.target === event.currentTarget || event.target.tagName === 'svg') {
+            hideTooltipSimple();
+        }
+    });
 
     // Set initial zoom with left margin to account for root node label
     svg.call(zoom.transform, initialTreeTransform);
@@ -181,6 +201,8 @@ function update(source) {
         .style('stroke-width', '1px')
         .style('fill-opacity', 1e-6)
         .style('cursor', 'pointer')
+        .on('mousedown', handleMouseDown)
+        .on('mouseup', handleMouseUp)
         .on('click', clickText)
         .on('mouseover', function(event, d) {
             showTooltipSimple(event, d);
@@ -200,6 +222,8 @@ function update(source) {
         .style('cursor', 'pointer')
         .style('pointer-events', 'all')
         .style('font-weight', '600')
+        .on('mousedown', handleMouseDown)
+        .on('mouseup', handleMouseUp)
         .on('click', clickText)
         .on('mouseover', function(event, d) {
             showTooltipSimple(event, d);
@@ -293,6 +317,17 @@ function diagonal(s, d) {
     return path;
 }
 
+// Handle mousedown - disable tooltip
+function handleMouseDown(event, d) {
+    tooltipEnabled = false;
+    cancelTooltip();
+}
+
+// Handle mouseup - re-enable tooltip
+function handleMouseUp(event, d) {
+    tooltipEnabled = true;
+}
+
 // Handle circle click (expand/collapse only)
 function clickCircle(event, d) {
     console.log('Circle clicked:', d.data.name);
@@ -338,13 +373,6 @@ function clickText(event, d) {
     loadFileContent(d.data.path, d.data);
 }
 
-// Tooltip delay timer
-let tooltipTimer = null;
-let tooltipEnabled = true;
-
-// Track selected node
-let selectedNode = null;
-
 // Update node selection styling
 function updateNodeSelection() {
     // Remove selection from all nodes
@@ -374,7 +402,7 @@ function showTooltipSimple(event, d) {
         clearTimeout(tooltipTimer);
     }
 
-    // Set a delay before showing tooltip (prevents blocking clicks)
+    // Set a delay before showing tooltip
     tooltipTimer = setTimeout(() => {
         const tooltip = document.getElementById('file-tooltip');
         const tooltipTitle = document.getElementById('tooltip-title');
@@ -395,6 +423,13 @@ function showTooltipSimple(event, d) {
 
         // Apply syntax highlighting
         Prism.highlightElement(tooltipCode);
+
+        // Apply APEX keyword tooltips
+        setTimeout(() => {
+            if (typeof applyApexKeywordTooltips === 'function') {
+                applyApexKeywordTooltips(tooltipCode);
+            }
+        }, 10);
 
         // Show tooltip
         tooltip.style.display = 'flex';
@@ -419,7 +454,7 @@ function showTooltipSimple(event, d) {
             tooltip.style.left = left + 'px';
             tooltip.style.top = top + 'px';
         }, 10);
-    }, 500); // 500ms delay before showing tooltip
+    }, TOOLTIP_DELAY_MS);
 }
 
 // Cancel tooltip if mouse leaves before delay
@@ -476,11 +511,12 @@ function displayNodeData(filePath, fullPath, nodeData) {
     // Apply syntax highlighting
     Prism.highlightElement(document.getElementById('yaml-code'));
 
-    // Apply APEX keyword colorization
-    // TODO: Implement colorizeApexKeywords function
-    // setTimeout(() => {
-    //     colorizeApexKeywords(document.getElementById('yaml-code'));
-    // }, 50);
+    // Apply APEX keyword tooltips after Prism highlighting
+    setTimeout(() => {
+        if (typeof applyApexKeywordTooltips === 'function') {
+            applyApexKeywordTooltips(document.getElementById('yaml-code'));
+        }
+    }, 50);
 
 
 
@@ -1171,6 +1207,11 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeSidebar();
     initializeContentPanel();
     initializeTooltip();
+
+    // Global mouseup listener to re-enable tooltips
+    document.addEventListener('mouseup', function() {
+        tooltipEnabled = true;
+    });
 
     // Debug: Log actual header heights
     setTimeout(() => {
