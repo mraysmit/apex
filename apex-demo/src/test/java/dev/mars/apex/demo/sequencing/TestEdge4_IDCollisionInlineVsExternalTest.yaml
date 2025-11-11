@@ -30,6 +30,6 @@ enrichments:
 # Reference external file that ALSO contains "collision-id"
 enrichment-refs:
   - name: "External Enrichments"
-    source: "src/test/java/dev/mars/apex/demo/sequencing/edge_cases/TestEdge4_IDCollisionInlineVsExternalTest_external.yaml"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/TestEdge4_IDCollisionInlineVsExternalTest_external.yaml"
     enabled: true
 

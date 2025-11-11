@@ -16,7 +16,7 @@ enrichments:
 # MUST execute at THIS EXACT POSITION
 enrichment-refs:
   - name: "external-enrichments"
-    source: "src/test/java/dev/mars/apex/demo/sequencing/order_guarantee/Test1_EnrichmentRefsPositionTest-external.yaml"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/Test1_EnrichmentRefsPositionTest-external.yaml"
 
 # Position 3: Rule AFTER enrichment-refs (to verify order)
 rules:

@@ -16,7 +16,7 @@ enrichments:
 # ONLY enrichment-groups should execute
 enrichment-refs:
   - name: "external-with-groups"
-    source: "src/test/java/dev/mars/apex/demo/sequencing/order_guarantee/Test2_EnrichmentGroupsOnlyTest-external.yaml"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/Test2_EnrichmentGroupsOnlyTest-external.yaml"
 
 # Position 3: Rule AFTER enrichment-refs
 rules:

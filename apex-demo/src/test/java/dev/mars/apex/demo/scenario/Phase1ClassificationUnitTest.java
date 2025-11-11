@@ -93,7 +93,9 @@ public class Phase1ClassificationUnitTest {
 
         assertNotNull(context, "Context should not be null");
         assertNotNull(context.getMetadata(), "Metadata should not be null");
-        assertTrue(context.getMetadata().isEmpty(), "Default metadata should be empty");
+        // Note: inputData() adds to metadata, so it won't be empty
+        assertEquals(1, context.getMetadata().size(), "Metadata should contain inputData");
+        assertEquals("test-data", context.getMetadata().get("inputData"), "InputData should be in metadata");
 
         logger.info("Minimal context validation successful: {}", context);
     }
