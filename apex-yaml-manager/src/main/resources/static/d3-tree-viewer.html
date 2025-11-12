@@ -125,38 +125,109 @@
             ☰
         </button>
 
-        <!-- Left Panel: Tree Viewer -->
-        <div class="tree-panel">
-            <!-- Tree Header with Toolbar -->
-            <div class="tree-header">
-                <div class="tree-title-container">
-                    <h2>Dependency Tree</h2>
-                    <span class="tree-path" id="tree-path" style="display: none;"></span>
-                </div>
-                <div class="tree-toolbar">
-                    <button class="toolbar-btn" id="zoom-in-btn" title="Zoom In">Zoom In</button>
-                    <button class="toolbar-btn" id="zoom-out-btn" title="Zoom Out">Zoom Out</button>
-                    <button class="toolbar-btn" id="reset-zoom-btn" title="Reset Zoom">Reset</button>
-                    <button class="toolbar-btn" id="expand-all-btn" title="Expand All">Expand All</button>
-                    <button class="toolbar-btn" id="collapse-all-btn" title="Collapse All">Collapse All</button>
-                </div>
-            </div>
-            
-            <!-- Tree Container -->
-            <div id="tree-container">
-                <div id="loading">Loading tree data...</div>
-                <div id="error" style="display: none;"></div>
+        <!-- Main Panel Container -->
+        <div class="main-panel-container">
+            <!-- Tab Navigation -->
+            <div class="view-tabs">
+                <button class="view-tab active" id="tree-view-tab" data-view="tree">
+                    <span class="tab-label">Tree View</span>
+                </button>
+                <button class="view-tab" id="list-view-tab" data-view="list">
+                    <span class="tab-label">List View</span>
+                </button>
             </div>
 
-            <!-- Floating Tooltip for File Preview -->
-            <div id="file-tooltip" class="file-tooltip" style="display: none;">
-                <div class="tooltip-header">
-                    <span class="tooltip-title" id="tooltip-title">File Preview</span>
-                    <span class="tooltip-close" id="tooltip-close">×</span>
+            <!-- Tree View Panel -->
+            <div class="view-panel active" id="tree-view-panel">
+                <!-- Tree Header with Toolbar -->
+                <div class="tree-header">
+                    <div class="tree-title-container">
+                        <h2>Dependency Tree</h2>
+                        <span class="tree-path" id="tree-path" style="display: none;"></span>
+                    </div>
+                    <div class="tree-toolbar">
+                        <button class="toolbar-btn" id="zoom-in-btn" title="Zoom In">Zoom In</button>
+                        <button class="toolbar-btn" id="zoom-out-btn" title="Zoom Out">Zoom Out</button>
+                        <button class="toolbar-btn" id="reset-zoom-btn" title="Reset Zoom">Reset</button>
+                        <button class="toolbar-btn" id="expand-all-btn" title="Expand All">Expand All</button>
+                        <button class="toolbar-btn" id="collapse-all-btn" title="Collapse All">Collapse All</button>
+                    </div>
                 </div>
-                <div class="tooltip-metadata" id="tooltip-metadata"></div>
-                <div class="tooltip-content">
-                    <pre><code class="language-yaml" id="tooltip-code"></code></pre>
+
+                <!-- Tree Container -->
+                <div id="tree-container">
+                    <div id="loading">Loading tree data...</div>
+                    <div id="error" style="display: none;"></div>
+                </div>
+
+                <!-- Floating Tooltip for File Preview -->
+                <div id="file-tooltip" class="file-tooltip" style="display: none;">
+                    <div class="tooltip-header">
+                        <span class="tooltip-title" id="tooltip-title">File Preview</span>
+                        <span class="tooltip-close" id="tooltip-close">×</span>
+                    </div>
+                    <div class="tooltip-metadata" id="tooltip-metadata"></div>
+                    <div class="tooltip-content">
+                        <pre><code class="language-yaml" id="tooltip-code"></code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- List View Panel -->
+            <div class="view-panel" id="list-view-panel" style="display: none;">
+                <!-- List Header with Toolbar -->
+                <div class="list-header">
+                    <div class="list-title-container">
+                        <h2>YAML Files List</h2>
+                        <span class="list-count" id="list-count">0 files</span>
+                    </div>
+                    <div class="list-toolbar">
+                        <input type="text" id="list-search-input" class="list-search" placeholder="Search files...">
+                        <button class="toolbar-btn" id="refresh-list-btn" title="Refresh List">Refresh</button>
+                    </div>
+                </div>
+
+                <!-- List Container -->
+                <div id="list-container">
+                    <div id="list-loading">Loading file list...</div>
+                    <div id="list-error" style="display: none;"></div>
+                    <table id="yaml-files-table" class="yaml-table" style="display: none;">
+                        <thead>
+                            <tr>
+                                <th class="sortable" data-column="filename">
+                                    <span>File Name</span>
+                                    <span class="sort-indicator"></span>
+                                </th>
+                                <th class="sortable" data-column="id">
+                                    <span>ID</span>
+                                    <span class="sort-indicator"></span>
+                                </th>
+                                <th class="sortable" data-column="name">
+                                    <span>Name</span>
+                                    <span class="sort-indicator"></span>
+                                </th>
+                                <th class="sortable" data-column="type">
+                                    <span>Type</span>
+                                    <span class="sort-indicator"></span>
+                                </th>
+                                <th class="sortable" data-column="author">
+                                    <span>Author</span>
+                                    <span class="sort-indicator"></span>
+                                </th>
+                                <th class="sortable" data-column="description">
+                                    <span>Description</span>
+                                    <span class="sort-indicator"></span>
+                                </th>
+                                <th class="sortable" data-column="version">
+                                    <span>Version</span>
+                                    <span class="sort-indicator"></span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="yaml-files-tbody">
+                            <!-- Table rows will be populated by JavaScript -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

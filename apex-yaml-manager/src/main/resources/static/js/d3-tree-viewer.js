@@ -64,10 +64,12 @@ function initializeTree() {
 
 // Load tree data from REST API
 function loadTreeData() {
-    // Use the graph-100 dataset which has 100+ files with deep dependencies
-    // When running with mvn spring-boot:run -pl apex-yaml-manager, the working directory is apex-yaml-manager
-    // So paths are relative to apex-yaml-manager directory
-    const basePath = `src/test/resources/apex-yaml-samples/graph-100`;
+    // Get the directory path from the File Browser panel input
+    const directoryInput = document.getElementById('directory-input');
+    const basePath = directoryInput ? directoryInput.value : 'src/test/resources/apex-yaml-samples/graph-100';
+
+    // Look for scenario registry file (common root file pattern) or use first YAML file
+    // The API will handle finding the appropriate root file
     const rootFile = `${basePath}/00-scenario-registry.yaml`;
 
     // Update the tree path display
@@ -424,12 +426,12 @@ function showTooltipSimple(event, d) {
         // Apply syntax highlighting
         Prism.highlightElement(tooltipCode);
 
-        // Apply APEX keyword tooltips
-        setTimeout(() => {
-            if (typeof applyApexKeywordTooltips === 'function') {
-                applyApexKeywordTooltips(tooltipCode);
-            }
-        }, 10);
+        // Apply APEX keyword tooltips - DISABLED per user request
+        // setTimeout(() => {
+        //     if (typeof applyApexKeywordTooltips === 'function') {
+        //         applyApexKeywordTooltips(tooltipCode);
+        //     }
+        // }, 10);
 
         // Show tooltip
         tooltip.style.display = 'flex';
@@ -511,12 +513,12 @@ function displayNodeData(filePath, fullPath, nodeData) {
     // Apply syntax highlighting
     Prism.highlightElement(document.getElementById('yaml-code'));
 
-    // Apply APEX keyword tooltips after Prism highlighting
-    setTimeout(() => {
-        if (typeof applyApexKeywordTooltips === 'function') {
-            applyApexKeywordTooltips(document.getElementById('yaml-code'));
-        }
-    }, 50);
+    // Apply APEX keyword tooltips after Prism highlighting - DISABLED per user request
+    // setTimeout(() => {
+    //     if (typeof applyApexKeywordTooltips === 'function') {
+    //         applyApexKeywordTooltips(document.getElementById('yaml-code'));
+    //     }
+    // }, 50);
 
 
 
@@ -976,12 +978,37 @@ function initializeSidebar() {
     initializeAccordion();
 
     // Browse button functionality
-    document.getElementById('browse-btn').addEventListener('click', function() {
+    const browseHandler = function() {
         const directory = document.getElementById('directory-input').value;
         const includeSubfolders = document.getElementById('include-subfolders').checked;
         console.log('Browse clicked:', directory, 'Include subfolders:', includeSubfolders);
-        // TODO: Implement directory browsing functionality
-        alert('Directory browsing will be implemented in the next phase.\nDirectory: ' + directory);
+
+        // Validate directory input
+        if (!directory || directory.trim() === '') {
+            alert('Please enter a directory path.');
+            return;
+        }
+
+        // Clear existing tree
+        if (g) {
+            g.selectAll("*").remove();
+        }
+
+        // Show loading message
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('loading').textContent = 'Loading tree data from: ' + directory;
+
+        // Reload tree data with new directory
+        loadTreeData();
+    };
+
+    document.getElementById('browse-btn').addEventListener('click', browseHandler);
+
+    // Allow Enter key in directory input to trigger browse
+    document.getElementById('directory-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            browseHandler();
+        }
     });
 
     // Search functionality
@@ -1199,6 +1226,373 @@ function updateTreePath(path) {
     }
 }
 
+// ========================================
+// TAB SWITCHING FUNCTIONALITY
+// ========================================
+
+/**
+ * Initialize tab switching between Tree View and List View
+ */
+function initializeTabSwitching() {
+    const treeViewTab = document.getElementById('tree-view-tab');
+    const listViewTab = document.getElementById('list-view-tab');
+    const treeViewPanel = document.getElementById('tree-view-panel');
+    const listViewPanel = document.getElementById('list-view-panel');
+
+    // Tree View Tab Click
+    treeViewTab.addEventListener('click', function() {
+        // Update tab states
+        treeViewTab.classList.add('active');
+        listViewTab.classList.remove('active');
+
+        // Update panel visibility
+        treeViewPanel.classList.add('active');
+        treeViewPanel.style.display = 'flex';
+        listViewPanel.classList.remove('active');
+        listViewPanel.style.display = 'none';
+
+        console.log('Switched to Tree View');
+    });
+
+    // List View Tab Click
+    listViewTab.addEventListener('click', function() {
+        // Update tab states
+        listViewTab.classList.add('active');
+        treeViewTab.classList.remove('active');
+
+        // Update panel visibility
+        listViewPanel.classList.add('active');
+        listViewPanel.style.display = 'flex';
+        treeViewPanel.classList.remove('active');
+        treeViewPanel.style.display = 'none';
+
+        // Load list view data if not already loaded
+        loadListViewData();
+
+        console.log('Switched to List View');
+    });
+}
+
+// ========================================
+// LIST VIEW FUNCTIONALITY
+// ========================================
+
+// Global list view state
+let listViewData = [];
+let currentSortColumn = 'filename';
+let currentSortDirection = 'asc';
+
+/**
+ * Load YAML files data for list view
+ */
+async function loadListViewData() {
+    console.log('loadListViewData called');
+    const listLoading = document.getElementById('list-loading');
+    const listError = document.getElementById('list-error');
+    const table = document.getElementById('yaml-files-table');
+
+    if (!listLoading || !listError || !table) {
+        console.error('List view elements not found in DOM');
+        return;
+    }
+
+    // Show loading state
+    listLoading.style.display = 'block';
+    listError.style.display = 'none';
+    table.style.display = 'none';
+
+    try {
+        // Get the directory path from the input
+        const directoryInput = document.getElementById('directory-input');
+        const basePath = directoryInput ? directoryInput.value : 'src/test/resources/apex-yaml-samples/graph-100';
+
+        console.log('Base path:', basePath);
+
+        if (!basePath) {
+            throw new Error('No directory path specified');
+        }
+
+        // Construct the root file path (same as tree view)
+        const rootFile = `${basePath}/00-scenario-registry.yaml`;
+        console.log('Root file:', rootFile);
+
+        // Use the same API endpoint as tree view (use relative URL to work with any port)
+        const apiUrl = `/yaml-manager/api/dependencies/tree?rootFile=${encodeURIComponent(rootFile)}`;
+        console.log('API URL:', apiUrl);
+
+        const response = await fetch(apiUrl);
+        console.log('Response status:', response.status);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Response error:', errorText);
+            throw new Error(`Failed to load data: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('Response data:', data);
+
+        // Handle the response format (same as tree view)
+        let treeData = null;
+        if (data.status === 'success' && data.tree) {
+            treeData = data.tree;
+        } else if (data.success && data.data && data.data.tree) {
+            treeData = data.data.tree;
+        } else {
+            console.error('Invalid response format:', data);
+            throw new Error('Invalid response format');
+        }
+
+        console.log('Tree data:', treeData);
+
+        // Extract all files from the tree structure
+        listViewData = extractFilesFromTree(treeData);
+        console.log('Extracted files:', listViewData.length);
+
+        // Render the table
+        renderListView();
+
+        // Hide loading, show table
+        listLoading.style.display = 'none';
+        table.style.display = 'table';
+
+        // Update count
+        updateListCount();
+
+        console.log('List view loaded successfully');
+
+    } catch (error) {
+        console.error('Error loading list view data:', error);
+        listLoading.style.display = 'none';
+        listError.textContent = `Error: ${error.message}`;
+        listError.style.display = 'block';
+    }
+}
+
+/**
+ * Extract all files from tree structure into flat array
+ */
+function extractFilesFromTree(node, files = []) {
+    if (!node) return files;
+
+    // Add current node
+    files.push({
+        filename: node.name || 'Unknown',
+        path: node.path || '',
+        id: node.metadata?.id || '',
+        name: node.metadata?.name || '',
+        type: node.type || 'unknown',
+        author: node.metadata?.author || '',
+        description: node.metadata?.description || '',
+        version: node.metadata?.version || '',
+        rules: node.rules || 0,
+        enrichments: node.enrichments || 0,
+        circular: node.circular || false
+    });
+
+    // Recursively process children
+    if (node.children && Array.isArray(node.children)) {
+        node.children.forEach(child => extractFilesFromTree(child, files));
+    }
+
+    return files;
+}
+
+/**
+ * Render the list view table
+ */
+function renderListView() {
+    const tbody = document.getElementById('yaml-files-tbody');
+    tbody.innerHTML = '';
+
+    // Sort data
+    const sortedData = sortListData(listViewData, currentSortColumn, currentSortDirection);
+
+    // Apply search filter if any
+    const searchInput = document.getElementById('list-search-input');
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+    const filteredData = searchTerm ?
+        sortedData.filter(file =>
+            file.filename.toLowerCase().includes(searchTerm) ||
+            file.id.toLowerCase().includes(searchTerm) ||
+            file.name.toLowerCase().includes(searchTerm) ||
+            file.type.toLowerCase().includes(searchTerm) ||
+            file.description.toLowerCase().includes(searchTerm)
+        ) : sortedData;
+
+    // Render rows
+    filteredData.forEach(file => {
+        const row = createTableRow(file);
+        tbody.appendChild(row);
+    });
+
+    // Update sort indicators
+    updateSortIndicators();
+}
+
+/**
+ * Create a table row for a file
+ */
+function createTableRow(file) {
+    const row = document.createElement('tr');
+    row.dataset.path = file.path;
+
+    // Filename
+    const filenameCell = document.createElement('td');
+    filenameCell.className = 'filename';
+    filenameCell.textContent = file.filename;
+    row.appendChild(filenameCell);
+
+    // ID
+    const idCell = document.createElement('td');
+    idCell.textContent = file.id || '-';
+    row.appendChild(idCell);
+
+    // Name
+    const nameCell = document.createElement('td');
+    nameCell.textContent = file.name || '-';
+    row.appendChild(nameCell);
+
+    // Type
+    const typeCell = document.createElement('td');
+    const typeBadge = document.createElement('span');
+    typeBadge.className = `type-badge ${file.type}`;
+    typeBadge.textContent = file.type;
+    typeCell.appendChild(typeBadge);
+    row.appendChild(typeCell);
+
+    // Author
+    const authorCell = document.createElement('td');
+    authorCell.textContent = file.author || '-';
+    row.appendChild(authorCell);
+
+    // Description
+    const descCell = document.createElement('td');
+    descCell.className = 'description';
+    descCell.textContent = file.description || '-';
+    descCell.title = file.description; // Full text on hover
+    row.appendChild(descCell);
+
+    // Version
+    const versionCell = document.createElement('td');
+    versionCell.textContent = file.version || '-';
+    row.appendChild(versionCell);
+
+    // Click handler to show file content
+    row.addEventListener('click', function() {
+        // Remove previous selection
+        document.querySelectorAll('.yaml-table tbody tr').forEach(r => r.classList.remove('selected'));
+        // Add selection to clicked row
+        row.classList.add('selected');
+        // Load file content
+        loadFileContentFromPath(file.path);
+    });
+
+    return row;
+}
+
+/**
+ * Sort list data by column
+ */
+function sortListData(data, column, direction) {
+    return [...data].sort((a, b) => {
+        let aVal = a[column] || '';
+        let bVal = b[column] || '';
+
+        // Convert to lowercase for string comparison
+        if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+        if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+
+        if (aVal < bVal) return direction === 'asc' ? -1 : 1;
+        if (aVal > bVal) return direction === 'asc' ? 1 : -1;
+        return 0;
+    });
+}
+
+/**
+ * Update sort indicators in table headers
+ */
+function updateSortIndicators() {
+    // Remove all sort classes
+    document.querySelectorAll('.yaml-table th').forEach(th => {
+        th.classList.remove('sort-asc', 'sort-desc');
+    });
+
+    // Add sort class to current column
+    const currentHeader = document.querySelector(`.yaml-table th[data-column="${currentSortColumn}"]`);
+    if (currentHeader) {
+        currentHeader.classList.add(`sort-${currentSortDirection}`);
+    }
+}
+
+/**
+ * Update list count display
+ */
+function updateListCount() {
+    const listCount = document.getElementById('list-count');
+    if (listCount) {
+        listCount.textContent = `${listViewData.length} files`;
+    }
+}
+
+/**
+ * Initialize list view event handlers
+ */
+function initializeListView() {
+    // Column header click for sorting
+    document.querySelectorAll('.yaml-table th.sortable').forEach(th => {
+        th.addEventListener('click', function() {
+            const column = this.dataset.column;
+
+            // Toggle direction if same column, otherwise default to ascending
+            if (currentSortColumn === column) {
+                currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSortColumn = column;
+                currentSortDirection = 'asc';
+            }
+
+            renderListView();
+        });
+    });
+
+    // Search input
+    const searchInput = document.getElementById('list-search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            renderListView();
+        });
+    }
+
+    // Refresh button
+    const refreshBtn = document.getElementById('refresh-list-btn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
+            loadListViewData();
+        });
+    }
+}
+
+/**
+ * Load file content from path (reuse existing functionality)
+ */
+async function loadFileContentFromPath(filePath) {
+    try {
+        // Find the file in the listViewData to get its metadata
+        const fileData = listViewData.find(f => f.path === filePath);
+
+        if (fileData) {
+            // Use the existing loadFileContent function with the file's metadata
+            loadFileContent(fileData.filename, fileData);
+        } else {
+            console.warn('File not found in list view data:', filePath);
+        }
+
+    } catch (error) {
+        console.error('Error loading file content:', error);
+    }
+}
+
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
     initializeTree();
@@ -1207,6 +1601,8 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeSidebar();
     initializeContentPanel();
     initializeTooltip();
+    initializeTabSwitching();
+    initializeListView();
 
     // Global mouseup listener to re-enable tooltips
     document.addEventListener('mouseup', function() {
