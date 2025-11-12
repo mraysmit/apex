@@ -1,269 +1,172 @@
-# ============================================================================
-# APEX Financial Services Enterprise Category Examples
-# ============================================================================
-# This file demonstrates real-world enterprise category usage in a financial
-# services context, showing how categories enable enterprise governance,
-# compliance tracking, and business domain organization.
-# ============================================================================
+# Financial Services Categories
+# Comprehensive category definitions for financial services enterprise scenarios
 
 metadata:
   id: "financial-services-categories"
-  name: "Financial Services Enterprise Categories"
-  version: "2.0.0"
-  description: "Real-world financial services category examples with enterprise governance"
-  type: "enterprise-demo"
-  author: "Financial Services Architecture Team"
-  created-date: "2025-01-01"
-
-# ============================================================================
-# REGULATORY COMPLIANCE CATEGORIES
-# ============================================================================
+  name: "Financial Services Categories"
+  version: "1.0.0"
+  description: "Comprehensive financial services category definitions"
+  type: "category-config"
+  author: "APEX Demo"
 
 categories:
-  # Basel III Capital Requirements
   - name: "basel-iii-capital"
-    description: "Basel III capital adequacy and liquidity requirements"
-    priority: 1
-    enabled: true
-    business-domain: "Regulatory Compliance"
-    business-owner: "Chief Risk Officer"
-    created-by: "Basel III Implementation Team"
-    source-system: "Capital Management System"
-    effective-date: "2025-01-01T00:00:00Z"
-    expiration-date: "2027-12-31T23:59:59Z"
-    stop-on-first-failure: true
-    parallel-execution: false
-
-  # Dodd-Frank Compliance
-  - name: "dodd-frank-compliance"
-    description: "Dodd-Frank Act compliance requirements"
-    priority: 2
+    description: "Basel III capital adequacy requirements"
+    priority: 5
     enabled: true
     business-domain: "Regulatory Compliance"
     business-owner: "Chief Compliance Officer"
-    created-by: "Dodd-Frank Compliance Team"
-    source-system: "Regulatory Reporting System"
-    effective-date: "2025-01-01T00:00:00Z"
-    expiration-date: "2025-12-31T23:59:59Z"
+    created-by: "Compliance Team"
     stop-on-first-failure: true
     parallel-execution: false
 
-  # MiFID II Requirements
-  - name: "mifid-ii-compliance"
-    description: "Markets in Financial Instruments Directive II compliance"
-    priority: 3
-    enabled: true
-    business-domain: "Regulatory Compliance"
-    business-owner: "Head of European Operations"
-    created-by: "MiFID II Implementation Team"
-    source-system: "European Compliance System"
-    effective-date: "2025-01-01T00:00:00Z"
-    expiration-date: "2025-12-31T23:59:59Z"
-    stop-on-first-failure: true
-    parallel-execution: false
-
-# ============================================================================
-# RISK MANAGEMENT CATEGORIES
-# ============================================================================
-
-  # Value at Risk (VaR) Calculations
-  - name: "var-calculations"
-    description: "Value at Risk calculation and monitoring"
-    priority: 10
-    enabled: true
-    business-domain: "Market Risk Management"
-    business-owner: "Head of Market Risk"
-    created-by: "Quantitative Risk Team"
-    source-system: "Risk Management Platform"
-    effective-date: "2025-01-01T00:00:00Z"
-    expiration-date: "2025-12-31T23:59:59Z"
-    stop-on-first-failure: false
-    parallel-execution: true
-
-  # Stress Testing
-  - name: "stress-testing"
-    description: "Regulatory and internal stress testing scenarios"
+  - name: "dodd-frank-compliance"
+    description: "Dodd-Frank Act compliance rules"
     priority: 5
     enabled: true
-    business-domain: "Enterprise Risk Management"
-    business-owner: "Chief Risk Officer"
-    created-by: "Stress Testing Team"
-    source-system: "Stress Testing Platform"
-    effective-date: "2025-01-01T00:00:00Z"
-    expiration-date: "2025-12-31T23:59:59Z"
-    stop-on-first-failure: false
-    parallel-execution: true
-
-  # Credit Risk Assessment
-  - name: "credit-risk-assessment"
-    description: "Credit risk evaluation and portfolio management"
-    priority: 8
-    enabled: true
-    business-domain: "Credit Risk Management"
-    business-owner: "Head of Credit Risk"
-    created-by: "Credit Risk Analytics Team"
-    source-system: "Credit Risk System"
-    effective-date: "2025-01-01T00:00:00Z"
-    expiration-date: "2025-12-31T23:59:59Z"
-    stop-on-first-failure: false
-    parallel-execution: true
-
-# ============================================================================
-# TRADING OPERATIONS CATEGORIES
-# ============================================================================
-
-  # Pre-Trade Risk Controls
-  - name: "pre-trade-controls"
-    description: "Pre-trade risk controls and limit monitoring"
-    priority: 4
-    enabled: true
-    business-domain: "Trading Operations"
-    business-owner: "Head of Trading"
-    created-by: "Trading Risk Team"
-    source-system: "Trading Risk Platform"
-    effective-date: "2025-01-01T00:00:00Z"
-    expiration-date: "2025-12-31T23:59:59Z"
+    business-domain: "Regulatory Compliance"
+    business-owner: "Chief Compliance Officer"
+    created-by: "Compliance Team"
     stop-on-first-failure: true
     parallel-execution: false
 
-  # Post-Trade Processing
+  - name: "mifid-ii-compliance"
+    description: "MiFID II compliance requirements"
+    priority: 5
+    enabled: true
+    business-domain: "Regulatory Compliance"
+    business-owner: "Chief Compliance Officer"
+    created-by: "Compliance Team"
+    stop-on-first-failure: true
+    parallel-execution: false
+
+  - name: "var-calculations"
+    description: "Value at Risk calculations"
+    priority: 10
+    enabled: true
+    business-domain: "Risk Management"
+    business-owner: "Chief Risk Officer"
+    created-by: "Risk Team"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+  - name: "stress-testing"
+    description: "Stress testing scenarios"
+    priority: 10
+    enabled: true
+    business-domain: "Risk Management"
+    business-owner: "Chief Risk Officer"
+    created-by: "Risk Team"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+  - name: "credit-risk-assessment"
+    description: "Credit risk assessment and scoring"
+    priority: 10
+    enabled: true
+    business-domain: "Risk Management"
+    business-owner: "Chief Risk Officer"
+    created-by: "Risk Team"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+  - name: "pre-trade-controls"
+    description: "Pre-trade risk controls"
+    priority: 5
+    enabled: true
+    business-domain: "Trading"
+    business-owner: "Head of Trading"
+    created-by: "Trading Team"
+    stop-on-first-failure: true
+    parallel-execution: false
+
   - name: "post-trade-processing"
-    description: "Post-trade processing and settlement validation"
+    description: "Post-trade processing and settlement"
     priority: 15
     enabled: true
     business-domain: "Operations"
-    business-owner: "Head of Operations"
-    created-by: "Post-Trade Operations Team"
-    source-system: "Settlement System"
-    effective-date: "2025-01-01T00:00:00Z"
-    expiration-date: "2025-12-31T23:59:59Z"
+    business-owner: "Operations Manager"
+    created-by: "Operations Team"
     stop-on-first-failure: false
     parallel-execution: true
 
-  # Market Data Validation
   - name: "market-data-validation"
-    description: "Market data quality and validation controls"
-    priority: 12
-    enabled: true
-    business-domain: "Market Data Management"
-    business-owner: "Head of Market Data"
-    created-by: "Market Data Team"
-    source-system: "Market Data Platform"
-    effective-date: "2025-01-01T00:00:00Z"
-    expiration-date: "2025-12-31T23:59:59Z"
-    stop-on-first-failure: false
-    parallel-execution: true
-
-# ============================================================================
-# CLIENT MANAGEMENT CATEGORIES
-# ============================================================================
-
-  # Client Onboarding
-  - name: "client-onboarding"
-    description: "Client onboarding and KYC processes"
-    priority: 6
-    enabled: true
-    business-domain: "Client Management"
-    business-owner: "Head of Client Services"
-    created-by: "Client Onboarding Team"
-    source-system: "Client Management System"
-    effective-date: "2025-01-01T00:00:00Z"
-    expiration-date: "2025-12-31T23:59:59Z"
-    stop-on-first-failure: false
-    parallel-execution: true
-
-  # Suitability Assessment
-  - name: "suitability-assessment"
-    description: "Investment suitability and appropriateness assessment"
-    priority: 7
-    enabled: true
-    business-domain: "Wealth Management"
-    business-owner: "Head of Wealth Management"
-    created-by: "Suitability Assessment Team"
-    source-system: "Wealth Management Platform"
-    effective-date: "2025-01-01T00:00:00Z"
-    expiration-date: "2025-12-31T23:59:59Z"
-    stop-on-first-failure: false
-    parallel-execution: true
-
-# ============================================================================
-# FINANCIAL REPORTING CATEGORIES
-# ============================================================================
-
-  # Regulatory Reporting
-  - name: "regulatory-reporting"
-    description: "Regulatory reporting and disclosure requirements"
-    priority: 9
-    enabled: true
-    business-domain: "Financial Reporting"
-    business-owner: "Chief Financial Officer"
-    created-by: "Regulatory Reporting Team"
-    source-system: "Regulatory Reporting Platform"
-    effective-date: "2025-01-01T00:00:00Z"
-    expiration-date: "2025-12-31T23:59:59Z"
-    stop-on-first-failure: false
-    parallel-execution: true
-
-  # Management Reporting
-  - name: "management-reporting"
-    description: "Internal management reporting and analytics"
-    priority: 20
-    enabled: true
-    business-domain: "Management Information"
-    business-owner: "Head of Management Information"
-    created-by: "Management Reporting Team"
-    source-system: "Business Intelligence Platform"
-    effective-date: "2025-01-01T00:00:00Z"
-    expiration-date: "2025-12-31T23:59:59Z"
-    stop-on-first-failure: false
-    parallel-execution: true
-
-# ============================================================================
-# TECHNOLOGY AND DATA CATEGORIES
-# ============================================================================
-
-  # Data Quality Management
-  - name: "data-quality-management"
-    description: "Enterprise data quality standards and controls"
-    priority: 25
+    description: "Market data validation and quality checks"
+    priority: 15
     enabled: true
     business-domain: "Data Management"
-    business-owner: "Chief Data Officer"
-    created-by: "Data Quality Team"
-    source-system: "Data Quality Platform"
-    effective-date: "2025-01-01T00:00:00Z"
-    expiration-date: "2025-12-31T23:59:59Z"
+    business-owner: "Data Governance Officer"
+    created-by: "Data Team"
     stop-on-first-failure: false
     parallel-execution: true
 
-  # Cybersecurity Controls
-  - name: "cybersecurity-controls"
-    description: "Cybersecurity and information security controls"
-    priority: 11
+  - name: "client-onboarding"
+    description: "Client onboarding and KYC"
+    priority: 10
     enabled: true
-    business-domain: "Information Security"
-    business-owner: "Chief Information Security Officer"
-    created-by: "Cybersecurity Team"
-    source-system: "Security Management Platform"
-    effective-date: "2025-01-01T00:00:00Z"
-    expiration-date: "2025-12-31T23:59:59Z"
+    business-domain: "Client Services"
+    business-owner: "Client Services Manager"
+    created-by: "Client Services Team"
     stop-on-first-failure: true
     parallel-execution: false
 
-# ============================================================================
-# BUSINESS CONTINUITY CATEGORIES
-# ============================================================================
-
-  # Business Continuity Planning
-  - name: "business-continuity"
-    description: "Business continuity and disaster recovery controls"
-    priority: 13
+  - name: "suitability-assessment"
+    description: "Investment suitability assessment"
+    priority: 10
     enabled: true
-    business-domain: "Business Continuity"
-    business-owner: "Chief Operating Officer"
-    created-by: "Business Continuity Team"
-    source-system: "Business Continuity Platform"
-    effective-date: "2025-01-01T00:00:00Z"
-    expiration-date: "2025-12-31T23:59:59Z"
+    business-domain: "Wealth Management"
+    business-owner: "Wealth Management Director"
+    created-by: "Wealth Management Team"
+    stop-on-first-failure: true
+    parallel-execution: false
+
+  - name: "regulatory-reporting"
+    description: "Regulatory reporting requirements"
+    priority: 15
+    enabled: true
+    business-domain: "Compliance"
+    business-owner: "Chief Compliance Officer"
+    created-by: "Compliance Team"
     stop-on-first-failure: false
     parallel-execution: true
+
+  - name: "management-reporting"
+    description: "Management reporting and analytics"
+    priority: 20
+    enabled: true
+    business-domain: "Finance"
+    business-owner: "CFO"
+    created-by: "Finance Team"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+  - name: "data-quality-management"
+    description: "Data quality management and governance"
+    priority: 15
+    enabled: true
+    business-domain: "Data Management"
+    business-owner: "Data Governance Officer"
+    created-by: "Data Team"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+  - name: "cybersecurity-controls"
+    description: "Cybersecurity controls and monitoring"
+    priority: 5
+    enabled: true
+    business-domain: "Security"
+    business-owner: "Chief Security Officer"
+    created-by: "Security Team"
+    stop-on-first-failure: true
+    parallel-execution: true
+
+  - name: "business-continuity"
+    description: "Business continuity and disaster recovery"
+    priority: 10
+    enabled: true
+    business-domain: "Operations"
+    business-owner: "Operations Manager"
+    created-by: "Operations Team"
+    stop-on-first-failure: false
+    parallel-execution: false
+

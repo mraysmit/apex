@@ -1,0 +1,73 @@
+# ============================================================================
+# APEX Trade Validation Rules for BasicStageConfigurationTest - FAILING VERSION
+# ============================================================================
+# Validation rules designed to FAIL for testing negative scenarios
+# These rules are intentionally written to demonstrate validation failures
+# ============================================================================
+
+metadata:
+  id: "trade-validation-rules-failing"
+  name: "Trade Validation Rules - Failing Version"
+  version: "1.0.0"
+  description: "Validation rules designed to fail for negative testing"
+  type: "rule-config"
+  author: "APEX Demo"
+
+# Trade validation rules - designed to TRIGGER when data is INVALID
+# These rules return TRUE when validation FAILS, so they can report the failure
+rules:
+  - id: "trade-id-not-numeric"
+    name: "Trade ID Not Numeric"
+    description: "Triggers when trade ID contains non-numeric characters"
+    condition: "#data.tradeId == null || !#data.tradeId.toString().matches('^[0-9]+$')"
+    message: "VALIDATION FAILED: Trade ID must contain only numeric characters"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "instrument-type-not-derivative"
+    name: "Instrument Type Not Derivative"
+    description: "Triggers when instrument is not a derivative"
+    condition: "#data.instrumentType == null || (#data.instrumentType != 'SWAP' && #data.instrumentType != 'FORWARD' && #data.instrumentType != 'DERIVATIVE')"
+    message: "VALIDATION FAILED: Only derivative instruments (SWAP, FORWARD, DERIVATIVE) are allowed"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "quantity-too-small"
+    name: "Quantity Too Small"
+    description: "Triggers when quantity is under minimum requirement"
+    condition: "#data.quantity == null || T(java.lang.Double).parseDouble(#data.quantity.toString()) <= 10000"
+    message: "VALIDATION FAILED: Quantity must be greater than 10,000 units"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "price-too-low"
+    name: "Price Too Low"
+    description: "Triggers when price is under minimum requirement"
+    condition: "#data.price == null || T(java.lang.Double).parseDouble(#data.price.toString()) <= 1000"
+    message: "VALIDATION FAILED: Price must be greater than 1,000"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "currency-not-exotic"
+    name: "Currency Not Exotic"
+    description: "Triggers when currency is not exotic"
+    condition: "#data.currency == null || (#data.currency != 'JPY' && #data.currency != 'CHF' && #data.currency != 'SEK' && #data.currency != 'NOK')"
+    message: "VALIDATION FAILED: Only exotic currencies (JPY, CHF, SEK, NOK) are allowed"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "counterparty-not-bank"
+    name: "Counterparty Not Bank"
+    description: "Triggers when counterparty is not a recognized bank"
+    condition: "#data.counterparty == null || (!#data.counterparty.toString().contains('BANK') && !#data.counterparty.toString().contains('CREDIT'))"
+    message: "VALIDATION FAILED: Counterparty must be a recognized bank (name must contain 'BANK' or 'CREDIT')"
+    severity: "WARNING"
+    enabled: true
+
+  - id: "trade-date-not-future"
+    name: "Trade Date Not Future"
+    description: "Triggers when trade date is not in the future"
+    condition: "#data.tradeDate == null || !T(java.time.LocalDate).parse(#data.tradeDate.toString()).isAfter(T(java.time.LocalDate).now())"
+    message: "VALIDATION FAILED: Trade date must be in the future"
+    severity: "ERROR"
+    enabled: true

@@ -1,0 +1,32 @@
+# Backward Compatibility Scenario
+# Scenario with regular (non-component) config files to test backward compatibility
+
+metadata:
+  id: "backward-compatibility-test"
+  name: "Backward Compatibility Test"
+  version: "1.0.0"
+  description: "Test scenario with regular config files (non-component)"
+  type: "scenario"
+  business-domain: "Testing"
+  owner: "test@example.com"
+
+scenario:
+  scenario-id: "backward-compatibility-test"
+  name: "Backward Compatibility Test"
+  description: "Test backward compatibility with non-component scenarios"
+  
+  data-types:
+    - "Trade"
+    - "java.util.Map"
+  
+  processing-stages:
+    # Stage 1: Regular validation rules (non-component)
+    - stage-name: "validation"
+      config-file: "dev/mars/apex/demo/scenario/ComponentScenarioTest-validation-config.yaml"
+      execution-order: 1
+      failure-policy: "terminate"
+      required: true
+      stage-metadata:
+        description: "Regular validation rules"
+        sla-ms: 1000
+

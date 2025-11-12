@@ -267,8 +267,13 @@ public class ComponentLoader {
      * Check if a file is a component file by loading and checking its type.
      */
     private boolean isComponentFile(String filePath) throws IOException {
-        ComponentConfiguration component = loadComponentFile(filePath);
-        return "component".equals(component.getType());
+        try {
+            ComponentConfiguration component = loadComponentFile(filePath);
+            return "component".equals(component.getType());
+        } catch (Exception e) {
+            // If we can't load it as a component, it's not a component file
+            return false;
+        }
     }
 
     /**

@@ -1,0 +1,61 @@
+# ================================================================================
+# APEX Configuration File
+# ================================================================================
+# Type: Validation Configuration
+# Purpose: Validation rules for ComponentScenarioTest
+# Description: Validation rules that match the test data structure
+# ================================================================================
+
+metadata:
+  id: "component-test-validation-config"
+  name: "Component Test Validation Configuration"
+  version: "1.0.0"
+  type: "validation-config"
+
+# Validation rules matching test data structure
+validation-rules:
+  - id: "validate-trade-id"
+    name: "Validate Trade ID"
+    description: "Ensure trade ID is present"
+    field: "tradeId"
+    condition: "#data.tradeId != null && !#data.tradeId.toString().isEmpty()"
+    error-message: "Trade ID is required"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "validate-amount"
+    name: "Validate Amount"
+    description: "Ensure amount is present and positive"
+    field: "amount"
+    condition: "#data.amount != null && T(java.lang.Double).parseDouble(#data.amount.toString()) > 0"
+    error-message: "Amount must be positive"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "validate-currency"
+    name: "Validate Currency"
+    description: "Ensure currency is present"
+    field: "currency"
+    condition: "#data.currency != null && !#data.currency.toString().isEmpty()"
+    error-message: "Currency is required"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "validate-counterparty"
+    name: "Validate Counterparty"
+    description: "Ensure counterparty is present"
+    field: "counterparty"
+    condition: "#data.counterparty != null && !#data.counterparty.toString().isEmpty()"
+    error-message: "Counterparty is required"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "validate-trade-type"
+    name: "Validate Trade Type"
+    description: "Ensure trade type is present"
+    field: "tradeType"
+    condition: "#data.tradeType != null && !#data.tradeType.toString().isEmpty()"
+    error-message: "Trade type is required"
+    severity: "ERROR"
+    enabled: true
+

@@ -368,6 +368,11 @@ public class ScenarioRegistryLoader {
         }
         stage.setConfigFile(configFile);
 
+        // Detect and log if this is a component file
+        if (configFile != null) {
+            validateAndLogComponentFile(configFile, stageName);
+        }
+
         // Set failure policy
         stage.setFailurePolicy((String) stageData.get("failure-policy"));
 
@@ -414,6 +419,34 @@ public class ScenarioRegistryLoader {
         }
 
         return stage;
+    }
+
+    /**
+     * Validate and log component file detection.
+     *
+     * <p>This method checks if a config file is a component file and logs the detection.
+     * It also validates that the component file exists and is accessible.</p>
+     *
+     * @param configFile The config file path to check
+     * @param stageName The stage name (for logging)
+     */
+    private void validateAndLogComponentFile(String configFile, String stageName) {
+        try {
+            // Check if this is a component file
+            if (configLoader.isComponentFile(configFile)) {
+                logger.info("Stage '{}' references a component file: {}", stageName, configFile);
+
+                // Validate that the component file exists and is accessible
+                // The isComponentFile() method already loads the file, so if we get here, it exists
+                logger.debug("Component file '{}' validated successfully", configFile);
+            } else {
+                logger.debug("Stage '{}' references a regular config file: {}", stageName, configFile);
+            }
+        } catch (Exception e) {
+            // Log warning but don't fail - the actual validation will happen at execution time
+            logger.warn("Unable to validate config file '{}' for stage '{}': {}",
+                       configFile, stageName, e.getMessage());
+        }
     }
 }
 

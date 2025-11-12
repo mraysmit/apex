@@ -1,0 +1,17 @@
+# Invalid Component - Wrong Type
+# Component with incorrect 'type' field (for validation testing)
+
+metadata:
+  id: "invalid-component-wrong-type"
+  name: "Invalid Component - Wrong Type"
+  version: "1.0.0"
+  description: "Component with wrong type field"
+  type: "rule-config"  # Should be "component"
+  business-domain: "testing"
+  owner: "APEX Demo Team"
+
+rule-configurations:
+  - file: "BasicStageConfigurationTest-validation-rules.yaml"
+    execution-order: 1
+    failure-policy: "terminate"
+

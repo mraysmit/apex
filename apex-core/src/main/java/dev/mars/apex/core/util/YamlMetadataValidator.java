@@ -71,7 +71,8 @@ public class YamlMetadataValidator {
         "enrichment",
         "rule-chain",
         "external-data-config",
-        "pipeline"
+        "pipeline",
+        "component"
     );
 
     // Valid failure policies for scenario stages

@@ -1,0 +1,34 @@
+# ================================================================================
+# APEX Configuration File
+# ================================================================================
+# Type: Enrichment Configuration
+# Purpose: Simple enrichments for ComponentScenarioTest
+# Description: Enrichments that add computed fields to trade data
+# ================================================================================
+
+metadata:
+  id: "component-test-enrichment-config"
+  name: "Component Test Enrichment Configuration"
+  version: "1.0.0"
+  type: "enrichment-config"
+
+# Simple enrichments that add computed fields
+enrichments:
+  - id: "add-trade-value"
+    name: "Calculate Trade Value"
+    description: "Calculate total trade value from amount"
+    type: "field-enrichment"
+    target-field: "tradeValue"
+    source-field: "amount"
+    condition: "#data.amount != null"
+    enabled: true
+
+  - id: "add-risk-category"
+    name: "Determine Risk Category"
+    description: "Categorize trade by amount"
+    type: "calculation-enrichment"
+    target-field: "riskCategory"
+    value: "#data.amount != null && T(java.lang.Double).parseDouble(#data.amount.toString()) > 500000 ? 'HIGH' : 'LOW'"
+    condition: "#data.amount != null"
+    enabled: true
+

@@ -1,0 +1,32 @@
+# Multi-Stage Component Scenario
+# Scenario with a component that has multiple stages (enrichment + validation)
+
+metadata:
+  id: "multi-stage-component-test"
+  name: "Multi-Stage Component Test"
+  version: "1.0.0"
+  description: "Test scenario with multi-stage component (enrichment + validation)"
+  type: "scenario"
+  business-domain: "Testing"
+  owner: "test@example.com"
+
+scenario:
+  scenario-id: "multi-stage-component-test"
+  name: "Multi-Stage Component Test"
+  description: "Test scenario with multi-stage component"
+  
+  data-types:
+    - "Trade"
+    - "java.util.Map"
+  
+  processing-stages:
+    # Stage 1: Multi-stage component (enrichment + validation)
+    - stage-name: "processing"
+      config-file: "dev/mars/apex/demo/scenario/multi-stage-component.yaml"
+      execution-order: 1
+      failure-policy: "terminate"
+      required: true
+      stage-metadata:
+        description: "Multi-stage processing using component"
+        sla-ms: 2000
+

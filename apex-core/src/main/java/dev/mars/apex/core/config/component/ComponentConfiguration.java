@@ -16,6 +16,7 @@ package dev.mars.apex.core.config.component;
  * limitations under the License.
  */
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -49,24 +50,21 @@ public class ComponentConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(ComponentConfiguration.class);
 
-    // Metadata fields
-    private String id;
-    private String name;
-    private String type;  // Must be "component"
-    private String version;
-    private String description;
-    private String businessDomain;
-    private String owner;
-    private String criticality;
-    private Integer slaMs;
-    private List<String> tags;
-    private String documentationUrl;
-    private Map<String, Object> metadata;
+    // Metadata section
+    @JsonProperty("metadata")
+    private Metadata metadata;
 
     // File references with execution order and failure policy
+    @JsonProperty("rule-configurations")
     private List<FileReference> ruleConfigurations;
+
+    @JsonProperty("enrichment-refs")
     private List<FileReference> enrichmentRefs;
+
+    @JsonProperty("component-refs")
     private List<FileReference> componentRefs;
+
+    @JsonProperty("config-files")
     private List<FileReference> configFiles;
 
     // Constructors
@@ -75,17 +73,176 @@ public class ComponentConfiguration {
         this.enrichmentRefs = new ArrayList<>();
         this.componentRefs = new ArrayList<>();
         this.configFiles = new ArrayList<>();
-        this.tags = new ArrayList<>();
-        this.metadata = new HashMap<>();
+        this.metadata = new Metadata();
+    }
+
+    /**
+     * Nested class representing component metadata.
+     */
+    public static class Metadata {
+        @JsonProperty("id")
+        private String id;
+
+        @JsonProperty("name")
+        private String name;
+
+        @JsonProperty("type")
+        private String type;  // Must be "component"
+
+        @JsonProperty("version")
+        private String version;
+
+        @JsonProperty("description")
+        private String description;
+
+        @JsonProperty("business-domain")
+        private String businessDomain;
+
+        @JsonProperty("owner")
+        private String owner;
+
+        @JsonProperty("criticality")
+        private String criticality;
+
+        @JsonProperty("sla-ms")
+        private Integer slaMs;
+
+        @JsonProperty("tags")
+        private List<String> tags;
+
+        @JsonProperty("documentation-url")
+        private String documentationUrl;
+
+        @JsonProperty("author")
+        private String author;
+
+        @JsonProperty("created")
+        private String created;
+
+        public Metadata() {
+            this.tags = new ArrayList<>();
+        }
+
+        // Getters and setters
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getVersion() {
+            return version;
+        }
+
+        public void setVersion(String version) {
+            this.version = version;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public String getBusinessDomain() {
+            return businessDomain;
+        }
+
+        public void setBusinessDomain(String businessDomain) {
+            this.businessDomain = businessDomain;
+        }
+
+        public String getOwner() {
+            return owner;
+        }
+
+        public void setOwner(String owner) {
+            this.owner = owner;
+        }
+
+        public String getCriticality() {
+            return criticality;
+        }
+
+        public void setCriticality(String criticality) {
+            this.criticality = criticality;
+        }
+
+        public Integer getSlaMs() {
+            return slaMs;
+        }
+
+        public void setSlaMs(Integer slaMs) {
+            this.slaMs = slaMs;
+        }
+
+        public List<String> getTags() {
+            return tags;
+        }
+
+        public void setTags(List<String> tags) {
+            this.tags = tags != null ? tags : new ArrayList<>();
+        }
+
+        public String getDocumentationUrl() {
+            return documentationUrl;
+        }
+
+        public void setDocumentationUrl(String documentationUrl) {
+            this.documentationUrl = documentationUrl;
+        }
+
+        public String getAuthor() {
+            return author;
+        }
+
+        public void setAuthor(String author) {
+            this.author = author;
+        }
+
+        public String getCreated() {
+            return created;
+        }
+
+        public void setCreated(String created) {
+            this.created = created;
+        }
     }
 
     /**
      * Nested class representing a file reference with optional execution order and failure policy.
      */
     public static class FileReference {
+        @JsonProperty("file")
         private String file;
+
+        @JsonProperty("execution-order")
         private Integer executionOrder;  // Optional: null means use document order
+
+        @JsonProperty("failure-policy")
         private String failurePolicy;    // Optional: null means inherit from stage
+
+        @JsonProperty("document-position")
         private int documentPosition;    // Internal: position in YAML document
 
         public FileReference() {}
@@ -216,23 +373,28 @@ public class ComponentConfiguration {
      * @throws IllegalStateException if validation fails
      */
     public void validate() {
+        // Validate metadata exists
+        if (metadata == null) {
+            throw new IllegalStateException("Component 'metadata' section is required");
+        }
+
         // Validate required fields
-        if (id == null || id.trim().isEmpty()) {
+        if (metadata.getId() == null || metadata.getId().trim().isEmpty()) {
             throw new IllegalStateException("Component 'id' is required");
         }
-        if (type == null || !type.equals("component")) {
-            throw new IllegalStateException("Component 'type' must be 'component', found: " + type);
+        if (metadata.getType() == null || !metadata.getType().equals("component")) {
+            throw new IllegalStateException("Component 'type' must be 'component', found: " + metadata.getType());
         }
 
         // Validate that component has at least one file reference
         if (getAllReferences().isEmpty()) {
-            throw new IllegalStateException("Component '" + id + "' must have at least one file reference");
+            throw new IllegalStateException("Component '" + metadata.getId() + "' must have at least one file reference");
         }
 
         // Validate file references
         for (FileReference ref : getAllReferences()) {
             if (ref.getFile() == null || ref.getFile().trim().isEmpty()) {
-                throw new IllegalStateException("Component '" + id + "' has file reference with missing 'file' field");
+                throw new IllegalStateException("Component '" + metadata.getId() + "' has file reference with missing 'file' field");
             }
 
             // Validate failure policy if specified
@@ -240,7 +402,7 @@ public class ComponentConfiguration {
                 String policy = ref.getFailurePolicy();
                 if (!isValidFailurePolicy(policy)) {
                     throw new IllegalStateException(
-                        "Component '" + id + "' has invalid failure-policy: " + policy + 
+                        "Component '" + metadata.getId() + "' has invalid failure-policy: " + policy +
                         ". Valid values: terminate, continue-with-warnings, flag-for-review");
                 }
             }
@@ -255,98 +417,131 @@ public class ComponentConfiguration {
 
     // Getters and Setters
     public String getId() {
-        return id;
+        return metadata != null ? metadata.getId() : null;
     }
 
     public void setId(String id) {
-        this.id = id;
+        if (metadata == null) {
+            metadata = new Metadata();
+        }
+        metadata.setId(id);
     }
 
     public String getName() {
-        return name;
+        return metadata != null ? metadata.getName() : null;
     }
 
     public void setName(String name) {
-        this.name = name;
+        if (metadata == null) {
+            metadata = new Metadata();
+        }
+        metadata.setName(name);
     }
 
     public String getType() {
-        return type;
+        return metadata != null ? metadata.getType() : null;
     }
 
     public void setType(String type) {
-        this.type = type;
+        if (metadata == null) {
+            metadata = new Metadata();
+        }
+        metadata.setType(type);
     }
 
     public String getVersion() {
-        return version;
+        return metadata != null ? metadata.getVersion() : null;
     }
 
     public void setVersion(String version) {
-        this.version = version;
+        if (metadata == null) {
+            metadata = new Metadata();
+        }
+        metadata.setVersion(version);
     }
 
     public String getDescription() {
-        return description;
+        return metadata != null ? metadata.getDescription() : null;
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        if (metadata == null) {
+            metadata = new Metadata();
+        }
+        metadata.setDescription(description);
     }
 
     public String getBusinessDomain() {
-        return businessDomain;
+        return metadata != null ? metadata.getBusinessDomain() : null;
     }
 
     public void setBusinessDomain(String businessDomain) {
-        this.businessDomain = businessDomain;
+        if (metadata == null) {
+            metadata = new Metadata();
+        }
+        metadata.setBusinessDomain(businessDomain);
     }
 
     public String getOwner() {
-        return owner;
+        return metadata != null ? metadata.getOwner() : null;
     }
 
     public void setOwner(String owner) {
-        this.owner = owner;
+        if (metadata == null) {
+            metadata = new Metadata();
+        }
+        metadata.setOwner(owner);
     }
 
     public String getCriticality() {
-        return criticality;
+        return metadata != null ? metadata.getCriticality() : null;
     }
 
     public void setCriticality(String criticality) {
-        this.criticality = criticality;
+        if (metadata == null) {
+            metadata = new Metadata();
+        }
+        metadata.setCriticality(criticality);
     }
 
     public Integer getSlaMs() {
-        return slaMs;
+        return metadata != null ? metadata.getSlaMs() : null;
     }
 
     public void setSlaMs(Integer slaMs) {
-        this.slaMs = slaMs;
+        if (metadata == null) {
+            metadata = new Metadata();
+        }
+        metadata.setSlaMs(slaMs);
     }
 
     public List<String> getTags() {
-        return tags;
+        return metadata != null ? metadata.getTags() : new ArrayList<>();
     }
 
     public void setTags(List<String> tags) {
-        this.tags = tags;
+        if (metadata == null) {
+            metadata = new Metadata();
+        }
+        metadata.setTags(tags);
     }
 
     public String getDocumentationUrl() {
-        return documentationUrl;
+        return metadata != null ? metadata.getDocumentationUrl() : null;
     }
 
     public void setDocumentationUrl(String documentationUrl) {
-        this.documentationUrl = documentationUrl;
+        if (metadata == null) {
+            metadata = new Metadata();
+        }
+        metadata.setDocumentationUrl(documentationUrl);
     }
 
-    public Map<String, Object> getMetadata() {
+    public Metadata getMetadata() {
         return metadata;
     }
 
-    public void setMetadata(Map<String, Object> metadata) {
+    public void setMetadata(Metadata metadata) {
         this.metadata = metadata;
     }
 
@@ -385,11 +580,11 @@ public class ComponentConfiguration {
     @Override
     public String toString() {
         return "ComponentConfiguration{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", type='" + type + '\'' +
-                ", version='" + version + '\'' +
-                ", businessDomain='" + businessDomain + '\'' +
+                "id='" + getId() + '\'' +
+                ", name='" + getName() + '\'' +
+                ", type='" + getType() + '\'' +
+                ", version='" + getVersion() + '\'' +
+                ", businessDomain='" + getBusinessDomain() + '\'' +
                 ", totalReferences=" + getAllReferences().size() +
                 ", ruleConfigurations=" + ruleConfigurations.size() +
                 ", enrichmentRefs=" + enrichmentRefs.size() +

@@ -762,9 +762,18 @@ public class YamlEnrichmentProcessor {
                            "', default-value='" + mapping.getDefaultValue() + "'");
 
                 Object sourceValue = null;
+                boolean isConstantMapping = "constant".equals(mapping.getSourceField());
 
-                // For failed lookups, don't try to extract source values
-                if (!isFailedLookup) {
+                // For constant mappings, skip field lookup and directly evaluate expression
+                if (isConstantMapping) {
+                    logger.debug("Constant mapping detected, will evaluate expression directly");
+                    // For constant mappings, expression/transformation is required
+                    if (mapping.getExpression() == null || mapping.getExpression().trim().isEmpty()) {
+                        logger.error("FIELD MAPPING FAILED: source-field 'constant' requires 'expression' or 'transformation' to be specified for target-field '" + mapping.getTargetField() + "'");
+                        continue;
+                    }
+                } else if (!isFailedLookup) {
+                    // For non-constant mappings, extract source value from source object
                     sourceValue = getFieldValue(sourceObject, mapping.getSourceField());
                     logger.debug("Source value for '" + mapping.getSourceField() + "': " + sourceValue);
 

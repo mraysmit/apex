@@ -1,5 +1,6 @@
 package dev.mars.apex.core.config.yaml;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.mars.apex.core.constants.SeverityConstants;
 
@@ -390,6 +391,7 @@ public class YamlEnrichment {
         private String targetField;
 
         @JsonProperty("expression")
+        @JsonAlias("transformation")  // Allow "transformation" as an alias for "expression"
         private String expression; // SpEL expression for field transformation
 
         @JsonProperty("default-value")
@@ -426,15 +428,6 @@ public class YamlEnrichment {
 
         public void setExpression(String expression) {
             this.expression = expression;
-        }
-
-        /**
-         * Alias for setExpression to support legacy YAML configurations using "transformation".
-         * @param transformation The transformation expression (alias for expression)
-         */
-        @JsonProperty("transformation")
-        public void setTransformation(String transformation) {
-            this.expression = transformation;
         }
 
         public Object getDefaultValue() {
@@ -952,6 +945,7 @@ public class YamlEnrichment {
         private String sourceField;
 
         @JsonProperty("expression")
+        @JsonAlias("transformation")  // Allow "transformation" as an alias for "expression"
         private String expression;
 
         @JsonProperty("fallback-value")
@@ -986,15 +980,6 @@ public class YamlEnrichment {
 
         public void setExpression(String expression) {
             this.expression = expression;
-        }
-
-        /**
-         * Alias for setExpression to support legacy YAML configurations using "transformation".
-         * @param transformation The transformation expression (alias for expression)
-         */
-        @JsonProperty("transformation")
-        public void setTransformation(String transformation) {
-            this.expression = transformation;
         }
 
         public String getFallbackValue() {

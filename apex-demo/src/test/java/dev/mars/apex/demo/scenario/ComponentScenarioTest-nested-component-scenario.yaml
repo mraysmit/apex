@@ -1,0 +1,32 @@
+# Nested Component Scenario
+# Scenario with a nested component (component that references another component)
+
+metadata:
+  id: "nested-component-test"
+  name: "Nested Component Test"
+  version: "1.0.0"
+  description: "Test scenario with nested component references"
+  type: "scenario"
+  business-domain: "Testing"
+  owner: "test@example.com"
+
+scenario:
+  scenario-id: "nested-component-test"
+  name: "Nested Component Test"
+  description: "Test scenario with nested component"
+  
+  data-types:
+    - "Trade"
+    - "java.util.Map"
+  
+  processing-stages:
+    # Stage 1: Nested component (references another component)
+    - stage-name: "nested-processing"
+      config-file: "dev/mars/apex/demo/scenario/nested-component-level1.yaml"
+      execution-order: 1
+      failure-policy: "terminate"
+      required: true
+      stage-metadata:
+        description: "Nested component processing"
+        sla-ms: 3000
+

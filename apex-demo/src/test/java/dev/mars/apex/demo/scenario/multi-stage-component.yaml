@@ -1,0 +1,28 @@
+# Multi-Stage Component
+# Component with enrichment and validation stages
+
+metadata:
+  id: "multi-stage-component"
+  name: "Multi-Stage Processing Component"
+  version: "1.0.0"
+  description: "Component with enrichment followed by validation"
+  type: "component"
+  business-domain: "data-processing"
+  owner: "APEX Demo Team"
+  criticality: "high"
+  sla-ms: 200
+  tags:
+    - enrichment
+    - validation
+    - multi-stage
+  documentation-url: "https://apex-docs.example.com/components/multi-stage"
+
+# Configuration files (execute in order)
+config-files:
+  - file: "dev/mars/apex/demo/scenario/ComponentScenarioTest-enrichment-config.yaml"
+    execution-order: 1
+    failure-policy: "continue-with-warnings"
+  - file: "dev/mars/apex/demo/scenario/ComponentScenarioTest-validation-config.yaml"
+    execution-order: 2
+    failure-policy: "terminate"
+

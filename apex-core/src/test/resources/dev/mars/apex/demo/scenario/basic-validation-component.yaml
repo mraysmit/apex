@@ -1,0 +1,25 @@
+# Basic Validation Component
+# Simple component with validation rules only
+
+metadata:
+  id: "basic-validation-component"
+  name: "Basic Validation Component"
+  version: "1.0.0"
+  description: "Simple component containing basic validation rules"
+  type: "component"
+  business-domain: "validation"
+  owner: "APEX Demo Team"
+  criticality: "medium"
+  sla-ms: 100
+  tags:
+    - validation
+    - basic
+    - demo
+  documentation-url: "https://apex-docs.example.com/components/basic-validation"
+
+# Rule configuration files
+rule-configurations:
+  - file: "BasicStageConfigurationTest-validation-rules.yaml"
+    execution-order: 1
+    failure-policy: "terminate"
+

@@ -1,0 +1,28 @@
+# Nested Component - Level 1 (Top Level)
+# Component that references another component
+
+metadata:
+  id: "nested-component-level1"
+  name: "Nested Component Level 1"
+  version: "1.0.0"
+  description: "Top-level component that references nested components"
+  type: "component"
+  business-domain: "testing"
+  owner: "APEX Demo Team"
+  criticality: "medium"
+  sla-ms: 300
+  tags:
+    - testing
+    - nesting
+    - level1
+  documentation-url: "https://apex-docs.example.com/components/nested-level1"
+
+# Configuration files (nested component + validation)
+config-files:
+  - file: "dev/mars/apex/demo/scenario/nested-component-level2.yaml"
+    execution-order: 1
+    failure-policy: "terminate"
+  - file: "dev/mars/apex/demo/scenario/ComponentScenarioTest-validation-config.yaml"
+    execution-order: 2
+    failure-policy: "terminate"
+

@@ -1,0 +1,28 @@
+# Component Scenario Test Registry
+# Registry file for component integration tests
+
+metadata:
+  id: "component-scenario-test-registry"
+  name: "Component Scenario Test Registry"
+  version: "1.0.0"
+  description: "Test scenario registry for component integration tests"
+  type: "scenario-registry"
+  created-by: "test@example.com"
+
+scenarios:
+  - scenario-id: "simple-component-test"
+    config-file: "src/test/java/dev/mars/apex/demo/scenario/ComponentScenarioTest-simple-component-scenario.yaml"
+
+  - scenario-id: "multi-stage-component-test"
+    config-file: "src/test/java/dev/mars/apex/demo/scenario/ComponentScenarioTest-multi-stage-component-scenario.yaml"
+
+  - scenario-id: "nested-component-test"
+    config-file: "src/test/java/dev/mars/apex/demo/scenario/ComponentScenarioTest-nested-component-scenario.yaml"
+
+  - scenario-id: "backward-compatibility-test"
+    config-file: "src/test/java/dev/mars/apex/demo/scenario/ComponentScenarioTest-backward-compatibility-scenario.yaml"
+
+routing:
+  strategy: "type-based"
+  default-scenario: "simple-component-test"
+
