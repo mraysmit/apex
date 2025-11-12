@@ -3,6 +3,8 @@ package dev.mars.apex.core.config.yaml;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import dev.mars.apex.core.config.component.ComponentConfiguration;
+import dev.mars.apex.core.config.component.ComponentLoader;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.service.data.external.DataSourceResolver;
 import dev.mars.apex.core.service.data.external.ExternalDataSourceConfig;
@@ -350,6 +352,46 @@ public class YamlConfigurationLoader {
 
         String type = (String) typeObj;
         logger.debug("Validated YAML file type '" + type + "' for file: " + filePath);
+    }
+
+    /**
+     * Check if a YAML file is a component file by examining its type field.
+     *
+     * @param filePath The path to the YAML file
+     * @return true if the file has type="component", false otherwise
+     */
+    public boolean isComponentFile(String filePath) {
+        try {
+            Map<String, Object> yamlContent = loadAsMap(filePath);
+            Object metadataObj = yamlContent.get("metadata");
+
+            if (metadataObj instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> metadata = (Map<String, Object>) metadataObj;
+                Object typeObj = metadata.get("type");
+
+                if (typeObj instanceof String) {
+                    return "component".equals(typeObj);
+                }
+            }
+
+            return false;
+        } catch (Exception e) {
+            logger.debug("Failed to check if file is component: " + filePath, e);
+            return false;
+        }
+    }
+
+    /**
+     * Load a component configuration file.
+     *
+     * @param componentFilePath The path to the component YAML file
+     * @return The loaded component configuration
+     * @throws YamlConfigurationException if loading fails
+     */
+    public ComponentConfiguration loadComponentFile(String componentFilePath) throws YamlConfigurationException {
+        ComponentLoader loader = new ComponentLoader();
+        return loader.loadComponent(componentFilePath);
     }
 
     /**

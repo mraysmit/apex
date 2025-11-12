@@ -16,6 +16,9 @@ package dev.mars.apex.core.service.scenario;
  * limitations under the License.
  */
 
+import dev.mars.apex.core.config.component.ComponentConfiguration;
+import dev.mars.apex.core.config.component.ComponentLoader;
+import dev.mars.apex.core.config.yaml.YamlConfigurationException;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
@@ -25,6 +28,7 @@ import dev.mars.apex.core.util.TestAwareLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -178,7 +182,7 @@ public class ScenarioStageExecutor {
     
     /**
      * Executes a single stage.
-     * 
+     *
      * @param stage the stage to execute
      * @param data the input data
      * @param context the execution context
@@ -186,7 +190,7 @@ public class ScenarioStageExecutor {
      */
     private StageExecutionResult executeStage(ScenarioStage stage, Object data, ScenarioExecutionResult context) {
         logger.info("Executing stage '{}' with config: {}", stage.getStageName(), stage.getConfigFile());
-        
+
         try {
             // Validate stage configuration
             List<String> validationErrors = stage.validate();
@@ -195,55 +199,190 @@ public class ScenarioStageExecutor {
                 TestAwareLogger.warn(logger, "Configuration error in stage '{}': {}", stage.getStageName(), errorMessage);
                 return StageExecutionResult.configurationError(stage.getStageName(), errorMessage);
             }
-            
-            // Load stage configuration with file-system first, then classpath fallback
-            YamlRuleConfiguration stageConfig;
-            try {
-                stageConfig = configLoader.loadFromFile(stage.getConfigFile());
-            } catch (dev.mars.apex.core.config.yaml.YamlConfigurationException e) {
-                // Fallback: treat path as classpath resource (tests/resources)
-                stageConfig = configLoader.loadFromClasspath(stage.getConfigFile());
+
+            // Check if config file is a component
+            if (configLoader.isComponentFile(stage.getConfigFile())) {
+                // Handle component file - expand and execute all referenced files
+                return executeComponentStage(stage, data, context);
+            } else {
+                // Handle regular config file
+                return executeRegularStage(stage, data, context);
             }
 
-            // Create rules engine for this stage
-            RulesEngine stageEngine = new RulesEngine(
-                ruleFactory.createRulesEngineConfiguration(stageConfig)
-            );
-            
-            // Create facts map with data and context
-            Map<String, Object> facts = createFactsMap(data, context);
-            
-            // Execute stage rules using the unified evaluation method
-            RuleResult ruleResult = stageEngine.evaluate(stageConfig, facts);
-            
-            // Create stage result based on rule execution
-            if (ruleResult.isSuccess()) {
-                StageExecutionResult stageResult = StageExecutionResult.success(stage.getStageName(), ruleResult);
-                
-                // Add enriched data as stage outputs if available
-                if (ruleResult.getEnrichedData() != null && !ruleResult.getEnrichedData().isEmpty()) {
-                    stageResult.setStageOutputs(ruleResult.getEnrichedData());
-                }
-                
-                return stageResult;
-            } else {
-                String errorMessage = "Stage execution failed: " + ruleResult.getMessage();
-                if (!ruleResult.getFailureMessages().isEmpty()) {
-                    errorMessage += " - " + String.join(", ", ruleResult.getFailureMessages());
-                }
-                
-                return stage.isRequired() ? 
-                    StageExecutionResult.criticalFailure(stage.getStageName(), errorMessage) :
-                    StageExecutionResult.nonCriticalFailure(stage.getStageName(), errorMessage);
-            }
-            
         } catch (Exception e) {
             TestAwareLogger.error(logger, "Error executing stage '{}': {}", stage.getStageName(), e.getMessage(), e);
-            
+
             String errorMessage = "Stage execution exception: " + e.getMessage();
-            return stage.isRequired() ? 
+            return stage.isRequired() ?
                 StageExecutionResult.criticalFailure(stage.getStageName(), errorMessage) :
                 StageExecutionResult.failure(stage.getStageName(), errorMessage);
+        }
+    }
+
+    /**
+     * Executes a stage with a regular configuration file.
+     */
+    private StageExecutionResult executeRegularStage(ScenarioStage stage, Object data, ScenarioExecutionResult context)
+            throws YamlConfigurationException {
+
+        // Load stage configuration with file-system first, then classpath fallback
+        YamlRuleConfiguration stageConfig;
+        try {
+            stageConfig = configLoader.loadFromFile(stage.getConfigFile());
+        } catch (dev.mars.apex.core.config.yaml.YamlConfigurationException e) {
+            // Fallback: treat path as classpath resource (tests/resources)
+            stageConfig = configLoader.loadFromClasspath(stage.getConfigFile());
+        }
+
+        // Create rules engine for this stage
+        RulesEngine stageEngine = new RulesEngine(
+            ruleFactory.createRulesEngineConfiguration(stageConfig)
+        );
+
+        // Create facts map with data and context
+        Map<String, Object> facts = createFactsMap(data, context);
+
+        // Execute stage rules using the unified evaluation method
+        RuleResult ruleResult = stageEngine.evaluate(stageConfig, facts);
+
+        // Create stage result based on rule execution
+        if (ruleResult.isSuccess()) {
+            StageExecutionResult stageResult = StageExecutionResult.success(stage.getStageName(), ruleResult);
+
+            // Add enriched data as stage outputs if available
+            if (ruleResult.getEnrichedData() != null && !ruleResult.getEnrichedData().isEmpty()) {
+                stageResult.setStageOutputs(ruleResult.getEnrichedData());
+            }
+
+            return stageResult;
+        } else {
+            String errorMessage = "Stage execution failed: " + ruleResult.getMessage();
+            if (!ruleResult.getFailureMessages().isEmpty()) {
+                errorMessage += " - " + String.join(", ", ruleResult.getFailureMessages());
+            }
+
+            return stage.isRequired() ?
+                StageExecutionResult.criticalFailure(stage.getStageName(), errorMessage) :
+                StageExecutionResult.nonCriticalFailure(stage.getStageName(), errorMessage);
+        }
+    }
+
+    /**
+     * Executes a stage with a component configuration file.
+     * Expands the component and executes all referenced files in order.
+     */
+    private StageExecutionResult executeComponentStage(ScenarioStage stage, Object data, ScenarioExecutionResult context)
+            throws YamlConfigurationException, IOException {
+
+        logger.info("Stage '{}' references a component file - expanding component", stage.getStageName());
+
+        // Load the component
+        ComponentLoader componentLoader = new ComponentLoader();
+        ComponentConfiguration component = componentLoader.loadComponent(stage.getConfigFile());
+
+        logger.info("Component '{}' loaded with {} total file references",
+                   component.getId(), component.getAllReferences().size());
+
+        // Resolve all file references (handles nesting and execution order)
+        List<ComponentLoader.ResolvedFileReference> resolvedFiles =
+            componentLoader.resolveAllReferences(component, stage.getConfigFile());
+
+        logger.info("Component '{}' resolved to {} configuration files",
+                   component.getId(), resolvedFiles.size());
+
+        // Execute each resolved file in order
+        StageExecutionResult aggregatedResult = StageExecutionResult.success(stage.getStageName(), null);
+        Map<String, Object> aggregatedOutputs = new HashMap<>();
+
+        for (ComponentLoader.ResolvedFileReference fileRef : resolvedFiles) {
+            logger.info("Executing component file: {} (depth: {})",
+                       fileRef.getFilePath(), fileRef.getNestingDepth());
+
+            // Determine effective failure policy (file-level overrides stage-level)
+            String effectiveFailurePolicy = fileRef.getFailurePolicy() != null ?
+                fileRef.getFailurePolicy() : stage.getFailurePolicy();
+
+            // Execute the file
+            StageExecutionResult fileResult = executeConfigFile(
+                fileRef.getFilePath(),
+                stage.getStageName(),
+                data,
+                context,
+                effectiveFailurePolicy
+            );
+
+            // Aggregate outputs
+            if (fileResult.getStageOutputs() != null) {
+                aggregatedOutputs.putAll(fileResult.getStageOutputs());
+            }
+
+            // Check if we should terminate based on failure policy
+            if (!fileResult.isSuccessful()) {
+                if ("terminate".equals(effectiveFailurePolicy)) {
+                    logger.warn("Component file '{}' failed with terminate policy - stopping component execution",
+                               fileRef.getFilePath());
+                    // Return a failure result
+                    StageExecutionResult failureResult = StageExecutionResult.criticalFailure(
+                        stage.getStageName(),
+                        "Component execution terminated due to file failure: " + fileRef.getFilePath()
+                    );
+                    failureResult.setStageOutputs(aggregatedOutputs);
+                    return failureResult;
+                } else {
+                    logger.warn("Component file '{}' failed but continuing with policy: {}",
+                               fileRef.getFilePath(), effectiveFailurePolicy);
+                }
+            }
+        }
+
+        aggregatedResult.setStageOutputs(aggregatedOutputs);
+        return aggregatedResult;
+    }
+
+    /**
+     * Executes a single configuration file.
+     */
+    private StageExecutionResult executeConfigFile(
+            String configFilePath,
+            String stageName,
+            Object data,
+            ScenarioExecutionResult context,
+            String failurePolicy) throws YamlConfigurationException {
+
+        // Load configuration
+        YamlRuleConfiguration config;
+        try {
+            config = configLoader.loadFromFile(configFilePath);
+        } catch (dev.mars.apex.core.config.yaml.YamlConfigurationException e) {
+            // Fallback: treat path as classpath resource
+            config = configLoader.loadFromClasspath(configFilePath);
+        }
+
+        // Create rules engine
+        RulesEngine engine = new RulesEngine(ruleFactory.createRulesEngineConfiguration(config));
+
+        // Create facts map
+        Map<String, Object> facts = createFactsMap(data, context);
+
+        // Execute rules
+        RuleResult ruleResult = engine.evaluate(config, facts);
+
+        // Create result
+        if (ruleResult.isSuccess()) {
+            StageExecutionResult result = StageExecutionResult.success(stageName, ruleResult);
+            if (ruleResult.getEnrichedData() != null && !ruleResult.getEnrichedData().isEmpty()) {
+                result.setStageOutputs(ruleResult.getEnrichedData());
+            }
+            return result;
+        } else {
+            String errorMessage = "Config file execution failed: " + ruleResult.getMessage();
+            if (!ruleResult.getFailureMessages().isEmpty()) {
+                errorMessage += " - " + String.join(", ", ruleResult.getFailureMessages());
+            }
+
+            return "terminate".equals(failurePolicy) ?
+                StageExecutionResult.criticalFailure(stageName, errorMessage) :
+                StageExecutionResult.nonCriticalFailure(stageName, errorMessage);
         }
     }
     
