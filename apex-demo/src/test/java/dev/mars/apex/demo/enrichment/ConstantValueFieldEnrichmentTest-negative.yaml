@@ -1,0 +1,34 @@
+version: "1.0"
+name: "Constant Value Field Enrichment - NEGATIVE TEST"
+description: |
+  Demonstrates INCORRECT pattern for assigning constant values.
+  
+  ❌ INCORRECT PATTERN (DO NOT USE):
+  - source-field: '''e1''' (triple quotes - WRONG!)
+  
+  This is the exact example from the user's debug issue.
+  This pattern will NOT work as expected because:
+  1. '''e1''' is interpreted as a field name to lookup, not a constant
+  2. The field lookup will fail or return null
+  3. The constant string 'e1' will NOT be assigned to the target field
+  
+  ✅ CORRECT PATTERN (USE THIS INSTEAD):
+  - source-field: "constant"
+  - expression: "'e1'"
+
+# ============================================================================
+# NEGATIVE TEST: Exact example from user's debug issue
+# ============================================================================
+enrichments:
+  - id: e1
+    name: rule builder parameter
+    description: e1
+    enabled: true
+    condition: true
+    type: field-enrichment
+    field-mappings:
+      # ❌ INCORRECT PATTERN - This is the user's original issue
+      # This will try to lookup a field named '''e1''' instead of assigning constant 'e1'
+      - source-field: '''e1'''
+        target-field: '#data.a_field'
+
