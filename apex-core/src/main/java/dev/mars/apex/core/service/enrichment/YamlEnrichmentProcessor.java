@@ -343,15 +343,18 @@ public class YamlEnrichmentProcessor {
             StandardEvaluationContext context = createEvaluationContext(targetObject);
             Expression keyExpr = getOrCompileExpression(lookupConfig.getLookupKey());
             lookupKey = keyExpr.getValue(context);
-            
+
             if (lookupKey == null) {
-                logger.debug("Lookup key evaluated to null for enrichment: " + enrichment.getId());
+                logger.error("LOOKUP KEY EVALUATION FAILED: Lookup key expression '" + lookupConfig.getLookupKey() +
+                           "' evaluated to NULL for enrichment '" + enrichment.getId() + "'. " +
+                           "Check: (1) expression syntax is correct, (2) referenced fields exist in target object, " +
+                           "(3) field values are not null. Enrichment will be skipped.");
                 return targetObject;
             }
-            
+
             logger.debug("Extracted lookup key: " + lookupKey);
         } catch (Exception e) {
-            throw new EnrichmentException("Failed to extract lookup key using expression '" + 
+            throw new EnrichmentException("Failed to extract lookup key using expression '" +
                                         lookupConfig.getLookupKey() + "'", e);
         }
         
@@ -753,14 +756,17 @@ public class YamlEnrichmentProcessor {
 
         for (YamlEnrichment.FieldMapping mapping : fieldMappings) {
             try {
-                logger.trace("Processing field mapping: " + mapping.getSourceField() + " -> " + mapping.getTargetField());
+                logger.debug("Processing field mapping: source-field='" + mapping.getSourceField() +
+                           "' -> target-field='" + mapping.getTargetField() +
+                           "', expression='" + mapping.getExpression() +
+                           "', default-value='" + mapping.getDefaultValue() + "'");
 
                 Object sourceValue = null;
 
                 // For failed lookups, don't try to extract source values
                 if (!isFailedLookup) {
                     sourceValue = getFieldValue(sourceObject, mapping.getSourceField());
-                    logger.trace("Source value for '" + mapping.getSourceField() + "': " + sourceValue);
+                    logger.debug("Source value for '" + mapping.getSourceField() + "': " + sourceValue);
 
                     // Handle missing required fields (only for successful lookups)
                     if (sourceValue == null && mapping.getRequired() != null && mapping.getRequired()) {
@@ -787,6 +793,15 @@ public class YamlEnrichmentProcessor {
                     setFieldValue(targetObject, mapping.getTargetField(), valueToSet);
                     logger.debug("Successfully mapped field: " + mapping.getSourceField() + " -> " +
                                mapping.getTargetField() + " (value: " + valueToSet + ")");
+                } else {
+                    // SERIOUS ERROR: Field mapping produced null value - this likely means:
+                    // 1. Source field lookup failed (field doesn't exist)
+                    // 2. Expression evaluation returned null
+                    // 3. No default value was provided
+                    logger.error("FIELD MAPPING FAILED: source-field '" + mapping.getSourceField() +
+                               "' -> target-field '" + mapping.getTargetField() +
+                               "' produced NULL value. Target field was NOT set. " +
+                               "Check: (1) source field exists, (2) expression is valid, (3) default-value is provided if needed.");
                 }
 
             } catch (Exception e) {
@@ -850,7 +865,10 @@ public class YamlEnrichmentProcessor {
                 logger.trace("SpEL expression '" + fieldName + "' evaluated to: " + value);
                 return value;
             } catch (Exception e) {
-                logger.warn("Failed to evaluate SpEL expression '" + fieldName + "': " + e.getMessage());
+                logger.error("SPEL EXPRESSION EVALUATION FAILED: Failed to evaluate SpEL expression '" + fieldName +
+                           "' for field lookup. Error: " + e.getMessage() + ". " +
+                           "Check: (1) expression syntax is correct, (2) referenced fields/methods exist, " +
+                           "(3) object context is valid. Returning NULL.");
                 return null;
             }
         }
@@ -912,7 +930,10 @@ public class YamlEnrichmentProcessor {
                 logger.trace("Successfully set field via SpEL '" + fieldName + "' to: " + value);
                 return;
             } catch (Exception e) {
-                logger.warn("Failed to set field via SpEL expression '" + fieldName + "': " + e.getMessage());
+                logger.error("SPEL EXPRESSION SET FAILED: Failed to set field via SpEL expression '" + fieldName +
+                           "' to value '" + value + "'. Error: " + e.getMessage() + ". " +
+                           "Check: (1) expression syntax is correct, (2) target field/property exists and is writable, " +
+                           "(3) value type is compatible with target field type. Field was NOT set.");
                 return;
             }
         }
@@ -952,15 +973,20 @@ public class YamlEnrichmentProcessor {
                         }
                     }
                 }
-                logger.warn("No suitable setter method found for field '" + fieldName + "' on object of type " +
-                              object.getClass().getSimpleName());
+                logger.error("SETTER METHOD NOT FOUND: No suitable setter method found for field '" + fieldName +
+                           "' on object of type " + object.getClass().getSimpleName() + ". " +
+                           "Check: (1) setter method exists (e.g., set" + Character.toUpperCase(fieldName.charAt(0)) +
+                           fieldName.substring(1) + "), (2) field name is correct, (3) object type supports this field. " +
+                           "Field was NOT set.");
             } catch (IllegalAccessException | InvocationTargetException e2) {
-                logger.warn("Could not invoke setter for field '" + fieldName + "' on object of type " +
-                          object.getClass().getSimpleName() + ": " + e2.getMessage(), e2);
+                logger.error("SETTER INVOCATION FAILED: Could not invoke setter for field '" + fieldName +
+                           "' on object of type " + object.getClass().getSimpleName() + ". Error: " + e2.getMessage() + ". " +
+                           "Check: (1) setter method is accessible, (2) value type is compatible. Field was NOT set.", e2);
             }
         } catch (IllegalAccessException | InvocationTargetException e) {
-            logger.warn("Could not invoke setter for field '" + fieldName + "' on object of type " +
-                      object.getClass().getSimpleName() + ": " + e.getMessage(), e);
+            logger.error("SETTER INVOCATION FAILED: Could not invoke setter for field '" + fieldName +
+                       "' on object of type " + object.getClass().getSimpleName() + ". Error: " + e.getMessage() + ". " +
+                       "Check: (1) setter method is accessible, (2) value type is compatible. Field was NOT set.", e);
         }
     }
 
