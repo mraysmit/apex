@@ -55,18 +55,114 @@ function initializeTree() {
     
     // Create tree layout
     tree = d3.tree().size([height - 100, width - 200]);
-    
-    // Load data from REST API (with small delay for testing)
+
+    // Load sample directories first, then load tree data
     setTimeout(() => {
-        loadTreeData();
+        loadSampleDirectories();
     }, 100);
+}
+
+// Load available sample directories into dropdown
+function loadSampleDirectories() {
+    const baseUrl = window.location.origin.includes('localhost') && window.location.pathname.includes('/yaml-manager')
+        ? window.location.origin
+        : 'http://localhost:8082';
+    const apiUrl = `${baseUrl}/yaml-manager/api/dependencies/sample-directories`;
+
+    fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+            const select = document.getElementById('directory-select');
+            select.innerHTML = ''; // Clear loading message
+
+            if (data.status === 'success' && data.directories) {
+                // Load recent directories from localStorage
+                const recentDirs = getRecentDirectories();
+
+                // Add recent directories first (if any)
+                if (recentDirs.length > 0) {
+                    const recentGroup = document.createElement('optgroup');
+                    recentGroup.label = 'Recent Directories';
+                    recentDirs.forEach(dir => {
+                        const option = document.createElement('option');
+                        option.value = dir.path;
+                        option.textContent = dir.name;
+                        recentGroup.appendChild(option);
+                    });
+                    select.appendChild(recentGroup);
+                }
+
+                // Add sample directories
+                const sampleGroup = document.createElement('optgroup');
+                sampleGroup.label = 'Sample Directories';
+                data.directories.forEach(dir => {
+                    const option = document.createElement('option');
+                    option.value = dir.path;
+                    option.textContent = dir.name;
+                    sampleGroup.appendChild(option);
+                });
+                select.appendChild(sampleGroup);
+
+                // Auto-load the first directory (from recent if available, otherwise from samples)
+                if (recentDirs.length > 0 || data.directories.length > 0) {
+                    loadTreeData();
+                }
+            } else {
+                select.innerHTML = '<option value="">No directories available</option>';
+            }
+        })
+        .catch(error => {
+            console.error('Failed to load sample directories:', error);
+            const select = document.getElementById('directory-select');
+            select.innerHTML = '<option value="">Error loading directories</option>';
+        });
+}
+
+// Get recent directories from localStorage (max 5)
+function getRecentDirectories() {
+    try {
+        const stored = localStorage.getItem('recentDirectories');
+        return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+        console.error('Failed to load recent directories from localStorage:', e);
+        return [];
+    }
+}
+
+// Save a directory to recent directories (max 5, most recent first)
+function saveRecentDirectory(path, name) {
+    try {
+        let recentDirs = getRecentDirectories();
+
+        // Remove if already exists (to move to top)
+        recentDirs = recentDirs.filter(dir => dir.path !== path);
+
+        // Add to beginning
+        recentDirs.unshift({ path, name });
+
+        // Keep only last 5
+        recentDirs = recentDirs.slice(0, 5);
+
+        // Save to localStorage
+        localStorage.setItem('recentDirectories', JSON.stringify(recentDirs));
+    } catch (e) {
+        console.error('Failed to save recent directory to localStorage:', e);
+    }
 }
 
 // Load tree data from REST API
 function loadTreeData() {
-    // Get the directory path from the File Browser panel input
-    const directoryInput = document.getElementById('directory-input');
-    const basePath = directoryInput ? directoryInput.value : 'src/test/resources/apex-yaml-samples/graph-100';
+    // Get the directory path from the dropdown or custom input
+    const directorySelect = document.getElementById('directory-select');
+    const customInput = document.getElementById('custom-directory-input');
+    const basePath = customInput && customInput.value.trim()
+        ? customInput.value.trim()
+        : (directorySelect ? directorySelect.value : 'apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100');
+
+    if (!basePath) {
+        alert('Please select a directory or enter a custom path.');
+        return;
+    }
 
     // Look for scenario registry file (common root file pattern) or use first YAML file
     // The API will handle finding the appropriate root file
@@ -83,27 +179,127 @@ function loadTreeData() {
 
     fetch(apiUrl)
         .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
+            // Always parse JSON first, regardless of status
+            return response.json().then(data => ({
+                ok: response.ok,
+                status: response.status,
+                data: data
+            }));
         })
-        .then(data => {
+        .then(result => {
+            const data = result.data;
             console.log('Loaded tree data:', data);
+
+            // Check for API-level errors (either HTTP error or status='error' in response)
+            if (!result.ok || data.status === 'error') {
+                const errorMsg = data.message || data.error || 'Unknown error occurred';
+
+                // Categorize the error
+                if (errorMsg.includes('Root file does not exist') || errorMsg.includes('FILE_NOT_FOUND')) {
+                    showAlert('error', 'File Not Found',
+                        `The directory does not contain a valid scenario registry file (00-scenario-registry.yaml).\n\n` +
+                        `Directory: ${basePath}\n\n` +
+                        `Please select a directory that contains APEX YAML configuration files.`);
+                } else if (errorMsg.includes('not found') || errorMsg.includes('does not exist')) {
+                    showAlert('error', 'Directory Not Found',
+                        `The specified directory could not be found:\n${basePath}\n\nPlease check the path and try again.`);
+                } else if (errorMsg.includes('permission') || errorMsg.includes('access denied')) {
+                    showAlert('error', 'Permission Denied',
+                        `You do not have permission to access:\n${basePath}\n\nPlease check folder permissions.`);
+                } else if (errorMsg.includes('not valid YAML') || errorMsg.includes('INVALID_YAML')) {
+                    showAlert('error', 'Invalid YAML',
+                        `The root YAML file is not valid:\n${errorMsg}\n\nPlease check your YAML files for syntax errors.`);
+                } else if (errorMsg.includes('YAML') || errorMsg.includes('syntax')) {
+                    showAlert('error', 'Invalid YAML',
+                        `YAML parsing error:\n${errorMsg}\n\nPlease check your YAML files for syntax errors.`);
+                } else {
+                    showAlert('error', 'Failed to Load Tree', errorMsg);
+                }
+
+                d3.select("#loading").style("display", "none");
+                return;
+            }
+
             // Handle both formats: apex-yaml-manager returns status=success, apex-rest-api returns success=true
             if (data.status === 'success' && data.tree) {
+                // Check if tree is empty or has no children
+                if (!data.tree.name) {
+                    showAlert('warning', 'Empty Tree',
+                        `No YAML files found in directory:\n${basePath}\n\nPlease check that the directory contains valid YAML configuration files.`);
+                    d3.select("#loading").style("display", "none");
+                    return;
+                }
+
+                // Check for warnings in the response
+                if (data.warnings && data.warnings.length > 0) {
+                    const warningMsg = data.warnings.join('\n');
+                    showAlert('warning', 'Tree Loaded with Warnings',
+                        `The dependency tree was loaded but some issues were found:\n${warningMsg}`, 8000);
+                }
+
                 // Current apex-yaml-manager format
                 processTreeData(data.tree);
+
+                // Save to recent directories
+                // Extract a friendly name from the path (last directory name)
+                const pathParts = basePath.replace(/\\/g, '/').split('/');
+                const dirName = pathParts[pathParts.length - 1] || 'Custom Directory';
+                saveRecentDirectory(basePath, dirName);
+
             } else if (data.success && data.data && data.data.tree) {
                 // Future apex-rest-api format (if needed)
                 processTreeData(data.data.tree);
+
+                // Save to recent directories
+                const pathParts = basePath.replace(/\\/g, '/').split('/');
+                const dirName = pathParts[pathParts.length - 1] || 'Custom Directory';
+                saveRecentDirectory(basePath, dirName);
+
             } else {
-                throw new Error('Invalid API response: ' + (data.message || data.error || 'No tree data'));
+                const errorMsg = data.message || data.error || 'No tree data returned from API';
+                showAlert('error', 'Invalid API Response',
+                    `The API returned an unexpected response:\n${errorMsg}\n\nPlease check the server logs for details.`);
+                d3.select("#loading").style("display", "none");
             }
         })
         .catch(error => {
             console.error('Error loading tree data:', error);
-            showError(`Failed to load tree data: ${error.message}`);
+
+            // Categorize errors for better user messaging
+            const errorMsg = error.message || 'Unknown error occurred';
+
+            // Check for specific file/directory errors first
+            if (errorMsg.includes('Root file does not exist') || errorMsg.includes('FILE_NOT_FOUND')) {
+                showAlert('error', 'File Not Found',
+                    `The directory does not contain a valid scenario registry file (00-scenario-registry.yaml).\n\n` +
+                    `Directory: ${basePath}\n\n` +
+                    `Please select a directory that contains APEX YAML configuration files.`);
+            } else if (errorMsg.includes('not found') || errorMsg.includes('does not exist')) {
+                showAlert('error', 'Directory Not Found',
+                    `The specified directory could not be found:\n${basePath}\n\nPlease check the path and try again.`);
+            } else if (errorMsg.includes('permission') || errorMsg.includes('access denied')) {
+                showAlert('error', 'Permission Denied',
+                    `You do not have permission to access:\n${basePath}\n\nPlease check folder permissions.`);
+            } else if (errorMsg.includes('YAML') || errorMsg.includes('syntax') || errorMsg.includes('INVALID_YAML')) {
+                showAlert('error', 'Invalid YAML',
+                    `YAML parsing error:\n${errorMsg}\n\nPlease check your YAML files for syntax errors.`);
+            } else if (errorMsg.includes('Failed to fetch') || errorMsg.includes('NetworkError')) {
+                showAlert('error', 'Network Error',
+                    `Unable to connect to the server. Please check:\n• Is the server running?\n• Is the network connection stable?\n• Are there any firewall issues?`);
+            } else if (errorMsg.includes('404')) {
+                showAlert('error', 'API Endpoint Not Found',
+                    `The API endpoint was not found (404).\n\nPlease ensure the YAML Manager service is running correctly.`);
+            } else if (errorMsg.includes('500') || errorMsg.includes('Internal Server Error')) {
+                showAlert('error', 'Server Error',
+                    `The server encountered an error (500).\n\nPlease check the server logs for details.`);
+            } else if (errorMsg.includes('timeout')) {
+                showAlert('error', 'Request Timeout',
+                    `The request took too long to complete.\n\nThe directory may contain too many files or the server is overloaded.`);
+            } else {
+                showAlert('error', 'Failed to Load Tree',
+                    `An error occurred while loading the dependency tree:\n${errorMsg}`);
+            }
+
             // Hide loading message on error
             d3.select("#loading").style("display", "none");
         });
@@ -127,6 +323,24 @@ function processTreeData(treeData) {
         console.log('D3 hierarchy created. Root:', root.data.name);
         console.log('Root has children:', root.children ? root.children.length : 0);
 
+        // Check for issues in the tree
+        const issues = analyzeTreeIssues(root);
+
+        // Show warnings if there are issues
+        if (issues.circularDeps.length > 0) {
+            const circularMsg = issues.circularDeps.map(dep => `• ${dep}`).join('\n');
+            showAlert('warning', 'Circular Dependencies Detected',
+                `The following circular dependencies were found:\n${circularMsg}\n\nThese may cause infinite loops during processing.`, 10000);
+        } else if (issues.missingFiles.length > 0) {
+            const missingMsg = issues.missingFiles.map(file => `• ${file}`).join('\n');
+            showAlert('warning', 'Missing Files Detected',
+                `The following referenced files could not be found:\n${missingMsg}\n\nPlease check your YAML references.`, 10000);
+        } else if (issues.invalidFiles.length > 0) {
+            const invalidMsg = issues.invalidFiles.map(file => `• ${file}`).join('\n');
+            showAlert('warning', 'Invalid YAML Files Detected',
+                `The following files have YAML syntax errors:\n${invalidMsg}\n\nThese files will be skipped during processing.`, 10000);
+        }
+
         // Set initial positions
         root.x0 = height / 2;
         root.y0 = 0;
@@ -138,7 +352,7 @@ function processTreeData(treeData) {
             console.log('After collapse, root children:', root.children.length);
             console.log('First child has _children:', root.children[0]._children ? root.children[0]._children.length : 0);
         }
-        
+
         // Render the tree
         update(root);
 
@@ -151,9 +365,53 @@ function processTreeData(treeData) {
 
     } catch (error) {
         console.error('Error processing tree data:', error);
-        showError(`Failed to process tree data: ${error.message}`);
+        showAlert('error', 'Failed to Process Tree',
+            `An error occurred while processing the dependency tree:\n${error.message}`);
         throw error; // Re-throw for testing purposes
     }
+}
+
+/**
+ * Analyze tree for issues (circular dependencies, missing files, invalid YAML)
+ */
+function analyzeTreeIssues(root) {
+    const issues = {
+        circularDeps: [],
+        missingFiles: [],
+        invalidFiles: []
+    };
+
+    function traverse(node) {
+        if (!node) return;
+
+        const data = node.data;
+
+        // Check for circular dependency
+        if (data.circularReference) {
+            issues.circularDeps.push(data.name);
+        }
+
+        // Check for missing files (type = 'unknown type' usually indicates missing file)
+        if (data.type === 'unknown type' && data.name && data.name.includes('missing')) {
+            issues.missingFiles.push(data.name);
+        }
+
+        // Check for invalid YAML files
+        if (data.type === 'rule configuration' && data.name && data.name.includes('invalid')) {
+            issues.invalidFiles.push(data.name);
+        }
+
+        // Traverse children
+        if (node.children) {
+            node.children.forEach(traverse);
+        }
+        if (node._children) {
+            node._children.forEach(traverse);
+        }
+    }
+
+    traverse(root);
+    return issues;
 }
 
 // Collapse a node and its children
@@ -165,10 +423,65 @@ function collapse(d) {
     }
 }
 
-// Show error message
+// Show error message (legacy - kept for compatibility)
 function showError(message) {
     document.getElementById('error').innerHTML = message;
     document.getElementById('error').style.display = 'block';
+}
+
+/**
+ * Show a nice-looking alert message
+ * @param {string} type - 'error', 'warning', 'info', or 'success'
+ * @param {string} title - Alert title
+ * @param {string} message - Alert message
+ * @param {number} autoClose - Auto-close after milliseconds (0 = no auto-close)
+ */
+function showAlert(type, title, message, autoClose = 0) {
+    const alertContainer = document.getElementById('alert-container');
+    const alertIcon = document.getElementById('alert-icon');
+    const alertTitle = document.getElementById('alert-title');
+    const alertMessage = document.getElementById('alert-message');
+
+    if (!alertContainer) return;
+
+    // Set icon based on type
+    const icons = {
+        'error': '❌',
+        'warning': '⚠️',
+        'info': 'ℹ️',
+        'success': '✅'
+    };
+
+    // Remove all alert type classes
+    alertContainer.classList.remove('alert-error', 'alert-warning', 'alert-info', 'alert-success');
+
+    // Add the appropriate class
+    alertContainer.classList.add(`alert-${type}`);
+
+    // Set content
+    alertIcon.textContent = icons[type] || 'ℹ️';
+    alertTitle.textContent = title;
+    alertMessage.textContent = message;
+
+    // Show the alert
+    alertContainer.style.display = 'block';
+
+    // Auto-close if specified
+    if (autoClose > 0) {
+        setTimeout(() => {
+            closeAlert();
+        }, autoClose);
+    }
+}
+
+/**
+ * Close the alert
+ */
+function closeAlert() {
+    const alertContainer = document.getElementById('alert-container');
+    if (alertContainer) {
+        alertContainer.style.display = 'none';
+    }
 }
 
 // Update tree visualization
@@ -981,39 +1294,71 @@ function initializeSidebar() {
     // Initialize accordion functionality
     initializeAccordion();
 
-    // Browse button functionality
-    const browseHandler = function() {
-        const directory = document.getElementById('directory-input').value;
-        const includeSubfolders = document.getElementById('include-subfolders').checked;
-        console.log('Browse clicked:', directory, 'Include subfolders:', includeSubfolders);
+    // Load button functionality (for dropdown selection)
+    const loadBtn = document.getElementById('load-btn');
+    if (loadBtn) {
+        loadBtn.addEventListener('click', function() {
+            const directorySelect = document.getElementById('directory-select');
+            const selectedPath = directorySelect.value;
 
-        // Validate directory input
-        if (!directory || directory.trim() === '') {
-            alert('Please enter a directory path.');
-            return;
-        }
+            if (!selectedPath) {
+                alert('Please select a directory.');
+                return;
+            }
 
-        // Clear existing tree
-        if (g) {
-            g.selectAll("*").remove();
-        }
+            // Clear custom input
+            const customInput = document.getElementById('custom-directory-input');
+            if (customInput) customInput.value = '';
 
-        // Show loading message
-        document.getElementById('loading').style.display = 'block';
-        document.getElementById('loading').textContent = 'Loading tree data from: ' + directory;
+            // Clear existing tree
+            if (g) {
+                g.selectAll("*").remove();
+            }
 
-        // Reload tree data with new directory
-        loadTreeData();
-    };
+            // Show loading message
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('loading').textContent = 'Loading tree data from: ' + selectedPath;
 
-    document.getElementById('browse-btn').addEventListener('click', browseHandler);
+            // Reload tree data with selected directory
+            loadTreeData();
+        });
+    }
 
-    // Allow Enter key in directory input to trigger browse
-    document.getElementById('directory-input').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            browseHandler();
-        }
-    });
+    // Load custom path button functionality
+    const loadCustomBtn = document.getElementById('load-custom-btn');
+    if (loadCustomBtn) {
+        loadCustomBtn.addEventListener('click', function() {
+            const customInput = document.getElementById('custom-directory-input');
+            const customPath = customInput.value.trim();
+
+            if (!customPath) {
+                alert('Please enter a custom directory path.');
+                return;
+            }
+
+            // Clear existing tree
+            if (g) {
+                g.selectAll("*").remove();
+            }
+
+            // Show loading message
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('loading').textContent = 'Loading tree data from: ' + customPath;
+
+            // Reload tree data with custom directory
+            loadTreeData();
+        });
+    }
+
+    // Allow Enter key in custom directory input to trigger load
+    const customInput = document.getElementById('custom-directory-input');
+    if (customInput) {
+        customInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loadCustomBtn.click();
+            }
+        });
+    }
 
     // Search functionality
     document.getElementById('search-input').addEventListener('input', function(e) {
@@ -1223,10 +1568,10 @@ function updateTreePath(path) {
     const treePathElement = document.getElementById('tree-path');
     treePathElement.textContent = path;
 
-    // Show path if checkbox is checked
+    // Show/hide path based on checkbox state
     const showPathToggle = document.getElementById('show-path-toggle');
-    if (showPathToggle && showPathToggle.checked) {
-        treePathElement.style.display = 'inline';
+    if (showPathToggle) {
+        treePathElement.style.display = showPathToggle.checked ? 'inline' : 'none';
     }
 }
 

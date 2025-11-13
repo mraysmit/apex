@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 /**
@@ -666,6 +667,57 @@ public class DependencyAnalysisController {
     }
 
     /**
+     * List available sample directories for the UI dropdown.
+     */
+    @GetMapping("/sample-directories")
+    @Operation(summary = "List sample directories", description = "Get list of available YAML sample directories")
+    @ApiResponse(responseCode = "200", description = "Sample directories retrieved successfully")
+    public ResponseEntity<Map<String, Object>> getSampleDirectories() {
+        try {
+            List<Map<String, String>> directories = new ArrayList<>();
+
+            // Get the current working directory
+            Path currentDir = Paths.get(System.getProperty("user.dir"));
+
+            // Determine project root (go up if we're in a module directory)
+            Path projectRoot = currentDir;
+            if (currentDir.endsWith("apex-yaml-manager") || currentDir.endsWith("apex-demo")) {
+                projectRoot = currentDir.getParent();
+            }
+
+            // Add known sample directories with absolute paths
+            Path graph100Path = projectRoot.resolve("apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100");
+            if (Files.exists(graph100Path)) {
+                directories.add(Map.of(
+                    "name", "Graph-100 (100 interconnected files)",
+                    "path", graph100Path.toAbsolutePath().toString()
+                ));
+            }
+
+            Path demoScenariosPath = projectRoot.resolve("apex-demo/src/test/java/dev/mars/apex/demo/scenario");
+            if (Files.exists(demoScenariosPath)) {
+                directories.add(Map.of(
+                    "name", "Demo Scenarios",
+                    "path", demoScenariosPath.toAbsolutePath().toString()
+                ));
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("directories", directories);
+            response.put("timestamp", System.currentTimeMillis());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Failed to list sample directories", e);
+            return ResponseEntity.badRequest().body(Map.of(
+                    "status", "error",
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
+    /**
      * Generate dependency tree for a file using nested children format (D3 Hierarchy standard).
      */
     @GetMapping("/tree")
@@ -688,6 +740,33 @@ public class DependencyAnalysisController {
             this.currentGraph = dependencyService.analyzeDependencies(decodedRootFile);
             // IMPORTANT: Build the tree starting from the graph's root key, not the raw request path
             String treeRoot = this.currentGraph.getRootFile();
+
+            // Validate that the root file exists and is valid YAML
+            dev.mars.apex.core.util.YamlNode rootNode = this.currentGraph.getNode(treeRoot);
+            if (rootNode == null || !rootNode.exists()) {
+                logger.error("Root file does not exist: {}", treeRoot);
+                return ResponseEntity.badRequest().body(Map.of(
+                        "status", "error",
+                        "message", "Root file does not exist: " + treeRoot,
+                        "errorType", "FILE_NOT_FOUND"
+                ));
+            }
+
+            if (!rootNode.isYamlValid()) {
+                logger.error("Root file is not valid YAML: {}", treeRoot);
+                return ResponseEntity.badRequest().body(Map.of(
+                        "status", "error",
+                        "message", "Root file is not valid YAML: " + treeRoot,
+                        "errorType", "INVALID_YAML"
+                ));
+            }
+
+            // Check if the graph has any meaningful content (more than just the root node)
+            if (this.currentGraph.getTotalFiles() <= 1 && this.currentGraph.getMaxDepth() == 0) {
+                logger.warn("No dependencies found for root file: {}", treeRoot);
+                // This is a warning, not an error - single file with no dependencies is valid
+            }
+
             TreeNode tree = dependencyService.generateDependencyTree(this.currentGraph, treeRoot);
 
             Map<String, Object> response = new HashMap<>();

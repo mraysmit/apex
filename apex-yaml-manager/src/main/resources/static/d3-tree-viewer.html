@@ -35,14 +35,18 @@
                         <span class="accordion-icon">▼</span>
                     </div>
                     <div class="accordion-content" id="accordion-directory">
-                        <input type="text" id="directory-input" class="sidebar-input"
-                               placeholder="Enter directory path..."
-                               value="C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100">
-                        <button class="sidebar-btn" id="browse-btn">Browse</button>
-                        <label class="sidebar-checkbox">
-                            <input type="checkbox" id="include-subfolders" checked>
-                            Include Subfolders
-                        </label>
+                        <label for="directory-select" style="display: block; margin-bottom: 5px; font-size: 12px; color: #666;">Select Sample Directory:</label>
+                        <select id="directory-select" class="sidebar-input" style="width: 100%; margin-bottom: 10px;">
+                            <option value="">Loading directories...</option>
+                        </select>
+                        <button class="sidebar-btn" id="load-btn" style="width: 100%;">Load Tree</button>
+                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd;">
+                            <label for="custom-directory-input" style="display: block; margin-bottom: 5px; font-size: 12px; color: #666;">Or enter custom path:</label>
+                            <input type="text" id="custom-directory-input" class="sidebar-input"
+                                   placeholder="Enter custom directory path..."
+                                   style="margin-bottom: 5px;">
+                            <button class="sidebar-btn" id="load-custom-btn" style="width: 100%;">Load Custom Path</button>
+                        </div>
                     </div>
                 </div>
 
@@ -143,7 +147,7 @@
                 <div class="tree-header">
                     <div class="tree-title-container">
                         <h2>Dependency Tree</h2>
-                        <span class="tree-path" id="tree-path" style="display: none;"></span>
+                        <span class="tree-path" id="tree-path"></span>
                     </div>
                     <div class="tree-toolbar">
                         <button class="toolbar-btn" id="zoom-in-btn" title="Zoom In">Zoom In</button>
@@ -158,6 +162,15 @@
                 <div id="tree-container">
                     <div id="loading">Loading tree data...</div>
                     <div id="error" style="display: none;"></div>
+                    <!-- Alert container for nice warnings/errors -->
+                    <div id="alert-container" class="alert" style="display: none;">
+                        <button class="alert-close" onclick="closeAlert()">&times;</button>
+                        <span class="alert-icon" id="alert-icon"></span>
+                        <div style="display: inline-block; vertical-align: middle;">
+                            <span class="alert-title" id="alert-title"></span>
+                            <span class="alert-message" id="alert-message"></span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Floating Tooltip for File Preview -->
