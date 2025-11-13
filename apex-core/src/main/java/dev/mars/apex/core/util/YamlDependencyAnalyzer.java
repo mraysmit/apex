@@ -61,8 +61,10 @@ public class YamlDependencyAnalyzer {
         "rule-configurations",
         "rule-chains",
         "enrichment-refs",
+        "component-refs",
         "config-files",
         "config-file",
+        "file",  // Used in component-refs, enrichment-refs, etc. for individual file references
         "include",
         "import",
         "source-config",
@@ -108,23 +110,28 @@ public class YamlDependencyAnalyzer {
     /**
      * Recursively analyzes a YAML file and its dependencies.
      */
-    private void analyzeFileRecursively(String filePath, YamlDependencyGraph graph, 
+    private void analyzeFileRecursively(String filePath, YamlDependencyGraph graph,
                                        Set<String> visited, int depth) {
-        
+
         // Avoid infinite recursion
         if (visited.contains(filePath)) {
             logger.debug("Already visited file: {}", filePath);
             return;
         }
-        
+
         visited.add(filePath);
         graph.updateMaxDepth(depth);
-        
+
         logger.debug("Analyzing YAML file at depth {}: {}", depth, filePath);
-        
+
         // Create node for this file
         YamlNode node = createYamlNode(filePath);
         graph.addNode(node);
+
+        // Check component nesting depth and issue warnings
+        if (node.getFileType() == YamlFileType.COMPONENT) {
+            checkComponentNestingDepth(filePath, depth);
+        }
         
         // If file doesn't exist or is invalid, stop here
         if (!node.exists() || !node.isYamlValid()) {
@@ -232,15 +239,19 @@ public class YamlDependencyAnalyzer {
             String currentPath = path.isEmpty() ? key : path + "." + key;
             
             if (FILE_REFERENCE_KEYS.contains(key) && value instanceof List) {
-                // Handle list of file references
+                // Handle list of file references (can be strings or maps with 'file' field)
                 List<Object> list = (List<Object>) value;
-                for (Object item : list) {
+                for (int i = 0; i < list.size(); i++) {
+                    Object item = list.get(i);
                     if (item instanceof String) {
                         String fileRef = (String) item;
                         if (YAML_FILE_PATTERN.matcher(fileRef).matches()) {
                             references.add(fileRef);
                             logger.debug("Found YAML reference at {}: {}", currentPath, fileRef);
                         }
+                    } else if (item instanceof Map) {
+                        // Recursively process map items (e.g., component-refs, config-files with execution-order)
+                        extractReferencesFromMap((Map<String, Object>) item, references, currentPath + "[" + i + "]");
                     }
                 }
             } else if (FILE_REFERENCE_KEYS.contains(key) && value instanceof String) {
@@ -267,11 +278,32 @@ public class YamlDependencyAnalyzer {
     }
     
     /**
-     * Determines the file type based on the file path.
+     * Determines the file type based on the file path and content.
+     * For component files, reads the metadata.type field to accurately detect them.
      */
     private YamlFileType determineFileType(String filePath) {
+        // Try to read metadata.type from the file for accurate detection
+        try {
+            String fullPath = new File(basePath, filePath).getAbsolutePath();
+            Map<String, Object> config = configLoader.loadAsMap(fullPath);
+            if (config != null && config.containsKey("metadata")) {
+                Map<String, Object> metadata = (Map<String, Object>) config.get("metadata");
+                if (metadata != null && metadata.containsKey("type")) {
+                    String type = (String) metadata.get("type");
+                    if ("component".equals(type)) {
+                        return YamlFileType.COMPONENT;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.debug("Could not read metadata.type from {}, falling back to path-based detection", filePath);
+        }
+
+        // Fall back to path-based detection
         if (filePath.contains("scenarios/")) {
             return YamlFileType.SCENARIO;
+        } else if (filePath.contains("components/")) {
+            return YamlFileType.COMPONENT;
         } else if (filePath.contains("bootstrap/")) {
             return YamlFileType.RULE_CONFIG;
         } else if (filePath.contains("enrichments/")) {
@@ -353,5 +385,33 @@ public class YamlDependencyAnalyzer {
                 generateTreeReport(graph, referencedFile, report, newPrefix, new HashSet<>(visited));
             }
         }
+    }
+
+    /**
+     * Checks component nesting depth and issues appropriate warnings.
+     *
+     * Nesting depth policy:
+     * - Levels 1-2: Normal operation (no warnings)
+     * - Levels 3-5: Log WARNING
+     * - Level 6+: Log CRITICAL ERROR and throw exception
+     */
+    private void checkComponentNestingDepth(String filePath, int depth) {
+        if (depth >= 6) {
+            String errorMsg = String.format(
+                "CRITICAL: Component nesting depth exceeded maximum allowed (6+). " +
+                "Component '%s' is at depth %d. This indicates excessive nesting and may cause " +
+                "performance issues or circular dependencies. Please refactor to reduce nesting depth.",
+                filePath, depth
+            );
+            logger.error(errorMsg);
+            throw new RuntimeException(errorMsg);
+        } else if (depth >= 3) {
+            logger.warn(
+                "Component nesting depth warning: Component '{}' is at depth {}. " +
+                "Consider refactoring if depth exceeds 5 to avoid complexity and performance issues.",
+                filePath, depth
+            );
+        }
+        // Levels 1-2: No warning needed
     }
 }

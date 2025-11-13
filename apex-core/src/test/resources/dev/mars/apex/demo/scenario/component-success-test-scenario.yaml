@@ -1,0 +1,42 @@
+# Component Success Test Scenario
+# Tests successful component execution
+
+metadata:
+  id: "component-success-test"
+  name: "Component Success Test"
+  version: "1.0.0"
+  description: "Test scenario for successful component execution"
+  type: "scenario"
+  business-domain: "testing"
+  owner: "APEX Demo Team"
+  criticality: "low"
+  tags:
+    - component
+    - success
+    - testing
+
+scenario:
+  scenario-id: "component-success-test"
+  name: "Component Success Test Scenario"
+  description: "Scenario that uses partial-sections-component for successful execution"
+
+  data-types:
+    - "HashMap"
+    - "java.util.Map"
+
+  # Classification rules to route to this scenario
+  classification-rules:
+    - condition: "tradeId != null"
+      priority: 1
+
+  # Processing stages using component
+  processing-stages:
+    - stage-name: "component-processing"
+      config-file: "src/test/resources/dev/mars/apex/demo/scenario/partial-sections-component.yaml"
+      execution-order: 1
+      failure-policy: "terminate"
+      required: true
+      stage-metadata:
+        description: "Execute partial-sections-component with all files"
+        expected-behavior: "SUCCESS - all component files execute successfully"
+

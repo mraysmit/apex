@@ -278,13 +278,29 @@ public class ComponentLoader {
 
     /**
      * Resolve relative file paths based on the component file location.
+     * If the referenced file is already absolute or starts with a known root (like "src/"),
+     * return it as-is without resolving.
      */
     private String resolveRelativePath(String componentFilePath, String referencedFile) {
+        // Check if the referenced file is already absolute or starts with a known root
+        Path referencedPath = Paths.get(referencedFile);
+        if (referencedPath.isAbsolute() || referencedFile.startsWith("src/") || referencedFile.startsWith("src\\")) {
+            return referencedFile;
+        }
+
+        // Check if the referenced file is already a full classpath path
+        // (e.g., "dev/mars/apex/demo/scenario/file.yaml" when component is also in "dev/mars/apex/demo/scenario/")
+        // If the referenced file contains a path separator, treat it as an absolute classpath path
+        if (referencedFile.contains("/") || referencedFile.contains("\\")) {
+            return referencedFile;
+        }
+
+        // Only resolve relative paths (e.g., "file.yaml" or "../other/file.yaml")
         Path componentPath = Paths.get(componentFilePath).getParent();
         if (componentPath == null) {
             return referencedFile;
         }
-        
+
         Path resolvedPath = componentPath.resolve(referencedFile).normalize();
         return resolvedPath.toString();
     }

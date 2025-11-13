@@ -356,28 +356,55 @@ public class YamlConfigurationLoader {
 
     /**
      * Check if a YAML file is a component file by examining its type field.
+     * Supports both file system paths and classpath resources.
      *
-     * @param filePath The path to the YAML file
+     * @param filePath The path to the YAML file (file system or classpath)
      * @return true if the file has type="component", false otherwise
      */
+    @SuppressWarnings("unchecked")
     public boolean isComponentFile(String filePath) {
+        logger.debug("Checking if file is component: {}", filePath);
         try {
-            Map<String, Object> yamlContent = loadAsMap(filePath);
+            Map<String, Object> yamlContent;
+
+            // Try file system first
+            Path path = Paths.get(filePath);
+            if (Files.exists(path)) {
+                logger.debug("Loading from file system: {}", filePath);
+                yamlContent = yamlMapper.readValue(path.toFile(), Map.class);
+            } else {
+                // Try classpath
+                logger.debug("File not found in file system, trying classpath: {}", filePath);
+                InputStream is = getClass().getClassLoader().getResourceAsStream(filePath);
+                if (is == null) {
+                    logger.debug("File not found in file system or classpath: {}", filePath);
+                    return false;
+                }
+                logger.debug("Loading from classpath: {}", filePath);
+                yamlContent = yamlMapper.readValue(is, Map.class);
+            }
+
             Object metadataObj = yamlContent.get("metadata");
 
             if (metadataObj instanceof Map) {
-                @SuppressWarnings("unchecked")
                 Map<String, Object> metadata = (Map<String, Object>) metadataObj;
                 Object typeObj = metadata.get("type");
 
                 if (typeObj instanceof String) {
-                    return "component".equals(typeObj);
+                    boolean isComponent = "component".equals(typeObj);
+                    if (isComponent) {
+                        logger.info("✓ Detected component file: {}", filePath);
+                    } else {
+                        logger.debug("File is not a component (type={}): {}", typeObj, filePath);
+                    }
+                    return isComponent;
                 }
             }
 
+            logger.debug("File has no type metadata: {}", filePath);
             return false;
         } catch (Exception e) {
-            logger.debug("Failed to check if file is component: " + filePath, e);
+            logger.warn("Failed to check if file is component: {} - {}", filePath, e.getMessage());
             return false;
         }
     }

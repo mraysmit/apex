@@ -1,0 +1,29 @@
+# Partial Sections Component
+# Component that only uses component-refs and config-files sections
+# Tests that components don't require all four reference sections
+
+metadata:
+  id: "partial-sections-component"
+  name: "Partial Sections Component"
+  version: "1.0.0"
+  description: "Component with only component-refs and config-files sections (no rule-configurations or enrichment-refs)"
+  type: "component"
+  business-domain: "testing"
+  owner: "APEX Demo Team"
+  criticality: "low"
+  sla-ms: 200
+  tags:
+    - testing
+    - partial
+    - flexible
+  documentation-url: "https://apex-docs.example.com/components/partial-sections"
+
+# Generic config files (only config-files section, no component-refs)
+config-files:
+  - file: "src/test/resources/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-validation-rules.yaml"
+    execution-order: 1
+    failure-policy: "terminate"
+  - file: "src/test/resources/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-enrichment-rules.yaml"
+    execution-order: 2
+    failure-policy: "continue-with-warnings"
+

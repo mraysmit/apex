@@ -1,0 +1,42 @@
+# Component Continue-With-Warnings Test Scenario
+# Tests component-ref failure with continue-with-warnings policy
+
+metadata:
+  id: "component-continue-test"
+  name: "Component Continue Test"
+  version: "1.0.0"
+  description: "Test scenario for component continue-with-warnings policy"
+  type: "scenario"
+  business-domain: "testing"
+  owner: "APEX Demo Team"
+  criticality: "low"
+  tags:
+    - component
+    - continue-with-warnings
+    - testing
+
+scenario:
+  scenario-id: "component-continue-test"
+  name: "Component Continue-With-Warnings Test Scenario"
+  description: "Scenario that tests component-ref failure with continue-with-warnings policy"
+
+  data-types:
+    - "HashMap"
+    - "java.util.Map"
+
+  # Classification rules
+  classification-rules:
+    - condition: "tradeId != null"
+      priority: 1
+
+  # Processing stages using component
+  processing-stages:
+    - stage-name: "component-processing"
+      config-file: "src/test/resources/dev/mars/apex/demo/scenario/partial-sections-component.yaml"
+      execution-order: 1
+      failure-policy: "continue-with-warnings"
+      required: false
+      stage-metadata:
+        description: "Execute component with continue-with-warnings policy"
+        expected-behavior: "CONTINUE - component-ref fails but processing continues"
+

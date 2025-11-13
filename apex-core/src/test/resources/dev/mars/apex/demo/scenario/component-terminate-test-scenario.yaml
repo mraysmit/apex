@@ -1,0 +1,42 @@
+# Component Terminate Test Scenario
+# Tests config-file failure with terminate policy
+
+metadata:
+  id: "component-terminate-test"
+  name: "Component Terminate Test"
+  version: "1.0.0"
+  description: "Test scenario for component terminate policy"
+  type: "scenario"
+  business-domain: "testing"
+  owner: "APEX Demo Team"
+  criticality: "high"
+  tags:
+    - component
+    - terminate
+    - testing
+
+scenario:
+  scenario-id: "component-terminate-test"
+  name: "Component Terminate Test Scenario"
+  description: "Scenario that tests config-file failure with terminate policy"
+
+  data-types:
+    - "HashMap"
+    - "java.util.Map"
+
+  # Classification rules
+  classification-rules:
+    - condition: "tradeId != null"
+      priority: 1
+
+  # Processing stages using component
+  processing-stages:
+    - stage-name: "component-processing"
+      config-file: "src/test/resources/dev/mars/apex/demo/scenario/partial-sections-component.yaml"
+      execution-order: 1
+      failure-policy: "terminate"
+      required: true
+      stage-metadata:
+        description: "Execute component with terminate policy"
+        expected-behavior: "TERMINATE - config-file fails and terminates processing"
+

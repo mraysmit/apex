@@ -304,4 +304,59 @@ class ComponentLoaderTest {
 
         logger.info("No circular references detected (as expected)");
     }
+
+    @Test
+    @DisplayName("Should load component with only component-refs and config-files sections")
+    void testPartialSectionsComponent() throws Exception {
+        logger.info("=== Testing Partial Sections Component (only component-refs and config-files) ===");
+
+        String componentPath = "dev/mars/apex/demo/scenario/partial-sections-component.yaml";
+        ComponentConfiguration component = loader.loadComponent(componentPath);
+
+        // Verify component loaded successfully
+        assertNotNull(component, "Component should be loaded");
+        assertEquals("partial-sections-component", component.getId(), "Component ID should match");
+        assertEquals("Partial Sections Component", component.getName(), "Component name should match");
+        assertEquals("component", component.getType(), "Component type should be 'component'");
+
+        // Verify that rule-configurations, enrichment-refs, and component-refs are empty (not used)
+        assertTrue(component.getRuleConfigurations().isEmpty(),
+            "Rule configurations should be empty");
+        assertTrue(component.getEnrichmentRefs().isEmpty(),
+            "Enrichment refs should be empty");
+        assertTrue(component.getComponentRefs().isEmpty(),
+            "Component refs should be empty");
+
+        // Verify that only config-files is populated
+        assertFalse(component.getConfigFiles().isEmpty(),
+            "Config files should not be empty");
+
+        assertEquals(2, component.getConfigFiles().size(),
+            "Should have 2 config file references");
+
+        // Verify getAllReferences() returns all references in correct order
+        List<ComponentConfiguration.FileReference> allRefs = component.getAllReferences();
+        assertEquals(2, allRefs.size(),
+            "Should have 2 total references (2 config-files)");
+
+        // Verify execution order: config-file (order 1), config-file (order 2)
+        assertTrue(allRefs.get(0).getFile().contains("BasicStageConfigurationTest-validation-rules.yaml"),
+            "First should be validation-rules config-file with execution-order 1");
+        assertEquals(1, allRefs.get(0).getExecutionOrder(),
+            "First reference should have execution-order 1");
+
+        assertTrue(allRefs.get(1).getFile().contains("BasicStageConfigurationTest-enrichment-rules.yaml"),
+            "Second should be enrichment-rules config-file with execution-order 2");
+        assertEquals(2, allRefs.get(1).getExecutionOrder(),
+            "Second reference should have execution-order 2");
+
+        // Verify failure policies
+        assertEquals("terminate", allRefs.get(0).getFailurePolicy(),
+            "First config-file should have terminate policy");
+        assertEquals("continue-with-warnings", allRefs.get(1).getFailurePolicy(),
+            "Second config-file should have continue-with-warnings policy");
+
+        logger.info("Partial sections component loaded successfully with {} total references", allRefs.size());
+        logger.info("Component demonstrates flexibility: only config-files section used (no component-refs, rule-configurations, or enrichment-refs)");
+    }
 }

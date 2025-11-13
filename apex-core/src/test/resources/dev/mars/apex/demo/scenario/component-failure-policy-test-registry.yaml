@@ -1,0 +1,41 @@
+# Component Failure Policy Test - Scenario Registry
+# Tests that failure policies work correctly for components
+
+metadata:
+  id: "component-failure-policy-test-registry"
+  name: "Component Failure Policy Test Registry"
+  version: "1.0.0"
+  description: "Registry for testing component failure policy handling"
+  type: "scenario-registry"
+  author: "APEX Demo Team"
+  created: "2025-11-13"
+
+# Scenario definitions
+scenarios:
+  # Test 1: Successful component execution
+  - scenario-id: "component-success-test"
+    config-file: "src/test/resources/dev/mars/apex/demo/scenario/component-success-test-scenario.yaml"
+    description: "Test successful component execution with all files passing"
+    tags:
+      - component
+      - success
+      - integration
+
+  # Test 2: Component-ref with continue-with-warnings policy
+  - scenario-id: "component-continue-test"
+    config-file: "src/test/resources/dev/mars/apex/demo/scenario/component-continue-test-scenario.yaml"
+    description: "Test component-ref failure with continue-with-warnings policy"
+    tags:
+      - component
+      - continue-with-warnings
+      - integration
+
+  # Test 3: Config-file with terminate policy
+  - scenario-id: "component-terminate-test"
+    config-file: "src/test/resources/dev/mars/apex/demo/scenario/component-terminate-test-scenario.yaml"
+    description: "Test config-file failure with terminate policy"
+    tags:
+      - component
+      - terminate
+      - integration
+

@@ -88,9 +88,8 @@ public class ScenarioStageExecutor {
         
         List<ScenarioStage> stages = scenario.getStagesByExecutionOrder();
         ScenarioExecutionResult result = new ScenarioExecutionResult(scenario.getScenarioId());
-        
+
         logger.info("Executing {} stages for scenario '{}'", stages.size(), scenario.getScenarioId());
-        System.out.println("=== SYSTEM.OUT: executeStages called for scenario: " + scenario.getScenarioId());
 
         int currentStageIndex = 0;
         for (ScenarioStage stage : stages) {
@@ -201,7 +200,9 @@ public class ScenarioStageExecutor {
             }
 
             // Check if config file is a component
-            if (configLoader.isComponentFile(stage.getConfigFile())) {
+            boolean isComponent = configLoader.isComponentFile(stage.getConfigFile());
+
+            if (isComponent) {
                 // Handle component file - expand and execute all referenced files
                 return executeComponentStage(stage, data, context);
             } else {

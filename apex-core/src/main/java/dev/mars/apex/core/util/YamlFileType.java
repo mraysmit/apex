@@ -31,6 +31,7 @@ public enum YamlFileType {
     ENRICHMENT("Enrichment Configuration"),
     DATASET("Dataset Configuration"),
     BOOTSTRAP("Bootstrap Configuration"),
+    COMPONENT("Component Configuration"),
     UNKNOWN("Unknown Type");
     
     private final String description;

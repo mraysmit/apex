@@ -435,7 +435,175 @@ class YamlDependencyAnalyzerTest {
         YamlDependencyGraph graph3 = analyzer.analyzeYamlDependencies("enrichments/test-enrichment.yaml");
         assertEquals(YamlFileType.ENRICHMENT, graph3.getNode("enrichments/test-enrichment.yaml").getFileType());
     }
-    
+
+    @Test
+    void testComponentFileTypeDetection() throws IOException {
+        // Create a component file with metadata.type = "component"
+        writeFile("components/test-component.yaml", """
+            metadata:
+              id: "test-component"
+              name: "Test Component"
+              type: "component"
+              version: "1.0.0"
+              description: "Test component for dependency analysis"
+
+            config-files:
+              - file: "config/test-rules.yaml"
+                execution-order: 1
+            """);
+
+        writeFile("config/test-rules.yaml", """
+            metadata:
+              name: "Test Rules"
+              type: "rule-config"
+              author: "test"
+            rules: []
+            """);
+
+        // Analyze dependencies
+        YamlDependencyGraph graph = analyzer.analyzeYamlDependencies("components/test-component.yaml");
+
+        // Verify component file type is correctly detected
+        YamlNode componentNode = graph.getNode("components/test-component.yaml");
+        assertNotNull(componentNode);
+        assertEquals(YamlFileType.COMPONENT, componentNode.getFileType());
+
+        // Verify component references are extracted
+        assertTrue(componentNode.getReferencedFiles().contains("config/test-rules.yaml"));
+    }
+
+    @Test
+    void testComponentRefsExtraction() throws IOException {
+        // Create a component that references other components
+        writeFile("components/parent-component.yaml", """
+            metadata:
+              id: "parent-component"
+              name: "Parent Component"
+              type: "component"
+              version: "1.0.0"
+              description: "Parent component"
+
+            component-refs:
+              - file: "components/child-component.yaml"
+                execution-order: 1
+
+            config-files:
+              - file: "config/parent-rules.yaml"
+                execution-order: 2
+            """);
+
+        writeFile("components/child-component.yaml", """
+            metadata:
+              id: "child-component"
+              name: "Child Component"
+              type: "component"
+              version: "1.0.0"
+              description: "Child component"
+
+            config-files:
+              - file: "config/child-rules.yaml"
+                execution-order: 1
+            """);
+
+        writeFile("config/parent-rules.yaml", """
+            metadata:
+              name: "Parent Rules"
+              type: "rule-config"
+              author: "test"
+            rules: []
+            """);
+
+        writeFile("config/child-rules.yaml", """
+            metadata:
+              name: "Child Rules"
+              type: "rule-config"
+              author: "test"
+            rules: []
+            """);
+
+        // Analyze dependencies
+        YamlDependencyGraph graph = analyzer.analyzeYamlDependencies("components/parent-component.yaml");
+
+        // Verify all files are in the graph
+        assertEquals(4, graph.getTotalFiles());
+
+        // Verify parent component references
+        YamlNode parentNode = graph.getNode("components/parent-component.yaml");
+        assertNotNull(parentNode);
+        assertEquals(YamlFileType.COMPONENT, parentNode.getFileType());
+        assertTrue(parentNode.getReferencedFiles().contains("components/child-component.yaml"));
+        assertTrue(parentNode.getReferencedFiles().contains("config/parent-rules.yaml"));
+
+        // Verify child component references
+        YamlNode childNode = graph.getNode("components/child-component.yaml");
+        assertNotNull(childNode);
+        assertEquals(YamlFileType.COMPONENT, childNode.getFileType());
+        assertTrue(childNode.getReferencedFiles().contains("config/child-rules.yaml"));
+    }
+
+    @Test
+    void testComponentNestingDepthWarning() throws IOException {
+        // Create a component with depth 3 (should trigger warning)
+        writeFile("components/level1.yaml", """
+            metadata:
+              id: "level1"
+              name: "Level 1 Component"
+              type: "component"
+              version: "1.0.0"
+              description: "Level 1"
+
+            component-refs:
+              - file: "components/level2.yaml"
+                execution-order: 1
+            """);
+
+        writeFile("components/level2.yaml", """
+            metadata:
+              id: "level2"
+              name: "Level 2 Component"
+              type: "component"
+              version: "1.0.0"
+              description: "Level 2"
+
+            component-refs:
+              - file: "components/level3.yaml"
+                execution-order: 1
+            """);
+
+        writeFile("components/level3.yaml", """
+            metadata:
+              id: "level3"
+              name: "Level 3 Component"
+              type: "component"
+              version: "1.0.0"
+              description: "Level 3"
+
+            config-files:
+              - file: "config/test-rules.yaml"
+                execution-order: 1
+            """);
+
+        writeFile("config/test-rules.yaml", """
+            metadata:
+              name: "Test Rules"
+              type: "rule-config"
+              author: "test"
+            rules: []
+            """);
+
+        // Analyze dependencies - should log warning for depth 3 but not fail
+        YamlDependencyGraph graph = analyzer.analyzeYamlDependencies("components/level1.yaml");
+
+        // Verify all components are in the graph
+        assertEquals(4, graph.getTotalFiles());
+        assertEquals(3, graph.getMaxDepth()); // level1(0) -> level2(1) -> level3(2) -> rules(3)
+
+        // Verify all components are correctly typed
+        assertEquals(YamlFileType.COMPONENT, graph.getNode("components/level1.yaml").getFileType());
+        assertEquals(YamlFileType.COMPONENT, graph.getNode("components/level2.yaml").getFileType());
+        assertEquals(YamlFileType.COMPONENT, graph.getNode("components/level3.yaml").getFileType());
+    }
+
     /**
      * Helper method to write content to a file in the temp directory.
      */

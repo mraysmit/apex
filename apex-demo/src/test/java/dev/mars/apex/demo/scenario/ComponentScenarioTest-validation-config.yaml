@@ -1,61 +1,57 @@
-# ================================================================================
-# APEX Configuration File
-# ================================================================================
-# Type: Validation Configuration
-# Purpose: Validation rules for ComponentScenarioTest
-# Description: Validation rules that match the test data structure
-# ================================================================================
+# ============================================================================
+# APEX Trade Validation Rules for ComponentScenarioTest
+# ============================================================================
+# Validation rules for component scenario testing
+# NOTE: Validation rules return TRUE when validation FAILS (not when it passes)
+# ============================================================================
 
 metadata:
-  id: "component-test-validation-config"
-  name: "Component Test Validation Configuration"
+  id: "component-test-validation-rules"
+  name: "Component Test Validation Rules"
   version: "1.0.0"
-  type: "validation-config"
+  description: "Validation rules for component scenario testing"
+  type: "rule-config"
+  author: "APEX Demo"
 
-# Validation rules matching test data structure
-validation-rules:
-  - id: "validate-trade-id"
-    name: "Validate Trade ID"
-    description: "Ensure trade ID is present"
-    field: "tradeId"
-    condition: "#data.tradeId != null && !#data.tradeId.toString().isEmpty()"
-    error-message: "Trade ID is required"
+# Trade validation rules
+rules:
+  - id: "trade-id-required"
+    name: "Trade ID Required"
+    description: "Validate that trade ID is present and not empty"
+    condition: "#data.tradeId == null || #data.tradeId.toString().isEmpty()"
+    message: "Trade ID is required and cannot be empty"
     severity: "ERROR"
     enabled: true
 
-  - id: "validate-amount"
-    name: "Validate Amount"
-    description: "Ensure amount is present and positive"
-    field: "amount"
-    condition: "#data.amount != null && T(java.lang.Double).parseDouble(#data.amount.toString()) > 0"
-    error-message: "Amount must be positive"
+  - id: "amount-positive"
+    name: "Amount Positive"
+    description: "Validate that amount is positive"
+    condition: "#data.amount == null || T(java.lang.Double).parseDouble(#data.amount.toString()) <= 0"
+    message: "Amount must be positive"
     severity: "ERROR"
     enabled: true
 
-  - id: "validate-currency"
-    name: "Validate Currency"
-    description: "Ensure currency is present"
-    field: "currency"
-    condition: "#data.currency != null && !#data.currency.toString().isEmpty()"
-    error-message: "Currency is required"
+  - id: "currency-required"
+    name: "Currency Required"
+    description: "Validate that currency is present and not empty"
+    condition: "#data.currency == null || #data.currency.toString().isEmpty()"
+    message: "Currency is required"
     severity: "ERROR"
     enabled: true
 
-  - id: "validate-counterparty"
-    name: "Validate Counterparty"
-    description: "Ensure counterparty is present"
-    field: "counterparty"
-    condition: "#data.counterparty != null && !#data.counterparty.toString().isEmpty()"
-    error-message: "Counterparty is required"
+  - id: "counterparty-required"
+    name: "Counterparty Required"
+    description: "Validate that counterparty is present and not empty"
+    condition: "#data.counterparty == null || #data.counterparty.toString().isEmpty()"
+    message: "Counterparty is required"
     severity: "ERROR"
     enabled: true
 
-  - id: "validate-trade-type"
-    name: "Validate Trade Type"
-    description: "Ensure trade type is present"
-    field: "tradeType"
-    condition: "#data.tradeType != null && !#data.tradeType.toString().isEmpty()"
-    error-message: "Trade type is required"
+  - id: "trade-type-required"
+    name: "Trade Type Required"
+    description: "Validate that trade type is present and not empty"
+    condition: "#data.tradeType == null || #data.tradeType.toString().isEmpty()"
+    message: "Trade type is required"
     severity: "ERROR"
     enabled: true
 
