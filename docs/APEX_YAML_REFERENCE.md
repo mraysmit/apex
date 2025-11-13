@@ -19,17 +19,18 @@
    - 5.3 [Rule Categories](#43-rule-categories)
 6. [Rule Groups Section](#6-rule-groups-section)
 7. [Enrichments Section](#7-enrichments-section)
-8. [Scenario Configurations](#8-scenario-configurations)
-9. [Dataset Definitions](#9-dataset-definitions)
-10. [External Data-Source References](#10-external-data-source-references)
-11. [Pipeline Orchestration](#11-pipeline-orchestration)
-12. [Advanced Features](#12-advanced-features)
-13. [Best Practices](#13-best-practices)
-14. [Common Patterns](#14-common-patterns)
-15. [Examples & Use Cases](#15-examples--use-cases)
-16. [Troubleshooting](#16-troubleshooting)
-17. [Reference](#17-reference)
-18. [Migration & Compatibility](#18-migration--compatibility)
+8. [Component Configurations](#8-component-configurations)
+9. [Scenario Configurations](#9-scenario-configurations)
+10. [Dataset Definitions](#10-dataset-definitions)
+11. [External Data-Source References](#11-external-data-source-references)
+12. [Pipeline Orchestration](#12-pipeline-orchestration)
+13. [Advanced Features](#13-advanced-features)
+14. [Best Practices](#14-best-practices)
+15. [Common Patterns](#15-common-patterns)
+16. [Examples & Use Cases](#16-examples--use-cases)
+17. [Troubleshooting](#17-troubleshooting)
+18. [Reference](#18-reference)
+19. [Migration & Compatibility](#19-migration--compatibility)
 
 ---
 
@@ -52,7 +53,9 @@ This section provides a definitive reference for all 72 supported APEX YAML keyw
 | **categories** | Document | No | List | Category definitions for the configuration |
 | **category** | Rule | No | String | Single category for rule classification |
 | **circuit-breaker** | DataSource | No | Map | Circuit breaker configuration for resilience |
-| **condition** | Rule/Enrichment | No | String | SpEL expression defining when rule/enrichment applies |
+| **component-refs** | Component | No | List | References to other component files |
+| **config-files** | Component | No | List | Configuration files with execution order and failure policy |
+| **condition** | Rule/Enrichment/Stage | No | String | SpEL expression defining when rule/enrichment/stage applies |
 | **conditional-mappings** | Enrichment | No | List | Conditional field mapping configurations |
 | **config-file** | Stage | Yes | String | Path to rule configuration file for stage |
 | **connection** | DataSource | Yes | Map | Database/external system connection configuration |
@@ -73,13 +76,15 @@ This section provides a definitive reference for all 72 supported APEX YAML keyw
 | **enabled** | Rule/Enrichment | No | Boolean | Whether the rule/enrichment is active |
 | **encoding** | DataSource | No | String | Character encoding for file-based sources |
 | **endpoints** | DataSource | No | Map | REST API endpoint definitions |
+| **enrichment-refs** | Component | No | List | References to enrichment configuration files |
 | **enrichments** | Document | No | List | Data enrichment configurations |
-| **execution-order** | Stage | Yes | Integer | Numeric execution order for stage |
+| **execution-order** | Stage/FileRef | No | Integer | Numeric execution order for stage or file reference |
 | **execution-settings** | Enrichment | No | Map | Execution behavior configuration for enrichments |
 | **expiration-date** | Rule | No | String | Date when rule expires (ISO 8601) |
-| **failure-policy** | Stage | No | String | Stage failure handling policy |
+| **failure-policy** | Stage/FileRef | No | String | Stage or file reference failure handling policy (terminate, continue-with-warnings, flag-for-review) |
 | **field-mappings** | Enrichment | No | List | Field mapping configurations for enrichments |
 | **field-types** | ValidationConfig | No | Map | Expected data types for rule validation |
+| **file** | FileRef | Yes | String | Path to configuration file in component file reference |
 | **file-format** | DataSource | No | Map | File format configuration (CSV, JSON, XML) |
 | **file-pattern** | DataSource | No | String | File name pattern for file-based sources |
 | **health-check** | DataSource | No | Map | Health check configuration for data sources |
@@ -97,6 +102,7 @@ This section provides a definitive reference for all 72 supported APEX YAML keyw
 | **override-priority** | RuleReference | No | Integer | Override priority for rule within group |
 | **parallel-execution** | RuleGroup | No | Boolean | Enable parallel execution of rules in group |
 | **parameter-names** | DataSource | No | Array | Parameter names for parameterized queries |
+| **rule-configurations** | Component | No | List | References to rule configuration files |
 | **pipeline** | Document | No | Map | Pipeline configuration for processing |
 | **polling-interval** | DataSource | No | Integer | Polling interval for file-based sources |
 | **priority** | Rule/Enrichment | No | Integer | Execution priority (lower numbers = higher priority) |
@@ -145,7 +151,12 @@ Valid values for the `type` field in metadata:
 - `enrichment` - Enrichment configuration documents
 - `dataset` - Dataset configuration documents
 - `scenario` - Scenario configuration documents
+- `scenario-registry` - Scenario registry documents
+- `component` - Component configuration documents (groups multiple config files)
 - `external-data-config` - External data configuration documents
+- `pipeline-config` - Pipeline configuration documents
+- `bootstrap` - Bootstrap configuration documents
+- `rule-chain` - Rule chain configuration documents
 
 ### 1.3 Required Fields by Document Type
 
@@ -352,6 +363,7 @@ APEX supports several document types, each with specific purposes and validation
 | `dataset` | Reference data and lookup tables | `id`, `source` | `data` |
 | `scenario` | End-to-end processing scenarios | `id`, `business-domain`, `owner` | `scenario`, `data-types`, (`rule-configurations` OR `processing-stages`) |
 | `scenario-registry` | Scenario collection management | `id`, `created-by` | `scenarios` |
+| `component` | Reusable configuration component | `id`, `name`, `version` | `rule-configurations`, `enrichment-refs`, `component-refs`, `config-files` |
 | `rule-chain` | Sequential rule execution definitions | `id`, `author` | `rule-chains` |
 | `external-data-config` | External data source configurations | `id`, `author` | `dataSources`, `configuration` |
 | `pipeline` | ETL and data processing pipeline orchestration | `id`, `author` | `pipeline`, `data-sources`, `data-sinks` |
@@ -2856,6 +2868,17 @@ scenario:
         description: "Regulatory compliance validation"
         sla-ms: 1000
         critical: true
+
+    - stage-name: "us-regulatory-check"
+      config-file: "config/us-regulatory.yaml"
+      execution-order: 4
+      condition: "#data['region'] == 'US'"  # Conditional execution
+      failure-policy: "terminate"
+      depends-on: ["compliance-check"]
+      stage-metadata:
+        description: "US-specific regulatory checks"
+        sla-ms: 800
+        critical: true
 ```
 
 ### 7.4 Stage Configuration Properties
@@ -2865,6 +2888,7 @@ scenario:
 | `stage-name` | Yes | String | Unique identifier for the stage |
 | `config-file` | Yes | String | Path to rule configuration file |
 | `execution-order` | Yes | Integer | Numeric execution order |
+| `condition` | No | String | SpEL expression for conditional execution |
 | `failure-policy` | No | String | How to handle stage failures |
 | `required` | No | Boolean | Whether stage is mandatory |
 | `depends-on` | No | List | Stage dependencies |
@@ -2897,7 +2921,83 @@ processing-stages:
     depends-on: ["validation"]  # Parallel with enrichment
 ```
 
-### 7.7 Multi-Environment Configuration
+### 7.7 Conditional Stage Execution
+
+Stages can include optional SpEL conditions that control whether the stage executes. This enables dynamic, data-driven workflow logic:
+
+```yaml
+processing-stages:
+  - stage-name: "us-compliance"
+    config-file: "config/us-compliance.yaml"
+    execution-order: 2
+    condition: "#data['region'] == 'US'"  # Only execute for US region
+    failure-policy: "terminate"
+
+  - stage-name: "emea-compliance"
+    config-file: "config/emea-compliance.yaml"
+    execution-order: 3
+    condition: "#data['region'] == 'EMEA'"  # Only execute for EMEA region
+    failure-policy: "terminate"
+
+  - stage-name: "high-value-check"
+    config-file: "config/high-value-validation.yaml"
+    execution-order: 4
+    condition: "#data['amount'] > 10000"  # Only for high-value trades
+    failure-policy: "flag-for-review"
+```
+
+**Condition Evaluation Behavior:**
+
+- **Condition True**: Stage executes normally
+- **Condition False**: Stage is skipped (logged as "skipped")
+- **No Condition**: Stage always executes (backward compatible)
+- **Evaluation Error**: Stage is skipped with error logged (safe default)
+
+**Complex Conditions:**
+
+Conditions support full SpEL syntax with access to `#data`, `#context`, and other variables:
+
+```yaml
+processing-stages:
+  - stage-name: "us-high-value-compliance"
+    config-file: "config/us-high-value.yaml"
+    condition: "#data['region'] == 'US' && #data['amount'] > 10000"
+    failure-policy: "terminate"
+
+  - stage-name: "exotic-options-pricing"
+    config-file: "config/exotic-pricing.yaml"
+    condition: "#data['productType'] == 'EXOTIC' && #data['underlyingAsset'] != null"
+    failure-policy: "continue-with-warnings"
+```
+
+**Conditions with Dependencies:**
+
+Conditions are evaluated **before** dependencies. A stage will only check dependencies if its condition is met:
+
+```yaml
+processing-stages:
+  - stage-name: "validation"
+    config-file: "config/validation.yaml"
+    execution-order: 1
+    # No condition - always runs
+
+  - stage-name: "us-compliance"
+    config-file: "config/us-compliance.yaml"
+    execution-order: 2
+    condition: "#data['region'] == 'US'"  # Checked first
+    depends-on: ["validation"]            # Checked only if condition is true
+    failure-policy: "terminate"
+```
+
+**Best Practices:**
+
+1. **Use conditions for data-driven routing** - Route trades to region-specific compliance checks
+2. **Combine with dependencies** - Ensure prerequisite stages complete before conditional stages
+3. **Keep conditions simple** - Complex logic should be in rules, not stage conditions
+4. **Handle evaluation errors gracefully** - Conditions that fail to evaluate will skip the stage
+5. **Log skipped stages** - Monitor which stages are being skipped to verify routing logic
+
+### 7.8 Multi-Environment Configuration
 
 Different environments can have different processing requirements:
 
@@ -2919,7 +3019,7 @@ scenario:
       failure-policy: "terminate"  # Strict for production
 ```
 
-### 7.8 Classification-Based Routing
+### 7.9 Classification-Based Routing
 
 Scenarios can include classification rules to automatically route data to the appropriate scenario based on data characteristics:
 
@@ -3074,7 +3174,263 @@ ScenarioExecutionResult result = engine.evaluateWithClassification(tradeData);
 
 ---
 
-## 8. Dataset Definitions
+## 8. Component Configurations
+
+### 8.1 Overview
+
+**Component Configurations** are reusable YAML files that group multiple configuration files together with controlled execution order and failure policies. Components enable:
+
+- **Modular Configuration**: Group related rules, enrichments, and other configs into logical units
+- **Reusability**: Reference the same component from multiple scenarios
+- **Execution Control**: Define explicit execution order and failure handling
+- **Nesting Support**: Components can reference other components (with depth limits)
+- **Backward Compatibility**: Existing YAML files work unchanged
+
+### 8.2 Component Structure
+
+```yaml
+metadata:
+  id: "component-id"
+  name: "Component Name"
+  version: "1.0.0"
+  description: "Component description"
+  type: "component"
+  business-domain: "Domain"
+  owner: "team@company.com"
+  criticality: "high"
+  sla-ms: 200
+  tags:
+    - tag1
+    - tag2
+
+# Optional: Rule configuration file references
+rule-configurations:
+  - file: "path/to/validation-rules.yaml"
+    execution-order: 1
+    failure-policy: "terminate"
+  - file: "path/to/business-rules.yaml"
+    execution-order: 2
+    failure-policy: "continue-with-warnings"
+
+# Optional: Enrichment file references
+enrichment-refs:
+  - file: "path/to/enrichments.yaml"
+    execution-order: 3
+    failure-policy: "continue-with-warnings"
+
+# Optional: Other component references (nesting)
+component-refs:
+  - file: "path/to/nested-component.yaml"
+    execution-order: 4
+    failure-policy: "terminate"
+
+# Optional: Generic config file references
+config-files:
+  - file: "path/to/any-config.yaml"
+    execution-order: 5
+    failure-policy: "flag-for-review"
+```
+
+### 8.3 File Reference Structure
+
+Each file reference in a component supports:
+
+| Field | Required | Type | Description |
+|-------|----------|------|-------------|
+| `file` | Yes | String | Path to configuration file (relative or absolute) |
+| `execution-order` | No | Integer | Numeric execution order (lower numbers execute first) |
+| `failure-policy` | No | String | Failure handling: `terminate`, `continue-with-warnings`, `flag-for-review` |
+
+**Execution Order Rules:**
+- Files with explicit `execution-order` are sorted numerically (ascending)
+- Files without `execution-order` execute in document order
+- Mixed mode: Ordered files execute first, then unordered files in document order
+
+**Failure Policy Options:**
+- `terminate` - Stop processing immediately on failure (default for critical operations)
+- `continue-with-warnings` - Log warning and continue processing (default for enrichments)
+- `flag-for-review` - Mark for manual review but continue processing
+
+### 8.4 Basic Component Example
+
+**Simple Validation Component:**
+
+```yaml
+metadata:
+  id: "basic-validation-component"
+  name: "Basic Trade Validation"
+  version: "1.0.0"
+  type: "component"
+  description: "Basic trade validation rules"
+  business-domain: "Trading"
+  owner: "trading-team@bank.com"
+
+rule-configurations:
+  - file: "validation/required-fields.yaml"
+    execution-order: 1
+    failure-policy: "terminate"
+  - file: "validation/data-quality.yaml"
+    execution-order: 2
+    failure-policy: "terminate"
+```
+
+### 8.5 Multi-Stage Component Example
+
+**Component with Enrichment and Validation:**
+
+```yaml
+metadata:
+  id: "multi-stage-component"
+  name: "Multi-Stage Processing Component"
+  version: "1.0.0"
+  type: "component"
+  description: "Component with enrichment followed by validation"
+  business-domain: "data-processing"
+  owner: "APEX Demo Team"
+  criticality: "high"
+  sla-ms: 200
+
+config-files:
+  - file: "enrichment/trade-enrichment.yaml"
+    execution-order: 1
+    failure-policy: "continue-with-warnings"
+  - file: "validation/trade-validation.yaml"
+    execution-order: 2
+    failure-policy: "terminate"
+```
+
+### 8.6 Nested Component Example
+
+**Parent Component Referencing Child Component:**
+
+```yaml
+metadata:
+  id: "nested-component-level1"
+  name: "Nested Component Level 1"
+  version: "1.0.0"
+  type: "component"
+  description: "Top-level component that references nested components"
+  business-domain: "testing"
+  owner: "APEX Demo Team"
+
+config-files:
+  - file: "components/nested-component-level2.yaml"
+    execution-order: 1
+    failure-policy: "terminate"
+  - file: "validation/final-validation.yaml"
+    execution-order: 2
+    failure-policy: "terminate"
+```
+
+**Child Component:**
+
+```yaml
+metadata:
+  id: "nested-component-level2"
+  name: "Nested Component Level 2"
+  version: "1.0.0"
+  type: "component"
+  description: "Child component with enrichment rules"
+
+enrichment-refs:
+  - file: "enrichment/basic-enrichment.yaml"
+    failure-policy: "continue-with-warnings"
+```
+
+### 8.7 Using Components in Scenarios
+
+Components can be referenced in scenario stages just like regular config files:
+
+```yaml
+metadata:
+  id: "trade-processing-scenario"
+  name: "Trade Processing Scenario"
+  type: "scenario"
+  business-domain: "Trading"
+
+scenario:
+  scenario-id: "trade-processing"
+  name: "Trade Processing Pipeline"
+
+  processing-stages:
+    - stage-name: "validation"
+      config-file: "components/validation-component.yaml"  # Component file
+      execution-order: 1
+      required: true
+
+    - stage-name: "enrichment"
+      config-file: "components/enrichment-component.yaml"  # Component file
+      execution-order: 2
+      required: true
+```
+
+### 8.8 Nesting Depth Limits
+
+To prevent excessive complexity and circular references:
+
+- **Levels 1-2**: Normal operation (no warnings)
+- **Levels 3-5**: WARNING logged (review recommended)
+- **Level 6+**: CRITICAL ERROR - processing terminates
+
+**Example Nesting:**
+```
+Level 1: scenario.yaml
+  └─ Level 2: component-level1.yaml
+       └─ Level 3: component-level2.yaml (WARNING)
+            └─ Level 4: component-level3.yaml (WARNING)
+                 └─ Level 5: component-level4.yaml (WARNING)
+                      └─ Level 6: component-level5.yaml (ERROR - REJECTED)
+```
+
+### 8.9 Circular Reference Detection
+
+APEX automatically detects and prevents circular component references:
+
+```yaml
+# component-a.yaml
+component-refs:
+  - file: "component-b.yaml"
+
+# component-b.yaml
+component-refs:
+  - file: "component-a.yaml"  # CIRCULAR REFERENCE - REJECTED
+```
+
+**Error Message:**
+```
+Circular component reference detected: component-a.yaml → component-b.yaml → component-a.yaml
+```
+
+### 8.10 Best Practices
+
+**1. Keep Components Focused**
+- Group related configurations together
+- Avoid mixing unrelated business logic
+- Use descriptive names and IDs
+
+**2. Use Execution Order Wisely**
+- Enrichments before validations
+- Critical validations first
+- Optional enrichments last
+
+**3. Choose Appropriate Failure Policies**
+- `terminate` for critical validations
+- `continue-with-warnings` for optional enrichments
+- `flag-for-review` for manual intervention cases
+
+**4. Limit Nesting Depth**
+- Prefer flat structures (1-2 levels)
+- Avoid deep nesting (3+ levels)
+- Use component-refs sparingly
+
+**5. Document Dependencies**
+- Add clear descriptions
+- Use tags for categorization
+- Specify business domain and owner
+
+---
+
+## 9. Dataset Definitions
 
 ### 8.1 Inline Datasets
 
@@ -3151,9 +3507,9 @@ lookup-dataset:
 
 ---
 
-## 9. External Data-Source References
+## 10. External Data-Source References
 
-### 9.1 Overview
+### 10.1 Overview
 
 **External Data-Source References** are APEX 2.0's enterprise-grade solution for clean architecture and configuration management. This system enables **separation of concerns** by splitting configurations into:
 

@@ -2138,6 +2138,7 @@ public class RulesEngine {
             String configFile = (String) stageData.get("config-file");
             Integer executionOrder = (Integer) stageData.get("execution-order");
             String failurePolicy = (String) stageData.get("failure-policy");
+            String condition = (String) stageData.get("condition");
             Boolean required = (Boolean) stageData.get("required");
 
             if (stageName == null || configFile == null || executionOrder == null) {
@@ -2150,6 +2151,10 @@ public class RulesEngine {
 
             if (failurePolicy != null) {
                 stage.setFailurePolicy(failurePolicy);
+            }
+
+            if (condition != null) {
+                stage.setCondition(condition);
             }
 
             if (required != null) {

@@ -373,7 +373,12 @@ const APEX_KEYWORDS = {
         description: 'Additional metadata for stage',
         required: false
     },
-    
+    'condition': {
+        category: 'Stage',
+        description: 'SpEL condition that controls whether the stage executes',
+        required: false
+    },
+
     // External References
     'rule-refs': {
         category: 'Document',

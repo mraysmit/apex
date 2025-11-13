@@ -24,6 +24,7 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.config.yaml.YamlRuleFactory;
+import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.util.TestAwareLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,42 +33,53 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * Executor for processing scenario stages with dependency management and failure policies.
- * 
+ * Executor for processing scenario stages with dependency management, conditional execution, and failure policies.
+ *
  * Follows the existing pattern from ComplexWorkflowExecutor and SequentialDependencyExecutor
  * but specialized for financial trade processing workflows. Handles stage dependencies,
- * failure policies, and provides comprehensive result tracking.
- * 
+ * conditional execution, failure policies, and provides comprehensive result tracking.
+ *
  * EXECUTION FEATURES:
+ * - Conditional stage execution via SpEL expressions
  * - Dependency-aware stage execution
  * - Configurable failure policies per stage
  * - Performance monitoring and SLA tracking
  * - Comprehensive error handling and recovery
  * - Context sharing between stages
- * 
+ *
+ * CONDITIONAL EXECUTION:
+ * - Stages can have optional SpEL conditions that control execution
+ * - Conditions are evaluated before dependency checks
+ * - If condition evaluates to false, stage is skipped
+ * - Condition evaluation errors result in stage being skipped (safe default)
+ * - Conditions have access to data context (#data, #scenarioContext, etc.)
+ *
  * FAILURE POLICIES:
  * - terminate: Stop processing immediately if stage fails
  * - continue-with-warnings: Log warnings but continue to next stage
  * - flag-for-review: Mark for manual review but continue processing
- * 
+ *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
 public class ScenarioStageExecutor {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(ScenarioStageExecutor.class);
 
     private final YamlConfigurationLoader configLoader;
     private final YamlRuleFactory ruleFactory;
+    private final ExpressionEvaluatorService expressionEvaluator;
 
     public ScenarioStageExecutor() {
         this.configLoader = new YamlConfigurationLoader();
         this.ruleFactory = new YamlRuleFactory();
+        this.expressionEvaluator = new ExpressionEvaluatorService();
     }
 
     public ScenarioStageExecutor(YamlConfigurationLoader configLoader, YamlRuleFactory ruleFactory) {
         this.configLoader = configLoader != null ? configLoader : new YamlConfigurationLoader();
         this.ruleFactory = ruleFactory != null ? ruleFactory : new YamlRuleFactory();
+        this.expressionEvaluator = new ExpressionEvaluatorService();
     }
     
     /**
@@ -93,9 +105,9 @@ public class ScenarioStageExecutor {
 
         int currentStageIndex = 0;
         for (ScenarioStage stage : stages) {
-            if (!shouldExecuteStage(stage, result)) {
-                String reason = getDependencyFailureReason(stage, result);
-                logger.info("Skipping stage '{}' due to dependencies: {}", stage.getStageName(), reason);
+            if (!shouldExecuteStage(stage, data, result)) {
+                String reason = getSkipReason(stage, data, result);
+                logger.info("Skipping stage '{}': {}", stage.getStageName(), reason);
                 result.addSkippedStage(stage.getStageName(), reason);
                 currentStageIndex++;
                 continue;
@@ -131,47 +143,86 @@ public class ScenarioStageExecutor {
     }
     
     /**
-     * Checks if a stage should be executed based on its dependencies.
-     * 
+     * Checks if a stage should be executed based on its condition and dependencies.
+     *
      * @param stage the stage to check
+     * @param data the input data for condition evaluation
      * @param result the current execution result
      * @return true if the stage should be executed
      */
-    private boolean shouldExecuteStage(ScenarioStage stage, ScenarioExecutionResult result) {
-        if (!stage.hasDependencies()) {
-            return true; // No dependencies, can execute
-        }
-        
-        // Check if all dependencies are satisfied
-        for (String dependency : stage.getDependsOn()) {
-            if (!result.isStageSuccessful(dependency)) {
-                logger.debug("Stage '{}' dependency '{}' not satisfied", stage.getStageName(), dependency);
+    private boolean shouldExecuteStage(ScenarioStage stage, Object data, ScenarioExecutionResult result) {
+        // First check condition (if specified)
+        if (stage.hasCondition()) {
+            try {
+                Map<String, Object> facts = createFactsMap(data, result);
+                Boolean conditionMet = expressionEvaluator.evaluateWithEnhancedContext(
+                    stage.getCondition(), facts, Boolean.class);
+                if (conditionMet == null || !conditionMet) {
+                    logger.info("Stage '{}' condition not met - skipping: {}",
+                        stage.getStageName(), stage.getCondition());
+                    return false;
+                }
+                logger.debug("Stage '{}' condition met: {}",
+                    stage.getStageName(), stage.getCondition());
+            } catch (Exception e) {
+                logger.warn("Stage '{}' condition evaluation failed - skipping: {}",
+                    stage.getStageName(), e.getMessage());
                 return false;
             }
         }
-        
+
+        // Then check dependencies
+        if (!stage.hasDependencies()) {
+            return true; // No dependencies, can execute
+        }
+
+        // Check if all dependencies are satisfied
+        for (String dependency : stage.getDependsOn()) {
+            if (!result.isStageSuccessful(dependency)) {
+                logger.debug("Stage '{}' dependency '{}' not satisfied",
+                    stage.getStageName(), dependency);
+                return false;
+            }
+        }
+
         return true;
     }
-    
+
     /**
-     * Gets the reason why a stage cannot be executed due to dependency failures.
-     * 
+     * Gets the reason why a stage is being skipped (condition or dependency failure).
+     *
      * @param stage the stage
+     * @param data the input data for condition evaluation
      * @param result the current execution result
-     * @return reason for dependency failure
+     * @return reason for skipping the stage
      */
-    private String getDependencyFailureReason(ScenarioStage stage, ScenarioExecutionResult result) {
-        if (!stage.hasDependencies()) {
-            return "No dependencies";
+    private String getSkipReason(ScenarioStage stage, Object data, ScenarioExecutionResult result) {
+        // Check condition first
+        if (stage.hasCondition()) {
+            try {
+                Map<String, Object> facts = createFactsMap(data, result);
+                Boolean conditionMet = expressionEvaluator.evaluateWithEnhancedContext(
+                    stage.getCondition(), facts, Boolean.class);
+                if (conditionMet == null || !conditionMet) {
+                    return "Condition not met: " + stage.getCondition();
+                }
+            } catch (Exception e) {
+                return "Condition evaluation failed: " + e.getMessage();
+            }
         }
-        
+
+        // Check dependencies
+        if (!stage.hasDependencies()) {
+            return "Unknown reason";
+        }
+
         List<String> failedDependencies = new ArrayList<>();
         for (String dependency : stage.getDependsOn()) {
             if (!result.isStageSuccessful(dependency)) {
                 failedDependencies.add(dependency);
             }
         }
-        
+
         if (failedDependencies.isEmpty()) {
             return "Dependencies satisfied";
         } else {

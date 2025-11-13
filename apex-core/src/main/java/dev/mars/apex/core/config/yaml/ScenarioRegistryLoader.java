@@ -376,6 +376,9 @@ public class ScenarioRegistryLoader {
         // Set failure policy
         stage.setFailurePolicy((String) stageData.get("failure-policy"));
 
+        // Set condition (optional SpEL expression for conditional execution)
+        stage.setCondition((String) stageData.get("condition"));
+
         // Set execution order
         Object executionOrder = stageData.get("execution-order");
         if (executionOrder != null) {

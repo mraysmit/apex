@@ -1,0 +1,39 @@
+# High-Value Trade Validation Rules
+# Used by ConditionalStageExecutionTest to demonstrate conditional stage execution
+# This stage only executes when condition: "#data['notionalAmount'] > 10000000" is true
+
+metadata:
+  id: "high-value-validation-rules"
+  name: "High-Value Trade Validation"
+  description: "Additional validation for high-value OTC options trades"
+  version: "1.0.0"
+  author: "Mark Andrew Ray-Smith Cityline Ltd"
+  created: "2024-11-13"
+
+type: "rule-config"
+
+rules:
+  - id: "senior-approval-required"
+    name: "Senior Management Approval"
+    description: "High-value trades require senior management approval"
+    condition: "#data['approvedBy'] != null && #data['approvedBy'].length() > 0"
+    message: "Trades over $10M require senior management approval"
+    enabled: true
+    priority: 1
+
+  - id: "credit-limit-check"
+    name: "Credit Limit Validation"
+    description: "Verify trade is within counterparty credit limit"
+    condition: "#data['creditLimitChecked'] == true"
+    message: "Credit limit must be verified for high-value trades"
+    enabled: true
+    priority: 2
+
+  - id: "risk-assessment-required"
+    name: "Risk Assessment Requirement"
+    description: "High-value trades require comprehensive risk assessment"
+    condition: "#data['riskAssessment'] != null"
+    message: "Risk assessment required for trades over $10M"
+    enabled: true
+    priority: 3
+

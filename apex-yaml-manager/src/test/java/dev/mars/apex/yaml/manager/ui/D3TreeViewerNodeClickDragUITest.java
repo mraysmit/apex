@@ -1,5 +1,6 @@
 package dev.mars.apex.yaml.manager.ui;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -7,6 +8,8 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
 
 import java.time.Duration;
 
@@ -16,16 +19,21 @@ import static org.junit.jupiter.api.Assertions.*;
  * Selenium UI tests for D3 Tree Viewer node click and drag behavior.
  * Tests that clicking tree nodes shows file content, but dragging (mousedown > 2 seconds) cancels the click.
  */
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class D3TreeViewerNodeClickDragUITest {
 
-    private static WebDriver driver;
-    private static WebDriverWait wait;
-    private static JavascriptExecutor jsExecutor;
-    private static final String baseUrl = "http://localhost:8082/yaml-manager";
+    @LocalServerPort
+    private int port;
 
-    @BeforeAll
-    static void setupClass() {
+    private WebDriver driver;
+    private WebDriverWait wait;
+    private JavascriptExecutor jsExecutor;
+    private String baseUrl;
+
+    @BeforeEach
+    void setUp() {
+        WebDriverManager.chromedriver().setup();
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless");
         options.addArguments("--disable-gpu");
@@ -36,19 +44,14 @@ public class D3TreeViewerNodeClickDragUITest {
         driver = new ChromeDriver(options);
         wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         jsExecutor = (JavascriptExecutor) driver;
+        baseUrl = "http://localhost:" + port + "/yaml-manager";
     }
 
-    @AfterAll
-    static void tearDownClass() {
+    @AfterEach
+    void tearDown() {
         if (driver != null) {
             driver.quit();
         }
-    }
-
-    @BeforeEach
-    void setUp() {
-        // Clear any previous state
-        driver.manage().deleteAllCookies();
     }
 
     @Test

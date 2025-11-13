@@ -75,8 +75,11 @@ function loadTreeData() {
     // Update the tree path display
     updateTreePath(basePath);
 
-    // Use apex-yaml-manager API (port 8082)
-    const apiUrl = `http://localhost:8082/yaml-manager/api/dependencies/tree?rootFile=${encodeURIComponent(rootFile)}`;
+    // Use apex-yaml-manager API - use current origin for tests, fallback to port 8082 for development
+    const baseUrl = window.location.origin.includes('localhost') && window.location.pathname.includes('/yaml-manager')
+        ? window.location.origin  // Use current origin if already on yaml-manager
+        : 'http://localhost:8082';  // Fallback for development
+    const apiUrl = `${baseUrl}/yaml-manager/api/dependencies/tree?rootFile=${encodeURIComponent(rootFile)}`;
 
     fetch(apiUrl)
         .then(response => {
@@ -756,7 +759,8 @@ function applyApexKeywordColorization(codeElement) {
         'execution-order': 'apex-scenario',
         'depends-on': 'apex-scenario',
         'failure-policy': 'apex-scenario',
-        'stage-metadata': 'apex-scenario'
+        'stage-metadata': 'apex-scenario',
+        'condition': 'apex-scenario'
     };
 
     // Simple approach: find text nodes and wrap APEX keywords

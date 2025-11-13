@@ -472,24 +472,27 @@ public class D3TreeViewerResizerUITest {
 
         WebElement treePanel = wait.until(ExpectedConditions.presenceOfElementLocated(
             By.cssSelector(".tree-panel")));
+        WebElement viewTabs = driver.findElement(By.cssSelector(".view-tabs"));
         WebElement treeHeader = driver.findElement(By.cssSelector(".tree-header"));
         WebElement treeContainer = driver.findElement(By.id("tree-container"));
 
         int treePanelHeight = treePanel.getSize().getHeight();
+        int viewTabsHeight = viewTabs.getSize().getHeight();
         int treeHeaderHeight = treeHeader.getSize().getHeight();
         int treeContainerHeight = treeContainer.getSize().getHeight();
 
         System.out.println("Tree Panel Height: " + treePanelHeight + "px");
+        System.out.println("View Tabs Height: " + viewTabsHeight + "px");
         System.out.println("Tree Header Height: " + treeHeaderHeight + "px");
         System.out.println("Tree Container Height: " + treeContainerHeight + "px");
 
-        // Tree container should fill remaining space after header
-        int expectedContainerHeight = treePanelHeight - treeHeaderHeight;
+        // Tree container should fill remaining space after view tabs and header
+        int expectedContainerHeight = treePanelHeight - viewTabsHeight - treeHeaderHeight;
         int heightDiff = Math.abs(treeContainerHeight - expectedContainerHeight);
 
         assertTrue(heightDiff <= 10,
             "Tree container should fill available space. " +
-            "Panel: " + treePanelHeight + "px, Header: " + treeHeaderHeight + "px, " +
+            "Panel: " + treePanelHeight + "px, ViewTabs: " + viewTabsHeight + "px, Header: " + treeHeaderHeight + "px, " +
             "Container: " + treeContainerHeight + "px, Expected: " + expectedContainerHeight + "px, Diff: " + heightDiff + "px");
     }
 

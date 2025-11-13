@@ -20,31 +20,39 @@ import java.util.*;
 
 /**
  * Configuration class representing a single processing stage within a scenario.
- * 
+ *
  * Each stage defines a specific phase of trade processing (validation, enrichment, compliance)
- * with explicit execution order, failure policies, and dependency management.
- * 
+ * with explicit execution order, failure policies, conditional execution, and dependency management.
+ *
  * STAGE CONFIGURATION FEATURES:
  * - Explicit execution order and dependencies
+ * - Conditional execution via SpEL expressions
  * - Configurable failure policies (terminate, continue-with-warnings, flag-for-review)
  * - Stage metadata for monitoring and SLA tracking
  * - Validation of stage configuration integrity
- * 
+ *
+ * CONDITIONAL EXECUTION:
+ * - Optional SpEL condition that controls whether stage executes
+ * - If condition evaluates to false, stage is skipped
+ * - If condition is null/empty, stage always executes (backward compatible)
+ * - Condition has access to data context (#data, #region, etc.)
+ *
  * FAILURE POLICIES:
  * - terminate: Stop processing immediately if stage fails
  * - continue-with-warnings: Log warnings but continue to next stage
  * - flag-for-review: Mark for manual review but continue processing
- * 
+ *
  * USAGE EXAMPLE:
  * ```java
  * ScenarioStage validationStage = new ScenarioStage();
  * validationStage.setStageName("validation");
  * validationStage.setConfigFile("config/otc-options-validation-rules.yaml");
  * validationStage.setExecutionOrder(1);
+ * validationStage.setCondition("#region == 'US'");  // Conditional execution
  * validationStage.setFailurePolicy("terminate");
  * validationStage.setRequired(true);
  * ```
- * 
+ *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
@@ -65,6 +73,7 @@ public class ScenarioStage {
     private String configFile;
     private int executionOrder;
     private String failurePolicy;
+    private String condition;
     private List<String> dependsOn;
     private boolean required;
     private Map<String, Object> stageMetadata;
@@ -121,7 +130,15 @@ public class ScenarioStage {
     public void setFailurePolicy(String failurePolicy) {
         this.failurePolicy = failurePolicy;
     }
-    
+
+    public String getCondition() {
+        return condition;
+    }
+
+    public void setCondition(String condition) {
+        this.condition = condition;
+    }
+
     public List<String> getDependsOn() {
         return dependsOn;
     }
@@ -180,13 +197,22 @@ public class ScenarioStage {
     
     /**
      * Checks if this stage has any dependencies.
-     * 
+     *
      * @return true if this stage has dependencies
      */
     public boolean hasDependencies() {
         return !dependsOn.isEmpty();
     }
-    
+
+    /**
+     * Checks if this stage has a condition specified.
+     *
+     * @return true if this stage has a condition
+     */
+    public boolean hasCondition() {
+        return condition != null && !condition.trim().isEmpty();
+    }
+
     /**
      * Gets the stage description from metadata.
      * 
@@ -288,12 +314,13 @@ public class ScenarioStage {
                 ", configFile='" + configFile + '\'' +
                 ", executionOrder=" + executionOrder +
                 ", failurePolicy='" + failurePolicy + '\'' +
+                ", condition='" + condition + '\'' +
                 ", dependsOn=" + dependsOn +
                 ", required=" + required +
                 ", description='" + getDescription() + '\'' +
                 '}';
     }
-    
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -304,11 +331,12 @@ public class ScenarioStage {
                 Objects.equals(stageName, that.stageName) &&
                 Objects.equals(configFile, that.configFile) &&
                 Objects.equals(failurePolicy, that.failurePolicy) &&
+                Objects.equals(condition, that.condition) &&
                 Objects.equals(dependsOn, that.dependsOn);
     }
-    
+
     @Override
     public int hashCode() {
-        return Objects.hash(stageName, configFile, executionOrder, failurePolicy, dependsOn, required);
+        return Objects.hash(stageName, configFile, executionOrder, failurePolicy, condition, dependsOn, required);
     }
 }
