@@ -3,6 +3,7 @@ metadata:
   name: Compliance Configuration
   description: Shared configuration for compliance checks
   version: 1.0.0
+  type: config
 
 config:
   sanctions-list-source: ofac

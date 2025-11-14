@@ -62,10 +62,20 @@ public class YamlTransformation {
     
     @JsonProperty("transformation-rules")
     private List<TransformationRule> transformationRules;
-    
+
+    // Simple field transformation properties (alternative to transformation-rules)
+    @JsonProperty("source-field")
+    private String sourceField;
+
+    @JsonProperty("target-field")
+    private String targetField;
+
+    @JsonProperty("expression")
+    private String expression; // SpEL expression for simple field transformations
+
     @JsonProperty("tags")
     private List<String> tags;
-    
+
     @JsonProperty("metadata")
     private Map<String, Object> metadata;
     
@@ -147,7 +157,31 @@ public class YamlTransformation {
     public void setTransformationRules(List<TransformationRule> transformationRules) {
         this.transformationRules = transformationRules;
     }
-    
+
+    public String getSourceField() {
+        return sourceField;
+    }
+
+    public void setSourceField(String sourceField) {
+        this.sourceField = sourceField;
+    }
+
+    public String getTargetField() {
+        return targetField;
+    }
+
+    public void setTargetField(String targetField) {
+        this.targetField = targetField;
+    }
+
+    public String getExpression() {
+        return expression;
+    }
+
+    public void setExpression(String expression) {
+        this.expression = expression;
+    }
+
     public List<String> getTags() {
         return tags;
     }

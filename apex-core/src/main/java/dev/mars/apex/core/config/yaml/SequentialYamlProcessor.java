@@ -300,8 +300,30 @@ public class SequentialYamlProcessor {
     private void processTransformations(ProcessingContext context) throws YamlConfigurationException {
         if (context.getConfiguration().getConfiguration().getTransformations() != null) {
             logger.debug("Processing transformations section");
-            // TODO: Integrate with YamlTransformationProcessor
+
+            // Create transformation processor
+            dev.mars.apex.core.service.transformation.YamlTransformationProcessor processor =
+                new dev.mars.apex.core.service.transformation.YamlTransformationProcessor();
+
+            // Process each transformation in document order
+            List<YamlTransformation> transformations = context.getConfiguration().getConfiguration().getTransformations();
+            logger.info("Processing {} transformations in document order", transformations.size());
+
+            // Get current data from context (if available)
+            Object currentData = context.getState("currentData");
+            if (currentData == null) {
+                // Initialize with empty map if no data exists
+                currentData = new java.util.HashMap<String, Object>();
+            }
+
+            // Process transformations
+            Object transformedData = processor.processTransformations(transformations, currentData);
+
+            // Update context with transformed data
+            context.setState("currentData", transformedData);
+
             context.recordSectionProcessed("transformations");
+            logger.info("Completed processing transformations section");
         }
     }
     

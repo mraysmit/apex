@@ -3,6 +3,7 @@ metadata:
   name: Enrichment Configuration
   description: Shared configuration for data enrichment
   version: 1.0.0
+  type: config
 
 config:
   market-data-source: bloomberg

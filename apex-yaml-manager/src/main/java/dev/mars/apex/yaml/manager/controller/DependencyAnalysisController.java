@@ -33,10 +33,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * REST API controller for dependency analysis operations.
@@ -888,6 +891,85 @@ public class DependencyAnalysisController {
             ));
         }
 
+    }
+
+    /**
+     * Browse the server's file system.
+     *
+     * @param path The directory path to browse (optional, defaults to current working directory)
+     * @return List of files and directories
+     */
+    @GetMapping("/browse")
+    @Operation(summary = "Browse server file system", description = "List files and directories at the specified path")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved file list")
+    public ResponseEntity<Map<String, Object>> browseFiles(
+            @Parameter(description = "Directory path to browse")
+            @RequestParam(required = false) String path) {
+        try {
+            Path browsePath;
+            if (path == null || path.trim().isEmpty()) {
+                browsePath = Paths.get(System.getProperty("user.dir"));
+            } else {
+                browsePath = Paths.get(path);
+            }
+
+            if (!Files.exists(browsePath)) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "status", "error",
+                        "message", "Path does not exist: " + path
+                ));
+            }
+
+            if (!Files.isDirectory(browsePath)) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "status", "error",
+                        "message", "Path is not a directory: " + path
+                ));
+            }
+
+            List<Map<String, Object>> items = new ArrayList<>();
+
+            try (Stream<Path> stream = Files.list(browsePath)) {
+                items = stream
+                        .sorted((p1, p2) -> {
+                            boolean d1 = Files.isDirectory(p1);
+                            boolean d2 = Files.isDirectory(p2);
+                            if (d1 && !d2) return -1;
+                            if (!d1 && d2) return 1;
+                            return p1.getFileName().toString().compareToIgnoreCase(p2.getFileName().toString());
+                        })
+                        .map(p -> {
+                            Map<String, Object> item = new HashMap<>();
+                            item.put("name", p.getFileName().toString());
+                            item.put("path", p.toString());
+                            item.put("isDirectory", Files.isDirectory(p));
+                            item.put("isYaml", p.toString().toLowerCase().endsWith(".yaml") ||
+                                              p.toString().toLowerCase().endsWith(".yml"));
+                            return item;
+                        })
+                        .collect(Collectors.toList());
+            }
+
+            Path parentPath = browsePath.getParent();
+            String parentPathStr = parentPath != null ? parentPath.toString() : null;
+
+            logger.info("Browse: currentPath={}, parentPath={}, items={}",
+                    browsePath.toString(), parentPathStr, items.size());
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("currentPath", browsePath.toString());
+            response.put("parentPath", parentPathStr);
+            response.put("items", items);
+
+            return ResponseEntity.ok(response);
+        } catch (IOException e) {
+            logger.error("Failed to browse files", e);
+            return ResponseEntity.badRequest().body(Map.of(
+                    "status", "error",
+                    "message", "Failed to browse directory: " + e.getMessage()
+            ));
+        }
     }
 }
 

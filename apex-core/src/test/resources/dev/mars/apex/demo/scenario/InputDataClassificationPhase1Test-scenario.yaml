@@ -15,8 +15,8 @@ scenario:
   scenario-id: "generic-test-scenario"
   name: "Generic Test Scenario for Classification"
   description: "Basic scenario for testing input data classification functionality"
-
-
+  data-types:
+    - "generic"
 
   # Stage-based processing configuration
   processing-stages:
@@ -25,7 +25,9 @@ scenario:
       stage-type: "validation"
       description: "Basic validation for classification testing"
       failure-policy: "continue-with-warnings"
+      execution-order: 1
       dependencies: []
+      config-file: "src/test/java/dev/mars/apex/demo/scenario/InputDataClassificationPhase1Test-validation-rules.yaml"
       configuration:
         rules-source: "src/test/java/dev/mars/apex/demo/scenario/InputDataClassificationPhase1Test-validation-rules.yaml"
 
@@ -34,7 +36,9 @@ scenario:
       stage-type: "enrichment"
       description: "Basic processing for classification testing"
       failure-policy: "continue-with-warnings"
+      execution-order: 2
       dependencies: ["validation"]
+      config-file: "src/test/java/dev/mars/apex/demo/scenario/InputDataClassificationPhase1Test-enrichment-rules.yaml"
       configuration:
         rules-source: "src/test/java/dev/mars/apex/demo/scenario/InputDataClassificationPhase1Test-enrichment-rules.yaml"
 

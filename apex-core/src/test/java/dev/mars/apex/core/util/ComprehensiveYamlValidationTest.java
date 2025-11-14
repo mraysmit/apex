@@ -155,7 +155,7 @@ class ComprehensiveYamlValidationTest {
             System.err.println("Absolute path would be: " + basePath.toAbsolutePath());
             return yamlFiles;
         }
-        
+
         try (Stream<Path> paths = Files.walk(basePath)) {
             paths.filter(Files::isRegularFile)
                  .filter(path -> {
@@ -165,6 +165,14 @@ class ComprehensiveYamlValidationTest {
                  .filter(path -> {
                      // Exclude Docker Compose files and other non-APEX YAML files
                      String fileName = path.getFileName().toString().toLowerCase();
+
+                     // Exclude intentionally invalid test files
+                     if (fileName.startsWith("invalid-") ||
+                         fileName.contains("failing-") ||
+                         fileName.contains("malformed-")) {
+                         return false;
+                     }
+
                      return !fileName.equals("docker-compose.yml") &&
                             !fileName.equals("docker-compose.yaml");
                  })
@@ -173,7 +181,7 @@ class ComprehensiveYamlValidationTest {
                      yamlFiles.add(relativePath);
                  });
         }
-        
+
         return yamlFiles;
     }
 }

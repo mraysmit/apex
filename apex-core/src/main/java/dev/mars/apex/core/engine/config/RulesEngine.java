@@ -30,6 +30,7 @@ import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import dev.mars.apex.core.service.engine.UnifiedRuleEvaluator;
+import dev.mars.apex.core.service.transformation.YamlTransformationProcessor;
 import dev.mars.apex.core.util.LoggingContext;
 import dev.mars.apex.core.util.RulesEngineLogger;
 import org.springframework.expression.Expression;
@@ -597,6 +598,7 @@ public class RulesEngine {
 
         List<String> failureMessages = new ArrayList<>();
         boolean overallSuccess = true;
+        Map<String, Object> enrichedData = convertToMap(targetObject);
 
         for (EnrichmentGroup group : enrichmentGroups) {
             logger.debug("Evaluating enrichment group: {}", group.getName());
@@ -607,14 +609,21 @@ public class RulesEngine {
                     overallSuccess = false;
                     failureMessages.add("Enrichment group '" + group.getId() + "' failed: " + result.getMessage());
                 }
+
+                // Collect enriched data from all enrichment results in the group
+                if (result.getEnrichmentResults() != null) {
+                    for (RuleResult enrichmentResult : result.getEnrichmentResults()) {
+                        if (enrichmentResult.getEnrichedData() != null) {
+                            enrichedData.putAll(enrichmentResult.getEnrichedData());
+                        }
+                    }
+                }
             } catch (Exception e) {
                 logger.error("Enrichment group '{}' failed with exception: {}", group.getName(), e.getMessage());
                 overallSuccess = false;
                 failureMessages.add("Enrichment group '" + group.getId() + "' exception: " + e.getMessage());
             }
         }
-
-        Map<String, Object> enrichedData = convertToMap(targetObject);
 
         if (overallSuccess) {
             return RuleResult.enrichmentSuccess(enrichedData, SeverityConstants.INFO);
@@ -1350,11 +1359,26 @@ public class RulesEngine {
                     case "enrichment-refs":
                     case "data-sinks":
                     case "categories":
-                    case "transformations":
                     case "rule-chains":
                     case "error-recovery":
                         // These sections are configuration/metadata - not executed
                         logger.debug("Skipping configuration section: {}", section);
+                        break;
+
+                    case "transformations":
+                        // Process transformations section
+                        if (yamlConfig.getTransformations() != null && !yamlConfig.getTransformations().isEmpty()) {
+                            logger.info("Processing {} transformations", yamlConfig.getTransformations().size());
+                            YamlTransformationProcessor transformationProcessor = new YamlTransformationProcessor();
+                            Object transformedData = transformationProcessor.processTransformations(
+                                yamlConfig.getTransformations(), enrichedData);
+                            // Update enrichedData with transformed data
+                            if (transformedData instanceof Map) {
+                                @SuppressWarnings("unchecked")
+                                Map<String, Object> transformedMap = (Map<String, Object>) transformedData;
+                                enrichedData.putAll(transformedMap);
+                            }
+                        }
                         break;
 
                     default:
@@ -1394,6 +1418,8 @@ public class RulesEngine {
         String sectionType = item.getSectionType();
         String itemId = item.getItemId();
 
+        logger.debug("processItem called with sectionType='{}', itemId='{}'", sectionType, itemId);
+
         switch (sectionType) {
             case "enrichments":
                 return processEnrichmentItem(itemId, yamlConfig, data);
@@ -1404,6 +1430,8 @@ public class RulesEngine {
             case "rule-groups":
                 return processRuleGroupItem(itemId, yamlConfig, data);
             case "transformations":
+                logger.debug("Matched transformations case, calling processTransformationItem");
+                return processTransformationItem(itemId, yamlConfig, data);
             case "rule-chains":
                 logger.warn("Section type '{}' not yet supported for item-level processing", sectionType);
                 return RuleResult.noMatch(sectionType + ":" + itemId, "Skipped - not yet supported", SeverityConstants.INFO);
@@ -1590,6 +1618,57 @@ public class RulesEngine {
         }
 
         return result;
+    }
+
+    /**
+     * Process a single transformation by ID.
+     *
+     * @param transformationId The transformation ID to process
+     * @param yamlConfig The YAML configuration
+     * @param data The data to transform
+     * @return RuleResult from processing the transformation
+     */
+    @SuppressWarnings("unchecked")
+    private RuleResult processTransformationItem(String transformationId, YamlRuleConfiguration yamlConfig, Map<String, Object> data) {
+        // Find transformation in yamlConfig.getTransformations()
+        dev.mars.apex.core.config.yaml.YamlTransformation transformation = findTransformationById(yamlConfig, transformationId);
+        if (transformation == null) {
+            logger.warn("Transformation not found: {}", transformationId);
+            return RuleResult.error("transformation:" + transformationId, "Transformation not found");
+        }
+
+        // Create transformation processor
+        dev.mars.apex.core.service.transformation.YamlTransformationProcessor processor =
+            new dev.mars.apex.core.service.transformation.YamlTransformationProcessor();
+
+        // Process single transformation
+        Object transformedData = processor.processTransformations(List.of(transformation), data);
+
+        // Return transformed data in RuleResult (do NOT modify input data map)
+        if (transformedData instanceof Map) {
+            return RuleResult.enrichmentSuccess((Map<String, Object>) transformedData);
+        } else {
+            // If transformation didn't return a Map, return empty enriched data
+            return RuleResult.enrichmentSuccess(new HashMap<>());
+        }
+    }
+
+    /**
+     * Find a transformation by ID in the configuration.
+     *
+     * @param config The YAML configuration
+     * @param transformationId The transformation ID to find
+     * @return The YamlTransformation if found, null otherwise
+     */
+    private dev.mars.apex.core.config.yaml.YamlTransformation findTransformationById(YamlRuleConfiguration config, String transformationId) {
+        if (config.getTransformations() != null) {
+            for (dev.mars.apex.core.config.yaml.YamlTransformation transformation : config.getTransformations()) {
+                if (transformationId.equals(transformation.getId())) {
+                    return transformation;
+                }
+            }
+        }
+        return null;
     }
 
     /**

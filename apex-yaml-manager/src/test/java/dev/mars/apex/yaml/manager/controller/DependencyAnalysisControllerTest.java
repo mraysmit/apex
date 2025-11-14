@@ -747,7 +747,7 @@ class DependencyAnalysisControllerTest {
     @SuppressWarnings("unchecked")
     void testNestedDependenciesToNLevels() {
         // Use the existing nested-yaml-structure test resources
-        String nestedRootPath = new File("apex-yaml-manager/src/test/resources/nested-yaml-structure/root-scenario.yaml").getAbsolutePath();
+        String nestedRootPath = new File("src/test/resources/nested-yaml-structure/root-scenario.yaml").getAbsolutePath();
 
         // Step 1: Analyze the nested structure
         ResponseEntity<Map<String, Object>> analyzeResponse = (ResponseEntity<Map<String, Object>>) (ResponseEntity<?>) restTemplate.postForEntity(
@@ -793,7 +793,7 @@ class DependencyAnalysisControllerTest {
     @Test
     @DisplayName("Should traverse and validate all nodes at each depth level")
     void testTraverseAllNodesAtEachDepthLevel() {
-        String nestedRootPath = new File("apex-yaml-manager/src/test/resources/nested-yaml-structure/root-scenario.yaml").getAbsolutePath();
+        String nestedRootPath = new File("src/test/resources/nested-yaml-structure/root-scenario.yaml").getAbsolutePath();
 
         // Analyze
         ResponseEntity<Map> analyzeResponse = restTemplate.postForEntity(
@@ -833,7 +833,7 @@ class DependencyAnalysisControllerTest {
     @Test
     @DisplayName("Should validate parent-child relationships across all levels")
     void testParentChildRelationshipsAcrossAllLevels() {
-        String nestedRootPath = new File("apex-yaml-manager/src/test/resources/nested-yaml-structure/root-scenario.yaml").getAbsolutePath();
+        String nestedRootPath = new File("src/test/resources/nested-yaml-structure/root-scenario.yaml").getAbsolutePath();
 
         // Get tree
         ResponseEntity<Map> treeResponse = restTemplate.getForEntity(
@@ -850,8 +850,8 @@ class DependencyAnalysisControllerTest {
     @Test
     @DisplayName("Should load tree data for exact HTML file path - DEBUGGING TEST")
     void testTreeEndpointWithExactHtmlFilePath() {
-        // This is the EXACT path the HTML is trying to use
-        String rootFile = "C:/Users/markr/dev/java/corejava/apex-rules-engine/apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100/00-scenario-registry.yaml";
+        // Use dynamic path instead of hardcoded path
+        String rootFile = new File("src/test/resources/apex-yaml-samples/graph-100/00-scenario-registry.yaml").getAbsolutePath();
 
         System.out.println("=== DEBUGGING TREE ENDPOINT ===");
         System.out.println("Testing with exact HTML file path: " + rootFile);
@@ -950,6 +950,7 @@ class DependencyAnalysisControllerTest {
             writer.write("  id: test-config\n");
             writer.write("  name: Test Configuration\n");
             writer.write("  version: 1.0.0\n");
+            writer.write("  type: rule-config\n");
         }
         return yamlFile;
     }

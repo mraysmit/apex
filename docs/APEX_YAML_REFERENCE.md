@@ -1,9 +1,10 @@
 ![APEX System Logo](APEX%20System%20logo.png)
 # APEX YAML Syntax Reference Guide
 
-**Version:** 2.2
-**Date:** 2025-09-29
+**Version:** 2.3
+**Date:** 2025-11-14
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
+**Change Summary:** Added `error-recovery` keyword documentation (Section 10.5)
 
 > **✅ SYNTAX VERIFIED**: This document has been updated and verified to use the correct APEX SpEL syntax. APEX processes HashMap data where fields are accessed using `#fieldName` syntax, NOT `#data.fieldName`. All examples in this document use the correct `#fieldName` syntax for field access in APEX YAML configurations.
 
@@ -24,6 +25,7 @@
 10. [Dataset Definitions](#10-dataset-definitions)
 11. [External Data-Source References](#11-external-data-source-references)
 12. [Pipeline Orchestration](#12-pipeline-orchestration)
+    - 12.5 [Error Recovery Configuration](#105-error-recovery-configuration)
 13. [Advanced Features](#13-advanced-features)
 14. [Best Practices](#14-best-practices)
 15. [Common Patterns](#15-common-patterns)
@@ -36,7 +38,7 @@
 
 ## 1. Quick Keyword Reference
 
-This section provides a definitive reference for all 72 supported APEX YAML keywords based on actual APEX core engine implementation.
+This section provides a definitive reference for all 73 supported APEX YAML keywords based on actual APEX core engine implementation.
 
 ### 1.1 Complete Keyword Reference Table
 
@@ -78,6 +80,7 @@ This section provides a definitive reference for all 72 supported APEX YAML keyw
 | **endpoints** | DataSource | No | Map | REST API endpoint definitions |
 | **enrichment-refs** | Component | No | List | References to enrichment configuration files |
 | **enrichments** | Document | No | List | Data enrichment configurations |
+| **error-recovery** | Document | No | Map | Error recovery configuration for resilience and fault tolerance |
 | **execution-order** | Stage/FileRef | No | Integer | Numeric execution order for stage or file reference |
 | **execution-settings** | Enrichment | No | Map | Execution behavior configuration for enrichments |
 | **expiration-date** | Rule | No | String | Date when rule expires (ISO 8601) |
@@ -4387,6 +4390,200 @@ for (PipelineStepResult stepResult : result.getStepResults()) {
     long stepDuration = stepResult.getDurationMs();
 }
 ```
+
+---
+
+## 10.5 Error Recovery Configuration
+
+### 10.5.1 Overview
+
+The **`error-recovery`** section provides configurable error handling and resilience strategies for APEX rule processing. This optional top-level section allows you to define how the system should respond to errors based on severity levels, enabling environment-specific behavior without code changes.
+
+**Key Features:**
+- **Severity-based policies**: Different recovery strategies for ERROR, WARNING, and INFO severities
+- **Backward compatibility**: When not present, system uses default fail-fast behavior
+- **Environment flexibility**: Configure strict error handling in development, resilient processing in production
+- **Retry mechanisms**: Configurable retry attempts with delays
+- **Observability**: Optional logging and metrics for recovery attempts
+
+### 10.5.2 Configuration Structure
+
+```yaml
+error-recovery:
+  # Global settings
+  enabled: true                           # Enable/disable error recovery globally
+  log-recovery-attempts: true             # Log recovery attempts for debugging
+  metrics-enabled: true                   # Collect recovery metrics
+  default-strategy: "CONTINUE_WITH_DEFAULT"  # Default recovery strategy
+
+  # Severity-specific policies
+  severity-policies:
+    ERROR:
+      recovery-enabled: false             # Strict error handling (backward compatible)
+      strategy: "FAIL_FAST"               # Fail immediately without recovery
+
+    WARNING:
+      recovery-enabled: true              # Enable recovery for warnings
+      strategy: "CONTINUE_WITH_DEFAULT"   # Use default values when recovery needed
+      max-retries: 1                      # Retry once before giving up
+      retry-delay: 100                    # Wait 100ms between retries
+
+    INFO:
+      recovery-enabled: true              # Enable recovery for info messages
+      strategy: "CONTINUE_WITH_DEFAULT"   # Use default values when recovery needed
+      max-retries: 0                      # No retries, just use defaults
+      retry-delay: 50                     # Minimal delay
+```
+
+### 10.5.3 Configuration Properties
+
+#### Global Properties
+
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `enabled` | Boolean | No | true | Enable/disable error recovery globally |
+| `log-recovery-attempts` | Boolean | No | false | Log recovery attempts for debugging |
+| `metrics-enabled` | Boolean | No | true | Collect recovery metrics for monitoring |
+| `default-strategy` | String | No | "FAIL_FAST" | Default recovery strategy when not specified |
+
+#### Severity Policy Properties
+
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `recovery-enabled` | Boolean | No | false | Enable recovery for this severity level |
+| `strategy` | String | No | "FAIL_FAST" | Recovery strategy (see strategies below) |
+| `max-retries` | Integer | No | 0 | Maximum number of retry attempts |
+| `retry-delay` | Long | No | 0 | Delay in milliseconds between retries |
+
+### 10.5.4 Recovery Strategies
+
+| Strategy | Description | Use Case |
+|----------|-------------|----------|
+| `FAIL_FAST` | Throw exception immediately (no recovery) | Critical validations, development environments |
+| `CONTINUE_WITH_DEFAULT` | Use default/null values and continue processing | Resilient production processing, non-critical enrichments |
+| `RETRY_WITH_SAFE_EXPRESSION` | Retry with simplified expressions (future) | Complex expression failures |
+| `SKIP_RULE` | Skip the failing rule and continue (future) | Optional validation rules |
+
+### 10.5.5 Environment-Specific Examples
+
+#### Development Environment
+
+Strict error handling for faster feedback:
+
+```yaml
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true    # Verbose logging for debugging
+  metrics-enabled: true
+  severity-policies:
+    ERROR:
+      recovery-enabled: false    # Strict error handling in development
+    WARNING:
+      recovery-enabled: true
+      max-retries: 0             # No retries for faster feedback
+    INFO:
+      recovery-enabled: true
+```
+
+#### Production Environment
+
+Resilient processing with retries:
+
+```yaml
+error-recovery:
+  enabled: true
+  log-recovery-attempts: false   # Reduce log noise in production
+  metrics-enabled: true          # Keep metrics for monitoring
+  severity-policies:
+    ERROR:
+      recovery-enabled: false    # Maintain strict error handling
+    WARNING:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 2             # More retries in production
+      retry-delay: 200
+    INFO:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+```
+
+#### Test Environment
+
+Disable all recovery for test validation:
+
+```yaml
+error-recovery:
+  enabled: false                 # Disable all recovery for testing
+  # When disabled, all errors will be thrown for test validation
+```
+
+### 10.5.6 Complete Example
+
+```yaml
+metadata:
+  id: "customer-validation-with-recovery"
+  name: "Customer Validation with Error Recovery"
+  version: "1.0"
+  type: "rule-config"
+
+# Error recovery configuration
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+  metrics-enabled: true
+  default-strategy: "CONTINUE_WITH_DEFAULT"
+
+  severity-policies:
+    ERROR:
+      recovery-enabled: false
+      strategy: "FAIL_FAST"
+    WARNING:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 1
+      retry-delay: 100
+    INFO:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+
+# Rules with different severities
+rules:
+  - id: "mandatory-field-check"
+    name: "Mandatory Field Validation"
+    condition: "#customerId != null && #customerId != ''"
+    severity: "ERROR"              # Will NOT recover (backward compatible)
+    message: "Customer ID is mandatory"
+
+  - id: "data-quality-check"
+    name: "Data Quality Validation"
+    condition: "#email != null && #email.contains('@')"
+    severity: "WARNING"            # Will recover with default behavior
+    message: "Email format appears invalid"
+
+  - id: "enrichment-info"
+    name: "Enrichment Information"
+    condition: "#region != null"
+    severity: "INFO"               # Will recover with default behavior
+    message: "Region information available"
+```
+
+### 10.5.7 Benefits
+
+1. **Environment-specific behavior**: Strict in development, resilient in production
+2. **Backward compatibility**: ERROR severity maintains existing fail-fast behavior
+3. **Granular control**: Different policies per severity level
+4. **Operational flexibility**: Can be tuned without code changes
+5. **Better observability**: Logging and metrics for recovery attempts
+6. **Reduced downtime**: Graceful degradation for non-critical failures
+
+### 10.5.8 Best Practices
+
+1. **Keep ERROR strict**: Maintain `recovery-enabled: false` for ERROR severity to catch critical issues
+2. **Use WARNING for recoverable failures**: Data quality issues, optional enrichments
+3. **Enable logging in development**: Set `log-recovery-attempts: true` for debugging
+4. **Reduce logging in production**: Set `log-recovery-attempts: false` to reduce noise
+5. **Monitor metrics**: Always enable `metrics-enabled: true` for production monitoring
+6. **Test without recovery**: Disable error recovery in test environments to validate error handling
 
 ---
 

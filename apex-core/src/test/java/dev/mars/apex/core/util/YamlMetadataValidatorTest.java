@@ -181,18 +181,16 @@ class YamlMetadataValidatorTest {
               description: "A test scenario registry"
               type: "scenario-registry"
               created-by: "test.admin@company.com"
-            
-            scenario-registry:
+
+            scenarios:
               - scenario-id: "test-scenario"
                 config-file: "scenarios/test-scenario.yaml"
-                data-types: ["TestDataType"]
-                description: "Test scenario"
             """;
-        
+
         writeFile("config/test-registry.yaml", validRegistry);
-        
+
         YamlValidationResult result = validator.validateFile("config/test-registry.yaml");
-        
+
         assertTrue(result.isValid(), "Valid registry should pass validation");
         assertEquals(0, result.getErrorCount());
     }

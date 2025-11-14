@@ -17,7 +17,7 @@
     
     <!-- Application JavaScript -->
     <script src="js/apex-keyword-tooltips.js?v=1" defer></script>
-    <script src="js/d3-tree-viewer.js?v=2" defer></script>
+    <script src="js/d3-tree-viewer.js?v=11" defer></script>
 </head>
 <body>
     <div class="main-container">
@@ -41,10 +41,13 @@
                         </select>
                         <button class="sidebar-btn" id="load-btn" style="width: 100%;">Load Tree</button>
                         <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd;">
-                            <label for="custom-directory-input" style="display: block; margin-bottom: 5px; font-size: 12px; color: #666;">Or enter custom path:</label>
-                            <input type="text" id="custom-directory-input" class="sidebar-input"
-                                   placeholder="Enter custom directory path..."
-                                   style="margin-bottom: 5px;">
+                            <label for="custom-directory-input" style="display: block; margin-bottom: 5px; font-size: 12px; color: #666;">Or enter custom path (file or directory):</label>
+                            <div style="display: flex; gap: 5px; margin-bottom: 5px;">
+                                <input type="text" id="custom-directory-input" class="sidebar-input"
+                                       placeholder="e.g., path/to/file.yaml or path/to/directory"
+                                       style="flex: 1; margin-bottom: 0;">
+                                <button class="sidebar-btn" id="browse-btn" style="width: 80px; padding: 8px;">Browse...</button>
+                            </div>
                             <button class="sidebar-btn" id="load-custom-btn" style="width: 100%;">Load Custom Path</button>
                         </div>
                     </div>
@@ -294,6 +297,32 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Browser Modal -->
+    <div id="file-browser-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Browse Server Files</h3>
+                <button class="modal-close" id="close-browser-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="file-browser-path">
+                    <label>Current Path:</label>
+                    <div style="display: flex; gap: 5px; margin-top: 5px;">
+                        <input type="text" id="browser-current-path" class="sidebar-input" readonly style="flex: 1;">
+                        <button class="sidebar-btn" id="browser-up-btn" style="width: 80px;">Up</button>
+                    </div>
+                </div>
+                <div class="file-browser-list" id="file-browser-list">
+                    <div class="loading">Loading...</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="sidebar-btn" id="browser-select-btn" style="margin-right: 10px;">Select</button>
+                <button class="sidebar-btn" id="browser-cancel-btn">Cancel</button>
             </div>
         </div>
     </div>

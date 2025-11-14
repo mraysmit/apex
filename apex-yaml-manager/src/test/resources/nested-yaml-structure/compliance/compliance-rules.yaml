@@ -3,6 +3,7 @@ metadata:
   name: Compliance Rules
   description: Compliance checks for regulatory requirements
   version: 1.0.0
+  type: rule-config
 
 rule-groups:
   - id: regulatory-compliance

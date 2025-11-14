@@ -3,6 +3,7 @@ metadata:
   name: Trade Validation Rules
   description: Validates trade data before processing
   version: 1.0.0
+  type: rule-config
 
 rule-groups:
   - id: basic-trade-validation

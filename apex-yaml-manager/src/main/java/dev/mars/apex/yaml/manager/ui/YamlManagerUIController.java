@@ -18,7 +18,6 @@ package dev.mars.apex.yaml.manager.ui;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * UI Controller for APEX YAML Manager web interface.
@@ -30,13 +29,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @version 1.0
  */
 @Controller
-@RequestMapping("/ui")
 public class YamlManagerUIController {
 
     /**
-     * Redirect to the standalone D3.js tree viewer.
+     * Redirect root path to the standalone D3.js tree viewer.
      */
-    @GetMapping
+    @GetMapping("/")
+    public String root() {
+        return "redirect:/d3-tree-viewer.html";
+    }
+
+    /**
+     * Redirect /ui path to the standalone D3.js tree viewer.
+     */
+    @GetMapping("/ui")
     public String index() {
         return "redirect:/d3-tree-viewer.html";
     }

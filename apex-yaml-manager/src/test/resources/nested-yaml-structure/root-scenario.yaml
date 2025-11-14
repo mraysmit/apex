@@ -3,6 +3,7 @@ metadata:
   name: Root Trading Scenario
   description: Root scenario that orchestrates all trading validations and enrichments
   version: 1.0.0
+  type: scenario
 
 scenario-refs:
   - trading/validation/trade-validation-rules.yaml

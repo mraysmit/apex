@@ -160,16 +160,27 @@ function loadTreeData() {
         : (directorySelect ? directorySelect.value : 'apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100');
 
     if (!basePath) {
-        alert('Please select a directory or enter a custom path.');
+        showAlert('warning', 'No Path Selected', 'Please select a directory from the dropdown or enter a custom path.');
         return;
     }
 
-    // Look for scenario registry file (common root file pattern) or use first YAML file
-    // The API will handle finding the appropriate root file
-    const rootFile = `${basePath}/00-scenario-registry.yaml`;
+    // Determine if the path is a file or directory
+    let rootFile;
+    let displayPath;
+
+    if (basePath.toLowerCase().endsWith('.yaml') || basePath.toLowerCase().endsWith('.yml')) {
+        // User entered a file path directly
+        rootFile = basePath;
+        // Extract directory for display
+        displayPath = basePath.substring(0, basePath.lastIndexOf('/'));
+    } else {
+        // User entered a directory path - look for scenario registry file
+        rootFile = `${basePath}/00-scenario-registry.yaml`;
+        displayPath = basePath;
+    }
 
     // Update the tree path display
-    updateTreePath(basePath);
+    updateTreePath(displayPath);
 
     // Use apex-yaml-manager API - use current origin for tests, fallback to port 8082 for development
     const baseUrl = window.location.origin.includes('localhost') && window.location.pathname.includes('/yaml-manager')
@@ -196,13 +207,25 @@ function loadTreeData() {
 
                 // Categorize the error
                 if (errorMsg.includes('Root file does not exist') || errorMsg.includes('FILE_NOT_FOUND')) {
-                    showAlert('error', 'File Not Found',
-                        `The directory does not contain a valid scenario registry file (00-scenario-registry.yaml).\n\n` +
-                        `Directory: ${basePath}\n\n` +
-                        `Please select a directory that contains APEX YAML configuration files.`);
+                    const isFilePath = rootFile.toLowerCase().endsWith('.yaml') || rootFile.toLowerCase().endsWith('.yml');
+                    if (isFilePath) {
+                        showAlert('error', 'File Not Found',
+                            `The specified YAML file could not be found:\n${rootFile}\n\n` +
+                            `Please check the file path and try again.\n\n` +
+                            `Tip: Make sure the path is relative to the server's working directory.`);
+                    } else {
+                        showAlert('error', 'File Not Found',
+                            `The directory does not contain a scenario registry file (00-scenario-registry.yaml).\n\n` +
+                            `Directory: ${displayPath}\n\n` +
+                            `Please either:\n` +
+                            `• Select a directory that contains 00-scenario-registry.yaml, or\n` +
+                            `• Enter the full path to a specific YAML file (e.g., path/to/file.yaml)`);
+                    }
                 } else if (errorMsg.includes('not found') || errorMsg.includes('does not exist')) {
-                    showAlert('error', 'Directory Not Found',
-                        `The specified directory could not be found:\n${basePath}\n\nPlease check the path and try again.`);
+                    showAlert('error', 'Path Not Found',
+                        `The specified path could not be found:\n${basePath}\n\n` +
+                        `Please check the path and try again.\n\n` +
+                        `Tip: Paths should be relative to the server's working directory.`);
                 } else if (errorMsg.includes('permission') || errorMsg.includes('access denied')) {
                     showAlert('error', 'Permission Denied',
                         `You do not have permission to access:\n${basePath}\n\nPlease check folder permissions.`);
@@ -1294,15 +1317,30 @@ function initializeSidebar() {
     // Initialize accordion functionality
     initializeAccordion();
 
+    // Initialize file browser and other sidebar functionality
+    initializeFileBrowser();
+}
+
+// Initialize file browser functionality
+let fileBrowserInitialized = false;
+function initializeFileBrowser() {
+    if (fileBrowserInitialized) {
+        console.log('initializeFileBrowser() already called, skipping');
+        return;
+    }
+    fileBrowserInitialized = true;
+    console.log('initializeFileBrowser() called');
+
     // Load button functionality (for dropdown selection)
     const loadBtn = document.getElementById('load-btn');
+    console.log('loadBtn:', loadBtn);
     if (loadBtn) {
         loadBtn.addEventListener('click', function() {
             const directorySelect = document.getElementById('directory-select');
             const selectedPath = directorySelect.value;
 
             if (!selectedPath) {
-                alert('Please select a directory.');
+                showAlert('warning', 'No Directory Selected', 'Please select a directory from the dropdown.');
                 return;
             }
 
@@ -1332,7 +1370,7 @@ function initializeSidebar() {
             const customPath = customInput.value.trim();
 
             if (!customPath) {
-                alert('Please enter a custom directory path.');
+                showAlert('warning', 'No Path Entered', 'Please enter a custom file path (e.g., path/to/file.yaml) or directory path.');
                 return;
             }
 
@@ -1359,6 +1397,195 @@ function initializeSidebar() {
             }
         });
     }
+
+    // File Browser functionality
+    let currentBrowserPath = null;
+    let currentBrowserParentPath = null;  // Store the parent path
+    let selectedBrowserPath = null;
+
+    const fileBrowserModal = document.getElementById('file-browser-modal');
+    const browseBtn = document.getElementById('browse-btn');
+    const closeBrowserModal = document.getElementById('close-browser-modal');
+    const browserCancelBtn = document.getElementById('browser-cancel-btn');
+    const browserSelectBtn = document.getElementById('browser-select-btn');
+    const browserUpBtn = document.getElementById('browser-up-btn');
+    const browserCurrentPath = document.getElementById('browser-current-path');
+    const fileBrowserList = document.getElementById('file-browser-list');
+
+    console.log('File browser elements:', {
+        fileBrowserModal: fileBrowserModal,
+        browseBtn: browseBtn,
+        browserUpBtn: browserUpBtn,
+        browserCurrentPath: browserCurrentPath,
+        fileBrowserList: fileBrowserList
+    });
+
+    function openFileBrowser() {
+        fileBrowserModal.classList.add('show');
+        selectedBrowserPath = null;
+        // Start from last used location, or current working directory if none
+        const lastPath = localStorage.getItem('fileBrowserLastPath');
+        loadFileBrowserDirectory(lastPath);
+    }
+
+    function closeFileBrowser() {
+        fileBrowserModal.classList.remove('show');
+    }
+
+    function loadFileBrowserDirectory(path) {
+        fileBrowserList.innerHTML = '<div class="loading">Loading...</div>';
+
+        const url = path
+            ? `/yaml-manager/api/dependencies/browse?path=${encodeURIComponent(path)}`
+            : '/yaml-manager/api/dependencies/browse';
+
+        console.log('Loading file browser directory from:', url);
+
+        fetch(url)
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Received data:', data);
+                if (data.status === 'error') {
+                    fileBrowserList.innerHTML = '<div class="loading">Error: ' + data.message + '</div>';
+                    showAlert('error', 'Browse Error', data.message);
+                    return;
+                }
+
+                currentBrowserPath = data.currentPath;
+                currentBrowserParentPath = data.parentPath;  // Store the parent path
+                browserCurrentPath.value = currentBrowserPath;
+
+                // Save the current path to localStorage for next time
+                localStorage.setItem('fileBrowserLastPath', currentBrowserPath);
+
+                // Enable/disable Up button
+                const shouldDisable = data.parentPath === null;
+                if (browserUpBtn) {
+                    browserUpBtn.disabled = shouldDisable;
+                    console.log('Up button state updated in loadFileBrowserDirectory:', {
+                        currentPath: data.currentPath,
+                        parentPath: data.parentPath,
+                        shouldDisable: shouldDisable,
+                        actualDisabled: browserUpBtn.disabled
+                    });
+                } else {
+                    console.error('browserUpBtn is null in loadFileBrowserDirectory, cannot update button state');
+                }
+
+                // Render file list
+                console.log('Rendering', data.items.length, 'items');
+                renderFileBrowserList(data.items);
+            })
+            .catch(error => {
+                console.error('Failed to browse directory:', error);
+                fileBrowserList.innerHTML = '<div class="loading">Error: ' + error.message + '</div>';
+                showAlert('error', 'Browse Error', 'Failed to browse directory: ' + error.message);
+            });
+    }
+
+    function renderFileBrowserList(items) {
+        if (items.length === 0) {
+            fileBrowserList.innerHTML = '<div class="loading">Empty directory</div>';
+            return;
+        }
+
+        fileBrowserList.innerHTML = '';
+        items.forEach(item => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'file-browser-item';
+            itemDiv.dataset.path = item.path;
+            itemDiv.dataset.isDirectory = item.isDirectory;
+
+            const icon = document.createElement('span');
+            icon.className = 'file-icon';
+            if (item.isDirectory) {
+                icon.className += ' directory';
+                icon.textContent = '📁';
+            } else if (item.isYaml) {
+                icon.className += ' yaml';
+                icon.textContent = '📄';
+            } else {
+                icon.className += ' file';
+                icon.textContent = '📄';
+            }
+
+            const name = document.createElement('span');
+            name.className = 'file-name';
+            name.textContent = item.name;
+
+            itemDiv.appendChild(icon);
+            itemDiv.appendChild(name);
+
+            itemDiv.addEventListener('click', function() {
+                // Single-click to select any item (file or directory)
+                document.querySelectorAll('.file-browser-item').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                itemDiv.classList.add('selected');
+                selectedBrowserPath = item.path;
+            });
+
+            // Double-click on directory to navigate
+            itemDiv.addEventListener('dblclick', function() {
+                if (item.isDirectory) {
+                    loadFileBrowserDirectory(item.path);
+                }
+            });
+
+            fileBrowserList.appendChild(itemDiv);
+        });
+    }
+
+    if (browseBtn) {
+        browseBtn.addEventListener('click', openFileBrowser);
+    }
+
+    if (closeBrowserModal) {
+        closeBrowserModal.addEventListener('click', closeFileBrowser);
+    }
+
+    if (browserCancelBtn) {
+        browserCancelBtn.addEventListener('click', closeFileBrowser);
+    }
+
+    if (browserSelectBtn) {
+        browserSelectBtn.addEventListener('click', function() {
+            if (selectedBrowserPath) {
+                customInput.value = selectedBrowserPath;
+                closeFileBrowser();
+            } else {
+                showAlert('warning', 'No Selection', 'Please select a file or directory.');
+            }
+        });
+    }
+
+    if (browserUpBtn) {
+        browserUpBtn.addEventListener('click', function() {
+            console.log('Up button clicked, current path:', currentBrowserPath, 'parent path:', currentBrowserParentPath);
+            // Navigate to parent directory using the stored parent path
+            if (currentBrowserParentPath) {
+                console.log('Navigating to parent:', currentBrowserParentPath);
+                loadFileBrowserDirectory(currentBrowserParentPath);
+            } else {
+                console.log('Already at root, cannot navigate up');
+            }
+        });
+    } else {
+        console.error('browserUpBtn is null, cannot add click listener');
+    }
+
+    // Close modal when clicking outside
+    fileBrowserModal.addEventListener('click', function(e) {
+        if (e.target === fileBrowserModal) {
+            closeFileBrowser();
+        }
+    });
 
     // Search functionality
     document.getElementById('search-input').addEventListener('input', function(e) {
@@ -1952,6 +2179,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeTooltip();
     initializeTabSwitching();
     initializeListView();
+    initializeFileBrowser();
 
     // Global mouseup listener to re-enable tooltips
     document.addEventListener('mouseup', function() {

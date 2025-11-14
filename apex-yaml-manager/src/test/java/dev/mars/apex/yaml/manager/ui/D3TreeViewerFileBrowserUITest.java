@@ -125,7 +125,7 @@ class D3TreeViewerFileBrowserUITest {
         assertTrue(customInput.isDisplayed(), "Custom directory input should be visible");
 
         String placeholder = customInput.getAttribute("placeholder");
-        assertEquals("Enter custom directory path...", placeholder,
+        assertEquals("e.g., path/to/file.yaml or path/to/directory", placeholder,
             "Custom input should have correct placeholder text");
     }
 
@@ -148,7 +148,7 @@ class D3TreeViewerFileBrowserUITest {
 
     @Test
     @Order(5)
-    @DisplayName("Test Load Custom Path button shows alert when custom path is empty")
+    @DisplayName("Test Load Custom Path button shows custom alert (not native alert) when custom path is empty")
     void testLoadCustomButtonValidatesEmptyPath() {
         driver.get(baseUrl + "/d3-tree-viewer.html");
 
@@ -162,16 +162,23 @@ class D3TreeViewerFileBrowserUITest {
         // Click load custom button
         loadCustomBtn.click();
 
-        // Wait for alert
-        try {
-            Alert alert = wait.until(ExpectedConditions.alertIsPresent());
-            String alertText = alert.getText();
-            assertEquals("Please enter a custom directory path.", alertText,
-                "Alert should show validation message for empty custom path");
-            alert.accept();
-        } catch (Exception e) {
-            fail("Expected alert to be shown for empty custom path: " + e.getMessage());
-        }
+        // Wait for custom alert container to appear (NOT native browser alert)
+        WebElement alertContainer = wait.until(ExpectedConditions.visibilityOfElementLocated(
+            By.id("alert-container")));
+
+        assertTrue(alertContainer.isDisplayed(), "Custom alert should be displayed");
+
+        // Verify it's a warning alert
+        String alertClass = alertContainer.getDomAttribute("class");
+        assertTrue(alertClass.contains("alert-warning"),
+            "Alert should be a warning. Actual class: " + alertClass);
+
+        // Verify alert title
+        WebElement alertTitle = driver.findElement(By.id("alert-title"));
+        assertEquals("No Path Entered", alertTitle.getText(),
+            "Alert title should indicate no path was entered");
+
+        System.out.println("Custom alert displayed correctly for empty custom path");
     }
 
     @Test

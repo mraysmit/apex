@@ -3,6 +3,7 @@ metadata:
   name: Trade Configuration
   description: Shared configuration for trade processing
   version: 1.0.0
+  type: config
 
 config:
   max-trade-amount: 1000000

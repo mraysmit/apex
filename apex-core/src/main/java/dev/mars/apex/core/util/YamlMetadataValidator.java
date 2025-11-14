@@ -331,22 +331,22 @@ public class YamlMetadataValidator {
      */
     @SuppressWarnings("unchecked")
     private void validateScenarioRegistryContent(Map<String, Object> yamlContent, YamlValidationResult result) {
-        Object registryObj = yamlContent.get("scenario-registry");
+        Object registryObj = yamlContent.get("scenarios");
         if (registryObj == null) {
-            result.addError("Scenario registry files must have a 'scenario-registry' section");
+            result.addError("Scenario registry files must have a 'scenarios' section");
             return;
         }
-        
+
         if (!(registryObj instanceof List)) {
-            result.addError("'scenario-registry' section must be a list");
+            result.addError("'scenarios' section must be a list");
             return;
         }
-        
+
         List<Object> registry = (List<Object>) registryObj;
         if (registry.isEmpty()) {
             result.addWarning("Scenario registry is empty");
         }
-        
+
         // Validate each registry entry
         for (int i = 0; i < registry.size(); i++) {
             Object entry = registry.get(i);
@@ -354,10 +354,10 @@ public class YamlMetadataValidator {
                 result.addError("Registry entry " + i + " must be a map/object");
                 continue;
             }
-            
+
             Map<String, Object> registryEntry = (Map<String, Object>) entry;
-            String[] requiredFields = {"scenario-id", "config-file", "data-types", "description"};
-            
+            String[] requiredFields = {"scenario-id", "config-file"};
+
             for (String field : requiredFields) {
                 if (!registryEntry.containsKey(field)) {
                     result.addError("Registry entry " + i + " missing required field: " + field);

@@ -74,7 +74,7 @@ class NestedDependencyTreeIntegrationTest {
 
         assertNotNull(summary);
         assertEquals("trade-validation-rules", summary.getId());
-        assertEquals("rules", summary.getFileType());
+        assertEquals("rule-config", summary.getFileType());
         assertEquals(2, summary.getRuleGroupCount());
         assertEquals(5, summary.getRuleCount());
     }
@@ -88,7 +88,7 @@ class NestedDependencyTreeIntegrationTest {
 
         assertNotNull(summary);
         assertEquals("trade-enrichment-rules", summary.getId());
-        assertEquals("enrichments", summary.getFileType());
+        assertEquals("enrichment", summary.getFileType());
         assertEquals(3, summary.getEnrichmentCount());
     }
 
@@ -101,7 +101,7 @@ class NestedDependencyTreeIntegrationTest {
 
         assertNotNull(summary);
         assertEquals("compliance-rules", summary.getId());
-        assertEquals("rules", summary.getFileType());
+        assertEquals("rule-config", summary.getFileType());
         assertEquals(3, summary.getRuleGroupCount());
         assertEquals(6, summary.getRuleCount());
     }
@@ -190,9 +190,9 @@ class NestedDependencyTreeIntegrationTest {
         compliance.setContentSummary(analyzer.analyzYamlContent(compliance.getName()));
         config.setContentSummary(analyzer.analyzYamlContent(config.getName()));
 
-        assertEquals("rules", validation.getContentSummary().getFileType());
-        assertEquals("enrichments", enrichment.getContentSummary().getFileType());
-        assertEquals("rules", compliance.getContentSummary().getFileType());
+        assertEquals("rule-config", validation.getContentSummary().getFileType());
+        assertEquals("enrichment", enrichment.getContentSummary().getFileType());
+        assertEquals("rule-config", compliance.getContentSummary().getFileType());
         assertEquals("config", config.getContentSummary().getFileType());
     }
 
@@ -292,8 +292,8 @@ class NestedDependencyTreeIntegrationTest {
         assertTrue(output.contains("root-scenario"), "Output should contain root-scenario filename");
         assertTrue(output.contains("trade-validation-rules"), "Output should contain trade-validation-rules filename");
         assertTrue(output.contains("trade-enrichment-rules"), "Output should contain trade-enrichment-rules filename");
-        assertTrue(output.contains("rules"), "Output should contain file type 'rules'");
-        assertTrue(output.contains("enrichments"), "Output should contain file type 'enrichments'");
+        assertTrue(output.contains("rule-config"), "Output should contain file type 'rule-config'");
+        assertTrue(output.contains("enrichment"), "Output should contain file type 'enrichment'");
     }
 
     private String formatTreeForConsole(TreeNode node) {

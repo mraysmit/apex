@@ -3,6 +3,7 @@ metadata:
   name: Trade Enrichment Rules
   description: Enriches trade data with market and counterparty information
   version: 1.0.0
+  type: enrichment
 
 enrichments:
   - id: market-data-enrichment
