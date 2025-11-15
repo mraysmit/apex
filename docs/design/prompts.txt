@@ -452,46 +452,48 @@ Write Tests First: Create comprehensive unit tests for new functionality
 Real Data Sources: Tests must use actual REST APIs, not inline data simulations
 Step-by-Step Validation: Test each component individually before integration
 
-# **🚨 CRITICAL ERROR HANDLING PRINCIPLE**
+# **🚨 CRITICAL ERROR HANDLING PRINCIPLES**
 
-## **Configuration Errors Must Be Handled Gracefully**
+## **Distinguish Between Configuration Errors and Business Logic Failures**
 
-**FUNDAMENTAL RULE: Configuration errors should NEVER throw exceptions that break application flow.**
+### **Core Principle: Different Error Types Require Different Handling Strategies**
 
-### **X WRONG APPROACH - Throwing Exceptions:**
+---
+
+## **1️⃣ Configuration Errors → Graceful Degradation (Log Warnings, Continue)**
+
+**RULE: Configuration errors should NEVER throw exceptions that break application flow.**
+
+### **What Are Configuration Errors?**
+Configuration errors are issues with YAML setup, missing optional fields, or user-correctable problems that don't represent fundamental system failures.
+
+### **Examples of Configuration Errors:**
+- Missing **optional** fields in lookup results
+- Invalid field mappings in YAML (user can fix)
+- Null or empty lookup keys (expected in some scenarios)
+- Invalid data type conversions (can use defaults)
+- Missing optional YAML configuration sections
+- Validation failures where user can correct input (e.g., invalid email format)
+- "No results found" scenarios (expected outcome)
+
+### **❌ WRONG APPROACH - Throwing Exceptions:**
 ```java
 // BAD: Throwing exceptions for configuration issues
-if (requiredField == null) {
-    throw new EnrichmentException("Required field 'market' is missing from lookup result");
+if (optionalField == null) {
+    throw new EnrichmentException("Optional field 'market' is missing from lookup result");
 }
 ```
 
 ### **✅ CORRECT APPROACH - Graceful Error Reporting:**
 ```java
 // GOOD: Log warnings and continue processing
-if (requiredField == null) {
-    logger.warn("Required field 'market' is missing from lookup result for key: {}", lookupKey);
-    return null; // or appropriate default value
+if (optionalField == null) {
+    logger.warn("Optional field 'market' is missing from lookup result for key: {}. Using default.", lookupKey);
+    return getDefaultValue(); // or return null, or Optional.empty()
 }
 ```
 
-### **Key Principles:**
-1. **Log, Don't Throw**: Configuration issues should be logged as warnings, not thrown as exceptions
-2. **Graceful Degradation**: System should continue processing with reasonable defaults
-3. **User-Friendly**: Provide clear error messages that help users fix their configurations
-4. **Fail-Safe**: Missing optional fields should not break the entire enrichment process
-5. **Defensive Programming**: Always assume configurations might be incomplete or incorrect
-
-### **Examples of Configuration Issues That Should Be Handled Gracefully:**
-- Missing required fields in lookup results
-- Invalid field mappings in YAML
-- Null or empty lookup keys
-- Database connection failures
-- File not found errors
-- Invalid data type conversions
-- Missing YAML configuration sections
-
-### **Implementation Pattern:**
+### **Implementation Pattern for Configuration Errors:**
 ```java
 try {
     // Attempt configuration operation
@@ -500,9 +502,164 @@ try {
     logger.warn("Configuration issue detected: {}. Using default behavior.", e.getMessage());
     return getDefaultValue();
 } catch (Exception e) {
-    logger.error("Unexpected error in configuration processing: {}", e.getMessage(), e);
+    logger.warn("Unexpected configuration error: {}. Continuing with defaults.", e.getMessage());
     return getFailSafeValue();
 }
+```
+
+---
+
+## **2️⃣ Business Logic Failures → Return Error Results (Track Failures, Propagate)**
+
+**RULE: Business logic failures should return structured error results (like RuleResult.error()) that allow callers to detect and handle failures programmatically.**
+
+### **What Are Business Logic Failures?**
+Business logic failures are fundamental errors in processing that represent actual system failures, not user-correctable configuration issues.
+
+### **Examples of Business Logic Failures:**
+- **Required** enrichment failed (system cannot proceed without this data)
+- Database connection failures (infrastructure problem, not user error)
+- File not found errors for **required** system files
+- Transformation processing errors (SpEL expression evaluation failed)
+- Rule evaluation errors (condition evaluation threw exception)
+- Data source unavailable (external API down)
+- Critical field mapping errors for **required** fields
+
+### **Key Distinction:**
+**When to avoid throwing exceptions for business logic failures:**
+- **Expected and recoverable conditions**: If the "failure" is a common and anticipated outcome that can be handled gracefully within normal program flow
+- **Validation failures where user can correct input**: Invalid email format in registration form
+- **"No results found" scenarios**: Querying database with no matching records
+- **Conditional outcomes in expected business flow**: Method attempts discount, returns true/false
+
+**When to return error results (not throw exceptions):**
+- Use `RuleResult.error()` or similar structured result objects
+- Track failure details in `failureMessages` list
+- Set appropriate severity (`SeverityConstants.ERROR`)
+- Allow caller to check `resultType == ERROR` and handle appropriately
+
+### **❌ WRONG APPROACH - Swallowing Errors:**
+```java
+// BAD: Catching and hiding business logic failures
+try {
+    processRequiredEnrichment(data);
+} catch (Exception e) {
+    logger.warn("Enrichment failed, continuing anyway...");
+    // ERROR IS LOST - caller has no way to detect failure!
+}
+```
+
+### **✅ CORRECT APPROACH - Return Structured Error Results:**
+```java
+// GOOD: Return error result that caller can check
+public RuleResult processEnrichmentWithResult(Enrichment enrichment, Object data) {
+    try {
+        Object result = processEnrichment(enrichment, data);
+        return RuleResult.enrichmentSuccess(result);
+    } catch (Exception e) {
+        logger.error("CRITICAL: Required enrichment failed: {}", enrichment.getId(), e);
+        return RuleResult.error(
+            "enrichment:" + enrichment.getId(),
+            "Enrichment processing failed: " + e.getMessage(),
+            SeverityConstants.ERROR
+        );
+    }
+}
+
+// Caller can now detect and handle the failure:
+RuleResult result = processor.processEnrichmentWithResult(enrichment, data);
+if (result.getResultType() == ResultType.ERROR) {
+    // Handle the failure appropriately (log, return HTTP 500, etc.)
+    return ResponseEntity.status(500).body(result.getFailureMessages());
+}
+```
+
+### **Implementation Pattern for Business Logic Failures:**
+```java
+public RuleResult processBusinessOperation(Config config, Object data) {
+    List<String> failureMessages = new ArrayList<>();
+
+    try {
+        // Attempt critical business operation
+        Object result = performCriticalOperation(config, data);
+        return RuleResult.match("operation", "Success", SeverityConstants.INFO);
+    } catch (Exception e) {
+        // Log as ERROR (not warning) - this is a real failure
+        logger.error("CRITICAL: Business operation failed: {}", config.getId(), e);
+
+        // Return structured error result (don't throw exception)
+        return RuleResult.error(
+            "operation:" + config.getId(),
+            "Operation failed: " + e.getMessage(),
+            SeverityConstants.ERROR
+        );
+    }
+}
+```
+
+---
+
+## **3️⃣ Decision Matrix: Configuration Error vs. Business Logic Failure**
+
+| Scenario | Type | Handling Strategy | Example |
+|----------|------|-------------------|---------|
+| Missing **optional** field in lookup result | Configuration Error | Log warning, use default, continue | `logger.warn()` + return default |
+| Missing **required** field for critical enrichment | Business Logic Failure | Return `RuleResult.error()`, track failure | `RuleResult.error()` |
+| Invalid email format (user input) | Configuration Error | Return validation result, user can fix | Return `false` or validation object |
+| Database connection failed | Business Logic Failure | Return `RuleResult.error()`, propagate | `RuleResult.error()` |
+| No results found in query | Expected Outcome | Return empty result, not an error | Return `Optional.empty()` or `null` |
+| SpEL expression evaluation failed | Business Logic Failure | Return `RuleResult.error()`, track failure | `RuleResult.error()` |
+| Invalid YAML syntax | Configuration Error | Log warning, skip section, continue | `logger.warn()` + skip |
+| Transformation processing error | Business Logic Failure | Return `RuleResult.error()`, fail fast | `RuleResult.error()` |
+
+---
+
+## **4️⃣ Key Principles Summary**
+
+### **Configuration Errors:**
+1. **Log, Don't Throw**: Log as warnings, not exceptions
+2. **Graceful Degradation**: Continue with reasonable defaults
+3. **User-Friendly**: Provide clear messages to help users fix configurations
+4. **Fail-Safe**: Don't break entire process for optional field issues
+5. **Defensive Programming**: Assume configurations might be incomplete
+
+### **Business Logic Failures:**
+1. **Return Structured Results**: Use `RuleResult.error()` or similar
+2. **Track Failure Details**: Populate `failureMessages` list
+3. **Log as ERROR**: Use `logger.error()` for critical failures
+4. **Enable Detection**: Caller must be able to check for failures
+5. **Propagate Appropriately**: REST API returns HTTP 500 on errors
+6. **Don't Throw Exceptions**: Return error results instead (unless truly exceptional)
+
+---
+
+## **5️⃣ REST API Error Propagation**
+
+### **For Business Logic Failures:**
+```java
+// REST Controller should check RuleResult and return appropriate HTTP status
+RuleResult result = rulesEngine.processWithResult(config, data);
+
+if (result.getResultType() == ResultType.ERROR) {
+    // Business logic failure → HTTP 500
+    return ResponseEntity.status(500).body(Map.of(
+        "error", "Processing failed",
+        "details", result.getFailureMessages()
+    ));
+}
+
+// Success → HTTP 200
+return ResponseEntity.ok(result.getEnrichedData());
+```
+
+### **For Configuration Errors:**
+```java
+// Configuration errors are handled gracefully, processing continues
+// REST API returns HTTP 200 with partial results and warnings
+return ResponseEntity.ok(Map.of(
+    "data", result.getEnrichedData(),
+    "warnings", result.getWarningMessages() // if available
+));
 ```
 
 run all the tests again

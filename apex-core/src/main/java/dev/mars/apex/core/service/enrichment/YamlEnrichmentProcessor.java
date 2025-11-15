@@ -90,6 +90,7 @@ public class YamlEnrichmentProcessor {
     private final Map<String, Map<String, Object>> ruleGroupResults = new java.util.concurrent.ConcurrentHashMap<>();
     private final Map<String, Boolean> individualRuleResults = new java.util.concurrent.ConcurrentHashMap<>();
 
+    @Deprecated(since = "3.0", forRemoval = true)
     public YamlEnrichmentProcessor(LookupServiceRegistry serviceRegistry,
                                    ExpressionEvaluatorService evaluatorService) {
         this.serviceRegistry = serviceRegistry;
@@ -106,8 +107,22 @@ public class YamlEnrichmentProcessor {
      * @param enrichments List of YAML enrichment configurations
      * @param targetObject The object to enrich
      * @return The enriched object
+     * @deprecated since 1.1, for removal in 2.0. This method returns Object and cannot propagate errors properly.
+     *             Use {@link #processEnrichmentsWithResult(List, Object)} instead, which returns RuleResult
+     *             with proper error tracking and failure messages.
+     *             <p><strong>CRITICAL FLAW:</strong> This method catches and logs exceptions but continues processing,
+     *             making it impossible for callers to detect failures. Errors are lost and only appear in logs.</p>
+     *             <p><strong>Migration:</strong> Replace {@code Object result = processor.processEnrichments(enrichments, data)}
+     *             with {@code RuleResult result = processor.processEnrichmentsWithResult(enrichments, data)}
+     *             and check {@code result.getResultType() == ResultType.ERROR} to detect failures.</p>
      */
+    @Deprecated(since = "1.1", forRemoval = true)
     public Object processEnrichments(List<YamlEnrichment> enrichments, Object targetObject) {
+        // Runtime deprecation warning
+        logger.warn("DEPRECATED: processEnrichments(List, Object) is deprecated since 1.1 and will be removed in 2.0. " +
+                    "Use processEnrichmentsWithResult(List, Object) instead for proper error propagation. " +
+                    "This method cannot propagate errors to callers - failures are only logged.");
+
         return processEnrichments(enrichments, targetObject, null);
     }
 
@@ -119,9 +134,23 @@ public class YamlEnrichmentProcessor {
      * @param targetObject The object to enrich
      * @param configuration The full YAML configuration (required for database lookups)
      * @return The enriched object
+     * @deprecated since 1.1, for removal in 2.0. This method returns Object and cannot propagate errors properly.
+     *             Use {@link #processEnrichmentsWithResult(List, Object, YamlRuleConfiguration)} instead, which returns RuleResult
+     *             with proper error tracking and failure messages.
+     *             <p><strong>CRITICAL FLAW:</strong> This method catches and logs exceptions but continues processing,
+     *             making it impossible for callers to detect failures. Errors are lost and only appear in logs.</p>
+     *             <p><strong>Migration:</strong> Replace {@code Object result = processor.processEnrichments(enrichments, data, config)}
+     *             with {@code RuleResult result = processor.processEnrichmentsWithResult(enrichments, data, config)}
+     *             and check {@code result.getResultType() == ResultType.ERROR} to detect failures.</p>
      */
+    @Deprecated(since = "1.1", forRemoval = true)
     public Object processEnrichments(List<YamlEnrichment> enrichments, Object targetObject,
                                    dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
+        // Runtime deprecation warning
+        logger.warn("DEPRECATED: processEnrichments(List, Object, YamlRuleConfiguration) is deprecated since 1.1 and will be removed in 2.0. " +
+                    "Use processEnrichmentsWithResult(List, Object, YamlRuleConfiguration) instead for proper error propagation. " +
+                    "This method cannot propagate errors to callers - failures are only logged.");
+
         // Set current configuration for database lookups
         this.currentConfiguration = configuration;
 
@@ -142,17 +171,17 @@ public class YamlEnrichmentProcessor {
         } else {
             logger.info("Processing " + enrichments.size() + " enrichments for null object");
         }
-        
+
         // Sort enrichments by priority (lower numbers = higher priority)
         enrichments.sort((e1, e2) -> {
             int priority1 = e1.getPriority() != null ? e1.getPriority() : 100;
             int priority2 = e2.getPriority() != null ? e2.getPriority() : 100;
             return Integer.compare(priority1, priority2);
         });
-        
+
         Object enrichedObject = targetObject;
         int processedCount = 0;
-        
+
         for (YamlEnrichment enrichment : enrichments) {
             try {
                 if (shouldProcessEnrichment(enrichment, enrichedObject)) {
@@ -170,16 +199,16 @@ public class YamlEnrichmentProcessor {
                 }
             } catch (Exception e) {
                 // CRITICAL: Enrichment processing failure is a serious configuration error
-                logger.error("CRITICAL: Failed to process enrichment '" + enrichment.getId() +
-                          "' - Error: " + e.getMessage(), e);
+                logger.error("CRITICAL: Enrichment failure in deprecated method cannot be propagated to caller: " + enrichment.getId() +
+                          " - Error: " + e.getMessage(), e);
                 // Continue processing other enrichments for now (backward compatibility)
                 // TODO: Consider fail-fast behavior for critical enrichments
             }
         }
-        
-        logger.info("Completed processing enrichments. Processed: " + processedCount + 
+
+        logger.info("Completed processing enrichments. Processed: " + processedCount +
                    " out of " + enrichments.size());
-        
+
         return enrichedObject;
     }
     
@@ -190,6 +219,7 @@ public class YamlEnrichmentProcessor {
      * @param targetObject The object to enrich
      * @return The enriched object
      */
+    @Deprecated(since = "3.0", forRemoval = true)
     public Object processEnrichment(YamlEnrichment enrichment, Object targetObject) {
         logger.debug("Processing enrichment: " + enrichment.getId() + " (type: " + enrichment.getType() + ")");
 
@@ -380,7 +410,7 @@ public class YamlEnrichmentProcessor {
 
         // If applyFieldMappings returns null, it means a required field mapping failed
         if (result == null) {
-            logger.warn("Enrichment '" + enrichment.getId() + "' failed due to required field mapping failure");
+            logger.error("CRITICAL: Enrichment '" + enrichment.getId() + "' failed due to required field mapping failure");
             // Return original target object to continue processing other enrichments
             return targetObject;
         }
@@ -416,7 +446,7 @@ public class YamlEnrichmentProcessor {
             if (enrichment.getFieldMappings() != null && !enrichment.getFieldMappings().isEmpty()) {
                 Object mappedResult = applyFieldMappings(enrichment.getFieldMappings(), targetObject, targetObject);
                 if (mappedResult == null) {
-                    logger.warn("Calculation enrichment '" + enrichment.getId() + "' failed due to required field mapping failure");
+                    logger.error("CRITICAL: Calculation enrichment '" + enrichment.getId() + "' failed due to required field mapping failure");
                     // Return original target object to continue processing other enrichments
                     return targetObject;
                 }
@@ -1057,6 +1087,7 @@ public class YamlEnrichmentProcessor {
     /**
      * Clear all caches.
      */
+    @Deprecated(since = "3.0", forRemoval = true)
     public void clearCache() {
         cacheManager.clearScope(ApexCacheManager.LOOKUP_RESULT_CACHE);
         cacheManager.clearScope(ApexCacheManager.EXPRESSION_CACHE);
@@ -1069,6 +1100,7 @@ public class YamlEnrichmentProcessor {
      *
      * @return Map containing cache statistics
      */
+    @Deprecated(since = "3.0", forRemoval = true)
     public Map<String, Object> getCacheStatistics() {
         Map<String, Object> stats = new HashMap<>();
 
@@ -1179,6 +1211,7 @@ public class YamlEnrichmentProcessor {
      * @param passed Whether the rule group passed
      * @param ruleResults Map of individual rule results within the group
      */
+    @Deprecated(since = "3.0", forRemoval = true)
     public void storeRuleGroupResult(String ruleGroupId, boolean passed, Map<String, Boolean> ruleResults) {
         Map<String, Object> groupRuleResults = new HashMap<>();
         groupRuleResults.put("passed", passed);
@@ -1218,6 +1251,7 @@ public class YamlEnrichmentProcessor {
      * @param ruleId The ID of the rule
      * @param passed Whether the rule passed
      */
+    @Deprecated(since = "3.0", forRemoval = true)
     public void storeIndividualRuleResult(String ruleId, boolean passed) {
         individualRuleResults.put(ruleId, passed);
         logger.debug("Stored individual rule result: " + ruleId + " -> passed=" + passed);
@@ -1486,6 +1520,7 @@ public class YamlEnrichmentProcessor {
      * @param targetObject The object to enrich
      * @return A RuleResult containing success status, enriched data, and failure messages
      */
+    @Deprecated(since = "3.0", forRemoval = true)
     public RuleResult processEnrichmentsWithResult(List<YamlEnrichment> enrichments, Object targetObject) {
         return processEnrichmentsWithResult(enrichments, targetObject, null);
     }
@@ -1499,21 +1534,24 @@ public class YamlEnrichmentProcessor {
      * @param configuration The full YAML configuration (required for database lookups)
      * @return A RuleResult containing success status, enriched data, and failure messages
      */
+    @Deprecated(since = "3.0", forRemoval = true)
     public RuleResult processEnrichmentsWithResult(List<YamlEnrichment> enrichments, Object targetObject,
                                                   dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
         logger.debug("Processing enrichments with result tracking for " + (enrichments != null ? enrichments.size() : 0) + " enrichments");
 
-        // Convert target object to Map for consistent handling
-        Map<String, Object> originalData = convertToMap(targetObject);
         List<String> failureMessages = new ArrayList<>();
         boolean overallSuccess = true;
 
         try {
-            // Process enrichments using existing method
-            Object enrichmentResult = processEnrichments(enrichments, targetObject, configuration);
+            // Process enrichments using existing method - this modifies targetObject IN PLACE
+            processEnrichments(enrichments, targetObject, configuration);
 
-            // Convert result to Map for analysis
-            Map<String, Object> enrichedData = convertToMap(enrichmentResult);
+            // Use the targetObject directly since it was modified in place
+            // Cast it to Map for analysis
+            @SuppressWarnings("unchecked")
+            Map<String, Object> enrichedData = (targetObject instanceof Map)
+                ? (Map<String, Object>) targetObject
+                : convertToMap(targetObject);
 
             // Detect enrichment failures by checking for required field mapping failures
             if (enrichments != null && !enrichments.isEmpty()) {
@@ -1522,7 +1560,7 @@ public class YamlEnrichmentProcessor {
                 if (enrichmentFailed) {
                     overallSuccess = false;
                     failureMessages.add("Required field enrichment failed - check logs for CRITICAL ERROR details");
-                    logger.warn("Enrichment failed due to required field mapping failures");
+                    logger.error("CRITICAL: Enrichment failed due to required field mapping failures");
                 }
             }
 
@@ -1534,14 +1572,18 @@ public class YamlEnrichmentProcessor {
                 logger.debug("Enrichment processing completed successfully with severity: " + aggregatedSeverity);
                 return RuleResult.enrichmentSuccess(enrichedData, aggregatedSeverity);
             } else {
-                logger.warn("Enrichment processing completed with failures, severity: " + aggregatedSeverity);
+                logger.error("CRITICAL: Enrichment processing completed with failures, severity: " + aggregatedSeverity);
                 return RuleResult.enrichmentFailure(failureMessages, enrichedData, aggregatedSeverity);
             }
 
         } catch (Exception e) {
-            logger.error("Exception during enrichment processing: " + e.getMessage(), e);
-            failureMessages.add("Enrichment processing exception: " + e.getMessage());
-            return RuleResult.enrichmentFailure(failureMessages, originalData, SeverityConstants.ERROR);
+            logger.error("CRITICAL: Exception during enrichment processing: " + e.getMessage(), e);
+            // Business logic failure - return error result
+            return RuleResult.error(
+                "enrichments",
+                "Enrichment processing failed: " + e.getMessage(),
+                SeverityConstants.ERROR
+            );
         }
     }
 
@@ -1553,6 +1595,7 @@ public class YamlEnrichmentProcessor {
      * @param targetObject The object to enrich
      * @return A RuleResult containing success status, enriched data, and failure messages
      */
+    @Deprecated(since = "3.0", forRemoval = true)
     public RuleResult processEnrichmentWithResult(YamlEnrichment enrichment, Object targetObject) {
         return processEnrichmentWithResult(enrichment, targetObject, null);
     }
@@ -1567,6 +1610,7 @@ public class YamlEnrichmentProcessor {
      * @param configuration The full YAML configuration (required for conditional mapping with rule group results)
      * @return A RuleResult containing success status, enriched data, and failure messages
      */
+    @Deprecated(since = "3.0", forRemoval = true)
     public RuleResult processEnrichmentWithResult(YamlEnrichment enrichment, Object targetObject,
                                                   dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
         if (enrichment == null) {
@@ -1593,6 +1637,8 @@ public class YamlEnrichmentProcessor {
         if (enrichments == null || enrichments.isEmpty()) {
             return false;
         }
+
+
 
         boolean hasFailures = false;
 
@@ -1684,6 +1730,7 @@ public class YamlEnrichmentProcessor {
      * @param yamlConfig The full YAML configuration (optional, needed for database lookups)
      * @return EnrichmentGroupResult with detailed execution information
      */
+    @Deprecated(since = "3.0", forRemoval = true)
     public EnrichmentGroupResult processEnrichmentGroup(EnrichmentGroup group, Object targetObject, YamlRuleConfiguration yamlConfig) {
         if (group == null) {
             return EnrichmentGroupResult.of("<null>", true, "No group", List.of(), 0L);
@@ -1793,6 +1840,7 @@ public class YamlEnrichmentProcessor {
      * @param yamlConfig The full YAML configuration (optional, needed for database lookups)
      * @return List of EnrichmentGroupResult, one per group
      */
+    @Deprecated(since = "3.0", forRemoval = true)
     public List<EnrichmentGroupResult> processEnrichmentGroups(List<EnrichmentGroup> groups, Object targetObject, YamlRuleConfiguration yamlConfig) {
         List<EnrichmentGroupResult> out = new ArrayList<>();
         if (groups == null || groups.isEmpty()) return out;

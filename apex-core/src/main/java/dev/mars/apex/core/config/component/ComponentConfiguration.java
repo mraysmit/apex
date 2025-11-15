@@ -18,9 +18,6 @@ package dev.mars.apex.core.config.component;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.*;
-import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Configuration class representing an APEX component.
@@ -47,8 +44,6 @@ import org.slf4j.LoggerFactory;
  * @since 2.2.0
  */
 public class ComponentConfiguration {
-
-    private static final Logger logger = LoggerFactory.getLogger(ComponentConfiguration.class);
 
     // Metadata section
     @JsonProperty("metadata")

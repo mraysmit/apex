@@ -165,6 +165,24 @@ public class EnrichmentController {
             }
 
             RuleResult result = rulesEngine.evaluate(yamlConfig, inputData);
+
+            // Check for business logic failures (ResultType.ERROR)
+            if (result.getResultType() == RuleResult.ResultType.ERROR) {
+                logger.error("CRITICAL: Enrichment processing failed with ERROR result type");
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("success", false);
+                errorResponse.put("error", "Enrichment processing failed");
+                errorResponse.put("message", result.getMessage());
+                errorResponse.put("timestamp", Instant.now());
+
+                // Include failure messages if available
+                if (result.hasFailures()) {
+                    errorResponse.put("failureMessages", result.getFailureMessages());
+                }
+
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            }
+
             Object enrichedObject = result.getEnrichedData().isEmpty() ? request.getTargetObject() : result.getEnrichedData();
 
             // Prepare response
@@ -252,6 +270,24 @@ public class EnrichmentController {
                 }
 
                 RuleResult result = rulesEngine.evaluate(yamlConfig, inputData);
+
+                // Check for business logic failures (ResultType.ERROR)
+                if (result.getResultType() == RuleResult.ResultType.ERROR) {
+                    logger.error("CRITICAL: Batch enrichment processing failed with ERROR result type for object");
+                    Map<String, Object> errorResponse = new HashMap<>();
+                    errorResponse.put("success", false);
+                    errorResponse.put("error", "Batch enrichment processing failed");
+                    errorResponse.put("message", result.getMessage());
+                    errorResponse.put("timestamp", Instant.now());
+
+                    // Include failure messages if available
+                    if (result.hasFailures()) {
+                        errorResponse.put("failureMessages", result.getFailureMessages());
+                    }
+
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+                }
+
                 Object enrichedObject = result.getEnrichedData().isEmpty() ? targetObject : result.getEnrichedData();
                 enrichedObjects.add(enrichedObject);
             }
@@ -337,6 +373,25 @@ public class EnrichmentController {
             }
 
             RuleResult result = rulesEngine.evaluate(config, inputData);
+
+            // Check for business logic failures (ResultType.ERROR)
+            if (result.getResultType() == RuleResult.ResultType.ERROR) {
+                logger.error("CRITICAL: Predefined enrichment processing failed with ERROR result type");
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("success", false);
+                errorResponse.put("error", "Predefined enrichment processing failed");
+                errorResponse.put("message", result.getMessage());
+                errorResponse.put("configName", configName);
+                errorResponse.put("timestamp", Instant.now());
+
+                // Include failure messages if available
+                if (result.hasFailures()) {
+                    errorResponse.put("failureMessages", result.getFailureMessages());
+                }
+
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            }
+
             Object enrichedObject = result.getEnrichedData().isEmpty() ? targetObject : result.getEnrichedData();
 
             // Prepare response

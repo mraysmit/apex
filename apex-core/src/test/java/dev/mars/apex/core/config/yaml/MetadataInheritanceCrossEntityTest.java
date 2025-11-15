@@ -22,10 +22,6 @@ import dev.mars.apex.core.engine.model.metadata.RuleMetadata;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Nested;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,8 +32,6 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @DisplayName("Cross-Entity Metadata Inheritance Tests")
 class MetadataInheritanceCrossEntityTest {
-
-    private static final Logger logger = LoggerFactory.getLogger(MetadataInheritanceCrossEntityTest.class);
 
     private YamlConfigurationLoader loader;
     private YamlRuleFactory factory;

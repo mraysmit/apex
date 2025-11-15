@@ -553,6 +553,29 @@ public class RulesEngine {
                 logger.debug("Rule group '{}' evaluated to: {} with aggregated severity: {}",
                            group.getName(), result, aggregatedSeverity);
 
+                // Debug: Log individual results
+                logger.debug("Individual results count: {}", evaluationResult.getIndividualResults().size());
+                for (RuleResult individualResult : evaluationResult.getIndividualResults()) {
+                    logger.debug("Individual result: type={}, success={}, message={}",
+                               individualResult.getResultType(), individualResult.isSuccess(), individualResult.getMessage());
+                }
+
+                // Check if any individual rule had an ERROR result type (not just ERROR severity)
+                // This indicates a rule evaluation exception, which is a business logic failure
+                for (RuleResult individualResult : evaluationResult.getIndividualResults()) {
+                    if (individualResult.getResultType() == RuleResult.ResultType.ERROR) {
+                        // CRITICAL: Rule evaluation exception is a business logic failure
+                        // This is NOT a "rule didn't match" scenario - it's a system failure
+                        logger.error("CRITICAL: Rule evaluation failed in group '{}': {}",
+                                   group.getName(), individualResult.getMessage());
+                        return RuleResult.error(
+                            group.getName(),
+                            "Rule group evaluation failed: " + individualResult.getMessage(),
+                            SeverityConstants.ERROR
+                        );
+                    }
+                }
+
                 if (result) {
                     logger.info("Rule group matched: {}", group.getName());
                     return RuleResult.match(group.getName(), group.getMessage(), aggregatedSeverity);
@@ -565,8 +588,14 @@ public class RulesEngine {
                     }
                 }
             } catch (Exception e) {
-                logger.info("Rule group evaluation issue for '{}': {}", group.getName(), e.getMessage());
-                logger.debug("Full exception details for rule group '{}':", group.getName(), e);
+                // CRITICAL: Rule group evaluation exception is a business logic failure
+                // This is NOT a "rule didn't match" scenario - it's a system failure
+                logger.error("CRITICAL: Rule group evaluation failed for '{}': {}", group.getName(), e.getMessage(), e);
+                return RuleResult.error(
+                    group.getName(),
+                    "Rule group evaluation failed: " + e.getMessage(),
+                    SeverityConstants.ERROR
+                );
             }
         }
 
@@ -1068,35 +1097,28 @@ public class RulesEngine {
                 logger.info("Processing {} enrichments", yamlConfig.getEnrichments().size());
 
                 try {
-                    // Store original data size to detect enrichment failures
-                    int originalDataSize = enrichedData.size();
-
-                    Object enrichmentResult = enrichmentProcessor.processEnrichments(
+                    // Process enrichments with result tracking
+                    RuleResult enrichmentResult = enrichmentProcessor.processEnrichmentsWithResult(
                         yamlConfig.getEnrichments(), enrichedData, yamlConfig);
 
-                    if (enrichmentResult instanceof Map) {
-                        @SuppressWarnings("unchecked")
-                        Map<String, Object> enrichmentMap = (Map<String, Object>) enrichmentResult;
-
-                        // Check for enrichment failures by detecting missing required fields
-                        boolean enrichmentFailed = detectEnrichmentFailures(yamlConfig, enrichmentMap, originalDataSize);
-
-                        if (enrichmentFailed) {
-                            overallSuccess = false;
-                            failureMessages.add("Required field enrichment failed - check logs for CRITICAL ERROR details");
-                            logger.warn("Enrichment failed due to required field mapping failures");
-                        }
-
-                        enrichedData = enrichmentMap;
-                        logger.debug("Enrichment completed successfully, enriched data size: {}", enrichedData.size());
-                    } else {
-                        logger.warn("Enrichment result is not a Map, using original data");
+                    // Check for enrichment errors
+                    if (enrichmentResult.getResultType() == RuleResult.ResultType.ERROR) {
                         overallSuccess = false;
-                        failureMessages.add("Enrichment result format is invalid");
+                        failureMessages.add("Enrichment processing failed: " + enrichmentResult.getMessage());
+                        if (enrichmentResult.hasFailures()) {
+                            failureMessages.addAll(enrichmentResult.getFailureMessages());
+                        }
+                        logger.error("CRITICAL: Enrichment processing failed: {}", enrichmentResult.getMessage());
+                        // DO NOT return early - preserve partial enriched data and continue processing
+                    }
+
+                    // Update enriched data from result (including partial data from failed enrichments)
+                    if (enrichmentResult.getEnrichedData() != null && !enrichmentResult.getEnrichedData().isEmpty()) {
+                        enrichedData.putAll(enrichmentResult.getEnrichedData());
+                        logger.debug("Enrichment completed, enriched data size: {}", enrichedData.size());
                     }
                 } catch (Exception e) {
-                    logger.info("Enrichment processing issue: {}", e.getMessage());
-                    logger.debug("Full enrichment exception details:", e);
+                    logger.error("CRITICAL: Enrichment processing exception: {}", e.getMessage(), e);
                     overallSuccess = false;
                     failureMessages.add("Enrichment processing failed: " + e.getMessage());
                 }
@@ -1207,31 +1229,29 @@ public class RulesEngine {
                         if (enrichmentProcessor != null && yamlConfig.getEnrichments() != null && !yamlConfig.getEnrichments().isEmpty()) {
                             logger.info("Processing {} enrichments", yamlConfig.getEnrichments().size());
                             try {
-                                int originalDataSize = enrichedData.size();
-                                Object enrichmentResult = enrichmentProcessor.processEnrichments(
+                                // Process enrichments with result tracking
+                                RuleResult enrichmentResult = enrichmentProcessor.processEnrichmentsWithResult(
                                     yamlConfig.getEnrichments(), enrichedData, yamlConfig);
 
-                                if (enrichmentResult instanceof Map) {
-                                    @SuppressWarnings("unchecked")
-                                    Map<String, Object> enrichmentMap = (Map<String, Object>) enrichmentResult;
-
-                                    boolean enrichmentFailed = detectEnrichmentFailures(yamlConfig, enrichmentMap, originalDataSize);
-                                    if (enrichmentFailed) {
-                                        overallSuccess = false;
-                                        failureMessages.add("Required field enrichment failed - check logs for CRITICAL ERROR details");
-                                        logger.warn("Enrichment failed due to required field mapping failures");
-                                    }
-
-                                    enrichedData = enrichmentMap;
-                                    logger.debug("Enrichment completed, enriched data size: {}", enrichedData.size());
-                                } else {
-                                    logger.warn("Enrichment result is not a Map, using original data");
+                                // Check for enrichment errors
+                                if (enrichmentResult.getResultType() == RuleResult.ResultType.ERROR) {
                                     overallSuccess = false;
-                                    failureMessages.add("Enrichment result format is invalid");
+                                    failureMessages.add("Enrichment processing failed: " + enrichmentResult.getMessage());
+                                    if (enrichmentResult.hasFailures()) {
+                                        failureMessages.addAll(enrichmentResult.getFailureMessages());
+                                    }
+                                    logger.error("CRITICAL: Enrichment processing failed: {}", enrichmentResult.getMessage());
+                                    // Return error immediately (fail-fast)
+                                    return RuleResult.error("enrichments", enrichmentResult.getMessage(), SeverityConstants.ERROR);
+                                }
+
+                                // Update enriched data from result
+                                if (enrichmentResult.getEnrichedData() != null && !enrichmentResult.getEnrichedData().isEmpty()) {
+                                    enrichedData.putAll(enrichmentResult.getEnrichedData());
+                                    logger.debug("Enrichment completed, enriched data size: {}", enrichedData.size());
                                 }
                             } catch (Exception e) {
-                                logger.info("Enrichment processing issue: {}", e.getMessage());
-                                logger.debug("Full enrichment exception details:", e);
+                                logger.error("CRITICAL: Enrichment processing exception: {}", e.getMessage(), e);
                                 overallSuccess = false;
                                 failureMessages.add("Enrichment processing failed: " + e.getMessage());
                             }
@@ -1370,13 +1390,26 @@ public class RulesEngine {
                         if (yamlConfig.getTransformations() != null && !yamlConfig.getTransformations().isEmpty()) {
                             logger.info("Processing {} transformations", yamlConfig.getTransformations().size());
                             YamlTransformationProcessor transformationProcessor = new YamlTransformationProcessor();
-                            Object transformedData = transformationProcessor.processTransformations(
+
+                            // Process transformations with result tracking
+                            RuleResult transformationResult = transformationProcessor.processTransformationsWithResult(
                                 yamlConfig.getTransformations(), enrichedData);
+
+                            // Check for transformation errors
+                            if (transformationResult.getResultType() == RuleResult.ResultType.ERROR) {
+                                overallSuccess = false;
+                                failureMessages.add("Transformation processing failed: " + transformationResult.getMessage());
+                                if (transformationResult.hasFailures()) {
+                                    failureMessages.addAll(transformationResult.getFailureMessages());
+                                }
+                                logger.error("CRITICAL: Transformation processing failed: {}", transformationResult.getMessage());
+                                // Return error immediately (fail-fast)
+                                return RuleResult.error("transformations", transformationResult.getMessage(), SeverityConstants.ERROR);
+                            }
+
                             // Update enrichedData with transformed data
-                            if (transformedData instanceof Map) {
-                                @SuppressWarnings("unchecked")
-                                Map<String, Object> transformedMap = (Map<String, Object>) transformedData;
-                                enrichedData.putAll(transformedMap);
+                            if (transformationResult.getEnrichedData() != null && !transformationResult.getEnrichedData().isEmpty()) {
+                                enrichedData.putAll(transformationResult.getEnrichedData());
                             }
                         }
                         break;
@@ -1628,7 +1661,6 @@ public class RulesEngine {
      * @param data The data to transform
      * @return RuleResult from processing the transformation
      */
-    @SuppressWarnings("unchecked")
     private RuleResult processTransformationItem(String transformationId, YamlRuleConfiguration yamlConfig, Map<String, Object> data) {
         // Find transformation in yamlConfig.getTransformations()
         dev.mars.apex.core.config.yaml.YamlTransformation transformation = findTransformationById(yamlConfig, transformationId);
@@ -1641,16 +1673,17 @@ public class RulesEngine {
         dev.mars.apex.core.service.transformation.YamlTransformationProcessor processor =
             new dev.mars.apex.core.service.transformation.YamlTransformationProcessor();
 
-        // Process single transformation
-        Object transformedData = processor.processTransformations(List.of(transformation), data);
+        // Process single transformation with result tracking
+        RuleResult transformationResult = processor.processTransformationsWithResult(List.of(transformation), data);
+
+        // Check for transformation errors
+        if (transformationResult.getResultType() == RuleResult.ResultType.ERROR) {
+            logger.error("CRITICAL: Transformation processing failed: {}", transformationResult.getMessage());
+            return transformationResult; // Return error result directly
+        }
 
         // Return transformed data in RuleResult (do NOT modify input data map)
-        if (transformedData instanceof Map) {
-            return RuleResult.enrichmentSuccess((Map<String, Object>) transformedData);
-        } else {
-            // If transformation didn't return a Map, return empty enriched data
-            return RuleResult.enrichmentSuccess(new HashMap<>());
-        }
+        return transformationResult;
     }
 
     /**
@@ -1688,38 +1721,6 @@ public class RulesEngine {
             }
         }
         return null;
-    }
-
-    /**
-     * Detect enrichment failures by checking if required fields were successfully enriched.
-     * This method examines the enrichment configuration and checks if required target fields
-     * are present in the enriched data.
-     */
-    private boolean detectEnrichmentFailures(YamlRuleConfiguration yamlConfig, Map<String, Object> enrichedData, int originalDataSize) {
-        if (yamlConfig.getEnrichments() == null || yamlConfig.getEnrichments().isEmpty()) {
-            return false;
-        }
-
-        boolean hasFailures = false;
-
-        for (var enrichment : yamlConfig.getEnrichments()) {
-            if (enrichment.getFieldMappings() != null) {
-                for (var mapping : enrichment.getFieldMappings()) {
-                    // Check if this is a required field mapping
-                    if (mapping.getRequired() != null && mapping.getRequired()) {
-                        String targetField = mapping.getTargetField();
-
-                        // Check if the required target field is missing or null in enriched data
-                        if (!enrichedData.containsKey(targetField) || enrichedData.get(targetField) == null) {
-                            logger.debug("Required field '{}' is missing from enriched data", targetField);
-                            hasFailures = true;
-                        }
-                    }
-                }
-            }
-        }
-
-        return hasFailures;
     }
 
     /**

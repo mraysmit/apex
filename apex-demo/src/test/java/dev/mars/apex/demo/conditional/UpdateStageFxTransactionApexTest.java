@@ -142,8 +142,6 @@ public class UpdateStageFxTransactionApexTest {
                 "src/test/java/dev/mars/apex/demo/conditional/UpdateStageFxTransactionMultiFileTest_main.yaml"
             );
             
-            RulesEngine engine = RulesEngine.fromYamlConfig(config);
-            
             // Test data
             Map<String, Object> testData = createSwiftTestData("1", "USD", "EUR");
 

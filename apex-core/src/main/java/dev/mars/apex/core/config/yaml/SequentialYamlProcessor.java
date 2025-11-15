@@ -1,6 +1,8 @@
 package dev.mars.apex.core.config.yaml;
 
 import dev.mars.apex.core.config.yaml.OrderedYamlConfiguration.ProcessingMode;
+import dev.mars.apex.core.constants.SeverityConstants;
+import dev.mars.apex.core.engine.model.RuleResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,46 +47,88 @@ public class SequentialYamlProcessor {
     
     /**
      * Process YAML file with sequential section processing.
-     * 
+     *
      * @param filePath Path to YAML file
      * @return Sequential processing result
      * @throws YamlConfigurationException if processing fails
+     * @deprecated since 1.1, for removal in 2.0. This method returns SequentialProcessingResult and cannot propagate errors properly.
+     *             Use {@link #processFileWithResult(String)} instead, which returns RuleResult
+     *             with proper error tracking and failure messages.
+     *             <p><strong>CRITICAL FLAW:</strong> This method throws YamlConfigurationException but doesn't provide
+     *             programmatic access to error details. Errors must be caught and inspected via exception messages.</p>
+     *             <p><strong>Migration:</strong> Replace {@code SequentialProcessingResult result = processor.processFile(filePath)}
+     *             with {@code RuleResult result = processor.processFileWithResult(filePath)}
+     *             and check {@code result.getResultType() == ResultType.ERROR} to detect failures.</p>
      */
+    @Deprecated(since = "1.1", forRemoval = true)
     public SequentialProcessingResult processFile(String filePath) throws YamlConfigurationException {
+        // Runtime deprecation warning
+        logger.warn("DEPRECATED: processFile() is deprecated since 1.1 and will be removed in 2.0. " +
+                    "Use processFileWithResult() instead for proper error propagation. " +
+                    "This method cannot propagate errors to callers - failures are only logged.");
+
         logger.info("Starting sequential processing of file: " + filePath);
-        
+
         // Step 1: Parse YAML with preserved order
         OrderedYamlConfiguration orderedConfig = orderedParser.parseFile(filePath);
-        
+
         // Step 2: Process based on mode
         return processOrderedConfiguration(orderedConfig, filePath);
     }
-    
+
     /**
      * Process YAML string with sequential section processing.
-     * 
+     *
      * @param yamlContent YAML content as string
      * @return Sequential processing result
      * @throws YamlConfigurationException if processing fails
+     * @deprecated since 1.1, for removal in 2.0. This method returns SequentialProcessingResult and cannot propagate errors properly.
+     *             Use {@link #processYamlStringWithResult(String)} instead, which returns RuleResult
+     *             with proper error tracking and failure messages.
+     *             <p><strong>CRITICAL FLAW:</strong> This method throws YamlConfigurationException but doesn't provide
+     *             programmatic access to error details. Errors must be caught and inspected via exception messages.</p>
+     *             <p><strong>Migration:</strong> Replace {@code SequentialProcessingResult result = processor.processYamlString(yamlContent)}
+     *             with {@code RuleResult result = processor.processYamlStringWithResult(yamlContent)}
+     *             and check {@code result.getResultType() == ResultType.ERROR} to detect failures.</p>
      */
+    @Deprecated(since = "1.1", forRemoval = true)
     public SequentialProcessingResult processYamlString(String yamlContent) throws YamlConfigurationException {
+        // Runtime deprecation warning
+        logger.warn("DEPRECATED: processYamlString() is deprecated since 1.1 and will be removed in 2.0. " +
+                    "Use processYamlStringWithResult() instead for proper error propagation. " +
+                    "This method cannot propagate errors to callers - failures are only logged.");
+
         return processYamlString(yamlContent, "<string>");
     }
-    
+
     /**
      * Process YAML string with sequential section processing and source identification.
-     * 
+     *
      * @param yamlContent YAML content as string
      * @param source Source identifier for error reporting
      * @return Sequential processing result
      * @throws YamlConfigurationException if processing fails
+     * @deprecated since 1.1, for removal in 2.0. This method returns SequentialProcessingResult and cannot propagate errors properly.
+     *             Use {@link #processYamlStringWithResult(String, String)} instead, which returns RuleResult
+     *             with proper error tracking and failure messages.
+     *             <p><strong>CRITICAL FLAW:</strong> This method throws YamlConfigurationException but doesn't provide
+     *             programmatic access to error details. Errors must be caught and inspected via exception messages.</p>
+     *             <p><strong>Migration:</strong> Replace {@code SequentialProcessingResult result = processor.processYamlString(yamlContent, source)}
+     *             with {@code RuleResult result = processor.processYamlStringWithResult(yamlContent, source)}
+     *             and check {@code result.getResultType() == ResultType.ERROR} to detect failures.</p>
      */
+    @Deprecated(since = "1.1", forRemoval = true)
     public SequentialProcessingResult processYamlString(String yamlContent, String source) throws YamlConfigurationException {
+        // Runtime deprecation warning
+        logger.warn("DEPRECATED: processYamlString(String, String) is deprecated since 1.1 and will be removed in 2.0. " +
+                    "Use processYamlStringWithResult(String, String) instead for proper error propagation. " +
+                    "This method cannot propagate errors to callers - failures are only logged.");
+
         logger.info("Starting sequential processing of YAML string from: " + source);
-        
+
         // Step 1: Parse YAML with preserved order
         OrderedYamlConfiguration orderedConfig = orderedParser.parseYamlString(yamlContent, source);
-        
+
         // Step 2: Process based on mode
         return processOrderedConfiguration(orderedConfig, source);
     }
@@ -96,20 +140,166 @@ public class SequentialYamlProcessor {
      * @param source Source identifier for error reporting
      * @return Sequential processing result
      * @throws YamlConfigurationException if processing fails
+     * @deprecated since 1.1, for removal in 2.0. This method returns SequentialProcessingResult and cannot propagate errors properly.
+     *             Use {@link #processOrderedConfigurationWithResult(OrderedYamlConfiguration, String)} instead, which returns RuleResult
+     *             with proper error tracking and failure messages.
+     *             <p><strong>CRITICAL FLAW:</strong> This method throws YamlConfigurationException but doesn't provide
+     *             programmatic access to error details. Errors must be caught and inspected via exception messages.</p>
+     *             <p><strong>Migration:</strong> Replace {@code SequentialProcessingResult result = processor.processOrderedConfiguration(config, source)}
+     *             with {@code RuleResult result = processor.processOrderedConfigurationWithResult(config, source)}
+     *             and check {@code result.getResultType() == ResultType.ERROR} to detect failures.</p>
      */
+    @Deprecated(since = "1.1", forRemoval = true)
     public SequentialProcessingResult processOrderedConfiguration(OrderedYamlConfiguration orderedConfig, String source)
             throws YamlConfigurationException {
-        
+        // Runtime deprecation warning
+        logger.warn("DEPRECATED: processOrderedConfiguration() is deprecated since 1.1 and will be removed in 2.0. " +
+                    "Use processOrderedConfigurationWithResult() instead for proper error propagation. " +
+                    "This method cannot propagate errors to callers - failures are only logged.");
+
         ProcessingMode mode = orderedConfig.getProcessingMode();
         logger.info("Processing mode detected: " + mode + " for source: " + source);
-        
+
         if (mode == ProcessingMode.STANDARD) {
             return processStandardMode(orderedConfig, source);
         } else {
             return processSequentialMode(orderedConfig, source);
         }
     }
-    
+
+    // ========================================
+    // RuleResult-returning methods (Phase 1 Day 4)
+    // ========================================
+
+    /**
+     * Process YAML file with sequential section processing and return RuleResult.
+     * This method provides programmatic access to processing success/failure status and detailed error information.
+     *
+     * @param filePath Path to YAML file
+     * @return A RuleResult containing success status, processed configuration, and failure messages
+     */
+    public RuleResult processFileWithResult(String filePath) {
+        logger.info("Starting sequential processing of file with RuleResult: " + filePath);
+
+        try {
+            // Step 1: Parse YAML with preserved order
+            OrderedYamlConfiguration orderedConfig = orderedParser.parseFile(filePath);
+
+            // Step 2: Process and return RuleResult
+            return processOrderedConfigurationWithResult(orderedConfig, filePath);
+        } catch (Exception e) {
+            logger.error("CRITICAL: Failed to process file '{}': {}", filePath, e.getMessage(), e);
+            return RuleResult.error(
+                "file:" + filePath,
+                "File processing failed: " + e.getMessage(),
+                SeverityConstants.ERROR
+            );
+        }
+    }
+
+    /**
+     * Process YAML string with sequential section processing and return RuleResult.
+     * This method provides programmatic access to processing success/failure status and detailed error information.
+     *
+     * @param yamlContent YAML content as string
+     * @return A RuleResult containing success status, processed configuration, and failure messages
+     */
+    public RuleResult processYamlStringWithResult(String yamlContent) {
+        return processYamlStringWithResult(yamlContent, "<string>");
+    }
+
+    /**
+     * Process YAML string with sequential section processing and source identification, returning RuleResult.
+     * This method provides programmatic access to processing success/failure status and detailed error information.
+     *
+     * @param yamlContent YAML content as string
+     * @param source Source identifier for error reporting
+     * @return A RuleResult containing success status, processed configuration, and failure messages
+     */
+    public RuleResult processYamlStringWithResult(String yamlContent, String source) {
+        logger.info("Starting sequential processing of YAML string with RuleResult from: " + source);
+
+        try {
+            // Step 1: Parse YAML with preserved order
+            OrderedYamlConfiguration orderedConfig = orderedParser.parseYamlString(yamlContent, source);
+
+            // Step 2: Process and return RuleResult
+            return processOrderedConfigurationWithResult(orderedConfig, source);
+        } catch (Exception e) {
+            logger.error("CRITICAL: Failed to process YAML string from '{}': {}", source, e.getMessage(), e);
+            return RuleResult.error(
+                "yaml-string:" + source,
+                "YAML string processing failed: " + e.getMessage(),
+                SeverityConstants.ERROR
+            );
+        }
+    }
+
+    /**
+     * Process ordered configuration based on processing mode and return RuleResult.
+     * This method provides programmatic access to processing success/failure status and detailed error information.
+     *
+     * @param orderedConfig Ordered YAML configuration
+     * @param source Source identifier for error reporting
+     * @return A RuleResult containing success status, processed configuration, and failure messages
+     */
+    public RuleResult processOrderedConfigurationWithResult(OrderedYamlConfiguration orderedConfig, String source) {
+        try {
+            ProcessingMode mode = orderedConfig.getProcessingMode();
+            logger.info("Processing mode detected: " + mode + " for source: " + source);
+
+            SequentialProcessingResult result;
+            if (mode == ProcessingMode.STANDARD) {
+                result = processStandardMode(orderedConfig, source);
+            } else {
+                result = processSequentialMode(orderedConfig, source);
+            }
+
+            // Convert SequentialProcessingResult to RuleResult
+            if (result.isSuccessful()) {
+                logger.info("Sequential processing completed successfully for: " + source);
+                return RuleResult.match(
+                    "sequential-processor:" + source,
+                    "Sequential processing completed successfully (" + result.getSectionsProcessed() + " sections processed)",
+                    SeverityConstants.INFO
+                );
+            } else {
+                // Processing had errors - build detailed error message
+                StringBuilder errorDetails = new StringBuilder();
+                errorDetails.append("Sequential processing failed: ")
+                    .append(result.getErrorsEncountered())
+                    .append(" errors encountered");
+
+                if (!result.getErrors().isEmpty()) {
+                    errorDetails.append(" - ");
+                    for (int i = 0; i < result.getErrors().size(); i++) {
+                        if (i > 0) errorDetails.append("; ");
+                        var error = result.getErrors().get(i);
+                        errorDetails.append(error.getSectionName())
+                            .append(": ")
+                            .append(error.getError());
+                    }
+                }
+
+                logger.error("CRITICAL: Sequential processing failed for '{}': {} errors encountered",
+                    source, result.getErrorsEncountered());
+
+                return RuleResult.error(
+                    "sequential-processor:" + source,
+                    errorDetails.toString(),
+                    SeverityConstants.ERROR
+                );
+            }
+        } catch (Exception e) {
+            logger.error("CRITICAL: Sequential processing exception for '{}': {}", source, e.getMessage(), e);
+            return RuleResult.error(
+                "sequential-processor:" + source,
+                "Sequential processing failed: " + e.getMessage(),
+                SeverityConstants.ERROR
+            );
+        }
+    }
+
     /**
      * Process using standard (backward compatible) mode.
      * Uses hardcoded processing order for backward compatibility.

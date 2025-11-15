@@ -430,9 +430,6 @@ class ApexNegativeCasesTest {
 
         // Create rules that can demonstrate different recovery strategies
         Rule criticalRule = new Rule("critical-validation", "#amount > 0 && #customerId != null", "Critical data validation failed");
-        Rule businessRule = new Rule("business-validation", "#amount <= #creditLimit", "Business rule validation failed");
-        Rule warningRule = new Rule("warning-check", "#amount <= #warningThreshold", "Warning threshold exceeded");
-
         // Test data with multiple issues
         Map<String, Object> problematicData = new HashMap<>();
         problematicData.put("amount", -100.0);      // Critical failure

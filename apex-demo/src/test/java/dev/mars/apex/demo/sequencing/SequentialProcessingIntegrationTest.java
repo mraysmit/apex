@@ -1,6 +1,7 @@
 package dev.mars.apex.demo.sequencing;
 
 import dev.mars.apex.core.config.yaml.*;
+import dev.mars.apex.core.engine.model.RuleResult;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -107,12 +108,13 @@ class SequentialProcessingIntegrationTest {
 
         // Parse and process sequentially
         OrderedYamlConfiguration orderedConfig = orderedParser.parseYamlString(sequentialYaml, "test");
-        SequentialProcessingResult result = sequentialProcessor.processOrderedConfiguration(orderedConfig, "test");
+        RuleResult result = sequentialProcessor.processOrderedConfigurationWithResult(orderedConfig, "test");
 
         // Verify processing worked
         assertNotNull(result);
-        assertNotNull(result.getConfiguration());
-        assertEquals(OrderedYamlConfiguration.ProcessingMode.SEQUENTIAL, result.getProcessingMode());
+        assertTrue(result.isSuccess(), "Processing should succeed");
+        assertEquals(RuleResult.ResultType.MATCH, result.getResultType(), "Result type should be MATCH");
+        assertFalse(result.hasFailures(), "Should have no failures");
 
         LOGGER.info("✅ SequentialYamlProcessor integration test PASSED - Processing successful!");
     }

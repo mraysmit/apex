@@ -18,6 +18,9 @@ data-sources:
 transformations:
   - id: "data-transform"
     name: "Data Transformation"
+    type: "field-transformation"
+    source-field: "customerId"
+    target-field: "transformedCustomerId"
 
 enrichments:
   - id: "enrich-customer"

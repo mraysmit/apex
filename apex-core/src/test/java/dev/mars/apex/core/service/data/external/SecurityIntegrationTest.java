@@ -198,10 +198,6 @@ class SecurityIntegrationTest {
         DataSourceConfiguration config = createRestApiConfigurationWithInvalidSsl();
         ExternalDataSource dataSource = factory.createDataSource(config);
 
-        // Connection might fail with SSL validation error, or succeed if SSL validation is not strict
-        // This test verifies that SSL configuration is handled properly
-        boolean connectionResult = dataSource.testConnection();
-
         // If SSL validation is implemented, connection should fail
         // If not implemented yet, we just verify the configuration is accepted
         assertNotNull(dataSource, "Data source should be created with SSL configuration");

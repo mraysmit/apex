@@ -15,7 +15,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -115,7 +114,6 @@ class RecoveryMetricsIntegrationTest {
         
         // Create evaluator with metrics disabled
         ErrorRecoveryService errorRecoveryService = new ErrorRecoveryService();
-        RulesEngineLogger rulesLogger = new RulesEngineLogger(RecoveryMetricsIntegrationTest.class);
         UnifiedRuleEvaluator evaluatorWithoutMetrics = new UnifiedRuleEvaluator(
             new SpelExpressionParser(), errorRecoveryService, performanceMonitor, configWithoutMetrics);
         

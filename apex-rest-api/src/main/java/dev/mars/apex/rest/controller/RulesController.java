@@ -382,6 +382,24 @@ public class RulesController {
             // Execute the rule
             RuleResult result = rulesEngine.executeRule(rule, request.getFacts());
 
+            // Check for business logic failures (ResultType.ERROR)
+            if (result.getResultType() == RuleResult.ResultType.ERROR) {
+                logger.error("CRITICAL: Rule execution failed with ERROR result type");
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("success", false);
+                errorResponse.put("error", "Rule execution failed");
+                errorResponse.put("ruleName", rule.getName());
+                errorResponse.put("message", result.getMessage());
+                errorResponse.put("timestamp", java.time.Instant.now());
+
+                // Include failure messages if available
+                if (result.hasFailures()) {
+                    errorResponse.put("failureMessages", result.getFailureMessages());
+                }
+
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            }
+
             // Prepare response
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
@@ -445,6 +463,25 @@ public class RulesController {
             List<RuleResult> results = new ArrayList<>();
             for (Rule rule : rules) {
                 RuleResult result = rulesEngine.executeRule(rule, request.getFacts());
+
+                // Check for business logic failures (ResultType.ERROR) - fail fast
+                if (result.getResultType() == RuleResult.ResultType.ERROR) {
+                    logger.error("CRITICAL: Batch rule execution failed with ERROR result type for rule: {}", rule.getName());
+                    Map<String, Object> errorResponse = new HashMap<>();
+                    errorResponse.put("success", false);
+                    errorResponse.put("error", "Batch rule execution failed");
+                    errorResponse.put("ruleName", rule.getName());
+                    errorResponse.put("message", result.getMessage());
+                    errorResponse.put("timestamp", java.time.Instant.now());
+
+                    // Include failure messages if available
+                    if (result.hasFailures()) {
+                        errorResponse.put("failureMessages", result.getFailureMessages());
+                    }
+
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+                }
+
                 results.add(result);
             }
 

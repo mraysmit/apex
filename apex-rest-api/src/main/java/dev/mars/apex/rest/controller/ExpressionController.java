@@ -141,6 +141,24 @@ public class ExpressionController {
             // Evaluate with detailed result
             RuleResult result = expressionEvaluationService.evaluateWithResult(request.getExpression(), request.getContext());
 
+            // Check for business logic failures (ResultType.ERROR)
+            if (result.getResultType() == RuleResult.ResultType.ERROR) {
+                logger.error("CRITICAL: Expression evaluation failed with ERROR result type");
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("success", false);
+                errorResponse.put("error", "Expression evaluation failed");
+                errorResponse.put("expression", request.getExpression());
+                errorResponse.put("message", result.getMessage());
+                errorResponse.put("timestamp", Instant.now());
+
+                // Include failure messages if available
+                if (result.hasFailures()) {
+                    errorResponse.put("failureMessages", result.getFailureMessages());
+                }
+
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            }
+
             // Prepare detailed response
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
