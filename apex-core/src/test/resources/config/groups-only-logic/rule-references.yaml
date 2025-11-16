@@ -30,6 +30,7 @@ rule-groups:
     name: "Rule Group 1 (uses rule-references)"
     operator: AND
     stop-on-first-failure: true
+    error-handling: fail-fast
     rule-references:
       - rule-id: r2
         sequence: 1

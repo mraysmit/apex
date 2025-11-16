@@ -1,10 +1,10 @@
 ![APEX System Logo](APEX%20System%20logo.png)
 # APEX YAML Syntax Reference Guide
 
-**Version:** 2.3
-**Date:** 2025-11-14
+**Version:** 2.4
+**Date:** 2025-11-16
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
-**Change Summary:** Added `error-recovery` keyword documentation (Section 10.5)
+**Change Summary:** Added comprehensive `error-handling` keyword documentation for rule-groups and enrichment-groups (Sections 5.2.5 and 7.2); updated Quick Keyword Reference table
 
 > **✅ SYNTAX VERIFIED**: This document has been updated and verified to use the correct APEX SpEL syntax. APEX processes HashMap data where fields are accessed using `#fieldName` syntax, NOT `#data.fieldName`. All examples in this document use the correct `#fieldName` syntax for field access in APEX YAML configurations.
 
@@ -80,6 +80,7 @@ This section provides a definitive reference for all 73 supported APEX YAML keyw
 | **endpoints** | DataSource | No | Map | REST API endpoint definitions |
 | **enrichment-refs** | Component | No | List | References to enrichment configuration files |
 | **enrichments** | Document | No | List | Data enrichment configurations |
+| **error-handling** | RuleGroup/EnrichmentGroup | No | String | Exception handling strategy: "fail-fast" (default), "continue-on-error", "skip-on-error" |
 | **error-recovery** | Document | No | Map | Error recovery configuration for resilience and fault tolerance |
 | **execution-order** | Stage/FileRef | No | Integer | Numeric execution order for stage or file reference |
 | **execution-settings** | Enrichment | No | Map | Execution behavior configuration for enrichments |
@@ -1556,6 +1557,7 @@ rule-groups:
 | `stop-on-first-failure` | No | false | Enable short-circuit evaluation | true |
 | `parallel-execution` | No | false | Execute rules in parallel | false |
 | `debug-mode` | No | false | Enable debug logging | false |
+| `error-handling` | No | "fail-fast" | Exception handling strategy: "fail-fast", "continue-on-error", "skip-on-error" | "continue-on-error" |
 | `rule-ids` | Conditional* | - | Simple: List of rule IDs | ["rule1", "rule2"] |
 | `rule-references` | Conditional* | - | Advanced: Rule reference objects | See examples below |
 
@@ -1574,7 +1576,69 @@ When using `rule-references`, each rule reference supports the following propert
 
 *Note: `override-priority` is documented but not yet implemented in the engine.
 
-#### 5.2.5 Practical Examples
+#### 5.2.5 Error Handling Strategy
+
+The `error-handling` property controls how the rule group handles **exceptions** during rule evaluation (e.g., SpEL evaluation errors, null pointer exceptions, data access errors).
+
+> **⚠️ IMPORTANT DISTINCTION:**
+> - **`error-handling`**: Controls **exception handling** (technical errors during evaluation)
+> - **`stop-on-first-failure`**: Controls **business logic short-circuiting** (AND/OR evaluation behavior)
+
+**Valid Values:**
+
+| Strategy | Behavior | Use Case |
+|----------|----------|----------|
+| `fail-fast` | Stop immediately and return error (default) | Critical validation where any error must halt processing |
+| `continue-on-error` | Log error and continue with remaining rules | Best-effort validation where partial results are acceptable |
+| `skip-on-error` | Skip the failed rule and continue | Resilient processing where individual rule failures shouldn't block the group |
+
+**Example: Error Handling Strategies**
+```yaml
+rule-groups:
+  # Critical validation - any error stops processing
+  - id: "critical-validation"
+    name: "Critical Validation Rules"
+    operator: "AND"
+    error-handling: "fail-fast"  # Default - stop on any exception
+    rule-ids:
+      - "mandatory-field-check"
+      - "data-integrity-check"
+
+  # Best-effort validation - continue despite errors
+  - id: "optional-validation"
+    name: "Optional Validation Rules"
+    operator: "OR"
+    error-handling: "continue-on-error"  # Log errors but continue
+    rule-ids:
+      - "optional-field-check"
+      - "supplementary-check"
+
+  # Resilient processing - skip problematic rules
+  - id: "resilient-validation"
+    name: "Resilient Validation Rules"
+    operator: "AND"
+    error-handling: "skip-on-error"  # Skip failed rules, continue with others
+    rule-ids:
+      - "external-api-check"
+      - "optional-enrichment-check"
+```
+
+**Error Handling vs Stop-on-First-Failure:**
+```yaml
+rule-groups:
+  # Demonstrates the difference between error-handling and stop-on-first-failure
+  - id: "combined-behavior"
+    name: "Combined Error Handling and Short-Circuiting"
+    operator: "AND"
+    stop-on-first-failure: true      # Business logic: stop on first FAILED rule
+    error-handling: "continue-on-error"  # Exception handling: continue on EXCEPTIONS
+    rule-ids:
+      - "rule-1"  # If this FAILS (returns false), stop-on-first-failure kicks in
+      - "rule-2"  # If this throws EXCEPTION, error-handling kicks in
+      - "rule-3"
+```
+
+#### 5.2.6 Practical Examples
 
 **Example 1: Custom Execution Order**
 ```yaml
@@ -2798,6 +2862,7 @@ Properties (per group):
 | operator | string (AND or OR) | Yes | — | Logical operator applied to member results |
 | stop-on-first-failure | boolean | No | true | Enable short-circuiting (stops on first failure for AND, first success for OR) |
 | parallel-execution | boolean | No | false | Evaluate all member enrichments concurrently; disables short-circuiting |
+| error-handling | string | No | "fail-fast" | Exception handling strategy: "fail-fast", "continue-on-error", "skip-on-error" |
 | enrichment-ids | list<string> | Optional | — | Direct enrichments included in listed order |
 | enrichment-group-references | list<string> | Optional | — | Include enrichments from referenced groups appended in order |
 
@@ -2812,6 +2877,38 @@ Reference processing and validation:
 - Group references are flattened after all groups are created (two-phase processing) to establish final execution order.
 - Validation ensures: referenced enrichment ids exist; referenced groups exist; no self-reference; cyclic `enrichment-group-references` are rejected.
 
+Error handling strategy:
+- **`error-handling`** controls **exception handling** during enrichment evaluation (e.g., SpEL errors, null pointer exceptions, data access errors)
+- **`stop-on-first-failure`** controls **business logic short-circuiting** (AND/OR evaluation behavior)
+- Valid values: `"fail-fast"` (default - stop on exception), `"continue-on-error"` (log and continue), `"skip-on-error"` (skip failed enrichment)
+
+**Example: Error Handling in Enrichment Groups**
+```yaml
+enrichment-groups:
+  # Critical enrichment - any error stops processing
+  - id: "critical-enrichment"
+    operator: "AND"
+    error-handling: "fail-fast"  # Default - stop on any exception
+    enrichment-ids:
+      - "mandatory-customer-lookup"
+      - "required-account-enrichment"
+
+  # Best-effort enrichment - continue despite errors
+  - id: "optional-enrichment"
+    operator: "OR"
+    error-handling: "continue-on-error"  # Log errors but continue
+    enrichment-ids:
+      - "optional-address-lookup"
+      - "supplementary-data-enrichment"
+
+  # Resilient enrichment - skip problematic enrichments
+  - id: "resilient-enrichment"
+    operator: "AND"
+    error-handling: "skip-on-error"  # Skip failed enrichments
+    enrichment-ids:
+      - "external-api-enrichment"
+      - "optional-calculation"
+```
 
 See also:
 - Rule Groups Section (conceptual parity, advanced execution semantics)

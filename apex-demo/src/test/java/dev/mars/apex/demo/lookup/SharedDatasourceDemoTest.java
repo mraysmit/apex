@@ -23,6 +23,7 @@ import dev.mars.apex.demo.DemoTestBase;
 
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +62,9 @@ public class SharedDatasourceDemoTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(SharedDatasourceDemoTest.class);
 
+    // Unique database name for this test class to avoid file locking conflicts
+    private static final String DB_NAME = "shared_datasource_demo_test";
+
     /**
      * Setup minimal H2 database with customer test data.
      * This is infrastructure setup, not business logic - business logic is in YAML.
@@ -69,7 +73,7 @@ public class SharedDatasourceDemoTest extends DemoTestBase {
     void setupH2Database() {
         logger.info("Setting up H2 database for shared datasource demo...");
 
-        String jdbcUrl = "jdbc:h2:./target/h2-demo/apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+        String jdbcUrl = "jdbc:h2:./target/h2-demo/" + DB_NAME + ";MODE=PostgreSQL";
 
         try (Connection connection = DriverManager.getConnection(jdbcUrl, "sa", "")) {
             Statement statement = connection.createStatement();
@@ -144,6 +148,21 @@ public class SharedDatasourceDemoTest extends DemoTestBase {
         } catch (Exception e) {
             fail("Failed to load YAML configuration: " + e.getMessage());
         }
+    }
+
+    @AfterEach
+    public void tearDown() {
+        // Shutdown H2 database to release file locks
+        try (Connection connection = DriverManager.getConnection(
+                "jdbc:h2:./target/h2-demo/" + DB_NAME, "sa", "")) {
+            connection.createStatement().execute("SHUTDOWN");
+            logger.info("✓ Database shutdown completed");
+        } catch (Exception e) {
+            logger.warn("Failed to shutdown database: " + e.getMessage());
+        }
+
+        // Call parent tearDown to clean up APEX services
+        super.tearDown();
     }
 
 }

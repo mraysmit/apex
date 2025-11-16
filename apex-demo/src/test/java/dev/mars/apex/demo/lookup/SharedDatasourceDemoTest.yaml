@@ -26,8 +26,8 @@ data-sources:
     type: "database"
     source-type: "h2"
     connection:
-      # H2 file-based database for true sharing between demo and APEX
-      database: "./target/h2-demo/apex_demo_shared"
+      # H2 file-based database - unique per test to avoid file locking
+      database: "./target/h2-demo/shared_datasource_demo_test"
       username: "sa"
       password: ""
 

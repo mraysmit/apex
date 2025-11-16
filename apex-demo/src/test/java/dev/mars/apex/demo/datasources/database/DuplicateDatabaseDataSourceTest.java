@@ -22,6 +22,7 @@ import dev.mars.apex.demo.DemoTestBase;
 import dev.mars.apex.core.cache.ApexCacheManager;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.slf4j.Logger;
@@ -57,12 +58,15 @@ public class DuplicateDatabaseDataSourceTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(DuplicateDatabaseDataSourceTest.class);
 
+    // Unique database name for this test class to avoid file locking conflicts
+    private static final String DB_NAME = "duplicate_datasource_test";
+
     @BeforeEach
     void setupDatabase() throws Exception {
         logger.info("Setting up H2 database with test data...");
-        
+
         // Create H2 database and populate with test data
-        String dbUrl = "jdbc:h2:./target/h2-demo/duplicate_test";
+        String dbUrl = "jdbc:h2:./target/h2-demo/" + DB_NAME;
         
         try (Connection conn = DriverManager.getConnection(dbUrl, "sa", "");
              Statement stmt = conn.createStatement()) {
@@ -273,6 +277,21 @@ public class DuplicateDatabaseDataSourceTest extends DemoTestBase {
             logger.error("❌ Test failed: {}", e.getMessage(), e);
             fail("Duplicate database data source test failed: " + e.getMessage());
         }
+    }
+
+    @AfterEach
+    public void tearDown() {
+        // Shutdown H2 database to release file locks
+        try (Connection connection = DriverManager.getConnection(
+                "jdbc:h2:./target/h2-demo/" + DB_NAME, "sa", "")) {
+            connection.createStatement().execute("SHUTDOWN");
+            logger.info("✓ Database shutdown completed");
+        } catch (Exception e) {
+            logger.warn("Failed to shutdown database: " + e.getMessage());
+        }
+
+        // Call parent tearDown to clean up APEX services
+        super.tearDown();
     }
 }
 

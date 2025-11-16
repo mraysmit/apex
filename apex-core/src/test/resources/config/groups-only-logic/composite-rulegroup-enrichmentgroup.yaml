@@ -37,18 +37,21 @@ enrichment-groups:
     name: e1 enrichment group 1
     operator: AND
     stop-on-first-failure: true
+    error-handling: fail-fast
     enrichment-ids:
       - e1
   - id: e2_eg
     name: e2 enrichment group 2
     operator: AND
     stop-on-first-failure: true
+    error-handling: fail-fast
     enrichment-group-references:
       - rbg1
   - id: e3_eg
     name: e3 enrichment group 3
     operator: AND
     stop-on-first-failure: true
+    error-handling: fail-fast
     enrichment-ids:
       - e2
 rules:
@@ -69,6 +72,7 @@ rule-groups:
   - id: identify-source-master-message-control-rule-group
     name: Identify Source Master Message Control rule group
     operator: AND
+    error-handling: fail-fast
     rule-ids:
       - is-source-identifier-populated
       - is-source-identifier-valid

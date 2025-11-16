@@ -45,6 +45,22 @@ public class YamlEnrichmentGroup {
     @JsonProperty("debug-mode")
     private Boolean debugMode;
 
+    /**
+     * Error handling strategy for exceptions during enrichment group evaluation.
+     * Valid values: "fail-fast", "continue-on-error", "skip-on-error"
+     *
+     * - fail-fast: Stop immediately and return error (default)
+     * - continue-on-error: Log error and continue with remaining enrichments
+     * - skip-on-error: Skip the failed enrichment and continue
+     *
+     * Note: This is different from stop-on-first-failure which controls
+     * business logic short-circuiting (AND/OR evaluation).
+     *
+     * @since 1.0
+     */
+    @JsonProperty("error-handling")
+    private String errorHandling;
+
     // Simple list of enrichment ids
     @JsonProperty("enrichment-ids")
     private List<String> enrichmentIds;
@@ -95,6 +111,7 @@ public class YamlEnrichmentGroup {
     public Boolean getStopOnFirstFailure() { return stopOnFirstFailure; }
     public Boolean getParallelExecution() { return parallelExecution; }
     public Boolean getDebugMode() { return debugMode; }
+    public String getErrorHandling() { return errorHandling; }
     public List<String> getEnrichmentIds() { return enrichmentIds; }
     public List<EnrichmentReference> getEnrichmentReferences() { return enrichmentReferences; }
     public List<String> getEnrichmentGroupReferences() { return enrichmentGroupReferences; }
@@ -141,6 +158,8 @@ public class YamlEnrichmentGroup {
 
     public String getExpirationDate() { return expirationDate; }
     public void setExpirationDate(String expirationDate) { this.expirationDate = expirationDate; }
+
+    public void setErrorHandling(String errorHandling) { this.errorHandling = errorHandling; }
 
     /**
      * Reference to an enrichment with sequence and overrides.

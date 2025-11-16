@@ -27,8 +27,8 @@ data-sources:
     description: "Customer database using H2 in PostgreSQL compatibility mode"
 
     connection:
-      # H2 file-based database for true sharing between demo and APEX
-      database: "./target/h2-demo/apex_demo_shared"
+      # H2 file-based database - unique per test to avoid file locking
+      database: "./target/h2-demo/postgresql_simple_enrichment_test"
       username: "sa"
       password: ""
 

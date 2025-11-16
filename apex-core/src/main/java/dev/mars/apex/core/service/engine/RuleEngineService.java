@@ -1,5 +1,6 @@
 package dev.mars.apex.core.service.engine;
 
+import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.springframework.expression.EvaluationContext;
@@ -88,7 +89,7 @@ public class RuleEngineService {
                 if (baseResult.getResultType() == RuleResult.ResultType.MATCH) {
                     ruleResult = RuleResult.match(rule.getName(), rule.getMessage(), rule.getSeverity());
                 } else if (baseResult.getResultType() == RuleResult.ResultType.ERROR) {
-                    String severity = rule.getSeverity() != null ? rule.getSeverity() : "ERROR";
+                    String severity = rule.getSeverity() != null ? rule.getSeverity() : SeverityConstants.ERROR;
                     ruleResult = RuleResult.error(rule.getName(), baseResult.getMessage(), severity);
                     // Print to System.err for test verification
                     System.err.println("Error evaluating rule '" + rule.getName() + "': " + baseResult.getMessage());
@@ -108,15 +109,15 @@ public class RuleEngineService {
                 }
             } catch (Exception e) {
                 // Create structured error result with severity from rule configuration
-                String severity = rule.getSeverity() != null ? rule.getSeverity() : "ERROR";
+                String severity = rule.getSeverity() != null ? rule.getSeverity() : SeverityConstants.ERROR;
                 String errorMessage = String.format("Rule evaluation failed: %s", e.getMessage());
                 RuleResult errorResult = RuleResult.error(rule.getName(), errorMessage, severity);
                 results.add(errorResult);
 
                 // Log error details at appropriate level based on severity (no stack traces in logs)
-                if ("CRITICAL".equalsIgnoreCase(severity)) {
+                if (SeverityConstants.CRITICAL.equalsIgnoreCase(severity)) {
                     logger.error("CRITICAL rule evaluation error for '" + rule.getName() + "': " + e.getMessage());
-                } else if ("WARNING".equalsIgnoreCase(severity)) {
+                } else if (SeverityConstants.WARNING.equalsIgnoreCase(severity)) {
                     logger.info("Rule evaluation warning for '" + rule.getName() + "': " + e.getMessage());
                 } else {
                     logger.info("Rule evaluation error for '" + rule.getName() + "': " + e.getMessage());

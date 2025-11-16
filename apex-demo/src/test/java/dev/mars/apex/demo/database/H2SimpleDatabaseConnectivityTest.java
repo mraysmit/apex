@@ -18,18 +18,21 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Simple Database Connectivity Test
- * 
+ *
  * The most trivial test to show database connectivity works.
  */
 public class H2SimpleDatabaseConnectivityTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(H2SimpleDatabaseConnectivityTest.class);
 
+    // Unique database name for this test class to avoid file locking conflicts
+    private static final String DB_NAME = "h2_simple_connectivity_test";
+
     @BeforeEach
     void setupDatabase() {
         logger.info("Setting up simple database...");
 
-        String jdbcUrl = "jdbc:h2:./target/h2-demo/simple_test;DB_CLOSE_DELAY=-1";
+        String jdbcUrl = "jdbc:h2:./target/h2-demo/" + DB_NAME;
 
         try (Connection connection = DriverManager.getConnection(jdbcUrl, "sa", "")) {
             Statement statement = connection.createStatement();
@@ -43,6 +46,21 @@ public class H2SimpleDatabaseConnectivityTest extends DemoTestBase {
         } catch (Exception e) {
             throw new RuntimeException("Database setup failed", e);
         }
+    }
+
+    @AfterEach
+    public void tearDown() {
+        // Shutdown H2 database to release file locks
+        try (Connection connection = DriverManager.getConnection(
+                "jdbc:h2:./target/h2-demo/" + DB_NAME, "sa", "")) {
+            connection.createStatement().execute("SHUTDOWN");
+            logger.info("✓ Database shutdown completed");
+        } catch (Exception e) {
+            logger.warn("Failed to shutdown database: " + e.getMessage());
+        }
+
+        // Call parent tearDown to clean up APEX services
+        super.tearDown();
     }
 
     @Test

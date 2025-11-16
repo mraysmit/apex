@@ -16,6 +16,8 @@ package dev.mars.apex.core.util;
  * limitations under the License.
  */
 
+import dev.mars.apex.core.config.yaml.YamlMetadataValidator;
+import dev.mars.apex.core.config.yaml.YamlValidationResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;

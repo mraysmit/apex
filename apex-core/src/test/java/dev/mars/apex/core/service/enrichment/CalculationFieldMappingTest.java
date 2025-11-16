@@ -2,8 +2,8 @@ package dev.mars.apex.core.service.enrichment;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import org.junit.jupiter.api.BeforeEach;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -17,14 +17,6 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class CalculationFieldMappingTest {
 
-    private YamlEnrichmentProcessor enrichmentProcessor;
-
-    @BeforeEach
-    void setUp() {
-        ExpressionEvaluatorService expressionEvaluator = new ExpressionEvaluatorService();
-        enrichmentProcessor = new YamlEnrichmentProcessor(null, expressionEvaluator);
-    }
-
     @Test
     void testCalculationFieldMapping() throws Exception {
         System.out.println("=== Testing Calculation Field Mapping ===");
@@ -32,9 +24,12 @@ public class CalculationFieldMappingTest {
         // Create YAML configuration with calculation enrichment and field mappings
         String yamlConfig = """
             metadata:
+              id: "calc-field-mapping-test"
               name: "Calculation Field Mapping Test"
               version: "1.0.0"
-            
+              description: "Test calculation field mapping"
+              type: "rule-config"
+
             enrichments:
               - id: "test-calculation"
                 type: "calculation-enrichment"
@@ -46,28 +41,26 @@ public class CalculationFieldMappingTest {
                   - source-field: "amount-validation-result"
                     target-field: "status"
             """;
-        
+
         // Load configuration
         YamlConfigurationLoader loader = new YamlConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
-        
+
         // Create input data
         Map<String, Object> inputData = new HashMap<>();
         inputData.put("amount", 100.0);
-        
+
         System.out.println("Input data: " + inputData);
-        
-        // Process enrichments
-        Object enrichedData = enrichmentProcessor.processEnrichments(config.getEnrichments(), inputData);
-        
-        System.out.println("Enriched data: " + enrichedData);
-        
+
+        // Process enrichments using RulesEngine
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+        RuleResult result = engine.evaluate(inputData);
+        Map<String, Object> enrichedMap = result.getEnrichedData();
+
+        System.out.println("Enriched data: " + enrichedMap);
+
         // Verify enriched data
-        assertNotNull(enrichedData, "Enriched data should not be null");
-        assertTrue(enrichedData instanceof Map, "Enriched data should be a Map");
-        
-        @SuppressWarnings("unchecked")
-        Map<String, Object> enrichedMap = (Map<String, Object>) enrichedData;
+        assertNotNull(enrichedMap, "Enriched data should not be null");
         
         // Verify original fields are preserved
         assertEquals(100.0, enrichedMap.get("amount"));

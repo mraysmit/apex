@@ -22,9 +22,12 @@ import dev.mars.apex.demo.DemoTestBase;
  */
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,6 +51,9 @@ import static org.junit.jupiter.api.Assertions.*;
 public class CompoundKeyLookupDemoTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(CompoundKeyLookupDemoTest.class);
+
+    // Unique database name for this test class to avoid file locking conflicts
+    private static final String DB_NAME = "compound_key_lookup_test";
 
     @Test
     void testCompoundKeyLookupFunctionality() {
@@ -178,7 +184,7 @@ public class CompoundKeyLookupDemoTest extends DemoTestBase {
     private void setupCustomerRegionDatabase() {
         logger.info("Setting up H2 database with customer-region data...");
 
-        String jdbcUrl = "jdbc:h2:./target/h2-demo/apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+        String jdbcUrl = "jdbc:h2:./target/h2-demo/" + DB_NAME + ";MODE=PostgreSQL";
 
         try (var connection = java.sql.DriverManager.getConnection(jdbcUrl, "sa", "")) {
             var statement = connection.createStatement();
@@ -216,6 +222,21 @@ public class CompoundKeyLookupDemoTest extends DemoTestBase {
             logger.error("Failed to setup customer-region database: " + e.getMessage(), e);
             throw new RuntimeException("Database setup failed", e);
         }
+    }
+
+    @AfterEach
+    public void tearDown() {
+        // Shutdown H2 database to release file locks
+        try (Connection connection = DriverManager.getConnection(
+                "jdbc:h2:./target/h2-demo/" + DB_NAME, "sa", "")) {
+            connection.createStatement().execute("SHUTDOWN");
+            logger.info("✓ Database shutdown completed");
+        } catch (Exception e) {
+            logger.warn("Failed to shutdown database: " + e.getMessage());
+        }
+
+        // Call parent tearDown to clean up APEX services
+        super.tearDown();
     }
 }
 

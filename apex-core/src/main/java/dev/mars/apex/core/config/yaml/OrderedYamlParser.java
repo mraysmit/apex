@@ -25,9 +25,9 @@ import java.util.*;
  * - Maintains full compatibility with existing YamlRuleConfiguration structure
  * - Supports all existing YAML features (property resolution, validation, etc.)
  * - Enables sequential processing that respects developer intent
- * 
+ *
  * @author APEX Sequential Processing Implementation
- * @since Phase 1 - Foundation
+ * @since 1.0
  */
 public class OrderedYamlParser {
     

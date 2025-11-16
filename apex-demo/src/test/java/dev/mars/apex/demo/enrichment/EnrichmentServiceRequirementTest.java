@@ -2,19 +2,12 @@ package dev.mars.apex.demo.enrichment;
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.error.ErrorRecoveryService;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.util.HashMap;
 import java.util.Map;

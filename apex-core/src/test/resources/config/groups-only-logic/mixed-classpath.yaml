@@ -16,6 +16,7 @@ enrichment-groups:
     name: Classpath Group
     description: Enrichment group from classpath
     enabled: true
+    error-handling: continue-on-error
     enrichment-ids:
       - classpath_enrichment
 

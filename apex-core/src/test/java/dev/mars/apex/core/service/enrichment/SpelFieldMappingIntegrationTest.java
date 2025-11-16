@@ -2,8 +2,8 @@ package dev.mars.apex.core.service.enrichment;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import org.junit.jupiter.api.BeforeEach;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -17,16 +17,6 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class SpelFieldMappingIntegrationTest {
 
-    private YamlEnrichmentProcessor enrichmentProcessor;
-    private YamlConfigurationLoader loader;
-
-    @BeforeEach
-    void setUp() {
-        ExpressionEvaluatorService expressionEvaluator = new ExpressionEvaluatorService();
-        enrichmentProcessor = new YamlEnrichmentProcessor(null, expressionEvaluator);
-        loader = new YamlConfigurationLoader();
-    }
-
     @Test
     void testOriginalIssueScenario() throws Exception {
         System.out.println("=== Testing Original Issue Scenario (SOLVED!) ===");
@@ -38,9 +28,12 @@ public class SpelFieldMappingIntegrationTest {
         
         String yamlConfig = """
             metadata:
+              id: "field-enrichment-demo"
               name: "Field Enrichment Demo (Original Issue)"
               version: "1.0.0"
-            
+              description: "Test SpEL field mapping"
+              type: "rule-config"
+
             enrichments:
               - id: "field-enrichment-demo"
                 name: "field-enrichment-demo"
@@ -55,30 +48,29 @@ public class SpelFieldMappingIntegrationTest {
                   - source-field: "#data.amount"
                     target-field: "trade_amount"
             """;
-        
+
+        YamlConfigurationLoader loader = new YamlConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
-        
+
         // Create input data with nested structure (exactly as in the issue)
         Map<String, Object> data = new HashMap<>();
         data.put("currency", "USD");
         data.put("amount", 1000);
-        
+
         Map<String, Object> inputData = new HashMap<>();
         inputData.put("data", data);
-        
+
         System.out.println("Input data: " + inputData);
-        
-        // Process enrichments
-        Object enrichedData = enrichmentProcessor.processEnrichments(config.getEnrichments(), inputData);
-        
-        System.out.println("Enriched data: " + enrichedData);
-        
+
+        // Process enrichments using RulesEngine
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+        RuleResult result = engine.evaluate(inputData);
+        Map<String, Object> enrichedMap = result.getEnrichedData();
+
+        System.out.println("Enriched data: " + enrichedMap);
+
         // Verify the issue is solved
-        assertNotNull(enrichedData, "Enriched data should not be null");
-        assertTrue(enrichedData instanceof Map, "Enriched data should be a Map");
-        
-        @SuppressWarnings("unchecked")
-        Map<String, Object> enrichedMap = (Map<String, Object>) enrichedData;
+        assertNotNull(enrichedMap, "Enriched data should not be null");
         
         // ✅ ISSUE SOLVED: Nested fields are now accessible via SpEL in field mappings
         assertEquals("USD", enrichedMap.get("buy_currency"), 
@@ -98,9 +90,12 @@ public class SpelFieldMappingIntegrationTest {
         
         String yamlConfig = """
             metadata:
+              id: "lookup-nested-results"
               name: "Lookup with Nested Results"
               version: "1.0.0"
-            
+              description: "Test lookup with nested results"
+              type: "rule-config"
+
             enrichments:
               - id: "instrument-lookup"
                 type: "lookup-enrichment"
@@ -128,21 +123,21 @@ public class SpelFieldMappingIntegrationTest {
                   - source-field: "#data.pricing.bid"
                     target-field: "bid_price"
             """;
-        
+
+        YamlConfigurationLoader loader = new YamlConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
-        
+
         Map<String, Object> inputData = new HashMap<>();
         inputData.put("symbol", "AAPL");
-        
+
         System.out.println("Input data: " + inputData);
-        
-        // Process enrichments
-        Object enrichedData = enrichmentProcessor.processEnrichments(config.getEnrichments(), inputData);
-        
-        System.out.println("Enriched data: " + enrichedData);
-        
-        @SuppressWarnings("unchecked")
-        Map<String, Object> enrichedMap = (Map<String, Object>) enrichedData;
+
+        // Process enrichments using RulesEngine
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+        RuleResult result = engine.evaluate(inputData);
+        Map<String, Object> enrichedMap = result.getEnrichedData();
+
+        System.out.println("Enriched data: " + enrichedMap);
         
         // Verify nested lookup results are extracted correctly
         assertEquals("Apple Inc.", enrichedMap.get("instrument_name"), 
@@ -166,8 +161,11 @@ public class SpelFieldMappingIntegrationTest {
 
         String yamlConfig = """
             metadata:
+              id: "consistency-demo"
               name: "Consistency Demo"
               version: "1.0.0"
+              description: "Test SpEL consistency"
+              type: "rule-config"
 
             enrichments:
               - id: "consistency-demo"
@@ -188,31 +186,31 @@ public class SpelFieldMappingIntegrationTest {
                   - source-field: "#data.trade.currency.toUpperCase()"
                     target-field: "currency_code"
             """;
-        
+
+        YamlConfigurationLoader loader = new YamlConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
-        
+
         // Create nested input data
         Map<String, Object> trade = new HashMap<>();
         trade.put("status", "ACTIVE");
         trade.put("counterparty", "JP Morgan");
         trade.put("amount", 1000000);
         trade.put("currency", "usd");
-        
+
         Map<String, Object> data = new HashMap<>();
         data.put("trade", trade);
-        
+
         Map<String, Object> inputData = new HashMap<>();
         inputData.put("data", data);
-        
+
         System.out.println("Input data: " + inputData);
-        
-        // Process enrichments
-        Object enrichedData = enrichmentProcessor.processEnrichments(config.getEnrichments(), inputData);
-        
-        System.out.println("Enriched data: " + enrichedData);
-        
-        @SuppressWarnings("unchecked")
-        Map<String, Object> enrichedMap = (Map<String, Object>) enrichedData;
+
+        // Process enrichments using RulesEngine
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+        RuleResult result = engine.evaluate(inputData);
+        Map<String, Object> enrichedMap = result.getEnrichedData();
+
+        System.out.println("Enriched data: " + enrichedMap);
         
         // Verify all SpEL features work together
         assertEquals("JP Morgan", enrichedMap.get("counterparty_name"),
@@ -235,9 +233,12 @@ public class SpelFieldMappingIntegrationTest {
         
         String yamlConfig = """
             metadata:
+              id: "backward-compat"
               name: "Backward Compatibility Test"
               version: "1.0.0"
-            
+              description: "Test backward compatibility"
+              type: "rule-config"
+
             enrichments:
               - id: "backward-compat"
                 type: "field-enrichment"
@@ -248,32 +249,32 @@ public class SpelFieldMappingIntegrationTest {
                     target-field: "currency_code"
                   - source-field: "amount"
                     target-field: "trade_amount"
-                  
+
                   # New style (with # prefix) - also works
                   - source-field: "#data.nested_field"
                     target-field: "nested_value"
             """;
-        
+
+        YamlConfigurationLoader loader = new YamlConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
-        
+
         // Create input data with both simple and nested fields
         Map<String, Object> data = new HashMap<>();
         data.put("nested_field", "nested_value");
-        
+
         Map<String, Object> inputData = new HashMap<>();
         inputData.put("currency", "EUR");
         inputData.put("amount", 5000);
         inputData.put("data", data);
-        
+
         System.out.println("Input data: " + inputData);
-        
-        // Process enrichments
-        Object enrichedData = enrichmentProcessor.processEnrichments(config.getEnrichments(), inputData);
-        
-        System.out.println("Enriched data: " + enrichedData);
-        
-        @SuppressWarnings("unchecked")
-        Map<String, Object> enrichedMap = (Map<String, Object>) enrichedData;
+
+        // Process enrichments using RulesEngine
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+        RuleResult result = engine.evaluate(inputData);
+        Map<String, Object> enrichedMap = result.getEnrichedData();
+
+        System.out.println("Enriched data: " + enrichedMap);
         
         // Verify backward compatibility
         assertEquals("EUR", enrichedMap.get("currency_code"), 

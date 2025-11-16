@@ -33,6 +33,7 @@ enrichment-groups:
     name: "Level 3 Group"
     operator: AND
     stop-on-first-failure: true
+    error-handling: fail-fast
     enrichment-ids:
       - level3_enrichment
 
@@ -40,6 +41,7 @@ enrichment-groups:
     name: "Level 2 Group (references level3_group)"
     operator: AND
     stop-on-first-failure: true
+    error-handling: fail-fast
     enrichment-ids:
       - level2_enrichment
     enrichment-group-references:
@@ -49,6 +51,7 @@ enrichment-groups:
     name: "Level 1 Group (references level2_group)"
     operator: AND
     stop-on-first-failure: true
+    error-handling: fail-fast
     enrichment-ids:
       - level1_enrichment
     enrichment-group-references:

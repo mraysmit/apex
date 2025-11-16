@@ -1,5 +1,6 @@
 package dev.mars.apex.core.service.error;
 
+import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
@@ -96,7 +97,7 @@ public class ErrorRecoveryService {
     
     private RecoveryResult handleContinueWithDefault(String ruleName, Exception originalException) {
         logger.info("Using default recovery for rule: " + ruleName);
-        RuleResult defaultResult = RuleResult.noMatch(ruleName, "No matching rules found", "INFO");
+        RuleResult defaultResult = RuleResult.noMatch(ruleName, "No matching rules found", SeverityConstants.INFO);
         return RecoveryResult.recovered(ruleName, defaultResult, "Continued with default result");
     }
     
@@ -119,7 +120,7 @@ public class ErrorRecoveryService {
                 RuleResult ruleResult = RuleResult.match(ruleName, "Rule matched with safe expression");
                 return RecoveryResult.recovered(ruleName, ruleResult, "Recovered using safe expression: " + safeExpression);
             } else {
-                RuleResult ruleResult = RuleResult.noMatch(ruleName, "Safe expression evaluated to false", "INFO");
+                RuleResult ruleResult = RuleResult.noMatch(ruleName, "Safe expression evaluated to false", SeverityConstants.INFO);
                 return RecoveryResult.recovered(ruleName, ruleResult, "Safe expression evaluated to false");
             }
         } catch (Exception e) {

@@ -22,11 +22,7 @@ import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import org.junit.jupiter.api.*;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.util.*;
 
@@ -54,20 +50,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class ApexNegativeCasesTest {
 
     private RulesEngine rulesEngine;
-    private YamlEnrichmentProcessor enrichmentProcessor;
-    private LookupServiceRegistry serviceRegistry;
-    private ExpressionEvaluatorService evaluatorService;
 
     @BeforeEach
     void setUp() {
         // Set up test infrastructure
-        serviceRegistry = new LookupServiceRegistry();
-        evaluatorService = new ExpressionEvaluatorService(new SpelExpressionParser());
-
         RulesEngineConfiguration configuration = new RulesEngineConfiguration();
         rulesEngine = new RulesEngine(configuration);
-
-        enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
     }
 
     // ========================================
@@ -249,21 +237,24 @@ class ApexNegativeCasesTest {
 
     @Test
     @DisplayName("Should demonstrate enrichment failure detection and recovery patterns")
-    void testEnrichmentFailureManagement() {
+    void testEnrichmentFailureManagement() throws Exception {
         System.out.println("=== Testing Enrichment Failure Management ===");
 
         // Create configuration with required fields that will fail
         YamlRuleConfiguration config = createTestYamlConfigurationWithRequiredFields();
 
         // Test data missing required enrichment source
-        TestDataObject incompleteData = new TestDataObject(null, 1000.0); // Missing currency
+        Map<String, Object> incompleteData = new HashMap<>();
+        incompleteData.put("currency", null); // Missing currency - will cause enrichment failure
+        incompleteData.put("amount", 1000.0);
 
         System.out.println("Testing enrichment with incomplete data:");
-        System.out.println("  - Currency: " + incompleteData.getCurrency() + " (null - will cause enrichment failure)");
-        System.out.println("  - Amount: " + incompleteData.getAmount());
+        System.out.println("  - Currency: " + incompleteData.get("currency") + " (null - will cause enrichment failure)");
+        System.out.println("  - Amount: " + incompleteData.get("amount"));
 
-        // Attempt enrichment with missing required data
-        RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(config.getEnrichments(), incompleteData);
+        // Attempt enrichment with missing required data using RulesEngine
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+        RuleResult result = engine.evaluate(incompleteData);
 
         // Validate enrichment failure detection
         assertNotNull(result, "RuleResult should not be null");
@@ -288,8 +279,11 @@ class ApexNegativeCasesTest {
         }
 
         // Test successful enrichment for comparison
-        TestDataObject completeData = new TestDataObject("USD", 1000.0);
-        RuleResult successResult = enrichmentProcessor.processEnrichmentsWithResult(config.getEnrichments(), completeData);
+        Map<String, Object> completeData = new HashMap<>();
+        completeData.put("currency", "USD");
+        completeData.put("amount", 1000.0);
+        RulesEngine successEngine = RulesEngine.fromYamlConfig(config);
+        RuleResult successResult = successEngine.evaluate(completeData);
 
         System.out.println("Comparison with complete data:");
         System.out.println("  - Success: " + successResult.isSuccess());
@@ -300,7 +294,7 @@ class ApexNegativeCasesTest {
 
     @Test
     @DisplayName("Should handle partial enrichment scenarios with mixed success/failure")
-    void testPartialEnrichmentScenarios() {
+    void testPartialEnrichmentScenarios() throws Exception {
         System.out.println("=== Testing Partial Enrichment Scenarios ===");
 
         // Create a more complex enrichment configuration
@@ -317,8 +311,9 @@ class ApexNegativeCasesTest {
         mixedData.forEach((key, value) ->
             System.out.println("  - " + key + ": " + (value != null ? value : "null")));
 
-        // Attempt enrichment
-        RuleResult result = enrichmentProcessor.processEnrichmentsWithResult(config.getEnrichments(), mixedData);
+        // Attempt enrichment using RulesEngine
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+        RuleResult result = engine.evaluate(mixedData);
 
         // Analyze partial enrichment results
         assertNotNull(result, "RuleResult should not be null");
@@ -487,16 +482,19 @@ class ApexNegativeCasesTest {
      */
     private YamlRuleConfiguration createTestYamlConfigurationWithRequiredFields() {
         YamlRuleConfiguration config = new YamlRuleConfiguration();
-        
-        // Set metadata
+
+        // Set metadata with all required fields
         YamlRuleConfiguration.ConfigurationMetadata metadata = new YamlRuleConfiguration.ConfigurationMetadata();
+        metadata.setId("test-config-required-fields");
         metadata.setName("testConfigurationWithRequiredFields");
+        metadata.setVersion("1.0.0");
         metadata.setDescription("Test configuration with required fields for failure detection");
+        metadata.setType("rule-config");
         config.setMetadata(metadata);
-        
+
         List<YamlEnrichment> enrichments = createTestEnrichmentListWithRequiredFields();
         config.setEnrichments(enrichments);
-        
+
         return config;
     }
 
@@ -532,10 +530,13 @@ class ApexNegativeCasesTest {
     private YamlRuleConfiguration createComplexEnrichmentConfiguration() {
         YamlRuleConfiguration config = new YamlRuleConfiguration();
 
-        // Set metadata
+        // Set metadata with all required fields
         YamlRuleConfiguration.ConfigurationMetadata metadata = new YamlRuleConfiguration.ConfigurationMetadata();
+        metadata.setId("complex-enrichment-config");
         metadata.setName("complexEnrichmentConfiguration");
+        metadata.setVersion("1.0.0");
         metadata.setDescription("Complex configuration for partial enrichment testing");
+        metadata.setType("rule-config");
         config.setMetadata(metadata);
 
         // Create multiple enrichments with different requirements
@@ -565,28 +566,4 @@ class ApexNegativeCasesTest {
         return config;
     }
 
-    /**
-     * Test data object for negative case testing.
-     */
-    private static class TestDataObject {
-        private String currency;
-        private Double amount;
-        private String currencyName; // Will be enriched
-        private String region; // Will be enriched
-
-        public TestDataObject(String currency, Double amount) {
-            this.currency = currency;
-            this.amount = amount;
-        }
-
-        // Getters and setters
-        public String getCurrency() { return currency; }
-        public void setCurrency(String currency) { this.currency = currency; }
-        public Double getAmount() { return amount; }
-        public void setAmount(Double amount) { this.amount = amount; }
-        public String getCurrencyName() { return currencyName; }
-        public void setCurrencyName(String currencyName) { this.currencyName = currencyName; }
-        public String getRegion() { return region; }
-        public void setRegion(String region) { this.region = region; }
-    }
 }

@@ -38,9 +38,9 @@ import java.util.Set;
  * - Centralized error recovery logic
  * - Comprehensive logging and metrics
  * - Graceful error handling following APEX principles
- * 
+ *
  * @author APEX Rules Engine
- * @since Phase 1 - Unified Evaluation Engine
+ * @since 1.0
  * @version 1.0
  */
 public class UnifiedRuleEvaluator {
@@ -167,7 +167,8 @@ public class UnifiedRuleEvaluator {
                     applyFieldMappings(rule.getMapToField(), context, enrichedData, evaluatedSuccessCode, null);
                 }
 
-                // Return result with codes and mappings
+                // When condition is TRUE, the rule matched successfully - severity is irrelevant
+                // Always return MATCH with success=true
                 RuleResult matchResult = new RuleResult(rule.getName(), rule.getMessage(), rule.getSeverity(),
                                                        true, RuleResult.ResultType.MATCH, metrics, enrichedData,
                                                        new java.util.ArrayList<>(), true, evaluatedSuccessCode, null, rule.getMapToField());
@@ -182,12 +183,28 @@ public class UnifiedRuleEvaluator {
                     applyFieldMappings(rule.getMapToField(), context, enrichedData, null, evaluatedErrorCode);
                 }
 
+                // Determine ResultType based on severity and error recovery configuration
+                // When condition is FALSE, severity determines if processing should fail-fast
+                RuleResult.ResultType resultType = RuleResult.ResultType.NO_MATCH;
+                boolean shouldFail = false;
+                
+                String severity = rule.getSeverity() != null ? rule.getSeverity() : SeverityConstants.INFO;
+                if (SeverityConstants.ERROR.equalsIgnoreCase(severity) || 
+                    SeverityConstants.CRITICAL.equalsIgnoreCase(severity)) {
+                    // Check if error recovery is disabled for this severity (default for ERROR/CRITICAL)
+                    if (!errorRecoveryConfig.isRecoveryEnabledForSeverity(severity)) {
+                        // Per design: ERROR/CRITICAL with recovery disabled should use FAIL_FAST
+                        resultType = RuleResult.ResultType.ERROR;
+                        shouldFail = true;
+                        rulesLogger.warn("Rule '{}' did not match with {} severity - evaluation will fail (recovery disabled)",
+                                       rule.getName(), severity);
+                    }
+                }
+
                 // Return result with codes and mappings
-                // Note: success=true because the rule evaluation itself was successful (no errors),
-                // even though the rule condition did not match
                 RuleResult noMatchResult = new RuleResult(rule.getName(), rule.getMessage(), rule.getSeverity(),
-                                                         false, RuleResult.ResultType.NO_MATCH, metrics, enrichedData,
-                                                         new java.util.ArrayList<>(), true, null, evaluatedErrorCode, rule.getMapToField());
+                                                         false, resultType, metrics, enrichedData,
+                                                         new java.util.ArrayList<>(), !shouldFail, null, evaluatedErrorCode, rule.getMapToField());
                 return noMatchResult;
             }
             
@@ -316,7 +333,7 @@ public class UnifiedRuleEvaluator {
 
         // Create standardized error message
         String errorMessage = String.format(ERROR_MESSAGE_FORMAT, rule.getName(), exception.getMessage());
-        String severity = rule.getSeverity() != null ? rule.getSeverity() : "ERROR";
+        String severity = rule.getSeverity() != null ? rule.getSeverity() : SeverityConstants.ERROR;
 
         // Attempt error recovery based on configurable severity policies
         if (errorRecoveryConfig.isRecoveryEnabledForSeverity(severity)) {
@@ -385,9 +402,9 @@ public class UnifiedRuleEvaluator {
         }
         
         // Log error details at appropriate level based on severity
-        if ("CRITICAL".equalsIgnoreCase(severity)) {
+        if (SeverityConstants.CRITICAL.equalsIgnoreCase(severity)) {
             rulesLogger.error("CRITICAL rule evaluation error for '{}': {}", rule.getName(), exception.getMessage());
-        } else if ("WARNING".equalsIgnoreCase(severity)) {
+        } else if (SeverityConstants.WARNING.equalsIgnoreCase(severity)) {
             rulesLogger.info("Rule evaluation warning for '{}': {}", rule.getName(), exception.getMessage());
         } else {
             rulesLogger.info("Rule evaluation error for '{}': {}", rule.getName(), exception.getMessage());
@@ -525,7 +542,7 @@ public class UnifiedRuleEvaluator {
 
         rulesLogger.info("No rules matched");
         // Return noMatch with accumulated enrichedData from all evaluated rules
-        return new RuleResult("no-match", "No matching rules found", "INFO", false, RuleResult.ResultType.NO_MATCH,
+        return new RuleResult("no-match", "No matching rules found", SeverityConstants.INFO, false, RuleResult.ResultType.NO_MATCH,
                              null, accumulatedEnrichedData, new java.util.ArrayList<>(), true, null, null, null);
     }
 
@@ -579,7 +596,7 @@ public class UnifiedRuleEvaluator {
 
         rulesLogger.info("No rules matched");
         // Return noMatch with accumulated enrichedData from all evaluated rules
-        return new RuleResult("no-match", "No matching rules found", "INFO", false, RuleResult.ResultType.NO_MATCH,
+        return new RuleResult("no-match", "No matching rules found", SeverityConstants.INFO, false, RuleResult.ResultType.NO_MATCH,
                              null, accumulatedEnrichedData, new java.util.ArrayList<>(), true, null, null, null);
     }
 

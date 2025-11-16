@@ -69,6 +69,22 @@ public class YamlRuleGroup {
     @JsonProperty("debug-mode")
     private Boolean debugMode;
 
+    /**
+     * Error handling strategy for exceptions during rule group evaluation.
+     * Valid values: "fail-fast", "continue-on-error", "skip-on-error"
+     *
+     * - fail-fast: Stop immediately and return error (default)
+     * - continue-on-error: Log error and continue with remaining rules
+     * - skip-on-error: Skip the failed rule and continue
+     *
+     * Note: This is different from stop-on-first-failure which controls
+     * business logic short-circuiting (AND/OR evaluation).
+     *
+     * @since 1.0
+     */
+    @JsonProperty("error-handling")
+    private String errorHandling;
+
     @JsonProperty("rule-ids")
     private List<String> ruleIds;
     
@@ -201,6 +217,14 @@ public class YamlRuleGroup {
 
     public void setDebugMode(Boolean debugMode) {
         this.debugMode = debugMode;
+    }
+
+    public String getErrorHandling() {
+        return errorHandling;
+    }
+
+    public void setErrorHandling(String errorHandling) {
+        this.errorHandling = errorHandling;
     }
     
     public List<String> getRuleIds() {

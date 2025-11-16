@@ -33,5 +33,6 @@ enrichment-groups:
     name: Is Source Identifier Valid enrichment group 1
     operator: AND
     stop-on-first-failure: true
+    error-handling: fail-fast
     enrichment-ids:
       - e3

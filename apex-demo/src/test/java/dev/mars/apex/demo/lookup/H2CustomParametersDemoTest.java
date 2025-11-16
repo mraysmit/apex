@@ -22,6 +22,7 @@ import dev.mars.apex.demo.DemoTestBase;
  */
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +54,9 @@ public class H2CustomParametersDemoTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(H2CustomParametersDemoTest.class);
 
+    // Unique database name for this test class to avoid file locking conflicts
+    private static final String DB_NAME = "h2_custom_parameters_test";
+
     /**
      * Setup H2 database with customers table and test data.
      * Following the exact pattern from YamlConfigurationValidationTest.java
@@ -60,7 +64,7 @@ public class H2CustomParametersDemoTest extends DemoTestBase {
     private void setupCustomerDatabase() {
         logger.info("Setting up H2 database with customer test data...");
 
-        String jdbcUrl = "jdbc:h2:./target/h2-demo/apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+        String jdbcUrl = "jdbc:h2:./target/h2-demo/" + DB_NAME + ";MODE=PostgreSQL";
 
         try (Connection connection = DriverManager.getConnection(jdbcUrl, "sa", "")) {
             Statement statement = connection.createStatement();
@@ -296,6 +300,21 @@ public class H2CustomParametersDemoTest extends DemoTestBase {
         } catch (Exception e) {
             fail("Failed to load YAML configuration: " + e.getMessage());
         }
+    }
+
+    @AfterEach
+    public void tearDown() {
+        // Shutdown H2 database to release file locks
+        try (Connection connection = DriverManager.getConnection(
+                "jdbc:h2:./target/h2-demo/" + DB_NAME, "sa", "")) {
+            connection.createStatement().execute("SHUTDOWN");
+            logger.info("✓ Database shutdown completed");
+        } catch (Exception e) {
+            logger.warn("Failed to shutdown database: " + e.getMessage());
+        }
+
+        // Call parent tearDown to clean up APEX services
+        super.tearDown();
     }
 }
 

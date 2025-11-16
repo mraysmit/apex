@@ -27,8 +27,8 @@ import java.util.List;
  * 4. Return processed configuration with results
  * 
  * @author APEX Sequential Processing Implementation
+ * @since 1.0
  * @version 1.0
- * @since Phase 2
  */
 public class SequentialYamlProcessor {
     

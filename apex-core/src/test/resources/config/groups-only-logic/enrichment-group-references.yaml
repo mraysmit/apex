@@ -33,6 +33,7 @@ enrichment-groups:
     name: "Referenced Base Group 1"
     operator: AND
     stop-on-first-failure: true
+    error-handling: fail-fast
     enrichment-ids:
       - rbg1_enrichment
 
@@ -40,6 +41,7 @@ enrichment-groups:
     name: "E1 Enrichment Group"
     operator: AND
     stop-on-first-failure: true
+    error-handling: fail-fast
     enrichment-ids:
       - e1
 
@@ -47,6 +49,7 @@ enrichment-groups:
     name: "E2 Enrichment Group (references rbg1)"
     operator: AND
     stop-on-first-failure: true
+    error-handling: fail-fast
     enrichment-group-references:
       - rbg1
 
@@ -54,6 +57,7 @@ enrichment-groups:
     name: "E3 Enrichment Group"
     operator: AND
     stop-on-first-failure: true
+    error-handling: fail-fast
     enrichment-ids:
       - e2
 

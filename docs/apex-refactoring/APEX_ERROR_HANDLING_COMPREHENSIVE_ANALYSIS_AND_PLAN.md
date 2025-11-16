@@ -1,8 +1,8 @@
 # APEX Error Handling - Comprehensive Analysis
 
 **Date:** 2025-11-15
-**Document Version:** 2.3 (Added error handling strategy clarifications)
-**Status:** 🔴 **CRITICAL - Systematic Error Handling Failures**
+**Document Version:** 2.4 (Week 2 Complete - All Tests Passing)
+**Status:** 🟢 **Week 2 COMPLETE** - Error Propagation + REST API Integration
 **Priority:** HIGHEST
 **Accuracy Assessment:** ✅ **100% ACCURATE** - Fully verified against apex-core and apex-demo
 
@@ -1981,7 +1981,7 @@ This implementation plan addresses **THREE CRITICAL, INTERCONNECTED PROBLEMS**:
 
 **Goal:** Fix all 5 "log and continue" bugs (business logic failures) and propagate errors to REST API
 
-**Progress:** ✅ **ALL 5 ISSUES COMPLETE** (Days 6-10)
+**Progress:** ✅ **ALL 5 ISSUES COMPLETE** (Days 6-10) + **ALL TESTS PASSING** (3,063 tests)
 
 **Important Context:** All 5 bugs documented below are **business logic failures** (not configuration errors). These represent critical system failures where processing operations failed with exceptions. Per the error handling strategy:
 - These must return `RuleResult.error()` with proper error tracking
@@ -1992,14 +1992,31 @@ This implementation plan addresses **THREE CRITICAL, INTERCONNECTED PROBLEMS**:
 **Week 2 Progress Summary:**
 - ✅ **ALL 5 ISSUES COMPLETE** (Days 6-10)
 - ✅ **WEEK 2 DELIVERABLE ACHIEVED**
+- ✅ **ALL TESTS PASSING** (3,063 tests across apex-core, apex-demo, apex-rest-api)
+- ✅ **3 apex-demo Test Failures FIXED** (enrichment partial data preservation + YAML transformation type)
 
 **Completion Status:**
 - ✅ Day 6: Issue #1 - Rule Group Evaluation Errors (COMPLETE)
 - ✅ Day 7: Issue #2 - Enrichment Processing Errors (COMPLETE - implementation was already correct, tests added)
 - ✅ Day 8: Issue #3 - Transformation Errors (COMPLETE - implementation was already correct, tests added)
 - ✅ Day 9: Issue #4 & #5 - Field Mapping and Rule Evaluation Errors (COMPLETE - logging levels fixed, Issue #5 is dead code)
-- ✅ Day 10: REST API Error Propagation (COMPLETE - HTTP 500 for business logic failures)
-- ⏳ Day 10: REST API Integration (NOT STARTED)
+- ✅ Day 10: REST API Error Propagation (COMPLETE - All controllers standardized: EnrichmentController, ExpressionController, RulesController)
+
+**Additional Fixes (Post Week 2):**
+- ✅ **Fixed 3 apex-demo Test Failures:**
+  1. ✅ BasicYamlEnrichmentGroupProcessingTest.testAllEnrichmentGroupsWithMissingC - Fixed partial enrichment data preservation
+  2. ✅ BasicYamlEnrichmentGroupProcessingTest.testAllEnrichmentGroupsWithOnlyA - Fixed partial enrichment data preservation
+  3. ✅ SequentialYamlProcessorTest.testComplexSectionOrdering - Fixed invalid YAML transformation type
+
+**Final Test Results:**
+```
+✅ apex-core:     2,117 tests (2,115 passed, 2 skipped)
+✅ apex-demo:       839 tests (831 passed, 8 skipped)
+✅ apex-rest-api:   107 tests (107 passed)
+────────────────────────────────────────────────────────
+✅ TOTAL:         3,063 tests - ALL PASSING
+BUILD SUCCESS
+```
 
 ---
 
@@ -2281,9 +2298,113 @@ Object enrichedObject = result.getEnrichedData().isEmpty() ? targetObject : resu
 
 ---
 
+#### Post Week 2: Fix apex-demo Test Failures
+
+**Status:** ✅ **COMPLETE** - All 3 test failures fixed, all 3,063 tests passing
+
+After completing Week 2, 3 apex-demo tests were failing. These failures were caused by the error handling changes and revealed important issues with partial data preservation.
+
+##### Test Failure 1 & 2: BasicYamlEnrichmentGroupProcessingTest
+
+**Failing Tests:**
+- `testAllEnrichmentGroupsWithMissingC` - Expected partial enrichment data to be preserved when field 'c' is missing
+- `testAllEnrichmentGroupsWithOnlyA` - Expected partial enrichment data to be preserved when only field 'a' is present
+
+**Root Cause:**
+When enrichment processing encountered a required field failure (field 'c' is missing), the test expected that fields 'a' and 'b' should still be copied even when field 'c' fails. However, the implementation had two issues:
+
+1. **RulesEngine.java (Lines 1104-1119)** - Early return when enrichment fails prevented partial enriched data from being preserved
+2. **YamlEnrichmentProcessor.java (Lines 1545-1558)** - Using `convertToMap()` on the return value instead of using `targetObject` directly
+
+**Fix Applied:**
+
+1. **RulesEngine.java** - Removed early return to preserve partial enriched data:
+```java
+// Check for enrichment errors
+if (enrichmentResult.getResultType() == RuleResult.ResultType.ERROR) {
+    overallSuccess = false;
+    failureMessages.add("Enrichment processing failed: " + enrichmentResult.getMessage());
+    if (enrichmentResult.hasFailures()) {
+        failureMessages.addAll(enrichmentResult.getFailureMessages());
+    }
+    logger.error("CRITICAL: Enrichment processing failed: {}", enrichmentResult.getMessage());
+    // DO NOT return early - preserve partial enriched data and continue processing
+}
+
+// Update enriched data from result (including partial data from failed enrichments)
+if (enrichmentResult.getEnrichedData() != null && !enrichmentResult.getEnrichedData().isEmpty()) {
+    enrichedData.putAll(enrichmentResult.getEnrichedData());
+    logger.debug("Enrichment completed, enriched data size: {}", enrichedData.size());
+}
+```
+
+2. **YamlEnrichmentProcessor.java** - Use `targetObject` directly since `processEnrichments()` modifies it IN PLACE:
+```java
+try {
+    // Process enrichments using existing method - this modifies targetObject IN PLACE
+    processEnrichments(enrichments, targetObject, configuration);
+
+    // Use the targetObject directly since it was modified in place
+    // Cast it to Map for analysis
+    @SuppressWarnings("unchecked")
+    Map<String, Object> enrichedData = (targetObject instanceof Map)
+        ? (Map<String, Object>) targetObject
+        : convertToMap(targetObject);
+
+    // Detect enrichment failures by checking for required field mapping failures
+    if (enrichments != null && !enrichments.isEmpty()) {
+        boolean enrichmentFailed = detectEnrichmentFailures(enrichments, enrichedData);
+```
+
+**Key Insight:** The deprecated `processEnrichments()` method modifies the `targetObject` parameter IN PLACE by calling `setFieldValue(targetObject, fieldName, value)` which does `map.put(fieldName, value)` for Map objects. The enriched fields ARE in the `targetObject`, but when `convertToMap()` creates a new HashMap from the return value, the enriched fields were not being copied. By using `targetObject` directly (which was modified in place), the enriched fields are preserved.
+
+**Files Modified:**
+- `apex-core/src/main/java/dev/mars/apex/core/engine/config/RulesEngine.java` (Lines 1104-1119)
+- `apex-core/src/main/java/dev/mars/apex/core/service/enrichment/YamlEnrichmentProcessor.java` (Lines 1545-1558)
+
+**Test Results:** Both tests now pass with partial enrichment data preserved
+
+---
+
+##### Test Failure 3: SequentialYamlProcessorTest.testComplexSectionOrdering
+
+**Failing Test:**
+- `testComplexSectionOrdering` - Expected processing to succeed but failed with "Unknown transformation type: spel"
+
+**Root Cause:**
+The YAML configuration file `SequentialYamlProcessorTestComplexOrdering.yaml` had an invalid transformation type `spel` instead of a valid APEX transformation type.
+
+**Valid Transformation Types in APEX:**
+- `field-transformation` - Simple field transformations with source-field, target-field, and expression
+- `object-transformation` - Object-level transformations
+- `conditional-transformation` - Conditional transformations (not yet fully implemented)
+
+**Fix Applied:**
+
+Changed transformation type from invalid `spel` to valid `field-transformation`:
+```yaml
+transformations:
+  - id: "data-transform"
+    name: "Data Transformation"
+    type: "field-transformation"
+    source-field: "customerId"
+    target-field: "transformedCustomerId"
+```
+
+**Files Modified:**
+- `apex-demo/src/test/java/dev/mars/apex/demo/sequencing/SequentialYamlProcessorTestComplexOrdering.yaml` (Lines 18-23)
+
+**Test Results:** Test now passes successfully
+
+**Actual Time:** 3 hours
+
+---
+
 ### Week 3: Configuration + ErrorRecoveryService Integration
 
 **Goal:** Add error-handling configuration and integrate ErrorRecoveryService
+
+**Status:** ⏳ **NOT STARTED**
 
 #### Day 11: Add error-handling Configuration to Rule Groups
 
@@ -3903,6 +4024,7 @@ if (result.getResultType() == RuleResult.ResultType.ERROR) {
 
 | Version | Date | Changes | Author |
 |---------|------|---------|--------|
+| **2.4** | 2025-11-15 | **Week 2 COMPLETE** - All 5 issues fixed, REST API error propagation standardized across all controllers (EnrichmentController, ExpressionController, RulesController). Fixed 3 apex-demo test failures: partial enrichment data preservation (RulesEngine.java, YamlEnrichmentProcessor.java) and invalid YAML transformation type (SequentialYamlProcessorTestComplexOrdering.yaml). All 3,063 tests passing (apex-core: 2,117, apex-demo: 839, apex-rest-api: 107). | AI Assistant |
 | **2.3** | 2025-11-15 | Added comprehensive "Error Handling Strategy" section clarifying distinction between Configuration Errors (graceful degradation) and Business Logic Failures (return error results). Updated all 5 bug descriptions with error type classifications. Updated Week 2 implementation tasks with clear error handling patterns. Added decision matrix and implementation patterns. | AI Assistant |
 | **2.2** | 2025-11-15 | Consolidated implementation plan - removed duplicate sections, moved implementation plan after "Comprehensive Test Coverage Analysis", integrated Testing Requirements, Success Criteria, Risk Mitigation, and Post-Implementation Tasks into consolidated plan | AI Assistant |
 | **2.1** | 2025-11-15 | Added comprehensive deprecation notices for section-level processing throughout document, added deprecation timeline, updated success criteria, expanded backward compatibility section | AI Assistant |

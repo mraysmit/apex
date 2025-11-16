@@ -1,4 +1,4 @@
-package dev.mars.apex.core.util;
+package dev.mars.apex.core.config.yaml;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -113,7 +113,50 @@ public class YamlMetadataValidator {
         this.configLoader = new YamlConfigurationLoader();
         this.basePath = basePath;
     }
-    
+
+    /**
+     * Static method to validate metadata section and throw exception if invalid.
+     * This is used by YamlConfigurationLoader during file loading.
+     *
+     * @param yamlContent The YAML content as a map
+     * @param filePath The file path for error reporting
+     * @throws YamlConfigurationException if metadata is missing or invalid
+     */
+    @SuppressWarnings("unchecked")
+    public static void validateMetadataAndThrow(Map<String, Object> yamlContent, String filePath) throws YamlConfigurationException {
+        // Check if metadata section exists
+        Object metadataObj = yamlContent.get("metadata");
+        if (metadataObj == null) {
+            throw new YamlConfigurationException("Missing required 'metadata' section in file: " + filePath);
+        }
+
+        if (!(metadataObj instanceof Map)) {
+            throw new YamlConfigurationException("Invalid metadata section in file: " + filePath + " - must be a map/object");
+        }
+
+        Map<String, Object> metadata = (Map<String, Object>) metadataObj;
+
+        // Validate required fields
+        for (String requiredField : REQUIRED_METADATA_FIELDS) {
+            if (!metadata.containsKey(requiredField) || metadata.get(requiredField) == null) {
+                throw new YamlConfigurationException("Missing required metadata field '" + requiredField + "' in file: " + filePath);
+            }
+
+            Object value = metadata.get(requiredField);
+            if (!(value instanceof String) || ((String) value).trim().isEmpty()) {
+                throw new YamlConfigurationException("Metadata field '" + requiredField + "' must be a non-empty string in file: " + filePath);
+            }
+        }
+
+        // Validate file type
+        String fileType = (String) metadata.get("type");
+        if (!VALID_FILE_TYPES.contains(fileType)) {
+            throw new YamlConfigurationException("Invalid file type '" + fileType + "' in file: " + filePath + ". Valid types: " + VALID_FILE_TYPES);
+        }
+
+        logger.debug("Validated YAML file type '{}' for file: {}", fileType, filePath);
+    }
+
     /**
      * Validates a single YAML file's metadata and structure.
      * 

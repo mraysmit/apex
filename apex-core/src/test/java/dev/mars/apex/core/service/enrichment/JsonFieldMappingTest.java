@@ -2,8 +2,8 @@ package dev.mars.apex.core.service.enrichment;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import org.junit.jupiter.api.BeforeEach;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -12,17 +12,9 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test JSON field mapping functionality to understand how APEX handles JSON data.
+ * Test JSON field mapping functionality using RulesEngine.
  */
 public class JsonFieldMappingTest {
-
-    private YamlEnrichmentProcessor enrichmentProcessor;
-
-    @BeforeEach
-    void setUp() {
-        ExpressionEvaluatorService expressionEvaluator = new ExpressionEvaluatorService();
-        enrichmentProcessor = new YamlEnrichmentProcessor(null, expressionEvaluator);
-    }
 
     @Test
     void testJsonFieldMappingWithComplexData() throws Exception {
@@ -79,19 +71,17 @@ public class JsonFieldMappingTest {
         inputData.put("lookupType", "market_data");
         
         System.out.println("Input data: " + inputData);
-        
-        // Process enrichments
-        Object enrichedData = enrichmentProcessor.processEnrichments(config.getEnrichments(), inputData);
-        
-        System.out.println("Enriched data: " + enrichedData);
-        
+
+        // Process enrichments using RulesEngine
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+        RuleResult result = engine.evaluate(inputData);
+        Map<String, Object> enrichedMap = result.getEnrichedData();
+
+        System.out.println("Enriched data: " + enrichedMap);
+
         // Verify enriched data
-        assertNotNull(enrichedData, "Enriched data should not be null");
-        assertTrue(enrichedData instanceof Map, "Enriched data should be a Map");
-        
-        @SuppressWarnings("unchecked")
-        Map<String, Object> enrichedMap = (Map<String, Object>) enrichedData;
-        
+        assertNotNull(enrichedMap, "Enriched data should not be null");
+
         System.out.println("Enriched data keys: " + enrichedMap.keySet());
         
         // Verify original fields are preserved
@@ -157,17 +147,15 @@ public class JsonFieldMappingTest {
         YamlConfigurationLoader loader = new YamlConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
         
-        // Process enrichments
-        Object enrichedData = enrichmentProcessor.processEnrichments(config.getEnrichments(), targetMap);
-        
-        System.out.println("Target map after: " + enrichedData);
-        
+        // Process enrichments using RulesEngine
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+        RuleResult result = engine.evaluate(targetMap);
+        Map<String, Object> enrichedMap = result.getEnrichedData();
+
+        System.out.println("Target map after: " + enrichedMap);
+
         // Verify the field enrichment worked
-        assertNotNull(enrichedData);
-        assertTrue(enrichedData instanceof Map);
-        
-        @SuppressWarnings("unchecked")
-        Map<String, Object> enrichedMap = (Map<String, Object>) enrichedData;
+        assertNotNull(enrichedMap);
         
         // Check if field mapping worked correctly (source field values should be copied)
         assertEquals("EURUSD", enrichedMap.get("marketSymbol")); // Copied from "symbol" field

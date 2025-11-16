@@ -1,0 +1,17 @@
+apex-core\src\test\resources\config\groups-only-logic\classpath-external.yaml
+apex-core\src\test\resources\config\groups-only-logic\classpath-main.yaml
+apex-core\src\test\resources\config\groups-only-logic\composite-rulegroup-enrichmentgroup.yaml
+apex-core\src\test\resources\config\groups-only-logic\enrichment-group-references.yaml
+apex-core\src\test\resources\config\groups-only-logic\enrichment-references.yaml
+apex-core\src\test\resources\config\groups-only-logic\mixed-classpath.yaml
+apex-core\src\test\resources\config\groups-only-logic\mixed-filesystem.yaml
+apex-core\src\test\resources\config\groups-only-logic\mixed-main.yaml
+apex-core\src\test\resources\config\groups-only-logic\nested-group-references.yaml
+apex-core\src\test\resources\config\groups-only-logic\nested-level1.yaml
+apex-core\src\test\resources\config\groups-only-logic\nested-level2.yaml
+apex-core\src\test\resources\config\groups-only-logic\nested-main.yaml
+apex-core\src\test\resources\config\groups-only-logic\rule-group-references.yaml
+apex-core\src\test\resources\config\groups-only-logic\rule-references.yaml
+apex-core\src\test\resources\config\groups-only-logic\test.yaml
+apex-core\src\test\resources\config\groups-only-logic\user-example-enrichment-group-refs.yaml
+apex-core\src\test\resources\rulegroups\customer-validation-groups.yaml

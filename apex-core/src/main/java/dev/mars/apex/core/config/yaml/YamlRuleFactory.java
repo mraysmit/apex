@@ -1,6 +1,7 @@
 package dev.mars.apex.core.config.yaml;
 
 import dev.mars.apex.core.api.RuleSet;
+import dev.mars.apex.core.constants.ErrorHandlingConstants;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.Category;
@@ -556,8 +557,15 @@ public class YamlRuleFactory {
             }
         }
 
+        // Parse error-handling strategy from YAML configuration
+        String errorHandling = yamlGroup.getErrorHandling() != null ? yamlGroup.getErrorHandling() : ErrorHandlingConstants.DEFAULT_STRATEGY;
+        if (!ErrorHandlingConstants.isValidStrategy(errorHandling)) {
+            logger.warn("Invalid error-handling '" + errorHandling + "' for rule group '" + id + "'. Using " + ErrorHandlingConstants.DEFAULT_STRATEGY + " as default.");
+            errorHandling = ErrorHandlingConstants.DEFAULT_STRATEGY;
+        }
+
         RuleGroup group = new RuleGroup(id, categoryName, name, description, priority,
-                                       isAndOperator, stopOnFirstFailure, parallelExecution, debugMode);
+                                       isAndOperator, stopOnFirstFailure, parallelExecution, debugMode, errorHandling);
 
         // Apply enterprise metadata with category inheritance
         // Rule group metadata takes precedence, but inherit from category if not specified
@@ -660,8 +668,15 @@ public class YamlRuleFactory {
             }
         }
 
+        // Parse error-handling strategy from YAML configuration
+        String errorHandling = yamlGroup.getErrorHandling() != null ? yamlGroup.getErrorHandling() : ErrorHandlingConstants.DEFAULT_STRATEGY;
+        if (!ErrorHandlingConstants.isValidStrategy(errorHandling)) {
+            logger.warn("Invalid error-handling '" + errorHandling + "' for rule group '" + id + "'. Using " + ErrorHandlingConstants.DEFAULT_STRATEGY + " as default.");
+            errorHandling = ErrorHandlingConstants.DEFAULT_STRATEGY;
+        }
+
         RuleGroup group = new RuleGroup(id, categoryName, name, description, priority,
-                                       isAndOperator, stopOnFirstFailure, parallelExecution, debugMode);
+                                       isAndOperator, stopOnFirstFailure, parallelExecution, debugMode, errorHandling);
 
         // Apply enterprise metadata with category inheritance
         // Rule group metadata takes precedence, but inherit from category if not specified

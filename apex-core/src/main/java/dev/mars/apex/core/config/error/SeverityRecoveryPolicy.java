@@ -47,9 +47,9 @@ import dev.mars.apex.core.service.error.ErrorRecoveryService;
  * errorPolicy.setRecoveryEnabled(false);
  * errorPolicy.setStrategy("FAIL_FAST");
  * }</pre>
- * 
+ *
  * @author APEX Rules Engine
- * @since Phase 3 - Configurable Error Recovery
+ * @since 1.0
  * @version 1.0
  */
 public class SeverityRecoveryPolicy {

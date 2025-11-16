@@ -35,6 +35,7 @@ enrichment-groups:
     name: Level 1 Group
     operator: AND
     stop-on-first-failure: false
+    error-handling: continue-on-error
     enrichment-group-references:
       - level2_group
     enrichment-ids:

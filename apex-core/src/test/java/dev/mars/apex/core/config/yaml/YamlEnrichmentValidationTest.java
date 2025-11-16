@@ -305,8 +305,9 @@ class YamlEnrichmentValidationTest {
                    "Expected message to contain 'Must be one of:', but was: " + exception.getMessage());
         assertTrue(exception.getMessage().contains("INFO") &&
                    exception.getMessage().contains("WARNING") &&
-                   exception.getMessage().contains("ERROR"),
-                   "Expected message to contain all severity levels, but was: " + exception.getMessage());
+                   exception.getMessage().contains("ERROR") &&
+                   exception.getMessage().contains("CRITICAL"),
+                   "Expected message to contain all severity levels (INFO, WARNING, ERROR, CRITICAL), but was: " + exception.getMessage());
     }
 
     private String createEnrichmentYamlWithValidSeverity() {
@@ -350,7 +351,7 @@ class YamlEnrichmentValidationTest {
             enrichments:
               - id: "test-enrichment"
                 type: "lookup-enrichment"
-                severity: "CRITICAL"
+                severity: "INVALID_SEVERITY"
                 condition: "#customerId != null"
                 lookup-config:
                   lookup-service: "testService"

@@ -1,9 +1,10 @@
 package dev.mars.apex.core.service.enrichment;
 
+import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlEnrichment;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import org.junit.jupiter.api.BeforeEach;
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -19,17 +20,6 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests the new conditional-mapping-enrichment type with priority-based processing.
  */
 public class ConditionalMappingEnrichmentTest {
-
-    private LookupServiceRegistry serviceRegistry;
-    private ExpressionEvaluatorService evaluatorService;
-    private YamlEnrichmentProcessor processor;
-
-    @BeforeEach
-    void setUp() {
-        this.serviceRegistry = new LookupServiceRegistry();
-        this.evaluatorService = new ExpressionEvaluatorService();
-        this.processor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
-    }
 
     @Test
     @DisplayName("Should create conditional mapping enrichment structure")
@@ -98,188 +88,165 @@ public class ConditionalMappingEnrichmentTest {
 
     @Test
     @DisplayName("Should process high priority rule first")
-    void shouldProcessHighPriorityRuleFirst() {
+    void shouldProcessHighPriorityRuleFirst() throws Exception {
         // Create test data that matches high priority rule
         Map<String, Object> testData = new HashMap<>();
         testData.put("SYSTEM_CODE", "SWIFT");
         testData.put("IS_NDF", "original_value");
 
-        // Create enrichment with priority-based rules
-        YamlEnrichment enrichment = createPriorityBasedEnrichment();
+        // Create YAML config with priority-based rules
+        String yamlConfig = """
+            metadata:
+              id: "priority-test"
+              name: "Priority Test"
+              version: "1.0.0"
+              description: "Test priority-based conditional mapping"
+              type: "rule-config"
 
-        // Process enrichment
-        List<YamlEnrichment> enrichments = new ArrayList<>();
-        enrichments.add(enrichment);
-        Object result = processor.processEnrichments(enrichments, testData, null);
+            enrichments:
+              - id: "priority-test"
+                type: "conditional-mapping-enrichment"
+                target-field: "IS_NDF"
+                mapping-rules:
+                  - id: "high-priority"
+                    priority: 1
+                    conditions:
+                      operator: "AND"
+                      rules:
+                        - condition: "#SYSTEM_CODE == 'SWIFT'"
+                    mapping:
+                      type: "direct"
+                      expression: "'HIGH_PRIORITY'"
+                  - id: "default"
+                    priority: 999
+                    mapping:
+                      type: "direct"
+                      expression: "'DEFAULT_VALUE'"
+                execution-settings:
+                  stop-on-first-match: true
+            """;
+
+        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
+
+        // Process enrichment using RulesEngine
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+        RuleResult result = engine.evaluate(testData);
+        Map<String, Object> resultMap = result.getEnrichedData();
 
         // Verify high priority rule was applied
-        assertNotNull(result);
-        assertTrue(result instanceof Map);
-        @SuppressWarnings("unchecked")
-        Map<String, Object> resultMap = (Map<String, Object>) result;
+        assertNotNull(resultMap);
         assertEquals("HIGH_PRIORITY", resultMap.get("IS_NDF"));
     }
 
     @Test
     @DisplayName("Should fall back to default rule when conditions not met")
-    void shouldFallBackToDefaultRule() {
+    void shouldFallBackToDefaultRule() throws Exception {
         // Create test data that doesn't match high priority rule
         Map<String, Object> testData = new HashMap<>();
         testData.put("SYSTEM_CODE", "OTHER");
         testData.put("IS_NDF", "original_value");
 
-        // Create enrichment with priority-based rules
-        YamlEnrichment enrichment = createPriorityBasedEnrichment();
+        // Create YAML config with priority-based rules
+        String yamlConfig = """
+            metadata:
+              id: "priority-test"
+              name: "Priority Test"
+              version: "1.0.0"
+              description: "Test priority-based conditional mapping"
+              type: "rule-config"
 
-        // Process enrichment
-        List<YamlEnrichment> enrichments = new ArrayList<>();
-        enrichments.add(enrichment);
-        Object result = processor.processEnrichments(enrichments, testData, null);
+            enrichments:
+              - id: "priority-test"
+                type: "conditional-mapping-enrichment"
+                target-field: "IS_NDF"
+                mapping-rules:
+                  - id: "high-priority"
+                    priority: 1
+                    conditions:
+                      operator: "AND"
+                      rules:
+                        - condition: "#SYSTEM_CODE == 'SWIFT'"
+                    mapping:
+                      type: "direct"
+                      expression: "'HIGH_PRIORITY'"
+                  - id: "default"
+                    priority: 999
+                    mapping:
+                      type: "direct"
+                      expression: "'DEFAULT_VALUE'"
+                execution-settings:
+                  stop-on-first-match: true
+            """;
+
+        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
+
+        // Process enrichment using RulesEngine
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+        RuleResult result = engine.evaluate(testData);
+        Map<String, Object> resultMap = result.getEnrichedData();
 
         // Verify default rule was applied
-        assertNotNull(result);
-        assertTrue(result instanceof Map);
-        @SuppressWarnings("unchecked")
-        Map<String, Object> resultMap = (Map<String, Object>) result;
+        assertNotNull(resultMap);
         assertEquals("DEFAULT_VALUE", resultMap.get("IS_NDF"));
     }
 
     @Test
     @DisplayName("Should stop on first match when configured")
-    void shouldStopOnFirstMatch() {
+    void shouldStopOnFirstMatch() throws Exception {
         // Create test data that would match multiple rules
         Map<String, Object> testData = new HashMap<>();
         testData.put("SYSTEM_CODE", "SWIFT");
         testData.put("IS_NDF", "original_value");
 
-        // Create enrichment with multiple matching rules
-        YamlEnrichment enrichment = createMultipleMatchingRulesEnrichment();
+        // Create YAML config with multiple matching rules
+        String yamlConfig = """
+            metadata:
+              id: "multiple-match-test"
+              name: "Multiple Match Test"
+              version: "1.0.0"
+              description: "Test stop on first match"
+              type: "rule-config"
 
-        // Process enrichment
-        List<YamlEnrichment> enrichments = new ArrayList<>();
-        enrichments.add(enrichment);
-        Object result = processor.processEnrichments(enrichments, testData, null);
+            enrichments:
+              - id: "multiple-match-test"
+                type: "conditional-mapping-enrichment"
+                target-field: "IS_NDF"
+                mapping-rules:
+                  - id: "first-rule"
+                    priority: 1
+                    conditions:
+                      operator: "AND"
+                      rules:
+                        - condition: "#SYSTEM_CODE == 'SWIFT'"
+                    mapping:
+                      type: "direct"
+                      expression: "'FIRST_MATCH'"
+                  - id: "second-rule"
+                    priority: 2
+                    conditions:
+                      operator: "AND"
+                      rules:
+                        - condition: "#SYSTEM_CODE != null"
+                    mapping:
+                      type: "direct"
+                      expression: "'SECOND_MATCH'"
+                execution-settings:
+                  stop-on-first-match: true
+            """;
+
+        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
+
+        // Process enrichment using RulesEngine
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+        RuleResult result = engine.evaluate(testData);
+        Map<String, Object> resultMap = result.getEnrichedData();
 
         // Verify only first (highest priority) rule was applied
-        assertNotNull(result);
-        assertTrue(result instanceof Map);
-        @SuppressWarnings("unchecked")
-        Map<String, Object> resultMap = (Map<String, Object>) result;
+        assertNotNull(resultMap);
         assertEquals("FIRST_MATCH", resultMap.get("IS_NDF"));
     }
 
-    /**
-     * Helper method to create a priority-based enrichment for testing.
-     */
-    private YamlEnrichment createPriorityBasedEnrichment() {
-        YamlEnrichment enrichment = new YamlEnrichment();
-        enrichment.setId("priority-test");
-        enrichment.setType("conditional-mapping-enrichment");
-        enrichment.setTargetField("IS_NDF");
-
-        List<YamlEnrichment.MappingRule> mappingRules = new ArrayList<>();
-        
-        // High priority rule
-        YamlEnrichment.MappingRule highPriorityRule = new YamlEnrichment.MappingRule();
-        highPriorityRule.setId("high-priority");
-        highPriorityRule.setPriority(1);
-        
-        YamlEnrichment.ConditionGroup conditions = new YamlEnrichment.ConditionGroup();
-        conditions.setOperator("AND");
-        List<YamlEnrichment.ConditionRule> conditionRules = new ArrayList<>();
-        YamlEnrichment.ConditionRule condRule = new YamlEnrichment.ConditionRule();
-        condRule.setCondition("#SYSTEM_CODE == 'SWIFT'");
-        conditionRules.add(condRule);
-        conditions.setRules(conditionRules);
-        highPriorityRule.setConditions(conditions);
-
-        YamlEnrichment.MappingConfig mapping = new YamlEnrichment.MappingConfig();
-        mapping.setType("direct");
-        mapping.setExpression("'HIGH_PRIORITY'");
-        highPriorityRule.setMapping(mapping);
-
-        mappingRules.add(highPriorityRule);
-
-        // Default rule (no conditions)
-        YamlEnrichment.MappingRule defaultRule = new YamlEnrichment.MappingRule();
-        defaultRule.setId("default");
-        defaultRule.setPriority(999);
-
-        YamlEnrichment.MappingConfig defaultMapping = new YamlEnrichment.MappingConfig();
-        defaultMapping.setType("direct");
-        defaultMapping.setExpression("'DEFAULT_VALUE'");
-        defaultRule.setMapping(defaultMapping);
-        
-        mappingRules.add(defaultRule);
-
-        enrichment.setMappingRules(mappingRules);
-
-        YamlEnrichment.ExecutionSettings settings = new YamlEnrichment.ExecutionSettings();
-        settings.setStopOnFirstMatch(true);
-        enrichment.setExecutionSettings(settings);
-
-        return enrichment;
-    }
-
-    /**
-     * Helper method to create enrichment with multiple matching rules.
-     */
-    private YamlEnrichment createMultipleMatchingRulesEnrichment() {
-        YamlEnrichment enrichment = new YamlEnrichment();
-        enrichment.setId("multiple-match-test");
-        enrichment.setType("conditional-mapping-enrichment");
-        enrichment.setTargetField("IS_NDF");
-
-        List<YamlEnrichment.MappingRule> mappingRules = new ArrayList<>();
-        
-        // First rule (priority 1)
-        YamlEnrichment.MappingRule rule1 = new YamlEnrichment.MappingRule();
-        rule1.setId("first-rule");
-        rule1.setPriority(1);
-        
-        YamlEnrichment.ConditionGroup conditions1 = new YamlEnrichment.ConditionGroup();
-        conditions1.setOperator("AND");
-        List<YamlEnrichment.ConditionRule> conditionRules1 = new ArrayList<>();
-        YamlEnrichment.ConditionRule condRule1 = new YamlEnrichment.ConditionRule();
-        condRule1.setCondition("#SYSTEM_CODE == 'SWIFT'");
-        conditionRules1.add(condRule1);
-        conditions1.setRules(conditionRules1);
-        rule1.setConditions(conditions1);
-
-        YamlEnrichment.MappingConfig mapping1 = new YamlEnrichment.MappingConfig();
-        mapping1.setType("direct");
-        mapping1.setExpression("'FIRST_MATCH'");
-        rule1.setMapping(mapping1);
-        
-        mappingRules.add(rule1);
-
-        // Second rule (priority 2) - would also match
-        YamlEnrichment.MappingRule rule2 = new YamlEnrichment.MappingRule();
-        rule2.setId("second-rule");
-        rule2.setPriority(2);
-        
-        YamlEnrichment.ConditionGroup conditions2 = new YamlEnrichment.ConditionGroup();
-        conditions2.setOperator("AND");
-        List<YamlEnrichment.ConditionRule> conditionRules2 = new ArrayList<>();
-        YamlEnrichment.ConditionRule condRule2 = new YamlEnrichment.ConditionRule();
-        condRule2.setCondition("#SYSTEM_CODE != null");
-        conditionRules2.add(condRule2);
-        conditions2.setRules(conditionRules2);
-        rule2.setConditions(conditions2);
-
-        YamlEnrichment.MappingConfig mapping2 = new YamlEnrichment.MappingConfig();
-        mapping2.setType("direct");
-        mapping2.setExpression("'SECOND_MATCH'");
-        rule2.setMapping(mapping2);
-        
-        mappingRules.add(rule2);
-
-        enrichment.setMappingRules(mappingRules);
-
-        YamlEnrichment.ExecutionSettings settings = new YamlEnrichment.ExecutionSettings();
-        settings.setStopOnFirstMatch(true);
-        enrichment.setExecutionSettings(settings);
-
-        return enrichment;
-    }
 }

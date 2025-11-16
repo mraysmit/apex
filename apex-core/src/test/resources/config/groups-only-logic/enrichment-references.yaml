@@ -33,6 +33,7 @@ enrichment-groups:
     name: "Enrichment Group 1 (uses enrichment-references)"
     operator: AND
     stop-on-first-failure: true
+    error-handling: fail-fast
     enrichment-references:
       - enrichment-id: e2
         sequence: 1

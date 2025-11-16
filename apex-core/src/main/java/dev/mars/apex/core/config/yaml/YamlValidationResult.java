@@ -1,4 +1,4 @@
-package dev.mars.apex.core.util;
+package dev.mars.apex.core.config.yaml;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd

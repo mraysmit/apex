@@ -26,6 +26,7 @@ rule-groups:
     name: "Base Rule Group"
     operator: AND
     stop-on-first-failure: false
+    error-handling: continue-on-error
     rule-ids:
       - rule1
       - rule2
@@ -34,6 +35,7 @@ rule-groups:
     name: "Composite Rule Group (references base_rule_group)"
     operator: AND
     stop-on-first-failure: false
+    error-handling: continue-on-error
     rule-group-references:
       - base_rule_group
 

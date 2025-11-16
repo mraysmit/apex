@@ -278,7 +278,14 @@ class DataTypeScenarioServiceTest {
      */
     private String createTestRegistryFile() throws IOException {
         String registryContent = """
-            scenario-registry:
+            metadata:
+              id: "test-registry"
+              name: "Test Scenario Registry"
+              version: "1.0.0"
+              description: "Test registry for scenario loading"
+              type: "scenario-registry"
+            
+            scenarios:
               - scenario-id: "otc-options-scenario"
                 config-file: "scenarios/otc-options.yaml"
             
@@ -339,7 +346,14 @@ class DataTypeScenarioServiceTest {
      */
     private String createCorruptedRegistryFile() throws IOException {
         String corruptedContent = """
-            scenario-registry:
+            metadata:
+              id: "corrupted-registry"
+              name: "Corrupted Registry"
+              version: "1.0.0"
+              description: "Registry with missing scenario files"
+              type: "scenario-registry"
+            
+            scenarios:
               - scenario-id: "corrupted-scenario"
                 config-file: "nonexistent/scenario.yaml"
             """;

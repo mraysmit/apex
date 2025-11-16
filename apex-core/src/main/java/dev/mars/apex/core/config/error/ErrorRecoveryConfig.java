@@ -42,22 +42,22 @@ import java.util.Map;
  * <pre>{@code
  * ErrorRecoveryConfig config = new ErrorRecoveryConfig();
  * config.setEnabled(true);
- * 
+ *
  * // ERROR severity - no recovery (backward compatible)
  * SeverityRecoveryPolicy errorPolicy = new SeverityRecoveryPolicy();
  * errorPolicy.setRecoveryEnabled(false);
  * errorPolicy.setStrategy("FAIL_FAST");
- * config.setSeverityPolicy("ERROR", errorPolicy);
- * 
+ * config.setSeverityPolicy(SeverityConstants.ERROR, errorPolicy);
+ *
  * // WARNING severity - recovery enabled
  * SeverityRecoveryPolicy warningPolicy = new SeverityRecoveryPolicy();
  * warningPolicy.setRecoveryEnabled(true);
  * warningPolicy.setStrategy("CONTINUE_WITH_DEFAULT");
- * config.setSeverityPolicy("WARNING", warningPolicy);
+ * config.setSeverityPolicy(SeverityConstants.WARNING, warningPolicy);
  * }</pre>
- * 
+ *
  * @author APEX Rules Engine
- * @since Phase 3 - Configurable Error Recovery
+ * @since 1.0
  * @version 1.0
  */
 public class ErrorRecoveryConfig {
@@ -69,7 +69,7 @@ public class ErrorRecoveryConfig {
 
     /**
      * Severity-specific recovery policies.
-     * Maps severity level (ERROR, WARNING, INFO) to recovery policy.
+     * Maps severity level (CRITICAL, ERROR, WARNING, INFO) to recovery policy.
      */
     private Map<String, SeverityRecoveryPolicy> severityPolicies = new HashMap<>();
 
@@ -104,7 +104,7 @@ public class ErrorRecoveryConfig {
         SeverityRecoveryPolicy criticalPolicy = new SeverityRecoveryPolicy();
         criticalPolicy.setRecoveryEnabled(false);
         criticalPolicy.setStrategy("FAIL_FAST");
-        severityPolicies.put("CRITICAL", criticalPolicy);
+        severityPolicies.put(SeverityConstants.CRITICAL, criticalPolicy);
 
         // ERROR severity - no recovery (matches current test expectations)
         SeverityRecoveryPolicy errorPolicy = new SeverityRecoveryPolicy();
@@ -129,8 +129,8 @@ public class ErrorRecoveryConfig {
 
     /**
      * Get the recovery policy for a specific severity level.
-     * 
-     * @param severity The severity level (ERROR, WARNING, INFO)
+     *
+     * @param severity The severity level (CRITICAL, ERROR, WARNING, INFO)
      * @return The recovery policy, or null if not configured
      */
     public SeverityRecoveryPolicy getSeverityPolicy(String severity) {
@@ -142,8 +142,8 @@ public class ErrorRecoveryConfig {
 
     /**
      * Set the recovery policy for a specific severity level.
-     * 
-     * @param severity The severity level (ERROR, WARNING, INFO)
+     *
+     * @param severity The severity level (CRITICAL, ERROR, WARNING, INFO)
      * @param policy The recovery policy to set
      */
     public void setSeverityPolicy(String severity, SeverityRecoveryPolicy policy) {

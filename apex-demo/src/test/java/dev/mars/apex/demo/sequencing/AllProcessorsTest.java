@@ -5,15 +5,11 @@ import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.error.ErrorRecoveryService;
-import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
-import dev.mars.apex.core.api.SimpleRulesEngine;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +27,6 @@ class AllProcessorsTest {
 
     private YamlConfigurationLoader yamlLoader;
     private RulesEngineConfiguration rulesEngineConfiguration;
-    private SimpleRulesEngine simpleRulesEngine;
 
     @BeforeEach
     void setUp() {
@@ -39,7 +34,6 @@ class AllProcessorsTest {
 
         yamlLoader = new YamlConfigurationLoader();
         rulesEngineConfiguration = new RulesEngineConfiguration();
-        simpleRulesEngine = new SimpleRulesEngine();
 
         LOGGER.info("✅ All processors initialized");
     }
@@ -186,10 +180,10 @@ class AllProcessorsTest {
     }
 
     @Test
-    @DisplayName("🚨 PROCESSOR 4: SimpleRulesEngine (Rules Only - No Enrichments)")
+    @DisplayName("🚨 PROCESSOR 4: RulesEngine with Individual Rules (Rules Only)")
     void testSimpleRulesEngine() {
-        LOGGER.info("=== TESTING: SimpleRulesEngine ===");
-        LOGGER.info("📋 Processing Order: Rules ONLY (no enrichment support)");
+        LOGGER.info("=== TESTING: RulesEngine with Individual Rules ===");
+        LOGGER.info("📋 Processing Order: Rules ONLY (demonstrating rule-only execution)");
         
         Map<String, Object> testData = new HashMap<>();
         testData.put("amount", 50000.0);
@@ -200,11 +194,32 @@ class AllProcessorsTest {
         LOGGER.info("💰 Input (pre-enriched): {}", testData);
         
         try {
-            // Test individual rule conditions
-            boolean riskScoreValid = simpleRulesEngine.evaluate("#riskScore != null && #riskScore >= 0", testData);
-            boolean riskCategoryValid = simpleRulesEngine.evaluate("#riskCategory != null && (#riskCategory == 'HIGH_RISK' || #riskCategory == 'MEDIUM_RISK' || #riskCategory == 'LOW_RISK')", testData);
+            // Create a minimal configuration for rule-only testing
+            RulesEngine engine = new RulesEngine(rulesEngineConfiguration);
             
-            LOGGER.info("📊 SimpleRulesEngine Results:");
+            // Create individual rules for testing
+            dev.mars.apex.core.engine.model.Rule riskScoreRule = 
+                new dev.mars.apex.core.engine.model.Rule(
+                    "risk-score-check", 
+                    "#riskScore != null && #riskScore >= 0", 
+                    "Risk score validation"
+                );
+                
+            dev.mars.apex.core.engine.model.Rule riskCategoryRule = 
+                new dev.mars.apex.core.engine.model.Rule(
+                    "risk-category-check", 
+                    "#riskCategory != null && (#riskCategory == 'HIGH_RISK' || #riskCategory == 'MEDIUM_RISK' || #riskCategory == 'LOW_RISK')", 
+                    "Risk category validation"
+                );
+            
+            // Execute individual rules
+            RuleResult riskScoreResult = engine.executeRule(riskScoreRule, testData);
+            RuleResult riskCategoryResult = engine.executeRule(riskCategoryRule, testData);
+            
+            boolean riskScoreValid = riskScoreResult.isTriggered();
+            boolean riskCategoryValid = riskCategoryResult.isTriggered();
+            
+            LOGGER.info("📊 RulesEngine Results:");
             LOGGER.info("   Risk Score Valid: {}", riskScoreValid);
             LOGGER.info("   Risk Category Valid: {}", riskCategoryValid);
             
@@ -212,8 +227,8 @@ class AllProcessorsTest {
             assertTrue(riskCategoryValid, "Risk category validation should pass");
             
         } catch (Exception e) {
-            LOGGER.error("💥 SimpleRulesEngine failed: {}", e.getMessage());
-            fail("SimpleRulesEngine should not fail: " + e.getMessage());
+            LOGGER.error("💥 RulesEngine failed: {}", e.getMessage());
+            fail("RulesEngine should not fail: " + e.getMessage());
         }
     }
 }

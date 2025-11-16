@@ -16,6 +16,7 @@ enrichment-groups:
     name: File System Group
     description: Enrichment group from file system
     enabled: true
+    error-handling: continue-on-error
     enrichment-ids:
       - filesystem_enrichment
 

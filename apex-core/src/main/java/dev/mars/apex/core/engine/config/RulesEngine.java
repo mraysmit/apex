@@ -163,8 +163,11 @@ public class RulesEngine {
         this.performanceMonitor = new RulePerformanceMonitor();
         this.enrichmentProcessor = new YamlEnrichmentProcessor(new LookupServiceRegistry(), new ExpressionEvaluatorService());
 
-        // Initialize the unified evaluator with default error recovery configuration
-        this.unifiedEvaluator = new UnifiedRuleEvaluator(parser, errorRecoveryService, performanceMonitor, new ErrorRecoveryConfig());
+        // Load error recovery configuration from YAML if available, otherwise use defaults
+        ErrorRecoveryConfig errorRecoveryConfig = loadErrorRecoveryConfig(yamlConfig);
+
+        // Initialize the unified evaluator with error recovery configuration from YAML
+        this.unifiedEvaluator = new UnifiedRuleEvaluator(parser, errorRecoveryService, performanceMonitor, errorRecoveryConfig);
 
         // Initialize pipeline components
         this.dataSourceFactory = DataSourceFactory.getInstance();
@@ -184,6 +187,8 @@ public class RulesEngine {
         logger.configuration("RulesEngine", "Initialized with configuration: " + configuration.getClass().getSimpleName());
         logger.debug("Using parser: {}", parser.getClass().getSimpleName());
         logger.debug("Using error recovery service: {}", errorRecoveryService.getClass().getSimpleName());
+        logger.debug("Using error recovery config: enabled={}, default-strategy={}",
+                    errorRecoveryConfig.isEnabled(), errorRecoveryConfig.getDefaultStrategy());
         logger.debug("Using performance monitor: {}", performanceMonitor.getClass().getSimpleName());
         logger.debug("Using enrichment processor: {}", enrichmentProcessor != null ? enrichmentProcessor.getClass().getSimpleName() : "none");
     }
@@ -887,16 +892,16 @@ public class RulesEngine {
                 String errorMessage = String.format("Rule evaluation failed: %s", e.getMessage());
 
                 // Get severity from rule configuration
-                String severity = "ERROR"; // Default severity for evaluation errors
+                String severity = SeverityConstants.ERROR; // Default severity for evaluation errors
                 if (ruleObj instanceof Rule) {
                     Rule rule = (Rule) ruleObj;
-                    severity = rule.getSeverity() != null ? rule.getSeverity() : "ERROR";
+                    severity = rule.getSeverity() != null ? rule.getSeverity() : SeverityConstants.ERROR;
                 }
 
                 // Log error details at appropriate level based on severity
-                if ("CRITICAL".equalsIgnoreCase(severity)) {
+                if (SeverityConstants.CRITICAL.equalsIgnoreCase(severity)) {
                     logger.error("CRITICAL rule evaluation error for '{}': {}", ruleName, e.getMessage());
-                } else if ("WARNING".equalsIgnoreCase(severity)) {
+                } else if (SeverityConstants.WARNING.equalsIgnoreCase(severity)) {
                     logger.info("Rule evaluation warning for '{}': {}", ruleName, e.getMessage());
                 } else {
                     logger.info("Rule evaluation error for '{}': {}", ruleName, e.getMessage());
@@ -1032,18 +1037,11 @@ public class RulesEngine {
                 logger.info("Processing {} individual rules", allRules.size());
                 RuleResult ruleResult = executeRulesList(allRules, enrichedData);
 
-                // Check for ERROR result type (actual system errors)
-                // NOTE: According to APEX design principles, validation rules triggering should NOT
-                // cause the stage to fail. They should be reported, but evaluation should still succeed.
-                // Only actual system errors (ResultType.ERROR) should cause failure.
+                // Check for ERROR result type - this includes validation rules with ERROR severity
+                // when error recovery is disabled (default for ERROR severity per APEX_ERROR_HANDLING_GUIDE)
                 if (ruleResult.getResultType() == RuleResult.ResultType.ERROR) {
                     overallSuccess = false;
                     failureMessages.add("Rule evaluation error: " + ruleResult.getMessage());
-                } else if (ruleResult.isTriggered() &&
-                          SeverityConstants.ERROR.equalsIgnoreCase(ruleResult.getSeverity())) {
-                    // Log the validation rule trigger, but don't treat it as a failure
-                    logger.warn("Validation failure: rules '{}' triggered with ERROR severity: {}",
-                               ruleResult.getRuleName(), ruleResult.getMessage());
                 }
 
                 // Update enriched data with results from rules (field mappings)
@@ -1076,17 +1074,11 @@ public class RulesEngine {
                 logger.info("Processing {} rule groups", allRuleGroups.size());
                 RuleResult ruleGroupResult = executeRuleGroupsList(allRuleGroups, enrichedData);
 
-                // Check for ERROR result type (actual system errors)
-                // NOTE: According to APEX design principles, validation rules triggering should NOT
-                // cause the stage to fail. They should be reported, but evaluation should still succeed.
+                // Check for ERROR result type - this includes validation rules with ERROR severity
+                // when error recovery is disabled (default for ERROR severity per APEX_ERROR_HANDLING_GUIDE)
                 if (ruleGroupResult.getResultType() == RuleResult.ResultType.ERROR) {
                     overallSuccess = false;
                     failureMessages.add("Rule group evaluation error: " + ruleGroupResult.getMessage());
-                } else if (ruleGroupResult.isTriggered() &&
-                          SeverityConstants.ERROR.equalsIgnoreCase(ruleGroupResult.getSeverity())) {
-                    // Log the validation rule group trigger, but don't treat it as a failure
-                    logger.warn("Validation failure: rule-groups '{}' triggered with ERROR severity: {}",
-                               ruleGroupResult.getRuleName(), ruleGroupResult.getMessage());
                 }
             }
 
@@ -1196,18 +1188,11 @@ public class RulesEngine {
 
                     RuleResult itemResult = processItem(item, yamlConfig, enrichedData);
 
-                    // Check for ERROR result type (actual system errors)
-                    // NOTE: According to APEX design principles, validation rules triggering should NOT
-                    // cause the stage to fail. They should be reported, but evaluation should still succeed.
+                    // Check for ERROR result type - this includes validation rules with ERROR severity
+                    // when error recovery is disabled (default for ERROR severity per APEX_ERROR_HANDLING_GUIDE)
                     if (itemResult.getResultType() == RuleResult.ResultType.ERROR) {
                         overallSuccess = false;
                         failureMessages.add(item.getSectionType() + " '" + item.getItemId() + "' error: " + itemResult.getMessage());
-                    } else if (itemResult.isTriggered() &&
-                              SeverityConstants.ERROR.equalsIgnoreCase(itemResult.getSeverity())) {
-                        // Log the validation rule trigger, but don't treat it as a failure
-                        // This applies to both rules and rule-groups
-                        logger.warn("Validation failure: {} '{}' triggered with ERROR severity: {}",
-                                   item.getSectionType(), item.getItemId(), itemResult.getMessage());
                     }
 
                     // Update enriched data with results
@@ -1274,17 +1259,11 @@ public class RulesEngine {
                             logger.info("Processing {} individual rules", allRules.size());
                             RuleResult ruleResult = executeRulesList(allRules, enrichedData);
 
-                            // Check for ERROR result type (actual system errors)
-                            // NOTE: According to APEX design principles, validation rules triggering should NOT
-                            // cause the stage to fail. They should be reported, but evaluation should still succeed.
+                            // Check for ERROR result type - this includes validation rules with ERROR severity
+                            // when error recovery is disabled (default for ERROR severity per APEX_ERROR_HANDLING_GUIDE)
                             if (ruleResult.getResultType() == RuleResult.ResultType.ERROR) {
                                 overallSuccess = false;
                                 failureMessages.add("Rule evaluation error: " + ruleResult.getMessage());
-                            } else if (ruleResult.isTriggered() &&
-                                      SeverityConstants.ERROR.equalsIgnoreCase(ruleResult.getSeverity())) {
-                                // Log the validation rule trigger, but don't treat it as a failure
-                                logger.warn("Validation failure: rules '{}' triggered with ERROR severity: {}",
-                                           ruleResult.getRuleName(), ruleResult.getMessage());
                             }
 
                             // Update enriched data with results from rules (field mappings)
@@ -1318,17 +1297,11 @@ public class RulesEngine {
                             logger.info("Processing {} rule groups", allRuleGroups.size());
                             RuleResult ruleGroupResult = executeRuleGroupsList(allRuleGroups, enrichedData);
 
-                            // Check for ERROR result type (actual system errors)
-                            // NOTE: According to APEX design principles, validation rules triggering should NOT
-                            // cause the stage to fail. They should be reported, but evaluation should still succeed.
+                            // Check for ERROR result type - this includes validation rules with ERROR severity
+                            // when error recovery is disabled (default for ERROR severity per APEX_ERROR_HANDLING_GUIDE)
                             if (ruleGroupResult.getResultType() == RuleResult.ResultType.ERROR) {
                                 overallSuccess = false;
                                 failureMessages.add("Rule group evaluation error: " + ruleGroupResult.getMessage());
-                            } else if (ruleGroupResult.isTriggered() &&
-                                      SeverityConstants.ERROR.equalsIgnoreCase(ruleGroupResult.getSeverity())) {
-                                // Log the validation rule group trigger, but don't treat it as a failure
-                                logger.warn("Validation failure: rule-groups '{}' triggered with ERROR severity: {}",
-                                           ruleGroupResult.getRuleName(), ruleGroupResult.getMessage());
                             }
                         }
                         break;
@@ -2261,6 +2234,25 @@ public class RulesEngine {
         } catch (Exception e) {
             logger.error("Error parsing scenario stage: {}", e.getMessage());
             return null;
+        }
+    }
+
+    /**
+     * Load error recovery configuration from YAML if available, otherwise return defaults.
+     *
+     * @param yamlConfig The YAML configuration (can be null)
+     * @return ErrorRecoveryConfig with settings from YAML or defaults
+     */
+    private ErrorRecoveryConfig loadErrorRecoveryConfig(YamlRuleConfiguration yamlConfig) {
+        if (yamlConfig != null && yamlConfig.getErrorRecovery() != null) {
+            logger.info("Loading error recovery configuration from YAML");
+            ErrorRecoveryConfig config = yamlConfig.getErrorRecovery().toErrorRecoveryConfig();
+            logger.debug("Error recovery config loaded: enabled={}, default-strategy={}",
+                        config.isEnabled(), config.getDefaultStrategy());
+            return config;
+        } else {
+            logger.debug("No error recovery configuration in YAML, using defaults");
+            return new ErrorRecoveryConfig(); // Returns default configuration
         }
     }
 

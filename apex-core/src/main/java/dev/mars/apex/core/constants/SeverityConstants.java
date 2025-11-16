@@ -31,6 +31,7 @@ import java.util.Set;
  *   <li><strong>INFO</strong> - Informational messages, successful processing</li>
  *   <li><strong>WARNING</strong> - Potential issues that don't prevent processing</li>
  *   <li><strong>ERROR</strong> - Critical issues that require immediate attention</li>
+ *   <li><strong>CRITICAL</strong> - Highest severity for system failures (legacy support)</li>
  * </ul>
  * 
  * <p>Usage examples:
@@ -54,17 +55,24 @@ import java.util.Set;
 public final class SeverityConstants {
     
     /**
+     * Critical severity level - indicates highest severity system failures (legacy support).
+     * Used for: system failures, unrecoverable errors in tests and error recovery configuration.
+     * Note: This is primarily for backward compatibility with existing tests and ErrorRecoveryConfig.
+     */
+    public static final String CRITICAL = "CRITICAL";
+
+    /**
      * Error severity level - indicates critical issues requiring immediate attention.
      * Used for: mandatory field violations, compliance failures, critical business logic errors.
      */
     public static final String ERROR = "ERROR";
-    
+
     /**
      * Warning severity level - indicates potential issues that don't prevent processing.
      * Used for: threshold breaches, unusual patterns, non-critical validation failures.
      */
     public static final String WARNING = "WARNING";
-    
+
     /**
      * Info severity level - indicates informational messages and successful processing.
      * Used for: successful validations, processing notifications, data enrichment info.
@@ -74,8 +82,9 @@ public final class SeverityConstants {
     /**
      * Set of all valid severity values.
      * Used for validation to ensure only supported severity levels are used.
+     * Note: CRITICAL is included for backward compatibility with tests and ErrorRecoveryConfig.
      */
-    public static final Set<String> VALID_SEVERITIES = Set.of(ERROR, WARNING, INFO);
+    public static final Set<String> VALID_SEVERITIES = Set.of(CRITICAL, ERROR, WARNING, INFO);
     
     /**
      * Default severity level used when no severity is specified.
@@ -86,18 +95,20 @@ public final class SeverityConstants {
     /**
      * Priority mapping for severity levels used in aggregation logic.
      * Higher numbers indicate higher severity/priority.
-     * 
+     *
      * <p>Priority values:
      * <ul>
-     *   <li>ERROR = 3 (highest priority)</li>
+     *   <li>CRITICAL = 4 (highest priority - legacy support)</li>
+     *   <li>ERROR = 3 (high priority)</li>
      *   <li>WARNING = 2 (medium priority)</li>
      *   <li>INFO = 1 (lowest priority)</li>
      * </ul>
-     * 
+     *
      * <p>This mapping is used by {@link dev.mars.apex.core.engine.model.RuleGroupSeverityAggregator}
      * to determine the most severe result when aggregating multiple rule results.
      */
     public static final Map<String, Integer> SEVERITY_PRIORITY = Map.of(
+        CRITICAL, 4,
         ERROR, 3,
         WARNING, 2,
         INFO, 1

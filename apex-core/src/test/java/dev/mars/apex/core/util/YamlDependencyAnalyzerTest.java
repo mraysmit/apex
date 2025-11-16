@@ -58,7 +58,10 @@ class YamlDependencyAnalyzerTest {
         // Create a simple scenario file
         String scenarioContent = """
             metadata:
+              id: "test-scenario"
               name: "Test Scenario"
+              version: "1.0.0"
+              description: "Test scenario for dependency analysis"
               type: "scenario"
             
             scenario:
@@ -73,7 +76,10 @@ class YamlDependencyAnalyzerTest {
         // Create rule configuration files
         String ruleConfigContent = """
             metadata:
+              id: "test-rules"
               name: "Test Rules"
+              version: "1.0.0"
+              description: "Test rule configuration"
               type: "rule-config"
 
             rules:
@@ -85,8 +91,11 @@ class YamlDependencyAnalyzerTest {
 
         String bootstrapContent = """
             metadata:
+              id: "test-bootstrap"
               name: "Test Bootstrap"
-              type: "bootstrap"
+              version: "1.0.0"
+              description: "Test bootstrap configuration"
+              type: "rule-config"
 
             datasets:
               - name: "test-dataset"
@@ -96,8 +105,11 @@ class YamlDependencyAnalyzerTest {
         // Create the referenced files that are expected
         String chainContent = """
             metadata:
+              id: "validation-chain"
               name: "Validation Chain"
-              type: "chain"
+              version: "1.0.0"
+              description: "Validation chain configuration"
+              type: "rule-chain"
 
             chain:
               name: "validation-chain"
@@ -108,7 +120,10 @@ class YamlDependencyAnalyzerTest {
 
         String enrichmentContent = """
             metadata:
+              id: "test-enrichment"
               name: "Test Enrichment"
+              version: "1.0.0"
+              description: "Test enrichment configuration"
               type: "enrichment"
 
             enrichment:
@@ -150,7 +165,10 @@ class YamlDependencyAnalyzerTest {
         // Create scenario that references missing files
         String scenarioContent = """
             metadata:
+              id: "test-scenario-missing"
               name: "Test Scenario with Missing Files"
+              version: "1.0.0"
+              description: "Test scenario with missing file references"
               type: "scenario"
 
             scenario:
@@ -178,7 +196,10 @@ class YamlDependencyAnalyzerTest {
         // Create scenario with valid YAML
         String scenarioContent = """
             metadata:
+              id: "test-scenario-invalid"
               name: "Test Scenario with Invalid Reference"
+              version: "1.0.0"
+              description: "Test scenario referencing invalid YAML"
               type: "scenario"
 
             scenario:
@@ -212,7 +233,10 @@ class YamlDependencyAnalyzerTest {
         // Create scenario
         String scenarioContent = """
             metadata:
+              id: "test-nested"
               name: "Test Nested Dependencies Scenario"
+              version: "1.0.0"
+              description: "Test scenario with nested dependencies"
               type: "scenario"
 
             scenario:
@@ -224,9 +248,11 @@ class YamlDependencyAnalyzerTest {
         // Create level 1 file that references level 2
         String level1Content = """
             metadata:
+              id: "level1-rules"
               name: "Level 1 Rules"
+              version: "1.0.0"
+              description: "Level 1 rule configuration"
               type: "rule-config"
-              author: "test"
 
             rules:
               rule-chains:
@@ -236,9 +262,11 @@ class YamlDependencyAnalyzerTest {
         // Create level 2 file that references level 3
         String level2Content = """
             metadata:
+              id: "level2-chain"
               name: "Level 2 Chain"
+              version: "1.0.0"
+              description: "Level 2 chain configuration"
               type: "rule-chain"
-              author: "test"
 
             enrichments:
               enrichment-refs:
@@ -248,9 +276,11 @@ class YamlDependencyAnalyzerTest {
         // Create level 3 file
         String level3Content = """
             metadata:
+              id: "level3-enrichment"
               name: "Level 3 Enrichment"
+              version: "1.0.0"
+              description: "Level 3 enrichment configuration"
               type: "enrichment"
-              author: "test"
 
             enrichment:
               name: "Final Level"
@@ -285,9 +315,11 @@ class YamlDependencyAnalyzerTest {
         // Create files with circular dependencies
         String file1Content = """
             metadata:
+              id: "file1"
               name: "File 1"
+              version: "1.0.0"
+              description: "First file in circular dependency"
               type: "rule-config"
-              author: "test"
 
             rules:
               rule-chains:
@@ -296,9 +328,11 @@ class YamlDependencyAnalyzerTest {
 
         String file2Content = """
             metadata:
+              id: "file2"
               name: "File 2"
+              version: "1.0.0"
+              description: "Second file in circular dependency"
               type: "rule-config"
-              author: "test"
 
             enrichments:
               enrichment-refs:
@@ -307,9 +341,11 @@ class YamlDependencyAnalyzerTest {
 
         String file3Content = """
             metadata:
+              id: "file3"
               name: "File 3"
+              version: "1.0.0"
+              description: "Third file in circular dependency"
               type: "rule-config"
-              author: "test"
 
             includes:
               include:
@@ -318,7 +354,10 @@ class YamlDependencyAnalyzerTest {
 
         String scenarioContent = """
             metadata:
+              id: "circular-test"
               name: "Circular Dependency Test Scenario"
+              version: "1.0.0"
+              description: "Test scenario for circular dependencies"
               type: "scenario"
 
             scenario:
@@ -346,7 +385,10 @@ class YamlDependencyAnalyzerTest {
         // Create simple scenario
         String scenarioContent = """
             metadata:
+              id: "text-report-test"
               name: "Text Report Test Scenario"
+              version: "1.0.0"
+              description: "Test scenario for text report generation"
               type: "scenario"
 
             scenario:
@@ -357,9 +399,11 @@ class YamlDependencyAnalyzerTest {
 
         String rulesContent = """
             metadata:
+              id: "test-rules"
               name: "Test Rules"
+              version: "1.0.0"
+              description: "Test rules configuration"
               type: "rule-config"
-              author: "test"
 
             rules:
               name: "Test Rules"
@@ -387,41 +431,56 @@ class YamlDependencyAnalyzerTest {
         // Create files in different directories with proper metadata
         writeFile("scenarios/test-scenario.yaml", """
             metadata:
+              id: "test-scenario"
               name: "Test Scenario"
+              version: "1.0.0"
+              description: "Test scenario for file type detection"
               type: "scenario"
             scenario: test
             """);
         writeFile("bootstrap/test-bootstrap.yaml", """
             metadata:
+              id: "test-bootstrap"
               name: "Test Bootstrap"
-              type: "bootstrap"
+              version: "1.0.0"
+              description: "Test bootstrap configuration"
+              type: "rule-config"
             bootstrap: test
             """);
         writeFile("enrichments/test-enrichment.yaml", """
             metadata:
+              id: "test-enrichment"
               name: "Test Enrichment"
+              version: "1.0.0"
+              description: "Test enrichment configuration"
               type: "enrichment"
-              author: "test"
             enrichment: test
             """);
         writeFile("rule-chains/test-chain.yaml", """
             metadata:
+              id: "test-chain"
               name: "Test Chain"
+              version: "1.0.0"
+              description: "Test chain configuration"
               type: "rule-chain"
-              author: "test"
             chain: test
             """);
         writeFile("datasets/test-dataset.yaml", """
             metadata:
+              id: "test-dataset"
               name: "Test Dataset"
+              version: "1.0.0"
+              description: "Test dataset configuration"
               type: "dataset"
             dataset: test
             """);
         writeFile("config/test-config.yaml", """
             metadata:
+              id: "test-config"
               name: "Test Config"
+              version: "1.0.0"
+              description: "Test configuration"
               type: "rule-config"
-              author: "test"
             config: test
             """);
         
@@ -454,9 +513,11 @@ class YamlDependencyAnalyzerTest {
 
         writeFile("config/test-rules.yaml", """
             metadata:
+              id: "test-rules"
               name: "Test Rules"
+              version: "1.0.0"
+              description: "Test rules configuration"
               type: "rule-config"
-              author: "test"
             rules: []
             """);
 
@@ -507,17 +568,21 @@ class YamlDependencyAnalyzerTest {
 
         writeFile("config/parent-rules.yaml", """
             metadata:
+              id: "parent-rules"
               name: "Parent Rules"
+              version: "1.0.0"
+              description: "Parent rules configuration"
               type: "rule-config"
-              author: "test"
             rules: []
             """);
 
         writeFile("config/child-rules.yaml", """
             metadata:
+              id: "child-rules"
               name: "Child Rules"
+              version: "1.0.0"
+              description: "Child rules configuration"
               type: "rule-config"
-              author: "test"
             rules: []
             """);
 
@@ -585,9 +650,11 @@ class YamlDependencyAnalyzerTest {
 
         writeFile("config/test-rules.yaml", """
             metadata:
+              id: "test-rules"
               name: "Test Rules"
+              version: "1.0.0"
+              description: "Test rules configuration for component nesting"
               type: "rule-config"
-              author: "test"
             rules: []
             """);
 

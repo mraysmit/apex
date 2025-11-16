@@ -81,6 +81,7 @@ class DataTypeScenarioServiceMalformedRegistryTest {
               id: "test-registry"
               name: "Test Registry"
               version: "1.0.0"
+              description: "Test registry for missing scenarios section"
               type: "scenario-registry"
             
             routing:
@@ -105,6 +106,7 @@ class DataTypeScenarioServiceMalformedRegistryTest {
               id: "test-registry"
               name: "Test Registry"
               version: "1.0.0"
+              description: "Test registry with empty scenarios list"
               type: "scenario-registry"
             
             scenarios: []
@@ -131,6 +133,7 @@ class DataTypeScenarioServiceMalformedRegistryTest {
               id: "test-registry"
               name: "Test Registry"
               version: "1.0.0"
+              description: "Test registry with null scenarios section"
               type: "scenario-registry"
             
             scenarios: null
@@ -157,6 +160,13 @@ class DataTypeScenarioServiceMalformedRegistryTest {
         
         // Given: Scenario entry without scenario-id
         String registryContent = """
+            metadata:
+              id: "test-registry"
+              name: "Test Registry"
+              version: "1.0.0"
+              description: "Test registry with missing scenario-id"
+              type: "scenario-registry"
+            
             scenarios:
               - config-file: "scenarios/test.yaml"
             
@@ -178,6 +188,13 @@ class DataTypeScenarioServiceMalformedRegistryTest {
         
         // Given: Scenario entry without config-file
         String registryContent = """
+            metadata:
+              id: "test-registry"
+              name: "Test Registry"
+              version: "1.0.0"
+              description: "Test registry with missing config-file"
+              type: "scenario-registry"
+            
             scenarios:
               - scenario-id: "test-scenario"
             
@@ -199,6 +216,13 @@ class DataTypeScenarioServiceMalformedRegistryTest {
         
         // Given: Scenario entry with null scenario-id
         String registryContent = """
+            metadata:
+              id: "test-registry"
+              name: "Test Registry"
+              version: "1.0.0"
+              description: "Test registry with null scenario-id"
+              type: "scenario-registry"
+            
             scenarios:
               - scenario-id: null
                 config-file: "scenarios/test.yaml"
@@ -221,6 +245,13 @@ class DataTypeScenarioServiceMalformedRegistryTest {
         
         // Given: Scenario entry with empty scenario-id
         String registryContent = """
+            metadata:
+              id: "test-registry"
+              name: "Test Registry"
+              version: "1.0.0"
+              description: "Test registry with empty scenario-id"
+              type: "scenario-registry"
+            
             scenarios:
               - scenario-id: ""
                 config-file: "scenarios/test.yaml"

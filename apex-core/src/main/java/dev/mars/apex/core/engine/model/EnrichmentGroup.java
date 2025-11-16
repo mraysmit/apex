@@ -1,6 +1,7 @@
 package dev.mars.apex.core.engine.model;
 
 import dev.mars.apex.core.config.yaml.YamlEnrichment;
+import dev.mars.apex.core.constants.ErrorHandlingConstants;
 
 import java.util.*;
 import java.util.UUID;
@@ -22,6 +23,15 @@ public class EnrichmentGroup {
     private boolean parallelExecution = false;
     private boolean debugMode = false;
     private Integer priority; // lower is higher priority
+
+    /**
+     * Error handling strategy for exceptions during enrichment group evaluation.
+     * Valid values: {@link ErrorHandlingConstants#FAIL_FAST}, {@link ErrorHandlingConstants#CONTINUE_ON_ERROR}, {@link ErrorHandlingConstants#SKIP_ON_ERROR}
+     * Default: {@link ErrorHandlingConstants#DEFAULT_STRATEGY}
+     *
+     * @since 1.0
+     */
+    private String errorHandling = ErrorHandlingConstants.DEFAULT_STRATEGY;
 
     // Enterprise metadata fields
     private String createdBy;
@@ -75,6 +85,7 @@ public class EnrichmentGroup {
     public boolean isParallelExecution() { return parallelExecution; }
     public boolean isDebugMode() { return debugMode; }
     public Integer getPriority() { return priority; }
+    public String getErrorHandling() { return errorHandling; }
 
     public EnrichmentGroup setName(String name) { this.name = name; return this; }
     public EnrichmentGroup setDescription(String description) { this.description = description; return this; }
@@ -83,6 +94,7 @@ public class EnrichmentGroup {
     public EnrichmentGroup setParallelExecution(boolean parallelExecution) { this.parallelExecution = parallelExecution; return this; }
     public EnrichmentGroup setDebugMode(boolean debugMode) { this.debugMode = debugMode; return this; }
     public EnrichmentGroup setPriority(Integer priority) { this.priority = priority; return this; }
+    public EnrichmentGroup setErrorHandling(String errorHandling) { this.errorHandling = errorHandling; return this; }
 
     public void addEnrichment(int sequence, YamlEnrichment enrichment) {
         if (enrichment == null) return;

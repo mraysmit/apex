@@ -35,6 +35,7 @@ enrichment-groups:
     name: Composite Group
     operator: AND
     stop-on-first-failure: false
+    error-handling: continue-on-error
     enrichment-group-references:
       - external_group_1
     enrichment-ids:

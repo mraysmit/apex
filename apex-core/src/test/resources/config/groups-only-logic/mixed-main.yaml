@@ -27,6 +27,7 @@ enrichment-groups:
     name: Composite Mixed Group
     description: References groups from both file system and classpath
     enabled: true
+    error-handling: continue-on-error
     enrichment-group-references:
       - filesystem_group
       - classpath_group

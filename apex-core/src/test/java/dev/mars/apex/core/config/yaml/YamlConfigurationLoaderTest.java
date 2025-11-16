@@ -264,12 +264,12 @@ class YamlConfigurationLoaderTest {
     @DisplayName("Should validate metadata when loading as Map")
     void testLoadAsMapWithInvalidMetadata() throws Exception {
         System.out.println("TEST: Triggering intentional error - testing invalid metadata validation");
-        
+
         Path yamlFile = tempDir.resolve("invalid-metadata.yaml");
         String invalidMetadataYaml = """
             metadata:
-              name: "Missing Type"
-              # Missing required 'type' field
+              name: "Missing Required Fields"
+              # Missing required 'id', 'type', 'version', 'description' fields
             rules: []
             """;
         Files.writeString(yamlFile, invalidMetadataYaml);
@@ -277,8 +277,8 @@ class YamlConfigurationLoaderTest {
         YamlConfigurationException exception = assertThrows(YamlConfigurationException.class, () -> {
             loader.loadAsMap(yamlFile.toString());
         }, "Should throw exception for missing required metadata fields");
-        
-        assertTrue(exception.getMessage().contains("Missing required 'type' field"), "Exception message should indicate missing type field");
+
+        assertTrue(exception.getMessage().contains("Missing required metadata field"), "Exception message should indicate missing required field");
     }
 
     // ========================================
@@ -418,24 +418,25 @@ class YamlConfigurationLoaderTest {
     private String createValidRuleConfigurationYaml() {
         return """
             metadata:
+              id: "test-config"
               name: "Test Configuration"
-              type: "rule-configuration"
+              type: "rule-config"
               version: "1.0.0"
               description: "Test configuration for unit tests"
-            
+
             rules:
               - id: "test-rule-1"
                 name: "Test Rule 1"
                 condition: "true"
                 message: "Test rule executed"
                 enabled: true
-              
+
               - id: "test-rule-2"
                 name: "Test Rule 2"
                 condition: "#amount > 1000"
                 message: "High amount detected"
                 enabled: true
-            
+
             rule-groups:
               - id: "test-group"
                 name: "Test Group"

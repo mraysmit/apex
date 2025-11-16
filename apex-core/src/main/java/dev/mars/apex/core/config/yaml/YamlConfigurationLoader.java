@@ -309,8 +309,8 @@ public class YamlConfigurationLoader {
             logger.info("Loading YAML file as Map: " + filePath);
             Map<String, Object> yamlContent = yamlMapper.readValue(path.toFile(), Map.class);
 
-            // Validate metadata if present
-            validateMetadata(yamlContent, filePath);
+            // Validate metadata using YamlMetadataValidator
+            YamlMetadataValidator.validateMetadataAndThrow(yamlContent, filePath);
 
             return yamlContent;
 
@@ -319,40 +319,7 @@ public class YamlConfigurationLoader {
         }
     }
 
-    /**
-     * Validates basic metadata requirements for YAML files.
-     *
-     * @param yamlContent The loaded YAML content
-     * @param filePath The file path for error reporting
-     * @throws YamlConfigurationException if validation fails
-     */
-    @SuppressWarnings("unchecked")
-    private void validateMetadata(Map<String, Object> yamlContent, String filePath) throws YamlConfigurationException {
-        Object metadataObj = yamlContent.get("metadata");
-        if (metadataObj == null) {
-            logger.warn("YAML file missing metadata section: " + filePath);
-            return; // Don't fail for missing metadata, just warn
-        }
 
-        if (!(metadataObj instanceof Map)) {
-            throw new YamlConfigurationException("Invalid metadata section in file: " + filePath + " - must be a map/object");
-        }
-
-        Map<String, Object> metadata = (Map<String, Object>) metadataObj;
-
-        // Check for required 'type' field
-        Object typeObj = metadata.get("type");
-        if (typeObj == null) {
-            throw new YamlConfigurationException("Missing required 'type' field in metadata for file: " + filePath);
-        }
-
-        if (!(typeObj instanceof String) || ((String) typeObj).trim().isEmpty()) {
-            throw new YamlConfigurationException("Invalid 'type' field in metadata for file: " + filePath + " - must be a non-empty string");
-        }
-
-        String type = (String) typeObj;
-        logger.debug("Validated YAML file type '" + type + "' for file: " + filePath);
-    }
 
     /**
      * Check if a YAML file is a component file by examining its type field.

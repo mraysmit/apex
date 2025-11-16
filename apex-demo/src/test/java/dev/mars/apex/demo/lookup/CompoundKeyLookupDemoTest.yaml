@@ -31,8 +31,8 @@ data-sources:
     description: "Customer-region database using H2 for compound key lookups"
 
     connection:
-      # H2 file-based database for compound key demo - using same pattern as other tests
-      database: "./target/h2-demo/apex_demo_shared"
+      # H2 file-based database - unique per test to avoid file locking
+      database: "./target/h2-demo/compound_key_lookup_test"
       username: "sa"
       password: ""
 

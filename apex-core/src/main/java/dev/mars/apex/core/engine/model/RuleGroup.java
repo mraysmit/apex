@@ -1,5 +1,6 @@
 package dev.mars.apex.core.engine.model;
 
+import dev.mars.apex.core.constants.ErrorHandlingConstants;
 import dev.mars.apex.core.constants.SeverityConstants;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -50,6 +51,15 @@ public class RuleGroup implements RuleBase {
     private final boolean debugMode;
     private String message;
 
+    /**
+     * Error handling strategy for exceptions during rule group evaluation.
+     * Valid values: {@link ErrorHandlingConstants#FAIL_FAST}, {@link ErrorHandlingConstants#CONTINUE_ON_ERROR}, {@link ErrorHandlingConstants#SKIP_ON_ERROR}
+     * Default: {@link ErrorHandlingConstants#DEFAULT_STRATEGY}
+     *
+     * @since 1.0
+     */
+    private final String errorHandling;
+
     // Enterprise metadata fields
     private String createdBy;
     private String businessDomain;
@@ -97,6 +107,27 @@ public class RuleGroup implements RuleBase {
     public RuleGroup(String id, String category, String name, String description,
                      int priority, boolean isAndOperator, boolean stopOnFirstFailure,
                      boolean parallelExecution, boolean debugMode) {
+        this(id, category, name, description, priority, isAndOperator, stopOnFirstFailure,
+             parallelExecution, debugMode, ErrorHandlingConstants.DEFAULT_STRATEGY);
+    }
+
+    /**
+     * Create a new rule group with a single category and full configuration options including error handling.
+     *
+     * @param id The unique identifier of the rule group
+     * @param category The initial category of the rule group
+     * @param name The name of the rule group
+     * @param description The description of what the rule group does
+     * @param priority The priority of the rule group (lower numbers = higher priority)
+     * @param isAndOperator Whether to use AND (true) or OR (false) to combine rules
+     * @param stopOnFirstFailure Whether to stop evaluation on first failure (AND) or success (OR)
+     * @param parallelExecution Whether to execute rules in parallel when possible
+     * @param debugMode Whether to enable debug mode (disables short-circuiting for complete evaluation)
+     * @param errorHandling Error handling strategy: {@link ErrorHandlingConstants#FAIL_FAST}, {@link ErrorHandlingConstants#CONTINUE_ON_ERROR}, or {@link ErrorHandlingConstants#SKIP_ON_ERROR}
+     */
+    public RuleGroup(String id, String category, String name, String description,
+                     int priority, boolean isAndOperator, boolean stopOnFirstFailure,
+                     boolean parallelExecution, boolean debugMode, String errorHandling) {
         this.uuid = UUID.randomUUID();
         this.id = id;
         this.categories = new HashSet<>();
@@ -109,6 +140,7 @@ public class RuleGroup implements RuleBase {
         this.stopOnFirstFailure = stopOnFirstFailure;
         this.parallelExecution = parallelExecution;
         this.debugMode = debugMode;
+        this.errorHandling = errorHandling != null ? errorHandling : ErrorHandlingConstants.DEFAULT_STRATEGY;
         this.message = description; // Default message is the description
     }
 
@@ -129,7 +161,7 @@ public class RuleGroup implements RuleBase {
         for (String categoryName : categoryNames) {
             categoryObjects.add(new Category(categoryName, priority));
         }
-        return new RuleGroup(id, categoryObjects, name, description, priority, isAndOperator, true, false, false);
+        return new RuleGroup(id, categoryObjects, name, description, priority, isAndOperator, true, false, false, ErrorHandlingConstants.DEFAULT_STRATEGY);
     }
 
     /**
@@ -144,7 +176,7 @@ public class RuleGroup implements RuleBase {
      */
     public RuleGroup(String id, Set<Category> categories, String name, String description,
                      int priority, boolean isAndOperator) {
-        this(id, categories, name, description, priority, isAndOperator, true, false, false);
+        this(id, categories, name, description, priority, isAndOperator, true, false, false, ErrorHandlingConstants.DEFAULT_STRATEGY);
     }
 
     /**
@@ -163,6 +195,27 @@ public class RuleGroup implements RuleBase {
     public RuleGroup(String id, Set<Category> categories, String name, String description,
                      int priority, boolean isAndOperator, boolean stopOnFirstFailure,
                      boolean parallelExecution, boolean debugMode) {
+        this(id, categories, name, description, priority, isAndOperator, stopOnFirstFailure,
+             parallelExecution, debugMode, ErrorHandlingConstants.DEFAULT_STRATEGY);
+    }
+
+    /**
+     * Create a new rule group with multiple category objects and full configuration options including error handling.
+     *
+     * @param id The unique identifier of the rule group
+     * @param categories The set of category objects this rule group belongs to
+     * @param name The name of the rule group
+     * @param description The description of what the rule group does
+     * @param priority The priority of the rule group (lower numbers = higher priority)
+     * @param isAndOperator Whether to use AND (true) or OR (false) to combine rules
+     * @param stopOnFirstFailure Whether to stop evaluation on first failure (AND) or success (OR)
+     * @param parallelExecution Whether to execute rules in parallel when possible
+     * @param debugMode Whether to enable debug mode (disables short-circuiting for complete evaluation)
+     * @param errorHandling Error handling strategy: {@link ErrorHandlingConstants#FAIL_FAST}, {@link ErrorHandlingConstants#CONTINUE_ON_ERROR}, or {@link ErrorHandlingConstants#SKIP_ON_ERROR}
+     */
+    public RuleGroup(String id, Set<Category> categories, String name, String description,
+                     int priority, boolean isAndOperator, boolean stopOnFirstFailure,
+                     boolean parallelExecution, boolean debugMode, String errorHandling) {
         this.uuid = UUID.randomUUID();
         this.id = id;
         this.categories = new HashSet<>(categories);
@@ -174,6 +227,7 @@ public class RuleGroup implements RuleBase {
         this.stopOnFirstFailure = stopOnFirstFailure;
         this.parallelExecution = parallelExecution;
         this.debugMode = debugMode;
+        this.errorHandling = errorHandling != null ? errorHandling : ErrorHandlingConstants.DEFAULT_STRATEGY;
         this.message = description; // Default message is the description
     }
 
@@ -872,6 +926,15 @@ public class RuleGroup implements RuleBase {
 
     public boolean isAndOperator() {
         return isAndOperator;
+    }
+
+    /**
+     * Get the error handling strategy for this rule group.
+     *
+     * @return The error handling strategy: "fail-fast", "continue-on-error", or "skip-on-error"
+     */
+    public String getErrorHandling() {
+        return errorHandling;
     }
 
     /**

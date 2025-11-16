@@ -17,6 +17,9 @@ package dev.mars.apex.core.util;
  */
 
 
+import dev.mars.apex.core.config.yaml.YamlMetadataValidator;
+import dev.mars.apex.core.config.yaml.YamlValidationResult;
+import dev.mars.apex.core.config.yaml.YamlValidationSummary;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -83,11 +86,12 @@ class YamlMetadataValidatorTest {
     void testMissingTypeField() throws IOException {
         String invalidScenario = """
             metadata:
+              id: "test-scenario"
               name: "Test Scenario"
               version: "1.0.0"
               description: "A test scenario"
               # Missing type field
-            
+
             scenario:
               scenario-id: "test-scenario"
               data-types:
@@ -95,13 +99,14 @@ class YamlMetadataValidatorTest {
               rule-configurations:
                 - "config/test-rules.yaml"
             """;
-        
+
         writeFile("scenarios/invalid-scenario.yaml", invalidScenario);
-        
+
         YamlValidationResult result = validator.validateFile("scenarios/invalid-scenario.yaml");
-        
+
         assertFalse(result.isValid(), "Scenario missing type should fail validation");
-        assertTrue(result.getErrors().stream().anyMatch(error -> error.contains("Missing required metadata field: type")));
+        assertTrue(result.getErrors().stream().anyMatch(error -> error.contains("Missing required metadata field 'type'")),
+            "Expected error about missing type field, but got: " + result.getErrors());
         assertEquals("INVALID", result.getStatus());
     }
     
@@ -109,18 +114,20 @@ class YamlMetadataValidatorTest {
     void testInvalidFileType() throws IOException {
         String invalidType = """
             metadata:
+              id: "test-file"
               name: "Test File"
               version: "1.0.0"
               description: "A test file"
               type: "invalid-type"
             """;
-        
+
         writeFile("test-file.yaml", invalidType);
-        
+
         YamlValidationResult result = validator.validateFile("test-file.yaml");
-        
+
         assertFalse(result.isValid(), "Invalid file type should fail validation");
-        assertTrue(result.getErrors().stream().anyMatch(error -> error.contains("Invalid file type: invalid-type")));
+        assertTrue(result.getErrors().stream().anyMatch(error -> error.contains("Invalid file type 'invalid-type'")),
+            "Expected error about invalid file type, but got: " + result.getErrors());
     }
     
     @Test
@@ -141,7 +148,8 @@ class YamlMetadataValidatorTest {
         YamlValidationResult result = validator.validateFile("scenarios/no-metadata.yaml");
 
         assertFalse(result.isValid(), "File without metadata should fail validation");
-        assertTrue(result.getErrors().stream().anyMatch(error -> error.contains("Missing 'metadata' section")));
+        assertTrue(result.getErrors().stream().anyMatch(error -> error.contains("Missing required 'metadata' section")),
+            "Expected error about missing metadata section, but got: " + result.getErrors());
     }
     
 

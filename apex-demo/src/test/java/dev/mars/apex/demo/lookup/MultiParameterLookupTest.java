@@ -26,6 +26,7 @@ import dev.mars.apex.demo.ColoredTestOutputExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -64,11 +65,26 @@ public class MultiParameterLookupTest {
 
     private static final Logger logger = LoggerFactory.getLogger(MultiParameterLookupTest.class);
 
+    // Unique database name for this test class to avoid file locking conflicts
+    private static final String DB_NAME = "multi_parameter_lookup_test";
+
     private YamlConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
         this.yamlLoader = new YamlConfigurationLoader();
+    }
+
+    @AfterEach
+    void tearDown() {
+        // Shutdown H2 database to release file locks
+        try (Connection connection = DriverManager.getConnection(
+                "jdbc:h2:./target/h2-demo/" + DB_NAME, "sa", "")) {
+            connection.createStatement().execute("SHUTDOWN");
+            logger.info("✓ Database shutdown completed");
+        } catch (Exception e) {
+            logger.warn("Failed to shutdown database: " + e.getMessage());
+        }
     }
 
     @Test
@@ -101,8 +117,8 @@ public class MultiParameterLookupTest {
      */
     private void setupDatabase() {
         logger.info("Setting up H2 database with test data...");
-        
-        String jdbcUrl = "jdbc:h2:./target/h2-demo/settlement_demo;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+
+        String jdbcUrl = "jdbc:h2:./target/h2-demo/" + DB_NAME + ";MODE=PostgreSQL";
         
         try (Connection connection = DriverManager.getConnection(jdbcUrl, "sa", "")) {
             Statement statement = connection.createStatement();

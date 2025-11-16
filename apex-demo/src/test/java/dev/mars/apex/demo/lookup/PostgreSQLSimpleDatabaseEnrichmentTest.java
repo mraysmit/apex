@@ -58,6 +58,9 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(PostgreSQLSimpleDatabaseEnrichmentTest.class);
 
+    // Unique database name for this test class to avoid file locking conflicts
+    private static final String DB_NAME = "postgresql_simple_enrichment_test";
+
     /**
      * Setup H2 database with customer data for enrichment testing.
      * This is infrastructure setup - business logic is in YAML configuration.
@@ -66,7 +69,7 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
     void setupH2Database() {
         logger.info("Setting up H2 database for simple database enrichment demo...");
 
-        String jdbcUrl = "jdbc:h2:./target/h2-demo/apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+        String jdbcUrl = "jdbc:h2:./target/h2-demo/" + DB_NAME + ";MODE=PostgreSQL";
 
         try (Connection connection = DriverManager.getConnection(jdbcUrl, "sa", "")) {
             Statement statement = connection.createStatement();
@@ -114,7 +117,7 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
         logger.info("PHASE 1: H2 Database Setup Validation");
         logger.info("=".repeat(80));
 
-        String jdbcUrl = "jdbc:h2:./target/h2-demo/apex_demo_shared;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
+        String jdbcUrl = "jdbc:h2:./target/h2-demo/" + DB_NAME + ";MODE=PostgreSQL";
 
         try (Connection connection = DriverManager.getConnection(jdbcUrl, "sa", "")) {
             Statement statement = connection.createStatement();
@@ -373,6 +376,21 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
             logger.error("Enrichment condition handling failed: " + e.getMessage(), e);
             fail("Enrichment condition handling failed: " + e.getMessage());
         }
+    }
+
+    @AfterEach
+    public void tearDown() {
+        // Shutdown H2 database to release file locks
+        try (Connection connection = DriverManager.getConnection(
+                "jdbc:h2:./target/h2-demo/" + DB_NAME, "sa", "")) {
+            connection.createStatement().execute("SHUTDOWN");
+            logger.info("✓ Database shutdown completed");
+        } catch (Exception e) {
+            logger.warn("Failed to shutdown database: " + e.getMessage());
+        }
+
+        // Call parent tearDown to clean up APEX services
+        super.tearDown();
     }
 }
 

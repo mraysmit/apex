@@ -1,0 +1,155 @@
+package dev.mars.apex.core.config.yaml;
+
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleGroup;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * Test class for Rule Group error-handling configuration.
+ * 
+ * Tests that the error-handling field is properly parsed from YAML and applied to RuleGroup instances.
+ *
+ * @author APEX Rules Engine
+ * @since 1.0
+ * @version 1.0
+ */
+class RuleGroupErrorHandlingConfigTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(RuleGroupErrorHandlingConfigTest.class);
+    private YamlConfigurationLoader yamlLoader;
+
+    @BeforeEach
+    void setUp() {
+        yamlLoader = new YamlConfigurationLoader();
+    }
+
+    @Test
+    @DisplayName("Test 1: Rule group with fail-fast error handling")
+    void testRuleGroupWithFailFastErrorHandling() throws Exception {
+        logger.info("=== Test 1: Testing rule group with fail-fast error handling ===");
+
+        String yaml = """
+            metadata:
+              name: "Error Handling Test"
+              type: "test-config"
+
+            rule-groups:
+              - id: "fail-fast-group"
+                name: "Fail Fast Group"
+                operator: "AND"
+                error-handling: "fail-fast"
+                rules:
+                  - id: "rule1"
+                    name: "Rule 1"
+                    condition: "#data.value > 10"
+                    message: "Value is greater than 10"
+                    severity: "INFO"
+            """;
+
+        YamlRuleConfiguration config = yamlLoader.fromYamlString(yaml);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+        RuleGroup group = engine.getConfiguration().getRuleGroupById("fail-fast-group");
+        assertNotNull(group, "Rule group should be created");
+        assertEquals("fail-fast", group.getErrorHandling(), "Error handling should be fail-fast");
+    }
+
+    @Test
+    @DisplayName("Test 2: Rule group with continue-on-error error handling")
+    void testRuleGroupWithContinueOnErrorHandling() throws Exception {
+        logger.info("=== Test 2: Testing rule group with continue-on-error error handling ===");
+
+        String yaml = """
+            metadata:
+              name: "Error Handling Test"
+              type: "test-config"
+
+            rule-groups:
+              - id: "continue-group"
+                name: "Continue On Error Group"
+                operator: "OR"
+                error-handling: "continue-on-error"
+                rules:
+                  - id: "rule1"
+                    name: "Rule 1"
+                    condition: "#data.value > 10"
+                    message: "Value is greater than 10"
+                    severity: "WARNING"
+            """;
+
+        YamlRuleConfiguration config = yamlLoader.fromYamlString(yaml);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+        RuleGroup group = engine.getConfiguration().getRuleGroupById("continue-group");
+        assertNotNull(group, "Rule group should be created");
+        assertEquals("continue-on-error", group.getErrorHandling(), "Error handling should be continue-on-error");
+    }
+
+    @Test
+    @DisplayName("Test 3: Rule group with skip-on-error error handling")
+    void testRuleGroupWithSkipOnErrorHandling() throws Exception {
+        logger.info("=== Test 3: Testing rule group with skip-on-error error handling ===");
+
+        String yaml = """
+            metadata:
+              name: "Error Handling Test"
+              type: "test-config"
+
+            rule-groups:
+              - id: "skip-group"
+                name: "Skip On Error Group"
+                operator: "AND"
+                error-handling: "skip-on-error"
+                rules:
+                  - id: "rule1"
+                    name: "Rule 1"
+                    condition: "#data.value > 10"
+                    message: "Value is greater than 10"
+                    severity: "ERROR"
+            """;
+
+        YamlRuleConfiguration config = yamlLoader.fromYamlString(yaml);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+        RuleGroup group = engine.getConfiguration().getRuleGroupById("skip-group");
+        assertNotNull(group, "Rule group should be created");
+        assertEquals("skip-on-error", group.getErrorHandling(), "Error handling should be skip-on-error");
+    }
+
+    @Test
+    @DisplayName("Test 4: Rule group with default error handling (no error-handling specified)")
+    void testRuleGroupWithDefaultErrorHandling() throws Exception {
+        logger.info("=== Test 4: Testing rule group with default error handling ===");
+
+        String yaml = """
+            metadata:
+              name: "Error Handling Test"
+              type: "test-config"
+
+            rule-groups:
+              - id: "default-group"
+                name: "Default Error Handling Group"
+                operator: "AND"
+                rules:
+                  - id: "rule1"
+                    name: "Rule 1"
+                    condition: "#data.value > 10"
+                    message: "Value is greater than 10"
+                    severity: "INFO"
+            """;
+
+        YamlRuleConfiguration config = yamlLoader.fromYamlString(yaml);
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+        RuleGroup group = engine.getConfiguration().getRuleGroupById("default-group");
+        assertNotNull(group, "Rule group should be created");
+        assertEquals("fail-fast", group.getErrorHandling(), "Error handling should default to fail-fast");
+    }
+}
+

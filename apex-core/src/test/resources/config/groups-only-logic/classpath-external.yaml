@@ -28,6 +28,7 @@ enrichment-groups:
     name: External Group 1
     operator: AND
     stop-on-first-failure: false
+    error-handling: continue-on-error
     enrichment-ids:
       - external_enrichment_1
 

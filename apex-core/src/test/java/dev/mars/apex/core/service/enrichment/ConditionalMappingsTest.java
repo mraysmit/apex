@@ -3,13 +3,11 @@ package dev.mars.apex.core.service.enrichment;
 import dev.mars.apex.core.config.yaml.YamlEnrichment;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import org.junit.jupiter.api.BeforeEach;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -23,30 +21,47 @@ public class ConditionalMappingsTest {
 
     private static final Logger logger = Logger.getLogger(ConditionalMappingsTest.class.getName());
 
-    private LookupServiceRegistry serviceRegistry;
-    private ExpressionEvaluatorService evaluatorService;
-    private YamlEnrichmentProcessor processor;
-    private YamlConfigurationLoader yamlLoader;
-
-    @BeforeEach
-    void setUp() {
-        serviceRegistry = new LookupServiceRegistry();
-        evaluatorService = new ExpressionEvaluatorService();
-        processor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
-        yamlLoader = new YamlConfigurationLoader();
-    }
-
     @Test
-    @DisplayName("Should create conditional-mappings structure programmatically")
+    @DisplayName("Should create conditional-mappings structure from YAML")
     void shouldCreateConditionalMappingsStructure() {
         logger.info("=== Testing Conditional Mappings Structure Creation ===");
 
         try {
-            // Create test enrichment with conditional mappings
-            YamlEnrichment enrichment = createTestEnrichmentWithOrConditions();
+            // Create YAML config with conditional mappings
+            String yamlConfig = """
+                metadata:
+                  id: "test-or-conditions"
+                  name: "Test OR Conditions"
+                  version: "1.0.0"
+                  description: "Test OR conditions in conditional mappings"
+                  type: "rule-config"
+
+                enrichments:
+                  - id: "test-or-conditions"
+                    type: "field-enrichment"
+                    conditional-mappings:
+                      - conditions:
+                          operator: "OR"
+                          rules:
+                            - condition: "#testField == 'VALUE1'"
+                              description: "Test value 1"
+                            - condition: "#testField == 'VALUE2'"
+                              description: "Test value 2"
+                        field-mappings:
+                          - source-field: "testField"
+                            target-field: "result"
+                            expression: "'OR_MATCHED'"
+                """;
+
+            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
             // Verify the structure was created correctly
-            assertNotNull(enrichment, "Enrichment should not be null");
+            assertNotNull(config, "Config should not be null");
+            assertNotNull(config.getEnrichments(), "Enrichments should not be null");
+            assertEquals(1, config.getEnrichments().size(), "Should have one enrichment");
+
+            YamlEnrichment enrichment = config.getEnrichments().get(0);
             assertEquals("test-or-conditions", enrichment.getId(), "Enrichment ID should match");
             assertEquals("field-enrichment", enrichment.getType(), "Should be field-enrichment type");
 
@@ -82,21 +97,46 @@ public class ConditionalMappingsTest {
         logger.info("=== Testing OR Conditions Processing ===");
 
         try {
-            // Create test enrichment with OR conditions
-            YamlEnrichment enrichment = createTestEnrichmentWithOrConditions();
-
             // Create test data that matches first OR condition
             Map<String, Object> data = new HashMap<>();
             data.put("testField", "VALUE1");
 
-            // Process the enrichment
-            Object result = processor.processEnrichment(enrichment, data);
-            assertNotNull(result, "Result should not be null");
+            // Create YAML config with OR conditions
+            String yamlConfig = """
+                metadata:
+                  id: "test-or-conditions"
+                  name: "Test OR Conditions"
+                  version: "1.0.0"
+                  description: "Test OR conditions in conditional mappings"
+                  type: "rule-config"
 
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedData = (Map<String, Object>) result;
+                enrichments:
+                  - id: "test-or-conditions"
+                    type: "field-enrichment"
+                    conditional-mappings:
+                      - conditions:
+                          operator: "OR"
+                          rules:
+                            - condition: "#testField == 'VALUE1'"
+                              description: "Test value 1"
+                            - condition: "#testField == 'VALUE2'"
+                              description: "Test value 2"
+                        field-mappings:
+                          - source-field: "testField"
+                            target-field: "result"
+                            expression: "'OR_MATCHED'"
+                """;
+
+            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
+
+            // Process enrichment using RulesEngine
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult result = engine.evaluate(data);
+            Map<String, Object> enrichedData = result.getEnrichedData();
 
             // Verify the conditional mapping was applied
+            assertNotNull(enrichedData, "Result should not be null");
             assertEquals("OR_MATCHED", enrichedData.get("result"), "Result should be 'OR_MATCHED'");
 
             logger.info("✓ OR conditions processing successful");
@@ -113,22 +153,50 @@ public class ConditionalMappingsTest {
         logger.info("=== Testing AND Conditions Processing ===");
 
         try {
-            // Create test enrichment with AND conditions
-            YamlEnrichment enrichment = createTestEnrichmentWithAndConditions();
-
             // Create test data that matches both AND conditions
             Map<String, Object> data = new HashMap<>();
             data.put("testField", "VALUE3");
             data.put("systemCode", "TEST");
 
-            // Process the enrichment
-            Object result = processor.processEnrichment(enrichment, data);
-            assertNotNull(result, "Result should not be null");
+            // Create YAML config with AND conditions
+            String yamlConfig = """
+                metadata:
+                  id: "test-and-conditions"
+                  name: "Test AND Conditions"
+                  version: "1.0.0"
+                  description: "Test AND conditions in conditional mappings"
+                  type: "rule-config"
 
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedData = (Map<String, Object>) result;
+                enrichments:
+                  - id: "test-and-conditions"
+                    type: "field-enrichment"
+                    conditional-mappings:
+                      - conditions:
+                          operator: "AND"
+                          rules:
+                            - condition: "#testField == 'VALUE3'"
+                              description: "Test value 3"
+                            - condition: "#systemCode == 'TEST'"
+                              description: "Test system"
+                        field-mappings:
+                          - source-field: "testField"
+                            target-field: "result"
+                            expression: "'AND_MATCHED'"
+                          - source-field: "systemCode"
+                            target-field: "system"
+                            expression: "#systemCode"
+                """;
+
+            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
+
+            // Process enrichment using RulesEngine
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult result = engine.evaluate(data);
+            Map<String, Object> enrichedData = result.getEnrichedData();
 
             // Verify the conditional mapping was applied
+            assertNotNull(enrichedData, "Result should not be null");
             assertEquals("AND_MATCHED", enrichedData.get("result"), "Result should be 'AND_MATCHED'");
             assertEquals("TEST", enrichedData.get("system"), "System should be 'TEST'");
 
@@ -146,21 +214,46 @@ public class ConditionalMappingsTest {
         logger.info("=== Testing Failed Conditions Handling ===");
 
         try {
-            // Create test enrichment with OR conditions
-            YamlEnrichment enrichment = createTestEnrichmentWithOrConditions();
-
             // Create test data that doesn't match any conditions
             Map<String, Object> data = new HashMap<>();
             data.put("testField", "NO_MATCH");
 
-            // Process the enrichment
-            Object result = processor.processEnrichment(enrichment, data);
-            assertNotNull(result, "Result should not be null");
+            // Create YAML config with OR conditions
+            String yamlConfig = """
+                metadata:
+                  id: "test-or-conditions"
+                  name: "Test OR Conditions"
+                  version: "1.0.0"
+                  description: "Test OR conditions in conditional mappings"
+                  type: "rule-config"
 
-            @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedData = (Map<String, Object>) result;
+                enrichments:
+                  - id: "test-or-conditions"
+                    type: "field-enrichment"
+                    conditional-mappings:
+                      - conditions:
+                          operator: "OR"
+                          rules:
+                            - condition: "#testField == 'VALUE1'"
+                              description: "Test value 1"
+                            - condition: "#testField == 'VALUE2'"
+                              description: "Test value 2"
+                        field-mappings:
+                          - source-field: "testField"
+                            target-field: "result"
+                            expression: "'OR_MATCHED'"
+                """;
+
+            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
+
+            // Process enrichment using RulesEngine
+            RulesEngine engine = RulesEngine.fromYamlConfig(config);
+            RuleResult result = engine.evaluate(data);
+            Map<String, Object> enrichedData = result.getEnrichedData();
 
             // Verify no conditional mapping was applied
+            assertNotNull(enrichedData, "Result should not be null");
             assertNull(enrichedData.get("result"), "Result should be null when no conditions match");
 
             logger.info("✓ Failed conditions handling successful");
@@ -171,77 +264,4 @@ public class ConditionalMappingsTest {
         }
     }
 
-    // Helper methods to create test enrichments
-    private YamlEnrichment createTestEnrichmentWithOrConditions() {
-        YamlEnrichment enrichment = new YamlEnrichment();
-        enrichment.setId("test-or-conditions");
-        enrichment.setType("field-enrichment");
-
-        // Create conditional mapping with OR conditions
-        YamlEnrichment.ConditionalMapping conditionalMapping = new YamlEnrichment.ConditionalMapping();
-        
-        YamlEnrichment.ConditionGroup conditionGroup = new YamlEnrichment.ConditionGroup();
-        conditionGroup.setOperator("OR");
-        
-        YamlEnrichment.ConditionRule rule1 = new YamlEnrichment.ConditionRule();
-        rule1.setCondition("#testField == 'VALUE1'");
-        rule1.setDescription("Test value 1");
-        
-        YamlEnrichment.ConditionRule rule2 = new YamlEnrichment.ConditionRule();
-        rule2.setCondition("#testField == 'VALUE2'");
-        rule2.setDescription("Test value 2");
-        
-        conditionGroup.setRules(List.of(rule1, rule2));
-        conditionalMapping.setConditions(conditionGroup);
-        
-        // Create field mapping
-        YamlEnrichment.FieldMapping fieldMapping = new YamlEnrichment.FieldMapping();
-        fieldMapping.setSourceField("testField");
-        fieldMapping.setTargetField("result");
-        fieldMapping.setExpression("'OR_MATCHED'");
-        
-        conditionalMapping.setFieldMappings(List.of(fieldMapping));
-        enrichment.setConditionalMappings(List.of(conditionalMapping));
-        
-        return enrichment;
-    }
-
-    private YamlEnrichment createTestEnrichmentWithAndConditions() {
-        YamlEnrichment enrichment = new YamlEnrichment();
-        enrichment.setId("test-and-conditions");
-        enrichment.setType("field-enrichment");
-
-        // Create conditional mapping with AND conditions
-        YamlEnrichment.ConditionalMapping conditionalMapping = new YamlEnrichment.ConditionalMapping();
-        
-        YamlEnrichment.ConditionGroup conditionGroup = new YamlEnrichment.ConditionGroup();
-        conditionGroup.setOperator("AND");
-        
-        YamlEnrichment.ConditionRule rule1 = new YamlEnrichment.ConditionRule();
-        rule1.setCondition("#testField == 'VALUE3'");
-        rule1.setDescription("Test value 3");
-        
-        YamlEnrichment.ConditionRule rule2 = new YamlEnrichment.ConditionRule();
-        rule2.setCondition("#systemCode == 'TEST'");
-        rule2.setDescription("Test system");
-        
-        conditionGroup.setRules(List.of(rule1, rule2));
-        conditionalMapping.setConditions(conditionGroup);
-        
-        // Create field mappings
-        YamlEnrichment.FieldMapping fieldMapping1 = new YamlEnrichment.FieldMapping();
-        fieldMapping1.setSourceField("testField");
-        fieldMapping1.setTargetField("result");
-        fieldMapping1.setExpression("'AND_MATCHED'");
-
-        YamlEnrichment.FieldMapping fieldMapping2 = new YamlEnrichment.FieldMapping();
-        fieldMapping2.setSourceField("systemCode");
-        fieldMapping2.setTargetField("system");
-        fieldMapping2.setExpression("#systemCode");
-        
-        conditionalMapping.setFieldMappings(List.of(fieldMapping1, fieldMapping2));
-        enrichment.setConditionalMappings(List.of(conditionalMapping));
-        
-        return enrichment;
-    }
 }

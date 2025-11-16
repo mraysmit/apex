@@ -1,5 +1,6 @@
 package dev.mars.apex.core.engine.config;
 
+import dev.mars.apex.core.constants.ErrorHandlingConstants;
 import dev.mars.apex.core.engine.model.Category;
 import dev.mars.apex.core.engine.model.RuleGroup;
 
@@ -44,6 +45,7 @@ public class RuleGroupBuilder {
     private String description;
     private int priority = 100; // Default priority
     private boolean isAndOperator = true; // Default to AND operator
+    private String errorHandling = ErrorHandlingConstants.DEFAULT_STRATEGY; // Default error handling strategy
 
     /**
      * Create a new RuleGroupBuilder with a generated ID.
@@ -172,6 +174,17 @@ public class RuleGroupBuilder {
     }
 
     /**
+     * Set the error handling strategy for this rule group.
+     *
+     * @param errorHandling The error handling strategy: "fail-fast", "continue-on-error", or "skip-on-error"
+     * @return This builder for method chaining
+     */
+    public RuleGroupBuilder withErrorHandling(String errorHandling) {
+        this.errorHandling = errorHandling;
+        return this;
+    }
+
+    /**
      * Build a RuleGroup instance with the current builder state.
      * If no categories have been added, a default category will be used.
      *
@@ -191,6 +204,6 @@ public class RuleGroupBuilder {
             categories.add(new Category("default", priority));
         }
 
-        return new RuleGroup(id, categories, name, description, priority, isAndOperator);
+        return new RuleGroup(id, categories, name, description, priority, isAndOperator, true, false, false, errorHandling);
     }
 }

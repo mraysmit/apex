@@ -23,6 +23,7 @@ import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +61,9 @@ public class SimpleDatabaseDataSourceTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(SimpleDatabaseDataSourceTest.class);
 
+    // Unique database name for this test class to avoid file locking conflicts
+    private static final String DB_NAME = "simple_datasource_test";
+
     @BeforeEach
     void setupDatabase() {
         try {
@@ -67,7 +71,7 @@ public class SimpleDatabaseDataSourceTest extends DemoTestBase {
 
             // Create H2 database connection
             Connection conn = DriverManager.getConnection(
-                "jdbc:h2:./target/h2-demo/datasource_demo", "sa", "");
+                "jdbc:h2:./target/h2-demo/" + DB_NAME, "sa", "");
 
             Statement stmt = conn.createStatement();
 
@@ -95,6 +99,21 @@ public class SimpleDatabaseDataSourceTest extends DemoTestBase {
         } catch (Exception e) {
             fail("Database setup failed: " + e.getMessage());
         }
+    }
+
+    @AfterEach
+    public void tearDown() {
+        // Shutdown H2 database to release file locks
+        try (Connection connection = DriverManager.getConnection(
+                "jdbc:h2:./target/h2-demo/" + DB_NAME, "sa", "")) {
+            connection.createStatement().execute("SHUTDOWN");
+            logger.info("✓ Database shutdown completed");
+        } catch (Exception e) {
+            logger.warn("Failed to shutdown database: " + e.getMessage());
+        }
+
+        // Call parent tearDown to clean up APEX services
+        super.tearDown();
     }
 
     @Test

@@ -17,6 +17,7 @@ rule-groups:
   - id: "customer-validation"
     name: "Customer Validation Group"
     description: "Validates customer data"
+    error-handling: continue-on-error
     rule-ids:
       - "age-check"
       - "email-validation"

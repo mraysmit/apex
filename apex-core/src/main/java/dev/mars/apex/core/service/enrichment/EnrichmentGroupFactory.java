@@ -4,6 +4,7 @@ import dev.mars.apex.core.config.yaml.YamlCategory;
 import dev.mars.apex.core.config.yaml.YamlEnrichment;
 import dev.mars.apex.core.config.yaml.YamlEnrichmentGroup;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.constants.ErrorHandlingConstants;
 import dev.mars.apex.core.engine.model.Category;
 import dev.mars.apex.core.engine.model.EnrichmentGroup;
 import org.slf4j.Logger;
@@ -54,6 +55,13 @@ public class EnrichmentGroupFactory {
                        "'. YamlCategory found: " + (yamlCategory != null) +
                        (yamlCategory != null ? ", businessOwner: " + yamlCategory.getBusinessOwner() : ""));
 
+            // Parse error-handling strategy from YAML configuration
+            String errorHandling = yg.getErrorHandling() != null ? yg.getErrorHandling() : ErrorHandlingConstants.DEFAULT_STRATEGY;
+            if (!ErrorHandlingConstants.isValidStrategy(errorHandling)) {
+                logger.warn("Invalid error-handling '" + errorHandling + "' for enrichment group '" + yg.getId() + "'. Using " + ErrorHandlingConstants.DEFAULT_STRATEGY + " as default.");
+                errorHandling = ErrorHandlingConstants.DEFAULT_STRATEGY;
+            }
+
             EnrichmentGroup g = new EnrichmentGroup(yg.getId())
                     .setName(yg.getName())
                     .setDescription(yg.getDescription())
@@ -61,7 +69,8 @@ public class EnrichmentGroupFactory {
                     .setStopOnFirstFailure(Boolean.TRUE.equals(yg.getStopOnFirstFailure()))
                     .setParallelExecution(Boolean.TRUE.equals(yg.getParallelExecution()))
                     .setDebugMode(yg.getDebugMode() != null ? yg.getDebugMode() : Boolean.parseBoolean(System.getProperty("apex.enrichmentgroup.debug", "false")))
-                    .setPriority(yg.getPriority());
+                    .setPriority(yg.getPriority())
+                    .setErrorHandling(errorHandling);
 
             // Apply enterprise metadata with category inheritance
             // Enrichment group metadata takes precedence, but inherit from category if not specified

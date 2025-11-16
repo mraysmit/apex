@@ -16,9 +16,9 @@ import org.slf4j.LoggerFactory;
  * - Provides access to sections in document order for sequential processing
  * - Maintains full compatibility with existing YamlRuleConfiguration
  * - Supports processing mode detection and selection
- * 
+ *
  * @author APEX Sequential Processing Implementation
- * @since Phase 1 - Foundation
+ * @since 1.0
  */
 public class OrderedYamlConfiguration {
     
