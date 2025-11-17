@@ -1,0 +1,23 @@
+# APEX Error Handling Guide - Reference Test Configuration
+# Scenario 3: Recovery (Condition = FALSE with WARNING severity, recovery enabled)
+#
+# Business Rule: tradeId is recommended (not required)
+# Condition: #tradeId != null
+# Test Data: tradeId is missing (null)
+# Expected: Condition evaluates to FALSE + WARNING severity + recovery enabled → CONTINUE (NO_MATCH)
+
+metadata:
+  name: "Error Handling Guide - Recovery Example"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "Demonstrates recovery where rule condition evaluates to FALSE with WARNING severity and recovery enabled"
+
+rules:
+  - id: "trade-id-recommended"
+    name: "Trade ID Recommended for Audit Trail"
+    condition: "#tradeId != null"
+    message: "Trade ID is recommended for audit trail purposes"
+    severity: "WARNING"
+    priority: 1
+    enabled: true
+

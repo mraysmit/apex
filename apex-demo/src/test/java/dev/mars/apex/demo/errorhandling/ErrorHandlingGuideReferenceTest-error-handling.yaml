@@ -1,0 +1,25 @@
+# APEX Error Handling Guide - Reference Test Configuration
+# Scenario 2: Error Handling (Condition = FALSE with ERROR severity, recovery disabled)
+#
+# Business Rule: tradeId must not be null
+# Condition: #tradeId != null
+# Test Data: tradeId is missing (null)
+# Expected: Condition evaluates to FALSE + ERROR severity + recovery disabled → FAIL_FAST
+
+metadata:
+  name: "Error Handling Guide - Error Handling Example"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "Demonstrates error handling where rule condition evaluates to FALSE with ERROR severity and recovery disabled"
+
+# No error-recovery section = recovery disabled for ERROR severity (default behavior)
+
+rules:
+  - id: "trade-id-required"
+    name: "Trade ID Required Validation"
+    condition: "#tradeId != null"
+    message: "Trade ID is required for all OTC options trades"
+    severity: "ERROR"
+    priority: 1
+    enabled: true
+

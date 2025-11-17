@@ -1,0 +1,23 @@
+# APEX Error Handling Guide - Reference Test Configuration
+# Scenario 1: Happy Path (Condition = TRUE)
+#
+# Business Rule: tradeId must not be null
+# Condition: #tradeId != null
+# Test Data: tradeId = "TRADE-001" (exists)
+# Expected: Condition evaluates to TRUE → rule MATCHES → SUCCESS
+
+metadata:
+  name: "Error Handling Guide - Happy Path Example"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "Demonstrates happy path where rule condition evaluates to TRUE and rule matches successfully"
+
+rules:
+  - id: "trade-id-required"
+    name: "Trade ID Required Validation"
+    condition: "#tradeId != null"
+    message: "Trade ID is required for all OTC options trades"
+    severity: "ERROR"
+    priority: 1
+    enabled: true
+
