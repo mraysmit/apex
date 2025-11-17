@@ -5,7 +5,7 @@ metadata:
   processing-mode: "sequential"
   description: |
     CRITICAL TEST: Verify enrichment-refs can appear BEFORE inline enrichments.
-    
+
     Expected Processing Order:
     1. E1-from-ref (enrich-market-data) - from external file
     2. E2-from-ref (calculate-greeks) - from external file
@@ -13,12 +13,25 @@ metadata:
     4. R1 (validate-market-data-enriched) - depends on E1
     5. R2 (validate-greeks-calculated) - depends on E2
     6. R3 (validate-counterparty-enriched) - depends on E3
-    
+
     This verifies that:
     - enrichment-refs can appear FIRST in document (before any inline enrichments)
     - Placeholder is expanded at correct position (beginning of processing)
     - Referenced enrichments execute BEFORE inline enrichments
     - All enrichments execute BEFORE rules
+
+# Error recovery configuration
+# Rules detect INVALID data (condition = TRUE when data is invalid)
+# With valid data, conditions return FALSE, so we need recovery enabled
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+
+  severity-policies:
+    ERROR:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
 
 # CRITICAL: enrichment-refs appears FIRST (before any inline enrichments)
 enrichment-refs:

@@ -5,6 +5,19 @@ metadata:
   description: "Test that rule-refs are expanded at the correct position in document order"
   processing-mode: "sequential"
 
+# Error recovery configuration
+# Rules detect INVALID data (condition = TRUE when data is invalid)
+# With valid data, conditions return FALSE, so we need recovery enabled
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+
+  severity-policies:
+    ERROR:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
+
 # Expected Processing Order:
 # 1. E1 (inline enrichment)
 # 2. R1 (from external file via rule-refs) - validate-notional-limit

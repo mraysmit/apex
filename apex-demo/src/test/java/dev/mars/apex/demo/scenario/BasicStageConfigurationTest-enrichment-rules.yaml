@@ -52,7 +52,7 @@ rules:
   - id: "market-determination-check"
     name: "Market Determination Check"
     description: "Verify market can be determined from currency (simulates enrichment)"
-    condition: "#data.currency != null"
+    condition: "#data['currency'] != null"
     severity: "INFO"
     category: "enrichment"
     message: "Market determination successful"

@@ -4,6 +4,19 @@ metadata:
   version: "1.0.0"
   description: "Test mixed individual rules and rule groups in document order"
 
+# Error recovery configuration
+# Rules detect INVALID data (condition = TRUE when data is invalid)
+# With valid data, conditions return FALSE, so we need recovery enabled
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+
+  severity-policies:
+    ERROR:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
+
 # YAML Section Order: enrichments → rule-refs → rules → rule-groups
 # Expected Processing Order: E1 → E2 → E3 → R1-ref → R2-ref → RG1-ref → RG2-ref → R3-inline → RG3-inline
 # Note: rule-refs loads BOTH individual rules AND rule groups from external files

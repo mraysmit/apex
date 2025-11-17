@@ -10,7 +10,7 @@ data-sources:
     type: "database"
     source-type: "h2"
     connection:
-      database: "./target/h2-demo/datasource_demo"
+      database: "./target/h2-demo/simple_datasource_test"
       username: "sa"
       password: ""
 

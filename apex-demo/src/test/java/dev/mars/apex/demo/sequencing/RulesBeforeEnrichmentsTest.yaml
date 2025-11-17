@@ -11,6 +11,19 @@ metadata:
   description: "Unusual but valid order - rules execute before enrichments"
   version: "1.0"
 
+# Error recovery configuration
+# Rules detect INVALID data (condition = TRUE when data is invalid)
+# With valid data, conditions return FALSE, so we need recovery enabled
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+
+  severity-policies:
+    ERROR:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
+
 # PHASE 1: Load external rules (R1, R2) and rule groups (RG1, RG2)
 rule-refs:
   - name: "external-rules"

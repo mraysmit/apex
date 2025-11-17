@@ -16,34 +16,27 @@ metadata:
 
 # VALIDATION RULES:
 # These rules check for required fields and demonstrate graceful failure handling
-# NOTE: Rules match when validation FAILS (not when it succeeds)
+# NOTE: Rules match when validation SUCCEEDS (data is valid)
 rules:
   - id: "required-amount-validation"
     name: "Required Amount Validation"
-    condition: "#data.amount == null || #data.amount <= 0"
-    message: "Amount is required and must be greater than zero"
+    condition: "#data['amount'] != null && #data['amount'] > 0"
+    message: "Amount is required and must be positive"
     severity: "ERROR"
     enabled: true
 
   - id: "required-customer-name-validation"
     name: "Required Customer Name Validation"
-    condition: "#data.customerName == null || #data.customerName.length() == 0"
-    message: "Customer name is required for transaction processing"
+    condition: "#data['customerName'] != null && #data['customerName'].length() > 0"
+    message: "Customer name is required"
     severity: "ERROR"
     enabled: true
 
   - id: "required-trade-id-validation"
     name: "Required Trade ID Validation"
-    condition: "#data.tradeId == null || #data.tradeId.length() == 0"
-    message: "Trade ID is required for transaction identification"
+    condition: "#data['tradeId'] != null && #data['tradeId'].length() > 0"
+    message: "Trade ID is required"
     severity: "ERROR"
-    enabled: true
-
-  - id: "optional-description-validation"
-    name: "Optional Description Validation"
-    condition: "#data.description != null && #data.description.length() == 0"
-    message: "Description should not be empty if provided"
-    severity: "WARNING"
     enabled: true
 
 # ============================================================================

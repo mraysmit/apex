@@ -184,12 +184,14 @@ class ScenarioEndToEndIntegrationComplexTest {
             metadata:
               id: "otc-option-us"
               name: "OTC Option US Processing"
+              description: "OTC Option US Processing Scenario"
+              version: "1.0.0"
               type: "scenario"
 
             scenario:
               scenario-id: "otc-option-us"
               name: "OTC Option US Processing"
-              
+
               classification-rule:
                 condition: "#data['tradeType'] == 'OTCOption' && #data['region'] == 'US'"
                 description: "US OTC option trades"
@@ -209,12 +211,14 @@ class ScenarioEndToEndIntegrationComplexTest {
             metadata:
               id: "bond-us"
               name: "Bond US Processing"
+              description: "Bond US Processing Scenario"
+              version: "1.0.0"
               type: "scenario"
 
             scenario:
               scenario-id: "bond-us"
               name: "Bond US Processing"
-              
+
               classification-rule:
                 condition: "#data['tradeType'] == 'Bond' && #data['region'] == 'US'"
                 description: "US bond trades"

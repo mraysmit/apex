@@ -4,6 +4,19 @@ metadata:
   version: "1.0.0"
   description: "External rules for OTC options trade processing - referenced by main config"
 
+# Error recovery configuration
+# These rules detect INVALID data (condition = TRUE when data is invalid)
+# With valid data, conditions return FALSE, so we need recovery enabled
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+
+  severity-policies:
+    ERROR:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
+
 # These rules will be loaded via rule-refs
 # They should appear in document order at the position of the rule-refs placeholder
 

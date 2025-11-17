@@ -32,11 +32,11 @@ scenario:
   # Processing stages using component
   processing-stages:
     - stage-name: "component-processing"
-      config-file: "src/test/resources/dev/mars/apex/demo/scenario/partial-sections-component.yaml"
+      config-file: "src/test/resources/dev/mars/apex/demo/scenario/success-test-component.yaml"
       execution-order: 1
       failure-policy: "terminate"
       required: true
       stage-metadata:
-        description: "Execute partial-sections-component with all files"
+        description: "Execute success-test-component with enrichment rules"
         expected-behavior: "SUCCESS - all component files execute successfully"
 

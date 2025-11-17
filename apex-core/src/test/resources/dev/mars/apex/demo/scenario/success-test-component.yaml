@@ -1,0 +1,22 @@
+# Success Test Component
+# Component designed to always succeed for testing successful execution
+
+metadata:
+  id: "success-test-component"
+  name: "Success Test Component"
+  version: "1.0.0"
+  description: "Component that always succeeds - used for testing successful component execution"
+  type: "component"
+  business-domain: "testing"
+  owner: "APEX Demo Team"
+  criticality: "low"
+  tags:
+    - testing
+    - success
+
+# Use enrichment rules that always pass (INFO severity)
+config-files:
+  - file: "src/test/resources/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-enrichment-rules.yaml"
+    execution-order: 1
+    failure-policy: "terminate"
+

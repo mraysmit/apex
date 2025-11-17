@@ -9,18 +9,22 @@ The APEX Rules Engine provides a comprehensive, configurable error handling and 
 ## Table of Contents
 
 1. [Core Concepts](#core-concepts)
-2. [Severity Levels](#severity-levels)
-3. [Recovery Strategies](#recovery-strategies)
-4. [Configuration](#configuration)
-5. [YAML Configuration](#yaml-configuration)
-6. [Programmatic Configuration](#programmatic-configuration)
-7. [Default Behavior](#default-behavior)
-8. [Usage Examples](#usage-examples)
-9. [Best Practices](#best-practices)
-10. [Monitoring and Metrics](#monitoring-and-metrics)
-11. [Troubleshooting](#troubleshooting)
-12. [API Reference](#api-reference)
-13. [Summary](#summary)
+2. [ResultType vs Severity](#resulttype-vs-severity)
+3. [Severity Levels](#severity-levels)
+4. [Recovery Strategies](#recovery-strategies)
+5. [Configuration](#configuration)
+6. [YAML Configuration](#yaml-configuration)
+7. [Programmatic Configuration](#programmatic-configuration)
+8. [Default Behavior](#default-behavior)
+9. [Usage Examples](#usage-examples)
+10. [Enrichment and Transformation Error Handling](#enrichment-and-transformation-error-handling)
+11. [Best Practices](#best-practices)
+12. [Monitoring and Metrics](#monitoring-and-metrics)
+13. [Advanced Topics](#advanced-topics)
+14. [Exception Hierarchy](#exception-hierarchy)
+15. [Troubleshooting](#troubleshooting)
+16. [API Reference](#api-reference)
+17. [Summary](#summary)
 
 ---
 
@@ -65,32 +69,192 @@ ELSE IF rule condition evaluates to FALSE:
       → ResultType = NO_MATCH, isSuccess = true (continue processing)
 ```
 
-#### Validation Rule Pattern
+#### Truth Tables for Rule Evaluation
 
-For validation rules, write conditions that return TRUE when data is **valid**:
+**CRITICAL PRINCIPLE**: Business rule conditions are fixed business logic from your catalogue. You cannot change them. You must match your test data and configuration to the condition.
+
+##### Example 1: Business Rule Condition `#data['tradeId'] != null`
+
+| Test Data (tradeId) | Condition Result | Severity | Recovery | Outcome | What This Tests |
+|---------------------|------------------|----------|----------|---------|-----------------|
+| "TRADE-001" | TRUE | ERROR | disabled | SUCCESS | Business rule matches - happy path |
+| null | FALSE | ERROR | disabled | FAIL_FAST | Business rule doesn't match - error handling |
+| "TRADE-001" | TRUE | WARNING | enabled | SUCCESS | Business rule matches - happy path |
+| null | FALSE | WARNING | enabled | CONTINUE | Business rule doesn't match - recovery works |
+
+##### Example 2: Business Rule Condition `#data['tradeId'] == null`
+
+| Test Data (tradeId) | Condition Result | Severity | Recovery | Outcome | What This Tests |
+|---------------------|------------------|----------|----------|---------|-----------------|
+| null | TRUE | ERROR | disabled | SUCCESS | Business rule matches - happy path |
+| "TRADE-001" | FALSE | ERROR | disabled | FAIL_FAST | Business rule doesn't match - error handling |
+| null | TRUE | WARNING | enabled | SUCCESS | Business rule matches - happy path |
+| "TRADE-001" | FALSE | WARNING | enabled | CONTINUE | Business rule doesn't match - recovery works |
+
+#### Testing Strategy
+
+When writing tests, you need separate tests for different scenarios:
+
+1. **Happy Path Test (Condition = TRUE)**
+   - Test data must make the condition evaluate to TRUE
+   - Expected outcome: SUCCESS (rule matches)
+   - Tests that the business rule correctly identifies the case it's designed to detect
+
+2. **Error Handling Test (Condition = FALSE with ERROR severity)**
+   - Test data must make the condition evaluate to FALSE
+   - Severity: ERROR or CRITICAL with recovery disabled
+   - Expected outcome: FAIL_FAST
+   - Tests that the system correctly fails when the business rule doesn't match
+
+3. **Recovery Test (Condition = FALSE with recovery enabled)**
+   - Test data must make the condition evaluate to FALSE
+   - Severity: WARNING or INFO with recovery enabled
+   - Expected outcome: CONTINUE (with recovery)
+   - Tests that the recovery mechanism works correctly
+
+#### Key Principles
+
+1. **Business rule conditions are fixed** - they represent your business logic catalogue and cannot be changed
+2. **Match test data to the condition** - ensure your test data produces the expected condition result (TRUE or FALSE)
+3. **Configure severity appropriately** - use ERROR/CRITICAL for fail-fast, WARNING/INFO for recovery
+4. **Test both paths** - every business rule should have tests for both condition = TRUE and condition = FALSE scenarios
+
+---
+
+## ResultType vs Severity
+
+### Understanding the Distinction
+
+APEX uses **two separate concepts** for error classification that work together but serve different purposes:
+
+1. **ResultType** (System-Level): Indicates the **outcome** of an operation
+2. **Severity** (Business-Level): Indicates the **importance** of a rule or validation
+
+### ResultType Enum
+
+`RuleResult.ResultType` represents the **actual outcome** of a rule evaluation or processing operation:
+
+| ResultType | Meaning | Use Case |
+|------------|---------|----------|
+| **MATCH** | Rule condition evaluated to TRUE | Rule matched successfully, validation passed |
+| **NO_MATCH** | Rule condition evaluated to FALSE (non-critical) | Rule didn't match, but processing can continue |
+| **ERROR** | System failure or exception occurred | Rule evaluation failed due to exception, enrichment failed, transformation failed |
+| **ENRICHMENT_FAILURE** | Enrichment processing failed | Specific type of error for enrichment operations |
+
+### Severity Levels (Business Classification)
+
+Severity is a **business classification** assigned to rules and validations:
+
+- **CRITICAL**: Highest priority business rules
+- **ERROR**: Important business validations
+- **WARNING**: Optional validations
+- **INFO**: Informational rules
+
+### How They Work Together
+
+The key pattern used throughout APEX is:
+
+```java
+// Pattern from RulesEngine.java
+if (itemResult.getResultType() == RuleResult.ResultType.ERROR) {
+    overallSuccess = false;
+    failureMessages.add(item.getSectionType() + " '" + item.getItemId() + "' error: " + itemResult.getMessage());
+}
+```
+
+**Critical Distinction**:
+
+1. **When a rule condition = TRUE**: ResultType is MATCH, severity is irrelevant
+2. **When a rule condition = FALSE**:
+   - If severity is ERROR/CRITICAL AND recovery is disabled → ResultType becomes ERROR
+   - If severity is WARNING/INFO OR recovery is enabled → ResultType is NO_MATCH
+
+### Example Scenarios
+
+#### Scenario 1: Validation Rule with ERROR Severity (Recovery Disabled)
 
 ```yaml
 rules:
-  # ✅ CORRECT: Condition returns TRUE when field exists (valid)
   - id: "trade-id-required"
-    condition: "#data['tradeId'] != null && !#data['tradeId'].toString().trim().isEmpty()"
-    message: "Trade ID is required"
-    severity: "ERROR"
-
-  # ❌ INCORRECT: Condition returns TRUE when field is missing (invalid)
-  - id: "trade-id-required-wrong"
-    condition: "#data['tradeId'] == null"
-    message: "Trade ID is required"
+    condition: "#data['tradeId'] != null"
     severity: "ERROR"
 ```
 
-**Why this matters:**
-- When `tradeId` **exists** → condition TRUE → rule matches → **success** ✅
-- When `tradeId` **missing** → condition FALSE → severity ERROR + recovery disabled → **fail-fast** ❌
+**When tradeId exists**:
+- Condition evaluates to TRUE
+- ResultType = MATCH
+- Processing continues ✅
 
-This pattern ensures that:
-1. Valid data passes validation (condition TRUE → success)
-2. Invalid data triggers fail-fast (condition FALSE + ERROR severity → failure)
+**When tradeId is missing**:
+- Condition evaluates to FALSE
+- Severity = ERROR (recovery disabled by default)
+- ResultType = ERROR
+- Processing fails immediately ❌
+
+#### Scenario 2: Enrichment Exception
+
+```java
+// From YamlEnrichmentProcessor
+try {
+    return processEnrichmentWithResult(enrichment, targetObject);
+} catch (Exception e) {
+    return RuleResult.enrichmentFailure(msgs, data, SeverityConstants.ERROR);
+}
+```
+
+**Result**:
+- ResultType = ENRICHMENT_FAILURE (or ERROR)
+- Severity = ERROR
+- Processing fails immediately ❌
+
+#### Scenario 3: Rule with WARNING Severity (Recovery Enabled)
+
+```yaml
+rules:
+  - id: "email-format-check"
+    condition: "#data['email'] != null && #data['email'].contains('@')"
+    severity: "WARNING"
+```
+
+**When email is invalid**:
+- Condition evaluates to FALSE
+- Severity = WARNING (recovery enabled by default)
+- ResultType = NO_MATCH
+- Processing continues ✅
+
+### Error Propagation Pattern
+
+Throughout the APEX codebase, errors propagate using this pattern:
+
+```java
+// 1. Process item (rule, enrichment, transformation)
+RuleResult itemResult = processItem(item, yamlConfig, enrichedData);
+
+// 2. Check for ERROR result type
+if (itemResult.getResultType() == RuleResult.ResultType.ERROR) {
+    overallSuccess = false;
+    failureMessages.add("Processing failed: " + itemResult.getMessage());
+    // Optionally fail-fast or continue collecting errors
+}
+
+// 3. Update enriched data if successful
+if (itemResult.getEnrichedData() != null) {
+    enrichedData.putAll(itemResult.getEnrichedData());
+}
+```
+
+This pattern is used in:
+- `RulesEngine.evaluateYamlConfigurationSequentially()` (lines 1186-1201)
+- `RulesEngine.evaluateYamlConfiguration()` (lines 1035-1050)
+- `RulesEngine.processEnrichments()` (lines 1220-1230)
+- `RulesEngine.processTransformations()` (lines 1370-1380)
+
+### Key Takeaways
+
+✅ **ResultType** = What happened (MATCH, NO_MATCH, ERROR)
+✅ **Severity** = How important it is (CRITICAL, ERROR, WARNING, INFO)
+✅ **ERROR ResultType** = System failure, always stops processing (unless explicitly handled)
+✅ **ERROR Severity** = Important business rule, may or may not stop processing (depends on recovery config)
 
 ---
 
@@ -482,24 +646,260 @@ error-recovery:
       strategy: "CONTINUE_WITH_DEFAULT"
 
 rules:
-  # Validation rule: Condition TRUE when data is valid
+  # Validation rule: Condition evaluates to TRUE when accountId exists
   - name: "critical-validation"
     condition: "#data.accountId != null"  # TRUE when accountId exists
     message: "Account ID is required"
     severity: "ERROR"
-    # When accountId exists: condition TRUE → success
-    # When accountId missing: condition FALSE + ERROR severity → FAIL_FAST
+    # When accountId exists: condition TRUE → rule matches → success
+    # When accountId missing: condition FALSE → rule doesn't match + ERROR severity → FAIL_FAST
 
-  # Optional validation: Condition TRUE when email format is valid
+  # Optional validation: Condition evaluates to TRUE when email format is correct
   - name: "optional-check"
-    condition: "#data.email != null && #data.email.contains('@')"  # TRUE when valid
+    condition: "#data.email != null && #data.email.contains('@')"  # TRUE when email has @
     message: "Email format validation"
     severity: "WARNING"
-    # When email valid: condition TRUE → success
-    # When email invalid: condition FALSE + WARNING severity → CONTINUE_WITH_DEFAULT
+    # When email has @: condition TRUE → rule matches → success
+    # When email missing @: condition FALSE → rule doesn't match + WARNING severity → CONTINUE_WITH_DEFAULT
 ```
 
-**Key Point**: Write validation rule conditions that return TRUE for valid data. When the condition returns FALSE (invalid data), the severity determines whether processing continues or fails.
+**Key Point**: Write rule conditions to return TRUE for the case you want to detect/match. When the condition returns FALSE (rule doesn't match), the severity determines whether processing continues or fails.
+
+---
+
+## Enrichment and Transformation Error Handling
+
+### Overview
+
+While the error recovery system primarily focuses on **rule evaluation** errors, APEX also provides robust error handling for **enrichments** and **transformations**. These operations have different error handling characteristics because they modify data rather than just evaluating conditions.
+
+### Enrichment Error Handling
+
+#### Fail-Fast Behavior
+
+Enrichments use **fail-fast** error handling by default. When an enrichment fails, processing stops immediately:
+
+```java
+// From YamlEnrichmentProcessor.java (lines 1752-1760)
+tasks.add(() -> {
+    try {
+        return processEnrichmentWithResult(enrichment, targetObject);
+    } catch (Exception e) {
+        List<String> msgs = new ArrayList<>();
+        msgs.add("Parallel enrichment exception: " + e.getMessage());
+        Map<String, Object> data = convertToMap(targetObject);
+        return RuleResult.enrichmentFailure(msgs, data, SeverityConstants.ERROR);
+    }
+});
+```
+
+#### Error Result Types
+
+Enrichment failures return `RuleResult` with:
+- **ResultType**: `ENRICHMENT_FAILURE` or `ERROR`
+- **Severity**: `ERROR` (by default)
+- **Failure Messages**: List of error descriptions
+- **Enriched Data**: Partial data if available
+
+#### Example: Enrichment Failure Detection
+
+```java
+// From RulesEngine.java (lines 1220-1230)
+RuleResult enrichmentResult = enrichmentProcessor.processEnrichmentsWithResult(
+    yamlConfig.getEnrichments(), enrichedData);
+
+// Check for enrichment errors
+if (enrichmentResult.getResultType() == RuleResult.ResultType.ERROR) {
+    overallSuccess = false;
+    failureMessages.add("Enrichment processing failed: " + enrichmentResult.getMessage());
+    logger.error("CRITICAL: Enrichment processing failed: {}", enrichmentResult.getMessage());
+    // Return error immediately (fail-fast)
+    return RuleResult.error("enrichments", enrichmentResult.getMessage(), SeverityConstants.ERROR);
+}
+```
+
+#### Required Field Validation
+
+Enrichments can specify required fields that must be present in the data:
+
+```yaml
+enrichments:
+  - id: "calculate-premium"
+    type: "calculation"
+    condition: "#data['notional'] != null"
+    expression: "#data['notional'] * 0.05"
+    result-field: "premium"
+    required-fields:
+      - "notional"
+      - "currency"
+```
+
+**Behavior**:
+- If required fields are missing → enrichment fails
+- ResultType = ERROR
+- Processing stops immediately
+
+### Transformation Error Handling
+
+#### Fail-Fast Behavior
+
+Transformations also use **fail-fast** error handling:
+
+```java
+// From YamlTransformationProcessor.java (lines 143-152)
+try {
+    if (shouldProcessTransformation(transformation, transformedObject)) {
+        transformedObject = processTransformation(transformation, transformedObject);
+        processedCount++;
+        logger.debug("Successfully processed transformation: {}", transformation.getId());
+    }
+} catch (Exception e) {
+    logger.error("CRITICAL: Transformation failed: {} - {}", transformation.getId(), e.getMessage(), e);
+
+    // Return error result immediately (fail-fast behavior)
+    return RuleResult.error(
+        "transformation:" + transformation.getId(),
+        "Transformation processing failed: " + e.getMessage(),
+        SeverityConstants.ERROR
+    );
+}
+```
+
+#### Error Detection Pattern
+
+```java
+// From RulesEngine.java (lines 1370-1380)
+RuleResult transformationResult = transformationProcessor.processTransformationsWithResult(
+    yamlConfig.getTransformations(), enrichedData);
+
+// Check for transformation errors
+if (transformationResult.getResultType() == RuleResult.ResultType.ERROR) {
+    overallSuccess = false;
+    failureMessages.add("Transformation processing failed: " + transformationResult.getMessage());
+    logger.error("CRITICAL: Transformation processing failed: {}", transformationResult.getMessage());
+    // Return error immediately (fail-fast)
+    return RuleResult.error("transformations", transformationResult.getMessage(), SeverityConstants.ERROR);
+}
+```
+
+### Parallel Execution Error Handling
+
+When enrichments are executed in parallel (using `parallel-execution: true`), errors are caught and converted to `RuleResult`:
+
+```java
+// From RulesEngine.java (lines 717-726)
+List<Callable<RuleResult>> tasks = new ArrayList<>();
+for (YamlEnrichment enrichment : enrichments) {
+    tasks.add(() -> {
+        try {
+            return enrichmentProcessor.processEnrichmentWithResult(enrichment, targetObject);
+        } catch (Exception e) {
+            List<String> msgs = new ArrayList<>();
+            msgs.add("Parallel enrichment exception: " + e.getMessage());
+            Map<String, Object> data = convertToMap(targetObject);
+            return RuleResult.enrichmentFailure(msgs, data, SeverityConstants.ERROR);
+        }
+    });
+}
+
+ExecutorService executor = Executors.newFixedThreadPool(
+    Math.min(tasks.size(), Runtime.getRuntime().availableProcessors())
+);
+```
+
+**Key Points**:
+- Each enrichment runs in its own thread
+- Exceptions are caught and converted to `RuleResult.enrichmentFailure()`
+- All results are collected before checking for errors
+- If any enrichment fails, the overall result is an error
+
+### YAML Configuration Examples
+
+#### Example 1: Enrichment with Error Handling
+
+```yaml
+metadata:
+  id: "trade-enrichment"
+  name: "Trade Enrichment with Error Handling"
+  version: "1.0"
+
+enrichments:
+  - id: "calculate-notional"
+    type: "calculation"
+    condition: "#data['quantity'] != null && #data['price'] != null"
+    expression: "#data['quantity'] * #data['price']"
+    result-field: "notional"
+    required-fields:
+      - "quantity"
+      - "price"
+    # If quantity or price is missing, enrichment fails with ERROR
+```
+
+#### Example 2: Transformation with Error Handling
+
+```yaml
+metadata:
+  id: "data-transformation"
+  name: "Data Transformation with Error Handling"
+  version: "1.0"
+
+transformations:
+  - id: "normalize-currency"
+    source-field: "currency"
+    target-field: "currencyCode"
+    expression: "#source.toUpperCase()"
+    # If expression fails (e.g., currency is null), transformation fails with ERROR
+```
+
+### Best Practices for Enrichment/Transformation Error Handling
+
+1. **Use Conditions to Prevent Errors**:
+   ```yaml
+   enrichments:
+     - id: "safe-calculation"
+       condition: "#data['amount'] != null && #data['amount'] > 0"
+       expression: "#data['amount'] * 1.1"
+       result-field: "adjustedAmount"
+   ```
+
+2. **Specify Required Fields**:
+   ```yaml
+   enrichments:
+     - id: "premium-calculation"
+       required-fields:
+         - "notional"
+         - "rate"
+       expression: "#data['notional'] * #data['rate']"
+       result-field: "premium"
+   ```
+
+3. **Use Null-Safe Expressions**:
+   ```yaml
+   enrichments:
+     - id: "safe-string-operation"
+       expression: "#data['name'] != null ? #data['name'].toUpperCase() : 'UNKNOWN'"
+       result-field: "upperName"
+   ```
+
+4. **Monitor Enrichment Failures**:
+   ```java
+   RuleResult result = rulesEngine.evaluate(data);
+   if (result.hasFailures()) {
+       for (String failure : result.getFailureMessages()) {
+           logger.error("Enrichment/Transformation failure: {}", failure);
+       }
+   }
+   ```
+
+### Key Differences from Rule Error Handling
+
+| Aspect | Rule Evaluation | Enrichment/Transformation |
+|--------|----------------|---------------------------|
+| **Default Behavior** | Configurable via error recovery | Always fail-fast |
+| **Recovery** | Supports recovery strategies | No recovery (always fails) |
+| **Severity** | Configurable per rule | Always ERROR |
+| **ResultType** | MATCH, NO_MATCH, or ERROR | ERROR or ENRICHMENT_FAILURE |
+| **Impact** | May continue processing | Always stops processing |
 
 ---
 
@@ -656,7 +1056,7 @@ When `metrics-enabled: true`, the system collects:
 
 ### Accessing Metrics
 
-Metrics are included in `RuleResult` objects:
+Metrics are included in `RuleResult` objects via the `RulePerformanceMetrics` class:
 
 ```java
 RuleResult result = rulesEngine.evaluate(data);
@@ -676,6 +1076,99 @@ if (result.getMetrics() != null) {
         System.out.println("Recovery time: " + recoveryTime.toMillis() + "ms");
     }
 }
+```
+
+### RulePerformanceMetrics Details
+
+The `RulePerformanceMetrics` class provides comprehensive performance and recovery tracking:
+
+#### Core Performance Metrics
+
+```java
+RulePerformanceMetrics metrics = result.getMetrics();
+
+// Execution timing
+Duration executionTime = metrics.getExecutionTime();
+Instant startTime = metrics.getStartTime();
+Instant endTime = metrics.getEndTime();
+
+// Rule information
+String ruleName = metrics.getRuleName();
+String severity = metrics.getSeverity();
+
+System.out.println("Rule '" + ruleName + "' executed in " + executionTime.toMillis() + "ms");
+```
+
+#### Recovery Metrics
+
+```java
+// Recovery tracking
+boolean recoveryAttempted = metrics.isRecoveryAttempted();
+boolean recoverySuccessful = metrics.isRecoverySuccessful();
+String recoveryStrategy = metrics.getRecoveryStrategy();
+String recoveryReason = metrics.getRecoveryReason();
+Duration recoveryTime = metrics.getRecoveryTime();
+
+if (recoveryAttempted) {
+    System.out.println("Recovery Strategy: " + recoveryStrategy);
+    System.out.println("Recovery Successful: " + recoverySuccessful);
+    System.out.println("Recovery Time: " + recoveryTime.toMillis() + "ms");
+    System.out.println("Recovery Reason: " + recoveryReason);
+}
+```
+
+#### Metrics Builder Pattern
+
+Metrics are built using the builder pattern in `UnifiedRuleEvaluator`:
+
+```java
+// From UnifiedRuleEvaluator.java (lines 367-372)
+RulePerformanceMetrics metrics = buildMetricsWithRecovery(
+    metricsBuilder,
+    rule,
+    exception,
+    recoveryAttempted,
+    recoverySuccessful,
+    recoveryStrategy,
+    recoveryReason,
+    recoveryTime
+);
+```
+
+### Aggregating Metrics Across Rules
+
+For batch processing or scenario execution, you can aggregate metrics:
+
+```java
+List<RuleResult> results = new ArrayList<>();
+// ... execute multiple rules ...
+
+// Aggregate metrics
+long totalExecutionTime = 0;
+int recoveryAttempts = 0;
+int successfulRecoveries = 0;
+
+for (RuleResult result : results) {
+    if (result.getMetrics() != null) {
+        RulePerformanceMetrics metrics = result.getMetrics();
+        totalExecutionTime += metrics.getExecutionTime().toMillis();
+
+        if (metrics.isRecoveryAttempted()) {
+            recoveryAttempts++;
+            if (metrics.isRecoverySuccessful()) {
+                successfulRecoveries++;
+            }
+        }
+    }
+}
+
+double recoverySuccessRate = recoveryAttempts > 0
+    ? (double) successfulRecoveries / recoveryAttempts * 100
+    : 0;
+
+System.out.println("Total execution time: " + totalExecutionTime + "ms");
+System.out.println("Recovery attempts: " + recoveryAttempts);
+System.out.println("Recovery success rate: " + String.format("%.2f%%", recoverySuccessRate));
 ```
 
 ### Log Output
@@ -712,39 +1205,485 @@ Error recovery can be integrated with:
 - **Alerting Systems**: Trigger alerts on high failure rates
 - **Logging Aggregators**: Send recovery logs to ELK, Splunk, etc.
 
+### Parallel Execution Error Handling
+
+APEX supports parallel execution of enrichments and rule groups for improved performance. Error handling in parallel contexts requires special consideration.
+
+#### Parallel Enrichment Execution
+
+When `parallel-execution: true` is set on an enrichment group, enrichments execute concurrently:
+
+```yaml
+enrichment-groups:
+  - id: "parallel-enrichments"
+    name: "Parallel Enrichment Group"
+    parallel-execution: true
+    enrichments:
+      - id: "enrich-1"
+        # ... enrichment config ...
+      - id: "enrich-2"
+        # ... enrichment config ...
+      - id: "enrich-3"
+        # ... enrichment config ...
+```
+
+#### Error Handling Pattern
+
+Each parallel task is wrapped in a try-catch block that converts exceptions to `RuleResult`:
+
+```java
+// From RulesEngine.java (lines 717-726)
+List<Callable<RuleResult>> tasks = new ArrayList<>();
+for (YamlEnrichment enrichment : enrichments) {
+    tasks.add(() -> {
+        try {
+            return enrichmentProcessor.processEnrichmentWithResult(enrichment, targetObject);
+        } catch (Exception e) {
+            List<String> msgs = new ArrayList<>();
+            msgs.add("Parallel enrichment exception: " + e.getMessage());
+            Map<String, Object> data = convertToMap(targetObject);
+            return RuleResult.enrichmentFailure(msgs, data, SeverityConstants.ERROR);
+        }
+    });
+}
+
+ExecutorService executor = Executors.newFixedThreadPool(
+    Math.min(tasks.size(), Runtime.getRuntime().availableProcessors())
+);
+```
+
+#### Key Characteristics
+
+1. **Thread Pool Sizing**: Uses `min(task_count, available_processors)` threads
+2. **Exception Isolation**: Each task's exceptions are caught independently
+3. **Result Collection**: All tasks complete before results are checked
+4. **Fail-Fast**: If any task returns ERROR, overall result is ERROR
+
+#### Example: Parallel Execution with Error Handling
+
+```java
+// From YamlEnrichmentProcessor.java (lines 1752-1760)
+if (group.isParallelExecution() && ordered.size() > 1) {
+    // Parallel branch: disable short-circuit and execute all enrichments
+    shortCircuit = false;
+
+    List<Callable<RuleResult>> tasks = new ArrayList<>();
+    for (YamlEnrichment enrichment : ordered) {
+        tasks.add(() -> {
+            try {
+                return processEnrichmentWithResult(enrichment, targetObject);
+            } catch (Exception e) {
+                List<String> msgs = new ArrayList<>();
+                msgs.add("Parallel enrichment exception: " + e.getMessage());
+                Map<String, Object> data = convertToMap(targetObject);
+                return RuleResult.enrichmentFailure(msgs, data, SeverityConstants.ERROR);
+            }
+        });
+    }
+
+    ExecutorService executor = Executors.newFixedThreadPool(
+        Math.min(tasks.size(), Runtime.getRuntime().availableProcessors())
+    );
+
+    try {
+        List<Future<RuleResult>> futures = executor.invokeAll(tasks);
+        // Check results for errors...
+    } finally {
+        executor.shutdown();
+    }
+}
+```
+
+#### Best Practices for Parallel Execution
+
+1. **Use for Independent Operations**: Only parallelize enrichments that don't depend on each other
+2. **Monitor Thread Pool**: Be aware of thread pool sizing for large enrichment groups
+3. **Handle Partial Failures**: Design enrichments to be idempotent in case of retries
+4. **Test Error Scenarios**: Verify behavior when some parallel tasks fail
+
 ### Performance Considerations
 
 - **Recovery Overhead**: Recovery attempts add latency (typically 1-10ms)
 - **Retry Delays**: Configure `retry-delay` based on your performance requirements
 - **Max Retries**: Limit `max-retries` to prevent excessive delays (recommended: 0-3)
+- **Parallel Execution**: Thread pool overhead vs. performance gain (test with your workload)
+- **Metrics Collection**: Minimal overhead (~1-2ms per rule evaluation)
+
+---
+
+## Exception Hierarchy
+
+APEX provides a comprehensive exception hierarchy for different types of errors. Understanding these exceptions helps with error handling and debugging.
+
+### Core Exception Classes
+
+#### RuleEngineException (Base Class)
+
+**Package**: `dev.mars.apex.core.exception`
+
+Base exception for all rules engine related errors:
+
+```java
+public class RuleEngineException extends Exception {
+    private final String errorCode;
+    private final String context;
+
+    public RuleEngineException(String errorCode, String message, String context) {
+        super(message);
+        this.errorCode = errorCode;
+        this.context = context;
+    }
+
+    public String getErrorCode() { return errorCode; }
+    public String getContext() { return context; }
+}
+```
+
+**Usage**:
+```java
+try {
+    // Rule engine operations
+} catch (RuleEngineException e) {
+    logger.error("Rule engine error [{}]: {} (Context: {})",
+        e.getErrorCode(), e.getMessage(), e.getContext());
+}
+```
+
+#### RuleEvaluationException
+
+**Package**: `dev.mars.apex.core.exception`
+
+Thrown when a rule evaluation fails:
+
+```java
+public class RuleEvaluationException extends RuleEngineException {
+    private final String ruleName;
+    private final String expression;
+    private final String suggestion;
+
+    public RuleEvaluationException(String ruleName, String expression, String message) {
+        super("RULE_EVALUATION_ERROR", message, "Rule: " + ruleName + ", Expression: " + expression);
+        this.ruleName = ruleName;
+        this.expression = expression;
+        this.suggestion = generateSuggestion(message);
+    }
+}
+```
+
+**Example**:
+```java
+throw new RuleEvaluationException(
+    "validate-amount",
+    "#data.amount > 1000",
+    "Property 'amount' not found in data context"
+);
+```
+
+#### RuleValidationException
+
+**Package**: `dev.mars.apex.core.exception`
+
+Thrown when rule validation fails (configuration errors):
+
+```java
+public class RuleValidationException extends RuleEngineException {
+    private final String ruleName;
+    private final List<ValidationError> validationErrors;
+
+    public void addValidationError(ValidationError error) {
+        this.validationErrors.add(error);
+    }
+
+    public static class ValidationError {
+        private final String field;
+        private final String message;
+        private final String suggestion;
+    }
+}
+```
+
+**Example**:
+```java
+RuleValidationException exception = new RuleValidationException("my-rule", "Invalid configuration");
+exception.addValidationError(new ValidationError("condition", "Condition cannot be null", "Add a valid SpEL expression"));
+throw exception;
+```
+
+#### RuleConfigurationException
+
+**Package**: `dev.mars.apex.core.exception`
+
+Thrown when there are issues with rule configuration:
+
+```java
+public class RuleConfigurationException extends RuleEngineException {
+    private final String configurationElement;
+    private final String expectedFormat;
+
+    public RuleConfigurationException(String configurationElement, String message, String expectedFormat) {
+        super("RULE_CONFIGURATION_ERROR", message, "Configuration element: " + configurationElement);
+        this.configurationElement = configurationElement;
+        this.expectedFormat = expectedFormat;
+    }
+}
+```
+
+**Example**:
+```java
+throw new RuleConfigurationException(
+    "error-recovery.severity-policies.ERROR",
+    "Invalid strategy value",
+    "Expected: FAIL_FAST, CONTINUE_WITH_DEFAULT, RETRY_WITH_SAFE_EXPRESSION, or SKIP_RULE"
+);
+```
+
+### Data Source Exceptions
+
+#### DataSourceException
+
+**Package**: `dev.mars.apex.core.service.data.external`
+
+Thrown when external data source operations fail:
+
+```java
+public class DataSourceException extends RuntimeException {
+    public enum ErrorType {
+        CONNECTION_ERROR,
+        CONFIGURATION_ERROR,
+        EXECUTION_ERROR,
+        DATA_FORMAT_ERROR,
+        TIMEOUT_ERROR,
+        AUTHENTICATION_ERROR,
+        NOT_FOUND_ERROR,
+        CIRCUIT_BREAKER_ERROR,
+        GENERAL_ERROR
+    }
+
+    private final ErrorType errorType;
+    private final String dataSourceId;
+    private final String operation;
+    private final boolean retryable;
+}
+```
+
+**Static Factory Methods**:
+```java
+// Connection error
+DataSourceException.connectionError("Failed to connect to database", cause);
+
+// Configuration error
+DataSourceException.configurationError("Missing required parameter: url");
+
+// Execution error
+DataSourceException.executionError("Query execution failed", cause, "SELECT * FROM trades");
+
+// Timeout error
+DataSourceException.timeoutError("Query timed out after 30s", "SELECT * FROM large_table");
+```
+
+#### DataSinkException
+
+**Package**: `dev.mars.apex.core.service.data.external`
+
+Thrown when data sink (write) operations fail:
+
+```java
+public class DataSinkException extends RuntimeException {
+    public enum ErrorType {
+        CONNECTION_ERROR,
+        WRITE_ERROR,
+        DATA_INTEGRITY_ERROR,
+        BATCH_ERROR,
+        SCHEMA_ERROR,
+        SECURITY_ERROR,
+        RESOURCE_ERROR,
+        TIMEOUT_ERROR,
+        DATA_ERROR,
+        UNKNOWN_ERROR
+    }
+
+    private final ErrorType errorType;
+    private final String sinkId;
+    private final String context;
+    private final boolean retryable;
+}
+```
+
+**Static Factory Methods**:
+```java
+// Write error
+DataSinkException.writeError("Failed to insert record", cause);
+
+// Data integrity error
+DataSinkException.dataIntegrityError("Primary key violation", cause);
+
+// Batch error
+DataSinkException.batchError("Batch insert failed", 50, 100); // 50 of 100 processed
+```
+
+### Enrichment Exceptions
+
+#### EnrichmentException
+
+**Package**: `dev.mars.apex.core.service.enrichment`
+
+Thrown when enrichment processing fails:
+
+```java
+public class EnrichmentException extends RuntimeException {
+    public EnrichmentException(String message) {
+        super(message);
+    }
+
+    public EnrichmentException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
+```
+
+**Example**:
+```java
+throw new EnrichmentException(
+    "Failed to calculate premium: notional field is null",
+    originalException
+);
+```
+
+### Database-Specific Exceptions
+
+#### SqlErrorClassifier
+
+**Package**: `dev.mars.apex.core.service.data.external.database`
+
+Utility for classifying SQL errors:
+
+```java
+public class SqlErrorClassifier {
+    public enum SqlErrorType {
+        CONNECTION_ERROR,
+        TIMEOUT_ERROR,
+        DATA_INTEGRITY_VIOLATION,
+        SYNTAX_ERROR,
+        PERMISSION_ERROR,
+        RESOURCE_ERROR,
+        FATAL_ERROR
+    }
+
+    public static SqlErrorType classifyError(SQLException e) {
+        String sqlState = e.getSQLState();
+        int errorCode = e.getErrorCode();
+
+        // Classify based on SQL state and error code
+        if (isConstraintViolation(sqlState, errorCode, message)) {
+            return SqlErrorType.DATA_INTEGRITY_VIOLATION;
+        }
+        // ... more classification logic
+    }
+}
+```
+
+**Usage**:
+```java
+try {
+    // Database operation
+} catch (SQLException e) {
+    SqlErrorType errorType = SqlErrorClassifier.classifyError(e);
+
+    switch (errorType) {
+        case DATA_INTEGRITY_VIOLATION:
+            // Handle gracefully (e.g., duplicate key)
+            logger.warn("Data integrity violation: {}", e.getMessage());
+            break;
+        case CONNECTION_ERROR:
+        case TIMEOUT_ERROR:
+            // Retry
+            logger.error("Retryable error: {}", e.getMessage());
+            throw DataSourceException.connectionError("Database connection failed", e);
+        default:
+            // Fail fast
+            throw DataSourceException.executionError("Database operation failed", e, operation);
+    }
+}
+```
+
+### Exception Handling Best Practices
+
+1. **Use Specific Exceptions**: Throw the most specific exception type for the error
+   ```java
+   // ✅ Good
+   throw new RuleEvaluationException(ruleName, expression, "Property not found");
+
+   // ❌ Bad
+   throw new RuntimeException("Error in rule");
+   ```
+
+2. **Include Context**: Always provide error codes and context
+   ```java
+   throw new RuleEngineException(
+       "RULE_EVAL_001",
+       "Failed to evaluate rule condition",
+       "Rule: " + ruleName + ", Data: " + dataContext
+   );
+   ```
+
+3. **Chain Exceptions**: Preserve the original exception
+   ```java
+   try {
+       // Operation
+   } catch (SQLException e) {
+       throw new DataSourceException(ErrorType.EXECUTION_ERROR, "Query failed", e, dataSourceId, query, true);
+   }
+   ```
+
+4. **Use Factory Methods**: Leverage static factory methods for common cases
+   ```java
+   // ✅ Good
+   throw DataSourceException.connectionError("Connection failed", cause);
+
+   // ❌ Verbose
+   throw new DataSourceException(ErrorType.CONNECTION_ERROR, "Connection failed", cause, null, null, true);
+   ```
+
+5. **Check Retryability**: Use the `retryable` flag to determine if operations should be retried
+   ```java
+   try {
+       // Data source operation
+   } catch (DataSourceException e) {
+       if (e.isRetryable()) {
+           // Retry logic
+       } else {
+           // Fail fast
+       }
+   }
+   ```
 
 ---
 
 ## Troubleshooting
 
-### Validation Rules Always Succeed (Even with Invalid Data)
+### Validation Rules Not Behaving As Expected
 
-**Problem**: Validation rules with ERROR severity always return success, even when data is invalid.
+**Problem**: Validation rules with ERROR severity are not producing the expected results.
 
-**Cause**: Rule condition is written to return TRUE when data is **invalid** instead of when it's **valid**.
+**Cause**: Misunderstanding of how rule conditions work with severity.
 
-**Solution**: Rewrite rule conditions to return TRUE for valid data:
+**Solution**: Understand that the condition is just a boolean expression. Write it to return TRUE for the case you want to detect:
 
 ```yaml
-# ❌ WRONG: Returns TRUE when field is missing
-- condition: "#data['tradeId'] == null"
-  severity: "ERROR"
-  # Missing field → condition TRUE → success (wrong!)
-  # Present field → condition FALSE → should fail (also wrong!)
-
-# ✅ CORRECT: Returns TRUE when field is present
+# Example 1: Detect when field is PRESENT (rule matches when tradeId exists)
 - condition: "#data['tradeId'] != null && !#data['tradeId'].toString().trim().isEmpty()"
   severity: "ERROR"
-  # Present field → condition TRUE → success ✓
-  # Missing field → condition FALSE + ERROR severity → fail-fast ✓
+  # tradeId present → condition TRUE → rule matches → success ✓
+  # tradeId missing → condition FALSE → rule doesn't match + ERROR severity → fail-fast ✓
+
+# Example 2: Detect when field is MISSING (rule matches when tradeId is null)
+- condition: "#data['tradeId'] == null"
+  severity: "ERROR"
+  # tradeId missing → condition TRUE → rule matches → success ✓
+  # tradeId present → condition FALSE → rule doesn't match + ERROR severity → fail-fast ✓
 ```
 
-**Key Concept**: Severity-based fail-fast **only applies when condition evaluates to FALSE**. If your validation condition returns TRUE for invalid data, the rule will incorrectly report success.
+**Key Concept**: Severity-based fail-fast **only applies when condition evaluates to FALSE**. Write your condition to return TRUE for whatever case you want to detect. The severity only matters when the condition returns FALSE.
 
 ### Recovery Not Working
 
@@ -826,11 +1765,11 @@ The APEX error handling system provides:
 
 1. **Severity applies when condition = FALSE**: Error recovery and fail-fast behavior only activate when a rule's condition evaluates to FALSE (rule did not match). When condition = TRUE (rule matched), the evaluation always succeeds regardless of severity.
 
-2. **Write positive validation conditions**: Validation rules should return TRUE for valid data and FALSE for invalid data. This ensures that invalid data triggers the appropriate severity-based response.
+2. **Conditions are boolean expressions**: Rule conditions simply return TRUE or FALSE. Write the condition to return TRUE for whatever case you want to detect/match. The severity only matters when the condition returns FALSE.
 
-3. **Default policies for ERROR/CRITICAL**: By default, ERROR and CRITICAL severities have recovery disabled and use FAIL_FAST strategy, meaning any validation failure will stop processing immediately.
+3. **Default policies for ERROR/CRITICAL**: By default, ERROR and CRITICAL severities have recovery disabled and use FAIL_FAST strategy, meaning when a rule with ERROR/CRITICAL severity doesn't match (condition = FALSE), processing will stop immediately.
 
-4. **Test your validation rules**: Always verify that validation rules behave correctly with both valid and invalid data to ensure severity-based fail-fast works as expected.
+4. **Test your validation rules**: Always verify that validation rules behave correctly by testing both cases where the condition returns TRUE and where it returns FALSE.
 
 ### Quick Reference
 
@@ -848,8 +1787,8 @@ For more information, see:
 
 ---
 
-**Last Updated**: November 17, 2025  
-**Version**: 2.1 (Updated with rule condition behavior clarification)
+**Last Updated**: November 17, 2025
+**Version**: 2.2 (Enhanced with ResultType vs Severity, Enrichment/Transformation error handling, Parallel execution, Exception hierarchy, and expanded metrics documentation)
 ✅ **Production-Ready**: Battle-tested with comprehensive logging and debugging support
 
 

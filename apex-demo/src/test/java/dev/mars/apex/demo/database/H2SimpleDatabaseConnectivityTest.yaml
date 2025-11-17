@@ -9,7 +9,7 @@ data-sources:
     type: "database"
     source-type: "h2"
     connection:
-      database: "./target/h2-demo/simple_test"
+      database: "./target/h2-demo/h2_simple_connectivity_test"
       username: "sa"
       password: ""
 

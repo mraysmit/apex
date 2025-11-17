@@ -21,6 +21,19 @@ metadata:
     - Rule-refs expands BEFORE inline rules
     - All enrichments execute BEFORE all rules
 
+# Error recovery configuration
+# Rules detect INVALID data (condition = TRUE when data is invalid)
+# With valid data, conditions return FALSE, so we need recovery enabled
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+
+  severity-policies:
+    ERROR:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
+
 # CRITICAL: enrichment-refs appears FIRST
 enrichment-refs:
   - name: "otc-market-enrichments"

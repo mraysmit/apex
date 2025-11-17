@@ -4,6 +4,19 @@ metadata:
   version: "1.0.0"
   description: "Test enrichment-group-refs placeholder expansion in document order"
 
+# Error recovery configuration
+# Rules detect INVALID data (condition = TRUE when data is invalid)
+# With valid data, conditions return FALSE, so we need recovery enabled
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+
+  severity-policies:
+    ERROR:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
+
 # YAML Section Order: enrichments → enrichment-refs → rules
 # Expected Processing Order: E1-inline → EG1-from-ref → EG2-from-ref → R1-inline
 

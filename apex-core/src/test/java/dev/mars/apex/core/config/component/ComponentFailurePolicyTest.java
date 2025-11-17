@@ -82,7 +82,18 @@ class ComponentFailurePolicyTest {
         ScenarioExecutionResult result = engine.evaluateScenario("component-success-test", validData);
 
         // Log detailed results
-        logger.info("\n" + result.getDetailedReport());
+        logger.info("\n=== DETAILED REPORT ===");
+        logger.info(result.getDetailedReport());
+        logger.info("\n=== EXECUTION SUMMARY ===");
+        logger.info(result.getExecutionSummary());
+        logger.info("\n=== STAGE RESULTS ===");
+        result.getStageResults().forEach(stageResult -> {
+            logger.info("Stage: {} - ResultType: {} - Successful: {} - Error: {}",
+                stageResult.getStageName(),
+                stageResult.getResultType(),
+                stageResult.isSuccessful(),
+                stageResult.getErrorMessage());
+        });
 
         // Verify successful execution
         assertNotNull(result, "Result should not be null");

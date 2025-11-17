@@ -12,7 +12,7 @@ metadata:
   name: "Compliance Test Scenario"
   version: "1.0.0"
   description: "Scenario for testing compliance rule execution after validation failures"
-  type: "scenario-config"
+  type: "scenario"
 
 # SCENARIO CONFIGURATION:
 # This scenario has multiple stages where validation may fail but compliance should execute

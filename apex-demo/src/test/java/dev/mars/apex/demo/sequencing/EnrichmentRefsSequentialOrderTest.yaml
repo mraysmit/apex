@@ -5,17 +5,30 @@ metadata:
   processing-mode: "sequential"
   description: |
     Test that enrichment-refs placeholder is expanded at the correct position in document order.
-    
+
     Expected Processing Order:
     1. E1-inline (enrich-counterparty-data) - inline enrichment
     2. E2-from-ref (enrich-market-data) - from external file
     3. E3-from-ref (calculate-greeks) - from external file
     4. R1 (validate-greeks-calculated) - depends on E3
-    
+
     This verifies that:
     - enrichment-refs placeholder is inserted at correct position during parsing
     - Placeholder is expanded to actual enrichments after reference processing
     - Referenced enrichments execute BEFORE subsequent rules
+
+# Error recovery configuration
+# Rules detect INVALID data (condition = TRUE when data is invalid)
+# With valid data, conditions return FALSE, so we need recovery enabled
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+
+  severity-policies:
+    ERROR:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
 
 # INLINE ENRICHMENT - should execute FIRST
 enrichments:

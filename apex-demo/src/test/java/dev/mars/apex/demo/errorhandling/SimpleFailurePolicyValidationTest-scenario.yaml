@@ -32,7 +32,7 @@ scenario:
     - stage-name: "validation"
       config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyValidationTest-validation.yaml"
       execution-order: 1
-      failure-policy: "continue-with-warnings"
+      failure-policy: "terminate"
       required: true
       stage-metadata:
         description: "Validation stage that tests rule failures and SpEL exception handling"

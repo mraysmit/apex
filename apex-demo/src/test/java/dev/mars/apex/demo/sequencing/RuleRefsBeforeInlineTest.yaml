@@ -5,18 +5,31 @@ metadata:
   processing-mode: "sequential"
   description: |
     CRITICAL TEST: Verify rule-refs can appear BEFORE inline rules.
-    
+
     Expected Processing Order:
     1. E1-inline (enrich-counterparty-data) - inline enrichment
     2. R1-from-ref (validate-notional-limit) - from external file
     3. R2-from-ref (validate-strike-price) - from external file
     4. R3-inline (validate-counterparty-enriched) - inline rule
-    
+
     This verifies that:
     - rule-refs can appear BEFORE inline rules
     - Placeholder is expanded at correct position (before inline rules)
     - Referenced rules execute BEFORE inline rules
     - All enrichments execute BEFORE all rules
+
+# Error recovery configuration
+# Rules detect INVALID data (condition = TRUE when data is invalid)
+# With valid data, conditions return FALSE, so we need recovery enabled
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+
+  severity-policies:
+    ERROR:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
 
 # ENRICHMENTS - should execute FIRST
 enrichments:
