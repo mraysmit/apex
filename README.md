@@ -15,7 +15,7 @@
 **Date:** 2025-11-16
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 
-A powerful expression processor for Java applications with comprehensive **data validation and enrichment capabilities**, **external data-source reference system**, scenario-based configuration management, and enterprise-grade YAML validation.
+An expression processor for Java applications with **data validation and enrichment capabilities**, **external data-source reference system**, scenario-based configuration management, and YAML validation.
 
 ## Quick Start
 
@@ -53,14 +53,14 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookups.SimpleFieldLookupDemo
 ## Key Features
 
 ### Core Capabilities - Data Validation and Enrichment
-- **Data Validation**: Comprehensive rule-based validation with enterprise-grade error reporting
+- **Data Validation**: Rule-based validation with detailed error reporting
 - **Rule Chaining**: Store rule evaluation results with `result-field` for use in subsequent rules
 - **Enrichment Chaining**: Store enrichment evaluation results (lookup success, condition match, mapping success) for conditional logic and fallback handling
 - **Data Enrichment**: Multi-source data enrichment with YAML datasets and external lookups
 - **YAML Dataset Enrichment**: Embed reference data directly in configuration files
 - **External Data Integration**: Connect to databases, REST APIs, file systems, and caches
-- **Comprehensive Error Handling**: Severity-based error recovery (CRITICAL, ERROR, WARNING, INFO) with configurable recovery strategies (FAIL_FAST, CONTINUE_WITH_DEFAULT, RETRY_WITH_SAFE_EXPRESSION, SKIP_RULE)
-- **73 YAML Keywords**: Complete declarative configuration language with comprehensive keyword reference for rules, enrichments, pipelines, and scenarios
+- **Error Handling**: Severity-based error recovery (CRITICAL, ERROR, WARNING, INFO) with configurable recovery strategies (FAIL_FAST, CONTINUE_WITH_DEFAULT, RETRY_WITH_SAFE_EXPRESSION, SKIP_RULE)
+- **73 YAML Keywords**: Declarative configuration language with complete keyword reference for rules, enrichments, pipelines, and scenarios
 - **Component Architecture (v2.2.0)**: Group multiple YAML files into reusable components with dependency management and circular reference detection
 - **Classification-Based Routing**: Automatic scenario selection based on data content using SpEL expressions
 
@@ -68,14 +68,14 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookups.SimpleFieldLookupDemo
 - **4-Panel Web Interface**: Real-time rule development and testing
 - **Built-in Templates**: Financial services patterns and examples
 - **Live Preview**: See validation and enrichment results instantly
-- **Cross-Browser Support**: Comprehensive UI testing with 100% coverage
+- **Cross-Browser Support**: UI testing with full coverage
 
 ### APEX 2.1 - External Data-Source Reference System
 - **Clean Architecture**: Separation of infrastructure and business logic configurations
 - **Configuration Caching**: Automatic caching of external configurations for performance
 - **Reusable Components**: Share data-source configurations across multiple rule sets
-- **Enterprise Scalability**: Environment-specific infrastructure with shared business logic
-- **Enhanced H2 Support**: Custom H2 parameters directly in YAML configuration for performance tuning and debugging
+- **Environment-Specific Configuration**: Environment-specific infrastructure with shared business logic
+- **H2 Support**: Custom H2 parameters directly in YAML configuration for performance tuning and debugging
 
 ### Scenario-Based Processing (APEX 3.0)
 - **Unified RulesEngine API**: Single entry point for all APEX processing types
@@ -92,13 +92,13 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookups.SimpleFieldLookupDemo
 - **Trade Settlement**: Post-trade processing and auto-repair workflows
 - **Risk Assessment**: Credit, market, and operational risk scoring
 
-### Enterprise Features
-- **Connection Pooling**: Production-ready database connection management
-- **Health Monitoring**: Comprehensive system health checks
+### Production Features
+- **Connection Pooling**: Database connection management
+- **Health Monitoring**: System health checks
 - **Caching**: Multi-level caching with circuit breakers
-- **Error Recovery System**: Configurable severity levels and recovery strategies for fault tolerance
+- **Error Recovery**: Configurable severity levels and recovery strategies for fault tolerance
 - **Component Architecture**: Reusable configuration components with nesting depth management (levels 1-2: OK, 3-5: WARNING, 6+: ERROR)
-- **100% Test Coverage**: Comprehensive testing with cross-browser UI support
+- **Test Coverage**: Full testing with cross-browser UI support
 
 ## RulesEngine API - Universal Entry Point (APEX 3.0)
 
@@ -213,7 +213,7 @@ ScenarioExecutionResult result = engine.evaluateWithClassification(data);
 
 ## External Data-Source Reference System
 
-APEX 2.1 introduces a revolutionary **external data-source reference system** that enables clean architecture and enterprise-grade configuration management.
+APEX 2.1 introduces an **external data-source reference system** that enables clean architecture and flexible configuration management.
 
 ### Clean Separation of Concerns
 
@@ -327,7 +327,7 @@ configuration:
 
 ## 🛡️ Error Handling System
 
-APEX provides a comprehensive error handling system with severity-based recovery for fault-tolerant processing.
+APEX provides an error handling system with severity-based recovery for fault-tolerant processing.
 
 ### Severity Levels
 
@@ -552,10 +552,10 @@ graph TB
 ## Project Structure
 
 - **apex-core**: Core rules engine and **external data-source reference system**
-- **apex-demo**: 16+ comprehensive demonstrations including **external data-source reference examples**
+- **apex-demo**: 16+ demonstrations including **external data-source reference examples**
 - **apex-playground**: Interactive web-based development environment
-- **apex-rest-api**: Complete REST API with OpenAPI/Swagger documentation
-- **docs**: Comprehensive documentation and guides including **external data-source reference guide**
+- **apex-rest-api**: REST API with OpenAPI/Swagger documentation
+- **docs**: Documentation and guides including **external data-source reference guide**
 
 ## Learning Paths
 
@@ -649,7 +649,7 @@ Production-ready deployment:
 - **[Rule Group Inline Reference Guide](docs/RULE_GROUP_INLINE_REFERENCE_GUIDE.md)** - Rule group patterns
 - **[APEX Data Management Guide](docs/APEX_DATA_MANAGEMENT_GUIDE.md)** - Data integration and management
 - **[Financial Services Guide](docs/old/APEX_FINANCIAL_SERVICES_DESIGN.md)** - Domain-specific patterns
-- **[Bootstrap Demos Guide](docs/APEX_BOOTSTRAP_DEMOS_GUIDE.md)** - 16+ comprehensive demonstrations
+- **[Bootstrap Demos Guide](docs/APEX_BOOTSTRAP_DEMOS_GUIDE.md)** - 16+ demonstrations
 
 ## Use Cases
 
@@ -689,7 +689,7 @@ Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) for detai
 ### General Documentation
 1. Start with the **[APEX Playground](http://localhost:8081/playground)** for hands-on experience
 2. Review the **[Bootstrap Demos Guide](docs/APEX_BOOTSTRAP_DEMOS_GUIDE.md)** for practical examples
-3. Check the **[Rules Engine User Guide](docs/APEX_RULES_ENGINE_USER_GUIDE.md)** for comprehensive documentation
+3. Check the **[Rules Engine User Guide](docs/APEX_RULES_ENGINE_USER_GUIDE.md)** for complete documentation
 4. Explore the **16+ demonstrations** in the `apex-demo` module
 
 ---
