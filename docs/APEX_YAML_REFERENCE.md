@@ -38,7 +38,7 @@
 
 ## 1. Quick Keyword Reference
 
-This section provides a definitive reference for all 73 supported APEX YAML keywords based on actual APEX core engine implementation.
+This section provides a definitive reference for APEX YAML keywords based on actual APEX core engine implementation. Approximately **155 keywords** are defined in apex-core, with **~140 functionally implemented** in execution logic. See Appendix C for planned/future keywords.
 
 ### 1.1 Complete Keyword Reference Table
 
@@ -5764,3 +5764,588 @@ The key to success with APEX YAML is:
 7. **Separate concerns**: Keep infrastructure and business logic configurations separate
 
 For additional support and examples, refer to the APEX documentation and community resources.
+
+---
+
+## Appendix A: Implemented APEX Keyword Dictionary
+
+This appendix provides an alphabetical reference of **functionally implemented** APEX YAML keywords that affect system behavior during rule/enrichment execution.
+
+**Note**: Keywords marked as "Metadata Only" are stored but do not affect execution logic. See Appendix C for planned/future keywords.
+
+### A
+
+- **actions** - List of actions to execute when a rule matches or condition is met
+- **alert-on-failure** - Boolean flag to trigger alerts when processing fails (used in health checks and pipeline monitoring)
+- **apiVersion** - API version for external data source configurations (type: external-data-config)
+- **authentication** - Authentication configuration for external data sources (username, password, tokens)
+
+### B
+
+- **backoff-multiplier** - Multiplier for exponential backoff in retry logic
+- **batch** - Batch processing configuration for handling multiple records
+- **business-domain** - Business domain classification (e.g., "Trading", "Compliance", "Risk")
+- **business-owner** - Business owner responsible for the rule or configuration
+
+### C
+
+- **cache** - Caching configuration for data sources (TTL, max size, eviction policy)
+- **cache-enabled** - Boolean flag to enable/disable caching
+- **cache-ttl-seconds** - Cache time-to-live in seconds
+- **calculation-config** - Configuration for calculation-enrichment type
+- **categories** - List of category definitions or category assignments
+- **category** - Single category for rule/enrichment classification
+- **circuit-breaker** - Circuit breaker configuration for resilience (failure threshold, timeout) - fully implemented in RestApiDataSource
+- **collect-metrics** - Boolean flag to enable metrics collection in pipelines and data sources
+- **component-refs** - References to other component files
+- **condition** - SpEL expression defining when rule/enrichment/stage applies
+- **conditional-mappings** - List of conditional field mapping configurations
+- **conditions** - Multiple conditions for complex logic
+- **config-files** - List of configuration files with execution order and failure policy
+- **configuration** - General configuration object
+- **connection** - Database or external system connection configuration (URL, credentials)
+- **connection-name** - Name identifier for a connection
+- **custom-properties** - Custom extensible properties for rules or enrichments (stored but not processed)
+- **custom-validators** - Custom validation logic references (defined but not fully implemented)
+
+### D
+
+- **data** - Data payload or data object
+- **data-sinks** - Output destinations for processed data
+- **data-source-ref** - Reference to an external data source configuration
+- **data-source-refs** - List of references to external data source configurations
+- **data-sources** - Inline data source definitions
+- **debug-mode** - Enable debug mode for detailed logging and execution traces
+- **default-strategy** - Default strategy for error recovery or processing
+- **default-value** - Fallback value when source field is missing or null
+- **default-values** - Multiple default values for different scenarios
+- **delay-ms** - Delay in milliseconds before retry or execution
+- **dependencies** - List of dependencies for execution order
+- **depends-on** - List of stage or component dependencies
+- **description** - Human-readable description of the configuration
+- **display-name** - Display name for UI presentation
+- **document-position** - Position of item in YAML document for ordering
+- **documentation-url** - URL to external documentation
+- **drop-if-exists** - Drop existing database tables or resources before creating
+
+### E
+
+- **effective-date** - Date when rule becomes effective (ISO 8601)
+- **else-actions** - Actions to execute when condition is false
+- **enabled** - Boolean flag indicating if rule/enrichment/component is active
+- **endpoint** - Single endpoint URL for REST API
+- **endpoints** - Map of REST API endpoint definitions
+- **enrichment-group-references** - References to other enrichment groups
+- **enrichment-groups** - Enrichment group definitions
+- **enrichment-id** - Unique identifier for an enrichment
+- **enrichment-ids** - List of enrichment IDs in a group
+- **enrichment-references** - Structured references to enrichments with sequence and overrides
+- **enrichment-refs** - References to external enrichment configuration files
+- **enrichments** - Data enrichment configurations
+- **environment** - Environment identifier (e.g., "dev", "test", "prod")
+- **error-code** - Error code to set when enrichment or rule fails
+- **error-handling** - Exception handling strategy (fail-fast, continue-on-error, skip-on-error)
+- **error-recovery** - Error recovery configuration for resilience and fault tolerance
+- **execution** - Execution configuration object
+- **execution-config** - Execution behavior configuration
+- **execution-order** - Numeric execution order for stages or file references
+- **execution-settings** - Execution behavior configuration for enrichments
+- **expiration-date** - Date when rule expires (ISO 8601)
+- **expression** - SpEL expression for field transformation or calculation
+
+### F
+
+- **failure-policy** - Failure handling policy (terminate, continue-with-warnings, flag-for-review)
+- **fallback-value** - Fallback value when primary value is unavailable
+- **field** - Field name for operations
+- **field-mappings** - List of field mapping configurations
+- **field-types** - Expected data types for field validation
+- **file** - Path to configuration file in component file reference
+- **file-format** - File format configuration (CSV, JSON, XML)
+- **file-path** - Path to file resource
+- **format-config** - Format configuration for file parsing
+
+### H
+
+- **health-check** - Health check configuration for data sources
+
+### I
+
+- **id** - Unique identifier for the configuration
+- **implementation** - Implementation class for custom data sources or validators
+- **init-script** - Initialization script for database setup
+- **init-scripts** - List of initialization scripts
+
+### K
+
+- **key-field** - Field name used as key for lookups
+- **key-patterns** - Key pattern definitions for key-value stores
+- **kind** - Kubernetes-style resource kind
+
+### L
+
+- **labels** - Key-value labels for classification
+- **last-modified** - Last modification timestamp (ISO 8601)
+- **log-matched-rule** - Boolean flag to log which rule matched
+- **log-progress** - Boolean flag to log processing progress
+- **log-recovery-attempts** - Boolean flag to log error recovery attempts
+- **lookup-config** - Configuration for lookup-enrichment type
+- **lookup-dataset** - Dataset configuration for lookup operations
+- **lookup-key** - SpEL expression for lookup key
+- **lookup-service** - Service name for lookup operations
+
+### M
+
+- **map-to-field** - Target field(s) for mapping results (String or List)
+- **mapping** - Single mapping configuration
+- **mapping-rules** - Complex mapping rule definitions
+- **max-attempts** - Maximum number of retry attempts
+- **max-delay-ms** - Maximum delay in milliseconds for backoff
+- **max-retries** - Maximum number of retries
+- **message** - Message displayed when rule is triggered or for logging
+- **metadata** - Document metadata section containing identification and configuration
+- **metrics-enabled** - Boolean flag to enable metrics collection
+- **mode** - Processing mode (e.g., "sequential", "parallel")
+- **monitoring** - Monitoring configuration
+
+### N
+
+- **name** - Human-readable name for the configuration
+
+### O
+
+- **operation** - Single operation definition
+- **operation-ref** - Reference to a named operation
+- **operations** - Map of operation definitions for REST APIs
+- **operator** - Logical operator for rule group (AND/OR)
+- **optional** - Boolean flag indicating if field or configuration is optional
+- **output-format** - Output format specification
+- **override-priority** - Override priority for rule within group
+- **owner** - Owner of the component or configuration
+
+### P
+
+- **parallel-execution** - Enable parallel execution of rules in group
+- **parameter-names** - Array of parameter names for parameterized queries
+- **parameters** - Map of parameters for operations or queries
+- **parent-category** - Parent category for hierarchical categorization
+- **pattern** - Regular expression pattern for validation
+- **pipeline** - Pipeline configuration for processing stages
+- **priority** - Execution priority (lower numbers = higher priority)
+- **processing-mode** - Processing mode (e.g., "document-order", "priority-order")
+
+### Q
+
+- **queries** - Named query definitions for database sources
+- **query** - Single query definition
+- **query-ref** - Reference to a named query
+
+### R
+
+- **recovery-enabled** - Boolean flag to enable error recovery
+- **required** - Boolean flag indicating if field mapping is mandatory
+- **required-fields** - List of required fields for validation
+- **response-mapping** - Response transformation configuration for REST APIs
+- **result-field** - Field name to store rule or enrichment evaluation result
+- **retry** - Retry configuration object
+- **retry-count** - Number of retry attempts
+- **retry-delay** - Delay between retry attempts
+- **retry-delay-ms** - Retry delay in milliseconds
+- **rule** - Single rule definition
+- **rule-chains** - Rule chain definitions for sequential rule execution
+- **rule-configurations** - References to rule configuration files in components
+- **rule-group-references** - References to other rule groups
+- **rule-groups** - Rule group definitions
+- **rule-id** - ID of rule being referenced
+- **rule-ids** - List of rule IDs in the group
+- **rule-references** - Detailed rule references with metadata
+- **rule-refs** - References to external rule configurations
+- **rules** - Rule definitions
+
+### S
+
+- **scenario** - Scenario configuration for multi-stage processing
+- **schema** - Schema definition for data validation
+- **sequence** - Execution sequence for rule within group
+- **severity** - Severity level (CRITICAL, ERROR, WARNING, INFO)
+- **severity-policies** - Severity-based policy configurations
+- **sink** - Single data sink configuration
+- **sla-ms** - Service level agreement in milliseconds
+- **source** - Source identifier or configuration
+- **source-field** - Source field name in field mappings
+- **source-system** - Source system identifier for audit trails
+- **source-type** - Type of data source (database, rest-api, file, cache, kafka)
+- **spec** - Kubernetes-style specification object
+- **steps** - List of processing steps
+- **stop-on-first-failure** - Stop group execution on first rule failure
+- **stop-on-first-match** - Stop processing on first matching rule
+- **strategy** - Strategy configuration (e.g., recovery strategy, execution strategy)
+- **success-code** - Success code to set when enrichment or rule succeeds
+
+### T
+
+- **tags** - Classification tags for the configuration
+- **target-field** - Target field name in field mappings
+- **target-type** - Target object type for enrichment or transformation
+- **timeout-ms** - Timeout in milliseconds
+- **topics** - Kafka topic definitions
+- **transformation-rules** - Transformation rule definitions
+- **transformations** - Data transformation configurations
+- **type** - Document type (rule-config, enrichment, dataset, scenario, external-data-config, component)
+
+### V
+
+- **validate-result** - Boolean flag to validate processing result
+- **validation** - Validation configuration for rules
+- **value** - Static value to set or use
+- **version** - Version identifier for the configuration
+
+---
+
+**Note:** This dictionary includes all @JsonProperty annotations found in apex-core. Some keywords are nested properties within parent objects (e.g., `cache-enabled` is a property within `cache`). Refer to the main reference sections for complete usage examples and context.
+
+---
+
+## Appendix B: Keywords Organized by APEX Category
+
+This appendix organizes APEX keywords by their functional category for easier navigation.
+
+### Document Structure Keywords
+
+Top-level sections that define the structure of APEX YAML documents:
+
+- **metadata** - Document metadata section
+- **data-sources** - Inline data source definitions
+- **data-source-refs** - References to external data source configurations
+- **enrichments** - Data enrichment configurations
+- **enrichment-groups** - Enrichment group definitions
+- **enrichment-refs** - References to external enrichment files
+- **rules** - Rule definitions
+- **rule-groups** - Rule group definitions
+- **rule-refs** - References to external rule configurations
+- **rule-chains** - Rule chain definitions for sequential execution
+- **transformations** - Data transformation configurations
+- **categories** - Category definitions for classification
+- **data-sinks** - Output destinations for processed data
+- **pipeline** - Pipeline configuration for multi-stage processing
+- **error-recovery** - Error recovery configuration
+- **scenario** - Scenario configuration
+- **component-refs** - References to component files
+- **config-files** - List of configuration files
+
+### Metadata Keywords
+
+Keywords used in the `metadata` section for document identification:
+
+- **id** - Unique identifier
+- **name** - Human-readable name
+- **description** - Detailed description
+- **version** - Version identifier
+- **type** - Document type (rule-config, enrichment, dataset, scenario, external-data-config, component)
+- **author** - Author or creator
+- **created** - Creation timestamp
+- **last-modified** - Last modification timestamp
+- **tags** - Classification tags
+- **processing-mode** - Processing mode (document-order, priority-order)
+- **environment** - Environment identifier (dev, test, prod)
+- **business-domain** - Business domain classification
+- **business-owner** - Business owner responsible
+- **created-by** - Creator identifier
+- **source-system** - Source system identifier
+- **effective-date** - Date when configuration becomes effective
+- **expiration-date** - Date when configuration expires
+- **documentation-url** - URL to external documentation
+- **display-name** - Display name for UI
+- **criticality** - Criticality level (HIGH, MEDIUM, LOW)
+- **owner** - Owner of the configuration
+- **sla-ms** - Service level agreement in milliseconds
+
+### Rule Keywords
+
+Keywords specific to rule definitions:
+
+- **rule** - Single rule definition
+- **rule-id** - Rule identifier
+- **rule-ids** - List of rule IDs
+- **rule-references** - Detailed rule references with metadata
+- **rule-configurations** - References to rule configuration files
+- **condition** - SpEL expression for rule condition
+- **conditions** - Multiple conditions
+- **message** - Message when rule triggers
+- **severity** - Severity level (CRITICAL, ERROR, WARNING, INFO)
+- **priority** - Execution priority
+- **enabled** - Enable/disable flag
+- **category** - Category assignment
+- **categories** - Multiple category assignments
+- **validation** - Validation configuration
+- **custom-properties** - Custom extensible properties
+- **default-value** - Default value when condition fails
+- **log-matched-rule** - Log which rule matched
+- **stop-on-first-match** - Stop on first matching rule
+- **result-field** - Field to store rule result
+
+### Rule Group Keywords
+
+Keywords for organizing rules into groups:
+
+- **rule-group-references** - References to other rule groups
+- **operator** - Logical operator (AND/OR)
+- **stop-on-first-failure** - Stop on first failure
+- **parallel-execution** - Enable parallel execution
+- **execution-config** - Execution configuration
+- **debug-mode** - Enable debug mode
+- **sequence** - Execution sequence
+- **override-priority** - Override priority for rule in group
+
+### Enrichment Keywords
+
+Keywords specific to enrichment definitions:
+
+- **enrichment-id** - Enrichment identifier
+- **enrichment-ids** - List of enrichment IDs
+- **enrichment-references** - Structured enrichment references
+- **enrichment-group-references** - References to enrichment groups
+- **lookup-config** - Lookup enrichment configuration
+- **calculation-config** - Calculation enrichment configuration
+- **field-mappings** - Field mapping configurations
+- **conditional-mappings** - Conditional field mappings
+- **mapping-rules** - Complex mapping rules
+- **target-field** - Target field name
+- **source-field** - Source field name
+- **target-type** - Target object type
+- **lookup-key** - Lookup key expression
+- **lookup-dataset** - Dataset for lookup
+- **lookup-service** - Service for lookup
+- **map-to-field** - Target field(s) for results
+- **success-code** - Success code to set
+- **error-code** - Error code to set
+- **execution-settings** - Execution behavior configuration
+
+### Transformation Keywords
+
+Keywords for data transformations:
+
+- **transformation-rules** - Transformation rule definitions
+- **expression** - SpEL expression for transformation
+- **actions** - Actions to execute
+- **else-actions** - Actions when condition is false
+- **mapping** - Single mapping configuration
+- **value** - Static value to set
+- **field** - Field name for operations
+
+### Data Source Keywords
+
+Keywords for configuring data sources:
+
+- **source-type** - Type of data source (database, rest-api, file, cache, kafka)
+- **connection** - Connection configuration
+- **connection-name** - Connection identifier
+- **data-source-ref** - Reference to external data source
+- **queries** - Named query definitions
+- **query** - Single query definition
+- **query-ref** - Reference to named query
+- **parameter-names** - Query parameter names
+- **parameters** - Operation or query parameters
+- **endpoints** - REST API endpoint definitions
+- **endpoint** - Single endpoint URL
+- **operations** - REST API operation definitions
+- **operation** - Single operation definition
+- **operation-ref** - Reference to named operation
+- **response-mapping** - Response transformation
+- **authentication** - Authentication configuration
+- **health-check** - Health check configuration
+- **circuit-breaker** - Circuit breaker configuration
+- **topics** - Kafka topic definitions
+- **file-path** - Path to file resource
+- **file-format** - File format configuration
+- **format-config** - Format parsing configuration
+- **init-script** - Database initialization script
+- **init-scripts** - List of initialization scripts
+- **auto-create** - Auto-create tables/resources
+- **auto-update** - Auto-update resources
+- **drop-if-exists** - Drop existing resources
+
+### Caching Keywords
+
+Keywords for caching configuration:
+
+- **cache** - Caching configuration
+- **cache-enabled** - Enable/disable caching
+- **cache-ttl-seconds** - Cache time-to-live
+
+### Error Handling & Recovery Keywords
+
+Keywords for error handling and resilience:
+
+- **error-handling** - Exception handling strategy
+- **error-recovery** - Error recovery configuration
+- **failure-policy** - Failure handling policy
+- **severity-policies** - Severity-based policies
+- **retry** - Retry configuration
+- **retry-count** - Number of retries
+- **retry-delay** - Delay between retries
+- **retry-delay-ms** - Retry delay in milliseconds
+- **max-retries** - Maximum retry attempts
+- **max-attempts** - Maximum attempts
+- **backoff-multiplier** - Exponential backoff multiplier
+- **delay-ms** - Delay in milliseconds
+- **max-delay-ms** - Maximum delay for backoff
+- **timeout-ms** - Timeout in milliseconds
+- **alert-on-failure** - Trigger alerts on failure
+- **recovery-enabled** - Enable error recovery
+- **log-recovery-attempts** - Log recovery attempts
+- **default-strategy** - Default recovery strategy
+- **strategy** - Strategy configuration
+- **fallback-value** - Fallback value when unavailable
+
+### Execution Control Keywords
+
+Keywords controlling execution behavior:
+
+- **execution** - Execution configuration
+- **execution-order** - Numeric execution order
+- **depends-on** - Dependencies for execution order
+- **dependencies** - List of dependencies
+- **steps** - Processing steps
+- **batch** - Batch processing configuration
+- **log-progress** - Log processing progress
+- **validate-result** - Validate processing result
+
+### Component & Configuration Keywords
+
+Keywords for component architecture:
+
+- **configuration** - General configuration object
+- **custom-validators** - Custom validation logic
+- **implementation** - Implementation class reference
+- **schema** - Schema definition
+- **required** - Required field flag
+- **optional** - Optional field flag
+- **required-fields** - List of required fields
+- **field-types** - Expected data types
+- **pattern** - Regular expression pattern
+- **default-values** - Multiple default values
+
+### Monitoring & Metrics Keywords
+
+Keywords for monitoring and observability:
+
+- **metrics-enabled** - Enable metrics collection
+- **collect-metrics** - Collect metrics flag
+- **monitoring** - Monitoring configuration
+
+### External Data Source Configuration Keywords
+
+Keywords specific to external data source configuration files (type: external-data-config):
+
+- **apiVersion** - API version for external data source config
+- **kind** - Resource kind (always "DataSource" for external configs)
+- **spec** - Specification object containing data source details
+- **labels** - Key-value labels for external data source classification
+
+### Data Sink Keywords
+
+Keywords for output destinations:
+
+- **sink** - Single data sink configuration
+- **output-format** - Output format specification
+
+### Miscellaneous Keywords
+
+Other utility keywords:
+
+- **data** - Data payload or object
+- **document-position** - Position in YAML document
+- **mode** - Processing mode
+- **source** - Source identifier
+- **key-field** - Key field for lookups
+- **key-patterns** - Key pattern definitions
+
+---
+
+**Note:** Some keywords may appear in multiple categories as they serve different purposes in different contexts. For detailed usage examples, refer to the main reference sections.
+
+---
+
+## Appendix C: Planned/Future Keywords
+
+This appendix lists keywords that are **defined in apex-core** (via @JsonProperty annotations) but are **NOT yet functionally implemented** in the execution logic. These keywords are stored in configuration objects but do not currently affect rule/enrichment execution behavior.
+
+### Metadata-Only Keywords
+
+These keywords are stored for audit, governance, and documentation purposes but do not affect execution:
+
+#### Audit & Governance Metadata
+- **author** - Author or creator of the configuration (stored but not checked during execution)
+- **created** - Creation timestamp in ISO 8601 format (stored but not checked during execution)
+- **created-by** - Creator identifier for audit trails (stored but not checked during execution)
+- **last-modified** - Last modification timestamp (stored but not checked during execution)
+- **owner** - Owner identifier (stored but not checked during execution)
+
+#### Business Metadata
+- **business-domain** - Business domain classification (e.g., "Trading", "Compliance") - stored and used for categorization/search in apex-yaml-manager, but does not affect rule execution
+- **business-owner** - Business owner responsible for the rule (stored and used for search/filtering in apex-yaml-manager, but does not affect rule execution)
+- **criticality** - Criticality level (e.g., "HIGH", "MEDIUM", "LOW") - stored but not checked during execution
+
+#### Display & Documentation Metadata
+- **display-name** - Display name for UI presentation (stored but not used in execution)
+- **documentation-url** - URL to external documentation (stored but not used in execution)
+
+### Date-Based Execution Control (Not Implemented)
+
+These date fields are stored in metadata but are **NOT checked before rule execution**:
+
+- **effective-date** - Date when rule becomes effective (ISO 8601 format)
+  - **Status**: Stored in RuleMetadata, used in apex-yaml-manager for category filtering
+  - **NOT implemented**: Rules execute regardless of effective date in apex-core RulesEngine
+
+- **expiration-date** - Date when rule expires (ISO 8601 format)
+  - **Status**: Stored in RuleMetadata, used in apex-yaml-manager for category filtering
+  - **NOT implemented**: Rules execute regardless of expiration date in apex-core RulesEngine
+
+**Future Implementation**: To make these functional, the RulesEngine.executeRule() and UnifiedRuleEvaluator.evaluateRule() methods would need to check these dates before executing rules.
+
+### Database Management Keywords (Not Implemented)
+
+These keywords are defined but database management features are not implemented:
+
+- **auto-create** - Automatically create database tables or resources if they don't exist
+  - **Status**: Defined in configuration classes but no implementation found
+
+- **auto-update** - Automatically update resources when configuration changes
+  - **Status**: Defined in configuration classes but no implementation found
+
+- **drop-if-exists** - Drop existing database tables or resources before creating
+  - **Status**: Defined in configuration classes but no implementation found
+
+### Validation Keywords (Partially Implemented)
+
+- **custom-validators** - Custom validation logic references
+  - **Status**: Defined in configuration but custom validator invocation not fully implemented
+  - **Current**: Basic validation exists, but extensible custom validators not supported
+
+- **validate-result** - Validate enrichment/rule results
+  - **Status**: Defined but comprehensive result validation not implemented
+
+### Usage Notes
+
+1. **Metadata Keywords**: These are useful for documentation, governance, and management tools (like apex-yaml-manager) but do not affect runtime behavior.
+
+2. **Date-Based Control**: If you need date-based rule activation/deactivation, you must implement this in your rule conditions:
+   ```yaml
+   condition: "T(java.time.LocalDate).now().isAfter(T(java.time.LocalDate).parse('2025-01-01')) && #amount > 1000"
+   ```
+
+3. **Database Management**: For database table creation/management, use external database migration tools (Flyway, Liquibase) rather than expecting APEX to manage schema.
+
+4. **Future Enhancements**: These keywords may be implemented in future versions of APEX. Check the release notes for updates.
+
+---
+
+## Summary of Keyword Counts
+
+- **Appendix A (Implemented)**: ~140 functionally implemented keywords
+- **Appendix C (Planned/Future)**: ~15 metadata-only keywords
+- **Total Defined**: ~155 keywords in apex-core
+
+**Note**: The original claim of "73 keywords" in line 41 was incorrect. The actual count is approximately 155 keywords defined in apex-core, with ~140 being functionally implemented in execution logic.

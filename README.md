@@ -60,7 +60,7 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookups.SimpleFieldLookupDemo
 - **YAML Dataset Enrichment**: Embed reference data directly in configuration files
 - **External Data Integration**: Connect to databases, REST APIs, file systems, and caches
 - **Error Handling**: Severity-based error recovery (CRITICAL, ERROR, WARNING, INFO) with configurable recovery strategies (FAIL_FAST, CONTINUE_WITH_DEFAULT, RETRY_WITH_SAFE_EXPRESSION, SKIP_RULE)
-- **73 YAML Keywords**: Declarative configuration language with complete keyword reference for rules, enrichments, pipelines, and scenarios
+- **155 YAML Keywords**: Declarative configuration language with ~140 functionally implemented keywords for rules, enrichments, pipelines, and scenarios
 - **Component Architecture (v2.2.0)**: Group multiple YAML files into reusable components with dependency management and circular reference detection
 - **Classification-Based Routing**: Automatic scenario selection based on data content using SpEL expressions
 
