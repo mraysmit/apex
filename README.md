@@ -2,16 +2,17 @@
 
 # APEX 
 
-[![Java](https://img.shields.io/badge/Java-23-orange.svg)](https://openjdk.java.net/projects/jdk/23/)
-[![Maven](https://img.shields.io/badge/Maven-3.8+-blue.svg)](https://maven.apache.org/)
+[![Java](https://img.shields.io/badge/Java-21%2B-orange.svg)](https://openjdk.java.net/projects/jdk/21/)
+[![Maven](https://img.shields.io/badge/Maven-3.6+-blue.svg)](https://maven.apache.org/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Version](https://img.shields.io/badge/Version-2.4-brightgreen.svg)](https://github.com/apex-rules-engine)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Compatible-blue.svg)](https://www.postgresql.org/)
 [![Playground](https://img.shields.io/badge/Playground-Interactive-purple.svg)](http://localhost:8081/playground)
 [![Financial Services](https://img.shields.io/badge/Financial%20Services-Ready-gold.svg)](docs/old/APEX_FINANCIAL_SERVICES_DESIGN.md)
 [![API Docs](https://img.shields.io/badge/API-Swagger-green.svg)](http://localhost:8080/swagger-ui.html)
 
-**Version:** 2.1
-**Date:** 2025-08-28
+**Version:** 2.4
+**Date:** 2025-11-16
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 
 A powerful expression processor for Java applications with comprehensive **data validation and enrichment capabilities**, **external data-source reference system**, scenario-based configuration management, and enterprise-grade YAML validation.
@@ -58,6 +59,10 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookups.SimpleFieldLookupDemo
 - **Data Enrichment**: Multi-source data enrichment with YAML datasets and external lookups
 - **YAML Dataset Enrichment**: Embed reference data directly in configuration files
 - **External Data Integration**: Connect to databases, REST APIs, file systems, and caches
+- **Comprehensive Error Handling**: Severity-based error recovery (CRITICAL, ERROR, WARNING, INFO) with configurable recovery strategies (FAIL_FAST, CONTINUE_WITH_DEFAULT, RETRY_WITH_SAFE_EXPRESSION, SKIP_RULE)
+- **73 YAML Keywords**: Complete declarative configuration language with comprehensive keyword reference for rules, enrichments, pipelines, and scenarios
+- **Component Architecture (v2.2.0)**: Group multiple YAML files into reusable components with dependency management and circular reference detection
+- **Classification-Based Routing**: Automatic scenario selection based on data content using SpEL expressions
 
 ### Interactive Playground - Development Environment
 - **4-Panel Web Interface**: Real-time rule development and testing
@@ -74,7 +79,8 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookups.SimpleFieldLookupDemo
 
 ### Scenario-Based Processing (APEX 3.0)
 - **Unified RulesEngine API**: Single entry point for all APEX processing types
-- **Classification-Based Routing**: Automatic scenario selection using SpEL expressions
+- **Classification-Based Routing**: Automatic scenario selection using SpEL expressions based on data content
+- **Component Support**: Use reusable components in processing stages for better organization
 - **Multi-Stage Pipelines**: Orchestrate validation, enrichment, and compliance stages
 - **Failure Policies**: Configurable handling (terminate, continue-with-warnings, flag-for-review)
 - **Stage Dependencies**: Define execution order and conditional processing
@@ -90,28 +96,60 @@ mvn exec:java -Dexec.mainClass="dev.mars.apex.demo.lookups.SimpleFieldLookupDemo
 - **Connection Pooling**: Production-ready database connection management
 - **Health Monitoring**: Comprehensive system health checks
 - **Caching**: Multi-level caching with circuit breakers
+- **Error Recovery System**: Configurable severity levels and recovery strategies for fault tolerance
+- **Component Architecture**: Reusable configuration components with nesting depth management (levels 1-2: OK, 3-5: WARNING, 6+: ERROR)
 - **100% Test Coverage**: Comprehensive testing with cross-browser UI support
 
 ## RulesEngine API - Universal Entry Point (APEX 3.0)
 
 APEX 3.0 introduces the **RulesEngine** as the unified entry point for all APEX processing types: rules, enrichments, pipelines, and scenarios.
 
+### Usage Patterns
+
+Choose the right pattern for your use case:
+
+| **Pattern** | **Lines** | **Use Case** | **When to Use** |
+|-------------|-----------|--------------|-----------------|
+| **One-Line** ⭐ | 1 line | Single evaluation | Default choice for most cases |
+| **Two-Line** ✅ | 2 lines | Multiple evaluations | When reusing engine or need cleanup |
+| **Advanced** ⚙️ | 7+ lines | Config inspection | Only when you need to inspect/modify config |
+
+**Bottom Line:** Start with the one-line pattern. Only use the two-line pattern if you need engine reuse. Avoid the advanced pattern unless you have a specific need for config inspection or modification.
+
 ### Quick Start Examples
 
-**Load and Execute Rules:**
+**⭐ One-Line Pattern (Simplest):**
 ```java
-// Load rules from YAML configuration
-RulesEngine engine = RulesEngine.fromYaml("config/validation-rules.yaml");
+// Single evaluation - most common use case
+Map<String, Object> data = Map.of("amount", 1000, "currency", "USD");
+RuleResult result = RulesEngine.fromFile("config.yaml").evaluate(data);
+```
 
-// Evaluate rules against data
-Map<String, Object> data = new HashMap<>();
-data.put("amount", 1000000.0);
-data.put("currency", "USD");
-
-RuleResult result = engine.evaluate(data);
-if (result.isSuccess()) {
-    System.out.println("All validations passed");
+**✅ Two-Line Pattern (Reusable):**
+```java
+// Reuse engine for multiple evaluations
+RulesEngine engine = RulesEngine.fromFile("config.yaml");
+for (Map<String, Object> item : items) {
+    RuleResult result = engine.evaluate(item);
+    // Process result...
 }
+engine.shutdown(); // Cleanup when done
+```
+
+**⚙️ Advanced Pattern (Config Inspection):**
+```java
+// Only when you need to inspect or modify configuration
+YamlConfigurationLoader loader = new YamlConfigurationLoader();
+YamlRuleConfiguration config = loader.loadFromFile("config.yaml");
+
+// Inspect or modify configuration
+if (config.getMetadata() != null) {
+    System.out.println("Config version: " + config.getMetadata().getVersion());
+}
+
+// Create engine from modified config
+RulesEngine engine = RulesEngine.fromYamlConfig(config);
+RuleResult result = engine.evaluate(data);
 ```
 
 **Scenario Processing with Classification:**
@@ -287,6 +325,174 @@ configuration:
 - **Environment Management**: Different infrastructure configurations for dev/test/prod
 - **Enterprise Scalability**: Production-ready configuration management
 
+## 🛡️ Error Handling System
+
+APEX provides a comprehensive error handling system with severity-based recovery for fault-tolerant processing.
+
+### Severity Levels
+
+- **CRITICAL** - System-level failures requiring immediate attention (e.g., database connection failures, configuration errors)
+- **ERROR** - Business logic failures that prevent processing (e.g., missing required fields, invalid data)
+- **WARNING** - Non-critical issues that allow continued processing (e.g., optional enrichment failures, fallback values used)
+- **INFO** - Informational messages for audit trails (e.g., rule matches, successful enrichments)
+
+### Recovery Strategies
+
+- **FAIL_FAST** - Stop processing immediately on error (default for CRITICAL severity)
+- **CONTINUE_WITH_DEFAULT** - Use default values and continue processing (recommended for WARNING severity)
+- **RETRY_WITH_SAFE_EXPRESSION** - Retry with safe fallback expression (for transient failures)
+- **SKIP_RULE** - Skip failed rule and continue with others (for optional validations)
+
+### YAML Configuration
+
+**Rule-Level Error Handling:**
+```yaml
+rules:
+  - id: "validate-amount"
+    condition: "#amount != null && #amount > 0"
+    message: "Amount must be positive"
+    error-handling:
+      severity: "ERROR"
+      recovery-strategy: "FAIL_FAST"
+```
+
+**Rule Group Error Handling:**
+```yaml
+rule-groups:
+  - id: "validation-group"
+    operator: "AND"
+    error-handling: "continue-on-error"  # Options: fail-fast, continue-on-error, skip-on-error
+    rule-ids:
+      - "validate-amount"
+      - "validate-currency"
+```
+
+**Enrichment Error Handling:**
+```yaml
+enrichments:
+  - id: "customer-lookup"
+    type: "lookup-enrichment"
+    error-handling:
+      severity: "WARNING"
+      recovery-strategy: "CONTINUE_WITH_DEFAULT"
+      default-value: "UNKNOWN"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "customer-database"
+```
+
+### Java API
+
+```java
+// Configure error handling programmatically
+RulesEngine engine = RulesEngine.builder()
+    .withYamlConfig("config/rules.yaml")
+    .withErrorHandling(ErrorHandlingConfig.builder()
+        .defaultSeverity(Severity.ERROR)
+        .defaultRecoveryStrategy(RecoveryStrategy.FAIL_FAST)
+        .build())
+    .build();
+
+// Check error details in results
+RuleResult result = engine.evaluate(data);
+if (result.hasErrors()) {
+    for (ErrorDetail error : result.getErrors()) {
+        System.out.println("Severity: " + error.getSeverity());
+        System.out.println("Message: " + error.getMessage());
+        System.out.println("Recovery: " + error.getRecoveryStrategy());
+    }
+}
+```
+
+**See [APEX Error Handling Guide](docs/APEX_ERROR_HANDLING_GUIDE.md) for complete documentation.**
+
+---
+
+## 🧩 Component Architecture (v2.2.0)
+
+Group multiple YAML configuration files into reusable components with dependency management and circular reference detection.
+
+### Features
+
+- ✅ **Reusable Components** - Group related configurations for better organization
+- ✅ **Dependency Management** - Automatic circular reference detection with DFS algorithm
+- ✅ **Execution Order Control** - Explicit execution-order or document-order execution
+- ✅ **Failure Policies** - Per-file failure handling (terminate, continue-with-warnings, flag-for-review)
+- ✅ **Nesting Depth Management** - Graduated warnings (levels 1-2: OK, 3-5: WARNING, 6+: ERROR)
+- ✅ **Scenario Integration** - Use components in processing stages seamlessly
+
+### Component Configuration Example
+
+```yaml
+metadata:
+  id: "trade-validation-component"
+  type: "component"
+  name: "Trade Validation Component"
+  version: "1.0.0"
+  description: "Reusable trade validation rules"
+  business-domain: "Trading"
+  owner: "trading.team@company.com"
+
+# Rule configuration files
+rule-configurations:
+  - file: "rules/basic-validation.yaml"
+    execution-order: 1
+    failure-policy: "terminate"
+
+  - file: "rules/business-validation.yaml"
+    execution-order: 2
+    failure-policy: "continue-with-warnings"
+
+# Enrichment configuration files
+enrichment-refs:
+  - file: "enrichments/customer-enrichment.yaml"
+    execution-order: 3
+    failure-policy: "continue-with-warnings"
+
+# Reference other components
+component-refs:
+  - file: "components/common-validations.yaml"
+    execution-order: 4
+    failure-policy: "terminate"
+```
+
+### Using Components in Scenarios
+
+```yaml
+scenario:
+  scenario-id: "trade-processing"
+  name: "Trade Processing Scenario"
+
+  processing-stages:
+    - stage-name: "validation"
+      config-file: "components/trade-validation-component.yaml"  # Reference component
+      execution-order: 1
+      failure-policy: "terminate"
+
+    - stage-name: "enrichment"
+      config-file: "components/trade-enrichment-component.yaml"
+      execution-order: 2
+      failure-policy: "continue-with-warnings"
+```
+
+### Java API
+
+```java
+// Load and use component directly
+RulesEngine engine = RulesEngine.fromFile("components/trade-validation-component.yaml");
+RuleResult result = engine.evaluate(tradeData);
+
+// Components are automatically expanded and executed in order
+System.out.println("Files executed: " + result.getExecutedFiles());
+System.out.println("All validations passed: " + result.isSuccess());
+```
+
+**See [APEX Component Implementation Status](docs/APEX_COMPONENT_IMPLEMENTATION_STATUS.md) for complete documentation.**
+
+---
+
 ## Architecture
 
 ```mermaid
@@ -353,27 +559,35 @@ graph TB
 
 ## Learning Paths
 
-### Quick Start (30 minutes)
-1. **APEX Playground** (15 minutes) - Interactive experimentation
-2. **Simple PostgreSQL Lookup Demo** (5 minutes) - External data-source references
-3. **OTC Options Bootstrap Demo** (10 minutes) - Complete workflow
+### 🚀 Quick Start Path (5 minutes)
+Get started with APEX in minutes:
+1. **Interactive Playground** - Launch `apex-playground` and experiment with live examples
+2. **One-Line API Usage** - `RulesEngine.fromFile("config.yaml").evaluate(data)`
+3. **Basic YAML Configuration** - Review simple rule and enrichment examples
 
-### Developer Path (3-4 hours)
-1. **External Data-Source Reference Demos** (45 minutes) - Modern clean architecture
-2. **All Lookup Pattern Examples** (60 minutes) - Master data enrichment
-3. **All Bootstrap Demonstrations** (120 minutes) - Complete financial workflows
-4. **Advanced Feature Demos** (60-90 minutes) - Technical deep dive
+### 👨‍💻 Developer Path (1-2 hours)
+Master APEX fundamentals:
+1. **[APEX Rules Engine User Guide](docs/APEX_RULES_ENGINE_USER_GUIDE.md)** (30 min) - Core concepts and patterns
+2. **[APEX YAML Reference](docs/APEX_YAML_REFERENCE.md)** (30 min) - 73 keywords and syntax
+3. **[APEX SpEL Guide](docs/APEX_SPEL_GUIDE.md)** (15 min) - Expression language
+4. **[APEX Error Handling Guide](docs/APEX_ERROR_HANDLING_GUIDE.md)** (15 min) - Fault tolerance
 
-### External Data-Source Reference Path (1-2 hours)
-1. **SimplePostgreSQLLookupDemo** (20 minutes) - Basic external references
-2. **PostgreSQLLookupDemo** (30 minutes) - Advanced multi-table lookups
-3. **ExternalDataSourceWorkingDemo** (30 minutes) - Production-ready patterns
-4. **Documentation Review** (30 minutes) - APEX YAML Reference and Data Management Guide
+### 🎯 Advanced Features Path (2-4 hours)
+Explore advanced capabilities:
+1. **[APEX Scenario User Guide](docs/APEX_SCENARIO_USER_GUIDE.md)** (45 min) - Multi-stage processing
+2. **[APEX Component Implementation Status](docs/APEX_COMPONENT_IMPLEMENTATION_STATUS.md)** (30 min) - Reusable components
+3. **[External Data-Source Reference System](#external-data-source-reference-system)** (45 min) - Clean architecture
+4. **[APEX Data Pipeline Orchestration Guide](docs/APEX_DATA_PIPELINE_ORCHESTRATION_GUIDE.md)** (45 min) - ETL workflows
+5. **Classification-Based Routing** (30 min) - Automatic scenario selection
 
-### Production Implementation (4-6 hours)
-1. **Complete Demo Ecosystem** (180 minutes) - All 16 demonstrations
-2. **Documentation Deep Dive** (120-180 minutes) - All 6 guides
-3. **Custom Implementation** (varies) - Build your own configurations
+### 🏭 Production Implementation Path (1-2 days)
+Production-ready deployment:
+1. **[APEX Technical Reference](docs/APEX_TECHNICAL_REFERENCE.md)** (2-3 hours) - Architecture deep dive
+2. **Error Handling & Recovery** (1-2 hours) - Fault-tolerant processing
+3. **Testing Framework** (2-3 hours) - Unit, integration, and performance testing
+4. **[APEX H2 Database Usage Guide](docs/APEX_H2_DATABASE_USAGE_GUIDE.md)** (1 hour) - Database integration
+5. **REST API Integration** (1-2 hours) - HTTP API patterns
+6. **Demo Ecosystem** (2-3 hours) - Review all 16+ demonstrations
 
 ## Demo Categories
 
@@ -394,21 +608,48 @@ graph TB
 - **Data Service Management** - Infrastructure management
 - **YAML Configuration Patterns** - Advanced configuration examples
 
+### Error Handling Demonstrations ⭐ NEW
+- **Severity-Based Recovery** - CRITICAL, ERROR, WARNING, INFO handling
+- **Recovery Strategies** - FAIL_FAST, CONTINUE_WITH_DEFAULT, RETRY_WITH_SAFE_EXPRESSION, SKIP_RULE
+- **Rule Group Error Handling** - fail-fast, continue-on-error, skip-on-error patterns
+- **Enrichment Error Handling** - Graceful degradation with default values
+
+### Component Architecture Demonstrations ⭐ NEW
+- **Reusable Components** - Group multiple YAML files into components
+- **Dependency Management** - Circular reference detection
+- **Execution Order Control** - Explicit and document-order execution
+- **Scenario Integration** - Use components in processing stages
+
 ## Documentation
 
-### Essential Guides
+### 📚 Essential Guides (Start Here)
 - **[APEX Playground](http://localhost:8081/playground)** - Interactive development environment
-- **[Rules Engine User Guide](docs/APEX_RULES_ENGINE_USER_GUIDE.md)** - Complete user documentation
-- **[Technical Reference](docs/APEX_TECHNICAL_REFERENCE.md)** - Architecture and implementation
-- **[Financial Services Guide](docs/old/APEX_FINANCIAL_SERVICES_DESIGN.md)** - Domain-specific patterns
-- **[Bootstrap Demos Guide](docs/APEX_BOOTSTRAP_DEMOS_GUIDE.md)** - 16 comprehensive demonstrations
-- **[REST API Guide](docs/APEX_REST_API_GUIDE.md)** - Complete HTTP API reference
-- **[Data Management Guide](docs/APEX_DATA_MANAGEMENT_GUIDE.md)** - Data integration and management
+- **[APEX Rules Engine User Guide](docs/APEX_RULES_ENGINE_USER_GUIDE.md)** - Complete user documentation with examples
+- **[APEX YAML Reference](docs/APEX_YAML_REFERENCE.md)** - 73 keywords and complete syntax reference
+- **[APEX Error Handling Guide](docs/APEX_ERROR_HANDLING_GUIDE.md)** ⭐ NEW - Severity-based error recovery
 
-### Quick Reference
-- **Configuration Questions**: [Rules Engine User Guide](docs/APEX_RULES_ENGINE_USER_GUIDE.md)
-- **Implementation Questions**: [Technical Reference](docs/APEX_TECHNICAL_REFERENCE.md)
-- **Financial Services Questions**: [Financial Services Guide](docs/old/APEX_FINANCIAL_SERVICES_DESIGN.md)
+### 🎯 Feature Guides
+- **[APEX Scenario User Guide](docs/APEX_SCENARIO_USER_GUIDE.md)** - Multi-stage processing and classification-based routing
+- **[APEX Component Implementation Status](docs/APEX_COMPONENT_IMPLEMENTATION_STATUS.md)** ⭐ NEW - Reusable component architecture
+- **[APEX Conditional Processing Guide](docs/APEX_CONDITIONAL_PROCESSING_GUIDE.md)** - Advanced conditional logic patterns
+- **[APEX Lookup Configuration Guide](docs/APEX_LOOKUP_CONFIGURATION_GUIDE.md)** - Data enrichment and lookup patterns
+- **[APEX Data Pipeline Orchestration Guide](docs/APEX_DATA_PIPELINE_ORCHESTRATION_GUIDE.md)** - ETL workflows
+- **[APEX Rule Categories Guide](docs/APEX_RULE_CATEGORIES_GUIDE.md)** - Rule organization and classification
+
+### 🔧 Technical References
+- **[APEX Technical Reference](docs/APEX_TECHNICAL_REFERENCE.md)** - Architecture and implementation details
+- **[APEX SpEL Guide](docs/APEX_SPEL_GUIDE.md)** - Spring Expression Language reference
+- **[APEX H2 Database Usage Guide](docs/APEX_H2_DATABASE_USAGE_GUIDE.md)** - Database integration patterns
+- **[APEX Parameterized Query Guide](docs/APEX_PARAMETERIZED_QUERY_GUIDE.md)** - Dynamic query patterns
+- **[APEX REST API Guide](docs/APEX_REST_API_GUIDE.md)** - Complete HTTP API reference
+
+### 🚀 Advanced Topics
+- **[APEX Configuration Manager API Guide](docs/APEX_CONFIGURATION_MANAGER_API_GUIDE.md)** - Configuration management
+- **[APEX YAML Processing Sequence Guide](docs/APEX_YAML_PROCESSING_SEQUENCE_GUIDE.md)** - Document order processing
+- **[Rule Group Inline Reference Guide](docs/RULE_GROUP_INLINE_REFERENCE_GUIDE.md)** - Rule group patterns
+- **[APEX Data Management Guide](docs/APEX_DATA_MANAGEMENT_GUIDE.md)** - Data integration and management
+- **[Financial Services Guide](docs/old/APEX_FINANCIAL_SERVICES_DESIGN.md)** - Domain-specific patterns
+- **[Bootstrap Demos Guide](docs/APEX_BOOTSTRAP_DEMOS_GUIDE.md)** - 16+ comprehensive demonstrations
 
 ## Use Cases
 
@@ -418,6 +659,8 @@ graph TB
 - **OTC Derivatives Validation**: Multi-tier validation framework
 - **Trade Settlement**: Post-trade processing and auto-repair workflows
 - **Risk Assessment**: Credit, market, and operational risk scoring
+- **Error Recovery** ⭐ NEW: Fault-tolerant processing with severity-based recovery strategies
+- **Component Reusability** ⭐ NEW: Share validation and enrichment logic across multiple scenarios
 
 ### Data Integration
 - **Static Reference Data** (< 100 records): Use YAML Datasets
