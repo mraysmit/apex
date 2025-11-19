@@ -17,24 +17,6 @@ Throughout this document, you'll see the following markers indicating implementa
 - **❌ NOT IMPLEMENTED** - Feature is planned but not yet available
 - **🔄 DEPRECATED** - Feature is deprecated and should not be used
 
-## Cache Configuration Hierarchy
-
-**Important:** APEX has two levels of cache configuration:
-
-1. **Lookup-Dataset Level** (Limited):
-   - `cache-enabled` - Enable/disable caching for this lookup
-   - `cache-ttl-seconds` - Time-to-live for cached entries
-
-2. **Data-Source Level** (Full Features):
-   - `enabled` - Enable/disable caching
-   - `ttlSeconds` - Time-to-live
-   - `maxSize` - Maximum cache entries
-   - `preload-enabled` - Preload cache on startup
-   - `refresh-ahead` - Refresh entries before expiration
-   - `statistics-enabled` - Enable cache statistics
-
-**Rule:** Advanced cache features (preload, max-size, refresh-ahead) are **only** available at the data-source level, not at the lookup-dataset level.
-
 ## Document Structure
 
 This guide follows a logical progression from simple to advanced topics:
@@ -123,6 +105,27 @@ RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
 For single evaluations, use the one-line pattern with method chaining:
 
+**YAML Configuration (config.yaml):**
+```yaml
+rules:
+  - id: "validate-amount"
+    condition: "#amount != null && #amount > 0"
+    message: "Amount must be positive"
+    severity: "ERROR"
+
+  - id: "validate-currency"
+    condition: "#currency != null && #currency.length() == 3"
+    message: "Currency must be valid 3-letter code"
+    severity: "ERROR"
+
+enrichments:
+  - id: "add-timestamp"
+    type: "calculation-enrichment"
+    result-field: "processedAt"
+    expression: "T(java.time.Instant).now()"
+```
+
+**Java Code:**
 ```java
 // ⭐ SIMPLEST - One line for single evaluation
 Map<String, Object> data = Map.of("amount", 1000, "currency", "USD");
@@ -132,6 +135,7 @@ RuleResult result = RulesEngine.fromFile("config.yaml").evaluate(data);
 if (result.isSuccess()) {
     System.out.println("✓ All rules passed!");
     Map<String, Object> enrichedData = result.getEnrichedData();
+    System.out.println("Processed at: " + enrichedData.get("processedAt"));
 }
 ```
 
@@ -139,14 +143,38 @@ if (result.isSuccess()) {
 
 When you need to reuse the engine for multiple evaluations or need cleanup:
 
+**YAML Configuration (config.yaml):**
+```yaml
+rules:
+  - id: "validate-trade"
+    condition: "#tradeId != null && #notional > 0 && #counterparty != null"
+    message: "Trade validation failed"
+    severity: "ERROR"
+    success-code: "TRADE-VALID-0000"
+    error-code: "TRADE-INVALID-5001"
+
+enrichments:
+  - id: "add-processing-metadata"
+    type: "calculation-enrichment"
+    result-field: "validatedAt"
+    expression: "T(java.time.Instant).now()"
+```
+
+**Java Code:**
 ```java
 // ✅ EFFICIENT - Reuse engine for multiple evaluations
 RulesEngine engine = RulesEngine.fromFile("config.yaml");
 
 // Process multiple items
-for (Map<String, Object> item : items) {
-    RuleResult result = engine.evaluate(item);
-    // Process result...
+List<Map<String, Object>> trades = loadTrades();
+for (Map<String, Object> trade : trades) {
+    RuleResult result = engine.evaluate(trade);
+
+    if (result.isSuccess()) {
+        System.out.println("✓ Trade " + trade.get("tradeId") + " validated");
+    } else {
+        System.out.println("✗ Trade " + trade.get("tradeId") + " failed: " + result.getMessage());
+    }
 }
 
 // Cleanup when done
@@ -157,17 +185,42 @@ engine.shutdown();
 
 Only use this pattern when you need to inspect or modify the configuration before creating the engine:
 
+**YAML Configuration (config.yaml):**
+```yaml
+metadata:
+  name: "Trade Validation Rules"
+  version: "2.0"
+  author: "Trading Systems Team"
+  description: "OTC options trade validation"
+
+rules:
+  - id: "validate-trade-basics"
+    condition: "#tradeId != null && #notional > 0"
+    message: "Basic trade validation"
+    severity: "ERROR"
+```
+
+**Java Code:**
 ```java
 // ⚙️ ADVANCED - Only when you need config inspection/modification
 YamlConfigurationLoader loader = new YamlConfigurationLoader();
 YamlRuleConfiguration config = loader.loadFromFile("config.yaml");
 
-// Inspect or modify configuration
+// Inspect configuration metadata
 if (config.getMetadata() != null) {
     System.out.println("Config version: " + config.getMetadata().getVersion());
+    System.out.println("Config author: " + config.getMetadata().getAuthor());
+
+    // Only use version 2.0+ configs
+    if (!config.getMetadata().getVersion().startsWith("2.")) {
+        throw new IllegalStateException("Unsupported config version");
+    }
 }
 
-// Create engine from modified config
+// Optionally modify configuration programmatically
+// config.getRules().add(buildCustomRule());
+
+// Create engine from inspected/modified config
 RulesEngine engine = RulesEngine.fromYamlConfig(config);
 RuleResult result = engine.evaluate(data);
 ```
