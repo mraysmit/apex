@@ -6,9 +6,9 @@
 **Date:** 2025-11-02
 **Author:** Mark A Ray-Smith Cityline Ltd.
 
-> **⚠️ IMPORTANT API UPDATE (Version 3.0)**
+> **⚠️ IMPORTANT API UPDATE**
 >
-> **The `DataPipelineEngine` class has been deprecated** and will be removed in version 4.0.
+> **The `DataPipelineEngine` class has been deprecated** and will be removed in a future version.
 >
 > **Use `RulesEngine` instead** - the universal entry point that handles pipelines, enrichments, rules, and all other YAML content types automatically.
 >
@@ -113,7 +113,7 @@ for (Customer customer : customers) {
 
 **Dynamic (YAML-Driven Orchestration):**
 ```java
-// APEX approach - YAML-driven orchestration (Version 3.0+)
+// APEX approach - YAML-driven orchestration
 RulesEngine rulesEngine = RulesEngine.fromFile("customer-etl-pipeline.yaml");
 RuleResult result = rulesEngine.evaluate(new HashMap<>());
 rulesEngine.shutdown();
@@ -224,49 +224,30 @@ graph TD
 
 ### Core Components
 
-#### 3.1 DataSink Interface
+The APEX Pipeline Orchestration system consists of several key components that work together to execute data processing workflows:
 
-```java
-public interface DataSink {
-    void write(String operation, Object data) throws DataSinkException;
-    void initialize(DataSinkConfiguration config) throws DataSinkException;
-    void shutdown();
-    boolean isHealthy();
-    DataSinkMetrics getMetrics();
-}
-```
+#### 3.1 Pipeline Executor
+- Orchestrates the execution of pipeline steps
+- Manages step dependencies and execution order
+- Handles error recovery and retry logic
+- Collects execution metrics and results
 
-#### 3.2 PipelineExecutor
+#### 3.2 Data Sources and Sinks
+- **Data Sources**: Provide input data from various systems (CSV, databases, REST APIs)
+- **Data Sinks**: Write output data to destinations (databases, files, message queues)
+- Configurable through YAML with connection pooling and health checks
 
-```java
-public class PipelineExecutor {
-    public YamlPipelineExecutionResult execute(PipelineConfiguration pipeline);
-    private void executeStep(PipelineStep step, YamlPipelineExecutionResult result);
-    private void validatePipeline(PipelineConfiguration pipeline);
-    private List<PipelineStep> topologicalSort(List<PipelineStep> steps);
-}
-```
+#### 3.3 Step Types
+- **Extract**: Read data from external data sources
+- **Transform**: Modify, validate, or enrich data
+- **Load**: Write data to external data sinks
+- **Audit**: Create audit trails and compliance records
 
-#### 3.3 Pipeline Configuration Classes
-
-```java
-public class PipelineConfiguration {
-    private String name;
-    private List<PipelineStep> steps;
-    private ExecutionConfiguration execution;
-    private MonitoringConfiguration monitoring;
-}
-
-public class PipelineStep {
-    private String name;
-    private String type; // extract, load, transform, audit
-    private String source; // for extract steps
-    private String sink; // for load/audit steps
-    private String operation;
-    private List<String> dependsOn;
-    private boolean optional;
-}
-```
+#### 3.4 Configuration System
+- YAML-based pipeline definitions
+- Support for metadata, execution settings, and monitoring
+- Dependency declaration and validation
+- Optional steps and error handling strategies
 
 ---
 
@@ -286,59 +267,64 @@ Let's create a simple pipeline that reads data from a CSV file and writes it to 
 
 ```yaml
 # my-first-pipeline.yaml
+# Standard metadata section - identifies and describes the pipeline
 metadata:
-  id: "my-first-pipeline"
-  name: "My First Pipeline"
-  version: "1.0.0"
-  description: "Simple CSV to database pipeline"
-  type: "pipeline-config"
-  author: "APEX Demo Team"
+  id: "my-first-pipeline"                          # Unique identifier for this pipeline
+  name: "My First Pipeline"                        # Human-readable name
+  version: "1.0.0"                                 # Semantic version number
+  description: "Simple CSV to database pipeline"   # Brief description of purpose
+  type: "pipeline-config"                          # Indicates this is a pipeline configuration
+  author: "APEX Demo Team"                         # Author or team name
 
+# Pipeline definition - orchestrates the workflow
 pipeline:
-  name: "csv-to-db-pipeline"
-  description: "Read CSV data and write to database"
+  name: "csv-to-db-pipeline"                      # Pipeline name (can differ from metadata name)
+  description: "Read CSV data and write to database"  # Detailed description
   
+  # Steps define the processing workflow in order
   steps:
-    - name: "extract-data"
-      type: "extract"
-      source: "csv-input"
-      operation: "getAllRecords"
+    - name: "extract-data"                        # Step 1: Extract data from CSV
+      type: "extract"                             # Step type: extract, load, transform, or audit
+      source: "csv-input"                         # References data source defined below
+      operation: "getAllRecords"                  # Named query from data source
       
-    - name: "load-data"
-      type: "load"
-      sink: "database-output"
-      operation: "insertRecord"
-      depends-on: ["extract-data"]
+    - name: "load-data"                           # Step 2: Load data to database
+      type: "load"                                # Load step writes to a data sink
+      sink: "database-output"                     # References data sink defined below
+      operation: "insertRecord"                   # Named operation from data sink
+      depends-on: ["extract-data"]                # Wait for extract-data step to complete
 
+# Data sources - where to read data from
 data-sources:
-  - name: "csv-input"
-    type: "file-system"
+  - name: "csv-input"                             # Source name (referenced by extract step)
+    type: "file-system"                           # Source type: file-system, database, etc.
     connection:
-      basePath: "./data"
-      filePattern: "input.csv"
+      basePath: "./data"                          # Directory containing the CSV file
+      filePattern: "input.csv"                    # Filename or pattern to match
     fileFormat:
-      type: "csv"
-      hasHeaderRow: true
+      type: "csv"                                 # File format type
+      hasHeaderRow: true                          # First row contains column names
     queries:
-      getAllRecords: "SELECT * FROM csv"
+      getAllRecords: "SELECT * FROM csv"          # Named query for reading data
 
+# Data sinks - where to write data to
 data-sinks:
-  - name: "database-output"
-    type: "database"
-    sourceType: "h2"
+  - name: "database-output"                       # Sink name (referenced by load step)
+    type: "database"                              # Sink type: database, file-system, etc.
+    sourceType: "h2"                              # Database type: h2, postgresql, mysql, etc.
     connection:
-      database: "./output/data"
-      username: "sa"
-      password: ""
+      database: "./output/data"                   # Database file path (for H2)
+      username: "sa"                              # Database username
+      password: ""                                # Database password (empty for H2)
     operations:
-      insertRecord: |
-        INSERT INTO records (id, name, value) 
-        VALUES (:id, :name, :value)
+      insertRecord: |                             # Named operation for inserting records
+        INSERT INTO records (id, name, value)     # SQL statement with named parameters
+        VALUES (:id, :name, :value)               # Parameters prefixed with colon (:)
 ```
 
 #### Step 2: Execute the Pipeline
 
-**Recommended API (Version 3.0+):**
+**Recommended API:**
 
 **⭐ SIMPLEST (One Line) - For single pipeline execution:**
 ```java
@@ -378,17 +364,17 @@ pipelineEngine.initialize(config);
 YamlPipelineExecutionResult result = pipelineEngine.executePipeline("csv-to-db-pipeline");
 ```
 
-### Working Demo
+### Working Test
 
-APEX includes a complete working demo that demonstrates pipeline orchestration:
+APEX includes a complete working test that demonstrates pipeline orchestration:
 
 ```bash
-# Run the CSV to H2 Pipeline Demo
-java -cp apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar \
-     dev.mars.apex.demo.etl.CsvToH2PipelineDemo
+# Run the CSV to H2 Pipeline Test
+cd apex-demo
+mvn test -Dtest=CsvToH2PipelineTest
 ```
 
-This demo processes 10 customer records from CSV to H2 database in approximately 23ms, demonstrating the performance and reliability of APEX pipeline orchestration.
+This test processes 3 customer records from CSV to H2 database, demonstrating the functionality and reliability of APEX pipeline orchestration.
 
 ---
 
@@ -399,91 +385,104 @@ This demo processes 10 customer records from CSV to H2 database in approximately
 Every pipeline configuration follows this structure:
 
 ```yaml
+# Metadata section - required for all pipeline configurations
 metadata:
-  id: "pipeline-identifier"
-  name: "Pipeline Name"
-  description: "What this pipeline does"
-  version: "1.0.0"
-  type: "pipeline-config"
-  author: "Pipeline Team"
+  id: "pipeline-identifier"                    # Unique ID for the pipeline
+  name: "Pipeline Name"                        # Display name
+  description: "What this pipeline does"       # Purpose description
+  version: "1.0.0"                             # Version number
+  type: "pipeline-config"                      # Must be "pipeline-config"
+  author: "Pipeline Team"                      # Author/team responsible
 
+# Pipeline section - defines the workflow orchestration
 pipeline:
-  name: "pipeline-identifier"
-  description: "Detailed description"
+  name: "pipeline-identifier"                  # Pipeline name
+  description: "Detailed description"          # Detailed workflow description
   
-  steps:
-    # Step definitions
+  steps:                                       # List of processing steps
+    # Step definitions go here
+    # Each step has: name, type, source/sink, operation, dependencies
     
-  execution:
-    # Execution configuration
+  execution:                                   # Optional: execution settings
+    # Execution configuration: mode, error-handling, retries, timeouts
     
-  monitoring:
-    # Monitoring configuration
+  monitoring:                                  # Optional: monitoring settings
+    # Monitoring configuration: logging, metrics, alerts
 
+# Data sources section - defines input data locations
 data-sources:
-  # Input data sources
+  # Input data sources: CSV files, databases, APIs, etc.
+  # Each source has: name, type, connection, queries/operations
 
+# Data sinks section - defines output data destinations
 data-sinks:
-  # Output data sinks
+  # Output data sinks: databases, files, message queues, etc.
+  # Each sink has: name, type, connection, operations
 ```
 
 ### Pipeline Metadata
 
 ```yaml
 metadata:
-  id: "customer-processing-pipeline"
-  name: "Customer Processing Pipeline"
-  version: "1.0.0"
-  description: "Complete customer data processing workflow"
-  type: "pipeline-config"
-  author: "Data Team"
-  tags: ["etl", "customers", "production"]
+  id: "customer-processing-pipeline"           # Unique identifier (no spaces)
+  name: "Customer Processing Pipeline"         # Human-readable display name
+  version: "1.0.0"                             # Semantic versioning (major.minor.patch)
+  description: "Complete customer data processing workflow"  # Brief purpose statement
+  type: "pipeline-config"                      # Must be "pipeline-config" for pipelines
+  author: "Data Team"                          # Team or individual responsible
+  tags: ["etl", "customers", "production"]    # Optional tags for categorization
 ```
 
 ### Pipeline Definition
 
 ```yaml
 pipeline:
-  name: "customer-processing-pipeline"
-  description: "Extract, validate, enrich, and load customer data"
+  name: "customer-processing-pipeline"         # Pipeline identifier
+  description: "Extract, validate, enrich, and load customer data"  # Workflow description
   
+  # Steps are executed based on dependencies (topologically sorted)
   steps:
-    - name: "extract-customers"
-      type: "extract"
-      source: "customer-csv-input"
-      operation: "getAllCustomers"
-      description: "Read customer data from CSV file"
+    # Step 1: Extract customer data from CSV file
+    - name: "extract-customers"                # Unique step name
+      type: "extract"                          # Step type: extract reads from data sources
+      source: "customer-csv-input"             # References data-sources section below
+      operation: "getAllCustomers"             # Named query from the data source
+      description: "Read customer data from CSV file"  # Human-readable description
       
-    - name: "validate-customers"
-      type: "transform"
+    # Step 2: Validate the extracted data
+    - name: "validate-customers"               # Second step in the pipeline
+      type: "transform"                        # Transform steps modify data
       description: "Validate customer data quality"
-      depends-on: ["extract-customers"]
-      transformations:
-        - type: "validation"
-          rule-group: "customer-validation-rules"
+      depends-on: ["extract-customers"]        # Wait for extract-customers to complete
+      transformations:                         # List of transformations to apply
+        - type: "validation"                   # Validation transformation
+          rule-group: "customer-validation-rules"  # Rule group to apply
           
-    - name: "enrich-customers"
-      type: "transform"
+    # Step 3: Enrich the validated data
+    - name: "enrich-customers"                 # Third step in the pipeline
+      type: "transform"                        # Another transform step
       description: "Enrich customer data with additional information"
-      depends-on: ["validate-customers"]
+      depends-on: ["validate-customers"]       # Wait for validation to complete
       transformations:
-        - type: "enrichment"
-          enrichment-id: "customer-profile-enrichment"
+        - type: "enrichment"                   # Enrichment transformation
+          enrichment-id: "customer-profile-enrichment"  # Enrichment to apply
           
-    - name: "load-customers"
-      type: "load"
-      sink: "customer-database"
-      operation: "upsertCustomer"
+    # Step 4: Load enriched data to database
+    - name: "load-customers"                   # Fourth step in the pipeline
+      type: "load"                             # Load steps write to data sinks
+      sink: "customer-database"                # References data-sinks section below
+      operation: "upsertCustomer"              # Named operation from the data sink
       description: "Load enriched customer data to database"
-      depends-on: ["enrich-customers"]
+      depends-on: ["enrich-customers"]         # Wait for enrichment to complete
       
-    - name: "audit-processing"
-      type: "audit"
-      sink: "audit-log"
-      operation: "logProcessingResults"
-      description: "Create audit trail"
-      depends-on: ["load-customers"]
-      optional: true
+    # Step 5: Create audit trail (optional)
+    - name: "audit-processing"                 # Fifth step in the pipeline
+      type: "audit"                            # Audit steps create compliance records
+      sink: "audit-log"                        # Audit log data sink
+      operation: "logProcessingResults"        # Audit operation to execute
+      description: "Create audit trail"        # Description of audit purpose
+      depends-on: ["load-customers"]           # Wait for load to complete
+      optional: true                           # Pipeline continues even if this step fails
 ```
 
 ### Execution Configuration
@@ -491,11 +490,15 @@ pipeline:
 ```yaml
 pipeline:
   execution:
-    mode: "sequential"  # or "parallel"
-    error-handling: "stop-on-error"  # or "continue-on-error"
-    max-retries: 3
-    retry-delay-ms: 1000
-    timeout-ms: 300000  # 5 minutes
+    mode: "sequential"                  # Execution mode: "sequential" or "parallel"
+                                        # sequential: steps run one after another
+                                        # parallel: independent steps run concurrently
+    error-handling: "stop-on-error"     # Error strategy: "stop-on-error" or "continue-on-error"
+                                        # stop-on-error: halt pipeline on first failure
+                                        # continue-on-error: execute remaining steps
+    max-retries: 3                      # Maximum retry attempts for failed steps
+    retry-delay-ms: 1000                # Delay between retry attempts (milliseconds)
+    timeout-ms: 300000                  # Pipeline timeout in milliseconds (5 minutes)
 ```
 
 ### Monitoring Configuration
@@ -503,11 +506,11 @@ pipeline:
 ```yaml
 pipeline:
   monitoring:
-    enabled: true
-    log-progress: true
-    collect-metrics: true
-    alert-on-failure: true
-    performance-tracking: true
+    enabled: true                       # Enable/disable monitoring features
+    log-progress: true                  # Log each step's progress to console/logs
+    collect-metrics: true               # Collect execution metrics (duration, counts, etc.)
+    alert-on-failure: true              # Trigger alerts when pipeline fails
+    performance-tracking: true          # Track and report performance statistics
 ```
 
 ---
@@ -520,15 +523,15 @@ Extract steps read data from external data sources:
 
 ```yaml
 steps:
-  - name: "extract-customers"
-    type: "extract"
-    source: "customer-csv-input"  # Data source name
-    operation: "getAllCustomers"  # Named query/operation
-    description: "Read customer data from CSV file"
-    parameters:
-      limit: 1000
-      offset: 0
-      filter: "status = 'ACTIVE'"
+  - name: "extract-customers"              # Unique name for this extract step
+    type: "extract"                        # Step type: extract reads from sources
+    source: "customer-csv-input"           # References data source by name
+    operation: "getAllCustomers"           # Named query defined in data source
+    description: "Read customer data from CSV file"  # Step description
+    parameters:                            # Optional parameters for the operation
+      limit: 1000                          # Maximum number of records to extract
+      offset: 0                            # Starting position (for pagination)
+      filter: "status = 'ACTIVE'"          # Filter condition for data extraction
 ```
 
 **Common Extract Patterns:**
@@ -543,16 +546,16 @@ Load steps write data to external data sinks:
 
 ```yaml
 steps:
-  - name: "load-to-database"
-    type: "load"
-    sink: "customer-h2-database"  # Data sink name
-    operation: "insertCustomer"   # Named operation
-    description: "Insert customers into database"
-    depends-on: ["extract-customers"]
-    parameters:
-      batch-size: 100
-      upsert: true
-      conflict-resolution: "update"
+  - name: "load-to-database"               # Unique name for this load step
+    type: "load"                           # Step type: load writes to sinks
+    sink: "customer-h2-database"           # References data sink by name
+    operation: "insertCustomer"            # Named operation defined in data sink
+    description: "Insert customers into database"  # Step description
+    depends-on: ["extract-customers"]      # Wait for extract step to complete first
+    parameters:                            # Optional parameters for the operation
+      batch-size: 100                      # Number of records to write per batch
+      upsert: true                         # Insert or update if record exists
+      conflict-resolution: "update"        # How to handle existing records
 ```
 
 **Common Load Patterns:**
@@ -567,29 +570,33 @@ Transform steps modify data between extraction and loading:
 
 ```yaml
 steps:
-  - name: "transform-customers"
-    type: "transform"
-    description: "Apply business transformations"
-    depends-on: ["extract-customers"]
-    transformations:
-      - name: "add-processing-timestamp"
-        type: "field-addition"
-        field: "processed_at"
-        value: "CURRENT_TIMESTAMP"
+  - name: "transform-customers"            # Unique name for this transform step
+    type: "transform"                      # Step type: transform modifies data
+    description: "Apply business transformations"  # Step description
+    depends-on: ["extract-customers"]      # Wait for extract step to complete
+    transformations:                       # List of transformations to apply
+      # Transformation 1: Add timestamp field
+      - name: "add-processing-timestamp"   # Transformation name
+        type: "field-addition"             # Add a new field to records
+        field: "processed_at"              # Name of the new field
+        value: "CURRENT_TIMESTAMP"         # Value to set (can be expression)
 
-      - name: "validate-email"
-        type: "validation"
-        field: "email"
-        rule: "email-format"
+      # Transformation 2: Validate email format
+      - name: "validate-email"             # Validation transformation
+        type: "validation"                 # Validate field against rules
+        field: "email"                     # Field to validate
+        rule: "email-format"               # Validation rule to apply
 
-      - name: "enrich-customer-data"
-        type: "enrichment"
-        enrichment-id: "customer-profile-lookup"
+      # Transformation 3: Enrich with external data
+      - name: "enrich-customer-data"       # Enrichment transformation
+        type: "enrichment"                 # Lookup and add external data
+        enrichment-id: "customer-profile-lookup"  # Enrichment configuration ID
 
-      - name: "calculate-risk-score"
-        type: "calculation"
-        field: "risk_score"
-        expression: "#creditScore * 0.6 + #incomeLevel * 0.4"
+      # Transformation 4: Calculate derived field
+      - name: "calculate-risk-score"       # Calculation transformation
+        type: "calculation"                # Compute new field value
+        field: "risk_score"                # Name of calculated field
+        expression: "#creditScore * 0.6 + #incomeLevel * 0.4"  # SpEL expression
 ```
 
 ### Audit Steps
@@ -598,18 +605,18 @@ Audit steps create audit trails and compliance records:
 
 ```yaml
 steps:
-  - name: "audit-processing"
-    type: "audit"
-    sink: "audit-log-file"
-    operation: "writeAuditRecord"
-    description: "Create audit trail for processed records"
-    depends-on: ["load-to-database"]
-    optional: true  # Won't fail pipeline if it fails
-    audit-config:
-      include-original-data: true
-      include-transformed-data: true
-      include-metadata: true
-      retention-days: 2555  # 7 years
+  - name: "audit-processing"               # Unique name for this audit step
+    type: "audit"                          # Step type: audit creates compliance records
+    sink: "audit-log-file"                 # References audit log data sink
+    operation: "writeAuditRecord"          # Named operation for audit logging
+    description: "Create audit trail for processed records"  # Step description
+    depends-on: ["load-to-database"]       # Wait for load step to complete
+    optional: true                         # Don't fail pipeline if audit fails
+    audit-config:                          # Audit-specific configuration
+      include-original-data: true          # Include original input data in audit
+      include-transformed-data: true       # Include transformed data in audit
+      include-metadata: true               # Include processing metadata
+      retention-days: 2555                 # Retention period (7 years for compliance)
 ```
 
 ---
@@ -622,21 +629,21 @@ Steps can declare dependencies on other steps:
 
 ```yaml
 steps:
-  - name: "extract-customers"
+  - name: "extract-customers"              # First extraction step
     type: "extract"
-    # No dependencies - runs first
+    # No dependencies - runs first (or in parallel with other independent steps)
 
-  - name: "extract-orders"
+  - name: "extract-orders"                 # Second extraction step
     type: "extract"
     # No dependencies - can run in parallel with extract-customers
 
-  - name: "join-customer-orders"
+  - name: "join-customer-orders"           # Transformation step
     type: "transform"
-    depends-on: ["extract-customers", "extract-orders"]  # Wait for both
+    depends-on: ["extract-customers", "extract-orders"]  # Wait for BOTH extracts
 
-  - name: "load-to-warehouse"
+  - name: "load-to-warehouse"              # Load step
     type: "load"
-    depends-on: ["join-customer-orders"]  # Wait for transformation
+    depends-on: ["join-customer-orders"]   # Wait for transformation to complete
 ```
 
 ### Dependency Validation
@@ -651,65 +658,71 @@ APEX automatically validates dependencies:
 
 #### Linear Dependencies
 ```yaml
-# A → B → C → D
+# Linear pattern: A → B → C → D
+# Each step waits for the previous one to complete
 steps:
-  - name: "step-a"
+  - name: "step-a"                         # First step: extract data
     type: "extract"
+    # No dependencies - starts the pipeline
 
-  - name: "step-b"
+  - name: "step-b"                         # Second step: transform
     type: "transform"
-    depends-on: ["step-a"]
+    depends-on: ["step-a"]                 # Waits for step-a to complete
 
-  - name: "step-c"
+  - name: "step-c"                         # Third step: more transformation
     type: "transform"
-    depends-on: ["step-b"]
+    depends-on: ["step-b"]                 # Waits for step-b to complete
 
-  - name: "step-d"
+  - name: "step-d"                         # Fourth step: load results
     type: "load"
-    depends-on: ["step-c"]
+    depends-on: ["step-c"]                 # Waits for step-c to complete
 ```
 
 #### Parallel Processing
 ```yaml
-# A → B, A → C, B+C → D
+# Parallel pattern: A → B, A → C, B+C → D
+# Steps B and C can run in parallel after A completes
 steps:
-  - name: "step-a"
+  - name: "step-a"                         # First step: extract data
     type: "extract"
+    # No dependencies - starts the pipeline
 
-  - name: "step-b"
+  - name: "step-b"                         # Second step: transform path 1
     type: "transform"
-    depends-on: ["step-a"]
+    depends-on: ["step-a"]                 # Waits only for step-a
 
-  - name: "step-c"
+  - name: "step-c"                         # Third step: transform path 2 (parallel to B)
     type: "transform"
-    depends-on: ["step-a"]
+    depends-on: ["step-a"]                 # Also waits only for step-a (runs parallel to B)
 
-  - name: "step-d"
+  - name: "step-d"                         # Fourth step: join results
     type: "load"
-    depends-on: ["step-b", "step-c"]
+    depends-on: ["step-b", "step-c"]       # Waits for BOTH step-b AND step-c to complete
 ```
 
 #### Fan-Out Pattern
 ```yaml
-# A → B, A → C, A → D (one source, multiple destinations)
+# Fan-out pattern: A → B, A → C, A → D
+# One source feeds multiple independent destinations
 steps:
-  - name: "extract-data"
+  - name: "extract-data"                   # Extract data once
     type: "extract"
+    # No dependencies - starts the pipeline
 
-  - name: "load-to-warehouse"
+  - name: "load-to-warehouse"              # Destination 1: data warehouse
     type: "load"
-    sink: "data-warehouse"
-    depends-on: ["extract-data"]
+    sink: "data-warehouse"                 # Write to warehouse
+    depends-on: ["extract-data"]           # Waits for extraction
 
-  - name: "load-to-cache"
+  - name: "load-to-cache"                  # Destination 2: cache (parallel to warehouse)
     type: "load"
-    sink: "redis-cache"
-    depends-on: ["extract-data"]
+    sink: "redis-cache"                    # Write to cache
+    depends-on: ["extract-data"]           # Also waits for extraction
 
-  - name: "send-to-api"
+  - name: "send-to-api"                    # Destination 3: external API (parallel)
     type: "load"
-    sink: "external-api"
-    depends-on: ["extract-data"]
+    sink: "external-api"                   # Send to external system
+    depends-on: ["extract-data"]           # Also waits for extraction
 ```
 
 ---
@@ -721,28 +734,28 @@ steps:
 Data sources provide input data for extract steps:
 
 ```yaml
-data-sources:
-  - name: "customer-csv-input"
-    type: "file-system"
-    enabled: true
-    connection:
-      basePath: "./target/demo/etl/data"
-      filePattern: "customers.csv"
-    fileFormat:
-      type: "csv"
-      hasHeaderRow: true
-      columnMappings:
-        "customer_id": "customer_id"
-        "customer_name": "customer_name"
-        "email_address": "email"
-        "status": "status"
-      columnTypes:
-        "customer_id": "integer"
-        "customer_name": "string"
-        "email": "string"
-        "status": "string"
-    queries:
-      getAllCustomers: "SELECT * FROM csv"
+data-sources:                                      # List of input data sources
+  - name: "customer-csv-input"                    # Unique name for this data source
+    type: "file-system"                           # Source type: file-system, database, rest-api
+    enabled: true                                  # Enable/disable this data source
+    connection:                                    # Connection configuration
+      basePath: "./target/demo/etl/data"          # Directory containing the file
+      filePattern: "customers.csv"                # File name or glob pattern
+    fileFormat:                                    # File format configuration
+      type: "csv"                                 # Format: csv, json, xml, etc.
+      hasHeaderRow: true                          # First row contains column names
+      columnMappings:                             # Map CSV columns to field names
+        "customer_id": "customer_id"             # CSV column -> internal field name
+        "customer_name": "customer_name"         # Column mapping for customer name
+        "email_address": "email"                 # Map email_address column to email field
+        "status": "status"                        # Status column mapping
+      columnTypes:                                # Data types for each column
+        "customer_id": "integer"                 # Customer ID is an integer
+        "customer_name": "string"                # Customer name is a string
+        "email": "string"                         # Email is a string
+        "status": "string"                        # Status is a string
+    queries:                                      # Named queries for data extraction
+      getAllCustomers: "SELECT * FROM csv"        # Query to retrieve all customers
 ```
 
 ### Data Sinks Configuration
@@ -752,36 +765,37 @@ Data sinks receive output data from load and audit steps:
 #### Database Data Sink
 
 ```yaml
-data-sinks:
-  - name: "customer-h2-database"
-    type: "database"
-    sourceType: "h2"
-    enabled: true
-    description: "H2 database for customer data storage"
+data-sinks:                                       # List of output data sinks
+  - name: "customer-h2-database"                  # Unique name for this data sink
+    type: "database"                              # Sink type: database, file-system, message-queue
+    sourceType: "h2"                              # Database type: h2, postgresql, mysql, etc.
+    enabled: true                                 # Enable/disable this data sink
+    description: "H2 database for customer data storage"  # Human-readable description
 
-    connection:
-      database: "./target/demo/etl/output/customer_database"
-      username: "sa"
-      password: ""
-      mode: "PostgreSQL"
+    connection:                                   # Database connection configuration
+      database: "./target/demo/etl/output/customer_database"  # Database file path (H2)
+      username: "sa"                              # Database username
+      password: ""                                # Database password (empty for H2)
+      mode: "PostgreSQL"                          # Compatibility mode (H2 specific)
 
     # Database operations for pipeline steps
-    operations:
-      insertCustomer: |
+    operations:                                   # Named operations for this sink
+      insertCustomer: |                           # Operation name referenced by load steps
         INSERT INTO customers (customer_id, customer_name, email, status, processed_at, created_at, updated_at)
         VALUES (:customer_id, :customer_name, :email, :status, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        # Named parameters (:param) are bound from record data
 
     # Automatic schema creation
-    schema:
-      autoCreate: true
-      init-script: |
+    schema:                                       # Schema management configuration
+      autoCreate: true                            # Automatically create tables if missing
+      init-script: |                              # SQL script to initialize schema
         -- Create customers table if it doesn't exist
         CREATE TABLE IF NOT EXISTS customers (
-          customer_id INTEGER PRIMARY KEY,
-          customer_name VARCHAR(255) NOT NULL,
-          email VARCHAR(255) UNIQUE,
-          status VARCHAR(50) DEFAULT 'ACTIVE',
-          processed_at TIMESTAMP,
+          customer_id INTEGER PRIMARY KEY,        -- Primary key
+          customer_name VARCHAR(255) NOT NULL,    -- Required field
+          email VARCHAR(255) UNIQUE,              -- Unique constraint on email
+          status VARCHAR(50) DEFAULT 'ACTIVE',    -- Default value for status
+          processed_at TIMESTAMP,                 -- Processing timestamp
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
@@ -794,32 +808,32 @@ data-sinks:
 #### File System Data Sink
 
 ```yaml
-  - name: "audit-log-file"
-    type: "file-system"
-    enabled: true
-    description: "JSON audit log for processed records"
+  - name: "audit-log-file"                       # Unique name for this audit log sink
+    type: "file-system"                          # Sink type: file-system for file output
+    enabled: true                                 # Enable/disable this data sink
+    description: "JSON audit log for processed records"  # Human-readable description
 
-    connection:
-      basePath: "./target/demo/etl/output"
-      filePattern: "audit-{timestamp}.json"
+    connection:                                   # File system connection configuration
+      basePath: "./target/demo/etl/output"       # Directory for output files
+      filePattern: "audit-{timestamp}.json"      # Filename with timestamp placeholder
 
-    operations:
-      writeAuditRecord: |
-        {
-          "timestamp": "{timestamp}",
-          "pipeline": "{pipeline_name}",
-          "step": "{step_name}",
-          "record_count": {record_count},
-          "status": "{status}",
-          "data": {data}
+    operations:                                   # Named operations for writing data
+      writeAuditRecord: |                         # Operation name for audit logging
+        {                                         # JSON template for audit records
+          "timestamp": "{timestamp}",            # When the record was processed
+          "pipeline": "{pipeline_name}",         # Name of the pipeline
+          "step": "{step_name}",                 # Name of the step
+          "record_count": {record_count},        # Number of records processed
+          "status": "{status}",                  # Processing status (success/failure)
+          "data": {data}                         # Actual data being audited
         }
 
-    # Error handling
-    errorHandling:
-      strategy: "log-and-continue"
-      deadLetterTable: "failed_records"
-      maxRetries: 3
-      retryDelay: 1000
+    # Error handling configuration
+    errorHandling:                                # How to handle write failures
+      strategy: "log-and-continue"               # Continue processing on errors
+      deadLetterTable: "failed_records"          # Where to store failed records
+      maxRetries: 3                               # Maximum retry attempts
+      retryDelay: 1000                            # Delay between retries (milliseconds)
 ```
 
 ---
@@ -834,18 +848,18 @@ APEX provides multiple error handling strategies:
 ```yaml
 pipeline:
   execution:
-    error-handling: "stop-on-error"
-    max-retries: 3
-    retry-delay-ms: 1000
+    error-handling: "stop-on-error"  # Halt pipeline immediately on first error
+    max-retries: 3                   # Retry failed steps up to 3 times
+    retry-delay-ms: 1000             # Wait 1 second between retry attempts
 ```
 
 #### Continue on Error
 ```yaml
 pipeline:
   execution:
-    error-handling: "continue-on-error"
-    max-retries: 3
-    retry-delay-ms: 1000
+    error-handling: "continue-on-error"  # Continue executing remaining steps on error
+    max-retries: 3                       # Retry failed steps up to 3 times
+    retry-delay-ms: 1000                 # Wait 1 second between retry attempts
 ```
 
 ### Optional Steps
@@ -854,12 +868,13 @@ Steps can be marked as optional to prevent pipeline failure:
 
 ```yaml
 steps:
-  - name: "audit-logging"
-    type: "audit"
-    sink: "audit-log-file"
-    operation: "writeAuditRecord"
-    depends-on: ["load-to-database"]
-    optional: true  # Won't fail pipeline if it fails
+  - name: "audit-logging"                   # Audit logging step
+    type: "audit"                           # Audit step type
+    sink: "audit-log-file"                  # Audit log destination
+    operation: "writeAuditRecord"           # Audit operation
+    depends-on: ["load-to-database"]        # Run after load completes
+    optional: true                          # Don't fail pipeline if this step fails
+                                            # Pipeline continues even if audit fails
 ```
 
 ### Dead Letter Handling
@@ -868,13 +883,13 @@ Failed records can be routed to dead letter queues:
 
 ```yaml
 data-sinks:
-  - name: "main-output"
-    type: "database"
-    errorHandling:
-      strategy: "dead-letter-queue"
-      deadLetterTable: "failed_records"
-      maxRetries: 3
-      retryDelay: 1000
+  - name: "main-output"                     # Primary output data sink
+    type: "database"                        # Database sink type
+    errorHandling:                          # Error handling configuration
+      strategy: "dead-letter-queue"         # Route failed records to dead letter queue
+      deadLetterTable: "failed_records"     # Table name for storing failed records
+      maxRetries: 3                         # Retry failed writes up to 3 times
+      retryDelay: 1000                      # Wait 1 second between retries (milliseconds)
 ```
 
 ---
@@ -896,19 +911,22 @@ Steps can access data from previous steps:
 
 ```yaml
 steps:
-  - name: "extract-customers"
+  - name: "extract-customers"               # Step 1: Extract data
     type: "extract"
-    # Data stored as "extract-customers" in context
+    # Data stored as "extract-customers" in pipeline context
+    # Available to all subsequent steps
 
-  - name: "transform-customers"
+  - name: "transform-customers"             # Step 2: Transform data
     type: "transform"
-    depends-on: ["extract-customers"]
-    # Accesses data from "extract-customers"
+    depends-on: ["extract-customers"]       # Depends on extract step
+    # Accesses data from "extract-customers" in context
+    # Stores transformed result back to context
 
-  - name: "load-customers"
+  - name: "load-customers"                  # Step 3: Load data
     type: "load"
-    depends-on: ["transform-customers"]
-    # Accesses transformed data
+    depends-on: ["transform-customers"]     # Depends on transform step
+    # Accesses transformed data from context
+    # Writes data to configured data sink
 ```
 
 ---
@@ -922,11 +940,11 @@ APEX provides comprehensive monitoring capabilities:
 ```yaml
 pipeline:
   monitoring:
-    enabled: true
-    log-progress: true
-    collect-metrics: true
-    alert-on-failure: true
-    performance-tracking: true
+    enabled: true                       # Enable monitoring features globally
+    log-progress: true                  # Log each step's progress to console/logs
+    collect-metrics: true               # Collect execution metrics (duration, counts, etc.)
+    alert-on-failure: true              # Send alerts when pipeline or steps fail
+    performance-tracking: true          # Track and report detailed performance statistics
 ```
 
 ### Execution Results
@@ -1140,12 +1158,12 @@ enrichments:
             expression: "'PROCESSED'"
 ```
 
-### Running the Demo
+### Running the Test
 
 ```bash
-# Run the CSV to H2 Pipeline Demo
-java -cp apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar \
-     dev.mars.apex.demo.etl.CsvToH2PipelineDemo
+# Run the CSV to H2 Pipeline Test
+cd apex-demo
+mvn test -Dtest=CsvToH2PipelineTest
 ```
 
 ---
@@ -1155,7 +1173,7 @@ java -cp apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar \
 ### System Capabilities
 
 #### Functional Features
-- **CSV→H2 Pipeline**: Complete working example with CsvToH2PipelineDemo
+- **CSV→H2 Pipeline**: Complete working example with CsvToH2PipelineTest
 - **YAML-Driven Orchestration**: Full pipeline orchestration defined in YAML
 - **Step Dependencies**: Automatic dependency resolution and validation
 - **Error Handling**: Configurable error handling with optional steps
@@ -1163,9 +1181,9 @@ java -cp apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar \
 - **Schema Management**: Automatic H2 database schema creation and initialization
 
 #### Performance Characteristics
-- **10 Records Processed**: Successfully processed 10 customer records in 23ms
-- **Extract Step**: 4ms to read CSV data
-- **Load Step**: 17ms to insert records into H2 database
+- **3 Records Processed**: Successfully processes 3 customer records from CSV to H2
+- **Extract Step**: Reads CSV data from file-system data source
+- **Load Step**: Inserts records into H2 database using data sink
 - **Schema Creation**: Automatic table and index creation
 - **Data Validation**: 100% data integrity maintained
 
@@ -1714,7 +1732,7 @@ data-sinks:
 
 ### Overview
 
-**As of APEX Version 3.0**, the `DataPipelineEngine` class and related types have been deprecated in favor of the universal `RulesEngine.evaluate()` API. This section provides complete guidance for migrating existing pipeline code.
+The `DataPipelineEngine` class and related types have been deprecated (as of version 3.0) in favor of the universal `RulesEngine.evaluate()` API. While `DataPipelineEngine` is still functional and present in the codebase, it is marked for future removal. This section provides complete guidance for migrating existing pipeline code.
 
 ### Why Migrate?
 
@@ -1728,9 +1746,11 @@ data-sinks:
 - **Content-agnostic processing**: Works with pipelines, enrichments, rules, scenarios
 - **Consistent API**: Same pattern for all YAML processing
 
+**Note:** The `RulesEngine` internally uses `PipelineExecutor` to handle pipeline configurations, maintaining full backward compatibility with existing YAML pipeline definitions.
+
 ### Deprecated Classes
 
-The following classes are deprecated and will be removed in version 4.0:
+The following classes are deprecated and will be removed in a future version:
 
 | Class | Status | Replacement |
 |-------|--------|-------------|
@@ -1852,7 +1872,7 @@ rulesEngine.shutdown();
 **If you need step-level data:**
 1. **Option 1**: Store data in external storage (database, file) during pipeline execution
 2. **Option 2**: Use data sinks to write step results to accessible locations
-3. **Option 3**: Keep using `DataPipelineEngine` until version 4.0 (not recommended)
+3. **Option 3**: Keep using `DataPipelineEngine` temporarily (not recommended)
 
 ### Testing Your Migration
 
