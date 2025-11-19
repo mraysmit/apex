@@ -244,29 +244,25 @@ graph TD
 
 ### Core Components
 
-#### 1. DataTypeScenarioService
+#### 1. RulesEngine (Universal Entry Point)
 
-The central service for scenario management and data type routing:
+**✅ RECOMMENDED** - The universal entry point for all scenario-based processing:
 
 ```java
-public class DataTypeScenarioService {
+// ⭐ SIMPLEST - One-line scenario pattern
+ScenarioExecutionResult result = RulesEngine
+    .fromScenarioRegistry("path/to/scenario-registry.yaml")
+    .evaluateScenario("scenario-id", inputData);
 
-    // Load scenarios from registry
-    public void loadScenarios(String registryPath) throws ScenarioException;
+// ✅ EFFICIENT - Two-line pattern when reusing engine
+RulesEngine engine = RulesEngine.fromScenarioRegistry("path/to/scenario-registry.yaml");
+ScenarioExecutionResult result = engine.evaluateScenario("scenario-id", inputData);
 
-    // Get scenario for specific data type
-    public ScenarioConfiguration getScenarioForData(Object data) throws ScenarioException;
-
-    // Get scenario by ID
-    public ScenarioConfiguration getScenario(String scenarioId) throws ScenarioException;
-
-    // List all available scenarios
-    public List<ScenarioConfiguration> getAvailableScenarios();
-
-    // Validate scenario configuration
-    public ScenarioValidationResult validateScenario(String scenarioId);
-}
+// Access scenario configuration if needed
+YamlRuleConfiguration config = engine.getConfiguration();
 ```
+
+**Note:** The `DataTypeScenarioService` class still exists internally for scenario management, but developers should use `RulesEngine.fromScenarioRegistry()` as the primary entry point. This provides a content-agnostic interface that doesn't require knowledge of internal service architecture.
 
 #### 2. ScenarioConfiguration
 
@@ -548,31 +544,35 @@ APEX supports the following standardized file types:
 
 #### 1. Scenario-Driven Processing
 
+**✅ RECOMMENDED PATTERN** - Using RulesEngine universal entry point:
+
 ```java
 @Service
 public class ScenarioBasedProcessor {
 
-    @Autowired
-    private DataTypeScenarioService scenarioService;
+    public ProcessingResult process(String scenarioId, Map<String, Object> data) {
+        // ⭐ SIMPLEST - One-line scenario evaluation
+        ScenarioExecutionResult result = RulesEngine
+            .fromScenarioRegistry("config/scenario-registry.yaml")
+            .evaluateScenario(scenarioId, data);
 
-    @Autowired
-    private RuleEngineService ruleEngine;
+        // Process results
+        return new ProcessingResult(result);
+    }
 
-    public ProcessingResult process(Object data) {
-        // 1. Discover scenario for data type
-        ScenarioConfiguration scenario = scenarioService.getScenarioForData(data);
+    public ProcessingResult processBatch(String scenarioId, List<Map<String, Object>> dataItems) {
+        // ✅ EFFICIENT - Reuse engine for multiple evaluations
+        RulesEngine engine = RulesEngine.fromScenarioRegistry("config/scenario-registry.yaml");
 
-        // 2. Load and execute rule configurations
-        List<String> ruleFiles = scenario.getRuleConfigurations();
-        ProcessingResult result = new ProcessingResult();
-
-        for (String ruleFile : ruleFiles) {
-            RuleConfiguration rules = loadRuleConfiguration(ruleFile);
-            RuleExecutionResult ruleResult = ruleEngine.execute(rules, data);
-            result.addRuleResult(ruleResult);
+        ProcessingResult batchResult = new ProcessingResult();
+        for (Map<String, Object> data : dataItems) {
+            ScenarioExecutionResult result = engine.evaluateScenario(scenarioId, data);
+            batchResult.addResult(result);
         }
 
-        return result;
+        // Cleanup
+        engine.shutdown();
+        return batchResult;
     }
 }
 ```
@@ -2203,45 +2203,50 @@ pipeline:
     alert-on-failure: true  # Alert on pipeline failures
 ```
 
-### Integration with DataPipelineEngine
+### Pipeline Execution with RulesEngine
 
-The pipeline orchestration integrates seamlessly with the existing DataPipelineEngine:
+**✅ RECOMMENDED** - Use RulesEngine universal entry point for pipeline execution:
 
 ```java
-public class DataPipelineEngine {
-    private YamlRuleConfiguration configuration;
+// ⭐ SIMPLEST - One-line pipeline execution
+RuleResult result = RulesEngine
+    .fromFile("config/pipeline.yaml")
+    .evaluate(inputData);
 
-    public YamlPipelineExecutionResult executePipeline(String pipelineName)
-            throws DataPipelineException {
+// ✅ EFFICIENT - Two-line pattern when reusing engine
+RulesEngine engine = RulesEngine.fromFile("config/pipeline.yaml");
+RuleResult result = engine.evaluate(inputData);
 
-        if (configuration.getPipeline() == null) {
-            throw new DataPipelineException("No pipeline configuration found");
-        }
-
-        PipelineExecutor executor = new PipelineExecutor(dataSourceManager);
-        return executor.execute(configuration.getPipeline());
-    }
-}
+// Access pipeline-specific results
+Map<String, Object> enrichedData = result.getEnrichedData();
+boolean success = result.isSuccess();
 ```
+
+**Note:** The `DataPipelineEngine` class still exists internally for pipeline orchestration, but developers should use `RulesEngine.fromFile()` as the primary entry point. This provides a content-agnostic interface that works for pipelines, rules, enrichments, and all other YAML content types.
 
 ### Usage Example
 
-**Java Code (Simplified):**
+**Java Code (Recommended Pattern):**
 ```java
-// Load YAML configuration
-YamlRuleConfiguration config = YamlConfigurationLoader.loadFromClasspath("pipeline.yaml");
-
-// Initialize pipeline engine
-DataPipelineEngine pipelineEngine = new DataPipelineEngine();
-pipelineEngine.initialize(config);
-
-// Execute YAML-defined pipeline
-YamlPipelineExecutionResult result = pipelineEngine.executePipeline("customer-etl-pipeline");
+// ⭐ SIMPLEST - One-line pattern for single execution
+RuleResult result = RulesEngine
+    .fromFile("classpath:config/customer-etl-pipeline.yaml")
+    .evaluate(inputData);
 
 // Check results
 System.out.println("Pipeline success: " + result.isSuccess());
-System.out.println("Duration: " + result.getDurationMs() + "ms");
-System.out.println("Steps completed: " + result.getSuccessfulSteps() + "/" + result.getTotalSteps());
+Map<String, Object> enrichedData = result.getEnrichedData();
+
+// ✅ EFFICIENT - Two-line pattern for multiple executions
+RulesEngine engine = RulesEngine.fromFile("classpath:config/customer-etl-pipeline.yaml");
+
+for (Map<String, Object> data : dataItems) {
+    RuleResult pipelineResult = engine.evaluate(data);
+    // Process results...
+}
+
+// Cleanup
+engine.shutdown();
 ```
 
 **YAML Configuration (Complete Orchestration):**

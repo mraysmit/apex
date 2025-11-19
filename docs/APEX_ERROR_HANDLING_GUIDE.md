@@ -1,5 +1,10 @@
 # APEX Error Handling Guide
 
+
+**Version:** 2.2  
+**Date:** 2025-10-09  
+**Author:** Mark Andrew Ray-Smith Cityline Ltd  
+
 ## Overview
 
 The APEX Rules Engine provides a comprehensive, configurable error handling and recovery system that allows you to control how the system responds to failures during rule evaluation. This guide explains how to configure and use error handling in your APEX applications.
