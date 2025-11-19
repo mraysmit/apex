@@ -1,6 +1,5 @@
 package dev.mars.apex.demo.lookup;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
@@ -55,12 +54,12 @@ public class ComprehensiveLookupTest extends DemoTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(ComprehensiveLookupTest.class);
 
-    // Unique database name for this test class to avoid file locking conflicts
-    private static final String DB_NAME = "comprehensive_lookup_test";
+    // Use same database name as the YAML configuration expects
+    private static final String DB_NAME = "customer_profile_enrichment_test";
 
     /**
      * Setup H2 database with customers table and test data.
-     * Following the exact pattern from H2CustomParametersDemoTest.java
+     * Uses the same data structure as CustomerProfileEnrichmentTest to ensure consistency.
      */
     private void setupCustomerDatabase() {
         logger.info("Setting up H2 database with customer test data...");
@@ -86,10 +85,14 @@ public class ComprehensiveLookupTest extends DemoTestBase {
                 )
                 """);
 
-            // Insert test data that matches the customerId used in tests
+            // Insert test data matching CustomerProfileEnrichmentTest
             statement.execute("""
                 INSERT INTO customers (customer_id, customer_name, customer_type, tier, region, status) VALUES
-                ('CUST001', 'Test Customer Corp', 'CORPORATE', 'GOLD', 'NA', 'ACTIVE')
+                ('CUST001', 'Acme Corporation', 'ENTERPRISE', 'PLATINUM', 'North America', 'ACTIVE'),
+                ('CUST002', 'Global Tech Solutions', 'ENTERPRISE', 'GOLD', 'Europe', 'ACTIVE'),
+                ('CUST003', 'Small Business Inc', 'SMB', 'SILVER', 'North America', 'ACTIVE'),
+                ('CUST004', 'Startup Innovations', 'STARTUP', 'BRONZE', 'Asia Pacific', 'ACTIVE'),
+                ('CUST005', 'Legacy Systems Ltd', 'ENTERPRISE', 'GOLD', 'Europe', 'INACTIVE')
                 """);
 
             logger.info("✓ H2 database setup completed successfully");
