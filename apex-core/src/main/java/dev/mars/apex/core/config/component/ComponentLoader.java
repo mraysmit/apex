@@ -16,8 +16,10 @@ package dev.mars.apex.core.config.component;
  * limitations under the License.
  */
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +59,28 @@ public class ComponentLoader {
     private final ObjectMapper yamlMapper;
 
     public ComponentLoader() {
-        this.yamlMapper = new ObjectMapper(new YAMLFactory());
+        this.yamlMapper = createYamlMapper();
+    }
+
+    /**
+     * Create and configure the YAML ObjectMapper.
+     * Uses same configuration as YamlConfigurationLoader for compatibility.
+     *
+     * @return Configured ObjectMapper for YAML processing
+     */
+    private ObjectMapper createYamlMapper() {
+        YAMLFactory yamlFactory = new YAMLFactory()
+                .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
+                .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
+                .enable(YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR);
+
+        ObjectMapper mapper = new ObjectMapper(yamlFactory);
+
+        // Configure mapper for better handling of missing properties
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
+
+        return mapper;
     }
 
     /**

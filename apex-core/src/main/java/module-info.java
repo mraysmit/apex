@@ -27,6 +27,7 @@ module dev.mars.apex.core {
     requires java.net.http;
     requires transitive spring.expression;
     requires spring.context;
+    requires spring.core;
 
     // Logging dependencies
     requires transitive org.slf4j;
