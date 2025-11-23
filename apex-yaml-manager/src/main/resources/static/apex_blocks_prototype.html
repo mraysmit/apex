@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="utf-8">
+        <title>Apex Blocks - Visual Rule Editor</title>
+        <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+        <style>
+            body {
+                background-color: #f5f5f5;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin: 0;
+                display: flex;
+                flex-direction: column;
+                height: 100vh;
+            }
+
+            header {
+                background-color: #2c3e50;
+                color: white;
+                padding: 1rem;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            h1 {
+                margin: 0;
+                font-size: 1.5rem;
+            }
+
+            #main-container {
+                display: flex;
+                flex: 1;
+                overflow: hidden;
+            }
+
+            #blocklyDiv {
+                flex: 2;
+                height: 100%;
+            }
+
+            #outputDiv {
+                flex: 1;
+                background-color: #1e1e1e;
+                color: #d4d4d4;
+                padding: 1rem;
+                overflow: auto;
+                border-left: 1px solid #ccc;
+                font-family: 'Consolas', 'Monaco', monospace;
+                display: flex;
+                flex-direction: column;
+            }
+
+            #yamlOutput {
+                white-space: pre;
+                flex: 1;
+            }
+
+            .btn {
+                background-color: #3498db;
+                color: white;
+                border: none;
+                padding: 0.5rem 1rem;
+                cursor: pointer;
+                border-radius: 4px;
+                font-size: 1rem;
+            }
+
+            .btn:hover {
+                background-color: #2980b9;
+            }
+
+            h2 {
+                margin-top: 0;
+                color: #ecf0f1;
+                font-size: 1.2rem;
+                border-bottom: 1px solid #555;
+                padding-bottom: 0.5rem;
+            }
+        </style>
+    </head>
+
+    <body>
+        <header>
+            <h1>Apex Blocks <span style="font-size: 0.8rem; opacity: 0.8;">(Prototype)</span></h1>
+            <button class="btn" onclick="downloadYaml()">Download YAML</button>
+        </header>
+
+        <div id="main-container">
+            <div id="blocklyDiv"></div>
+            <div id="outputDiv">
+                <h2>Generated YAML</h2>
+                <div id="yamlOutput"># Drag blocks to generate YAML...</div>
+            </div>
+        </div>
+
+        <xml xmlns="https://developers.google.com/blockly/xml" id="toolbox" style="display: none">
+            <category name="Configuration" colour="#5C81A6">
+                <block type="apex_rule_config"></block>
+            </category>
+            <category name="Rules" colour="#5CA681">
+                <block type="apex_rule"></block>
+                <block type="apex_rule_group"></block>
+                <block type="apex_rule_ref"></block>
+            </category>
+            <category name="Enrichments" colour="#A65C81">
+                <block type="apex_enrichment_group"></block>
+                <block type="apex_enrichment_ref"></block>
+                <block type="apex_enrichment_calculation"></block>
+                <block type="apex_enrichment_field"></block>
+                <block type="apex_enrichment_lookup"></block>
+                <block type="apex_field_mapping"></block>
+            </category>
+            <category name="Logic" colour="#5C81A6">
+                <block type="apex_condition_compare"></block>
+                <block type="apex_condition_logic"></block>
+                <block type="apex_field_ref"></block>
+                <block type="text"></block>
+                <block type="math_number"></block>
+                <block type="logic_boolean"></block>
+            </category>
+            <category name="Actions" colour="#5C81A6">
+                <block type="apex_action_log"></block>
+            </category>
+        </xml>
+
+        <script>
+            // --- 1. Define Custom Blocks (JSON Array for static blocks) ---
+
+            Blockly.defineBlocksWithJsonArray([
+                {
+                    "type": "apex_rule_config",
+                    "message0": "Configuration %1 ID: %2 %3 Rules: %4 %5 Rule Groups: %6 %7 Enrichments: %8 %9 Enrichment Groups: %10",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "my-config" },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "RULES", "check": "Rule" },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "RULE_GROUPS", "check": "RuleGroup" },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "ENRICHMENTS", "check": "Enrichment" },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "ENRICHMENT_GROUPS", "check": "EnrichmentGroup" }
+                    ],
+                    "colour": 230,
+                    "tooltip": "Top-level configuration file",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_rule",
+                    "message0": "Rule %1 ID: %2 %3 Name: %4 %5 Condition: %6 %7 Actions: %8",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "rule-1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "My Rule" },
+                        { "type": "input_dummy" },
+                        { "type": "input_value", "name": "CONDITION", "check": ["Boolean", "String"] },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "ACTIONS" }
+                    ],
+                    "previousStatement": "Rule",
+                    "nextStatement": "Rule",
+                    "colour": 120,
+                    "tooltip": "Defines a single business rule",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_rule_group",
+                    "message0": "Rule Group %1 ID: %2 %3 Name: %4 %5 Operator: %6 %7 Rules: %8",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "group-1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "My Group" },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "OPERATOR", "options": [["AND", "AND"], ["OR", "OR"]] },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "RULE_IDS", "check": "RuleRef" }
+                    ],
+                    "previousStatement": "RuleGroup",
+                    "nextStatement": "RuleGroup",
+                    "colour": 180,
+                    "tooltip": "Groups rules together with logical operator",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_rule_ref",
+                    "message0": "Rule ID: %1",
+                    "args0": [
+                        { "type": "field_input", "name": "RULE_ID", "text": "rule-1" }
+                    ],
+                    "previousStatement": "RuleRef",
+                    "nextStatement": "RuleRef",
+                    "colour": 180,
+                    "tooltip": "Reference to a rule ID",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_enrichment_group",
+                    "message0": "Enrichment Group %1 ID: %2 %3 Name: %4 %5 Operator: %6 %7 Enrichments: %8",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "eg-1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "My Enrichment Group" },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "OPERATOR", "options": [["AND", "AND"], ["OR", "OR"]] },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "ENRICHMENT_IDS", "check": "EnrichmentRef" }
+                    ],
+                    "previousStatement": "EnrichmentGroup",
+                    "nextStatement": "EnrichmentGroup",
+                    "colour": 180,
+                    "tooltip": "Groups enrichments together",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_enrichment_ref",
+                    "message0": "Enrichment ID: %1",
+                    "args0": [
+                        { "type": "field_input", "name": "ENRICHMENT_ID", "text": "enrichment-1" }
+                    ],
+                    "previousStatement": "EnrichmentRef",
+                    "nextStatement": "EnrichmentRef",
+                    "colour": 180,
+                    "tooltip": "Reference to an enrichment ID",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_enrichment_calculation",
+                    "message0": "Calculation Enrichment %1 ID: %2 %3 Condition: %4 %5 Expression: %6 %7 Result Field: %8",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "calc-1" },
+                        { "type": "input_dummy" },
+                        { "type": "input_value", "name": "CONDITION", "check": ["Boolean", "String"] },
+                        { "type": "input_dummy" },
+                        { "type": "input_value", "name": "EXPRESSION", "check": ["String", "Number"] },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "RESULT_FIELD", "text": "calculatedValue" }
+                    ],
+                    "previousStatement": "Enrichment",
+                    "nextStatement": "Enrichment",
+                    "colour": 300,
+                    "tooltip": "Performs a calculation and stores the result",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_enrichment_field",
+                    "message0": "Field Enrichment %1 ID: %2 %3 Condition: %4 %5 Mappings: %6",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "field-enrich-1" },
+                        { "type": "input_dummy" },
+                        { "type": "input_value", "name": "CONDITION", "check": ["Boolean", "String"] },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "MAPPINGS", "check": "FieldMapping" }
+                    ],
+                    "previousStatement": "Enrichment",
+                    "nextStatement": "Enrichment",
+                    "colour": 300,
+                    "tooltip": "Maps or transforms fields",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_enrichment_lookup",
+                    "message0": "Lookup Enrichment %1 ID: %2 %3 Condition: %4 %5 Lookup Key: %6 %7 Dataset Key Field: %8 %9 Mappings: %10",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "lookup-1" },
+                        { "type": "input_dummy" },
+                        { "type": "input_value", "name": "CONDITION", "check": ["Boolean", "String"] },
+                        { "type": "input_dummy" },
+                        { "type": "input_value", "name": "KEY", "check": ["String"] },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DATASET_KEY", "text": "id" },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "MAPPINGS", "check": "FieldMapping" }
+                    ],
+                    "previousStatement": "Enrichment",
+                    "nextStatement": "Enrichment",
+                    "colour": 300,
+                    "tooltip": "Look up data from an external dataset",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_field_mapping",
+                    "message0": "Mapping %1 Source: %2 %3 Target: %4 %5 Expression: %6",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "SOURCE", "text": "sourceField" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "TARGET", "text": "targetField" },
+                        { "type": "input_dummy" },
+                        { "type": "input_value", "name": "EXPRESSION", "check": ["String", "Number"] }
+                    ],
+                    "previousStatement": "FieldMapping",
+                    "nextStatement": "FieldMapping",
+                    "colour": 330,
+                    "tooltip": "Maps a single field",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_field_ref",
+                    "message0": "Field #%1",
+                    "args0": [
+                        { "type": "field_input", "name": "FIELD", "text": "amount" }
+                    ],
+                    "output": "String",
+                    "colour": 290,
+                    "tooltip": "Reference a data field (e.g., #amount)",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_condition_compare",
+                    "message0": "%1 %2 %3",
+                    "args0": [
+                        { "type": "input_value", "name": "A" },
+                        {
+                            "type": "field_dropdown", "name": "OP", "options": [
+                                ["==", "=="], ["!=", "!="], [">", ">"], ["<", "<"], [">=", ">="], ["<=", "<="]
+                            ]
+                        },
+                        { "type": "input_value", "name": "B" }
+                    ],
+                    "output": "Boolean",
+                    "colour": 210,
+                    "tooltip": "Comparison operation",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_condition_logic",
+                    "message0": "%1 %2 %3",
+                    "args0": [
+                        { "type": "input_value", "name": "A", "check": "Boolean" },
+                        { "type": "field_dropdown", "name": "OP", "options": [["AND", "&&"], ["OR", "||"]] },
+                        { "type": "input_value", "name": "B", "check": "Boolean" }
+                    ],
+                    "output": "Boolean",
+                    "colour": 210,
+                    "tooltip": "Logical operation",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_action_log",
+                    "message0": "Log Message %1",
+                    "args0": [
+                        { "type": "field_input", "name": "MSG", "text": "Rule triggered!" }
+                    ],
+                    "previousStatement": null,
+                    "nextStatement": null,
+                    "colour": 160,
+                    "tooltip": "Log a message when rule fires",
+                    "helpUrl": ""
+                }
+            ]);
+
+            // --- 1b. Define Dynamic Block (Lookup) ---
+
+            const AVAILABLE_DATASETS = [
+                ["Counterparty Data", "dataset-counterparty"],
+                ["Instrument Reference", "dataset-instrument"],
+                ["Country Codes", "dataset-countries"],
+                ["Risk Limits", "dataset-risk-limits"]
+            ];
+
+            Blockly.Blocks['apex_enrichment_lookup'] = {
+                init: function () {
+                    this.appendDummyInput()
+                        .appendField("Lookup Enrichment");
+                    this.appendDummyInput()
+                        .appendField("ID:")
+                        .appendField(new Blockly.FieldTextInput("lookup-1"), "ID");
+                    this.appendValueInput("CONDITION")
+                        .setCheck(["Boolean", "String"])
+                        .appendField("Condition:");
+                    this.appendDummyInput()
+                        .appendField("Dataset:")
+                        .appendField(new Blockly.FieldDropdown(function () {
+                            return AVAILABLE_DATASETS;
+                        }), "DATASET");
+                    this.appendValueInput("KEY")
+                        .setCheck("String")
+                        .appendField("Lookup Key:");
+                    this.appendDummyInput()
+                        .appendField("Dataset Key Field:")
+                        .appendField(new Blockly.FieldTextInput("id"), "DATASET_KEY");
+                    this.appendStatementInput("MAPPINGS")
+                        .setCheck("FieldMapping")
+                        .appendField("Mappings:");
+                    this.setPreviousStatement(true, "Enrichment");
+                    this.setNextStatement(true, "Enrichment");
+                    this.setColour(300);
+                    this.setTooltip("Look up data from an external dataset");
+                }
+            };
+
+            // --- 2. Define Generators (Block -> Object Model) ---
+
+            const apexGenerator = new Blockly.Generator('APEX');
+
+            apexGenerator.forBlock['apex_rule_config'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const rulesCode = generator.statementToCode(block, 'RULES');
+                const ruleGroupsCode = generator.statementToCode(block, 'RULE_GROUPS');
+                const enrichmentsCode = generator.statementToCode(block, 'ENRICHMENTS');
+                const enrichmentGroupsCode = generator.statementToCode(block, 'ENRICHMENT_GROUPS');
+
+                const rules = rulesCode ? JSON.parse(`[${rulesCode.replace(/,\s*$/, '')}]`) : [];
+                const ruleGroups = ruleGroupsCode ? JSON.parse(`[${ruleGroupsCode.replace(/,\s*$/, '')}]`) : [];
+                const enrichments = enrichmentsCode ? JSON.parse(`[${enrichmentsCode.replace(/,\s*$/, '')}]`) : [];
+                const enrichmentGroups = enrichmentGroupsCode ? JSON.parse(`[${enrichmentGroupsCode.replace(/,\s*$/, '')}]`) : [];
+
+                const config = {
+                    metadata: {
+                        id: id,
+                        type: "rule-config",
+                        version: "1.0.0"
+                    },
+                    rules: rules,
+                    "rule-groups": ruleGroups,
+                    enrichments: enrichments,
+                    "enrichment-groups": enrichmentGroups
+                };
+                return JSON.stringify(config, null, 2);
+            };
+
+            apexGenerator.forBlock['apex_rule'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const name = block.getFieldValue('NAME');
+                const condition = generator.valueToCode(block, 'CONDITION', 0) || "true";
+
+                const ruleObj = {
+                    id: id,
+                    name: name,
+                    condition: condition.replace(/^"|"$/g, ''),
+                    actions: []
+                };
+
+                return JSON.stringify(ruleObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_rule_group'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const name = block.getFieldValue('NAME');
+                const operator = block.getFieldValue('OPERATOR');
+                const ruleIdsCode = generator.statementToCode(block, 'RULE_IDS');
+
+                // ruleIdsCode will be a comma-separated string of quoted IDs: "rule-1", "rule-2",
+                const ruleIds = ruleIdsCode ? JSON.parse(`[${ruleIdsCode.replace(/,\s*$/, '')}]`) : [];
+
+                const groupObj = {
+                    id: id,
+                    name: name,
+                    operator: operator,
+                    "rule-ids": ruleIds
+                };
+
+                return JSON.stringify(groupObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_rule_ref'] = function (block, generator) {
+                const ruleId = block.getFieldValue('RULE_ID');
+                return `"${ruleId}",`;
+            };
+
+            apexGenerator.forBlock['apex_enrichment_group'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const name = block.getFieldValue('NAME');
+                const operator = block.getFieldValue('OPERATOR');
+                const enrichmentIdsCode = generator.statementToCode(block, 'ENRICHMENT_IDS');
+
+                const enrichmentIds = enrichmentIdsCode ? JSON.parse(`[${enrichmentIdsCode.replace(/,\s*$/, '')}]`) : [];
+
+                const groupObj = {
+                    id: id,
+                    name: name,
+                    operator: operator,
+                    "enrichment-ids": enrichmentIds
+                };
+
+                return JSON.stringify(groupObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_enrichment_ref'] = function (block, generator) {
+                const enrichmentId = block.getFieldValue('ENRICHMENT_ID');
+                return `"${enrichmentId}",`;
+            };
+
+            apexGenerator.forBlock['apex_enrichment_calculation'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const condition = generator.valueToCode(block, 'CONDITION', 0);
+                const expression = generator.valueToCode(block, 'EXPRESSION', 0) || "null";
+                const resultField = block.getFieldValue('RESULT_FIELD');
+
+                const enrichmentObj = {
+                    id: id,
+                    type: "calculation-enrichment",
+                    "calculation-config": {
+                        expression: expression.replace(/^"|"$/g, ''),
+                        "result-field": resultField
+                    }
+                };
+                if (condition) {
+                    enrichmentObj.condition = condition.replace(/^"|"$/g, '');
+                }
+
+                return JSON.stringify(enrichmentObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_enrichment_field'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const condition = generator.valueToCode(block, 'CONDITION', 0);
+                const mappingsCode = generator.statementToCode(block, 'MAPPINGS');
+                const mappings = mappingsCode ? JSON.parse(`[${mappingsCode.replace(/,\s*$/, '')}]`) : [];
+
+                const enrichmentObj = {
+                    id: id,
+                    type: "field-enrichment",
+                    "field-mappings": mappings
+                };
+                if (condition) {
+                    enrichmentObj.condition = condition.replace(/^"|"$/g, '');
+                }
+
+                return JSON.stringify(enrichmentObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_enrichment_lookup'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const condition = generator.valueToCode(block, 'CONDITION', 0);
+                const dataset = block.getFieldValue('DATASET');
+                const key = generator.valueToCode(block, 'KEY', 0) || "null";
+                const datasetKey = block.getFieldValue('DATASET_KEY');
+                const mappingsCode = generator.statementToCode(block, 'MAPPINGS');
+                const mappings = mappingsCode ? JSON.parse(`[${mappingsCode.replace(/,\s*$/, '')}]`) : [];
+
+                const enrichmentObj = {
+                    id: id,
+                    type: "lookup-enrichment",
+                    "lookup-config": {
+                        "lookup-key": key.replace(/^"|"$/g, ''),
+                        "lookup-dataset": {
+                            type: "reference",
+                            id: dataset,
+                            "key-field": datasetKey
+                        }
+                    },
+                    "field-mappings": mappings
+                };
+                if (condition) {
+                    enrichmentObj.condition = condition.replace(/^"|"$/g, '');
+                }
+
+                return JSON.stringify(enrichmentObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_field_mapping'] = function (block, generator) {
+                const source = block.getFieldValue('SOURCE');
+                const target = block.getFieldValue('TARGET');
+                const expression = generator.valueToCode(block, 'EXPRESSION', 0);
+
+                const mappingObj = {
+                    "target-field": target
+                };
+                if (source) mappingObj["source-field"] = source;
+                if (expression) mappingObj["expression"] = expression.replace(/^"|"$/g, '');
+
+                return JSON.stringify(mappingObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_field_ref'] = function (block, generator) {
+                const field = block.getFieldValue('FIELD');
+                return [`#${field}`, 0];
+            };
+
+            apexGenerator.forBlock['apex_condition_compare'] = function (block, generator) {
+                const a = generator.valueToCode(block, 'A', 0) || 'null';
+                const op = block.getFieldValue('OP');
+                const b = generator.valueToCode(block, 'B', 0) || 'null';
+                return [`${a} ${op} ${b}`, 0];
+            };
+
+            apexGenerator.forBlock['apex_condition_logic'] = function (block, generator) {
+                const a = generator.valueToCode(block, 'A', 0) || 'false';
+                const op = block.getFieldValue('OP');
+                const b = generator.valueToCode(block, 'B', 0) || 'false';
+                return [`${a} ${op} ${b}`, 0];
+            };
+
+            apexGenerator.forBlock['text'] = function (block, generator) {
+                const text = block.getFieldValue('TEXT');
+                return [`'${text}'`, 0];
+            };
+
+            apexGenerator.forBlock['math_number'] = function (block, generator) {
+                const num = block.getFieldValue('NUM');
+                return [num, 0];
+            };
+
+            apexGenerator.forBlock['logic_boolean'] = function (block, generator) {
+                const bool = block.getFieldValue('BOOL');
+                return [bool.toLowerCase(), 0];
+            };
+
+            apexGenerator.forBlock['apex_action_log'] = function (block, generator) {
+                return '';
+            };
+
+            apexGenerator.scrub_ = function (block, code) {
+                const nextBlock = block.nextConnection && block.nextConnection.targetBlock();
+                const nextCode = apexGenerator.blockToCode(nextBlock);
+                return code + nextCode;
+            };
+
+            // --- 3. Initialize Workspace ---
+
+            const workspace = Blockly.inject('blocklyDiv', {
+                toolbox: document.getElementById('toolbox'),
+                scrollbars: true,
+                trashcan: true
+            });
+
+            // --- 4. Live Update Logic ---
+
+            function updateYaml() {
+                const topBlocks = workspace.getTopBlocks(false);
+                if (topBlocks.length === 0) {
+                    document.getElementById('yamlOutput').textContent = "# Drag 'Configuration' block to start";
+                    return;
+                }
+
+                const configBlock = topBlocks.find(b => b.type === 'apex_rule_config');
+                if (!configBlock) {
+                    document.getElementById('yamlOutput').textContent = "# Please start with a 'Configuration' block";
+                    return;
+                }
+
+                try {
+                    const jsonStr = apexGenerator.blockToCode(configBlock);
+                    if (jsonStr && jsonStr.trim()) {
+                        const jsonObj = JSON.parse(jsonStr);
+                        const yamlStr = jsyaml.dump(jsonObj);
+                        document.getElementById('yamlOutput').textContent = yamlStr;
+                    }
+                } catch (e) {
+                    console.error(e);
+                    document.getElementById('yamlOutput').textContent = "# Error generating YAML: " + e.message;
+                }
+            }
+
+            workspace.addChangeListener(updateYaml);
+
+            // --- 5. Download Function ---
+            function downloadYaml() {
+                const yamlContent = document.getElementById('yamlOutput').textContent;
+                const blob = new Blob([yamlContent], { type: 'text/yaml' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'apex-rules.yaml';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
+
+            // Create a default starting block
+            const startBlock = workspace.newBlock('apex_rule_config');
+            startBlock.initSvg();
+            startBlock.render();
+            startBlock.moveBy(50, 50);
+
+            // Force initial update
+            if (typeof jsyaml === 'undefined') {
+                document.getElementById('yamlOutput').textContent = "# Error: js-yaml library failed to load. Please check your internet connection.";
+            } else {
+                updateYaml();
+            }
+        </script>
+    </body>
+
+</html>
