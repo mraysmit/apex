@@ -9,35 +9,6 @@
 > **✅ SYNTAX VERIFIED**: This document has been updated and verified to use the correct APEX SpEL syntax. APEX processes HashMap data where fields are accessed using `#fieldName` syntax, NOT `#data.fieldName`. All examples in this document use the correct `#fieldName` syntax for field access in APEX YAML configurations.
 
 ## Table of Contents
-
-1. [Quick Keyword Reference](#1-quick-keyword-reference)
-2. [Introduction & Overview](#2-introduction--overview)
-3. [Document Structure & Metadata](#3-document-structure--metadata)
-4. [Core Syntax Elements](#4-core-syntax-elements)
-5. [Rules Section](#5-rules-section)
-   - 5.1 [Validation Rules](#41-validation-rules)
-   - 5.2 [Business Rules](#42-business-rules)
-   - 5.3 [Rule Categories](#43-rule-categories)
-6. [Rule Groups Section](#6-rule-groups-section)
-7. [Enrichments Section](#7-enrichments-section)
-8. [Component Configurations](#8-component-configurations)
-9. [Scenario Configurations](#9-scenario-configurations)
-10. [Dataset Definitions](#10-dataset-definitions)
-11. [External Data-Source References](#11-external-data-source-references)
-12. [Pipeline Orchestration](#12-pipeline-orchestration)
-    - 12.5 [Error Recovery Configuration](#105-error-recovery-configuration)
-13. [Advanced Features](#13-advanced-features)
-14. [Best Practices](#14-best-practices)
-15. [Common Patterns](#15-common-patterns)
-16. [Examples & Use Cases](#16-examples--use-cases)
-17. [Troubleshooting](#17-troubleshooting)
-18. [Reference](#18-reference)
-19. [Migration & Compatibility](#19-migration--compatibility)
-
----
-
-## 1. Quick Keyword Reference
-
 This section provides a definitive reference for APEX YAML keywords based on actual APEX core engine implementation. Approximately **155 keywords** are defined in apex-core, with **~140 functionally implemented** in execution logic. See Appendix C for planned/future keywords.
 
 ### 1.1 Complete Keyword Reference Table
@@ -253,7 +224,7 @@ APEX 2.0 introduces **external data-source references** that enable clean separa
 
 ---
 
-## 2. Document Structure & Metadata
+## 3. Document Structure & Metadata
 
 ### Required Metadata Section
 
@@ -550,7 +521,7 @@ data-sinks:
 
 ---
 
-## 3. Core Syntax Elements
+## 4. Core Syntax Elements
 
 ### 3.1 Data Access Patterns
 
@@ -911,7 +882,7 @@ expression: "T(com.company.utils.FinancialUtils).calculateInterest(#principal, #
 
 ---
 
-## 4. Rules Section
+## 5. Rules Section
 
 ### 4.1 Validation Rules
 
@@ -1446,7 +1417,7 @@ rules:
 
 ---
 
-## 5. Rule Groups Section
+## 6. Rule Groups Section
 
 ### 5.1 Overview
 
@@ -2150,7 +2121,7 @@ rule-groups:
 
 ---
 
-## 6. Enrichments Section
+## 7. Enrichments Section
 
 ### 6.1 Lookup Enrichments
 
@@ -2567,6 +2538,9 @@ field-mappings:
 | `field-mappings` | Yes* | List of field mapping configurations |
 | `conditional-mappings` | Yes* | List of conditional mapping configurations |
 | `result-field` | No | Field name to store condition evaluation result (boolean: true if condition matched, false otherwise) |
+| `success-code` | No | Code to set in the result object upon successful execution |
+| `error-code` | No | Code to set in the result object upon failure |
+| `map-to-field` | No | Target field(s) for mapping results (String or List<String>) |
 
 *At least one of `field-mappings` or `conditional-mappings` is required.
 
@@ -2754,9 +2728,9 @@ Use `conditional-mapping-enrichment` when you need to:
 
 ---
 
-## 7. Scenario Configurations
+## 8. Scenario Configurations
 
-### 7.1 Overview
+### 8.1 Overview
 
 Scenario configurations define end-to-end processing pipelines for specific data types. They enable systematic routing of different data types through appropriate validation, enrichment, and compliance processing stages.
 
@@ -3274,9 +3248,9 @@ ScenarioExecutionResult result = engine.evaluateWithClassification(tradeData);
 
 ---
 
-## 8. Component Configurations
+## 9. Component Configurations
 
-### 8.1 Overview
+### 9.1 Overview
 
 **Component Configurations** are reusable YAML files that group multiple configuration files together with controlled execution order and failure policies. Components enable:
 
@@ -3530,9 +3504,9 @@ Circular component reference detected: component-a.yaml → component-b.yaml →
 
 ---
 
-## 9. Dataset Definitions
+## 10. Dataset Definitions
 
-### 8.1 Inline Datasets
+### 10.1 Inline Datasets
 
 Inline datasets embed data directly in the configuration:
 
@@ -3580,7 +3554,7 @@ lookup-config:
         account: "DTC567890"
 ```
 
-### 6.2 External Datasets
+### 10.2 External Datasets
 
 Reference external data sources:
 
@@ -3602,21 +3576,126 @@ lookup-dataset:
 | `source` | Yes | Data source identifier |
 | `endpoint` | No | API endpoint or query |
 | `key-field` | Yes | Field used for lookup matching |
-| `cache-ttl` | No | Cache time-to-live in seconds |
-| `timeout` | No | Request timeout in milliseconds |
 
----
+## 11. Rule Chains
 
-## 10. External Data-Source References
+The `rule-chains` section allows for complex, multi-step rule execution flows. This feature is critical for implementing advanced business logic that requires conditional branching, sequential dependencies, or accumulative scoring.
 
-### 10.1 Overview
+The behavior of a rule chain is determined by its `pattern` field.
 
-**External Data-Source References** are APEX 2.0's enterprise-grade solution for clean architecture and configuration management. This system enables **separation of concerns** by splitting configurations into:
+### 11.1 Conditional Chaining (`conditional-chaining`)
+Executes a "trigger" rule. If it matches, it executes a set of "on-trigger" rules. If it doesn't match, it executes "on-no-trigger" rules.
 
+**Syntax:**
+```yaml
+rule-chains:
+  - id: "high-value-processing"
+    pattern: "conditional-chaining"
+    configuration:
+      trigger-rule: "high-value-check" # Rule ID
+      conditional-rules:
+        on-trigger:
+          - "enhanced-due-diligence"
+          - "senior-approval-required"
+        on-no-trigger:
+          - "standard-check"
+```
+
+### 11.2 Sequential Dependency (`sequential-dependency`)
+Executes rules in a strict sequence where subsequent rules depend on the output of previous ones. Output variables from one stage are available in the context for subsequent stages.
+
+**Syntax:**
+```yaml
+rule-chains:
+  - id: "discount-pipeline"
+    pattern: "sequential-dependency"
+    configuration:
+      stages:
+        - rule: "base-discount-calc"
+          output-variable: "baseDiscount" # Stored in context as #baseDiscount
+        - rule: "loyalty-bonus-calc"
+          output-variable: "loyaltyBonus"
+        - rule: "final-price-calc"
+          output-variable: "finalPrice"
+```
+
+### 11.3 Result-Based Routing (`result-based-routing`)
+Routes execution to different rule sets based on the *result* of a routing rule. The routing rule must return a string value that matches one of the defined routes.
+
+**Syntax:**
+```yaml
+rule-chains:
+  - id: "risk-routing"
+    pattern: "result-based-routing"
+    configuration:
+      routing-rule: "assess-risk-level" # Returns 'HIGH', 'MEDIUM', or 'LOW'
+      routes:
+        "HIGH":
+          - "high-risk-check-1"
+          - "high-risk-check-2"
+        "MEDIUM":
+          - "medium-risk-check"
+        "LOW":
+          - "auto-approve"
+```
+
+### 11.4 Accumulative Chaining (`accumulative-chaining`)
+Accumulates a score or value from multiple rules and makes a final decision. Useful for credit scoring or risk assessment.
+
+**Syntax:**
+```yaml
+rule-chains:
+  - id: "credit-scoring"
+    pattern: "accumulative-chaining"
+    configuration:
+      accumulator: "0" # Initial value (can be a number or SpEL expression)
+      accumulation-rules:
+        - rule: "payment-history-good"
+          weight: 10 # Added to accumulator if rule matches
+        - rule: "high-debt-ratio"
+          weight: -5 # Subtracted if rule matches
+      decision-rule: "approve-if-score-above-700" # Evaluated against final accumulator value
+```
+
+### 11.5 Complex Workflow (`complex-workflow`)
+Defines a directed acyclic graph (DAG) of rules with explicit dependencies. Steps execute only when their dependencies have successfully completed.
+
+**Syntax:**
+```yaml
+rule-chains:
+  - id: "onboarding-workflow"
+    pattern: "complex-workflow"
+    configuration:
+      steps:
+        - id: "kyc-check"
+          rule: "perform-kyc"
+        - id: "credit-check"
+          rule: "perform-credit-check"
+          depends-on: ["kyc-check"] # Runs only after KYC completes
+        - id: "account-setup"
+          rule: "setup-account"
+          depends-on: ["kyc-check", "credit-check"] # Runs after both complete
+```
+
+### 11.6 Fluent Builder (`fluent-builder`)
+Constructs a complex object or result by chaining rules that each contribute to building the final state. Supports `on-success` and `on-failure` branching at each step.
+
+**Syntax:**
+```yaml
+rule-chains:
+  - id: "policy-builder"
+    pattern: "fluent-builder"
+    configuration:
+      builder-target: "policyObject" # The object being built
+      steps:
+        - rule: "validate-eligibility"
+          on-success:
+            rule: "apply-standard-coverage"
+          on-failure:
 - **Infrastructure Configuration**: External, reusable data-source configurations
 - **Business Logic Configuration**: Lean, focused enrichment and validation rules
 
-### 7.2 Benefits of External References
+### 12.2 Benefits of External References
 
 #### Clean Architecture
 - **Separation of Concerns**: Infrastructure and business logic cleanly separated
@@ -3628,17 +3707,6 @@ lookup-dataset:
 - **Connection Pooling**: Shared database connections across multiple enrichments
 - **Environment Management**: Different infrastructure configurations for dev/test/prod
 
-#### Production Readiness
-- **Named Parameter Binding**: Enhanced database integration with parameter validation
-- **Field Mapping Case Sensitivity**: Production-ready field handling
-- **Error Handling**: Comprehensive error handling and fallback mechanisms
-
-### 7.3 External Data-Source Reference Syntax
-
-#### Basic Structure
-
-```yaml
-metadata:
   name: "Business Logic Configuration"
   version: "2.0.0"
   description: "Lean configuration using external data-source references"
@@ -3658,21 +3726,10 @@ enrichments:
     lookup-config:
       lookup-key: "#field"
       lookup-dataset:
-        type: "database"
-        data-source-ref: "database-name"  # References external data-source
-        query-ref: "namedQuery"           # Named query from external config
-```
-
-#### External Data-Source Reference Properties
-
-| Property | Required | Description | Example |
-|----------|----------|-------------|---------|
-| `name` | Yes | Unique identifier for the data-source reference | "postgresql-customer-database" |
-| `source` | Yes | Path to external data-source configuration file | "data-sources/customer-db.yaml" |
 | `enabled` | No | Whether this reference is active (default: true) | true |
 | `description` | No | Human-readable description | "Customer database for profile enrichment" |
 
-### 7.4 External Data-Source Configuration Files
+### 12.4 External Data-Source Configuration Files
 
 External data-source configuration files contain infrastructure-specific settings:
 
@@ -3821,7 +3878,7 @@ health-check:
   interval: 30000
 ```
 
-### 7.5 Using External References in Enrichments
+### 12.5 Using External References in Enrichments
 
 #### Simple Database Lookup with External Reference
 
@@ -3867,7 +3924,7 @@ enrichments:
         required: true
 ```
 
-### 7.6 Advanced External Reference Patterns
+### 12.6 Advanced External Reference Patterns
 
 #### Multiple External Data-Sources
 
@@ -3913,7 +3970,7 @@ enrichments:
         query-ref: "getCurrentPrice"
 ```
 
-### 7.7 Configuration Caching and Performance
+### 12.7 Configuration Caching and Performance
 
 #### Automatic Configuration Caching
 
@@ -3946,7 +4003,7 @@ enrichments:
 - **Query Preparation**: Named queries prepared once and reused
 - **Memory Efficiency**: Reduced memory footprint through shared configurations
 
-### 7.8 Field Mapping and Case Sensitivity
+### 12.8 Field Mapping and Case Sensitivity
 
 #### Production-Ready Field Mapping
 
@@ -3971,7 +4028,7 @@ enrichments:
         required: true
 ```
 
-### 7.9 Error Handling and Validation
+### 12.9 Error Handling and Validation
 
 #### External Reference Validation
 
@@ -4181,9 +4238,9 @@ data-sinks:
 
 ---
 
-## 10. Pipeline Orchestration
+## 13. Pipeline Orchestration
 
-### 10.1 Overview
+### 13.1 Overview
 
 **Pipeline Orchestration** is APEX's approach to YAML-driven data processing workflows. This system embodies the core APEX principle that **all processing logic should be contained in the YAML configuration file**, eliminating hardcoded orchestration in Java code.
 
@@ -4209,7 +4266,7 @@ pipelineEngine.execute("getAllCustomers", "customer-csv-input",
 pipelineEngine.executePipeline("customer-etl-pipeline");
 ```
 
-### 9.2 Pipeline Configuration Structure
+### 13.2 Pipeline Configuration Structure
 
 #### Basic Pipeline Syntax
 
@@ -4684,9 +4741,9 @@ rules:
 
 ---
 
-## 11. Advanced Features
+## 14. Advanced Features
 
-### 11.1 Conditional Logic
+### 14.1 Conditional Logic
 
 #### Ternary Operators
 
@@ -4851,7 +4908,7 @@ enrichments:
 - **Fallback Handling**: Provide default values when validation fails
 - **Audit Trails**: Track which rules triggered specific processing
 
-### 11.2 Function Usage
+### 14.2 Function Usage
 
 #### Built-in Functions
 
@@ -4909,9 +4966,9 @@ expression: "#value != null && #value.matches('[0-9]+') ? T(java.lang.Integer).p
 
 ---
 
-## 12. Best Practices
+## 15. Best Practices
 
-### 12.1 Performance Guidelines
+### 15.1 Performance Guidelines
 
 #### Condition Optimization
 
@@ -4969,7 +5026,7 @@ calculations:
     expression: "#baseValue + #baseValue * 0.1"
 ```
 
-### 8.2 Maintainability
+### 15.2 Maintainability
 
 #### Naming Conventions
 
@@ -5012,7 +5069,7 @@ enrichments:
         expression: "#var1Day99 * T(java.lang.Math).sqrt(10)"
 ```
 
-### 8.3 Error Handling
+### 15.3 Error Handling
 
 #### Graceful Degradation
 
@@ -5045,9 +5102,9 @@ expression: "#text != null && #text.trim().length() > 0 ? #text.toUpperCase() : 
 
 ---
 
-## 13. Common Patterns
+## 16. Common Patterns
 
-### 13.1 Financial Services Patterns
+### 16.1 Financial Services Patterns
 
 #### Reference Data Enrichment Pattern
 
@@ -5177,9 +5234,9 @@ rules:
 
 ---
 
-## 14. Examples & Use Cases
+## 17. Examples & Use Cases
 
-### 14.1 Simple REST API Lookup Example
+### 17.1 Simple REST API Lookup Example
 
 This is a complete, working example based on the `SimpleRestApiYamlTest`:
 
@@ -5424,9 +5481,9 @@ enrichments:
 
 ---
 
-## 15. Troubleshooting
+## 18. Troubleshooting
 
-### 15.1 Common Errors
+### 18.1 Common Errors
 
 #### Syntax Errors
 
@@ -5527,9 +5584,9 @@ calculations:
 
 ---
 
-## 16. Reference
+## 19. Reference
 
-### 16.1 Syntax Quick Reference
+### 19.1 Syntax Quick Reference
 
 #### Operators Table
 
@@ -5625,17 +5682,6 @@ APEX adds these extensions to standard SpEL:
 - **Expression complexity**: Keep expressions reasonably simple
 - **Recursion**: Avoid recursive expressions
 - **Memory usage**: Large datasets should use external sources
-
----
-
-## 17. Migration & Compatibility
-
-### Version Compatibility
-
-APEX YAML maintains backward compatibility within major versions:
-
-- **Major versions** (1.x → 2.x): May introduce breaking changes
-- **Minor versions** (1.1 → 1.2): Backward compatible, new features
 - **Patch versions** (1.1.1 → 1.1.2): Bug fixes, fully compatible
 
 ### Migration Strategies
@@ -5775,6 +5821,8 @@ This appendix provides an alphabetical reference of **functionally implemented**
 
 ### A
 
+- **accumulator** - Initial value for accumulative chaining
+- **accumulation-rules** - List of rules for accumulative chaining
 - **actions** - List of actions to execute when a rule matches or condition is met
 - **alert-on-failure** - Boolean flag to trigger alerts when processing fails (used in health checks and pipeline monitoring)
 - **apiVersion** - API version for external data source configurations (type: external-data-config)
@@ -5784,6 +5832,7 @@ This appendix provides an alphabetical reference of **functionally implemented**
 
 - **backoff-multiplier** - Multiplier for exponential backoff in retry logic
 - **batch** - Batch processing configuration for handling multiple records
+- **builder-target** - Target object for fluent builder pattern
 - **business-domain** - Business domain classification (e.g., "Trading", "Compliance", "Risk")
 - **business-owner** - Business owner responsible for the rule or configuration
 
@@ -5800,6 +5849,7 @@ This appendix provides an alphabetical reference of **functionally implemented**
 - **component-refs** - References to other component files
 - **condition** - SpEL expression defining when rule/enrichment/stage applies
 - **conditional-mappings** - List of conditional field mapping configurations
+- **conditional-rules** - Rules to execute based on trigger result in conditional chaining
 - **conditions** - Multiple conditions for complex logic
 - **config-files** - List of configuration files with execution order and failure policy
 - **configuration** - General configuration object
@@ -5816,6 +5866,7 @@ This appendix provides an alphabetical reference of **functionally implemented**
 - **data-source-refs** - List of references to external data source configurations
 - **data-sources** - Inline data source definitions
 - **debug-mode** - Enable debug mode for detailed logging and execution traces
+- **decision-rule** - Final decision rule for accumulative chaining
 - **default-strategy** - Default strategy for error recovery or processing
 - **default-value** - Fallback value when source field is missing or null
 - **default-values** - Multiple default values for different scenarios
@@ -5914,12 +5965,17 @@ This appendix provides an alphabetical reference of **functionally implemented**
 
 ### O
 
+- **on-failure** - Rules to execute on failure in fluent builder pattern
+- **on-no-trigger** - Rules to execute if trigger rule fails in conditional chaining
+- **on-success** - Rules to execute on success in fluent builder pattern
+- **on-trigger** - Rules to execute if trigger rule matches in conditional chaining
 - **operation** - Single operation definition
 - **operation-ref** - Reference to a named operation
 - **operations** - Map of operation definitions for REST APIs
 - **operator** - Logical operator for rule group (AND/OR)
 - **optional** - Boolean flag indicating if field or configuration is optional
 - **output-format** - Output format specification
+- **output-variable** - Variable to store result in sequential dependency pattern
 - **override-priority** - Override priority for rule within group
 - **owner** - Owner of the component or configuration
 
@@ -5951,6 +6007,8 @@ This appendix provides an alphabetical reference of **functionally implemented**
 - **retry-count** - Number of retry attempts
 - **retry-delay** - Delay between retry attempts
 - **retry-delay-ms** - Retry delay in milliseconds
+- **routes** - Map of routes for result-based routing
+- **routing-rule** - Rule to determine execution route
 - **rule** - Single rule definition
 - **rule-chains** - Rule chain definitions for sequential rule execution
 - **rule-configurations** - References to rule configuration files in components
@@ -5976,6 +6034,7 @@ This appendix provides an alphabetical reference of **functionally implemented**
 - **source-system** - Source system identifier for audit trails
 - **source-type** - Type of data source (database, rest-api, file, cache, kafka)
 - **spec** - Kubernetes-style specification object
+- **stages** - List of stages for sequential dependency pattern
 - **steps** - List of processing steps
 - **stop-on-first-failure** - Stop group execution on first rule failure
 - **stop-on-first-match** - Stop processing on first matching rule
@@ -5991,6 +6050,7 @@ This appendix provides an alphabetical reference of **functionally implemented**
 - **topics** - Kafka topic definitions
 - **transformation-rules** - Transformation rule definitions
 - **transformations** - Data transformation configurations
+- **trigger-rule** - Rule to trigger conditional chaining
 - **type** - Document type (rule-config, enrichment, dataset, scenario, external-data-config, component)
 
 ### V
@@ -5999,6 +6059,10 @@ This appendix provides an alphabetical reference of **functionally implemented**
 - **validation** - Validation configuration for rules
 - **value** - Static value to set or use
 - **version** - Version identifier for the configuration
+
+### W
+
+- **weight** - Weight for accumulative chaining rules
 
 ---
 
