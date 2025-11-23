@@ -100,6 +100,12 @@
             <category name="Configuration" colour="#5C81A6">
                 <block type="apex_rule_config"></block>
             </category>
+            <category name="Sections" colour="#7C5CA6">
+                <block type="apex_section_rules"></block>
+                <block type="apex_section_rule_groups"></block>
+                <block type="apex_section_enrichments"></block>
+                <block type="apex_section_enrichment_groups"></block>
+            </category>
             <category name="Rules" colour="#5CA681">
                 <block type="apex_rule"></block>
                 <block type="apex_rule_group"></block>
@@ -132,21 +138,67 @@
             Blockly.defineBlocksWithJsonArray([
                 {
                     "type": "apex_rule_config",
-                    "message0": "Configuration %1 ID: %2 %3 Rules: %4 %5 Rule Groups: %6 %7 Enrichments: %8 %9 Enrichment Groups: %10",
+                    "message0": "Configuration %1 ID: %2 %3 Sections: %4",
                     "args0": [
                         { "type": "input_dummy" },
                         { "type": "field_input", "name": "ID", "text": "my-config" },
                         { "type": "input_dummy" },
-                        { "type": "input_statement", "name": "RULES", "check": "Rule" },
+                        { "type": "input_statement", "name": "SECTIONS", "check": "Section" }
+                    ],
+                    "colour": 230,
+                    "tooltip": "Top-level configuration file - drag section blocks here",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_section_rules",
+                    "message0": "Rules Section %1 %2",
+                    "args0": [
                         { "type": "input_dummy" },
-                        { "type": "input_statement", "name": "RULE_GROUPS", "check": "RuleGroup" },
+                        { "type": "input_statement", "name": "RULES", "check": "Rule" }
+                    ],
+                    "previousStatement": "Section",
+                    "nextStatement": "Section",
+                    "colour": 120,
+                    "tooltip": "Container for rules",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_section_rule_groups",
+                    "message0": "Rule Groups Section %1 %2",
+                    "args0": [
                         { "type": "input_dummy" },
-                        { "type": "input_statement", "name": "ENRICHMENTS", "check": "Enrichment" },
+                        { "type": "input_statement", "name": "RULE_GROUPS", "check": "RuleGroup" }
+                    ],
+                    "previousStatement": "Section",
+                    "nextStatement": "Section",
+                    "colour": 180,
+                    "tooltip": "Container for rule groups",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_section_enrichments",
+                    "message0": "Enrichments Section %1 %2",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "ENRICHMENTS", "check": "Enrichment" }
+                    ],
+                    "previousStatement": "Section",
+                    "nextStatement": "Section",
+                    "colour": 300,
+                    "tooltip": "Container for enrichments",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_section_enrichment_groups",
+                    "message0": "Enrichment Groups Section %1 %2",
+                    "args0": [
                         { "type": "input_dummy" },
                         { "type": "input_statement", "name": "ENRICHMENT_GROUPS", "check": "EnrichmentGroup" }
                     ],
-                    "colour": 230,
-                    "tooltip": "Top-level configuration file",
+                    "previousStatement": "Section",
+                    "nextStatement": "Section",
+                    "colour": 180,
+                    "tooltip": "Container for enrichment groups",
                     "helpUrl": ""
                 },
                 {
@@ -267,27 +319,6 @@
                     "helpUrl": ""
                 },
                 {
-                    "type": "apex_enrichment_lookup",
-                    "message0": "Lookup Enrichment %1 ID: %2 %3 Condition: %4 %5 Lookup Key: %6 %7 Dataset Key Field: %8 %9 Mappings: %10",
-                    "args0": [
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "ID", "text": "lookup-1" },
-                        { "type": "input_dummy" },
-                        { "type": "input_value", "name": "CONDITION", "check": ["Boolean", "String"] },
-                        { "type": "input_dummy" },
-                        { "type": "input_value", "name": "KEY", "check": ["String"] },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "DATASET_KEY", "text": "id" },
-                        { "type": "input_dummy" },
-                        { "type": "input_statement", "name": "MAPPINGS", "check": "FieldMapping" }
-                    ],
-                    "previousStatement": "Enrichment",
-                    "nextStatement": "Enrichment",
-                    "colour": 300,
-                    "tooltip": "Look up data from an external dataset",
-                    "helpUrl": ""
-                },
-                {
                     "type": "apex_field_mapping",
                     "message0": "Mapping %1 Source: %2 %3 Target: %4 %5 Expression: %6",
                     "args0": [
@@ -405,28 +436,63 @@
 
             apexGenerator.forBlock['apex_rule_config'] = function (block, generator) {
                 const id = block.getFieldValue('ID');
-                const rulesCode = generator.statementToCode(block, 'RULES');
-                const ruleGroupsCode = generator.statementToCode(block, 'RULE_GROUPS');
-                const enrichmentsCode = generator.statementToCode(block, 'ENRICHMENTS');
-                const enrichmentGroupsCode = generator.statementToCode(block, 'ENRICHMENT_GROUPS');
+                const sectionsCode = generator.statementToCode(block, 'SECTIONS');
 
-                const rules = rulesCode ? JSON.parse(`[${rulesCode.replace(/,\s*$/, '')}]`) : [];
-                const ruleGroups = ruleGroupsCode ? JSON.parse(`[${ruleGroupsCode.replace(/,\s*$/, '')}]`) : [];
-                const enrichments = enrichmentsCode ? JSON.parse(`[${enrichmentsCode.replace(/,\s*$/, '')}]`) : [];
-                const enrichmentGroups = enrichmentGroupsCode ? JSON.parse(`[${enrichmentGroupsCode.replace(/,\s*$/, '')}]`) : [];
+                // Parse sections
+                let rules = [];
+                let ruleGroups = [];
+                let enrichments = [];
+                let enrichmentGroups = [];
+
+                if (sectionsCode) {
+                    const sections = JSON.parse(`[${sectionsCode.replace(/,\s*$/, '')}]`);
+                    sections.forEach(section => {
+                        if (section.type === 'rules') rules = section.content;
+                        if (section.type === 'rule-groups') ruleGroups = section.content;
+                        if (section.type === 'enrichments') enrichments = section.content;
+                        if (section.type === 'enrichment-groups') enrichmentGroups = section.content;
+                    });
+                }
 
                 const config = {
                     metadata: {
                         id: id,
                         type: "rule-config",
                         version: "1.0.0"
-                    },
-                    rules: rules,
-                    "rule-groups": ruleGroups,
-                    enrichments: enrichments,
-                    "enrichment-groups": enrichmentGroups
+                    }
                 };
+
+                // Only add non-empty sections
+                if (rules.length > 0) config.rules = rules;
+                if (ruleGroups.length > 0) config["rule-groups"] = ruleGroups;
+                if (enrichments.length > 0) config.enrichments = enrichments;
+                if (enrichmentGroups.length > 0) config["enrichment-groups"] = enrichmentGroups;
+
                 return JSON.stringify(config, null, 2);
+            };
+
+            apexGenerator.forBlock['apex_section_rules'] = function (block, generator) {
+                const rulesCode = generator.statementToCode(block, 'RULES');
+                const rules = rulesCode ? JSON.parse(`[${rulesCode.replace(/,\s*$/, '')}]`) : [];
+                return JSON.stringify({ type: 'rules', content: rules }) + ',';
+            };
+
+            apexGenerator.forBlock['apex_section_rule_groups'] = function (block, generator) {
+                const ruleGroupsCode = generator.statementToCode(block, 'RULE_GROUPS');
+                const ruleGroups = ruleGroupsCode ? JSON.parse(`[${ruleGroupsCode.replace(/,\s*$/, '')}]`) : [];
+                return JSON.stringify({ type: 'rule-groups', content: ruleGroups }) + ',';
+            };
+
+            apexGenerator.forBlock['apex_section_enrichments'] = function (block, generator) {
+                const enrichmentsCode = generator.statementToCode(block, 'ENRICHMENTS');
+                const enrichments = enrichmentsCode ? JSON.parse(`[${enrichmentsCode.replace(/,\s*$/, '')}]`) : [];
+                return JSON.stringify({ type: 'enrichments', content: enrichments }) + ',';
+            };
+
+            apexGenerator.forBlock['apex_section_enrichment_groups'] = function (block, generator) {
+                const enrichmentGroupsCode = generator.statementToCode(block, 'ENRICHMENT_GROUPS');
+                const enrichmentGroups = enrichmentGroupsCode ? JSON.parse(`[${enrichmentGroupsCode.replace(/,\s*$/, '')}]`) : [];
+                return JSON.stringify({ type: 'enrichment-groups', content: enrichmentGroups }) + ',';
             };
 
             apexGenerator.forBlock['apex_rule'] = function (block, generator) {
@@ -450,7 +516,6 @@
                 const operator = block.getFieldValue('OPERATOR');
                 const ruleIdsCode = generator.statementToCode(block, 'RULE_IDS');
 
-                // ruleIdsCode will be a comma-separated string of quoted IDs: "rule-1", "rule-2",
                 const ruleIds = ruleIdsCode ? JSON.parse(`[${ruleIdsCode.replace(/,\s*$/, '')}]`) : [];
 
                 const groupObj = {
