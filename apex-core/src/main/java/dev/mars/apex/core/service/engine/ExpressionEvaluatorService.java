@@ -184,6 +184,32 @@ public class ExpressionEvaluatorService {
     }
 
     /**
+     * Create an enhanced evaluation context from a root object.
+     * This method centralizes context creation logic for the entire APEX system.
+     *
+     * @param rootObject The root object for the context
+     * @return The evaluation context with MapPropertyAccessor and proper variable setup
+     */
+    public StandardEvaluationContext createEvaluationContext(Object rootObject) {
+        StandardEvaluationContext context = new StandardEvaluationContext(rootObject);
+
+        // Add custom property accessor for Maps (enables #data.property syntax)
+        context.addPropertyAccessor(new MapPropertyAccessor());
+
+        // If root object is a Map, add entries as variables for backward compatibility
+        // This allows accessing map keys using #key syntax (e.g., #referralL2)
+        if (rootObject instanceof Map) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> map = (Map<String, Object>) rootObject;
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                context.setVariable(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return context;
+    }
+
+    /**
      * Create an enhanced evaluation context from facts map.
      * This method adopts the same context creation logic as UnifiedRuleEvaluator
      * to ensure consistent SpEL evaluation behavior across APEX.
@@ -192,22 +218,7 @@ public class ExpressionEvaluatorService {
      * @return The evaluation context with MapPropertyAccessor and proper variable setup
      */
     public StandardEvaluationContext createEnhancedContext(Map<String, Object> facts) {
-        StandardEvaluationContext context = new StandardEvaluationContext();
-
-        // Add custom property accessor for Maps (enables #data.property syntax)
-        context.addPropertyAccessor(new MapPropertyAccessor());
-
-        if (facts != null) {
-            // Set the facts map as the root object so properties can be accessed directly
-            context.setRootObject(facts);
-
-            // Also add facts as variables for backward compatibility (accessed with #variableName)
-            for (Map.Entry<String, Object> entry : facts.entrySet()) {
-                context.setVariable(entry.getKey(), entry.getValue());
-            }
-        }
-
-        return context;
+        return createEvaluationContext(facts);
     }
 
     /**

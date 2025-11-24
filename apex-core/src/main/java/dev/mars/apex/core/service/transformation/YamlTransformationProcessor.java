@@ -3,9 +3,11 @@ package dev.mars.apex.core.service.transformation;
 import dev.mars.apex.core.config.yaml.YamlTransformation;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
@@ -41,14 +43,25 @@ public class YamlTransformationProcessor {
     
     private static final Logger logger = LoggerFactory.getLogger(YamlTransformationProcessor.class);
     
-    private final SpelExpressionParser parser;
+    private final ExpressionEvaluatorService evaluatorService;
+    private final ExpressionParser parser;
     private final Map<String, Expression> expressionCache;
     
     /**
-     * Create a new transformation processor.
+     * Create a new transformation processor with default evaluator service.
      */
     public YamlTransformationProcessor() {
-        this.parser = new SpelExpressionParser();
+        this(new ExpressionEvaluatorService());
+    }
+
+    /**
+     * Create a new transformation processor with specified evaluator service.
+     * 
+     * @param evaluatorService The expression evaluator service
+     */
+    public YamlTransformationProcessor(ExpressionEvaluatorService evaluatorService) {
+        this.evaluatorService = evaluatorService;
+        this.parser = evaluatorService.getParser();
         this.expressionCache = new HashMap<>();
         logger.info("YamlTransformationProcessor initialized");
     }
@@ -315,8 +328,8 @@ public class YamlTransformationProcessor {
             // Set target field value
             if (transformation.getTargetField() != null) {
                 setFieldValue(targetObject, transformation.getTargetField(), transformedValue);
-                logger.debug("Field transformation completed: {} -> {} = {}",
-                    transformation.getSourceField(), transformation.getTargetField(), transformedValue);
+            } else {
+                logger.warn("Target field is null for transformation: {}", transformation.getId());
             }
 
             return targetObject;
@@ -408,12 +421,7 @@ public class YamlTransformationProcessor {
      * @return The evaluation context
      */
     private StandardEvaluationContext createEvaluationContext(Object rootObject) {
-        StandardEvaluationContext context = new StandardEvaluationContext(rootObject);
-
-        // Add custom property accessor for Maps to enable nested field access
-        context.addPropertyAccessor(new dev.mars.apex.core.engine.config.MapPropertyAccessor());
-
-        return context;
+        return evaluatorService.createEvaluationContext(rootObject);
     }
 
     /**

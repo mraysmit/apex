@@ -143,8 +143,32 @@ public abstract class PatternExecutor {
         String name = getStringValue(ruleConfig, "name", id);
         String condition = getStringValue(ruleConfig, "condition", "true");
         String message = getStringValue(ruleConfig, "message", "Rule " + name + " executed");
+        String severity = getStringValue(ruleConfig, "severity", "INFO");
+        String resultField = getStringValue(ruleConfig, "result-field", null);
         
-        return new Rule(name, condition, message);
+        // Create rule with extended properties
+        // Using the constructor that supports resultField
+        // Rule(String id, Set<Category> categories, String name, String condition,
+        //      String message, String description, int priority, String severity,
+        //      RuleMetadata metadata, Object defaultValue, String successCode, String errorCode,
+        //      Object mapToField, String resultField)
+        
+        return new Rule(
+            id, 
+            new java.util.HashSet<>(), // categories
+            name, 
+            condition, 
+            message, 
+            message, // description
+            100, // priority
+            severity,
+            null, // metadata
+            null, // defaultValue
+            null, // successCode
+            null, // errorCode
+            null, // mapToField
+            resultField
+        );
     }
     
     /**

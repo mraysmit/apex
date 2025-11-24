@@ -51,6 +51,7 @@ public class UnifiedRuleEvaluator {
     private final ErrorRecoveryService errorRecoveryService;
     private final RulePerformanceMonitor performanceMonitor;
     private final ErrorRecoveryConfig errorRecoveryConfig;
+    private final ExpressionEvaluatorService evaluatorService;
     
     /**
      * Standard error message format for consistency across all evaluation paths.
@@ -65,6 +66,7 @@ public class UnifiedRuleEvaluator {
         this.errorRecoveryService = new ErrorRecoveryService();
         this.performanceMonitor = new RulePerformanceMonitor();
         this.errorRecoveryConfig = new ErrorRecoveryConfig();
+        this.evaluatorService = new ExpressionEvaluatorService(this.parser);
     }
     
     /**
@@ -77,10 +79,7 @@ public class UnifiedRuleEvaluator {
     public UnifiedRuleEvaluator(ExpressionParser parser,
                                ErrorRecoveryService errorRecoveryService,
                                RulePerformanceMonitor performanceMonitor) {
-        this.parser = parser != null ? parser : new SpelExpressionParser();
-        this.errorRecoveryService = errorRecoveryService != null ? errorRecoveryService : new ErrorRecoveryService();
-        this.performanceMonitor = performanceMonitor != null ? performanceMonitor : new RulePerformanceMonitor();
-        this.errorRecoveryConfig = new ErrorRecoveryConfig();
+        this(parser, errorRecoveryService, performanceMonitor, new ErrorRecoveryConfig());
     }
 
     /**
@@ -99,8 +98,26 @@ public class UnifiedRuleEvaluator {
         this.errorRecoveryService = errorRecoveryService != null ? errorRecoveryService : new ErrorRecoveryService();
         this.performanceMonitor = performanceMonitor != null ? performanceMonitor : new RulePerformanceMonitor();
         this.errorRecoveryConfig = errorRecoveryConfig != null ? errorRecoveryConfig : new ErrorRecoveryConfig();
+        this.evaluatorService = new ExpressionEvaluatorService(this.parser);
+    }
 
-
+    /**
+     * Create a new UnifiedRuleEvaluator with custom components including evaluator service.
+     *
+     * @param evaluatorService The expression evaluator service
+     * @param errorRecoveryService The error recovery service
+     * @param performanceMonitor The performance monitor
+     * @param errorRecoveryConfig The error recovery configuration
+     */
+    public UnifiedRuleEvaluator(ExpressionEvaluatorService evaluatorService,
+                               ErrorRecoveryService errorRecoveryService,
+                               RulePerformanceMonitor performanceMonitor,
+                               ErrorRecoveryConfig errorRecoveryConfig) {
+        this.evaluatorService = evaluatorService != null ? evaluatorService : new ExpressionEvaluatorService();
+        this.parser = this.evaluatorService.getParser();
+        this.errorRecoveryService = errorRecoveryService != null ? errorRecoveryService : new ErrorRecoveryService();
+        this.performanceMonitor = performanceMonitor != null ? performanceMonitor : new RulePerformanceMonitor();
+        this.errorRecoveryConfig = errorRecoveryConfig != null ? errorRecoveryConfig : new ErrorRecoveryConfig();
     }
     
     /**
@@ -470,29 +487,13 @@ public class UnifiedRuleEvaluator {
 
     /**
      * Create a standard evaluation context from facts map.
-     * This method replicates the context creation logic from RulesEngine
-     * to ensure consistent SpEL evaluation behavior.
+     * This method delegates to ExpressionEvaluatorService to ensure consistent SpEL evaluation behavior.
      *
      * @param facts The facts to include in the context
      * @return The evaluation context
      */
     private StandardEvaluationContext createEvaluationContext(Map<String, Object> facts) {
-        StandardEvaluationContext context = new StandardEvaluationContext();
-
-        // Add custom property accessor for Maps (enables #data.property syntax)
-        context.addPropertyAccessor(new MapPropertyAccessor());
-
-        if (facts != null) {
-            // Set the facts map as the root object so properties can be accessed directly
-            context.setRootObject(facts);
-
-            // Also add facts as variables for backward compatibility (accessed with #variableName)
-            for (Map.Entry<String, Object> entry : facts.entrySet()) {
-                context.setVariable(entry.getKey(), entry.getValue());
-            }
-        }
-
-        return context;
+        return evaluatorService.createEvaluationContext(facts);
     }
 
     /**

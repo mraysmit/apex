@@ -2819,6 +2819,11 @@ enrichment-groups:
   - id: composite
     operator: AND
     enrichment-ids: [ e3 ]
+    enrichment-group: base_and  # Singular reference (alias for enrichment-group-references)
+
+  - id: composite_plural
+    operator: AND
+    enrichment-ids: [ e3 ]
     enrichment-group-references: [ base_and ]
 
   - id: composite_par_and
@@ -2838,6 +2843,7 @@ Properties (per group):
 | parallel-execution | boolean | No | false | Evaluate all member enrichments concurrently; disables short-circuiting |
 | error-handling | string | No | "fail-fast" | Exception handling strategy: "fail-fast", "continue-on-error", "skip-on-error" |
 | enrichment-ids | list<string> | Optional | — | Direct enrichments included in listed order |
+| enrichment-group | string | Optional | — | Singular alias for enrichment-group-references (convenience) |
 | enrichment-group-references | list<string> | Optional | — | Include enrichments from referenced groups appended in order |
 
 Execution semantics:
@@ -3628,15 +3634,26 @@ rule-chains:
   - id: "risk-routing"
     pattern: "result-based-routing"
     configuration:
-      routing-rule: "assess-risk-level" # Returns 'HIGH', 'MEDIUM', or 'LOW'
+      router-rule:
+        condition: "#riskScore > 80 ? 'HIGH' : (#riskScore > 50 ? 'MEDIUM' : 'LOW')"
+        output-variable: "riskLevel"
+        message: "Determining risk level"
       routes:
         "HIGH":
-          - "high-risk-check-1"
-          - "high-risk-check-2"
+          rules:
+            - id: "high-risk-check-1"
+              condition: "true"
+              message: "High risk check"
         "MEDIUM":
-          - "medium-risk-check"
+          rules:
+            - id: "medium-risk-check"
+              condition: "true"
+              message: "Medium risk check"
         "LOW":
-          - "auto-approve"
+          rules:
+            - id: "auto-approve"
+              condition: "true"
+              message: "Auto approved"
 ```
 
 ### 11.4 Accumulative Chaining (`accumulative-chaining`)

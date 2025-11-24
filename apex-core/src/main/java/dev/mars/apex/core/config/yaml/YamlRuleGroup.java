@@ -94,6 +94,10 @@ public class YamlRuleGroup {
     @JsonProperty("rule-group-references")
     private List<String> ruleGroupReferences;
 
+    // Plural alias for rule-group-references
+    @JsonProperty("rule-groups")
+    private List<String> ruleGroups;
+
     @JsonProperty("tags")
     private List<String> tags;
     
@@ -244,7 +248,8 @@ public class YamlRuleGroup {
     }
 
     public List<String> getRuleGroupReferences() {
-        return ruleGroupReferences;
+        if (ruleGroupReferences != null) return ruleGroupReferences;
+        return ruleGroups;
     }
 
     public void setRuleGroupReferences(List<String> ruleGroupReferences) {

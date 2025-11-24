@@ -6976,6 +6976,66 @@ flowchart TD
     style L fill:#e8f5e8
 ```
 
+### Orchestrating Enrichments with Rule Chains
+
+The `conditional-chaining` pattern in Rule Chains currently **only supports Rules**, not Enrichments. The `conditional-rules` block strictly expects rule definitions.
+
+However, you can achieve the exact same behavior by using the **`result-field`** feature. This allows your Rule Chain to "flag" a transaction, which then triggers specific Enrichments defined in the main `enrichments` section.
+
+#### Solution: The "Flag & React" Pattern
+
+1.  **In your Rule Chain**: Use `result-field` in your trigger rule to save the outcome (e.g., `isHighValueLoan`).
+2.  **In your Enrichments**: Use `condition` to check that flag.
+
+Here is the correct configuration to achieve your goal:
+
+```yaml
+# 1. Rule Chain: Detects the condition and sets a flag
+rule-chains:
+  - id: "enhanced-processing"
+    pattern: "conditional-chaining"
+    priority: 30
+    configuration:
+      trigger-rule:
+        condition: "#loanAmount > 1000000 && #creditScore >= 60"
+        message: "High-value loan with acceptable credit"
+        result-field: "isHighValueLoan"  # <--- KEY: Persist the result (true/false)
+      
+      conditional-rules:
+        on-trigger:
+          - condition: "#manualUnderwritingRequired = true"
+            message: "Manual underwriting required"
+        on-no-trigger:
+          - condition: "#standardProcessing = true"
+            message: "Standard automated processing"
+
+# 2. Enrichments: React to the flag set by the Rule Chain
+enrichments:
+  # This runs ONLY if the trigger-rule above was true
+  - id: "high-value-data-lookup"
+    type: "lookup-enrichment"
+    condition: "#isHighValueLoan == true"  # <--- KEY: React to the flag
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset: 
+        # ... your dataset config ...
+    field-mappings:
+      - source-field: "riskProfile"
+        target-field: "customerRisk"
+
+  # You can also handle the "else" case (on-no-trigger)
+  - id: "standard-data-lookup"
+    type: "lookup-enrichment"
+    condition: "#isHighValueLoan == false" # <--- KEY: React to the 'else' case
+    # ... standard enrichment config ...
+```
+
+#### Why this is the recommended approach
+*   **Separation of Concerns**: Rule Chains handle *flow control* and *validation logic*, while the `enrichments` section remains the single source of truth for *data modification*.
+*   **Traceability**: The `isHighValueLoan` flag becomes part of the transaction record, making it easier to debug why a specific enrichment was applied.
+
+If you need complex branching logic specifically for enrichments (like a Switch/Case), you can also use the **`conditional-mapping-enrichment`** type, which is designed for that specific purpose.
+
 ### Execution Context and Variable Propagation
 
 Rule chains maintain an execution context that allows results from one stage to be used in subsequent stages:

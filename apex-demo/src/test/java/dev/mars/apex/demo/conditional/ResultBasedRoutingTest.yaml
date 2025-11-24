@@ -1,0 +1,41 @@
+metadata:
+  name: "Result Based Routing Test"
+  description: "Verifies that Rule Chains can use Result-Based Routing (Switch/Case) pattern"
+  version: "1.0"
+  type: "rule-config"
+  processing-mode: "sequential"
+
+rule-chains:
+  - id: "risk-routing-chain"
+    name: "Risk Routing Chain"
+    description: "Routes transactions based on risk score"
+    pattern: "result-based-routing"
+    configuration:
+      # The "SWITCH" statement
+      router-rule:
+        id: "determine-risk"
+        # Returns a string key: 'HIGH', 'MEDIUM', or 'LOW'
+        condition: "#riskScore > 80 ? 'HIGH' : (#riskScore > 50 ? 'MEDIUM' : 'LOW')"
+        output-variable: "riskLevel"
+        message: "Determining risk level"
+
+      # The "CASE" blocks
+      routes:
+        HIGH:
+          rules:
+            - id: "reject-transaction"
+              condition: "true"
+              message: "Transaction rejected due to high risk"
+              result-field: "transactionRejected"
+        MEDIUM:
+          rules:
+            - id: "manual-review"
+              condition: "true"
+              message: "Flagged for manual review"
+              result-field: "manualReviewRequired"
+        LOW:
+          rules:
+            - id: "auto-approve"
+              condition: "true"
+              message: "Transaction auto-approved"
+              result-field: "autoApproved"

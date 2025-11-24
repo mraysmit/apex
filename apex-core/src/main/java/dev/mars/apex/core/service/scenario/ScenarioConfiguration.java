@@ -27,6 +27,8 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+
 /**
  * Configuration class representing a complete data type processing scenario.
  *
@@ -347,14 +349,50 @@ public class ScenarioConfiguration {
     }
 
     /**
-     * Evaluates the classification rule against the provided data.
+     * Evaluates the classification rule against the provided data using the provided evaluator service.
      *
      * Uses SpEL (Spring Expression Language) to evaluate the classification rule condition
      * against a Map of data. The data is available in the expression as #data variable.
      *
      * @param data the data to evaluate against (Map<String, Object>)
+     * @param evaluatorService the service to use for creating the evaluation context
      * @return true if the classification rule matches, false otherwise
      */
+    public boolean matchesClassificationRule(Map<String, Object> data, ExpressionEvaluatorService evaluatorService) {
+        if (!hasClassificationRule()) {
+            return false;
+        }
+
+        if (data == null) {
+            logger.debug("Cannot evaluate classification rule against null data for scenario: " + scenarioId);
+            return false;
+        }
+
+        try {
+            Expression expression = parser.parseExpression(classificationRuleCondition);
+            StandardEvaluationContext context = evaluatorService.createEvaluationContext(data);
+            context.setVariable("data", data);
+
+            Boolean result = expression.getValue(context, Boolean.class);
+            return result != null && result;
+
+        } catch (Exception e) {
+            logger.warn("Failed to evaluate classification rule for scenario '" + scenarioId + "': " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Evaluates the classification rule against the provided data.
+     *
+     * Uses SpEL (Spring Expression Language) to evaluate the classification rule condition
+     * against a Map of data. The data is available in the expression as #data variable.
+     *
+     * @deprecated Use {@link #matchesClassificationRule(Map, ExpressionEvaluatorService)} instead to ensure consistent context creation.
+     * @param data the data to evaluate against (Map<String, Object>)
+     * @return true if the classification rule matches, false otherwise
+     */
+    @Deprecated
     public boolean matchesClassificationRule(Map<String, Object> data) {
         if (!hasClassificationRule()) {
             return false;

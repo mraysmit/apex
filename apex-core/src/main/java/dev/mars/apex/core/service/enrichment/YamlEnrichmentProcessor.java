@@ -76,7 +76,6 @@ public class YamlEnrichmentProcessor {
     private static final Logger logger = LoggerFactory.getLogger(YamlEnrichmentProcessor.class);
 
     private final LookupServiceRegistry serviceRegistry;
-    @SuppressWarnings("unused") // Reserved for future expression evaluation enhancements
     private final ExpressionEvaluatorService evaluatorService;
     private final SpelExpressionParser parser;
 
@@ -1036,10 +1035,7 @@ public class YamlEnrichmentProcessor {
      * @return The evaluation context
      */
     private StandardEvaluationContext createEvaluationContext(Object rootObject) {
-        StandardEvaluationContext context = new StandardEvaluationContext(rootObject);
-
-        // Add custom property accessor for Maps to enable nested field access
-        context.addPropertyAccessor(new dev.mars.apex.core.engine.config.MapPropertyAccessor());
+        StandardEvaluationContext context = evaluatorService.createEvaluationContext(rootObject);
 
         // Add common variables and functions
         context.setVariable("serviceRegistry", serviceRegistry);
@@ -1050,16 +1046,6 @@ public class YamlEnrichmentProcessor {
         }
         if (!individualRuleResults.isEmpty()) {
             context.setVariable("ruleResults", individualRuleResults);
-        }
-
-        // If the root object is a Map, add its entries as variables for easier access
-        if (rootObject instanceof Map) {
-            Map<?, ?> rootMap = (Map<?, ?>) rootObject;
-            for (Map.Entry<?, ?> entry : rootMap.entrySet()) {
-                if (entry.getKey() instanceof String) {
-                    context.setVariable((String) entry.getKey(), entry.getValue());
-                }
-            }
         }
 
         return context;
@@ -1897,7 +1883,7 @@ public class YamlEnrichmentProcessor {
 
         try {
             // Create a new context with success_code and error_code variables
-            StandardEvaluationContext mappingContext = new StandardEvaluationContext(context.getRootObject().getValue());
+            StandardEvaluationContext mappingContext = evaluatorService.createEvaluationContext(context.getRootObject().getValue());
 
             // Copy ALL variables from the original context using reflection
             // This ensures that variables like #notionalValue, #delta, etc. are available in map-to-field expressions

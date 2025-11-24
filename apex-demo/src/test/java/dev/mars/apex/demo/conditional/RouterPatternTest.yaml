@@ -1,0 +1,80 @@
+# ==================================================================================
+# ROUTER PATTERN TEST CONFIGURATION
+# ==================================================================================
+# This configuration demonstrates a "Router" processing pattern using
+# Result-Based Routing.
+#
+# Unlike the Waterfall pattern which executes sequentially, the Router pattern
+# evaluates a central "Router Rule" first. This rule determines exactly which
+# path (route) the execution should take.
+#
+# The logic uses a nested SpEL expression to simulate a decision tree:
+# 1. Check Credit Score -> If low, route to REJECT
+# 2. Check Income -> If low, route to REFER_INCOME
+# 3. Check DTI -> If high, route to REFER_DEBT
+# 4. If all pass -> route to APPROVE
+# ==================================================================================
+metadata:
+  name: "Router Pattern Test"
+  description: "Verifies 3-level decision tree using Result-Based Routing with nested SpEL"
+  version: "1.0"
+  type: "rule-config"
+
+rule-chains:
+  - id: "3-level-loan-decision"
+    name: "Loan Approval Decision Tree"
+    pattern: "result-based-routing"
+    configuration:
+      router-rule:
+        # The Router Rule is the "Brain" of this pattern.
+        # It evaluates a complex condition and returns a string key (the route name).
+        #
+        # Logic implemented via nested ternary operators:
+        # 1. Is Credit Score <= 700? -> 'REJECT'
+        # 2. Else, is Income <= 50000? -> 'REFER_INCOME'
+        # 3. Else, is DTI >= 0.40? -> 'REFER_DEBT'
+        # 4. Else -> 'APPROVE'
+        condition: >
+          #creditScore <= 700 ? 'REJECT' :
+          (#income <= 50000   ? 'REFER_INCOME' :
+          (#dti >= 0.40       ? 'REFER_DEBT' : 
+          'APPROVE'))
+        output-variable: "decision"
+        message: "Routing based on 3-level criteria"
+
+      routes:
+        # Route 1: Approval Path
+        # Executed only if all criteria are met.
+        APPROVE:
+          rules: # THEN block for Approval
+            - id: "final-approval"
+              condition: "true"
+              message: "Loan Approved"
+              result-field: "loanStatus"
+        
+        # Route 2: Rejection Path
+        # Executed if Credit Score is too low.
+        REJECT:
+          rules: # THEN block for Rejection
+            - id: "rejection-notice"
+              condition: "true"
+              message: "Rejected due to Credit Score"
+              result-field: "rejectionReason"
+        
+        # Route 3: Income Referral Path
+        # Executed if Credit is OK but Income is low.
+        REFER_INCOME:
+          rules: # THEN block for Income Referral
+            - id: "referral-income"
+              condition: "true"
+              message: "Referred: Income insufficient for auto-approval"
+              result-field: "referralReason"
+        
+        # Route 4: Debt Referral Path
+        # Executed if Credit and Income are OK but DTI is high.
+        REFER_DEBT:
+          rules: # THEN block for Debt Referral
+            - id: "referral-debt"
+              condition: "true"
+              message: "Referred: High Debt-to-Income ratio"
+              result-field: "referralReason"

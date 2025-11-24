@@ -17,6 +17,7 @@ package dev.mars.apex.rest.controller;
  */
 
 
+import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.engine.TemplateProcessorService;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import io.swagger.v3.oas.annotations.Operation;
@@ -55,6 +56,9 @@ public class TemplateController {
 
     @Autowired
     private TemplateProcessorService templateProcessorService;
+
+    @Autowired
+    private ExpressionEvaluatorService evaluatorService;
 
     /**
      * Process a JSON template with provided context data.
@@ -396,14 +400,6 @@ public class TemplateController {
      * Helper method to create evaluation context from a map of variables.
      */
     private StandardEvaluationContext createEvaluationContext(Map<String, Object> contextVariables) {
-        StandardEvaluationContext context = new StandardEvaluationContext();
-
-        if (contextVariables != null) {
-            for (Map.Entry<String, Object> entry : contextVariables.entrySet()) {
-                context.setVariable(entry.getKey(), entry.getValue());
-            }
-        }
-
-        return context;
+        return evaluatorService.createEvaluationContext(contextVariables);
     }
 }

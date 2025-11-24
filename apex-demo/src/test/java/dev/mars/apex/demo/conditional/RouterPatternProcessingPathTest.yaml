@@ -1,0 +1,55 @@
+# ==================================================================================
+# ROUTER PATTERN PROCESSING PATH TEST CONFIGURATION
+# ==================================================================================
+metadata:
+  name: "Router Pattern Processing Path Test"
+  description: "Verifies routing based on processingPath variable"
+  version: "1.0"
+  type: "rule-config"
+
+enrichment-group-references: []
+
+rules:
+  - id: "flag-for-review"
+    name: "Flag for Review"
+    condition: "true"
+    message: "Flagged for review"
+    result-field: "reviewStatus"
+
+  - id: "notify-supervisor"
+    name: "Notify Supervisor"
+    condition: "true"
+    message: "Supervisor notified"
+
+  - id: "approve-loan"
+    name: "Approve Loan"
+    condition: "true"
+    message: "Loan Approved"
+    result-field: "approvalStatus"
+
+  - id: "send-confirmation"
+    name: "Send Confirmation"
+    condition: "true"
+    message: "Confirmation sent"
+
+  - id: "standard-validation"
+    name: "Standard Validation"
+    condition: "true"
+    message: "Standard validation passed"
+    result-field: "validationStatus"
+
+rule-chains:
+  - id: "execute-processing-path"
+    name: "Execute Processing Path"
+    pattern: "result-based-routing"
+    configuration:
+      router-rule:
+        # The router is now simple - just read the decision from Phase 1
+        condition: "#processingPath"
+      routes:
+        "MANUAL_REVIEW":
+          rules: [ "flag-for-review", "notify-supervisor" ]
+        "AUTO_APPROVE":
+          rules: [ "approve-loan", "send-confirmation" ]
+        "STANDARD_PROCESS":
+          rules: [ "standard-validation" ]

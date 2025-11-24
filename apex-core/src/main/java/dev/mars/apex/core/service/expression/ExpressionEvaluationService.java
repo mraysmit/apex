@@ -250,15 +250,7 @@ public class ExpressionEvaluationService {
      * @return A StandardEvaluationContext with the variables set
      */
     private EvaluationContext createEvaluationContext(Map<String, Object> contextVariables) {
-        StandardEvaluationContext context = new StandardEvaluationContext();
-        
-        if (contextVariables != null) {
-            for (Map.Entry<String, Object> entry : contextVariables.entrySet()) {
-                context.setVariable(entry.getKey(), entry.getValue());
-            }
-        }
-        
-        return context;
+        return expressionEvaluatorService.createEvaluationContext(contextVariables);
     }
     
     /**

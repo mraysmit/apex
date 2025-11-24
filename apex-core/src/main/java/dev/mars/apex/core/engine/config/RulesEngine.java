@@ -92,6 +92,7 @@ import java.util.concurrent.*;
 public class RulesEngine {
     private static final RulesEngineLogger logger = new RulesEngineLogger(RulesEngine.class);
     private final ExpressionParser parser;
+    private final ExpressionEvaluatorService evaluatorService;
     private final RulesEngineConfiguration configuration;
     private final ErrorRecoveryService errorRecoveryService;
     private final RulePerformanceMonitor performanceMonitor;
@@ -159,15 +160,16 @@ public class RulesEngine {
         this.yamlConfig = yamlConfig;
         this.scenarioRegistry = scenarioRegistry;
         this.parser = new SpelExpressionParser();
+        this.evaluatorService = new ExpressionEvaluatorService(this.parser);
         this.errorRecoveryService = new ErrorRecoveryService();
         this.performanceMonitor = new RulePerformanceMonitor();
-        this.enrichmentProcessor = new YamlEnrichmentProcessor(new LookupServiceRegistry(), new ExpressionEvaluatorService());
+        this.enrichmentProcessor = new YamlEnrichmentProcessor(new LookupServiceRegistry(), this.evaluatorService);
 
         // Load error recovery configuration from YAML if available, otherwise use defaults
         ErrorRecoveryConfig errorRecoveryConfig = loadErrorRecoveryConfig(yamlConfig);
 
         // Initialize the unified evaluator with error recovery configuration from YAML
-        this.unifiedEvaluator = new UnifiedRuleEvaluator(parser, errorRecoveryService, performanceMonitor, errorRecoveryConfig);
+        this.unifiedEvaluator = new UnifiedRuleEvaluator(this.evaluatorService, errorRecoveryService, performanceMonitor, errorRecoveryConfig);
 
         // Initialize pipeline components
         this.dataSourceFactory = DataSourceFactory.getInstance();
@@ -462,32 +464,8 @@ public class RulesEngine {
      * @return A new StandardEvaluationContext with the facts added as variables
      */
     private StandardEvaluationContext createContext(Map<String, Object> facts) {
-        logger.debug("Creating evaluation context");
-        StandardEvaluationContext context = new StandardEvaluationContext();
-
-        // Add custom property accessor for Maps
-        context.addPropertyAccessor(new MapPropertyAccessor());
-
-        // Add all facts to the evaluation context
-        if (facts != null) {
-            logger.debug("Adding {} facts to context", facts.size());
-
-            // Set the facts map as the root object so properties can be accessed directly
-            context.setRootObject(facts);
-
-            // Also add facts as variables for backward compatibility (accessed with #variableName)
-            for (Map.Entry<String, Object> fact : facts.entrySet()) {
-                context.setVariable(fact.getKey(), fact.getValue());
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Added fact: {} = {}", fact.getKey(),
-                        fact.getValue() != null ? fact.getValue().getClass().getSimpleName() : "null");
-                }
-            }
-        } else {
-            logger.debug("No facts provided to context");
-        }
-
-        return context;
+        logger.debug("Creating evaluation context via ExpressionEvaluatorService");
+        return evaluatorService.createEvaluationContext(facts);
     }
 
     /**
@@ -636,8 +614,10 @@ public class RulesEngine {
 
         for (EnrichmentGroup group : enrichmentGroups) {
             logger.debug("Evaluating enrichment group: {}", group.getName());
+            logger.debug("Enriched data keys before group '{}': {}", group.getName(), enrichedData.keySet());
             try {
-                EnrichmentGroupResult result = processEnrichmentGroup(group, targetObject);
+                EnrichmentGroupResult result = processEnrichmentGroup(group, enrichedData);
+                logger.debug("Enriched data keys after group '{}': {}", group.getName(), enrichedData.keySet());
 
                 if (!result.isSuccess()) {
                     overallSuccess = false;
@@ -1000,167 +980,17 @@ public class RulesEngine {
             return RuleResult.evaluationFailure(failureMessages, new HashMap<>(), "evaluation", "Null input data");
         }
 
-        // Check if section order is available for sequential processing
+        // Determine execution order
         List<String> sectionOrder = yamlConfig.getSectionOrder();
-        if (sectionOrder != null && !sectionOrder.isEmpty()) {
-            logger.info("Using sequential processing - executing sections in document order: {}", sectionOrder);
-            return evaluateInDocumentOrder(yamlConfig, inputData, sectionOrder);
-        } else {
-            logger.info("Using standard processing - executing sections in hardcoded order");
-            return evaluateInStandardOrder(yamlConfig, inputData);
+        
+        if (sectionOrder == null || sectionOrder.isEmpty()) {
+            // Fallback to standard legacy order if no section order is defined
+            logger.info("No section order defined - using default standard order");
+            sectionOrder = Arrays.asList("rules", "rule-groups", "enrichments", "enrichment-groups");
         }
-    }
 
-    /**
-     * Evaluate using standard hardcoded order (backward compatible).
-     * This is the original evaluation logic.
-     */
-    private RuleResult evaluateInStandardOrder(YamlRuleConfiguration yamlConfig, Map<String, Object> inputData) {
-        List<String> failureMessages = new ArrayList<>();
-        Map<String, Object> enrichedData = new HashMap<>(inputData);
-        boolean overallSuccess = true;
-
-        try {
-            // Phase 1: Process individual rules if available
-            // Use rules from yamlConfig if available, otherwise fall back to engine's configuration
-            List<Rule> allRules = null;
-            if (yamlConfig.getRules() != null && !yamlConfig.getRules().isEmpty()) {
-                logger.info("Using rules from yamlConfig parameter");
-                YamlRuleFactory ruleFactory = new YamlRuleFactory();
-                allRules = ruleFactory.createRules(yamlConfig);
-            } else if (configuration.getAllRules() != null && !configuration.getAllRules().isEmpty()) {
-                logger.info("Using rules from engine's internal configuration");
-                allRules = configuration.getAllRules();
-            }
-
-            if (allRules != null && !allRules.isEmpty()) {
-                logger.info("Processing {} individual rules", allRules.size());
-                RuleResult ruleResult = executeRulesList(allRules, enrichedData);
-
-                // Check for ERROR result type - this includes validation rules with ERROR severity
-                // when error recovery is disabled (default for ERROR severity per APEX_ERROR_HANDLING_GUIDE)
-                if (ruleResult.getResultType() == RuleResult.ResultType.ERROR) {
-                    overallSuccess = false;
-                    failureMessages.add("Rule evaluation error: " + ruleResult.getMessage());
-                }
-
-                // Update enriched data with results from rules (field mappings)
-                if (ruleResult.getEnrichedData() != null) {
-                    enrichedData.putAll(ruleResult.getEnrichedData());
-                }
-            }
-
-            // Phase 2: Process rule groups if available
-            // Use rule groups from yamlConfig if available, otherwise fall back to engine's configuration
-            List<RuleGroup> allRuleGroups = null;
-            if (yamlConfig.getRuleGroups() != null && !yamlConfig.getRuleGroups().isEmpty()) {
-                logger.info("Using rule groups from yamlConfig parameter");
-                YamlRuleFactory ruleFactory = new YamlRuleFactory();
-                // Need to create a temporary config to resolve rule references
-                RulesEngineConfiguration tempConfig = new RulesEngineConfiguration();
-                // First create rules and register them
-                List<Rule> rules = ruleFactory.createRules(yamlConfig);
-                for (Rule rule : rules) {
-                    tempConfig.registerRule(rule);
-                }
-                // Then create rule groups
-                allRuleGroups = ruleFactory.createRuleGroups(yamlConfig, tempConfig);
-            } else if (configuration.getAllRuleGroups() != null && !configuration.getAllRuleGroups().isEmpty()) {
-                logger.info("Using rule groups from engine's internal configuration");
-                allRuleGroups = configuration.getAllRuleGroups();
-            }
-
-            if (allRuleGroups != null && !allRuleGroups.isEmpty()) {
-                logger.info("Processing {} rule groups", allRuleGroups.size());
-                RuleResult ruleGroupResult = executeRuleGroupsList(allRuleGroups, enrichedData);
-
-                // Check for ERROR result type - this includes validation rules with ERROR severity
-                // when error recovery is disabled (default for ERROR severity per APEX_ERROR_HANDLING_GUIDE)
-                if (ruleGroupResult.getResultType() == RuleResult.ResultType.ERROR) {
-                    overallSuccess = false;
-                    failureMessages.add("Rule group evaluation error: " + ruleGroupResult.getMessage());
-                }
-            }
-
-            // Phase 3: Process enrichments if available and YamlEnrichmentProcessor is configured
-            // NOTE: Enrichments are processed AFTER rules and rule groups so that enrichments can reference
-            // rule results via #ruleGroupResults and #ruleResults context variables
-            if (enrichmentProcessor != null && yamlConfig.getEnrichments() != null && !yamlConfig.getEnrichments().isEmpty()) {
-                logger.info("Processing {} enrichments", yamlConfig.getEnrichments().size());
-
-                try {
-                    // Process enrichments with result tracking
-                    RuleResult enrichmentResult = enrichmentProcessor.processEnrichmentsWithResult(
-                        yamlConfig.getEnrichments(), enrichedData, yamlConfig);
-
-                    // Check for enrichment errors
-                    if (enrichmentResult.getResultType() == RuleResult.ResultType.ERROR) {
-                        overallSuccess = false;
-                        failureMessages.add("Enrichment processing failed: " + enrichmentResult.getMessage());
-                        if (enrichmentResult.hasFailures()) {
-                            failureMessages.addAll(enrichmentResult.getFailureMessages());
-                        }
-                        logger.error("CRITICAL: Enrichment processing failed: {}", enrichmentResult.getMessage());
-                        // DO NOT return early - preserve partial enriched data and continue processing
-                    }
-
-                    // Update enriched data from result (including partial data from failed enrichments)
-                    if (enrichmentResult.getEnrichedData() != null && !enrichmentResult.getEnrichedData().isEmpty()) {
-                        enrichedData.putAll(enrichmentResult.getEnrichedData());
-                        logger.debug("Enrichment completed, enriched data size: {}", enrichedData.size());
-                    }
-                } catch (Exception e) {
-                    logger.error("CRITICAL: Enrichment processing exception: {}", e.getMessage(), e);
-                    overallSuccess = false;
-                    failureMessages.add("Enrichment processing failed: " + e.getMessage());
-                }
-            } else if (yamlConfig.getEnrichments() != null && !yamlConfig.getEnrichments().isEmpty()) {
-                logger.warn("Enrichments defined in configuration but no YamlEnrichmentProcessor available");
-                overallSuccess = false;
-                failureMessages.add("Enrichments defined but no YamlEnrichmentProcessor configured");
-            }
-
-            // Phase 4: Process enrichment groups if available
-            // Use enrichment groups from yamlConfig if available, otherwise fall back to engine's configuration
-            List<EnrichmentGroup> allEnrichmentGroups = null;
-            if (yamlConfig.getEnrichmentGroups() != null && !yamlConfig.getEnrichmentGroups().isEmpty()) {
-                logger.info("Using enrichment groups from yamlConfig parameter");
-                allEnrichmentGroups = EnrichmentGroupFactory.buildEnrichmentGroups(yamlConfig);
-            } else if (configuration.getAllEnrichmentGroups() != null && !configuration.getAllEnrichmentGroups().isEmpty()) {
-                logger.info("Using enrichment groups from engine's internal configuration");
-                allEnrichmentGroups = configuration.getAllEnrichmentGroups();
-            }
-
-            if (allEnrichmentGroups != null && !allEnrichmentGroups.isEmpty()) {
-                logger.info("Processing {} enrichment groups", allEnrichmentGroups.size());
-                RuleResult enrichmentGroupResult = executeEnrichmentGroupsList(allEnrichmentGroups, enrichedData);
-
-                if (enrichmentGroupResult.getResultType() == RuleResult.ResultType.ERROR) {
-                    overallSuccess = false;
-                    failureMessages.add("Enrichment group evaluation error: " + enrichmentGroupResult.getMessage());
-                }
-
-                // Update enriched data with results from enrichment groups
-                if (enrichmentGroupResult.getEnrichedData() != null) {
-                    enrichedData.putAll(enrichmentGroupResult.getEnrichedData());
-                }
-            }
-
-            // Return comprehensive result
-            if (overallSuccess && failureMessages.isEmpty()) {
-                logger.info("Unified evaluation completed successfully");
-                return RuleResult.evaluationSuccess(enrichedData, "evaluation", "Evaluation completed successfully");
-            } else {
-                logger.info("Unified evaluation completed with {} failures", failureMessages.size());
-                return RuleResult.evaluationFailure(failureMessages, enrichedData, "evaluation", "Evaluation completed with failures");
-            }
-
-        } catch (Exception e) {
-            logger.error("Unified evaluation failed with exception: {}", e.getMessage());
-            logger.debug("Full unified evaluation exception details:", e);
-            failureMessages.add("Evaluation failed: " + e.getMessage());
-            return RuleResult.evaluationFailure(failureMessages, enrichedData, "evaluation", "Evaluation failed");
-        }
+        logger.info("Executing sections in order: {}", sectionOrder);
+        return evaluateSequential(yamlConfig, inputData, sectionOrder);
     }
 
     /**
@@ -1168,9 +998,9 @@ public class RulesEngine {
      * This respects the developer's intent as expressed through YAML structure.
      *
      * If item-level order is available, processes individual items in document order.
-     * Otherwise, falls back to section-level processing for backward compatibility.
+     * Otherwise, falls back to section-level processing.
      */
-    private RuleResult evaluateInDocumentOrder(YamlRuleConfiguration yamlConfig, Map<String, Object> inputData, List<String> sectionOrder) {
+    private RuleResult evaluateSequential(YamlRuleConfiguration yamlConfig, Map<String, Object> inputData, List<String> sectionOrder) {
         List<String> failureMessages = new ArrayList<>();
         Map<String, Object> enrichedData = new HashMap<>(inputData);
         boolean overallSuccess = true;
@@ -1201,7 +1031,7 @@ public class RulesEngine {
                     }
                 }
             } else {
-                // FALLBACK: Section-level processing (existing code)
+                // FALLBACK: Section-level processing
                 logger.info("No item order available, falling back to section-level processing");
                 logger.info("Processing {} sections in document order", sectionOrder.size());
 
@@ -1352,7 +1182,23 @@ public class RulesEngine {
                     case "enrichment-refs":
                     case "data-sinks":
                     case "categories":
+                        // These sections are configuration/metadata - not executed
+                        logger.debug("Skipping configuration section: {}", section);
+                        break;
+
                     case "rule-chains":
+                        if (yamlConfig.getRuleChains() != null && !yamlConfig.getRuleChains().isEmpty()) {
+                            logger.info("Processing {} rule chains", yamlConfig.getRuleChains().size());
+                            for (YamlRuleChain chain : yamlConfig.getRuleChains()) {
+                                RuleResult chainResult = processRuleChainItem(chain.getId(), yamlConfig, enrichedData);
+                                if (chainResult.getResultType() == RuleResult.ResultType.ERROR) {
+                                    overallSuccess = false;
+                                    failureMessages.add("Rule chain '" + chain.getId() + "' error: " + chainResult.getMessage());
+                                }
+                            }
+                        }
+                        break;
+
                     case "error-recovery":
                         // These sections are configuration/metadata - not executed
                         logger.debug("Skipping configuration section: {}", section);
@@ -1362,7 +1208,7 @@ public class RulesEngine {
                         // Process transformations section
                         if (yamlConfig.getTransformations() != null && !yamlConfig.getTransformations().isEmpty()) {
                             logger.info("Processing {} transformations", yamlConfig.getTransformations().size());
-                            YamlTransformationProcessor transformationProcessor = new YamlTransformationProcessor();
+                            YamlTransformationProcessor transformationProcessor = new YamlTransformationProcessor(this.evaluatorService);
 
                             // Process transformations with result tracking
                             RuleResult transformationResult = transformationProcessor.processTransformationsWithResult(
@@ -1439,8 +1285,7 @@ public class RulesEngine {
                 logger.debug("Matched transformations case, calling processTransformationItem");
                 return processTransformationItem(itemId, yamlConfig, data);
             case "rule-chains":
-                logger.warn("Section type '{}' not yet supported for item-level processing", sectionType);
-                return RuleResult.noMatch(sectionType + ":" + itemId, "Skipped - not yet supported", SeverityConstants.INFO);
+                return processRuleChainItem(itemId, yamlConfig, data);
             default:
                 logger.warn("Unknown section type: {}", sectionType);
                 return RuleResult.error(sectionType + ":" + itemId, "Unknown section type");
@@ -1644,7 +1489,7 @@ public class RulesEngine {
 
         // Create transformation processor
         dev.mars.apex.core.service.transformation.YamlTransformationProcessor processor =
-            new dev.mars.apex.core.service.transformation.YamlTransformationProcessor();
+            new dev.mars.apex.core.service.transformation.YamlTransformationProcessor(this.evaluatorService);
 
         // Process single transformation with result tracking
         RuleResult transformationResult = processor.processTransformationsWithResult(List.of(transformation), data);
@@ -1772,6 +1617,7 @@ public class RulesEngine {
             throw new IllegalStateException(
                 "YAML configuration does not contain a scenario section. " +
                 "Use a scenario configuration file or RulesEngine.fromScenarioRegistry() for scenario evaluation."
+           
             );
         }
 
@@ -1954,6 +1800,7 @@ public class RulesEngine {
      * Higher values indicate higher severity.
      *
      * @param severity The severity level (ERROR, WARNING, INFO)
+
      * @return The priority value (3 for ERROR, 2 for WARNING, 1 for INFO)
      */
     private int getSeverityPriority(String severity) {
@@ -2064,7 +1911,7 @@ public class RulesEngine {
             if (scenario.hasClassificationRule()) {
                 logger.debug("Evaluating classification rule for scenario: {}", scenario.getScenarioId());
 
-                if (scenario.matchesClassificationRule(inputData)) {
+                if (scenario.matchesClassificationRule(inputData, this.evaluatorService)) {
                     logger.info("Found matching scenario: {} ({})",
                         scenario.getScenarioId(), scenario.getClassificationRuleDescription());
                     return scenario;
@@ -2307,6 +2154,305 @@ public class RulesEngine {
         @Override
         public dev.mars.apex.core.service.scenario.ScenarioExecutionResult evaluateWithClassification(Map<String, Object> inputData) {
             return engine.evaluateWithClassification(inputData);
+        }
+    }
+
+    /**
+     * Process a single rule chain by ID.
+     *
+     * @param chainId The rule chain ID to process
+     * @param yamlConfig The YAML configuration
+     * @param data The data to evaluate
+     * @return RuleResult from processing the rule chain
+     */
+    private RuleResult processRuleChainItem(String chainId, YamlRuleConfiguration yamlConfig, Map<String, Object> data) {
+        // Find rule chain in yamlConfig
+        YamlRuleChain chain = findRuleChainById(yamlConfig, chainId);
+        if (chain == null) {
+            logger.warn("Rule chain not found: {}", chainId);
+            return RuleResult.error("rule-chain:" + chainId, "Rule chain not found");
+        }
+
+        if (!chain.isEnabled()) {
+            logger.info("Rule chain '{}' is disabled, skipping", chainId);
+            return RuleResult.noMatch(chainId, "Rule chain disabled", SeverityConstants.INFO);
+        }
+
+        logger.info("Processing rule chain: {} (Pattern: {})", chain.getName(), chain.getPattern());
+
+        // Handle different patterns
+        if ("conditional-chaining".equals(chain.getPattern())) {
+            return executeConditionalChainingPattern(chain, data);
+        } else if ("result-based-routing".equals(chain.getPattern())) {
+            return executeResultBasedRoutingPattern(chain, yamlConfig, data);
+        } else {
+            logger.warn("Rule chain pattern '{}' not yet supported", chain.getPattern());
+            return RuleResult.noMatch(chainId, "Pattern not supported: " + chain.getPattern(), SeverityConstants.INFO);
+        }
+    }
+
+    /**
+     * Find a rule chain by ID in the configuration.
+     *
+     * @param config The YAML configuration
+     * @param chainId The rule chain ID to find
+     * @return The YamlRuleChain if found, null otherwise
+     */
+    private YamlRuleChain findRuleChainById(YamlRuleConfiguration config, String chainId) {
+        if (config.getRuleChains() != null) {
+            for (YamlRuleChain chain : config.getRuleChains()) {
+                if (chainId.equals(chain.getId())) {
+                    return chain;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Execute a rule chain with the 'result-based-routing' pattern.
+     *
+     * @param chain The rule chain to execute
+     * @param yamlConfig The YAML configuration
+     * @param data The data to evaluate
+     * @return RuleResult from execution
+     */
+    @SuppressWarnings("unchecked")
+    private RuleResult executeResultBasedRoutingPattern(YamlRuleChain chain, YamlRuleConfiguration yamlConfig, Map<String, Object> data) {
+        Map<String, Object> config = chain.getConfiguration();
+        if (config == null) {
+            return RuleResult.error(chain.getId(), "Missing configuration for rule chain");
+        }
+
+        // 1. Evaluate Router Rule
+        Map<String, Object> routerRuleConfig = (Map<String, Object>) config.get("router-rule");
+        if (routerRuleConfig == null) {
+            return RuleResult.error(chain.getId(), "Missing router-rule configuration");
+        }
+
+        String condition = (String) routerRuleConfig.get("condition");
+        String resultField = (String) routerRuleConfig.get("result-field");
+
+        StandardEvaluationContext context = createContext(data);
+        String routeKey = null;
+        try {
+            Expression exp = parser.parseExpression(condition);
+            Object result = exp.getValue(context);
+            routeKey = result != null ? result.toString() : "null";
+        } catch (Exception e) {
+            logger.error("Error evaluating router rule for chain '{}': {}", chain.getId(), e.getMessage());
+            return RuleResult.error(chain.getId(), "Router evaluation failed: " + e.getMessage());
+        }
+
+        // Set result field if specified
+        if (resultField != null && !resultField.isEmpty()) {
+            data.put(resultField, routeKey);
+            logger.debug("Set result field '{}' to {}", resultField, routeKey);
+        }
+
+        logger.info("Router evaluated to route: '{}'", routeKey);
+
+        // 2. Execute Route Rules
+        Map<String, Object> routes = (Map<String, Object>) config.get("routes");
+        if (routes != null) {
+            Object routeObj = routes.get(routeKey);
+            List<Map<String, Object>> rulesConfig = null;
+            
+            if (routeObj instanceof Map) {
+                Map<String, Object> routeConfig = (Map<String, Object>) routeObj;
+                rulesConfig = (List<Map<String, Object>>) routeConfig.get("rules");
+
+                // Handle enrichment groups
+                List<String> enrichmentGroupRefs = null;
+                if (routeConfig.containsKey("enrichment-group-references")) {
+                    enrichmentGroupRefs = (List<String>) routeConfig.get("enrichment-group-references");
+                } else if (routeConfig.containsKey("enrichment-groups")) {
+                    enrichmentGroupRefs = (List<String>) routeConfig.get("enrichment-groups");
+                }
+
+                if (enrichmentGroupRefs != null && !enrichmentGroupRefs.isEmpty()) {
+                    logger.info("Executing {} enrichment groups for route '{}'", enrichmentGroupRefs.size(), routeKey);
+                    List<EnrichmentGroup> groupsToExecute = new ArrayList<>();
+                    
+                    for (String groupId : enrichmentGroupRefs) {
+                        EnrichmentGroup group = null;
+                        
+                        // Try to find in YAML config first
+                        if (yamlConfig != null && yamlConfig.getEnrichmentGroups() != null) {
+                            for (YamlEnrichmentGroup yamlGroup : yamlConfig.getEnrichmentGroups()) {
+                                if (groupId.equals(yamlGroup.getId())) {
+                                    // Found in YAML, build it
+                                    List<EnrichmentGroup> groups = EnrichmentGroupFactory.buildEnrichmentGroups(yamlConfig);
+                                    for (EnrichmentGroup g : groups) {
+                                        if (groupId.equals(g.getId())) {
+                                            group = g;
+                                            break;
+                                        }
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        // Fallback to engine configuration
+                        if (group == null) {
+                            group = configuration.getEnrichmentGroupById(groupId);
+                        }
+
+                        if (group != null) {
+                            groupsToExecute.add(group);
+                        } else {
+                            logger.warn("Enrichment group '{}' not found for route '{}'", groupId, routeKey);
+                        }
+                    }
+                    
+                    if (!groupsToExecute.isEmpty()) {
+                        RuleResult enrichmentResult = executeEnrichmentGroupsList(groupsToExecute, data);
+                        if (enrichmentResult.getEnrichedData() != null) {
+                            data.putAll(enrichmentResult.getEnrichedData());
+                            logger.debug("Merged enriched data from route '{}' into context", routeKey);
+                        }
+                    }
+                }
+            } else if (routeObj instanceof List) {
+                // Support direct list for backward compatibility or simpler syntax
+                rulesConfig = (List<Map<String, Object>>) routeObj;
+            }
+            
+            if (rulesConfig != null) {
+                logger.info("Executing route '{}' for chain '{}'", routeKey, chain.getName());
+                // Convert simple map configs to Rule objects and execute
+                List<Rule> rules = new ArrayList<>();
+                for (Map<String, Object> rc : rulesConfig) {
+                    String ruleId = (String) rc.get("id");
+                    String ruleCondition = (String) rc.get("condition");
+                    String ruleMessage = (String) rc.get("message");
+                    String ruleResultField = (String) rc.get("result-field");
+                    logger.debug("Creating rule '{}' with result-field: '{}'", ruleId, ruleResultField);
+                    
+                    // Use full constructor to include resultField and severity
+                    Rule r = new Rule(
+                        ruleId, 
+                        Collections.singleton(new dev.mars.apex.core.engine.model.Category("default", 100)), 
+                        "Rule-" + ruleId, 
+                        ruleCondition, 
+                        ruleMessage, 
+                        ruleMessage, 
+                        100, 
+                        SeverityConstants.INFO, 
+                        null, // metadata
+                        null, // defaultValue
+                        null, // successCode
+                        null, // errorCode
+                        null, // mapToField
+                        ruleResultField // resultField
+                    );
+                    rules.add(r);
+                }
+                executeRulesList(rules, data);
+                return RuleResult.match(chain.getId(), "Executed route: " + routeKey);
+            } else {
+                // If we executed enrichment groups but no rules, consider it a match
+                if (routeObj instanceof Map) {
+                    Map<String, Object> routeConfig = (Map<String, Object>) routeObj;
+                    if (routeConfig.containsKey("enrichment-group-references") || routeConfig.containsKey("enrichment-groups")) {
+                        return RuleResult.match(chain.getId(), "Executed route (enrichment only): " + routeKey);
+                    }
+                }
+                
+                logger.info("No rules defined for route '{}' in chain '{}'", routeKey, chain.getName());
+                return RuleResult.noMatch(chain.getId(), "No rules for route: " + routeKey, SeverityConstants.INFO);
+            }
+        }
+
+        return RuleResult.noMatch(chain.getId(), "No routes configuration found", SeverityConstants.WARNING);
+    }
+
+    /**
+     * Execute a rule chain with the 'conditional-chaining' pattern.
+     *
+     * @param chain The rule chain to execute
+     * @param data The data to evaluate
+     * @return RuleResult from execution
+     */
+    @SuppressWarnings("unchecked")
+    private RuleResult executeConditionalChainingPattern(YamlRuleChain chain, Map<String, Object> data) {
+        Map<String, Object> config = chain.getConfiguration();
+        if (config == null) {
+            return RuleResult.error(chain.getId(), "Missing configuration for rule chain");
+        }
+
+        // 1. Evaluate Trigger Rule
+        Map<String, Object> triggerRuleConfig = (Map<String, Object>) config.get("trigger-rule");
+        if (triggerRuleConfig == null) {
+            return RuleResult.error(chain.getId(), "Missing trigger-rule configuration");
+        }
+
+        String condition = (String) triggerRuleConfig.get("condition");
+        String message = (String) triggerRuleConfig.get("message");
+        String resultField = (String) triggerRuleConfig.get("result-field");
+
+        StandardEvaluationContext context = createContext(data);
+        boolean triggered = false;
+        try {
+            Expression exp = parser.parseExpression(condition);
+            Boolean result = exp.getValue(context, Boolean.class);
+            triggered = result != null && result;
+        } catch (Exception e) {
+            logger.error("Error evaluating trigger rule for chain '{}': {}", chain.getId(), e.getMessage());
+            return RuleResult.error(chain.getId(), "Trigger evaluation failed: " + e.getMessage());
+        }
+
+        // Set result field if specified
+        if (resultField != null && !resultField.trim().isEmpty()) {
+            data.put(resultField, triggered);
+            logger.debug("Set result field '{}' to {}", resultField, triggered);
+        }
+
+        // 2. Execute Conditional Rules
+        Map<String, Object> conditionalRules = (Map<String, Object>) config.get("conditional-rules");
+        if (conditionalRules != null) {
+            String sectionToExecute = triggered ? "on-trigger" : "on-no-trigger";
+            List<Map<String, Object>> rulesConfig = (List<Map<String, Object>>) conditionalRules.get(sectionToExecute);
+            
+            if (rulesConfig != null) {
+                logger.info("Executing '{}' path for chain '{}'", sectionToExecute, chain.getName());
+                // Convert simple map configs to Rule objects and execute
+                List<Rule> rules = new ArrayList<>();
+                for (Map<String, Object> rc : rulesConfig) {
+                    String ruleId = (String) rc.get("id");
+                    String ruleCondition = (String) rc.get("condition");
+                    String ruleMessage = (String) rc.get("message");
+                    String ruleResultField = (String) rc.get("result-field");
+                    String ruleSeverity = (String) rc.get("severity");
+                    
+                    // Use full constructor to include resultField and severity
+                    Rule r = new Rule(
+                        ruleId, 
+                        Collections.singleton(new dev.mars.apex.core.engine.model.Category("default", 100)), 
+                        "Rule-" + ruleId, 
+                        ruleCondition, 
+                        ruleMessage, 
+                        ruleMessage, 
+                        100, 
+                        ruleSeverity != null ? ruleSeverity : SeverityConstants.INFO, 
+                        null, // metadata
+                        null, // defaultValue
+                        null, // successCode
+                        null, // errorCode
+                        null, // mapToField
+                        ruleResultField // resultField
+                    );
+                    rules.add(r);
+                }
+                executeRulesList(rules, data);
+            }
+        }
+
+        if (triggered) {
+            return RuleResult.match(chain.getId(), message != null ? message : "Rule chain triggered");
+        } else {
+            return RuleResult.noMatch(chain.getId(), "Rule chain not triggered", SeverityConstants.INFO);
         }
     }
 }

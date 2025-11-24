@@ -83,6 +83,12 @@ public class BasicYamlEnrichmentGroupProcessingTest extends DemoTestBase {
             return;
         }
 
+        // DEBUG: Print groups
+        dev.mars.apex.core.service.enrichment.EnrichmentGroupFactory.buildEnrichmentGroups(config).forEach(g -> {
+            System.out.println("DEBUG: Group " + g.getId() + " has " + g.getEnrichmentsInOrder().size() + " enrichments");
+            g.getEnrichmentsInOrder().forEach(e -> System.out.println("  - " + e.getId()));
+        });
+
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
         // Test data missing field 'c' - this will cause e3 to fail
@@ -93,6 +99,10 @@ public class BasicYamlEnrichmentGroupProcessingTest extends DemoTestBase {
 
         // Execute - this processes ALL 4 enrichment groups
         RuleResult result = engine.evaluate(data);
+
+        // DEBUG: Print result
+        System.out.println("DEBUG: Result success: " + result.isSuccess());
+        System.out.println("DEBUG: Enriched Data: " + result.getEnrichedData());
 
         // Verify overall failure (because composite and composite_par_and groups will fail)
         assertFalse(result.isSuccess(), "RulesEngine should fail when enrichment groups fail");

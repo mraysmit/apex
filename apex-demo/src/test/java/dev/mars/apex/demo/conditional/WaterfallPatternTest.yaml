@@ -1,0 +1,112 @@
+# ==================================================================================
+# WATERFALL PATTERN TEST CONFIGURATION
+# ==================================================================================
+# This configuration demonstrates a "Waterfall" processing pattern using
+# Sequential Conditional Chaining.
+#
+# The logic flows through 3 distinct levels:
+# 1. Credit Check (Gatekeeper)
+# 2. Income Check (Dependent on Level 1)
+# 3. Debt Check (Dependent on Level 2)
+#
+# If any level fails or refers, the subsequent levels effectively "skip" or
+# handle the state accordingly, simulating a multi-stage approval process.
+# ==================================================================================
+metadata:
+  name: "Waterfall Pattern Test"
+  description: "Verifies 3-level processing workflow using Sequential Conditional Chaining"
+  version: "1.0"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created-date: "2025-10-30"
+
+
+rule-chains:
+  # Level 1: Credit Check
+  # This is the first gate. If credit score is too low, we reject immediately.
+  # Pattern: conditional-chaining
+  # - Trigger: Checks if credit score > 700.
+  # - On No Trigger: If score <= 700, execute rejection rule.
+  - id: "level-1-credit"
+    name: "Level 1: Credit Check"
+    pattern: "conditional-chaining"
+    configuration:
+      trigger-rule:
+        id: "check-level-1"
+        name: "Check Level 1 Credit Score"
+        condition: "#creditScore > 700"
+        message: "Level 1 Passed: Credit Score OK"
+        result-field: "level1Passed"
+        severity: "INFO"
+      conditional-rules:
+        on-no-trigger:
+          - id: "reject-level-1"
+            name: "Reject Level 1"
+            condition: "true"
+            message: "Rejected at Level 1"
+            result-field: "rejectionReason"
+            severity: "ERROR"
+
+  # Level 2: Income Check (Runs only if Level 1 Passed)
+  # This level depends on the result of Level 1 (#level1Passed).
+  # If Level 1 passed, we check income.
+  # If income is low, we refer instead of rejecting outright.
+  - id: "level-2-income"
+    name: "Level 2: Income Check"
+    pattern: "conditional-chaining"
+    configuration:
+      trigger-rule:
+        id: "check-level-2"
+        name: "Check Level 2 Income"
+        condition: "#level1Passed == true && #income > 50000"
+        message: "Level 2 Passed: Income OK"
+        result-field: "level2Passed"
+        severity: "INFO"
+      conditional-rules:
+        on-no-trigger:
+          - id: "refer-level-2"
+            name: "Refer Level 2"
+            condition: "#level1Passed == true"
+            message: "Referred at Level 2"
+            result-field: "referralL2"
+            severity: "WARNING"
+
+  # Level 3: Debt Check (Runs only if Level 2 Passed)
+  # This is the final gate. Depends on Level 2 result (#level2Passed).
+  # Checks Debt-to-Income (DTI) ratio.
+  # - On Trigger: If DTI is good, grant Final Approval.
+  # - On No Trigger: If DTI is bad, refer.
+  - id: "level-3-debt"
+    name: "Level 3: Debt Check"
+    pattern: "conditional-chaining"
+    configuration:
+      trigger-rule:
+        id: "check-level-3"
+        name: "Check Level 3 DTI"
+        condition: "#level2Passed == true && #dti < 0.40"
+        message: "Level 3 Passed: DTI OK"
+        result-field: "isApproved"
+        severity: "INFO"
+      conditional-rules:
+        on-trigger:
+          - id: "final-approval-action"
+            name: "Final Approval Action"
+            condition: "true"
+            message: "Loan Fully Approved"
+            result-field: "loanStatus"
+            severity: "INFO"
+        on-no-trigger:
+          - id: "refer-level-3"
+            name: "Refer Level 3"
+            condition: "#level2Passed == true"
+            message: "Referred at Level 3"
+            result-field: "referralL3"
+            severity: "WARNING"
+
+# Post-Processing Transformations
+# Consolidates referral reasons from Level 2 or Level 3 into a single field.
+transformations:
+  - id: "consolidate-referrals"
+    type: "field-transformation"
+    expression: "(#referralL2 != null && #referralL2) || (#referralL3 != null && #referralL3)"
+    target-field: "referralReason"

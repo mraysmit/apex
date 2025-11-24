@@ -69,5 +69,37 @@ class YamlEnrichmentGroupMappingTest {
         assertNotNull(metadata);
         assertEquals("team-a", metadata.get("owner"));
     }
+
+    @Test
+    @DisplayName("YamlEnrichmentGroup supports 'enrichments' alias")
+    void testEnrichmentsAlias() throws Exception {
+        String yaml = """
+            id: eg-alias-test
+            enrichments: [E1, E2]
+            """;
+
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        YamlEnrichmentGroup group = mapper.readValue(yaml, YamlEnrichmentGroup.class);
+
+        assertNotNull(group.getEnrichmentIds());
+        assertEquals(2, group.getEnrichmentIds().size());
+        assertTrue(group.getEnrichmentIds().containsAll(List.of("E1", "E2")));
+    }
+
+    @Test
+    @DisplayName("YamlEnrichmentGroup supports 'enrichment-groups' alias")
+    void testEnrichmentGroupsAlias() throws Exception {
+        String yaml = """
+            id: eg-alias-test
+            enrichment-groups: [EG1, EG2]
+            """;
+
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        YamlEnrichmentGroup group = mapper.readValue(yaml, YamlEnrichmentGroup.class);
+
+        assertNotNull(group.getEnrichmentGroupReferences());
+        assertEquals(2, group.getEnrichmentGroupReferences().size());
+        assertTrue(group.getEnrichmentGroupReferences().containsAll(List.of("EG1", "EG2")));
+    }
 }
 

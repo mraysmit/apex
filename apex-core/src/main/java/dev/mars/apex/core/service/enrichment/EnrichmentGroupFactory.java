@@ -110,32 +110,74 @@ public class EnrichmentGroupFactory {
             groupsById.put(yg.getId(), g);
         }
 
-        // Second phase: process enrichment-group-references after all groups are created
+        // Second phase: process enrichment-group-references recursively
+        Map<String, YamlEnrichmentGroup> yamlGroupsById = new HashMap<>();
         for (YamlEnrichmentGroup yg : config.getEnrichmentGroups()) {
-            if (yg == null || yg.getEnrichmentGroupReferences() == null || yg.getEnrichmentGroupReferences().isEmpty()) continue;
+            if (yg != null && yg.getId() != null) {
+                yamlGroupsById.put(yg.getId(), yg);
+            }
+        }
 
-            EnrichmentGroup targetGroup = groupsById.get(yg.getId());
-            if (targetGroup == null) {
-                logger.warn("Target enrichment group not found: " + yg.getId());
-                continue;
+        Set<String> resolvedGroups = new HashSet<>();
+        Set<String> resolvingGroups = new HashSet<>();
+
+        for (String groupId : groupsById.keySet()) {
+            resolveEnrichmentGroupReferences(groupId, groupsById, yamlGroupsById, resolvedGroups, resolvingGroups);
+        }
+
+        return groups;
+    }
+
+    private static void resolveEnrichmentGroupReferences(String groupId,
+                                                       Map<String, EnrichmentGroup> groupsById,
+                                                       Map<String, YamlEnrichmentGroup> yamlGroupsById,
+                                                       Set<String> resolvedGroups,
+                                                       Set<String> resolvingGroups) {
+        if (resolvedGroups.contains(groupId)) {
+            return;
+        }
+
+        if (resolvingGroups.contains(groupId)) {
+            throw new RuntimeException("Circular dependency detected in enrichment groups: " + resolvingGroups + " -> " + groupId);
+        }
+
+        resolvingGroups.add(groupId);
+
+        YamlEnrichmentGroup yamlGroup = yamlGroupsById.get(groupId);
+        if (yamlGroup != null) {
+            // Collect all references from plural and singular fields
+            List<String> allReferences = new ArrayList<>();
+            if (yamlGroup.getEnrichmentGroupReferences() != null) {
+                allReferences.addAll(yamlGroup.getEnrichmentGroupReferences());
+            }
+            if (yamlGroup.getEnrichmentGroup() != null) {
+                allReferences.add(yamlGroup.getEnrichmentGroup());
             }
 
-            int nextSequence = targetGroup.getEnrichmentsBySequence().size() + 1;
-            for (String referencedGroupId : yg.getEnrichmentGroupReferences()) {
-                EnrichmentGroup referencedGroup = groupsById.get(referencedGroupId);
-                if (referencedGroup != null) {
-                    for (YamlEnrichment e : referencedGroup.getEnrichmentsInOrder()) {
-                        targetGroup.addEnrichment(nextSequence++, e);
+            if (!allReferences.isEmpty()) {
+                EnrichmentGroup targetGroup = groupsById.get(groupId);
+                
+                // Calculate starting sequence number (after existing enrichments)
+                int nextSequence = targetGroup.getEnrichmentsBySequence().size() + 1;
+
+                for (String refId : allReferences) {
+                    // Recursively resolve the referenced group first
+                    resolveEnrichmentGroupReferences(refId, groupsById, yamlGroupsById, resolvedGroups, resolvingGroups);
+
+                    EnrichmentGroup referencedGroup = groupsById.get(refId);
+                    if (referencedGroup != null) {
+                        for (YamlEnrichment e : referencedGroup.getEnrichmentsInOrder()) {
+                            targetGroup.addEnrichment(nextSequence++, e);
+                        }
+                    } else {
+                        logger.warn("Referenced enrichment group not found: " + refId + " in group: " + groupId);
                     }
-                } else {
-                    String errorMsg = "Referenced enrichment group not found: " + referencedGroupId + " in group: " + yg.getId();
-                    logger.error(errorMsg);
-                    throw new RuntimeException(errorMsg);
                 }
             }
         }
 
-        return groups;
+        resolvingGroups.remove(groupId);
+        resolvedGroups.add(groupId);
     }
 
     private static boolean mapOperatorToAnd(String operator) {

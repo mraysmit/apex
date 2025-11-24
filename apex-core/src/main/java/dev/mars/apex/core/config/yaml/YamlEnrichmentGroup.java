@@ -73,6 +73,18 @@ public class YamlEnrichmentGroup {
     @JsonProperty("enrichment-group-references")
     private List<String> enrichmentGroupReferences;
 
+    // Plural alias for enrichment-group-references
+    @JsonProperty("enrichment-groups")
+    private List<String> enrichmentGroups;
+
+    // Singular alias for enrichment-group-references (kebab-case)
+    @JsonProperty("enrichment-group")
+    private String enrichmentGroup;
+
+    // Alias for enrichment-ids
+    @JsonProperty("enrichments")
+    private List<String> enrichments;
+
     // Reserved for future dependency DAGs
     @JsonProperty("depends-on")
     private List<String> dependsOn;
@@ -112,9 +124,16 @@ public class YamlEnrichmentGroup {
     public Boolean getParallelExecution() { return parallelExecution; }
     public Boolean getDebugMode() { return debugMode; }
     public String getErrorHandling() { return errorHandling; }
-    public List<String> getEnrichmentIds() { return enrichmentIds; }
+    public List<String> getEnrichmentIds() {
+        if (enrichmentIds != null) return enrichmentIds;
+        return enrichments;
+    }
     public List<EnrichmentReference> getEnrichmentReferences() { return enrichmentReferences; }
-    public List<String> getEnrichmentGroupReferences() { return enrichmentGroupReferences; }
+    public List<String> getEnrichmentGroupReferences() {
+        if (enrichmentGroupReferences != null) return enrichmentGroupReferences;
+        return enrichmentGroups;
+    }
+    public String getEnrichmentGroup() { return enrichmentGroup; }
     public List<String> getDependsOn() { return dependsOn; }
     public List<String> getTags() { return tags; }
     public Map<String, Object> getMetadata() { return metadata; }
@@ -131,6 +150,7 @@ public class YamlEnrichmentGroup {
     public void setEnrichmentIds(List<String> enrichmentIds) { this.enrichmentIds = enrichmentIds; }
     public void setEnrichmentReferences(List<EnrichmentReference> enrichmentReferences) { this.enrichmentReferences = enrichmentReferences; }
     public void setEnrichmentGroupReferences(List<String> enrichmentGroupReferences) { this.enrichmentGroupReferences = enrichmentGroupReferences; }
+    public void setEnrichmentGroup(String enrichmentGroup) { this.enrichmentGroup = enrichmentGroup; }
     public void setDependsOn(List<String> dependsOn) { this.dependsOn = dependsOn; }
     public void setTags(List<String> tags) { this.tags = tags; }
     public void setMetadata(Map<String, Object> metadata) { this.metadata = metadata; }

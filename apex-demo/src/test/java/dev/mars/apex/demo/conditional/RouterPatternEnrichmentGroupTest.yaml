@@ -1,0 +1,56 @@
+# ==================================================================================
+# ROUTER PATTERN ENRICHMENT GROUP TEST CONFIGURATION
+# ==================================================================================
+metadata:
+  name: "Router Pattern Enrichment Group Test"
+  description: "Verifies routing with enrichment-group-references"
+  version: "1.0"
+  type: "rule-config"
+
+enrichments:
+  - id: "set-review-status"
+    type: "calculation-enrichment"
+    calculation-config:
+        expression: "true"
+        result-field: "reviewStatus"
+  - id: "set-supervisor-notified"
+    type: "calculation-enrichment"
+    calculation-config:
+        expression: "true"
+        result-field: "supervisorNotified"
+  - id: "set-approval-status"
+    type: "calculation-enrichment"
+    calculation-config:
+        expression: "true"
+        result-field: "approvalStatus"
+  - id: "set-confirmation-sent"
+    type: "calculation-enrichment"
+    calculation-config:
+        expression: "true"
+        result-field: "confirmationSent"
+
+enrichment-groups:
+  - id: "manual-review-enrichments"
+    name: "Manual Review Enrichments"
+    enrichments:
+      - "set-review-status"
+      - "set-supervisor-notified"
+
+  - id: "auto-approve-enrichments"
+    name: "Auto Approve Enrichments"
+    enrichments:
+      - "set-approval-status"
+      - "set-confirmation-sent"
+
+rule-chains:
+  - id: "execute-processing-path"
+    name: "Execute Processing Path"
+    pattern: "result-based-routing"
+    configuration:
+      router-rule:
+        condition: "#processingPath"
+      routes:
+        "MANUAL_REVIEW":
+          enrichment-group-references: [ "manual-review-enrichments" ]
+        "AUTO_APPROVE":
+          enrichment-group-references: [ "auto-approve-enrichments" ]

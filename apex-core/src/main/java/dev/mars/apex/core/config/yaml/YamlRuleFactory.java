@@ -853,110 +853,69 @@ public class YamlRuleFactory {
 
         logger.info("Processing rule group references with global registry containing " + globalRuleGroupsById.size() + " groups");
 
-        for (YamlRuleGroup yamlGroup : yamlConfig.getRuleGroups()) {
-            if ((yamlGroup.getEnabled() == null || yamlGroup.getEnabled()) && yamlGroup.getRuleGroupReferences() != null) {
-                logger.info("Processing rule group references for group: " + yamlGroup.getId());
-
-                RuleGroup targetGroup = globalRuleGroupsById.get(yamlGroup.getId());
-                if (targetGroup == null) {
-                    logger.warn("Target rule group not found in global registry: " + yamlGroup.getId());
-                    continue;
-                }
-
-                addRuleGroupReferencesToGroupWithGlobalRegistry(yamlGroup, targetGroup, globalRuleGroupsById);
+        // Build map of YAML groups for lookups
+        Map<String, YamlRuleGroup> yamlGroupsById = new HashMap<>();
+        for (YamlRuleGroup yg : yamlConfig.getRuleGroups()) {
+            if (yg.getId() != null) {
+                yamlGroupsById.put(yg.getId(), yg);
             }
+        }
+
+        Set<String> resolvedGroups = new HashSet<>();
+        Set<String> resolvingGroups = new HashSet<>();
+
+        for (String groupId : globalRuleGroupsById.keySet()) {
+            resolveRuleGroupReferences(groupId, globalRuleGroupsById, yamlGroupsById, resolvedGroups, resolvingGroups);
         }
     }
 
-    /**
-     * Add rules from referenced rule groups using global registry (enables cross-file references).
-     * This is the key method that enables cross-file rule-group references.
-     */
-    private void addRuleGroupReferencesToGroupWithGlobalRegistry(YamlRuleGroup yamlGroup, RuleGroup targetGroup, Map<String, RuleGroup> globalRuleGroupsById) throws YamlConfigurationException {
-        if (yamlGroup.getRuleGroupReferences() == null) {
+    private void resolveRuleGroupReferences(String groupId,
+                                          Map<String, RuleGroup> globalRuleGroupsById,
+                                          Map<String, YamlRuleGroup> yamlGroupsById,
+                                          Set<String> resolvedGroups,
+                                          Set<String> resolvingGroups) throws YamlConfigurationException {
+        if (resolvedGroups.contains(groupId)) {
             return;
         }
 
-        logger.info("Processing " + yamlGroup.getRuleGroupReferences().size() + " rule group references for group: " + yamlGroup.getId());
+        if (resolvingGroups.contains(groupId)) {
+            throw new YamlConfigurationException("Circular dependency detected in rule groups: " + resolvingGroups + " -> " + groupId);
+        }
 
-        // Calculate starting sequence number (after existing rules)
-        int nextSequence = targetGroup.getRules().size() + 1;
+        resolvingGroups.add(groupId);
 
-        for (String referencedGroupId : yamlGroup.getRuleGroupReferences()) {
-            logger.info("Processing rule group reference: " + referencedGroupId);
+        YamlRuleGroup yamlGroup = yamlGroupsById.get(groupId);
+        if (yamlGroup != null && yamlGroup.getRuleGroupReferences() != null) {
+            RuleGroup targetGroup = globalRuleGroupsById.get(groupId);
+            
+            // Calculate starting sequence number (after existing rules)
+            int nextSequence = targetGroup.getRules().size() + 1;
 
-            // Use global registry instead of config.getRuleGroupById() - this enables cross-file references!
-            RuleGroup referencedGroup = globalRuleGroupsById.get(referencedGroupId);
-            if (referencedGroup != null) {
-                // Add all rules from the referenced group to the target group
-                for (Rule rule : referencedGroup.getRules()) {
-                    targetGroup.addRule(rule, nextSequence++);
-                    logger.debug("Added rule " + rule.getId() + " from group " + referencedGroupId + " to group " + targetGroup.getId());
+            for (String refId : yamlGroup.getRuleGroupReferences()) {
+                // Recursively resolve the referenced group first
+                resolveRuleGroupReferences(refId, globalRuleGroupsById, yamlGroupsById, resolvedGroups, resolvingGroups);
+
+                RuleGroup referencedGroup = globalRuleGroupsById.get(refId);
+                if (referencedGroup != null) {
+                    // Add all rules from the referenced group to the target group
+                    for (Rule rule : referencedGroup.getRules()) {
+                        targetGroup.addRule(rule, nextSequence++);
+                        logger.debug("Added rule " + rule.getId() + " from group " + refId + " to group " + targetGroup.getId());
+                    }
+                    logger.info("Successfully added " + referencedGroup.getRules().size() + " rules from group " + refId + " to group " + targetGroup.getId());
+                } else {
+                    String errorMsg = "Referenced rule group not found in global registry: " + refId + " in group: " + groupId;
+                    logger.error(errorMsg);
+                    throw new YamlConfigurationException(errorMsg);
                 }
-                logger.info("Successfully added " + referencedGroup.getRules().size() + " rules from group " + referencedGroupId + " to group " + targetGroup.getId());
-            } else {
-                String errorMsg = "Referenced rule group not found in global registry: " + referencedGroupId + " in group: " + yamlGroup.getId();
-                logger.error(errorMsg);
-                throw new YamlConfigurationException(errorMsg);
             }
         }
+
+        resolvingGroups.remove(groupId);
+        resolvedGroups.add(groupId);
     }
 
-    /**
-     * Process rule group references in a second phase after all rule groups have been created.
-     * This allows rule groups to reference other rule groups that might be defined later in the configuration.
-     */
-    private void processRuleGroupReferences(YamlRuleConfiguration yamlConfig, RulesEngineConfiguration config) throws YamlConfigurationException {
-        if (yamlConfig.getRuleGroups() == null) {
-            return;
-        }
 
-        for (YamlRuleGroup yamlGroup : yamlConfig.getRuleGroups()) {
-            if ((yamlGroup.getEnabled() == null || yamlGroup.getEnabled()) && yamlGroup.getRuleGroupReferences() != null) {
-                logger.info("Processing rule group references for group: " + yamlGroup.getId());
-
-                RuleGroup targetGroup = config.getRuleGroupById(yamlGroup.getId());
-                if (targetGroup == null) {
-                    logger.warn("Target rule group not found: " + yamlGroup.getId());
-                    continue;
-                }
-
-                addRuleGroupReferencesToGroup(yamlGroup, targetGroup, config);
-            }
-        }
-    }
-
-    /**
-     * Add rules from referenced rule groups to the target rule group.
-     */
-    private void addRuleGroupReferencesToGroup(YamlRuleGroup yamlGroup, RuleGroup targetGroup, RulesEngineConfiguration config) throws YamlConfigurationException {
-        if (yamlGroup.getRuleGroupReferences() == null) {
-            return;
-        }
-
-        logger.info("Processing " + yamlGroup.getRuleGroupReferences().size() + " rule group references for group: " + yamlGroup.getId());
-
-        // Calculate starting sequence number (after existing rules)
-        int nextSequence = targetGroup.getRules().size() + 1;
-
-        for (String referencedGroupId : yamlGroup.getRuleGroupReferences()) {
-            logger.info("Processing rule group reference: " + referencedGroupId);
-
-            RuleGroup referencedGroup = config.getRuleGroupById(referencedGroupId);
-            if (referencedGroup != null) {
-                // Add all rules from the referenced group to the target group
-                for (Rule rule : referencedGroup.getRules()) {
-                    targetGroup.addRule(rule, nextSequence++);
-                    logger.debug("Added rule " + rule.getId() + " from group " + referencedGroupId + " to group " + targetGroup.getId());
-                }
-                logger.info("Successfully added " + referencedGroup.getRules().size() + " rules from group " + referencedGroupId + " to group " + targetGroup.getId());
-            } else {
-                String errorMsg = "Referenced rule group not found: " + referencedGroupId + " in group: " + yamlGroup.getId();
-                logger.error(errorMsg);
-                throw new YamlConfigurationException(errorMsg);
-            }
-        }
-    }
     
     /**
      * Get an existing category or create a new one.
