@@ -642,6 +642,7 @@ public class RulesEngine {
         if (overallSuccess) {
             return RuleResult.enrichmentSuccess(enrichedData, SeverityConstants.INFO);
         } else {
+            logger.debug("Returning enrichment failure with data keys: {}", enrichedData.keySet());
             return RuleResult.enrichmentFailure(failureMessages, enrichedData, SeverityConstants.ERROR);
         }
     }
@@ -695,12 +696,16 @@ public class RulesEngine {
 
         for (YamlEnrichment enrichment : enrichments) {
             tasks.add(() -> {
+                // Create a thread-local copy of the data for each parallel task
+                // This prevents ConcurrentModificationException and data corruption
+                // as HashMap is not thread-safe for concurrent modifications
+                Object taskTargetObject = convertToMap(targetObject);
                 try {
-                    return enrichmentProcessor.processEnrichmentWithResult(enrichment, targetObject);
+                    return enrichmentProcessor.processEnrichmentWithResult(enrichment, taskTargetObject);
                 } catch (Exception e) {
                     List<String> msgs = new ArrayList<>();
                     msgs.add("Parallel enrichment exception: " + e.getMessage());
-                    Map<String, Object> data = convertToMap(targetObject);
+                    Map<String, Object> data = convertToMap(taskTargetObject);
                     return RuleResult.enrichmentFailure(msgs, data, SeverityConstants.ERROR);
                 }
             });
@@ -1056,8 +1061,8 @@ public class RulesEngine {
                                         failureMessages.addAll(enrichmentResult.getFailureMessages());
                                     }
                                     logger.error("CRITICAL: Enrichment processing failed: {}", enrichmentResult.getMessage());
-                                    // Return error immediately (fail-fast)
-                                    return RuleResult.error("enrichments", enrichmentResult.getMessage(), SeverityConstants.ERROR);
+                                    // Return error immediately (fail-fast) but include enriched data
+                                    return RuleResult.enrichmentFailure(failureMessages, enrichmentResult.getEnrichedData(), SeverityConstants.ERROR);
                                 }
 
                                 // Update enriched data from result
@@ -1151,6 +1156,9 @@ public class RulesEngine {
                             logger.info("Processing {} enrichment groups", allEnrichmentGroups.size());
                             RuleResult enrichmentGroupResult = executeEnrichmentGroupsList(allEnrichmentGroups, enrichedData);
 
+                            logger.debug("Enrichment group result type: {}", enrichmentGroupResult.getResultType());
+                            logger.debug("Enrichment group result data keys: {}", enrichmentGroupResult.getEnrichedData().keySet());
+
                             if (enrichmentGroupResult.getResultType() == RuleResult.ResultType.ERROR) {
                                 overallSuccess = false;
                                 failureMessages.add("Enrichment group evaluation error: " + enrichmentGroupResult.getMessage());
@@ -1222,8 +1230,8 @@ public class RulesEngine {
                                     failureMessages.addAll(transformationResult.getFailureMessages());
                                 }
                                 logger.error("CRITICAL: Transformation processing failed: {}", transformationResult.getMessage());
-                                // Return error immediately (fail-fast)
-                                return RuleResult.error("transformations", transformationResult.getMessage(), SeverityConstants.ERROR);
+                                // Return error immediately (fail-fast) but include enriched data
+                                return RuleResult.evaluationFailure(failureMessages, transformationResult.getEnrichedData(), "transformations", transformationResult.getMessage(), SeverityConstants.ERROR);
                             }
 
                             // Update enrichedData with transformed data
@@ -1246,6 +1254,7 @@ public class RulesEngine {
                 return RuleResult.evaluationSuccess(enrichedData, "evaluation", "Sequential evaluation completed successfully");
             } else {
                 logger.info("Sequential evaluation completed with {} failures", failureMessages.size());
+                logger.debug("Final enriched data keys (failure): {}", enrichedData.keySet());
                 return RuleResult.evaluationFailure(failureMessages, enrichedData, "evaluation", "Sequential evaluation completed with failures");
             }
 

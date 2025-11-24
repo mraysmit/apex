@@ -496,7 +496,13 @@ public class YamlEnrichmentProcessor {
 
         // Apply regular field mappings (if present)
         if (enrichment.getFieldMappings() != null && !enrichment.getFieldMappings().isEmpty()) {
-            targetObject = applyFieldMappings(enrichment.getFieldMappings(), targetObject, targetObject);
+            Object result = applyFieldMappings(enrichment.getFieldMappings(), targetObject, targetObject);
+            if (result != null) {
+                targetObject = result;
+            } else {
+                logger.error("CRITICAL: Field enrichment '" + enrichment.getId() + "' failed due to required field mapping failure");
+                // Keep original targetObject to preserve partial data
+            }
         }
 
         return targetObject;
@@ -1529,15 +1535,16 @@ public class YamlEnrichmentProcessor {
         boolean overallSuccess = true;
 
         try {
-            // Process enrichments using existing method - this modifies targetObject IN PLACE
-            processEnrichments(enrichments, targetObject, configuration);
+            // Process enrichments using existing method
+            // We MUST capture the return value because processEnrichments might return a new object
+            // or the same object modified in place.
+            Object resultObject = processEnrichments(enrichments, targetObject, configuration);
 
-            // Use the targetObject directly since it was modified in place
-            // Cast it to Map for analysis
+            // Use the resultObject for analysis
             @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedData = (targetObject instanceof Map)
-                ? (Map<String, Object>) targetObject
-                : convertToMap(targetObject);
+            Map<String, Object> enrichedData = (resultObject instanceof Map)
+                ? (Map<String, Object>) resultObject
+                : convertToMap(resultObject);
 
             // Detect enrichment failures by checking for required field mapping failures
             if (enrichments != null && !enrichments.isEmpty()) {
@@ -1769,27 +1776,7 @@ public class YamlEnrichmentProcessor {
                 results.add(RuleResult.enrichmentFailure(msgs, data, SeverityConstants.ERROR));
             } finally {
                 executor.shutdownNow();
-            }
-
-            // Aggregate overall based on AND/OR semantics (no short-circuit)
-            boolean overall = andOp;
-            if (!andOp) overall = false;
-            for (RuleResult r : results) {
-                boolean ok = r != null && r.isSuccess();
-                if (andOp) {
-                    if (!ok) {
-                        overall = false;
-                    }
-                } else { // OR
-                    if (ok) {
-                        overall = true;
-                    }
-                }
-            }
-
-            long elapsed = System.currentTimeMillis() - start;
-            String message = overall ? "Enrichment group succeeded" : "Enrichment group failed";
-            return EnrichmentGroupResult.of(group.getId(), overall, message, results, elapsed);
+ }
         }
 
         // Sequential branch (with possible short-circuiting)
