@@ -6750,69 +6750,96 @@ rule-chains:
 
 ### Pattern-Specific Configuration Examples
 
-#### Pattern 1: Conditional Chaining
-Execute expensive or specialized rules only when certain conditions are met:
+#### Pattern 1: Conditional Chaining (If-Then-Else Logic)
+**Business Context:** Implements standard "If-Then-Else" logic. Use this when you need to check a trigger condition (e.g., "Is this a high-risk transaction?") and execute completely different sets of rules based on the result.
 
 ```yaml
 rule-chains:
-  - id: "high-value-processing"
+  - id: "high-risk-workflow"
     pattern: "conditional-chaining"
     configuration:
+      # The "IF" statement (Trigger)
       trigger-rule:
-        condition: "#customerType == 'PREMIUM' && #transactionAmount > 100000"
-        message: "High-value customer transaction detected"
+        id: "check-high-risk"
+        condition: "#amount > 1000000"
+        message: "Checking for high-value transaction"
+      
       conditional-rules:
+        # The "THEN" block (executes if trigger is true)
         on-trigger:
-          - condition: "#accountAge >= 3"
-            message: "Enhanced due diligence check"
+          - id: "manager-approval"
+            condition: "#approvalLevel >= 2"
+            message: "Manager approval required"
+          - id: "compliance-check"
+            condition: "true"
+            message: "Compliance check initiated"
+            
+        # The "ELSE" block (executes if trigger is false)
         on-no-trigger:
-          - condition: "true"
+          - id: "standard-processing"
+            condition: "true"
             message: "Standard processing applied"
 ```
 
-#### Pattern 2: Sequential Dependency
-Build processing pipelines where each stage uses results from previous stages:
+#### Pattern 2: Sequential Dependency (Pipeline Logic)
+**Business Context:** Implements "Pipeline" logic where steps must happen in a specific order. A subsequent stage only runs if the previous stage succeeds. This uses the `depends-on` keyword to enforce dependencies (e.g., "Only check credit limit if identity verification passed").
 
 ```yaml
 rule-chains:
-  - id: "discount-pipeline"
+  - id: "validation-pipeline"
     pattern: "sequential-dependency"
     configuration:
       stages:
-        - stage: 1
-          name: "Base Discount"
-          rule:
-            condition: "#customerTier == 'GOLD' ? 0.15 : 0.05"
-            message: "Base discount calculated"
-          output-variable: "baseDiscount"
-        - stage: 2
-          name: "Regional Multiplier"
-          rule:
-            condition: "#region == 'US' ? #baseDiscount * 1.2 : #baseDiscount"
-            message: "Regional multiplier applied"
-          output-variable: "finalDiscount"
+        - stage: "initial-check"
+          name: "Initial Data Check"
+          rules:
+            - id: "check-data-presence"
+              condition: "#data != null"
+              message: "Data is present"
+
+        - stage: "deep-validation"
+          name: "Deep Validation"
+          # This block ONLY executes if 'initial-check' passes
+          depends-on: "initial-check"
+          rules:
+            - id: "check-validity"
+              condition: "#data.isValid == true"
+              message: "Data is valid"
 ```
 
-#### Pattern 3: Result-Based Routing
-Route to different rule sets based on intermediate results:
+#### Pattern 3: Result-Based Routing (Switch/Case Logic)
+**Business Context:** Implements "Switch/Case" logic. Routes a transaction to different processing paths based on a calculated value or category (e.g., "Route to High, Medium, or Low risk queues based on a score").
 
 ```yaml
 rule-chains:
   - id: "risk-routing"
     pattern: "result-based-routing"
     configuration:
+      # The "SWITCH" statement
       router-rule:
-        condition: "#riskScore > 70 ? 'HIGH_RISK' : 'LOW_RISK'"
-        message: "Risk level determined"
+        id: "determine-risk"
+        # Returns a string key: 'HIGH', 'MEDIUM', or 'LOW'
+        condition: "#riskScore > 80 ? 'HIGH' : (#riskScore > 50 ? 'MEDIUM' : 'LOW')"
+        output-variable: "riskLevel"
+        message: "Determining risk level"
+
+      # The "CASE" blocks
       routes:
-        HIGH_RISK:
+        HIGH:
           rules:
-            - condition: "#transactionAmount > 100000"
-              message: "Manager approval required"
-        LOW_RISK:
+            - id: "reject-transaction"
+              condition: "true"
+              message: "Transaction rejected due to high risk"
+        MEDIUM:
           rules:
-            - condition: "#transactionAmount > 0"
-              message: "Basic validation"
+            - id: "manual-review"
+              condition: "true"
+              message: "Flagged for manual review"
+        LOW:
+          rules:
+            - id: "auto-approve"
+              condition: "true"
+              message: "Transaction auto-approved"
 ```
 
 #### Pattern 4: Accumulative Chaining with Weight-Based Rule Selection
