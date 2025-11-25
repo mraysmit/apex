@@ -131,8 +131,13 @@
                 <block type="apex_enrichment_ref"></block>
                 <block type="apex_enrichment_calculation"></block>
                 <block type="apex_enrichment_field"></block>
-                <block type="apex_enrichment_lookup"></block>
                 <block type="apex_field_mapping"></block>
+            </category>
+            <category name="Lookups" colour="#805CA6">
+                <block type="apex_enrichment_lookup"></block>
+                <block type="apex_lookup_dataset_reference"></block>
+                <block type="apex_lookup_dataset_database"></block>
+                <block type="apex_lookup_parameter"></block>
             </category>
             <category name="Logic" colour="#5C81A6">
                 <block type="apex_condition_compare"></block>
@@ -274,7 +279,7 @@
                 },
                 {
                     "type": "apex_rule",
-                    "message0": "Rule %1 ID: %2 %3 Name: %4 %5 Enabled: %6 %7 Message: %8 %9 Severity: %10 %11 Priority (Optional): %12 %13 Category: %14 %15 Result Field: %16 %17 Condition: %18",
+                    "message0": "Rule %1 ID: %2 %3 Name: %4 %5 Enabled: %6 %7 Message: %8 %9 Severity: %10 %11 Priority (Optional): %12 %13 Category: %14 %15 Result Field (Optional): %16 %17 Condition: %18",
                     "args0": [
                         { "type": "input_dummy" },
                         { "type": "field_input", "name": "ID", "text": "rule-1" },
@@ -291,7 +296,7 @@
                         { "type": "input_dummy" },
                         { "type": "field_input", "name": "CATEGORY", "text": "" },
                         { "type": "input_dummy" },
-                        { "type": "field_input", "name": "RESULT_FIELD", "text": "" },
+                        { "type": "input_value", "name": "RESULT_FIELD", "check": ["String", "Number", "Boolean"] },
                         { "type": "input_dummy" },
                         { "type": "input_value", "name": "CONDITION", "check": ["Boolean", "String"] }
                     ],
@@ -655,16 +660,54 @@
                     "tooltip": "Defines a query for the data source",
                     "helpUrl": ""
                 },
+                {
+                    "type": "apex_lookup_dataset_reference",
+                    "message0": "Reference Dataset %1 ID: %2 %3 Key Field: %4",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "dataset-1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "KEY_FIELD", "text": "id" }
+                    ],
+                    "output": "LookupDataset",
+                    "colour": 260,
+                    "tooltip": "Reference to a pre-defined dataset",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_lookup_dataset_database",
+                    "message0": "Database Dataset %1 Data Source Ref: %2 %3 Query: %4 %5 Parameters: %6",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DS_REF", "text": "customer-database" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "QUERY", "text": "SELECT * FROM table WHERE id = :id" },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "PARAMETERS", "check": "LookupParameter" }
+                    ],
+                    "output": "LookupDataset",
+                    "colour": 260,
+                    "tooltip": "Database query lookup",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_lookup_parameter",
+                    "message0": "Parameter %1 Field: %2 %3 Type: %4",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "FIELD", "text": "customerId" },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "TYPE", "options": [["String", "string"], ["Integer", "integer"], ["Boolean", "boolean"]] }
+                    ],
+                    "previousStatement": "LookupParameter",
+                    "nextStatement": "LookupParameter",
+                    "colour": 260,
+                    "tooltip": "Query parameter mapping",
+                    "helpUrl": ""
+                },
             ]);
 
             // --- 1b. Define Dynamic Block (Lookup) ---
-
-            const AVAILABLE_DATASETS = [
-                ["Counterparty Data", "dataset-counterparty"],
-                ["Instrument Reference", "dataset-instrument"],
-                ["Country Codes", "dataset-countries"],
-                ["Risk Limits", "dataset-risk-limits"]
-            ];
 
             Blockly.Blocks['apex_enrichment_lookup'] = {
                 init: function () {
@@ -679,17 +722,12 @@
                     this.appendValueInput("CONDITION")
                         .setCheck(["Boolean", "String"])
                         .appendField("Condition:");
-                    this.appendDummyInput()
-                        .appendField("Dataset:")
-                        .appendField(new Blockly.FieldDropdown(function () {
-                            return AVAILABLE_DATASETS;
-                        }), "DATASET");
                     this.appendValueInput("KEY")
                         .setCheck("String")
                         .appendField("Lookup Key:");
-                    this.appendDummyInput()
-                        .appendField("Dataset Key Field:")
-                        .appendField(new Blockly.FieldTextInput("id"), "DATASET_KEY");
+                    this.appendValueInput("DATASET")
+                        .setCheck("LookupDataset")
+                        .appendField("Dataset Config:");
                     this.appendStatementInput("MAPPINGS")
                         .setCheck("Transformation")
                         .appendField("Mappings:");
@@ -981,7 +1019,7 @@
                 const severity = block.getFieldValue('SEVERITY');
                 const priority = block.getFieldValue('PRIORITY');
                 const category = block.getFieldValue('CATEGORY');
-                const resultField = block.getFieldValue('RESULT_FIELD');
+                const resultFieldCode = generator.valueToCode(block, 'RESULT_FIELD', 0);
                 const condition = generator.valueToCode(block, 'CONDITION', 0) || "true";
 
                 const ruleObj = {
@@ -997,7 +1035,9 @@
                     ruleObj.priority = parseInt(priority);
                 }
                 if (category) ruleObj.category = category;
-                if (resultField) ruleObj["result-field"] = resultField;
+                if (resultFieldCode) {
+                    ruleObj["result-field"] = resultFieldCode.replace(/^['"]|['"]$/g, '');
+                }
 
                 return JSON.stringify(ruleObj) + ',';
             };
@@ -1099,31 +1139,81 @@
                 const id = block.getFieldValue('ID');
                 const enabled = block.getFieldValue('ENABLED') === 'TRUE';
                 const condition = generator.valueToCode(block, 'CONDITION', 0);
-                const dataset = block.getFieldValue('DATASET');
                 const key = generator.valueToCode(block, 'KEY', 0) || "null";
-                const datasetKey = block.getFieldValue('DATASET_KEY');
+                const datasetCode = generator.valueToCode(block, 'DATASET', 0);
                 const mappingsCode = generator.statementToCode(block, 'MAPPINGS');
                 const mappings = mappingsCode ? JSON.parse(`[${mappingsCode.replace(/,\s*$/, '')}]`) : [];
+
+                let dataset = null;
+                if (datasetCode) {
+                    try {
+                        dataset = JSON.parse(datasetCode);
+                    } catch (e) {
+                        console.error("Error parsing dataset config", e);
+                    }
+                }
 
                 const enrichmentObj = {
                     id: id,
                     enabled: enabled,
                     type: "lookup-enrichment",
                     "lookup-config": {
-                        "lookup-key": key.replace(/^"|"$/g, ''),
-                        "lookup-dataset": {
-                            type: "reference",
-                            id: dataset,
-                            "key-field": datasetKey
-                        }
+                        "lookup-key": key.replace(/^"|"$/g, '')
                     },
                     "field-mappings": mappings
                 };
+
+                if (dataset) {
+                    enrichmentObj["lookup-config"]["lookup-dataset"] = dataset;
+                }
+
                 if (condition) {
                     enrichmentObj.condition = condition.replace(/^"|"$/g, '');
                 }
 
                 return JSON.stringify(enrichmentObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_lookup_dataset_reference'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const keyField = block.getFieldValue('KEY_FIELD');
+                
+                const datasetObj = {
+                    type: "reference",
+                    id: id,
+                    "key-field": keyField
+                };
+                
+                return [JSON.stringify(datasetObj), 0];
+            };
+
+            apexGenerator.forBlock['apex_lookup_dataset_database'] = function (block, generator) {
+                const dsRef = block.getFieldValue('DS_REF');
+                const query = block.getFieldValue('QUERY');
+                const parametersCode = generator.statementToCode(block, 'PARAMETERS');
+                
+                const parameters = parametersCode ? JSON.parse(`[${parametersCode.replace(/,\s*$/, '')}]`) : [];
+                
+                const datasetObj = {
+                    type: "database",
+                    "data-source-ref": dsRef,
+                    query: query,
+                    parameters: parameters
+                };
+                
+                return [JSON.stringify(datasetObj), 0];
+            };
+
+            apexGenerator.forBlock['apex_lookup_parameter'] = function (block, generator) {
+                const field = block.getFieldValue('FIELD');
+                const type = block.getFieldValue('TYPE');
+                
+                const paramObj = {
+                    field: field,
+                    type: type
+                };
+                
+                return JSON.stringify(paramObj) + ',';
             };
 
             apexGenerator.forBlock['apex_field_mapping'] = function (block, generator) {
@@ -1248,12 +1338,174 @@
                 return code + nextCode;
             };
 
+            // --- 2b. Custom Context Menu Configuration ---
+            
+            const CONTEXT_MENU_CONFIG = {
+                'apex_rule_config': [
+                    { input: 'SECTIONS', type: 'apex_section_data_source_refs', text: "Add Data Source Refs Section" },
+                    { input: 'SECTIONS', type: 'apex_section_rules', text: "Add Rules Section" },
+                    { input: 'SECTIONS', type: 'apex_section_rule_groups', text: "Add Rule Groups Section" },
+                    { input: 'SECTIONS', type: 'apex_section_enrichments', text: "Add Enrichments Section" },
+                    { input: 'SECTIONS', type: 'apex_section_enrichment_groups', text: "Add Enrichment Groups Section" },
+                    { input: 'SECTIONS', type: 'apex_section_transformations', text: "Add Transformations Section" }
+                ],
+                'apex_data_source_config': [
+                    { input: 'DATA_SOURCES', type: 'apex_data_source_database', text: 'Add Database Source' },
+                    { input: 'DATA_SOURCES', type: 'apex_data_source_rest', text: 'Add REST Source' },
+                    { input: 'DATA_SOURCES', type: 'apex_data_source_file', text: 'Add File Source' }
+                ],
+                'apex_section_data_source_refs': [
+                    { input: 'DATA_SOURCE_REFS', type: 'apex_data_source_ref', text: 'Add Data Source Ref' }
+                ],
+                'apex_section_rules': [
+                    { input: 'RULES', type: 'apex_rule', text: 'Add Rule' }
+                ],
+                'apex_section_rule_groups': [
+                    { input: 'RULE_GROUPS', type: 'apex_rule_group', text: 'Add Rule Group' }
+                ],
+                'apex_section_enrichments': [
+                    { input: 'ENRICHMENTS', type: 'apex_enrichment_calculation', text: 'Add Calculation Enrichment' },
+                    { input: 'ENRICHMENTS', type: 'apex_enrichment_field', text: 'Add Field Enrichment' },
+                    { input: 'ENRICHMENTS', type: 'apex_enrichment_lookup', text: 'Add Lookup Enrichment' }
+                ],
+                'apex_section_enrichment_groups': [
+                    { input: 'ENRICHMENT_GROUPS', type: 'apex_enrichment_group', text: 'Add Enrichment Group' }
+                ],
+                'apex_section_transformations': [
+                    { input: 'TRANSFORMATIONS', type: 'apex_conditional_transformation', text: 'Add Conditional Transformation' },
+                    { input: 'TRANSFORMATIONS', type: 'apex_action_set_field', text: 'Add Set Field Action' }
+                ],
+                'apex_rule': [
+                    { input: 'CONDITION', type: 'apex_condition_compare', text: 'Add Condition (Compare)' },
+                    { input: 'CONDITION', type: 'apex_condition_logic', text: 'Add Condition (Logic)' },
+                    { input: 'RESULT_FIELD', type: 'text', text: 'Add Result Field (Text)' },
+                    { input: 'RESULT_FIELD', type: 'apex_field_ref', text: 'Add Result Field (Ref)' }
+                ],
+                'apex_rule_group': [
+                    { input: 'RULE_IDS', type: 'apex_rule_ref', text: 'Add Rule Reference' }
+                ],
+                'apex_enrichment_group': [
+                    { input: 'ENRICHMENT_IDS', type: 'apex_enrichment_ref', text: 'Add Enrichment Reference' }
+                ],
+                'apex_enrichment_calculation': [
+                    { input: 'CONDITION', type: 'apex_condition_compare', text: 'Add Condition' },
+                    { input: 'EXPRESSION', type: 'text', text: 'Add Expression (Text)' }
+                ],
+                'apex_enrichment_field': [
+                    { input: 'CONDITION', type: 'apex_condition_compare', text: 'Add Condition' },
+                    { input: 'MAPPINGS', type: 'apex_field_mapping', text: 'Add Field Mapping' }
+                ],
+                'apex_field_mapping': [
+                    { input: 'EXPRESSION', type: 'text', text: 'Add Expression (Text)' }
+                ],
+                'apex_enrichment_lookup': [
+                    { input: 'CONDITION', type: 'apex_condition_compare', text: 'Add Condition' },
+                    { input: 'KEY', type: 'text', text: 'Add Key (Text)' },
+                    { input: 'KEY', type: 'apex_field_ref', text: 'Add Key (Field Ref)' },
+                    { input: 'DATASET', type: 'apex_lookup_dataset_reference', text: 'Add Dataset Reference' },
+                    { input: 'DATASET', type: 'apex_lookup_dataset_database', text: 'Add Database Dataset' },
+                    { input: 'MAPPINGS', type: 'apex_field_mapping', text: 'Add Field Mapping' }
+                ],
+                'apex_data_source_database': [
+                    { input: 'QUERIES', type: 'apex_data_source_query', text: 'Add Query' }
+                ],
+                'apex_data_source_rest': [
+                    { input: 'ENDPOINTS', type: 'apex_data_source_endpoint', text: 'Add Endpoint' }
+                ],
+                'apex_lookup_dataset_database': [
+                    { input: 'PARAMETERS', type: 'apex_lookup_parameter', text: 'Add Parameter' }
+                ],
+                'apex_conditional_transformation': [
+                    { input: 'CONDITION', type: 'apex_condition_compare', text: 'Add Condition' },
+                    { input: 'ACTIONS_TRUE', type: 'apex_action_set_field', text: 'Add Action (True)' },
+                    { input: 'ACTIONS_FALSE', type: 'apex_action_set_field', text: 'Add Action (False)' }
+                ],
+                'apex_action_set_field': [
+                    { input: 'FIELD', type: 'apex_field_ref', text: 'Add Field Ref' },
+                    { input: 'VALUE', type: 'text', text: 'Add Text Value' },
+                    { input: 'VALUE', type: 'math_number', text: 'Add Number Value' },
+                    { input: 'VALUE', type: 'logic_boolean', text: 'Add Boolean Value' }
+                ],
+                'apex_condition_compare': [
+                    { input: 'A', type: 'apex_field_ref', text: 'Add Field Ref (Left)' },
+                    { input: 'B', type: 'text', text: 'Add Text Value (Right)' },
+                    { input: 'B', type: 'math_number', text: 'Add Number Value (Right)' }
+                ],
+                'apex_condition_logic': [
+                    { input: 'A', type: 'apex_condition_compare', text: 'Add Comparison (Left)' },
+                    { input: 'A', type: 'apex_condition_logic', text: 'Add Logic Group (Left)' },
+                    { input: 'B', type: 'apex_condition_compare', text: 'Add Comparison (Right)' },
+                    { input: 'B', type: 'apex_condition_logic', text: 'Add Logic Group (Right)' }
+                ]
+            };
+
+            // Apply Context Menus
+            for (const blockType in CONTEXT_MENU_CONFIG) {
+                if (Blockly.Blocks[blockType]) {
+                    Blockly.Blocks[blockType].customContextMenu = function(options) {
+                        const menuItems = CONTEXT_MENU_CONFIG[blockType];
+                        
+                        menuItems.forEach(item => {
+                            const input = this.getInput(item.input);
+                            if (!input) return;
+
+                            // Check if we can connect (Stack vs Single)
+                            const isStack = input.type === Blockly.NEXT_STATEMENT; // 3 is NEXT_STATEMENT
+                            const isConnected = input.connection && input.connection.targetConnection;
+                            
+                            // For Value/Single inputs, only show if empty
+                            if (!isStack && isConnected) return;
+
+                            const option = {
+                                enabled: true,
+                                text: item.text,
+                                callback: function() {
+                                    const workspace = this.workspace;
+                                    const newBlock = workspace.newBlock(item.type);
+                                    newBlock.initSvg();
+                                    newBlock.render();
+
+                                    let parentConnection = input.connection;
+                                    
+                                    if (isStack) {
+                                        // Find the last connection in the stack
+                                        while (parentConnection.targetConnection) {
+                                            parentConnection = parentConnection.targetConnection.sourceBlock_.nextConnection;
+                                            if (!parentConnection) break; // Should not happen for well-formed stacks
+                                        }
+                                        if (parentConnection) {
+                                            parentConnection.connect(newBlock.previousConnection);
+                                        }
+                                    } else {
+                                        // Connect directly (Value or Statement)
+                                        const childConnection = newBlock.outputConnection || newBlock.previousConnection;
+                                        parentConnection.connect(childConnection);
+                                    }
+                                    
+                                    newBlock.select();
+                                }.bind(this)
+                            };
+                            options.push(option);
+                        });
+                    };
+                }
+            }
+
             // --- 3. Initialize Workspace ---
 
             const workspace = Blockly.inject('blocklyDiv', {
                 toolbox: document.getElementById('toolbox'),
                 scrollbars: true,
-                trashcan: true
+                trashcan: true,
+                zoom: {
+                    controls: true,
+                    wheel: true,
+                    startScale: 1.0,
+                    maxScale: 3,
+                    minScale: 0.3,
+                    scaleSpeed: 1.2,
+                    pinch: true
+                }
             });
 
             // --- 4. Live Update Logic ---
@@ -1307,6 +1559,211 @@
                 a.click();
                 document.body.removeChild(a);
             }
+
+            // --- 6. Click-to-Fill Support (Event Listener) ---
+            
+            const AUTO_FILL_MAP = {
+                'apex_rule_config': {
+                    'SECTIONS': [
+                        'apex_section_data_source_refs',
+                        'apex_section_rules',
+                        'apex_section_rule_groups',
+                        'apex_section_enrichments',
+                        'apex_section_enrichment_groups',
+                        'apex_section_transformations'
+                    ]
+                },
+                'apex_data_source_config': {
+                    'DATA_SOURCES': [
+                        'apex_data_source_database',
+                        'apex_data_source_rest',
+                        'apex_data_source_file',
+                        'apex_data_source_query',
+                        'apex_data_source_endpoint',
+                        'apex_data_source_ref'
+                    ]
+                },
+                'apex_section_data_source_refs': { 'DATA_SOURCE_REFS': 'apex_data_source_ref' },
+                'apex_section_rules': { 'RULES': 'apex_rule' },
+                'apex_section_rule_groups': { 'RULE_GROUPS': 'apex_rule_group' },
+                'apex_section_enrichments': { 
+                    'ENRICHMENTS': [
+                        'apex_enrichment_calculation',
+                        'apex_enrichment_field',
+                        'apex_enrichment_lookup'
+                    ]
+                },
+                'apex_section_enrichment_groups': { 'ENRICHMENT_GROUPS': 'apex_enrichment_group' },
+                'apex_section_transformations': { 
+                    'TRANSFORMATIONS': [
+                        'apex_conditional_transformation',
+                        'apex_action_set_field'
+                    ]
+                },
+                
+                'apex_rule': {
+                    'CONDITION': 'apex_condition_compare',
+                    'RESULT_FIELD': 'text'
+                },
+                'apex_rule_group': { 'RULE_IDS': 'apex_rule_ref' },
+                
+                'apex_enrichment_group': { 'ENRICHMENT_IDS': 'apex_enrichment_ref' },
+                'apex_enrichment_calculation': { 
+                    'CONDITION': 'apex_condition_compare',
+                    'EXPRESSION': 'text'
+                },
+                'apex_enrichment_field': {
+                    'CONDITION': 'apex_condition_compare',
+                    'MAPPINGS': 'apex_field_mapping'
+                },
+                'apex_enrichment_lookup': {
+                    'CONDITION': 'apex_condition_compare',
+                    'KEY': 'text',
+                    'DATASET': 'apex_lookup_dataset_reference',
+                    'MAPPINGS': 'apex_field_mapping'
+                },
+                
+                'apex_data_source_database': { 'QUERIES': 'apex_data_source_query' },
+                'apex_data_source_rest': { 'ENDPOINTS': 'apex_data_source_endpoint' },
+                'apex_lookup_dataset_database': { 'PARAMETERS': 'apex_lookup_parameter' },
+                
+                'apex_conditional_transformation': {
+                    'CONDITION': 'apex_condition_compare',
+                    'ACTIONS_TRUE': 'apex_action_set_field',
+                    'ACTIONS_FALSE': 'apex_action_set_field'
+                },
+                
+                'apex_action_set_field': {
+                    'FIELD': 'apex_field_ref',
+                    'VALUE': 'text'
+                },
+                'apex_field_mapping': { 'EXPRESSION': 'text' },
+                
+                'apex_condition_compare': {
+                    'A': 'apex_field_ref',
+                    'B': 'text'
+                },
+                'apex_condition_logic': {
+                    'A': 'apex_condition_compare',
+                    'B': 'apex_condition_compare'
+                }
+            };
+
+            let lastClickTime = 0;
+            let lastClickedBlockId = null;
+
+            function onBlockClick(event) {
+                // We only care about click events on blocks
+                if (event.type === Blockly.Events.CLICK && event.blockId) {
+                    const workspace = Blockly.getMainWorkspace();
+                    const block = workspace.getBlockById(event.blockId);
+                    
+                    if (!block) return;
+
+                    // Double Click to Delete
+                    const currentTime = new Date().getTime();
+                    const isDoubleClick = (event.blockId === lastClickedBlockId) && ((currentTime - lastClickTime) < 400);
+                    
+                    lastClickTime = currentTime;
+                    lastClickedBlockId = event.blockId;
+
+                    if (isDoubleClick) {
+                        if (block.isDeletable()) {
+                            block.dispose(true);
+                            updateYaml();
+                        }
+                        return;
+                    }
+                    
+                    const config = AUTO_FILL_MAP[block.type];
+                    if (!config) return;
+
+                    // Find the first empty input defined in our map
+                    for (const inputName in config) {
+                        const input = block.getInput(inputName);
+                        if (!input || !input.connection) continue;
+                        
+                        const targetConfig = config[inputName];
+                        
+                        // Case 1: Array (Rotation/Cycle - Replace existing)
+                        if (Array.isArray(targetConfig)) {
+                            const parentConnection = input.connection;
+                            const targetConnection = parentConnection.targetConnection;
+                            
+                            let nextType = targetConfig[0];
+                            
+                            if (targetConnection) {
+                                // There is already a block connected
+                                const existingBlock = targetConnection.sourceBlock_;
+                                
+                                // Check if the existing block has any children (content)
+                                // We iterate over inputs (like 'RULES', 'ENRICHMENTS') to see if they are populated
+                                const hasChildren = existingBlock.inputList.some(inp => 
+                                    inp.connection && inp.connection.targetConnection
+                                );
+
+                                if (hasChildren) {
+                                    // If populated, do NOT rotate/replace. 
+                                    // This prevents accidental deletion of user data.
+                                    return;
+                                }
+
+                                const idx = targetConfig.indexOf(existingBlock.type);
+                                
+                                // Calculate next type
+                                if (idx !== -1) {
+                                    nextType = targetConfig[(idx + 1) % targetConfig.length];
+                                }
+                                
+                                // Remove the existing block (healStack=true preserves blocks connected after it)
+                                existingBlock.dispose(true);
+                            }
+                            
+                            // Create and connect the new block
+                            createAndConnect(workspace, nextType, parentConnection);
+                            return; 
+                        }
+                        // Case 2: String (Single Input or Append to Stack)
+                        else if (typeof targetConfig === 'string') {
+                            // Check if it's a statement input (stack) - 3 is NEXT_STATEMENT (Input Type)
+                            if (input.type === 3) { 
+                                // Walk to the end of the stack
+                                let connection = input.connection;
+                                while (connection.targetConnection) {
+                                    connection = connection.targetConnection.sourceBlock_.nextConnection;
+                                    if (!connection) break; 
+                                }
+                                if (connection) {
+                                    createAndConnect(workspace, targetConfig, connection);
+                                    return;
+                                }
+                            } else {
+                                // Value or Dummy input - only fill if empty
+                                if (!input.connection.targetConnection) {
+                                    createAndConnect(workspace, targetConfig, input.connection);
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            function createAndConnect(workspace, type, parentConnection) {
+                 console.log("Auto-filling " + type);
+                 const newBlock = workspace.newBlock(type);
+                 newBlock.initSvg();
+                 newBlock.render();
+                 
+                 const childConnection = newBlock.outputConnection || newBlock.previousConnection;
+                 if (childConnection) {
+                     parentConnection.connect(childConnection);
+                     newBlock.select();
+                     updateYaml();
+                 }
+            }
+
+            workspace.addChangeListener(onBlockClick);
 
             // Create a default starting block
             const startBlock = workspace.newBlock('apex_rule_config');
