@@ -16,10 +16,6 @@ package dev.mars.apex.yaml.manager.controller;
  * limitations under the License.
  */
 
-import dev.mars.apex.yaml.manager.model.DependencyMetrics;
-import dev.mars.apex.yaml.manager.model.EnhancedYamlDependencyGraph;
-import dev.mars.apex.yaml.manager.model.ImpactAnalysisResult;
-import dev.mars.apex.yaml.manager.model.TreeNode;
 import dev.mars.apex.yaml.manager.service.DependencyAnalysisService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,9 +32,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;

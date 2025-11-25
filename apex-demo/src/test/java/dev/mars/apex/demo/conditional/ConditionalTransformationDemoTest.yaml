@@ -1,0 +1,66 @@
+metadata:
+  id: "conditional-transformation-demo"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "Comprehensive demo of conditional transformations"
+
+transformations:
+  # 1. Basic True Condition
+  - id: "trans-basic-true"
+    type: "conditional-transformation"
+    priority: 10
+    transformation-rules:
+      - condition: "#amount > 1000"
+        actions:
+          - type: "set-field"
+            field: "status"
+            value: "HIGH_VALUE"
+
+  # 2. Basic False Condition (Else)
+  - id: "trans-basic-false"
+    type: "conditional-transformation"
+    priority: 20
+    transformation-rules:
+      - condition: "#amount < 0"
+        actions:
+          - type: "set-field"
+            field: "validity"
+            value: "INVALID"
+        else-actions:
+          - type: "set-field"
+            field: "validity"
+            value: "VALID"
+
+  # 3. Multiple Actions & Types
+  - id: "trans-complex-actions"
+    type: "conditional-transformation"
+    priority: 30
+    transformation-rules:
+      - condition: "#currency == 'USD'"
+        actions:
+          # Calculate
+          - type: "calculate-field"
+            field: "taxAmount"
+            expression: "#amount * 0.1"
+          # Copy
+          - type: "copy-field"
+            field: "originalCurrency"
+            source-field: "currency"
+          # Remove
+          - type: "remove-field"
+            field: "temporaryFlag"
+          # Set
+          - type: "set-field"
+            field: "processed"
+            value: true
+
+  # 4. Nested/Complex Condition
+  - id: "trans-complex-condition"
+    type: "conditional-transformation"
+    priority: 40
+    transformation-rules:
+      - condition: "#status == 'HIGH_VALUE' && #validity == 'VALID'"
+        actions:
+          - type: "set-field"
+            field: "priority_processing"
+            value: true

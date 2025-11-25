@@ -360,8 +360,130 @@ public class YamlTransformationProcessor {
      * @return The transformed object
      */
     private Object processConditionalTransformation(YamlTransformation transformation, Object targetObject) {
-        logger.warn("Conditional transformation not yet implemented for transformation: {}", transformation.getId());
+        List<YamlTransformation.TransformationRule> rules = transformation.getTransformationRules();
+        
+        if (rules == null || rules.isEmpty()) {
+            logger.debug("No transformation rules defined for conditional transformation: {}", transformation.getId());
+            return targetObject;
+        }
+        
+        StandardEvaluationContext context = createEvaluationContext(targetObject);
+        processRules(rules, targetObject, context, transformation.getId());
+        
         return targetObject;
+    }
+
+    /**
+     * Process a list of transformation rules recursively.
+     * 
+     * @param rules List of rules to process
+     * @param targetObject The target object
+     * @param context The evaluation context
+     * @param transformationId The transformation ID for logging
+     */
+    private void processRules(List<YamlTransformation.TransformationRule> rules, Object targetObject, 
+                             StandardEvaluationContext context, String transformationId) {
+        if (rules == null || rules.isEmpty()) {
+            return;
+        }
+        
+        for (YamlTransformation.TransformationRule rule : rules) {
+            boolean conditionMet = true;
+            
+            // Evaluate condition if present
+            if (rule.getCondition() != null && !rule.getCondition().trim().isEmpty()) {
+                try {
+                    Expression conditionExpr = getOrCompileExpression(rule.getCondition());
+                    Boolean result = conditionExpr.getValue(context, Boolean.class);
+                    conditionMet = result != null && result;
+                } catch (Exception e) {
+                    logger.warn("Failed to evaluate rule condition for transformation {}: {}", 
+                        transformationId, e.getMessage());
+                    conditionMet = false;
+                }
+            }
+            
+            if (conditionMet) {
+                processActions(rule.getActions(), targetObject, context, transformationId);
+            } else {
+                processActions(rule.getElseActions(), targetObject, context, transformationId);
+            }
+        }
+    }
+
+    /**
+     * Process a list of transformation actions.
+     * 
+     * @param actions List of actions to process
+     * @param targetObject The target object
+     * @param context The evaluation context
+     * @param transformationId The transformation ID for logging
+     */
+    private void processActions(List<YamlTransformation.TransformationAction> actions, Object targetObject, 
+                               StandardEvaluationContext context, String transformationId) {
+        if (actions == null || actions.isEmpty()) {
+            return;
+        }
+        
+        for (YamlTransformation.TransformationAction action : actions) {
+            try {
+                processAction(action, targetObject, context, transformationId);
+            } catch (Exception e) {
+                String errorMsg = String.format("Failed to process action %s for transformation %s: %s", 
+                    action.getType(), transformationId, e.getMessage());
+                logger.error(errorMsg);
+                throw new RuntimeException(errorMsg, e);
+            }
+        }
+    }
+    
+    /**
+     * Process a single transformation action.
+     * 
+     * @param action The action to process
+     * @param targetObject The target object
+     * @param context The evaluation context
+     * @param transformationId The transformation ID
+     */
+    private void processAction(YamlTransformation.TransformationAction action, Object targetObject, 
+                              StandardEvaluationContext context, String transformationId) {
+        String type = action.getType();
+        if (type == null) {
+            logger.warn("Action type is null");
+            return;
+        }
+        
+        switch (type) {
+            case "set-field" -> {
+                if (action.getField() != null) {
+                    setFieldValue(targetObject, action.getField(), action.getValue());
+                }
+            }
+            case "calculate-field" -> {
+                if (action.getField() != null && action.getExpression() != null) {
+                    Expression expr = getOrCompileExpression(action.getExpression());
+                    Object result = expr.getValue(context);
+                    setFieldValue(targetObject, action.getField(), result);
+                }
+            }
+            case "copy-field" -> {
+                if (action.getField() != null && action.getSourceField() != null) {
+                    Object sourceValue = getFieldValue(targetObject, action.getSourceField());
+                    setFieldValue(targetObject, action.getField(), sourceValue);
+                }
+            }
+            case "remove-field" -> {
+                if (action.getField() != null && targetObject instanceof Map) {
+                    ((Map<?, ?>) targetObject).remove(action.getField());
+                }
+            }
+            case "conditional-transformation" -> {
+                if (action.getTransformationRules() != null && !action.getTransformationRules().isEmpty()) {
+                    processRules(action.getTransformationRules(), targetObject, context, transformationId);
+                }
+            }
+            default -> logger.warn("Unknown action type: {}", type);
+        }
     }
 
     /**

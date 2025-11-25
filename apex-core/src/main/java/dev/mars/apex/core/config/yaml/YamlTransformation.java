@@ -207,9 +207,15 @@ public class YamlTransformation {
         
         @JsonProperty("actions")
         private List<TransformationAction> actions;
+
+        @JsonProperty("actions-true")
+        private List<TransformationAction> actionsTrue;
         
         @JsonProperty("else-actions")
         private List<TransformationAction> elseActions;
+
+        @JsonProperty("actions-false")
+        private List<TransformationAction> actionsFalse;
         
         // Default constructor
         public TransformationRule() {}
@@ -224,19 +230,27 @@ public class YamlTransformation {
         }
         
         public List<TransformationAction> getActions() {
-            return actions;
+            return actionsTrue != null ? actionsTrue : actions;
         }
         
         public void setActions(List<TransformationAction> actions) {
             this.actions = actions;
         }
+
+        public void setActionsTrue(List<TransformationAction> actionsTrue) {
+            this.actionsTrue = actionsTrue;
+        }
         
         public List<TransformationAction> getElseActions() {
-            return elseActions;
+            return actionsFalse != null ? actionsFalse : elseActions;
         }
         
         public void setElseActions(List<TransformationAction> elseActions) {
             this.elseActions = elseActions;
+        }
+
+        public void setActionsFalse(List<TransformationAction> actionsFalse) {
+            this.actionsFalse = actionsFalse;
         }
     }
     
@@ -261,6 +275,9 @@ public class YamlTransformation {
         
         @JsonProperty("parameters")
         private Map<String, Object> parameters;
+        
+        @JsonProperty("transformation-rules")
+        private List<TransformationRule> transformationRules;
         
         // Default constructor
         public TransformationAction() {}
@@ -312,6 +329,14 @@ public class YamlTransformation {
         
         public void setParameters(Map<String, Object> parameters) {
             this.parameters = parameters;
+        }
+
+        public List<TransformationRule> getTransformationRules() {
+            return transformationRules;
+        }
+
+        public void setTransformationRules(List<TransformationRule> transformationRules) {
+            this.transformationRules = transformationRules;
         }
     }
 }
