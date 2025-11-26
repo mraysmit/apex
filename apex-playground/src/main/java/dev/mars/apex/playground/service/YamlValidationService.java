@@ -99,7 +99,11 @@ public class YamlValidationService {
                 response.setMessage("YAML configuration is valid");
                 logger.debug("YAML validation successful");
             } else {
-                response.setMessage("YAML configuration has validation errors");
+                if (!response.getErrors().isEmpty()) {
+                    response.setMessage("Validation failed: " + response.getErrors().get(0).getMessage());
+                } else {
+                    response.setMessage("YAML configuration has validation errors");
+                }
                 logger.debug("YAML validation failed with {} errors and {} warnings",
                            response.getErrors().size(), response.getWarnings().size());
             }
@@ -207,12 +211,20 @@ public class YamlValidationService {
             // Parse YAML as Map to extract metadata
             Map<String, Object> yamlMap = parseYamlAsMap(yamlContent);
 
-            // Extract metadata if present
+            // Use Core Validator for validation
+            try {
+                YamlMetadataValidator.validateMetadataAndThrow(yamlMap, "playground-editor");
+            } catch (YamlConfigurationException e) {
+                response.addError(e.getMessage(), 0, 0);
+            }
+
+            // Extract metadata if present (for UI display)
             if (yamlMap.containsKey("metadata")) {
                 @SuppressWarnings("unchecked")
                 Map<String, Object> metadataMap = (Map<String, Object>) yamlMap.get("metadata");
 
                 YamlValidationResponse.YamlMetadata metadata = new YamlValidationResponse.YamlMetadata();
+                metadata.setId((String) metadataMap.get("id"));
                 metadata.setName((String) metadataMap.get("name"));
                 metadata.setVersion((String) metadataMap.get("version"));
                 metadata.setDescription((String) metadataMap.get("description"));
@@ -220,20 +232,6 @@ public class YamlValidationService {
                 metadata.setAuthor((String) metadataMap.get("author"));
 
                 response.setMetadata(metadata);
-
-                // Validate metadata completeness
-                if (metadata.getName() == null || metadata.getName().trim().isEmpty()) {
-                    response.addWarning("Metadata is missing 'name' field", 0, 0);
-                }
-                if (metadata.getVersion() == null || metadata.getVersion().trim().isEmpty()) {
-                    response.addWarning("Metadata is missing 'version' field", 0, 0);
-                }
-                if (metadata.getDescription() == null || metadata.getDescription().trim().isEmpty()) {
-                    response.addWarning("Metadata is missing 'description' field", 0, 0);
-                }
-
-            } else {
-                response.addWarning("Configuration is missing metadata section", 0, 0);
             }
 
             logger.debug("Metadata validation completed");

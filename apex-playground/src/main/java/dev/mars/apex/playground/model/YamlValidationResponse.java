@@ -203,6 +203,9 @@ public class YamlValidationResponse {
     @Schema(description = "Metadata information extracted from YAML")
     public static class YamlMetadata {
         
+        @JsonProperty("id")
+        private String id;
+
         @JsonProperty("name")
         private String name;
 
@@ -219,6 +222,8 @@ public class YamlValidationResponse {
         private String author;
 
         // Getters and setters
+        public String getId() { return id; }
+        public void setId(String id) { this.id = id; }
         public String getName() { return name; }
         public void setName(String name) { this.name = name; }
         public String getVersion() { return version; }

@@ -1370,8 +1370,9 @@ public class RulesEngine {
             return RuleResult.error("rule:" + ruleId, "Rule not found");
         }
 
-        // Execute single rule using executeRulesList()
-        RuleResult result = executeRulesList(List.of(rule), data);
+        // Execute single rule using executeRule() directly to preserve rule identity in result
+        // even if the rule does not match (executeRulesList returns generic no-match)
+        RuleResult result = executeRule(rule, data);
 
         // Store individual rule result for conditional mapping in enrichments
         // This allows enrichments to reference #ruleResults in document order mode

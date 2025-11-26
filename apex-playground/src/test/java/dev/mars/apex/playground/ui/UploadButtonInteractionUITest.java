@@ -137,13 +137,30 @@ class UploadButtonInteractionUITest {
                   "Upload YAML button should have success outline styling");
 
         // Verify icons
-        // Note: FontAwesome icons might be rendered differently or have different classes depending on version
-        // We check for the presence of the <i> tag which contains the icon class
-        WebElement dataIcon = uploadDataBtn.findElement(By.tagName("i"));
-        WebElement yamlIcon = uploadYamlBtn.findElement(By.tagName("i"));
+        // Note: FontAwesome icons might be rendered as <i> or <svg> depending on configuration
+        WebElement dataIcon = findIconElement(uploadDataBtn);
+        WebElement yamlIcon = findIconElement(uploadYamlBtn);
         
-        assertTrue(dataIcon.getDomAttribute("class").contains("fa-upload"), "Upload Data button should have upload icon");
-        assertTrue(yamlIcon.getDomAttribute("class").contains("fa-file-upload"), "Upload YAML button should have file-upload icon");
+        String dataIconClass = dataIcon.getDomAttribute("class");
+        String yamlIconClass = yamlIcon.getDomAttribute("class");
+        
+        // Check for icon classes (works for both <i> and <svg>)
+        System.out.println("Data icon class: " + dataIconClass);
+        System.out.println("YAML icon class: " + yamlIconClass);
+        
+        assertTrue(dataIconClass != null && dataIconClass.contains("fa-upload"), 
+                  "Upload Data button should have upload icon. Found: " + dataIconClass);
+        // FontAwesome 6 uses fa-file-arrow-up but aliases fa-file-upload might be present or not depending on SVG rendering
+        assertTrue(yamlIconClass != null && (yamlIconClass.contains("fa-file-upload") || yamlIconClass.contains("fa-file-arrow-up")), 
+                  "Upload YAML button should have file-upload icon. Found: " + yamlIconClass);
+    }
+
+    private WebElement findIconElement(WebElement parent) {
+        try {
+            return parent.findElement(By.tagName("svg"));
+        } catch (org.openqa.selenium.NoSuchElementException e) {
+            return parent.findElement(By.tagName("i"));
+        }
     }
 
     @Test

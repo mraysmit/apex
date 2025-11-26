@@ -193,17 +193,24 @@ function validateYamlRealtime(yamlContent) {
  */
 function clearAll() {
     if (confirm('Are you sure you want to clear all content?')) {
-        sourceDataEditor.value = '';
-        yamlRulesEditor.value = '';
-        document.getElementById('validationResults').innerHTML = '<p class="text-muted">Click "Process" to see validation results...</p>';
-        document.getElementById('enrichmentResults').innerHTML = '<p class="text-muted">Click "Process" to see enrichment results and performance metrics...</p>';
-        updateYamlStatus(true, 'Valid');
-        updateProcessingTime(0);
-
-        // Clear file name displays
-        clearSourceDataFileName();
-        clearYamlRulesFileName();
+        resetPlayground();
     }
+}
+
+/**
+ * Reset playground to initial state without confirmation
+ */
+function resetPlayground() {
+    sourceDataEditor.value = '';
+    yamlRulesEditor.value = '';
+    document.getElementById('validationResults').innerHTML = '<p class="text-muted">Click "Process" to see validation results...</p>';
+    document.getElementById('enrichmentResults').innerHTML = '<p class="text-muted">Click "Process" to see enrichment results and performance metrics...</p>';
+    updateYamlStatus(true, 'Valid');
+    updateProcessingTime(0);
+
+    // Clear file name displays
+    clearSourceDataFileName();
+    clearYamlRulesFileName();
 }
 
 /**
@@ -233,6 +240,9 @@ async function loadExample() {
  * Load default example data
  */
 function loadDefaultExample() {
+    // Clear existing content
+    resetPlayground();
+
     const exampleData = {
         "name": "John Doe",
         "age": 30,
@@ -380,6 +390,9 @@ async function loadSpecificExample(category, id) {
             loadDefaultExample();
             return;
         }
+
+        // Clear existing content before loading new example
+        resetPlayground();
 
         // Load the example data
         if (example.yaml) {

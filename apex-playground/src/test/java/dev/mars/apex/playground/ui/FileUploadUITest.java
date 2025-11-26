@@ -202,7 +202,8 @@ class FileUploadUITest {
 
         // Then - JavaScript validation should show error alert
         try {
-            verifyErrorAlert("File size exceeds");
+            // Check for "exceeds" which is present in "File size (XX MB) exceeds..."
+            verifyErrorAlert("exceeds");
         } catch (Exception e) {
             // If no alert appears, verify the file wasn't processed
             WebElement sourceEditor = driver.findElement(By.id("sourceDataEditor"));
@@ -284,8 +285,10 @@ class FileUploadUITest {
     private void verifyErrorAlert(String expectedMessage) {
         WebElement alert = wait.until(ExpectedConditions.presenceOfElementLocated(
             By.cssSelector(".alert-danger")));
-        assertTrue(alert.getText().toLowerCase().contains(expectedMessage.toLowerCase()),
-                  "Error alert should contain expected message");
+        String alertText = alert.getText();
+        System.out.println("Alert text found: '" + alertText + "'");
+        assertTrue(alertText.toLowerCase().contains(expectedMessage.toLowerCase()),
+                  "Error alert should contain expected message: " + expectedMessage + ", but was: " + alertText);
     }
 
     private File createTestJsonFile() throws IOException {
