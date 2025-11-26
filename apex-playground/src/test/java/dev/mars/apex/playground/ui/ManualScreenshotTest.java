@@ -19,6 +19,7 @@ package dev.mars.apex.playground.ui;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Disabled;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -45,6 +46,7 @@ import java.time.format.DateTimeFormatter;
     "logging.level.dev.mars.apex=INFO",
     "apex.playground.examples-enabled=true"
 })
+@Disabled("Screenshots disabled for performance")
 class ManualScreenshotTest {
 
     private WebDriver driver;

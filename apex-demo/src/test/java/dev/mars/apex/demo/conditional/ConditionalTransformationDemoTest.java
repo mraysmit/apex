@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class ConditionalTransformationDemoTest extends DemoTestBase {
 
-    private static final String YAML_FILE = "c:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-demo/src/test/java/dev/mars/apex/demo/conditional/ConditionalTransformationDemoTest.yaml";
+    private static final String YAML_FILE = "src/test/java/dev/mars/apex/demo/conditional/ConditionalTransformationDemoTest.yaml";
 
     @Test
     @DisplayName("Test Conditional Transformations - High Value USD Scenario")

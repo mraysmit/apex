@@ -1,0 +1,46 @@
+metadata:
+  id: "payment-routing-transformation"
+  name: "Payment Routing Logic"
+  version: "1.0.0"
+  description: "Routes payments to different systems based on amount and currency"
+  type: "transformation-config"
+
+transformations:
+  - id: "high-value-routing"
+    type: "conditional-transformation"
+    transformation-rules:
+      # High Value USD -> SWIFT
+      - condition: "#amount > 1000000 && #currency == 'USD'"
+        actions-true:
+          - type: "set-field"
+            field: "routing.system"
+            value: "SWIFT"
+          - type: "set-field"
+            field: "routing.priority"
+            value: "URGENT"
+
+  - id: "low-value-routing"
+    type: "conditional-transformation"
+    transformation-rules:
+      # Low Value Domestic -> ACH
+      - condition: "#amount <= 10000 && #currency == 'USD'"
+        actions-true:
+          - type: "set-field"
+            field: "routing.system"
+            value: "ACH"
+          - type: "set-field"
+            field: "routing.priority"
+            value: "STANDARD"
+
+  - id: "euro-routing"
+    type: "conditional-transformation"
+    transformation-rules:
+      # Euro Payments -> SEPA
+      - condition: "#currency == 'EUR'"
+        actions-true:
+          - type: "set-field"
+            field: "routing.system"
+            value: "SEPA"
+          - type: "set-field"
+            field: "routing.priority"
+            value: "STANDARD"

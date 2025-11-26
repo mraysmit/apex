@@ -1,0 +1,16 @@
+{
+  "tradeId": "TRD-2023-88492",
+  "tradeDate": "2023-11-26",
+  "counterparty": "ACME_CORP_LTD",
+  "instrument": {
+    "type": "InterestRateSwap",
+    "symbol": "IRS-USD-10Y"
+  },
+  "notionalAmount": 5000000,
+  "currency": "USD",
+  "defaultQuantity": null,
+  "metadata": {
+    "sourceSystem": "FRONT_OFFICE_A",
+    "traderId": "T-1023"
+  }
+}

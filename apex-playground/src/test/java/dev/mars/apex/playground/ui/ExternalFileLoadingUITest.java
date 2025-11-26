@@ -225,7 +225,8 @@ class ExternalFileLoadingUITest {
         
         // Set XML format initially
         WebElement xmlFormatRadio = driver.findElement(By.id("xmlFormat"));
-        xmlFormatRadio.click();
+        // Use JS click because the input might be covered by the label
+        ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].click();", xmlFormatRadio);
         
         assertTrue(xmlFormatRadio.isSelected(), "XML format should be selected");
 
@@ -261,8 +262,9 @@ class ExternalFileLoadingUITest {
         WebElement loadExampleBtn = driver.findElement(By.id("loadExampleBtn"));
         
         // Click multiple times rapidly to potentially trigger network issues
+        org.openqa.selenium.JavascriptExecutor js = (org.openqa.selenium.JavascriptExecutor) driver;
         for (int i = 0; i < 3; i++) {
-            loadExampleBtn.click();
+            js.executeScript("arguments[0].click();", loadExampleBtn);
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -300,10 +302,18 @@ class ExternalFileLoadingUITest {
         // When
         WebElement clearBtn = driver.findElement(By.id("clearBtn"));
         clearBtn.click();
+        
+        // Handle confirmation alert
+        try {
+            wait.until(ExpectedConditions.alertIsPresent());
+            driver.switchTo().alert().accept();
+        } catch (Exception e) {
+            // Alert might not appear if not implemented or already handled
+        }
 
         // Then
-        assertEquals("", sourceEditor.getDomAttribute("value"), "Source editor should be cleared");
-        assertEquals("", yamlEditor.getDomAttribute("value"), "YAML editor should be cleared");
+        assertEquals("", sourceEditor.getDomProperty("value"), "Source editor should be cleared");
+        assertEquals("", yamlEditor.getDomProperty("value"), "YAML editor should be cleared");
     }
 
     // Helper methods

@@ -1,0 +1,82 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/C:/Users/markr/scoop/apps/maven/current/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------------< com.apex:apex-playground >----------------------
+[INFO] Building APEX Playground 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ apex-playground ---
+[INFO] Copying 5 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ apex-playground ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ apex-playground ---
+[INFO] Copying 1 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ apex-playground ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- surefire:3.1.2:test (default-test) @ apex-playground ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.mars.apex.playground.ui.ApexEngineContentProcessingUITest
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+[ERROR] Tests run: 8, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 24.28 s <<< FAILURE! -- in dev.mars.apex.playground.ui.ApexEngineContentProcessingUITest
+[ERROR] dev.mars.apex.playground.ui.ApexEngineContentProcessingUITest.shouldProcessUploadedFilesWithApexEnrichmentsAndDisplayEnrichedData -- Time elapsed: 1.782 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Enrichment results should contain enriched value 'premium' ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at dev.mars.apex.playground.ui.ApexEngineContentProcessingUITest.shouldProcessUploadedFilesWithApexEnrichmentsAndDisplayEnrichedData(ApexEngineContentProcessingUITest.java:177)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.mars.apex.playground.ui.ApexEngineContentProcessingUITest.shouldVerifyActualDataTransformationInEnrichmentResults -- Time elapsed: 1.912 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Enrichment results should contain calculated full name 'John Doe' ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at dev.mars.apex.playground.ui.ApexEngineContentProcessingUITest.shouldVerifyActualDataTransformationInEnrichmentResults(ApexEngineContentProcessingUITest.java:547)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   ApexEngineContentProcessingUITest.shouldProcessUploadedFilesWithApexEnrichmentsAndDisplayEnrichedData:177 Enrichment results should contain enriched value 'premium' ==> expected: <true> but was: <false>
+[ERROR]   ApexEngineContentProcessingUITest.shouldVerifyActualDataTransformationInEnrichmentResults:547 Enrichment results should contain calculated full name 'John Doe' ==> expected: <true> but was: <false>
+[INFO] 
+[ERROR] Tests run: 8, Failures: 2, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  27.772 s
+[INFO] Finished at: 2025-11-26T11:59:23+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.1.2:test (default-test) on project apex-playground: There are test failures.
+[ERROR] 
+[ERROR] Please refer to C:\Users\markr\dev\java\corejava\apex-rules-engine\apex-playground\target\surefire-reports for the individual test results.
+[ERROR] Please refer to dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

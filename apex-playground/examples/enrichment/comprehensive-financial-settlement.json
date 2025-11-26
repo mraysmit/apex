@@ -1,0 +1,12 @@
+{
+  "assetClass": "EQUITY",
+  "quantity": 5000000,
+  "tradeId": "TRD-999",
+  "market": "UK",
+  "counterparty": "Goldman Sachs",
+  "currency": "GBP",
+  "targetCurrency": "USD",
+  "settlementAmount": 500000,
+  "counterpartyId": "CP-001",
+  "assetType": "EQUITY"
+}

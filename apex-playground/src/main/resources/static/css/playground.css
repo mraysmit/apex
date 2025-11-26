@@ -1,25 +1,75 @@
 /* APEX Playground Custom Styles */
 
-/* Main layout */
-.playground-panels {
-    min-height: 400px;
+/* Full Screen Layout */
+html, body {
+    height: 100vh;
+    margin: 0;
+    overflow: hidden; /* Prevent scrollbars on main window */
 }
 
-.playground-panels .card {
-    min-height: 400px;
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Navbar should not shrink */
+.navbar {
+    flex-shrink: 0;
+}
+
+/* Main layout container */
+.playground-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* Important for nested flex scrolling */
+    overflow: hidden; /* Handle overflow here */
+}
+
+/* Grid System */
+.playground-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem; /* Reduced gap */
+    flex-grow: 1;
+    min-height: 0;
+    padding-bottom: 0.5rem; /* Small padding at bottom */
+}
+
+.playground-panel {
+    min-width: 0;
+    min-height: 0;
+}
+
+.playground-panel .card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.playground-panel .card-body {
+    flex: 1;
+    min-height: 0;
+    padding: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Editor styling */
-.playground-panels textarea {
+.playground-panel textarea {
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
     font-size: 14px;
     line-height: 1.4;
     border: none;
     resize: none;
-    min-height: 350px;
+    flex: 1;
+    height: 100%;
+    width: 100%;
 }
 
-.playground-panels textarea:focus {
+.playground-panel textarea:focus {
     outline: none;
     box-shadow: none;
 }
@@ -29,11 +79,11 @@
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
     font-size: 13px;
     line-height: 1.4;
-    max-height: 350px;
+    height: 100%;
     overflow-y: auto;
     background-color: #f8f9fa;
     padding: 15px;
-    border-radius: 4px;
+    border-radius: 0 0 4px 4px;
 }
 
 /* Status indicators */
@@ -171,17 +221,24 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
-    .playground-panels .card {
-        min-height: 300px;
+@media (max-width: 576px) {
+    html, body {
+        height: auto;
+        overflow: auto;
     }
     
-    .playground-panels textarea {
-        min-height: 250px;
+    .playground-container {
+        height: auto;
+        display: block;
+    }
+
+    .playground-grid {
+        display: block;
     }
     
-    .results-panel {
-        max-height: 250px;
+    .playground-panel {
+        margin-bottom: 1rem;
+        height: 400px; /* Fixed height for mobile */
     }
     
     .btn-toolbar {

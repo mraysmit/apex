@@ -40,8 +40,8 @@ public class ExampleService {
     
     private static final Logger logger = LoggerFactory.getLogger(ExampleService.class);
     
-    private final PathMatchingResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
-    
+    private static final String EXAMPLES_DIR = "examples";
+
     /**
      * Get all available example categories and their configurations.
      */
@@ -49,14 +49,30 @@ public class ExampleService {
         Map<String, Object> examples = new LinkedHashMap<>();
         
         try {
-            // Load examples from different categories
-            examples.put("quickstart", getQuickStartExamples());
-            examples.put("financial", getFinancialExamples());
-            examples.put("validation", getValidationExamples());
-            examples.put("lookup", getLookupExamples());
-            examples.put("advanced", getAdvancedExamples());
+            // Load examples from the examples directory and its subdirectories
+            java.io.File examplesDir = new java.io.File(EXAMPLES_DIR);
+            if (examplesDir.exists() && examplesDir.isDirectory()) {
+                // Scan subdirectories
+                java.io.File[] subDirs = examplesDir.listFiles(java.io.File::isDirectory);
+                if (subDirs != null) {
+                    for (java.io.File subDir : subDirs) {
+                        List<Map<String, Object>> categoryExamples = getExamplesFromDir(subDir);
+                        if (!categoryExamples.isEmpty()) {
+                            examples.put(subDir.getName(), categoryExamples);
+                        }
+                    }
+                }
+                
+                // Scan root directory for uncategorized examples
+                List<Map<String, Object>> rootExamples = getExamplesFromDir(examplesDir);
+                if (!rootExamples.isEmpty()) {
+                    examples.put("uncategorized", rootExamples);
+                }
+            } else {
+                examples.put("message", "No examples found in " + examplesDir.getAbsolutePath());
+            }
             
-            logger.info("Loaded {} example categories", examples.size());
+            logger.info("Loaded examples from {}", EXAMPLES_DIR);
             
         } catch (Exception e) {
             logger.error("Error loading examples", e);
@@ -71,8 +87,7 @@ public class ExampleService {
      */
     public Map<String, Object> getExample(String category, String name) {
         try {
-            String resourcePath = getResourcePath(category, name);
-            String yamlContent = loadResourceContent(resourcePath);
+            String yamlContent = loadExampleFile(category, name + ".yaml");
             
             Map<String, Object> example = new HashMap<>();
             example.put("name", name);
@@ -89,266 +104,77 @@ public class ExampleService {
             return errorExample;
         }
     }
-    
-    private List<Map<String, Object>> getQuickStartExamples() {
+
+    private List<Map<String, Object>> getExamplesFromDir(java.io.File dir) {
         List<Map<String, Object>> examples = new ArrayList<>();
-
-        examples.add(createExampleInfo(
-            "quick-start",
-            "Quick Start Demo",
-            "Simple validation rules for getting started",
-            "demo-rules/quick-start.yaml"
-        ));
-
-        examples.add(createExampleInfo(
-            "file-processing",
-            "File Processing Configuration",
-            "YAML configuration for file processing",
-            "yaml-examples/file-processing-config.yaml"
-        ));
-
-        return examples;
-    }
-    
-    private List<Map<String, Object>> getFinancialExamples() {
-        List<Map<String, Object>> examples = new ArrayList<>();
-
-        examples.add(createExampleInfo(
-            "financial-validation",
-            "Financial Validation Rules",
-            "Financial trade validation and enrichment",
-            "demo-rules/financial-validation.yaml"
-        ));
-
-        examples.add(createExampleInfo(
-            "financial-enrichment",
-            "Financial Enrichment Rules",
-            "Comprehensive financial enrichment processing",
-            "config/financial-enrichment-rules.yaml"
-        ));
-
-        examples.add(createExampleInfo(
-            "settlement-validation",
-            "Settlement Validation Rules",
-            "Settlement validation and processing rules",
-            "config/settlement-validation-rules.yaml"
-        ));
-
-        return examples;
-    }
-    
-    private List<Map<String, Object>> getValidationExamples() {
-        List<Map<String, Object>> examples = new ArrayList<>();
-
-        examples.add(createExampleInfo(
-            "custody-auto-repair",
-            "Custody Auto Repair Rules",
-            "Comprehensive custody auto repair validation",
-            "demo-rules/custody-auto-repair-rules.yaml"
-        ));
-
-        examples.add(createExampleInfo(
-            "derivatives-validation",
-            "Derivatives Validation Rules",
-            "Complex derivatives validation rules",
-            "config/derivatives-validation-rules.yaml"
-        ));
-
-        return examples;
-    }
-    
-    private List<Map<String, Object>> getLookupExamples() {
-        List<Map<String, Object>> examples = new ArrayList<>();
-
-        examples.add(createExampleInfo(
-            "comprehensive-lookup",
-            "Comprehensive Lookup Demo",
-            "Advanced lookup patterns and enrichment",
-            "demo-configs/comprehensive-lookup-demo.yaml"
-        ));
-
-        examples.add(createExampleInfo(
-            "compound-key-lookup",
-            "Compound Key Lookup",
-            "Advanced lookup with compound keys",
-            "examples/lookups/compound-key-lookup.yaml"
-        ));
-
-        return examples;
-    }
-    
-    private List<Map<String, Object>> getAdvancedExamples() {
-        List<Map<String, Object>> examples = new ArrayList<>();
-
-        examples.add(createExampleInfo(
-            "batch-processing",
-            "Batch Processing Demo",
-            "Batch data processing with rules",
-            "batch-processing.yaml"
-        ));
-
-        examples.add(createExampleInfo(
-            "dataset-enrichment",
-            "Dataset Enrichment Rules",
-            "Advanced dataset enrichment patterns",
-            "demo-rules/dataset-enrichment.yaml"
-        ));
-
-        examples.add(createExampleInfo(
-            "rule-chains",
-            "Rule Chains Patterns",
-            "Complex rule chaining patterns",
-            "demo-rules/rule-chains-patterns.yaml"
-        ));
-
-        return examples;
-    }
-    
-    private Map<String, Object> createExampleInfo(String id, String name, String description, String resourcePath) {
-        Map<String, Object> example = new HashMap<>();
-        example.put("id", id);
-        example.put("name", name);
-        example.put("description", description);
-        example.put("resourcePath", resourcePath);
         
-        // Try to load the actual content to verify it exists
-        try {
-            String content = loadResourceContent(resourcePath);
-            example.put("available", true);
-            example.put("size", content.length());
-        } catch (Exception e) {
-            example.put("available", false);
-            example.put("error", e.getMessage());
-            logger.warn("Example {} not available at {}: {}", id, resourcePath, e.getMessage());
-        }
-        
-        return example;
-    }
-    
-    private String getResourcePath(String category, String name) {
-        // Map category/name combinations to actual resource paths
-        // Use the same paths as defined in the example creation methods
-        switch (category) {
-            case "quickstart":
-                switch (name) {
-                    case "quick-start":
-                        return "demo-rules/quick-start.yaml";
-                    case "file-processing":
-                        return "yaml-examples/file-processing-config.yaml";
-                    case "basic-validation":
-                        return "demo-rules/basic-validation.yaml";
-                    default:
-                        return "demo-rules/" + name + ".yaml";
+        if (dir.exists() && dir.isDirectory()) {
+            java.io.File[] files = dir.listFiles((d, name) -> name.endsWith(".yaml") || name.endsWith(".yml"));
+            if (files != null) {
+                for (java.io.File file : files) {
+                    String name = file.getName();
+                    String displayName = name.replace(".yaml", "").replace(".yml", "").replace("-", " ");
+                    displayName = displayName.substring(0, 1).toUpperCase() + displayName.substring(1);
+                    
+                    Map<String, Object> info = new HashMap<>();
+                    info.put("id", name.replace(".yaml", "").replace(".yml", ""));
+                    info.put("name", displayName);
+                    info.put("description", "Loaded from " + name);
+                    info.put("available", true);
+                    info.put("size", file.length());
+                    
+                    examples.add(info);
                 }
-            case "financial":
-                switch (name) {
-                    case "financial-validation":
-                        return "demo-rules/financial-validation.yaml";
-                    case "financial-enrichment":
-                        return "config/financial-enrichment-rules.yaml";
-                    case "settlement-validation":
-                        return "config/settlement-validation-rules.yaml";
-                    case "trade-validation":
-                        return "config/trade-validation-rules.yaml";
-                    default:
-                        return "config/" + name + ".yaml";
-                }
-            case "validation":
-                switch (name) {
-                    case "custody-auto-repair":
-                        return "demo-rules/custody-auto-repair-rules.yaml";
-                    case "derivatives-validation":
-                        return "config/derivatives-validation-rules.yaml";
-                    case "data-validation":
-                        return "demo-rules/data-validation-rules.yaml";
-                    default:
-                        return "demo-rules/" + name + ".yaml";
-                }
-            case "lookup":
-                switch (name) {
-                    case "comprehensive-lookup":
-                        return "demo-configs/comprehensive-lookup-demo.yaml";
-                    case "compound-key-lookup":
-                        return "examples/lookups/compound-key-lookup.yaml";
-                    case "simple-lookup":
-                        return "examples/lookups/simple-lookup.yaml";
-                    default:
-                        return "examples/lookups/" + name + ".yaml";
-                }
-            case "advanced":
-                switch (name) {
-                    case "batch-processing":
-                        return "batch-processing.yaml";
-                    case "dataset-enrichment":
-                        return "demo-rules/dataset-enrichment.yaml";
-                    case "rule-chains":
-                        return "demo-rules/rule-chains-patterns.yaml";
-                    default:
-                        return "demo-rules/" + name + ".yaml";
-                }
-            default:
-                // For truly unknown categories, we should return an error
-                throw new IllegalArgumentException("Unknown example category: " + category);
-        }
-    }
-    
-    private String loadResourceContent(String resourcePath) throws IOException {
-        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
-            if (inputStream == null) {
-                logger.warn("Resource not found: {}, providing mock YAML content", resourcePath);
-                return generateMockYamlContent(resourcePath);
             }
-            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         }
+        return examples;
     }
 
-    private String generateMockYamlContent(String resourcePath) {
-        // Extract name from path for mock content
-        String fileName = resourcePath.substring(resourcePath.lastIndexOf('/') + 1);
-        String name = fileName.replace(".yaml", "").replace("-", " ");
-
-        return String.format("""
-            # Mock YAML Configuration for %s
-            metadata:
-              name: "%s"
-              version: "1.0.0"
-              description: "Mock configuration for playground demonstration"
-              type: "rule-config"
-              author: "APEX Playground"
-
-            rules:
-              - name: "sample-rule"
-                condition: "#amount > 0"
-                message: "Amount must be positive"
-                enabled: true
-
-            enrichments:
-              - name: "sample-enrichment"
-                type: "lookup-enrichment"
-                enabled: true
-                lookupConfig:
-                  lookupKey: "#currency"
-                  lookupDataset:
-                    keyField: "code"
-                    data:
-                      - code: "USD"
-                        name: "US Dollar"
-                      - code: "EUR"
-                        name: "Euro"
-            """, name, name);
+    private String loadExampleFile(String category, String fileName) throws IOException {
+        java.io.File file;
+        if ("uncategorized".equals(category)) {
+            file = new java.io.File(EXAMPLES_DIR, fileName);
+        } else {
+            file = new java.io.File(new java.io.File(EXAMPLES_DIR, category), fileName);
+        }
+        
+        if (file.exists()) {
+            return java.nio.file.Files.readString(file.toPath(), StandardCharsets.UTF_8);
+        }
+        throw new IOException("File not found: " + file.getAbsolutePath());
     }
-    
+
+
     private Map<String, Object> getSampleDataForExample(String category, String name) {
-        // Return appropriate sample data based on the example type
-        switch (category) {
-            case "financial":
+        // Try to load corresponding JSON file
+        try {
+            String jsonContent = loadExampleFile(category, name + ".json");
+            @SuppressWarnings("unchecked")
+            Map<String, Object> data = new com.fasterxml.jackson.databind.ObjectMapper().readValue(jsonContent, Map.class);
+            return data;
+        } catch (Exception e) {
+            logger.warn("Could not load JSON data for example {}/{}: {}", category, name, e.getMessage());
+            
+            // Fallback to hardcoded logic if JSON file not found
+            if (name.contains("financial")) {
                 return createFinancialSampleData();
-            case "validation":
-                return createValidationSampleData();
-            case "lookup":
-                return createLookupSampleData();
-            default:
-                return createDefaultSampleData();
+            } else if (name.contains("quick-start")) {
+                Map<String, Object> data = new HashMap<>();
+                data.put("amount", 100.00);
+                data.put("currency", "USD");
+                return data;
+            }
+            
+            switch (category) {
+                case "financial":
+                    return createFinancialSampleData();
+                case "validation":
+                    return createValidationSampleData();
+                case "lookup":
+                    return createLookupSampleData();
+                default:
+                    return createDefaultSampleData();
+            }
         }
     }
     

@@ -1,0 +1,18 @@
+metadata:
+  name: "Quick Start Demo"
+  version: "1.0.0"
+  description: "Simple validation rules for getting started"
+  type: "rule-config"
+
+rules:
+  - id: "check-amount"
+    name: "Check Amount"
+    condition: "#amount > 0"
+    message: "Amount must be positive"
+    severity: "ERROR"
+
+  - id: "check-currency"
+    name: "Check Currency"
+    condition: "#currency != null && #currency.length() == 3"
+    message: "Currency must be a valid 3-letter code"
+    severity: "WARNING"

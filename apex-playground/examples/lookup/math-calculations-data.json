@@ -1,0 +1,18 @@
+{
+  "calculationId": "CALC-REQ-001",
+  "scenario": "RiskModel_Alpha",
+  "parameters": {
+    "volatility": 0.15,
+    "timeHorizon": 365
+  },
+  "inputs": {
+    "value1": 144,
+    "base": 2,
+    "exponent": 8,
+    "number": 123.456
+  },
+  "value1": 144,
+  "base": 2,
+  "exponent": 8,
+  "number": 123.456
+}

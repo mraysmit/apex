@@ -131,17 +131,19 @@ class UploadButtonInteractionUITest {
         WebElement uploadYamlBtn = driver.findElement(By.id("uploadYamlBtn"));
 
         // Then - Verify button styling
-        assertTrue(uploadDataBtn.getDomAttribute("class").contains("btn-outline-success"), 
+        assertTrue(uploadDataBtn.getDomProperty("className").contains("btn-outline-success"), 
                   "Upload Data button should have success outline styling");
-        assertTrue(uploadYamlBtn.getDomAttribute("class").contains("btn-outline-success"), 
+        assertTrue(uploadYamlBtn.getDomProperty("className").contains("btn-outline-success"), 
                   "Upload YAML button should have success outline styling");
 
         // Verify icons
-        WebElement dataIcon = uploadDataBtn.findElement(By.className("fa-upload"));
-        WebElement yamlIcon = uploadYamlBtn.findElement(By.className("fa-file-upload"));
+        // Note: FontAwesome icons might be rendered differently or have different classes depending on version
+        // We check for the presence of the <i> tag which contains the icon class
+        WebElement dataIcon = uploadDataBtn.findElement(By.tagName("i"));
+        WebElement yamlIcon = uploadYamlBtn.findElement(By.tagName("i"));
         
-        assertTrue(dataIcon.isDisplayed(), "Upload Data button should have upload icon");
-        assertTrue(yamlIcon.isDisplayed(), "Upload YAML button should have file-upload icon");
+        assertTrue(dataIcon.getDomAttribute("class").contains("fa-upload"), "Upload Data button should have upload icon");
+        assertTrue(yamlIcon.getDomAttribute("class").contains("fa-file-upload"), "Upload YAML button should have file-upload icon");
     }
 
     @Test
@@ -170,8 +172,8 @@ class UploadButtonInteractionUITest {
         WebElement yamlFileInput = driver.findElement(By.id("yamlFileInput"));
 
         // Then
-        String dataAccept = dataFileInput.getDomAttribute("accept");
-        String yamlAccept = yamlFileInput.getDomAttribute("accept");
+        String dataAccept = dataFileInput.getDomProperty("accept");
+        String yamlAccept = yamlFileInput.getDomProperty("accept");
 
         assertTrue(dataAccept.contains(".json"), "Data input should accept JSON files");
         assertTrue(dataAccept.contains(".xml"), "Data input should accept XML files");
@@ -200,7 +202,7 @@ class UploadButtonInteractionUITest {
 
         // Verify they're in the same button group
         WebElement buttonGroup = uploadDataBtn.findElement(By.xpath(".."));
-        assertTrue(buttonGroup.getDomAttribute("class").contains("btn-group"), 
+        assertTrue(buttonGroup.getDomProperty("className").contains("btn-group"), 
                   "Upload buttons should be in a button group");
         assertTrue(buttonGroup.findElements(By.id("uploadYamlBtn")).size() > 0, 
                   "Both upload buttons should be in the same group");
@@ -279,9 +281,9 @@ class UploadButtonInteractionUITest {
         WebElement uploadYamlBtn = driver.findElement(By.id("uploadYamlBtn"));
 
         // Then - Verify buttons have proper attributes
-        assertEquals("button", uploadDataBtn.getDomAttribute("type"), 
+        assertEquals("button", uploadDataBtn.getDomProperty("type"), 
                     "Upload Data button should have correct type");
-        assertEquals("button", uploadYamlBtn.getDomAttribute("type"), 
+        assertEquals("button", uploadYamlBtn.getDomProperty("type"), 
                     "Upload YAML button should have correct type");
 
         // Verify buttons are not disabled

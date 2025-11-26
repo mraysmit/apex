@@ -105,7 +105,8 @@ async function processData() {
     const startTime = Date.now();
     
     try {
-        const response = await fetch(window.playgroundConfig.apiBaseUrl + '/process', {
+        // Add timestamp to prevent caching
+        const response = await fetch(window.playgroundConfig.apiBaseUrl + '/process?t=' + new Date().getTime(), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -120,9 +121,11 @@ async function processData() {
         const result = await response.json();
         const processingTime = Date.now() - startTime;
         
+        console.log('Processing result:', result);
+
         // Display results
         displayValidationResults(result.validation || { message: result.message });
-        displayEnrichmentResults(result.enrichment || { message: result.message });
+        displayEnrichmentResults(result.enrichment || { message: result.message }, result.metrics);
         updateProcessingTime(processingTime);
         
     } catch (error) {
@@ -299,38 +302,59 @@ function showExampleSelectionDialog(examplesData) {
 }
 
 /**
- * Create HTML for example categories
+ * Create HTML for example categories using Bootstrap Accordion
  */
 function createExampleCategoriesHTML(examplesData) {
-    let html = '';
+    let html = '<div class="accordion" id="examplesAccordion">';
+    let index = 0;
 
     Object.keys(examplesData).forEach(category => {
-        if (category === 'timestamp' || category === 'message') return;
+        if (category === 'timestamp' || category === 'message' || category === 'error') return;
 
         const examples = examplesData[category];
-        if (Array.isArray(examples)) {
+        if (Array.isArray(examples) && examples.length > 0) {
+            const categoryId = `category-${index}`;
+            const isFirst = index === 0;
+            
             html += `
-                <div class="example-category">
-                    <h4>${category.charAt(0).toUpperCase() + category.slice(1)}</h4>
-                    <div class="example-list">
-                        ${examples.map(example => `
-                            <div class="example-item ${example.available ? '' : 'unavailable'}"
-                                 data-category="${category}"
-                                 data-id="${example.id}">
-                                <div class="example-name">${example.name}</div>
-                                <div class="example-description">${example.description}</div>
-                                ${!example.available ? '<div class="example-error">Not available</div>' : ''}
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="heading-${categoryId}">
+                        <button class="accordion-button ${isFirst ? '' : 'collapsed'}" type="button" 
+                                data-bs-toggle="collapse" data-bs-target="#collapse-${categoryId}" 
+                                aria-expanded="${isFirst}" aria-controls="collapse-${categoryId}">
+                            ${category.charAt(0).toUpperCase() + category.slice(1)}
+                            <span class="badge bg-secondary ms-2">${examples.length}</span>
+                        </button>
+                    </h2>
+                    <div id="collapse-${categoryId}" class="accordion-collapse collapse ${isFirst ? 'show' : ''}" 
+                         aria-labelledby="heading-${categoryId}" data-bs-parent="#examplesAccordion">
+                        <div class="accordion-body p-0">
+                            <div class="list-group list-group-flush">
+                                ${examples.map(example => `
+                                    <button type="button" class="list-group-item list-group-item-action example-item ${example.available ? '' : 'disabled'}"
+                                            data-category="${category}"
+                                            data-id="${example.id}">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">${example.name}</h6>
+                                            <small class="text-muted">${formatFileSize(example.size)}</small>
+                                        </div>
+                                        <p class="mb-1 small text-muted">${example.description || 'No description available'}</p>
+                                    </button>
+                                `).join('')}
                             </div>
-                        `).join('')}
+                        </div>
                     </div>
                 </div>
             `;
+            index++;
         }
     });
 
+    html += '</div>';
+
     // Add event listeners for example selection
     setTimeout(() => {
-        document.querySelectorAll('.example-item.available, .example-item:not(.unavailable)').forEach(item => {
+        document.querySelectorAll('.example-item:not(.disabled)').forEach(item => {
             item.addEventListener('click', () => {
                 const category = item.dataset.category;
                 const id = item.dataset.id;
@@ -422,15 +446,50 @@ function updateYamlStatus(isValid, message) {
  */
 function displayValidationResults(results) {
     const container = document.getElementById('validationResults');
+    if (!container) return;
+
+    // Clear and update content
     container.innerHTML = `<pre>${JSON.stringify(results, null, 2)}</pre>`;
+    
+    // Visual feedback for update
+    const originalBg = container.style.backgroundColor;
+    container.style.transition = 'background-color 0.3s';
+    container.style.backgroundColor = '#e8f0fe'; // Light blue highlight
+    
+    setTimeout(() => {
+        container.style.backgroundColor = originalBg || '#f8f9fa';
+    }, 300);
 }
 
 /**
  * Display enrichment results
  */
-function displayEnrichmentResults(results) {
+function displayEnrichmentResults(enrichment, metrics) {
+    console.log('Displaying enrichment results. Metrics:', metrics);
     const container = document.getElementById('enrichmentResults');
-    container.innerHTML = `<pre>${JSON.stringify(results, null, 2)}</pre>`;
+    
+    let html = '';
+    
+    // Metrics section
+    if (metrics) {
+        html += '<div class="mb-3 border-bottom pb-2">';
+        html += '<h6 class="text-muted mb-2">Performance Metrics</h6>';
+        html += '<div class="row g-2 small">';
+        html += `<div class="col-6">Total Time: <span class="fw-bold text-primary">${metrics.totalTimeMs}ms</span></div>`;
+        html += `<div class="col-6">Rules Execution: <span class="fw-bold">${metrics.rulesExecutionTimeMs}ms</span></div>`;
+        html += `<div class="col-6">YAML Parsing: <span class="fw-bold">${metrics.yamlParsingTimeMs}ms</span></div>`;
+        html += `<div class="col-6">Data Parsing: <span class="fw-bold">${metrics.dataParsingTimeMs}ms</span></div>`;
+        if (metrics.enrichmentTimeMs > 0) {
+            html += `<div class="col-6">Enrichment: <span class="fw-bold">${metrics.enrichmentTimeMs}ms</span></div>`;
+        }
+        html += '</div></div>';
+    }
+    
+    // Enrichment section
+    html += '<h6 class="text-muted mb-2">Enrichment Data</h6>';
+    html += `<pre>${JSON.stringify(enrichment, null, 2)}</pre>`;
+    
+    container.innerHTML = html;
 }
 
 /**

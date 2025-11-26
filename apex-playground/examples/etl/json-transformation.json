@@ -1,0 +1,6 @@
+{
+  "note": "This pipeline reads data from examples/etl/data/orders.json",
+  "parameters": {
+    "taxRate": 0.10
+  }
+}

@@ -1,0 +1,60 @@
+metadata:
+  id: "simple-inline-rule-group-test"
+  name: "Simple Inline Rule Group Test"
+  version: "1.0.0"
+  description: "Simple test with 2 rules and inline rule-group references"
+  type: "rule-config"
+  author: "APEX Demo Team"
+  created-date: "2025-01-15"
+  tags: ["demo", "rule-groups", "inline-references", "simple"]
+
+rules:
+  # Rule 1: Check username format
+  - id: "username-check"
+    name: "Username Format Check"
+    description: "Validates that username is present and at least 3 chars"
+    condition: "#username != null && #username.length() >= 3"
+    message: "Username {{#username}} is valid"
+    severity: "INFO"
+    priority: 1
+
+  # Rule 2: Check account status
+  - id: "status-check"
+    name: "Account Status Check"
+    description: "Validates that account status is ACTIVE"
+    condition: "#status == 'ACTIVE'"
+    message: "Account status is {{#status}}"
+    severity: "ERROR"
+    priority: 1
+
+  # Rule 3: Check email format
+  - id: "email-check"
+    name: "Email Format Check"
+    description: "Validates that email contains @"
+    condition: "#email != null && #email.contains('@')"
+    message: "Email {{#email}} format is valid"
+    severity: "INFO"
+    priority: 2
+
+rule-groups:
+  # Base rule group: Basic Data Integrity
+  - id: "basic-integrity"
+    name: "Basic Data Integrity Group"
+    description: "Checks username and email format"
+    operator: "AND"
+    stop-on-first-failure: false
+    rule-ids:
+      - "username-check"
+      - "email-check"
+
+  # Composite rule group: Full Account Eligibility
+  # References the base group by ID (inline reference) + adds status check
+  - id: "account-eligibility"
+    name: "Account Eligibility Group"
+    description: "Combines integrity checks with status validation"
+    operator: "AND"
+    stop-on-first-failure: true
+    rule-ids:
+      - "status-check"
+    rule-group-references:
+      - "basic-integrity"  # ✓ Inline rule-group-id reference within same file

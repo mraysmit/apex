@@ -1,0 +1,24 @@
+{
+  "orderId": "ORD-99283",
+  "customer": {
+    "id": "CUST-9982",
+    "name": "Global Tech Industries",
+    "tier": "PLATINUM",
+    "region": "NA"
+  },
+  "items": [
+    {
+      "productId": "PROD-X100",
+      "description": "Enterprise Server Rack",
+      "quantity": 100,
+      "unitPrice": 100.0
+    }
+  ],
+  "shippingAddress": {
+    "city": "New York",
+    "country": "USA"
+  },
+  "quantity": 100,
+  "unitPrice": 100.0,
+  "customerTier": "PLATINUM"
+}

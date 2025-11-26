@@ -1,0 +1,95 @@
+metadata:
+  id: "constant-enrichment-samples"
+  name: "Constant Enrichment Samples"
+  version: "1.0.0"
+  description: "Various examples of using constant values to enrich fields"
+  type: "enrichment"
+  author: "apex-playground"
+
+enrichments:
+  # Example 1: Environment Configuration
+  # Sets constant configuration values for the processing environment
+  - id: "set-environment-constants"
+    name: "Set Environment Constants"
+    type: "field-enrichment"
+    description: "Injects environment-specific constants into the data context"
+    enabled: true
+    field-mappings:
+      - source-field: "constant"
+        target-field: "environment"
+        expression: "'DEVELOPMENT'"
+      
+      - source-field: "constant"
+        target-field: "apiVersion"
+        expression: "'v2.4'"
+        
+      - source-field: "constant"
+        target-field: "processingNode"
+        # Alternative syntax using 'transformation' instead of 'expression'
+        transformation: "'node-us-east-1'"
+
+  # Example 2: Default Values
+  # Sets default values for fields only if they are missing (null)
+  - id: "set-default-values"
+    name: "Set Default Values"
+    type: "field-enrichment"
+    description: "Sets default currency and priority if not present"
+    enabled: true
+    field-mappings:
+      - source-field: "constant"
+        target-field: "currency"
+        expression: "#currency == null ? 'USD' : #currency"
+        
+      - source-field: "constant"
+        target-field: "priority"
+        expression: "#priority == null ? 'NORMAL' : #priority"
+
+  # Example 3: System Flags
+  # Sets boolean flags for system control
+  - id: "set-system-flags"
+    name: "Set System Flags"
+    type: "field-enrichment"
+    description: "Sets internal processing flags"
+    enabled: true
+    field-mappings:
+      - source-field: "constant"
+        target-field: "auditEnabled"
+        expression: "true"
+        
+      - source-field: "constant"
+        target-field: "retryEnabled"
+        expression: "false"
+
+  # Example 4: Error Codes
+  # Assigns constant error codes based on conditions
+  - id: "assign-error-codes"
+    name: "Assign Error Codes"
+    type: "field-enrichment"
+    description: "Assigns specific error codes for invalid states"
+    enabled: true
+    condition: "#status == 'ERROR'"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "errorCode"
+        expression: "'ERR-500'"
+        
+      - source-field: "constant"
+        target-field: "errorSeverity"
+        expression: "'CRITICAL'"
+
+  # Example 5: Alternative Syntax
+  # Demonstrates using 'transformation' keyword instead of 'expression'
+  - id: "alternative-syntax-demo"
+    name: "Alternative Syntax Demo"
+    type: "field-enrichment"
+    description: "Uses transformation property for constant assignment"
+    enabled: true
+    field-mappings:
+      - source-field: "constant"
+        target-field: "dataSource"
+        transformation: "'LEGACY_SYSTEM'"
+      
+      - source-field: "constant"
+        target-field: "dataQuality"
+        transformation: "'UNVERIFIED'"
+

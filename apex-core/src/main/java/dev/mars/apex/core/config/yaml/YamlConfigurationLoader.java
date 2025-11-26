@@ -2393,8 +2393,11 @@ public class YamlConfigurationLoader {
             YamlEnrichment.FieldMapping mapping = fieldMappings.get(i);
 
             // Validate required fields
-            if (mapping.getSourceField() == null || mapping.getSourceField().trim().isEmpty()) {
-                throw new YamlConfigurationException("Field mapping at index " + i + " missing 'source-field' for enrichment: " + enrichmentId);
+            boolean hasSourceField = mapping.getSourceField() != null && !mapping.getSourceField().trim().isEmpty();
+            boolean hasExpression = mapping.getExpression() != null && !mapping.getExpression().trim().isEmpty();
+
+            if (!hasSourceField && !hasExpression) {
+                throw new YamlConfigurationException("Field mapping at index " + i + " missing 'source-field' for enrichment: " + enrichmentId + ". Must provide at least one of: source-field, expression (or transformation).");
             }
 
             if (mapping.getTargetField() == null || mapping.getTargetField().trim().isEmpty()) {

@@ -1,0 +1,13 @@
+{
+  "transactionId": "TXN-998877",
+  "timestamp": "2023-11-26T14:30:00Z",
+  "type": "WIRE_TRANSFER",
+  "amount": 1500,
+  "currency": "USD",
+  "customerId": "CUST-001",
+  "merchant": {
+    "name": "Online Store",
+    "category": "Retail"
+  },
+  "riskScore": 12
+}

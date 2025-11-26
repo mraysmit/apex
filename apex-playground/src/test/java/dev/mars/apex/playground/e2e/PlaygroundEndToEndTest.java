@@ -125,7 +125,7 @@ class PlaygroundEndToEndTest {
 
             HttpResponse<String> cssResponse = httpClient.send(cssRequest, HttpResponse.BodyHandlers.ofString());
             assertEquals(200, cssResponse.statusCode());
-            assertTrue(cssResponse.body().contains("playground-panels"));
+            assertTrue(cssResponse.body().contains("playground-grid"));
 
             // Test JavaScript
             HttpRequest jsRequest = HttpRequest.newBuilder()

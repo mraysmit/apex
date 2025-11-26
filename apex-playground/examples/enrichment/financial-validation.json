@@ -1,0 +1,8 @@
+{
+  "tradeId": "TRD-001",
+  "amount": 150000.00,
+  "currency": "USD",
+  "counterparty": "BANK-ABC",
+  "tradeDate": "2024-08-24",
+  "settlementDate": "2024-08-26"
+}

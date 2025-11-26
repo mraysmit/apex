@@ -1,0 +1,7 @@
+{
+  "note": "This pipeline reads data from examples/etl/data/customers.csv",
+  "executionParameters": {
+    "batchSize": 100,
+    "dryRun": false
+  }
+}

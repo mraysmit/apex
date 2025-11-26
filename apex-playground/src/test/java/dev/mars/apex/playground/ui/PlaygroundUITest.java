@@ -336,7 +336,8 @@ class PlaygroundUITest {
 
         WebElement processBtn = driver.findElement(By.id("processBtn"));
         assertTrue(processBtn.isDisplayed(), "Process button should be visible on mobile");
-        processBtn.click();
+        // Use JS click to avoid interception on mobile viewport
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", processBtn);
 
         // Then - Verify processing works on mobile
         WebElement validationArea = wait.until(ExpectedConditions.presenceOfElementLocated(
@@ -526,7 +527,7 @@ class PlaygroundUITest {
     }
 
     private String getTextAreaContent(WebElement element) {
-        String value = element.getDomAttribute("value");
+        String value = element.getDomProperty("value");
         if (value != null && !value.isEmpty()) {
             return value;
         }

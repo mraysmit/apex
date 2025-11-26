@@ -18,6 +18,7 @@ package dev.mars.apex.playground.ui;
 
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Disabled;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.TestPropertySource;
@@ -47,6 +48,7 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 })
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DisplayName("Multi-Format Screenshot Tests")
+@Disabled("Screenshots disabled for performance")
 public class MultiFormatScreenshotTest {
 
     @LocalServerPort

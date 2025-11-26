@@ -1,0 +1,151 @@
+version: "1.0"
+name: "Constant Value Field Enrichment Test"
+description: |
+  Demonstrates CORRECT patterns for assigning constant values in field-enrichment.
+  
+  CORRECT PATTERN:
+  - source-field: "constant" (special keyword)
+  - expression: "'value'" (SpEL string literal)
+  OR
+  - transformation: "'value'" (alternative to expression)
+  
+  INCORRECT PATTERNS (DO NOT USE):
+  - source-field: '''value''' (triple quotes - WRONG!)
+  - source-field: 'value' (direct value - WRONG!)
+
+# ============================================================================
+# TEST 1: Basic Constant String Assignment
+# ============================================================================
+enrichments:
+  - id: "assign-basic-constants"
+    name: "Assign Basic Constant Strings"
+    type: "field-enrichment"
+    description: "Demonstrates basic constant string assignment pattern"
+    enabled: true
+    field-mappings:
+      # Pattern 1: Using expression
+      - source-field: "constant"
+        target-field: "status"
+        expression: "'ACTIVE'"
+      
+      # Pattern 2: Using expression for enrichment ID (the original issue)
+      - source-field: "constant"
+        target-field: "enrichmentId"
+        expression: "'e1'"
+      
+      # Pattern 3: Using transformation (alternative syntax)
+      - source-field: "constant"
+        target-field: "productType"
+        transformation: "'OTC_OPTION'"
+
+# ============================================================================
+# TEST 2: Constant Numeric Assignment
+# ============================================================================
+  - id: "assign-numeric-constants"
+    name: "Assign Constant Numeric Values"
+    type: "field-enrichment"
+    description: "Demonstrates numeric and boolean constant assignment"
+    enabled: true
+    field-mappings:
+      # Integer constant
+      - source-field: "constant"
+        target-field: "defaultQuantity"
+        expression: "100"
+      
+      # Decimal constant
+      - source-field: "constant"
+        target-field: "defaultPrice"
+        expression: "99.99"
+      
+      # Boolean constant
+      - source-field: "constant"
+        target-field: "requiresValidation"
+        expression: "true"
+
+# ============================================================================
+# TEST 3 & 4: Conditional Constant Assignment
+# ============================================================================
+  - id: "assign-high-value-constants"
+    name: "Assign High Value Trade Constants"
+    type: "field-enrichment"
+    description: "Conditional assignment for high value trades"
+    enabled: true
+    condition: "#notionalAmount > 10000000"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "valueCategory"
+        expression: "'HIGH_VALUE'"
+      
+      - source-field: "constant"
+        target-field: "requiresApproval"
+        expression: "true"
+      
+      - source-field: "constant"
+        target-field: "approvalLevel"
+        expression: "'SENIOR_TRADER'"
+
+  - id: "assign-standard-value-constants"
+    name: "Assign Standard Value Trade Constants"
+    type: "field-enrichment"
+    description: "Conditional assignment for standard value trades"
+    enabled: true
+    condition: "#notionalAmount <= 10000000"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "valueCategory"
+        expression: "'STANDARD'"
+      
+      - source-field: "constant"
+        target-field: "requiresApproval"
+        expression: "false"
+      
+      - source-field: "constant"
+        target-field: "approvalLevel"
+        expression: "'AUTO_APPROVED'"
+
+# ============================================================================
+# TEST 5: Nested Field Constant Assignment
+# ============================================================================
+  - id: "assign-nested-constants"
+    name: "Assign Constants to Nested Fields"
+    type: "field-enrichment"
+    description: "Demonstrates constant assignment to nested fields using #metadata.field notation"
+    enabled: true
+    field-mappings:
+      - source-field: "constant"
+        target-field: "#metadata.validationStatus"
+        expression: "'VALIDATED'"
+      
+      - source-field: "constant"
+        target-field: "#metadata.source"
+        expression: "'SYSTEM'"
+      
+      - source-field: "constant"
+        target-field: "#metadata.version"
+        expression: "'v1.0'"
+
+# ============================================================================
+# TEST 6: OTC Options Trade Processing - Domain Example
+# ============================================================================
+  - id: "assign-otc-option-constants"
+    name: "Assign OTC Option Trade Constants"
+    type: "field-enrichment"
+    description: "Domain-specific constant assignment for OTC options trades"
+    enabled: true
+    condition: "#underlying != null && #optionType != null"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "assetClass"
+        expression: "'OTC_OPTION'"
+      
+      - source-field: "constant"
+        target-field: "tradingDesk"
+        expression: "'FX_DERIVATIVES'"
+      
+      - source-field: "constant"
+        target-field: "documentationType"
+        expression: "'ISDA'"
+      
+      - source-field: "constant"
+        target-field: "settlementCycle"
+        expression: "'T+2'"

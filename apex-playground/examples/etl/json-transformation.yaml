@@ -1,0 +1,55 @@
+metadata:
+  id: "json-transform-pipeline"
+  name: "JSON Transformation Pipeline"
+  version: "1.0.0"
+  description: "Reads orders from JSON, calculates tax, and writes to new JSON"
+  type: "pipeline-config"
+  author: "APEX Demo Team"
+  tags: ["etl", "json", "transformation"]
+
+pipeline:
+  name: "order-processing"
+  steps:
+    - name: "extract-orders"
+      type: "extract"
+      source: "orders-json-source"
+      operation: "getAllOrders"
+
+    - name: "calculate-tax"
+      type: "transform"
+      depends-on: ["extract-orders"]
+      transformations:
+        - type: "calculation"
+          field: "taxAmount"
+          expression: "#amount * 0.10"
+        - type: "calculation"
+          field: "totalAmount"
+          expression: "#amount + (#amount * 0.10)"
+
+    - name: "load-processed-orders"
+      type: "load"
+      sink: "processed-orders-sink"
+      operation: "writeOrder"
+      depends-on: ["calculate-tax"]
+
+data-sources:
+  - name: "orders-json-source"
+    type: "file-system"
+    enabled: true
+    connection:
+      base-path: "./examples/etl/data"
+      file-pattern: "orders.json"
+    fileFormat:
+      type: "json"
+    queries:
+      getAllOrders: "read-all"
+
+data-sinks:
+  - name: "processed-orders-sink"
+    type: "file-system"
+    enabled: true
+    connection:
+      base-path: "./target/playground/etl/output"
+      file-pattern: "processed-orders-{timestamp}.json"
+    operations:
+      writeOrder: "write"

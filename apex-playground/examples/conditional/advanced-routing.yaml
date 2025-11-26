@@ -1,0 +1,148 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Purpose: Demonstrate advanced priority-based routing using conditional-mapping-enrichment
+#          Shows how to implement complex routing logic with priorities
+# ============================================================================
+
+metadata:
+  id: "advanced-routing-example"
+  name: "Advanced Priority Routing"
+  version: "1.0.0"
+  description: "Demonstrates priority-based routing using conditional-mapping-enrichment"
+  type: "scenario"
+  author: "APEX Demo Team"
+  created: "2025-09-17"
+  tags: ["routing", "priority", "conditional-mapping"]
+
+enrichments:
+  # 1. Priority-based routing for customer segments
+  - id: "customer-segment-routing"
+    name: "Customer Segment Routing"
+    type: "conditional-mapping-enrichment"
+    description: "Route customers to appropriate service tiers based on segment and value"
+    
+    conditional-mappings:
+      # Priority 1: VIP Customers (High Value)
+      - condition: "#customerSegment == 'VIP' && #totalValue > 1000000"
+        priority: 1
+        mappings:
+          - source-field: "customerSegment"
+            target-field: "serviceTier"
+            value: "PLATINUM_CONCIERGE"
+          - source-field: "totalValue"
+            target-field: "slaHours"
+            value: 1
+          - source-field: "totalValue"
+            target-field: "routingQueue"
+            value: "VIP_QUEUE"
+
+      # Priority 2: Corporate Customers (High Value)
+      - condition: "#customerSegment == 'CORPORATE' && #totalValue > 500000"
+        priority: 2
+        mappings:
+          - source-field: "customerSegment"
+            target-field: "serviceTier"
+            value: "GOLD_BUSINESS"
+          - source-field: "totalValue"
+            target-field: "slaHours"
+            value: 4
+          - source-field: "totalValue"
+            target-field: "routingQueue"
+            value: "CORP_QUEUE"
+
+      # Priority 3: Standard Customers (High Value)
+      - condition: "#totalValue > 100000"
+        priority: 3
+        mappings:
+          - source-field: "customerSegment"
+            target-field: "serviceTier"
+            value: "SILVER_PREMIUM"
+          - source-field: "totalValue"
+            target-field: "slaHours"
+            value: 8
+          - source-field: "totalValue"
+            target-field: "routingQueue"
+            value: "PREMIUM_QUEUE"
+
+      # Default: All other customers
+      - condition: "true"
+        priority: 99
+        mappings:
+          - source-field: "customerSegment"
+            target-field: "serviceTier"
+            value: "STANDARD"
+          - source-field: "totalValue"
+            target-field: "slaHours"
+            value: 24
+          - source-field: "totalValue"
+            target-field: "routingQueue"
+            value: "GENERAL_QUEUE"
+
+  # 2. Region-based compliance routing
+  - id: "compliance-routing"
+    name: "Compliance Routing"
+    type: "conditional-mapping-enrichment"
+    description: "Route transactions to compliance teams based on region and risk"
+    
+    conditional-mappings:
+      # Priority 1: High Risk Regions
+      - condition: "{'NK', 'IR', 'SY'}.contains(#countryCode)"
+        priority: 1
+        mappings:
+          - source-field: "countryCode"
+            target-field: "complianceTeam"
+            value: "SANCTIONS_TEAM"
+          - source-field: "countryCode"
+            target-field: "reviewLevel"
+            value: "L3_ENHANCED_DUE_DILIGENCE"
+
+      # Priority 2: Medium Risk Regions
+      - condition: "{'RU', 'CN', 'VE'}.contains(#countryCode)"
+        priority: 2
+        mappings:
+          - source-field: "countryCode"
+            target-field: "complianceTeam"
+            value: "REGIONAL_RISK_TEAM"
+          - source-field: "countryCode"
+            target-field: "reviewLevel"
+            value: "L2_STANDARD_REVIEW"
+
+      # Default: Low Risk Regions
+      - condition: "true"
+        priority: 99
+        mappings:
+          - source-field: "countryCode"
+            target-field: "complianceTeam"
+            value: "AUTOMATED_CHECK"
+          - source-field: "countryCode"
+            target-field: "reviewLevel"
+            value: "L1_AUTOMATED"
+
+  # 3. Product-specific routing
+  - id: "product-routing"
+    name: "Product Routing"
+    type: "conditional-mapping-enrichment"
+    description: "Route products to specialized teams"
+    
+    conditional-mappings:
+      - condition: "#productType == 'DERIVATIVES'"
+        priority: 1
+        mappings:
+          - source-field: "productType"
+            target-field: "productTeam"
+            value: "DERIVATIVES_DESK"
+      
+      - condition: "#productType == 'FX_SPOT'"
+        priority: 2
+        mappings:
+          - source-field: "productType"
+            target-field: "productTeam"
+            value: "FX_SPOT_DESK"
+            
+      - condition: "true"
+        priority: 99
+        mappings:
+          - source-field: "productType"
+            target-field: "productTeam"
+            value: "GENERAL_OPERATIONS"

@@ -1,0 +1,51 @@
+metadata:
+  id: "constant-value-enrichment"
+  name: "Constant Value Assignment"
+  version: "1.0.0"
+  description: "Demonstrates assigning constant strings, numbers, and booleans to fields"
+  type: "enrichment"
+
+enrichments:
+  - id: "assign-basic-constants"
+    name: "Assign Basic Constants"
+    type: "field-enrichment"
+    description: "Assigns static values to status and type fields"
+    enabled: true
+    field-mappings:
+      - source-field: "constant"
+        target-field: "status"
+        expression: "'ACTIVE'"
+      
+      - source-field: "constant"
+        target-field: "productType"
+        transformation: "'OTC_OPTION'"
+
+  - id: "assign-numeric-constants"
+    name: "Assign Numeric Defaults"
+    type: "field-enrichment"
+    description: "Sets default quantity and price if missing"
+    enabled: true
+    condition: "#defaultQuantity == null"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "defaultQuantity"
+        expression: "100"
+      
+      - source-field: "constant"
+        target-field: "requiresValidation"
+        expression: "true"
+
+  - id: "conditional-constants"
+    name: "High Value Trade Flags"
+    type: "field-enrichment"
+    description: "Flags trades over 1M as HIGH_VALUE"
+    enabled: true
+    condition: "#notionalAmount > 1000000"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "valueCategory"
+        expression: "'HIGH_VALUE'"
+      
+      - source-field: "constant"
+        target-field: "approvalLevel"
+        expression: "'SENIOR_TRADER'"

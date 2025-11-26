@@ -1,0 +1,177 @@
+package dev.mars.apex.playground.ui;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
+import org.junit.jupiter.api.*;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.TestPropertySource;
+
+import java.time.Duration;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestPropertySource(properties = {
+    "logging.level.dev.mars.apex=WARN",
+    "logging.level.org.springframework=WARN"
+})
+@DisplayName("APEX Playground Layout Tests")
+class PlaygroundLayoutTest {
+
+    @LocalServerPort
+    private int port;
+
+    private WebDriver driver;
+    private String baseUrl;
+
+    @BeforeAll
+    static void setupClass() {
+        WebDriverManager.chromedriver().setup();
+    }
+
+    @BeforeEach
+    void setUp() {
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--headless");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--disable-gpu");
+        options.addArguments("--window-size=1920,1080");
+
+        driver = new ChromeDriver(options);
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
+        baseUrl = "http://localhost:" + port;
+    }
+
+    @AfterEach
+    void tearDown() {
+        if (driver != null) {
+            driver.quit();
+        }
+    }
+
+    @Test
+    @DisplayName("Should fill browser viewport height")
+    void shouldFillBrowserViewportHeight() {
+        driver.get(baseUrl + "/playground");
+
+        // Get viewport height
+        long viewportHeight = (Long) ((org.openqa.selenium.JavascriptExecutor) driver)
+                .executeScript("return window.innerHeight");
+        
+        // Get container
+        WebElement container = driver.findElement(By.className("playground-container"));
+        
+        // Get container location and size
+        int containerBottom = container.getLocation().getY() + container.getSize().getHeight();
+        
+        // The container bottom should be very close to viewport height
+        // Allow small margin (e.g. 5px)
+        assertTrue(Math.abs(viewportHeight - containerBottom) < 5, 
+            String.format("Container bottom (%d) should be at viewport bottom (%d)", 
+                containerBottom, viewportHeight));
+    }
+
+    @Test
+    @DisplayName("Should have 4 panels in a grid")
+    void shouldHave4PanelsInGrid() {
+        driver.get(baseUrl + "/playground");
+
+        // Check grid exists
+        WebElement grid = driver.findElement(By.className("playground-grid"));
+        assertNotNull(grid, "Playground grid should exist");
+
+        // Check 4 panels exist
+        int panelCount = driver.findElements(By.className("playground-panel")).size();
+        assertEquals(4, panelCount, "Should have exactly 4 panels");
+    }
+
+    @Test
+    @DisplayName("Panels should expand to fill grid cells")
+    void panelsShouldExpandToFillGridCells() {
+        driver.get(baseUrl + "/playground");
+
+        WebElement grid = driver.findElement(By.className("playground-grid"));
+        int gridHeight = grid.getSize().getHeight();
+        
+        // Get first panel
+        WebElement firstPanel = driver.findElement(By.className("playground-panel"));
+        int panelHeight = firstPanel.getSize().getHeight();
+
+        // In a 2x2 grid, panel height should be roughly half of grid height (minus gap)
+        // 1080p screen -> ~900px grid -> ~450px panel
+        assertTrue(panelHeight > gridHeight / 2 - 50, 
+            String.format("Panel height (%d) should be roughly half of grid height (%d)", 
+                panelHeight, gridHeight));
+    }
+
+    @Test
+    @DisplayName("Should have correct 2x2 grid layout coordinates")
+    void shouldHaveCorrectGridCoordinates() {
+        driver.get(baseUrl + "/playground");
+
+        WebElement grid = driver.findElement(By.className("playground-grid"));
+        int gridWidth = grid.getSize().getWidth();
+        int gridHeight = grid.getSize().getHeight();
+        int gridX = grid.getLocation().getX();
+        int gridY = grid.getLocation().getY();
+        
+        int midX = gridX + gridWidth / 2;
+        int midY = gridY + gridHeight / 2;
+
+        java.util.List<WebElement> panels = driver.findElements(By.className("playground-panel"));
+        assertEquals(4, panels.size(), "Should have 4 panels");
+
+        // Panel 1: Top Left
+        WebElement p1 = panels.get(0);
+        assertTrue(p1.getLocation().getX() < midX, "Panel 1 should be left");
+        assertTrue(p1.getLocation().getY() < midY, "Panel 1 should be top");
+
+        // Panel 2: Top Right
+        WebElement p2 = panels.get(1);
+        assertTrue(p2.getLocation().getX() >= midX - 20, "Panel 2 should be right (allowing for gap)"); // -20 for gap/margin of error
+        assertTrue(p2.getLocation().getY() < midY, "Panel 2 should be top");
+
+        // Panel 3: Bottom Left
+        WebElement p3 = panels.get(2);
+        assertTrue(p3.getLocation().getX() < midX, "Panel 3 should be left");
+        assertTrue(p3.getLocation().getY() >= midY - 20, "Panel 3 should be bottom (allowing for gap)");
+
+        // Panel 4: Bottom Right
+        WebElement p4 = panels.get(3);
+        assertTrue(p4.getLocation().getX() >= midX - 20, "Panel 4 should be right");
+        assertTrue(p4.getLocation().getY() >= midY - 20, "Panel 4 should be bottom");
+    }
+
+    @Test
+    @DisplayName("Should maintain grid layout on smaller screens (tablet)")
+    void shouldMaintainGridLayoutOnTablet() {
+        // Resize window to tablet size (e.g. iPad portrait width is 768px)
+        // We want to ensure it stays as grid above 576px
+        driver.manage().window().setSize(new Dimension(800, 1024));
+        driver.get(baseUrl + "/playground");
+
+        WebElement grid = driver.findElement(By.className("playground-grid"));
+        
+        // Check if it's still a grid (panels should be side-by-side)
+        java.util.List<WebElement> panels = driver.findElements(By.className("playground-panel"));
+        WebElement p1 = panels.get(0);
+        WebElement p2 = panels.get(1);
+
+        // If grid is active, p2 should be to the right of p1
+        // If block is active (stacked), p2 should be below p1
+        
+        int p1Y = p1.getLocation().getY();
+        int p2Y = p2.getLocation().getY();
+        
+        // Allow for small alignment differences, but they should be roughly on the same row
+        assertTrue(Math.abs(p1Y - p2Y) < 50, 
+            "Panels should be side-by-side on tablet width (800px). Found Y coords: " + p1Y + ", " + p2Y);
+    }
+}

@@ -1,0 +1,21 @@
+{
+  "messageId": "MSG-20231126-001",
+  "type": "PACS.008",
+  "sender": "BANKUS33",
+  "receiver": "BANKGB22",
+  "transaction": {
+    "amount": 5000000,
+    "currency": "USD",
+    "valueDate": "2023-11-27"
+  },
+  "debtor": {
+    "name": "John Doe",
+    "account": "1234567890"
+  },
+  "creditor": {
+    "name": "Jane Smith",
+    "account": "0987654321"
+  },
+  "amount": 5000000,
+  "currency": "USD"
+}

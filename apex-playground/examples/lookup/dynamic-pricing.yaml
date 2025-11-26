@@ -1,0 +1,49 @@
+metadata:
+  id: "dynamic-pricing-lookup"
+  name: "Dynamic Pricing Calculation"
+  version: "1.0.0"
+  description: "Calculates total amount and discount rates using mathematical expressions in lookup keys"
+  type: "enrichment"
+
+enrichments:
+  - id: "dynamic-pricing-calculation"
+    name: "Dynamic Pricing with Math"
+    description: "Calculate total amount and discount rate based on customer tier"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#quantity != null && #unitPrice != null && #customerTier != null"
+    
+    lookup-config:
+      # Mathematical operations in lookup key
+      lookup-key: "{'totalAmount': #quantity * #unitPrice, 'discountRate': #customerTier == 'PLATINUM' ? 0.15 : (#customerTier == 'GOLD' ? 0.10 : 0.05)}"
+      
+      lookup-dataset:
+        type: "inline"
+        key-field: "pricingKey"
+        data:
+          # Platinum tier pricing (15% discount)
+          - pricingKey: "PLATINUM_PRICING"
+            totalAmount: 10000.0
+            discountRate: 0.15
+            finalAmount: 8500.0
+            tierBenefits: "Premium support, expedited processing"
+            
+          # Gold tier pricing (10% discount)
+          - pricingKey: "GOLD_PRICING"
+            totalAmount: 10000.0
+            discountRate: 0.10
+            finalAmount: 9000.0
+            tierBenefits: "Priority support"
+            
+          # Standard tier pricing (5% discount)
+          - pricingKey: "STANDARD_PRICING"
+            totalAmount: 10000.0
+            discountRate: 0.05
+            finalAmount: 9500.0
+            tierBenefits: "Standard support"
+
+    field-mappings:
+      - source-field: "finalAmount"
+        target-field: "calculatedFinalAmount"
+      - source-field: "tierBenefits"
+        target-field: "customerTierBenefits"

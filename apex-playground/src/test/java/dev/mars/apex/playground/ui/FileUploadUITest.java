@@ -126,7 +126,7 @@ class FileUploadUITest {
 
         // Then
         WebElement sourceEditor = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("sourceDataEditor")));
-        String editorContent = sourceEditor.getDomAttribute("value");
+        String editorContent = sourceEditor.getDomProperty("value");
         
         assertTrue(editorContent.contains("John Doe"), "Editor should contain uploaded JSON data");
         assertTrue(editorContent.contains("john.doe@example.com"), "Editor should contain email from JSON");
@@ -152,7 +152,7 @@ class FileUploadUITest {
 
         // Then
         WebElement yamlEditor = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("yamlRulesEditor")));
-        String editorContent = yamlEditor.getDomAttribute("value");
+        String editorContent = yamlEditor.getDomProperty("value");
         
         assertTrue(editorContent.contains("metadata:"), "Editor should contain uploaded YAML metadata");
         assertTrue(editorContent.contains("Test Configuration"), "Editor should contain YAML name");
@@ -183,7 +183,7 @@ class FileUploadUITest {
             // If no alert appears, the file input might have been rejected by browser
             // Verify that the editor content hasn't changed
             WebElement sourceEditor = driver.findElement(By.id("sourceDataEditor"));
-            String editorContent = sourceEditor.getDomAttribute("value");
+            String editorContent = sourceEditor.getDomProperty("value");
             assertTrue(editorContent.isEmpty() || !editorContent.contains("This is not a valid data file"),
                       "Invalid file content should not be loaded into editor");
         }
@@ -206,7 +206,7 @@ class FileUploadUITest {
         } catch (Exception e) {
             // If no alert appears, verify the file wasn't processed
             WebElement sourceEditor = driver.findElement(By.id("sourceDataEditor"));
-            String editorContent = sourceEditor.getDomAttribute("value");
+            String editorContent = sourceEditor.getDomProperty("value");
             // Large file content should not be loaded (would be too much text)
             assertTrue(editorContent.length() < 1000000,
                       "Large file content should not be loaded into editor");
@@ -357,7 +357,7 @@ class FileUploadUITest {
 
         // Then
         WebElement sourceEditor = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("sourceDataEditor")));
-        String editorContent = sourceEditor.getDomAttribute("value");
+        String editorContent = sourceEditor.getDomProperty("value");
 
         assertTrue(editorContent.contains("<person>"), "Editor should contain uploaded XML data");
         assertTrue(editorContent.contains("<name>Jane Smith</name>"), "Editor should contain XML content");
@@ -380,7 +380,7 @@ class FileUploadUITest {
 
         // Then
         WebElement sourceEditor = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("sourceDataEditor")));
-        String editorContent = sourceEditor.getDomAttribute("value");
+        String editorContent = sourceEditor.getDomProperty("value");
 
         assertTrue(editorContent.contains("name,age,email"), "Editor should contain CSV headers");
         assertTrue(editorContent.contains("Bob Johnson,25"), "Editor should contain CSV data");
@@ -407,7 +407,7 @@ class FileUploadUITest {
         } catch (Exception e) {
             // If no alert appears, verify the editor remains empty
             WebElement sourceEditor = driver.findElement(By.id("sourceDataEditor"));
-            String editorContent = sourceEditor.getDomAttribute("value");
+            String editorContent = sourceEditor.getDomProperty("value");
             assertTrue(editorContent.isEmpty(), "Editor should remain empty when empty file is uploaded");
         }
     }
@@ -444,7 +444,7 @@ class FileUploadUITest {
 
         // Then
         WebElement fileInput = driver.findElement(By.id("dataFileInput"));
-        assertEquals("", fileInput.getDomAttribute("value"), "File input should be cleared after upload");
+        assertEquals("", fileInput.getDomProperty("value"), "File input should be cleared after upload");
     }
 
     // Additional helper methods for new test files

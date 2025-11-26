@@ -1,0 +1,20 @@
+[
+  {
+    "orderId": "ORD-001",
+    "customer": "John Doe",
+    "amount": 150.00,
+    "items": ["Widget A", "Widget B"]
+  },
+  {
+    "orderId": "ORD-002",
+    "customer": "Jane Smith",
+    "amount": 250.50,
+    "items": ["Gadget X"]
+  },
+  {
+    "orderId": "ORD-003",
+    "customer": "Bob Jones",
+    "amount": 50.00,
+    "items": ["Tool Y"]
+  }
+]

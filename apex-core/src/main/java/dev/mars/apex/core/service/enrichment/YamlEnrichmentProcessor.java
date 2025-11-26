@@ -798,13 +798,14 @@ public class YamlEnrichmentProcessor {
 
                 Object sourceValue = null;
                 boolean isConstantMapping = "constant".equals(mapping.getSourceField());
+                boolean isImplicitConstant = mapping.getSourceField() == null || mapping.getSourceField().trim().isEmpty();
 
-                // For constant mappings, skip field lookup and directly evaluate expression
-                if (isConstantMapping) {
-                    logger.debug("Constant mapping detected, will evaluate expression directly");
+                // For constant mappings (explicit or implicit), skip field lookup and directly evaluate expression
+                if (isConstantMapping || isImplicitConstant) {
+                    logger.debug("Constant mapping detected (explicit=" + isConstantMapping + "), will evaluate expression directly");
                     // For constant mappings, expression/transformation is required
                     if (mapping.getExpression() == null || mapping.getExpression().trim().isEmpty()) {
-                        logger.error("FIELD MAPPING FAILED: source-field 'constant' requires 'expression' or 'transformation' to be specified for target-field '" + mapping.getTargetField() + "'");
+                        logger.error("FIELD MAPPING FAILED: source-field 'constant' (or missing) requires 'expression' or 'transformation' to be specified for target-field '" + mapping.getTargetField() + "'");
                         continue;
                     }
                 } else if (!isFailedLookup) {

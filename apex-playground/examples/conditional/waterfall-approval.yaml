@@ -1,0 +1,101 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Purpose: Demonstrate "Waterfall" processing pattern using Rule Chains
+#          Shows sequential conditional chaining where each step depends on the previous
+# ============================================================================
+
+metadata:
+  id: "waterfall-approval-process"
+  name: "Waterfall Approval Process"
+  version: "1.0.0"
+  description: "Demonstrates 3-level waterfall approval using Sequential Conditional Chaining"
+  type: "scenario"
+  author: "APEX Demo Team"
+  created: "2025-09-17"
+  tags: ["waterfall", "rule-chain", "conditional-logic", "approval"]
+
+rule-chains:
+  # Level 1: Credit Check (Gatekeeper)
+  # If credit score is too low, we reject immediately.
+  - id: "level-1-credit"
+    name: "Level 1: Credit Check"
+    pattern: "conditional-chaining"
+    configuration:
+      trigger-rule:
+        id: "check-level-1"
+        name: "Check Level 1 Credit Score"
+        condition: "#creditScore > 700"
+        message: "Level 1 Passed: Credit Score OK"
+        result-field: "level1Passed"
+        severity: "INFO"
+      conditional-rules:
+        on-no-trigger:
+          - id: "reject-level-1"
+            name: "Reject Level 1"
+            condition: "true"
+            message: "Rejected at Level 1: Credit Score too low"
+            result-field: "rejectionReason"
+            severity: "ERROR"
+            # In a real app, we might stop here, but the chain continues
+            # Subsequent levels check #level1Passed
+
+  # Level 2: Income Check (Runs only if Level 1 Passed)
+  - id: "level-2-income"
+    name: "Level 2: Income Check"
+    pattern: "conditional-chaining"
+    configuration:
+      trigger-rule:
+        id: "check-level-2"
+        name: "Check Level 2 Income"
+        condition: "#level1Passed == true && #income > 50000"
+        message: "Level 2 Passed: Income OK"
+        result-field: "level2Passed"
+        severity: "INFO"
+      conditional-rules:
+        on-no-trigger:
+          - id: "refer-level-2"
+            name: "Refer Level 2"
+            condition: "#level1Passed == true"
+            message: "Referred at Level 2: Income insufficient"
+            result-field: "referralL2"
+            severity: "WARNING"
+
+  # Level 3: Debt Check (Runs only if Level 2 Passed)
+  - id: "level-3-debt"
+    name: "Level 3: Debt Check"
+    pattern: "conditional-chaining"
+    configuration:
+      trigger-rule:
+        id: "check-level-3"
+        name: "Check Level 3 DTI"
+        condition: "#level2Passed == true && #dti < 0.40"
+        message: "Level 3 Passed: DTI OK"
+        result-field: "isApproved"
+        severity: "INFO"
+      conditional-rules:
+        on-trigger:
+          - id: "final-approval-action"
+            name: "Final Approval Action"
+            condition: "true"
+            message: "Loan Fully Approved"
+            result-field: "loanStatus"
+            severity: "INFO"
+            value: "APPROVED"
+        on-no-trigger:
+          - id: "refer-level-3"
+            name: "Refer Level 3"
+            condition: "#level2Passed == true"
+            message: "Referred at Level 3: DTI too high"
+            result-field: "referralL3"
+            severity: "WARNING"
+
+# Post-Processing: Consolidate status
+transformations:
+  - id: "consolidate-status"
+    type: "field-transformation"
+    expression: |
+      #rejectionReason != null ? 'REJECTED' :
+      (#referralL2 != null || #referralL3 != null) ? 'REFERRED' :
+      #loanStatus
+    target-field: "finalApplicationStatus"

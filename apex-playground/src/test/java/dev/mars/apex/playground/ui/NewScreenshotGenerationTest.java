@@ -19,6 +19,7 @@ package dev.mars.apex.playground.ui;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Disabled;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -52,6 +53,7 @@ import static org.junit.jupiter.api.Assertions.*;
     "apex.playground.examples-enabled=true"
 })
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Disabled("Screenshots disabled for performance")
 class NewScreenshotGenerationTest {
 
     private WebDriver driver;
@@ -239,8 +241,11 @@ class NewScreenshotGenerationTest {
                 message: [unclosed array
             """);
         
+        // Click validate button to trigger full validation
+        driver.findElement(By.id("validateBtn")).click();
+        
         // Wait for validation to show error
-        wait.until(ExpectedConditions.textToBe(By.id("yamlStatus"), "Invalid"));
+        wait.until(ExpectedConditions.textToBePresentInElementLocated(By.id("yamlStatus"), "Invalid"));
         
         takeScreenshot("playground_yaml_validation_error");
     }

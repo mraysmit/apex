@@ -17,15 +17,14 @@ package dev.mars.apex.playground.service;
  */
 
 
-import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.engine.model.RuleBase;
+import dev.mars.apex.core.engine.model.Rule;
+import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
-import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.playground.model.PlaygroundRequest;
 import dev.mars.apex.playground.model.PlaygroundResponse;
 import dev.mars.apex.playground.model.RuleExecutionResult;
@@ -36,6 +35,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Collections;
 
 /**
  * Core service for APEX Playground operations.
@@ -57,22 +58,12 @@ public class PlaygroundService {
 
     private final DataProcessingService dataProcessingService;
     private final YamlValidationService yamlValidationService;
-    private final YamlRulesEngineService yamlRulesEngineService;
-    private final YamlEnrichmentProcessor enrichmentProcessor;
-    private final LookupServiceRegistry lookupServiceRegistry;
-    private final ExpressionEvaluatorService expressionEvaluatorService;
 
     @Autowired
     public PlaygroundService(DataProcessingService dataProcessingService,
                            YamlValidationService yamlValidationService) {
         this.dataProcessingService = dataProcessingService;
         this.yamlValidationService = yamlValidationService;
-        this.yamlRulesEngineService = new YamlRulesEngineService();
-
-        // Initialize services needed for real APEX engine integration
-        this.lookupServiceRegistry = new LookupServiceRegistry();
-        this.expressionEvaluatorService = new ExpressionEvaluatorService();
-        this.enrichmentProcessor = new YamlEnrichmentProcessor(lookupServiceRegistry, expressionEvaluatorService);
     }
 
     /**
@@ -115,14 +106,81 @@ public class PlaygroundService {
 
             // Step 3: Create and execute rules engine
             long rulesStartTime = System.currentTimeMillis();
-            RulesEngine rulesEngine = yamlRulesEngineService.createRulesEngineFromString(request.getYamlRules());
+            
+            // Parse YAML to config object first to check for pipeline
+            YamlConfigurationLoader configLoader = new YamlConfigurationLoader();
+            YamlRuleConfiguration yamlConfig = configLoader.fromYamlString(request.getYamlRules());
+            
+            RulesEngine rulesEngine = RulesEngine.fromYamlConfig(yamlConfig);
 
-            // Execute rules against the parsed data
-            RuleResult ruleResult = rulesEngine.executeRulesForCategory("default", parsedData);
+            // Check for pipeline execution
+            if (yamlConfig.getPipeline() != null) {
+                logger.info("Executing pipeline: {}", yamlConfig.getPipeline().getName());
+                try {
+                    RuleResult pipelineResult = rulesEngine.evaluate(parsedData);
+                    
+                    // Add pipeline result to response
+                    RuleExecutionResult executionResult = new RuleExecutionResult(
+                        "pipeline-" + System.currentTimeMillis(),
+                        yamlConfig.getPipeline().getName(),
+                        pipelineResult.getResultType() == RuleResult.ResultType.MATCH,
+                        pipelineResult.getMessage()
+                    );
+                    
+                    if (pipelineResult.getPerformanceMetrics() != null) {
+                        executionResult.setExecutionTimeMs(pipelineResult.getPerformanceMetrics().getEvaluationTimeMillis());
+                    }
+                    
+                    response.getValidation().addResult(executionResult);
+                    
+                } catch (Exception e) {
+                    logger.error("Error executing pipeline", e);
+                    RuleExecutionResult errorResult = new RuleExecutionResult(
+                        "pipeline-error-" + System.currentTimeMillis(),
+                        yamlConfig.getPipeline().getName(),
+                        false,
+                        "Pipeline execution error: " + e.getMessage()
+                    );
+                    response.getValidation().addResult(errorResult);
+                }
+            }
+
+            // Execute rules individually to capture all results
+            List<RuleBase> rules = rulesEngine.getConfiguration().getRulesForCategory("default");
+            if (rules != null && !rules.isEmpty()) {
+                logger.info("Executing {} rules individually for playground", rules.size());
+                for (RuleBase rule : rules) {
+                    RuleResult result = null;
+                    try {
+                        if (rule instanceof Rule) {
+                            result = rulesEngine.executeRule((Rule) rule, parsedData);
+                        } else if (rule instanceof RuleGroup) {
+                            result = rulesEngine.executeRuleGroupsList(Collections.singletonList((RuleGroup) rule), parsedData);
+                        }
+                        
+                        if (result != null) {
+                            addRuleResultToResponse(result, response);
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error executing rule '{}': {}", rule.getName(), e.getMessage());
+                        // Add error result
+                        RuleExecutionResult errorResult = new RuleExecutionResult(
+                            "rule-error-" + System.currentTimeMillis(),
+                            rule.getName(),
+                            false,
+                            "Execution error: " + e.getMessage()
+                        );
+                        response.getValidation().addResult(errorResult);
+                    }
+                }
+            } else {
+                logger.info("No rules found in 'default' category");
+            }
+            
             response.getMetrics().setRulesExecutionTimeMs(System.currentTimeMillis() - rulesStartTime);
 
-            // Step 4: Process results
-            processRuleResults(ruleResult, parsedData, response, request);
+            // Step 4: Process enrichments
+            processEnrichments(request, parsedData, response);
 
             // Step 5: Set final metrics and status
             response.getMetrics().setTotalTimeMs(System.currentTimeMillis() - startTime);
@@ -165,16 +223,15 @@ public class PlaygroundService {
     }
 
     /**
-     * Process rule execution results and populate the response.
+     * Add a single rule result to the response.
      */
-    private void processRuleResults(RuleResult ruleResult, Map<String, Object> originalData, PlaygroundResponse response, PlaygroundRequest request) {
-        // Process validation results
+    private void addRuleResultToResponse(RuleResult ruleResult, PlaygroundResponse response) {
         PlaygroundResponse.ValidationResult validation = response.getValidation();
 
         if (ruleResult.isTriggered()) {
             // Rule was triggered (passed)
             RuleExecutionResult executionResult = new RuleExecutionResult(
-                "rule-" + System.currentTimeMillis(),
+                "rule-" + System.currentTimeMillis() + "-" + ruleResult.getRuleName().hashCode(),
                 ruleResult.getRuleName(),
                 true,
                 ruleResult.getMessage()
@@ -188,7 +245,7 @@ public class PlaygroundService {
         } else {
             // Rule was not triggered (failed)
             RuleExecutionResult executionResult = new RuleExecutionResult(
-                "rule-" + System.currentTimeMillis(),
+                "rule-" + System.currentTimeMillis() + "-" + ruleResult.getRuleName().hashCode(),
                 ruleResult.getRuleName() != null ? ruleResult.getRuleName() : "unknown",
                 false,
                 ruleResult.getMessage() != null ? ruleResult.getMessage() : "Rule condition not met"
@@ -200,8 +257,15 @@ public class PlaygroundService {
 
             validation.addResult(executionResult);
         }
+        
+        logger.debug("Processed rule result: name={}, triggered={}, message={}",
+                    ruleResult.getRuleName(), ruleResult.isTriggered(), ruleResult.getMessage());
+    }
 
-        // Process enrichment results using real APEX engine
+    /**
+     * Process enrichments and populate the response.
+     */
+    private void processEnrichments(PlaygroundRequest request, Map<String, Object> originalData, PlaygroundResponse response) {
         PlaygroundResponse.EnrichmentResult enrichment = response.getEnrichment();
 
         try {
@@ -213,13 +277,21 @@ public class PlaygroundService {
                 // Create a copy of original data for enrichment
                 Map<String, Object> dataToEnrich = new HashMap<>(originalData);
 
-                // Apply real enrichments using APEX engine
-                Object enrichedResult = enrichmentProcessor.processEnrichments(yamlConfig.getEnrichments(), dataToEnrich);
+                // Apply real enrichments using APEX engine (RulesEngine)
+                // Create a config for enrichment only to avoid re-executing rules
+                YamlRuleConfiguration enrichmentConfig = new YamlRuleConfiguration();
+                enrichmentConfig.setEnrichments(yamlConfig.getEnrichments());
+                enrichmentConfig.setDataSources(yamlConfig.getDataSources());
+                enrichmentConfig.setDataSourceRefs(yamlConfig.getDataSourceRefs());
+                
+                // Create a temporary engine for enrichment
+                RulesEngine enrichmentEngine = RulesEngine.fromYamlConfig(enrichmentConfig);
+                
+                RuleResult result = enrichmentEngine.evaluate(dataToEnrich);
 
                 // Set the actual enriched data
-                if (enrichedResult instanceof Map) {
-                    @SuppressWarnings("unchecked")
-                    Map<String, Object> enrichedMap = (Map<String, Object>) enrichedResult;
+                if (result.getEnrichedData() != null) {
+                    Map<String, Object> enrichedMap = result.getEnrichedData();
                     enrichment.setEnrichedData(enrichedMap);
 
                     // Calculate how many fields were added
@@ -244,8 +316,5 @@ public class PlaygroundService {
             enrichment.setEnriched(false);
             enrichment.setFieldsAdded(0);
         }
-
-        logger.debug("Processed rule results: triggered={}, message={}",
-                    ruleResult.isTriggered(), ruleResult.getMessage());
     }
 }

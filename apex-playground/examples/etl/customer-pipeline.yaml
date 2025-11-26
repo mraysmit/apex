@@ -1,0 +1,112 @@
+metadata:
+  id: "customer-etl-pipeline"
+  name: "Customer ETL Pipeline"
+  version: "1.0.0"
+  description: "Extracts customers from CSV, enriches them, and loads into H2 database"
+  type: "pipeline-config"
+  author: "APEX Demo Team"
+  tags: ["etl", "csv", "h2", "enrichment"]
+
+pipeline:
+  name: "customer-onboarding"
+  description: "Onboard new customers from CSV file"
+  
+  steps:
+    - name: "extract-customers"
+      type: "extract"
+      source: "customer-csv-source"
+      operation: "getAllCustomers"
+      description: "Read customer records from CSV"
+
+    - name: "enrich-customer-data"
+      type: "transform"
+      depends-on: ["extract-customers"]
+      description: "Enrich customer data with processing metadata"
+      transformations:
+        - type: "enrichment"
+          enrichment-id: "customer-metadata-enrichment"
+
+    - name: "load-to-database"
+      type: "load"
+      sink: "customer-h2-sink"
+      operation: "insertCustomer"
+      depends-on: ["enrich-customer-data"]
+      description: "Save customers to H2 database"
+
+    - name: "audit-logging"
+      type: "audit"
+      sink: "audit-file-sink"
+      operation: "writeAuditRecord"
+      depends-on: ["load-to-database"]
+      optional: true
+      description: "Log processing results"
+
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+    max-retries: 1
+
+data-sources:
+  - name: "customer-csv-source"
+    type: "file-system"
+    enabled: true
+    connection:
+      base-path: "./examples/etl/data"
+      file-pattern: "customers.csv"
+    fileFormat:
+      type: "csv"
+      hasHeaderRow: true
+      columnMappings:
+        "customer_id": "customerId"
+        "customer_name": "customerName"
+        "email": "email"
+        "status": "status"
+    queries:
+      getAllCustomers: "SELECT * FROM csv"
+
+data-sinks:
+  - name: "customer-h2-sink"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    connection:
+      database: "./target/playground/etl/output/customer_db"
+      username: "sa"
+      password: ""
+    schema:
+      auto-create: true
+      init-script: |
+        CREATE TABLE IF NOT EXISTS customers (
+          id INTEGER PRIMARY KEY,
+          name VARCHAR(255),
+          email VARCHAR(255),
+          status VARCHAR(50),
+          processed_at TIMESTAMP
+        );
+    operations:
+      insertCustomer: |
+        INSERT INTO customers (id, name, email, status, processed_at)
+        VALUES (:customerId, :customerName, :email, :status, CURRENT_TIMESTAMP)
+
+  - name: "audit-file-sink"
+    type: "file-system"
+    enabled: true
+    connection:
+      base-path: "./target/playground/etl/output/audit"
+      file-pattern: "audit-{timestamp}.json"
+    operations:
+      writeAuditRecord: "write"
+
+enrichments:
+  - id: "customer-metadata-enrichment"
+    type: "field-transformation"
+    condition: "true"
+    transformation-rules:
+      - condition: "true"
+        actions:
+          - type: "set-field"
+            field: "sourceSystem"
+            expression: "'CSV_IMPORT'"
+          - type: "set-field"
+            field: "importDate"
+            expression: "new java.util.Date()"

@@ -1,0 +1,15 @@
+{
+  "userId": "U-1001",
+  "username": "jdoe",
+  "status": "ACTIVE",
+  "email": "jdoe@example.com",
+  "profile": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "age": 25,
+    "department": "IT"
+  },
+  "lastLogin": "2023-11-25T10:00:00Z",
+  "roles": ["USER", "ADMIN"],
+  "age": 25
+}

@@ -197,7 +197,7 @@ class DragDropFileUploadUITest {
         jsExecutor.executeScript("arguments[0].checked = true;", jsonFormatRadio);
 
         // Then - Verify content was loaded
-        String editorContent = sourceEditor.getDomAttribute("value");
+        String editorContent = sourceEditor.getDomProperty("value");
         assertTrue(editorContent.contains("John Doe"), "Editor should contain JSON content");
         assertTrue(editorContent.contains("john.doe@example.com"), "Editor should contain email");
         assertTrue(jsonFormatRadio.isSelected(), "JSON format should be selected");
@@ -222,7 +222,7 @@ class DragDropFileUploadUITest {
             yamlEditor, fileContent);
 
         // Then - Verify content was loaded
-        String editorContent = yamlEditor.getDomAttribute("value");
+        String editorContent = yamlEditor.getDomProperty("value");
         assertTrue(editorContent.contains("metadata:"), "Editor should contain YAML metadata");
         assertTrue(editorContent.contains("Test Configuration"), "Editor should contain YAML name");
         assertTrue(editorContent.contains("test-rule"), "Editor should contain rule ID");
@@ -269,7 +269,7 @@ class DragDropFileUploadUITest {
         jsExecutor.executeScript(
             "arguments[0].value = arguments[1]; arguments[0].dispatchEvent(new Event('input'));",
             sourceEditor, jsonContent);
-        assertTrue(sourceEditor.getDomAttribute("value").contains("John Doe"), "Should handle JSON");
+        assertTrue(sourceEditor.getDomProperty("value").contains("John Doe"), "Should handle JSON");
 
         // Test XML file
         File xmlFile = createTestXmlFile();
@@ -277,7 +277,7 @@ class DragDropFileUploadUITest {
         jsExecutor.executeScript(
             "arguments[0].value = arguments[1]; arguments[0].dispatchEvent(new Event('input'));",
             sourceEditor, xmlContent);
-        assertTrue(sourceEditor.getDomAttribute("value").contains("<person>"), "Should handle XML");
+        assertTrue(sourceEditor.getDomProperty("value").contains("<person>"), "Should handle XML");
 
         // Test CSV file
         File csvFile = createTestCsvFile();
@@ -285,7 +285,7 @@ class DragDropFileUploadUITest {
         jsExecutor.executeScript(
             "arguments[0].value = arguments[1]; arguments[0].dispatchEvent(new Event('input'));",
             sourceEditor, csvContent);
-        assertTrue(sourceEditor.getDomAttribute("value").contains("name,age,email"), "Should handle CSV");
+        assertTrue(sourceEditor.getDomProperty("value").contains("name,age,email"), "Should handle CSV");
     }
 
     // Helper methods for creating test files

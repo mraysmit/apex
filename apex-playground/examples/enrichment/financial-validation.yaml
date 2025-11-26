@@ -1,0 +1,24 @@
+metadata:
+  name: "Financial Validation Rules"
+  version: "1.0.0"
+  description: "Financial trade validation and enrichment"
+  type: "rule-config"
+
+rules:
+  - id: "validate-trade-date"
+    name: "Validate Trade Date"
+    condition: "#tradeDate != null"
+    message: "Trade date is required"
+    severity: "ERROR"
+
+  - id: "validate-settlement-date"
+    name: "Validate Settlement Date"
+    condition: "#settlementDate != null && #settlementDate.compareTo(#tradeDate) >= 0"
+    message: "Settlement date must be on or after trade date"
+    severity: "ERROR"
+
+  - id: "high-value-trade"
+    name: "High Value Trade Check"
+    condition: "#amount > 1000000"
+    message: "High value trade requires manual review"
+    severity: "INFO"

@@ -1,0 +1,6 @@
+customer_id,customer_name,email,status
+1001,John Smith,john.smith@example.com,ACTIVE
+1002,Jane Doe,jane.doe@example.com,ACTIVE
+1003,Bob Johnson,bob.johnson@example.com,PENDING
+1004,Alice Brown,alice.brown@example.com,INACTIVE
+1005,Charlie Wilson,charlie.wilson@example.com,ACTIVE

@@ -171,6 +171,10 @@ class ApexEngineContentProcessingUITest {
                   "Enrichment results should contain APEX engine enrichment structure");
         assertTrue(enrichmentContent.contains("\"enriched\"") || enrichmentContent.contains("enrichmentSources"),
                   "Enrichment results should show APEX engine enrichment status");
+        
+        // Verify specific enriched values
+        assertTrue(enrichmentContent.contains("premium"), "Enrichment results should contain enriched value 'premium'");
+        assertTrue(enrichmentContent.contains("vip"), "Enrichment results should contain enriched value 'vip'");
     }
 
     @Test
@@ -387,12 +391,17 @@ class ApexEngineContentProcessingUITest {
                   version: "1.0.0"
                 
                 enrichments:
-                  - type: "lookup-enrichment"
+                  - id: "add-category"
+                    type: "field-enrichment"
                     name: "Add Category"
                     condition: "#amount > 2000"
-                    enrichments:
-                      category: "premium"
-                      status: "vip"
+                    field-mappings:
+                      - source-field: "amount"
+                        target-field: "category"
+                        expression: "'premium'"
+                      - source-field: "amount"
+                        target-field: "status"
+                        expression: "'vip'"
                 
                 rules:
                   - id: "enrichment-validation"
@@ -535,6 +544,10 @@ class ApexEngineContentProcessingUITest {
         assertTrue(enrichmentContent.contains("John") || enrichmentContent.contains("salary") ||
                   enrichmentContent.contains("department") || enrichmentContent.contains("enrichedData"),
                   "Should show data processed by APEX engine");
+
+        // Verify specific transformed values
+        assertTrue(enrichmentContent.contains("John Doe"), "Enrichment results should contain calculated full name 'John Doe'");
+        assertTrue(enrichmentContent.contains("low"), "Enrichment results should contain calculated risk level 'low'");
     }
 
     @Test
@@ -598,12 +611,17 @@ class ApexEngineContentProcessingUITest {
                   version: "1.0.0"
 
                 enrichments:
-                  - type: "lookup-enrichment"
+                  - id: "add-full-name"
+                    type: "field-enrichment"
                     name: "Add Full Name"
                     condition: "#firstName != null && #lastName != null"
-                    enrichments:
-                      fullName: "#firstName + ' ' + #lastName"
-                      riskLevel: "#salary > 50000 ? 'low' : 'high'"
+                    field-mappings:
+                      - source-field: "firstName"
+                        target-field: "fullName"
+                        expression: "#firstName + ' ' + #lastName"
+                      - source-field: "salary"
+                        target-field: "riskLevel"
+                        expression: "#salary > 50000 ? 'low' : 'high'"
 
                 rules:
                   - id: "transformation-validation"

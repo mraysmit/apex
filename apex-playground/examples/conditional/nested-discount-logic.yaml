@@ -1,0 +1,63 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Purpose: Demonstrate deep nested conditional transformations (4 levels)
+#          Shows how to nest conditional-transformation actions for complex logic
+# ============================================================================
+
+metadata:
+  id: "nested-discount-logic"
+  name: "Nested Discount Logic (4 Levels)"
+  version: "1.0.0"
+  description: "Demonstrates 4-level deep nested conditional transformation logic"
+  type: "transformation-config"
+  author: "APEX Demo Team"
+  created: "2025-09-17"
+  tags: ["nested", "conditional-transformation", "complex-logic"]
+
+transformations:
+  - id: "nested-discount-logic"
+    type: "conditional-transformation"
+    transformation-rules:
+      # Level 1: Region Check
+      - condition: "#root['region'] == 'NA'"
+        actions-true:
+          - type: "set-field"
+            field: "regionCheck"
+            value: "passed"
+          
+          # Level 2: Amount Check
+          - type: "conditional-transformation"
+            transformation-rules:
+              - condition: "#root['amount'] > 1000"
+                actions-true:
+                  - type: "set-field"
+                    field: "amountCheck"
+                    value: "passed"
+                  
+                  # Level 3: Currency Check
+                  - type: "conditional-transformation"
+                    transformation-rules:
+                      - condition: "#root['currency'] == 'USD'"
+                        actions-true:
+                          - type: "set-field"
+                            field: "currencyCheck"
+                            value: "passed"
+                          
+                          # Level 4: Customer Type Check
+                          - type: "conditional-transformation"
+                            transformation-rules:
+                              - condition: "#root['customerType'] == 'VIP'"
+                                actions-true:
+                                  - type: "set-field"
+                                    field: "discount"
+                                    value: 0.20
+                                  - type: "set-field"
+                                    field: "finalCheck"
+                                    value: "passed"
+                                    
+                        # Level 3 Else: Currency Mismatch
+                        actions-false:
+                          - type: "set-field"
+                            field: "currencyCheck"
+                            value: "failed-currency-mismatch"

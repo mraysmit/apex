@@ -1,0 +1,43 @@
+metadata:
+  id: "math-calculations"
+  name: "Mathematical Calculations"
+  version: "1.0.0"
+  description: "Demonstrates advanced math functions like Square Root, Power, and Rounding"
+  type: "enrichment"
+
+enrichments:
+  - id: "square-root-calculation"
+    name: "Square Root Calc"
+    type: "calculation-enrichment"
+    description: "Calculate square root using Math.sqrt"
+    condition: "#value1 != null"
+    calculation-config:
+      expression: "T(java.lang.Math).sqrt(#value1)"
+      result-field: "squareRoot"
+    field-mappings:
+      - source-field: "squareRoot"
+        target-field: "result.squareRoot"
+
+  - id: "power-calculation"
+    name: "Power Calc"
+    type: "calculation-enrichment"
+    description: "Calculate power using Math.pow"
+    condition: "#base != null && #exponent != null"
+    calculation-config:
+      expression: "T(java.lang.Math).pow(#base, #exponent)"
+      result-field: "powerResult"
+    field-mappings:
+      - source-field: "powerResult"
+        target-field: "result.power"
+
+  - id: "rounding-calculation"
+    name: "Rounding Calc"
+    type: "calculation-enrichment"
+    description: "Round number to nearest integer"
+    condition: "#number != null"
+    calculation-config:
+      expression: "T(java.lang.Math).round(#number)"
+      result-field: "roundedValue"
+    field-mappings:
+      - source-field: "roundedValue"
+        target-field: "result.rounded"
