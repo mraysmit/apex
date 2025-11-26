@@ -49,3 +49,17 @@ enrichments:
       - source-field: "constant"
         target-field: "approvalLevel"
         expression: "'SENIOR_TRADER'"
+
+  - id: "assign-implicit-constants"
+    name: "Assign Implicit Constants (New Syntax)"
+    type: "field-enrichment"
+    description: "Demonstrates the new simplified syntax where source-field is omitted"
+    enabled: true
+    field-mappings:
+      - target-field: "processingMode"
+        expression: "'BATCH'"
+        description: "Implicit constant using expression (source-field omitted)"
+      
+      - target-field: "validationVersion"
+        transformation: "'V2.1'"
+        description: "Implicit constant using transformation (source-field omitted)"

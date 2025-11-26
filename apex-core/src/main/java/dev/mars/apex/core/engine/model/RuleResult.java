@@ -42,6 +42,7 @@ public class RuleResult implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final UUID id;
+    private final String ruleId;  // The rule's ID from YAML configuration
     private final String ruleName;
     private final String message;
     private final String severity;
@@ -59,6 +60,9 @@ public class RuleResult implements Serializable {
     private final String successCode;
     private final String errorCode;
     private final Object mapToField;  // String or List<String>
+
+    // Child results for composite evaluations (e.g., evaluateSequential)
+    private final List<RuleResult> childResults;
 
     /**
      * Enum representing the type of result.
@@ -97,6 +101,7 @@ public class RuleResult implements Serializable {
      */
     public RuleResult(String ruleName, String message, String severity, boolean triggered, ResultType resultType) {
         this.id = UUID.randomUUID();
+        this.ruleId = null;  // No ruleId for backward compatibility
         this.ruleName = ruleName;
         this.message = message;
         this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
@@ -112,6 +117,7 @@ public class RuleResult implements Serializable {
         this.successCode = null;
         this.errorCode = null;
         this.mapToField = null;
+        this.childResults = new ArrayList<>();
     }
 
     /**
@@ -139,6 +145,7 @@ public class RuleResult implements Serializable {
      */
     public RuleResult(String ruleName, String message, String severity, boolean triggered, ResultType resultType, RulePerformanceMetrics performanceMetrics) {
         this.id = UUID.randomUUID();
+        this.ruleId = null;  // No ruleId for backward compatibility
         this.ruleName = ruleName;
         this.message = message;
         this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
@@ -154,6 +161,7 @@ public class RuleResult implements Serializable {
         this.successCode = null;
         this.errorCode = null;
         this.mapToField = null;
+        this.childResults = new ArrayList<>();
     }
 
     /**
@@ -218,6 +226,7 @@ public class RuleResult implements Serializable {
                      RulePerformanceMetrics performanceMetrics, Map<String, Object> enrichedData,
                      List<String> failureMessages, boolean success) {
         this.id = UUID.randomUUID();
+        this.ruleId = null;  // No ruleId for backward compatibility
         this.ruleName = ruleName;
         this.message = message;
         this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
@@ -233,6 +242,7 @@ public class RuleResult implements Serializable {
         this.successCode = null;
         this.errorCode = null;
         this.mapToField = null;
+        this.childResults = new ArrayList<>();
     }
 
     /**
@@ -256,6 +266,7 @@ public class RuleResult implements Serializable {
                      RulePerformanceMetrics performanceMetrics, Map<String, Object> enrichedData,
                      List<String> failureMessages, boolean success, String successCode, String errorCode, Object mapToField) {
         this.id = UUID.randomUUID();
+        this.ruleId = null;  // No ruleId for backward compatibility
         this.ruleName = ruleName;
         this.message = message;
         this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
@@ -271,6 +282,80 @@ public class RuleResult implements Serializable {
         this.successCode = successCode;
         this.errorCode = errorCode;
         this.mapToField = mapToField;
+        this.childResults = new ArrayList<>();
+    }
+
+    /**
+     * Create a new rule result with ruleId for individual rule tracking.
+     * This constructor is used by UnifiedRuleEvaluator to create results with proper rule identification.
+     *
+     * @param ruleId The rule's ID from YAML configuration
+     * @param ruleName The name of the rule that was evaluated
+     * @param message The message associated with the rule
+     * @param severity The severity level (ERROR, WARNING, INFO)
+     * @param triggered Whether the rule was triggered (true) or not (false)
+     * @param resultType The type of result
+     * @param performanceMetrics The performance metrics for this rule evaluation
+     * @param enrichedData The enriched data map containing all enrichment results
+     * @param failureMessages List of failure messages from enrichments and rules
+     * @param success Overall success status of the evaluation
+     * @param successCode The code evaluated when rule succeeded (null if no code)
+     * @param errorCode The code evaluated when rule failed (null if no code)
+     * @param mapToField Field mapping expressions (null if no mapping)
+     */
+    public RuleResult(String ruleId, String ruleName, String message, String severity, boolean triggered, ResultType resultType,
+                     RulePerformanceMetrics performanceMetrics, Map<String, Object> enrichedData,
+                     List<String> failureMessages, boolean success, String successCode, String errorCode, Object mapToField) {
+        this.id = UUID.randomUUID();
+        this.ruleId = ruleId;
+        this.ruleName = ruleName;
+        this.message = message;
+        this.severity = severity != null ? severity : SeverityConstants.INFO;
+        this.triggered = triggered;
+        this.timestamp = Instant.now();
+        this.resultType = resultType;
+        this.performanceMetrics = performanceMetrics;
+        this.enrichedData = enrichedData != null ? new HashMap<>(enrichedData) : new HashMap<>();
+        this.failureMessages = failureMessages != null ? new ArrayList<>(failureMessages) : new ArrayList<>();
+        this.success = success;
+        this.successCode = successCode;
+        this.errorCode = errorCode;
+        this.mapToField = mapToField;
+        this.childResults = new ArrayList<>();
+    }
+
+    /**
+     * Create a new rule result with childResults for composite evaluations.
+     * This constructor is used by evaluateSequential to create results containing individual rule results.
+     *
+     * @param ruleName The name of the evaluation
+     * @param message The message associated with the evaluation
+     * @param triggered Whether the evaluation was triggered (true) or not (false)
+     * @param resultType The type of result
+     * @param enrichedData The enriched data map containing all enrichment results
+     * @param failureMessages List of failure messages from enrichments and rules
+     * @param success Overall success status of the evaluation
+     * @param childResults List of individual rule results
+     */
+    public RuleResult(String ruleName, String message, boolean triggered, ResultType resultType,
+                     Map<String, Object> enrichedData, List<String> failureMessages, boolean success,
+                     List<RuleResult> childResults) {
+        this.id = UUID.randomUUID();
+        this.ruleId = null;
+        this.ruleName = ruleName;
+        this.message = message;
+        this.severity = SeverityConstants.INFO;
+        this.triggered = triggered;
+        this.timestamp = Instant.now();
+        this.resultType = resultType;
+        this.performanceMetrics = null;
+        this.enrichedData = enrichedData != null ? new HashMap<>(enrichedData) : new HashMap<>();
+        this.failureMessages = failureMessages != null ? new ArrayList<>(failureMessages) : new ArrayList<>();
+        this.success = success;
+        this.successCode = null;
+        this.errorCode = null;
+        this.mapToField = null;
+        this.childResults = childResults != null ? new ArrayList<>(childResults) : new ArrayList<>();
     }
 
     /**
@@ -507,6 +592,23 @@ public class RuleResult implements Serializable {
     }
 
     /**
+     * Create a new rule result for successful complete evaluation with child results.
+     * This method is used when both enrichments and rules complete successfully and we want to
+     * preserve individual rule results.
+     *
+     * @param enrichedData The enriched data map containing all enrichment results
+     * @param ruleName The name of the final rule that was evaluated
+     * @param ruleMessage The message from the final rule evaluation
+     * @param childResults List of individual rule results
+     * @return A new RuleResult instance representing successful complete evaluation with child results
+     */
+    public static RuleResult evaluationSuccess(Map<String, Object> enrichedData, String ruleName, String ruleMessage,
+                                              List<RuleResult> childResults) {
+        return new RuleResult(ruleName, ruleMessage,
+                             true, ResultType.MATCH, enrichedData, new ArrayList<>(), true, childResults);
+    }
+
+    /**
      * Create a new rule result for failed complete evaluation (enrichments + rules).
      * This method is used when either enrichments or rules fail during evaluation.
      *
@@ -549,6 +651,7 @@ public class RuleResult implements Serializable {
      */
     public RuleResult(String ruleName, String message) {
         this.id = UUID.randomUUID();
+        this.ruleId = null;  // No ruleId for backward compatibility
         this.ruleName = ruleName;
         this.message = message;
         this.severity = SeverityConstants.INFO; // Default severity for backward compatibility
@@ -574,11 +677,12 @@ public class RuleResult implements Serializable {
         this.successCode = null;
         this.errorCode = null;
         this.mapToField = null;
+        this.childResults = new ArrayList<>();
     }
 
     /**
      * Get the unique identifier of this result.
-     * 
+     *
      * @return The UUID of this result
      */
     public UUID getId() {
@@ -586,12 +690,30 @@ public class RuleResult implements Serializable {
     }
 
     /**
+     * Get the rule ID from YAML configuration.
+     *
+     * @return The rule ID, or null if not set
+     */
+    public String getRuleId() {
+        return ruleId;
+    }
+
+    /**
      * Get the name of the rule that was evaluated.
-     * 
+     *
      * @return The rule name
      */
     public String getRuleName() {
         return ruleName;
+    }
+
+    /**
+     * Get the child results from composite evaluations.
+     *
+     * @return List of child RuleResult objects, or empty list if none
+     */
+    public List<RuleResult> getChildResults() {
+        return childResults != null ? new ArrayList<>(childResults) : new ArrayList<>();
     }
 
     /**

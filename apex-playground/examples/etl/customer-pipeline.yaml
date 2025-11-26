@@ -99,14 +99,10 @@ data-sinks:
 
 enrichments:
   - id: "customer-metadata-enrichment"
-    type: "field-transformation"
+    type: "field-enrichment"
     condition: "true"
-    transformation-rules:
-      - condition: "true"
-        actions:
-          - type: "set-field"
-            field: "sourceSystem"
-            expression: "'CSV_IMPORT'"
-          - type: "set-field"
-            field: "importDate"
-            expression: "new java.util.Date()"
+    field-mappings:
+      - target-field: "sourceSystem"
+        expression: "'CSV_IMPORT'"
+      - target-field: "importDate"
+        expression: "new java.util.Date()"

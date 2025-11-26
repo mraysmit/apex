@@ -1009,6 +1009,7 @@ public class RulesEngine {
         List<String> failureMessages = new ArrayList<>();
         Map<String, Object> enrichedData = new HashMap<>(inputData);
         boolean overallSuccess = true;
+        List<RuleResult> individualRuleResults = new ArrayList<>();  // Collect individual rule results
 
         try {
             // Check if item-level order is available
@@ -1022,6 +1023,11 @@ public class RulesEngine {
                     logger.debug("Processing item: {} ({})", item.getItemId(), item.getSectionType());
 
                     RuleResult itemResult = processItem(item, yamlConfig, enrichedData);
+
+                    // Collect individual rule results for rules section
+                    if ("rules".equals(item.getSectionType())) {
+                        individualRuleResults.add(itemResult);
+                    }
 
                     // Check for ERROR result type - this includes validation rules with ERROR severity
                     // when error recovery is disabled (default for ERROR severity per APEX_ERROR_HANDLING_GUIDE)
@@ -1092,18 +1098,23 @@ public class RulesEngine {
 
                         if (allRules != null && !allRules.isEmpty()) {
                             logger.info("Processing {} individual rules", allRules.size());
-                            RuleResult ruleResult = executeRulesList(allRules, enrichedData);
 
-                            // Check for ERROR result type - this includes validation rules with ERROR severity
-                            // when error recovery is disabled (default for ERROR severity per APEX_ERROR_HANDLING_GUIDE)
-                            if (ruleResult.getResultType() == RuleResult.ResultType.ERROR) {
-                                overallSuccess = false;
-                                failureMessages.add("Rule evaluation error: " + ruleResult.getMessage());
-                            }
+                            // Evaluate each rule individually to collect results
+                            for (Rule rule : allRules) {
+                                RuleResult ruleResult = unifiedEvaluator.evaluateRule(rule, enrichedData);
+                                individualRuleResults.add(ruleResult);  // Collect individual result
 
-                            // Update enriched data with results from rules (field mappings)
-                            if (ruleResult.getEnrichedData() != null) {
-                                enrichedData.putAll(ruleResult.getEnrichedData());
+                                // Check for ERROR result type - this includes validation rules with ERROR severity
+                                // when error recovery is disabled (default for ERROR severity per APEX_ERROR_HANDLING_GUIDE)
+                                if (ruleResult.getResultType() == RuleResult.ResultType.ERROR) {
+                                    overallSuccess = false;
+                                    failureMessages.add("Rule evaluation error: " + ruleResult.getMessage());
+                                }
+
+                                // Update enriched data with results from rules (field mappings)
+                                if (ruleResult.getEnrichedData() != null) {
+                                    enrichedData.putAll(ruleResult.getEnrichedData());
+                                }
                             }
                         }
                         break;
@@ -1248,14 +1259,16 @@ public class RulesEngine {
             }
             } // End of fallback section-level processing
 
-            // Return comprehensive result
+            // Return comprehensive result with individual rule results
             if (overallSuccess && failureMessages.isEmpty()) {
-                logger.info("Sequential evaluation completed successfully");
-                return RuleResult.evaluationSuccess(enrichedData, "evaluation", "Sequential evaluation completed successfully");
+                logger.info("Sequential evaluation completed successfully with {} individual rule results", individualRuleResults.size());
+                return RuleResult.evaluationSuccess(enrichedData, "evaluation", "Sequential evaluation completed successfully", individualRuleResults);
             } else {
                 logger.info("Sequential evaluation completed with {} failures", failureMessages.size());
                 logger.debug("Final enriched data keys (failure): {}", enrichedData.keySet());
-                return RuleResult.evaluationFailure(failureMessages, enrichedData, "evaluation", "Sequential evaluation completed with failures");
+                // For failures, also include individual rule results
+                return new RuleResult("evaluation", "Sequential evaluation completed with failures",
+                                     false, RuleResult.ResultType.ERROR, enrichedData, failureMessages, false, individualRuleResults);
             }
 
         } catch (Exception e) {

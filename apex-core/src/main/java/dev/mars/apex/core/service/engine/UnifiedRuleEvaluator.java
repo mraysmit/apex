@@ -186,7 +186,7 @@ public class UnifiedRuleEvaluator {
 
                 // When condition is TRUE, the rule matched successfully - severity is irrelevant
                 // Always return MATCH with success=true
-                RuleResult matchResult = new RuleResult(rule.getName(), rule.getMessage(), rule.getSeverity(),
+                RuleResult matchResult = new RuleResult(rule.getId(), rule.getName(), rule.getMessage(), rule.getSeverity(),
                                                        true, RuleResult.ResultType.MATCH, metrics, enrichedData,
                                                        new java.util.ArrayList<>(), true, evaluatedSuccessCode, null, rule.getMapToField());
                 return matchResult;
@@ -219,7 +219,7 @@ public class UnifiedRuleEvaluator {
                 }
 
                 // Return result with codes and mappings
-                RuleResult noMatchResult = new RuleResult(rule.getName(), rule.getMessage(), rule.getSeverity(),
+                RuleResult noMatchResult = new RuleResult(rule.getId(), rule.getName(), rule.getMessage(), rule.getSeverity(),
                                                          false, resultType, metrics, enrichedData,
                                                          new java.util.ArrayList<>(), !shouldFail, null, evaluatedErrorCode, rule.getMapToField());
                 return noMatchResult;

@@ -56,23 +56,22 @@ class ExampleServiceTest {
         assertTrue(examples.size() > 0);
         
         // Should have expected categories
-        assertTrue(examples.containsKey("quickstart"));
-        assertTrue(examples.containsKey("financial"));
+        assertTrue(examples.containsKey("basic"));
+        assertTrue(examples.containsKey("enrichment"));
         assertTrue(examples.containsKey("validation"));
         assertTrue(examples.containsKey("lookup"));
-        assertTrue(examples.containsKey("advanced"));
     }
 
     @Test
     @DisplayName("Should get specific example successfully")
     void shouldGetSpecificExampleSuccessfully() {
         // When
-        Map<String, Object> example = exampleService.getExample("quickstart", "basic-validation");
+        Map<String, Object> example = exampleService.getExample("basic", "quick-start");
         
         // Then
         assertNotNull(example);
-        assertEquals("basic-validation", example.get("name"));
-        assertEquals("quickstart", example.get("category"));
+        assertEquals("quick-start", example.get("name"));
+        assertEquals("basic", example.get("category"));
         assertNotNull(example.get("sampleData"));
     }
 
@@ -90,16 +89,16 @@ class ExampleServiceTest {
     @Test
     @DisplayName("Should provide sample data for different categories")
     void shouldProvideSampleDataForDifferentCategories() {
-        // Test financial example
-        Map<String, Object> financialExample = exampleService.getExample("financial", "trade-validation");
-        assertNotNull(financialExample.get("sampleData"));
+        // Test basic example
+        Map<String, Object> basicExample = exampleService.getExample("basic", "simple-age-validation");
+        assertNotNull(basicExample.get("sampleData"));
         
         // Test validation example
-        Map<String, Object> validationExample = exampleService.getExample("validation", "data-validation");
+        Map<String, Object> validationExample = exampleService.getExample("validation", "value-threshold");
         assertNotNull(validationExample.get("sampleData"));
         
         // Test lookup example
-        Map<String, Object> lookupExample = exampleService.getExample("lookup", "simple-lookup");
+        Map<String, Object> lookupExample = exampleService.getExample("lookup", "dynamic-pricing");
         assertNotNull(lookupExample.get("sampleData"));
     }
 }

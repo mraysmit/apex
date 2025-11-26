@@ -79,9 +79,8 @@ rule-chains:
             name: "Final Approval Action"
             condition: "true"
             message: "Loan Fully Approved"
-            result-field: "loanStatus"
+            result-field: "approvalTriggered"
             severity: "INFO"
-            value: "APPROVED"
         on-no-trigger:
           - id: "refer-level-3"
             name: "Refer Level 3"
@@ -90,6 +89,16 @@ rule-chains:
             result-field: "referralL3"
             severity: "WARNING"
 
+# Post-Processing: Set loan status based on approval results
+enrichments:
+  - id: "set-loan-status"
+    type: "field-enrichment"
+    description: "Set loanStatus to APPROVED when all levels pass"
+    condition: "#isApproved == true"
+    field-mappings:
+      - target-field: "loanStatus"
+        expression: "'APPROVED'"
+
 # Post-Processing: Consolidate status
 transformations:
   - id: "consolidate-status"
@@ -97,5 +106,5 @@ transformations:
     expression: |
       #rejectionReason != null ? 'REJECTED' :
       (#referralL2 != null || #referralL3 != null) ? 'REFERRED' :
-      #loanStatus
+      #loanStatus != null ? #loanStatus : 'PENDING'
     target-field: "finalApplicationStatus"

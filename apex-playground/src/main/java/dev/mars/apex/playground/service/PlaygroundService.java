@@ -21,9 +21,6 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.engine.model.RuleBase;
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
 import dev.mars.apex.playground.model.PlaygroundRequest;
 import dev.mars.apex.playground.model.PlaygroundResponse;
@@ -33,10 +30,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Collections;
+import java.util.Map;
 
 /**
  * Core service for APEX Playground operations.
@@ -106,86 +101,67 @@ public class PlaygroundService {
 
             // Step 3: Create and execute rules engine
             long rulesStartTime = System.currentTimeMillis();
-            
-            // Parse YAML to config object first to check for pipeline
+
+            // Parse YAML to config object
             YamlConfigurationLoader configLoader = new YamlConfigurationLoader();
             YamlRuleConfiguration yamlConfig = configLoader.fromYamlString(request.getYamlRules());
-            
+
+            // Create engine from config
             RulesEngine rulesEngine = RulesEngine.fromYamlConfig(yamlConfig);
 
-            // Check for pipeline execution
-            if (yamlConfig.getPipeline() != null) {
-                logger.info("Executing pipeline: {}", yamlConfig.getPipeline().getName());
-                try {
-                    RuleResult pipelineResult = rulesEngine.evaluate(parsedData);
-                    
-                    // Add pipeline result to response
-                    RuleExecutionResult executionResult = new RuleExecutionResult(
-                        "pipeline-" + System.currentTimeMillis(),
-                        yamlConfig.getPipeline().getName(),
-                        pipelineResult.getResultType() == RuleResult.ResultType.MATCH,
-                        pipelineResult.getMessage()
-                    );
-                    
-                    if (pipelineResult.getPerformanceMetrics() != null) {
-                        executionResult.setExecutionTimeMs(pipelineResult.getPerformanceMetrics().getEvaluationTimeMillis());
-                    }
-                    
-                    response.getValidation().addResult(executionResult);
-                    
-                } catch (Exception e) {
-                    logger.error("Error executing pipeline", e);
-                    RuleExecutionResult errorResult = new RuleExecutionResult(
-                        "pipeline-error-" + System.currentTimeMillis(),
-                        yamlConfig.getPipeline().getName(),
-                        false,
-                        "Pipeline execution error: " + e.getMessage()
-                    );
-                    response.getValidation().addResult(errorResult);
-                }
-            }
+            // Execute unified evaluation
+            RuleResult result = rulesEngine.evaluate(parsedData);
 
-            // Execute rules individually to capture all results
-            List<RuleBase> rules = rulesEngine.getConfiguration().getRulesForCategory("default");
-            if (rules != null && !rules.isEmpty()) {
-                logger.info("Executing {} rules individually for playground", rules.size());
-                for (RuleBase rule : rules) {
-                    RuleResult result = null;
-                    try {
-                        if (rule instanceof Rule) {
-                            result = rulesEngine.executeRule((Rule) rule, parsedData);
-                        } else if (rule instanceof RuleGroup) {
-                            result = rulesEngine.executeRuleGroupsList(Collections.singletonList((RuleGroup) rule), parsedData);
-                        }
-                        
-                        if (result != null) {
-                            addRuleResultToResponse(result, response);
-                        }
-                    } catch (Exception e) {
-                        logger.error("Error executing rule '{}': {}", rule.getName(), e.getMessage());
-                        // Add error result
-                        RuleExecutionResult errorResult = new RuleExecutionResult(
-                            "rule-error-" + System.currentTimeMillis(),
-                            rule.getName(),
-                            false,
-                            "Execution error: " + e.getMessage()
-                        );
-                        response.getValidation().addResult(errorResult);
-                    }
-                }
-            } else {
-                logger.info("No rules found in 'default' category");
-            }
-            
             response.getMetrics().setRulesExecutionTimeMs(System.currentTimeMillis() - rulesStartTime);
 
-            // Step 4: Process enrichments
-            processEnrichments(request, parsedData, response);
+            // Step 4: Map results to response
+            response.setSuccess(result.isSuccess());
+            response.setMessage(result.getMessage());
 
-            // Step 5: Set final metrics and status
+            // Handle enrichment data
+            if (result.getEnrichedData() != null) {
+                response.getEnrichment().setEnrichedData(result.getEnrichedData());
+                response.getEnrichment().setEnriched(true);
+
+                // Calculate fields added (approximate)
+                int fieldsAdded = result.getEnrichedData().size() - parsedData.size();
+                response.getEnrichment().setFieldsAdded(Math.max(0, fieldsAdded));
+            }
+
+            // Handle failures
+            if (result.hasFailures()) {
+                for (String failure : result.getFailureMessages()) {
+                    response.addError(failure);
+                }
+            }
+
+            // Populate validation results from individual rule results
+            List<RuleResult> childResults = result.getChildResults();
+            if (childResults != null && !childResults.isEmpty()) {
+                logger.info("Processing {} individual rule results", childResults.size());
+                for (RuleResult childResult : childResults) {
+                    RuleExecutionResult executionResult = new RuleExecutionResult(
+                        childResult.getRuleId() != null ? childResult.getRuleId() : childResult.getRuleName(),
+                        childResult.getRuleName(),
+                        childResult.isTriggered(),
+                        childResult.getMessage()
+                    );
+                    response.getValidation().addResult(executionResult);
+                }
+            } else {
+                // Fallback: create a single overall result if no child results
+                logger.info("No individual rule results, creating overall result");
+                RuleExecutionResult executionResult = new RuleExecutionResult(
+                    "evaluation-" + System.currentTimeMillis(),
+                    "Overall Evaluation",
+                    result.isTriggered(),
+                    result.getMessage()
+                );
+                response.getValidation().addResult(executionResult);
+            }
+
+            // Step 5: Set final metrics
             response.getMetrics().setTotalTimeMs(System.currentTimeMillis() - startTime);
-            response.setSuccess(true);
-            response.setMessage("Processing completed successfully");
 
             logger.info("Processing completed successfully in {}ms", response.getMetrics().getTotalTimeMs());
 
@@ -219,102 +195,6 @@ public class PlaygroundService {
         } catch (Exception e) {
             logger.debug("Source data validation failed: {}", e.getMessage());
             return false;
-        }
-    }
-
-    /**
-     * Add a single rule result to the response.
-     */
-    private void addRuleResultToResponse(RuleResult ruleResult, PlaygroundResponse response) {
-        PlaygroundResponse.ValidationResult validation = response.getValidation();
-
-        if (ruleResult.isTriggered()) {
-            // Rule was triggered (passed)
-            RuleExecutionResult executionResult = new RuleExecutionResult(
-                "rule-" + System.currentTimeMillis() + "-" + ruleResult.getRuleName().hashCode(),
-                ruleResult.getRuleName(),
-                true,
-                ruleResult.getMessage()
-            );
-
-            if (ruleResult.getPerformanceMetrics() != null) {
-                executionResult.setExecutionTimeMs(ruleResult.getPerformanceMetrics().getEvaluationTimeMillis());
-            }
-
-            validation.addResult(executionResult);
-        } else {
-            // Rule was not triggered (failed)
-            RuleExecutionResult executionResult = new RuleExecutionResult(
-                "rule-" + System.currentTimeMillis() + "-" + ruleResult.getRuleName().hashCode(),
-                ruleResult.getRuleName() != null ? ruleResult.getRuleName() : "unknown",
-                false,
-                ruleResult.getMessage() != null ? ruleResult.getMessage() : "Rule condition not met"
-            );
-
-            if (ruleResult.getPerformanceMetrics() != null) {
-                executionResult.setExecutionTimeMs(ruleResult.getPerformanceMetrics().getEvaluationTimeMillis());
-            }
-
-            validation.addResult(executionResult);
-        }
-        
-        logger.debug("Processed rule result: name={}, triggered={}, message={}",
-                    ruleResult.getRuleName(), ruleResult.isTriggered(), ruleResult.getMessage());
-    }
-
-    /**
-     * Process enrichments and populate the response.
-     */
-    private void processEnrichments(PlaygroundRequest request, Map<String, Object> originalData, PlaygroundResponse response) {
-        PlaygroundResponse.EnrichmentResult enrichment = response.getEnrichment();
-
-        try {
-            // Parse YAML configuration to get enrichments
-            YamlConfigurationLoader configLoader = new YamlConfigurationLoader();
-            YamlRuleConfiguration yamlConfig = configLoader.fromYamlString(request.getYamlRules());
-
-            if (yamlConfig.getEnrichments() != null && !yamlConfig.getEnrichments().isEmpty()) {
-                // Create a copy of original data for enrichment
-                Map<String, Object> dataToEnrich = new HashMap<>(originalData);
-
-                // Apply real enrichments using APEX engine (RulesEngine)
-                // Create a config for enrichment only to avoid re-executing rules
-                YamlRuleConfiguration enrichmentConfig = new YamlRuleConfiguration();
-                enrichmentConfig.setEnrichments(yamlConfig.getEnrichments());
-                enrichmentConfig.setDataSources(yamlConfig.getDataSources());
-                enrichmentConfig.setDataSourceRefs(yamlConfig.getDataSourceRefs());
-                
-                // Create a temporary engine for enrichment
-                RulesEngine enrichmentEngine = RulesEngine.fromYamlConfig(enrichmentConfig);
-                
-                RuleResult result = enrichmentEngine.evaluate(dataToEnrich);
-
-                // Set the actual enriched data
-                if (result.getEnrichedData() != null) {
-                    Map<String, Object> enrichedMap = result.getEnrichedData();
-                    enrichment.setEnrichedData(enrichedMap);
-
-                    // Calculate how many fields were added
-                    int fieldsAdded = enrichedMap.size() - originalData.size();
-                    enrichment.setFieldsAdded(Math.max(0, fieldsAdded));
-                    enrichment.setEnriched(fieldsAdded > 0 || !enrichedMap.equals(originalData));
-                } else {
-                    enrichment.setEnrichedData(originalData);
-                    enrichment.setEnriched(false);
-                    enrichment.setFieldsAdded(0);
-                }
-            } else {
-                // No enrichments defined in YAML
-                enrichment.setEnrichedData(originalData);
-                enrichment.setEnriched(false);
-                enrichment.setFieldsAdded(0);
-            }
-        } catch (Exception e) {
-            logger.error("Error processing enrichments: {}", e.getMessage(), e);
-            // Fallback to original data on error
-            enrichment.setEnrichedData(originalData);
-            enrichment.setEnriched(false);
-            enrichment.setFieldsAdded(0);
         }
     }
 }

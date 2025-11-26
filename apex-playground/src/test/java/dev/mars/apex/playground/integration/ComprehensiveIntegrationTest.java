@@ -231,7 +231,7 @@ class ComprehensiveIntegrationTest {
         assertEquals(1500.75, ((Number) balance).doubleValue(), 0.01);
         
         // Verify rules executed correctly with numeric comparisons
-        // Note: APEX rules engine stops after first matching rule
+        // With unified execution, we get a single overall result
         assertNotNull(playgroundResponse.getValidation());
         assertTrue(playgroundResponse.getValidation().isValid());
         assertEquals(1, playgroundResponse.getValidation().getRulesExecuted());
@@ -301,7 +301,7 @@ class ComprehensiveIntegrationTest {
         assertEquals(75000, ((Number) salary).intValue());
         assertEquals(true, active);
         
-        // Verify rules passed (engine stops after first match)
+        // Verify rules passed (unified execution returns single result)
         assertEquals(1, playgroundResponse.getValidation().getRulesPassed());
     }
 

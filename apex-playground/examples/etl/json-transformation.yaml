@@ -32,6 +32,10 @@ pipeline:
       operation: "writeOrder"
       depends-on: ["calculate-tax"]
 
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+
 data-sources:
   - name: "orders-json-source"
     type: "file-system"

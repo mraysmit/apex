@@ -522,7 +522,25 @@ public class YamlTransformationProcessor {
     @SuppressWarnings("unchecked")
     private void setFieldValue(Object object, String fieldName, Object value) {
         if (object instanceof Map) {
-            ((Map<String, Object>) object).put(fieldName, value);
+            Map<String, Object> map = (Map<String, Object>) object;
+            if (fieldName.contains(".")) {
+                String[] parts = fieldName.split("\\.");
+                Map<String, Object> current = map;
+                for (int i = 0; i < parts.length - 1; i++) {
+                    String part = parts[i];
+                    Object existing = current.get(part);
+                    if (existing == null || !(existing instanceof Map)) {
+                        Map<String, Object> newMap = new HashMap<>();
+                        current.put(part, newMap);
+                        current = newMap;
+                    } else {
+                        current = (Map<String, Object>) existing;
+                    }
+                }
+                current.put(parts[parts.length - 1], value);
+            } else {
+                map.put(fieldName, value);
+            }
             return;
         }
 

@@ -525,3 +525,45 @@ body {
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+
+/* Validation Status Indicator */
+.validation-status {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.validation-status.validation-passed {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.validation-status.validation-failed {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.validation-status-icon {
+    font-size: 1.5rem;
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.validation-status-icon.valid {
+    color: #28a745;
+}
+
+.validation-status-icon.invalid {
+    color: #dc3545;
+}
+
+.validation-status-text {
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}

@@ -1,148 +1,160 @@
 # ============================================================================
 # APEX YAML Configuration File
 # ============================================================================
-# Purpose: Demonstrate advanced priority-based routing using conditional-mapping-enrichment
-#          Shows how to implement complex routing logic with priorities
+# Purpose: Demonstrate advanced priority-based routing using field-enrichment
+#          with conditional-mappings for multi-field conditional assignments
 # ============================================================================
 
 metadata:
   id: "advanced-routing-example"
   name: "Advanced Priority Routing"
   version: "1.0.0"
-  description: "Demonstrates priority-based routing using conditional-mapping-enrichment"
+  description: "Demonstrates priority-based routing using field-enrichment with conditional-mappings"
   type: "scenario"
   author: "APEX Demo Team"
   created: "2025-09-17"
   tags: ["routing", "priority", "conditional-mapping"]
 
 enrichments:
-  # 1. Priority-based routing for customer segments
-  - id: "customer-segment-routing"
-    name: "Customer Segment Routing"
-    type: "conditional-mapping-enrichment"
-    description: "Route customers to appropriate service tiers based on segment and value"
-    
-    conditional-mappings:
-      # Priority 1: VIP Customers (High Value)
-      - condition: "#customerSegment == 'VIP' && #totalValue > 1000000"
-        priority: 1
-        mappings:
-          - source-field: "customerSegment"
-            target-field: "serviceTier"
-            value: "PLATINUM_CONCIERGE"
-          - source-field: "totalValue"
-            target-field: "slaHours"
-            value: 1
-          - source-field: "totalValue"
-            target-field: "routingQueue"
-            value: "VIP_QUEUE"
+  # 1. VIP Customer Routing (Priority 1)
+  - id: "vip-customer-routing"
+    name: "VIP Customer Routing"
+    type: "field-enrichment"
+    description: "Route VIP customers to platinum concierge service"
+    condition: "#customerSegment == 'VIP' && #totalValue > 1000000"
+    field-mappings:
+      - source-field: "customerSegment"
+        target-field: "serviceTier"
+        expression: "'PLATINUM_CONCIERGE'"
+      - source-field: "totalValue"
+        target-field: "slaHours"
+        expression: "1"
+      - source-field: "totalValue"
+        target-field: "routingQueue"
+        expression: "'VIP_QUEUE'"
 
-      # Priority 2: Corporate Customers (High Value)
-      - condition: "#customerSegment == 'CORPORATE' && #totalValue > 500000"
-        priority: 2
-        mappings:
-          - source-field: "customerSegment"
-            target-field: "serviceTier"
-            value: "GOLD_BUSINESS"
-          - source-field: "totalValue"
-            target-field: "slaHours"
-            value: 4
-          - source-field: "totalValue"
-            target-field: "routingQueue"
-            value: "CORP_QUEUE"
+  # 2. Corporate Customer Routing (Priority 2)
+  - id: "corporate-customer-routing"
+    name: "Corporate Customer Routing"
+    type: "field-enrichment"
+    description: "Route corporate customers to gold business service"
+    condition: "#serviceTier == null && #customerSegment == 'CORPORATE' && #totalValue > 500000"
+    field-mappings:
+      - source-field: "customerSegment"
+        target-field: "serviceTier"
+        expression: "'GOLD_BUSINESS'"
+      - source-field: "totalValue"
+        target-field: "slaHours"
+        expression: "4"
+      - source-field: "totalValue"
+        target-field: "routingQueue"
+        expression: "'CORP_QUEUE'"
 
-      # Priority 3: Standard Customers (High Value)
-      - condition: "#totalValue > 100000"
-        priority: 3
-        mappings:
-          - source-field: "customerSegment"
-            target-field: "serviceTier"
-            value: "SILVER_PREMIUM"
-          - source-field: "totalValue"
-            target-field: "slaHours"
-            value: 8
-          - source-field: "totalValue"
-            target-field: "routingQueue"
-            value: "PREMIUM_QUEUE"
+  # 3. Premium Customer Routing (Priority 3)
+  - id: "premium-customer-routing"
+    name: "Premium Customer Routing"
+    type: "field-enrichment"
+    description: "Route high-value customers to silver premium service"
+    condition: "#serviceTier == null && #totalValue > 100000"
+    field-mappings:
+      - source-field: "customerSegment"
+        target-field: "serviceTier"
+        expression: "'SILVER_PREMIUM'"
+      - source-field: "totalValue"
+        target-field: "slaHours"
+        expression: "8"
+      - source-field: "totalValue"
+        target-field: "routingQueue"
+        expression: "'PREMIUM_QUEUE'"
 
-      # Default: All other customers
-      - condition: "true"
-        priority: 99
-        mappings:
-          - source-field: "customerSegment"
-            target-field: "serviceTier"
-            value: "STANDARD"
-          - source-field: "totalValue"
-            target-field: "slaHours"
-            value: 24
-          - source-field: "totalValue"
-            target-field: "routingQueue"
-            value: "GENERAL_QUEUE"
+  # 4. Default Customer Routing
+  - id: "default-customer-routing"
+    name: "Default Customer Routing"
+    type: "field-enrichment"
+    description: "Route all other customers to standard service"
+    condition: "#serviceTier == null"
+    field-mappings:
+      - source-field: "customerSegment"
+        target-field: "serviceTier"
+        expression: "'STANDARD'"
+      - source-field: "totalValue"
+        target-field: "slaHours"
+        expression: "24"
+      - source-field: "totalValue"
+        target-field: "routingQueue"
+        expression: "'GENERAL_QUEUE'"
 
-  # 2. Region-based compliance routing
-  - id: "compliance-routing"
-    name: "Compliance Routing"
-    type: "conditional-mapping-enrichment"
-    description: "Route transactions to compliance teams based on region and risk"
-    
-    conditional-mappings:
-      # Priority 1: High Risk Regions
-      - condition: "{'NK', 'IR', 'SY'}.contains(#countryCode)"
-        priority: 1
-        mappings:
-          - source-field: "countryCode"
-            target-field: "complianceTeam"
-            value: "SANCTIONS_TEAM"
-          - source-field: "countryCode"
-            target-field: "reviewLevel"
-            value: "L3_ENHANCED_DUE_DILIGENCE"
+  # 5. High Risk Region Compliance Routing
+  - id: "high-risk-compliance-routing"
+    name: "High Risk Compliance Routing"
+    type: "field-enrichment"
+    description: "Route high-risk regions to sanctions team"
+    condition: "{'NK', 'IR', 'SY'}.contains(#countryCode)"
+    field-mappings:
+      - source-field: "countryCode"
+        target-field: "complianceTeam"
+        expression: "'SANCTIONS_TEAM'"
+      - source-field: "countryCode"
+        target-field: "reviewLevel"
+        expression: "'L3_ENHANCED_DUE_DILIGENCE'"
 
-      # Priority 2: Medium Risk Regions
-      - condition: "{'RU', 'CN', 'VE'}.contains(#countryCode)"
-        priority: 2
-        mappings:
-          - source-field: "countryCode"
-            target-field: "complianceTeam"
-            value: "REGIONAL_RISK_TEAM"
-          - source-field: "countryCode"
-            target-field: "reviewLevel"
-            value: "L2_STANDARD_REVIEW"
+  # 6. Medium Risk Region Compliance Routing
+  - id: "medium-risk-compliance-routing"
+    name: "Medium Risk Compliance Routing"
+    type: "field-enrichment"
+    description: "Route medium-risk regions to regional risk team"
+    condition: "#complianceTeam == null && {'RU', 'CN', 'VE'}.contains(#countryCode)"
+    field-mappings:
+      - source-field: "countryCode"
+        target-field: "complianceTeam"
+        expression: "'REGIONAL_RISK_TEAM'"
+      - source-field: "countryCode"
+        target-field: "reviewLevel"
+        expression: "'L2_STANDARD_REVIEW'"
 
-      # Default: Low Risk Regions
-      - condition: "true"
-        priority: 99
-        mappings:
-          - source-field: "countryCode"
-            target-field: "complianceTeam"
-            value: "AUTOMATED_CHECK"
-          - source-field: "countryCode"
-            target-field: "reviewLevel"
-            value: "L1_AUTOMATED"
+  # 7. Low Risk Region Compliance Routing (Default)
+  - id: "low-risk-compliance-routing"
+    name: "Low Risk Compliance Routing"
+    type: "field-enrichment"
+    description: "Route low-risk regions to automated check"
+    condition: "#complianceTeam == null"
+    field-mappings:
+      - source-field: "countryCode"
+        target-field: "complianceTeam"
+        expression: "'AUTOMATED_CHECK'"
+      - source-field: "countryCode"
+        target-field: "reviewLevel"
+        expression: "'L1_AUTOMATED'"
 
-  # 3. Product-specific routing
-  - id: "product-routing"
-    name: "Product Routing"
-    type: "conditional-mapping-enrichment"
-    description: "Route products to specialized teams"
-    
-    conditional-mappings:
-      - condition: "#productType == 'DERIVATIVES'"
-        priority: 1
-        mappings:
-          - source-field: "productType"
-            target-field: "productTeam"
-            value: "DERIVATIVES_DESK"
-      
-      - condition: "#productType == 'FX_SPOT'"
-        priority: 2
-        mappings:
-          - source-field: "productType"
-            target-field: "productTeam"
-            value: "FX_SPOT_DESK"
-            
-      - condition: "true"
-        priority: 99
-        mappings:
-          - source-field: "productType"
-            target-field: "productTeam"
-            value: "GENERAL_OPERATIONS"
+  # 8. Derivatives Product Routing
+  - id: "derivatives-product-routing"
+    name: "Derivatives Product Routing"
+    type: "field-enrichment"
+    description: "Route derivatives to derivatives desk"
+    condition: "#productType == 'DERIVATIVES'"
+    field-mappings:
+      - source-field: "productType"
+        target-field: "productTeam"
+        expression: "'DERIVATIVES_DESK'"
+
+  # 9. FX Spot Product Routing
+  - id: "fx-spot-product-routing"
+    name: "FX Spot Product Routing"
+    type: "field-enrichment"
+    description: "Route FX spot to FX spot desk"
+    condition: "#productTeam == null && #productType == 'FX_SPOT'"
+    field-mappings:
+      - source-field: "productType"
+        target-field: "productTeam"
+        expression: "'FX_SPOT_DESK'"
+
+  # 10. Default Product Routing
+  - id: "default-product-routing"
+    name: "Default Product Routing"
+    type: "field-enrichment"
+    description: "Route all other products to general operations"
+    condition: "#productTeam == null"
+    field-mappings:
+      - source-field: "productType"
+        target-field: "productTeam"
+        expression: "'GENERAL_OPERATIONS'"

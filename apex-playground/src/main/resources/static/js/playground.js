@@ -445,20 +445,43 @@ function updateYamlStatus(isValid, message) {
  * Display validation results
  */
 function displayValidationResults(results) {
-    const container = document.getElementById('validationResults');
-    if (!container) return;
+    console.log('displayValidationResults called with:', results);
+    console.log('results.valid =', results?.valid, 'type:', typeof results?.valid);
 
-    // Clear and update content
-    container.innerHTML = `<pre>${JSON.stringify(results, null, 2)}</pre>`;
-    
+    const container = document.getElementById('validationResults');
+    if (!container) {
+        console.error('validationResults container not found!');
+        return;
+    }
+
+    // Determine validation status - check for "valid" field in results
+    const isValid = results && results.valid === true;
+    console.log('isValid =', isValid);
+    const statusIcon = isValid
+        ? '<span class="validation-status-icon valid">✓</span>'
+        : '<span class="validation-status-icon invalid">✗</span>';
+    const statusText = isValid ? 'PASSED' : 'FAILED';
+    const statusClass = isValid ? 'validation-passed' : 'validation-failed';
+
+    // Build the HTML with status indicator at the top
+    const statusHtml = `
+        <div class="validation-status ${statusClass}">
+            ${statusIcon}
+            <span class="validation-status-text">${statusText}</span>
+        </div>
+        <pre>${JSON.stringify(results, null, 2)}</pre>
+    `;
+
+    container.innerHTML = statusHtml;
+
     // Visual feedback for update
     const originalBg = container.style.backgroundColor;
     container.style.transition = 'background-color 0.3s';
-    container.style.backgroundColor = '#e8f0fe'; // Light blue highlight
-    
+    container.style.backgroundColor = isValid ? '#d4edda' : '#f8d7da'; // Green or red tint
+
     setTimeout(() => {
         container.style.backgroundColor = originalBg || '#f8f9fa';
-    }, 300);
+    }, 500);
 }
 
 /**

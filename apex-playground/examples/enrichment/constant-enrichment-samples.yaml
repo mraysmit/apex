@@ -93,3 +93,19 @@ enrichments:
         target-field: "dataQuality"
         transformation: "'UNVERIFIED'"
 
+  # Example 6: Implicit Constants (New in v2.1)
+  # Demonstrates the simplified syntax where source-field is omitted
+  - id: "implicit-constants-demo"
+    name: "Implicit Constants Demo"
+    type: "field-enrichment"
+    description: "Assigns constants without specifying source-field"
+    enabled: true
+    field-mappings:
+      - target-field: "featureFlag"
+        expression: "'ENABLED'"
+        description: "Implicit constant using expression"
+      
+      - target-field: "schemaVersion"
+        transformation: "'2.1.0'"
+        description: "Implicit constant using transformation"
+

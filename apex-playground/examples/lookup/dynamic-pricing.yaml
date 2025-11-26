@@ -15,7 +15,7 @@ enrichments:
     
     lookup-config:
       # Mathematical operations in lookup key
-      lookup-key: "{'totalAmount': #quantity * #unitPrice, 'discountRate': #customerTier == 'PLATINUM' ? 0.15 : (#customerTier == 'GOLD' ? 0.10 : 0.05)}"
+      lookup-key: "#customerTier + '_PRICING'"
       
       lookup-dataset:
         type: "inline"
