@@ -59,7 +59,7 @@ class SaveLoadConfigurationUITest {
 
     @BeforeEach
     void setUp() {
-        // Setup Chrome driver with options for download testing
+        // Configure Chrome options for headless testing
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless");
         options.addArguments("--no-sandbox");

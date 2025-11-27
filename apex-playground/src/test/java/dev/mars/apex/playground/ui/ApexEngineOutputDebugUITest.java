@@ -58,6 +58,7 @@ class ApexEngineOutputDebugUITest {
 
     @BeforeEach
     void setUp() {
+        // Configure Chrome options for headless testing
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless");
         options.addArguments("--no-sandbox");

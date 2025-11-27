@@ -110,7 +110,7 @@ public class PlaygroundScreenshotUtil {
             case CHROME -> {
                 ChromeOptions options = new ChromeOptions();
                 if (headless) {
-                    options.addArguments("--headless");
+                    // options.addArguments("--headless");
                 }
                 options.addArguments("--no-sandbox");
                 options.addArguments("--disable-dev-shm-usage");
@@ -121,7 +121,7 @@ public class PlaygroundScreenshotUtil {
             case FIREFOX -> {
                 FirefoxOptions options = new FirefoxOptions();
                 if (headless) {
-                    options.addArguments("--headless");
+                    // options.addArguments("--headless");
                 }
                 options.addArguments("--width=1920");
                 options.addArguments("--height=1080");
@@ -130,7 +130,7 @@ public class PlaygroundScreenshotUtil {
             case EDGE -> {
                 EdgeOptions options = new EdgeOptions();
                 if (headless) {
-                    options.addArguments("--headless");
+                    // options.addArguments("--headless");
                 }
                 options.addArguments("--no-sandbox");
                 options.addArguments("--disable-dev-shm-usage");

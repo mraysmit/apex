@@ -303,15 +303,34 @@ class ExternalFileLoadingUITest {
         WebElement clearBtn = driver.findElement(By.id("clearBtn"));
         clearBtn.click();
         
-        // Handle confirmation alert
+        // Handle confirmation modal (Bootstrap modal, not native alert)
         try {
-            wait.until(ExpectedConditions.alertIsPresent());
-            driver.switchTo().alert().accept();
+            // Wait for modal to be visible
+            WebElement modal = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("confirmationModal")));
+            
+            // Find and click the confirm button inside the modal
+            WebElement confirmBtn = modal.findElement(By.id("confirmActionBtn"));
+            
+            // Use JS click to ensure it works even if animation is still playing
+            ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].click();", confirmBtn);
+            
+            // Wait for modal to disappear
+            wait.until(ExpectedConditions.invisibilityOf(modal));
         } catch (Exception e) {
-            // Alert might not appear if not implemented or already handled
+            // Fallback for native alert if implementation changes
+            try {
+                wait.until(ExpectedConditions.alertIsPresent());
+                driver.switchTo().alert().accept();
+            } catch (Exception ex) {
+                // Ignore if neither appears (might be already cleared or no confirmation needed)
+                System.out.println("No confirmation dialog appeared: " + ex.getMessage());
+            }
         }
 
         // Then
+        // Wait a moment for the clear action to complete
+        try { Thread.sleep(500); } catch (InterruptedException e) {}
+        
         assertEquals("", sourceEditor.getDomProperty("value"), "Source editor should be cleared");
         assertEquals("", yamlEditor.getDomProperty("value"), "YAML editor should be cleared");
     }

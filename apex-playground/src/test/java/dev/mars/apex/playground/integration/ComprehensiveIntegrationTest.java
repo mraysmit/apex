@@ -69,24 +69,31 @@ class ComprehensiveIntegrationTest {
         // Given - A complete, valid YAML configuration
         String validYaml = """
             metadata:
+              id: "integration-test-rules"
               name: "Integration Test Rules"
               version: "1.0.0"
               description: "Test configuration for integration testing"
-              type: "rule-configuration"
+              type: "rule-config"
               author: "Test Author"
             
             rules:
               - id: "age-check"
                 name: "Age Verification"
+                description: "Verifies age"
+                type: "validation-rule"
                 condition: "#age >= 18"
-                message: "Must be 18 or older"
+                error-message: "Must be 18 or older"
+                severity: "ERROR"
                 enabled: true
                 priority: 100
               
               - id: "status-check"
                 name: "Status Verification"
+                description: "Verifies status"
+                type: "validation-rule"
                 condition: "#status == 'active'"
-                message: "Account must be active"
+                error-message: "Account must be active"
+                severity: "ERROR"
                 enabled: true
                 priority: 200
             """;
@@ -188,6 +195,7 @@ class ComprehensiveIntegrationTest {
 
         String yamlRules = """
             metadata:
+              id: "xml-processing-test"
               name: "XML Processing Test"
               version: "1.0.0"
               type: "rule-config"
@@ -197,13 +205,19 @@ class ComprehensiveIntegrationTest {
             rules:
               - id: "age-rule"
                 name: "Age Check"
+                description: "Checks age"
+                type: "validation-rule"
                 condition: "#age >= 21"
-                message: "Customer is of legal age"
+                error-message: "Customer is of legal age"
+                severity: "INFO"
               
               - id: "balance-rule"
                 name: "Balance Check"
+                description: "Checks balance"
+                type: "validation-rule"
                 condition: "#balance > 1000"
-                message: "High value customer"
+                error-message: "High value customer"
+                severity: "INFO"
             """;
 
         PlaygroundRequest request = new PlaygroundRequest();
@@ -265,6 +279,7 @@ class ComprehensiveIntegrationTest {
 
         String yamlRules = """
             metadata:
+              id: "json-processing-test"
               name: "JSON Processing Test"
               version: "1.0.0"
               type: "rule-config"
@@ -274,13 +289,19 @@ class ComprehensiveIntegrationTest {
             rules:
               - id: "salary-rule"
                 name: "Salary Check"
+                description: "Checks salary"
+                type: "validation-rule"
                 condition: "#salary >= 50000"
-                message: "Above minimum salary"
+                error-message: "Above minimum salary"
+                severity: "INFO"
               
               - id: "active-rule"
                 name: "Active Status"
+                description: "Checks status"
+                type: "validation-rule"
                 condition: "#active == true"
-                message: "Employee is active"
+                error-message: "Employee is active"
+                severity: "INFO"
             """;
 
         PlaygroundRequest request = new PlaygroundRequest();
@@ -329,6 +350,7 @@ class ComprehensiveIntegrationTest {
 
         String yamlRules = """
             metadata:
+              id: "csv-processing-test"
               name: "CSV Processing Test"
               version: "1.0.0"
               type: "rule-config"
@@ -338,8 +360,11 @@ class ComprehensiveIntegrationTest {
             rules:
               - id: "age-rule"
                 name: "Age Check"
+                description: "Checks age"
+                type: "validation-rule"
                 condition: "#age >= 25"
-                message: "Minimum age requirement met"
+                error-message: "Minimum age requirement met"
+                severity: "INFO"
             """;
 
         PlaygroundRequest request = new PlaygroundRequest();

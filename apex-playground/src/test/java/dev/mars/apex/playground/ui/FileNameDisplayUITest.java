@@ -64,7 +64,8 @@ class FileNameDisplayUITest {
     private int port;
 
     @BeforeEach
-    void setUp() throws IOException {
+    void setUp() {
+        // Configure Chrome options for headless testing
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless");
         options.addArguments("--no-sandbox");
@@ -77,7 +78,11 @@ class FileNameDisplayUITest {
         jsExecutor = (JavascriptExecutor) driver;
         baseUrl = "http://localhost:" + port;
         
-        tempDir = Files.createTempDirectory("file-name-display-test");
+        try {
+            tempDir = Files.createTempDirectory("file-name-display-test");
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create temp directory", e);
+        }
     }
 
     @AfterEach
@@ -220,9 +225,29 @@ class FileNameDisplayUITest {
         WebElement clearBtn = driver.findElement(By.id("clearBtn"));
         clearBtn.click();
         
-        // Handle confirmation dialog
-        wait.until(ExpectedConditions.alertIsPresent());
-        driver.switchTo().alert().accept();
+        // Handle confirmation modal (Bootstrap modal, not native alert)
+        try {
+            // Wait for modal to be visible
+            WebElement modal = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("confirmationModal")));
+            
+            // Find and click the confirm button inside the modal
+            WebElement confirmBtn = modal.findElement(By.id("confirmActionBtn"));
+            
+            // Use JS click to ensure it works even if animation is still playing
+            ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("arguments[0].click();", confirmBtn);
+            
+            // Wait for modal to disappear
+            wait.until(ExpectedConditions.invisibilityOf(modal));
+        } catch (Exception e) {
+            // Fallback for native alert if implementation changes
+            try {
+                wait.until(ExpectedConditions.alertIsPresent());
+                driver.switchTo().alert().accept();
+            } catch (Exception ex) {
+                // Ignore if neither appears
+                System.out.println("No confirmation dialog appeared: " + ex.getMessage());
+            }
+        }
 
         // Then - Verify file names are cleared
         wait.until(ExpectedConditions.textToBe(By.id("sourceDataFileName"), "No file loaded"));

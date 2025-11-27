@@ -150,7 +150,7 @@ class PlaygroundEndToEndTest {
             // Step 1: Validate YAML configuration
             String yamlValidationRequest = """
                 {
-                  "yamlContent": "metadata:\\n  name: \\"E2E Test Rules\\"\\n  version: \\"1.0.0\\"\\n  type: \\"rule-config\\"\\n  description: \\"End-to-end test validation rules\\"\\n  author: \\"Test Author\\"\\nrules:\\n  - id: \\"age-check\\"\\n    name: \\"Age Validation\\"\\n    condition: \\"#age >= 18\\"\\n    message: \\"Age must be 18 or older\\""
+                  "yamlContent": "metadata:\\n  id: \\"e2e-test-rules\\"\\n  name: \\"E2E Test Rules\\"\\n  version: \\"1.0.0\\"\\n  type: \\"rule-config\\"\\n  description: \\"End-to-end test validation rules\\"\\n  author: \\"Test Author\\"\\nrules:\\n  - id: \\"age-check\\"\\n    name: \\"Age Validation\\"\\n    description: \\"Validates age\\"\\n    type: \\"validation-rule\\"\\n    condition: \\"#age >= 18\\"\\n    error-message: \\"Age must be 18 or older\\"\\n    severity: \\"ERROR\\""
                 }
                 """;
 
@@ -171,7 +171,7 @@ class PlaygroundEndToEndTest {
             String processingRequest = """
                 {
                   "sourceData": "{\\"name\\": \\"Alice Johnson\\", \\"age\\": 28, \\"email\\": \\"alice@example.com\\", \\"department\\": \\"Engineering\\"}",
-                  "yamlRules": "metadata:\\n  name: \\"E2E Test Rules\\"\\n  version: \\"1.0.0\\"\\n  type: \\"rule-config\\"\\n  description: \\"End-to-end test validation rules\\"\\n  author: \\"Test Author\\"\\nrules:\\n  - id: \\"age-check\\"\\n    name: \\"Age Validation\\"\\n    condition: \\"#age >= 18\\"\\n    message: \\"Age must be 18 or older\\"",
+                  "yamlRules": "metadata:\\n  id: \\"e2e-test-rules\\"\\n  name: \\"E2E Test Rules\\"\\n  version: \\"1.0.0\\"\\n  type: \\"rule-config\\"\\n  description: \\"End-to-end test validation rules\\"\\n  author: \\"Test Author\\"\\nrules:\\n  - id: \\"age-check\\"\\n    name: \\"Age Validation\\"\\n    description: \\"Validates age\\"\\n    type: \\"validation-rule\\"\\n    condition: \\"#age >= 18\\"\\n    error-message: \\"Age must be 18 or older\\"\\n    severity: \\"ERROR\\"",
                   "dataFormat": "JSON"
                 }
                 """;
@@ -206,7 +206,7 @@ class PlaygroundEndToEndTest {
             String processingRequest = """
                 {
                   "sourceData": "{\\"name\\": \\"Bob Smith\\", \\"age\\": 16, \\"email\\": \\"bob@example.com\\"}",
-                  "yamlRules": "metadata:\\n  name: \\"Age Validation Rules\\"\\n  version: \\"1.0.0\\"\\n  type: \\"rule-config\\"\\n  description: \\"Test Description\\"\\n  author: \\"Test Author\\"\\nrules:\\n  - id: \\"age-check\\"\\n    name: \\"Age Validation\\"\\n    condition: \\"#age >= 18\\"\\n    message: \\"Age must be 18 or older\\"",
+                  "yamlRules": "metadata:\\n  id: \\"age-validation-rules\\"\\n  name: \\"Age Validation Rules\\"\\n  version: \\"1.0.0\\"\\n  type: \\"rule-config\\"\\n  description: \\"Test Description\\"\\n  author: \\"Test Author\\"\\nrules:\\n  - id: \\"age-check-fail\\"\\n    name: \\"Age Validation\\"\\n    description: \\"Validates age\\"\\n    type: \\"validation-rule\\"\\n    condition: \\"#age >= 18\\"\\n    error-message: \\"Age must be 18 or older\\"\\n    severity: \\"ERROR\\"\\n    enabled: true",
                   "dataFormat": "JSON"
                 }
                 """;
@@ -223,8 +223,9 @@ class PlaygroundEndToEndTest {
             assertEquals(200, processResponse.statusCode());
             String responseBody = processResponse.body();
             
-            assertTrue(responseBody.contains("\"success\"") && responseBody.contains("true")); // Processing succeeds
-            assertTrue(responseBody.contains("\"valid\"") && responseBody.contains("false")); // But validation fails
+            // When validation fails with ERROR severity, the overall success is false
+            assertTrue(responseBody.contains("\"success\"") && responseBody.contains("false"), "Processing should return success: false when validation fails"); 
+            assertTrue(responseBody.contains("\"valid\"") && responseBody.contains("false"), "Validation should be false");
             assertTrue(responseBody.contains("\"rulesFailed\"") && responseBody.contains("1"));
             assertTrue(responseBody.contains("Bob Smith"));
             assertTrue(responseBody.contains("\"age\"") && responseBody.contains("16"));
@@ -238,7 +239,7 @@ class PlaygroundEndToEndTest {
             String csvProcessingRequest = """
                 {
                   "sourceData": "name,age,department,salary\\nCarol Davis,32,Marketing,75000\\nDavid Wilson,29,Sales,68000",
-                  "yamlRules": "metadata:\\n  name: \\"CSV Processing Rules\\"\\n  version: \\"1.0.0\\"\\n  type: \\"rule-config\\"\\n  description: \\"Test Description\\"\\n  author: \\"Test Author\\"\\nrules:\\n  - id: \\"age-check\\"\\n    name: \\"Age Validation\\"\\n    condition: \\"#age >= 25\\"\\n    message: \\"Age must be 25 or older for this position\\"",
+                  "yamlRules": "metadata:\\n  id: \\"csv-processing-rules\\"\\n  name: \\"CSV Processing Rules\\"\\n  version: \\"1.0.0\\"\\n  type: \\"rule-config\\"\\n  description: \\"Test Description\\"\\n  author: \\"Test Author\\"\\nrules:\\n  - id: \\"age-check\\"\\n    name: \\"Age Validation\\"\\n    description: \\"Validates age\\"\\n    type: \\"validation-rule\\"\\n    condition: \\"#age >= 25\\"\\n    error-message: \\"Age must be 25 or older for this position\\"\\n    severity: \\"ERROR\\"",
                   "dataFormat": "CSV"
                 }
                 """;
@@ -264,7 +265,7 @@ class PlaygroundEndToEndTest {
             String xmlProcessingRequest = """
                 {
                   "sourceData": "<person><name>Eve Brown</name><age>35</age><department>HR</department></person>",
-                  "yamlRules": "metadata:\\n  name: \\"XML Processing Rules\\"\\n  version: \\"1.0.0\\"\\n  type: \\"rule-config\\"\\n  description: \\"Test Description\\"\\n  author: \\"Test Author\\"\\nrules:\\n  - id: \\"age-check\\"\\n    name: \\"Age Validation\\"\\n    condition: \\"#age >= 30\\"\\n    message: \\"Age must be 30 or older\\"",
+                  "yamlRules": "metadata:\\n  id: \\"xml-processing-rules\\"\\n  name: \\"XML Processing Rules\\"\\n  version: \\"1.0.0\\"\\n  type: \\"rule-config\\"\\n  description: \\"Test Description\\"\\n  author: \\"Test Author\\"\\nrules:\\n  - id: \\"age-check\\"\\n    name: \\"Age Validation\\"\\n    description: \\"Validates age\\"\\n    type: \\"validation-rule\\"\\n    condition: \\"#age >= 30\\"\\n    error-message: \\"Age must be 30 or older\\"\\n    severity: \\"ERROR\\"",
                   "dataFormat": "XML"
                 }
                 """;
@@ -374,7 +375,7 @@ class PlaygroundEndToEndTest {
             String processingRequest = """
                 {
                   "sourceData": "{\\"name\\": \\"Performance Test User\\", \\"age\\": 30, \\"department\\": \\"Engineering\\", \\"salary\\": 85000}",
-                  "yamlRules": "metadata:\\n  name: \\"Performance Test Rules\\"\\n  version: \\"1.0.0\\"\\n  type: \\"rule-config\\"\\n  description: \\"Test Description\\"\\n  author: \\"Test Author\\"\\nrules:\\n  - id: \\"age-check\\"\\n    name: \\"Age Validation\\"\\n    condition: \\"#age >= 18\\"\\n    message: \\"Age must be 18 or older\\"\\n  - id: \\"salary-check\\"\\n    name: \\"Salary Validation\\"\\n    condition: \\"#salary > 50000\\"\\n    message: \\"Salary must be above 50000\\"",
+                  "yamlRules": "metadata:\\n  id: \\"performance-test-rules\\"\\n  name: \\"Performance Test Rules\\"\\n  version: \\"1.0.0\\"\\n  type: \\"rule-config\\"\\n  description: \\"Test Description\\"\\n  author: \\"Test Author\\"\\nrules:\\n  - id: \\"age-check\\"\\n    name: \\"Age Validation\\"\\n    description: \\"Validates age\\"\\n    type: \\"validation-rule\\"\\n    condition: \\"#age >= 18\\"\\n    error-message: \\"Age must be 18 or older\\"\\n    severity: \\"ERROR\\"\\n  - id: \\"salary-check\\"\\n    name: \\"Salary Validation\\"\\n    description: \\"Validates salary\\"\\n    type: \\"validation-rule\\"\\n    condition: \\"#salary > 50000\\"\\n    error-message: \\"Salary must be above 50000\\"\\n    severity: \\"ERROR\\"",
                   "dataFormat": "JSON"
                 }
                 """;
@@ -410,7 +411,7 @@ class PlaygroundEndToEndTest {
             String processingRequest = """
                 {
                   "sourceData": "{\\"name\\": \\"Concurrent User\\", \\"age\\": 25}",
-                  "yamlRules": "metadata:\\n  name: \\"Concurrent Test Rules\\"\\n  version: \\"1.0.0\\"\\n  type: \\"rule-config\\"\\n  description: \\"Test Description\\"\\n  author: \\"Test Author\\"\\nrules:\\n  - id: \\"age-check\\"\\n    name: \\"Age Validation\\"\\n    condition: \\"#age >= 18\\"\\n    message: \\"Age must be 18 or older\\"",
+                  "yamlRules": "metadata:\\n  id: \\"concurrent-test-rules\\"\\n  name: \\"Concurrent Test Rules\\"\\n  version: \\"1.0.0\\"\\n  type: \\"rule-config\\"\\n  description: \\"Test Description\\"\\n  author: \\"Test Author\\"\\nrules:\\n  - id: \\"age-check\\"\\n    name: \\"Age Validation\\"\\n    description: \\"Validates age\\"\\n    type: \\"validation-rule\\"\\n    condition: \\"#age >= 18\\"\\n    error-message: \\"Age must be 18 or older\\"\\n    severity: \\"ERROR\\"",
                   "dataFormat": "JSON"
                 }
                 """;

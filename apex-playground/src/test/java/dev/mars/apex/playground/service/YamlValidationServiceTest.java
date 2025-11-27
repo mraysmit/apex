@@ -154,6 +154,9 @@ class YamlValidationServiceTest {
                 rules:
                   - id: "test-rule"
                     name: "Test Rule"
+                    type: "validation-rule"
+                    severity: "ERROR"
+                    error-message: "Age must be > 18"
                     condition: "#age > 18"
                     message: "Age validation
                 """;

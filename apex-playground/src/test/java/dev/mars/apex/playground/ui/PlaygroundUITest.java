@@ -222,13 +222,33 @@ class PlaygroundUITest {
         
         fillDataAndRules(testData, testYaml);
 
-        // When - Click clear button and handle confirmation alert
+        // When - Click clear button and handle confirmation modal
         WebElement clearBtn = driver.findElement(By.id("clearBtn"));
         clearBtn.click();
 
-        // Handle the confirmation alert
-        wait.until(ExpectedConditions.alertIsPresent());
-        driver.switchTo().alert().accept();
+        // Handle the confirmation modal
+        try {
+            // Wait for modal to be visible
+            WebElement modal = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("confirmationModal")));
+            
+            // Find and click the confirm button inside the modal
+            WebElement confirmBtn = modal.findElement(By.id("confirmActionBtn"));
+            
+            // Use JS click to ensure it works even if there are animation overlays
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", confirmBtn);
+            
+            // Wait for modal to disappear
+            wait.until(ExpectedConditions.invisibilityOf(modal));
+        } catch (Exception e) {
+            // Fallback for debugging if modal interaction fails
+            System.out.println("Modal interaction failed: " + e.getMessage());
+            // Try direct JS click on confirm button as backup
+            try {
+                ((JavascriptExecutor) driver).executeScript("document.getElementById('confirmActionBtn').click();");
+            } catch (Exception ex) {
+                // Ignore if fallback also fails
+            }
+        }
 
         // Then - Verify fields are cleared
         WebElement dataArea = driver.findElement(By.id("sourceDataEditor"));

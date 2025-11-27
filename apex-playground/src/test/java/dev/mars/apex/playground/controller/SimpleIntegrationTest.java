@@ -74,7 +74,7 @@ class SimpleIntegrationTest {
     void shouldValidateYamlSuccessfully() {
         // Given
         Map<String, Object> request = new HashMap<>();
-        request.put("yamlContent", "metadata:\n  name: \"Test Rules\"\n  version: \"1.0.0\"\n  type: \"rule-config\"\n  description: \"Test Description\"\n  author: \"Test Author\"\nrules:\n  - id: \"age-check\"\n    name: \"Age Validation\"\n    condition: \"#age >= 18\"");
+        request.put("yamlContent", "metadata:\n  id: \"test-rules\"\n  name: \"Test Rules\"\n  version: \"1.0.0\"\n  type: \"rule-config\"\n  description: \"Test Description\"\n  author: \"Test Author\"\nrules:\n  - id: \"age-check\"\n    name: \"Age Validation\"\n    description: \"Validates age\"\n    type: \"validation-rule\"\n    condition: \"#age >= 18\"\n    error-message: \"Age must be 18 or older\"\n    severity: \"ERROR\"");
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -95,7 +95,7 @@ class SimpleIntegrationTest {
         // Given
         PlaygroundRequest request = new PlaygroundRequest();
         request.setSourceData("{\"name\": \"John Doe\", \"age\": 25}");
-        request.setYamlRules("metadata:\n  name: \"Test Rules\"\n  version: \"1.0.0\"\n  type: \"rule-config\"\n  description: \"Test Description\"\n  author: \"Test Author\"\nrules:\n  - id: \"age-check\"\n    name: \"Age Validation\"\n    condition: \"#age >= 18\"");
+        request.setYamlRules("metadata:\n  id: \"test-rules\"\n  name: \"Test Rules\"\n  version: \"1.0.0\"\n  type: \"rule-config\"\n  description: \"Test Description\"\n  author: \"Test Author\"\nrules:\n  - id: \"age-check\"\n    name: \"Age Validation\"\n    description: \"Validates age\"\n    type: \"validation-rule\"\n    condition: \"#age >= 18\"\n    error-message: \"Age must be 18 or older\"\n    severity: \"ERROR\"");
         request.setDataFormat("JSON");
 
         HttpHeaders headers = new HttpHeaders();
