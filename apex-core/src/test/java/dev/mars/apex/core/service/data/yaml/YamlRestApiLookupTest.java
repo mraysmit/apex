@@ -18,7 +18,9 @@ package dev.mars.apex.core.service.data.yaml;
 
 
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
+import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlDataSource;
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.service.data.external.DataSourceException;
 import dev.mars.apex.core.service.data.external.ExternalDataSource;
 import dev.mars.apex.core.service.data.external.factory.DataSourceFactory;
@@ -31,12 +33,15 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Integration tests for REST API data sources created from YAML configurations.
  *
- * This test class validates:
+ * This test class validates the complete YAML-to-RestAPI pipeline:
+ * - Loading REST API configurations from YAML file
  * - REST API data source creation from YAML
  * - YAML configuration parsing for REST APIs
  * - Parameter binding in API configurations
  * - Authentication configuration
  * - Error handling for configuration issues
+ *
+ * The YAML configuration file is loaded from classpath: rest-api-lookup-test.yaml
  *
  * Note: This test focuses on YAML configuration validation rather than actual HTTP calls
  * to avoid external dependencies. For full HTTP testing, use integration test suites.
@@ -49,11 +54,24 @@ class YamlRestApiLookupTest {
     private static final String MOCK_API_URL = "https://api.example.com";
 
     private DataSourceFactory factory;
+    private YamlConfigurationLoader yamlLoader;
+    private YamlRuleConfiguration yamlConfig;
     private ExternalDataSource restApiSource;
 
     @BeforeEach
-    void setUp() throws DataSourceException {
+    void setUp() throws Exception {
         factory = DataSourceFactory.getInstance();
+        yamlLoader = new YamlConfigurationLoader();
+
+        // Set API base URL property for YAML resolution
+        System.setProperty("API_BASE_URL", MOCK_API_URL);
+
+        // Load YAML configuration from file
+        yamlConfig = yamlLoader.loadFromClasspath("rest-api-lookup-test.yaml");
+        assertNotNull(yamlConfig, "YAML configuration should be loaded");
+        assertNotNull(yamlConfig.getDataSources(), "Data sources should be present");
+
+        System.out.println("TEST: Loaded " + yamlConfig.getDataSources().size() + " data sources from YAML");
     }
 
     @AfterEach
@@ -66,7 +84,20 @@ class YamlRestApiLookupTest {
             }
         }
 
+        // Clean up system properties
+        System.clearProperty("API_BASE_URL");
+
         factory.clearCache();
+    }
+
+    /**
+     * Find a data source by name from the loaded YAML configuration.
+     */
+    private YamlDataSource findDataSourceByName(String name) {
+        return yamlConfig.getDataSources().stream()
+            .filter(ds -> name.equals(ds.getName()))
+            .findFirst()
+            .orElse(null);
     }
 
     // ========================================
@@ -76,8 +107,9 @@ class YamlRestApiLookupTest {
     @Test
     @DisplayName("Should create REST API data source from YAML configuration")
     void testRestApiConfigurationFromYaml() throws DataSourceException {
-        // Create YAML configuration for REST API
-        YamlDataSource yamlApi = createBasicRestApiYamlDataSource();
+        // Get REST API data source from YAML
+        YamlDataSource yamlApi = findDataSourceByName("test-api");
+        assertNotNull(yamlApi, "REST API data source should be in YAML");
 
         // Convert and create data source
         DataSourceConfiguration config = yamlApi.toDataSourceConfiguration();
@@ -102,7 +134,9 @@ class YamlRestApiLookupTest {
     @Test
     @DisplayName("Should handle parameterized API configuration from YAML")
     void testParameterizedApiConfigurationFromYaml() throws DataSourceException {
-        YamlDataSource yamlApi = createParameterizedRestApiYamlDataSource();
+        // Get parameterized REST API data source from YAML
+        YamlDataSource yamlApi = findDataSourceByName("parameterized-api");
+        assertNotNull(yamlApi, "Parameterized API data source should be in YAML");
 
         DataSourceConfiguration config = yamlApi.toDataSourceConfiguration();
         restApiSource = factory.createDataSource(config);
@@ -123,7 +157,9 @@ class YamlRestApiLookupTest {
     @Test
     @DisplayName("Should handle API authentication configuration from YAML")
     void testApiAuthenticationConfigurationFromYaml() throws DataSourceException {
-        YamlDataSource yamlApi = createAuthenticatedRestApiYamlDataSource();
+        // Get authenticated REST API data source from YAML
+        YamlDataSource yamlApi = findDataSourceByName("authenticated-api");
+        assertNotNull(yamlApi, "Authenticated API data source should be in YAML");
 
         DataSourceConfiguration config = yamlApi.toDataSourceConfiguration();
         restApiSource = factory.createDataSource(config);
@@ -167,7 +203,9 @@ class YamlRestApiLookupTest {
     @Test
     @DisplayName("Should handle complex endpoint configurations")
     void testComplexEndpointConfigurations() throws DataSourceException {
-        YamlDataSource yamlApi = createComplexRestApiYamlDataSource();
+        // Get complex REST API data source from YAML
+        YamlDataSource yamlApi = findDataSourceByName("complex-api");
+        assertNotNull(yamlApi, "Complex API data source should be in YAML");
 
         DataSourceConfiguration config = yamlApi.toDataSourceConfiguration();
         restApiSource = factory.createDataSource(config);
@@ -185,89 +223,5 @@ class YamlRestApiLookupTest {
         assertTrue(Arrays.asList(paramNames).contains("userData"), "Should include user data parameters");
 
         System.out.println("TEST: Complex endpoint configuration validated successfully");
-    }
-
-    // ========================================
-    // Helper Methods for Creating YAML Configurations
-    // ========================================
-
-    private YamlDataSource createBasicRestApiYamlDataSource() {
-        YamlDataSource yamlApi = new YamlDataSource();
-        yamlApi.setName("test-api");
-        yamlApi.setType("rest-api");
-        yamlApi.setSourceType("rest-api"); // Set source type explicitly
-        yamlApi.setEnabled(true);
-        yamlApi.setDescription("Test REST API data source");
-
-        // Configure connection (use hyphenated keys as expected by YAML converter)
-        Map<String, Object> connection = yamlApi.getConnection();
-        connection.put("base-url", MOCK_API_URL);
-        connection.put("timeout", 10000);
-        connection.put("retry-attempts", 2);
-
-        // Configure endpoints
-        Map<String, String> endpoints = yamlApi.getEndpoints();
-        endpoints.put("users", "/api/users");
-        endpoints.put("health", "/api/health");
-        endpoints.put("default", "/api/health");
-
-        return yamlApi;
-    }
-
-    private YamlDataSource createParameterizedRestApiYamlDataSource() {
-        YamlDataSource yamlApi = createBasicRestApiYamlDataSource();
-
-        // Add parameterized endpoints
-        Map<String, String> endpoints = yamlApi.getEndpoints();
-        endpoints.put("getUserById", "/api/users/{userId}");
-        endpoints.put("getUsersByStatus", "/api/users?status={status}");
-
-        // Set parameter names
-        yamlApi.setParameterNames(new String[]{"userId", "status", "limit"});
-
-        return yamlApi;
-    }
-
-    private YamlDataSource createAuthenticatedRestApiYamlDataSource() {
-        YamlDataSource yamlApi = createBasicRestApiYamlDataSource();
-
-        // Configure authentication (use hyphenated keys as expected by YAML converter)
-        Map<String, Object> auth = yamlApi.getAuthentication();
-        auth.put("type", "api-key");
-        auth.put("api-key", "test-api-key-12345");
-        auth.put("api-key-header", "X-API-Key");
-
-        // Add protected endpoint
-        yamlApi.getEndpoints().put("protected", "/api/protected");
-
-        return yamlApi;
-    }
-
-    private YamlDataSource createComplexRestApiYamlDataSource() {
-        YamlDataSource yamlApi = createBasicRestApiYamlDataSource();
-
-        // Add complex endpoints with different HTTP methods
-        Map<String, String> endpoints = yamlApi.getEndpoints();
-        endpoints.put("searchUsers", "/api/users/search?q={searchQuery}&limit={limit}");
-        endpoints.put("createUser", "/api/users");
-        endpoints.put("updateUser", "/api/users/{userId}");
-        endpoints.put("deleteUser", "/api/users/{userId}");
-        endpoints.put("getUserProfile", "/api/users/{userId}/profile");
-        endpoints.put("getUserOrders", "/api/users/{userId}/orders?status={orderStatus}");
-
-        // Set comprehensive parameter names
-        yamlApi.setParameterNames(new String[]{
-            "userId", "searchQuery", "limit", "userData", "orderStatus", "profileData"
-        });
-
-        // Configure additional headers
-        Map<String, Object> connection = yamlApi.getConnection();
-        connection.put("headers", Map.of(
-            "Accept", "application/json",
-            "Content-Type", "application/json",
-            "User-Agent", "ApexRulesEngine/1.0"
-        ));
-
-        return yamlApi;
     }
 }

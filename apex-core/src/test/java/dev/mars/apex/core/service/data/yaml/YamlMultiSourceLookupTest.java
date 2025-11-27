@@ -18,6 +18,7 @@ package dev.mars.apex.core.service.data.yaml;
 
 
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
+import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlDataSource;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.service.data.external.DataSourceException;
@@ -37,17 +38,18 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Integration tests for multi-source data lookup scenarios using YAML configurations.
- * 
- * This test class validates complex data lookup patterns that involve multiple
- * data sources working together, simulating real-world scenarios such as:
+ *
+ * This test class validates the complete YAML-to-MultiSource pipeline:
+ * - Loading multi-source configurations from YAML file
+ * - Property resolution for connection details
  * - Cache-first lookup with database fallback
  * - Data enrichment from multiple sources
  * - Failover between primary and secondary sources
  * - Data aggregation from heterogeneous sources
  * - Performance optimization through source prioritization
- * 
- * Tests are based on the mixed-example.yaml configuration patterns.
- * 
+ *
+ * The YAML configuration file is loaded from classpath: multi-source-lookup-test.yaml
+ *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
@@ -59,19 +61,28 @@ class YamlMultiSourceLookupTest {
     private DataSourceFactory factory;
     private DataSourceConfigurationService configService;
     private DataSourceManager dataSourceManager;
+    private YamlConfigurationLoader yamlLoader;
+    private YamlRuleConfiguration yamlConfig;
     private Map<String, ExternalDataSource> dataSources;
 
     @BeforeEach
-    void setUp() throws DataSourceException {
+    void setUp() throws Exception {
         factory = DataSourceFactory.getInstance();
         configService = DataSourceConfigurationService.getInstance();
         dataSourceManager = new DataSourceManager();
+        yamlLoader = new YamlConfigurationLoader();
         dataSources = new HashMap<>();
-        
-        // Initialize with empty configuration
-        YamlRuleConfiguration emptyConfig = new YamlRuleConfiguration();
-        emptyConfig.setDataSources(new ArrayList<>());
-        configService.initialize(emptyConfig);
+
+        // Load YAML configuration from file
+        yamlConfig = yamlLoader.loadFromClasspath("multi-source-lookup-test.yaml");
+        assertNotNull(yamlConfig, "YAML configuration should be loaded");
+        assertNotNull(yamlConfig.getDataSources(), "Data sources should be present");
+        assertFalse(yamlConfig.getDataSources().isEmpty(), "Should have at least one data source");
+
+        System.out.println("TEST: Loaded " + yamlConfig.getDataSources().size() + " data sources from YAML");
+
+        // Initialize configuration service with loaded YAML
+        configService.initialize(yamlConfig);
     }
 
     @AfterEach
@@ -150,7 +161,7 @@ class YamlMultiSourceLookupTest {
 
     @Test
     @DisplayName("Should perform data enrichment from multiple sources")
-    void testDataEnrichmentFromMultipleSources() throws DataSourceException, IOException {
+    void testDataEnrichmentFromMultipleSources() throws Exception {
         // Setup multiple sources: database, file, and cache
         setupMultipleSourcesForEnrichment();
         
@@ -233,64 +244,89 @@ class YamlMultiSourceLookupTest {
     private void setupCacheAndDatabaseSources() throws DataSourceException {
         // Create cache source
         setupCacheSource();
-        
+
         // Create database source
         setupDatabaseSource();
     }
 
     private void setupCacheSource() throws DataSourceException {
-        YamlDataSource yamlCache = createCacheYamlDataSource();
+        // Get cache data source from YAML
+        YamlDataSource yamlCache = findDataSourceByName("primary-cache");
+        assertNotNull(yamlCache, "Cache data source should be in YAML");
+
         DataSourceConfiguration cacheConfig = yamlCache.toDataSourceConfiguration();
         ExternalDataSource cacheSource = factory.createDataSource(cacheConfig);
         dataSources.put("primary-cache", cacheSource);
+
+        System.out.println("TEST: Cache source created from YAML successfully");
     }
 
     private void setupDatabaseSource() throws DataSourceException {
-        YamlDataSource yamlDb = createDatabaseYamlDataSource();
+        // Get database data source from YAML
+        YamlDataSource yamlDb = findDataSourceByName("user-database");
+        assertNotNull(yamlDb, "Database data source should be in YAML");
+
         DataSourceConfiguration dbConfig = yamlDb.toDataSourceConfiguration();
         ExternalDataSource dbSource = factory.createDataSource(dbConfig);
         dataSources.put("user-database", dbSource);
-        
+
+        System.out.println("TEST: Database source created from YAML successfully");
+
         // Initialize database with test data
         initializeDatabaseWithTestData(dbSource);
     }
 
-    private void setupMultipleSourcesForEnrichment() throws DataSourceException, IOException {
+    private void setupMultipleSourcesForEnrichment() throws Exception {
         setupCacheAndDatabaseSources();
-        
+
         // Add file source for profile data
         Path profileFile = createUserProfileFile();
-        YamlDataSource yamlFile = createFileYamlDataSource(profileFile.getParent().toString());
+
+        // Set base path property and reload YAML
+        System.setProperty("PROFILE_FILE_BASE_PATH", profileFile.getParent().toString());
+        yamlConfig = yamlLoader.loadFromClasspath("multi-source-lookup-test.yaml");
+
+        // Get file data source from YAML
+        YamlDataSource yamlFile = findDataSourceByName("profile-files");
+        assertNotNull(yamlFile, "File data source should be in YAML");
+
         DataSourceConfiguration fileConfig = yamlFile.toDataSourceConfiguration();
         ExternalDataSource fileSource = factory.createDataSource(fileConfig);
         dataSources.put("profile-files", fileSource);
-        
+
+        System.out.println("TEST: File source created from YAML successfully");
+
         // Pre-populate cache with preferences
         populateCacheWithPreferences();
+
+        // Clean up property
+        System.clearProperty("PROFILE_FILE_BASE_PATH");
     }
 
     private void setupSourcesWithDifferentPerformance() throws DataSourceException {
         // Fast cache source
         setupCacheSource();
-        
+
         // Slower database source
         setupDatabaseSource();
-        
+
         // Pre-populate with test data
         ExternalDataSource cacheSource = dataSources.get("primary-cache");
         Map<String, Object> fastData = Map.of("key", "fast-data", "value", "cached-value");
         cacheSource.query("put", fastData);
-        
-        ExternalDataSource dbSource = dataSources.get("user-database");
+
         // Database already has test data from setup
+        System.out.println("TEST: Sources with different performance characteristics set up");
     }
 
     private void setupMultipleSourcesForResilience() throws DataSourceException {
         setupCacheAndDatabaseSources();
-        
+
         // Verify both sources are initially healthy
         assertTrue(dataSources.get("primary-cache").isHealthy());
         assertTrue(dataSources.get("user-database").isHealthy());
+
+        System.out.println("TEST: Multiple sources for resilience testing set up");
     }
 
     // ========================================
@@ -408,74 +444,17 @@ class YamlMultiSourceLookupTest {
     }
 
     // ========================================
-    // Helper Methods for Creating YAML Configurations
+    // Helper Methods
     // ========================================
 
-    /** Creates YAML configuration for in-memory cache data source. */
-    private YamlDataSource createCacheYamlDataSource() {
-        YamlDataSource yamlCache = new YamlDataSource();
-        yamlCache.setName("primary-cache");
-        yamlCache.setType("cache");
-        yamlCache.setSourceType("memory");
-        yamlCache.setEnabled(true);
-        yamlCache.setDescription("Primary cache for multi-source testing");
-
-        Map<String, Object> cache = yamlCache.getCache();
-        cache.put("enabled", true);
-        cache.put("maxSize", 1000);
-        cache.put("ttlSeconds", 300);
-        cache.put("evictionPolicy", "LRU");
-        cache.put("keyPrefix", "multi");
-
-        return yamlCache;
-    }
-
-    /** Creates YAML configuration for H2 in-memory database data source. */
-    private YamlDataSource createDatabaseYamlDataSource() {
-        YamlDataSource yamlDb = new YamlDataSource();
-        yamlDb.setName("user-database");
-        yamlDb.setType("database");
-        yamlDb.setSourceType("h2");
-        yamlDb.setEnabled(true);
-        yamlDb.setDescription("User database for multi-source testing");
-
-        Map<String, Object> connection = yamlDb.getConnection();
-        connection.put("url", "jdbc:h2:mem:multisourcedb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE");
-        connection.put("username", "sa");
-        connection.put("password", "");
-        connection.put("driverClassName", "org.h2.Driver");
-
-        Map<String, String> queries = yamlDb.getQueries();
-        queries.put("createTable", "CREATE TABLE IF NOT EXISTS users (id INT PRIMARY KEY, name VARCHAR(255), email VARCHAR(255), status VARCHAR(50))");
-        queries.put("insertTestData", "INSERT INTO users (id, name, email, status) VALUES (123, 'John Doe', 'john@example.com', 'active'), (456, 'Jane Smith', 'jane@example.com', 'active'), (789, 'Bob Johnson', 'bob@example.com', 'inactive')");
-        queries.put("getUserById", "SELECT * FROM users WHERE id = :id");
-        queries.put("getAllUsers", "SELECT * FROM users");
-        queries.put("default", "SELECT 1 as health_check");
-
-        yamlDb.setParameterNames(new String[]{"id"});
-
-        return yamlDb;
-    }
-
-    /** Creates YAML configuration for file system data source with JSON profile data. */
-    private YamlDataSource createFileYamlDataSource(String basePath) {
-        YamlDataSource yamlFile = new YamlDataSource();
-        yamlFile.setName("profile-files");
-        yamlFile.setType("file-system");
-        yamlFile.setEnabled(true);
-        yamlFile.setDescription("User profile files for enrichment");
-
-        Map<String, Object> connection = yamlFile.getConnection();
-        connection.put("base-path", basePath);  // Use hyphenated key as expected by conversion
-        connection.put("file-pattern", "*.json");
-        connection.put("encoding", "UTF-8");
-        connection.put("watch-for-changes", false);
-
-        Map<String, Object> fileFormat = yamlFile.getFileFormat();
-        fileFormat.put("type", "json");
-        fileFormat.put("rootPath", "$");
-
-        return yamlFile;
+    /**
+     * Find a data source by name from the loaded YAML configuration.
+     */
+    private YamlDataSource findDataSourceByName(String name) {
+        return yamlConfig.getDataSources().stream()
+            .filter(ds -> name.equals(ds.getName()))
+            .findFirst()
+            .orElse(null);
     }
 
     // ========================================

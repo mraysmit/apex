@@ -18,7 +18,9 @@ package dev.mars.apex.core.service.data.yaml;
 
 
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
+import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlDataSource;
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.service.data.external.DataSourceException;
 import dev.mars.apex.core.service.data.external.ExternalDataSource;
 import dev.mars.apex.core.service.data.external.factory.DataSourceFactory;
@@ -30,27 +32,41 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Comprehensive tests for parameter binding and query execution in YAML-configured data sources.
- * 
- * This test class validates:
+ *
+ * This test class validates the complete YAML-to-ParameterBinding pipeline:
+ * - Loading parameter binding configurations from YAML file
  * - Named parameter binding in database queries
  * - Parameter validation and type conversion
  * - Complex parameter scenarios (arrays, objects, null values)
  * - Parameter binding in different data source types
  * - Error handling for invalid parameters
  * - Performance of parameterized queries
- * 
+ *
+ * The YAML configuration file is loaded from classpath: parameter-binding-test.yaml
+ *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
 class YamlParameterBindingTest {
 
     private DataSourceFactory factory;
+    private YamlConfigurationLoader yamlLoader;
+    private YamlRuleConfiguration yamlConfig;
     private ExternalDataSource databaseSource;
     private ExternalDataSource cacheSource;
 
     @BeforeEach
-    void setUp() throws DataSourceException {
+    void setUp() throws Exception {
         factory = DataSourceFactory.getInstance();
+        yamlLoader = new YamlConfigurationLoader();
+
+        // Load YAML configuration from file
+        yamlConfig = yamlLoader.loadFromClasspath("parameter-binding-test.yaml");
+        assertNotNull(yamlConfig, "YAML configuration should be loaded");
+        assertNotNull(yamlConfig.getDataSources(), "Data sources should be present");
+
+        System.out.println("TEST: Loaded " + yamlConfig.getDataSources().size() + " data sources from YAML");
+
         setupTestDataSources();
     }
 
@@ -306,62 +322,36 @@ class YamlParameterBindingTest {
     // Helper Methods
     // ========================================
 
+    /**
+     * Find a data source by name from the loaded YAML configuration.
+     */
+    private YamlDataSource findDataSourceByName(String name) {
+        return yamlConfig.getDataSources().stream()
+            .filter(ds -> name.equals(ds.getName()))
+            .findFirst()
+            .orElse(null);
+    }
+
     private void setupTestDataSources() throws DataSourceException {
-        // Setup database source
-        YamlDataSource yamlDb = createDatabaseYamlDataSource();
+        // Setup database source from YAML
+        YamlDataSource yamlDb = findDataSourceByName("param-test-db");
+        assertNotNull(yamlDb, "Database data source should be in YAML");
+
         DataSourceConfiguration dbConfig = yamlDb.toDataSourceConfiguration();
         databaseSource = factory.createDataSource(dbConfig);
+
+        System.out.println("TEST: Database source created from YAML successfully");
+
         initializeDatabaseWithTestData();
-        
-        // Setup cache source
-        YamlDataSource yamlCache = createCacheYamlDataSource();
+
+        // Setup cache source from YAML
+        YamlDataSource yamlCache = findDataSourceByName("param-test-cache");
+        assertNotNull(yamlCache, "Cache data source should be in YAML");
+
         DataSourceConfiguration cacheConfig = yamlCache.toDataSourceConfiguration();
         cacheSource = factory.createDataSource(cacheConfig);
-    }
 
-    private YamlDataSource createDatabaseYamlDataSource() {
-        YamlDataSource yamlDb = new YamlDataSource();
-        yamlDb.setName("param-test-db");
-        yamlDb.setType("database");
-        yamlDb.setSourceType("h2");
-        yamlDb.setEnabled(true);
-        
-        Map<String, Object> connection = yamlDb.getConnection();
-        connection.put("url", "jdbc:h2:mem:paramtestdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE");
-        connection.put("username", "sa");
-        connection.put("password", "");
-        connection.put("driverClassName", "org.h2.Driver");
-        
-        Map<String, String> queries = yamlDb.getQueries();
-        queries.put("createTable", "CREATE TABLE IF NOT EXISTS users (id INT PRIMARY KEY, name VARCHAR(255), email VARCHAR(255), status VARCHAR(50), last_login TIMESTAMP)");
-        queries.put("insertTestData", "INSERT INTO users (id, name, email, status) VALUES (1, 'Alice Johnson', 'alice@example.com', 'active'), (2, 'Bob Smith', 'bob@example.com', 'active'), (3, 'Charlie Brown', 'charlie@example.com', 'inactive')");
-        queries.put("getUserById", "SELECT * FROM users WHERE id = :id");
-        queries.put("getUsersByIdRangeAndStatus", "SELECT * FROM users WHERE id BETWEEN :minId AND :maxId AND status = :status");
-        queries.put("getUsersByNamePattern", "SELECT * FROM users WHERE name LIKE :namePattern");
-        queries.put("getUserWithOptionalField", "SELECT * FROM users WHERE id = :id AND (:optionalField IS NULL OR status = :optionalField)");
-        queries.put("updateUserActiveStatus", "UPDATE users SET status = CASE WHEN :isActive THEN 'active' ELSE 'inactive' END WHERE id = :id");
-        queries.put("updateLastLogin", "UPDATE users SET last_login = :loginDate WHERE id = :userId");
-        queries.put("getRecentLogins", "SELECT * FROM users WHERE last_login BETWEEN :startDate AND :endDate");
-        
-        yamlDb.setParameterNames(new String[]{"id", "minId", "maxId", "status", "namePattern", "optionalField", "isActive", "userId", "loginDate", "startDate", "endDate"});
-        
-        return yamlDb;
-    }
-
-    private YamlDataSource createCacheYamlDataSource() {
-        YamlDataSource yamlCache = new YamlDataSource();
-        yamlCache.setName("param-test-cache");
-        yamlCache.setType("cache");
-        yamlCache.setSourceType("memory");
-        yamlCache.setEnabled(true);
-        
-        Map<String, Object> cache = yamlCache.getCache();
-        cache.put("enabled", true);
-        cache.put("maxSize", 1000);
-        cache.put("ttlSeconds", 300);
-        cache.put("evictionPolicy", "LRU");
-        
-        return yamlCache;
+        System.out.println("TEST: Cache source created from YAML successfully");
     }
 
     private void initializeDatabaseWithTestData() throws DataSourceException {

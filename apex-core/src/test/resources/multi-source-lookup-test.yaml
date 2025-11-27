@@ -1,0 +1,58 @@
+---
+# YAML configuration for YamlMultiSourceLookupTest
+# Tests multi-source data lookup patterns (cache + database + file system)
+
+metadata:
+  name: multi-source-lookup-test
+  description: Multi-source integration test configuration
+  version: 1.0.0
+  created-date: 2025-11-27
+
+data-sources:
+  # Primary cache for multi-source testing
+  - name: primary-cache
+    type: cache
+    source-type: memory
+    enabled: true
+    description: Primary cache for multi-source testing
+    cache:
+      enabled: true
+      max-size: 1000
+      ttl-seconds: 300
+      eviction-policy: LRU
+      key-prefix: multi
+
+  # H2 database for user data
+  - name: user-database
+    type: database
+    source-type: h2
+    enabled: true
+    description: User database for multi-source testing
+    connection:
+      url: "jdbc:h2:mem:multisourcedb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE"
+      username: sa
+      password: ""
+      driver-class-name: org.h2.Driver
+    queries:
+      createTable: "CREATE TABLE IF NOT EXISTS users (id INT PRIMARY KEY, name VARCHAR(255), email VARCHAR(255), status VARCHAR(50))"
+      insertTestData: "INSERT INTO users (id, name, email, status) VALUES (123, 'John Doe', 'john@example.com', 'active'), (456, 'Jane Smith', 'jane@example.com', 'active'), (789, 'Bob Johnson', 'bob@example.com', 'inactive')"
+      getUserById: "SELECT * FROM users WHERE id = :id"
+      getAllUsers: "SELECT * FROM users"
+      default: "SELECT 1 as health_check"
+    parameter-names:
+      - id
+
+  # File system data source for user profiles
+  - name: profile-files
+    type: file-system
+    enabled: true
+    description: User profile files for enrichment
+    connection:
+      base-path: ${PROFILE_FILE_BASE_PATH:.}
+      file-pattern: "*.json"
+      encoding: UTF-8
+      watch-for-changes: false
+    file-format:
+      type: json
+      root-path: "$"
+

@@ -1,0 +1,110 @@
+---
+# YAML configuration for YamlDataLookupIntegrationTest
+# Tests cache, file system, and database data sources
+
+metadata:
+  name: data-lookup-integration-test
+  description: Integration test configuration for data lookup functionality
+  version: 1.0.0
+  created-date: 2025-11-27
+
+data-sources:
+  # Cache data source for testing cache operations
+  - name: test-cache
+    type: cache
+    source-type: memory
+    enabled: true
+    description: Test cache data source
+    cache:
+      enabled: true
+      max-size: 1000
+      ttl-seconds: 300
+      eviction-policy: LRU
+      key-prefix: test
+
+  # Cache with short TTL for testing eviction
+  - name: test-cache-ttl
+    type: cache
+    source-type: memory
+    enabled: true
+    description: Test cache with short TTL
+    cache:
+      enabled: true
+      max-size: 1000
+      ttl-seconds: ${CACHE_TTL_SECONDS:1}
+      eviction-policy: LRU
+      key-prefix: test-ttl
+
+  # File system data source for JSON files
+  - name: test-files-json
+    type: file-system
+    enabled: true
+    description: Test file system data source for JSON
+    connection:
+      base-path: ${TEST_FILE_BASE_PATH:.}
+      file-pattern: "*.json"
+      encoding: UTF-8
+      watch-for-changes: false
+    file-format:
+      type: json
+      root-path: "$"
+
+  # File system data source for CSV files
+  - name: test-files-csv
+    type: file-system
+    enabled: true
+    description: Test file system data source for CSV
+    connection:
+      base-path: ${TEST_FILE_BASE_PATH:.}
+      file-pattern: "*.csv"
+      encoding: UTF-8
+      watch-for-changes: false
+    file-format:
+      type: csv
+      has-header: true
+      delimiter: ","
+
+  # H2 in-memory database for testing
+  - name: test-database
+    type: database
+    source-type: h2
+    enabled: true
+    description: Test H2 database
+    connection:
+      url: "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE"
+      username: sa
+      password: ""
+      driver-class-name: org.h2.Driver
+    queries:
+      createTable: "CREATE TABLE IF NOT EXISTS users (id INT PRIMARY KEY, name VARCHAR(255), email VARCHAR(255))"
+      insertUser: "INSERT INTO users (id, name, email) VALUES (1, 'John Doe', 'john@example.com')"
+      getAllUsers: "SELECT * FROM users"
+      getUserById: "SELECT * FROM users WHERE id = :id"
+      default: "SELECT 1 as health_check"
+
+  # H2 database with parameterized queries
+  - name: test-database-params
+    type: database
+    source-type: h2
+    enabled: true
+    description: Test H2 database with parameterized queries
+    connection:
+      url: "jdbc:h2:mem:testdb_params;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE"
+      username: sa
+      password: ""
+      driver-class-name: org.h2.Driver
+    queries:
+      createTable: "CREATE TABLE IF NOT EXISTS users (id INT PRIMARY KEY, name VARCHAR(255), email VARCHAR(255))"
+      insertUser: "INSERT INTO users (id, name, email) VALUES (1, 'John Doe', 'john@example.com')"
+      getAllUsers: "SELECT * FROM users"
+      getUserById: "SELECT * FROM users WHERE id = :id"
+      getUserByEmail: "SELECT * FROM users WHERE email = :email"
+      getUsersByNamePattern: "SELECT * FROM users WHERE name LIKE :namePattern"
+      insertUserWithParams: "INSERT INTO users (id, name, email) VALUES (:id, :name, :email)"
+      default: "SELECT 1 as health_check"
+    parameter-names:
+      - id
+      - name
+      - email
+      - namePattern
+

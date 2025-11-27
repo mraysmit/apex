@@ -18,6 +18,7 @@ package dev.mars.apex.core.service.data.yaml;
 
 
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
+import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlDataSource;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.service.data.external.DataSourceException;
@@ -36,15 +37,15 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Comprehensive integration tests for YAML data lookup functionality.
- * 
- * This test class validates that YAML configurations translate correctly to working
- * data lookup functionality across all supported data source types:
+ *
+ * This test class validates the complete YAML-to-DataSource pipeline:
+ * - Loading data source configurations from YAML file
+ * - Property resolution for connection details
  * - Database query execution from YAML configs
  * - File-based lookup operations (CSV, JSON)
  * - Cache-based lookup with TTL and eviction
- * - REST API lookup with authentication
  * - Parameter binding and query execution
- * 
+ *
  * Tests cover:
  * - YAML configuration parsing and validation
  * - Data source creation from YAML configurations
@@ -52,7 +53,9 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Parameter binding and query execution
  * - Error handling and edge cases
  * - Performance characteristics
- * 
+ *
+ * The YAML configuration file is loaded from classpath: data-lookup-integration-test.yaml
+ *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
@@ -63,18 +66,27 @@ class YamlDataLookupIntegrationTest {
 
     private DataSourceFactory factory;
     private DataSourceConfigurationService configService;
+    private YamlConfigurationLoader yamlLoader;
+    private YamlRuleConfiguration yamlConfig;
     private Map<String, ExternalDataSource> testDataSources;
 
     @BeforeEach
-    void setUp() throws DataSourceException {
+    void setUp() throws Exception {
         factory = DataSourceFactory.getInstance();
         configService = DataSourceConfigurationService.getInstance();
+        yamlLoader = new YamlConfigurationLoader();
         testDataSources = new HashMap<>();
-        
-        // Initialize with empty configuration to ensure clean state
-        YamlRuleConfiguration emptyConfig = new YamlRuleConfiguration();
-        emptyConfig.setDataSources(new ArrayList<>());
-        configService.initialize(emptyConfig);
+
+        // Load YAML configuration from file
+        yamlConfig = yamlLoader.loadFromClasspath("data-lookup-integration-test.yaml");
+        assertNotNull(yamlConfig, "YAML configuration should be loaded");
+        assertNotNull(yamlConfig.getDataSources(), "Data sources should be present");
+        assertFalse(yamlConfig.getDataSources().isEmpty(), "Should have at least one data source");
+
+        System.out.println("TEST: Loaded " + yamlConfig.getDataSources().size() + " data sources from YAML");
+
+        // Initialize configuration service with loaded YAML
+        configService.initialize(yamlConfig);
     }
 
     @AfterEach
@@ -103,19 +115,22 @@ class YamlDataLookupIntegrationTest {
     @Test
     @DisplayName("Should create cache data source from YAML and perform lookup operations")
     void testCacheDataSourceFromYaml() throws DataSourceException {
-        // Create YAML configuration for cache data source
-        YamlDataSource yamlCache = createCacheYamlDataSource();
-        
+        // Get cache data source from YAML
+        YamlDataSource yamlCache = findDataSourceByName("test-cache");
+        assertNotNull(yamlCache, "Cache data source should be in YAML");
+
         // Convert to configuration and create data source
         DataSourceConfiguration config = yamlCache.toDataSourceConfiguration();
         ExternalDataSource cacheSource = factory.createDataSource(config);
         testDataSources.put("cache-test", cacheSource);
-        
+
         // Verify basic properties
         assertEquals("test-cache", cacheSource.getName());
         assertEquals("memory", cacheSource.getDataType()); // Note: Cache sources use "memory" as data type
         assertTrue(cacheSource.isHealthy());
-        
+
+        System.out.println("TEST: Cache data source created from YAML successfully");
+
         // Test cache operations
         testCacheOperations(cacheSource);
     }
@@ -123,15 +138,31 @@ class YamlDataLookupIntegrationTest {
     @Test
     @DisplayName("Should handle cache TTL and eviction from YAML configuration")
     void testCacheTtlAndEvictionFromYaml() throws DataSourceException, InterruptedException {
-        // Create cache with short TTL
-        YamlDataSource yamlCache = createCacheYamlDataSourceWithTtl(1); // 1 second TTL
-        
+        // Set TTL property for test
+        System.setProperty("CACHE_TTL_SECONDS", "1");
+
+        // Reload YAML to pick up property
+        try {
+            yamlConfig = yamlLoader.loadFromClasspath("data-lookup-integration-test.yaml");
+        } catch (Exception e) {
+            fail("Failed to reload YAML: " + e.getMessage());
+        }
+
+        // Get cache with short TTL from YAML
+        YamlDataSource yamlCache = findDataSourceByName("test-cache-ttl");
+        assertNotNull(yamlCache, "Cache TTL data source should be in YAML");
+
         DataSourceConfiguration config = yamlCache.toDataSourceConfiguration();
         ExternalDataSource cacheSource = factory.createDataSource(config);
         testDataSources.put("cache-ttl-test", cacheSource);
-        
+
+        System.out.println("TEST: Cache with TTL created from YAML successfully");
+
         // Test TTL behavior
         testCacheTtlBehavior(cacheSource);
+
+        // Clean up property
+        System.clearProperty("CACHE_TTL_SECONDS");
     }
 
     // ========================================
@@ -143,17 +174,31 @@ class YamlDataLookupIntegrationTest {
     void testFileSystemJsonLookupFromYaml() throws DataSourceException, IOException {
         // Create test JSON file
         Path jsonFile = createTestJsonFile();
-        
-        // Create YAML configuration for file system data source
-        YamlDataSource yamlFile = createFileSystemYamlDataSource(jsonFile.getParent().toString(), "*.json");
-        
+
+        // Set base path property and reload YAML
+        System.setProperty("TEST_FILE_BASE_PATH", jsonFile.getParent().toString());
+        try {
+            yamlConfig = yamlLoader.loadFromClasspath("data-lookup-integration-test.yaml");
+        } catch (Exception e) {
+            fail("Failed to reload YAML: " + e.getMessage());
+        }
+
+        // Get file system data source from YAML
+        YamlDataSource yamlFile = findDataSourceByName("test-files-json");
+        assertNotNull(yamlFile, "JSON file data source should be in YAML");
+
         // Convert and create data source
         DataSourceConfiguration config = yamlFile.toDataSourceConfiguration();
         ExternalDataSource fileSource = factory.createDataSource(config);
         testDataSources.put("file-json-test", fileSource);
-        
+
+        System.out.println("TEST: JSON file system data source created from YAML successfully");
+
         // Test JSON file lookup
         testJsonFileLookup(fileSource, jsonFile.getFileName().toString());
+
+        // Clean up property
+        System.clearProperty("TEST_FILE_BASE_PATH");
     }
 
     @Test
@@ -161,17 +206,31 @@ class YamlDataLookupIntegrationTest {
     void testFileSystemCsvLookupFromYaml() throws DataSourceException, IOException {
         // Create test CSV file
         Path csvFile = createTestCsvFile();
-        
-        // Create YAML configuration for CSV file system data source
-        YamlDataSource yamlFile = createFileSystemYamlDataSource(csvFile.getParent().toString(), "*.csv");
-        
+
+        // Set base path property and reload YAML
+        System.setProperty("TEST_FILE_BASE_PATH", csvFile.getParent().toString());
+        try {
+            yamlConfig = yamlLoader.loadFromClasspath("data-lookup-integration-test.yaml");
+        } catch (Exception e) {
+            fail("Failed to reload YAML: " + e.getMessage());
+        }
+
+        // Get file system data source from YAML
+        YamlDataSource yamlFile = findDataSourceByName("test-files-csv");
+        assertNotNull(yamlFile, "CSV file data source should be in YAML");
+
         // Convert and create data source
         DataSourceConfiguration config = yamlFile.toDataSourceConfiguration();
         ExternalDataSource fileSource = factory.createDataSource(config);
         testDataSources.put("file-csv-test", fileSource);
-        
+
+        System.out.println("TEST: CSV file system data source created from YAML successfully");
+
         // Test CSV file lookup
         testCsvFileLookup(fileSource, csvFile.getFileName().toString());
+
+        // Clean up property
+        System.clearProperty("TEST_FILE_BASE_PATH");
     }
 
     // ========================================
@@ -181,14 +240,17 @@ class YamlDataLookupIntegrationTest {
     @Test
     @DisplayName("Should create H2 database data source from YAML and execute queries")
     void testDatabaseQueryExecutionFromYaml() throws DataSourceException {
-        // Create YAML configuration for H2 in-memory database
-        YamlDataSource yamlDb = createH2DatabaseYamlDataSource();
-        
+        // Get H2 database data source from YAML
+        YamlDataSource yamlDb = findDataSourceByName("test-database");
+        assertNotNull(yamlDb, "H2 database data source should be in YAML");
+
         // Convert and create data source
         DataSourceConfiguration config = yamlDb.toDataSourceConfiguration();
         ExternalDataSource dbSource = factory.createDataSource(config);
         testDataSources.put("db-test", dbSource);
-        
+
+        System.out.println("TEST: H2 database data source created from YAML successfully");
+
         // Test database operations
         testDatabaseOperations(dbSource);
     }
@@ -196,117 +258,32 @@ class YamlDataLookupIntegrationTest {
     @Test
     @DisplayName("Should handle parameterized queries from YAML configuration")
     void testParameterizedQueriesFromYaml() throws DataSourceException {
-        // Create database with parameterized queries
-        YamlDataSource yamlDb = createH2DatabaseWithParameterizedQueries();
-        
+        // Get database with parameterized queries from YAML
+        YamlDataSource yamlDb = findDataSourceByName("test-database-params");
+        assertNotNull(yamlDb, "Parameterized database data source should be in YAML");
+
         DataSourceConfiguration config = yamlDb.toDataSourceConfiguration();
         ExternalDataSource dbSource = factory.createDataSource(config);
         testDataSources.put("db-param-test", dbSource);
-        
+
+        System.out.println("TEST: Parameterized database data source created from YAML successfully");
+
         // Test parameterized query execution
         testParameterizedQueryExecution(dbSource);
     }
 
     // ========================================
-    // Helper Methods for Creating YAML Configurations
+    // Helper Methods
     // ========================================
 
-    private YamlDataSource createCacheYamlDataSource() {
-        YamlDataSource yamlCache = new YamlDataSource();
-        yamlCache.setName("test-cache");
-        yamlCache.setType("cache");
-        yamlCache.setSourceType("memory");
-        yamlCache.setEnabled(true);
-        yamlCache.setDescription("Test cache data source");
-        
-        // Configure cache settings
-        Map<String, Object> cache = yamlCache.getCache();
-        cache.put("enabled", true);
-        cache.put("maxSize", 1000);
-        cache.put("ttlSeconds", 300);
-        cache.put("evictionPolicy", "LRU");
-        cache.put("keyPrefix", "test");
-        
-        return yamlCache;
-    }
-
-    private YamlDataSource createCacheYamlDataSourceWithTtl(int ttlSeconds) {
-        YamlDataSource yamlCache = createCacheYamlDataSource();
-        yamlCache.getCache().put("ttlSeconds", ttlSeconds);
-        return yamlCache;
-    }
-
-    private YamlDataSource createFileSystemYamlDataSource(String basePath, String filePattern) {
-        YamlDataSource yamlFile = new YamlDataSource();
-        yamlFile.setName("test-files");
-        yamlFile.setType("file-system");
-        yamlFile.setEnabled(true);
-        yamlFile.setDescription("Test file system data source");
-
-        // Configure connection - use the convenience methods
-        yamlFile.setBasePath(basePath);
-        yamlFile.setFilePattern(filePattern);
-
-        // Also set in the connection map for completeness
-        Map<String, Object> connection = yamlFile.getConnection();
-        connection.put("basePath", basePath);
-        connection.put("filePattern", filePattern);
-        connection.put("encoding", "UTF-8");
-        connection.put("watchForChanges", false);
-
-        // Configure file format
-        Map<String, Object> fileFormat = yamlFile.getFileFormat();
-        if (filePattern.contains("json")) {
-            fileFormat.put("type", "json");
-            fileFormat.put("rootPath", "$");
-        } else if (filePattern.contains("csv")) {
-            fileFormat.put("type", "csv");
-            fileFormat.put("hasHeader", true);
-            fileFormat.put("delimiter", ",");
-        }
-
-        return yamlFile;
-    }
-
-    private YamlDataSource createH2DatabaseYamlDataSource() {
-        YamlDataSource yamlDb = new YamlDataSource();
-        yamlDb.setName("test-database");
-        yamlDb.setType("database");
-        yamlDb.setSourceType("h2");
-        yamlDb.setEnabled(true);
-        yamlDb.setDescription("Test H2 database");
-        
-        // Configure connection
-        Map<String, Object> connection = yamlDb.getConnection();
-        connection.put("url", "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE");
-        connection.put("username", "sa");
-        connection.put("password", "");
-        connection.put("driverClassName", "org.h2.Driver");
-        
-        // Configure queries
-        Map<String, String> queries = yamlDb.getQueries();
-        queries.put("createTable", "CREATE TABLE IF NOT EXISTS users (id INT PRIMARY KEY, name VARCHAR(255), email VARCHAR(255))");
-        queries.put("insertUser", "INSERT INTO users (id, name, email) VALUES (1, 'John Doe', 'john@example.com')");
-        queries.put("getAllUsers", "SELECT * FROM users");
-        queries.put("getUserById", "SELECT * FROM users WHERE id = :id");
-        queries.put("default", "SELECT 1 as health_check");
-        
-        return yamlDb;
-    }
-
-    private YamlDataSource createH2DatabaseWithParameterizedQueries() {
-        YamlDataSource yamlDb = createH2DatabaseYamlDataSource();
-        
-        // Add parameterized queries
-        Map<String, String> queries = yamlDb.getQueries();
-        queries.put("getUserByEmail", "SELECT * FROM users WHERE email = :email");
-        queries.put("getUsersByNamePattern", "SELECT * FROM users WHERE name LIKE :namePattern");
-        queries.put("insertUserWithParams", "INSERT INTO users (id, name, email) VALUES (:id, :name, :email)");
-        
-        // Set parameter names
-        yamlDb.setParameterNames(new String[]{"id", "name", "email", "namePattern"});
-        
-        return yamlDb;
+    /**
+     * Find a data source by name from the loaded YAML configuration.
+     */
+    private YamlDataSource findDataSourceByName(String name) {
+        return yamlConfig.getDataSources().stream()
+            .filter(ds -> name.equals(ds.getName()))
+            .findFirst()
+            .orElse(null);
     }
 
     // ========================================

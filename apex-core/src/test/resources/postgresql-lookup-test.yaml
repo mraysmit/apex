@@ -1,0 +1,74 @@
+metadata:
+  id: "postgresql-lookup-test"
+  name: "PostgreSQL Lookup Test Configuration"
+  version: "1.0.0"
+  type: "enrichment"
+  description: "Integration test for PostgreSQL data source from YAML"
+  author: "test@example.com"
+
+# PostgreSQL data source configuration
+data-sources:
+  - name: "test-postgres"
+    type: "database"
+    source-type: "postgresql"
+    enabled: true
+    description: "Test PostgreSQL database"
+    
+    connection:
+      host: "${POSTGRES_HOST:localhost}"
+      port: ${POSTGRES_PORT:5432}
+      database: "${POSTGRES_DB:testdb}"
+      username: "${POSTGRES_USER:testuser}"
+      password: "${POSTGRES_PASSWORD:testpass}"
+      
+      # Connection pool settings
+      max-pool-size: 10
+      min-pool-size: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+    
+    queries:
+      getUserById: "SELECT * FROM users WHERE id = :userId"
+      getUserByEmail: "SELECT * FROM users WHERE email = :email"
+      getActiveUsers: "SELECT * FROM users WHERE status = :status ORDER BY id"
+      getUsersWithPreferences: "SELECT id, name, preferences FROM users WHERE preferences IS NOT NULL ORDER BY id"
+      getUsersByTheme: "SELECT * FROM users WHERE preferences->>'theme' = :theme"
+      getUsersByTag: "SELECT * FROM users WHERE :tag = ANY(tags)"
+      getRecentUsers: "SELECT * FROM users WHERE created_at >= NOW() - INTERVAL '1 day' ORDER BY created_at DESC"
+      getMonthlyUsers: "SELECT * FROM users WHERE created_at >= NOW() - INTERVAL '30 days'"
+      getAllUsers: "SELECT * FROM users ORDER BY id"
+      testQuery: "SELECT 1 as test_value"
+      invalidQuery: "SELECT * FORM users"
+    
+    parameter-names:
+      - "userId"
+      - "email"
+      - "status"
+      - "theme"
+      - "tag"
+      - "threadId"
+
+# Simple enrichment to test lookup functionality
+enrichments:
+  - id: "user-lookup"
+    name: "User Lookup by ID"
+    type: "lookup-enrichment"
+    condition: "#userId != null"
+    
+    lookup-config:
+      lookup-key: "#userId"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "test-postgres"
+        query-ref: "getUserById"
+      cache-enabled: false
+    
+    field-mappings:
+      - source-field: "name"
+        target-field: "userName"
+      - source-field: "email"
+        target-field: "userEmail"
+      - source-field: "status"
+        target-field: "userStatus"
+

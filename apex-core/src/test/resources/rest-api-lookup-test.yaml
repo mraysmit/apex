@@ -1,0 +1,99 @@
+---
+# YAML configuration for YamlRestApiLookupTest
+# Tests REST API data source configurations
+
+metadata:
+  name: rest-api-lookup-test
+  description: REST API lookup test configuration
+  version: 1.0.0
+  created-date: 2025-11-27
+
+data-sources:
+  # Basic REST API data source
+  - name: test-api
+    type: rest-api
+    source-type: rest-api
+    enabled: true
+    description: Test REST API data source
+    connection:
+      base-url: ${API_BASE_URL:https://api.example.com}
+      timeout: 10000
+      retry-attempts: 2
+    endpoints:
+      users: /api/users
+      health: /api/health
+      default: /api/health
+
+  # Parameterized REST API data source
+  - name: parameterized-api
+    type: rest-api
+    source-type: rest-api
+    enabled: true
+    description: Parameterized REST API data source
+    connection:
+      base-url: ${API_BASE_URL:https://api.example.com}
+      timeout: 10000
+      retry-attempts: 2
+    endpoints:
+      users: /api/users
+      health: /api/health
+      default: /api/health
+      getUserById: /api/users/{userId}
+      getUsersByStatus: /api/users?status={status}
+    parameter-names:
+      - userId
+      - status
+      - limit
+
+  # Authenticated REST API data source
+  - name: authenticated-api
+    type: rest-api
+    source-type: rest-api
+    enabled: true
+    description: Authenticated REST API data source
+    connection:
+      base-url: ${API_BASE_URL:https://api.example.com}
+      timeout: 10000
+      retry-attempts: 2
+    authentication:
+      type: api-key
+      api-key: test-api-key-12345
+      api-key-header: X-API-Key
+    endpoints:
+      users: /api/users
+      health: /api/health
+      default: /api/health
+      protected: /api/protected
+
+  # Complex REST API data source with multiple endpoints
+  - name: complex-api
+    type: rest-api
+    source-type: rest-api
+    enabled: true
+    description: Complex REST API data source
+    connection:
+      base-url: ${API_BASE_URL:https://api.example.com}
+      timeout: 10000
+      retry-attempts: 2
+      headers:
+        Accept: application/json
+        Content-Type: application/json
+        User-Agent: ApexRulesEngine/1.0
+    endpoints:
+      users: /api/users
+      health: /api/health
+      default: /api/health
+      searchUsers: /api/users/search?q={searchQuery}&limit={limit}
+      createUser: /api/users
+      updateUser: /api/users/{userId}
+      deleteUser: /api/users/{userId}
+      getUserProfile: /api/users/{userId}/profile
+      getUserOrders: /api/users/{userId}/orders?status={orderStatus}
+    parameter-names:
+      - userId
+      - searchQuery
+      - limit
+      - userData
+      - orderStatus
+      - profileData
+

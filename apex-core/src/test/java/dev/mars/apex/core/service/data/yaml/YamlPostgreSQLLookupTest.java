@@ -18,7 +18,9 @@ package dev.mars.apex.core.service.data.yaml;
 
 
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
+import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlDataSource;
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.service.data.external.DataSourceException;
 import dev.mars.apex.core.service.data.external.ExternalDataSource;
 import dev.mars.apex.core.service.data.external.factory.DataSourceFactory;
@@ -34,17 +36,20 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Integration tests for PostgreSQL data sources created from YAML configurations.
- * 
- * This test class validates:
- * - PostgreSQL data source creation from YAML
+ *
+ * This test class validates the complete YAML-to-PostgreSQL pipeline:
+ * - Loading PostgreSQL data source configuration from YAML file
+ * - Property resolution for connection details (host, port, database, credentials)
+ * - PostgreSQL data source creation from parsed YAML configuration
  * - Connection establishment and health checks
  * - Complex SQL query execution with parameters
  * - Transaction handling and connection pooling
  * - PostgreSQL-specific features (arrays, JSON, custom types)
  * - Error handling and connection recovery
- * 
+ *
  * Uses Testcontainers to provide a real PostgreSQL instance for testing.
- * 
+ * The YAML configuration file is loaded from classpath: postgresql-lookup-test.yaml
+ *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
@@ -60,6 +65,7 @@ class YamlPostgreSQLLookupTest {
 
     private DataSourceFactory factory;
     private ExternalDataSource postgresSource;
+    private YamlConfigurationLoader yamlLoader;
 
     @BeforeAll
     static void setUpContainer() {
@@ -68,18 +74,40 @@ class YamlPostgreSQLLookupTest {
     }
 
     @BeforeEach
-    void setUp() throws DataSourceException {
+    void setUp() throws Exception {
         factory = DataSourceFactory.getInstance();
+        yamlLoader = new YamlConfigurationLoader();
 
         // Wait for container to be ready and get connection details
         assertTrue(postgres.isRunning(), "PostgreSQL container should be running");
 
-        // Create PostgreSQL data source from YAML using actual container connection details
-        YamlDataSource yamlPostgres = createPostgreSQLYamlDataSource();
+        // Set environment variables for property resolution in YAML
+        System.setProperty("POSTGRES_HOST", postgres.getHost());
+        System.setProperty("POSTGRES_PORT", String.valueOf(postgres.getFirstMappedPort()));
+        System.setProperty("POSTGRES_DB", postgres.getDatabaseName());
+        System.setProperty("POSTGRES_USER", postgres.getUsername());
+        System.setProperty("POSTGRES_PASSWORD", postgres.getPassword());
+
+        System.out.println("TEST: PostgreSQL container connection details:");
+        System.out.println("  Host: " + postgres.getHost());
+        System.out.println("  Port: " + postgres.getFirstMappedPort());
+        System.out.println("  Database: " + postgres.getDatabaseName());
+        System.out.println("  Username: " + postgres.getUsername());
+
+        // Load YAML configuration from file
+        YamlRuleConfiguration yamlConfig = yamlLoader.loadFromClasspath("postgresql-lookup-test.yaml");
+        assertNotNull(yamlConfig, "YAML configuration should be loaded");
+        assertNotNull(yamlConfig.getDataSources(), "Data sources should be present");
+        assertFalse(yamlConfig.getDataSources().isEmpty(), "Should have at least one data source");
+
+        // Get the PostgreSQL data source from YAML
+        YamlDataSource yamlPostgres = yamlConfig.getDataSources().get(0);
+        assertEquals("test-postgres", yamlPostgres.getName(), "Data source name should match");
+
         DataSourceConfiguration config = yamlPostgres.toDataSourceConfiguration();
 
         // Debug: Print the converted configuration
-        System.out.println("TEST: Converted DataSourceConfiguration:");
+        System.out.println("TEST: Converted DataSourceConfiguration from YAML:");
         System.out.println("  Name: " + config.getName());
         System.out.println("  Source Type: " + config.getSourceType());
         if (config.getConnection() != null) {
@@ -87,7 +115,6 @@ class YamlPostgreSQLLookupTest {
             System.out.println("  Connection Port: " + config.getConnection().getPort());
             System.out.println("  Connection Database: " + config.getConnection().getDatabase());
             System.out.println("  Connection Username: " + config.getConnection().getUsername());
-            System.out.println("  Connection Custom Properties: " + config.getConnection().getCustomProperties());
         } else {
             System.out.println("  Connection: null");
         }
@@ -107,8 +134,15 @@ class YamlPostgreSQLLookupTest {
                 System.out.println("TEST: Cleanup error (expected): " + e.getMessage());
             }
         }
-        
+
         factory.clearCache();
+
+        // Clean up system properties
+        System.clearProperty("POSTGRES_HOST");
+        System.clearProperty("POSTGRES_PORT");
+        System.clearProperty("POSTGRES_DB");
+        System.clearProperty("POSTGRES_USER");
+        System.clearProperty("POSTGRES_PASSWORD");
     }
 
     // ========================================
@@ -270,14 +304,13 @@ class YamlPostgreSQLLookupTest {
         
         assertNotNull(recentUsers, "Should handle timestamp queries");
         
-        // Test parameterized date query (fix INTERVAL parameter binding)
-        Map<String, Object> dateParams = Map.of("days", 30);
+        // Test date query (INTERVAL doesn't support parameter binding in PostgreSQL)
         List<Object> monthlyUsers = postgresSource.query(
             "SELECT * FROM users WHERE created_at >= NOW() - INTERVAL '30 days'",
-            Collections.emptyMap() // Don't use parameters in INTERVAL expressions
+            Collections.emptyMap()
         );
-        
-        assertNotNull(monthlyUsers, "Should handle parameterized date queries");
+
+        assertNotNull(monthlyUsers, "Should handle date queries with INTERVAL");
     }
 
     // ========================================
@@ -344,57 +377,6 @@ class YamlPostgreSQLLookupTest {
     // ========================================
     // Helper Methods
     // ========================================
-
-    private YamlDataSource createPostgreSQLYamlDataSource() {
-        YamlDataSource yamlPostgres = new YamlDataSource();
-        yamlPostgres.setName("test-postgres");
-        yamlPostgres.setType("database");
-        yamlPostgres.setSourceType("postgresql");
-        yamlPostgres.setEnabled(true);
-        yamlPostgres.setDescription("Test PostgreSQL database");
-
-        // Configure connection using container details (get fresh connection info)
-        String jdbcUrl = postgres.getJdbcUrl();
-        String username = postgres.getUsername();
-        String password = postgres.getPassword();
-
-        System.out.println("TEST: PostgreSQL container connection details:");
-        System.out.println("  JDBC URL: " + jdbcUrl);
-        System.out.println("  Username: " + username);
-        System.out.println("  Password: " + password);
-
-        // Parse JDBC URL to extract host, port, database
-        // Format: jdbc:postgresql://host:port/database
-        String host = postgres.getHost();
-        Integer port = postgres.getFirstMappedPort();
-        String database = postgres.getDatabaseName();
-
-        System.out.println("TEST: Parsed connection details:");
-        System.out.println("  Host: " + host);
-        System.out.println("  Port: " + port);
-        System.out.println("  Database: " + database);
-
-        Map<String, Object> connection = yamlPostgres.getConnection();
-        connection.put("host", host);
-        connection.put("port", port);
-        connection.put("database", database);
-        connection.put("username", username);
-        connection.put("password", password);
-
-        // Configure connection pool (use hyphenated keys)
-        connection.put("max-pool-size", 10);
-        connection.put("min-pool-size", 2);
-        connection.put("connection-timeout", 30000);
-        connection.put("idle-timeout", 600000);
-        connection.put("max-lifetime", 1800000);
-        
-        // Set parameter names for testing
-        yamlPostgres.setParameterNames(new String[]{
-            "userId", "minId", "maxId", "status", "theme", "tag", "days", "threadId", "nonexistentParam"
-        });
-        
-        return yamlPostgres;
-    }
 
     private void initializePostgreSQLTestData() throws DataSourceException {
         System.out.println("TEST: Initializing PostgreSQL test data");
