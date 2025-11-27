@@ -21,10 +21,10 @@ rules:
     severity: "WARNING"
     priority: 2
 
-  - id: "critical-value-error"
-    name: "Critical Value Error Check"
-    condition: "#amount != null && #amount > 10000"
-    message: "CRITICAL: Amount {{#amount}} exceeds maximum allowed limit"
+  - id: "max-amount-validation"
+    name: "Maximum Amount Validation"
+    condition: "#amount == null || #amount <= 10000"
+    message: "Amount {{#amount}} is within maximum allowed limit"
     severity: "ERROR"
     priority: 1
 
@@ -59,7 +59,7 @@ rule-groups:
     description: "OR group testing amount thresholds with escalating severities"
     operator: "OR"
     rule-ids:
-      - "critical-value-error"
+      - "max-amount-validation"
       - "high-value-warning"
       - "value-threshold-check"
 

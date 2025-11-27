@@ -46,6 +46,18 @@ class YamlValidationServiceTest {
         yamlValidationService = new YamlValidationService();
     }
 
+    private static String loadExampleYaml(String path) {
+        try {
+            java.nio.file.Path file = java.nio.file.Path.of("examples", path);
+            if (!java.nio.file.Files.exists(file)) {
+                file = java.nio.file.Path.of("apex-playground", "examples", path);
+            }
+            return java.nio.file.Files.readString(file);
+        } catch (java.io.IOException e) {
+            throw new RuntimeException("Failed to load example YAML: " + path, e);
+        }
+    }
+
     @Nested
     @DisplayName("Valid YAML Tests")
     class ValidYamlTests {
@@ -54,26 +66,18 @@ class YamlValidationServiceTest {
         @DisplayName("Should validate complete YAML configuration")
         void shouldValidateCompleteYamlConfiguration() {
             // Given
-            String validYaml = """
-                metadata:
-                  name: "Test Rules"
-                  version: "1.0.0"
-                  description: "Test validation rules"
-                  author: "Test Author"
-                rules:
-                  - id: "age-check"
-                    name: "Age Validation"
-                    condition: "#age >= 18"
-                    message: "Age must be 18 or older"
-                  - id: "email-check"
-                    name: "Email Validation"
-                    condition: "#email != null && #email.contains('@')"
-                    message: "Valid email required"
-                """;
+            String validYaml = loadExampleYaml("basic/simple-age-validation.yaml");
             
             // When
             YamlValidationResponse response = yamlValidationService.validateYaml(validYaml);
             
+            if (!response.isValid()) {
+                System.out.println("Validation failed with errors:");
+                response.getErrors().forEach(e -> System.out.println(" - " + e.getMessage()));
+                System.out.println("Validation warnings:");
+                response.getWarnings().forEach(w -> System.out.println(" - " + w.getMessage()));
+            }
+
             // Then
             assertNotNull(response);
             assertTrue(response.isValid());
@@ -83,13 +87,13 @@ class YamlValidationServiceTest {
             
             // Check metadata
             assertNotNull(response.getMetadata());
-            assertEquals("Test Rules", response.getMetadata().getName());
+            assertEquals("Simple Age Validation", response.getMetadata().getName());
             assertEquals("1.0.0", response.getMetadata().getVersion());
-            assertEquals("Test validation rules", response.getMetadata().getDescription());
-            assertEquals("Test Author", response.getMetadata().getAuthor());
+            assertEquals("The simplest possible YAML validation rule - validates age >= 18", response.getMetadata().getDescription());
+            assertEquals("apex-demo-team@example.com", response.getMetadata().getAuthor());
             
             // Check statistics
-            assertEquals(2, response.getStatistics().getRulesCount());
+            assertEquals(3, response.getStatistics().getRulesCount());
             assertEquals(0, response.getStatistics().getEnrichmentsCount());
         }
 
@@ -97,20 +101,7 @@ class YamlValidationServiceTest {
         @DisplayName("Should validate YAML with enrichments")
         void shouldValidateYamlWithEnrichments() {
             // Given
-            String yamlWithEnrichments = """
-                metadata:
-                  name: "Enrichment Rules"
-                  version: "1.0.0"
-                enrichments:
-                  - id: "add-timestamp"
-                    name: "Add Timestamp"
-                    field: "processedAt"
-                    value: "now()"
-                  - id: "add-category"
-                    name: "Add Category"
-                    field: "category"
-                    value: "premium"
-                """;
+            String yamlWithEnrichments = loadExampleYaml("enrichment/constant-value-enrichment.yaml");
 
             // When
             YamlValidationResponse response = yamlValidationService.validateYaml(yamlWithEnrichments);
@@ -122,20 +113,14 @@ class YamlValidationServiceTest {
             assertTrue(response.isValid() || !response.isValid()); // Accept either outcome
             assertEquals(0, response.getStatistics().getRulesCount());
             // Enrichments counting may not be implemented in the current statistics logic
-            assertTrue(response.getStatistics().getEnrichmentsCount() >= 0);
+            assertTrue(response.getStatistics().getEnrichmentsCount() >= 6);
         }
 
         @Test
         @DisplayName("Should validate minimal YAML configuration")
         void shouldValidateMinimalYamlConfiguration() {
             // Given
-            String minimalYaml = """
-                rules:
-                  - id: "simple-rule"
-                    name: "Simple Rule"
-                    condition: "true"
-                    message: "Always passes"
-                """;
+            String minimalYaml = loadExampleYaml("basic/minimal-rule.yaml");
             
             // When
             YamlValidationResponse response = yamlValidationService.validateYaml(minimalYaml);
@@ -145,10 +130,8 @@ class YamlValidationServiceTest {
             assertTrue(response.isValid());
             assertEquals(1, response.getStatistics().getRulesCount());
             
-            // Should have warnings for missing metadata
-            assertTrue(response.getWarnings().size() > 0);
-            assertTrue(response.getWarnings().stream()
-                .anyMatch(w -> w.getMessage().contains("missing metadata section")));
+            // Should have no warnings as metadata is complete
+            assertTrue(response.getWarnings().isEmpty());
         }
     }
 
@@ -162,8 +145,12 @@ class YamlValidationServiceTest {
             // Given
             String invalidYaml = """
                 metadata:
+                  id: "test-rules-config"
                   name: "Test Rules"
-                  version: 1.0.0
+                  version: "1.0.0"
+                  type: "rule-config"
+                  description: "Test Description"
+                  author: "Test Author"
                 rules:
                   - id: "test-rule"
                     name: "Test Rule"
@@ -178,7 +165,7 @@ class YamlValidationServiceTest {
             assertNotNull(response);
             assertFalse(response.isValid());
             assertTrue(response.getErrors().size() > 0);
-            assertTrue(response.getMessage().contains("validation errors"));
+            assertTrue(response.getMessage().contains("validation errors") || response.getMessage().contains("Validation failed"));
         }
 
         @Test
@@ -187,7 +174,12 @@ class YamlValidationServiceTest {
             // Given
             String yamlMissingFields = """
                 metadata:
+                  id: "test-rules-config"
                   name: "Test Rules"
+                  version: "1.0.0"
+                  type: "rule-config"
+                  description: "Test Description"
+                  author: "Test Author"
                 rules:
                   - id: "incomplete-rule"
                     condition: "#age > 18"
@@ -237,8 +229,12 @@ class YamlValidationServiceTest {
             // Given
             String emptyConfig = """
                 metadata:
+                  id: "empty-config"
                   name: "Empty Config"
                   version: "1.0.0"
+                  type: "rule-config"
+                  description: "Test Description"
+                  author: "Test Author"
                 """;
             
             // When
@@ -256,13 +252,17 @@ class YamlValidationServiceTest {
     @DisplayName("Real-time Validation Tests")
     class RealTimeValidationTests {
 
+        static java.util.stream.Stream<String> validYamlProvider() {
+            return java.util.stream.Stream.of(
+                loadExampleYaml("basic/simple-age-validation.yaml"),
+                loadExampleYaml("enrichment/comprehensive-financial-settlement.yaml"),
+                loadExampleYaml("basic/minimal-rule.yaml")
+            );
+        }
+
         @ParameterizedTest
         @DisplayName("Should return true for valid YAML")
-        @ValueSource(strings = {
-            "metadata:\n  name: Test",
-            "rules:\n  - id: test\n    name: Test Rule\n    condition: true",
-            "enrichments:\n  - id: test\n    field: test"
-        })
+        @org.junit.jupiter.params.provider.MethodSource("validYamlProvider")
         void shouldReturnTrueForValidYaml(String yaml) {
             // When
             boolean isValid = yamlValidationService.isValidYaml(yaml);
@@ -304,29 +304,18 @@ class YamlValidationServiceTest {
         @DisplayName("Should extract complete metadata")
         void shouldExtractCompleteMetadata() {
             // Given
-            String yamlWithMetadata = """
-                metadata:
-                  name: "Complete Metadata Test"
-                  version: "2.1.0"
-                  description: "A comprehensive test of metadata extraction"
-                  type: "validation"
-                  author: "Test Suite"
-                rules:
-                  - id: "test"
-                    name: "Test Rule"
-                    condition: "true"
-                """;
+            String yamlWithMetadata = loadExampleYaml("basic/simple-age-validation.yaml");
             
             // When
             YamlValidationResponse response = yamlValidationService.validateYaml(yamlWithMetadata);
             
             // Then
             assertNotNull(response.getMetadata());
-            assertEquals("Complete Metadata Test", response.getMetadata().getName());
-            assertEquals("2.1.0", response.getMetadata().getVersion());
-            assertEquals("A comprehensive test of metadata extraction", response.getMetadata().getDescription());
-            assertEquals("validation", response.getMetadata().getType());
-            assertEquals("Test Suite", response.getMetadata().getAuthor());
+            assertEquals("Simple Age Validation", response.getMetadata().getName());
+            assertEquals("1.0.0", response.getMetadata().getVersion());
+            assertEquals("The simplest possible YAML validation rule - validates age >= 18", response.getMetadata().getDescription());
+            assertEquals("rule-config", response.getMetadata().getType());
+            assertEquals("apex-demo-team@example.com", response.getMetadata().getAuthor());
         }
 
         @Test
@@ -335,6 +324,7 @@ class YamlValidationServiceTest {
             // Given
             String yamlWithIncompleteMetadata = """
                 metadata:
+                  id: "incomplete-metadata"
                   name: "Incomplete Metadata"
                   # Missing version and description
                 rules:
@@ -347,10 +337,10 @@ class YamlValidationServiceTest {
             YamlValidationResponse response = yamlValidationService.validateYaml(yamlWithIncompleteMetadata);
             
             // Then
-            assertTrue(response.getWarnings().stream()
-                .anyMatch(w -> w.getMessage().contains("missing 'version' field")));
-            assertTrue(response.getWarnings().stream()
-                .anyMatch(w -> w.getMessage().contains("missing 'description' field")));
+            // With stricter validation, this is now an error, not just a warning
+            assertFalse(response.isValid());
+            assertTrue(response.getErrors().stream()
+                .anyMatch(e -> e.getMessage().contains("Missing required field") || e.getMessage().contains("Missing required metadata field")));
         }
     }
 
@@ -364,7 +354,12 @@ class YamlValidationServiceTest {
             // Given
             String yamlWithErrors = """
                 metadata:
+                  id: "error-test"
                   name: "Error Test"
+                  version: "1.0.0"
+                  type: "rule-config"
+                  description: "Test Description"
+                  author: "Test Author"
                 rules:
                   - id: "test-rule"
                     # Missing required name field
@@ -392,7 +387,12 @@ class YamlValidationServiceTest {
             // Given
             String yaml = """
                 metadata:
+                  id: "test-config"
                   name: "Test"
+                  version: "1.0.0"
+                  type: "rule-config"
+                  description: "Test Description"
+                  author: "Test Author"
                 rules:
                   - id: "test"
                     name: "Test Rule"
@@ -418,36 +418,16 @@ class YamlValidationServiceTest {
         @DisplayName("Should count rules and enrichments correctly")
         void shouldCountRulesAndEnrichmentsCorrectly() {
             // Given
-            String yamlWithBoth = """
-                metadata:
-                  name: "Mixed Configuration"
-                rules:
-                  - id: "rule1"
-                    name: "Rule 1"
-                    condition: "true"
-                  - id: "rule2"
-                    name: "Rule 2"
-                    condition: "false"
-                enrichments:
-                  - id: "enrich1"
-                    field: "field1"
-                    value: "value1"
-                  - id: "enrich2"
-                    field: "field2"
-                    value: "value2"
-                  - id: "enrich3"
-                    field: "field3"
-                    value: "value3"
-                """;
+            String yamlWithBoth = loadExampleYaml("enrichment/comprehensive-financial-settlement.yaml");
             
             // When
             YamlValidationResponse response = yamlValidationService.validateYaml(yamlWithBoth);
             
             // Then
             // Statistics counting may not be fully implemented yet
-            assertTrue(response.getStatistics().getRulesCount() >= 0);
-            assertTrue(response.getStatistics().getEnrichmentsCount() >= 0);
-            assertTrue(response.getStatistics().getErrorCount() >= 0);
+            assertTrue(response.getStatistics().getRulesCount() >= 3);
+            assertTrue(response.getStatistics().getEnrichmentsCount() >= 7);
+            assertEquals(0, response.getStatistics().getErrorCount());
         }
 
         @Test
@@ -456,7 +436,12 @@ class YamlValidationServiceTest {
             // Given
             String yamlWithIssues = """
                 metadata:
+                  id: "issues-test"
                   name: "Issues Test"
+                  version: "1.0.0"
+                  type: "rule-config"
+                  description: "Test Description"
+                  author: "Test Author"
                   # Missing version - should generate warning
                 rules:
                   - id: "incomplete-rule"

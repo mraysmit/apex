@@ -1,8 +1,10 @@
 metadata:
+  id: "financial-validation"
   name: "Financial Validation Rules"
   version: "1.0.0"
   description: "Financial trade validation and enrichment"
   type: "rule-config"
+  author: "APEX Demo Team"
 
 rules:
   - id: "validate-trade-date"

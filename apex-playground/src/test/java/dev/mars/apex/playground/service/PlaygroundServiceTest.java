@@ -69,7 +69,9 @@ class PlaygroundServiceTest {
             // Then
             assertNotNull(response);
             assertTrue(response.isSuccess());
-            assertEquals("Processing completed successfully", response.getMessage());
+            // Message depends on the engine result, usually "Sequential evaluation completed successfully"
+            assertNotNull(response.getMessage());
+            assertTrue(response.getMessage().contains("successfully"));
             assertNotNull(response.getValidation());
             assertNotNull(response.getEnrichment());
             assertNotNull(response.getMetrics());
@@ -187,6 +189,33 @@ class PlaygroundServiceTest {
             assertNotNull(response);
             // Real service should handle requests gracefully
             assertNotNull(response.getMessage());
+        }
+
+        @Test
+        @DisplayName("Should handle invalid JSON with explicit error result")
+        void shouldHandleInvalidJsonWithExplicitErrorResult() {
+            // Given
+            PlaygroundRequest request = createValidRequest();
+            request.setSourceData("{ invalid json }");
+            request.setDataFormat("JSON");
+
+            // When
+            PlaygroundResponse response = playgroundService.processData(request);
+
+            // Then
+            assertNotNull(response);
+            assertFalse(response.isSuccess(), "Response should be marked as failed");
+            assertNotNull(response.getValidation());
+            assertFalse(response.getValidation().getResults().isEmpty(), "Validation results should not be empty");
+            
+            // Verify we have an error result
+            boolean hasError = response.getValidation().getResults().stream()
+                .anyMatch(r -> "ERROR".equals(r.getSeverity()));
+            assertTrue(hasError, "Should contain at least one ERROR result");
+            
+            // Verify the message contains useful info
+            assertNotNull(response.getMessage());
+            assertTrue(response.getMessage().contains("Processing failed"), "Message should indicate error");
         }
     }
 

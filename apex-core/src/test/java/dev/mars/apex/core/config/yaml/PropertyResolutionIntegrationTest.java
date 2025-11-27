@@ -70,7 +70,7 @@ public class PropertyResolutionIntegrationTest {
             data-sources:
               - name: "test-database"
                 type: "database"
-                sourceType: "postgresql"
+                source-type: "postgresql"
                 enabled: true
                 description: "Test database with resolved properties"
                 
@@ -125,7 +125,7 @@ public class PropertyResolutionIntegrationTest {
             data-sources:
               - name: "stream-database"
                 type: "database"
-                sourceType: "postgresql"
+                source-type: "postgresql"
                 connection:
                   host: "${TEST_DB_HOST}"
                   database: "${TEST_DB_NAME:default_db}"
@@ -162,7 +162,7 @@ public class PropertyResolutionIntegrationTest {
             data-sources:
               - name: "string-database"
                 type: "database"
-                sourceType: "h2"
+                source-type: "h2"
                 connection:
                   database: "${TEST_DB_NAME}"
                   username: "${TEST_DB_USER}"
@@ -197,7 +197,7 @@ public class PropertyResolutionIntegrationTest {
             data-sources:
               - name: "static-database"
                 type: "database"
-                sourceType: "h2"
+                source-type: "h2"
                 connection:
                   database: "static_db"
                   username: "static_user"

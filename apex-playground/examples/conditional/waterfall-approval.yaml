@@ -10,7 +10,7 @@ metadata:
   name: "Waterfall Approval Process"
   version: "1.0.0"
   description: "Demonstrates 3-level waterfall approval using Sequential Conditional Chaining"
-  type: "scenario"
+  type: "rule-config"
   author: "APEX Demo Team"
   created: "2025-09-17"
   tags: ["waterfall", "rule-chain", "conditional-logic", "approval"]

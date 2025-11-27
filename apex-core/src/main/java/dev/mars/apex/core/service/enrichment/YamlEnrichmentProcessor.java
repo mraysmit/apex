@@ -1535,17 +1535,48 @@ public class YamlEnrichmentProcessor {
         List<String> failureMessages = new ArrayList<>();
         boolean overallSuccess = true;
 
-        try {
-            // Process enrichments using existing method
-            // We MUST capture the return value because processEnrichments might return a new object
-            // or the same object modified in place.
-            Object resultObject = processEnrichments(enrichments, targetObject, configuration);
+        // Set current configuration for database lookups
+        this.currentConfiguration = configuration;
 
+        if (enrichments == null || enrichments.isEmpty()) {
+            Map<String, Object> resultData = convertToMap(targetObject);
+            return RuleResult.enrichmentSuccess(resultData);
+        }
+
+        // Sort enrichments by priority (lower numbers = higher priority)
+        enrichments.sort((e1, e2) -> {
+            int priority1 = e1.getPriority() != null ? e1.getPriority() : 100;
+            int priority2 = e2.getPriority() != null ? e2.getPriority() : 100;
+            return Integer.compare(priority1, priority2);
+        });
+
+        Object enrichedObject = targetObject;
+
+        for (YamlEnrichment enrichment : enrichments) {
+            try {
+                if (shouldProcessEnrichment(enrichment, enrichedObject)) {
+                    enrichedObject = processEnrichment(enrichment, enrichedObject);
+                    logger.debug("Successfully processed enrichment: " + enrichment.getId());
+                } else {
+                    logger.debug("Skipping enrichment (condition not met): " + enrichment.getId());
+
+                    // Phase 5: Store result-field for field-enrichment (condition did not match)
+                    if ("field-enrichment".equals(enrichment.getType()) && enrichment.getResultField() != null) {
+                        setFieldValue(enrichedObject, enrichment.getResultField(), false);
+                        logger.info("Phase 5: Stored field-enrichment result in field: " + enrichment.getResultField() + " = false");
+                    }
+                }
+            } catch (Exception e) {
+                logger.error("Enrichment processing failed: " + enrichment.getId() + " - " + e.getMessage(), e);
+                overallSuccess = false;
+                failureMessages.add("Enrichment '" + enrichment.getId() + "' failed: " + e.getMessage());
+            }
+        }
+
+        try {
             // Use the resultObject for analysis
             @SuppressWarnings("unchecked")
-            Map<String, Object> enrichedData = (resultObject instanceof Map)
-                ? (Map<String, Object>) resultObject
-                : convertToMap(resultObject);
+            Map<String, Object> enrichedData = convertToMap(enrichedObject);
 
             // Detect enrichment failures by checking for required field mapping failures
             if (enrichments != null && !enrichments.isEmpty()) {

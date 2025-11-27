@@ -72,7 +72,9 @@ public class YamlMetadataValidator {
         "rule-chain",
         "external-data-config",
         "pipeline",
-        "component"
+        "pipeline-config",
+        "component",
+        "transformation-config"
     );
 
     // Valid failure policies for scenario stages
@@ -99,7 +101,8 @@ public class YamlMetadataValidator {
         "enrichment", Set.of("author"),
         "rule-chain", Set.of("author"),
         "external-data-config", Set.of("author"),
-        "pipeline", Set.of("author")
+        "pipeline", Set.of("author"),
+        "pipeline-config", Set.of("author")
     );
     
     private final YamlConfigurationLoader configLoader;

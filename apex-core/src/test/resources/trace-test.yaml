@@ -1,0 +1,17 @@
+metadata:
+  id: trace-test
+  name: trace-test
+  type: "rule-config"
+  description: "Trace test configuration"
+  author: Test Author
+  version: "1.0"
+
+rules:
+  - id: "rule1"
+    name: "Rule 1"
+    condition: "true"
+    message: "Rule 1 matched"
+
+item-order:
+  - section-type: "rules"
+    item-id: "rule1"

@@ -1,8 +1,10 @@
 metadata:
+  id: "quick-start"
   name: "Quick Start Demo"
   version: "1.0.0"
   description: "Simple validation rules for getting started"
   type: "rule-config"
+  author: "APEX Demo Team"
 
 rules:
   - id: "check-amount"

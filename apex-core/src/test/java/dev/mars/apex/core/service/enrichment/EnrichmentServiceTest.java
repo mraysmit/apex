@@ -49,8 +49,9 @@ class EnrichmentServiceTest {
     @DisplayName("Should enrich object using field-enrichment")
     void testEnrichObjectWithYamlConfig() throws Exception {
         String yamlConfig = """
-            name: test-enrichment-config
-            description: Test enrichment configuration
+            metadata:
+              name: test-enrichment-config
+              description: Test enrichment configuration
             enrichments:
               - id: currency-enrichment
                 type: field-enrichment
@@ -77,8 +78,9 @@ class EnrichmentServiceTest {
     @DisplayName("Should handle empty YAML configuration gracefully")
     void testEnrichObjectWithEmptyYamlConfig() throws Exception {
         String emptyConfig = """
-            name: empty-config
-            description: Empty configuration
+            metadata:
+              name: empty-config
+              description: Empty configuration
             """;
 
         Map<String, Object> inputData = new HashMap<>();
@@ -97,8 +99,9 @@ class EnrichmentServiceTest {
     @DisplayName("Should handle multiple field enrichments in sequence")
     void testMultipleEnrichmentsInSequence() throws Exception {
         String yamlConfig = """
-            name: multiple-enrichments
-            description: Multiple enrichment test
+            metadata:
+              name: multiple-enrichments
+              description: Multiple enrichment test
             enrichments:
               - id: enrichment-1
                 type: field-enrichment
@@ -130,8 +133,9 @@ class EnrichmentServiceTest {
     @DisplayName("Should reject invalid enrichment type during YAML loading")
     void testInvalidEnrichmentType() {
         String yamlConfig = """
-            name: error-test
-            description: Test error handling
+            metadata:
+              name: error-test
+              description: Test error handling
             enrichments:
               - id: invalid-enrichment
                 type: nonexistent-type

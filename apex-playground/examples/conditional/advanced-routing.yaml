@@ -10,7 +10,7 @@ metadata:
   name: "Advanced Priority Routing"
   version: "1.0.0"
   description: "Demonstrates priority-based routing using field-enrichment with conditional-mappings"
-  type: "scenario"
+  type: "rule-config"
   author: "APEX Demo Team"
   created: "2025-09-17"
   tags: ["routing", "priority", "conditional-mapping"]

@@ -40,10 +40,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 2025-08-28
  * @version 1.0
  */
-class ComprehensiveYamlValidationTest {
+public class ComprehensiveYamlValidationTest {
     
     @Test
-    void testAllYamlFilesHaveTypeAttribute() throws IOException {
+    public void testAllYamlFilesHaveTypeAttribute() throws IOException {
         // Use the actual project structure - YAML files are in apex-core test resources
         // Try multiple possible paths to handle different execution contexts
         String basePath = findYamlBasePath();

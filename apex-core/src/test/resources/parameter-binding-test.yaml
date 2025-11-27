@@ -4,9 +4,12 @@
 
 metadata:
   name: parameter-binding-test
+  id: parameter-binding-test
+  type: rule-config
+  author: Test Author
   description: Parameter binding test configuration
   version: 1.0.0
-  created-date: 2025-11-27
+  created: 2025-11-27
 
 data-sources:
   # H2 database for parameter binding tests

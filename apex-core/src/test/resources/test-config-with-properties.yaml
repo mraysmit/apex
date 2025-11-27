@@ -136,13 +136,4 @@ rules:
     description: "Validate user data before processing"
     condition: "#data != null"
     priority: 100
-    
-    actions:
-      - type: "validation"
-        validations:
-          - field: "userId"
-            required: true
-            message: "User ID is required"
-          - field: "email"
-            pattern: "^[A-Za-z0-9+_.-]+@(.+)$"
-            message: "Valid email address is required"
+

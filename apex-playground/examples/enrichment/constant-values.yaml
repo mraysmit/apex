@@ -4,6 +4,7 @@ metadata:
   version: "1.0.0"
   description: "Demonstrates assigning constant strings, numbers, and booleans to fields"
   type: "enrichment"
+  author: "APEX Demo Team"
 
 enrichments:
   - id: "assign-basic-constants"

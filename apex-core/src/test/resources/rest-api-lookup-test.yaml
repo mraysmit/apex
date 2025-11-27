@@ -4,9 +4,12 @@
 
 metadata:
   name: rest-api-lookup-test
+  id: rest-api-lookup-test
+  type: rule-config
+  author: Test Author
   description: REST API lookup test configuration
   version: 1.0.0
-  created-date: 2025-11-27
+  created: 2025-11-27
 
 data-sources:
   # Basic REST API data source

@@ -35,16 +35,17 @@ data-sources:
       username: "sa"
       password: ""
 
-    schema:
-      auto-create: true
-      init-script: |
-        CREATE TABLE IF NOT EXISTS test_data (
-          id INTEGER PRIMARY KEY,
-          name VARCHAR(255)
-        );
+    custom-properties:
+      schema:
+        auto-create: true
+        init-script: |
+          CREATE TABLE IF NOT EXISTS test_data (
+            id INTEGER PRIMARY KEY,
+            name VARCHAR(255)
+          );
 
-        INSERT INTO test_data (id, name) VALUES
-          (1, 'Test Record 1');
+          INSERT INTO test_data (id, name) VALUES
+            (1, 'Test Record 1');
 
     queries:
       getAll: "SELECT id, name FROM test_data"

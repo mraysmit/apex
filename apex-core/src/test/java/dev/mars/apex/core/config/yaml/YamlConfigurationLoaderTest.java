@@ -139,6 +139,30 @@ class YamlConfigurationLoaderTest {
                   "Exception message should indicate YAML parsing failure");
     }
 
+    @Test
+    @DisplayName("Should ignore unknown properties (lenient parsing)")
+    void testLoadFromFileWithUnknownProperties() throws Exception {
+        System.out.println("TEST: Testing unknown properties - should be ignored");
+        
+        Path invalidYamlFile = tempDir.resolve("unknown-property.yaml");
+        String invalidYaml = """
+            metadata:
+              name: "Unknown Property Config"
+              type: "rule-configuration"
+            rules:
+              - id: "test-rule"
+                name: "Test Rule"
+                condition: "true"
+                unknown_field: "This should be ignored"
+            """;
+        Files.writeString(invalidYamlFile, invalidYaml);
+
+        assertDoesNotThrow(() -> {
+            YamlRuleConfiguration config = loader.loadFromFile(invalidYamlFile.toString());
+            assertNotNull(config, "Configuration should be loaded despite unknown property");
+        }, "Should not throw exception for unknown property");
+    }
+
     // ========================================
     // Stream Loading Tests (loadFromStream)
     // ========================================

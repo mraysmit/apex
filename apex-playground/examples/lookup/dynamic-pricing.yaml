@@ -4,6 +4,7 @@ metadata:
   version: "1.0.0"
   description: "Calculates total amount and discount rates using mathematical expressions in lookup keys"
   type: "enrichment"
+  author: "APEX Demo Team"
 
 enrichments:
   - id: "dynamic-pricing-calculation"

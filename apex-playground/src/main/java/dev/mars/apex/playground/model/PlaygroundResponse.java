@@ -18,6 +18,7 @@ package dev.mars.apex.playground.model;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import dev.mars.apex.core.engine.model.ExecutionStep;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.Instant;
@@ -67,10 +68,15 @@ public class PlaygroundResponse {
     @Schema(description = "List of errors that occurred during processing")
     private List<String> errors;
 
+    @JsonProperty("trace")
+    @Schema(description = "Execution trace steps")
+    private List<ExecutionStep> trace;
+
     // Default constructor
     public PlaygroundResponse() {
         this.timestamp = Instant.now();
         this.errors = new ArrayList<>();
+        this.trace = new ArrayList<>();
         this.validation = new ValidationResult();
         this.enrichment = new EnrichmentResult();
         this.metrics = new ProcessingMetrics();
@@ -138,6 +144,14 @@ public class PlaygroundResponse {
 
     public void setErrors(List<String> errors) {
         this.errors = errors;
+    }
+
+    public List<ExecutionStep> getTrace() {
+        return trace;
+    }
+
+    public void setTrace(List<ExecutionStep> trace) {
+        this.trace = trace;
     }
 
     public void addError(String error) {

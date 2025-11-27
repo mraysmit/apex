@@ -4,9 +4,12 @@
 
 metadata:
   name: multi-source-lookup-test
+  id: multi-source-lookup-test
+  type: rule-config
+  author: Test Author
   description: Multi-source integration test configuration
   version: 1.0.0
-  created-date: 2025-11-27
+  created: 2025-11-27
 
 data-sources:
   # Primary cache for multi-source testing

@@ -8,6 +8,7 @@ import dev.mars.apex.core.config.yaml.*;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.model.EnrichmentGroup;
 import dev.mars.apex.core.engine.model.EnrichmentGroupResult;
+import dev.mars.apex.core.engine.model.ExecutionStep;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleBase;
 import dev.mars.apex.core.engine.model.RuleGroup;
@@ -98,6 +99,7 @@ public class RulesEngine {
     private final RulePerformanceMonitor performanceMonitor;
     private final YamlEnrichmentProcessor enrichmentProcessor;
     private final UnifiedRuleEvaluator unifiedEvaluator;
+    private final List<String> initializationErrors = new ArrayList<>();
 
     /**
      * The YAML configuration used to create this engine (if created via static factory methods).
@@ -214,6 +216,7 @@ public class RulesEngine {
                         logger.debug("Initialized data source: {}", config.getName());
                     } catch (DataSourceException e) {
                         logger.warn("Failed to initialize data source '{}': {}", yamlDataSource.getName(), e.getMessage());
+                        initializationErrors.add("Failed to initialize data source '" + yamlDataSource.getName() + "': " + e.getMessage());
                     }
                 }
             }
@@ -229,6 +232,7 @@ public class RulesEngine {
                         logger.debug("Initialized data sink: {}", config.getName());
                     } catch (DataSinkException e) {
                         logger.warn("Failed to initialize data sink '{}': {}", yamlDataSink.getName(), e.getMessage());
+                        initializationErrors.add("Failed to initialize data sink '" + yamlDataSink.getName() + "': " + e.getMessage());
                     }
                 }
             }
@@ -239,6 +243,7 @@ public class RulesEngine {
         } catch (Exception e) {
             logger.warn("Failed to initialize pipeline components: {}", e.getMessage());
             logger.debug("Pipeline initialization exception details:", e);
+            initializationErrors.add("Failed to initialize pipeline components: " + e.getMessage());
         }
     }
 
@@ -266,17 +271,41 @@ public class RulesEngine {
             // Execute pipeline
             YamlPipelineExecutionResult result = pipelineExecutor.execute(pipeline);
 
+            // Convert pipeline steps to ExecutionSteps for tracing
+            List<ExecutionStep> pipelineSteps = new ArrayList<>();
+            if (result.getStepResults() != null) {
+                for (dev.mars.apex.core.engine.pipeline.PipelineStepResult stepResult : result.getStepResults()) {
+                    String status = stepResult.isSuccess() ? "SUCCESS" : (stepResult.isSkipped() ? "SKIPPED" : "FAILURE");
+                    String message = stepResult.getError() != null ? stepResult.getError() : 
+                                   (stepResult.isSkipped() ? "Step skipped" : "Step completed successfully");
+                    
+                    pipelineSteps.add(new ExecutionStep(
+                        stepResult.getStepName(),
+                        "PIPELINE_STEP",
+                        status,
+                        message,
+                        stepResult.getDurationMs()
+                    ));
+                }
+            }
+
             // Convert to RuleResult
+            RuleResult ruleResult;
             if (result.isSuccess()) {
                 logger.info("Pipeline '{}' executed successfully in {}ms",
                         pipeline.getName(), result.getDurationMs());
-                return RuleResult.match("pipeline:" + pipeline.getName(),
+                ruleResult = RuleResult.match("pipeline:" + pipeline.getName(),
                         "Pipeline executed successfully", SeverityConstants.INFO);
             } else {
                 logger.error("Pipeline '{}' execution failed: {}", pipeline.getName(), result.getError());
-                return RuleResult.error("pipeline:" + pipeline.getName(),
+                ruleResult = RuleResult.error("pipeline:" + pipeline.getName(),
                         "Pipeline execution failed: " + result.getError());
             }
+            
+            // Attach the execution path
+            ruleResult.setExecutionPath(pipelineSteps);
+            return ruleResult;
+            
         } catch (DataPipelineException e) {
             logger.error("Pipeline execution failed with exception", e);
             return RuleResult.error("pipeline:" + pipeline.getName(),
@@ -969,6 +998,13 @@ public class RulesEngine {
     public RuleResult evaluate(YamlRuleConfiguration yamlConfig, Map<String, Object> inputData) {
         logger.info("Starting unified evaluation with enrichments and rules");
 
+        // Check for initialization errors first
+        if (!initializationErrors.isEmpty()) {
+            logger.error("Engine has initialization errors: {}", initializationErrors);
+            Map<String, Object> data = inputData != null ? new HashMap<>(inputData) : new HashMap<>();
+            return RuleResult.evaluationFailure(initializationErrors, data, "initialization", "Engine initialization failed");
+        }
+
         // Handle null inputs gracefully
         if (yamlConfig == null) {
             logger.warn("YAML configuration is null");
@@ -991,7 +1027,7 @@ public class RulesEngine {
         if (sectionOrder == null || sectionOrder.isEmpty()) {
             // Fallback to standard legacy order if no section order is defined
             logger.info("No section order defined - using default standard order");
-            sectionOrder = Arrays.asList("rules", "rule-groups", "enrichments", "enrichment-groups");
+            sectionOrder = Arrays.asList("rules", "rule-groups", "enrichments", "enrichment-groups", "transformations", "pipeline");
         }
 
         logger.info("Executing sections in order: {}", sectionOrder);
@@ -1010,6 +1046,7 @@ public class RulesEngine {
         Map<String, Object> enrichedData = new HashMap<>(inputData);
         boolean overallSuccess = true;
         List<RuleResult> individualRuleResults = new ArrayList<>();  // Collect individual rule results
+        List<ExecutionStep> executionPath = new ArrayList<>(); // Trace execution
 
         try {
             // Check if item-level order is available
@@ -1022,7 +1059,17 @@ public class RulesEngine {
                 for (ProcessingItem item : itemOrder) {
                     logger.debug("Processing item: {} ({})", item.getItemId(), item.getSectionType());
 
+                    long start = System.currentTimeMillis();
                     RuleResult itemResult = processItem(item, yamlConfig, enrichedData);
+                    long duration = System.currentTimeMillis() - start;
+
+                    executionPath.add(new ExecutionStep(
+                        item.getItemId(), 
+                        item.getSectionType(), 
+                        itemResult.isSuccess() ? "SUCCESS" : "FAILURE", 
+                        itemResult.getMessage(), 
+                        duration
+                    ));
 
                     // Collect individual rule results for rules section
                     if ("rules".equals(item.getSectionType())) {
@@ -1041,6 +1088,22 @@ public class RulesEngine {
                         enrichedData.putAll(itemResult.getEnrichedData());
                     }
                 }
+
+                // Execute pipeline if present (since it's not an item in itemOrder)
+                if (yamlConfig.getPipeline() != null) {
+                    logger.info("Processing pipeline (post-item-processing): {}", yamlConfig.getPipeline().getName());
+                    RuleResult pipelineResult = executePipeline(yamlConfig.getPipeline(), enrichedData);
+
+                    // Add pipeline steps to execution path
+                    if (pipelineResult.getExecutionPath() != null) {
+                        executionPath.addAll(pipelineResult.getExecutionPath());
+                    }
+
+                    if (pipelineResult.getResultType() == RuleResult.ResultType.ERROR) {
+                        overallSuccess = false;
+                        failureMessages.add("Pipeline execution error: " + pipelineResult.getMessage());
+                    }
+                }
             } else {
                 // FALLBACK: Section-level processing
                 logger.info("No item order available, falling back to section-level processing");
@@ -1049,6 +1112,9 @@ public class RulesEngine {
                 // Process sections in the order they appear in the YAML document
                 for (String section : sectionOrder) {
                     logger.debug("Processing section: {}", section);
+                    long sectionStart = System.currentTimeMillis();
+                    String sectionStatus = "SUCCESS";
+                    String sectionMessage = "Section processed";
 
                 switch (section) {
                     case "enrichments":
@@ -1062,13 +1128,21 @@ public class RulesEngine {
                                 // Check for enrichment errors
                                 if (enrichmentResult.getResultType() == RuleResult.ResultType.ERROR) {
                                     overallSuccess = false;
+                                    sectionStatus = "FAILURE";
+                                    sectionMessage = enrichmentResult.getMessage();
                                     failureMessages.add("Enrichment processing failed: " + enrichmentResult.getMessage());
                                     if (enrichmentResult.hasFailures()) {
                                         failureMessages.addAll(enrichmentResult.getFailureMessages());
                                     }
                                     logger.error("CRITICAL: Enrichment processing failed: {}", enrichmentResult.getMessage());
+                                    
+                                    long duration = System.currentTimeMillis() - sectionStart;
+                                    executionPath.add(new ExecutionStep(section, "SECTION", sectionStatus, sectionMessage, duration));
+                                    
                                     // Return error immediately (fail-fast) but include enriched data
-                                    return RuleResult.enrichmentFailure(failureMessages, enrichmentResult.getEnrichedData(), SeverityConstants.ERROR);
+                                    RuleResult result = RuleResult.enrichmentFailure(failureMessages, enrichmentResult.getEnrichedData(), SeverityConstants.ERROR);
+                                    result.setExecutionPath(executionPath);
+                                    return result;
                                 }
 
                                 // Update enriched data from result
@@ -1079,6 +1153,8 @@ public class RulesEngine {
                             } catch (Exception e) {
                                 logger.error("CRITICAL: Enrichment processing exception: {}", e.getMessage(), e);
                                 overallSuccess = false;
+                                sectionStatus = "FAILURE";
+                                sectionMessage = e.getMessage();
                                 failureMessages.add("Enrichment processing failed: " + e.getMessage());
                             }
                         }
@@ -1108,6 +1184,8 @@ public class RulesEngine {
                                 // when error recovery is disabled (default for ERROR severity per APEX_ERROR_HANDLING_GUIDE)
                                 if (ruleResult.getResultType() == RuleResult.ResultType.ERROR) {
                                     overallSuccess = false;
+                                    sectionStatus = "FAILURE";
+                                    sectionMessage = "Rule evaluation error";
                                     failureMessages.add("Rule evaluation error: " + ruleResult.getMessage());
                                 }
 
@@ -1147,6 +1225,8 @@ public class RulesEngine {
                             // when error recovery is disabled (default for ERROR severity per APEX_ERROR_HANDLING_GUIDE)
                             if (ruleGroupResult.getResultType() == RuleResult.ResultType.ERROR) {
                                 overallSuccess = false;
+                                sectionStatus = "FAILURE";
+                                sectionMessage = ruleGroupResult.getMessage();
                                 failureMessages.add("Rule group evaluation error: " + ruleGroupResult.getMessage());
                             }
                         }
@@ -1172,6 +1252,8 @@ public class RulesEngine {
 
                             if (enrichmentGroupResult.getResultType() == RuleResult.ResultType.ERROR) {
                                 overallSuccess = false;
+                                sectionStatus = "FAILURE";
+                                sectionMessage = enrichmentGroupResult.getMessage();
                                 failureMessages.add("Enrichment group evaluation error: " + enrichmentGroupResult.getMessage());
                             }
 
@@ -1187,8 +1269,15 @@ public class RulesEngine {
                             logger.info("Processing pipeline: {}", yamlConfig.getPipeline().getName());
                             RuleResult pipelineResult = executePipeline(yamlConfig.getPipeline(), enrichedData);
 
+                            // Add pipeline steps to execution path
+                            if (pipelineResult.getExecutionPath() != null) {
+                                executionPath.addAll(pipelineResult.getExecutionPath());
+                            }
+
                             if (pipelineResult.getResultType() == RuleResult.ResultType.ERROR) {
                                 overallSuccess = false;
+                                sectionStatus = "FAILURE";
+                                sectionMessage = pipelineResult.getMessage();
                                 failureMessages.add("Pipeline execution error: " + pipelineResult.getMessage());
                             }
                         }
@@ -1212,6 +1301,8 @@ public class RulesEngine {
                                 RuleResult chainResult = processRuleChainItem(chain.getId(), yamlConfig, enrichedData);
                                 if (chainResult.getResultType() == RuleResult.ResultType.ERROR) {
                                     overallSuccess = false;
+                                    sectionStatus = "FAILURE";
+                                    sectionMessage = chainResult.getMessage();
                                     failureMessages.add("Rule chain '" + chain.getId() + "' error: " + chainResult.getMessage());
                                 }
                             }
@@ -1236,13 +1327,21 @@ public class RulesEngine {
                             // Check for transformation errors
                             if (transformationResult.getResultType() == RuleResult.ResultType.ERROR) {
                                 overallSuccess = false;
+                                sectionStatus = "FAILURE";
+                                sectionMessage = transformationResult.getMessage();
                                 failureMessages.add("Transformation processing failed: " + transformationResult.getMessage());
                                 if (transformationResult.hasFailures()) {
                                     failureMessages.addAll(transformationResult.getFailureMessages());
                                 }
                                 logger.error("CRITICAL: Transformation processing failed: {}", transformationResult.getMessage());
+                                
+                                long duration = System.currentTimeMillis() - sectionStart;
+                                executionPath.add(new ExecutionStep(section, "SECTION", sectionStatus, sectionMessage, duration));
+                                
                                 // Return error immediately (fail-fast) but include enriched data
-                                return RuleResult.evaluationFailure(failureMessages, transformationResult.getEnrichedData(), "transformations", transformationResult.getMessage(), SeverityConstants.ERROR);
+                                RuleResult result = RuleResult.evaluationFailure(failureMessages, transformationResult.getEnrichedData(), "transformations", transformationResult.getMessage(), SeverityConstants.ERROR);
+                                result.setExecutionPath(executionPath);
+                                return result;
                             }
 
                             // Update enrichedData with transformed data
@@ -1256,19 +1355,32 @@ public class RulesEngine {
                         logger.warn("Unknown section encountered during sequential processing: {}", section);
                         break;
                 }
+                
+                long duration = System.currentTimeMillis() - sectionStart;
+                // Only record step if it wasn't a skipped configuration section
+                if (!section.equals("metadata") && !section.equals("data-sources") && 
+                    !section.equals("data-source-refs") && !section.equals("rule-refs") && 
+                    !section.equals("enrichment-refs") && !section.equals("data-sinks") && 
+                    !section.equals("categories") && !section.equals("error-recovery")) {
+                    executionPath.add(new ExecutionStep(section, "SECTION", sectionStatus, sectionMessage, duration));
+                }
             }
             } // End of fallback section-level processing
 
             // Return comprehensive result with individual rule results
             if (overallSuccess && failureMessages.isEmpty()) {
                 logger.info("Sequential evaluation completed successfully with {} individual rule results", individualRuleResults.size());
-                return RuleResult.evaluationSuccess(enrichedData, "evaluation", "Sequential evaluation completed successfully", individualRuleResults);
+                RuleResult result = RuleResult.evaluationSuccess(enrichedData, "evaluation", "Sequential evaluation completed successfully", individualRuleResults);
+                result.setExecutionPath(executionPath);
+                return result;
             } else {
                 logger.info("Sequential evaluation completed with {} failures", failureMessages.size());
                 logger.debug("Final enriched data keys (failure): {}", enrichedData.keySet());
                 // For failures, also include individual rule results
-                return new RuleResult("evaluation", "Sequential evaluation completed with failures",
+                RuleResult result = new RuleResult("evaluation", "Sequential evaluation completed with failures",
                                      false, RuleResult.ResultType.ERROR, enrichedData, failureMessages, false, individualRuleResults);
+                result.setExecutionPath(executionPath);
+                return result;
             }
 
         } catch (Exception e) {

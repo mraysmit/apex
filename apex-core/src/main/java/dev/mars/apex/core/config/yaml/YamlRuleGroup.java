@@ -1,5 +1,6 @@
 package dev.mars.apex.core.config.yaml;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
@@ -86,6 +87,7 @@ public class YamlRuleGroup {
     private String errorHandling;
 
     @JsonProperty("rule-ids")
+    @JsonAlias({"rules"}) // Alias for backward compatibility
     private List<String> ruleIds;
     
     @JsonProperty("rule-references")

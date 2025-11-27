@@ -12,10 +12,6 @@ rules:
     name: "Add Processing Timestamp"
     description: "Adds processing timestamp to the trade"
     condition: "true"
-    actions:
-      - type: "set-field"
-        field: "processingTimestamp"
-        value: "T(java.time.Instant).now().toString()"
     severity: "INFO"
     category: "ENRICHMENT"
     enabled: true
@@ -25,10 +21,6 @@ rules:
     name: "Add Processing Status"
     description: "Adds processing status to the trade"
     condition: "true"
-    actions:
-      - type: "set-field"
-        field: "processingStatus"
-        value: "PROCESSED"
     severity: "INFO"
     category: "ENRICHMENT"
     enabled: true

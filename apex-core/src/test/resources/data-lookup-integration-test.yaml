@@ -4,9 +4,12 @@
 
 metadata:
   name: data-lookup-integration-test
+  id: data-lookup-integration-test
+  type: rule-config
+  author: Test Author
   description: Integration test configuration for data lookup functionality
   version: 1.0.0
-  created-date: 2025-11-27
+  created: 2025-11-27
 
 data-sources:
   # Cache data source for testing cache operations

@@ -32,8 +32,9 @@ class EnrichmentServiceRuleResultTest {
     @DisplayName("Should return success RuleResult when no enrichments provided")
     void testEnrichObjectWithResult_NoEnrichments() throws Exception {
         String yamlConfig = """
-            name: "Empty Config"
-            description: "Config with no enrichments"
+            metadata:
+              name: "Empty Config"
+              description: "Config with no enrichments"
             """;
 
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
@@ -56,8 +57,9 @@ class EnrichmentServiceRuleResultTest {
     @DisplayName("Should return success RuleResult for successful enrichment")
     void testEnrichObjectWithResult_Success() throws Exception {
         String yamlConfig = """
-            name: "Success Test"
-            description: "Test successful enrichment"
+            metadata:
+              name: "Success Test"
+              description: "Test successful enrichment"
 
             enrichments:
               - id: test-enrichment
@@ -87,8 +89,9 @@ class EnrichmentServiceRuleResultTest {
     @DisplayName("Should return failure RuleResult for required field mapping failure")
     void testEnrichObjectWithResult_RequiredFieldFailure() throws Exception {
         String yamlConfig = """
-            name: "Required Field Test"
-            description: "Test required field failure"
+            metadata:
+              name: "Required Field Test"
+              description: "Test required field failure"
 
             enrichments:
               - id: test-enrichment
@@ -117,8 +120,9 @@ class EnrichmentServiceRuleResultTest {
     @DisplayName("Should handle multiple enrichments correctly")
     void testEnrichObjectWithResult_MultipleEnrichments() throws Exception {
         String yamlConfig = """
-            name: "Multiple Enrichments Test"
-            description: "Test multiple enrichments"
+            metadata:
+              name: "Multiple Enrichments Test"
+              description: "Test multiple enrichments"
 
             enrichments:
               - id: enrichment1

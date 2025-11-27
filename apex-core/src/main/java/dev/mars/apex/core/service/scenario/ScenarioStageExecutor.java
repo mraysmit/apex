@@ -22,6 +22,7 @@ import dev.mars.apex.core.config.yaml.YamlConfigurationException;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.ExecutionStep;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.config.yaml.YamlRuleFactory;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
@@ -109,15 +110,40 @@ public class ScenarioStageExecutor {
                 String reason = getSkipReason(stage, data, result);
                 logger.info("Skipping stage '{}': {}", stage.getStageName(), reason);
                 result.addSkippedStage(stage.getStageName(), reason);
+                
+                // Add trace step for skipped stage
+                result.addExecutionStep(new ExecutionStep(
+                    stage.getStageName(), 
+                    "SCENARIO_STAGE", 
+                    "SKIPPED", 
+                    reason, 
+                    0
+                ));
+                
                 currentStageIndex++;
                 continue;
             }
 
             long stageStartTime = System.currentTimeMillis();
             StageExecutionResult stageResult = executeStage(stage, data, result);
-            stageResult.setExecutionTimeMs(System.currentTimeMillis() - stageStartTime);
+            long duration = System.currentTimeMillis() - stageStartTime;
+            stageResult.setExecutionTimeMs(duration);
 
             result.addStageResult(stageResult);
+            
+            // Add trace step for executed stage
+            result.addExecutionStep(new ExecutionStep(
+                stage.getStageName(), 
+                "SCENARIO_STAGE", 
+                stageResult.isSuccessful() ? "SUCCESS" : "FAILURE", 
+                stageResult.getErrorMessage() != null ? stageResult.getErrorMessage() : "Stage completed", 
+                duration
+            ));
+            
+            // Add inner execution steps from the stage's rule result if available
+            if (stageResult.getRuleResult() != null && stageResult.getRuleResult().getExecutionPath() != null) {
+                result.addExecutionSteps(stageResult.getRuleResult().getExecutionPath());
+            }
 
             logger.info("Stage '{}' completed: {}", stage.getStageName(), stageResult.getExecutionSummary());
 
@@ -128,6 +154,15 @@ public class ScenarioStageExecutor {
                 for (int i = currentStageIndex + 1; i < stages.size(); i++) {
                     ScenarioStage remainingStage = stages.get(i);
                     result.addSkippedStage(remainingStage.getStageName(), "Scenario terminated due to previous stage failure");
+                    
+                    // Add trace step for skipped stage
+                    result.addExecutionStep(new ExecutionStep(
+                        remainingStage.getStageName(), 
+                        "SCENARIO_STAGE", 
+                        "SKIPPED", 
+                        "Scenario terminated due to previous stage failure", 
+                        0
+                    ));
                 }
 
                 break; // Terminate processing based on failure policy

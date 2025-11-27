@@ -17,6 +17,7 @@ package dev.mars.apex.core.config.yaml;
  */
 
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.mars.apex.core.config.datasource.*;
 
@@ -24,8 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * YAML configuration class for external data sources.
@@ -86,6 +87,7 @@ public class YamlDataSource {
     private Map<String, String> keyPatterns;
     
     @JsonProperty("file-format")
+    @JsonAlias("fileFormat")
     private Map<String, Object> fileFormat;
     
     @JsonProperty("circuit-breaker")
@@ -609,7 +611,14 @@ public class YamlDataSource {
         config.setDelimiter(getStringValue(map, "delimiter"));
         config.setQuoteCharacter(getStringValue(map, "quote-character"));
         config.setEscapeCharacter(getStringValue(map, "escape-character"));
-        config.setHeaderRow(getBooleanValue(map, "header-row", true));
+        
+        // Handle header-row and hasHeaderRow
+        Boolean headerRow = getBooleanValue(map, "header-row", null);
+        if (headerRow == null) {
+            headerRow = getBooleanValue(map, "hasHeaderRow", true);
+        }
+        config.setHeaderRow(headerRow);
+
         config.setSkipLines(getIntegerValue(map, "skip-lines"));
         config.setEncoding(getStringValue(map, "encoding"));
         config.setDateFormat(getStringValue(map, "date-format"));
@@ -628,6 +637,11 @@ public class YamlDataSource {
 
         @SuppressWarnings("unchecked")
         Map<String, String> columnMappings = (Map<String, String>) map.get("column-mappings");
+        if (columnMappings == null) {
+            @SuppressWarnings("unchecked")
+            Map<String, String> camelCaseMappings = (Map<String, String>) map.get("columnMappings");
+            columnMappings = camelCaseMappings;
+        }
         if (columnMappings != null) {
             config.setColumnMappings(columnMappings);
         }

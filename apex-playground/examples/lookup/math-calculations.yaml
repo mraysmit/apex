@@ -4,6 +4,7 @@ metadata:
   version: "1.0.0"
   description: "Demonstrates advanced math functions like Square Root, Power, and Rounding"
   type: "enrichment"
+  author: "APEX Demo Team"
 
 enrichments:
   - id: "square-root-calculation"

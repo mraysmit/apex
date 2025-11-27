@@ -30,8 +30,9 @@ class EnrichmentGroupExecutionTest {
 
     private String buildAndGroupYaml() {
         return """
-            name: "AND Group Test"
-            description: "Test AND enrichment group"
+            metadata:
+              name: "AND Group Test"
+              description: "Test AND enrichment group"
 
             enrichments:
               - id: e1
@@ -60,8 +61,9 @@ class EnrichmentGroupExecutionTest {
 
     private String buildOrGroupYaml() {
         return """
-            name: "OR Group Test"
-            description: "Test OR enrichment group"
+            metadata:
+              name: "OR Group Test"
+              description: "Test OR enrichment group"
 
             enrichments:
               - id: e1

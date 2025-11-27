@@ -1,17 +1,10 @@
-version: "1.0"
-name: "Constant Value Field Enrichment Test"
-description: |
-  Demonstrates CORRECT patterns for assigning constant values in field-enrichment.
-  
-  CORRECT PATTERN:
-  - source-field: "constant" (special keyword)
-  - expression: "'value'" (SpEL string literal)
-  OR
-  - transformation: "'value'" (alternative to expression)
-  
-  INCORRECT PATTERNS (DO NOT USE):
-  - source-field: '''value''' (triple quotes - WRONG!)
-  - source-field: 'value' (direct value - WRONG!)
+metadata:
+  id: "constant-value-enrichment"
+  name: "Constant Value Field Enrichment Test"
+  version: "1.0"
+  description: "Demonstrates CORRECT patterns for assigning constant values in field-enrichment."
+  type: "rule-config"
+  author: "APEX Demo Team"
 
 # ============================================================================
 # TEST 1: Basic Constant String Assignment

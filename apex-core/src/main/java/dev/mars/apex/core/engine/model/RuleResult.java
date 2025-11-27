@@ -64,6 +64,9 @@ public class RuleResult implements Serializable {
     // Child results for composite evaluations (e.g., evaluateSequential)
     private final List<RuleResult> childResults;
 
+    // New field for execution trace
+    private List<ExecutionStep> executionPath = new ArrayList<>();
+
     /**
      * Enum representing the type of result.
      */
@@ -810,6 +813,24 @@ public class RuleResult implements Serializable {
     }
 
     // New API methods for comprehensive evaluation results
+
+    /**
+     * Get the execution path (trace) of the evaluation.
+     *
+     * @return List of execution steps
+     */
+    public List<ExecutionStep> getExecutionPath() {
+        return executionPath != null ? new ArrayList<>(executionPath) : new ArrayList<>();
+    }
+
+    /**
+     * Set the execution path (trace) of the evaluation.
+     *
+     * @param executionPath List of execution steps
+     */
+    public void setExecutionPath(List<ExecutionStep> executionPath) {
+        this.executionPath = executionPath != null ? new ArrayList<>(executionPath) : new ArrayList<>();
+    }
 
     /**
      * New API: Returns the matched rule/group name when a rule/group was triggered.

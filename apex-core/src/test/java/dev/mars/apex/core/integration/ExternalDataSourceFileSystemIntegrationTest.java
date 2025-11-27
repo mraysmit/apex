@@ -63,7 +63,14 @@ public class ExternalDataSourceFileSystemIntegrationTest {
                 ttlSeconds: 300
             """;
 
+        // Write files to temporary directory
+        Path externalDataSourceFile = tempDir.resolve("customer-database.yaml");
+        Path mainConfigFile = tempDir.resolve("main-config.yaml");
+        
+        Files.writeString(externalDataSourceFile, externalDataSourceConfig);
+
         // Create main configuration that references the external data source
+        // Use absolute path to ensure resolution works in test environment
         String mainConfig = """
             metadata:
               name: "Customer Processing Rules"
@@ -71,10 +78,9 @@ public class ExternalDataSourceFileSystemIntegrationTest {
               description: "Rules for customer data processing with external data sources"
             
             # Reference to external data source configuration
-            external-data-sources:
+            data-source-refs:
               - name: "customer-db"
-                type: "external-data-config"
-                source: "customer-database.yaml"
+                source: "%s"
             
             rules:
               - id: "customer-exists"
@@ -90,13 +96,8 @@ public class ExternalDataSourceFileSystemIntegrationTest {
                 operator: "AND"
                 rule-ids:
                   - "customer-exists"
-            """;
+            """.formatted(externalDataSourceFile.toString().replace("\\", "\\\\"));
 
-        // Write files to temporary directory
-        Path externalDataSourceFile = tempDir.resolve("customer-database.yaml");
-        Path mainConfigFile = tempDir.resolve("main-config.yaml");
-        
-        Files.writeString(externalDataSourceFile, externalDataSourceConfig);
         Files.writeString(mainConfigFile, mainConfig);
 
         // Test: Load using createRulesEngineFromMultipleFiles (this was the failing scenario)
@@ -144,16 +145,23 @@ public class ExternalDataSourceFileSystemIntegrationTest {
               enabled: true
             """;
 
+        // Write all files
+        Path externalDataSourceFile = tempDir.resolve("product-database.yaml");
+        Path rulesConfigFile = tempDir.resolve("rules.yaml");
+        Path ruleGroupsConfigFile = tempDir.resolve("rule-groups.yaml");
+        
+        Files.writeString(externalDataSourceFile, externalDataSource);
+
         // Rules file with external data source reference
+        // Use absolute path
         String rulesFile = """
             metadata:
               name: "Product Rules"
               version: "1.0.0"
             
-            external-data-sources:
+            data-source-refs:
               - name: "product-db"
-                type: "external-data-config"
-                source: "product-database.yaml"
+                source: "%s"
             
             rules:
               - id: "product-validation"
@@ -162,7 +170,7 @@ public class ExternalDataSourceFileSystemIntegrationTest {
                 message: "Product ID is required"
                 severity: "ERROR"
                 priority: 1
-            """;
+            """.formatted(externalDataSourceFile.toString().replace("\\", "\\\\"));
 
         // Rule groups file
         String ruleGroupsFile = """
@@ -178,12 +186,6 @@ public class ExternalDataSourceFileSystemIntegrationTest {
                   - "product-validation"
             """;
 
-        // Write all files
-        Path externalDataSourceFile = tempDir.resolve("product-database.yaml");
-        Path rulesConfigFile = tempDir.resolve("rules.yaml");
-        Path ruleGroupsConfigFile = tempDir.resolve("rule-groups.yaml");
-        
-        Files.writeString(externalDataSourceFile, externalDataSource);
         Files.writeString(rulesConfigFile, rulesFile);
         Files.writeString(ruleGroupsConfigFile, ruleGroupsFile);
 

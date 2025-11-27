@@ -1,5 +1,6 @@
 package dev.mars.apex.core.config.yaml;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
@@ -136,8 +137,8 @@ public class OrderedYamlParser {
             throw new YamlConfigurationException("YAML parsing error in " + source + ": " + e.getMessage(), e);
         } catch (org.yaml.snakeyaml.constructor.ConstructorException e) {
             throw new YamlConfigurationException("YAML construction error in " + source + ": " + e.getMessage(), e);
-        } catch (IOException e) {
-            throw new YamlConfigurationException("Failed to parse YAML content from: " + source, e);
+        } catch (JsonProcessingException e) {
+            throw new YamlConfigurationException("JSON processing error in YAML content from: " + source + ". Error: " + e.getMessage(), e);
         }
     }
     
@@ -369,7 +370,9 @@ public class OrderedYamlParser {
 
         ObjectMapper mapper = new ObjectMapper(yamlFactory);
 
-        // Configure mapper for better handling of missing properties
+        // Configure mapper to fail on unknown properties (strict validation)
+        // NOTE: Changed to false to support numbered sections (e.g. enrichments-1) which are
+        // handled manually by mergeNumberedSections() but would cause Jackson to fail
         mapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
 

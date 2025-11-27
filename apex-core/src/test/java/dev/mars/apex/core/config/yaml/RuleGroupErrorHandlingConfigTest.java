@@ -39,17 +39,20 @@ class RuleGroupErrorHandlingConfigTest {
               name: "Error Handling Test"
               type: "test-config"
 
+            rules:
+              - id: "rule1"
+                name: "Rule 1"
+                condition: "#data.value > 10"
+                message: "Value is greater than 10"
+                severity: "INFO"
+
             rule-groups:
               - id: "fail-fast-group"
                 name: "Fail Fast Group"
                 operator: "AND"
                 error-handling: "fail-fast"
-                rules:
-                  - id: "rule1"
-                    name: "Rule 1"
-                    condition: "#data.value > 10"
-                    message: "Value is greater than 10"
-                    severity: "INFO"
+                rule-ids:
+                  - "rule1"
             """;
 
         YamlRuleConfiguration config = yamlLoader.fromYamlString(yaml);
@@ -70,17 +73,20 @@ class RuleGroupErrorHandlingConfigTest {
               name: "Error Handling Test"
               type: "test-config"
 
+            rules:
+              - id: "rule1"
+                name: "Rule 1"
+                condition: "#data.value > 10"
+                message: "Value is greater than 10"
+                severity: "WARNING"
+
             rule-groups:
               - id: "continue-group"
                 name: "Continue On Error Group"
                 operator: "OR"
                 error-handling: "continue-on-error"
-                rules:
-                  - id: "rule1"
-                    name: "Rule 1"
-                    condition: "#data.value > 10"
-                    message: "Value is greater than 10"
-                    severity: "WARNING"
+                rule-ids:
+                  - "rule1"
             """;
 
         YamlRuleConfiguration config = yamlLoader.fromYamlString(yaml);
@@ -101,17 +107,20 @@ class RuleGroupErrorHandlingConfigTest {
               name: "Error Handling Test"
               type: "test-config"
 
+            rules:
+              - id: "rule1"
+                name: "Rule 1"
+                condition: "#data.value > 10"
+                message: "Value is greater than 10"
+                severity: "ERROR"
+
             rule-groups:
               - id: "skip-group"
                 name: "Skip On Error Group"
                 operator: "AND"
                 error-handling: "skip-on-error"
-                rules:
-                  - id: "rule1"
-                    name: "Rule 1"
-                    condition: "#data.value > 10"
-                    message: "Value is greater than 10"
-                    severity: "ERROR"
+                rule-ids:
+                  - "rule1"
             """;
 
         YamlRuleConfiguration config = yamlLoader.fromYamlString(yaml);
@@ -132,16 +141,19 @@ class RuleGroupErrorHandlingConfigTest {
               name: "Error Handling Test"
               type: "test-config"
 
+            rules:
+              - id: "rule1"
+                name: "Rule 1"
+                condition: "#data.value > 10"
+                message: "Value is greater than 10"
+                severity: "INFO"
+
             rule-groups:
               - id: "default-group"
                 name: "Default Error Handling Group"
                 operator: "AND"
-                rules:
-                  - id: "rule1"
-                    name: "Rule 1"
-                    condition: "#data.value > 10"
-                    message: "Value is greater than 10"
-                    severity: "INFO"
+                rule-ids:
+                  - "rule1"
             """;
 
         YamlRuleConfiguration config = yamlLoader.fromYamlString(yaml);

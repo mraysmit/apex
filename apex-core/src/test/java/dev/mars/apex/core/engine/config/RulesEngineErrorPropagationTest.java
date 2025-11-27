@@ -69,6 +69,21 @@ class RulesEngineErrorPropagationTest {
         logger.info("Result message: {}", result.getMessage());
         logger.info("Result success: {}", result.isSuccess());
 
+        // Verify that the error was actually reported
+        assertFalse(result.isSuccess(), "Result should be marked as failed for missing datasource");
+        
+        // Check failure messages for details
+        boolean foundError = false;
+        if (result.getFailureMessages() != null) {
+            for (String msg : result.getFailureMessages()) {
+                if (msg.contains("missing-datasource-enrichment") || msg.contains("nonexistent-service")) {
+                    foundError = true;
+                    break;
+                }
+            }
+        }
+        assertTrue(foundError, "Failure messages should contain details about the missing datasource. Messages: " + result.getFailureMessages());
+
         logger.info("✅ Test 1 PASSED: Missing datasource handled gracefully");
     }
 
@@ -99,6 +114,27 @@ class RulesEngineErrorPropagationTest {
         logger.info("Result type: {}", result.getResultType());
         logger.info("Result message: {}", result.getMessage());
         logger.info("Result success: {}", result.isSuccess());
+
+        // Verify that the error was actually reported
+        assertFalse(result.isSuccess(), "Result should be marked as failed for invalid expression");
+        
+        // Check failure messages for details
+        boolean foundError = false;
+        if (result.getFailureMessages() != null) {
+            for (String msg : result.getFailureMessages()) {
+                // The error message might be wrapped multiple times, so we look for key parts
+                // "Transformation processing failed" - from RulesEngine or Processor
+                // "EL1007E" - SpEL error code for property not found
+                // "Field transformation failed" - from Processor
+                if (msg.contains("Transformation processing failed") || 
+                    msg.contains("EL1007E") || 
+                    msg.contains("Field transformation failed")) {
+                    foundError = true;
+                    break;
+                }
+            }
+        }
+        assertTrue(foundError, "Failure messages should contain details about the invalid expression. Messages: " + result.getFailureMessages());
 
         logger.info("✅ Test 2 PASSED: Invalid transformation expression handled gracefully");
     }
@@ -194,6 +230,7 @@ class RulesEngineErrorPropagationTest {
         // Create transformation with invalid SpEL expression
         YamlTransformation transformation = new YamlTransformation();
         transformation.setId("invalid-expression-transformation");
+        transformation.setType("field-transformation");
         transformation.setTargetField("result");
         transformation.setExpression("#data.amount.nonExistentMethod()"); // Invalid method call
 
@@ -250,8 +287,9 @@ class RulesEngineErrorPropagationTest {
         // Create transformation with valid expression
         YamlTransformation transformation = new YamlTransformation();
         transformation.setId("valid-transformation");
+        transformation.setType("field-transformation");
         transformation.setTargetField("doubledAmount");
-        transformation.setExpression("#data.amount * 2"); // Simple valid expression
+        transformation.setExpression("#amount * 2"); // Simple valid expression
 
         config.setTransformations(Collections.singletonList(transformation));
         return config;

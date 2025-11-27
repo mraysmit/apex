@@ -126,6 +126,7 @@ async function processData() {
         // Display results
         displayValidationResults(result.validation || { message: result.message });
         displayEnrichmentResults(result.enrichment || { message: result.message }, result.metrics);
+        displayTraceResults(result.trace);
         updateProcessingTime(processingTime);
         
     } catch (error) {
@@ -192,9 +193,33 @@ function validateYamlRealtime(yamlContent) {
  * Clear all editors and results
  */
 function clearAll() {
-    if (confirm('Are you sure you want to clear all content?')) {
+    showConfirmationModal('Are you sure you want to clear all content? This action cannot be undone.', () => {
         resetPlayground();
-    }
+    });
+}
+
+/**
+ * Show confirmation modal
+ */
+function showConfirmationModal(message, onConfirm) {
+    const modalElement = document.getElementById('confirmationModal');
+    const messageElement = document.getElementById('confirmationMessage');
+    const confirmBtn = document.getElementById('confirmActionBtn');
+    
+    messageElement.textContent = message;
+    
+    // Remove existing event listeners to prevent multiple firings
+    const newConfirmBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+    
+    newConfirmBtn.addEventListener('click', () => {
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        modal.hide();
+        onConfirm();
+    });
+    
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
 }
 
 /**
@@ -525,6 +550,63 @@ function displayEnrichmentResults(enrichment, metrics) {
     html += '<h6 class="text-muted mb-2">Enrichment Data</h6>';
     html += `<pre>${JSON.stringify(enrichment, null, 2)}</pre>`;
     
+    container.innerHTML = html;
+}
+
+/**
+ * Display execution trace results
+ */
+function displayTraceResults(trace) {
+    const container = document.getElementById('traceResults');
+    
+    if (!trace || trace.length === 0) {
+        container.innerHTML = '<p class="text-muted">No execution trace available.</p>';
+        return;
+    }
+
+    let html = '<div class="list-group list-group-flush">';
+    
+    trace.forEach(step => {
+        const statusClass = step.status === 'SUCCESS' ? 'text-success' : 'text-danger';
+        const iconClass = step.status === 'SUCCESS' ? 'fa-check-circle' : 'fa-times-circle';
+        const duration = step.durationMs >= 0 ? `${step.durationMs}ms` : '';
+        
+        // Determine indentation based on type
+        let indentClass = '';
+        let icon = 'fa-cog';
+        
+        if (step.type === 'SCENARIO_STAGE') {
+            indentClass = 'fw-bold bg-light';
+            icon = 'fa-layer-group';
+        } else if (step.type === 'SECTION') {
+            indentClass = 'ps-4';
+            icon = 'fa-folder';
+        } else {
+            indentClass = 'ps-5 small';
+            icon = 'fa-code';
+        }
+
+        html += `
+            <div class="list-group-item ${indentClass}">
+                <div class="d-flex w-100 justify-content-between align-items-center">
+                    <div>
+                        <i class="fas ${icon} me-2 text-muted"></i>
+                        <span class="me-2">${step.name}</span>
+                        <span class="badge bg-secondary rounded-pill" style="font-size: 0.7em">${step.type}</span>
+                    </div>
+                    <div class="text-end">
+                        <span class="me-3 ${statusClass}">
+                            <i class="fas ${iconClass} me-1"></i>${step.status}
+                        </span>
+                        <small class="text-muted" style="min-width: 50px; display: inline-block;">${duration}</small>
+                    </div>
+                </div>
+                ${step.message ? `<div class="small text-muted mt-1 ms-4"><i class="fas fa-info-circle me-1"></i>${step.message}</div>` : ''}
+            </div>
+        `;
+    });
+    
+    html += '</div>';
     container.innerHTML = html;
 }
 

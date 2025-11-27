@@ -52,6 +52,7 @@ public class ScenarioExecutionResult {
     private final Map<String, String> skippedStages; // stageName -> reason (ConcurrentHashMap for thread-safety)
     private final AtomicLong totalExecutionTimeMs;
     private final Map<String, Object> scenarioOutputs;
+    private final List<dev.mars.apex.core.engine.model.ExecutionStep> executionPath; // Trace execution
     
     public ScenarioExecutionResult(String scenarioId) {
         this.scenarioId = scenarioId;
@@ -65,6 +66,7 @@ public class ScenarioExecutionResult {
         this.skippedStages = new java.util.concurrent.ConcurrentHashMap<>();
         this.totalExecutionTimeMs = new AtomicLong(0);
         this.scenarioOutputs = new java.util.concurrent.ConcurrentHashMap<>();
+        this.executionPath = new CopyOnWriteArrayList<>();
     }
     
     // Getters
@@ -111,6 +113,20 @@ public class ScenarioExecutionResult {
     
     public Map<String, Object> getScenarioOutputs() {
         return new HashMap<>(scenarioOutputs);
+    }
+
+    public List<dev.mars.apex.core.engine.model.ExecutionStep> getExecutionPath() {
+        return new ArrayList<>(executionPath);
+    }
+
+    public void addExecutionStep(dev.mars.apex.core.engine.model.ExecutionStep step) {
+        this.executionPath.add(step);
+    }
+
+    public void addExecutionSteps(List<dev.mars.apex.core.engine.model.ExecutionStep> steps) {
+        if (steps != null) {
+            this.executionPath.addAll(steps);
+        }
     }
     
     // Stage management methods

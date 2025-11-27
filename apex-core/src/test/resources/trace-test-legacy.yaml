@@ -1,0 +1,13 @@
+metadata:
+  id: trace-test-legacy
+  name: trace-test-legacy
+  type: "rule-config"
+  description: "Legacy trace test configuration"
+  author: Test Author
+  version: "1.0"
+
+rules:
+  - id: "rule1"
+    name: "Rule 1"
+    condition: "true"
+    message: "Rule 1 matched"

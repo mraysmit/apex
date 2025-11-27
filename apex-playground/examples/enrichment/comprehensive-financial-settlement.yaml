@@ -3,6 +3,7 @@ metadata:
   name: "Comprehensive Financial Settlement Demo"
   description: "Multi-asset settlement processing with cross-border and high-value transaction support"
   version: "1.0.0"
+  type: "rule-config"
   author: "APEX Demo Team"
 
 enrichments:

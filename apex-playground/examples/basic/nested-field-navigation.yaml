@@ -1,8 +1,12 @@
 # Demonstrates SpEL field navigation (NEW in v2.3)
 # Shows how to access nested fields using # prefix
 metadata:
+  id: "nested-field-navigation"
   name: "Nested Field Navigation Demo"
   version: "1.0.0"
+  description: "Demonstrates SpEL field navigation"
+  type: "rule-config"
+  author: "APEX Demo Team"
 
 enrichments:
   - id: "extract-nested-fields"

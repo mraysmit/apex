@@ -182,8 +182,7 @@ class RuleReferenceErrorHandlingTest {
             
             # Some other configuration but no rules
             categories:
-              - id: "test-category"
-                name: "Test Category"
+              - name: "Test Category"
             """;
         
         Path noRulesFile = tempDir.resolve("no-rules.yaml");

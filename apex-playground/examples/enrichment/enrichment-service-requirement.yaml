@@ -2,7 +2,8 @@ metadata:
   id: enrichment-service-requirement-test
   name: Enrichment Service Requirement Test
   version: 1.0.0
-  type: configuration
+  type: rule-config
+  author: "APEX Demo Team"
   description: Test configuration with enrichments to verify EnrichmentService requirement
   tags:
     - enrichment

@@ -51,16 +51,19 @@ class RulesEngineRuleGroupErrorHandlingTest {
               name: "NPE Test"
               type: "test-config"
 
+            rules:
+              - id: "npe-rule"
+                name: "NPE Rule"
+                condition: "#customer.address.city == 'NYC'"
+                message: "Customer is in NYC"
+                severity: "ERROR"
+
             rule-groups:
               - id: "npe-rule-group"
                 name: "npe-rule-group"
-                logic-operator: "AND"
-                rules:
-                  - id: "npe-rule"
-                    name: "NPE Rule"
-                    condition: "#data.customer.address.city == 'NYC'"
-                    message: "Customer is in NYC"
-                    severity: "ERROR"
+                operator: "AND"
+                rule-ids:
+                  - "npe-rule"
             """;
 
         try {
@@ -102,16 +105,19 @@ class RulesEngineRuleGroupErrorHandlingTest {
               name: "Rule Group Success Test"
               type: "test-config"
 
+            rules:
+              - id: "valid-rule"
+                name: "Valid Rule"
+                condition: "#amount > 50"
+                message: "Amount is greater than 50"
+                severity: "INFO"
+
             rule-groups:
               - id: "valid-rule-group"
                 name: "valid-rule-group"
-                logic-operator: "AND"
-                rules:
-                  - id: "valid-rule"
-                    name: "Valid Rule"
-                    condition: "#data.amount > 50"
-                    message: "Amount is greater than 50"
-                    severity: "INFO"
+                operator: "AND"
+                rule-ids:
+                  - "valid-rule"
             """;
 
         try {
@@ -148,16 +154,19 @@ class RulesEngineRuleGroupErrorHandlingTest {
               name: "Safe Navigation Test"
               type: "test-config"
 
+            rules:
+              - id: "safe-nav-rule"
+                name: "Safe Navigation Rule"
+                condition: "#customer?.address?.city == 'NYC'"
+                message: "Customer is in NYC"
+                severity: "INFO"
+
             rule-groups:
               - id: "safe-nav-rule-group"
                 name: "safe-nav-rule-group"
-                logic-operator: "AND"
-                rules:
-                  - id: "safe-nav-rule"
-                    name: "Safe Navigation Rule"
-                    condition: "#data.customer?.address?.city == 'NYC'"
-                    message: "Customer is in NYC"
-                    severity: "INFO"
+                operator: "AND"
+                rule-ids:
+                  - "safe-nav-rule"
             """;
 
         try {

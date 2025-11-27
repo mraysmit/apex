@@ -25,16 +25,17 @@ metadata:
 # Define one data source
 data-sources:
   - name: "valid-source"
-    type: "inline"
+    type: "cache"
     enabled: true
     description: "Valid data source"
     
-    data:
-      - id: 1
-        name: "Test"
+    cache:
+      enabled: true
+      max-size: 100
+      ttl-seconds: 60
     
     operations:
-      getAll: "SELECT * FROM data"
+      getAll: "get-all"
 
 # Pipeline references NON-EXISTENT data source
 pipeline:

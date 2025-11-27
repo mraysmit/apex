@@ -19,6 +19,8 @@ package dev.mars.apex.playground.service;
 
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.config.yaml.YamlDataSource;
+import dev.mars.apex.core.config.yaml.YamlDataSourceRef;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
@@ -30,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -106,6 +109,24 @@ public class PlaygroundService {
             YamlConfigurationLoader configLoader = new YamlConfigurationLoader();
             YamlRuleConfiguration yamlConfig = configLoader.fromYamlString(request.getYamlRules());
 
+            // Extract enrichment sources
+            List<String> enrichmentSources = new ArrayList<>();
+            if (yamlConfig.getDataSources() != null) {
+                for (YamlDataSource ds : yamlConfig.getDataSources()) {
+                    if (ds.getName() != null) {
+                        enrichmentSources.add(ds.getName());
+                    }
+                }
+            }
+            if (yamlConfig.getDataSourceRefs() != null) {
+                for (YamlDataSourceRef ref : yamlConfig.getDataSourceRefs()) {
+                    if (ref.getName() != null) {
+                        enrichmentSources.add(ref.getName());
+                    }
+                }
+            }
+            response.getEnrichment().setEnrichmentSources(enrichmentSources);
+
             // Create engine from config
             RulesEngine rulesEngine = RulesEngine.fromYamlConfig(yamlConfig);
 
@@ -117,15 +138,18 @@ public class PlaygroundService {
             // Step 4: Map results to response
             response.setSuccess(result.isSuccess());
             response.setMessage(result.getMessage());
+            response.setTrace(result.getExecutionPath());
 
             // Handle enrichment data
             if (result.getEnrichedData() != null) {
                 response.getEnrichment().setEnrichedData(result.getEnrichedData());
-                response.getEnrichment().setEnriched(true);
 
                 // Calculate fields added (approximate)
                 int fieldsAdded = result.getEnrichedData().size() - parsedData.size();
                 response.getEnrichment().setFieldsAdded(Math.max(0, fieldsAdded));
+                
+                // Only mark as enriched if fields were added
+                response.getEnrichment().setEnriched(fieldsAdded > 0);
             }
 
             // Handle failures
@@ -170,11 +194,35 @@ public class PlaygroundService {
             response.setSuccess(false);
             response.setMessage("YAML configuration error: " + e.getMessage());
             response.addError("YAML configuration error: " + e.getMessage());
+            
+            // Add system error to validation results to ensure UI reflects failure
+            response.getValidation().addResult(new RuleExecutionResult(
+                "yaml-error", 
+                "Configuration Error", 
+                false, 
+                e.getMessage(),
+                null,
+                0,
+                "ERROR",
+                "system"
+            ));
         } catch (Exception e) {
             logger.error("Processing error: {}", e.getMessage(), e);
             response.setSuccess(false);
             response.setMessage("Processing failed: " + e.getMessage());
             response.addError("Processing error: " + e.getMessage());
+            
+            // Add system error to validation results to ensure UI reflects failure
+            response.getValidation().addResult(new RuleExecutionResult(
+                "system-error", 
+                "System Error", 
+                false, 
+                e.getMessage(),
+                null,
+                0,
+                "ERROR",
+                "system"
+            ));
         }
 
         return response;

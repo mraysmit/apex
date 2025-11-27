@@ -71,10 +71,6 @@ class ErrorHandlingPerformanceBenchmarkTest {
               - id: "test-rule-1"
                 name: "test-rule"
                 condition: "#amount > 1000"
-                actions:
-                  - type: "set-field"
-                    field: "category"
-                    value: "high-value"
             """;
 
         // YAML configuration without error-recovery
@@ -87,10 +83,6 @@ class ErrorHandlingPerformanceBenchmarkTest {
               - id: "test-rule-1"
                 name: "test-rule"
                 condition: "#amount > 1000"
-                actions:
-                  - type: "set-field"
-                    field: "category"
-                    value: "high-value"
             """;
 
         // Load configurations

@@ -424,8 +424,8 @@ public class YamlConfigurationLoader {
 
         ObjectMapper mapper = new ObjectMapper(yamlFactory);
 
-        // Configure mapper for better handling of missing properties
-        mapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        // Configure mapper to fail on unknown properties (strict validation)
+        mapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
         mapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
 
         return mapper;

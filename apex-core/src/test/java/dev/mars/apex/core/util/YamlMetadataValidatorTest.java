@@ -316,6 +316,26 @@ class YamlMetadataValidatorTest {
         assertEquals("VALID", result.getStatus());
     }
 
+    @Test
+    void testValidPipelineConfigType() throws IOException {
+        String validPipelineConfig = """
+            metadata:
+              id: "test-pipeline-config-001"
+              name: "Test Pipeline Config"
+              version: "1.0.0"
+              description: "A test pipeline configuration"
+              type: "pipeline-config"
+              author: "pipeline.team@company.com"
+            """;
+
+        writeFile("config/pipeline-config-test.yaml", validPipelineConfig);
+
+        YamlValidationResult result = validator.validateFile("config/pipeline-config-test.yaml");
+        assertTrue(result.isValid(), "Pipeline-config type should be valid. Errors: " + result.getErrors());
+        assertTrue(result.getErrors().isEmpty());
+        assertEquals("VALID", result.getStatus());
+    }
+
     /**
      * Helper method to write content to a file in the temp directory.
      */

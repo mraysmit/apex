@@ -39,7 +39,8 @@ class YamlProcessingSequenceAnalyzerTest {
     @DisplayName("Test 1: Simple enrichments with no groups - all execute at definition position")
     void testSimpleEnrichmentsNoGroups() {
         String yaml = """
-            name: "Simple Enrichments"
+            metadata:
+              name: "Simple Enrichments"
             
             enrichments:
               - id: "enrich-1"
@@ -92,7 +93,8 @@ class YamlProcessingSequenceAnalyzerTest {
     @DisplayName("Test 2: Enrichments with groups - grouped items filtered out")
     void testEnrichmentsWithGroups() {
         String yaml = """
-            name: "Enrichments with Groups"
+            metadata:
+              name: "Enrichments with Groups"
             
             enrichments:
               - id: "standalone-1"
@@ -165,7 +167,8 @@ class YamlProcessingSequenceAnalyzerTest {
     @DisplayName("Test 3: Rules with rule-groups - grouped rules filtered out")
     void testRulesWithRuleGroups() {
         String yaml = """
-            name: "Rules with Rule Groups"
+            metadata:
+              name: "Rules with Rule Groups"
             
             rules:
               - id: "standalone-rule-1"
@@ -217,7 +220,8 @@ class YamlProcessingSequenceAnalyzerTest {
     @DisplayName("Test 4: Complex interleaving - enrichments, rules, groups")
     void testComplexInterleaving() {
         String yaml = """
-            name: "Complex Interleaving"
+            metadata:
+              name: "Complex Interleaving"
             
             enrichments:
               - id: "enrich-1"
@@ -272,7 +276,8 @@ class YamlProcessingSequenceAnalyzerTest {
     @DisplayName("Test 5: Report formatting")
     void testReportFormatting() {
         String yaml = """
-            name: "Test Report"
+            metadata:
+              name: "Test Report"
 
             enrichments:
               - id: "enrich-1"
@@ -300,8 +305,9 @@ class YamlProcessingSequenceAnalyzerTest {
     @DisplayName("Test 6: Empty YAML - no items")
     void testEmptyYaml() {
         String yaml = """
-            name: "Empty YAML"
-            description: "No processing items"
+            metadata:
+              name: "Empty YAML"
+              description: "No processing items"
             """;
 
         ProcessingSequenceReport report = analyzer.analyzeYamlString(yaml, "test6");
@@ -315,7 +321,8 @@ class YamlProcessingSequenceAnalyzerTest {
     @DisplayName("Test 7: All items grouped - nothing executes at definition position")
     void testAllItemsGrouped() {
         String yaml = """
-            name: "All Items Grouped"
+            metadata:
+              name: "All Items Grouped"
 
             enrichments:
               - id: "grouped-1"
@@ -361,7 +368,8 @@ class YamlProcessingSequenceAnalyzerTest {
     @DisplayName("Test 8: Numbered suffixes preserved in document order")
     void testNumberedSuffixes() {
         String yaml = """
-            name: "Numbered Suffixes"
+            metadata:
+              name: "Numbered Suffixes"
 
             enrichments:
               - id: "enrich-1"
@@ -429,7 +437,8 @@ class YamlProcessingSequenceAnalyzerTest {
     @DisplayName("Test 10: toString returns formatted report")
     void testToString() {
         String yaml = """
-            name: "Test ToString"
+            metadata:
+              name: "Test ToString"
 
             enrichments:
               - id: "enrich-1"

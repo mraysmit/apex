@@ -20,7 +20,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.config.yaml.YamlMetadataValidator;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.config.yaml.YamlValidationResult;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,7 +36,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -862,6 +867,43 @@ public class PlaygroundExamplesValidationTest {
             assertNotNull(engine, "RulesEngine should be created successfully");
 
             logger.info("✓ json-transformation test passed (configuration validated)");
+        }
+    }
+
+    // ========================================================================
+    // GLOBAL VALIDATION
+    // ========================================================================
+    @Nested
+    @DisplayName("Global Validation")
+    class GlobalValidation {
+
+        @Test
+        @DisplayName("Validate all YAML files in examples folder")
+        void validateAllYamlFiles() throws IOException {
+            Path examplesPath = resolveExamplePath("");
+            logger.info("Scanning for YAML files in: {}", examplesPath);
+
+            // Use null base path so we can pass absolute paths
+            YamlMetadataValidator validator = new YamlMetadataValidator(null);
+            List<String> errors = new ArrayList<>();
+
+            try (Stream<Path> paths = Files.walk(examplesPath)) {
+                paths.filter(Files::isRegularFile)
+                     .filter(p -> p.toString().endsWith(".yaml") || p.toString().endsWith(".yml"))
+                     .forEach(path -> {
+                         logger.debug("Validating: {}", path);
+                         YamlValidationResult result = validator.validateFile(path.toAbsolutePath().toString());
+                         if (!result.isValid()) {
+                             errors.add("Validation failed for " + examplesPath.relativize(path) + ": " + result.getErrors());
+                         }
+                     });
+            }
+
+            if (!errors.isEmpty()) {
+                fail("Validation failed for " + errors.size() + " files:\n" + String.join("\n", errors));
+            }
+            
+            logger.info("✓ All YAML files validated successfully");
         }
     }
 }
