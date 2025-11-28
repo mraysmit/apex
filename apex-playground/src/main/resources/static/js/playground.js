@@ -569,6 +569,7 @@ function displayTraceResults(trace) {
     trace.forEach(step => {
         const statusClass = step.status === 'SUCCESS' ? 'text-success' : 'text-danger';
         const iconClass = step.status === 'SUCCESS' ? 'fa-check-circle' : 'fa-times-circle';
+        const statusText = step.status === 'SUCCESS' ? 'Step Processed' : step.status;
         const duration = step.durationMs >= 0 ? `${step.durationMs}ms` : '';
         
         // Determine indentation based on type
@@ -596,7 +597,7 @@ function displayTraceResults(trace) {
                     </div>
                     <div class="text-end">
                         <span class="me-3 ${statusClass}">
-                            <i class="fas ${iconClass} me-1"></i>${step.status}
+                            <i class="fas ${iconClass} me-1"></i>${statusText}
                         </span>
                         <small class="text-muted" style="min-width: 50px; display: inline-block;">${duration}</small>
                     </div>
