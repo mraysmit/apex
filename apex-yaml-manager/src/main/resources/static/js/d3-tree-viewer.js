@@ -1951,19 +1951,31 @@ async function loadListViewData() {
 function extractFilesFromTree(node, files = []) {
     if (!node) return files;
 
+    // Use contentSummary if available, otherwise fallback to node properties
+    const metadata = node.contentSummary || {};
+
     // Add current node
     files.push({
         filename: node.name || 'Unknown',
         path: node.path || '',
-        id: node.metadata?.id || '',
-        name: node.metadata?.name || '',
-        type: node.type || 'unknown',
-        author: node.metadata?.author || '',
-        description: node.metadata?.description || '',
-        version: node.metadata?.version || '',
+        contentSummary: node.contentSummary || {}, // Preserve contentSummary for detail view
+        circularReference: node.circularReference, // Preserve circular reference message
+        id: metadata.id || node.id || '',
+        name: metadata.name || node.name || '',
+        type: metadata.fileType || node.type || 'unknown',
+        author: metadata.author || node.author || '',
+        description: metadata.description || '',
+        version: metadata.version || node.version || '',
+        businessDomain: metadata.businessDomain || '',
+        owner: metadata.owner || '',
         rules: node.rules || 0,
         enrichments: node.enrichments || 0,
-        circular: node.circular || false
+        circular: node.circular || false,
+        depth: node.depth,
+        height: node.height,
+        childCount: node.childCount,
+        descendantCount: node.descendantCount,
+        lastModified: node.lastModified
     });
 
     // Recursively process children
@@ -2036,6 +2048,16 @@ function createTableRow(file) {
     typeBadge.textContent = file.type;
     typeCell.appendChild(typeBadge);
     row.appendChild(typeCell);
+
+    // Business Domain
+    const domainCell = document.createElement('td');
+    domainCell.textContent = file.businessDomain || '-';
+    row.appendChild(domainCell);
+
+    // Owner
+    const ownerCell = document.createElement('td');
+    ownerCell.textContent = file.owner || '-';
+    row.appendChild(ownerCell);
 
     // Author
     const authorCell = document.createElement('td');

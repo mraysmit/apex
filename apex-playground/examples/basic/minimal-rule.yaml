@@ -4,7 +4,7 @@ metadata:
   name: "Minimal Rule"
   type: "rule-config"
   version: "1.0.0"
-  description: "Minimal rule example"
+  description: "Minimal rule example x"
   author: "APEX Demo"
 
 rules:
@@ -13,3 +13,4 @@ rules:
     condition: "#age >= 18"
     message: "Must be 18 or older"
     enabled: true
+

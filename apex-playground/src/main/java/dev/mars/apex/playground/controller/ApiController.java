@@ -209,6 +209,76 @@ public class ApiController {
     }
 
     /**
+     * Save YAML content for a specific example.
+     */
+    @PostMapping("/examples/{category}/{name}/yaml")
+    @Operation(
+        summary = "Save example YAML",
+        description = "Save YAML configuration for a specific example."
+    )
+    @ApiResponse(responseCode = "200", description = "Example YAML saved successfully")
+    @ApiResponse(responseCode = "500", description = "Failed to save example")
+    public ResponseEntity<Map<String, Object>> saveExampleYaml(
+            @PathVariable String category,
+            @PathVariable String name,
+            @RequestBody String content) {
+        logger.info("Saving example YAML: {}/{}", category, name);
+
+        try {
+            exampleService.saveExampleYaml(category, name, content);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Example YAML saved successfully");
+            response.put("timestamp", System.currentTimeMillis());
+            
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            logger.error("Error saving example YAML {}/{}", category, name, e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Failed to save example: " + e.getMessage());
+            return ResponseEntity.status(500).body(errorResponse);
+        }
+    }
+
+    /**
+     * Save data content for a specific example.
+     */
+    @PostMapping("/examples/{category}/{name}/data")
+    @Operation(
+        summary = "Save example data",
+        description = "Save data configuration for a specific example."
+    )
+    @ApiResponse(responseCode = "200", description = "Example data saved successfully")
+    @ApiResponse(responseCode = "500", description = "Failed to save example")
+    public ResponseEntity<Map<String, Object>> saveExampleData(
+            @PathVariable String category,
+            @PathVariable String name,
+            @RequestBody String content) {
+        logger.info("Saving example data: {}/{}", category, name);
+
+        try {
+            exampleService.saveExampleData(category, name, content);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Example data saved successfully");
+            response.put("timestamp", System.currentTimeMillis());
+            
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            logger.error("Error saving example data {}/{}", category, name, e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "Failed to save example: " + e.getMessage());
+            return ResponseEntity.status(500).body(errorResponse);
+        }
+    }
+
+    /**
      * Upload data file.
      */
     @PostMapping("/upload/data")

@@ -89,8 +89,11 @@ public class ExampleService {
         try {
             String yamlContent = loadExampleFile(category, name + ".yaml");
             
+            String displayName = name.replace("-", " ");
+            displayName = displayName.substring(0, 1).toUpperCase() + displayName.substring(1);
+
             Map<String, Object> example = new HashMap<>();
-            example.put("name", name);
+            example.put("name", displayName);
             example.put("category", category);
             example.put("yaml", yamlContent);
             example.put("sampleData", getSampleDataForExample(category, name));
@@ -103,6 +106,46 @@ public class ExampleService {
             errorExample.put("error", "Failed to load example: " + e.getMessage());
             return errorExample;
         }
+    }
+
+    /**
+     * Save YAML content for a specific example.
+     */
+    public void saveExampleYaml(String category, String name, String content) throws IOException {
+        java.io.File file;
+        if ("uncategorized".equals(category)) {
+            file = new java.io.File(EXAMPLES_DIR, name + ".yaml");
+        } else {
+            file = new java.io.File(new java.io.File(EXAMPLES_DIR, category), name + ".yaml");
+        }
+        
+        // Ensure parent directory exists
+        if (!file.getParentFile().exists()) {
+            file.getParentFile().mkdirs();
+        }
+        
+        java.nio.file.Files.writeString(file.toPath(), content, StandardCharsets.UTF_8);
+        logger.info("Saved YAML example to {}", file.getAbsolutePath());
+    }
+
+    /**
+     * Save data content for a specific example.
+     */
+    public void saveExampleData(String category, String name, String content) throws IOException {
+        java.io.File file;
+        if ("uncategorized".equals(category)) {
+            file = new java.io.File(EXAMPLES_DIR, name + ".json");
+        } else {
+            file = new java.io.File(new java.io.File(EXAMPLES_DIR, category), name + ".json");
+        }
+        
+        // Ensure parent directory exists
+        if (!file.getParentFile().exists()) {
+            file.getParentFile().mkdirs();
+        }
+        
+        java.nio.file.Files.writeString(file.toPath(), content, StandardCharsets.UTF_8);
+        logger.info("Saved data example to {}", file.getAbsolutePath());
     }
 
     private List<Map<String, Object>> getExamplesFromDir(java.io.File dir) {

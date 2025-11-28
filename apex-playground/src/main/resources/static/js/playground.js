@@ -8,12 +8,13 @@
 // Global variables
 let sourceDataEditor, yamlRulesEditor;
 let currentDataFormat = 'JSON';
+let currentExample = null;
 
 // Initialize playground when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     initializePlayground();
     setupEventListeners();
-    loadDefaultExample();
+    // loadDefaultExample(); // Disabled to start with empty UI
 });
 
 /**
@@ -66,6 +67,10 @@ function setupEventListeners() {
     document.getElementById('uploadYamlBtn').addEventListener('click', () => {
         document.getElementById('yamlFileInput').click();
     });
+
+    // Save buttons
+    document.getElementById('saveDataBtn').addEventListener('click', saveData);
+    document.getElementById('saveYamlBtn').addEventListener('click', saveYaml);
 
     // File input change handlers
     document.getElementById('dataFileInput').addEventListener('change', handleDataFileUpload);
@@ -236,6 +241,9 @@ function resetPlayground() {
     // Clear file name displays
     clearSourceDataFileName();
     clearYamlRulesFileName();
+    
+    // Clear current example context
+    currentExample = null;
 }
 
 /**
@@ -323,6 +331,9 @@ function showExampleSelectionDialog(examplesData) {
 
     document.body.appendChild(modal);
 
+    // Attach listeners to example items
+    attachExampleListeners();
+
     // Add event listeners
     modal.querySelector('.example-modal-close').addEventListener('click', () => {
         document.body.removeChild(modal);
@@ -387,19 +398,21 @@ function createExampleCategoriesHTML(examplesData) {
 
     html += '</div>';
 
-    // Add event listeners for example selection
-    setTimeout(() => {
-        document.querySelectorAll('.example-item:not(.disabled)').forEach(item => {
-            item.addEventListener('click', () => {
-                const category = item.dataset.category;
-                const id = item.dataset.id;
-                loadSpecificExample(category, id);
-                document.querySelector('.example-modal').remove();
-            });
-        });
-    }, 100);
-
     return html;
+}
+
+/**
+ * Attach event listeners to example items
+ */
+function attachExampleListeners() {
+    document.querySelectorAll('.example-item:not(.disabled)').forEach(item => {
+        item.addEventListener('click', () => {
+            const category = item.dataset.category;
+            const id = item.dataset.id;
+            loadSpecificExample(category, id);
+            document.querySelector('.example-modal').remove();
+        });
+    });
 }
 
 /**
@@ -418,6 +431,13 @@ async function loadSpecificExample(category, id) {
 
         // Clear existing content before loading new example
         resetPlayground();
+        
+        // Set current example context
+        currentExample = {
+            category: category,
+            id: id,
+            name: example.name
+        };
 
         // Load the example data
         if (example.yaml) {
@@ -460,6 +480,100 @@ function saveConfiguration() {
     URL.revokeObjectURL(url);
     
     showAlert('Configuration saved successfully!', 'success');
+}
+
+/**
+ * Save source data to file or server
+ */
+async function saveData() {
+    const content = sourceDataEditor.value;
+    if (!content) {
+        showAlert('No data to save.', 'warning');
+        return;
+    }
+    
+    // If loaded from example, save back to server
+    if (currentExample) {
+        try {
+            const response = await fetch(`${window.playgroundConfig.apiBaseUrl}/examples/${currentExample.category}/${currentExample.id}/data`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain',
+                },
+                body: content
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showAlert(`Example "${currentExample.name}" data saved successfully!`, 'success');
+            } else {
+                showAlert(`Failed to save example data: ${result.error}`, 'danger');
+            }
+        } catch (error) {
+            console.error('Error saving example data:', error);
+            showAlert(`Error saving example data: ${error.message}`, 'danger');
+        }
+        return;
+    }
+    
+    const extension = currentDataFormat ? currentDataFormat.toLowerCase() : 'txt';
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `data.${extension}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+/**
+ * Save YAML rules to file or server
+ */
+async function saveYaml() {
+    const content = yamlRulesEditor.value;
+    if (!content) {
+        showAlert('No YAML rules to save.', 'warning');
+        return;
+    }
+    
+    // If loaded from example, save back to server
+    if (currentExample) {
+        try {
+            const response = await fetch(`${window.playgroundConfig.apiBaseUrl}/examples/${currentExample.category}/${currentExample.id}/yaml`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain',
+                },
+                body: content
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showAlert(`Example "${currentExample.name}" YAML saved successfully!`, 'success');
+            } else {
+                showAlert(`Failed to save example: ${result.error}`, 'danger');
+            }
+        } catch (error) {
+            console.error('Error saving example:', error);
+            showAlert(`Error saving example: ${error.message}`, 'danger');
+        }
+        return;
+    }
+    
+    // Otherwise download as file
+    const blob = new Blob([content], { type: 'text/yaml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'rules.yaml';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }
 
 /**

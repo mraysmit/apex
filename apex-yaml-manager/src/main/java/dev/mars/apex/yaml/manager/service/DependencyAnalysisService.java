@@ -501,6 +501,12 @@ public class DependencyAnalysisService {
                         summary.setName(tempSummary.getName());
                         summary.setDescription(tempSummary.getDescription());
                         summary.setVersion(tempSummary.getVersion());
+                        summary.setAuthor(tempSummary.getAuthor());
+                        summary.setBusinessDomain(tempSummary.getBusinessDomain());
+                        summary.setOwner(tempSummary.getOwner());
+                        summary.setTags(tempSummary.getTags());
+                        summary.setCategories(tempSummary.getCategories());
+                        summary.setDependencies(tempSummary.getDependencies());
                         summary.setCreatedDate(tempSummary.getCreatedDate());
                         summary.setLastModifiedDate(tempSummary.getLastModifiedDate());
                         summary.setRuleCount(tempSummary.getRuleCount());

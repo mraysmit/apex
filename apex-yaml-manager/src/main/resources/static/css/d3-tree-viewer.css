@@ -637,6 +637,10 @@ body {
     overflow: hidden !important; /* Hide overflow, let children handle scrolling */
     display: flex !important;
     flex-direction: column !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    border: none !important;
 }
 
 .content-accordion-content.collapsed {
@@ -646,8 +650,10 @@ body {
 .file-metadata {
     padding: 15px;
     background-color: #2d3748;
-    border-left: 4px solid #4299e1;
     height: 100% !important;
+    width: 100%;
+    margin: 0;
+    border: none;
     box-sizing: border-box;
     overflow: auto;
 }
