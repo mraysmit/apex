@@ -22,15 +22,65 @@ document.addEventListener('DOMContentLoaded', function() {
  */
 function initializePlayground() {
     console.log('Initializing APEX Playground...');
-    
+
     // Initialize editors (placeholder - will be enhanced with CodeMirror in Phase 3)
     sourceDataEditor = document.getElementById('sourceDataEditor');
     yamlRulesEditor = document.getElementById('yamlRulesEditor');
-    
+
     // Set initial data format
     updateDataFormat('JSON');
-    
+
+    // Check for data transferred from Visual Editor
+    loadTransferredData();
+
     console.log('Playground initialized successfully');
+}
+
+/**
+ * Load data transferred from the Visual Editor via localStorage
+ */
+function loadTransferredData() {
+    try {
+        const transferDataStr = localStorage.getItem('apex_visual_editor_transfer');
+        if (!transferDataStr) {
+            return;
+        }
+
+        const transferData = JSON.parse(transferDataStr);
+
+        // Check if data is recent (within last 30 seconds) to avoid loading stale data
+        const age = Date.now() - transferData.timestamp;
+        if (age > 30000) {
+            console.log('Transfer data is stale, ignoring');
+            localStorage.removeItem('apex_visual_editor_transfer');
+            return;
+        }
+
+        // Load YAML into the rules editor
+        if (transferData.yaml && yamlRulesEditor) {
+            yamlRulesEditor.value = transferData.yaml;
+            document.getElementById('yamlRulesFileName').textContent = 'From Visual Editor';
+            console.log('Loaded YAML from Visual Editor');
+        }
+
+        // Load JSON into the source data editor
+        if (transferData.json && sourceDataEditor) {
+            sourceDataEditor.value = transferData.json;
+            document.getElementById('sourceDataFileName').textContent = 'From Visual Editor';
+            // Ensure JSON format is selected
+            document.getElementById('jsonFormat').checked = true;
+            updateDataFormat('JSON');
+            console.log('Loaded JSON data from Visual Editor');
+        }
+
+        // Clear the transfer data so it's not loaded again on refresh
+        localStorage.removeItem('apex_visual_editor_transfer');
+
+        console.log('Successfully loaded data from Visual Editor');
+    } catch (e) {
+        console.error('Error loading transferred data:', e);
+        localStorage.removeItem('apex_visual_editor_transfer');
+    }
 }
 
 /**
@@ -146,15 +196,16 @@ async function processData() {
 
 /**
  * Validate YAML configuration
+ * @returns {Promise<{valid: boolean, message: string}>} Validation result
  */
 async function validateYaml() {
     const yamlRules = yamlRulesEditor.value.trim();
-    
+
     if (!yamlRules) {
         showAlert('Please provide YAML rules configuration to validate.', 'warning');
-        return;
+        return { valid: false, message: 'No YAML content provided' };
     }
-    
+
     try {
         const response = await fetch(window.playgroundConfig.apiBaseUrl + '/validate', {
             method: 'POST',
@@ -165,13 +216,15 @@ async function validateYaml() {
                 yamlContent: yamlRules
             })
         });
-        
+
         const result = await response.json();
         updateYamlStatus(result.valid, result.message);
-        
+        return result;
+
     } catch (error) {
         console.error('Validation error:', error);
         updateYamlStatus(false, 'Validation error: ' + error.message);
+        return { valid: false, message: 'Validation error: ' + error.message };
     }
 }
 

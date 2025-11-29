@@ -562,5 +562,333 @@ class VisualEditorUITest {
         // Clean up
         js.executeScript("localStorage.removeItem('apex_visual_editor_templates');");
     }
-}
 
+    @Test
+    @Order(18)
+    @DisplayName("Accordion sections exist and YAML section is expanded by default")
+    void testAccordionSectionsExist() {
+        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        // Check YAML section exists and is expanded
+        Boolean yamlSectionExpanded = (Boolean) js.executeScript(
+            "var section = document.getElementById('yamlSection');" +
+            "return section && section.classList.contains('expanded');"
+        );
+        assertTrue(yamlSectionExpanded, "YAML section should exist and be expanded by default");
+
+        // Check Eval Data section exists and is NOT expanded
+        Boolean evalSectionExists = (Boolean) js.executeScript(
+            "var section = document.getElementById('evalDataSection');" +
+            "return section && !section.classList.contains('expanded');"
+        );
+        assertTrue(evalSectionExists, "Eval Data section should exist and be collapsed by default");
+    }
+
+    @Test
+    @Order(19)
+    @DisplayName("Accordion toggle function works")
+    void testAccordionToggle() {
+        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        // Toggle YAML section (should collapse it)
+        js.executeScript("toggleAccordion('yamlSection');");
+        try { Thread.sleep(100); } catch (InterruptedException e) {}
+
+        Boolean yamlCollapsed = (Boolean) js.executeScript(
+            "return !document.getElementById('yamlSection').classList.contains('expanded');"
+        );
+        assertTrue(yamlCollapsed, "YAML section should be collapsed after toggle");
+
+        // Toggle Eval Data section (should expand it)
+        js.executeScript("toggleAccordion('evalDataSection');");
+        try { Thread.sleep(100); } catch (InterruptedException e) {}
+
+        Boolean evalExpanded = (Boolean) js.executeScript(
+            "return document.getElementById('evalDataSection').classList.contains('expanded');"
+        );
+        assertTrue(evalExpanded, "Eval Data section should be expanded after toggle");
+    }
+
+    @Test
+    @Order(20)
+    @DisplayName("Evaluation data functions are defined")
+    void testEvalDataFunctionsDefined() {
+        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean switchTabDefined = (Boolean) js.executeScript("return typeof switchEvalTab === 'function';");
+        Boolean clearDefined = (Boolean) js.executeScript("return typeof clearEvalData === 'function';");
+        Boolean formatDefined = (Boolean) js.executeScript("return typeof formatEvalJson === 'function';");
+        Boolean getJsonDefined = (Boolean) js.executeScript("return typeof getEvalDataAsJson === 'function';");
+        Boolean getEvalJsonFromEditorDefined = (Boolean) js.executeScript("return typeof getEvalJsonFromEditor === 'function';");
+        Boolean renderTreeDefined = (Boolean) js.executeScript("return typeof renderJsonTree === 'function';");
+
+        assertTrue(switchTabDefined, "switchEvalTab should be defined");
+        assertTrue(clearDefined, "clearEvalData should be defined");
+        assertTrue(formatDefined, "formatEvalJson should be defined");
+        assertTrue(getJsonDefined, "getEvalDataAsJson should be defined");
+        assertTrue(getEvalJsonFromEditorDefined, "getEvalJsonFromEditor should be defined");
+        assertTrue(renderTreeDefined, "renderJsonTree should be defined");
+    }
+
+    @Test
+    @Order(21)
+    @DisplayName("JSON editor accepts and validates JSON")
+    void testJsonEditorValidation() {
+        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        // Set valid JSON in editor
+        js.executeScript(
+            "document.getElementById('evalJsonEditor').value = '{\"name\": \"test\", \"value\": 123}';" +
+            "validateAndParseJson();"
+        );
+        try { Thread.sleep(100); } catch (InterruptedException e) {}
+
+        // Error should be hidden
+        Boolean errorHidden = (Boolean) js.executeScript(
+            "return document.getElementById('evalJsonError').style.display === 'none';"
+        );
+        assertTrue(errorHidden, "Error should be hidden for valid JSON");
+
+        // Set invalid JSON
+        js.executeScript(
+            "document.getElementById('evalJsonEditor').value = '{invalid json}';" +
+            "validateAndParseJson();"
+        );
+        try { Thread.sleep(100); } catch (InterruptedException e) {}
+
+        // Error should be visible
+        Boolean errorVisible = (Boolean) js.executeScript(
+            "return document.getElementById('evalJsonError').style.display !== 'none';"
+        );
+        assertTrue(errorVisible, "Error should be visible for invalid JSON");
+    }
+
+    @Test
+    @Order(22)
+    @DisplayName("JSON can be formatted in editor")
+    void testJsonFormatting() {
+        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        // Set compact JSON
+        js.executeScript(
+            "document.getElementById('evalJsonEditor').value = '{\"name\":\"test\",\"nested\":{\"a\":1,\"b\":2}}';"
+        );
+
+        // Format it
+        js.executeScript("formatEvalJson();");
+        try { Thread.sleep(100); } catch (InterruptedException e) {}
+
+        // Check it's now formatted (contains newlines)
+        String formatted = (String) js.executeScript("return document.getElementById('evalJsonEditor').value;");
+        assertTrue(formatted.contains("\n"), "Formatted JSON should contain newlines");
+        assertTrue(formatted.contains("  "), "Formatted JSON should contain indentation");
+    }
+
+    @Test
+    @Order(23)
+    @DisplayName("Tree view renders nested JSON")
+    void testTreeViewRendering() {
+        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        // Set nested JSON
+        js.executeScript(
+            "document.getElementById('evalJsonEditor').value = '{\"trade\": {\"id\": \"TRD-001\", \"amount\": 1000}}';"
+        );
+
+        // Update tree view
+        js.executeScript("updateTreeView();");
+        try { Thread.sleep(100); } catch (InterruptedException e) {}
+
+        // Check tree contains expected elements
+        String treeHtml = (String) js.executeScript(
+            "return document.getElementById('evalTreeContainer').innerHTML;"
+        );
+        assertTrue(treeHtml.contains("trade"), "Tree should contain 'trade' key");
+        assertTrue(treeHtml.contains("TRD-001"), "Tree should contain 'TRD-001' value");
+        assertTrue(treeHtml.contains("1000"), "Tree should contain '1000' value");
+    }
+
+    @Test
+    @Order(24)
+    @DisplayName("Eval data tabs exist and can be switched")
+    void testEvalDataTabs() {
+        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        // Expand eval section first
+        js.executeScript("toggleAccordion('evalDataSection');");
+        try { Thread.sleep(100); } catch (InterruptedException e) {}
+
+        // Check tabs exist (Bootstrap nav-link tabs)
+        Long tabCount = (Long) js.executeScript("return document.querySelectorAll('.nav-tabs-dark .nav-link').length;");
+        assertEquals(3L, tabCount, "Should have 3 tabs (Editor, Tree, Files)");
+
+        // Check editor panel is active by default
+        Boolean editorActive = (Boolean) js.executeScript(
+            "return document.getElementById('evalEditorPanel').classList.contains('active');"
+        );
+        assertTrue(editorActive, "Editor panel should be active by default");
+
+        // Check JSON editor exists
+        Boolean editorExists = (Boolean) js.executeScript(
+            "return document.getElementById('evalJsonEditor') !== null;"
+        );
+        assertTrue(editorExists, "JSON editor textarea should exist");
+    }
+
+    @Test
+    @Order(25)
+    @DisplayName("File drop zone exists")
+    void testFileDropZoneExists() {
+        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean dropZoneExists = (Boolean) js.executeScript(
+            "return document.getElementById('evalFileDrop') !== null;"
+        );
+        assertTrue(dropZoneExists, "File drop zone should exist");
+
+        Boolean fileInputExists = (Boolean) js.executeScript(
+            "return document.getElementById('evalFileInput') !== null;"
+        );
+        assertTrue(fileInputExists, "File input should exist");
+    }
+
+    @Test
+    @Order(26)
+    @DisplayName("extractJsonPaths extracts paths from nested JSON")
+    void testExtractJsonPaths() {
+        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        // Test with nested JSON
+        String paths = (String) js.executeScript(
+            "var data = {" +
+            "  trade: {" +
+            "    id: 'TRD-001'," +
+            "    currency: 'USD'," +
+            "    amount: 1000," +
+            "    counterparty: {" +
+            "      id: 'CP-123'," +
+            "      name: 'Acme Corp'" +
+            "    }" +
+            "  }" +
+            "};" +
+            "var paths = extractJsonPaths(data, '');" +
+            "return paths.join(',');"
+        );
+
+        assertTrue(paths.contains("trade.id"), "Should extract trade.id");
+        assertTrue(paths.contains("trade.currency"), "Should extract trade.currency");
+        assertTrue(paths.contains("trade.amount"), "Should extract trade.amount");
+        assertTrue(paths.contains("trade.counterparty.id"), "Should extract trade.counterparty.id");
+        assertTrue(paths.contains("trade.counterparty.name"), "Should extract trade.counterparty.name");
+    }
+
+    @Test
+    @Order(27)
+    @DisplayName("extractJsonPaths handles arrays with [*] notation")
+    void testExtractJsonPathsWithArrays() {
+        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        // Test with arrays
+        String paths = (String) js.executeScript(
+            "var data = {" +
+            "  trades: [" +
+            "    { id: 'TRD-001', amount: 1000 }," +
+            "    { id: 'TRD-002', amount: 2000 }" +
+            "  ]" +
+            "};" +
+            "var paths = extractJsonPaths(data, '');" +
+            "return paths.join(',');"
+        );
+
+        assertTrue(paths.contains("trades[*].id"), "Should extract trades[*].id");
+        assertTrue(paths.contains("trades[*].amount"), "Should extract trades[*].amount");
+    }
+
+    @Test
+    @Order(28)
+    @DisplayName("loadFieldsIntoEditor populates loadedFieldPaths")
+    void testLoadFieldsIntoEditor() {
+        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        // Set JSON in editor
+        js.executeScript(
+            "document.getElementById('evalJsonEditor').value = JSON.stringify({" +
+            "  order: { id: 'ORD-001', total: 500, items: [{ sku: 'ABC', qty: 2 }] }" +
+            "});"
+        );
+
+        // Load fields (uses toast notifications, no alert to dismiss)
+        js.executeScript("loadFieldsIntoEditor();");
+        try { Thread.sleep(100); } catch (InterruptedException e) {}
+
+        // Check loaded paths
+        String paths = (String) js.executeScript("return getLoadedFieldPaths().join(',');");
+        assertTrue(paths.contains("order.id"), "Should have order.id");
+        assertTrue(paths.contains("order.total"), "Should have order.total");
+        assertTrue(paths.contains("order.items[*].sku"), "Should have order.items[*].sku");
+        assertTrue(paths.contains("order.items[*].qty"), "Should have order.items[*].qty");
+    }
+
+    @Test
+    @Order(29)
+    @DisplayName("getFieldOptions returns loaded paths for dropdown")
+    void testGetFieldOptions() {
+        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        // Initially should return no fields message
+        String initialOptions = (String) js.executeScript(
+            "var opts = getFieldOptions();" +
+            "return opts[0][0];"
+        );
+        assertEquals("(no fields loaded)", initialOptions, "Should show no fields message initially");
+
+        // Load some fields (uses toast notifications, no alert to dismiss)
+        js.executeScript(
+            "document.getElementById('evalJsonEditor').value = '{\"name\": \"test\", \"value\": 123}';" +
+            "loadFieldsIntoEditor();"
+        );
+        try { Thread.sleep(100); } catch (InterruptedException e) {}
+
+        // Now should return actual options
+        Long optionCount = (Long) js.executeScript("return getFieldOptions().length;");
+        assertEquals(2L, optionCount, "Should have 2 field options (name, value)");
+    }
+
+    @Test
+    @Order(30)
+    @DisplayName("apex_field_ref block uses dropdown")
+    void testFieldRefBlockHasDropdown() {
+        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        // Check that apex_field_ref block is defined
+        Boolean blockDefined = (Boolean) js.executeScript(
+            "return typeof Blockly.Blocks['apex_field_ref'] !== 'undefined';"
+        );
+        assertTrue(blockDefined, "apex_field_ref block should be defined");
+
+        // Create a field ref block and check it has FIELD dropdown
+        Boolean hasDropdown = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_field_ref');" +
+            "block.initSvg(); block.render();" +
+            "var field = block.getField('FIELD');" +
+            "var isDropdown = field instanceof Blockly.FieldDropdown;" +
+            "block.dispose();" +
+            "return isDropdown;"
+        );
+        assertTrue(hasDropdown, "FIELD should be a dropdown");
+    }
+}

@@ -1,37 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
     <head>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>APEX Visual Rule Editor</title>
+
+        <!-- Bootstrap CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+        <!-- Blockly -->
         <script src="https://unpkg.com/blockly/blockly.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+
         <!-- Prism.js for YAML syntax highlighting -->
         <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
         <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+
         <style>
             body {
-                background-color: #f5f5f5;
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                 margin: 0;
                 display: flex;
                 flex-direction: column;
                 height: 100vh;
-            }
-
-            header {
-                background-color: #2c3e50;
-                color: white;
-                padding: 1rem;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-
-            h1 {
-                margin: 0;
-                font-size: 1.5rem;
+                overflow: hidden;
             }
 
             #main-container {
@@ -49,10 +42,92 @@
                 flex: 1;
                 background-color: #1e1e1e;
                 color: #d4d4d4;
-                padding: 1rem;
                 overflow: auto;
                 border-left: 1px solid #ccc;
                 font-family: 'Consolas', 'Monaco', monospace;
+                display: flex;
+                flex-direction: column;
+            }
+
+            /* Accordion Styles */
+            .accordion-section {
+                display: flex;
+                flex-direction: column;
+                border-bottom: 1px solid #3a3a3a;
+            }
+
+            .accordion-section.expanded {
+                flex: 1;
+            }
+
+            .accordion-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.75rem 1rem;
+                background-color: #2d2d2d;
+                cursor: pointer;
+                user-select: none;
+            }
+
+            .accordion-header:hover {
+                background-color: #383838;
+            }
+
+            .accordion-header .btn {
+                position: relative;
+                z-index: 10;
+            }
+
+            .accordion-header .btn-success {
+                background-color: #198754 !important;
+                border-color: #198754 !important;
+                color: #fff !important;
+            }
+
+            .accordion-header .btn-success:hover {
+                background-color: #157347 !important;
+                border-color: #146c43 !important;
+                color: #fff !important;
+            }
+
+            .accordion-header .btn-outline-light {
+                border-color: #f8f9fa !important;
+                color: #f8f9fa !important;
+                background-color: transparent !important;
+            }
+
+            .accordion-header .btn-outline-light:hover {
+                background-color: #f8f9fa !important;
+                border-color: #f8f9fa !important;
+                color: #000 !important;
+            }
+
+            .accordion-header h2 {
+                margin: 0;
+                font-size: 1rem;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .accordion-header .accordion-arrow {
+                transition: transform 0.2s ease;
+                font-size: 0.75rem;
+            }
+
+            .accordion-section.expanded .accordion-arrow {
+                transform: rotate(90deg);
+            }
+
+            .accordion-content {
+                display: none;
+                flex: 1;
+                overflow: auto;
+                padding: 0.75rem 1rem;
+            }
+
+            .accordion-section.expanded .accordion-content {
                 display: flex;
                 flex-direction: column;
             }
@@ -64,6 +139,166 @@
                 font-size: 14px;
                 line-height: 1.6;
                 overflow: auto;
+            }
+
+            #evalDataOutput {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            /* Dark theme nav tabs */
+            .nav-tabs-dark {
+                border-bottom-color: #3a3a3a;
+            }
+
+            .nav-tabs-dark .nav-link {
+                color: #888;
+                border: none;
+                border-bottom: 2px solid transparent;
+                background: transparent;
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+
+            .nav-tabs-dark .nav-link:hover {
+                color: #d4d4d4;
+                border-color: transparent;
+            }
+
+            .nav-tabs-dark .nav-link.active {
+                color: #d4d4d4;
+                background: transparent;
+                border-color: transparent;
+                border-bottom-color: #0d6efd;
+            }
+
+            .eval-data-panel {
+                display: none;
+                flex: 1;
+                overflow: auto;
+            }
+
+            .eval-data-panel.active {
+                display: flex;
+                flex-direction: column;
+            }
+
+            #evalJsonEditor {
+                flex: 1;
+                min-height: 200px;
+                background: #1a1a1a;
+                border: 1px solid #3a3a3a;
+                border-radius: 4px;
+                font-family: 'Courier New', monospace;
+                font-size: 13px;
+                color: #d4d4d4;
+                padding: 0.5rem;
+                resize: none;
+                line-height: 1.5;
+            }
+
+            #evalJsonEditor:focus {
+                outline: none;
+                border-color: #3498db;
+            }
+
+            .eval-tree-container {
+                flex: 1;
+                overflow: auto;
+                font-family: 'Courier New', monospace;
+                font-size: 13px;
+            }
+
+            .eval-tree-node {
+                padding-left: 1rem;
+            }
+
+            .eval-tree-key {
+                color: #9cdcfe;
+            }
+
+            .eval-tree-string {
+                color: #ce9178;
+            }
+
+            .eval-tree-number {
+                color: #b5cea8;
+            }
+
+            .eval-tree-boolean {
+                color: #569cd6;
+            }
+
+            .eval-tree-null {
+                color: #569cd6;
+            }
+
+            .eval-tree-toggle {
+                cursor: pointer;
+                user-select: none;
+                color: #888;
+                margin-right: 0.25rem;
+            }
+
+            .eval-tree-toggle:hover {
+                color: #d4d4d4;
+            }
+
+            .eval-file-drop {
+                border: 2px dashed #3a3a3a;
+                border-radius: 8px;
+                padding: 2rem;
+                text-align: center;
+                color: #888;
+                margin-bottom: 0.5rem;
+                transition: all 0.2s;
+            }
+
+            .eval-file-drop.dragover {
+                border-color: #3498db;
+                background: rgba(52, 152, 219, 0.1);
+                color: #d4d4d4;
+            }
+
+            .eval-file-list {
+                flex: 1;
+                overflow: auto;
+            }
+
+            .eval-file-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.5rem;
+                background: #2a2a2a;
+                border-radius: 4px;
+                margin-bottom: 0.25rem;
+            }
+
+            .eval-file-item:hover {
+                background: #333;
+            }
+
+            .eval-file-name {
+                color: #d4d4d4;
+                font-size: 0.9rem;
+            }
+
+            .eval-file-size {
+                color: #888;
+                font-size: 0.8rem;
+                margin-left: 0.5rem;
+            }
+
+            .eval-json-error {
+                color: #e74c3c;
+                font-size: 0.85rem;
+                padding: 0.5rem;
+                background: rgba(231, 76, 60, 0.1);
+                border-radius: 4px;
+                margin-top: 0.5rem;
             }
 
             #yamlOutput pre {
@@ -169,73 +404,166 @@
                 font-style: italic;
             }
 
-            .btn {
-                background-color: #3498db;
-                color: white;
-                border: none;
-                padding: 0.5rem 1rem;
-                cursor: pointer;
-                border-radius: 4px;
-                font-size: 1rem;
-            }
-
-            .btn:hover {
-                background-color: #2980b9;
-            }
-
-            h2 {
+            /* Override h2 in dark panels */
+            #outputDiv h2 {
                 margin-top: 0;
                 color: #ecf0f1;
-                font-size: 1.2rem;
-                border-bottom: 1px solid #555;
-                padding-bottom: 0.5rem;
+                font-size: 1rem;
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+            /* Toast notifications */
+            #toast-container {
+                position: fixed;
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 9999;
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+                pointer-events: none;
+                padding-top: 0.5rem;
+            }
+
+            .toast {
+                background: #2c3e50;
+                color: #ecf0f1;
+                padding: 0.75rem 1rem;
+                border-radius: 6px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                max-width: 500px;
+                min-width: 300px;
+                font-size: 0.9rem;
+                line-height: 1.4;
+                opacity: 0;
+                transform: translateY(-100%);
+                transition: all 0.3s ease;
+                pointer-events: auto;
+                text-align: center;
+            }
+
+            .toast.show {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            .toast.success {
+                border-top: 4px solid #27ae60;
+            }
+
+            .toast.error {
+                border-top: 4px solid #e74c3c;
+            }
+
+            .toast.info {
+                border-top: 4px solid #3498db;
+            }
+
+            .toast.warning {
+                border-top: 4px solid #f39c12;
+            }
+
+            .toast-title {
+                font-weight: bold;
+                margin-bottom: 0.25rem;
+            }
+
+            .toast-message {
+                white-space: pre-wrap;
             }
         </style>
     </head>
 
     <body>
-        <header>
-            <h1>Apex Visual Rule Editor <span style="font-size: 0.8rem; opacity: 0.8;">(Prototype)</span></h1>
-            <div style="display: flex; gap: 0.5rem;">
-                <button class="btn" onclick="openSaveTemplateModal()">Save Template</button>
-                <button class="btn" onclick="openYamlImportModal()">Open in APEX Editor</button>
-                <button class="btn" onclick="downloadYaml()">Download YAML</button>
+        <!-- Toast container -->
+        <div id="toast-container"></div>
+
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">APEX Visual Rule Editor <span class="badge bg-secondary">Prototype</span></a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/playground">Playground</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/help">Visual Editor Help</a>
+                        </li>
+                    </ul>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-success btn-sm" onclick="openInPlayground()">Open in Playground</button>
+                        <button class="btn btn-outline-light btn-sm" onclick="openSaveTemplateModal()">Save Template</button>
+                        <button class="btn btn-outline-light btn-sm" onclick="openYamlImportModal()">Import YAML</button>
+                        <button class="btn btn-outline-light btn-sm" onclick="downloadYaml()">Download YAML</button>
+                    </div>
+                </div>
             </div>
-        </header>
+        </nav>
 
         <!-- YAML Import Modal -->
-        <div id="yamlImportModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;">
-            <div style="background: #2c3e50; padding: 1.5rem; border-radius: 8px; width: 80%; max-width: 800px; max-height: 80vh; display: flex; flex-direction: column;">
-                <h2 style="color: white; margin: 0 0 1rem 0;">Import APEX YAML Configuration</h2>
-                <textarea id="yamlImportInput" placeholder="Paste your APEX YAML configuration here..." style="flex: 1; min-height: 400px; font-family: 'Consolas', 'Monaco', monospace; font-size: 0.9rem; padding: 1rem; border: none; border-radius: 4px; background: #1e1e1e; color: #d4d4d4; resize: none;"></textarea>
-                <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem;">
-                    <button class="btn" style="background-color: #7f8c8d;" onclick="closeYamlImportModal()">Cancel</button>
-                    <button class="btn" onclick="importYamlToBlocks()">Import</button>
+        <div class="modal fade" id="yamlImportModal" tabindex="-1" aria-labelledby="yamlImportModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content bg-dark text-light">
+                    <div class="modal-header border-secondary">
+                        <h5 class="modal-title" id="yamlImportModalLabel">Import APEX YAML Configuration</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <textarea id="yamlImportInput" class="form-control bg-dark text-light font-monospace" placeholder="Paste your APEX YAML configuration here..." style="min-height: 400px;"></textarea>
+                    </div>
+                    <div class="modal-footer border-secondary">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="importYamlToBlocks()">Import</button>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Save Template Modal -->
-        <div id="saveTemplateModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;">
-            <div style="background: #2c3e50; padding: 1.5rem; border-radius: 8px; width: 400px; display: flex; flex-direction: column;">
-                <h2 style="color: white; margin: 0 0 1rem 0;">Save as Template</h2>
-                <p style="color: #bdc3c7; margin: 0 0 1rem 0; font-size: 0.9rem;">Save the current workspace as a reusable template.</p>
-                <input type="text" id="templateNameInput" placeholder="Template name..." style="padding: 0.75rem; border: none; border-radius: 4px; background: #1e1e1e; color: #d4d4d4; font-size: 1rem; margin-bottom: 1rem;">
-                <textarea id="templateDescInput" placeholder="Description (optional)..." style="height: 80px; font-family: inherit; font-size: 0.9rem; padding: 0.75rem; border: none; border-radius: 4px; background: #1e1e1e; color: #d4d4d4; resize: none; margin-bottom: 1rem;"></textarea>
-                <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
-                    <button class="btn" style="background-color: #7f8c8d;" onclick="closeSaveTemplateModal()">Cancel</button>
-                    <button class="btn" onclick="saveTemplate()">Save</button>
+        <div class="modal fade" id="saveTemplateModal" tabindex="-1" aria-labelledby="saveTemplateModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content bg-dark text-light">
+                    <div class="modal-header border-secondary">
+                        <h5 class="modal-title" id="saveTemplateModalLabel">Save as Template</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted small">Save the current workspace as a reusable template.</p>
+                        <div class="mb-3">
+                            <input type="text" id="templateNameInput" class="form-control bg-dark text-light" placeholder="Template name...">
+                        </div>
+                        <div class="mb-3">
+                            <textarea id="templateDescInput" class="form-control bg-dark text-light" placeholder="Description (optional)..." rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-secondary">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="saveTemplate()">Save</button>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Manage Templates Modal -->
-        <div id="manageTemplatesModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;">
-            <div style="background: #2c3e50; padding: 1.5rem; border-radius: 8px; width: 500px; max-height: 80vh; display: flex; flex-direction: column;">
-                <h2 style="color: white; margin: 0 0 1rem 0;">Manage Templates</h2>
-                <div id="templatesList" style="flex: 1; overflow-y: auto; max-height: 400px;"></div>
-                <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem;">
-                    <button class="btn" style="background-color: #7f8c8d;" onclick="closeManageTemplatesModal()">Close</button>
+        <div class="modal fade" id="manageTemplatesModal" tabindex="-1" aria-labelledby="manageTemplatesModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content bg-dark text-light">
+                    <div class="modal-header border-secondary">
+                        <h5 class="modal-title" id="manageTemplatesModalLabel">Manage Templates</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="templatesList" style="max-height: 400px; overflow-y: auto;"></div>
+                    </div>
+                    <div class="modal-footer border-secondary">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -243,16 +571,85 @@
         <div id="main-container">
             <div id="blocklyDiv"></div>
             <div id="outputDiv">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h2 style="margin: 0;">Generated YAML</h2>
-                    <div style="display: flex; gap: 0.25rem; align-items: center;">
-                        <button class="btn" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; min-width: 28px;" onclick="zoomYaml(-1)" title="Zoom out">-</button>
-                        <span id="zoomLevel" style="font-size: 0.7rem; color: #aaa; min-width: 35px; text-align: center;">14px</span>
-                        <button class="btn" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; min-width: 28px;" onclick="zoomYaml(1)" title="Zoom in">+</button>
-                        <button class="btn" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; margin-left: 0.5rem;" onclick="copyYamlToClipboard()" title="Copy to clipboard">Copy</button>
+                <!-- Generated YAML Accordion Section -->
+                <div id="yamlSection" class="accordion-section expanded">
+                    <div class="accordion-header" onclick="toggleAccordion('yamlSection')">
+                        <h2><span class="accordion-arrow">&#9654;</span> Generated YAML</h2>
+                        <div class="d-flex gap-1 align-items-center" onclick="event.stopPropagation()">
+                            <button class="btn btn-outline-light btn-sm" style="min-width: 28px;" onclick="zoomYaml(-1)" title="Zoom out">-</button>
+                            <span id="zoomLevel" class="small text-light" style="min-width: 35px; text-align: center;">14px</span>
+                            <button class="btn btn-outline-light btn-sm" style="min-width: 28px;" onclick="zoomYaml(1)" title="Zoom in">+</button>
+                            <button class="btn btn-outline-light btn-sm ms-2" onclick="copyYamlToClipboard()" title="Copy to clipboard">Copy</button>
+                        </div>
+                    </div>
+                    <div class="accordion-content">
+                        <div id="yamlOutput"># Drag blocks to generate YAML...</div>
                     </div>
                 </div>
-                <div id="yamlOutput"># Drag blocks to generate YAML...</div>
+
+                <!-- Evaluation Data Sets Accordion Section -->
+                <div id="evalDataSection" class="accordion-section expanded">
+                    <div class="accordion-header" onclick="toggleAccordion('evalDataSection')">
+                        <h2><span class="accordion-arrow">&#9654;</span> Evaluation Data Sets</h2>
+                        <div class="d-flex gap-1 align-items-center" onclick="event.stopPropagation()">
+                            <button class="btn btn-success btn-sm" onclick="loadFieldsIntoEditor()" title="Load JSON fields into Field blocks">Load into Editor</button>
+                            <button class="btn btn-outline-light btn-sm" onclick="formatEvalJson()" title="Format JSON">Format</button>
+                            <button class="btn btn-outline-light btn-sm" onclick="clearEvalData()" title="Clear all">Clear</button>
+                        </div>
+                    </div>
+                    <div class="accordion-content">
+                        <div id="evalDataOutput">
+                            <!-- Tabs -->
+                            <ul class="nav nav-tabs nav-tabs-dark" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" onclick="switchEvalTab('editor')">JSON Editor</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" onclick="switchEvalTab('tree')">Tree View</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" onclick="switchEvalTab('files')">Files</button>
+                                </li>
+                            </ul>
+
+                            <!-- JSON Editor Panel -->
+                            <div id="evalEditorPanel" class="eval-data-panel active">
+                                <textarea id="evalJsonEditor" class="form-control bg-dark text-light font-monospace" placeholder='Enter JSON data here, e.g.:
+{
+  "trade": {
+    "id": "TRD-001",
+    "type": "FX_SPOT",
+    "amount": 1000000,
+    "currency": "USD",
+    "counterparty": {
+      "id": "CP-123",
+      "name": "Acme Corp"
+    }
+  }
+}'></textarea>
+                                <div id="evalJsonError" class="alert alert-danger mt-2 small" style="display: none;"></div>
+                            </div>
+
+                            <!-- Tree View Panel -->
+                            <div id="evalTreePanel" class="eval-data-panel">
+                                <div class="eval-tree-container" id="evalTreeContainer">
+                                    <p class="text-muted fst-italic">Enter JSON in the editor tab to see tree view</p>
+                                </div>
+                            </div>
+
+                            <!-- Files Panel -->
+                            <div id="evalFilesPanel" class="eval-data-panel">
+                                <div class="eval-file-drop" id="evalFileDrop">
+                                    <p>Drag and drop JSON files here</p>
+                                    <p class="small text-muted">or</p>
+                                    <input type="file" id="evalFileInput" accept=".json" multiple style="display: none;">
+                                    <button class="btn btn-outline-primary" onclick="document.getElementById('evalFileInput').click()">Browse Files</button>
+                                </div>
+                                <div class="eval-file-list" id="evalFileList"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -312,6 +709,46 @@
         </xml>
 
         <script>
+            // --- Toast Notification System ---
+            function showToast(message, type, title, duration) {
+                type = type || 'info';
+                duration = duration || 4000;
+
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.className = 'toast ' + type;
+
+                let html = '';
+                if (title) {
+                    html += '<div class="toast-title">' + escapeHtmlForToast(title) + '</div>';
+                }
+                html += '<div class="toast-message">' + escapeHtmlForToast(message) + '</div>';
+                toast.innerHTML = html;
+
+                container.appendChild(toast);
+
+                // Trigger animation
+                requestAnimationFrame(() => {
+                    toast.classList.add('show');
+                });
+
+                // Auto-remove
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.parentNode.removeChild(toast);
+                        }
+                    }, 300);
+                }, duration);
+            }
+
+            function escapeHtmlForToast(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
             // --- 1. Define Custom Blocks (JSON Array for static blocks) ---
 
             Blockly.defineBlocksWithJsonArray([
@@ -616,17 +1053,7 @@
                     "tooltip": "Sets a field to a specific value",
                     "helpUrl": ""
                 },
-                {
-                    "type": "apex_field_ref",
-                    "message0": "Field #%1",
-                    "args0": [
-                        { "type": "field_input", "name": "FIELD", "text": "amount" }
-                    ],
-                    "output": "String",
-                    "colour": 290,
-                    "tooltip": "Reference a data field (e.g., #amount)",
-                    "helpUrl": ""
-                },
+
                 {
                     "type": "apex_condition_compare",
                     "message0": "%1 %2 %3",
@@ -889,6 +1316,105 @@
                     this.setNextStatement(true, "RuleRef");
                     this.setColour(180);
                     this.setTooltip("Reference to a rule ID");
+                }
+            };
+
+            // Field Reference block with dynamic dropdown from JSON data
+            var loadedFieldPaths = [];
+
+            function getFieldOptions() {
+                if (loadedFieldPaths.length === 0) {
+                    return [["(no fields loaded)", ""]];
+                }
+                return loadedFieldPaths.map(function(path) {
+                    return [path, path];
+                });
+            }
+
+            function extractJsonPaths(obj, prefix) {
+                var paths = [];
+                prefix = prefix || '';
+
+                if (obj === null || obj === undefined) {
+                    return paths;
+                }
+
+                if (Array.isArray(obj)) {
+                    // For arrays, use [*] notation and recurse into first element as sample
+                    if (obj.length > 0) {
+                        var arrayPrefix = prefix + '[*]';
+                        var firstElement = obj[0];
+                        if (typeof firstElement === 'object' && firstElement !== null) {
+                            paths = paths.concat(extractJsonPaths(firstElement, arrayPrefix));
+                        } else {
+                            paths.push(arrayPrefix);
+                        }
+                    }
+                } else if (typeof obj === 'object') {
+                    for (var key in obj) {
+                        if (obj.hasOwnProperty(key)) {
+                            var newPath = prefix ? prefix + '.' + key : key;
+                            var value = obj[key];
+
+                            if (value === null || typeof value !== 'object') {
+                                // Leaf node
+                                paths.push(newPath);
+                            } else if (Array.isArray(value)) {
+                                // Array - add path with [*] and recurse
+                                paths = paths.concat(extractJsonPaths(value, newPath));
+                            } else {
+                                // Nested object - recurse
+                                paths = paths.concat(extractJsonPaths(value, newPath));
+                            }
+                        }
+                    }
+                }
+
+                return paths;
+            }
+
+            function loadFieldsIntoEditor() {
+                var jsonText = document.getElementById('evalJsonEditor').value.trim();
+
+                if (!jsonText) {
+                    showToast('No JSON data in editor. Enter JSON data first.', 'warning');
+                    return;
+                }
+
+                try {
+                    var data = JSON.parse(jsonText);
+                    loadedFieldPaths = extractJsonPaths(data, '');
+                    loadedFieldPaths.sort();
+
+                    if (loadedFieldPaths.length === 0) {
+                        showToast('No fields found in JSON data.', 'warning');
+                        return;
+                    }
+
+                    // Show confirmation
+                    var pathList = loadedFieldPaths.slice(0, 10).join('\n');
+                    if (loadedFieldPaths.length > 10) {
+                        pathList += '\n... and ' + (loadedFieldPaths.length - 10) + ' more';
+                    }
+                    showToast(pathList, 'success', 'Loaded ' + loadedFieldPaths.length + ' field paths', 5000);
+
+                } catch (e) {
+                    showToast('Invalid JSON: ' + e.message, 'error');
+                }
+            }
+
+            function getLoadedFieldPaths() {
+                return loadedFieldPaths;
+            }
+
+            Blockly.Blocks['apex_field_ref'] = {
+                init: function() {
+                    this.appendDummyInput()
+                        .appendField("Field #")
+                        .appendField(new Blockly.FieldDropdown(getFieldOptions), "FIELD");
+                    this.setOutput(true, "String");
+                    this.setColour(290);
+                    this.setTooltip("Reference a data field from loaded JSON");
                 }
             };
 
@@ -1808,11 +2334,22 @@
                 try {
                     const yamlParts = [];
 
+                    // YAML dump options for APEX-compliant formatting
+                    const yamlOptions = {
+                        indent: 2,              // 2-space indentation
+                        lineWidth: -1,          // No line wrapping (keep long strings on one line)
+                        noRefs: true,           // Don't use YAML references
+                        sortKeys: false,        // Preserve key order
+                        quotingType: '"',       // Use double quotes for strings
+                        forceQuotes: true,      // Quote all string values (APEX convention)
+                        flowLevel: -1           // Use block style for all nested structures
+                    };
+
                     configBlocks.forEach(block => {
                         const jsonStr = apexGenerator.blockToCode(block);
                         if (jsonStr && jsonStr.trim()) {
                             const jsonObj = JSON.parse(jsonStr);
-                            const yamlStr = jsyaml.dump(jsonObj);
+                            const yamlStr = jsyaml.dump(jsonObj, yamlOptions);
                             yamlParts.push(yamlStr);
                         }
                     });
@@ -1897,6 +2434,28 @@
                 document.body.removeChild(a);
             }
 
+            // --- 5. Open in Playground Function ---
+            function openInPlayground() {
+                // Get the generated YAML
+                const yamlContent = currentYamlText || document.getElementById('yamlOutput').textContent;
+
+                // Get the JSON data from the evaluation data editor
+                const jsonContent = document.getElementById('evalJsonEditor').value.trim();
+
+                // Store in localStorage for the playground to pick up
+                const transferData = {
+                    yaml: yamlContent,
+                    json: jsonContent,
+                    timestamp: Date.now()
+                };
+                localStorage.setItem('apex_visual_editor_transfer', JSON.stringify(transferData));
+
+                // Open playground in new tab
+                window.open('/playground', '_blank');
+
+                showToast('Opening in Playground...', 'info');
+            }
+
             // --- 5a. Copy to Clipboard Function ---
             function copyYamlToClipboard() {
                 const yamlContent = currentYamlText || document.getElementById('yamlOutput').textContent;
@@ -1918,7 +2477,7 @@
                     setTimeout(() => { btn.textContent = originalText; }, 1000);
                 } catch (err) {
                     console.error('Failed to copy:', err);
-                    alert('Failed to copy to clipboard');
+                    showToast('Failed to copy to clipboard', 'error');
                 } finally {
                     document.body.removeChild(textarea);
                 }
@@ -1935,15 +2494,368 @@
                 document.getElementById('zoomLevel').textContent = yamlFontSize + 'px';
             }
 
+            // --- 5b2. Accordion Functions ---
+            function toggleAccordion(sectionId) {
+                const section = document.getElementById(sectionId);
+                const isExpanded = section.classList.contains('expanded');
+
+                // Toggle the clicked section
+                if (isExpanded) {
+                    section.classList.remove('expanded');
+                } else {
+                    section.classList.add('expanded');
+                }
+            }
+
+            // --- 5b3. Evaluation Data Set Functions ---
+            let evalDataFiles = [];
+            let currentEvalData = null;
+
+            function switchEvalTab(tabName) {
+                // Update tab buttons (Bootstrap nav-link)
+                document.querySelectorAll('.nav-tabs-dark .nav-link').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                event.target.classList.add('active');
+
+                // Update panels
+                document.querySelectorAll('.eval-data-panel').forEach(panel => {
+                    panel.classList.remove('active');
+                });
+
+                if (tabName === 'editor') {
+                    document.getElementById('evalEditorPanel').classList.add('active');
+                } else if (tabName === 'tree') {
+                    document.getElementById('evalTreePanel').classList.add('active');
+                    updateTreeView();
+                } else if (tabName === 'files') {
+                    document.getElementById('evalFilesPanel').classList.add('active');
+                }
+            }
+
+            function getEvalJsonFromEditor() {
+                return document.getElementById('evalJsonEditor').value;
+            }
+
+            function setEvalJsonInEditor(json) {
+                document.getElementById('evalJsonEditor').value = json;
+                validateAndParseJson();
+            }
+
+            function validateAndParseJson() {
+                const editor = document.getElementById('evalJsonEditor');
+                const errorDiv = document.getElementById('evalJsonError');
+                const jsonText = editor.value.trim();
+
+                if (!jsonText) {
+                    errorDiv.style.display = 'none';
+                    currentEvalData = null;
+                    return true;
+                }
+
+                try {
+                    currentEvalData = JSON.parse(jsonText);
+                    errorDiv.style.display = 'none';
+                    return true;
+                } catch (e) {
+                    errorDiv.textContent = 'JSON Error: ' + e.message;
+                    errorDiv.style.display = 'block';
+                    currentEvalData = null;
+                    return false;
+                }
+            }
+
+            function formatEvalJson() {
+                const editor = document.getElementById('evalJsonEditor');
+                const jsonText = editor.value.trim();
+
+                if (!jsonText) return;
+
+                try {
+                    const parsed = JSON.parse(jsonText);
+                    editor.value = JSON.stringify(parsed, null, 2);
+                    document.getElementById('evalJsonError').style.display = 'none';
+                    currentEvalData = parsed;
+                } catch (e) {
+                    document.getElementById('evalJsonError').textContent = 'JSON Error: ' + e.message;
+                    document.getElementById('evalJsonError').style.display = 'block';
+                }
+            }
+
+            function updateTreeView() {
+                const container = document.getElementById('evalTreeContainer');
+                const jsonText = document.getElementById('evalJsonEditor').value.trim();
+
+                if (!jsonText) {
+                    container.innerHTML = '<p style="color: #888; font-style: italic;">Enter JSON in the editor tab to see tree view</p>';
+                    return;
+                }
+
+                try {
+                    const data = JSON.parse(jsonText);
+                    container.innerHTML = renderJsonTree(data, '');
+                } catch (e) {
+                    container.innerHTML = '<p style="color: #e74c3c;">Invalid JSON: ' + escapeHtml(e.message) + '</p>';
+                }
+            }
+
+            function renderJsonTree(data, path, collapsed) {
+                if (data === null) {
+                    return '<span class="eval-tree-null">null</span>';
+                }
+
+                if (typeof data === 'string') {
+                    return '<span class="eval-tree-string">"' + escapeHtml(data) + '"</span>';
+                }
+
+                if (typeof data === 'number') {
+                    return '<span class="eval-tree-number">' + data + '</span>';
+                }
+
+                if (typeof data === 'boolean') {
+                    return '<span class="eval-tree-boolean">' + data + '</span>';
+                }
+
+                if (Array.isArray(data)) {
+                    if (data.length === 0) {
+                        return '<span style="color: #888;">[]</span>';
+                    }
+
+                    const id = 'tree_' + Math.random().toString(36).substr(2, 9);
+                    let html = '<span class="eval-tree-toggle" onclick="toggleTreeNode(\'' + id + '\')">&#9660;</span>';
+                    html += '<span style="color: #888;">[</span>';
+                    html += '<span style="color: #888; font-size: 0.8em;"> ' + data.length + ' items</span>';
+                    html += '<div id="' + id + '" class="eval-tree-node">';
+
+                    data.forEach((item, idx) => {
+                        html += '<div>';
+                        html += '<span class="eval-tree-key">[' + idx + ']</span>: ';
+                        html += renderJsonTree(item, path + '[' + idx + ']');
+                        if (idx < data.length - 1) html += ',';
+                        html += '</div>';
+                    });
+
+                    html += '</div>';
+                    html += '<span style="color: #888;">]</span>';
+                    return html;
+                }
+
+                if (typeof data === 'object') {
+                    const keys = Object.keys(data);
+                    if (keys.length === 0) {
+                        return '<span style="color: #888;">{}</span>';
+                    }
+
+                    const id = 'tree_' + Math.random().toString(36).substr(2, 9);
+                    let html = '<span class="eval-tree-toggle" onclick="toggleTreeNode(\'' + id + '\')">&#9660;</span>';
+                    html += '<span style="color: #888;">{</span>';
+                    html += '<div id="' + id + '" class="eval-tree-node">';
+
+                    keys.forEach((key, idx) => {
+                        html += '<div>';
+                        html += '<span class="eval-tree-key">"' + escapeHtml(key) + '"</span>: ';
+                        html += renderJsonTree(data[key], path + '.' + key);
+                        if (idx < keys.length - 1) html += ',';
+                        html += '</div>';
+                    });
+
+                    html += '</div>';
+                    html += '<span style="color: #888;">}</span>';
+                    return html;
+                }
+
+                return '<span>' + String(data) + '</span>';
+            }
+
+            function toggleTreeNode(id) {
+                const node = document.getElementById(id);
+                const toggle = node.previousElementSibling.previousElementSibling;
+
+                if (node.style.display === 'none') {
+                    node.style.display = 'block';
+                    toggle.innerHTML = '&#9660;';
+                } else {
+                    node.style.display = 'none';
+                    toggle.innerHTML = '&#9654;';
+                }
+            }
+
+            function escapeHtml(text) {
+                if (text === null || text === undefined) return '';
+                const div = document.createElement('div');
+                div.textContent = String(text);
+                return div.innerHTML.replace(/"/g, '&quot;');
+            }
+
+            // File handling
+            var fileHandlersInitialized = false;
+
+            function initFileHandlers() {
+                if (fileHandlersInitialized) return;
+
+                const dropZone = document.getElementById('evalFileDrop');
+                const fileInput = document.getElementById('evalFileInput');
+
+                if (!dropZone || !fileInput) return;
+
+                fileHandlersInitialized = true;
+
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('dragover');
+                });
+
+                dropZone.addEventListener('dragleave', () => {
+                    dropZone.classList.remove('dragover');
+                });
+
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('dragover');
+                    handleFiles(e.dataTransfer.files);
+                });
+
+                fileInput.addEventListener('change', (e) => {
+                    handleFiles(e.target.files);
+                    // Reset input so same files can be selected again
+                    e.target.value = '';
+                });
+            }
+
+            function handleFiles(files) {
+                Array.from(files).forEach(file => {
+                    if (file.type === 'application/json' || file.name.endsWith('.json')) {
+                        // Check for duplicate by name
+                        const existingIndex = evalDataFiles.findIndex(f => f.name === file.name);
+
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            try {
+                                const content = e.target.result;
+                                JSON.parse(content); // Validate JSON
+
+                                const fileData = {
+                                    name: file.name,
+                                    size: file.size,
+                                    content: content
+                                };
+
+                                if (existingIndex >= 0) {
+                                    // Replace existing file with same name
+                                    evalDataFiles[existingIndex] = fileData;
+                                } else {
+                                    evalDataFiles.push(fileData);
+                                }
+                                renderFileList();
+                            } catch (err) {
+                                showToast('Invalid JSON in file: ' + file.name, 'error');
+                            }
+                        };
+                        reader.readAsText(file);
+                    }
+                });
+            }
+
+            function renderFileList() {
+                const list = document.getElementById('evalFileList');
+
+                if (evalDataFiles.length === 0) {
+                    list.innerHTML = '';
+                    return;
+                }
+
+                let html = '';
+                evalDataFiles.forEach((file, idx) => {
+                    const sizeStr = file.size < 1024 ? file.size + ' B' :
+                                   file.size < 1024 * 1024 ? (file.size / 1024).toFixed(1) + ' KB' :
+                                   (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+
+                    html += '<div class="eval-file-item">';
+                    html += '<div>';
+                    html += '<span class="eval-file-name">' + escapeHtml(file.name) + '</span>';
+                    html += '<span class="eval-file-size">' + sizeStr + '</span>';
+                    html += '</div>';
+                    html += '<div style="display: flex; gap: 0.25rem;">';
+                    html += '<button class="btn" style="padding: 2px 8px; font-size: 0.75rem; background: #198754; color: #fff;" onclick="loadFileToEditor(' + idx + ')">Open</button>';
+                    html += '<button class="btn" style="padding: 2px 8px; font-size: 0.75rem; background: #c0392b; color: #fff;" onclick="removeFile(' + idx + ')">X</button>';
+                    html += '</div>';
+                    html += '</div>';
+                });
+
+                list.innerHTML = html;
+            }
+
+            function loadFileToEditor(idx) {
+                if (evalDataFiles[idx]) {
+                    setEvalJsonInEditor(evalDataFiles[idx].content);
+                    // Switch to JSON Editor tab
+                    switchEvalTab('editor');
+                    // Also update the nav-link active state
+                    document.querySelectorAll('.nav-tabs-dark .nav-link').forEach(tab => tab.classList.remove('active'));
+                    document.querySelector('.nav-tabs-dark .nav-link').classList.add('active');
+                }
+            }
+
+            function removeFile(idx) {
+                evalDataFiles.splice(idx, 1);
+                renderFileList();
+            }
+
+            function clearEvalData() {
+                if (confirm('Clear all evaluation data?')) {
+                    document.getElementById('evalJsonEditor').value = '';
+                    document.getElementById('evalJsonError').style.display = 'none';
+                    evalDataFiles = [];
+                    currentEvalData = null;
+                    renderFileList();
+                    updateTreeView();
+                }
+            }
+
+            function getEvalDataAsJson() {
+                return document.getElementById('evalJsonEditor').value;
+            }
+
+            function getEvalDataParsed() {
+                const jsonText = document.getElementById('evalJsonEditor').value.trim();
+                if (!jsonText) return null;
+                try {
+                    return JSON.parse(jsonText);
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            // Initialize file handlers when DOM is ready
+            document.addEventListener('DOMContentLoaded', initFileHandlers);
+
+            // Also add input event listener for live validation
+            setTimeout(() => {
+                const editor = document.getElementById('evalJsonEditor');
+                if (editor) {
+                    editor.addEventListener('input', validateAndParseJson);
+                }
+                initFileHandlers();
+            }, 100);
+
             // --- 5c. YAML Import Functions ---
 
+            let yamlImportModalInstance = null;
+            let saveTemplateModalInstance = null;
+            let manageTemplatesModalInstance = null;
+
             function openYamlImportModal() {
-                document.getElementById('yamlImportModal').style.display = 'flex';
-                document.getElementById('yamlImportInput').focus();
+                if (!yamlImportModalInstance) {
+                    yamlImportModalInstance = new bootstrap.Modal(document.getElementById('yamlImportModal'));
+                }
+                yamlImportModalInstance.show();
+                setTimeout(() => document.getElementById('yamlImportInput').focus(), 200);
             }
 
             function closeYamlImportModal() {
-                document.getElementById('yamlImportModal').style.display = 'none';
+                if (yamlImportModalInstance) {
+                    yamlImportModalInstance.hide();
+                }
                 document.getElementById('yamlImportInput').value = '';
             }
 
@@ -1966,25 +2878,30 @@
                     localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(templates));
                 } catch (e) {
                     console.error('Error saving templates:', e);
-                    alert('Error saving template: ' + e.message);
+                    showToast('Error saving template: ' + e.message, 'error');
                 }
             }
 
             function openSaveTemplateModal() {
-                document.getElementById('saveTemplateModal').style.display = 'flex';
+                if (!saveTemplateModalInstance) {
+                    saveTemplateModalInstance = new bootstrap.Modal(document.getElementById('saveTemplateModal'));
+                }
                 document.getElementById('templateNameInput').value = '';
                 document.getElementById('templateDescInput').value = '';
-                document.getElementById('templateNameInput').focus();
+                saveTemplateModalInstance.show();
+                setTimeout(() => document.getElementById('templateNameInput').focus(), 200);
             }
 
             function closeSaveTemplateModal() {
-                document.getElementById('saveTemplateModal').style.display = 'none';
+                if (saveTemplateModalInstance) {
+                    saveTemplateModalInstance.hide();
+                }
             }
 
             function saveTemplate() {
                 const name = document.getElementById('templateNameInput').value.trim();
                 if (!name) {
-                    alert('Please enter a template name.');
+                    showToast('Please enter a template name.', 'warning');
                     return;
                 }
 
@@ -2024,7 +2941,7 @@
                 // Refresh the toolbox to show the new template
                 workspace.updateToolbox(document.getElementById('toolbox'));
 
-                alert('Template "' + name + '" saved successfully!');
+                showToast('Template "' + name + '" saved successfully!', 'success');
             }
 
             function loadTemplate(templateName) {
@@ -2032,7 +2949,7 @@
                 const template = templates.find(t => t.name === templateName);
 
                 if (!template) {
-                    alert('Template not found.');
+                    showToast('Template not found.', 'error');
                     return;
                 }
 
@@ -2066,12 +2983,17 @@
             }
 
             function openManageTemplatesModal() {
-                document.getElementById('manageTemplatesModal').style.display = 'flex';
+                if (!manageTemplatesModalInstance) {
+                    manageTemplatesModalInstance = new bootstrap.Modal(document.getElementById('manageTemplatesModal'));
+                }
                 renderTemplatesList();
+                manageTemplatesModalInstance.show();
             }
 
             function closeManageTemplatesModal() {
-                document.getElementById('manageTemplatesModal').style.display = 'none';
+                if (manageTemplatesModalInstance) {
+                    manageTemplatesModalInstance.hide();
+                }
             }
 
             function renderTemplatesList() {
@@ -2096,8 +3018,8 @@
                     }
                     html += '</div>';
                     html += '<div style="display: flex; gap: 0.25rem;">';
-                    html += '<button class="btn" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="loadTemplate(\'' + escapeHtml(template.name).replace(/'/g, "\\'") + '\'); closeManageTemplatesModal();">Load</button>';
-                    html += '<button class="btn" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background-color: #c0392b;" onclick="deleteTemplate(\'' + escapeHtml(template.name).replace(/'/g, "\\'") + '\')">Delete</button>';
+                    html += '<button class="btn" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background-color: #198754; color: #fff;" onclick="loadTemplate(\'' + escapeHtml(template.name).replace(/'/g, "\\'") + '\'); closeManageTemplatesModal();">Load</button>';
+                    html += '<button class="btn" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background-color: #c0392b; color: #fff;" onclick="deleteTemplate(\'' + escapeHtml(template.name).replace(/'/g, "\\'") + '\')">Delete</button>';
                     html += '</div>';
                     html += '</div>';
                     html += '</div>';
@@ -2180,14 +3102,14 @@
             function importYamlToBlocks() {
                 const yamlText = document.getElementById('yamlImportInput').value.trim();
                 if (!yamlText) {
-                    alert('Please paste YAML content to import.');
+                    showToast('Please paste YAML content to import.', 'warning');
                     return;
                 }
 
                 try {
                     const config = jsyaml.load(yamlText);
                     if (!config || !config.metadata) {
-                        alert('Invalid APEX YAML: missing metadata section.');
+                        showToast('Invalid APEX YAML: missing metadata section.', 'error');
                         return;
                     }
 
@@ -2208,7 +3130,7 @@
 
                 } catch (e) {
                     console.error('YAML Import Error:', e);
-                    alert('Error parsing YAML: ' + e.message);
+                    showToast('Error parsing YAML: ' + e.message, 'error');
                 }
             }
 
@@ -3030,7 +3952,7 @@
                 
                 'apex_condition_compare': {
                     'A': 'apex_field_ref',
-                    'B': 'text'
+                    'B': ['text', 'math_number']
                 },
                 'apex_condition_logic': {
                     'A': 'apex_condition_compare',
@@ -3185,6 +4107,9 @@
                 updateYaml();
             }
         </script>
+
+        <!-- Bootstrap JS -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     </body>
 
 </html>
