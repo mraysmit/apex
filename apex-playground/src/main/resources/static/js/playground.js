@@ -130,13 +130,9 @@ function setupEventListeners() {
     // Drag and drop event listeners
     setupDragAndDrop();
     
-    // Real-time YAML validation (debounced)
-    let yamlValidationTimeout;
+    // Reset validation status when YAML content changes
     yamlRulesEditor.addEventListener('input', function() {
-        clearTimeout(yamlValidationTimeout);
-        yamlValidationTimeout = setTimeout(() => {
-            validateYamlRealtime(this.value);
-        }, 500);
+        resetYamlValidationStatus();
     });
 }
 
@@ -147,18 +143,30 @@ async function processData() {
     const processBtn = document.getElementById('processBtn');
     const sourceData = sourceDataEditor.value.trim();
     const yamlRules = yamlRulesEditor.value.trim();
-    
+
     if (!sourceData || !yamlRules) {
         showAlert('Please provide both source data and YAML rules configuration.', 'warning');
         return;
     }
-    
+
     // Show processing state
     processBtn.disabled = true;
+    processBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Validating...';
+
+    // Validate YAML first
+    const validationResult = await validateYaml();
+    if (!validationResult.valid) {
+        showAlert('YAML validation failed: ' + validationResult.message, 'danger');
+        processBtn.disabled = false;
+        processBtn.innerHTML = '<i class="fas fa-play"></i> Process';
+        return;
+    }
+
+    // Update button to show processing
     processBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-    
+
     const startTime = Date.now();
-    
+
     try {
         // Add timestamp to prevent caching
         const response = await fetch(window.playgroundConfig.apiBaseUrl + '/process?t=' + new Date().getTime(), {
@@ -172,10 +180,10 @@ async function processData() {
                 dataFormat: currentDataFormat
             })
         });
-        
+
         const result = await response.json();
         const processingTime = Date.now() - startTime;
-        
+
         console.log('Processing result:', result);
 
         // Display results
@@ -183,7 +191,7 @@ async function processData() {
         displayEnrichmentResults(result.enrichment || { message: result.message }, result.metrics);
         displayTraceResults(result.trace);
         updateProcessingTime(processingTime);
-        
+
     } catch (error) {
         console.error('Processing error:', error);
         showAlert('Error processing data: ' + error.message, 'danger');
@@ -229,14 +237,23 @@ async function validateYaml() {
 }
 
 /**
+ * Reset YAML validation status to "Not Validated"
+ */
+function resetYamlValidationStatus() {
+    const statusBadge = document.getElementById('yamlStatus');
+    statusBadge.textContent = 'Not Validated';
+    statusBadge.className = 'badge bg-secondary';
+}
+
+/**
  * Real-time YAML validation (lightweight)
  */
 function validateYamlRealtime(yamlContent) {
     if (!yamlContent.trim()) {
-        updateYamlStatus(true, 'Valid');
+        resetYamlValidationStatus();
         return;
     }
-    
+
     // Basic YAML syntax check (placeholder - will be enhanced in Phase 2)
     try {
         // Simple validation - check for basic YAML structure
@@ -360,7 +377,7 @@ rules:
     updateSourceDataFileName('example-data.json', JSON.stringify(exampleData, null, 2).length);
     updateYamlRulesFileName('example-rules.yaml', exampleYaml.length);
 
-    validateYamlRealtime(exampleYaml);
+    resetYamlValidationStatus();
 }
 
 /**
@@ -502,6 +519,9 @@ async function loadSpecificExample(category, id) {
             sourceDataEditor.value = JSON.stringify(example.sampleData, null, 2);
             updateSourceDataFileName(`${example.name.toLowerCase().replace(/\s+/g, '-')}-data.json`, JSON.stringify(example.sampleData, null, 2).length);
         }
+
+        // Reset validation status when loading a new example
+        resetYamlValidationStatus();
 
         showAlert(`Example "${example.name}" loaded successfully`, 'success');
 
@@ -1250,5 +1270,41 @@ function hideUploadProgress() {
         setTimeout(() => {
             modal.hide();
         }, 500);
+    }
+}
+
+/**
+ * Toggle the bottom right panel collapse state
+ */
+function toggleBottomRightPanel() {
+    const grid = document.querySelector('.playground-grid');
+    const btn = document.getElementById('collapseBottomRightBtn');
+
+    if (grid.classList.contains('bottom-right-collapsed')) {
+        grid.classList.remove('bottom-right-collapsed');
+        btn.classList.remove('collapsed');
+        btn.title = 'Collapse panel';
+    } else {
+        grid.classList.add('bottom-right-collapsed');
+        btn.classList.add('collapsed');
+        btn.title = 'Expand panel';
+    }
+}
+
+/**
+ * Toggle the bottom left panel collapse state
+ */
+function toggleBottomLeftPanel() {
+    const grid = document.querySelector('.playground-grid');
+    const btn = document.getElementById('collapseBottomLeftBtn');
+
+    if (grid.classList.contains('bottom-left-collapsed')) {
+        grid.classList.remove('bottom-left-collapsed');
+        btn.classList.remove('collapsed');
+        btn.title = 'Collapse panel';
+    } else {
+        grid.classList.add('bottom-left-collapsed');
+        btn.classList.add('collapsed');
+        btn.title = 'Expand panel';
     }
 }

@@ -44,9 +44,9 @@
     </nav>
 
     <!-- Main Content -->
-    <div class="container-fluid px-3 pt-3 playground-container">
+    <div class="container-fluid px-3 pt-0 playground-container">
         <!-- Toolbar -->
-        <div class="row mb-2 flex-shrink-0">
+        <div class="row mb-1 flex-shrink-0">
             <div class="col-12">
                 <div class="btn-toolbar" role="toolbar">
                     <div class="btn-group me-2" role="group">
@@ -145,19 +145,49 @@
 
         <!-- 4-Panel Layout -->
         <div class="playground-grid">
-            <!-- Top Left: Source Data -->
+            <!-- Top Left: YAML Rules -->
             <div class="playground-panel">
                 <div class="card h-100">
-                    <div class="card-header">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="card-header p-2">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h6 class="mb-0">YAML Rules Configuration</h6>
+                            <span class="badge bg-secondary" id="yamlStatus">Not Validated</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <small class="text-muted me-2">
+                                <i class="fas fa-file-code me-1"></i>
+                                <span id="yamlRulesFileName">No file loaded</span>
+                            </small>
+                            <small class="text-muted" id="yamlRulesFileSize"></small>
+                        </div>
+                    </div>
+                    <div class="card-body p-0 position-relative">
+                        <div id="yamlDropZone" class="drop-zone position-absolute w-100 h-100 d-none">
+                            <div class="drop-zone-content">
+                                <i class="fas fa-file-code fa-3x text-success mb-3"></i>
+                                <h5>Drop your YAML file here</h5>
+                                <p class="text-muted">Supports YAML and YML files</p>
+                            </div>
+                        </div>
+                        <textarea id="yamlRulesEditor" class="form-control h-100"
+                                  placeholder="Enter your YAML rules configuration here or drag and drop a YAML file..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Right: Source Data -->
+            <div class="playground-panel">
+                <div class="card h-100">
+                    <div class="card-header p-2">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
                             <h6 class="mb-0">Source Data</h6>
                             <div class="btn-group btn-group-sm" role="group">
                                 <input type="radio" class="btn-check" name="dataFormat" id="jsonFormat" value="JSON" checked>
-                                <label class="btn btn-outline-secondary" for="jsonFormat">JSON</label>
+                                <label class="btn btn-outline-secondary py-0 px-2" for="jsonFormat">JSON</label>
                                 <input type="radio" class="btn-check" name="dataFormat" id="xmlFormat" value="XML">
-                                <label class="btn btn-outline-secondary" for="xmlFormat">XML</label>
+                                <label class="btn btn-outline-secondary py-0 px-2" for="xmlFormat">XML</label>
                                 <input type="radio" class="btn-check" name="dataFormat" id="csvFormat" value="CSV">
-                                <label class="btn btn-outline-secondary" for="csvFormat">CSV</label>
+                                <label class="btn btn-outline-secondary py-0 px-2" for="csvFormat">CSV</label>
                             </div>
                         </div>
                         <div class="d-flex align-items-center">
@@ -182,41 +212,14 @@
                 </div>
             </div>
 
-            <!-- Top Right: YAML Rules -->
-            <div class="playground-panel">
-                <div class="card h-100">
-                    <div class="card-header">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6 class="mb-0">YAML Rules Configuration</h6>
-                            <span class="badge bg-success" id="yamlStatus">Valid</span>
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <small class="text-muted me-2">
-                                <i class="fas fa-file-code me-1"></i>
-                                <span id="yamlRulesFileName">No file loaded</span>
-                            </small>
-                            <small class="text-muted" id="yamlRulesFileSize"></small>
-                        </div>
-                    </div>
-                    <div class="card-body p-0 position-relative">
-                        <div id="yamlDropZone" class="drop-zone position-absolute w-100 h-100 d-none">
-                            <div class="drop-zone-content">
-                                <i class="fas fa-file-code fa-3x text-success mb-3"></i>
-                                <h5>Drop your YAML file here</h5>
-                                <p class="text-muted">Supports YAML and YML files</p>
-                            </div>
-                        </div>
-                        <textarea id="yamlRulesEditor" class="form-control h-100"
-                                  placeholder="Enter your YAML rules configuration here or drag and drop a YAML file..."></textarea>
-                    </div>
-                </div>
-            </div>
-
             <!-- Bottom Left: Validation Results -->
-            <div class="playground-panel">
+            <div class="playground-panel" id="bottomLeftPanel">
                 <div class="card h-100">
-                    <div class="card-header">
-                        <h6 class="mb-0">Validation Results</h6>
+                    <div class="card-header d-flex align-items-center p-2">
+                        <button class="collapse-toggle-btn" id="collapseBottomLeftBtn" onclick="toggleBottomLeftPanel()" title="Collapse/Expand panel">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <h6 class="mb-0 py-1 ms-2">Validation Results</h6>
                     </div>
                     <div class="card-body">
                         <div id="validationResults" class="results-panel">
@@ -227,28 +230,33 @@
             </div>
 
             <!-- Bottom Right: Enrichment Results & Trace -->
-            <div class="playground-panel">
+            <div class="playground-panel" id="bottomRightPanel">
                 <div class="card h-100">
                     <div class="card-header d-flex justify-content-between align-items-center p-2">
-                        <ul class="nav nav-pills card-header-pills" id="resultsTab" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active py-1 px-3" id="enrichment-tab" data-bs-toggle="tab" data-bs-target="#enrichment-content" type="button" role="tab" aria-controls="enrichment-content" aria-selected="true">Enrichment</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link py-1 px-3" id="trace-tab" data-bs-toggle="tab" data-bs-target="#trace-content" type="button" role="tab" aria-controls="trace-content" aria-selected="false">Trace</button>
-                            </li>
-                        </ul>
+                        <div class="d-flex align-items-center">
+                            <button class="collapse-toggle-btn" id="collapseBottomRightBtn" onclick="toggleBottomRightPanel()" title="Collapse/Expand panel">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <ul class="nav nav-underline ms-2" id="resultsTab" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active py-0 px-2" id="enrichment-tab" data-bs-toggle="tab" data-bs-target="#enrichment-content" type="button" role="tab" aria-controls="enrichment-content" aria-selected="true">Enrichment</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link py-0 px-2" id="trace-tab" data-bs-toggle="tab" data-bs-target="#trace-content" type="button" role="tab" aria-controls="trace-content" aria-selected="false">Trace</button>
+                                </li>
+                            </ul>
+                        </div>
                         <small class="text-muted" id="processingTime">Processing time: --</small>
                     </div>
                     <div class="card-body p-0">
                         <div class="tab-content h-100" id="resultsTabContent">
-                            <div class="tab-pane fade show active h-100 p-3" id="enrichment-content" role="tabpanel" aria-labelledby="enrichment-tab" style="overflow-y: auto;">
-                                <div id="enrichmentResults" class="results-panel">
+                            <div class="tab-pane fade show active h-100 p-0" id="enrichment-content" role="tabpanel" aria-labelledby="enrichment-tab" style="overflow-y: auto;">
+                                <div id="enrichmentResults" class="results-panel h-100" style="border-radius: 0;">
                                     <p class="text-muted">Click "Process" to see enrichment results and performance metrics...</p>
                                 </div>
                             </div>
                             <div class="tab-pane fade h-100 p-0" id="trace-content" role="tabpanel" aria-labelledby="trace-tab" style="overflow-y: auto;">
-                                <div id="traceResults" class="results-panel p-3">
+                                <div id="traceResults" class="results-panel h-100" style="border-radius: 0;">
                                     <p class="text-muted">Click "Process" to see execution trace...</p>
                                 </div>
                             </div>

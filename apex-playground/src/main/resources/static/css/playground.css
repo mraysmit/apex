@@ -31,10 +31,59 @@ body {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: repeat(2, minmax(0, 1fr));
-    gap: 0.5rem; /* Reduced gap */
+    gap: 0.5rem;
     flex-grow: 1;
     min-height: 0;
-    padding-bottom: 0.5rem; /* Small padding at bottom */
+    padding-bottom: 0.5rem;
+}
+
+/* Collapsible bottom-right panel support */
+.playground-grid.bottom-right-collapsed .playground-panel:nth-child(4) {
+    align-self: end;
+}
+
+.playground-grid.bottom-right-collapsed .playground-panel:nth-child(4) .card-body {
+    display: none;
+}
+
+.playground-grid.bottom-right-collapsed .playground-panel:nth-child(4) .card {
+    height: auto;
+}
+
+/* Collapsible bottom-left panel support */
+.playground-grid.bottom-left-collapsed .playground-panel:nth-child(3) {
+    align-self: end;
+}
+
+.playground-grid.bottom-left-collapsed .playground-panel:nth-child(3) .card-body {
+    display: none;
+}
+
+.playground-grid.bottom-left-collapsed .playground-panel:nth-child(3) .card {
+    height: auto;
+}
+
+/* Both bottom panels collapsed - shrink the row */
+.playground-grid.bottom-left-collapsed.bottom-right-collapsed {
+    grid-template-rows: 1fr auto;
+}
+
+/* Collapse toggle button */
+.collapse-toggle-btn {
+    background: none;
+    border: none;
+    color: #6c757d;
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.collapse-toggle-btn:hover {
+    color: #495057;
+}
+
+.collapse-toggle-btn.collapsed {
+    transform: rotate(180deg);
 }
 
 .playground-panel {
@@ -110,9 +159,9 @@ body {
 
 /* Toolbar styling */
 .btn-toolbar {
-    padding: 10px 0;
+    padding: 10px 0 8px 0;
     border-bottom: 1px solid #dee2e6;
-    margin-bottom: 15px;
+    margin-bottom: 5px;
 }
 
 /* Card headers */
@@ -120,6 +169,14 @@ body {
     background-color: #f8f9fa;
     border-bottom: 1px solid #dee2e6;
     padding: 10px 15px;
+}
+
+/* Ensure consistent header heights in bottom playground panels */
+.playground-panel:nth-child(3) .card-header,
+.playground-panel:nth-child(4) .card-header {
+    height: 46px;
+    min-height: 46px;
+    max-height: 46px;
 }
 
 .card-header h6 {

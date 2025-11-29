@@ -754,10 +754,12 @@
             Blockly.defineBlocksWithJsonArray([
                 {
                     "type": "apex_rule_config",
-                    "message0": "Configuration %1 ID: %2 %3 Version: %4 %5 Description: %6 %7 Author: %8 %9 Business Domain: %10 %11 Effective Date: %12 %13 Expiration Date: %14 %15 Tags (comma-sep): %16 %17 Sections: %18",
+                    "message0": "Configuration %1 ID: %2 %3 Name: %4 %5 Version: %6 %7 Description: %8 %9 Author: %10 %11 Business Domain: %12 %13 Effective Date: %14 %15 Expiration Date: %16 %17 Tags (comma-sep): %18 %19 Sections: %20",
                     "args0": [
                         { "type": "input_dummy" },
                         { "type": "field_input", "name": "ID", "text": "my-config" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "My Configuration" },
                         { "type": "input_dummy" },
                         { "type": "field_input", "name": "VERSION", "text": "1.0.0" },
                         { "type": "input_dummy" },
@@ -1454,6 +1456,7 @@
 
             apexGenerator.forBlock['apex_rule_config'] = function (block, generator) {
                 const id = block.getFieldValue('ID');
+                const name = block.getFieldValue('NAME');
                 const version = block.getFieldValue('VERSION');
                 const description = block.getFieldValue('DESCRIPTION');
                 const author = block.getFieldValue('AUTHOR');
@@ -1487,6 +1490,7 @@
 
                 const metadata = {
                     id: id,
+                    name: name,
                     type: transformations.length > 0 ? "transformation-config" : "rule-config",
                     version: version
                 };
@@ -3139,6 +3143,7 @@
                 const meta = config.metadata || {};
 
                 block.setFieldValue(meta.id || 'imported-config', 'ID');
+                block.setFieldValue(meta.name || 'Imported Configuration', 'NAME');
                 block.setFieldValue(meta.version || '1.0.0', 'VERSION');
                 block.setFieldValue(meta.description || '', 'DESCRIPTION');
                 block.setFieldValue(meta.author || '', 'AUTHOR');
