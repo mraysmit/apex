@@ -1,0 +1,3190 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="utf-8">
+        <title>APEX Visual Rule Editor</title>
+        <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+        <!-- Prism.js for YAML syntax highlighting -->
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+        <style>
+            body {
+                background-color: #f5f5f5;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin: 0;
+                display: flex;
+                flex-direction: column;
+                height: 100vh;
+            }
+
+            header {
+                background-color: #2c3e50;
+                color: white;
+                padding: 1rem;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            h1 {
+                margin: 0;
+                font-size: 1.5rem;
+            }
+
+            #main-container {
+                display: flex;
+                flex: 1;
+                overflow: hidden;
+            }
+
+            #blocklyDiv {
+                flex: 2;
+                height: 100%;
+            }
+
+            #outputDiv {
+                flex: 1;
+                background-color: #1e1e1e;
+                color: #d4d4d4;
+                padding: 1rem;
+                overflow: auto;
+                border-left: 1px solid #ccc;
+                font-family: 'Consolas', 'Monaco', monospace;
+                display: flex;
+                flex-direction: column;
+            }
+
+            #yamlOutput {
+                white-space: pre;
+                flex: 1;
+                font-family: 'Courier New', monospace;
+                font-size: 14px;
+                line-height: 1.6;
+                overflow: auto;
+            }
+
+            #yamlOutput pre {
+                margin: 0;
+                padding: 0;
+            }
+
+            #yamlOutput code {
+                display: block;
+                background: transparent !important;
+            }
+
+            /* Override Prism theme for better contrast */
+            #yamlOutput code[class*="language-"],
+            #yamlOutput pre[class*="language-"] {
+                background: transparent !important;
+                color: #e2e8f0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            /* APEX Keyword Colorization - matching d3-tree-viewer */
+            /* Metadata keywords - Blue */
+            .token.apex-metadata {
+                color: #64B5F6 !important;
+                font-weight: bold;
+            }
+
+            /* Rules section keywords - Green */
+            .token.apex-rules {
+                color: #81C784 !important;
+                font-weight: bold;
+            }
+
+            /* Enrichment keywords - Purple */
+            .token.apex-enrichment {
+                color: #BA68C8 !important;
+                font-weight: bold;
+            }
+
+            /* Rule Groups keywords - Orange */
+            .token.apex-rulegroup {
+                color: #FFB74D !important;
+                font-weight: bold;
+            }
+
+            /* Data Source keywords - Cyan */
+            .token.apex-datasource {
+                color: #4DD0E1 !important;
+                font-weight: bold;
+            }
+
+            /* Scenario keywords - Pink */
+            .token.apex-scenario {
+                color: #F48FB1 !important;
+                font-weight: bold;
+            }
+
+            /* Pipeline keywords - Lime */
+            .token.apex-pipeline {
+                color: #AED581 !important;
+                font-weight: bold;
+            }
+
+            /* Common keywords - Light Yellow */
+            .token.apex-common {
+                color: #FFE082 !important;
+                font-weight: bold;
+            }
+
+            /* SpEL expressions - Red */
+            .token.apex-spel {
+                color: #EF5350 !important;
+            }
+
+            /* Collapsible sections */
+            .yaml-section {
+                cursor: pointer;
+                user-select: none;
+            }
+            .yaml-section:hover {
+                background-color: rgba(255,255,255,0.05);
+            }
+            .yaml-toggle {
+                display: inline-block;
+                width: 1em;
+                color: #888;
+            }
+            .yaml-collapsed > .yaml-children {
+                display: none;
+            }
+            .yaml-collapsed > .yaml-toggle::before {
+                content: '+';
+            }
+            .yaml-expanded > .yaml-toggle::before {
+                content: '-';
+            }
+            .yaml-children {
+                display: block;
+            }
+            .yaml-placeholder {
+                color: #888;
+                font-style: italic;
+            }
+
+            .btn {
+                background-color: #3498db;
+                color: white;
+                border: none;
+                padding: 0.5rem 1rem;
+                cursor: pointer;
+                border-radius: 4px;
+                font-size: 1rem;
+            }
+
+            .btn:hover {
+                background-color: #2980b9;
+            }
+
+            h2 {
+                margin-top: 0;
+                color: #ecf0f1;
+                font-size: 1.2rem;
+                border-bottom: 1px solid #555;
+                padding-bottom: 0.5rem;
+            }
+        </style>
+    </head>
+
+    <body>
+        <header>
+            <h1>Apex Visual Rule Editor <span style="font-size: 0.8rem; opacity: 0.8;">(Prototype)</span></h1>
+            <div style="display: flex; gap: 0.5rem;">
+                <button class="btn" onclick="openSaveTemplateModal()">Save Template</button>
+                <button class="btn" onclick="openYamlImportModal()">Open in APEX Editor</button>
+                <button class="btn" onclick="downloadYaml()">Download YAML</button>
+            </div>
+        </header>
+
+        <!-- YAML Import Modal -->
+        <div id="yamlImportModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;">
+            <div style="background: #2c3e50; padding: 1.5rem; border-radius: 8px; width: 80%; max-width: 800px; max-height: 80vh; display: flex; flex-direction: column;">
+                <h2 style="color: white; margin: 0 0 1rem 0;">Import APEX YAML Configuration</h2>
+                <textarea id="yamlImportInput" placeholder="Paste your APEX YAML configuration here..." style="flex: 1; min-height: 400px; font-family: 'Consolas', 'Monaco', monospace; font-size: 0.9rem; padding: 1rem; border: none; border-radius: 4px; background: #1e1e1e; color: #d4d4d4; resize: none;"></textarea>
+                <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem;">
+                    <button class="btn" style="background-color: #7f8c8d;" onclick="closeYamlImportModal()">Cancel</button>
+                    <button class="btn" onclick="importYamlToBlocks()">Import</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Save Template Modal -->
+        <div id="saveTemplateModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;">
+            <div style="background: #2c3e50; padding: 1.5rem; border-radius: 8px; width: 400px; display: flex; flex-direction: column;">
+                <h2 style="color: white; margin: 0 0 1rem 0;">Save as Template</h2>
+                <p style="color: #bdc3c7; margin: 0 0 1rem 0; font-size: 0.9rem;">Save the current workspace as a reusable template.</p>
+                <input type="text" id="templateNameInput" placeholder="Template name..." style="padding: 0.75rem; border: none; border-radius: 4px; background: #1e1e1e; color: #d4d4d4; font-size: 1rem; margin-bottom: 1rem;">
+                <textarea id="templateDescInput" placeholder="Description (optional)..." style="height: 80px; font-family: inherit; font-size: 0.9rem; padding: 0.75rem; border: none; border-radius: 4px; background: #1e1e1e; color: #d4d4d4; resize: none; margin-bottom: 1rem;"></textarea>
+                <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+                    <button class="btn" style="background-color: #7f8c8d;" onclick="closeSaveTemplateModal()">Cancel</button>
+                    <button class="btn" onclick="saveTemplate()">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manage Templates Modal -->
+        <div id="manageTemplatesModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;">
+            <div style="background: #2c3e50; padding: 1.5rem; border-radius: 8px; width: 500px; max-height: 80vh; display: flex; flex-direction: column;">
+                <h2 style="color: white; margin: 0 0 1rem 0;">Manage Templates</h2>
+                <div id="templatesList" style="flex: 1; overflow-y: auto; max-height: 400px;"></div>
+                <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem;">
+                    <button class="btn" style="background-color: #7f8c8d;" onclick="closeManageTemplatesModal()">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="main-container">
+            <div id="blocklyDiv"></div>
+            <div id="outputDiv">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2 style="margin: 0;">Generated YAML</h2>
+                    <div style="display: flex; gap: 0.25rem; align-items: center;">
+                        <button class="btn" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; min-width: 28px;" onclick="zoomYaml(-1)" title="Zoom out">-</button>
+                        <span id="zoomLevel" style="font-size: 0.7rem; color: #aaa; min-width: 35px; text-align: center;">14px</span>
+                        <button class="btn" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; min-width: 28px;" onclick="zoomYaml(1)" title="Zoom in">+</button>
+                        <button class="btn" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; margin-left: 0.5rem;" onclick="copyYamlToClipboard()" title="Copy to clipboard">Copy</button>
+                    </div>
+                </div>
+                <div id="yamlOutput"># Drag blocks to generate YAML...</div>
+            </div>
+        </div>
+
+        <xml xmlns="https://developers.google.com/blockly/xml" id="toolbox" style="display: none">
+            <category name="Configuration" colour="#5C81A6">
+                <block type="apex_rule_config"></block>
+                <block type="apex_data_source_config"></block>
+            </category>
+            <category name="Sections" colour="#7C5CA6">
+                <block type="apex_section_data_source_refs"></block>
+                <block type="apex_section_enrichment_groups"></block>
+                <block type="apex_section_enrichments"></block>
+                <block type="apex_section_rule_groups"></block>
+                <block type="apex_section_rules"></block>
+                <block type="apex_section_transformations"></block>
+            </category>
+            <category name="Data Sources" colour="#A65C5C">
+                <block type="apex_data_source_database"></block>
+                <block type="apex_data_source_rest"></block>
+                <block type="apex_data_source_file"></block>
+                <block type="apex_data_source_query"></block>
+                <block type="apex_data_source_endpoint"></block>
+                <block type="apex_data_source_ref"></block>
+            </category>
+            <category name="Rules" colour="#5CA681">
+                <block type="apex_rule"></block>
+                <block type="apex_rule_group"></block>
+                <block type="apex_rule_ref"></block>
+            </category>
+            <category name="Transformations" colour="#A6815C">
+                <block type="apex_conditional_transformation"></block>
+                <block type="apex_action_set_field"></block>
+            </category>
+            <category name="Enrichments" colour="#A65C81">
+                <block type="apex_enrichment_group"></block>
+                <block type="apex_enrichment_ref"></block>
+                <block type="apex_enrichment_calculation"></block>
+                <block type="apex_enrichment_field"></block>
+                <block type="apex_field_mapping"></block>
+            </category>
+            <category name="Lookups" colour="#805CA6">
+                <block type="apex_enrichment_lookup"></block>
+                <block type="apex_lookup_dataset_reference"></block>
+                <block type="apex_lookup_dataset_database"></block>
+                <block type="apex_lookup_parameter"></block>
+            </category>
+            <category name="Logic" colour="#5C81A6">
+                <block type="apex_condition_compare"></block>
+                <block type="apex_condition_logic"></block>
+                <block type="apex_field_ref"></block>
+                <block type="text"></block>
+                <block type="math_number"></block>
+                <block type="logic_boolean"></block>
+            </category>
+            <sep></sep>
+            <category name="Templates" colour="#E67E22" custom="TEMPLATES"></category>
+        </xml>
+
+        <script>
+            // --- 1. Define Custom Blocks (JSON Array for static blocks) ---
+
+            Blockly.defineBlocksWithJsonArray([
+                {
+                    "type": "apex_rule_config",
+                    "message0": "Configuration %1 ID: %2 %3 Version: %4 %5 Description: %6 %7 Author: %8 %9 Business Domain: %10 %11 Effective Date: %12 %13 Expiration Date: %14 %15 Tags (comma-sep): %16 %17 Sections: %18",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "my-config" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "VERSION", "text": "1.0.0" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DESCRIPTION", "text": "My configuration" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "AUTHOR", "text": "user@example.com" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "BUSINESS_DOMAIN", "text": "Trade Processing" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "EFFECTIVE_DATE", "text": "" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "EXPIRATION_DATE", "text": "" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "TAGS", "text": "tag1, tag2" },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "SECTIONS", "check": "Section" }
+                    ],
+                    "colour": 230,
+                    "tooltip": "Top-level configuration file - drag section blocks here",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_section_data_source_refs",
+                    "message0": "Data Source Refs Section %1 %2",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "DATA_SOURCE_REFS", "check": "DataSourceRef" }
+                    ],
+                    "previousStatement": "Section",
+                    "nextStatement": "Section",
+                    "colour": 0,
+                    "tooltip": "Container for data source references",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_data_source_ref",
+                    "message0": "Data Source Ref %1 Name: %2 %3 Source: %4 %5 Enabled: %6 %7 Description: %8",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "my-db" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "SOURCE", "text": "data-sources/my-db.yaml" },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "ENABLED", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DESCRIPTION", "text": "" }
+                    ],
+                    "previousStatement": "DataSourceRef",
+                    "nextStatement": "DataSourceRef",
+                    "colour": 0,
+                    "tooltip": "Reference to an external data source configuration",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_section_rules",
+                    "message0": "Rules Section %1 %2",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "RULES", "check": "Rule" }
+                    ],
+                    "previousStatement": "Section",
+                    "nextStatement": "Section",
+                    "colour": 120,
+                    "tooltip": "Container for rules",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_section_rule_groups",
+                    "message0": "Rule Groups Section %1 %2",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "RULE_GROUPS", "check": "RuleGroup" }
+                    ],
+                    "previousStatement": "Section",
+                    "nextStatement": "Section",
+                    "colour": 180,
+                    "tooltip": "Container for rule groups",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_section_enrichments",
+                    "message0": "Enrichments Section %1 %2",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "ENRICHMENTS", "check": "Enrichment" }
+                    ],
+                    "previousStatement": "Section",
+                    "nextStatement": "Section",
+                    "colour": 300,
+                    "tooltip": "Container for enrichments",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_section_enrichment_groups",
+                    "message0": "Enrichment Groups Section %1 %2",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "ENRICHMENT_GROUPS", "check": "EnrichmentGroup" }
+                    ],
+                    "previousStatement": "Section",
+                    "nextStatement": "Section",
+                    "colour": 180,
+                    "tooltip": "Container for enrichment groups",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_section_transformations",
+                    "message0": "Transformations Section %1 %2",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "TRANSFORMATIONS", "check": "Transformation" }
+                    ],
+                    "previousStatement": "Section",
+                    "nextStatement": "Section",
+                    "colour": 30,
+                    "tooltip": "Container for transformations",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_rule",
+                    "message0": "Rule %1 ID: %2 %3 Name: %4 %5 Enabled: %6 %7 Message: %8 %9 Severity: %10 %11 Priority (Optional): %12 %13 Category: %14 %15 Result Field (Optional): %16 %17 Condition: %18",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "rule-1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "My Rule" },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "ENABLED", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "MESSAGE", "text": "Rule triggered" },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "SEVERITY", "options": [["ERROR", "ERROR"], ["WARNING", "WARNING"], ["INFO", "INFO"]] },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "PRIORITY", "text": "" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "CATEGORY", "text": "" },
+                        { "type": "input_dummy" },
+                        { "type": "input_value", "name": "RESULT_FIELD", "check": ["String", "Number", "Boolean"] },
+                        { "type": "input_dummy" },
+                        { "type": "input_value", "name": "CONDITION", "check": ["Boolean", "String"] }
+                    ],
+                    "previousStatement": "Rule",
+                    "nextStatement": "Rule",
+                    "colour": 120,
+                    "tooltip": "Defines a single business rule",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_rule_group",
+                    "message0": "Rule Group %1 ID: %2 %3 Name: %4 %5 Enabled: %6 %7 Operator: %8 %9 Rules: %10",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "rule-group-1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "My Rule Group" },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "ENABLED", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "OPERATOR", "options": [["AND", "AND"], ["OR", "OR"]] },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "RULE_IDS", "check": "RuleRef" }
+                    ],
+                    "previousStatement": "RuleGroup",
+                    "nextStatement": "RuleGroup",
+                    "colour": 180,
+                    "tooltip": "Groups rules together with logical operator",
+                    "helpUrl": ""
+                },
+
+                {
+                    "type": "apex_enrichment_group",
+                    "message0": "Enrichment Group %1 ID: %2 %3 Name: %4 %5 Enabled: %6 %7 Operator: %8 %9 Enrichments: %10",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "eg-1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "My Enrichment Group" },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "ENABLED", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "OPERATOR", "options": [["AND", "AND"], ["OR", "OR"]] },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "ENRICHMENT_IDS", "check": "EnrichmentRef" }
+                    ],
+                    "previousStatement": "EnrichmentGroup",
+                    "nextStatement": "EnrichmentGroup",
+                    "colour": 180,
+                    "tooltip": "Groups enrichments together",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_enrichment_ref",
+                    "message0": "Enrichment ID: %1",
+                    "args0": [
+                        { "type": "field_input", "name": "ENRICHMENT_ID", "text": "enrichment-1" }
+                    ],
+                    "previousStatement": "EnrichmentRef",
+                    "nextStatement": "EnrichmentRef",
+                    "colour": 180,
+                    "tooltip": "Reference to an enrichment ID",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_enrichment_calculation",
+                    "message0": "Calculation Enrichment %1 ID: %2 %3 Enabled: %4 %5 Condition: %6 %7 Expression: %8 %9 Result Field: %10",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "calc-1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "ENABLED", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "input_value", "name": "CONDITION", "check": ["Boolean", "String"] },
+                        { "type": "input_dummy" },
+                        { "type": "input_value", "name": "EXPRESSION", "check": ["String", "Number"] },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "RESULT_FIELD", "text": "calculatedValue" }
+                    ],
+                    "previousStatement": "Enrichment",
+                    "nextStatement": "Enrichment",
+                    "colour": 300,
+                    "tooltip": "Performs a calculation and stores the result",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_enrichment_field",
+                    "message0": "Field Enrichment %1 ID: %2 %3 Enabled: %4 %5 Condition: %6 %7 Transformations: %8",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "field-enrich-1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "ENABLED", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "input_value", "name": "CONDITION", "check": ["Boolean", "String"] },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "MAPPINGS", "check": "Transformation" }
+                    ],
+                    "previousStatement": "Enrichment",
+                    "nextStatement": "Enrichment",
+                    "colour": 300,
+                    "tooltip": "Maps or transforms fields",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_field_mapping",
+                    "message0": "Mapping %1 Source: %2 %3 Target: %4 %5 Expression: %6",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "SOURCE", "text": "sourceField" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "TARGET", "text": "targetField" },
+                        { "type": "input_dummy" },
+                        { "type": "input_value", "name": "EXPRESSION", "check": ["String", "Number"] }
+                    ],
+                    "previousStatement": "Transformation",
+                    "nextStatement": "Transformation",
+                    "colour": 330,
+                    "tooltip": "Maps a single field",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_conditional_transformation",
+                    "message0": "Conditional Transformation %1 ID (Optional): %2 %3 Enabled: %4 %5 Condition: %6 %7 Actions (True): %8 %9 Actions (False): %10",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "" },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "ENABLED", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "input_value", "name": "CONDITION", "check": ["Boolean", "String"] },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "ACTIONS_TRUE", "check": "Transformation" },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "ACTIONS_FALSE", "check": "Transformation" }
+                    ],
+                    "previousStatement": "Transformation",
+                    "nextStatement": "Transformation",
+                    "colour": 330,
+                    "tooltip": "Conditionally executes transformations",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_action_set_field",
+                    "message0": "Set Field %1 Field: %2 %3 Value: %4",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "input_value", "name": "FIELD", "check": "String" },
+                        { "type": "input_dummy" },
+                        { "type": "input_value", "name": "VALUE", "check": ["String", "Number", "Boolean"] }
+                    ],
+                    "previousStatement": "Transformation",
+                    "nextStatement": "Transformation",
+                    "colour": 330,
+                    "tooltip": "Sets a field to a specific value",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_field_ref",
+                    "message0": "Field #%1",
+                    "args0": [
+                        { "type": "field_input", "name": "FIELD", "text": "amount" }
+                    ],
+                    "output": "String",
+                    "colour": 290,
+                    "tooltip": "Reference a data field (e.g., #amount)",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_condition_compare",
+                    "message0": "%1 %2 %3",
+                    "args0": [
+                        { "type": "input_value", "name": "A" },
+                        {
+                            "type": "field_dropdown", "name": "OP", "options": [
+                                ["==", "=="], ["!=", "!="], [">", ">"], ["<", "<"], [">=", ">="], ["<=", "<="]
+                            ]
+                        },
+                        { "type": "input_value", "name": "B" }
+                    ],
+                    "output": "Boolean",
+                    "colour": 210,
+                    "tooltip": "Comparison operation",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_condition_logic",
+                    "message0": "%1 %2 %3",
+                    "args0": [
+                        { "type": "input_value", "name": "A", "check": "Boolean" },
+                        { "type": "field_dropdown", "name": "OP", "options": [["AND", "&&"], ["OR", "||"]] },
+                        { "type": "input_value", "name": "B", "check": "Boolean" }
+                    ],
+                    "output": "Boolean",
+                    "colour": 210,
+                    "tooltip": "Logical operation",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_action_log",
+                    "message0": "Log Message %1",
+                    "args0": [
+                        { "type": "field_input", "name": "MSG", "text": "Rule triggered!" }
+                    ],
+                    "previousStatement": null,
+                    "nextStatement": null,
+                    "colour": 160,
+                    "tooltip": "Log a message when rule fires",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_data_source_config",
+                    "message0": "Data Source Config %1 ID: %2 %3 Version: %4 %5 Description: %6 %7 Author: %8 %9 Business Domain: %10 %11 Effective Date: %12 %13 Expiration Date: %14 %15 Tags (comma-sep): %16 %17 Data Sources: %18",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "my-ds-config" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "VERSION", "text": "1.0.0" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DESCRIPTION", "text": "Data Source Configuration" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "AUTHOR", "text": "user@example.com" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "BUSINESS_DOMAIN", "text": "Infrastructure" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "EFFECTIVE_DATE", "text": "" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "EXPIRATION_DATE", "text": "" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "TAGS", "text": "tag1, tag2" },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "DATA_SOURCES", "check": "DataSource" }
+                    ],
+                    "colour": 230,
+                    "tooltip": "Top-level configuration for data sources",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_data_source_database",
+                    "message0": "Database Source %1 ID: %2 %3 Name: %4 %5 Enabled: %6 %7 Description: %8 %9 Host: %10 %11 Port: %12 %13 Database: %14 %15 Username: %16 %17 Password: %18 %19 Queries: %20",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "ds-db-1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "db-source" },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "ENABLED", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DESCRIPTION", "text": "" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "HOST", "text": "localhost" },
+                        { "type": "input_dummy" },
+                        { "type": "field_number", "name": "PORT", "value": 5432 },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DATABASE", "text": "mydb" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "USERNAME", "text": "user" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "PASSWORD", "text": "pass" },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "QUERIES", "check": "DataSourceQuery" }
+                    ],
+                    "previousStatement": "DataSource",
+                    "nextStatement": "DataSource",
+                    "colour": 0,
+                    "tooltip": "Defines a Database data source",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_data_source_rest",
+                    "message0": "REST API Source %1 ID: %2 %3 Name: %4 %5 Enabled: %6 %7 Description: %8 %9 Base URL: %10 %11 Timeout (ms): %12 %13 Endpoints: %14",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "ds-rest-1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "api-source" },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "ENABLED", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DESCRIPTION", "text": "" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "BASE_URL", "text": "https://api.example.com" },
+                        { "type": "input_dummy" },
+                        { "type": "field_number", "name": "TIMEOUT", "value": 30000 },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "ENDPOINTS", "check": "DataSourceEndpoint" }
+                    ],
+                    "previousStatement": "DataSource",
+                    "nextStatement": "DataSource",
+                    "colour": 0,
+                    "tooltip": "Defines a REST API data source",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_data_source_file",
+                    "message0": "File Source %1 ID: %2 %3 Name: %4 %5 Enabled: %6 %7 Description: %8 %9 Base Path: %10 %11 File Pattern: %12 %13 Format: %14",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "ds-file-1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "file-source" },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "ENABLED", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DESCRIPTION", "text": "" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "BASE_PATH", "text": "/data/files" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "FILE_PATTERN", "text": "*.csv" },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "FORMAT", "options": [["CSV", "csv"], ["JSON", "json"], ["XML", "xml"]] }
+                    ],
+                    "previousStatement": "DataSource",
+                    "nextStatement": "DataSource",
+                    "colour": 0,
+                    "tooltip": "Defines a File System data source",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_data_source_endpoint",
+                    "message0": "Endpoint %1 ID: %2 %3 Name: %4 %5 Path: %6",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "ep-1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "endpoint1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "PATH", "text": "/v1/resource" }
+                    ],
+                    "previousStatement": "DataSourceEndpoint",
+                    "nextStatement": "DataSourceEndpoint",
+                    "colour": 0,
+                    "tooltip": "Defines a REST endpoint",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_data_source_query",
+                    "message0": "Query %1 ID: %2 %3 Name: %4 %5 SQL/Path: %6",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "q-1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "query1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "QUERY", "text": "SELECT * FROM table" }
+                    ],
+                    "previousStatement": "DataSourceQuery",
+                    "nextStatement": "DataSourceQuery",
+                    "colour": 0,
+                    "tooltip": "Defines a query for the data source",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_lookup_dataset_reference",
+                    "message0": "Reference Dataset %1 ID: %2 %3 Key Field: %4",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "dataset-1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "KEY_FIELD", "text": "id" }
+                    ],
+                    "output": "LookupDataset",
+                    "colour": 260,
+                    "tooltip": "Reference to a pre-defined dataset",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_lookup_dataset_database",
+                    "message0": "Database Dataset %1 Data Source Ref: %2 %3 Query: %4 %5 Parameters: %6",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DS_REF", "text": "customer-database" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "QUERY", "text": "SELECT * FROM table WHERE id = :id" },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "PARAMETERS", "check": "LookupParameter" }
+                    ],
+                    "output": "LookupDataset",
+                    "colour": 260,
+                    "tooltip": "Database query lookup",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_lookup_parameter",
+                    "message0": "Parameter %1 Field: %2 %3 Type: %4",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "FIELD", "text": "customerId" },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "TYPE", "options": [["String", "string"], ["Integer", "integer"], ["Boolean", "boolean"]] }
+                    ],
+                    "previousStatement": "LookupParameter",
+                    "nextStatement": "LookupParameter",
+                    "colour": 260,
+                    "tooltip": "Query parameter mapping",
+                    "helpUrl": ""
+                },
+            ]);
+
+            // --- 1b. Define Dynamic Blocks ---
+
+            // Helper function to get all rule IDs in the workspace
+            function getRuleOptions() {
+                var workspace = Blockly.getMainWorkspace();
+                if (!workspace) return [['(no rules)', '']];
+
+                var ruleBlocks = workspace.getBlocksByType('apex_rule', false);
+                if (ruleBlocks.length === 0) return [['(no rules)', '']];
+
+                var options = [];
+                ruleBlocks.forEach(function(block) {
+                    var id = block.getFieldValue('ID');
+                    if (id) {
+                        options.push([id, id]);
+                    }
+                });
+
+                return options.length > 0 ? options : [['(no rules)', '']];
+            }
+
+            // Rule Reference block with dynamic dropdown
+            Blockly.Blocks['apex_rule_ref'] = {
+                init: function() {
+                    this.appendDummyInput()
+                        .appendField("Rule ID:")
+                        .appendField(new Blockly.FieldDropdown(getRuleOptions), "RULE_ID");
+                    this.setPreviousStatement(true, "RuleRef");
+                    this.setNextStatement(true, "RuleRef");
+                    this.setColour(180);
+                    this.setTooltip("Reference to a rule ID");
+                }
+            };
+
+            // Lookup Enrichment block
+            Blockly.Blocks['apex_enrichment_lookup'] = {
+                init: function () {
+                    this.appendDummyInput()
+                        .appendField("Lookup Enrichment");
+                    this.appendDummyInput()
+                        .appendField("ID:")
+                        .appendField(new Blockly.FieldTextInput("lookup-1"), "ID");
+                    this.appendDummyInput()
+                        .appendField("Enabled:")
+                        .appendField(new Blockly.FieldCheckbox("TRUE"), "ENABLED");
+                    this.appendValueInput("CONDITION")
+                        .setCheck(["Boolean", "String"])
+                        .appendField("Condition:");
+                    this.appendValueInput("KEY")
+                        .setCheck("String")
+                        .appendField("Lookup Key:");
+                    this.appendValueInput("DATASET")
+                        .setCheck("LookupDataset")
+                        .appendField("Dataset Config:");
+                    this.appendStatementInput("MAPPINGS")
+                        .setCheck("Transformation")
+                        .appendField("Mappings:");
+                    this.setPreviousStatement(true, "Enrichment");
+                    this.setNextStatement(true, "Enrichment");
+                    this.setColour(300);
+                    this.setTooltip("Look up data from an external dataset");
+                }
+            };
+
+            // --- 2. Define Generators (Block -> Object Model) ---
+
+            const apexGenerator = new Blockly.Generator('APEX');
+
+            apexGenerator.forBlock['apex_rule_config'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const version = block.getFieldValue('VERSION');
+                const description = block.getFieldValue('DESCRIPTION');
+                const author = block.getFieldValue('AUTHOR');
+                const businessDomain = block.getFieldValue('BUSINESS_DOMAIN');
+                const effectiveDate = block.getFieldValue('EFFECTIVE_DATE');
+                const expirationDate = block.getFieldValue('EXPIRATION_DATE');
+                const tagsStr = block.getFieldValue('TAGS');
+                const sectionsCode = generator.statementToCode(block, 'SECTIONS');
+
+                // Parse sections
+                let rules = [];
+                let ruleGroups = [];
+                let enrichments = [];
+                let enrichmentGroups = [];
+                let transformations = [];
+                let dataSourceRefs = [];
+
+                if (sectionsCode) {
+                    const sections = JSON.parse(`[${sectionsCode.replace(/,\s*$/, '')}]`);
+                    sections.forEach(section => {
+                        if (section.type === 'rules') rules = section.content;
+                        if (section.type === 'rule-groups') ruleGroups = section.content;
+                        if (section.type === 'enrichments') enrichments = section.content;
+                        if (section.type === 'enrichment-groups') enrichmentGroups = section.content;
+                        if (section.type === 'transformations') transformations = section.content;
+                        if (section.type === 'data-source-refs') dataSourceRefs = section.content;
+                    });
+                }
+
+                const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(t => t.length > 0) : [];
+
+                const metadata = {
+                    id: id,
+                    type: transformations.length > 0 ? "transformation-config" : "rule-config",
+                    version: version
+                };
+
+                // Conditionally add optional fields
+                if (description) metadata.description = description;
+                if (author) metadata.author = author;
+                if (businessDomain) metadata["business-domain"] = businessDomain;
+                if (effectiveDate) metadata["effective-date"] = effectiveDate;
+                if (expirationDate) metadata["expiration-date"] = expirationDate;
+                if (tags.length > 0) metadata.tags = tags;
+
+                const config = {
+                    metadata: metadata
+                };
+
+                // Only add non-empty sections
+                if (dataSourceRefs.length > 0) config["data-source-refs"] = dataSourceRefs;
+                if (rules.length > 0) config.rules = rules;
+                if (ruleGroups.length > 0) config["rule-groups"] = ruleGroups;
+                if (enrichments.length > 0) config.enrichments = enrichments;
+                if (enrichmentGroups.length > 0) config["enrichment-groups"] = enrichmentGroups;
+                if (transformations.length > 0) config.transformations = transformations;
+
+                return JSON.stringify(config, null, 2);
+            };
+
+            apexGenerator.forBlock['apex_section_data_source_refs'] = function (block, generator) {
+                const refsCode = generator.statementToCode(block, 'DATA_SOURCE_REFS');
+                const refs = refsCode ? JSON.parse(`[${refsCode.replace(/,\s*$/, '')}]`) : [];
+                return JSON.stringify({ type: 'data-source-refs', content: refs }) + ',';
+            };
+
+            apexGenerator.forBlock['apex_data_source_ref'] = function (block, generator) {
+                const name = block.getFieldValue('NAME');
+                const source = block.getFieldValue('SOURCE');
+                const enabled = block.getFieldValue('ENABLED') === 'TRUE';
+                const description = block.getFieldValue('DESCRIPTION');
+
+                const refObj = {
+                    name: name,
+                    source: source,
+                    enabled: enabled
+                };
+
+                if (description) {
+                    refObj.description = description;
+                }
+
+                return JSON.stringify(refObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_data_source_config'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const version = block.getFieldValue('VERSION');
+                const description = block.getFieldValue('DESCRIPTION');
+                const author = block.getFieldValue('AUTHOR');
+                const businessDomain = block.getFieldValue('BUSINESS_DOMAIN');
+                const effectiveDate = block.getFieldValue('EFFECTIVE_DATE');
+                const expirationDate = block.getFieldValue('EXPIRATION_DATE');
+                const tagsStr = block.getFieldValue('TAGS');
+                const dataSourcesCode = generator.statementToCode(block, 'DATA_SOURCES');
+
+                const dataSources = dataSourcesCode ? JSON.parse(`[${dataSourcesCode.replace(/,\s*$/, '')}]`) : [];
+                const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(t => t.length > 0) : [];
+
+                const metadata = {
+                    id: id,
+                    type: "data-source-config",
+                    version: version,
+                    description: description
+                };
+
+                // Conditionally add optional fields
+                if (author) metadata.author = author;
+                if (businessDomain) metadata["business-domain"] = businessDomain;
+                if (effectiveDate) metadata["effective-date"] = effectiveDate;
+                if (expirationDate) metadata["expiration-date"] = expirationDate;
+                if (tags.length > 0) metadata.tags = tags;
+
+                const config = {
+                    metadata: metadata,
+                    "data-sources": dataSources
+                };
+
+                return JSON.stringify(config, null, 2);
+            };
+
+            apexGenerator.forBlock['apex_data_source_database'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const name = block.getFieldValue('NAME');
+                const enabled = block.getFieldValue('ENABLED') === 'TRUE';
+                const description = block.getFieldValue('DESCRIPTION');
+                const host = block.getFieldValue('HOST');
+                const port = block.getFieldValue('PORT');
+                const database = block.getFieldValue('DATABASE');
+                const username = block.getFieldValue('USERNAME');
+                const password = block.getFieldValue('PASSWORD');
+                const queriesCode = generator.statementToCode(block, 'QUERIES');
+
+                const queries = queriesCode ? JSON.parse(`[${queriesCode.replace(/,\s*$/, '')}]`) : [];
+
+                const dsObj = {
+                    id: id,
+                    name: name,
+                    enabled: enabled,
+                    type: "DATABASE",
+                    "connection-config": {
+                        host: host,
+                        port: parseInt(port),
+                        database: database,
+                        username: username,
+                        password: password
+                    },
+                    queries: queries
+                };
+
+                if (description) dsObj.description = description;
+
+                return JSON.stringify(dsObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_data_source_rest'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const name = block.getFieldValue('NAME');
+                const enabled = block.getFieldValue('ENABLED') === 'TRUE';
+                const description = block.getFieldValue('DESCRIPTION');
+                const baseUrl = block.getFieldValue('BASE_URL');
+                const timeout = block.getFieldValue('TIMEOUT');
+                const endpointsCode = generator.statementToCode(block, 'ENDPOINTS');
+
+                const endpoints = endpointsCode ? JSON.parse(`[${endpointsCode.replace(/,\s*$/, '')}]`) : [];
+
+                const dsObj = {
+                    id: id,
+                    name: name,
+                    enabled: enabled,
+                    type: "REST_API",
+                    "connection-config": {
+                        "base-url": baseUrl,
+                        timeout: parseInt(timeout)
+                    },
+                    endpoints: endpoints
+                };
+
+                if (description) dsObj.description = description;
+
+                return JSON.stringify(dsObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_data_source_file'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const name = block.getFieldValue('NAME');
+                const enabled = block.getFieldValue('ENABLED') === 'TRUE';
+                const description = block.getFieldValue('DESCRIPTION');
+                const basePath = block.getFieldValue('BASE_PATH');
+                const filePattern = block.getFieldValue('FILE_PATTERN');
+                const format = block.getFieldValue('FORMAT');
+
+                const dsObj = {
+                    id: id,
+                    name: name,
+                    enabled: enabled,
+                    type: "FILE_SYSTEM",
+                    "connection-config": {
+                        "base-path": basePath,
+                        "file-pattern": filePattern,
+                        format: format
+                    }
+                };
+
+                if (description) dsObj.description = description;
+
+                return JSON.stringify(dsObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_data_source_query'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const name = block.getFieldValue('NAME');
+                const query = block.getFieldValue('QUERY');
+
+                const queryObj = {
+                    id: id,
+                    name: name,
+                    query: query
+                };
+
+                return JSON.stringify(queryObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_data_source_endpoint'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const name = block.getFieldValue('NAME');
+                const path = block.getFieldValue('PATH');
+
+                const endpointObj = {
+                    id: id,
+                    name: name,
+                    path: path
+                };
+
+                return JSON.stringify(endpointObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_section_rules'] = function (block, generator) {
+                const rulesCode = generator.statementToCode(block, 'RULES');
+                const rules = rulesCode ? JSON.parse(`[${rulesCode.replace(/,\s*$/, '')}]`) : [];
+                return JSON.stringify({ type: 'rules', content: rules }) + ',';
+            };
+
+            apexGenerator.forBlock['apex_section_rule_groups'] = function (block, generator) {
+                const ruleGroupsCode = generator.statementToCode(block, 'RULE_GROUPS');
+                const ruleGroups = ruleGroupsCode ? JSON.parse(`[${ruleGroupsCode.replace(/,\s*$/, '')}]`) : [];
+                return JSON.stringify({ type: 'rule-groups', content: ruleGroups }) + ',';
+            };
+
+            apexGenerator.forBlock['apex_section_enrichments'] = function (block, generator) {
+                const enrichmentsCode = generator.statementToCode(block, 'ENRICHMENTS');
+                const enrichments = enrichmentsCode ? JSON.parse(`[${enrichmentsCode.replace(/,\s*$/, '')}]`) : [];
+                return JSON.stringify({ type: 'enrichments', content: enrichments }) + ',';
+            };
+
+            apexGenerator.forBlock['apex_section_enrichment_groups'] = function (block, generator) {
+                const enrichmentGroupsCode = generator.statementToCode(block, 'ENRICHMENT_GROUPS');
+                const enrichmentGroups = enrichmentGroupsCode ? JSON.parse(`[${enrichmentGroupsCode.replace(/,\s*$/, '')}]`) : [];
+                return JSON.stringify({ type: 'enrichment-groups', content: enrichmentGroups }) + ',';
+            };
+
+            apexGenerator.forBlock['apex_section_transformations'] = function (block, generator) {
+                const transformationsCode = generator.statementToCode(block, 'TRANSFORMATIONS');
+                const transformations = transformationsCode ? JSON.parse(`[${transformationsCode.replace(/,\s*$/, '')}]`) : [];
+                return JSON.stringify({ type: 'transformations', content: transformations }) + ',';
+            };
+
+            apexGenerator.forBlock['apex_rule'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const name = block.getFieldValue('NAME');
+                const enabled = block.getFieldValue('ENABLED') === 'TRUE';
+                const message = block.getFieldValue('MESSAGE');
+                const severity = block.getFieldValue('SEVERITY');
+                const priority = block.getFieldValue('PRIORITY');
+                const category = block.getFieldValue('CATEGORY');
+                const resultFieldCode = generator.valueToCode(block, 'RESULT_FIELD', 0);
+                const condition = generator.valueToCode(block, 'CONDITION', 0) || "true";
+
+                const ruleObj = {
+                    id: id,
+                    name: name,
+                    enabled: enabled,
+                    message: message,
+                    severity: severity,
+                    condition: condition.replace(/^"|"$/g, '')
+                };
+
+                if (priority && !isNaN(priority) && priority.trim() !== '') {
+                    ruleObj.priority = parseInt(priority);
+                }
+                if (category) ruleObj.category = category;
+                if (resultFieldCode) {
+                    ruleObj["result-field"] = resultFieldCode.replace(/^['"]|['"]$/g, '');
+                }
+
+                return JSON.stringify(ruleObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_rule_group'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const name = block.getFieldValue('NAME');
+                const enabled = block.getFieldValue('ENABLED') === 'TRUE';
+                const operator = block.getFieldValue('OPERATOR');
+                const ruleIdsCode = generator.statementToCode(block, 'RULE_IDS');
+
+                const ruleIds = ruleIdsCode ? JSON.parse(`[${ruleIdsCode.replace(/,\s*$/, '')}]`) : [];
+
+                const groupObj = {
+                    id: id,
+                    name: name,
+                    enabled: enabled,
+                    operator: operator,
+                    "rule-ids": ruleIds
+                };
+
+                return JSON.stringify(groupObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_rule_ref'] = function (block, generator) {
+                const ruleId = block.getFieldValue('RULE_ID');
+                return `"${ruleId}",`;
+            };
+
+            apexGenerator.forBlock['apex_enrichment_group'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const name = block.getFieldValue('NAME');
+                const enabled = block.getFieldValue('ENABLED') === 'TRUE';
+                const operator = block.getFieldValue('OPERATOR');
+                const enrichmentIdsCode = generator.statementToCode(block, 'ENRICHMENT_IDS');
+
+                const enrichmentIds = enrichmentIdsCode ? JSON.parse(`[${enrichmentIdsCode.replace(/,\s*$/, '')}]`) : [];
+
+                const groupObj = {
+                    id: id,
+                    name: name,
+                    enabled: enabled,
+                    operator: operator,
+                    "enrichment-ids": enrichmentIds
+                };
+
+                return JSON.stringify(groupObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_enrichment_ref'] = function (block, generator) {
+                const enrichmentId = block.getFieldValue('ENRICHMENT_ID');
+                return `"${enrichmentId}",`;
+            };
+
+            apexGenerator.forBlock['apex_enrichment_calculation'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const enabled = block.getFieldValue('ENABLED') === 'TRUE';
+                const condition = generator.valueToCode(block, 'CONDITION', 0);
+                const expression = generator.valueToCode(block, 'EXPRESSION', 0) || "null";
+                const resultField = block.getFieldValue('RESULT_FIELD');
+
+                const enrichmentObj = {
+                    id: id,
+                    enabled: enabled,
+                    type: "calculation-enrichment",
+                    "calculation-config": {
+                        expression: expression.replace(/^"|"$/g, ''),
+                        "result-field": resultField
+                    }
+                };
+                if (condition) {
+                    enrichmentObj.condition = condition.replace(/^"|"$/g, '');
+                }
+
+                return JSON.stringify(enrichmentObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_enrichment_field'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const enabled = block.getFieldValue('ENABLED') === 'TRUE';
+                const condition = generator.valueToCode(block, 'CONDITION', 0);
+                const mappingsCode = generator.statementToCode(block, 'MAPPINGS');
+                const mappings = mappingsCode ? JSON.parse(`[${mappingsCode.replace(/,\s*$/, '')}]`) : [];
+
+                const enrichmentObj = {
+                    id: id,
+                    enabled: enabled,
+                    type: "field-enrichment",
+                    "field-mappings": mappings
+                };
+                if (condition) {
+                    enrichmentObj.condition = condition.replace(/^"|"$/g, '');
+                }
+
+                return JSON.stringify(enrichmentObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_enrichment_lookup'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const enabled = block.getFieldValue('ENABLED') === 'TRUE';
+                const condition = generator.valueToCode(block, 'CONDITION', 0);
+                const key = generator.valueToCode(block, 'KEY', 0) || "null";
+                const datasetCode = generator.valueToCode(block, 'DATASET', 0);
+                const mappingsCode = generator.statementToCode(block, 'MAPPINGS');
+                const mappings = mappingsCode ? JSON.parse(`[${mappingsCode.replace(/,\s*$/, '')}]`) : [];
+
+                let dataset = null;
+                if (datasetCode) {
+                    try {
+                        dataset = JSON.parse(datasetCode);
+                    } catch (e) {
+                        console.error("Error parsing dataset config", e);
+                    }
+                }
+
+                const enrichmentObj = {
+                    id: id,
+                    enabled: enabled,
+                    type: "lookup-enrichment",
+                    "lookup-config": {
+                        "lookup-key": key.replace(/^"|"$/g, '')
+                    },
+                    "field-mappings": mappings
+                };
+
+                if (dataset) {
+                    enrichmentObj["lookup-config"]["lookup-dataset"] = dataset;
+                }
+
+                if (condition) {
+                    enrichmentObj.condition = condition.replace(/^"|"$/g, '');
+                }
+
+                return JSON.stringify(enrichmentObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_lookup_dataset_reference'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const keyField = block.getFieldValue('KEY_FIELD');
+                
+                const datasetObj = {
+                    type: "reference",
+                    id: id,
+                    "key-field": keyField
+                };
+                
+                return [JSON.stringify(datasetObj), 0];
+            };
+
+            apexGenerator.forBlock['apex_lookup_dataset_database'] = function (block, generator) {
+                const dsRef = block.getFieldValue('DS_REF');
+                const query = block.getFieldValue('QUERY');
+                const parametersCode = generator.statementToCode(block, 'PARAMETERS');
+                
+                const parameters = parametersCode ? JSON.parse(`[${parametersCode.replace(/,\s*$/, '')}]`) : [];
+                
+                const datasetObj = {
+                    type: "database",
+                    "data-source-ref": dsRef,
+                    query: query,
+                    parameters: parameters
+                };
+                
+                return [JSON.stringify(datasetObj), 0];
+            };
+
+            apexGenerator.forBlock['apex_lookup_parameter'] = function (block, generator) {
+                const field = block.getFieldValue('FIELD');
+                const type = block.getFieldValue('TYPE');
+                
+                const paramObj = {
+                    field: field,
+                    type: type
+                };
+                
+                return JSON.stringify(paramObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_field_mapping'] = function (block, generator) {
+                const source = block.getFieldValue('SOURCE');
+                const target = block.getFieldValue('TARGET');
+                const expression = generator.valueToCode(block, 'EXPRESSION', 0);
+
+                const mappingObj = {
+                    "target-field": target
+                };
+                if (source) mappingObj["source-field"] = source;
+                if (expression) mappingObj["expression"] = expression.replace(/^"|"$/g, '');
+
+                return JSON.stringify(mappingObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_action_set_field'] = function (block, generator) {
+                const fieldCode = generator.valueToCode(block, 'FIELD', 0) || "'fieldName'";
+                const valueCode = generator.valueToCode(block, 'VALUE', 0) || "null";
+
+                // Process Field
+                let field = fieldCode;
+                if (field.startsWith("'") || field.startsWith('"')) {
+                    field = field.replace(/^['"]|['"]$/g, "");
+                }
+                if (field.startsWith("#")) {
+                    field = field.substring(1);
+                }
+
+                // Process Value
+                let value = valueCode;
+                if (typeof value === 'string') {
+                    if (value.startsWith("'") || value.startsWith('"')) {
+                        value = value.replace(/^['"]|['"]$/g, "");
+                    } else if (value === "true" || value === "false") {
+                        value = (value === "true");
+                    } else if (!isNaN(value) && value.trim() !== '') {
+                        value = Number(value);
+                    }
+                }
+
+                const actionObj = {
+                    "type": "set-field",
+                    "field": field,
+                    "value": value
+                };
+
+                return JSON.stringify(actionObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_conditional_transformation'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const enabled = block.getFieldValue('ENABLED') === 'TRUE';
+                const condition = generator.valueToCode(block, 'CONDITION', 0) || "true";
+                const actionsTrueCode = generator.statementToCode(block, 'ACTIONS_TRUE');
+                const actionsFalseCode = generator.statementToCode(block, 'ACTIONS_FALSE');
+
+                const actionsTrue = actionsTrueCode ? JSON.parse(`[${actionsTrueCode.replace(/,\s*$/, '')}]`) : [];
+                const actionsFalse = actionsFalseCode ? JSON.parse(`[${actionsFalseCode.replace(/,\s*$/, '')}]`) : [];
+
+                const ruleObj = {
+                    "condition": condition.replace(/^"|"$/g, '')
+                };
+
+                if (actionsTrue.length > 0) {
+                    ruleObj["actions-true"] = actionsTrue;
+                }
+                if (actionsFalse.length > 0) {
+                    ruleObj["actions-false"] = actionsFalse;
+                }
+
+                const transformObj = {
+                    "type": "conditional-transformation",
+                    "enabled": enabled,
+                    "transformation-rules": [ ruleObj ]
+                };
+
+                if (id) {
+                    transformObj.id = id;
+                }
+
+                return JSON.stringify(transformObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_field_ref'] = function (block, generator) {
+                const field = block.getFieldValue('FIELD');
+                return [`#${field}`, 0];
+            };
+
+            apexGenerator.forBlock['apex_condition_compare'] = function (block, generator) {
+                const a = generator.valueToCode(block, 'A', 0) || 'null';
+                const op = block.getFieldValue('OP');
+                const b = generator.valueToCode(block, 'B', 0) || 'null';
+                return [`${a} ${op} ${b}`, 0];
+            };
+
+            apexGenerator.forBlock['apex_condition_logic'] = function (block, generator) {
+                const a = generator.valueToCode(block, 'A', 0) || 'false';
+                const op = block.getFieldValue('OP');
+                const b = generator.valueToCode(block, 'B', 0) || 'false';
+                return [`${a} ${op} ${b}`, 0];
+            };
+
+            apexGenerator.forBlock['text'] = function (block, generator) {
+                const text = block.getFieldValue('TEXT');
+                return [`'${text}'`, 0];
+            };
+
+            apexGenerator.forBlock['math_number'] = function (block, generator) {
+                const num = block.getFieldValue('NUM');
+                return [num, 0];
+            };
+
+            apexGenerator.forBlock['logic_boolean'] = function (block, generator) {
+                const bool = block.getFieldValue('BOOL');
+                return [bool.toLowerCase(), 0];
+            };
+
+            apexGenerator.scrub_ = function (block, code) {
+                const nextBlock = block.nextConnection && block.nextConnection.targetBlock();
+                const nextCode = apexGenerator.blockToCode(nextBlock);
+                return code + nextCode;
+            };
+
+            // --- 2b. Custom Context Menu Configuration ---
+            
+            const CONTEXT_MENU_CONFIG = {
+                'apex_rule_config': [
+                    { input: 'SECTIONS', type: 'apex_section_data_source_refs', text: "Add Data Source Refs Section" },
+                    { input: 'SECTIONS', type: 'apex_section_rules', text: "Add Rules Section" },
+                    { input: 'SECTIONS', type: 'apex_section_rule_groups', text: "Add Rule Groups Section" },
+                    { input: 'SECTIONS', type: 'apex_section_enrichments', text: "Add Enrichments Section" },
+                    { input: 'SECTIONS', type: 'apex_section_enrichment_groups', text: "Add Enrichment Groups Section" },
+                    { input: 'SECTIONS', type: 'apex_section_transformations', text: "Add Transformations Section" }
+                ],
+                'apex_data_source_config': [
+                    { input: 'DATA_SOURCES', type: 'apex_data_source_database', text: 'Add Database Source' },
+                    { input: 'DATA_SOURCES', type: 'apex_data_source_rest', text: 'Add REST Source' },
+                    { input: 'DATA_SOURCES', type: 'apex_data_source_file', text: 'Add File Source' }
+                ],
+                'apex_section_data_source_refs': [
+                    { input: 'DATA_SOURCE_REFS', type: 'apex_data_source_ref', text: 'Add Data Source Ref' }
+                ],
+                'apex_section_rules': [
+                    { input: 'RULES', type: 'apex_rule', text: 'Add Rule' }
+                ],
+                'apex_section_rule_groups': [
+                    { input: 'RULE_GROUPS', type: 'apex_rule_group', text: 'Add Rule Group' }
+                ],
+                'apex_section_enrichments': [
+                    { input: 'ENRICHMENTS', type: 'apex_enrichment_calculation', text: 'Add Calculation Enrichment' },
+                    { input: 'ENRICHMENTS', type: 'apex_enrichment_field', text: 'Add Field Enrichment' },
+                    { input: 'ENRICHMENTS', type: 'apex_enrichment_lookup', text: 'Add Lookup Enrichment' }
+                ],
+                'apex_section_enrichment_groups': [
+                    { input: 'ENRICHMENT_GROUPS', type: 'apex_enrichment_group', text: 'Add Enrichment Group' }
+                ],
+                'apex_section_transformations': [
+                    { input: 'TRANSFORMATIONS', type: 'apex_conditional_transformation', text: 'Add Conditional Transformation' },
+                    { input: 'TRANSFORMATIONS', type: 'apex_action_set_field', text: 'Add Set Field Action' }
+                ],
+                'apex_rule': [
+                    { input: 'CONDITION', type: 'apex_condition_compare', text: 'Add Condition (Compare)' },
+                    { input: 'CONDITION', type: 'apex_condition_logic', text: 'Add Condition (Logic)' },
+                    { input: 'RESULT_FIELD', type: 'text', text: 'Add Result Field (Text)' },
+                    { input: 'RESULT_FIELD', type: 'apex_field_ref', text: 'Add Result Field (Ref)' }
+                ],
+                'apex_rule_group': [
+                    { input: 'RULE_IDS', type: 'apex_rule_ref', text: 'Add Rule Reference' }
+                ],
+                'apex_enrichment_group': [
+                    { input: 'ENRICHMENT_IDS', type: 'apex_enrichment_ref', text: 'Add Enrichment Reference' }
+                ],
+                'apex_enrichment_calculation': [
+                    { input: 'CONDITION', type: 'apex_condition_compare', text: 'Add Condition' },
+                    { input: 'EXPRESSION', type: 'text', text: 'Add Expression (Text)' }
+                ],
+                'apex_enrichment_field': [
+                    { input: 'CONDITION', type: 'apex_condition_compare', text: 'Add Condition' },
+                    { input: 'MAPPINGS', type: 'apex_field_mapping', text: 'Add Field Mapping' }
+                ],
+                'apex_field_mapping': [
+                    { input: 'EXPRESSION', type: 'text', text: 'Add Expression (Text)' }
+                ],
+                'apex_enrichment_lookup': [
+                    { input: 'CONDITION', type: 'apex_condition_compare', text: 'Add Condition' },
+                    { input: 'KEY', type: 'text', text: 'Add Key (Text)' },
+                    { input: 'KEY', type: 'apex_field_ref', text: 'Add Key (Field Ref)' },
+                    { input: 'DATASET', type: 'apex_lookup_dataset_reference', text: 'Add Dataset Reference' },
+                    { input: 'DATASET', type: 'apex_lookup_dataset_database', text: 'Add Database Dataset' },
+                    { input: 'MAPPINGS', type: 'apex_field_mapping', text: 'Add Field Mapping' }
+                ],
+                'apex_data_source_database': [
+                    { input: 'QUERIES', type: 'apex_data_source_query', text: 'Add Query' }
+                ],
+                'apex_data_source_rest': [
+                    { input: 'ENDPOINTS', type: 'apex_data_source_endpoint', text: 'Add Endpoint' }
+                ],
+                'apex_lookup_dataset_database': [
+                    { input: 'PARAMETERS', type: 'apex_lookup_parameter', text: 'Add Parameter' }
+                ],
+                'apex_conditional_transformation': [
+                    { input: 'CONDITION', type: 'apex_condition_compare', text: 'Add Condition' },
+                    { input: 'ACTIONS_TRUE', type: 'apex_action_set_field', text: 'Add Action (True)' },
+                    { input: 'ACTIONS_FALSE', type: 'apex_action_set_field', text: 'Add Action (False)' }
+                ],
+                'apex_action_set_field': [
+                    { input: 'FIELD', type: 'apex_field_ref', text: 'Add Field Ref' },
+                    { input: 'VALUE', type: 'text', text: 'Add Text Value' },
+                    { input: 'VALUE', type: 'math_number', text: 'Add Number Value' },
+                    { input: 'VALUE', type: 'logic_boolean', text: 'Add Boolean Value' }
+                ],
+                'apex_condition_compare': [
+                    { input: 'A', type: 'apex_field_ref', text: 'Add Field Ref (Left)' },
+                    { input: 'B', type: 'text', text: 'Add Text Value (Right)' },
+                    { input: 'B', type: 'math_number', text: 'Add Number Value (Right)' }
+                ],
+                'apex_condition_logic': [
+                    { input: 'A', type: 'apex_condition_compare', text: 'Add Comparison (Left)' },
+                    { input: 'A', type: 'apex_condition_logic', text: 'Add Logic Group (Left)' },
+                    { input: 'B', type: 'apex_condition_compare', text: 'Add Comparison (Right)' },
+                    { input: 'B', type: 'apex_condition_logic', text: 'Add Logic Group (Right)' }
+                ]
+            };
+
+            // Configuration for block ID prefixes and field names
+            const BLOCK_ID_CONFIG = {
+                'apex_rule': { prefix: 'rule-', field: 'ID' },
+                'apex_rule_group': { prefix: 'rule-group-', field: 'ID' },
+                'apex_enrichment_calculation': { prefix: 'enrichment-', field: 'ID' },
+                'apex_enrichment_field': { prefix: 'enrichment-', field: 'ID' },
+                'apex_enrichment_lookup': { prefix: 'enrichment-', field: 'ID' },
+                'apex_enrichment_group': { prefix: 'enrichment-group-', field: 'ID' },
+                'apex_conditional_transformation': { prefix: 'transformation-', field: 'ID' },
+                'apex_data_source_database': { prefix: 'datasource-', field: 'ID' },
+                'apex_data_source_rest': { prefix: 'datasource-', field: 'ID' },
+                'apex_data_source_file': { prefix: 'datasource-', field: 'ID' }
+            };
+
+            // Generate unique ID for a block type
+            function generateUniqueId(workspace, blockType) {
+                return generateUniqueIdExcluding(workspace, blockType, null);
+            }
+
+            // Generate unique ID for a block type, excluding a specific block ID
+            function generateUniqueIdExcluding(workspace, blockType, excludeBlockId) {
+                var config = BLOCK_ID_CONFIG[blockType];
+                if (!config) return null;
+
+                var prefix = config.prefix;
+                var allBlocks = workspace.getAllBlocks(false);
+                var existingIds = allBlocks
+                    .filter(function(b) {
+                        // Exclude the specified block
+                        if (excludeBlockId && b.id === excludeBlockId) return false;
+                        return b.getField(config.field);
+                    })
+                    .map(function(b) { return b.getFieldValue(config.field); })
+                    .filter(function(id) { return id && id.startsWith(prefix); });
+
+                var maxNum = 0;
+                existingIds.forEach(function(id) {
+                    var num = parseInt(id.substring(prefix.length), 10);
+                    if (!isNaN(num) && num > maxNum) {
+                        maxNum = num;
+                    }
+                });
+
+                return prefix + (maxNum + 1);
+            }
+
+            // Find the first rule ID in the workspace
+            function findFirstRuleId(workspace) {
+                var allBlocks = workspace.getAllBlocks(false);
+                for (var i = 0; i < allBlocks.length; i++) {
+                    if (allBlocks[i].type === 'apex_rule') {
+                        return allBlocks[i].getFieldValue('ID');
+                    }
+                }
+                return null;
+            }
+
+            // Find the first enrichment ID in the workspace
+            function findFirstEnrichmentId(workspace) {
+                var allBlocks = workspace.getAllBlocks(false);
+                for (var i = 0; i < allBlocks.length; i++) {
+                    var t = allBlocks[i].type;
+                    if (t === 'apex_enrichment_calculation' || t === 'apex_enrichment_field' || t === 'apex_enrichment_lookup') {
+                        return allBlocks[i].getFieldValue('ID');
+                    }
+                }
+                return null;
+            }
+
+            // Create context menu handler for a specific block type
+            function createContextMenuHandler(blockType) {
+                return function(options) {
+                    var menuItems = CONTEXT_MENU_CONFIG[blockType];
+                    var self = this;
+
+                    for (var i = 0; i < menuItems.length; i++) {
+                        (function(item) {
+                            var input = self.getInput(item.input);
+                            if (!input) return;
+
+                            var isStack = input.type === Blockly.NEXT_STATEMENT;
+                            var isConnected = input.connection && input.connection.targetConnection;
+
+                            if (!isStack && isConnected) return;
+
+                            options.push({
+                                enabled: true,
+                                text: item.text,
+                                callback: function() {
+                                    var workspace = self.workspace;
+                                    var newBlock = workspace.newBlock(item.type);
+                                    newBlock.initSvg();
+                                    newBlock.render();
+
+                                    // Auto-generate unique ID for blocks with ID fields
+                                    var uniqueId = generateUniqueId(workspace, item.type);
+                                    if (uniqueId) {
+                                        newBlock.setFieldValue(uniqueId, 'ID');
+                                    }
+
+                                    // If creating a rule reference, use the first rule's ID
+                                    if (item.type === 'apex_rule_ref') {
+                                        var firstRuleId = findFirstRuleId(workspace);
+                                        if (firstRuleId) {
+                                            newBlock.setFieldValue(firstRuleId, 'RULE_ID');
+                                        }
+                                    }
+
+                                    // If creating an enrichment reference, use the first enrichment's ID
+                                    if (item.type === 'apex_enrichment_ref') {
+                                        var firstEnrichmentId = findFirstEnrichmentId(workspace);
+                                        if (firstEnrichmentId) {
+                                            newBlock.setFieldValue(firstEnrichmentId, 'ENRICHMENT_ID');
+                                        }
+                                    }
+
+                                    var parentConnection = input.connection;
+
+                                    if (isStack) {
+                                        while (parentConnection.targetConnection) {
+                                            parentConnection = parentConnection.targetConnection.sourceBlock_.nextConnection;
+                                            if (!parentConnection) break;
+                                        }
+                                        if (parentConnection) {
+                                            parentConnection.connect(newBlock.previousConnection);
+                                        }
+                                    } else {
+                                        var childConnection = newBlock.outputConnection || newBlock.previousConnection;
+                                        parentConnection.connect(childConnection);
+                                    }
+
+                                    newBlock.select();
+                                }
+                            });
+                        })(menuItems[i]);
+                    }
+                };
+            }
+
+            // Apply Context Menus
+            for (var blockType in CONTEXT_MENU_CONFIG) {
+                if (CONTEXT_MENU_CONFIG.hasOwnProperty(blockType) && Blockly.Blocks[blockType]) {
+                    Blockly.Blocks[blockType].customContextMenu = createContextMenuHandler(blockType);
+                }
+            }
+
+            // --- 3. Initialize Workspace ---
+
+            const workspace = Blockly.inject('blocklyDiv', {
+                toolbox: document.getElementById('toolbox'),
+                scrollbars: true,
+                trashcan: true,
+                zoom: {
+                    controls: true,
+                    wheel: true,
+                    startScale: 1.0,
+                    maxScale: 3,
+                    minScale: 0.3,
+                    scaleSpeed: 1.2,
+                    pinch: true
+                }
+            });
+
+            // Register the Templates category callback
+            registerTemplatesCategory();
+
+            // --- 4. Live Update Logic ---
+
+            function updateYaml() {
+                const topBlocks = workspace.getTopBlocks(true); // Order by position
+                if (topBlocks.length === 0) {
+                    document.getElementById('yamlOutput').textContent = "# Drag 'Configuration' or 'Data Source Config' block to start";
+                    return;
+                }
+
+                const configBlocks = topBlocks.filter(b => b.type === 'apex_rule_config' || b.type === 'apex_data_source_config');
+
+                if (configBlocks.length === 0) {
+                    document.getElementById('yamlOutput').innerHTML = '<span class="yaml-comment"># Please start with a \'Configuration\' or \'Data Source Config\' block</span>';
+                    return;
+                }
+
+                try {
+                    const yamlParts = [];
+
+                    configBlocks.forEach(block => {
+                        const jsonStr = apexGenerator.blockToCode(block);
+                        if (jsonStr && jsonStr.trim()) {
+                            const jsonObj = JSON.parse(jsonStr);
+                            const yamlStr = jsyaml.dump(jsonObj);
+                            yamlParts.push(yamlStr);
+                        }
+                    });
+
+                    if (yamlParts.length > 0) {
+                        const yamlText = yamlParts.join('\n---\n');
+                        currentYamlText = yamlText; // Store for copy/download
+                        renderYamlWithPrism(yamlText);
+                    }
+                } catch (e) {
+                    console.error(e);
+                    document.getElementById('yamlOutput').innerHTML = '<pre style="color: #6a9955;"># Error generating YAML: ' + e.message + '</pre>';
+                }
+            }
+
+            // Store current YAML text for copy/download
+            let currentYamlText = '';
+
+            // --- 4b. Render YAML with Prism.js and APEX keyword highlighting ---
+            function renderYamlWithPrism(yamlText) {
+                const outputDiv = document.getElementById('yamlOutput');
+                outputDiv.innerHTML = '<pre><code class="language-yaml" id="yaml-code"></code></pre>';
+
+                const codeElement = document.getElementById('yaml-code');
+                codeElement.textContent = yamlText;
+
+                // Apply Prism syntax highlighting
+                Prism.highlightElement(codeElement);
+
+                // Apply APEX keyword colorization
+                applyApexKeywordColors(codeElement);
+            }
+
+            // APEX keyword categories for colorization (matching d3-tree-viewer)
+            const APEX_KEYWORDS = {
+                metadata: ['metadata', 'id', 'type', 'version', 'description', 'author', 'business-domain', 'effective-date', 'expiration-date', 'tags'],
+                rules: ['rules', 'rule', 'condition', 'message', 'severity', 'priority', 'category', 'result-field', 'error-code', 'success-code'],
+                enrichment: ['enrichments', 'enrichment', 'enrichment-groups', 'field-mappings', 'source-field', 'target-field', 'expression', 'calculation-config', 'lookup-config', 'lookup-key', 'lookup-dataset', 'field-enrichment', 'calculation-enrichment', 'lookup-enrichment'],
+                rulegroup: ['rule-groups', 'rule-group', 'rule-ids', 'operator', 'enrichment-ids'],
+                datasource: ['data-sources', 'data-source', 'data-source-refs', 'connection-config', 'host', 'port', 'database', 'username', 'password', 'base-url', 'timeout', 'queries', 'query', 'endpoints', 'endpoint', 'path', 'base-path', 'file-pattern', 'format', 'parameters'],
+                scenario: ['scenario', 'scenarios', 'input-type', 'rule-config', 'enrichment-config'],
+                pipeline: ['pipeline', 'pipelines', 'stages', 'stage', 'mode', 'error-handling', 'max-retries', 'retry-delay-ms'],
+                common: ['enabled', 'name', 'source', 'value', 'field', 'key-field']
+            };
+
+            function applyApexKeywordColors(codeElement) {
+                // Find all Prism key tokens and apply APEX-specific colors
+                const keyTokens = codeElement.querySelectorAll('.token.key, .token.atrule');
+
+                keyTokens.forEach(token => {
+                    const text = token.textContent.trim();
+
+                    for (const [category, keywords] of Object.entries(APEX_KEYWORDS)) {
+                        if (keywords.includes(text)) {
+                            token.classList.add('apex-' + category);
+                            break;
+                        }
+                    }
+                });
+
+                // Highlight SpEL expressions (strings containing #)
+                const stringTokens = codeElement.querySelectorAll('.token.string');
+                stringTokens.forEach(token => {
+                    if (token.textContent.includes('#')) {
+                        token.classList.add('apex-spel');
+                    }
+                });
+            }
+
+            workspace.addChangeListener(updateYaml);
+
+            // --- 5. Download Function ---
+            function downloadYaml() {
+                const yamlContent = currentYamlText || document.getElementById('yamlOutput').textContent;
+                const blob = new Blob([yamlContent], { type: 'text/yaml' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'apex-rules.yaml';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
+
+            // --- 5a. Copy to Clipboard Function ---
+            function copyYamlToClipboard() {
+                const yamlContent = currentYamlText || document.getElementById('yamlOutput').textContent;
+                const btn = event.target;
+
+                // Create temporary textarea for copying
+                const textarea = document.createElement('textarea');
+                textarea.value = yamlContent;
+                textarea.style.position = 'fixed';
+                textarea.style.left = '-9999px';
+                document.body.appendChild(textarea);
+                textarea.select();
+
+                try {
+                    document.execCommand('copy');
+                    // Brief visual feedback
+                    const originalText = btn.textContent;
+                    btn.textContent = 'Copied!';
+                    setTimeout(() => { btn.textContent = originalText; }, 1000);
+                } catch (err) {
+                    console.error('Failed to copy:', err);
+                    alert('Failed to copy to clipboard');
+                } finally {
+                    document.body.removeChild(textarea);
+                }
+            }
+
+            // --- 5b. Zoom Functions ---
+            let yamlFontSize = 14;
+            const MIN_FONT_SIZE = 8;
+            const MAX_FONT_SIZE = 24;
+
+            function zoomYaml(delta) {
+                yamlFontSize = Math.max(MIN_FONT_SIZE, Math.min(MAX_FONT_SIZE, yamlFontSize + delta));
+                document.getElementById('yamlOutput').style.fontSize = yamlFontSize + 'px';
+                document.getElementById('zoomLevel').textContent = yamlFontSize + 'px';
+            }
+
+            // --- 5c. YAML Import Functions ---
+
+            function openYamlImportModal() {
+                document.getElementById('yamlImportModal').style.display = 'flex';
+                document.getElementById('yamlImportInput').focus();
+            }
+
+            function closeYamlImportModal() {
+                document.getElementById('yamlImportModal').style.display = 'none';
+                document.getElementById('yamlImportInput').value = '';
+            }
+
+            // --- 5d. Template Functions ---
+
+            const TEMPLATES_STORAGE_KEY = 'apex_visual_editor_templates';
+
+            function getTemplates() {
+                try {
+                    const stored = localStorage.getItem(TEMPLATES_STORAGE_KEY);
+                    return stored ? JSON.parse(stored) : [];
+                } catch (e) {
+                    console.error('Error loading templates:', e);
+                    return [];
+                }
+            }
+
+            function saveTemplates(templates) {
+                try {
+                    localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(templates));
+                } catch (e) {
+                    console.error('Error saving templates:', e);
+                    alert('Error saving template: ' + e.message);
+                }
+            }
+
+            function openSaveTemplateModal() {
+                document.getElementById('saveTemplateModal').style.display = 'flex';
+                document.getElementById('templateNameInput').value = '';
+                document.getElementById('templateDescInput').value = '';
+                document.getElementById('templateNameInput').focus();
+            }
+
+            function closeSaveTemplateModal() {
+                document.getElementById('saveTemplateModal').style.display = 'none';
+            }
+
+            function saveTemplate() {
+                const name = document.getElementById('templateNameInput').value.trim();
+                if (!name) {
+                    alert('Please enter a template name.');
+                    return;
+                }
+
+                const description = document.getElementById('templateDescInput').value.trim();
+
+                // Serialize the current workspace
+                const state = Blockly.serialization.workspaces.save(workspace);
+
+                const templates = getTemplates();
+
+                // Check if template with same name exists
+                const existingIndex = templates.findIndex(t => t.name === name);
+                if (existingIndex >= 0) {
+                    if (!confirm('A template with this name already exists. Overwrite?')) {
+                        return;
+                    }
+                    templates[existingIndex] = {
+                        name: name,
+                        description: description,
+                        state: state,
+                        createdAt: templates[existingIndex].createdAt,
+                        updatedAt: new Date().toISOString()
+                    };
+                } else {
+                    templates.push({
+                        name: name,
+                        description: description,
+                        state: state,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    });
+                }
+
+                saveTemplates(templates);
+                closeSaveTemplateModal();
+
+                // Refresh the toolbox to show the new template
+                workspace.updateToolbox(document.getElementById('toolbox'));
+
+                alert('Template "' + name + '" saved successfully!');
+            }
+
+            function loadTemplate(templateName) {
+                const templates = getTemplates();
+                const template = templates.find(t => t.name === templateName);
+
+                if (!template) {
+                    alert('Template not found.');
+                    return;
+                }
+
+                if (workspace.getAllBlocks(false).length > 0) {
+                    if (!confirm('This will replace all current blocks. Continue?')) {
+                        return;
+                    }
+                }
+
+                workspace.clear();
+                Blockly.serialization.workspaces.load(template.state, workspace);
+                updateYaml();
+            }
+
+            function deleteTemplate(templateName) {
+                if (!confirm('Delete template "' + templateName + '"?')) {
+                    return;
+                }
+
+                const templates = getTemplates();
+                const filtered = templates.filter(t => t.name !== templateName);
+                saveTemplates(filtered);
+
+                // Refresh the toolbox
+                workspace.updateToolbox(document.getElementById('toolbox'));
+
+                // Refresh the manage modal if open
+                if (document.getElementById('manageTemplatesModal').style.display === 'flex') {
+                    renderTemplatesList();
+                }
+            }
+
+            function openManageTemplatesModal() {
+                document.getElementById('manageTemplatesModal').style.display = 'flex';
+                renderTemplatesList();
+            }
+
+            function closeManageTemplatesModal() {
+                document.getElementById('manageTemplatesModal').style.display = 'none';
+            }
+
+            function renderTemplatesList() {
+                const templates = getTemplates();
+                const container = document.getElementById('templatesList');
+
+                if (templates.length === 0) {
+                    container.innerHTML = '<p style="color: #bdc3c7; text-align: center;">No templates saved yet.</p>';
+                    return;
+                }
+
+                let html = '';
+                templates.forEach(function(template) {
+                    const date = new Date(template.updatedAt || template.createdAt).toLocaleDateString();
+                    html += '<div style="background: #34495e; padding: 0.75rem; border-radius: 4px; margin-bottom: 0.5rem;">';
+                    html += '<div style="display: flex; justify-content: space-between; align-items: center;">';
+                    html += '<div>';
+                    html += '<strong style="color: white;">' + escapeHtml(template.name) + '</strong>';
+                    html += '<span style="color: #7f8c8d; font-size: 0.8rem; margin-left: 0.5rem;">' + date + '</span>';
+                    if (template.description) {
+                        html += '<p style="color: #bdc3c7; margin: 0.25rem 0 0 0; font-size: 0.85rem;">' + escapeHtml(template.description) + '</p>';
+                    }
+                    html += '</div>';
+                    html += '<div style="display: flex; gap: 0.25rem;">';
+                    html += '<button class="btn" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="loadTemplate(\'' + escapeHtml(template.name).replace(/'/g, "\\'") + '\'); closeManageTemplatesModal();">Load</button>';
+                    html += '<button class="btn" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background-color: #c0392b;" onclick="deleteTemplate(\'' + escapeHtml(template.name).replace(/'/g, "\\'") + '\')">Delete</button>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                });
+
+                container.innerHTML = html;
+            }
+
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            // Register custom toolbox category for Templates
+            // Store button callbacks for testing access
+            var templateButtonCallbacks = {};
+
+            function registerTemplatesCategory() {
+                const templatesCallback = function(ws) {
+                    const templates = getTemplates();
+                    const blockList = [];
+
+                    // Add "Manage Templates" button
+                    const manageButton = document.createElement('button');
+                    manageButton.setAttribute('text', 'Manage Templates');
+                    manageButton.setAttribute('callbackKey', 'manageTemplates');
+                    blockList.push(manageButton);
+
+                    if (templates.length === 0) {
+                        // Add a label indicating no templates
+                        const label = document.createElement('label');
+                        label.setAttribute('text', 'No templates saved');
+                        blockList.push(label);
+                    } else {
+                        // Add a label
+                        const label = document.createElement('label');
+                        label.setAttribute('text', 'Click to load:');
+                        blockList.push(label);
+
+                        // Add each template as a button and register its callback
+                        templates.forEach(function(template) {
+                            const button = document.createElement('button');
+                            button.setAttribute('text', template.name);
+                            const callbackKey = 'loadTemplate_' + template.name;
+                            button.setAttribute('callbackKey', callbackKey);
+                            blockList.push(button);
+
+                            // Create and store callback for this template
+                            var callback = function() {
+                                loadTemplate(template.name);
+                            };
+                            templateButtonCallbacks[callbackKey] = callback;
+
+                            // Register callback for this template (re-registers each time category is opened)
+                            workspace.registerButtonCallback(callbackKey, callback);
+                        });
+                    }
+
+                    return blockList;
+                };
+
+                workspace.registerToolboxCategoryCallback('TEMPLATES', templatesCallback);
+
+                // Register the manage templates button callback
+                workspace.registerButtonCallback('manageTemplates', function() {
+                    openManageTemplatesModal();
+                });
+            }
+
+            // Function to trigger a template button callback (for testing)
+            function triggerTemplateCallback(callbackKey) {
+                if (templateButtonCallbacks[callbackKey]) {
+                    templateButtonCallbacks[callbackKey]();
+                    return true;
+                }
+                return false;
+            }
+
+            function importYamlToBlocks() {
+                const yamlText = document.getElementById('yamlImportInput').value.trim();
+                if (!yamlText) {
+                    alert('Please paste YAML content to import.');
+                    return;
+                }
+
+                try {
+                    const config = jsyaml.load(yamlText);
+                    if (!config || !config.metadata) {
+                        alert('Invalid APEX YAML: missing metadata section.');
+                        return;
+                    }
+
+                    // Clear existing blocks
+                    workspace.clear();
+
+                    // Determine config type and create root block
+                    const configType = config.metadata.type || 'rule-config';
+
+                    if (configType === 'data-source-config') {
+                        createDataSourceConfigBlock(config);
+                    } else {
+                        createRuleConfigBlock(config);
+                    }
+
+                    closeYamlImportModal();
+                    updateYaml();
+
+                } catch (e) {
+                    console.error('YAML Import Error:', e);
+                    alert('Error parsing YAML: ' + e.message);
+                }
+            }
+
+            function createRuleConfigBlock(config) {
+                const block = workspace.newBlock('apex_rule_config');
+                const meta = config.metadata || {};
+
+                block.setFieldValue(meta.id || 'imported-config', 'ID');
+                block.setFieldValue(meta.version || '1.0.0', 'VERSION');
+                block.setFieldValue(meta.description || '', 'DESCRIPTION');
+                block.setFieldValue(meta.author || '', 'AUTHOR');
+                block.setFieldValue(meta['business-domain'] || '', 'BUSINESS_DOMAIN');
+                block.setFieldValue(meta['effective-date'] || '', 'EFFECTIVE_DATE');
+                block.setFieldValue(meta['expiration-date'] || '', 'EXPIRATION_DATE');
+                block.setFieldValue((meta.tags || []).join(', '), 'TAGS');
+
+                block.initSvg();
+                block.render();
+                block.moveBy(50, 50);
+
+                let lastSectionBlock = null;
+
+                // Create Data Source Refs Section
+                if (config['data-source-refs'] && config['data-source-refs'].length > 0) {
+                    const sectionBlock = createSectionBlock('apex_section_data_source_refs', block, 'SECTIONS', lastSectionBlock);
+                    lastSectionBlock = sectionBlock;
+
+                    let lastRefBlock = null;
+                    config['data-source-refs'].forEach(ref => {
+                        const refBlock = workspace.newBlock('apex_data_source_ref');
+                        refBlock.setFieldValue(ref.name || '', 'NAME');
+                        refBlock.setFieldValue(ref.source || '', 'SOURCE');
+                        refBlock.setFieldValue(ref.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                        refBlock.setFieldValue(ref.description || '', 'DESCRIPTION');
+                        refBlock.initSvg();
+                        refBlock.render();
+
+                        connectToStatement(sectionBlock, 'DATA_SOURCE_REFS', refBlock, lastRefBlock);
+                        lastRefBlock = refBlock;
+                    });
+                }
+
+                // Create Rules Section
+                if (config.rules && config.rules.length > 0) {
+                    const sectionBlock = createSectionBlock('apex_section_rules', block, 'SECTIONS', lastSectionBlock);
+                    lastSectionBlock = sectionBlock;
+
+                    let lastRuleBlock = null;
+                    config.rules.forEach(rule => {
+                        const ruleBlock = createRuleBlock(rule);
+                        connectToStatement(sectionBlock, 'RULES', ruleBlock, lastRuleBlock);
+                        lastRuleBlock = ruleBlock;
+                    });
+                }
+
+                // Create Rule Groups Section
+                if (config['rule-groups'] && config['rule-groups'].length > 0) {
+                    const sectionBlock = createSectionBlock('apex_section_rule_groups', block, 'SECTIONS', lastSectionBlock);
+                    lastSectionBlock = sectionBlock;
+
+                    let lastGroupBlock = null;
+                    config['rule-groups'].forEach(group => {
+                        const groupBlock = createRuleGroupBlock(group);
+                        connectToStatement(sectionBlock, 'RULE_GROUPS', groupBlock, lastGroupBlock);
+                        lastGroupBlock = groupBlock;
+                    });
+                }
+
+                // Create Enrichments Section
+                if (config.enrichments && config.enrichments.length > 0) {
+                    const sectionBlock = createSectionBlock('apex_section_enrichments', block, 'SECTIONS', lastSectionBlock);
+                    lastSectionBlock = sectionBlock;
+
+                    let lastEnrichBlock = null;
+                    config.enrichments.forEach(enrich => {
+                        const enrichBlock = createEnrichmentBlock(enrich);
+                        if (enrichBlock) {
+                            connectToStatement(sectionBlock, 'ENRICHMENTS', enrichBlock, lastEnrichBlock);
+                            lastEnrichBlock = enrichBlock;
+                        }
+                    });
+                }
+
+                // Create Enrichment Groups Section
+                if (config['enrichment-groups'] && config['enrichment-groups'].length > 0) {
+                    const sectionBlock = createSectionBlock('apex_section_enrichment_groups', block, 'SECTIONS', lastSectionBlock);
+                    lastSectionBlock = sectionBlock;
+
+                    let lastGroupBlock = null;
+                    config['enrichment-groups'].forEach(group => {
+                        const groupBlock = createEnrichmentGroupBlock(group);
+                        connectToStatement(sectionBlock, 'ENRICHMENT_GROUPS', groupBlock, lastGroupBlock);
+                        lastGroupBlock = groupBlock;
+                    });
+                }
+
+                // Create Transformations Section
+                if (config.transformations && config.transformations.length > 0) {
+                    const sectionBlock = createSectionBlock('apex_section_transformations', block, 'SECTIONS', lastSectionBlock);
+                    lastSectionBlock = sectionBlock;
+
+                    let lastTransformBlock = null;
+                    config.transformations.forEach(transform => {
+                        const transformBlock = createTransformationBlock(transform);
+                        if (transformBlock) {
+                            connectToStatement(sectionBlock, 'TRANSFORMATIONS', transformBlock, lastTransformBlock);
+                            lastTransformBlock = transformBlock;
+                        }
+                    });
+                }
+
+                return block;
+            }
+
+            function createDataSourceConfigBlock(config) {
+                const block = workspace.newBlock('apex_data_source_config');
+                const meta = config.metadata || {};
+
+                block.setFieldValue(meta.id || 'imported-ds-config', 'ID');
+                block.setFieldValue(meta.version || '1.0.0', 'VERSION');
+                block.setFieldValue(meta.description || '', 'DESCRIPTION');
+                block.setFieldValue(meta.author || '', 'AUTHOR');
+                block.setFieldValue(meta['business-domain'] || '', 'BUSINESS_DOMAIN');
+                block.setFieldValue(meta['effective-date'] || '', 'EFFECTIVE_DATE');
+                block.setFieldValue(meta['expiration-date'] || '', 'EXPIRATION_DATE');
+                block.setFieldValue((meta.tags || []).join(', '), 'TAGS');
+
+                block.initSvg();
+                block.render();
+                block.moveBy(50, 50);
+
+                // Create Data Sources
+                if (config['data-sources'] && config['data-sources'].length > 0) {
+                    let lastDsBlock = null;
+                    config['data-sources'].forEach(ds => {
+                        const dsBlock = createDataSourceBlock(ds);
+                        if (dsBlock) {
+                            connectToStatement(block, 'DATA_SOURCES', dsBlock, lastDsBlock);
+                            lastDsBlock = dsBlock;
+                        }
+                    });
+                }
+
+                return block;
+            }
+
+            function createSectionBlock(type, parentBlock, inputName, lastSectionBlock) {
+                const sectionBlock = workspace.newBlock(type);
+                sectionBlock.initSvg();
+                sectionBlock.render();
+
+                const input = parentBlock.getInput(inputName);
+                if (lastSectionBlock) {
+                    lastSectionBlock.nextConnection.connect(sectionBlock.previousConnection);
+                } else if (input && input.connection) {
+                    input.connection.connect(sectionBlock.previousConnection);
+                }
+
+                return sectionBlock;
+            }
+
+            function connectToStatement(parentBlock, inputName, childBlock, lastBlock) {
+                if (lastBlock) {
+                    lastBlock.nextConnection.connect(childBlock.previousConnection);
+                } else {
+                    const input = parentBlock.getInput(inputName);
+                    if (input && input.connection) {
+                        input.connection.connect(childBlock.previousConnection);
+                    }
+                }
+            }
+
+            function createRuleBlock(rule) {
+                const block = workspace.newBlock('apex_rule');
+                block.setFieldValue(rule.id || '', 'ID');
+                block.setFieldValue(rule.name || '', 'NAME');
+                block.setFieldValue(rule.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                block.setFieldValue(rule.message || '', 'MESSAGE');
+                block.setFieldValue(rule.severity || 'ERROR', 'SEVERITY');
+                block.setFieldValue(rule.priority !== undefined ? String(rule.priority) : '', 'PRIORITY');
+                block.setFieldValue(rule.category || '', 'CATEGORY');
+                block.initSvg();
+                block.render();
+
+                // Create condition block if present
+                if (rule.condition) {
+                    const conditionBlock = createConditionBlock(rule.condition);
+                    if (conditionBlock) {
+                        const condInput = block.getInput('CONDITION');
+                        if (condInput && condInput.connection) {
+                            condInput.connection.connect(conditionBlock.outputConnection);
+                        }
+                    }
+                }
+
+                // Create result-field block if present
+                if (rule['result-field']) {
+                    const textBlock = workspace.newBlock('text');
+                    textBlock.setFieldValue(rule['result-field'], 'TEXT');
+                    textBlock.initSvg();
+                    textBlock.render();
+                    const rfInput = block.getInput('RESULT_FIELD');
+                    if (rfInput && rfInput.connection) {
+                        rfInput.connection.connect(textBlock.outputConnection);
+                    }
+                }
+
+                return block;
+            }
+
+            function createRuleGroupBlock(group) {
+                const block = workspace.newBlock('apex_rule_group');
+                block.setFieldValue(group.id || '', 'ID');
+                block.setFieldValue(group.name || '', 'NAME');
+                block.setFieldValue(group.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                block.setFieldValue(group.operator || 'AND', 'OPERATOR');
+                block.initSvg();
+                block.render();
+
+                // Create rule references
+                const ruleIds = group['rule-ids'] || [];
+                let lastRefBlock = null;
+                ruleIds.forEach(ruleId => {
+                    const refBlock = workspace.newBlock('apex_rule_ref');
+                    refBlock.setFieldValue(ruleId, 'RULE_ID');
+                    refBlock.initSvg();
+                    refBlock.render();
+                    connectToStatement(block, 'RULE_IDS', refBlock, lastRefBlock);
+                    lastRefBlock = refBlock;
+                });
+
+                return block;
+            }
+
+            function createEnrichmentGroupBlock(group) {
+                const block = workspace.newBlock('apex_enrichment_group');
+                block.setFieldValue(group.id || '', 'ID');
+                block.setFieldValue(group.name || '', 'NAME');
+                block.setFieldValue(group.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                block.setFieldValue(group.operator || 'AND', 'OPERATOR');
+                block.initSvg();
+                block.render();
+
+                // Create enrichment references
+                const enrichmentIds = group['enrichment-ids'] || [];
+                let lastRefBlock = null;
+                enrichmentIds.forEach(enrichId => {
+                    const refBlock = workspace.newBlock('apex_enrichment_ref');
+                    refBlock.setFieldValue(enrichId, 'ENRICHMENT_ID');
+                    refBlock.initSvg();
+                    refBlock.render();
+                    connectToStatement(block, 'ENRICHMENT_IDS', refBlock, lastRefBlock);
+                    lastRefBlock = refBlock;
+                });
+
+                return block;
+            }
+
+            function createEnrichmentBlock(enrich) {
+                const type = enrich.type || '';
+
+                if (type === 'calculation-enrichment') {
+                    return createCalculationEnrichmentBlock(enrich);
+                } else if (type === 'field-enrichment') {
+                    return createFieldEnrichmentBlock(enrich);
+                } else if (type === 'lookup-enrichment') {
+                    return createLookupEnrichmentBlock(enrich);
+                }
+
+                return null;
+            }
+
+            function createCalculationEnrichmentBlock(enrich) {
+                const block = workspace.newBlock('apex_enrichment_calculation');
+                block.setFieldValue(enrich.id || '', 'ID');
+                block.setFieldValue(enrich.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+
+                const calcConfig = enrich['calculation-config'] || {};
+                block.setFieldValue(calcConfig['result-field'] || '', 'RESULT_FIELD');
+                block.initSvg();
+                block.render();
+
+                // Create condition
+                if (enrich.condition) {
+                    const condBlock = createConditionBlock(enrich.condition);
+                    if (condBlock) {
+                        const condInput = block.getInput('CONDITION');
+                        if (condInput && condInput.connection) {
+                            condInput.connection.connect(condBlock.outputConnection);
+                        }
+                    }
+                }
+
+                // Create expression
+                if (calcConfig.expression) {
+                    const exprBlock = workspace.newBlock('text');
+                    exprBlock.setFieldValue(calcConfig.expression, 'TEXT');
+                    exprBlock.initSvg();
+                    exprBlock.render();
+                    const exprInput = block.getInput('EXPRESSION');
+                    if (exprInput && exprInput.connection) {
+                        exprInput.connection.connect(exprBlock.outputConnection);
+                    }
+                }
+
+                return block;
+            }
+
+            function createFieldEnrichmentBlock(enrich) {
+                const block = workspace.newBlock('apex_enrichment_field');
+                block.setFieldValue(enrich.id || '', 'ID');
+                block.setFieldValue(enrich.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                block.initSvg();
+                block.render();
+
+                // Create condition
+                if (enrich.condition) {
+                    const condBlock = createConditionBlock(enrich.condition);
+                    if (condBlock) {
+                        const condInput = block.getInput('CONDITION');
+                        if (condInput && condInput.connection) {
+                            condInput.connection.connect(condBlock.outputConnection);
+                        }
+                    }
+                }
+
+                // Create field mappings
+                const mappings = enrich['field-mappings'] || [];
+                let lastMappingBlock = null;
+                mappings.forEach(mapping => {
+                    const mappingBlock = createFieldMappingBlock(mapping);
+                    connectToStatement(block, 'MAPPINGS', mappingBlock, lastMappingBlock);
+                    lastMappingBlock = mappingBlock;
+                });
+
+                return block;
+            }
+
+            function createLookupEnrichmentBlock(enrich) {
+                const block = workspace.newBlock('apex_enrichment_lookup');
+                block.setFieldValue(enrich.id || '', 'ID');
+                block.setFieldValue(enrich.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                block.initSvg();
+                block.render();
+
+                // Create condition
+                if (enrich.condition) {
+                    const condBlock = createConditionBlock(enrich.condition);
+                    if (condBlock) {
+                        const condInput = block.getInput('CONDITION');
+                        if (condInput && condInput.connection) {
+                            condInput.connection.connect(condBlock.outputConnection);
+                        }
+                    }
+                }
+
+                // Create lookup key
+                const lookupConfig = enrich['lookup-config'] || {};
+                if (lookupConfig['lookup-key']) {
+                    const keyBlock = createConditionBlock(lookupConfig['lookup-key']);
+                    if (keyBlock) {
+                        const keyInput = block.getInput('KEY');
+                        if (keyInput && keyInput.connection) {
+                            keyInput.connection.connect(keyBlock.outputConnection);
+                        }
+                    }
+                }
+
+                // Create dataset config
+                const dataset = lookupConfig['lookup-dataset'];
+                if (dataset) {
+                    const datasetBlock = createDatasetBlock(dataset);
+                    if (datasetBlock) {
+                        const dsInput = block.getInput('DATASET');
+                        if (dsInput && dsInput.connection) {
+                            dsInput.connection.connect(datasetBlock.outputConnection);
+                        }
+                    }
+                }
+
+                // Create field mappings
+                const mappings = enrich['field-mappings'] || [];
+                let lastMappingBlock = null;
+                mappings.forEach(mapping => {
+                    const mappingBlock = createFieldMappingBlock(mapping);
+                    connectToStatement(block, 'MAPPINGS', mappingBlock, lastMappingBlock);
+                    lastMappingBlock = mappingBlock;
+                });
+
+                return block;
+            }
+
+            function createDatasetBlock(dataset) {
+                const type = dataset.type || 'reference';
+
+                if (type === 'reference') {
+                    const block = workspace.newBlock('apex_lookup_dataset_reference');
+                    block.setFieldValue(dataset.id || '', 'ID');
+                    block.setFieldValue(dataset['key-field'] || '', 'KEY_FIELD');
+                    block.initSvg();
+                    block.render();
+                    return block;
+                } else if (type === 'database') {
+                    const block = workspace.newBlock('apex_lookup_dataset_database');
+                    block.setFieldValue(dataset['data-source-ref'] || '', 'DS_REF');
+                    block.setFieldValue(dataset.query || '', 'QUERY');
+                    block.initSvg();
+                    block.render();
+
+                    // Create parameters
+                    const params = dataset.parameters || [];
+                    let lastParamBlock = null;
+                    params.forEach(param => {
+                        const paramBlock = workspace.newBlock('apex_lookup_parameter');
+                        paramBlock.setFieldValue(param.field || '', 'FIELD');
+                        paramBlock.setFieldValue(param.type || 'string', 'TYPE');
+                        paramBlock.initSvg();
+                        paramBlock.render();
+                        connectToStatement(block, 'PARAMETERS', paramBlock, lastParamBlock);
+                        lastParamBlock = paramBlock;
+                    });
+
+                    return block;
+                }
+
+                return null;
+            }
+
+            function createFieldMappingBlock(mapping) {
+                const block = workspace.newBlock('apex_field_mapping');
+                block.setFieldValue(mapping['source-field'] || '', 'SOURCE');
+                block.setFieldValue(mapping['target-field'] || '', 'TARGET');
+                block.initSvg();
+                block.render();
+
+                if (mapping.expression) {
+                    const exprBlock = workspace.newBlock('text');
+                    exprBlock.setFieldValue(mapping.expression, 'TEXT');
+                    exprBlock.initSvg();
+                    exprBlock.render();
+                    const exprInput = block.getInput('EXPRESSION');
+                    if (exprInput && exprInput.connection) {
+                        exprInput.connection.connect(exprBlock.outputConnection);
+                    }
+                }
+
+                return block;
+            }
+
+            function createTransformationBlock(transform) {
+                const type = transform.type || '';
+
+                if (type === 'conditional-transformation') {
+                    return createConditionalTransformationBlock(transform);
+                } else if (type === 'set-field') {
+                    return createSetFieldBlock(transform);
+                }
+
+                return null;
+            }
+
+            function createConditionalTransformationBlock(transform) {
+                const block = workspace.newBlock('apex_conditional_transformation');
+                block.setFieldValue(transform.id || '', 'ID');
+                block.setFieldValue(transform.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                block.initSvg();
+                block.render();
+
+                // Process transformation rules (take first one for now)
+                const rules = transform['transformation-rules'] || [];
+                if (rules.length > 0) {
+                    const rule = rules[0];
+
+                    // Create condition
+                    if (rule.condition) {
+                        const condBlock = createConditionBlock(rule.condition);
+                        if (condBlock) {
+                            const condInput = block.getInput('CONDITION');
+                            if (condInput && condInput.connection) {
+                                condInput.connection.connect(condBlock.outputConnection);
+                            }
+                        }
+                    }
+
+                    // Create actions-true
+                    const actionsTrue = rule['actions-true'] || [];
+                    let lastTrueBlock = null;
+                    actionsTrue.forEach(action => {
+                        const actionBlock = createTransformationBlock(action);
+                        if (actionBlock) {
+                            connectToStatement(block, 'ACTIONS_TRUE', actionBlock, lastTrueBlock);
+                            lastTrueBlock = actionBlock;
+                        }
+                    });
+
+                    // Create actions-false
+                    const actionsFalse = rule['actions-false'] || [];
+                    let lastFalseBlock = null;
+                    actionsFalse.forEach(action => {
+                        const actionBlock = createTransformationBlock(action);
+                        if (actionBlock) {
+                            connectToStatement(block, 'ACTIONS_FALSE', actionBlock, lastFalseBlock);
+                            lastFalseBlock = actionBlock;
+                        }
+                    });
+                }
+
+                return block;
+            }
+
+            function createSetFieldBlock(action) {
+                const block = workspace.newBlock('apex_action_set_field');
+                block.initSvg();
+                block.render();
+
+                // Create field reference
+                if (action.field) {
+                    const fieldBlock = workspace.newBlock('apex_field_ref');
+                    fieldBlock.setFieldValue(action.field, 'FIELD');
+                    fieldBlock.initSvg();
+                    fieldBlock.render();
+                    const fieldInput = block.getInput('FIELD');
+                    if (fieldInput && fieldInput.connection) {
+                        fieldInput.connection.connect(fieldBlock.outputConnection);
+                    }
+                }
+
+                // Create value
+                if (action.value !== undefined) {
+                    let valueBlock;
+                    if (typeof action.value === 'boolean') {
+                        valueBlock = workspace.newBlock('logic_boolean');
+                        valueBlock.setFieldValue(action.value ? 'TRUE' : 'FALSE', 'BOOL');
+                    } else if (typeof action.value === 'number') {
+                        valueBlock = workspace.newBlock('math_number');
+                        valueBlock.setFieldValue(action.value, 'NUM');
+                    } else {
+                        valueBlock = workspace.newBlock('text');
+                        valueBlock.setFieldValue(String(action.value), 'TEXT');
+                    }
+                    valueBlock.initSvg();
+                    valueBlock.render();
+                    const valueInput = block.getInput('VALUE');
+                    if (valueInput && valueInput.connection) {
+                        valueInput.connection.connect(valueBlock.outputConnection);
+                    }
+                }
+
+                return block;
+            }
+
+            function createDataSourceBlock(ds) {
+                const type = ds.type || '';
+
+                if (type === 'DATABASE') {
+                    const block = workspace.newBlock('apex_data_source_database');
+                    block.setFieldValue(ds.id || '', 'ID');
+                    block.setFieldValue(ds.name || '', 'NAME');
+                    block.setFieldValue(ds.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                    block.setFieldValue(ds.description || '', 'DESCRIPTION');
+
+                    const connConfig = ds['connection-config'] || {};
+                    block.setFieldValue(connConfig.host || 'localhost', 'HOST');
+                    block.setFieldValue(connConfig.port || 5432, 'PORT');
+                    block.setFieldValue(connConfig.database || '', 'DATABASE');
+                    block.setFieldValue(connConfig.username || '', 'USERNAME');
+                    block.setFieldValue(connConfig.password || '', 'PASSWORD');
+                    block.initSvg();
+                    block.render();
+
+                    // Create queries
+                    const queries = ds.queries || [];
+                    let lastQueryBlock = null;
+                    queries.forEach(query => {
+                        const queryBlock = workspace.newBlock('apex_data_source_query');
+                        queryBlock.setFieldValue(query.id || '', 'ID');
+                        queryBlock.setFieldValue(query.name || '', 'NAME');
+                        queryBlock.setFieldValue(query.query || '', 'QUERY');
+                        queryBlock.initSvg();
+                        queryBlock.render();
+                        connectToStatement(block, 'QUERIES', queryBlock, lastQueryBlock);
+                        lastQueryBlock = queryBlock;
+                    });
+
+                    return block;
+                } else if (type === 'REST_API') {
+                    const block = workspace.newBlock('apex_data_source_rest');
+                    block.setFieldValue(ds.id || '', 'ID');
+                    block.setFieldValue(ds.name || '', 'NAME');
+                    block.setFieldValue(ds.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                    block.setFieldValue(ds.description || '', 'DESCRIPTION');
+
+                    const connConfig = ds['connection-config'] || {};
+                    block.setFieldValue(connConfig['base-url'] || '', 'BASE_URL');
+                    block.setFieldValue(connConfig.timeout || 30000, 'TIMEOUT');
+                    block.initSvg();
+                    block.render();
+
+                    // Create endpoints
+                    const endpoints = ds.endpoints || [];
+                    let lastEndpointBlock = null;
+                    endpoints.forEach(ep => {
+                        const epBlock = workspace.newBlock('apex_data_source_endpoint');
+                        epBlock.setFieldValue(ep.id || '', 'ID');
+                        epBlock.setFieldValue(ep.name || '', 'NAME');
+                        epBlock.setFieldValue(ep.path || '', 'PATH');
+                        epBlock.initSvg();
+                        epBlock.render();
+                        connectToStatement(block, 'ENDPOINTS', epBlock, lastEndpointBlock);
+                        lastEndpointBlock = epBlock;
+                    });
+
+                    return block;
+                } else if (type === 'FILE_SYSTEM') {
+                    const block = workspace.newBlock('apex_data_source_file');
+                    block.setFieldValue(ds.id || '', 'ID');
+                    block.setFieldValue(ds.name || '', 'NAME');
+                    block.setFieldValue(ds.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                    block.setFieldValue(ds.description || '', 'DESCRIPTION');
+
+                    const connConfig = ds['connection-config'] || {};
+                    block.setFieldValue(connConfig['base-path'] || '', 'BASE_PATH');
+                    block.setFieldValue(connConfig['file-pattern'] || '', 'FILE_PATTERN');
+                    block.setFieldValue(connConfig.format || 'csv', 'FORMAT');
+                    block.initSvg();
+                    block.render();
+
+                    return block;
+                }
+
+                return null;
+            }
+
+            function createConditionBlock(condition) {
+                if (typeof condition !== 'string') return null;
+
+                const trimmed = condition.trim();
+
+                // Try to parse complex conditions (with && or ||)
+                const logicMatch = trimmed.match(/^(.+?)\s*(&&|\|\|)\s*(.+)$/);
+                if (logicMatch) {
+                    const block = workspace.newBlock('apex_condition_logic');
+                    block.setFieldValue(logicMatch[2], 'OP');
+                    block.initSvg();
+                    block.render();
+
+                    const leftBlock = createConditionBlock(logicMatch[1]);
+                    if (leftBlock) {
+                        const aInput = block.getInput('A');
+                        if (aInput && aInput.connection) {
+                            aInput.connection.connect(leftBlock.outputConnection);
+                        }
+                    }
+
+                    const rightBlock = createConditionBlock(logicMatch[3]);
+                    if (rightBlock) {
+                        const bInput = block.getInput('B');
+                        if (bInput && bInput.connection) {
+                            bInput.connection.connect(rightBlock.outputConnection);
+                        }
+                    }
+
+                    return block;
+                }
+
+                // Try to parse comparison (==, !=, >, <, >=, <=)
+                const compareMatch = trimmed.match(/^(.+?)\s*(==|!=|>=|<=|>|<)\s*(.+)$/);
+                if (compareMatch) {
+                    const block = workspace.newBlock('apex_condition_compare');
+                    block.setFieldValue(compareMatch[2], 'OP');
+                    block.initSvg();
+                    block.render();
+
+                    const leftBlock = createValueBlock(compareMatch[1].trim());
+                    if (leftBlock) {
+                        const aInput = block.getInput('A');
+                        if (aInput && aInput.connection) {
+                            aInput.connection.connect(leftBlock.outputConnection);
+                        }
+                    }
+
+                    const rightBlock = createValueBlock(compareMatch[3].trim());
+                    if (rightBlock) {
+                        const bInput = block.getInput('B');
+                        if (bInput && bInput.connection) {
+                            bInput.connection.connect(rightBlock.outputConnection);
+                        }
+                    }
+
+                    return block;
+                }
+
+                // Fall back to text block for unparseable conditions
+                return createValueBlock(trimmed);
+            }
+
+            function createValueBlock(value) {
+                const trimmed = value.trim();
+
+                // Field reference (#field)
+                if (trimmed.startsWith('#')) {
+                    const block = workspace.newBlock('apex_field_ref');
+                    block.setFieldValue(trimmed.substring(1), 'FIELD');
+                    block.initSvg();
+                    block.render();
+                    return block;
+                }
+
+                // Boolean
+                if (trimmed === 'true' || trimmed === 'false') {
+                    const block = workspace.newBlock('logic_boolean');
+                    block.setFieldValue(trimmed.toUpperCase(), 'BOOL');
+                    block.initSvg();
+                    block.render();
+                    return block;
+                }
+
+                // Number
+                if (!isNaN(trimmed) && trimmed !== '') {
+                    const block = workspace.newBlock('math_number');
+                    block.setFieldValue(Number(trimmed), 'NUM');
+                    block.initSvg();
+                    block.render();
+                    return block;
+                }
+
+                // String (remove quotes if present)
+                let textValue = trimmed;
+                if ((textValue.startsWith("'") && textValue.endsWith("'")) ||
+                    (textValue.startsWith('"') && textValue.endsWith('"'))) {
+                    textValue = textValue.slice(1, -1);
+                }
+
+                const block = workspace.newBlock('text');
+                block.setFieldValue(textValue, 'TEXT');
+                block.initSvg();
+                block.render();
+                return block;
+            }
+
+            // --- 6. Click-to-Fill Support (Event Listener) ---
+            
+            const AUTO_FILL_MAP = {
+                'apex_rule_config': {
+                    'SECTIONS': [
+                        'apex_section_data_source_refs',
+                        'apex_section_rules',
+                        'apex_section_rule_groups',
+                        'apex_section_enrichments',
+                        'apex_section_enrichment_groups',
+                        'apex_section_transformations'
+                    ]
+                },
+                'apex_data_source_config': {
+                    'DATA_SOURCES': [
+                        'apex_data_source_database',
+                        'apex_data_source_rest',
+                        'apex_data_source_file',
+                        'apex_data_source_query',
+                        'apex_data_source_endpoint',
+                        'apex_data_source_ref'
+                    ]
+                },
+                'apex_section_data_source_refs': { 'DATA_SOURCE_REFS': 'apex_data_source_ref' },
+                'apex_section_rules': { 'RULES': 'apex_rule' },
+                'apex_section_rule_groups': { 'RULE_GROUPS': 'apex_rule_group' },
+                'apex_section_enrichments': { 
+                    'ENRICHMENTS': [
+                        'apex_enrichment_calculation',
+                        'apex_enrichment_field',
+                        'apex_enrichment_lookup'
+                    ]
+                },
+                'apex_section_enrichment_groups': { 'ENRICHMENT_GROUPS': 'apex_enrichment_group' },
+                'apex_section_transformations': { 
+                    'TRANSFORMATIONS': [
+                        'apex_conditional_transformation',
+                        'apex_action_set_field'
+                    ]
+                },
+                
+                'apex_rule': {
+                    'CONDITION': 'apex_condition_compare',
+                    'RESULT_FIELD': 'text'
+                },
+                'apex_rule_group': { 'RULE_IDS': 'apex_rule_ref' },
+                
+                'apex_enrichment_group': { 'ENRICHMENT_IDS': 'apex_enrichment_ref' },
+                'apex_enrichment_calculation': { 
+                    'CONDITION': 'apex_condition_compare',
+                    'EXPRESSION': 'text'
+                },
+                'apex_enrichment_field': {
+                    'CONDITION': 'apex_condition_compare',
+                    'MAPPINGS': 'apex_field_mapping'
+                },
+                'apex_enrichment_lookup': {
+                    'CONDITION': 'apex_condition_compare',
+                    'KEY': 'text',
+                    'DATASET': 'apex_lookup_dataset_reference',
+                    'MAPPINGS': 'apex_field_mapping'
+                },
+                
+                'apex_data_source_database': { 'QUERIES': 'apex_data_source_query' },
+                'apex_data_source_rest': { 'ENDPOINTS': 'apex_data_source_endpoint' },
+                'apex_lookup_dataset_database': { 'PARAMETERS': 'apex_lookup_parameter' },
+                
+                'apex_conditional_transformation': {
+                    'CONDITION': 'apex_condition_compare',
+                    'ACTIONS_TRUE': 'apex_action_set_field',
+                    'ACTIONS_FALSE': 'apex_action_set_field'
+                },
+                
+                'apex_action_set_field': {
+                    'FIELD': 'apex_field_ref',
+                    'VALUE': 'text'
+                },
+                'apex_field_mapping': { 'EXPRESSION': 'text' },
+                
+                'apex_condition_compare': {
+                    'A': 'apex_field_ref',
+                    'B': 'text'
+                },
+                'apex_condition_logic': {
+                    'A': 'apex_condition_compare',
+                    'B': 'apex_condition_compare'
+                }
+            };
+
+            let lastClickTime = 0;
+            let lastClickedBlockId = null;
+
+            function onBlockClick(event) {
+                // We only care about click events on blocks
+                if (event.type === Blockly.Events.CLICK && event.blockId) {
+                    const workspace = Blockly.getMainWorkspace();
+                    const block = workspace.getBlockById(event.blockId);
+                    
+                    if (!block) return;
+
+                    // Double Click to Delete
+                    const currentTime = new Date().getTime();
+                    const isDoubleClick = (event.blockId === lastClickedBlockId) && ((currentTime - lastClickTime) < 400);
+                    
+                    lastClickTime = currentTime;
+                    lastClickedBlockId = event.blockId;
+
+                    if (isDoubleClick) {
+                        if (block.isDeletable()) {
+                            block.dispose(true);
+                            updateYaml();
+                        }
+                        return;
+                    }
+                    
+                    const config = AUTO_FILL_MAP[block.type];
+                    if (!config) return;
+
+                    // Find the first empty input defined in our map
+                    for (const inputName in config) {
+                        const input = block.getInput(inputName);
+                        if (!input || !input.connection) continue;
+                        
+                        const targetConfig = config[inputName];
+                        
+                        // Case 1: Array (Rotation/Cycle - Replace existing)
+                        if (Array.isArray(targetConfig)) {
+                            const parentConnection = input.connection;
+                            const targetConnection = parentConnection.targetConnection;
+                            
+                            let nextType = targetConfig[0];
+                            
+                            if (targetConnection) {
+                                // There is already a block connected
+                                const existingBlock = targetConnection.sourceBlock_;
+                                
+                                // Check if the existing block has any children (content)
+                                // We iterate over inputs (like 'RULES', 'ENRICHMENTS') to see if they are populated
+                                const hasChildren = existingBlock.inputList.some(inp => 
+                                    inp.connection && inp.connection.targetConnection
+                                );
+
+                                if (hasChildren) {
+                                    // If populated, do NOT rotate/replace. 
+                                    // This prevents accidental deletion of user data.
+                                    return;
+                                }
+
+                                const idx = targetConfig.indexOf(existingBlock.type);
+                                
+                                // Calculate next type
+                                if (idx !== -1) {
+                                    nextType = targetConfig[(idx + 1) % targetConfig.length];
+                                }
+                                
+                                // Remove the existing block (healStack=true preserves blocks connected after it)
+                                existingBlock.dispose(true);
+                            }
+                            
+                            // Create and connect the new block
+                            createAndConnect(workspace, nextType, parentConnection);
+                            return; 
+                        }
+                        // Case 2: String (Single Input or Append to Stack)
+                        else if (typeof targetConfig === 'string') {
+                            // Check if it's a statement input (stack) - 3 is NEXT_STATEMENT (Input Type)
+                            if (input.type === 3) { 
+                                // Walk to the end of the stack
+                                let connection = input.connection;
+                                while (connection.targetConnection) {
+                                    connection = connection.targetConnection.sourceBlock_.nextConnection;
+                                    if (!connection) break; 
+                                }
+                                if (connection) {
+                                    createAndConnect(workspace, targetConfig, connection);
+                                    return;
+                                }
+                            } else {
+                                // Value or Dummy input - only fill if empty
+                                if (!input.connection.targetConnection) {
+                                    createAndConnect(workspace, targetConfig, input.connection);
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            function createAndConnect(workspace, type, parentConnection) {
+                 console.log("Auto-filling " + type);
+                 const newBlock = workspace.newBlock(type);
+                 newBlock.initSvg();
+                 newBlock.render();
+                 
+                 const childConnection = newBlock.outputConnection || newBlock.previousConnection;
+                 if (childConnection) {
+                     parentConnection.connect(childConnection);
+                     newBlock.select();
+                     updateYaml();
+                 }
+            }
+
+            workspace.addChangeListener(onBlockClick);
+
+            // Listen for block creation to auto-generate unique IDs
+            workspace.addChangeListener(function(event) {
+                if (event.type === Blockly.Events.BLOCK_CREATE) {
+                    var block = workspace.getBlockById(event.blockId);
+                    if (!block) return;
+
+                    var config = BLOCK_ID_CONFIG[block.type];
+                    if (config) {
+                        var currentId = block.getFieldValue(config.field);
+                        var defaultId = config.prefix + '1';
+
+                        // Only auto-generate if the block has the default ID
+                        // This prevents overwriting manually set IDs
+                        if (currentId === defaultId) {
+                            // Generate unique ID, excluding this block from the count
+                            var uniqueId = generateUniqueIdExcluding(workspace, block.type, block.id);
+                            if (uniqueId) {
+                                block.setFieldValue(uniqueId, config.field);
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Force initial update
+            if (typeof jsyaml === 'undefined') {
+                document.getElementById('yamlOutput').textContent = "# Error: js-yaml library failed to load. Please check your internet connection.";
+            } else {
+                updateYaml();
+            }
+        </script>
+    </body>
+
+</html>
