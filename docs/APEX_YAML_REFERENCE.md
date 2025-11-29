@@ -15,6 +15,8 @@ This section provides a definitive reference for APEX YAML keywords based on act
 
 | Keyword | Category | Required | Type | Description |
 |---------|----------|----------|------|-------------|
+| **actions-false** | TransformationRule | No | List | Actions to execute when transformation rule condition evaluates to false (alias for else-actions) |
+| **actions-true** | TransformationRule | No | List | Actions to execute when transformation rule condition evaluates to true (takes precedence over actions) |
 | **authentication** | DataSource | No | Map | Authentication configuration for external data sources |
 | **author** | Metadata | Conditional | String | Author of the configuration (required for rule-config, enrichment) |
 | **base-path** | DataSource | No | String | Base file system path for file-based data sources |
@@ -49,6 +51,7 @@ This section provides a definitive reference for APEX YAML keywords based on act
 | **enabled** | Rule/Enrichment | No | Boolean | Whether the rule/enrichment is active |
 | **encoding** | DataSource | No | String | Character encoding for file-based sources |
 | **endpoints** | DataSource | No | Map | REST API endpoint definitions |
+| **enrichment-group** | EnrichmentGroup | No | String | Singular reference to another enrichment group for hierarchical composition |
 | **enrichment-refs** | Component | No | List | References to enrichment configuration files |
 | **enrichments** | Document | No | List | Data enrichment configurations |
 | **error-handling** | RuleGroup/EnrichmentGroup | No | String | Exception handling strategy: "fail-fast" (default), "continue-on-error", "skip-on-error" |
@@ -5841,6 +5844,8 @@ This appendix provides an alphabetical reference of **functionally implemented**
 - **accumulator** - Initial value for accumulative chaining
 - **accumulation-rules** - List of rules for accumulative chaining
 - **actions** - List of actions to execute when a rule matches or condition is met
+- **actions-false** - Actions to execute when transformation rule condition evaluates to false (alias for else-actions)
+- **actions-true** - Actions to execute when transformation rule condition evaluates to true (takes precedence over actions)
 - **alert-on-failure** - Boolean flag to trigger alerts when processing fails (used in health checks and pipeline monitoring)
 - **apiVersion** - API version for external data source configurations (type: external-data-config)
 - **authentication** - Authentication configuration for external data sources (username, password, tokens)
@@ -5903,7 +5908,8 @@ This appendix provides an alphabetical reference of **functionally implemented**
 - **enabled** - Boolean flag indicating if rule/enrichment/component is active
 - **endpoint** - Single endpoint URL for REST API
 - **endpoints** - Map of REST API endpoint definitions
-- **enrichment-group-references** - References to other enrichment groups
+- **enrichment-group** - Singular reference to another enrichment group for hierarchical composition
+- **enrichment-group-references** - References to other enrichment groups (plural form)
 - **enrichment-groups** - Enrichment group definitions
 - **enrichment-id** - Unique identifier for an enrichment
 - **enrichment-ids** - List of enrichment IDs in a group
@@ -6208,11 +6214,80 @@ Keywords for data transformations:
 
 - **transformation-rules** - Transformation rule definitions
 - **expression** - SpEL expression for transformation
-- **actions** - Actions to execute
-- **else-actions** - Actions when condition is false
+- **actions** - Actions to execute (legacy, use actions-true for new configurations)
+- **actions-true** - Actions to execute when condition is true (takes precedence over actions)
+- **actions-false** - Actions to execute when condition is false (alias for else-actions)
+- **else-actions** - Actions when condition is false (legacy, use actions-false for new configurations)
 - **mapping** - Single mapping configuration
 - **value** - Static value to set
 - **field** - Field name for operations
+
+#### Conditional Transformation Actions (actions-true / actions-false)
+
+The `actions-true` and `actions-false` keywords provide explicit conditional branching in transformation rules. These are the modern, preferred keywords for conditional transformations.
+
+**Keyword Precedence:**
+- When both `actions` and `actions-true` are specified, `actions-true` takes precedence
+- `actions-false` is an alias for `else-actions` (both work identically)
+
+**Example: Basic Conditional Transformation**
+```yaml
+transformations:
+  - id: "priority-check"
+    type: "conditional-transformation"
+    transformation-rules:
+      - condition: "#root['amount'] > 10000"
+        actions-true:
+          - type: "set-field"
+            field: "priority"
+            value: "high"
+        actions-false:
+          - type: "set-field"
+            field: "priority"
+            value: "normal"
+```
+
+**Example: Nested Conditional Transformations**
+```yaml
+transformations:
+  - id: "complex-nesting"
+    type: "conditional-transformation"
+    transformation-rules:
+      - condition: "#root['level1'] == true"
+        actions-true:
+          - type: "set-field"
+            field: "l1_executed"
+            value: true
+          - type: "conditional-transformation"
+            transformation-rules:
+              - condition: "#root['level2'] == true"
+                actions-true:
+                  - type: "set-field"
+                    field: "l2_result"
+                    value: "true-path"
+                actions-false:
+                  - type: "set-field"
+                    field: "l2_result"
+                    value: "false-path"
+```
+
+**Example: Multiple Sibling Rules**
+```yaml
+transformations:
+  - id: "sibling-rules"
+    type: "conditional-transformation"
+    transformation-rules:
+      - condition: "#root['type'] == 'A'"
+        actions-true:
+          - type: "set-field"
+            field: "mark"
+            value: "A"
+      - condition: "#root['value'] > 10"
+        actions-true:
+          - type: "set-field"
+            field: "size"
+            value: "big"
+```
 
 ### Data Source Keywords
 

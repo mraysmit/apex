@@ -75,16 +75,28 @@ public class PlaygroundController {
 
     /**
      * Display the examples page.
-     * 
+     *
      * @param model Spring MVC model for template rendering
      * @return The examples template name
      */
     @GetMapping("/examples")
     public String examples(Model model) {
         logger.info("Loading playground examples page");
-        
+
         model.addAttribute("title", "APEX Playground - Examples");
-        
+
         return "examples";
+    }
+
+    /**
+     * Redirect to the visual rule editor (Blockly-based prototype).
+     * The editor is served as a static file to avoid Thymeleaf processing.
+     *
+     * @return Redirect to the static HTML file
+     */
+    @GetMapping("/visual-editor")
+    public String visualEditor() {
+        logger.info("Redirecting to APEX Visual Rule Editor");
+        return "redirect:/apex_blocks_prototype.html";
     }
 }
