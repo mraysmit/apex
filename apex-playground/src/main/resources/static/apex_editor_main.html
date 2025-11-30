@@ -657,6 +657,19 @@
             <category name="Configuration" colour="#5C81A6">
                 <block type="apex_rule_config"></block>
                 <block type="apex_data_source_config"></block>
+                <block type="apex_scenario_config"></block>
+                <block type="apex_scenario_registry"></block>
+                <block type="apex_component_config"></block>
+            </category>
+            <category name="Scenarios" colour="#CC66CC">
+                <block type="apex_section_scenario"></block>
+                <block type="apex_classification_rule"></block>
+                <block type="apex_processing_stage"></block>
+                <block type="apex_scenario_ref"></block>
+            </category>
+            <category name="Components" colour="#00A6A6">
+                <block type="apex_file_reference"></block>
+                <block type="apex_data_source_ref"></block>
             </category>
             <category name="Sections" colour="#7C5CA6">
                 <block type="apex_section_data_source_refs"></block>
@@ -665,6 +678,10 @@
                 <block type="apex_section_rule_groups"></block>
                 <block type="apex_section_rules"></block>
                 <block type="apex_section_transformations"></block>
+                <block type="apex_error_recovery"></block>
+            </category>
+            <category name="Error Recovery" colour="#CC3333">
+                <block type="apex_severity_policy"></block>
             </category>
             <category name="Data Sources" colour="#A65C5C">
                 <block type="apex_data_source_database"></block>
@@ -1285,6 +1302,283 @@
                     "tooltip": "Query parameter mapping",
                     "helpUrl": ""
                 },
+                // --- Scenario Blocks ---
+                {
+                    "type": "apex_scenario_config",
+                    "message0": "Scenario Configuration %1 ID: %2 %3 Name: %4 %5 Version: %6 %7 Description: %8 %9 Author: %10 %11 Business Domain: %12 %13 Owner: %14 %15 Tags (comma-sep): %16 %17 Scenario: %18",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "my-scenario" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "My Scenario" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "VERSION", "text": "1.0.0" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DESCRIPTION", "text": "Scenario description" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "AUTHOR", "text": "user@example.com" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "BUSINESS_DOMAIN", "text": "Trade Processing" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "OWNER", "text": "team@example.com" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "TAGS", "text": "scenario, workflow" },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "SCENARIO", "check": "ScenarioSection" }
+                    ],
+                    "colour": 330,
+                    "tooltip": "Top-level scenario configuration file",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_section_scenario",
+                    "message0": "Scenario %1 Scenario ID: %2 %3 Description: %4 %5 Data Types (comma-sep): %6 %7 Classification Rule: %8 %9 Processing Stages: %10",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "SCENARIO_ID", "text": "my-scenario" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DESCRIPTION", "text": "Scenario workflow" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DATA_TYPES", "text": "HashMap, Map" },
+                        { "type": "input_dummy" },
+                        { "type": "input_value", "name": "CLASSIFICATION_RULE", "check": "ClassificationRule" },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "PROCESSING_STAGES", "check": "ProcessingStage" }
+                    ],
+                    "previousStatement": "ScenarioSection",
+                    "nextStatement": "ScenarioSection",
+                    "colour": 330,
+                    "tooltip": "Scenario definition with classification and processing stages",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_classification_rule",
+                    "message0": "Classification Rule %1 Condition: %2 %3 Description: %4",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "input_value", "name": "CONDITION", "check": ["Boolean", "String"] },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DESCRIPTION", "text": "Route matching trades" }
+                    ],
+                    "output": "ClassificationRule",
+                    "colour": 330,
+                    "tooltip": "Classification rule to determine if scenario applies",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_processing_stage",
+                    "message0": "Processing Stage %1 Stage Name: %2 %3 Description: %4 %5 Config File: %6 %7 Execution Order: %8 %9 Failure Policy: %10 %11 Required: %12 %13 Depends On (comma-sep): %14",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "STAGE_NAME", "text": "validation" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DESCRIPTION", "text": "Validate incoming data" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "CONFIG_FILE", "text": "config/validation-rules.yaml" },
+                        { "type": "input_dummy" },
+                        { "type": "field_number", "name": "EXECUTION_ORDER", "value": 1, "min": 1 },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "FAILURE_POLICY", "options": [
+                            ["terminate", "terminate"],
+                            ["continue-with-warnings", "continue-with-warnings"],
+                            ["flag-for-review", "flag-for-review"]
+                        ]},
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "REQUIRED", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DEPENDS_ON", "text": "" }
+                    ],
+                    "previousStatement": "ProcessingStage",
+                    "nextStatement": "ProcessingStage",
+                    "colour": 330,
+                    "tooltip": "Processing stage in the scenario workflow",
+                    "helpUrl": ""
+                },
+                // --- Scenario Registry Blocks ---
+                {
+                    "type": "apex_scenario_registry",
+                    "message0": "Scenario Registry %1 ID: %2 %3 Name: %4 %5 Version: %6 %7 Description: %8 %9 Created By: %10 %11 Routing Strategy: %12 %13 Default Scenario: %14 %15 Scenarios: %16",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "my-registry" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "My Scenario Registry" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "VERSION", "text": "1.0.0" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DESCRIPTION", "text": "Registry description" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "CREATED_BY", "text": "user@example.com" },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "ROUTING_STRATEGY", "options": [
+                            ["type-based", "type-based"],
+                            ["classification-based", "classification-based"]
+                        ]},
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DEFAULT_SCENARIO", "text": "" },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "SCENARIOS", "check": "ScenarioRef" }
+                    ],
+                    "colour": 290,
+                    "tooltip": "Scenario registry - references multiple scenario configuration files",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_scenario_ref",
+                    "message0": "Scenario Reference %1 Scenario ID: %2 %3 Config File: %4 %5 Business Domain: %6",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "SCENARIO_ID", "text": "my-scenario" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "CONFIG_FILE", "text": "scenarios/my-scenario.yaml" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "BUSINESS_DOMAIN", "text": "Trading" }
+                    ],
+                    "previousStatement": "ScenarioRef",
+                    "nextStatement": "ScenarioRef",
+                    "colour": 290,
+                    "tooltip": "Reference to a scenario configuration file",
+                    "helpUrl": ""
+                },
+                // --- Component Reference Blocks ---
+                {
+                    "type": "apex_component_config",
+                    "message0": "Component Configuration %1 ID: %2 %3 Name: %4 %5 Version: %6 %7 Description: %8 %9 Business Domain: %10 %11 Owner: %12 %13 Criticality: %14 %15 SLA (ms): %16 %17 Tags (comma-sep): %18 %19 File References: %20",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "my-component" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "My Component" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "VERSION", "text": "1.0.0" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DESCRIPTION", "text": "Component description" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "BUSINESS_DOMAIN", "text": "Trade Processing" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "OWNER", "text": "team@example.com" },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "CRITICALITY", "options": [
+                            ["high", "high"],
+                            ["medium", "medium"],
+                            ["low", "low"]
+                        ]},
+                        { "type": "input_dummy" },
+                        { "type": "field_number", "name": "SLA_MS", "value": 200, "min": 0 },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "TAGS", "text": "component, reusable" },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "FILE_REFS", "check": "FileReference" }
+                    ],
+                    "colour": 180,
+                    "tooltip": "Component configuration grouping multiple config files",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_file_reference",
+                    "message0": "File Reference %1 Type: %2 %3 File: %4 %5 Execution Order: %6 %7 Failure Policy: %8",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "REF_TYPE", "options": [
+                            ["rule-configurations", "rule-configurations"],
+                            ["enrichment-refs", "enrichment-refs"],
+                            ["component-refs", "component-refs"],
+                            ["config-files", "config-files"]
+                        ]},
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "FILE", "text": "path/to/config.yaml" },
+                        { "type": "input_dummy" },
+                        { "type": "field_number", "name": "EXECUTION_ORDER", "value": 1, "min": 1 },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "FAILURE_POLICY", "options": [
+                            ["terminate", "terminate"],
+                            ["continue-with-warnings", "continue-with-warnings"],
+                            ["flag-for-review", "flag-for-review"]
+                        ]}
+                    ],
+                    "previousStatement": "FileReference",
+                    "nextStatement": "FileReference",
+                    "colour": 180,
+                    "tooltip": "Reference to an external configuration file",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_data_source_ref",
+                    "message0": "Data Source Reference %1 Name: %2 %3 Source: %4 %5 Enabled: %6 %7 Description: %8",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "my-database" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "SOURCE", "text": "data-sources/database-config.yaml" },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "ENABLED", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DESCRIPTION", "text": "Reference to external database configuration" }
+                    ],
+                    "previousStatement": "DataSourceRef",
+                    "nextStatement": "DataSourceRef",
+                    "colour": 180,
+                    "tooltip": "Reference to an external data source configuration file",
+                    "helpUrl": ""
+                },
+                // --- Error Recovery Blocks ---
+                {
+                    "type": "apex_error_recovery",
+                    "message0": "Error Recovery Section %1 Enabled: %2 %3 Log Recovery Attempts: %4 %5 Metrics Enabled: %6 %7 Default Strategy: %8 %9 Severity Policies: %10",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "ENABLED", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "LOG_RECOVERY", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "METRICS_ENABLED", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "DEFAULT_STRATEGY", "options": [
+                            ["CONTINUE_WITH_DEFAULT", "CONTINUE_WITH_DEFAULT"],
+                            ["FAIL_FAST", "FAIL_FAST"],
+                            ["SKIP_RULE", "SKIP_RULE"],
+                            ["RETRY_WITH_SAFE_EXPRESSION", "RETRY_WITH_SAFE_EXPRESSION"]
+                        ]},
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "SEVERITY_POLICIES", "check": "SeverityPolicy" }
+                    ],
+                    "previousStatement": "Section",
+                    "nextStatement": "Section",
+                    "colour": 0,
+                    "tooltip": "Error recovery configuration section - add to Rule Config",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_severity_policy",
+                    "message0": "Severity Policy %1 Severity: %2 %3 Recovery Enabled: %4 %5 Strategy: %6 %7 Max Retries: %8 %9 Retry Delay (ms): %10",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "SEVERITY", "options": [
+                            ["CRITICAL", "CRITICAL"],
+                            ["ERROR", "ERROR"],
+                            ["WARNING", "WARNING"],
+                            ["INFO", "INFO"]
+                        ]},
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "RECOVERY_ENABLED", "checked": false },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "STRATEGY", "options": [
+                            ["FAIL_FAST", "FAIL_FAST"],
+                            ["CONTINUE_WITH_DEFAULT", "CONTINUE_WITH_DEFAULT"],
+                            ["SKIP_RULE", "SKIP_RULE"],
+                            ["RETRY_WITH_SAFE_EXPRESSION", "RETRY_WITH_SAFE_EXPRESSION"]
+                        ]},
+                        { "type": "input_dummy" },
+                        { "type": "field_number", "name": "MAX_RETRIES", "value": 0, "min": 0 },
+                        { "type": "input_dummy" },
+                        { "type": "field_number", "name": "RETRY_DELAY", "value": 100, "min": 0 }
+                    ],
+                    "previousStatement": "SeverityPolicy",
+                    "nextStatement": "SeverityPolicy",
+                    "colour": 0,
+                    "tooltip": "Severity-specific error recovery policy",
+                    "helpUrl": ""
+                },
             ]);
 
             // --- 1b. Define Dynamic Blocks ---
@@ -1473,6 +1767,7 @@
                 let enrichmentGroups = [];
                 let transformations = [];
                 let dataSourceRefs = [];
+                let errorRecovery = null;
 
                 if (sectionsCode) {
                     const sections = JSON.parse(`[${sectionsCode.replace(/,\s*$/, '')}]`);
@@ -1483,6 +1778,7 @@
                         if (section.type === 'enrichment-groups') enrichmentGroups = section.content;
                         if (section.type === 'transformations') transformations = section.content;
                         if (section.type === 'data-source-refs') dataSourceRefs = section.content;
+                        if (section.type === 'error-recovery') errorRecovery = section.content;
                     });
                 }
 
@@ -1506,6 +1802,9 @@
                 const config = {
                     metadata: metadata
                 };
+
+                // Add error-recovery section right after metadata (if present)
+                if (errorRecovery) config["error-recovery"] = errorRecovery;
 
                 // Only add non-empty sections
                 if (dataSourceRefs.length > 0) config["data-source-refs"] = dataSourceRefs;
@@ -2046,6 +2345,327 @@
                 return [bool.toLowerCase(), 0];
             };
 
+            // --- Scenario Generator Functions ---
+
+            apexGenerator.forBlock['apex_scenario_config'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const name = block.getFieldValue('NAME');
+                const version = block.getFieldValue('VERSION');
+                const description = block.getFieldValue('DESCRIPTION');
+                const author = block.getFieldValue('AUTHOR');
+                const businessDomain = block.getFieldValue('BUSINESS_DOMAIN');
+                const owner = block.getFieldValue('OWNER');
+                const tagsStr = block.getFieldValue('TAGS');
+                const scenarioCode = generator.statementToCode(block, 'SCENARIO');
+
+                const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(t => t.length > 0) : [];
+
+                // Parse scenario section
+                let scenarioObj = null;
+                if (scenarioCode) {
+                    try {
+                        const sections = JSON.parse(`[${scenarioCode.replace(/,\s*$/, '')}]`);
+                        if (sections.length > 0) {
+                            scenarioObj = sections[0];
+                        }
+                    } catch (e) {
+                        console.error("Error parsing scenario section", e);
+                    }
+                }
+
+                const metadata = {
+                    id: id,
+                    name: name,
+                    type: "scenario",
+                    version: version
+                };
+
+                // Conditionally add optional fields
+                if (description) metadata.description = description;
+                if (author) metadata.author = author;
+                if (businessDomain) metadata["business-domain"] = businessDomain;
+                if (owner) metadata.owner = owner;
+                if (tags.length > 0) metadata.tags = tags;
+
+                const config = {
+                    metadata: metadata
+                };
+
+                if (scenarioObj) {
+                    config.scenario = scenarioObj;
+                }
+
+                return JSON.stringify(config, null, 2);
+            };
+
+            apexGenerator.forBlock['apex_section_scenario'] = function (block, generator) {
+                const scenarioId = block.getFieldValue('SCENARIO_ID');
+                const description = block.getFieldValue('DESCRIPTION');
+                const dataTypesStr = block.getFieldValue('DATA_TYPES');
+                const classificationRuleCode = generator.valueToCode(block, 'CLASSIFICATION_RULE', 0);
+                const stagesCode = generator.statementToCode(block, 'PROCESSING_STAGES');
+
+                const dataTypes = dataTypesStr ? dataTypesStr.split(',').map(t => t.trim()).filter(t => t.length > 0) : [];
+                const stages = stagesCode ? JSON.parse(`[${stagesCode.replace(/,\s*$/, '')}]`) : [];
+
+                const scenarioObj = {
+                    "scenario-id": scenarioId
+                };
+
+                if (description) scenarioObj.description = description;
+
+                // Parse classification rule
+                if (classificationRuleCode) {
+                    try {
+                        const classRule = JSON.parse(classificationRuleCode);
+                        scenarioObj["classification-rule"] = classRule;
+                    } catch (e) {
+                        console.error("Error parsing classification rule", e);
+                    }
+                }
+
+                if (dataTypes.length > 0) scenarioObj["data-types"] = dataTypes;
+                if (stages.length > 0) scenarioObj["processing-stages"] = stages;
+
+                return JSON.stringify(scenarioObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_classification_rule'] = function (block, generator) {
+                const condition = generator.valueToCode(block, 'CONDITION', 0) || "true";
+                const description = block.getFieldValue('DESCRIPTION');
+
+                const ruleObj = {
+                    condition: condition.replace(/^"|"$/g, '')
+                };
+
+                if (description) ruleObj.description = description;
+
+                return [JSON.stringify(ruleObj), 0];
+            };
+
+            apexGenerator.forBlock['apex_processing_stage'] = function (block, generator) {
+                const stageName = block.getFieldValue('STAGE_NAME');
+                const description = block.getFieldValue('DESCRIPTION');
+                const configFile = block.getFieldValue('CONFIG_FILE');
+                const executionOrder = block.getFieldValue('EXECUTION_ORDER');
+                const failurePolicy = block.getFieldValue('FAILURE_POLICY');
+                const required = block.getFieldValue('REQUIRED') === 'TRUE';
+                const dependsOnStr = block.getFieldValue('DEPENDS_ON');
+
+                const dependsOn = dependsOnStr ? dependsOnStr.split(',').map(t => t.trim()).filter(t => t.length > 0) : [];
+
+                const stageObj = {
+                    "stage-name": stageName,
+                    "config-file": configFile,
+                    "execution-order": parseInt(executionOrder),
+                    "failure-policy": failurePolicy
+                };
+
+                if (description) stageObj.description = description;
+                if (required !== undefined) stageObj.required = required;
+                if (dependsOn.length > 0) stageObj["depends-on"] = dependsOn;
+
+                return JSON.stringify(stageObj) + ',';
+            };
+
+            // --- Scenario Registry Generator Functions ---
+
+            apexGenerator.forBlock['apex_scenario_registry'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const name = block.getFieldValue('NAME');
+                const version = block.getFieldValue('VERSION');
+                const description = block.getFieldValue('DESCRIPTION');
+                const createdBy = block.getFieldValue('CREATED_BY');
+                const routingStrategy = block.getFieldValue('ROUTING_STRATEGY');
+                const defaultScenario = block.getFieldValue('DEFAULT_SCENARIO');
+                const scenariosCode = generator.statementToCode(block, 'SCENARIOS');
+
+                const metadata = {
+                    id: id,
+                    name: name,
+                    version: version,
+                    type: "scenario-registry"
+                };
+
+                if (description) metadata.description = description;
+                if (createdBy) metadata["created-by"] = createdBy;
+
+                const config = { metadata: metadata };
+
+                // Parse scenario references
+                if (scenariosCode) {
+                    try {
+                        const scenarios = JSON.parse(`[${scenariosCode.replace(/,\s*$/, '')}]`);
+                        config.scenarios = scenarios;
+                    } catch (e) {
+                        console.error("Error parsing scenario references", e);
+                    }
+                }
+
+                // Add routing section
+                const routing = {
+                    strategy: routingStrategy
+                };
+                if (defaultScenario) routing["default-scenario"] = defaultScenario;
+                config.routing = routing;
+
+                return JSON.stringify(config, null, 2);
+            };
+
+            apexGenerator.forBlock['apex_scenario_ref'] = function (block, generator) {
+                const scenarioId = block.getFieldValue('SCENARIO_ID');
+                const configFile = block.getFieldValue('CONFIG_FILE');
+                const businessDomain = block.getFieldValue('BUSINESS_DOMAIN');
+
+                const refObj = {
+                    "scenario-id": scenarioId,
+                    "config-file": configFile
+                };
+
+                if (businessDomain) refObj["business-domain"] = businessDomain;
+
+                return JSON.stringify(refObj) + ',';
+            };
+
+            // --- Component Reference Generator Functions ---
+
+            apexGenerator.forBlock['apex_component_config'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const name = block.getFieldValue('NAME');
+                const version = block.getFieldValue('VERSION');
+                const description = block.getFieldValue('DESCRIPTION');
+                const businessDomain = block.getFieldValue('BUSINESS_DOMAIN');
+                const owner = block.getFieldValue('OWNER');
+                const criticality = block.getFieldValue('CRITICALITY');
+                const slaMs = block.getFieldValue('SLA_MS');
+                const tagsStr = block.getFieldValue('TAGS');
+                const fileRefsCode = generator.statementToCode(block, 'FILE_REFS');
+
+                const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(t => t.length > 0) : [];
+
+                const metadata = {
+                    id: id,
+                    name: name,
+                    version: version,
+                    type: "component"
+                };
+
+                if (description) metadata.description = description;
+                if (businessDomain) metadata["business-domain"] = businessDomain;
+                if (owner) metadata.owner = owner;
+                if (criticality) metadata.criticality = criticality;
+                if (slaMs) metadata["sla-ms"] = parseInt(slaMs);
+                if (tags.length > 0) metadata.tags = tags;
+
+                const config = { metadata: metadata };
+
+                // Parse file references and group by type
+                if (fileRefsCode) {
+                    try {
+                        const refs = JSON.parse(`[${fileRefsCode.replace(/,\s*$/, '')}]`);
+                        const grouped = {};
+                        refs.forEach(ref => {
+                            const refType = ref.refType;
+                            delete ref.refType;
+                            if (!grouped[refType]) grouped[refType] = [];
+                            grouped[refType].push(ref);
+                        });
+                        Object.assign(config, grouped);
+                    } catch (e) {
+                        console.error("Error parsing file references", e);
+                    }
+                }
+
+                return JSON.stringify(config, null, 2);
+            };
+
+            apexGenerator.forBlock['apex_file_reference'] = function (block, generator) {
+                const refType = block.getFieldValue('REF_TYPE');
+                const file = block.getFieldValue('FILE');
+                const executionOrder = block.getFieldValue('EXECUTION_ORDER');
+                const failurePolicy = block.getFieldValue('FAILURE_POLICY');
+
+                const refObj = {
+                    refType: refType,
+                    file: file,
+                    "execution-order": parseInt(executionOrder),
+                    "failure-policy": failurePolicy
+                };
+
+                return JSON.stringify(refObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_data_source_ref'] = function (block, generator) {
+                const name = block.getFieldValue('NAME');
+                const source = block.getFieldValue('SOURCE');
+                const enabled = block.getFieldValue('ENABLED') === 'TRUE';
+                const description = block.getFieldValue('DESCRIPTION');
+
+                const refObj = {
+                    name: name,
+                    source: source,
+                    enabled: enabled
+                };
+
+                if (description) refObj.description = description;
+
+                return JSON.stringify(refObj) + ',';
+            };
+
+            // --- Error Recovery Generator Functions ---
+
+            apexGenerator.forBlock['apex_error_recovery'] = function (block, generator) {
+                const enabled = block.getFieldValue('ENABLED') === 'TRUE';
+                const logRecovery = block.getFieldValue('LOG_RECOVERY') === 'TRUE';
+                const metricsEnabled = block.getFieldValue('METRICS_ENABLED') === 'TRUE';
+                const defaultStrategy = block.getFieldValue('DEFAULT_STRATEGY');
+                const policiesCode = generator.statementToCode(block, 'SEVERITY_POLICIES');
+
+                const recoveryObj = {
+                    enabled: enabled,
+                    "log-recovery-attempts": logRecovery,
+                    "metrics-enabled": metricsEnabled,
+                    "default-strategy": defaultStrategy
+                };
+
+                // Parse severity policies
+                if (policiesCode) {
+                    try {
+                        const policies = JSON.parse(`[${policiesCode.replace(/,\s*$/, '')}]`);
+                        const severityPolicies = {};
+                        policies.forEach(policy => {
+                            const severity = policy.severity;
+                            delete policy.severity;
+                            severityPolicies[severity] = policy;
+                        });
+                        recoveryObj["severity-policies"] = severityPolicies;
+                    } catch (e) {
+                        console.error("Error parsing severity policies", e);
+                    }
+                }
+
+                // Return as a section format for apex_rule_config to consume
+                return JSON.stringify({ type: 'error-recovery', content: recoveryObj }) + ',';
+            };
+
+            apexGenerator.forBlock['apex_severity_policy'] = function (block, generator) {
+                const severity = block.getFieldValue('SEVERITY');
+                const recoveryEnabled = block.getFieldValue('RECOVERY_ENABLED') === 'TRUE';
+                const strategy = block.getFieldValue('STRATEGY');
+                const maxRetries = block.getFieldValue('MAX_RETRIES');
+                const retryDelay = block.getFieldValue('RETRY_DELAY');
+
+                const policyObj = {
+                    severity: severity,
+                    "recovery-enabled": recoveryEnabled,
+                    strategy: strategy,
+                    "max-retries": parseInt(maxRetries),
+                    "retry-delay": parseInt(retryDelay)
+                };
+
+                return JSON.stringify(policyObj) + ',';
+            };
+
             apexGenerator.scrub_ = function (block, code) {
                 const nextBlock = block.nextConnection && block.nextConnection.targetBlock();
                 const nextCode = apexGenerator.blockToCode(nextBlock);
@@ -2061,7 +2681,8 @@
                     { input: 'SECTIONS', type: 'apex_section_rule_groups', text: "Add Rule Groups Section" },
                     { input: 'SECTIONS', type: 'apex_section_enrichments', text: "Add Enrichments Section" },
                     { input: 'SECTIONS', type: 'apex_section_enrichment_groups', text: "Add Enrichment Groups Section" },
-                    { input: 'SECTIONS', type: 'apex_section_transformations', text: "Add Transformations Section" }
+                    { input: 'SECTIONS', type: 'apex_section_transformations', text: "Add Transformations Section" },
+                    { input: 'SECTIONS', type: 'apex_error_recovery', text: "Add Error Recovery Section" }
                 ],
                 'apex_data_source_config': [
                     { input: 'DATA_SOURCES', type: 'apex_data_source_database', text: 'Add Database Source' },
@@ -2150,6 +2771,29 @@
                     { input: 'A', type: 'apex_condition_logic', text: 'Add Logic Group (Left)' },
                     { input: 'B', type: 'apex_condition_compare', text: 'Add Comparison (Right)' },
                     { input: 'B', type: 'apex_condition_logic', text: 'Add Logic Group (Right)' }
+                ],
+                // Scenario context menu options
+                'apex_scenario_config': [
+                    { input: 'SCENARIO', type: 'apex_section_scenario', text: 'Add Scenario Section' }
+                ],
+                'apex_scenario_registry': [
+                    { input: 'SCENARIOS', type: 'apex_scenario_ref', text: 'Add Scenario Reference' }
+                ],
+                'apex_section_scenario': [
+                    { input: 'CLASSIFICATION_RULE', type: 'apex_classification_rule', text: 'Add Classification Rule' },
+                    { input: 'PROCESSING_STAGES', type: 'apex_processing_stage', text: 'Add Processing Stage' }
+                ],
+                'apex_classification_rule': [
+                    { input: 'CONDITION', type: 'apex_condition_compare', text: 'Add Condition (Compare)' },
+                    { input: 'CONDITION', type: 'apex_condition_logic', text: 'Add Condition (Logic)' }
+                ],
+                // Component reference context menu options
+                'apex_component_config': [
+                    { input: 'FILE_REFS', type: 'apex_file_reference', text: 'Add File Reference' }
+                ],
+                // Error recovery context menu options
+                'apex_error_recovery': [
+                    { input: 'SEVERITY_POLICIES', type: 'apex_severity_policy', text: 'Add Severity Policy' }
                 ]
             };
 
@@ -2164,7 +2808,15 @@
                 'apex_conditional_transformation': { prefix: 'transformation-', field: 'ID' },
                 'apex_data_source_database': { prefix: 'datasource-', field: 'ID' },
                 'apex_data_source_rest': { prefix: 'datasource-', field: 'ID' },
-                'apex_data_source_file': { prefix: 'datasource-', field: 'ID' }
+                'apex_data_source_file': { prefix: 'datasource-', field: 'ID' },
+                // Scenario blocks
+                'apex_scenario_config': { prefix: 'scenario-', field: 'ID' },
+                'apex_scenario_registry': { prefix: 'registry-', field: 'ID' },
+                'apex_scenario_ref': { prefix: 'scenario-', field: 'SCENARIO_ID' },
+                'apex_processing_stage': { prefix: 'stage-', field: 'STAGE_NAME' },
+                // Component blocks
+                'apex_component_config': { prefix: 'component-', field: 'ID' },
+                'apex_file_reference': { prefix: 'ref-', field: 'FILE' }
             };
 
             // Generate unique ID for a block type
@@ -2321,17 +2973,26 @@
 
             // --- 4. Live Update Logic ---
 
+            // Top-level configuration block types that generate YAML
+            const TOP_LEVEL_CONFIG_BLOCKS = [
+                'apex_rule_config',
+                'apex_data_source_config',
+                'apex_scenario_config',
+                'apex_scenario_registry',
+                'apex_component_config'
+            ];
+
             function updateYaml() {
                 const topBlocks = workspace.getTopBlocks(true); // Order by position
                 if (topBlocks.length === 0) {
-                    document.getElementById('yamlOutput').textContent = "# Drag 'Configuration' or 'Data Source Config' block to start";
+                    document.getElementById('yamlOutput').textContent = "# Drag a Configuration block to start";
                     return;
                 }
 
-                const configBlocks = topBlocks.filter(b => b.type === 'apex_rule_config' || b.type === 'apex_data_source_config');
+                const configBlocks = topBlocks.filter(b => TOP_LEVEL_CONFIG_BLOCKS.includes(b.type));
 
                 if (configBlocks.length === 0) {
-                    document.getElementById('yamlOutput').innerHTML = '<span class="yaml-comment"># Please start with a \'Configuration\' or \'Data Source Config\' block</span>';
+                    document.getElementById('yamlOutput').innerHTML = '<span class="yaml-comment"># Please start with a Configuration block (Rule Config, Data Source Config, Scenario Config, or Component Config)</span>';
                     return;
                 }
 
@@ -3962,7 +4623,22 @@
                 'apex_condition_logic': {
                     'A': 'apex_condition_compare',
                     'B': 'apex_condition_compare'
-                }
+                },
+
+                // Scenario blocks
+                'apex_scenario_config': { 'SCENARIO': 'apex_section_scenario' },
+                'apex_scenario_registry': { 'SCENARIOS': 'apex_scenario_ref' },
+                'apex_section_scenario': {
+                    'CLASSIFICATION_RULE': 'apex_classification_rule',
+                    'PROCESSING_STAGES': 'apex_processing_stage'
+                },
+                'apex_classification_rule': { 'CONDITION': 'apex_condition_compare' },
+
+                // Component blocks
+                'apex_component_config': { 'FILE_REFS': 'apex_file_reference' },
+
+                // Error recovery blocks
+                'apex_error_recovery': { 'SEVERITY_POLICIES': 'apex_severity_policy' }
             };
 
             let lastClickTime = 0;
