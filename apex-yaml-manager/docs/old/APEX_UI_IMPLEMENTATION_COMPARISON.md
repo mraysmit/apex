@@ -91,7 +91,7 @@ This document compares the user interface implementations in the modules apex-pl
 
 
 ## Frontend JavaScript
-- apex-playground: static/js/playground.js (rich, stateful)
+- apex-playground: static/js/apex_playground.js (rich, stateful)
   - Handles editors, drag-and-drop, file validation, upload modal simulation
   - Realtime YAML validation (basic placeholder)
   - Examples loader (modal with categories)
@@ -479,7 +479,7 @@ This plan consolidates the tree viewer migration to D3 (using HTML elements) wit
 ## Appendix: File References
 - apex-playground
   - UI: src/main/resources/templates/playground.html
-  - JS: src/main/resources/static/js/playground.js
+  - JS: src/main/resources/static/js/apex_playground.js
   - Controllers: dev.mars.apex.playground.controller.*
   - Config: src/main/resources/application.yml
 

@@ -119,7 +119,7 @@ class PlaygroundEndToEndTest {
         void shouldServeStaticResourcesSuccessfully() throws Exception {
             // Test CSS
             HttpRequest cssRequest = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "/css/playground.css"))
+                .uri(URI.create(baseUrl + "/css/apex_playground.css"))
                 .GET()
                 .build();
 
@@ -129,7 +129,7 @@ class PlaygroundEndToEndTest {
 
             // Test JavaScript
             HttpRequest jsRequest = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "/js/playground.js"))
+                .uri(URI.create(baseUrl + "/js/apex_playground.js"))
                 .GET()
                 .build();
 

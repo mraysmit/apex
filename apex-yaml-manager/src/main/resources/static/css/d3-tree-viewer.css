@@ -1012,8 +1012,10 @@ body {
     border-radius: 8px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     z-index: 10000;
-    max-width: 500px;
-    max-height: 600px;
+    /* Dynamic sizing - will be set by JavaScript based on content */
+    min-width: 300px;
+    max-width: 700px;
+    max-height: 80vh; /* Maximum 80% of viewport height */
     display: flex;
     flex-direction: column;
     overflow: hidden;

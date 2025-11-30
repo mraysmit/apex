@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.0.1/theme/monokai.min.css">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" th:href="@{/css/playground.css(v=${#dates.createNow().getTime()})}">
+    <link rel="stylesheet" th:href="@{/css/apex_playground.css(v=${#dates.createNow().getTime()})}">
 </head>
 <body>
     <!-- Navigation -->
@@ -279,7 +279,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
     
     <!-- Custom JavaScript -->
-    <script th:src="@{/js/playground.js(v=${#dates.createNow().getTime()})}"></script>
+    <script th:src="@{/js/apex_playground.js(v=${#dates.createNow().getTime()})}"></script>
     
     <script th:inline="javascript">
         // Pass configuration to JavaScript

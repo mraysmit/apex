@@ -238,7 +238,7 @@ Collects timing metrics at each stage (YAML parsing, data parsing, rules executi
 
 ## 10. Frontend Integration
 
-The JavaScript frontend (`playground.js`) calls the REST API:
+The JavaScript frontend (`apex_playground.js`) calls the REST API:
 
 ```javascript
 async function processData() {

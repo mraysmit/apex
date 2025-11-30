@@ -14,6 +14,131 @@ let selectedNode = null;
 // Tooltip delay in milliseconds
 const TOOLTIP_DELAY_MS = 500;
 
+// Color scheme for different node attributes
+const nodeAttributeColors = {
+    filename: '#ffffff',      // White - primary text
+    type: '#74b9ff',          // Light blue
+    metadataId: '#ffeaa7',    // Yellow/gold
+    counts: '#55efc4',        // Mint green
+    description: '#b2bec3'    // Gray
+};
+
+// Generate node label lines based on checkbox settings
+// Returns an array of {text, type} objects for multi-line display with colors
+function getNodeLabelLines(d) {
+    const data = d.data || d;
+    const lines = [];
+
+    // Check which options are enabled
+    const showFilename = document.getElementById('node-show-filename')?.checked ?? true;
+    const showType = document.getElementById('node-show-type')?.checked ?? false;
+    const showRuleCount = document.getElementById('node-show-rule-count')?.checked ?? false;
+    const showEnrichmentCount = document.getElementById('node-show-enrichment-count')?.checked ?? false;
+    const showMetadataId = document.getElementById('node-show-metadata-id')?.checked ?? false;
+    const showDescription = document.getElementById('node-show-description')?.checked ?? false;
+
+    // Line 1: Filename (always on its own line for clarity)
+    if (showFilename) {
+        lines.push({ text: data.name || 'Unknown', type: 'filename' });
+    }
+
+    // Line 2: Type (if enabled and has value)
+    if (showType) {
+        const type = data.contentSummary?.fileType || data.type || '';
+        if (type) {
+            lines.push({ text: `[${type}]`, type: 'type' });
+        }
+    }
+
+    // Line 3: Metadata ID (if enabled and has value)
+    if (showMetadataId) {
+        const metadataId = data.contentSummary?.id || '';
+        if (metadataId) {
+            lines.push({ text: `ID: ${metadataId}`, type: 'metadataId' });
+        }
+    }
+
+    // Line 4: Counts (if enabled)
+    const counts = [];
+    if (showRuleCount) {
+        const ruleCount = data.contentSummary?.ruleCount || 0;
+        counts.push(`R: ${ruleCount}`);
+    }
+    if (showEnrichmentCount) {
+        const enrichmentCount = data.contentSummary?.enrichmentCount || 0;
+        counts.push(`E: ${enrichmentCount}`);
+    }
+    if (counts.length > 0) {
+        lines.push({ text: counts.join(' | '), type: 'counts' });
+    }
+
+    // Line 5: Description (if enabled and has value)
+    if (showDescription) {
+        const description = data.contentSummary?.description || '';
+        if (description) {
+            // Truncate long descriptions
+            const truncated = description.length > 40 ? description.substring(0, 40) + '...' : description;
+            lines.push({ text: truncated, type: 'description' });
+        }
+    }
+
+    // If nothing is selected, show filename as fallback
+    if (lines.length === 0) {
+        lines.push({ text: data.name || 'Unknown', type: 'filename' });
+    }
+
+    return lines;
+}
+
+// Render multi-line text using tspan elements with colors
+function renderNodeText(textElement, d) {
+    const lines = getNodeLabelLines(d);
+    const isLeft = d.children || d._children;
+    const lineHeight = 14; // pixels between lines
+
+    // Clear existing tspans
+    d3.select(textElement).selectAll('tspan').remove();
+
+    // Calculate vertical offset to center the text block
+    const totalHeight = (lines.length - 1) * lineHeight;
+    const startY = -totalHeight / 2;
+
+    // Add tspan for each line with appropriate color
+    lines.forEach((line, i) => {
+        const color = nodeAttributeColors[line.type] || '#ffffff';
+        d3.select(textElement)
+            .append('tspan')
+            .attr('x', isLeft ? -13 : 13)
+            .attr('dy', i === 0 ? startY : lineHeight)
+            .attr('text-anchor', isLeft ? 'end' : 'start')
+            .style('fill', color)
+            .text(line.text);
+    });
+}
+
+// Update all node labels and resize background rectangles
+function updateNodeLabels() {
+    if (!g) return;
+
+    const padding = 4;
+
+    g.selectAll('g.node text')
+        .each(function(d) {
+            // Render multi-line text
+            renderNodeText(this, d);
+
+            // Get the bounding box of the updated text
+            const bbox = this.getBBox();
+
+            // Update the background rectangle to match new text size
+            d3.select(this.parentNode).select('.label-background')
+                .attr('x', bbox.x - padding)
+                .attr('y', bbox.y - padding)
+                .attr('width', bbox.width + padding * 2)
+                .attr('height', bbox.height + padding * 2);
+        });
+}
+
 // Initialize the tree viewer
 function initializeTree() {
     // Show loading message initially
@@ -56,66 +181,37 @@ function initializeTree() {
     // Create tree layout
     tree = d3.tree().size([height - 100, width - 200]);
 
-    // Load sample directories first, then load tree data
+    // Load recent directories first, then load tree data if any exist
     setTimeout(() => {
-        loadSampleDirectories();
+        loadRecentDirectories(true);  // Auto-load on initial page load
     }, 100);
 }
 
 // Load available sample directories into dropdown
-function loadSampleDirectories() {
-    const baseUrl = window.location.origin.includes('localhost') && window.location.pathname.includes('/yaml-manager')
-        ? window.location.origin
-        : 'http://localhost:8082';
-    const apiUrl = `${baseUrl}/yaml-manager/api/dependencies/sample-directories`;
+function loadRecentDirectories(autoLoad = false) {
+    const select = document.getElementById('directory-select');
+    select.innerHTML = ''; // Clear loading message
 
-    fetch(apiUrl)
-        .then(response => response.json())
-        .then(data => {
-            const select = document.getElementById('directory-select');
-            select.innerHTML = ''; // Clear loading message
+    // Load recent directories from localStorage only
+    const recentDirs = getRecentDirectories();
 
-            if (data.status === 'success' && data.directories) {
-                // Load recent directories from localStorage
-                const recentDirs = getRecentDirectories();
-
-                // Add recent directories first (if any)
-                if (recentDirs.length > 0) {
-                    const recentGroup = document.createElement('optgroup');
-                    recentGroup.label = 'Recent Directories';
-                    recentDirs.forEach(dir => {
-                        const option = document.createElement('option');
-                        option.value = dir.path;
-                        option.textContent = dir.name;
-                        recentGroup.appendChild(option);
-                    });
-                    select.appendChild(recentGroup);
-                }
-
-                // Add sample directories
-                const sampleGroup = document.createElement('optgroup');
-                sampleGroup.label = 'Sample Directories';
-                data.directories.forEach(dir => {
-                    const option = document.createElement('option');
-                    option.value = dir.path;
-                    option.textContent = dir.name;
-                    sampleGroup.appendChild(option);
-                });
-                select.appendChild(sampleGroup);
-
-                // Auto-load the first directory (from recent if available, otherwise from samples)
-                if (recentDirs.length > 0 || data.directories.length > 0) {
-                    loadTreeData();
-                }
-            } else {
-                select.innerHTML = '<option value="">No directories available</option>';
-            }
-        })
-        .catch(error => {
-            console.error('Failed to load sample directories:', error);
-            const select = document.getElementById('directory-select');
-            select.innerHTML = '<option value="">Error loading directories</option>';
+    if (recentDirs.length > 0) {
+        recentDirs.forEach(dir => {
+            const option = document.createElement('option');
+            option.value = dir.path;
+            // Show if it's a file or folder
+            const isFile = dir.path.toLowerCase().endsWith('.yaml') || dir.path.toLowerCase().endsWith('.yml');
+            option.textContent = (isFile ? '[File] ' : '[Folder] ') + dir.name;
+            select.appendChild(option);
         });
+
+        // Auto-load the first recent item only on initial page load
+        if (autoLoad) {
+            loadTreeData();
+        }
+    } else {
+        select.innerHTML = '<option value="">No recent items - use Browse or enter a path</option>';
+    }
 }
 
 // Get recent directories from localStorage (max 5)
@@ -145,6 +241,9 @@ function saveRecentDirectory(path, name) {
 
         // Save to localStorage
         localStorage.setItem('recentDirectories', JSON.stringify(recentDirs));
+
+        // Refresh the dropdown to show the new recent item
+        loadRecentDirectories();
     } catch (e) {
         console.error('Failed to save recent directory to localStorage:', e);
     }
@@ -157,175 +256,230 @@ function loadTreeData() {
     const customInput = document.getElementById('custom-directory-input');
     const basePath = customInput && customInput.value.trim()
         ? customInput.value.trim()
-        : (directorySelect ? directorySelect.value : 'apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100');
+        : (directorySelect ? directorySelect.value : '');
 
     if (!basePath) {
-        showAlert('warning', 'No Path Selected', 'Please select a directory from the dropdown or enter a custom path.');
+        showAlert('warning', 'No Path Selected', 'Please select a recent item from the dropdown, use Browse, or enter a custom path.');
         return;
     }
-
-    // Determine if the path is a file or directory
-    let rootFile;
-    let displayPath;
-
-    if (basePath.toLowerCase().endsWith('.yaml') || basePath.toLowerCase().endsWith('.yml')) {
-        // User entered a file path directly
-        rootFile = basePath;
-        // Extract directory for display
-        displayPath = basePath.substring(0, basePath.lastIndexOf('/'));
-    } else {
-        // User entered a directory path - look for scenario registry file
-        rootFile = `${basePath}/00-scenario-registry.yaml`;
-        displayPath = basePath;
-    }
-
-    // Update the tree path display
-    updateTreePath(displayPath);
 
     // Use apex-yaml-manager API - use current origin for tests, fallback to port 8082 for development
     const baseUrl = window.location.origin.includes('localhost') && window.location.pathname.includes('/yaml-manager')
         ? window.location.origin  // Use current origin if already on yaml-manager
         : 'http://localhost:8082';  // Fallback for development
-    const apiUrl = `${baseUrl}/yaml-manager/api/dependencies/tree?rootFile=${encodeURIComponent(rootFile)}`;
+
+    // Determine if the path is a file or directory
+    const isFile = basePath.toLowerCase().endsWith('.yaml') || basePath.toLowerCase().endsWith('.yml');
+
+    if (isFile) {
+        // Load single file as dependency tree root
+        loadSingleFileTree(basePath, baseUrl);
+    } else {
+        // Scan folder for all YAML files
+        loadFolderFiles(basePath, baseUrl);
+    }
+}
+
+// Load a single file as the root of a dependency tree
+// skipSaveRecent: if true, don't save to recent items (used when called from loadFolderFiles)
+function loadSingleFileTree(filePath, baseUrl, skipSaveRecent = false) {
+    const displayPath = filePath.substring(0, filePath.lastIndexOf('/') || filePath.lastIndexOf('\\'));
+    updateTreePath(displayPath || filePath);
+
+    const apiUrl = `${baseUrl}/yaml-manager/api/dependencies/tree?rootFile=${encodeURIComponent(filePath)}`;
 
     fetch(apiUrl)
-        .then(response => {
-            // Always parse JSON first, regardless of status
-            return response.json().then(data => ({
-                ok: response.ok,
-                status: response.status,
-                data: data
-            }));
-        })
+        .then(response => response.json().then(data => ({ ok: response.ok, status: response.status, data: data })))
         .then(result => {
             const data = result.data;
             console.log('Loaded tree data:', data);
 
-            // Check for API-level errors (either HTTP error or status='error' in response)
             if (!result.ok || data.status === 'error') {
                 const errorMsg = data.message || data.error || 'Unknown error occurred';
-
-                // Categorize the error
                 if (errorMsg.includes('Root file does not exist') || errorMsg.includes('FILE_NOT_FOUND')) {
-                    const isFilePath = rootFile.toLowerCase().endsWith('.yaml') || rootFile.toLowerCase().endsWith('.yml');
-                    if (isFilePath) {
-                        showAlert('error', 'File Not Found',
-                            `The specified YAML file could not be found:\n${rootFile}\n\n` +
-                            `Please check the file path and try again.\n\n` +
-                            `Tip: Make sure the path is relative to the server's working directory.`);
-                    } else {
-                        showAlert('error', 'File Not Found',
-                            `The directory does not contain a scenario registry file (00-scenario-registry.yaml).\n\n` +
-                            `Directory: ${displayPath}\n\n` +
-                            `Please either:\n` +
-                            `• Select a directory that contains 00-scenario-registry.yaml, or\n` +
-                            `• Enter the full path to a specific YAML file (e.g., path/to/file.yaml)`);
-                    }
-                } else if (errorMsg.includes('not found') || errorMsg.includes('does not exist')) {
-                    showAlert('error', 'Path Not Found',
-                        `The specified path could not be found:\n${basePath}\n\n` +
-                        `Please check the path and try again.\n\n` +
-                        `Tip: Paths should be relative to the server's working directory.`);
-                } else if (errorMsg.includes('permission') || errorMsg.includes('access denied')) {
-                    showAlert('error', 'Permission Denied',
-                        `You do not have permission to access:\n${basePath}\n\nPlease check folder permissions.`);
+                    showAlert('error', 'File Not Found',
+                        `The specified YAML file could not be found:\n${filePath}\n\nPlease check the file path and try again.`);
                 } else if (errorMsg.includes('not valid YAML') || errorMsg.includes('INVALID_YAML')) {
                     showAlert('error', 'Invalid YAML',
-                        `The root YAML file is not valid:\n${errorMsg}\n\nPlease check your YAML files for syntax errors.`);
-                } else if (errorMsg.includes('YAML') || errorMsg.includes('syntax')) {
-                    showAlert('error', 'Invalid YAML',
-                        `YAML parsing error:\n${errorMsg}\n\nPlease check your YAML files for syntax errors.`);
+                        `The YAML file is not valid:\n${errorMsg}\n\nPlease check your YAML files for syntax errors.`);
                 } else {
                     showAlert('error', 'Failed to Load Tree', errorMsg);
                 }
-
                 d3.select("#loading").style("display", "none");
                 return;
             }
 
-            // Handle both formats: apex-yaml-manager returns status=success, apex-rest-api returns success=true
             if (data.status === 'success' && data.tree) {
-                // Check if tree is empty or has no children
                 if (!data.tree.name) {
-                    showAlert('warning', 'Empty Tree',
-                        `No YAML files found in directory:\n${basePath}\n\nPlease check that the directory contains valid YAML configuration files.`);
+                    showAlert('warning', 'Empty Tree', `No dependencies found for file:\n${filePath}`);
                     d3.select("#loading").style("display", "none");
                     return;
                 }
 
-                // Check for warnings in the response
                 if (data.warnings && data.warnings.length > 0) {
-                    const warningMsg = data.warnings.join('\n');
-                    showAlert('warning', 'Tree Loaded with Warnings',
-                        `The dependency tree was loaded but some issues were found:\n${warningMsg}`, 8000);
+                    showAlert('warning', 'Tree Loaded with Warnings', data.warnings.join('\n'), 8000);
                 }
 
-                // Current apex-yaml-manager format
                 processTreeData(data.tree);
 
-                // Save to recent directories
-                // Extract a friendly name from the path (last directory name)
-                const pathParts = basePath.replace(/\\/g, '/').split('/');
-                const dirName = pathParts[pathParts.length - 1] || 'Custom Directory';
-                saveRecentDirectory(basePath, dirName);
-
-            } else if (data.success && data.data && data.data.tree) {
-                // Future apex-rest-api format (if needed)
-                processTreeData(data.data.tree);
-
-                // Save to recent directories
-                const pathParts = basePath.replace(/\\/g, '/').split('/');
-                const dirName = pathParts[pathParts.length - 1] || 'Custom Directory';
-                saveRecentDirectory(basePath, dirName);
-
+                // Save to recent - extract filename (unless skipSaveRecent is true)
+                if (!skipSaveRecent) {
+                    const pathParts = filePath.replace(/\\/g, '/').split('/');
+                    const fileName = pathParts[pathParts.length - 1] || 'File';
+                    saveRecentDirectory(filePath, fileName);
+                }
             } else {
-                const errorMsg = data.message || data.error || 'No tree data returned from API';
-                showAlert('error', 'Invalid API Response',
-                    `The API returned an unexpected response:\n${errorMsg}\n\nPlease check the server logs for details.`);
+                showAlert('error', 'Invalid API Response', data.message || 'No tree data returned from API');
                 d3.select("#loading").style("display", "none");
             }
         })
         .catch(error => {
             console.error('Error loading tree data:', error);
-
-            // Categorize errors for better user messaging
-            const errorMsg = error.message || 'Unknown error occurred';
-
-            // Check for specific file/directory errors first
-            if (errorMsg.includes('Root file does not exist') || errorMsg.includes('FILE_NOT_FOUND')) {
-                showAlert('error', 'File Not Found',
-                    `The directory does not contain a valid scenario registry file (00-scenario-registry.yaml).\n\n` +
-                    `Directory: ${basePath}\n\n` +
-                    `Please select a directory that contains APEX YAML configuration files.`);
-            } else if (errorMsg.includes('not found') || errorMsg.includes('does not exist')) {
-                showAlert('error', 'Directory Not Found',
-                    `The specified directory could not be found:\n${basePath}\n\nPlease check the path and try again.`);
-            } else if (errorMsg.includes('permission') || errorMsg.includes('access denied')) {
-                showAlert('error', 'Permission Denied',
-                    `You do not have permission to access:\n${basePath}\n\nPlease check folder permissions.`);
-            } else if (errorMsg.includes('YAML') || errorMsg.includes('syntax') || errorMsg.includes('INVALID_YAML')) {
-                showAlert('error', 'Invalid YAML',
-                    `YAML parsing error:\n${errorMsg}\n\nPlease check your YAML files for syntax errors.`);
-            } else if (errorMsg.includes('Failed to fetch') || errorMsg.includes('NetworkError')) {
-                showAlert('error', 'Network Error',
-                    `Unable to connect to the server. Please check:\n• Is the server running?\n• Is the network connection stable?\n• Are there any firewall issues?`);
-            } else if (errorMsg.includes('404')) {
-                showAlert('error', 'API Endpoint Not Found',
-                    `The API endpoint was not found (404).\n\nPlease ensure the YAML Manager service is running correctly.`);
-            } else if (errorMsg.includes('500') || errorMsg.includes('Internal Server Error')) {
-                showAlert('error', 'Server Error',
-                    `The server encountered an error (500).\n\nPlease check the server logs for details.`);
-            } else if (errorMsg.includes('timeout')) {
-                showAlert('error', 'Request Timeout',
-                    `The request took too long to complete.\n\nThe directory may contain too many files or the server is overloaded.`);
-            } else {
-                showAlert('error', 'Failed to Load Tree',
-                    `An error occurred while loading the dependency tree:\n${errorMsg}`);
-            }
-
-            // Hide loading message on error
+            showAlert('error', 'Failed to Load Tree', error.message || 'Unknown error occurred');
             d3.select("#loading").style("display", "none");
         });
+}
+
+// Load all YAML files from a folder - always displays in List View only
+function loadFolderFiles(folderPath, baseUrl) {
+    updateTreePath(folderPath);
+
+    const apiUrl = `${baseUrl}/yaml-manager/api/dependencies/scan-folder?folderPath=${encodeURIComponent(folderPath)}`;
+
+    fetch(apiUrl, { method: 'POST' })
+        .then(response => response.json().then(data => ({ ok: response.ok, status: response.status, data: data })))
+        .then(result => {
+            const data = result.data;
+            console.log('Scanned folder:', data);
+
+            if (!result.ok || data.status === 'error') {
+                const errorMsg = data.message || data.error || 'Unknown error occurred';
+                showAlert('error', 'Failed to Scan Folder', errorMsg);
+                d3.select("#loading").style("display", "none");
+                return;
+            }
+
+            if (data.status === 'success' && data.yamlFiles) {
+                if (data.yamlFiles.length === 0) {
+                    showAlert('warning', 'No YAML Files', `No YAML files found in folder:\n${folderPath}`);
+                    d3.select("#loading").style("display", "none");
+                    return;
+                }
+
+                const folderName = folderPath.replace(/\\/g, '/').split('/').pop() || 'Folder';
+
+                // Folders always load into List View only
+                console.log('Loading folder into List View:', folderPath);
+
+                // Clear the tree view
+                clearTreeView();
+
+                // Populate list view with folder files
+                populateListViewWithFolderFiles(data.yamlFiles);
+
+                // Switch to List View tab
+                switchToListViewTab();
+
+                saveRecentDirectory(folderPath, folderName);
+                d3.select("#loading").style("display", "none");
+                showAlert('success', 'Folder Loaded',
+                    `Found ${data.yamlFiles.length} YAML files.`, 3000);
+            } else {
+                showAlert('error', 'Invalid API Response', data.message || 'No file list returned from API');
+                d3.select("#loading").style("display", "none");
+            }
+        })
+        .catch(error => {
+            console.error('Error scanning folder:', error);
+            showAlert('error', 'Failed to Scan Folder', error.message || 'Unknown error occurred');
+            d3.select("#loading").style("display", "none");
+        });
+}
+
+// Switch to List View tab programmatically
+function switchToListViewTab() {
+    const treeViewTab = document.getElementById('tree-view-tab');
+    const listViewTab = document.getElementById('list-view-tab');
+    const treeViewPanel = document.getElementById('tree-view-panel');
+    const listViewPanel = document.getElementById('list-view-panel');
+
+    if (treeViewTab && listViewTab && treeViewPanel && listViewPanel) {
+        // Update tab states
+        listViewTab.classList.add('active');
+        treeViewTab.classList.remove('active');
+
+        // Update panel visibility
+        listViewPanel.classList.add('active');
+        listViewPanel.style.display = 'flex';
+        treeViewPanel.classList.remove('active');
+        treeViewPanel.style.display = 'none';
+
+        console.log('Programmatically switched to List View');
+    }
+}
+
+// Clear the tree view
+function clearTreeView() {
+    // Clear the SVG content
+    if (g) {
+        g.selectAll('*').remove();
+    }
+    // Reset tree data
+    root = null;
+    console.log('Tree view cleared');
+}
+
+// Populate list view directly with folder files (without loading from API)
+function populateListViewWithFolderFiles(yamlFiles) {
+    const listLoading = document.getElementById('list-loading');
+    const listError = document.getElementById('list-error');
+    const table = document.getElementById('yaml-files-table');
+
+    if (!listLoading || !listError || !table) {
+        console.error('List view elements not found in DOM');
+        return;
+    }
+
+    // Convert folder files to list view format
+    listViewData = yamlFiles.map(file => ({
+        filename: file.name || 'Unknown',
+        path: file.path || '',
+        contentSummary: {
+            fileType: file.type,
+            id: file.id,
+            description: file.description,
+            ruleCount: file.ruleCount || 0,
+            enrichmentCount: file.enrichmentCount || 0
+        },
+        id: file.id || '',
+        name: file.name || '',
+        type: file.type || 'unknown',
+        author: file.author || '',
+        description: file.description || '',
+        version: file.version || '',
+        businessDomain: file.businessDomain || '',
+        owner: file.owner || '',
+        rules: file.ruleCount || 0,
+        enrichments: file.enrichmentCount || 0,
+        circular: false,
+        depth: 0,
+        height: 0,
+        childCount: 0,
+        descendantCount: 0
+    }));
+
+    // Render the table
+    renderListView();
+
+    // Hide loading, show table
+    listLoading.style.display = 'none';
+    listError.style.display = 'none';
+    table.style.display = 'table';
+
+    // Update count
+    updateListCount();
+
+    console.log('List view populated with', listViewData.length, 'files from folder');
 }
 
 // Process and render tree data
@@ -554,15 +708,15 @@ function update(source) {
 
     // Add labels for nodes - clicking text shows file content
     nodeEnter.append('text')
-        .attr('dy', '.35em')
-        .attr('x', d => d.children || d._children ? -13 : 13)
-        .attr('text-anchor', d => d.children || d._children ? 'end' : 'start')
-        .text(d => d.data.name || 'Unknown')
         .style('fill', 'white')
         .style('fill-opacity', 1e-6)
         .style('cursor', 'pointer')
         .style('pointer-events', 'all')
         .style('font-weight', '600')
+        .each(function(d) {
+            // Render multi-line text using tspans
+            renderNodeText(this, d);
+        })
         .on('mousedown', handleMouseDown)
         .on('mouseup', handleMouseUp)
         .on('click', clickText)
@@ -572,7 +726,7 @@ function update(source) {
         .on('mouseout', function(event, d) {
             cancelTooltip();
         });
-    
+
     // Update existing nodes
     const nodeUpdate = nodeEnter.merge(node);
 
@@ -589,6 +743,9 @@ function update(source) {
     nodeUpdate.select('text')
         .style('fill-opacity', 1)
         .each(function(d) {
+            // Re-render multi-line text (in case options changed)
+            renderNodeText(this, d);
+
             // Get the bounding box of the text to size the background
             const bbox = this.getBBox();
             const padding = 4;
@@ -762,15 +919,39 @@ function showTooltipSimple(event, d) {
 
         tooltipCode.textContent = content;
 
+        // Calculate width based on longest line
+        // Font: 12px Courier New, approx 7.2px per character
+        // Content padding: 15px * 2 = 30px
+        // Border: 2px * 2 = 4px
+        // Scrollbar reserve: 20px
+        const lines = content.split('\n');
+        const maxLineLength = Math.max(...lines.map(line => line.length));
+        const charWidth = 7.2;
+        const widthPadding = 30 + 4 + 20;
+        let tooltipWidth = Math.min(700, Math.max(300, maxLineLength * charWidth + widthPadding));
+
+        // Apply width first so content can render
+        tooltip.style.width = tooltipWidth + 'px';
+        tooltip.style.height = 'auto';
+        tooltip.style.display = 'flex';
+
         // Apply syntax highlighting
         Prism.highlightElement(tooltipCode);
 
-        // Apply APEX keyword tooltips - DISABLED per user request
-        // setTimeout(() => {
-        //     if (typeof applyApexKeywordTooltips === 'function') {
-        //         applyApexKeywordTooltips(tooltipCode);
-        //     }
-        // }, 10);
+        // Now measure the actual rendered content height
+        const tooltipContent = document.querySelector('.tooltip-content');
+        const tooltipHeader = document.querySelector('.tooltip-header');
+        const headerHeight = tooltipHeader ? tooltipHeader.offsetHeight : 45;
+        const contentScrollHeight = tooltipContent ? tooltipContent.scrollHeight : 0;
+        const borderHeight = 4; // 2px border * 2
+
+        // Calculate total height needed
+        const maxHeight = window.innerHeight * 0.8;
+        let tooltipHeight = Math.min(maxHeight, Math.max(150,
+            headerHeight + contentScrollHeight + borderHeight));
+
+        // Apply final height
+        tooltip.style.height = tooltipHeight + 'px';
 
         // Show tooltip
         tooltip.style.display = 'flex';
@@ -1340,7 +1521,7 @@ function initializeFileBrowser() {
             const selectedPath = directorySelect.value;
 
             if (!selectedPath) {
-                showAlert('warning', 'No Directory Selected', 'Please select a directory from the dropdown.');
+                showAlert('warning', 'No Item Selected', 'Please select a recent file or folder from the dropdown, or use Browse to find one.');
                 return;
             }
 
@@ -1355,10 +1536,29 @@ function initializeFileBrowser() {
 
             // Show loading message
             document.getElementById('loading').style.display = 'block';
-            document.getElementById('loading').textContent = 'Loading tree data from: ' + selectedPath;
+            document.getElementById('loading').textContent = 'Loading: ' + selectedPath;
 
             // Reload tree data with selected directory
             loadTreeData();
+        });
+    }
+
+    // Clear Recent button functionality
+    const clearRecentBtn = document.getElementById('clear-recent-btn');
+    if (clearRecentBtn) {
+        clearRecentBtn.addEventListener('click', function() {
+            // Clear localStorage
+            localStorage.removeItem('recentDirectories');
+
+            // Reload the dropdown (will now be empty)
+            loadRecentDirectories();
+
+            // Clear the tree
+            if (g) {
+                g.selectAll("*").remove();
+            }
+
+            showAlert('success', 'Recent Items Cleared', 'All recent files and folders have been cleared.', 3000);
         });
     }
 
@@ -1623,6 +1823,15 @@ function initializeFileBrowser() {
         const treePath = document.getElementById('tree-path');
         treePath.style.display = this.checked ? 'inline' : 'none';
         console.log('Directory path', this.checked ? 'shown' : 'hidden');
+    });
+
+    // Node display options - update labels when any checkbox changes
+    const nodeDisplayOptions = document.querySelectorAll('.node-display-option');
+    nodeDisplayOptions.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            console.log('Node display option changed:', this.id, this.checked);
+            updateNodeLabels();
+        });
     });
 }
 
@@ -2172,22 +2381,39 @@ function initializeListView() {
 }
 
 /**
- * Load file content from path (reuse existing functionality)
+ * Load file content from path by fetching from API
  */
 async function loadFileContentFromPath(filePath) {
     try {
-        // Find the file in the listViewData to get its metadata
-        const fileData = listViewData.find(f => f.path === filePath);
+        console.log('Loading file content from path:', filePath);
 
-        if (fileData) {
-            // Use the existing loadFileContent function with the file's metadata
-            loadFileContent(fileData.filename, fileData);
-        } else {
-            console.warn('File not found in list view data:', filePath);
+        // Get base URL
+        const baseUrl = window.location.origin + '/yaml-manager';
+        const apiUrl = `${baseUrl}/api/dependencies/file-content?filePath=${encodeURIComponent(filePath)}`;
+
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+
+        if (!response.ok || data.status === 'error') {
+            console.error('Failed to load file content:', data.message);
+            showAlert('error', 'Failed to Load File', data.message || 'Unknown error');
+            return;
         }
+
+        // Build node data structure expected by displayNodeData
+        const nodeData = {
+            contentSummary: data.contentSummary,
+            circularReference: null
+        };
+
+        // Display the file content
+        displayNodeData(data.filename, filePath, nodeData);
+
+        console.log('File content loaded successfully:', data.filename);
 
     } catch (error) {
         console.error('Error loading file content:', error);
+        showAlert('error', 'Failed to Load File', error.message || 'Unknown error');
     }
 }
 

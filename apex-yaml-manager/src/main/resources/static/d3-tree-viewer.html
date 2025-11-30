@@ -35,11 +35,12 @@
                         <span class="accordion-icon">▼</span>
                     </div>
                     <div class="accordion-content" id="accordion-directory">
-                        <label for="directory-select" style="display: block; margin-bottom: 5px; font-size: 12px; color: #666;">Select Sample Directory:</label>
+                        <label for="directory-select" style="display: block; margin-bottom: 5px; font-size: 12px; color: #666;">Recent Files/Folders:</label>
                         <select id="directory-select" class="sidebar-input" style="width: 100%; margin-bottom: 10px;">
-                            <option value="">Loading directories...</option>
+                            <option value="">No recent items</option>
                         </select>
-                        <button class="sidebar-btn" id="load-btn" style="width: 100%;">Load Tree</button>
+                        <button class="sidebar-btn" id="load-btn" style="width: 100%;">Load</button>
+                        <button class="sidebar-btn" id="clear-recent-btn" style="width: 100%; margin-top: 5px; background: #dc3545;">Clear Recent</button>
                         <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd;">
                             <label for="custom-directory-input" style="display: block; margin-bottom: 5px; font-size: 12px; color: #666;">Or enter custom path (file or directory):</label>
                             <div style="display: flex; gap: 5px; margin-bottom: 5px;">
@@ -64,13 +65,13 @@
                     </div>
                 </div>
 
-                <!-- Filter by Type Accordion -->
+                <!-- Filter by Type Accordion (collapsed by default) -->
                 <div class="accordion-section">
-                    <div class="accordion-header" data-section="filter">
+                    <div class="accordion-header collapsed" data-section="filter">
                         <span>Filter by Type</span>
                         <span class="accordion-icon">▼</span>
                     </div>
-                    <div class="accordion-content" id="accordion-filter">
+                    <div class="accordion-content collapsed" id="accordion-filter">
                         <label class="sidebar-checkbox">
                             <input type="checkbox" class="file-type-filter" value="scenario" checked>
                             Scenarios
@@ -104,6 +105,40 @@
                             </div>
                             <!-- Dynamic type statistics will be added here -->
                         </div>
+                    </div>
+                </div>
+
+                <!-- Node Options Accordion -->
+                <div class="accordion-section">
+                    <div class="accordion-header" data-section="node-options">
+                        <span>Node Options</span>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-content" id="accordion-node-options">
+                        <label class="sidebar-checkbox">
+                            <input type="checkbox" id="node-show-filename" class="node-display-option" checked>
+                            Filename
+                        </label>
+                        <label class="sidebar-checkbox">
+                            <input type="checkbox" id="node-show-type" class="node-display-option" checked>
+                            Type
+                        </label>
+                        <label class="sidebar-checkbox">
+                            <input type="checkbox" id="node-show-rule-count" class="node-display-option">
+                            Rule Count
+                        </label>
+                        <label class="sidebar-checkbox">
+                            <input type="checkbox" id="node-show-enrichment-count" class="node-display-option">
+                            Enrichment Count
+                        </label>
+                        <label class="sidebar-checkbox">
+                            <input type="checkbox" id="node-show-metadata-id" class="node-display-option">
+                            Metadata ID
+                        </label>
+                        <label class="sidebar-checkbox">
+                            <input type="checkbox" id="node-show-description" class="node-display-option" checked>
+                            Description
+                        </label>
                     </div>
                 </div>
 

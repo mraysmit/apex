@@ -1,7 +1,7 @@
 /**
  * JavaScript unit tests for APEX Playground frontend functionality.
  * 
- * Tests the playground.js functionality using Jest-like syntax.
+ * Tests the apex_playground.js functionality using Jest-like syntax.
  * These tests can be run with any JavaScript testing framework.
  */
 
@@ -80,7 +80,7 @@ global.console = {
     debug: function() {}
 };
 
-// Load the playground.js functionality (simulated)
+// Load the apex_playground.js functionality (simulated)
 // In a real test environment, you would import or require the actual file
 
 /**

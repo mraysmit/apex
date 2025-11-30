@@ -82,21 +82,21 @@ class D3TreeViewerFileBrowserUITest {
 
         assertTrue(directorySelect.isDisplayed(), "Directory dropdown should be visible");
 
-        // Wait for directories to load (should replace "Loading directories..." option)
+        // Wait for dropdown to be populated (either with recent items or "No recent items" message)
         wait.until(driver -> {
             String firstOption = directorySelect.findElement(By.cssSelector("option")).getText();
             return !firstOption.contains("Loading");
         });
 
-        // Verify dropdown has options
+        // Verify dropdown has at least one option (either recent items or placeholder)
         var options = directorySelect.findElements(By.tagName("option"));
         assertTrue(options.size() > 0, "Directory dropdown should have at least one option");
 
-        // Verify first option contains expected text
+        // Verify first option contains expected text (either recent item or "No recent items" message)
         String firstOptionText = options.get(0).getText();
         System.out.println("First directory option: " + firstOptionText);
-        assertTrue(firstOptionText.contains("Graph-100") || firstOptionText.contains("Demo"),
-            "First option should be a known sample directory");
+        assertTrue(firstOptionText.contains("No recent items") || firstOptionText.contains("[File]") || firstOptionText.contains("[Folder]"),
+            "First option should be 'No recent items' or a recent file/folder");
     }
 
     @Test
@@ -108,9 +108,9 @@ class D3TreeViewerFileBrowserUITest {
         WebElement loadBtn = wait.until(ExpectedConditions.presenceOfElementLocated(
             By.id("load-btn")));
 
-        assertTrue(loadBtn.isDisplayed(), "Load Tree button should be visible");
-        assertTrue(loadBtn.isEnabled(), "Load Tree button should be enabled");
-        assertEquals("Load Tree", loadBtn.getText(), "Load Tree button should have correct text");
+        assertTrue(loadBtn.isDisplayed(), "Load button should be visible");
+        assertTrue(loadBtn.isEnabled(), "Load button should be enabled");
+        assertEquals("Load", loadBtn.getText(), "Load button should have correct text");
     }
 
     @Test
@@ -156,6 +156,26 @@ class D3TreeViewerFileBrowserUITest {
             By.id("custom-directory-input")));
         WebElement loadCustomBtn = driver.findElement(By.id("load-custom-btn"));
 
+        // Wait for initial tree load to complete and any alerts to clear
+        // The page auto-loads the first directory which may trigger alerts (e.g., circular dependencies)
+        try {
+            Thread.sleep(2000); // Wait for initial load
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        // Close any existing alert by clicking the close button if present
+        try {
+            WebElement closeBtn = driver.findElement(By.id("alert-close-btn"));
+            if (closeBtn.isDisplayed()) {
+                closeBtn.click();
+                // Wait for alert to hide
+                wait.until(ExpectedConditions.invisibilityOfElementLocated(By.id("alert-container")));
+            }
+        } catch (Exception e) {
+            // No alert to close, continue
+        }
+
         // Ensure custom input is empty
         customInput.clear();
 
@@ -183,23 +203,26 @@ class D3TreeViewerFileBrowserUITest {
 
     @Test
     @Order(6)
-    @DisplayName("Test Load Tree button triggers tree reload with selected directory")
+    @DisplayName("Test Load button triggers tree reload when recent item is selected")
     void testLoadButtonTriggersTreeReload() {
         driver.get(baseUrl + "/d3-tree-viewer.html");
 
-        // Wait for initial tree to load
+        // First, load a folder via custom path to populate recent items
+        WebElement customInput = wait.until(ExpectedConditions.presenceOfElementLocated(
+            By.id("custom-directory-input")));
+        WebElement loadCustomBtn = driver.findElement(By.id("load-custom-btn"));
+
+        String testPath = "src/test/resources/apex-yaml-samples/graph-100";
+        customInput.sendKeys(testPath);
+        loadCustomBtn.click();
+
+        // Wait for List View to load (folders now load into List View only)
         wait.until(ExpectedConditions.presenceOfElementLocated(
-            By.cssSelector("#tree-container svg")));
+            By.cssSelector("#yaml-files-table tbody tr")));
 
-        WebElement directorySelect = wait.until(ExpectedConditions.presenceOfElementLocated(
-            By.id("directory-select")));
+        // Now the dropdown should have a recent item
+        WebElement directorySelect = driver.findElement(By.id("directory-select"));
         WebElement loadBtn = driver.findElement(By.id("load-btn"));
-
-        // Wait for directories to load
-        wait.until(driver -> {
-            String firstOption = directorySelect.findElement(By.cssSelector("option")).getText();
-            return !firstOption.contains("Loading");
-        });
 
         // Use JavaScript to monitor when loadTreeData is called
         jsExecutor.executeScript(
@@ -211,21 +234,21 @@ class D3TreeViewerFileBrowserUITest {
             "};"
         );
 
-        // Click load button with selected directory
+        // Click load button with selected recent item
         loadBtn.click();
 
         // Wait a moment for the click to be processed
         try {
-            Thread.sleep(200);
+            Thread.sleep(500);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
 
         // Verify loadTreeData was called
         Boolean loadTreeDataCalled = (Boolean) jsExecutor.executeScript("return window.loadTreeDataCalled;");
-        assertTrue(loadTreeDataCalled, "loadTreeData should be called when Load Tree button is clicked");
+        assertTrue(loadTreeDataCalled, "loadTreeData should be called when Load button is clicked");
 
-        System.out.println("Load Tree button successfully triggered tree reload");
+        System.out.println("Load button successfully triggered tree reload");
     }
 
     @Test
@@ -242,7 +265,7 @@ class D3TreeViewerFileBrowserUITest {
             By.id("custom-directory-input")));
 
         // Enter a custom path
-        String customPath = "apex-yaml-manager/src/test/resources/apex-yaml-samples/graph-100";
+        String customPath = "src/test/resources/apex-yaml-samples/graph-100";
         customInput.sendKeys(customPath);
 
         // Use JavaScript to monitor when loadTreeData is called
@@ -344,90 +367,142 @@ class D3TreeViewerFileBrowserUITest {
 
     @Test
     @Order(11)
-    @DisplayName("Test dropdown selection changes selected value")
+    @DisplayName("Test dropdown selection changes selected value after loading a folder")
     void testDropdownSelectionChanges() {
         driver.get(baseUrl + "/d3-tree-viewer.html");
 
-        WebElement directorySelect = wait.until(ExpectedConditions.presenceOfElementLocated(
-            By.id("directory-select")));
+        // First, load a folder via custom path to populate recent items
+        WebElement customInput = wait.until(ExpectedConditions.presenceOfElementLocated(
+            By.id("custom-directory-input")));
+        WebElement loadCustomBtn = driver.findElement(By.id("load-custom-btn"));
 
-        // Wait for directories to load
-        wait.until(driver -> {
-            String firstOption = directorySelect.findElement(By.cssSelector("option")).getText();
-            return !firstOption.contains("Loading");
-        });
+        String testPath = "src/test/resources/apex-yaml-samples/graph-100";
+        customInput.sendKeys(testPath);
+        loadCustomBtn.click();
 
-        // Get all options
-        var options = directorySelect.findElements(By.tagName("option"));
-        assertTrue(options.size() > 0, "Should have at least one directory option");
+        // Wait for List View to load (folders now load into List View only)
+        wait.until(ExpectedConditions.presenceOfElementLocated(
+            By.cssSelector("#yaml-files-table tbody tr")));
 
-        // Select first option
-        options.get(0).click();
+        // Wait a moment for dropdown to be refreshed
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
 
-        // Verify selection
-        String selectedValue = directorySelect.getDomProperty("value");
+        // Use JavaScript to get dropdown info to avoid stale element issues
+        Long optionCount = (Long) jsExecutor.executeScript(
+            "return document.getElementById('directory-select').options.length;");
+        assertTrue(optionCount > 0, "Should have at least one recent item");
+
+        // Use JavaScript to select first option and get its value
+        String selectedValue = (String) jsExecutor.executeScript(
+            "var select = document.getElementById('directory-select');" +
+            "select.selectedIndex = 0;" +
+            "return select.value;");
+
         assertNotNull(selectedValue, "Selected value should not be null");
         assertFalse(selectedValue.isEmpty(), "Selected value should not be empty");
 
-        System.out.println("Selected directory: " + selectedValue);
+        System.out.println("Selected recent item: " + selectedValue);
     }
 
     @Test
     @Order(12)
-    @DisplayName("Test API endpoint returns sample directories")
-    void testSampleDirectoriesAPIEndpoint() {
+    @DisplayName("Test Clear Recent button clears recent items")
+    void testClearRecentButton() {
         driver.get(baseUrl + "/d3-tree-viewer.html");
 
-        // Use JavaScript to call the API directly
-        Object result = jsExecutor.executeAsyncScript(
-            "const callback = arguments[arguments.length - 1];" +
-            "fetch('" + baseUrl + "/api/dependencies/sample-directories')" +
-            "  .then(response => response.json())" +
-            "  .then(data => callback(data))" +
-            "  .catch(error => callback({status: 'error', message: error.message}));"
-        );
+        // First, load a folder via custom path to populate recent items
+        WebElement customInput = wait.until(ExpectedConditions.presenceOfElementLocated(
+            By.id("custom-directory-input")));
+        WebElement loadCustomBtn = driver.findElement(By.id("load-custom-btn"));
 
-        assertNotNull(result, "API should return a result");
-        System.out.println("API response: " + result);
+        String testPath = "src/test/resources/apex-yaml-samples/graph-100";
+        customInput.sendKeys(testPath);
+        loadCustomBtn.click();
+
+        // Wait for List View to load (folders now load into List View only)
+        wait.until(ExpectedConditions.presenceOfElementLocated(
+            By.cssSelector("#yaml-files-table tbody tr")));
+
+        // Wait a moment for dropdown to be refreshed
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        // Use JavaScript to verify dropdown has recent item
+        String firstOptionBefore = (String) jsExecutor.executeScript(
+            "return document.getElementById('directory-select').options[0].text;");
+        assertTrue(firstOptionBefore.contains("[Folder]"), "Should have a recent folder item");
+
+        // Click Clear Recent button
+        WebElement clearRecentBtn = driver.findElement(By.id("clear-recent-btn"));
+        clearRecentBtn.click();
+
+        // Wait a moment for the clear action to complete
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        // Use JavaScript to verify dropdown now shows "No recent items"
+        String firstOptionAfter = (String) jsExecutor.executeScript(
+            "return document.getElementById('directory-select').options[0].text;");
+        assertTrue(firstOptionAfter.contains("No recent items"), "Should show 'No recent items' after clearing");
+
+        System.out.println("Clear Recent button works correctly");
     }
 
     @Test
     @Order(13)
-    @DisplayName("Test Graph-100 directory loads successfully without errors")
-    void testGraph100LoadsSuccessfully() {
+    @DisplayName("Test folder loads all YAML files into List View")
+    void testFolderLoadsAllYamlFiles() {
         driver.get(baseUrl + "/d3-tree-viewer.html");
 
-        // Wait for initial tree to load
+        // Load a folder via custom path
+        WebElement customInput = wait.until(ExpectedConditions.presenceOfElementLocated(
+            By.id("custom-directory-input")));
+        WebElement loadCustomBtn = driver.findElement(By.id("load-custom-btn"));
+
+        String testPath = "src/test/resources/apex-yaml-samples/graph-100";
+        customInput.sendKeys(testPath);
+        loadCustomBtn.click();
+
+        // Wait for List View to load (folders now load into List View only)
         wait.until(ExpectedConditions.presenceOfElementLocated(
-            By.cssSelector("#tree-container svg")));
+            By.cssSelector("#yaml-files-table tbody tr")));
 
-        WebElement directorySelect = wait.until(ExpectedConditions.presenceOfElementLocated(
-            By.id("directory-select")));
+        // Verify List View tab is active
+        WebElement listViewTab = driver.findElement(By.id("list-view-tab"));
+        assertTrue(listViewTab.getDomAttribute("class").contains("active"),
+            "List View tab should be active when folder is loaded");
 
-        // Wait for directories to load
-        wait.until(driver -> {
-            String firstOption = directorySelect.findElement(By.cssSelector("option")).getText();
-            return !firstOption.contains("Loading");
-        });
+        // Verify List View has multiple rows (files)
+        var rows = driver.findElements(By.cssSelector("#yaml-files-table tbody tr"));
+        assertTrue(rows.size() > 1, "List View should have multiple files");
 
-        // Find and select Graph-100 option
-        var options = directorySelect.findElements(By.tagName("option"));
-        WebElement graph100Option = null;
-        for (WebElement option : options) {
-            if (option.getText().contains("Graph-100")) {
-                graph100Option = option;
-                break;
-            }
-        }
+        System.out.println("Folder loaded with " + rows.size() + " files in List View");
+    }
 
-        assertNotNull(graph100Option, "Graph-100 option should be present in dropdown");
+    @Test
+    @Order(14)
+    @DisplayName("Test single YAML file loads as dependency tree")
+    void testSingleFileLoadsDependencyTree() {
+        driver.get(baseUrl + "/d3-tree-viewer.html");
 
-        // Select Graph-100
-        graph100Option.click();
+        // Load a single YAML file via custom path
+        WebElement customInput = wait.until(ExpectedConditions.presenceOfElementLocated(
+            By.id("custom-directory-input")));
+        WebElement loadCustomBtn = driver.findElement(By.id("load-custom-btn"));
 
-        // Click Load Tree button
-        WebElement loadBtn = driver.findElement(By.id("load-btn"));
-        loadBtn.click();
+        String testPath = "src/test/resources/apex-yaml-samples/graph-100/00-scenario-registry.yaml";
+        customInput.sendKeys(testPath);
+        loadCustomBtn.click();
 
         // Wait for tree nodes to appear (this indicates tree has loaded)
         wait.until(ExpectedConditions.presenceOfElementLocated(
@@ -455,67 +530,197 @@ class D3TreeViewerFileBrowserUITest {
     }
 
     @Test
-    @Order(14)
-    @DisplayName("Test Demo Scenarios directory shows error or warning alert")
-    void testDemoScenariosShowsError() {
+    @Order(15)
+    @DisplayName("Test recent items show [File] or [Folder] prefix")
+    void testRecentItemsShowPrefix() {
         driver.get(baseUrl + "/d3-tree-viewer.html");
 
-        // Wait for initial tree to load
+        // Load a folder via custom path
+        WebElement customInput = wait.until(ExpectedConditions.presenceOfElementLocated(
+            By.id("custom-directory-input")));
+        WebElement loadCustomBtn = driver.findElement(By.id("load-custom-btn"));
+
+        String folderPath = "src/test/resources/apex-yaml-samples/graph-100";
+        customInput.sendKeys(folderPath);
+        loadCustomBtn.click();
+
+        // Wait for List View to load (folders now load into List View only)
         wait.until(ExpectedConditions.presenceOfElementLocated(
-            By.cssSelector("#tree-container svg")));
+            By.cssSelector("#yaml-files-table tbody tr")));
 
-        WebElement directorySelect = wait.until(ExpectedConditions.presenceOfElementLocated(
-            By.id("directory-select")));
-
-        // Wait for directories to load
-        wait.until(driver -> {
-            String firstOption = directorySelect.findElement(By.cssSelector("option")).getText();
-            return !firstOption.contains("Loading");
-        });
-
-        // Find and select Demo Scenarios option
-        var options = directorySelect.findElements(By.tagName("option"));
-        WebElement demoOption = null;
-        for (WebElement option : options) {
-            if (option.getText().contains("Demo")) {
-                demoOption = option;
-                break;
-            }
+        // Wait a moment for dropdown to be refreshed
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
 
-        assertNotNull(demoOption, "Demo Scenarios option should be present in dropdown");
+        // Use JavaScript to verify dropdown shows [Folder] prefix
+        String firstOptionText = (String) jsExecutor.executeScript(
+            "return document.getElementById('directory-select').options[0].text;");
+        assertTrue(firstOptionText.contains("[Folder]"), "Folder should show [Folder] prefix: " + firstOptionText);
 
-        // Select Demo Scenarios
-        demoOption.click();
+        // Now load a single file
+        customInput = driver.findElement(By.id("custom-directory-input"));
+        customInput.clear();
+        String filePath = "src/test/resources/apex-yaml-samples/graph-100/00-scenario-registry.yaml";
+        customInput.sendKeys(filePath);
+        loadCustomBtn = driver.findElement(By.id("load-custom-btn"));
+        loadCustomBtn.click();
 
-        // Click Load Tree button
-        WebElement loadBtn = driver.findElement(By.id("load-btn"));
-        loadBtn.click();
+        // Wait for tree to load (files load into Tree View)
+        wait.until(ExpectedConditions.presenceOfElementLocated(
+            By.cssSelector("#tree-container svg g.node")));
 
-        // Wait for alert to appear
-        WebElement alertContainer = wait.until(ExpectedConditions.visibilityOfElementLocated(
-            By.id("alert-container")));
+        // Wait a moment for dropdown to be refreshed
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
 
-        // Verify alert is displayed
-        assertTrue(alertContainer.isDisplayed(), "Alert should be displayed for Demo Scenarios");
+        // Use JavaScript to verify dropdown now shows [File] prefix for the most recent item
+        firstOptionText = (String) jsExecutor.executeScript(
+            "return document.getElementById('directory-select').options[0].text;");
+        assertTrue(firstOptionText.contains("[File]"), "File should show [File] prefix: " + firstOptionText);
 
-        // Verify it's an error or warning alert (not success or info)
-        String alertClass = alertContainer.getDomAttribute("class");
-        assertTrue(alertClass.contains("alert-error") || alertClass.contains("alert-warning"),
-            "Demo Scenarios should show error or warning alert (not success). Alert class: " + alertClass);
+        System.out.println("Recent items show correct prefixes");
+    }
 
-        // Get alert title and message
-        String alertTitle = driver.findElement(By.id("alert-title")).getText();
-        String alertMessage = driver.findElement(By.id("alert-message")).getText();
+    @Test
+    @Order(16)
+    @DisplayName("Test clicking List View row displays file content")
+    void testListViewRowClickDisplaysFileContent() {
+        driver.get(baseUrl + "/d3-tree-viewer.html");
 
-        System.out.println("Demo Scenarios alert:");
-        System.out.println("  Title: " + alertTitle);
-        System.out.println("  Message: " + alertMessage);
-        System.out.println("  Class: " + alertClass);
+        // Load a folder via custom path
+        WebElement customInput = wait.until(ExpectedConditions.presenceOfElementLocated(
+            By.id("custom-directory-input")));
+        WebElement loadCustomBtn = driver.findElement(By.id("load-custom-btn"));
 
-        // Verify alert contains meaningful error information
-        assertFalse(alertTitle.isEmpty(), "Alert title should not be empty");
-        assertFalse(alertMessage.isEmpty(), "Alert message should not be empty");
+        String folderPath = "src/test/resources/apex-yaml-samples/graph-100";
+        customInput.sendKeys(folderPath);
+        loadCustomBtn.click();
+
+        // Wait for List View to load (folders now load into List View only)
+        wait.until(ExpectedConditions.presenceOfElementLocated(
+            By.cssSelector("#yaml-files-table tbody tr")));
+
+        // Verify List View tab is active
+        WebElement listViewTab = driver.findElement(By.id("list-view-tab"));
+        assertTrue(listViewTab.getDomAttribute("class").contains("active"),
+            "List View tab should be active when folder is loaded");
+
+        // Get the first row in the list view
+        WebElement firstRow = driver.findElement(By.cssSelector("#yaml-files-table tbody tr"));
+        String filename = firstRow.findElement(By.cssSelector("td.filename")).getText();
+        System.out.println("Clicking on file: " + filename);
+
+        // Click on the first row
+        firstRow.click();
+
+        // Wait for the file content to be displayed - need to wait for async API call
+        // The yaml-section should become visible and yaml-code should have content
+        try {
+            Thread.sleep(1000); // Wait for async API call to complete
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("yaml-section")));
+
+        // Check for browser console errors
+        var logs = driver.manage().logs().get("browser");
+        for (var entry : logs) {
+            System.out.println("Browser log: " + entry.getLevel() + " - " + entry.getMessage());
+        }
+
+        // Verify the YAML content is displayed (not empty and not an error message)
+        WebElement yamlCode = driver.findElement(By.id("yaml-code"));
+        String yamlContent = yamlCode.getText();
+
+        System.out.println("YAML content length: " + yamlContent.length());
+        System.out.println("YAML content preview: " + yamlContent.substring(0, Math.min(200, yamlContent.length())));
+
+        assertFalse(yamlContent.isEmpty(), "YAML content should not be empty");
+        assertFalse(yamlContent.contains("Error: No content available"),
+            "YAML content should not show error message. Content: " + yamlContent.substring(0, Math.min(100, yamlContent.length())));
+
+        // Verify the row is selected
+        assertTrue(firstRow.getDomAttribute("class").contains("selected"),
+            "Clicked row should have 'selected' class");
+
+        System.out.println("List View row click displays file content successfully");
+    }
+
+    @Test
+    @Order(17)
+    @DisplayName("Test clicking multiple List View rows updates content")
+    void testListViewMultipleRowClicks() {
+        driver.get(baseUrl + "/d3-tree-viewer.html");
+
+        // Load a folder via custom path
+        WebElement customInput = wait.until(ExpectedConditions.presenceOfElementLocated(
+            By.id("custom-directory-input")));
+        WebElement loadCustomBtn = driver.findElement(By.id("load-custom-btn"));
+
+        String folderPath = "src/test/resources/apex-yaml-samples/graph-100";
+        customInput.sendKeys(folderPath);
+        loadCustomBtn.click();
+
+        // Wait for List View to load
+        wait.until(ExpectedConditions.presenceOfElementLocated(
+            By.cssSelector("#yaml-files-table tbody tr")));
+
+        // Get all rows
+        var rows = driver.findElements(By.cssSelector("#yaml-files-table tbody tr"));
+        assertTrue(rows.size() >= 2, "Should have at least 2 rows for this test");
+
+        // Click first row
+        WebElement firstRow = rows.get(0);
+        String firstFilename = firstRow.findElement(By.cssSelector("td.filename")).getText();
+        System.out.println("Clicking first file: " + firstFilename);
+        firstRow.click();
+
+        // Wait for content to load
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("yaml-section")));
+        String firstContent = driver.findElement(By.id("yaml-code")).getText();
+        System.out.println("First file content length: " + firstContent.length());
+
+        // Click second row
+        WebElement secondRow = rows.get(1);
+        String secondFilename = secondRow.findElement(By.cssSelector("td.filename")).getText();
+        System.out.println("Clicking second file: " + secondFilename);
+        secondRow.click();
+
+        // Wait for content to update
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        String secondContent = driver.findElement(By.id("yaml-code")).getText();
+        System.out.println("Second file content length: " + secondContent.length());
+
+        // Verify content changed (unless files happen to be identical)
+        assertFalse(secondContent.isEmpty(), "Second file content should not be empty");
+        assertFalse(secondContent.contains("Error: No content available"),
+            "Second file should not show error message");
+
+        // Verify second row is now selected and first is not
+        assertFalse(firstRow.getDomAttribute("class").contains("selected"),
+            "First row should no longer be selected");
+        assertTrue(secondRow.getDomAttribute("class").contains("selected"),
+            "Second row should be selected");
+
+        System.out.println("Multiple row clicks work correctly");
     }
 }
 

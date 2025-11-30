@@ -21,6 +21,7 @@ import dev.mars.apex.yaml.manager.model.DependencyMetrics;
 import dev.mars.apex.yaml.manager.model.EnhancedYamlDependencyGraph;
 import dev.mars.apex.yaml.manager.model.ImpactAnalysisResult;
 import dev.mars.apex.yaml.manager.model.TreeNode;
+import dev.mars.apex.yaml.manager.model.YamlContentSummary;
 import dev.mars.apex.yaml.manager.service.DependencyAnalysisService;
 import dev.mars.apex.yaml.manager.service.TreeValidationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -63,13 +64,16 @@ public class DependencyAnalysisController {
 
     private final DependencyAnalysisService dependencyService;
     private final TreeValidationService treeValidationService;
+    private final dev.mars.apex.yaml.manager.service.YamlContentAnalyzer contentAnalyzer;
     private EnhancedYamlDependencyGraph currentGraph;
 
     @Autowired
     public DependencyAnalysisController(DependencyAnalysisService dependencyService,
-                                        TreeValidationService treeValidationService) {
+                                        TreeValidationService treeValidationService,
+                                        dev.mars.apex.yaml.manager.service.YamlContentAnalyzer contentAnalyzer) {
         this.dependencyService = dependencyService;
         this.treeValidationService = treeValidationService;
+        this.contentAnalyzer = contentAnalyzer;
     }
 
     /**
@@ -585,7 +589,7 @@ public class DependencyAnalysisController {
      * Scan a folder for YAML files and generate dependency tree.
      */
     @PostMapping("/scan-folder")
-    @Operation(summary = "Scan folder for YAML files", description = "Scan a folder recursively for YAML files and generate dependency tree")
+    @Operation(summary = "Scan folder for YAML files", description = "Scan a folder recursively for YAML files, analyze types, and suggest a root file for dependency tree")
     @ApiResponse(responseCode = "200", description = "Folder scanned successfully")
     @ApiResponse(responseCode = "400", description = "Invalid folder path")
     public ResponseEntity<Map<String, Object>> scanFolder(
@@ -630,23 +634,66 @@ public class DependencyAnalysisController {
             // Sort files by name
             yamlFiles.sort(java.nio.file.Path::compareTo);
 
-            // Convert to list of file info
-            List<Map<String, Object>> fileList = yamlFiles.stream()
-                    .map(path -> {
-                        Map<String, Object> fileInfo = new HashMap<>();
-                        fileInfo.put("path", path.toString());
-                        fileInfo.put("name", path.getFileName().toString());
-                        fileInfo.put("size", getFileSize(path));
-                        return fileInfo;
-                    })
-                    .toList();
+            // Analyze each file to get type and find suggested root
+            String suggestedRoot = null;
+            int suggestedRootPriority = 0; // Higher = better root candidate
+
+            List<Map<String, Object>> fileList = new ArrayList<>();
+            for (java.nio.file.Path path : yamlFiles) {
+                Map<String, Object> fileInfo = new HashMap<>();
+                fileInfo.put("path", path.toString());
+                fileInfo.put("name", path.getFileName().toString());
+                fileInfo.put("size", getFileSize(path));
+
+                // Analyze file type
+                try {
+                    var summary = contentAnalyzer.analyzYamlContent(path.toString());
+                    if (summary != null) {
+                        String fileType = summary.getFileType();
+                        fileInfo.put("type", fileType != null ? fileType : "unknown");
+                        fileInfo.put("id", summary.getId());
+                        fileInfo.put("description", summary.getDescription());
+                        fileInfo.put("ruleCount", summary.getRuleCount());
+                        fileInfo.put("enrichmentCount", summary.getEnrichmentCount());
+
+                        // Determine if this is a good root candidate
+                        // Priority: scenario-registry (5) > scenario (4) > rules with groups (3) > rules (2) > other (1)
+                        int priority = 1;
+                        if ("scenario-registry".equals(fileType)) {
+                            priority = 5;
+                        } else if ("scenario".equals(fileType)) {
+                            priority = 4;
+                        } else if ("rules".equals(fileType) && summary.getRuleGroupCount() > 0) {
+                            priority = 3;
+                        } else if ("rules".equals(fileType) || "rule-config".equals(fileType)) {
+                            priority = 2;
+                        }
+
+                        if (priority > suggestedRootPriority) {
+                            suggestedRootPriority = priority;
+                            suggestedRoot = path.toString();
+                        }
+                    } else {
+                        fileInfo.put("type", "unknown");
+                    }
+                } catch (Exception e) {
+                    logger.debug("Could not analyze file type for: {}", path, e);
+                    fileInfo.put("type", "unknown");
+                }
+
+                fileList.add(fileInfo);
+            }
 
             Map<String, Object> response = new HashMap<>();
             response.put("status", "success");
             response.put("folderPath", folderPath);
             response.put("yamlFiles", fileList);
             response.put("totalFiles", yamlFiles.size());
+            response.put("suggestedRoot", suggestedRoot);
             response.put("timestamp", System.currentTimeMillis());
+
+            logger.info("Scanned folder {} with {} files, suggested root: {}",
+                folderPath, yamlFiles.size(), suggestedRoot);
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -968,6 +1015,74 @@ public class DependencyAnalysisController {
             return ResponseEntity.badRequest().body(Map.of(
                     "status", "error",
                     "message", "Failed to browse directory: " + e.getMessage()
+            ));
+        }
+    }
+
+    /**
+     * Get file content and metadata for a YAML file.
+     *
+     * @param filePath The path to the YAML file
+     * @return File content and metadata
+     */
+    @GetMapping("/file-content")
+    @Operation(summary = "Get file content", description = "Read and return the content of a YAML file with metadata")
+    @ApiResponse(responseCode = "200", description = "File content retrieved successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid file path or file not found")
+    public ResponseEntity<Map<String, Object>> getFileContent(
+            @Parameter(description = "Path to the YAML file")
+            @RequestParam String filePath) {
+        logger.info("Getting file content for: {}", filePath);
+
+        try {
+            Path path = Paths.get(filePath);
+            if (!Files.exists(path)) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "status", "error",
+                        "message", "File not found: " + filePath
+                ));
+            }
+
+            if (Files.isDirectory(path)) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "status", "error",
+                        "message", "Path is a directory, not a file: " + filePath
+                ));
+            }
+
+            // Read file content
+            String content = Files.readString(path);
+
+            // Analyze the file to get metadata
+            YamlContentSummary summary = contentAnalyzer.analyzYamlContent(filePath);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("path", filePath);
+            response.put("filename", path.getFileName().toString());
+            response.put("content", content);
+
+            // Include content summary metadata
+            Map<String, Object> metadata = new HashMap<>();
+            metadata.put("fileType", summary.getFileType());
+            metadata.put("id", summary.getId());
+            metadata.put("name", summary.getName());
+            metadata.put("description", summary.getDescription());
+            metadata.put("author", summary.getAuthor());
+            metadata.put("version", summary.getVersion());
+            metadata.put("businessDomain", summary.getBusinessDomain());
+            metadata.put("owner", summary.getOwner());
+            metadata.put("ruleCount", summary.getRuleCount());
+            metadata.put("enrichmentCount", summary.getEnrichmentCount());
+            metadata.put("rawContent", content);
+            response.put("contentSummary", metadata);
+
+            return ResponseEntity.ok(response);
+        } catch (IOException e) {
+            logger.error("Failed to read file content", e);
+            return ResponseEntity.badRequest().body(Map.of(
+                    "status", "error",
+                    "message", "Failed to read file: " + e.getMessage()
             ));
         }
     }

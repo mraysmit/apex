@@ -1030,5 +1030,87 @@ class DependencyAnalysisControllerTest {
             }
         }
     }
+
+    // ========================================
+    // GET /api/dependencies/file-content Tests
+    // ========================================
+
+    @Test
+    @DisplayName("Should return file content for valid YAML file")
+    void testGetFileContentSuccess() {
+        String filePath = "src/test/resources/apex-yaml-samples/graph-100/00-scenario-registry.yaml";
+        String url = baseUrl + "/file-content?filePath=" + filePath;
+
+        ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        Map<String, Object> body = response.getBody();
+        assertNotNull(body);
+        assertEquals("success", body.get("status"));
+        assertEquals("00-scenario-registry.yaml", body.get("filename"));
+        assertNotNull(body.get("content"));
+        assertTrue(body.get("content").toString().contains("metadata"));
+
+        // Verify contentSummary
+        Map<String, Object> contentSummary = (Map<String, Object>) body.get("contentSummary");
+        assertNotNull(contentSummary);
+        assertNotNull(contentSummary.get("rawContent"));
+        assertTrue(contentSummary.get("rawContent").toString().contains("metadata"));
+        assertEquals("scenario-registry", contentSummary.get("fileType"));
+    }
+
+    @Test
+    @DisplayName("Should return error for non-existent file")
+    void testGetFileContentFileNotFound() {
+        String filePath = "src/test/resources/non-existent-file.yaml";
+        String url = baseUrl + "/file-content?filePath=" + filePath;
+
+        ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        Map<String, Object> body = response.getBody();
+        assertNotNull(body);
+        assertEquals("error", body.get("status"));
+        assertTrue(body.get("message").toString().contains("File not found"));
+    }
+
+    @Test
+    @DisplayName("Should return error for directory path")
+    void testGetFileContentDirectoryPath() {
+        String filePath = "src/test/resources/apex-yaml-samples/graph-100";
+        String url = baseUrl + "/file-content?filePath=" + filePath;
+
+        ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        Map<String, Object> body = response.getBody();
+        assertNotNull(body);
+        assertEquals("error", body.get("status"));
+        assertTrue(body.get("message").toString().contains("directory"));
+    }
+
+    @Test
+    @DisplayName("Should return content with all metadata fields")
+    void testGetFileContentMetadataFields() {
+        String filePath = "src/test/resources/apex-yaml-samples/graph-100/00-scenario-registry.yaml";
+        String url = baseUrl + "/file-content?filePath=" + filePath;
+
+        ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        Map<String, Object> body = response.getBody();
+        Map<String, Object> contentSummary = (Map<String, Object>) body.get("contentSummary");
+
+        // Verify all expected metadata fields are present
+        assertTrue(contentSummary.containsKey("fileType"));
+        assertTrue(contentSummary.containsKey("id"));
+        assertTrue(contentSummary.containsKey("name"));
+        assertTrue(contentSummary.containsKey("description"));
+        assertTrue(contentSummary.containsKey("author"));
+        assertTrue(contentSummary.containsKey("version"));
+        assertTrue(contentSummary.containsKey("ruleCount"));
+        assertTrue(contentSummary.containsKey("enrichmentCount"));
+        assertTrue(contentSummary.containsKey("rawContent"));
+    }
 }
 

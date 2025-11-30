@@ -55,7 +55,7 @@ apex-playground/
 ├── src/main/resources/
 │   ├── static/
 │   │   ├── css/playground.css              # Custom styles
-│   │   ├── js/playground.js                # Frontend logic
+│   │   ├── js/apex_playground.js                # Frontend logic
 │   │   └── lib/                            # Third-party libraries
 │   ├── templates/
 │   │   └── playground.html                 # Main UI template

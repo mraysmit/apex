@@ -55,7 +55,7 @@ public class PlaygroundController {
         model.addAttribute("version", "1.0.0");
         model.addAttribute("apiBaseUrl", "/playground/api");
         
-        return "playground";
+        return "apex_playground";
     }
 
     /**

@@ -84,7 +84,7 @@ class VisualEditorUITest {
     @Order(1)
     @DisplayName("Visual editor page loads successfully")
     void testPageLoads() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         
         // Wait for Blockly to initialize
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
@@ -100,7 +100,7 @@ class VisualEditorUITest {
     @Order(2)
     @DisplayName("BLOCK_ID_CONFIG is defined correctly")
     void testBlockIdConfigExists() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
         
         // Check BLOCK_ID_CONFIG exists and has expected entries
@@ -116,7 +116,7 @@ class VisualEditorUITest {
     @Order(3)
     @DisplayName("generateUniqueId function returns rule-1 for first rule")
     void testGenerateUniqueIdFirstRule() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
         
         String result = (String) js.executeScript(
@@ -130,7 +130,7 @@ class VisualEditorUITest {
     @Order(4)
     @DisplayName("generateUniqueId increments ID after adding a rule")
     void testGenerateUniqueIdIncrement() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
 
         // Add a rule block - the event listener will auto-assign rule-1
@@ -156,7 +156,7 @@ class VisualEditorUITest {
     @Order(5)
     @DisplayName("generateUniqueId handles gaps in numbering")
     void testGenerateUniqueIdWithGaps() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
 
         // Add first rule - gets rule-1 automatically
@@ -195,7 +195,7 @@ class VisualEditorUITest {
     @Order(6)
     @DisplayName("generateUniqueId works for rule-group")
     void testGenerateUniqueIdRuleGroup() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
         
         String result = (String) js.executeScript(
@@ -209,7 +209,7 @@ class VisualEditorUITest {
     @Order(7)
     @DisplayName("findFirstRuleId returns null when no rules exist")
     void testFindFirstRuleIdEmpty() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
         
         Object result = js.executeScript(
@@ -223,7 +223,7 @@ class VisualEditorUITest {
     @Order(8)
     @DisplayName("findFirstRuleId finds existing rule")
     void testFindFirstRuleIdFindsRule() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
 
         // Add a rule - it will get auto-assigned rule-1
@@ -245,7 +245,7 @@ class VisualEditorUITest {
     @Order(9)
     @DisplayName("Block creation event triggers auto-ID generation")
     void testBlockCreationAutoId() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
         
         // Create first rule - should get rule-1
@@ -289,7 +289,7 @@ class VisualEditorUITest {
     @Order(10)
     @DisplayName("Context menu handler is attached to apex_rule_group")
     void testContextMenuHandlerExists() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
 
         Boolean hasHandler = (Boolean) js.executeScript(
@@ -302,7 +302,7 @@ class VisualEditorUITest {
     @Order(11)
     @DisplayName("Rule reference created via context menu uses first rule ID")
     void testRuleRefAutoPopulation() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
 
         // Create a rule first
@@ -345,7 +345,7 @@ class VisualEditorUITest {
     @Order(12)
     @DisplayName("Rule reference dropdown shows existing rules")
     void testRuleRefDropdownShowsRules() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
 
         // Create two rules with specific IDs
@@ -379,7 +379,7 @@ class VisualEditorUITest {
     @Order(13)
     @DisplayName("Rule reference dropdown shows no rules message when empty")
     void testRuleRefDropdownEmptyMessage() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
 
         // Get the dropdown options when no rules exist
@@ -396,7 +396,7 @@ class VisualEditorUITest {
     @Order(14)
     @DisplayName("Template functions are defined")
     void testTemplateFunctionsDefined() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
 
         // Check that template functions exist
@@ -415,7 +415,7 @@ class VisualEditorUITest {
     @Order(15)
     @DisplayName("Templates category is registered in toolbox")
     void testTemplatesCategoryRegistered() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
 
         // Check that the Templates category exists in the toolbox
@@ -435,7 +435,7 @@ class VisualEditorUITest {
     @Order(16)
     @DisplayName("Save and load template works")
     void testSaveAndLoadTemplate() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
 
         // Clear any existing templates
@@ -496,7 +496,7 @@ class VisualEditorUITest {
     @Order(17)
     @DisplayName("Clicking template button in toolbox loads template")
     void testClickTemplateButtonLoadsTemplate() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
 
         // Clear any existing templates and create one
@@ -567,7 +567,7 @@ class VisualEditorUITest {
     @Order(18)
     @DisplayName("Accordion sections exist and YAML section is expanded by default")
     void testAccordionSectionsExist() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
 
         // Check YAML section exists and is expanded
@@ -589,7 +589,7 @@ class VisualEditorUITest {
     @Order(19)
     @DisplayName("Accordion toggle function works")
     void testAccordionToggle() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
 
         // Toggle YAML section (should collapse it)
@@ -615,7 +615,7 @@ class VisualEditorUITest {
     @Order(20)
     @DisplayName("Evaluation data functions are defined")
     void testEvalDataFunctionsDefined() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
 
         Boolean switchTabDefined = (Boolean) js.executeScript("return typeof switchEvalTab === 'function';");
@@ -637,7 +637,7 @@ class VisualEditorUITest {
     @Order(21)
     @DisplayName("JSON editor accepts and validates JSON")
     void testJsonEditorValidation() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
 
         // Set valid JSON in editor
@@ -671,7 +671,7 @@ class VisualEditorUITest {
     @Order(22)
     @DisplayName("JSON can be formatted in editor")
     void testJsonFormatting() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
 
         // Set compact JSON
@@ -693,7 +693,7 @@ class VisualEditorUITest {
     @Order(23)
     @DisplayName("Tree view renders nested JSON")
     void testTreeViewRendering() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
 
         // Set nested JSON
@@ -718,7 +718,7 @@ class VisualEditorUITest {
     @Order(24)
     @DisplayName("Eval data tabs exist and can be switched")
     void testEvalDataTabs() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
 
         // Expand eval section first
@@ -746,7 +746,7 @@ class VisualEditorUITest {
     @Order(25)
     @DisplayName("File drop zone exists")
     void testFileDropZoneExists() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
 
         Boolean dropZoneExists = (Boolean) js.executeScript(
@@ -764,7 +764,7 @@ class VisualEditorUITest {
     @Order(26)
     @DisplayName("extractJsonPaths extracts paths from nested JSON")
     void testExtractJsonPaths() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
 
         // Test with nested JSON
@@ -795,7 +795,7 @@ class VisualEditorUITest {
     @Order(27)
     @DisplayName("extractJsonPaths handles arrays with [*] notation")
     void testExtractJsonPathsWithArrays() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
 
         // Test with arrays
@@ -818,7 +818,7 @@ class VisualEditorUITest {
     @Order(28)
     @DisplayName("loadFieldsIntoEditor populates loadedFieldPaths")
     void testLoadFieldsIntoEditor() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
 
         // Set JSON in editor
@@ -844,7 +844,7 @@ class VisualEditorUITest {
     @Order(29)
     @DisplayName("getFieldOptions returns loaded paths for dropdown")
     void testGetFieldOptions() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
 
         // Initially should return no fields message
@@ -870,7 +870,7 @@ class VisualEditorUITest {
     @Order(30)
     @DisplayName("apex_field_ref block uses dropdown")
     void testFieldRefBlockHasDropdown() {
-        driver.get(baseUrl + "/apex_blocks_prototype.html");
+        driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
 
         // Check that apex_field_ref block is defined

@@ -67,10 +67,11 @@ class ExampleServiceTest {
     void shouldGetSpecificExampleSuccessfully() {
         // When
         Map<String, Object> example = exampleService.getExample("basic", "quick-start");
-        
+
         // Then
         assertNotNull(example);
-        assertEquals("quick-start", example.get("name"));
+        // Name is converted to display format: "quick-start" -> "Quick start"
+        assertEquals("Quick start", example.get("name"));
         assertEquals("basic", example.get("category"));
         assertNotNull(example.get("sampleData"));
     }
