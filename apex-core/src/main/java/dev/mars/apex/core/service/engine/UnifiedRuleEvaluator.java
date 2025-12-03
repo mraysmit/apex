@@ -159,26 +159,10 @@ public class UnifiedRuleEvaluator {
             try {
                 result = exp.getValue(context, Boolean.class);
             } catch (SpelEvaluationException e) {
-                // Catch SpEL evaluation errors and provide helpful context
-                String errorMsg;
-                String exMsg = e.getMessage() != null ? e.getMessage() : "";
-                
-                // Check if it's a property/field access error or method call on null
-                if (exMsg.contains("Property or field") || exMsg.contains("cannot be found") || 
-                    exMsg.contains("not readable") || exMsg.contains("null context object")) {
-                    String varName = extractVariableName(exMsg, rule.getCondition());
-                    errorMsg = String.format("Rule '%s' references undefined or inaccessible variable '%s'. " +
-                                           "Check that the YAML rule condition matches actual data fields. Condition: %s",
-                                           rule.getName(), varName, rule.getCondition());
-                } else {
-                    errorMsg = String.format("Rule '%s' evaluation failed: %s. Condition: %s",
-                                           rule.getName(), e.getMessage(), rule.getCondition());
-                }
-                
-                TestAwareLogger.error(rulesLogger, errorMsg);
-                RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition());
-                LoggingContext.clearContext();
-                return RuleResult.error(rule.getName(), errorMsg, rule.getSeverity(), metrics);
+                // Delegate to error recovery handler for consistent error handling
+                // This ensures SpEL evaluation errors go through the same recovery logic
+                // as other exceptions, respecting severity-based recovery policies
+                return handleEvaluationError(rule, e, metricsBuilder);
             }
 
             // Phase 5: Store result in context if result-field is configured

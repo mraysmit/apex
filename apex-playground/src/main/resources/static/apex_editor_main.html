@@ -473,6 +473,22 @@
             .toast-message {
                 white-space: pre-wrap;
             }
+
+            /* Fix Blockly context menu scrollbar issue */
+            .blocklyContextMenu {
+                max-height: none !important;
+                overflow: visible !important;
+            }
+
+            .blocklyMenu {
+                max-height: none !important;
+                overflow: visible !important;
+            }
+
+            .blocklyWidgetDiv .blocklyMenu {
+                max-height: none !important;
+                overflow: visible !important;
+            }
         </style>
     </head>
 
@@ -766,38 +782,592 @@
                 return div.innerHTML;
             }
 
-            // --- 1. Define Custom Blocks (JSON Array for static blocks) ---
+            // --- 0. Custom Collapsible Section Field ---
 
+            /**
+             * FieldCollapsibleSection - A custom field that creates a clickable header
+             * to toggle visibility of subsequent inputs in the block.
+             */
+            class FieldCollapsibleSection extends Blockly.Field {
+                constructor(text, inputNames, opt_collapsed) {
+                    super(text);
+                    this.SERIALIZABLE = true;
+                    this.CURSOR = 'pointer';
+                    this.text_ = text;
+                    this.inputNames_ = inputNames || [];  // Names of inputs to show/hide
+                    this.collapsed_ = opt_collapsed !== undefined ? opt_collapsed : false;
+                    this.arrowElement_ = null;
+                }
+
+                static fromJson(options) {
+                    return new FieldCollapsibleSection(
+                        options['text'],
+                        options['inputNames'],
+                        options['collapsed']
+                    );
+                }
+
+                initView() {
+                    // Create the group element
+                    this.createBorderRect_();
+                    this.createTextElement_();
+
+                    // Create arrow indicator
+                    this.arrowElement_ = Blockly.utils.dom.createSvgElement(
+                        'text',
+                        {
+                            'class': 'blocklyCollapsibleArrow',
+                            'x': 0,
+                            'y': 0,
+                            'dominant-baseline': 'central'
+                        },
+                        this.fieldGroup_
+                    );
+                    this.arrowElement_.style.fontFamily = 'monospace';
+                    this.arrowElement_.style.fontSize = '10px';
+                    this.arrowElement_.style.fill = '#fff';
+                    this.arrowElement_.style.cursor = 'pointer';
+
+                    this.updateArrow_();
+                }
+
+                updateArrow_() {
+                    if (this.arrowElement_) {
+                        this.arrowElement_.textContent = this.collapsed_ ? '▶' : '▼';
+                    }
+                }
+
+                render_() {
+                    super.render_();
+                    this.updateSize_();
+                }
+
+                updateSize_() {
+                    // Get text width
+                    const textWidth = this.textElement_ ?
+                        Blockly.utils.dom.getTextWidth(this.textElement_) : 0;
+                    const arrowWidth = 14;
+                    const padding = 10;
+
+                    const width = arrowWidth + textWidth + padding;
+                    const height = this.constants_ ? this.constants_.FIELD_TEXT_HEIGHT + 8 : 20;
+
+                    this.size_.width = width;
+                    this.size_.height = height;
+
+                    if (this.borderRect_) {
+                        this.borderRect_.setAttribute('width', width);
+                        this.borderRect_.setAttribute('height', height);
+                        this.borderRect_.setAttribute('rx', 4);
+                        this.borderRect_.setAttribute('ry', 4);
+                        this.borderRect_.style.fill = 'rgba(255,255,255,0.15)';
+                        this.borderRect_.style.cursor = 'pointer';
+                    }
+
+                    if (this.arrowElement_) {
+                        this.arrowElement_.setAttribute('x', 4);
+                        this.arrowElement_.setAttribute('y', height / 2);
+                    }
+
+                    if (this.textElement_) {
+                        this.textElement_.setAttribute('x', arrowWidth + 2);
+                        this.textElement_.setAttribute('y', height / 2);
+                        this.textElement_.setAttribute('dominant-baseline', 'central');
+                    }
+                }
+
+                showEditor_() {
+                    // Toggle collapsed state
+                    this.collapsed_ = !this.collapsed_;
+                    this.updateArrow_();
+                    this.updateInputVisibility_();
+
+                    // Re-render the block
+                    if (this.sourceBlock_ && this.sourceBlock_.rendered) {
+                        this.sourceBlock_.render();
+                    }
+                }
+
+                updateInputVisibility_() {
+                    if (!this.sourceBlock_) return;
+
+                    for (const inputName of this.inputNames_) {
+                        const input = this.sourceBlock_.getInput(inputName);
+                        if (input) {
+                            input.setVisible(!this.collapsed_);
+                        }
+                    }
+                }
+
+                // Called when block is rendered
+                applyColour() {
+                    // Update visibility when block is first rendered
+                    this.updateInputVisibility_();
+                }
+
+                getValue() {
+                    return this.collapsed_ ? 'collapsed' : 'expanded';
+                }
+
+                setValue(newValue) {
+                    if (newValue === 'collapsed') {
+                        this.collapsed_ = true;
+                    } else if (newValue === 'expanded') {
+                        this.collapsed_ = false;
+                    }
+                    this.updateArrow_();
+                    this.updateInputVisibility_();
+                }
+
+                saveState() {
+                    return { collapsed: this.collapsed_ };
+                }
+
+                loadState(state) {
+                    if (state && state.collapsed !== undefined) {
+                        this.collapsed_ = state.collapsed;
+                        this.updateArrow_();
+                        this.updateInputVisibility_();
+                    }
+                }
+
+                toXml(fieldElement) {
+                    fieldElement.setAttribute('collapsed', this.collapsed_);
+                    return fieldElement;
+                }
+
+                fromXml(fieldElement) {
+                    this.collapsed_ = fieldElement.getAttribute('collapsed') === 'true';
+                    this.updateArrow_();
+                    this.updateInputVisibility_();
+                }
+            }
+
+            // Register the custom field
+            Blockly.fieldRegistry.register('field_collapsible_section', FieldCollapsibleSection);
+
+            // --- 1. Define Custom Blocks ---
+
+            // Define apex_rule_config with collapsible sections using JavaScript
+            Blockly.Blocks['apex_rule_config'] = {
+                init: function() {
+                    this.setColour(230);
+                    this.setTooltip('Top-level configuration file - drag section blocks here');
+
+                    // Title row
+                    this.appendDummyInput('TITLE')
+                        .appendField('Configuration');
+
+                    // Required fields (always visible)
+                    this.appendDummyInput('ROW_ID')
+                        .appendField('ID:')
+                        .appendField(new Blockly.FieldTextInput('my-config'), 'ID');
+
+                    this.appendDummyInput('ROW_NAME')
+                        .appendField('Name:')
+                        .appendField(new Blockly.FieldTextInput('My Configuration'), 'NAME');
+
+                    this.appendDummyInput('ROW_VERSION')
+                        .appendField('Version:')
+                        .appendField(new Blockly.FieldTextInput('1.0.0'), 'VERSION');
+
+                    // Collapsible "Metadata" section header
+                    this.appendDummyInput('METADATA_HEADER')
+                        .appendField(new FieldCollapsibleSection(
+                            'Metadata',
+                            ['ROW_DESCRIPTION', 'ROW_AUTHOR', 'ROW_CREATED_BY', 'ROW_CREATED_DATE', 'ROW_LAST_MODIFIED', 'ROW_BUSINESS_DOMAIN', 'ROW_EFFECTIVE_DATE', 'ROW_EXPIRATION_DATE', 'ROW_TAGS'],
+                            true  // Start collapsed
+                        ), 'METADATA_TOGGLE');
+
+                    // Optional metadata fields (collapsible)
+                    this.appendDummyInput('ROW_DESCRIPTION')
+                        .appendField('Description:')
+                        .appendField(new Blockly.FieldTextInput('My configuration'), 'DESCRIPTION');
+
+                    this.appendDummyInput('ROW_AUTHOR')
+                        .appendField('Author:')
+                        .appendField(new Blockly.FieldTextInput('user@example.com'), 'AUTHOR');
+
+                    this.appendDummyInput('ROW_CREATED_BY')
+                        .appendField('Created By:')
+                        .appendField(new Blockly.FieldTextInput(''), 'CREATED_BY');
+
+                    this.appendDummyInput('ROW_CREATED_DATE')
+                        .appendField('Created Date:')
+                        .appendField(new Blockly.FieldTextInput(''), 'CREATED_DATE');
+
+                    this.appendDummyInput('ROW_LAST_MODIFIED')
+                        .appendField('Last Modified:')
+                        .appendField(new Blockly.FieldTextInput(''), 'LAST_MODIFIED');
+
+                    this.appendDummyInput('ROW_BUSINESS_DOMAIN')
+                        .appendField('Business Domain:')
+                        .appendField(new Blockly.FieldTextInput('Trade Processing'), 'BUSINESS_DOMAIN');
+
+                    this.appendDummyInput('ROW_EFFECTIVE_DATE')
+                        .appendField('Effective Date:')
+                        .appendField(new Blockly.FieldTextInput(''), 'EFFECTIVE_DATE');
+
+                    this.appendDummyInput('ROW_EXPIRATION_DATE')
+                        .appendField('Expiration Date:')
+                        .appendField(new Blockly.FieldTextInput(''), 'EXPIRATION_DATE');
+
+                    this.appendDummyInput('ROW_TAGS')
+                        .appendField('Tags (comma-sep):')
+                        .appendField(new Blockly.FieldTextInput('tag1, tag2'), 'TAGS');
+
+                    // Sections input (always visible)
+                    this.appendStatementInput('SECTIONS')
+                        .setCheck('Section')
+                        .appendField('Sections:');
+                }
+            };
+
+            // Define apex_data_source_config with collapsible sections
+            Blockly.Blocks['apex_data_source_config'] = {
+                init: function() {
+                    this.setColour(230);
+                    this.setTooltip('Top-level configuration for data sources');
+
+                    this.appendDummyInput('TITLE')
+                        .appendField('Data Source Config');
+
+                    // Required fields
+                    this.appendDummyInput('ROW_ID')
+                        .appendField('ID:')
+                        .appendField(new Blockly.FieldTextInput('my-ds-config'), 'ID');
+
+                    this.appendDummyInput('ROW_VERSION')
+                        .appendField('Version:')
+                        .appendField(new Blockly.FieldTextInput('1.0.0'), 'VERSION');
+
+                    // Collapsible metadata section
+                    this.appendDummyInput('METADATA_HEADER')
+                        .appendField(new FieldCollapsibleSection(
+                            'Metadata',
+                            ['ROW_DESCRIPTION', 'ROW_AUTHOR', 'ROW_CREATED_BY', 'ROW_CREATED_DATE', 'ROW_LAST_MODIFIED', 'ROW_BUSINESS_DOMAIN', 'ROW_EFFECTIVE_DATE', 'ROW_EXPIRATION_DATE', 'ROW_TAGS'],
+                            true
+                        ), 'METADATA_TOGGLE');
+
+                    this.appendDummyInput('ROW_DESCRIPTION')
+                        .appendField('Description:')
+                        .appendField(new Blockly.FieldTextInput('Data Source Configuration'), 'DESCRIPTION');
+
+                    this.appendDummyInput('ROW_AUTHOR')
+                        .appendField('Author:')
+                        .appendField(new Blockly.FieldTextInput('user@example.com'), 'AUTHOR');
+
+                    this.appendDummyInput('ROW_CREATED_BY')
+                        .appendField('Created By:')
+                        .appendField(new Blockly.FieldTextInput(''), 'CREATED_BY');
+
+                    this.appendDummyInput('ROW_CREATED_DATE')
+                        .appendField('Created Date:')
+                        .appendField(new Blockly.FieldTextInput(''), 'CREATED_DATE');
+
+                    this.appendDummyInput('ROW_LAST_MODIFIED')
+                        .appendField('Last Modified:')
+                        .appendField(new Blockly.FieldTextInput(''), 'LAST_MODIFIED');
+
+                    this.appendDummyInput('ROW_BUSINESS_DOMAIN')
+                        .appendField('Business Domain:')
+                        .appendField(new Blockly.FieldTextInput('Infrastructure'), 'BUSINESS_DOMAIN');
+
+                    this.appendDummyInput('ROW_EFFECTIVE_DATE')
+                        .appendField('Effective Date:')
+                        .appendField(new Blockly.FieldTextInput(''), 'EFFECTIVE_DATE');
+
+                    this.appendDummyInput('ROW_EXPIRATION_DATE')
+                        .appendField('Expiration Date:')
+                        .appendField(new Blockly.FieldTextInput(''), 'EXPIRATION_DATE');
+
+                    this.appendDummyInput('ROW_TAGS')
+                        .appendField('Tags (comma-sep):')
+                        .appendField(new Blockly.FieldTextInput('tag1, tag2'), 'TAGS');
+
+                    this.appendStatementInput('DATA_SOURCES')
+                        .setCheck('DataSource')
+                        .appendField('Data Sources:');
+                }
+            };
+
+            // Define apex_scenario_config with collapsible sections
+            Blockly.Blocks['apex_scenario_config'] = {
+                init: function() {
+                    this.setColour(330);
+                    this.setTooltip('Top-level scenario configuration file');
+
+                    this.appendDummyInput('TITLE')
+                        .appendField('Scenario Configuration');
+
+                    // Required fields
+                    this.appendDummyInput('ROW_ID')
+                        .appendField('ID:')
+                        .appendField(new Blockly.FieldTextInput('my-scenario'), 'ID');
+
+                    this.appendDummyInput('ROW_NAME')
+                        .appendField('Name:')
+                        .appendField(new Blockly.FieldTextInput('My Scenario'), 'NAME');
+
+                    this.appendDummyInput('ROW_VERSION')
+                        .appendField('Version:')
+                        .appendField(new Blockly.FieldTextInput('1.0.0'), 'VERSION');
+
+                    this.appendDummyInput('ROW_BUSINESS_DOMAIN')
+                        .appendField('Business Domain:')
+                        .appendField(new Blockly.FieldTextInput('Trade Processing'), 'BUSINESS_DOMAIN');
+
+                    // Collapsible metadata section
+                    this.appendDummyInput('METADATA_HEADER')
+                        .appendField(new FieldCollapsibleSection(
+                            'Metadata',
+                            ['ROW_DESCRIPTION', 'ROW_AUTHOR', 'ROW_CREATED_BY', 'ROW_CREATED_DATE', 'ROW_LAST_MODIFIED', 'ROW_OWNER', 'ROW_TAGS'],
+                            true
+                        ), 'METADATA_TOGGLE');
+
+                    this.appendDummyInput('ROW_DESCRIPTION')
+                        .appendField('Description:')
+                        .appendField(new Blockly.FieldTextInput('Scenario description'), 'DESCRIPTION');
+
+                    this.appendDummyInput('ROW_AUTHOR')
+                        .appendField('Author:')
+                        .appendField(new Blockly.FieldTextInput('user@example.com'), 'AUTHOR');
+
+                    this.appendDummyInput('ROW_CREATED_BY')
+                        .appendField('Created By:')
+                        .appendField(new Blockly.FieldTextInput(''), 'CREATED_BY');
+
+                    this.appendDummyInput('ROW_CREATED_DATE')
+                        .appendField('Created Date:')
+                        .appendField(new Blockly.FieldTextInput(''), 'CREATED_DATE');
+
+                    this.appendDummyInput('ROW_LAST_MODIFIED')
+                        .appendField('Last Modified:')
+                        .appendField(new Blockly.FieldTextInput(''), 'LAST_MODIFIED');
+
+                    this.appendDummyInput('ROW_OWNER')
+                        .appendField('Owner:')
+                        .appendField(new Blockly.FieldTextInput('team@example.com'), 'OWNER');
+
+                    this.appendDummyInput('ROW_TAGS')
+                        .appendField('Tags (comma-sep):')
+                        .appendField(new Blockly.FieldTextInput('scenario, workflow'), 'TAGS');
+
+                    this.appendStatementInput('SCENARIO')
+                        .setCheck('ScenarioSection')
+                        .appendField('Scenario:');
+                }
+            };
+
+            // Define apex_scenario_registry with collapsible sections
+            Blockly.Blocks['apex_scenario_registry'] = {
+                init: function() {
+                    this.setColour(290);
+                    this.setTooltip('Scenario registry - references multiple scenario configuration files');
+
+                    this.appendDummyInput('TITLE')
+                        .appendField('Scenario Registry');
+
+                    // Required fields
+                    this.appendDummyInput('ROW_ID')
+                        .appendField('ID:')
+                        .appendField(new Blockly.FieldTextInput('my-registry'), 'ID');
+
+                    this.appendDummyInput('ROW_NAME')
+                        .appendField('Name:')
+                        .appendField(new Blockly.FieldTextInput('My Scenario Registry'), 'NAME');
+
+                    this.appendDummyInput('ROW_VERSION')
+                        .appendField('Version:')
+                        .appendField(new Blockly.FieldTextInput('1.0.0'), 'VERSION');
+
+                    // Collapsible metadata section
+                    this.appendDummyInput('METADATA_HEADER')
+                        .appendField(new FieldCollapsibleSection(
+                            'Metadata',
+                            ['ROW_DESCRIPTION', 'ROW_CREATED_BY', 'ROW_CREATED_DATE', 'ROW_LAST_MODIFIED', 'ROW_TAGS'],
+                            true
+                        ), 'METADATA_TOGGLE');
+
+                    this.appendDummyInput('ROW_DESCRIPTION')
+                        .appendField('Description:')
+                        .appendField(new Blockly.FieldTextInput('Registry description'), 'DESCRIPTION');
+
+                    this.appendDummyInput('ROW_CREATED_BY')
+                        .appendField('Created By:')
+                        .appendField(new Blockly.FieldTextInput('user@example.com'), 'CREATED_BY');
+
+                    this.appendDummyInput('ROW_CREATED_DATE')
+                        .appendField('Created Date:')
+                        .appendField(new Blockly.FieldTextInput(''), 'CREATED_DATE');
+
+                    this.appendDummyInput('ROW_LAST_MODIFIED')
+                        .appendField('Last Modified:')
+                        .appendField(new Blockly.FieldTextInput(''), 'LAST_MODIFIED');
+
+                    this.appendDummyInput('ROW_TAGS')
+                        .appendField('Tags (comma-sep):')
+                        .appendField(new Blockly.FieldTextInput('registry, scenarios'), 'TAGS');
+
+                    // Routing configuration
+                    this.appendDummyInput('ROW_ROUTING')
+                        .appendField('Routing Strategy:')
+                        .appendField(new Blockly.FieldDropdown([
+                            ['type-based', 'type-based'],
+                            ['classification-based', 'classification-based']
+                        ]), 'ROUTING_STRATEGY');
+
+                    this.appendDummyInput('ROW_DEFAULT')
+                        .appendField('Default Scenario:')
+                        .appendField(new Blockly.FieldTextInput(''), 'DEFAULT_SCENARIO');
+
+                    this.appendStatementInput('SCENARIOS')
+                        .setCheck('ScenarioRef')
+                        .appendField('Scenarios:');
+                }
+            };
+
+            // Define apex_component_config with collapsible sections
+            Blockly.Blocks['apex_component_config'] = {
+                init: function() {
+                    this.setColour(180);
+                    this.setTooltip('Component configuration grouping multiple config files');
+
+                    this.appendDummyInput('TITLE')
+                        .appendField('Component Configuration');
+
+                    // Required fields
+                    this.appendDummyInput('ROW_ID')
+                        .appendField('ID:')
+                        .appendField(new Blockly.FieldTextInput('my-component'), 'ID');
+
+                    this.appendDummyInput('ROW_NAME')
+                        .appendField('Name:')
+                        .appendField(new Blockly.FieldTextInput('My Component'), 'NAME');
+
+                    this.appendDummyInput('ROW_VERSION')
+                        .appendField('Version:')
+                        .appendField(new Blockly.FieldTextInput('1.0.0'), 'VERSION');
+
+                    // Collapsible metadata section
+                    this.appendDummyInput('METADATA_HEADER')
+                        .appendField(new FieldCollapsibleSection(
+                            'Metadata',
+                            ['ROW_DESCRIPTION', 'ROW_BUSINESS_DOMAIN', 'ROW_OWNER', 'ROW_CREATED_BY', 'ROW_CREATED_DATE', 'ROW_LAST_MODIFIED', 'ROW_CRITICALITY', 'ROW_SLA', 'ROW_TAGS'],
+                            true
+                        ), 'METADATA_TOGGLE');
+
+                    this.appendDummyInput('ROW_DESCRIPTION')
+                        .appendField('Description:')
+                        .appendField(new Blockly.FieldTextInput('Component description'), 'DESCRIPTION');
+
+                    this.appendDummyInput('ROW_BUSINESS_DOMAIN')
+                        .appendField('Business Domain:')
+                        .appendField(new Blockly.FieldTextInput('Trade Processing'), 'BUSINESS_DOMAIN');
+
+                    this.appendDummyInput('ROW_OWNER')
+                        .appendField('Owner:')
+                        .appendField(new Blockly.FieldTextInput('team@example.com'), 'OWNER');
+
+                    this.appendDummyInput('ROW_CREATED_BY')
+                        .appendField('Created By:')
+                        .appendField(new Blockly.FieldTextInput(''), 'CREATED_BY');
+
+                    this.appendDummyInput('ROW_CREATED_DATE')
+                        .appendField('Created Date:')
+                        .appendField(new Blockly.FieldTextInput(''), 'CREATED_DATE');
+
+                    this.appendDummyInput('ROW_LAST_MODIFIED')
+                        .appendField('Last Modified:')
+                        .appendField(new Blockly.FieldTextInput(''), 'LAST_MODIFIED');
+
+                    this.appendDummyInput('ROW_CRITICALITY')
+                        .appendField('Criticality:')
+                        .appendField(new Blockly.FieldDropdown([
+                            ['high', 'high'],
+                            ['medium', 'medium'],
+                            ['low', 'low']
+                        ]), 'CRITICALITY');
+
+                    this.appendDummyInput('ROW_SLA')
+                        .appendField('SLA (ms):')
+                        .appendField(new Blockly.FieldNumber(200, 0), 'SLA_MS');
+
+                    this.appendDummyInput('ROW_TAGS')
+                        .appendField('Tags (comma-sep):')
+                        .appendField(new Blockly.FieldTextInput('component, reusable'), 'TAGS');
+
+                    this.appendStatementInput('FILE_REFS')
+                        .setCheck('FileReference')
+                        .appendField('File References:');
+                }
+            };
+
+            // Define apex_rule with collapsible section for enabled/message/severity
+            Blockly.Blocks['apex_rule'] = {
+                init: function() {
+                    this.setColour(120);
+                    this.setTooltip('Defines a single business rule');
+                    this.setPreviousStatement(true, 'Rule');
+                    this.setNextStatement(true, 'Rule');
+
+                    this.appendDummyInput('TITLE')
+                        .appendField('Rule');
+
+                    // Required fields (always visible)
+                    this.appendDummyInput('ROW_ID')
+                        .appendField('ID:')
+                        .appendField(new Blockly.FieldTextInput('rule-1'), 'ID');
+
+                    this.appendDummyInput('ROW_NAME')
+                        .appendField('Name:')
+                        .appendField(new Blockly.FieldTextInput('My Rule'), 'NAME');
+
+                    // Collapsible section for enabled/message/severity
+                    this.appendDummyInput('OPTIONS_HEADER')
+                        .appendField(new FieldCollapsibleSection(
+                            'Options',
+                            ['ROW_ENABLED', 'ROW_MESSAGE', 'ROW_SEVERITY', 'ROW_PRIORITY', 'ROW_CATEGORY', 'ROW_RESULT_FIELD'],
+                            true
+                        ), 'OPTIONS_TOGGLE');
+
+                    this.appendDummyInput('ROW_ENABLED')
+                        .appendField('Enabled:')
+                        .appendField(new Blockly.FieldCheckbox(true), 'ENABLED');
+
+                    this.appendDummyInput('ROW_MESSAGE')
+                        .appendField('Message:')
+                        .appendField(new Blockly.FieldTextInput('Rule triggered'), 'MESSAGE');
+
+                    this.appendDummyInput('ROW_SEVERITY')
+                        .appendField('Severity:')
+                        .appendField(new Blockly.FieldDropdown([
+                            ['ERROR', 'ERROR'],
+                            ['WARNING', 'WARNING'],
+                            ['INFO', 'INFO']
+                        ]), 'SEVERITY');
+
+                    this.appendDummyInput('ROW_PRIORITY')
+                        .appendField('Priority:')
+                        .appendField(new Blockly.FieldTextInput(''), 'PRIORITY');
+
+                    this.appendDummyInput('ROW_CATEGORY')
+                        .appendField('Category:')
+                        .appendField(new Blockly.FieldTextInput(''), 'CATEGORY');
+
+                    this.appendValueInput('ROW_RESULT_FIELD')
+                        .setCheck(['String', 'Number', 'Boolean'])
+                        .appendField('Result Field:');
+
+                    // Condition (always visible)
+                    this.appendValueInput('CONDITION')
+                        .setCheck(['Boolean', 'String'])
+                        .appendField('Condition:');
+                }
+            };
+
+            // Define remaining blocks with JSON
             Blockly.defineBlocksWithJsonArray([
-                {
-                    "type": "apex_rule_config",
-                    "message0": "Configuration %1 ID: %2 %3 Name: %4 %5 Version: %6 %7 Description: %8 %9 Author: %10 %11 Business Domain: %12 %13 Effective Date: %14 %15 Expiration Date: %16 %17 Tags (comma-sep): %18 %19 Sections: %20",
-                    "args0": [
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "ID", "text": "my-config" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "NAME", "text": "My Configuration" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "VERSION", "text": "1.0.0" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "DESCRIPTION", "text": "My configuration" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "AUTHOR", "text": "user@example.com" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "BUSINESS_DOMAIN", "text": "Trade Processing" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "EFFECTIVE_DATE", "text": "" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "EXPIRATION_DATE", "text": "" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "TAGS", "text": "tag1, tag2" },
-                        { "type": "input_dummy" },
-                        { "type": "input_statement", "name": "SECTIONS", "check": "Section" }
-                    ],
-                    "colour": 230,
-                    "tooltip": "Top-level configuration file - drag section blocks here",
-                    "helpUrl": ""
-                },
                 {
                     "type": "apex_section_data_source_refs",
                     "message0": "Data Source Refs Section %1 %2",
@@ -893,35 +1463,6 @@
                     "nextStatement": "Section",
                     "colour": 30,
                     "tooltip": "Container for transformations",
-                    "helpUrl": ""
-                },
-                {
-                    "type": "apex_rule",
-                    "message0": "Rule %1 ID: %2 %3 Name: %4 %5 Enabled: %6 %7 Message: %8 %9 Severity: %10 %11 Priority (Optional): %12 %13 Category: %14 %15 Result Field (Optional): %16 %17 Condition: %18",
-                    "args0": [
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "ID", "text": "rule-1" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "NAME", "text": "My Rule" },
-                        { "type": "input_dummy" },
-                        { "type": "field_checkbox", "name": "ENABLED", "checked": true },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "MESSAGE", "text": "Rule triggered" },
-                        { "type": "input_dummy" },
-                        { "type": "field_dropdown", "name": "SEVERITY", "options": [["ERROR", "ERROR"], ["WARNING", "WARNING"], ["INFO", "INFO"]] },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "PRIORITY", "text": "" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "CATEGORY", "text": "" },
-                        { "type": "input_dummy" },
-                        { "type": "input_value", "name": "RESULT_FIELD", "check": ["String", "Number", "Boolean"] },
-                        { "type": "input_dummy" },
-                        { "type": "input_value", "name": "CONDITION", "check": ["Boolean", "String"] }
-                    ],
-                    "previousStatement": "Rule",
-                    "nextStatement": "Rule",
-                    "colour": 120,
-                    "tooltip": "Defines a single business rule",
                     "helpUrl": ""
                 },
                 {
@@ -1116,33 +1657,6 @@
                     "helpUrl": ""
                 },
                 {
-                    "type": "apex_data_source_config",
-                    "message0": "Data Source Config %1 ID: %2 %3 Version: %4 %5 Description: %6 %7 Author: %8 %9 Business Domain: %10 %11 Effective Date: %12 %13 Expiration Date: %14 %15 Tags (comma-sep): %16 %17 Data Sources: %18",
-                    "args0": [
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "ID", "text": "my-ds-config" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "VERSION", "text": "1.0.0" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "DESCRIPTION", "text": "Data Source Configuration" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "AUTHOR", "text": "user@example.com" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "BUSINESS_DOMAIN", "text": "Infrastructure" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "EFFECTIVE_DATE", "text": "" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "EXPIRATION_DATE", "text": "" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "TAGS", "text": "tag1, tag2" },
-                        { "type": "input_dummy" },
-                        { "type": "input_statement", "name": "DATA_SOURCES", "check": "DataSource" }
-                    ],
-                    "colour": 230,
-                    "tooltip": "Top-level configuration for data sources",
-                    "helpUrl": ""
-                },
-                {
                     "type": "apex_data_source_database",
                     "message0": "Database Source %1 ID: %2 %3 Name: %4 %5 Enabled: %6 %7 Description: %8 %9 Host: %10 %11 Port: %12 %13 Database: %14 %15 Username: %16 %17 Password: %18 %19 Queries: %20",
                     "args0": [
@@ -1304,33 +1818,6 @@
                 },
                 // --- Scenario Blocks ---
                 {
-                    "type": "apex_scenario_config",
-                    "message0": "Scenario Configuration %1 ID: %2 %3 Name: %4 %5 Version: %6 %7 Description: %8 %9 Author: %10 %11 Business Domain: %12 %13 Owner: %14 %15 Tags (comma-sep): %16 %17 Scenario: %18",
-                    "args0": [
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "ID", "text": "my-scenario" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "NAME", "text": "My Scenario" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "VERSION", "text": "1.0.0" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "DESCRIPTION", "text": "Scenario description" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "AUTHOR", "text": "user@example.com" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "BUSINESS_DOMAIN", "text": "Trade Processing" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "OWNER", "text": "team@example.com" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "TAGS", "text": "scenario, workflow" },
-                        { "type": "input_dummy" },
-                        { "type": "input_statement", "name": "SCENARIO", "check": "ScenarioSection" }
-                    ],
-                    "colour": 330,
-                    "tooltip": "Top-level scenario configuration file",
-                    "helpUrl": ""
-                },
-                {
                     "type": "apex_section_scenario",
                     "message0": "Scenario %1 Scenario ID: %2 %3 Description: %4 %5 Data Types (comma-sep): %6 %7 Classification Rule: %8 %9 Processing Stages: %10",
                     "args0": [
@@ -1396,34 +1883,6 @@
                 },
                 // --- Scenario Registry Blocks ---
                 {
-                    "type": "apex_scenario_registry",
-                    "message0": "Scenario Registry %1 ID: %2 %3 Name: %4 %5 Version: %6 %7 Description: %8 %9 Created By: %10 %11 Routing Strategy: %12 %13 Default Scenario: %14 %15 Scenarios: %16",
-                    "args0": [
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "ID", "text": "my-registry" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "NAME", "text": "My Scenario Registry" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "VERSION", "text": "1.0.0" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "DESCRIPTION", "text": "Registry description" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "CREATED_BY", "text": "user@example.com" },
-                        { "type": "input_dummy" },
-                        { "type": "field_dropdown", "name": "ROUTING_STRATEGY", "options": [
-                            ["type-based", "type-based"],
-                            ["classification-based", "classification-based"]
-                        ]},
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "DEFAULT_SCENARIO", "text": "" },
-                        { "type": "input_dummy" },
-                        { "type": "input_statement", "name": "SCENARIOS", "check": "ScenarioRef" }
-                    ],
-                    "colour": 290,
-                    "tooltip": "Scenario registry - references multiple scenario configuration files",
-                    "helpUrl": ""
-                },
-                {
                     "type": "apex_scenario_ref",
                     "message0": "Scenario Reference %1 Scenario ID: %2 %3 Config File: %4 %5 Business Domain: %6",
                     "args0": [
@@ -1441,39 +1900,6 @@
                     "helpUrl": ""
                 },
                 // --- Component Reference Blocks ---
-                {
-                    "type": "apex_component_config",
-                    "message0": "Component Configuration %1 ID: %2 %3 Name: %4 %5 Version: %6 %7 Description: %8 %9 Business Domain: %10 %11 Owner: %12 %13 Criticality: %14 %15 SLA (ms): %16 %17 Tags (comma-sep): %18 %19 File References: %20",
-                    "args0": [
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "ID", "text": "my-component" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "NAME", "text": "My Component" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "VERSION", "text": "1.0.0" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "DESCRIPTION", "text": "Component description" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "BUSINESS_DOMAIN", "text": "Trade Processing" },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "OWNER", "text": "team@example.com" },
-                        { "type": "input_dummy" },
-                        { "type": "field_dropdown", "name": "CRITICALITY", "options": [
-                            ["high", "high"],
-                            ["medium", "medium"],
-                            ["low", "low"]
-                        ]},
-                        { "type": "input_dummy" },
-                        { "type": "field_number", "name": "SLA_MS", "value": 200, "min": 0 },
-                        { "type": "input_dummy" },
-                        { "type": "field_input", "name": "TAGS", "text": "component, reusable" },
-                        { "type": "input_dummy" },
-                        { "type": "input_statement", "name": "FILE_REFS", "check": "FileReference" }
-                    ],
-                    "colour": 180,
-                    "tooltip": "Component configuration grouping multiple config files",
-                    "helpUrl": ""
-                },
                 {
                     "type": "apex_file_reference",
                     "message0": "File Reference %1 Type: %2 %3 File: %4 %5 Execution Order: %6 %7 Failure Policy: %8",
@@ -1754,6 +2180,9 @@
                 const version = block.getFieldValue('VERSION');
                 const description = block.getFieldValue('DESCRIPTION');
                 const author = block.getFieldValue('AUTHOR');
+                const createdBy = block.getFieldValue('CREATED_BY');
+                const createdDate = block.getFieldValue('CREATED_DATE');
+                const lastModified = block.getFieldValue('LAST_MODIFIED');
                 const businessDomain = block.getFieldValue('BUSINESS_DOMAIN');
                 const effectiveDate = block.getFieldValue('EFFECTIVE_DATE');
                 const expirationDate = block.getFieldValue('EXPIRATION_DATE');
@@ -1794,6 +2223,9 @@
                 // Conditionally add optional fields
                 if (description) metadata.description = description;
                 if (author) metadata.author = author;
+                if (createdBy) metadata["created-by"] = createdBy;
+                if (createdDate) metadata["created-date"] = createdDate;
+                if (lastModified) metadata["last-modified"] = lastModified;
                 if (businessDomain) metadata["business-domain"] = businessDomain;
                 if (effectiveDate) metadata["effective-date"] = effectiveDate;
                 if (expirationDate) metadata["expiration-date"] = expirationDate;
@@ -1847,6 +2279,9 @@
                 const version = block.getFieldValue('VERSION');
                 const description = block.getFieldValue('DESCRIPTION');
                 const author = block.getFieldValue('AUTHOR');
+                const createdBy = block.getFieldValue('CREATED_BY');
+                const createdDate = block.getFieldValue('CREATED_DATE');
+                const lastModified = block.getFieldValue('LAST_MODIFIED');
                 const businessDomain = block.getFieldValue('BUSINESS_DOMAIN');
                 const effectiveDate = block.getFieldValue('EFFECTIVE_DATE');
                 const expirationDate = block.getFieldValue('EXPIRATION_DATE');
@@ -1865,6 +2300,9 @@
 
                 // Conditionally add optional fields
                 if (author) metadata.author = author;
+                if (createdBy) metadata["created-by"] = createdBy;
+                if (createdDate) metadata["created-date"] = createdDate;
+                if (lastModified) metadata["last-modified"] = lastModified;
                 if (businessDomain) metadata["business-domain"] = businessDomain;
                 if (effectiveDate) metadata["effective-date"] = effectiveDate;
                 if (expirationDate) metadata["expiration-date"] = expirationDate;
@@ -2032,7 +2470,7 @@
                 const severity = block.getFieldValue('SEVERITY');
                 const priority = block.getFieldValue('PRIORITY');
                 const category = block.getFieldValue('CATEGORY');
-                const resultFieldCode = generator.valueToCode(block, 'RESULT_FIELD', 0);
+                const resultFieldCode = generator.valueToCode(block, 'ROW_RESULT_FIELD', 0);
                 const condition = generator.valueToCode(block, 'CONDITION', 0) || "true";
 
                 const ruleObj = {
@@ -2353,6 +2791,9 @@
                 const version = block.getFieldValue('VERSION');
                 const description = block.getFieldValue('DESCRIPTION');
                 const author = block.getFieldValue('AUTHOR');
+                const createdBy = block.getFieldValue('CREATED_BY');
+                const createdDate = block.getFieldValue('CREATED_DATE');
+                const lastModified = block.getFieldValue('LAST_MODIFIED');
                 const businessDomain = block.getFieldValue('BUSINESS_DOMAIN');
                 const owner = block.getFieldValue('OWNER');
                 const tagsStr = block.getFieldValue('TAGS');
@@ -2383,6 +2824,9 @@
                 // Conditionally add optional fields
                 if (description) metadata.description = description;
                 if (author) metadata.author = author;
+                if (createdBy) metadata["created-by"] = createdBy;
+                if (createdDate) metadata["created-date"] = createdDate;
+                if (lastModified) metadata["last-modified"] = lastModified;
                 if (businessDomain) metadata["business-domain"] = businessDomain;
                 if (owner) metadata.owner = owner;
                 if (tags.length > 0) metadata.tags = tags;
@@ -2476,9 +2920,14 @@
                 const version = block.getFieldValue('VERSION');
                 const description = block.getFieldValue('DESCRIPTION');
                 const createdBy = block.getFieldValue('CREATED_BY');
+                const createdDate = block.getFieldValue('CREATED_DATE');
+                const lastModified = block.getFieldValue('LAST_MODIFIED');
+                const tagsStr = block.getFieldValue('TAGS');
                 const routingStrategy = block.getFieldValue('ROUTING_STRATEGY');
                 const defaultScenario = block.getFieldValue('DEFAULT_SCENARIO');
                 const scenariosCode = generator.statementToCode(block, 'SCENARIOS');
+
+                const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(t => t.length > 0) : [];
 
                 const metadata = {
                     id: id,
@@ -2489,6 +2938,9 @@
 
                 if (description) metadata.description = description;
                 if (createdBy) metadata["created-by"] = createdBy;
+                if (createdDate) metadata["created-date"] = createdDate;
+                if (lastModified) metadata["last-modified"] = lastModified;
+                if (tags.length > 0) metadata.tags = tags;
 
                 const config = { metadata: metadata };
 
@@ -2536,6 +2988,9 @@
                 const description = block.getFieldValue('DESCRIPTION');
                 const businessDomain = block.getFieldValue('BUSINESS_DOMAIN');
                 const owner = block.getFieldValue('OWNER');
+                const createdBy = block.getFieldValue('CREATED_BY');
+                const createdDate = block.getFieldValue('CREATED_DATE');
+                const lastModified = block.getFieldValue('LAST_MODIFIED');
                 const criticality = block.getFieldValue('CRITICALITY');
                 const slaMs = block.getFieldValue('SLA_MS');
                 const tagsStr = block.getFieldValue('TAGS');
@@ -2553,6 +3008,9 @@
                 if (description) metadata.description = description;
                 if (businessDomain) metadata["business-domain"] = businessDomain;
                 if (owner) metadata.owner = owner;
+                if (createdBy) metadata["created-by"] = createdBy;
+                if (createdDate) metadata["created-date"] = createdDate;
+                if (lastModified) metadata["last-modified"] = lastModified;
                 if (criticality) metadata.criticality = criticality;
                 if (slaMs) metadata["sla-ms"] = parseInt(slaMs);
                 if (tags.length > 0) metadata.tags = tags;
