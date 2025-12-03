@@ -2,19 +2,19 @@ COMPREHENSIVE APEX YAML VALIDATION REPORT
 =========================================
 
 OVERALL STATISTICS:
-  Total YAML files: 66
-  Fully valid files: 32
-  Structurally valid: 32
+  Total YAML files: 95
+  Fully valid files: 55
+  Structurally valid: 55
   Dependency issues only: 0
-  Invalid files: 34
+  Invalid files: 40
 
 SUCCESS RATES:
-  Overall success rate: 48.5%
-  Structural success rate: 48.5%
+  Overall success rate: 57.9%
+  Structural success rate: 57.9%
 
 ERROR BREAKDOWN:
-  Other Issues: 15 occurrences
-  Document Type Issues: 11 occurrences
+  Other Issues: 19 occurrences
+  Document Type Issues: 13 occurrences
   Missing Required Fields: 10 occurrences
 
 SAMPLE VALID FILES:
@@ -30,18 +30,18 @@ SAMPLE VALID FILES:
   • test.yaml
 
 SAMPLE INVALID FILES:
-  • circular-a.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\circular-a.yaml: Document type 'external-data-config' requires at least one of: [dataSources, configuration]
-  • circular-b.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\circular-b.yaml: Document type 'external-data-config' requires at least one of: [dataSources, configuration]
-  • classpath-external.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\classpath-external.yaml: Document type 'external-data-config' requires at least one of: [dataSources, configuration]
-  • classpath-main.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\classpath-main.yaml: Document type 'external-data-config' requires at least one of: [dataSources, configuration]
-  • mixed-classpath.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\mixed-classpath.yaml: Document type 'external-data-config' requires at least one of: [dataSources, configuration]
-  • mixed-filesystem.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\mixed-filesystem.yaml: Document type 'external-data-config' requires at least one of: [dataSources, configuration]
-  • mixed-main.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\mixed-main.yaml: Document type 'external-data-config' requires at least one of: [dataSources, configuration]
-  • nested-level1.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\nested-level1.yaml: Document type 'external-data-config' requires at least one of: [dataSources, configuration]
-  • nested-level2.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\nested-level2.yaml: Document type 'external-data-config' requires at least one of: [dataSources, configuration]
-  • nested-main.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\nested-main.yaml: Document type 'external-data-config' requires at least one of: [dataSources, configuration]
+  • circular-a.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\circular-a.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
+  • circular-b.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\circular-b.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
+  • classpath-external.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\classpath-external.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
+  • classpath-main.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\classpath-main.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
+  • mixed-classpath.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\mixed-classpath.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
+  • mixed-filesystem.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\mixed-filesystem.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
+  • mixed-main.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\mixed-main.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
+  • nested-level1.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\nested-level1.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
+  • nested-level2.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\nested-level2.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
+  • nested-main.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\nested-main.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
 
 BULK FIX IMPACT ASSESSMENT:
   Previous estimated rate: 21.3%
-  Current actual rate: 48.5%
-  Improvement: +27.2 percentage points
+  Current actual rate: 57.9%
+  Improvement: +36.6 percentage points

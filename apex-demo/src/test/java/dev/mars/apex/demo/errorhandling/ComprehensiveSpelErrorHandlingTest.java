@@ -74,8 +74,12 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
         assertEquals(RuleResult.ResultType.ERROR, result.getResultType(), 
                     "Should return ERROR for missing property");
         assertFalse(result.isTriggered(), "Error rule should not be triggered");
-        assertTrue(result.getMessage().contains("Property or field 'nonExistentProperty' cannot be found"),
-                  "Error message should mention missing property");
+        // Updated to accept new error message format
+        String msg = result.getMessage();
+        assertTrue(msg.contains("nonExistentProperty") && 
+                  (msg.contains("references undefined") || msg.contains("inaccessible variable") || 
+                   msg.contains("Property or field")),
+                  "Error message should mention missing property: " + msg);
         
         logger.info("✓ Property not found handled gracefully");
     }

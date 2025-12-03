@@ -16,6 +16,7 @@ import dev.mars.apex.core.engine.config.MapPropertyAccessor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
@@ -153,7 +154,32 @@ public class UnifiedRuleEvaluator {
             
             // Parse and evaluate the SpEL expression
             Expression exp = parser.parseExpression(rule.getCondition());
-            Boolean result = exp.getValue(context, Boolean.class);
+            Boolean result;
+            
+            try {
+                result = exp.getValue(context, Boolean.class);
+            } catch (SpelEvaluationException e) {
+                // Catch SpEL evaluation errors and provide helpful context
+                String errorMsg;
+                String exMsg = e.getMessage() != null ? e.getMessage() : "";
+                
+                // Check if it's a property/field access error or method call on null
+                if (exMsg.contains("Property or field") || exMsg.contains("cannot be found") || 
+                    exMsg.contains("not readable") || exMsg.contains("null context object")) {
+                    String varName = extractVariableName(exMsg, rule.getCondition());
+                    errorMsg = String.format("Rule '%s' references undefined or inaccessible variable '%s'. " +
+                                           "Check that the YAML rule condition matches actual data fields. Condition: %s",
+                                           rule.getName(), varName, rule.getCondition());
+                } else {
+                    errorMsg = String.format("Rule '%s' evaluation failed: %s. Condition: %s",
+                                           rule.getName(), e.getMessage(), rule.getCondition());
+                }
+                
+                TestAwareLogger.error(rulesLogger, errorMsg);
+                RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition());
+                LoggingContext.clearContext();
+                return RuleResult.error(rule.getName(), errorMsg, rule.getSeverity(), metrics);
+            }
 
             // Phase 5: Store result in context if result-field is configured
             if (rule.getResultField() != null && !rule.getResultField().trim().isEmpty()) {
@@ -705,4 +731,54 @@ public class UnifiedRuleEvaluator {
             rulesLogger.warn("Error applying field mapping '{}': {}", mapping, e.getMessage());
         }
     }
+    
+    /**
+     * Extract variable name from SpEL exception message or condition.
+     * Attempts to parse messages like "Property or field 'age' cannot be found"
+     * or extract from condition like "#undefinedVariable.length() > 0"
+     *
+     * @param exceptionMessage The exception message
+     * @param condition The rule condition that failed
+     * @return The variable name, or "unknown" if not parseable
+     */
+    private String extractVariableName(String exceptionMessage, String condition) {
+        if (exceptionMessage == null && condition == null) {
+            return "unknown";
+        }
+        
+        // First try to extract variable name from exception message
+        // Patterns like: "Property or field 'varName'"
+        if (exceptionMessage != null) {
+            int startQuote = exceptionMessage.indexOf('\'');
+            if (startQuote >= 0) {
+                int endQuote = exceptionMessage.indexOf('\'', startQuote + 1);
+                if (endQuote > startQuote) {
+                    return exceptionMessage.substring(startQuote + 1, endQuote);
+                }
+            }
+        }
+        
+        // If that didn't work, try to extract from condition
+        // Pattern: #variableName or #variableName.something
+        if (condition != null && condition.contains("#")) {
+            int hashIndex = condition.indexOf('#');
+            int endIndex = hashIndex + 1;
+            
+            // Find the end of the variable name (stops at space, dot, bracket, or operator)
+            while (endIndex < condition.length()) {
+                char c = condition.charAt(endIndex);
+                if (!Character.isLetterOrDigit(c) && c != '_') {
+                    break;
+                }
+                endIndex++;
+            }
+            
+            if (endIndex > hashIndex + 1) {
+                return condition.substring(hashIndex + 1, endIndex);
+            }
+        }
+        
+        return "unknown";
+    }
 }
+

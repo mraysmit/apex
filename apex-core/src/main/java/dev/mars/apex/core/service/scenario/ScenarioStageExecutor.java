@@ -321,10 +321,9 @@ public class ScenarioStageExecutor {
             stageConfig = configLoader.loadFromClasspath(stage.getConfigFile());
         }
 
-        // Create rules engine for this stage
-        RulesEngine stageEngine = new RulesEngine(
-            ruleFactory.createRulesEngineConfiguration(stageConfig)
-        );
+        // Create rules engine for this stage WITH stageConfig for data source initialization
+        // CRITICAL: Pass stageConfig to constructor so data sources are initialized for enrichment database lookups
+        RulesEngine stageEngine = RulesEngine.fromYamlConfig(stageConfig);
 
         // Create facts map with data and context
         Map<String, Object> facts = createFactsMap(data, context);
@@ -445,8 +444,9 @@ public class ScenarioStageExecutor {
             config = configLoader.loadFromClasspath(configFilePath);
         }
 
-        // Create rules engine
-        RulesEngine engine = new RulesEngine(ruleFactory.createRulesEngineConfiguration(config));
+        // Create rules engine WITH config for data source initialization
+        // CRITICAL: Use fromYamlConfig() so data sources are initialized for enrichment database lookups
+        RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
         // Create facts map
         Map<String, Object> facts = createFactsMap(data, context);

@@ -622,14 +622,14 @@ public class RulesEngine {
     }
 
     /**
-     * Execute a list of enrichment groups against the provided target object.
-     * This is a PRIVATE method - enrichment groups are processed automatically by evaluate().
+     * Execute a list of enrichment groups with proper result aggregation.
      *
      * @param enrichmentGroups The list of enrichment groups to execute
      * @param targetObject The target object to enrich
+     * @param yamlConfig The YAML configuration (required for database lookups)
      * @return The result of enrichment group execution
      */
-    private RuleResult executeEnrichmentGroupsList(List<EnrichmentGroup> enrichmentGroups, Object targetObject) {
+    private RuleResult executeEnrichmentGroupsList(List<EnrichmentGroup> enrichmentGroups, Object targetObject, YamlRuleConfiguration yamlConfig) {
         if (enrichmentGroups == null || enrichmentGroups.isEmpty()) {
             logger.info("No enrichment groups provided for execution");
             return RuleResult.noRules();
@@ -645,7 +645,7 @@ public class RulesEngine {
             logger.debug("Evaluating enrichment group: {}", group.getName());
             logger.debug("Enriched data keys before group '{}': {}", group.getName(), enrichedData.keySet());
             try {
-                EnrichmentGroupResult result = processEnrichmentGroup(group, enrichedData);
+                EnrichmentGroupResult result = processEnrichmentGroup(group, enrichedData, yamlConfig);
                 logger.debug("Enriched data keys after group '{}': {}", group.getName(), enrichedData.keySet());
 
                 if (!result.isSuccess()) {
@@ -682,9 +682,10 @@ public class RulesEngine {
      *
      * @param group The enrichment group to process
      * @param targetObject The target object to enrich
+     * @param yamlConfig The YAML configuration (required for database lookups)
      * @return The result of enrichment group processing
      */
-    private EnrichmentGroupResult processEnrichmentGroup(EnrichmentGroup group, Object targetObject) {
+    private EnrichmentGroupResult processEnrichmentGroup(EnrichmentGroup group, Object targetObject, YamlRuleConfiguration yamlConfig) {
         if (group == null) {
             return EnrichmentGroupResult.of("<null>", true, "No group", List.of(), 0L);
         }
@@ -698,10 +699,10 @@ public class RulesEngine {
 
         if (group.isParallelExecution() && ordered.size() > 1) {
             // Parallel execution - no short-circuit
-            results = processEnrichmentGroupParallel(ordered, targetObject);
+            results = processEnrichmentGroupParallel(ordered, targetObject, yamlConfig);
         } else {
             // Sequential execution with possible short-circuit
-            results = processEnrichmentGroupSequential(ordered, targetObject, andOp, shortCircuit);
+            results = processEnrichmentGroupSequential(ordered, targetObject, andOp, shortCircuit, yamlConfig);
         }
 
         // Aggregate overall based on AND/OR semantics
@@ -717,9 +718,10 @@ public class RulesEngine {
      *
      * @param enrichments The list of enrichments to process
      * @param targetObject The target object to enrich
+     * @param yamlConfig The YAML configuration (required for database lookups)
      * @return List of enrichment results
      */
-    private List<RuleResult> processEnrichmentGroupParallel(List<YamlEnrichment> enrichments, Object targetObject) {
+    private List<RuleResult> processEnrichmentGroupParallel(List<YamlEnrichment> enrichments, Object targetObject, YamlRuleConfiguration yamlConfig) {
         List<RuleResult> results = new ArrayList<>();
         List<Callable<RuleResult>> tasks = new ArrayList<>();
 
@@ -730,7 +732,7 @@ public class RulesEngine {
                 // as HashMap is not thread-safe for concurrent modifications
                 Object taskTargetObject = convertToMap(targetObject);
                 try {
-                    return enrichmentProcessor.processEnrichmentWithResult(enrichment, taskTargetObject);
+                    return enrichmentProcessor.processEnrichmentWithResult(enrichment, taskTargetObject, yamlConfig);
                 } catch (Exception e) {
                     List<String> msgs = new ArrayList<>();
                     msgs.add("Parallel enrichment exception: " + e.getMessage());
@@ -769,20 +771,21 @@ public class RulesEngine {
     }
 
     /**
-     * Process enrichments sequentially with possible short-circuit.
+     * Process enrichments sequentially.
      *
      * @param enrichments The list of enrichments to process
      * @param targetObject The target object to enrich
      * @param andOp Whether to use AND operator (true) or OR operator (false)
      * @param shortCircuit Whether to stop on first failure/success
+     * @param yamlConfig The YAML configuration (required for database lookups)
      * @return List of enrichment results
      */
     private List<RuleResult> processEnrichmentGroupSequential(List<YamlEnrichment> enrichments, Object targetObject,
-                                                               boolean andOp, boolean shortCircuit) {
+                                                               boolean andOp, boolean shortCircuit, YamlRuleConfiguration yamlConfig) {
         List<RuleResult> results = new ArrayList<>();
 
         for (YamlEnrichment enrichment : enrichments) {
-            RuleResult r = enrichmentProcessor.processEnrichmentWithResult(enrichment, targetObject);
+            RuleResult r = enrichmentProcessor.processEnrichmentWithResult(enrichment, targetObject, yamlConfig);
             results.add(r);
             boolean ok = r.isSuccess();
 
@@ -1245,7 +1248,7 @@ public class RulesEngine {
 
                         if (allEnrichmentGroups != null && !allEnrichmentGroups.isEmpty()) {
                             logger.info("Processing {} enrichment groups", allEnrichmentGroups.size());
-                            RuleResult enrichmentGroupResult = executeEnrichmentGroupsList(allEnrichmentGroups, enrichedData);
+                            RuleResult enrichmentGroupResult = executeEnrichmentGroupsList(allEnrichmentGroups, enrichedData, yamlConfig);
 
                             logger.debug("Enrichment group result type: {}", enrichmentGroupResult.getResultType());
                             logger.debug("Enrichment group result data keys: {}", enrichmentGroupResult.getEnrichedData().keySet());
@@ -1536,7 +1539,7 @@ public class RulesEngine {
         }
 
         // Execute single enrichment group using executeEnrichmentGroupsList()
-        return executeEnrichmentGroupsList(List.of(group), data);
+        return executeEnrichmentGroupsList(List.of(group), data, yamlConfig);
     }
 
     /**
@@ -2442,7 +2445,7 @@ public class RulesEngine {
                     }
                     
                     if (!groupsToExecute.isEmpty()) {
-                        RuleResult enrichmentResult = executeEnrichmentGroupsList(groupsToExecute, data);
+                        RuleResult enrichmentResult = executeEnrichmentGroupsList(groupsToExecute, data, yamlConfig);
                         if (enrichmentResult.getEnrichedData() != null) {
                             data.putAll(enrichmentResult.getEnrichedData());
                             logger.debug("Merged enriched data from route '{}' into context", routeKey);

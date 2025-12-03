@@ -1,0 +1,75 @@
+metadata:
+  id: "enrichment-group-database-lookup-test"
+  name: "Enrichment Group Database Lookup Test"
+  description: "CRITICAL REGRESSION TEST: Tests enrichment-groups containing database lookup enrichments"
+  version: "1.0.0"
+  type: "rule-config"
+  author: "Mark Andrew Ray-Smith"
+  created-date: "2025-12-03"
+  tags: ["regression", "critical", "database", "enrichment-groups"]
+
+# Database configuration - CRITICAL: This must be passed through enrichment-group processing
+data-sources:
+  - name: "test-h2-database"
+    type: "database"
+    source-type: "h2"
+    description: "H2 in-memory database for testing enrichment-groups with database lookups"
+    connection:
+      database: "mem:testdb;DB_CLOSE_DELAY=-1"
+      username: "sa"
+      password: ""
+      pool-size: 5
+      timeout: 30000
+
+# Individual enrichment definitions
+enrichments:
+  - id: "customer-database-lookup"
+    name: "Customer Database Lookup"
+    type: "lookup-enrichment"
+    description: "Lookup customer details from H2 database"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "test-h2-database"
+        query: "SELECT customer_name, credit_rating, country FROM customers WHERE customer_id = :customerId"
+        parameters:
+          - field: "customerId"
+            type: "string"
+    field-mappings:
+      - source-field: "CUSTOMER_NAME"
+        target-field: "customerName"
+        required: true  # Make this required to detect lookup failures
+      - source-field: "CREDIT_RATING"
+        target-field: "creditRating"
+      - source-field: "COUNTRY"
+        target-field: "country"
+
+  - id: "customer-validation"
+    name: "Customer Validation"
+    type: "field-enrichment"
+    description: "Validate customer data was enriched"
+    field-mappings:
+      - source-field: "customerName"
+        target-field: "customerNameValidated"
+        required: false
+
+# CRITICAL TEST: Enrichment-group containing database lookup enrichment
+# This is the combination that was never tested before, leading to the bug
+enrichment-groups:
+  - id: "customer-enrichment-group"
+    name: "Customer Enrichment Group"
+    description: "CRITICAL: Group containing database lookup enrichment that requires yamlConfig"
+    operator: "AND"
+    enrichment-ids:
+      - "customer-database-lookup"
+      - "customer-validation"
+    enabled: true
+
+# Simple rule to trigger evaluation (enrichment-groups run during evaluate())
+rules:
+  - id: "always-pass"
+    name: "Always Pass Rule"
+    condition: "true"
+    message: "Rule evaluation complete"
+    severity: "INFO"

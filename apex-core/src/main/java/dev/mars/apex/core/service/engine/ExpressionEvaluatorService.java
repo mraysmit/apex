@@ -184,6 +184,7 @@ public class ExpressionEvaluatorService {
     }
 
     /**
+    /**
      * Create an enhanced evaluation context from a root object.
      * This method centralizes context creation logic for the entire APEX system.
      *
@@ -208,7 +209,6 @@ public class ExpressionEvaluatorService {
 
         return context;
     }
-
     /**
      * Create an enhanced evaluation context from facts map.
      * This method adopts the same context creation logic as UnifiedRuleEvaluator
