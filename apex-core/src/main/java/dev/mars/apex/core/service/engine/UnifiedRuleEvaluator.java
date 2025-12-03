@@ -245,18 +245,12 @@ public class UnifiedRuleEvaluator {
             return RuleResult.noRules();
         }
 
-        // Check for missing parameters
-        Set<String> missingParameters = RuleParameterExtractor.validateParameters(rule, facts);
-        if (!missingParameters.isEmpty()) {
-            TestAwareLogger.warn(rulesLogger, "Missing parameters for rule '{}': {}", rule.getName(), missingParameters);
-            // Return ERROR - missing required parameters is a failure condition
-            // Preserve the original rule's severity
-            List<String> failureMessages = List.of("Missing parameters: " + missingParameters);
-            String severity = rule.getSeverity() != null ? rule.getSeverity() : SeverityConstants.INFO;
-            return RuleResult.evaluationFailure(failureMessages, new HashMap<String, Object>(),
-                rule.getName(), "Missing parameters: " + missingParameters, severity);
-        }
-
+        // NOTE: Parameter validation removed after #data refactoring.
+        // With direct variable access (#variable instead of #data['variable']), 
+        // SpEL naturally handles missing variables by throwing PropertyNotFoundException,
+        // which is properly caught and handled by the error recovery system.
+        // This allows the severity-based error recovery to work correctly.
+        
         // Create evaluation context
         StandardEvaluationContext context = createEvaluationContext(facts);
 

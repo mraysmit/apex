@@ -1056,7 +1056,7 @@ rule-groups:
 ```yaml
 rules:
   - id: "complex-rule"
-    condition: "#data.field?.subfield > 100"
+    condition: "#field?.subfield > 100"
     error-handling: "skip-on-error"  # Override group-level setting
 ```
 
@@ -1097,7 +1097,7 @@ metadata:
 enrichments:
   - id: enrich-customer
     type: lookup-enrichment
-    condition: "#data.customerId != null"
+    condition: "#customerId != null"
     data-source-ref: customer-db
     query-ref: getCustomer
     field-mappings:
@@ -1173,7 +1173,7 @@ rule-groups:
     operator: AND
     rules:
       - id: check-amount
-        condition: "#data.amount > #invalidVariable"  # ← Variable doesn't exist
+        condition: "#amount > #invalidVariable"  # ← Variable doesn't exist
         message: "Amount exceeds limit"
 ```
 
@@ -3140,8 +3140,8 @@ private String createSafeExpression(String expression) {
 
 **Limitations:**
 - Only handles simple property access patterns
-- Doesn't handle method calls (e.g., `#data.getValue()`)
-- Doesn't handle array/list access (e.g., `#data.items[0]`)
+- Doesn't handle method calls (e.g., `#getValue()`)
+- Doesn't handle array/list access (e.g., `#items[0]`)
 - Doesn't handle nested expressions
 
 **Enhancement Recommended (Future):**

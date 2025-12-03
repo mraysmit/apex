@@ -88,9 +88,10 @@ class ValidationControllerIntegrationTest {
 
         // Validate response
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().isValid(), "Valid YAML should pass validation");
-        assertEquals(0, response.getBody().getErrorCount(), "Valid YAML should have no errors");
+        ValidationResult body = response.getBody();
+        assertNotNull(body);
+        assertTrue(body.isValid(), "Valid YAML should pass validation");
+        assertEquals(0, body.getErrorCount(), "Valid YAML should have no errors");
     }
 
     @Test
@@ -112,9 +113,10 @@ class ValidationControllerIntegrationTest {
 
         // Validate response
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertFalse(response.getBody().isValid(), "YAML without metadata should fail");
-        assertTrue(response.getBody().getErrorCount() > 0, "Should have errors");
+        ValidationResult body = response.getBody();
+        assertNotNull(body);
+        assertFalse(body.isValid(), "YAML without metadata should fail");
+        assertTrue(body.getErrorCount() > 0, "Should have errors");
     }
 
     @Test
@@ -137,9 +139,10 @@ class ValidationControllerIntegrationTest {
 
         // Validate response
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertFalse(response.getBody().isValid(), "YAML without id should fail");
-        assertTrue(response.getBody().getErrorCount() > 0, "Should have errors");
+        ValidationResult body = response.getBody();
+        assertNotNull(body);
+        assertFalse(body.isValid(), "YAML without id should fail");
+        assertTrue(body.getErrorCount() > 0, "Should have errors");
     }
 
     @Test
@@ -154,9 +157,10 @@ class ValidationControllerIntegrationTest {
 
         // Validate response
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertFalse(response.getBody().isValid(), "Non-existent file should fail validation");
-        assertTrue(response.getBody().getErrorCount() > 0, "Should have errors");
+        ValidationResult body = response.getBody();
+        assertNotNull(body);
+        assertFalse(body.isValid(), "Non-existent file should fail validation");
+        assertTrue(body.getErrorCount() > 0, "Should have errors");
     }
 
     @Test
@@ -198,8 +202,9 @@ class ValidationControllerIntegrationTest {
 
         // Validate response
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertNotNull(response.getBody().getFilePath());
+        ValidationResult body = response.getBody();
+        assertNotNull(body);
+        assertNotNull(body.getFilePath());
     }
 
     // ========================================
@@ -226,8 +231,9 @@ class ValidationControllerIntegrationTest {
 
         // Validate response
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertNotNull(response.getBody().getFilePath());
+        ValidationResult body = response.getBody();
+        assertNotNull(body);
+        assertNotNull(body.getFilePath());
     }
 
     // ========================================
@@ -256,8 +262,9 @@ class ValidationControllerIntegrationTest {
 
         // Validate response
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("ALL", response.getBody().getValidationType());
+        ValidationResult body = response.getBody();
+        assertNotNull(body);
+        assertEquals("ALL", body.getValidationType());
     }
 
     // ========================================
@@ -284,8 +291,9 @@ class ValidationControllerIntegrationTest {
 
         // Validate response
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody(), "Valid file should return true");
+        Boolean body = response.getBody();
+        assertNotNull(body);
+        assertTrue(body, "Valid file should return true");
     }
 
     @Test
@@ -307,8 +315,9 @@ class ValidationControllerIntegrationTest {
 
         // Validate response
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertFalse(response.getBody(), "Invalid file should return false");
+        Boolean body = response.getBody();
+        assertNotNull(body);
+        assertFalse(body, "Invalid file should return false");
     }
 }
 

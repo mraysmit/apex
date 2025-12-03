@@ -9,14 +9,14 @@ metadata:
 rules:
   - id: "otc-classification"
     name: "OTC Trade Classification"
-    condition: "#data['type'] == 'OTC'"
+    condition: "#type == 'OTC'"
     message: "Trade classified as OTC"
     severity: "INFO"
     enabled: true
 
   - id: "trade-id-validation"
     name: "Trade ID Validation"
-    condition: "#data.containsKey('id')"
+    condition: "#containsKey('id')"
     message: "Trade ID present"
     severity: "INFO"
     enabled: true
@@ -35,7 +35,7 @@ enrichments:
     type: "calculation-enrichment"
     condition: "true"
     calculation-config:
-      expression: "#data.containsKey('id') ? (#data['id'] % 2 == 0 ? 10.0 : 15.0) : 0.0"
+      expression: "#containsKey('id') ? (#id % 2 == 0 ? 10.0 : 15.0) : 0.0"
       result-field: "processingFee"
     field-mappings:
       - source-field: "processingFee"

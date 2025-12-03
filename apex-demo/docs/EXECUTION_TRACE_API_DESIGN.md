@@ -71,7 +71,7 @@ The execution trace uses the **same TreeNode format** as the dependency tree, wi
           "scenariosEvaluated": [
             {
               "scenarioId": "otc-option-us",
-              "classificationRule": "#data['tradeType'] == 'OTCOption' && #data['region'] == 'US'",
+              "classificationRule": "#'tradeType'] == 'OTCOption' && #'region'] == 'US'",
               "classificationResult": true,
               "evaluationOrder": 1
             }
@@ -84,7 +84,7 @@ The execution trace uses the **same TreeNode format** as the dependency tree, wi
       "defaultScenario": "generic-trade-processing"
     },
     "scenarioSelection": {
-      "classificationRule": "#data['tradeType'] == 'OTCOption' && #data['region'] == 'US'",
+      "classificationRule": "#'tradeType'] == 'OTCOption' && #'region'] == 'US'",
       "classificationResult": true,
       "alternativesConsidered": ["scenario-fx-spot", "scenario-equity-option"],
       "selectionReason": "Classification rule matched: US OTC Option trade",
@@ -397,7 +397,7 @@ The complete decision hierarchy in APEX includes:
         "scenariosEvaluated": [
           {
             "scenarioId": "otc-option-us",
-            "classificationRule": "#data['tradeType'] == 'OTCOption' && #data['region'] == 'US'",
+            "classificationRule": "#'tradeType'] == 'OTCOption' && #'region'] == 'US'",
             "classificationResult": true,
             "evaluationOrder": 1,
             "evaluationTimeMs": 2,
@@ -408,7 +408,7 @@ The complete decision hierarchy in APEX includes:
           },
           {
             "scenarioId": "fx-spot-processing",
-            "classificationRule": "#data['tradeType'] == 'SPOT'",
+            "classificationRule": "#'tradeType'] == 'SPOT'",
             "classificationResult": false,
             "evaluationOrder": 2,
             "evaluationTimeMs": 1,
@@ -418,7 +418,7 @@ The complete decision hierarchy in APEX includes:
           },
           {
             "scenarioId": "bond-processing",
-            "classificationRule": "#data['instrumentType'] == 'BOND'",
+            "classificationRule": "#'instrumentType'] == 'BOND'",
             "classificationResult": false,
             "evaluationOrder": 3,
             "evaluationTimeMs": 1,
@@ -461,7 +461,7 @@ The complete decision hierarchy in APEX includes:
 {
   "scenarioSelection": {
     "scenarioId": "otc-option-us",
-    "classificationRule": "#data['tradeType'] == 'OTCOption' && #data['region'] == 'US'",
+    "classificationRule": "#'tradeType'] == 'OTCOption' && #'region'] == 'US'",
     "classificationResult": true,
     "classificationConfidence": 0.95,
     "alternativesConsidered": ["scenario-fx-spot", "scenario-equity-option"],
@@ -2648,9 +2648,9 @@ routing:
 routing:
   strategy: "rule-based"
   rules:
-    - condition: "#data['source'] == 'MUREX'"
+    - condition: "#'source'] == 'MUREX'"
       target-scenario: "murex-processing"
-    - condition: "#data['source'] == 'CALYPSO'"
+    - condition: "#'source'] == 'CALYPSO'"
       target-scenario: "calypso-processing"
   default-scenario: "generic-processing"
 ```
@@ -3389,7 +3389,7 @@ This example shows a complete execution trace with decision data captured at all
           "scenariosEvaluated": [
             {
               "scenarioId": "otc-option-us",
-              "classificationRule": "#data['tradeType'] == 'OTCOption' && #data['region'] == 'US'",
+              "classificationRule": "#'tradeType'] == 'OTCOption' && #'region'] == 'US'",
               "classificationResult": true,
               "evaluationOrder": 1,
               "evaluationTimeMs": 2

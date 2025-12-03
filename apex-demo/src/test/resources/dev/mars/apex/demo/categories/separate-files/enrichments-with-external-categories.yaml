@@ -229,4 +229,4 @@ enrichments:
     field-mappings:
       - source-field: "dataCompletenessScore"
         target-field: "dataQualityGrade"
-        transformation: "#dataCompletenessScore >= 95 ? 'A' : (#dataCompletenessScore >= 85 ? 'B' : 'C')"
+        transformation: "#CompletenessScore >= 95 ? 'A' : (#CompletenessScore >= 85 ? 'B' : 'C')"

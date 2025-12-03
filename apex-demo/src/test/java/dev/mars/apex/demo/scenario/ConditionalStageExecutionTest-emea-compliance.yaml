@@ -1,6 +1,6 @@
 # EMEA Compliance Validation Rules
 # Used by ConditionalStageExecutionTest to demonstrate conditional stage execution
-# This stage only executes when condition: "#data['region'] == 'EMEA'" is true
+# This stage only executes when condition: "#'region'] == 'EMEA'" is true
 
 metadata:
   id: "emea-compliance-rules"
@@ -16,7 +16,7 @@ rules:
   - id: "emea-mifid-check"
     name: "MiFID II Compliance Check"
     description: "Verify trade complies with MiFID II regulations"
-    condition: "#data['productType'] == 'OTC_OPTION'"
+    condition: "#'productType'] == 'OTC_OPTION'"
     message: "Trade must comply with MiFID II regulations for OTC derivatives"
     enabled: true
     priority: 1
@@ -24,7 +24,7 @@ rules:
   - id: "emea-emir-reporting"
     name: "EMIR Reporting Requirement"
     description: "Ensure trade meets EMIR reporting requirements"
-    condition: "#data['notionalAmount'] > 500000"
+    condition: "#'notionalAmount'] > 500000"
     message: "High-value OTC trades require EMIR reporting"
     enabled: true
     priority: 2
@@ -32,7 +32,7 @@ rules:
   - id: "emea-counterparty-check"
     name: "EMEA Counterparty Validation"
     description: "Validate counterparty is authorized for EMEA trades"
-    condition: "#data['counterparty'] != null && #data['counterparty'].length() > 0"
+    condition: "#'counterparty'] != null && #'counterparty'].length() > 0"
     message: "Counterparty must be specified for EMEA trades"
     enabled: true
     priority: 3

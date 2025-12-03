@@ -172,7 +172,7 @@ class SequentialYamlProcessorRuleResultTest {
             
             rules:
               - id: test-rule
-                condition: "#data.amount > 100"
+                condition: "#amount > 100"
                 message: "Amount exceeds threshold"
             """;
 

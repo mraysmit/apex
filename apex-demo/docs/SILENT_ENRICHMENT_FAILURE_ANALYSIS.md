@@ -102,7 +102,7 @@ enrichments:
     
 rules:
   - id: check-customer
-    condition: "#data.customer_name != null"
+    condition: "#customer_name != null"
 ```
 
 ### Without EnrichmentService (FATAL FAILURE)
@@ -130,7 +130,7 @@ rules:
 3. Line 480: if (enrichmentService != null && ...) → TRUE
 4. enrichmentService.enrichObject() called
 5. customer_name field added to enrichedData
-6. Rule evaluation: "#data.customer_name != null" → TRUE
+6. Rule evaluation: "#customer_name != null" → TRUE
 7. Test passes
 ```
 

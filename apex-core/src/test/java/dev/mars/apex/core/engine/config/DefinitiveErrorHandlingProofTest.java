@@ -51,14 +51,14 @@ class DefinitiveErrorHandlingProofTest {
         // Given: Rule with CRITICAL severity that will fail
         Rule rule = new Rule(
             "critical-method-error",
-            "#data['value'].nonExistentMethod() > 0",
+            "#'value'].nonExistentMethod() > 0",
             "Critical method error test",
             "CRITICAL"
         );
         
         // Create a simple object that has a value property to test method call errors
         Map<String, Object> facts = new HashMap<>();
-        facts.put("data", Map.of("value", 100));
+        facts.putAll(Map.of("value", 100));
         
         // When: Execute rule that will fail
         RuleResult result = rulesEngine.executeRule(rule, facts);
@@ -85,20 +85,17 @@ class DefinitiveErrorHandlingProofTest {
     void testNonCriticalErrorsAreLoggedAndRecovered() {
         logger.info("📋 Testing non-critical error handling - should log error and recover");
 
-        // Given: Rule with WARNING severity that will fail (non-critical)
+        // Given: Rule with WARNING severity that will throw exception (non-critical)
         Rule rule = new Rule(
             "warning-missing-property",
-            "#data.nonExistentField != null",
+            "#nonExistentField.length() > 0",  // Method call on missing variable throws exception
             "Missing property test",
             "WARNING"
         );
         
-        Map<String, Object> data = new HashMap<>();
-        data.put("quantity", 100);
-        // Missing "nonExistentField"
-        
         Map<String, Object> facts = new HashMap<>();
-        facts.put("data", data);
+        facts.put("quantity", 100);
+        // Missing "nonExistentField"
         
         // When: Execute rule that will fail
         RuleResult result = rulesEngine.executeRule(rule, facts);
@@ -125,16 +122,13 @@ class DefinitiveErrorHandlingProofTest {
         // Given: Rule with WARNING severity that will fail
         Rule rule = new Rule(
             "warning-type-error",
-            "#data.stringField > 100",
+            "#stringField > 100",
             "Type comparison warning",
             "WARNING"
         );
         
-        Map<String, Object> data = new HashMap<>();
-        data.put("stringField", "not-a-number");
-        
         Map<String, Object> facts = new HashMap<>();
-        facts.put("data", data);
+        facts.put("stringField", "not-a-number");
         
         // When: Execute rule that will fail
         RuleResult result = rulesEngine.executeRule(rule, facts);
@@ -159,16 +153,13 @@ class DefinitiveErrorHandlingProofTest {
         // Test 1: Null pointer with CRITICAL severity
         Rule nullRule = new Rule(
             "critical-null-error",
-            "#data.nullField.toString() != null",
+            "#nullField.toString() != null",
             "Critical null access",
             "CRITICAL"
         );
         
-        Map<String, Object> nullData = new HashMap<>();
-        nullData.put("nullField", null);
-        
         Map<String, Object> nullFacts = new HashMap<>();
-        nullFacts.put("data", nullData);
+        nullFacts.put("nullField", null);
         
         RuleResult nullResult = rulesEngine.executeRule(nullRule, nullFacts);
         
@@ -180,17 +171,14 @@ class DefinitiveErrorHandlingProofTest {
         // Test 2: Property access with CRITICAL severity
         Rule propertyRule = new Rule(
             "critical-property-error",
-            "#data.missing.length() > 0",
+            "#missing.length() > 0",
             "Critical property access",
             "CRITICAL"
         );
         
-        Map<String, Object> propertyData = new HashMap<>();
-        propertyData.put("existing", "value");
-        // Missing "missing" property
-        
         Map<String, Object> propertyFacts = new HashMap<>();
-        propertyFacts.put("data", propertyData);
+        propertyFacts.put("existing", "value");
+        // Missing "missing" property
         
         RuleResult propertyResult = rulesEngine.executeRule(propertyRule, propertyFacts);
         
@@ -210,17 +198,14 @@ class DefinitiveErrorHandlingProofTest {
         // Given: Rule that will fail with specific context
         Rule rule = new Rule(
             "context-preservation-test",
-            "#data.complexObject.deepProperty.method() == true",
+            "#complexObject.deepProperty.method() == true",
             "Complex context preservation test",
             "CRITICAL"
         );
         
-        Map<String, Object> data = new HashMap<>();
-        data.put("simpleProperty", "value");
-        // Missing "complexObject"
-        
         Map<String, Object> facts = new HashMap<>();
-        facts.put("data", data);
+        facts.put("simpleProperty", "value");
+        // Missing "complexObject"
         
         // When: Execute rule that will fail
         RuleResult result = rulesEngine.executeRule(rule, facts);
@@ -255,9 +240,9 @@ class DefinitiveErrorHandlingProofTest {
         // Test various error scenarios
         String[] severities = {"CRITICAL", "WARNING", "INFO"};
         String[] conditions = {
-            "#data.missing.method()",
-            "#data.nullField.toString()",
-            "#data.value.nonExistentMethod()"
+            "#missing.method()",
+            "#nullField.toString()",
+            "#value.nonExistentMethod()"
         };
         
         for (String severity : severities) {
@@ -271,12 +256,9 @@ class DefinitiveErrorHandlingProofTest {
                     severity
                 );
                 
-                Map<String, Object> data = new HashMap<>();
-                data.put("value", 100);
-                data.put("nullField", null);
-                
                 Map<String, Object> facts = new HashMap<>();
-                facts.put("data", data);
+                facts.put("value", 100);
+                facts.put("nullField", null);
                 
                 RuleResult result = rulesEngine.executeRule(rule, facts);
                 

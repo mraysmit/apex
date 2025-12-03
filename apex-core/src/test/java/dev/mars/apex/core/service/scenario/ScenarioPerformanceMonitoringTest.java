@@ -66,9 +66,9 @@ class ScenarioPerformanceMonitoringTest {
         @DisplayName("Should track execution time accurately")
         void testExecutionTimeTracking() {
             logger.info("TEST: Execution time tracking");
-            
-            // Given: Scenario with classification rule
-            scenario.setClassificationRuleCondition("#data['type'] == 'OTC'");
+
+            // Given: Scenario with classification rule (using direct field access)
+            scenario.setClassificationRuleCondition("['type'] == 'OTC'");
             
             ScenarioStage stage = new ScenarioStage("test-stage", "config/test.yaml", 1);
             scenario.addProcessingStage(stage);
@@ -98,9 +98,9 @@ class ScenarioPerformanceMonitoringTest {
         @DisplayName("Should collect performance metrics for each stage")
         void testStagePerformanceMetrics() {
             logger.info("TEST: Stage performance metrics collection");
-            
-            // Given: Scenario with multiple stages
-            scenario.setClassificationRuleCondition("#data['type'] == 'OTC'");
+
+            // Given: Scenario with multiple stages (using direct field access)
+            scenario.setClassificationRuleCondition("['type'] == 'OTC'");
             
             ScenarioStage stage1 = new ScenarioStage("stage-1", "config/stage1.yaml", 1);
             ScenarioStage stage2 = new ScenarioStage("stage-2", "config/stage2.yaml", 2);
@@ -135,9 +135,9 @@ class ScenarioPerformanceMonitoringTest {
         @DisplayName("Should calculate average execution time across multiple runs")
         void testAverageExecutionTimeCalculation() {
             logger.info("TEST: Average execution time calculation");
-            
-            // Given: Scenario with classification rule
-            scenario.setClassificationRuleCondition("#data['type'] == 'OTC'");
+
+            // Given: Scenario with classification rule (using direct field access)
+            scenario.setClassificationRuleCondition("['type'] == 'OTC'");
             
             ScenarioStage stage = new ScenarioStage("test-stage", "config/test.yaml", 1);
             scenario.addProcessingStage(stage);
@@ -170,9 +170,9 @@ class ScenarioPerformanceMonitoringTest {
         @DisplayName("Should provide performance data through result objects")
         void testPerformanceDataAccessibility() {
             logger.info("TEST: Performance data accessibility");
-            
-            // Given: Scenario with multiple stages
-            scenario.setClassificationRuleCondition("#data['type'] == 'OTC'");
+
+            // Given: Scenario with multiple stages (using direct field access)
+            scenario.setClassificationRuleCondition("['type'] == 'OTC'");
             
             ScenarioStage stage1 = new ScenarioStage("stage-1", "config/stage1.yaml", 1);
             ScenarioStage stage2 = new ScenarioStage("stage-2", "config/stage2.yaml", 2);
@@ -207,10 +207,10 @@ class ScenarioPerformanceMonitoringTest {
         @DisplayName("Should detect slow query execution")
         void testSlowQueryDetection() {
             logger.info("TEST: Slow query detection");
-            
-            // Given: Scenario with complex classification rule
+
+            // Given: Scenario with complex classification rule (using direct field access)
             scenario.setClassificationRuleCondition(
-                "#data['type'] == 'OTC' && #data['amount'] > 1000000 && #data['currency'] == 'USD'");
+                "['type'] == 'OTC' && ['amount'] > 1000000 && ['currency'] == 'USD'");
             
             ScenarioStage stage = new ScenarioStage("test-stage", "config/test.yaml", 1);
             scenario.addProcessingStage(stage);

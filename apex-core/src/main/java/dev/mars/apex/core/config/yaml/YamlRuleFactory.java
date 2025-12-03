@@ -940,7 +940,6 @@ public class YamlRuleFactory {
      * @param yamlConfig The YAML configuration
      * @return List of Rule objects
      */
-    @SuppressWarnings("unused") // Public API method for independent rule creation
     public List<Rule> createRules(YamlRuleConfiguration yamlConfig) {
         List<Rule> rules = new ArrayList<>();
 
@@ -980,7 +979,6 @@ public class YamlRuleFactory {
      * @param config The rules engine configuration (to lookup existing rules)
      * @return List of RuleGroup objects
      */
-    @SuppressWarnings("unused") // Public API method for independent rule group creation
     public List<RuleGroup> createRuleGroups(YamlRuleConfiguration yamlConfig, RulesEngineConfiguration config) throws YamlConfigurationException {
         List<RuleGroup> groups = new ArrayList<>();
         
@@ -1004,7 +1002,6 @@ public class YamlRuleFactory {
      * @param yamlConfig The YAML configuration
      * @return List of Category objects
      */
-    @SuppressWarnings("unused") // Public API method for independent category creation
     public List<Category> createCategories(YamlRuleConfiguration yamlConfig) {
         List<Category> categories = new ArrayList<>();
         

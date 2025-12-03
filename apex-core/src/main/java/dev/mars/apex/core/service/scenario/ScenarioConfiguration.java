@@ -27,6 +27,7 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import dev.mars.apex.core.engine.config.MapPropertyAccessor;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 
 /**
@@ -352,7 +353,8 @@ public class ScenarioConfiguration {
      * Evaluates the classification rule against the provided data using the provided evaluator service.
      *
      * Uses SpEL (Spring Expression Language) to evaluate the classification rule condition
-     * against a Map of data. The data is available in the expression as #data variable.
+     * against a Map of data. Data fields are accessible directly by name (e.g., tradeId, amount)
+     * or as variables with # prefix (e.g., #tradeId, #amount).
      *
      * @param data the data to evaluate against (Map<String, Object>)
      * @param evaluatorService the service to use for creating the evaluation context
@@ -371,7 +373,6 @@ public class ScenarioConfiguration {
         try {
             Expression expression = parser.parseExpression(classificationRuleCondition);
             StandardEvaluationContext context = evaluatorService.createEvaluationContext(data);
-            context.setVariable("data", data);
 
             Boolean result = expression.getValue(context, Boolean.class);
             return result != null && result;
@@ -386,7 +387,8 @@ public class ScenarioConfiguration {
      * Evaluates the classification rule against the provided data.
      *
      * Uses SpEL (Spring Expression Language) to evaluate the classification rule condition
-     * against a Map of data. The data is available in the expression as #data variable.
+     * against a Map of data. Data fields are accessible directly by name (e.g., tradeId, amount)
+     * or as variables with # prefix (e.g., #tradeId, #amount).
      *
      * @deprecated Use {@link #matchesClassificationRule(Map, ExpressionEvaluatorService)} instead to ensure consistent context creation.
      * @param data the data to evaluate against (Map<String, Object>)
@@ -405,8 +407,12 @@ public class ScenarioConfiguration {
 
         try {
             Expression expression = parser.parseExpression(classificationRuleCondition);
-            StandardEvaluationContext context = new StandardEvaluationContext();
-            context.setVariable("data", data);
+            StandardEvaluationContext context = new StandardEvaluationContext(data);
+            context.addPropertyAccessor(new MapPropertyAccessor());
+            // Add map entries as variables for #fieldName access
+            for (Map.Entry<String, Object> entry : data.entrySet()) {
+                context.setVariable(entry.getKey(), entry.getValue());
+            }
 
             Boolean result = expression.getValue(context, Boolean.class);
             return result != null && result;
@@ -573,14 +579,14 @@ class RoutingRule {
     }
     
     private String extractSimpleClassName(String condition) {
-        // Extract class name from condition like "#data.class.simpleName == 'OtcOption'"
+        // Extract class name from condition like "#class.simpleName == 'OtcOption'"
         int start = condition.indexOf("'") + 1;
         int end = condition.lastIndexOf("'");
         return start > 0 && end > start ? condition.substring(start, end) : "";
     }
     
     private String extractDataType(String condition) {
-        // Extract data type from condition like "#dataType == 'CommoditySwap'"
+        // Extract data type from condition like "#tradeType == 'CommoditySwap'"
         int start = condition.indexOf("'") + 1;
         int end = condition.lastIndexOf("'");
         return start > 0 && end > start ? condition.substring(start, end) : "";

@@ -124,7 +124,7 @@ public interface ScenarioEvaluator {
      * <p><b>Example:</b></p>
      * <pre>
      * // Registry contains scenarios with classification rules like:
-     * // "#data['tradeType'] == 'OTCOption' && #data['region'] == 'US'"
+     * // "#'tradeType'] == 'OTCOption' && #'region'] == 'US'"
      * 
      * Map&lt;String, Object&gt; data = new HashMap&lt;&gt;();
      * data.put("tradeType", "OTCOption");

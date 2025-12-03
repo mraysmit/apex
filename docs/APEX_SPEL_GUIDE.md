@@ -41,11 +41,11 @@ SpEL is now supported consistently across ALL APEX features:
 
 | Feature | SpEL Support | Example |
 |---------|--------------|---------|
-| **Conditions** | ✅ Yes | `condition: '#data.currency != null'` |
-| **Transformations** | ✅ Yes | `expression: '#data.currency'` |
+| **Conditions** | ✅ Yes | `condition: '#currency != null'` |
+| **Transformations** | ✅ Yes | `expression: '#currency'` |
 | **Lookup Keys** | ✅ Yes | `lookup-key: '#symbol'` |
 | **Calculations** | ✅ Yes | `expression: '#amount * 0.01'` |
-| **Field Mappings** | ✅ **NEW (v2.3)** | `source-field: '#data.currency'` |
+| **Field Mappings** | ✅ **NEW (v2.3)** | `source-field: '#currency'` |
 
 ### The `#` Prefix Convention
 
@@ -54,7 +54,7 @@ SpEL is now supported consistently across ALL APEX features:
 
 ```yaml
 # SpEL expression (evaluated)
-source-field: "#data.currency"
+source-field: "#currency"
 
 # Simple field name (direct lookup)
 source-field: "currency"
@@ -72,7 +72,7 @@ source-field: "currency"
 ```yaml
 enrichments:
   - id: "field-enrichment-demo"
-    condition: "#data.currency != null"  # ✅ Works
+    condition: "#currency != null"  # ✅ Works
     field-mappings:
       - source-field: "currency"          # ❌ Fails - can't access nested
         target-field: "buy_currency"
@@ -82,9 +82,9 @@ enrichments:
 ```yaml
 enrichments:
   - id: "field-enrichment-demo"
-    condition: "#data.currency != null"  # ✅ Works
+    condition: "#currency != null"  # ✅ Works
     field-mappings:
-      - source-field: "#data.currency"   # ✅ NOW WORKS!
+      - source-field: "#currency"   # ✅ NOW WORKS!
         target-field: "buy_currency"
 ```
 
@@ -93,18 +93,18 @@ enrichments:
 #### 1. Nested Field Access
 ```yaml
 field-mappings:
-  - source-field: "#data.currency"
+  - source-field: "#currency"
     target-field: "buy_currency"
-  - source-field: "#data.trade.counterparty"
+  - source-field: "#trade.counterparty"
     target-field: "counterparty_name"
 ```
 
 #### 2. Safe Navigation
 ```yaml
 field-mappings:
-  - source-field: "#data?.currency"
+  - source-field: "currency"
     target-field: "currency_code"
-  - source-field: "#data?.trade?.amount"
+  - source-field: "#trade?.amount"
     target-field: "trade_amount"
 ```
 
@@ -132,7 +132,7 @@ field-mappings:
 #### 6. Combination with Transformations
 ```yaml
 field-mappings:
-  - source-field: "#data.amount"
+  - source-field: "#amount"
     target-field: "adjusted_amount"
     expression: "#value * 1.1"
 ```
@@ -148,7 +148,7 @@ field-mappings:
     target-field: "currency_code"
 
   # New style - also works
-  - source-field: "#data.currency"
+  - source-field: "#currency"
     target-field: "buy_currency"
 ```
 
@@ -368,10 +368,10 @@ condition: "#trades?.?[status == 'PENDING'].size() > 0"
 
 ```yaml
 # ✅ Good - type validation
-condition: "#data.items instanceof T(java.util.List) && #data.items.size() > 0"
+condition: "#items instanceof T(java.util.List) && #items.size() > 0"
 
 # ❌ Risky - assumes type without checking
-condition: "#data.items.size() > 0"
+condition: "#items.size() > 0"
 ```
 
 ### 7. Use Meaningful Variable Names
@@ -432,10 +432,10 @@ condition: "#trade?.otcTrade?.otcLeg?.size() > 5 && #trade.otcTrade.otcLeg[5]?.s
 
 ```yaml
 # ❌ Wrong - assumes array type
-condition: "#data.items[0].name != null"
+condition: "#items[0].name != null"
 
 # ✅ Correct - validates type first
-condition: "#data.items instanceof T(java.util.List) && #data.items.size() > 0 && #data.items[0]?.name != null"
+condition: "#items instanceof T(java.util.List) && #items.size() > 0 && #items[0]?.name != null"
 ```
 
 ### 5. Missing `#` Prefix in Field Mappings
@@ -448,7 +448,7 @@ field-mappings:
 
 # ✅ Correct - use # prefix for SpEL
 field-mappings:
-  - source-field: "#data.currency"  # Evaluates as SpEL expression
+  - source-field: "#currency"  # Evaluates as SpEL expression
     target-field: "currency_code"
 ```
 
@@ -547,11 +547,11 @@ enrichments:
                 ask: 150.30
     field-mappings:
       # Access nested fields in lookup result with SpEL
-      - source-field: "#data.instrument.name"
+      - source-field: "#instrument.name"
         target-field: "instrument_name"
-      - source-field: "#data.instrument.type"
+      - source-field: "#instrument.type"
         target-field: "instrument_type"
-      - source-field: "#data.pricing.bid"
+      - source-field: "#pricing.bid"
         target-field: "bid_price"
 ```
 

@@ -9,14 +9,14 @@ metadata:
 rules:
   - id: "otc-type-check"
     name: "OTC Type Check"
-    condition: "#data['type'] == 'OTC'"
+    condition: "#type == 'OTC'"
     message: "Trade is OTC type"
     severity: "INFO"
     enabled: true
 
   - id: "record-id-check"
     name: "Record ID Check"
-    condition: "#data.containsKey('id')"
+    condition: "#containsKey('id')"
     message: "Record has ID"
     severity: "INFO"
     enabled: true
@@ -35,7 +35,7 @@ enrichments:
     type: "calculation-enrichment"
     condition: "true"
     calculation-config:
-      expression: "#data.containsKey('id') ? T(java.lang.String).valueOf(#data['id']).hashCode() : 0"
+      expression: "#containsKey('id') ? T(java.lang.String).valueOf(#id).hashCode() : 0"
       result-field: "recordHash"
     field-mappings:
       - source-field: "recordHash"

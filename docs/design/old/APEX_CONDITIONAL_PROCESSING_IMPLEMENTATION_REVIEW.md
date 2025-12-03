@@ -210,8 +210,8 @@ if (fieldName.startsWith("#")) {
 - `SpelFieldMappingIntegrationTest.java` - Integration scenarios
 
 **Capabilities Verified:**
-- ✅ Nested field access: `source-field: "#data.trade.counterparty"`
-- ✅ Safe navigation: `source-field: "#data?.pricing?.bid"`
+- ✅ Nested field access: `source-field: "#trade.counterparty"`
+- ✅ Safe navigation: `source-field: "#pricing?.bid"`
 - ✅ Array indexing: `source-field: "#legs[0].currency"`
 - ✅ Method calls: `source-field: "#currency.toUpperCase()"`
 - ✅ Complex expressions: `source-field: "#status == 'ACTIVE' ? #activePrice : #inactivePrice"`

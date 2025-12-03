@@ -97,7 +97,7 @@ class ScenarioEndToEndIntegrationTest {
 
         logger.info("[OK] Scenario YAML created at: {}", scenarioFile);
         logger.info("  [Scenario Configuration]");
-        logger.info("  - Classification Rule: #data['tradeType'] == 'OTCOption' && #data['region'] == 'US'");
+        logger.info("  - Classification Rule: #'tradeType'] == 'OTCOption' && #'region'] == 'US'");
         logger.info("  - Processing Stages: validation, enrichment");
         logger.info("  - Scenario Content:");
         for (String line : scenarioYaml.split("\n")) {
@@ -119,13 +119,13 @@ class ScenarioEndToEndIntegrationTest {
         logger.info("  [Validation Rules Configuration]");
         logger.info("  Rule 1: Validate Notional Amount");
         logger.info("    - ID: validate-notional");
-        logger.info("    - Condition: #data['notional'] > 0");
+        logger.info("    - Condition: #'notional'] > 0");
         logger.info("    - Message: Notional amount must be positive");
         logger.info("    - Purpose: Ensure trade notional is positive");
         logger.info("  ");
         logger.info("  Rule 2: Validate Region");
         logger.info("    - ID: validate-region");
-        logger.info("    - Condition: #data['region'] == 'US'");
+        logger.info("    - Condition: #'region'] == 'US'");
         logger.info("    - Message: Region must be US");
         logger.info("    - Purpose: Ensure trade is for US region");
         logger.info("  Total Validation Rules: 2");
@@ -143,7 +143,7 @@ class ScenarioEndToEndIntegrationTest {
         logger.info("  [Enrichment Rules Configuration]");
         logger.info("  Rule 1: Enrich Risk Category");
         logger.info("    - ID: enrich-risk-category");
-        logger.info("    - Condition: #data['notional'] > 50000000");
+        logger.info("    - Condition: #'notional'] > 50000000");
         logger.info("    - Message: High notional trade - mark as HIGH_RISK");
         logger.info("    - Purpose: Classify high-value trades for risk management");
         logger.info("    - Enrichment Output: riskCategory = HIGH_RISK");
@@ -197,11 +197,11 @@ class ScenarioEndToEndIntegrationTest {
         logger.info("[CLASSIFICATION RULE] Applying classification rule to incoming data");
         logger.info("=".repeat(80));
         logger.info("  [Classification Rule Definition]");
-        logger.info("  - Condition: #data['tradeType'] == 'OTCOption' && #data['region'] == 'US'");
+        logger.info("  - Condition: #'tradeType'] == 'OTCOption' && #'region'] == 'US'");
         logger.info("  - Description: US OTC option trades");
         logger.info("  [Incoming Data Evaluation]");
-        logger.info("  - #data['tradeType'] = '{}' (Expected: 'OTCOption')", tradeData.get("tradeType"));
-        logger.info("  - #data['region'] = '{}' (Expected: 'US')", tradeData.get("region"));
+        logger.info("  - #'tradeType'] = '{}' (Expected: 'OTCOption')", tradeData.get("tradeType"));
+        logger.info("  - #'region'] = '{}' (Expected: 'US')", tradeData.get("region"));
         logger.info("  [Rule Evaluation]");
         boolean tradeTypeMatch = "OTCOption".equals(tradeData.get("tradeType"));
         boolean regionMatch = "US".equals(tradeData.get("region"));
@@ -256,11 +256,11 @@ class ScenarioEndToEndIntegrationTest {
                 logger.info("  - Successful: {}", validationStage.isSuccessful());
                 logger.info("  [Validation Rules Checked]");
                 logger.info("  [OK] Rule 1: Validate Notional Amount");
-                logger.info("    - Condition: #data['notional'] > 0");
+                logger.info("    - Condition: #'notional'] > 0");
                 logger.info("    - Input Value: ${}", String.format("%,d", notionalValue));
                 logger.info("    - Result: PASSED (75000000 > 0)");
                 logger.info("  [OK] Rule 2: Validate Region");
-                logger.info("    - Condition: #data['region'] == 'US'");
+                logger.info("    - Condition: #'region'] == 'US'");
                 logger.info("    - Input Value: {}", tradeData.get("region"));
                 logger.info("    - Result: PASSED (US == US)");
                 logger.info("  All validation rules passed successfully");
@@ -281,7 +281,7 @@ class ScenarioEndToEndIntegrationTest {
                 logger.info("  - Successful: {}", enrichmentStage.isSuccessful());
                 logger.info("  [Enrichment Rules Checked]");
                 logger.info("  [OK] Rule 1: Enrich Risk Category");
-                logger.info("    - Condition: #data['notional'] > 50000000");
+                logger.info("    - Condition: #'notional'] > 50000000");
                 logger.info("    - Input Value: ${}", String.format("%,d", notionalValue));
                 logger.info("    - Result: PASSED (75000000 > 50000000)");
                 logger.info("    - Enrichment: Mark as HIGH_RISK");
@@ -338,7 +338,7 @@ class ScenarioEndToEndIntegrationTest {
               description: "Complete processing pipeline for US OTC options"
 
               classification-rule:
-                condition: "#data['tradeType'] == 'OTCOption' && #data['region'] == 'US'"
+                condition: "#'tradeType'] == 'OTCOption' && #'region'] == 'US'"
                 description: "US OTC option trades"
 
               processing-stages:
@@ -375,13 +375,13 @@ class ScenarioEndToEndIntegrationTest {
             rules:
               - id: "validate-notional"
                 name: "Validate Notional Amount"
-                condition: "#data['notional'] > 0"
+                condition: "#'notional'] > 0"
                 message: "Notional amount must be positive"
                 enabled: true
               
               - id: "validate-region"
                 name: "Validate Region"
-                condition: "#data['region'] == 'US'"
+                condition: "#'region'] == 'US'"
                 message: "Region must be US"
                 enabled: true
             """;
@@ -399,7 +399,7 @@ class ScenarioEndToEndIntegrationTest {
             rules:
               - id: "enrich-risk-category"
                 name: "Enrich Risk Category"
-                condition: "#data['notional'] > 50000000"
+                condition: "#'notional'] > 50000000"
                 message: "High notional trade - mark as HIGH_RISK"
                 enabled: true
               

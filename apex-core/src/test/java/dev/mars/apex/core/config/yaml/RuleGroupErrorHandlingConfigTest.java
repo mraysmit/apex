@@ -42,7 +42,7 @@ class RuleGroupErrorHandlingConfigTest {
             rules:
               - id: "rule1"
                 name: "Rule 1"
-                condition: "#data.value > 10"
+                condition: "#value > 10"
                 message: "Value is greater than 10"
                 severity: "INFO"
 
@@ -76,7 +76,7 @@ class RuleGroupErrorHandlingConfigTest {
             rules:
               - id: "rule1"
                 name: "Rule 1"
-                condition: "#data.value > 10"
+                condition: "#value > 10"
                 message: "Value is greater than 10"
                 severity: "WARNING"
 
@@ -110,7 +110,7 @@ class RuleGroupErrorHandlingConfigTest {
             rules:
               - id: "rule1"
                 name: "Rule 1"
-                condition: "#data.value > 10"
+                condition: "#value > 10"
                 message: "Value is greater than 10"
                 severity: "ERROR"
 
@@ -144,7 +144,7 @@ class RuleGroupErrorHandlingConfigTest {
             rules:
               - id: "rule1"
                 name: "Rule 1"
-                condition: "#data.value > 10"
+                condition: "#value > 10"
                 message: "Value is greater than 10"
                 severity: "INFO"
 

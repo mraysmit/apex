@@ -14,7 +14,7 @@ rules:
   # Secondary processing
   - id: "secondary-processing"
     name: "Secondary Processing"
-    condition: "#data['type'] == 'OTC'"
+    condition: "#type == 'OTC'"
     message: "Secondary processing completed"
     severity: "INFO"
 

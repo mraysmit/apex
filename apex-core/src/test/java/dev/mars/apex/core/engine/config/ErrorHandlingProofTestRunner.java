@@ -90,13 +90,13 @@ class ErrorHandlingProofTestRunner {
         
         // Test missing property error
         assertStructuredError(() -> {
-            Rule rule = new Rule("test-rule", "#data.missing != null", "Test", "CRITICAL");
+            Rule rule = new Rule("test-rule", "#missing != null", "Test", "CRITICAL");
             return rulesEngine.executeRule(rule, createEmptyFacts());
         }, "PATH 1: executeRule() missing property");
 
         // Test type mismatch error
         assertStructuredError(() -> {
-            Rule rule = new Rule("type-rule", "#data.text > 100", "Test", "WARNING");
+            Rule rule = new Rule("type-rule", "#text > 100", "Test", "WARNING");
             return rulesEngine.executeRule(rule, createTextFacts());
         }, "PATH 1: executeRule() type mismatch");
     }
@@ -106,7 +106,7 @@ class ErrorHandlingProofTestRunner {
         
         assertStructuredError(() -> {
             List<Rule> rules = Arrays.asList(
-                createFailingRule("list-rule", "#data.invalid.length() > 0", "CRITICAL")
+                createFailingRule("list-rule", "#invalid.length() > 0", "CRITICAL")
             );
             return rulesEngine.executeRulesList(rules, createEmptyFacts());
         }, "PATH 2: executeRulesList() failure");
@@ -117,7 +117,7 @@ class ErrorHandlingProofTestRunner {
 
         assertStructuredError(() -> {
             List<dev.mars.apex.core.engine.model.RuleBase> rules = Arrays.asList(
-                createFailingRule("mixed-rule", "#data.nonexistent != null", "CRITICAL")
+                createFailingRule("mixed-rule", "#nonexistent != null", "CRITICAL")
             );
             return rulesEngine.executeRules(rules, createEmptyFacts());
         }, "PATH 3: executeRules() failure");
@@ -129,7 +129,7 @@ class ErrorHandlingProofTestRunner {
         totalTests++;
         try {
             List<Rule> rules = Arrays.asList(
-                createFailingRule("service-rule", "#data.missing.toString()", "WARNING")
+                createFailingRule("service-rule", "#missing.toString()", "WARNING")
             );
             
             org.springframework.expression.EvaluationContext context = 
@@ -161,13 +161,13 @@ class ErrorHandlingProofTestRunner {
         
         // Test CRITICAL severity
         assertStructuredErrorWithSeverity(() -> {
-            Rule rule = new Rule("critical-rule", "#data.missing.critical()", "Critical test", "CRITICAL");
+            Rule rule = new Rule("critical-rule", "#missing.critical()", "Critical test", "CRITICAL");
             return rulesEngine.executeRule(rule, createEmptyFacts());
         }, "CRITICAL", "PATH 5: CRITICAL severity handling");
 
         // Test WARNING severity
         assertStructuredErrorWithSeverity(() -> {
-            Rule rule = new Rule("warning-rule", "#data.missing.warning()", "Warning test", "WARNING");
+            Rule rule = new Rule("warning-rule", "#missing.warning()", "Warning test", "WARNING");
             return rulesEngine.executeRule(rule, createEmptyFacts());
         }, "WARNING", "PATH 5: WARNING severity handling");
     }
@@ -177,13 +177,13 @@ class ErrorHandlingProofTestRunner {
         
         // Test null pointer access
         assertStructuredError(() -> {
-            Rule rule = new Rule("null-rule", "#data.nullField.toString()", "Null test", "CRITICAL");
+            Rule rule = new Rule("null-rule", "#nullField.toString()", "Null test", "CRITICAL");
             return rulesEngine.executeRule(rule, createNullFacts());
         }, "PATH 6: Null pointer handling");
 
         // Test method not found
         assertStructuredError(() -> {
-            Rule rule = new Rule("method-rule", "#data.value.nonExistentMethod()", "Method test", "CRITICAL");
+            Rule rule = new Rule("method-rule", "#value.nonExistentMethod()", "Method test", "CRITICAL");
             return rulesEngine.executeRule(rule, createValidFacts());
         }, "PATH 6: Method not found handling");
     }
@@ -228,32 +228,24 @@ class ErrorHandlingProofTestRunner {
     }
     
     private Map<String, Object> createEmptyFacts() {
-        Map<String, Object> facts = new HashMap<>();
-        facts.put("data", new HashMap<>());
-        return facts;
+        return new HashMap<>();
     }
     
     private Map<String, Object> createTextFacts() {
-        Map<String, Object> data = new HashMap<>();
-        data.put("text", "not-a-number");
         Map<String, Object> facts = new HashMap<>();
-        facts.put("data", data);
+        facts.put("text", "not-a-number");
         return facts;
     }
     
     private Map<String, Object> createNullFacts() {
-        Map<String, Object> data = new HashMap<>();
-        data.put("nullField", null);
         Map<String, Object> facts = new HashMap<>();
-        facts.put("data", data);
+        facts.put("nullField", null);
         return facts;
     }
     
     private Map<String, Object> createValidFacts() {
-        Map<String, Object> data = new HashMap<>();
-        data.put("value", 100);
         Map<String, Object> facts = new HashMap<>();
-        facts.put("data", data);
+        facts.put("value", 100);
         return facts;
     }
     

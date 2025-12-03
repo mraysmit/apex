@@ -53,7 +53,7 @@ import java.util.*;
  * - Conditions are evaluated before dependency checks
  * - If condition evaluates to false, stage is skipped
  * - Condition evaluation errors result in stage being skipped (safe default)
- * - Conditions have access to data context (#data, #scenarioContext, etc.)
+ * - Conditions have access to data context (#tradeId, #region,  #scenarioContext, etc.)
  *
  * FAILURE POLICIES:
  * - terminate: Stop processing immediately if stage fails
@@ -482,7 +482,17 @@ public class ScenarioStageExecutor {
      */
     private Map<String, Object> createFactsMap(Object data, ScenarioExecutionResult context) {
         Map<String, Object> facts = new HashMap<>();
-        facts.put("data", data);
+        
+        // Add data fields directly at root level (no wrapper)
+        if (data instanceof Map) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> dataMap = (Map<String, Object>) data;
+            facts.putAll(dataMap);
+        } else {
+            // For non-Map data, keep original behavior
+            facts.put("data", data);
+        }
+        
         facts.put("scenarioContext", context);
         facts.put("previousStageResults", context.getStageResults());
         facts.put("scenarioId", context.getScenarioId());

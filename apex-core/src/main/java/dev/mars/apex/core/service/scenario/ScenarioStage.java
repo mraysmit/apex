@@ -35,7 +35,7 @@ import java.util.*;
  * - Optional SpEL condition that controls whether stage executes
  * - If condition evaluates to false, stage is skipped
  * - If condition is null/empty, stage always executes (backward compatible)
- * - Condition has access to data context (#data, #region, etc.)
+ * - Condition has access to data context (#tradeId, #region, etc.)
  *
  * FAILURE POLICIES:
  * - terminate: Stop processing immediately if stage fails

@@ -125,7 +125,7 @@ enrichment-groups:
     parallel-execution: false
     priority: 10
     enabled: true
-    condition: "#data.customerType == 'PREMIUM'"
+    condition: "#customerType == 'PREMIUM'"
     enrichment-ids:
       - "customer-name-enrichment"
       - "customer-address-enrichment"

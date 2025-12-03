@@ -10,14 +10,14 @@ rules:
   - id: rule1
     name: "Rule 1"
     description: "First validation rule"
-    condition: "#data.amount > 100"
+    condition: "#amount > 100"
     severity: ERROR
     message: "Amount must be greater than 100"
 
   - id: rule2
     name: "Rule 2"
     description: "Second validation rule"
-    condition: "#data.status == 'ACTIVE'"
+    condition: "#status == 'ACTIVE'"
     severity: WARNING
     message: "Status must be ACTIVE"
 

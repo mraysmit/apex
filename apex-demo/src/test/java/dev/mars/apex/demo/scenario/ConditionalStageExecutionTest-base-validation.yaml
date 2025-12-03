@@ -16,7 +16,7 @@ rules:
   - id: "product-type-required"
     name: "Product Type Required"
     description: "Product type must be specified"
-    condition: "#data['productType'] != null && #data['productType'].length() > 0"
+    condition: "['productType'] != null && ['productType'].length() > 0"
     message: "Product type is required for all trades"
     enabled: true
     priority: 1
@@ -24,7 +24,7 @@ rules:
   - id: "notional-amount-positive"
     name: "Notional Amount Positive"
     description: "Notional amount must be positive"
-    condition: "#data['notionalAmount'] != null && #data['notionalAmount'] > 0"
+    condition: "['notionalAmount'] != null && ['notionalAmount'] > 0"
     message: "Notional amount must be greater than zero"
     enabled: true
     priority: 2
@@ -32,7 +32,7 @@ rules:
   - id: "region-required"
     name: "Region Required"
     description: "Trading region must be specified"
-    condition: "#data['region'] != null && #data['region'].length() > 0"
+    condition: "['region'] != null && ['region'].length() > 0"
     message: "Trading region is required"
     enabled: true
     priority: 3
@@ -40,7 +40,7 @@ rules:
   - id: "trade-date-required"
     name: "Trade Date Required"
     description: "Trade date must be specified"
-    condition: "#data['tradeDate'] != null"
+    condition: "['tradeDate'] != null"
     message: "Trade date is required"
     enabled: true
     priority: 4

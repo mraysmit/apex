@@ -104,7 +104,7 @@ This document provides a comprehensive status report on APEX YAML keywords that 
 ```yaml
 # In field-mappings (WORKING):
 field-mappings:
-  - source-field: "#data.amount"
+  - source-field: "#amount"
     target-field: "adjusted_amount"
     expression: "#value * 1.1"
 

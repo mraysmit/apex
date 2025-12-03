@@ -53,7 +53,7 @@ public class YamlCalculationConfigDefaultValueTest {
     @Test
     public void testCalculationConfigWithCompleteConfiguration() {
         YamlEnrichment.CalculationConfig config = new YamlEnrichment.CalculationConfig();
-        config.setExpression("#data.amount * 1.1");
+        config.setExpression("#amount * 1.1");
         config.setResultField("adjustedAmount");
         config.setDefaultValue(0.0);
         
@@ -62,7 +62,7 @@ public class YamlCalculationConfigDefaultValueTest {
         config.setDependencies(dependencies);
         
         // Verify all fields are set correctly
-        assertEquals("#data.amount * 1.1", config.getExpression());
+        assertEquals("#amount * 1.1", config.getExpression());
         assertEquals("adjustedAmount", config.getResultField());
         assertEquals(0.0, config.getDefaultValue());
         assertEquals(dependencies, config.getDependencies());
@@ -110,7 +110,7 @@ public class YamlCalculationConfigDefaultValueTest {
         YamlEnrichment.CalculationConfig config = new YamlEnrichment.CalculationConfig();
         
         // Set traditional fields without default-value
-        config.setExpression("#data.price * #data.quantity");
+        config.setExpression("#price * #quantity");
         config.setResultField("totalValue");
         
         java.util.List<String> dependencies = new java.util.ArrayList<>();
@@ -122,7 +122,7 @@ public class YamlCalculationConfigDefaultValueTest {
         assertNull(config.getDefaultValue());
         
         // Verify other fields work as expected
-        assertEquals("#data.price * #data.quantity", config.getExpression());
+        assertEquals("#price * #quantity", config.getExpression());
         assertEquals("totalValue", config.getResultField());
         assertEquals(2, config.getDependencies().size());
         assertTrue(config.getDependencies().contains("price"));
@@ -132,7 +132,7 @@ public class YamlCalculationConfigDefaultValueTest {
     @Test
     public void testCalculationConfigDefaultValueForFinancialCalculations() {
         YamlEnrichment.CalculationConfig config = new YamlEnrichment.CalculationConfig();
-        config.setExpression("#data.principal * #data.interestRate / 100");
+        config.setExpression("#principal * #interestRate / 100");
         config.setResultField("interestAmount");
         config.setDefaultValue(0.0); // Safe default for financial calculations
         
@@ -142,7 +142,7 @@ public class YamlCalculationConfigDefaultValueTest {
         config.setDependencies(dependencies);
         
         // Verify configuration for financial use case
-        assertEquals("#data.principal * #data.interestRate / 100", config.getExpression());
+        assertEquals("#principal * #interestRate / 100", config.getExpression());
         assertEquals("interestAmount", config.getResultField());
         assertEquals(0.0, config.getDefaultValue());
         assertEquals(2, config.getDependencies().size());
@@ -177,7 +177,7 @@ public class YamlCalculationConfigDefaultValueTest {
         enrichment.setType("calculation-enrichment");
         
         YamlEnrichment.CalculationConfig config = new YamlEnrichment.CalculationConfig();
-        config.setExpression("#data.baseValue * 2");
+        config.setExpression("#baseValue * 2");
         config.setResultField("doubledValue");
         config.setDefaultValue("CALCULATION_FAILED");
         
@@ -186,7 +186,7 @@ public class YamlCalculationConfigDefaultValueTest {
         // Verify the enrichment contains the calculation config with default value
         assertNotNull(enrichment.getCalculationConfig());
         assertEquals("CALCULATION_FAILED", enrichment.getCalculationConfig().getDefaultValue());
-        assertEquals("#data.baseValue * 2", enrichment.getCalculationConfig().getExpression());
+        assertEquals("#baseValue * 2", enrichment.getCalculationConfig().getExpression());
         assertEquals("doubledValue", enrichment.getCalculationConfig().getResultField());
     }
 }

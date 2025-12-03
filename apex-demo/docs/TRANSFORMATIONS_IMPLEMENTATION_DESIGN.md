@@ -132,7 +132,7 @@ transformations:
     priority: 100
 
     # When to apply this transformation
-    condition: "#data.name != null"
+    condition: "#name != null"
 
     # Simple field transformation using standardized "expression" property
     source-field: "name"
@@ -153,7 +153,7 @@ transformations:
 
     transformation-rules:
       # Rule 1: Handle active statuses
-      - condition: "{'A', 'ACTIVE', '1'}.contains(#data.status)"
+      - condition: "{'A', 'ACTIVE', '1'}.contains(#status)"
         actions:
           - type: "set-field"
             field: "normalized_status"
@@ -163,7 +163,7 @@ transformations:
             value: 1
 
       # Rule 2: Handle inactive statuses
-      - condition: "{'I', 'INACTIVE', '0'}.contains(#data.status)"
+      - condition: "{'I', 'INACTIVE', '0'}.contains(#status)"
         actions:
           - type: "set-field"
             field: "normalized_status"
@@ -192,17 +192,17 @@ transformations:
   - id: "currency-conversion"
     name: "Currency Conversion"
     type: "multi-field-transformation"
-    condition: "#data.currency == 'USD'"
+    condition: "#currency == 'USD'"
 
     transformation-rules:
       - actions:
           - type: "calculate-field"
             field: "amount_eur"
-            expression: "#data.amount * 0.85"  # ← Uses "expression"
+            expression: "#amount * 0.85"  # ← Uses "expression"
 
           - type: "calculate-field"
             field: "amount_gbp"
-            expression: "#data.amount * 0.73"  # ← Uses "expression"
+            expression: "#amount * 0.73"  # ← Uses "expression"
 
           - type: "set-field"
             field: "conversion_date"
@@ -299,7 +299,7 @@ transformations:
 
 rules:
   - id: "validate-risk"
-    condition: "#data.risk_score > 70"
+    condition: "#risk_score > 70"
     # ... validate using transformed data
 ```
 
@@ -406,13 +406,13 @@ rules:
 # Normalize incoming data before enrichment
 transformations:
   - id: "normalize-currency"
-    condition: "#data.currency != null"
+    condition: "#currency != null"
     source-field: "currency"
     target-field: "currency"
     expression: "#value.toUpperCase().trim()"  # ← Uses "expression"
 
   - id: "normalize-amount"
-    condition: "#data.amount != null"
+    condition: "#amount != null"
     source-field: "amount"
     target-field: "amount"
     expression: "T(java.math.BigDecimal).valueOf(#value)"  # ← Uses "expression"
@@ -437,19 +437,19 @@ transformations:
       - actions:
           - type: "calculate-field"
             field: "total_amount"
-            expression: "#data.quantity * #data.unit_price"
+            expression: "#quantity * #unit_price"
           
           - type: "calculate-field"
             field: "tax_amount"
-            expression: "#data.total_amount * 0.20"
+            expression: "#total_amount * 0.20"
           
           - type: "calculate-field"
             field: "grand_total"
-            expression: "#data.total_amount + #data.tax_amount"
+            expression: "#total_amount + #tax_amount"
 
 rules:
   - id: "validate-total"
-    condition: "#data.grand_total > 10000"
+    condition: "#grand_total > 10000"
     # Validate calculated total
 ```
 
@@ -461,17 +461,17 @@ transformations:
   - id: "system-specific-mapping"
     type: "conditional-transformation"
     transformation-rules:
-      - condition: "#data.source_system == 'SWIFT'"
+      - condition: "#source_system == 'SWIFT'"
         actions:
           - type: "set-field"
             field: "is_ndf"
-            expression: "#data.ndf_flag == '1' ? true : false"
+            expression: "#ndf_flag == '1' ? true : false"
       
-      - condition: "#data.source_system == 'REUTERS'"
+      - condition: "#source_system == 'REUTERS'"
         actions:
           - type: "set-field"
             field: "is_ndf"
-            expression: "#data.ndf_indicator?.toUpperCase() == 'TRUE'"
+            expression: "#ndf_indicator?.toUpperCase() == 'TRUE'"
       
       - condition: "true"
         actions:

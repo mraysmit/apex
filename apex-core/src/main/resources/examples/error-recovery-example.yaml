@@ -45,21 +45,21 @@ error-recovery:
 rules:
   - id: "mandatory-field-check"
     name: "Mandatory Field Validation"
-    condition: "#data.customerId != null && #data.customerId != ''"
+    condition: "customerId != null && customerId != ''"
     severity: "ERROR"              # Will NOT recover (backward compatible)
     message: "Customer ID is mandatory"
     description: "Critical validation that must not be bypassed"
-    
+
   - id: "data-quality-check"
     name: "Data Quality Validation"
-    condition: "#data.email != null && #data.email.contains('@')"
+    condition: "email != null && email.contains('@')"
     severity: "WARNING"            # Will recover with default behavior
     message: "Email format appears invalid"
     description: "Data quality check that can be recovered"
-    
+
   - id: "enrichment-info"
     name: "Enrichment Information"
-    condition: "#data.region != null"
+    condition: "region != null"
     severity: "INFO"               # Will recover with default behavior
     message: "Region information available for enrichment"
     description: "Informational rule for data enrichment"
@@ -70,10 +70,10 @@ enrichments:
     name: "Customer Data Enrichment"
     type: "calculation-enrichment"
     description: "Enrich customer data with calculated fields"
-    condition: "#data.customerId != null"
-    
+    condition: "customerId != null"
+
     calculation-config:
-      expression: "#data.customerId + '-' + (#data.region != null ? #data.region : 'UNKNOWN')"
+      expression: "customerId + '-' + (region != null ? region : 'UNKNOWN')"
       result-field: "customerKey"
     
     field-mappings:

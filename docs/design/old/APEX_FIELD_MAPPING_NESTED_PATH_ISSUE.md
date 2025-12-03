@@ -20,9 +20,9 @@
 ```yaml
 enrichments:
   - id: field-enrichment-demo
-    condition: '#data.currency != null'
+    condition: '#currency != null'
     field-mappings:
-      - source-field: '#data.currency'    # ✅ NEW - SpEL support!
+      - source-field: '#currency'    # ✅ NEW - SpEL support!
         target-field: buy_currency
 ```
 
@@ -39,11 +39,11 @@ enrichments:
 **Problem:** Field mappings in enrichments do not support SpEL expressions for nested field paths, while conditions, transformations, and lookup-keys all use SpEL.
 
 This creates an inconsistency where:
-- ✅ **Conditions** use SpEL: `condition: '#data.currency != null'`
-- ✅ **Transformations** use SpEL: `expression: '#data.currency'`
+- ✅ **Conditions** use SpEL: `condition: '#currency != null'`
+- ✅ **Transformations** use SpEL: `expression: '#currency'`
 - ✅ **Lookup keys** use SpEL: `lookup-key: '#symbol'`
 - ✅ **Calculations** use SpEL: `expression: '#amount * 0.01'`
-- ❌ **Field mappings** don't support SpEL: `source-field: currency` (cannot use `#data.currency`)
+- ❌ **Field mappings** don't support SpEL: `source-field: currency` (cannot use `#currency`)
 
 **Solution:** Allow `source-field` and `target-field` to accept SpEL expressions (prefixed with `#`) for consistency across all APEX features.
 
@@ -56,7 +56,7 @@ This creates an inconsistency where:
 enrichments:
   - id: field-enrichment-demo
     type: field-enrichment
-    condition: '#data.currency != null'  # ✅ Works - can access nested field
+    condition: '#currency != null'  # ✅ Works - can access nested field
     field-mappings:
       - source-field: currency            # ❌ Fails - looks for 'currency' at root level
         target-field: buy_currency
@@ -75,7 +75,7 @@ When the object structure is:
 ```
 
 **Condition evaluation:**
-- `#data.currency` → ✅ Works correctly, accesses `data.currency`
+- `#currency` → ✅ Works correctly, accesses `data.currency`
 
 **Field mapping:**
 - `source-field: currency` → ❌ Looks for `currency` at root level (not found)
@@ -117,14 +117,14 @@ private Object getFieldValue(Object object, String fieldName) {
 ## Comparison: How Conditions Work
 
 Conditions use **SpEL (Spring Expression Language)** which natively supports:
-- Nested property access: `#data.currency`
-- Safe navigation: `#data?.currency`
-- Complex expressions: `#data.items[0].price`
+- Nested property access: `#currency`
+- Safe navigation: `#currency`
+- Complex expressions: `#items[0].price`
 
 **Code Location:** Lines 1214-1226 (createEvaluationContext)
 ```java
 StandardEvaluationContext context = createEvaluationContext(targetObject);
-Expression expr = parser.parseExpression("#data.currency");  // ✅ SpEL handles nesting
+Expression expr = parser.parseExpression("#currency");  // ✅ SpEL handles nesting
 return expr.getValue(context);
 ```
 
@@ -145,10 +145,10 @@ Use `transformation` with SpEL instead of `source-field`:
 enrichments:
   - id: field-enrichment-demo
     type: field-enrichment
-    condition: '#data.currency != null'
+    condition: '#currency != null'
     field-mappings:
       - target-field: buy_currency
-        expression: '#data.currency'  # ✅ Workaround - use transformation instead
+        expression: '#currency'  # ✅ Workaround - use transformation instead
 ```
 
 **Limitation:** This workaround requires knowing SpEL and is not intuitive for simple field copying.
@@ -160,8 +160,8 @@ enrichments:
 ### Why SpEL is the Right Choice
 
 **Consistency Across APEX:**
-- ✅ **Conditions** already use SpEL: `condition: '#data.currency != null'`
-- ✅ **Transformations** already use SpEL: `expression: '#data.currency'`
+- ✅ **Conditions** already use SpEL: `condition: '#currency != null'`
+- ✅ **Transformations** already use SpEL: `expression: '#currency'`
 - ✅ **Lookup keys** already use SpEL: `lookup-key: '#symbol'`
 - ✅ **Calculations** already use SpEL: `expression: '#amount * 0.01'`
 
@@ -246,10 +246,10 @@ private void setFieldValue(Object object, String fieldName, Object value) {
 ### Benefits
 
 **1. Full SpEL Power:**
-- ✅ Nested fields: `#data.currency`
-- ✅ Safe navigation: `#data?.currency`
+- ✅ Nested fields: `#currency`
+- ✅ Safe navigation: `#currency`
 - ✅ Array indexing: `#items[0].price`
-- ✅ Complex expressions: `#data.trade.counterparty.name`
+- ✅ Complex expressions: `#trade.counterparty.name`
 - ✅ Conditional logic: `#status == 'ACTIVE' ? #activePrice : #inactivePrice`
 
 **2. Perfect Consistency:**
@@ -257,11 +257,11 @@ private void setFieldValue(Object object, String fieldName, Object value) {
 enrichments:
   - id: example
     type: field-enrichment
-    condition: '#data.currency != null'        # SpEL in condition
+    condition: '#currency != null'        # SpEL in condition
     field-mappings:
-      - source-field: '#data.currency'         # SpEL in source-field (NEW!)
+      - source-field: '#currency'         # SpEL in source-field (NEW!)
         target-field: buy_currency
-      - source-field: '#data.amount'           # SpEL in source-field (NEW!)
+      - source-field: '#amount'           # SpEL in source-field (NEW!)
         target-field: trade_amount
         expression: '#value * 1.1'         # SpEL in transformation (existing)
 ```
@@ -274,13 +274,13 @@ field-mappings:
     target-field: buy_currency
 
   # New SpEL expressions work too
-  - source-field: '#data.currency'
+  - source-field: '#currency'
     target-field: buy_currency
 ```
 
 **4. Clear Intent:**
 - `source-field: currency` → Simple field lookup
-- `source-field: '#data.currency'` → SpEL expression (explicit via `#` prefix)
+- `source-field: '#currency'` → SpEL expression (explicit via `#` prefix)
 
 **5. No Performance Impact:**
 - Simple fields use fast reflection/map lookup
@@ -296,18 +296,18 @@ field-mappings:
   # Can't use source-field for nested fields
   # Must use transformation instead
   - target-field: buy_currency
-    expression: '#data.currency'  # Workaround - not intuitive
+    expression: '#currency'  # Workaround - not intuitive
 ```
 
 **After (With SpEL Support):**
 ```yaml
 field-mappings:
   # Natural and intuitive
-  - source-field: '#data.currency'
+  - source-field: '#currency'
     target-field: buy_currency
 
   # Can still use transformation for actual transformations
-  - source-field: '#data.amount'
+  - source-field: '#amount'
     target-field: adjusted_amount
     expression: '#value * 1.1'  # Transform the source value
 ```
@@ -343,12 +343,12 @@ field-mappings:
 **File:** `apex-core/src/test/java/dev/mars/apex/core/service/enrichment/SpelFieldMappingTest.java` (NEW)
 
 **Test Cases:**
-1. **Simple nested field access** - `source-field: '#data.currency'`
-2. **Multi-level nesting** - `source-field: '#data.trade.counterparty'`
-3. **Safe navigation** - `source-field: '#data?.currency'`
+1. **Simple nested field access** - `source-field: '#currency'`
+2. **Multi-level nesting** - `source-field: '#trade.counterparty'`
+3. **Safe navigation** - `source-field: '#currency'`
 4. **Array indexing** - `source-field: '#items[0].price'`
-5. **Complex expressions** - `source-field: '#data.trade?.amount'`
-6. **Nested target fields** - `target-field: '#data.result.status'`
+5. **Complex expressions** - `source-field: '#trade?.amount'`
+6. **Nested target fields** - `target-field: '#result.status'`
 7. **Mixed simple and SpEL** - Both in same enrichment
 8. **Backward compatibility** - Simple field names still work
 9. **Null handling** - SpEL expressions with null values
@@ -381,22 +381,22 @@ field-mappings:
 enrichments:
   - id: field-enrichment-demo
     type: field-enrichment
-    condition: '#data.currency != null'
+    condition: '#currency != null'
     field-mappings:
       # ✅ Simple field (existing behavior - backward compatible)
       - source-field: status
         target-field: trade_status
 
       # ✅ Nested field with SpEL (new behavior)
-      - source-field: '#data.currency'
+      - source-field: '#currency'
         target-field: buy_currency
 
       # ✅ Multi-level nesting with SpEL (new behavior)
-      - source-field: '#data.trade.counterparty'
+      - source-field: '#trade.counterparty'
         target-field: counterparty_name
 
       # ✅ Safe navigation with SpEL (new behavior)
-      - source-field: '#data?.trade?.amount'
+      - source-field: '#trade?.amount'
         target-field: trade_amount
 ```
 
@@ -416,13 +416,13 @@ enrichments:
       # Lookup result structure: { "data": { "instrument": { "name": "...", "type": "..." } } }
 
       # ✅ Access nested fields in lookup result with SpEL
-      - source-field: '#data.instrument.name'
+      - source-field: '#instrument.name'
         target-field: instrument_name
 
-      - source-field: '#data.instrument.type'
+      - source-field: '#instrument.type'
         target-field: instrument_type
 
-      - source-field: '#data.pricing?.bid'
+      - source-field: '#pricing?.bid'
         target-field: bid_price
         default-value: 0.0
 ```
@@ -435,19 +435,19 @@ enrichments:
     type: field-enrichment
     field-mappings:
       # ✅ Array indexing
-      - source-field: '#data.trades[0].amount'
+      - source-field: '#trades[0].amount'
         target-field: first_trade_amount
 
       # ✅ Conditional expression in source-field
-      - source-field: '#data.status == "ACTIVE" ? #data.activePrice : #data.inactivePrice'
+      - source-field: '#status == "ACTIVE" ? #activePrice : #inactivePrice'
         target-field: current_price
 
       # ✅ Method calls
-      - source-field: '#data.currency.toUpperCase()'
+      - source-field: '#currency.toUpperCase()'
         target-field: currency_code
 
       # ✅ Combination with transformation
-      - source-field: '#data.amount'
+      - source-field: '#amount'
         target-field: adjusted_amount
         expression: '#value * 1.1'  # Apply 10% markup
 ```
@@ -460,14 +460,14 @@ enrichments:
     name: field-enrichment-demo
     description: field-enrichment-demo
     enabled: true
-    condition: '#data.currency != null'
+    condition: '#currency != null'
     type: field-enrichment
     field-mappings:
       # ✅ NOW WORKS! Access nested field with SpEL
-      - source-field: '#data.currency'
+      - source-field: '#currency'
         target-field: buy_currency
 
-      - source-field: '#data.amount'
+      - source-field: '#amount'
         target-field: trade_amount
 ```
 
@@ -485,7 +485,7 @@ void testSpelNestedFieldAccess() {
         "data", Map.of("currency", "USD", "amount", 1000)
     );
 
-    // Test: source-field: '#data.currency'
+    // Test: source-field: '#currency'
     // Expected: Extracts "USD" from nested structure
 }
 ```
@@ -496,7 +496,7 @@ void testSpelNestedFieldAccess() {
 void testSpelSafeNavigation() {
     Map<String, Object> data = Map.of("data", Map.of());
 
-    // Test: source-field: '#data?.currency'
+    // Test: source-field: '#currency'
     // Expected: Returns null without error
 }
 ```
@@ -592,10 +592,10 @@ field-mappings:
 **New SpEL syntax is additive (opt-in via `#` prefix):**
 ```yaml
 field-mappings:
-  - source-field: '#data.currency'  # ✅ New - SpEL expression
+  - source-field: '#currency'  # ✅ New - SpEL expression
     target-field: buy_currency
 
-  - source-field: '#data.amount'    # ✅ New - SpEL expression
+  - source-field: '#amount'    # ✅ New - SpEL expression
     target-field: trade_amount
 ```
 
@@ -605,7 +605,7 @@ field-mappings:
   - source-field: status              # Simple field
     target-field: trade_status
 
-  - source-field: '#data.currency'    # SpEL expression
+  - source-field: '#currency'    # SpEL expression
     target-field: buy_currency
 ```
 
@@ -789,16 +789,16 @@ private void setFieldValue(Object object, String fieldName, Object value) {
 
 ### Unit Tests (Create: `SpelFieldMappingTest.java`)
 
-- [ ] Basic nested field: `source-field: '#data.currency'`
-- [ ] Safe navigation: `source-field: '#data?.currency'`
+- [ ] Basic nested field: `source-field: '#currency'`
+- [ ] Safe navigation: `source-field: '#currency'`
 - [ ] Array indexing: `source-field: '#items[0].price'`
 - [ ] Complex expressions: `source-field: '#status == "ACTIVE" ? #activePrice : #inactivePrice'`
 - [ ] Backward compatibility: `source-field: 'currency'` (no `#`)
 - [ ] Error handling: Invalid SpEL expression
 - [ ] Null handling: SpEL with null values
 - [ ] Mixed usage: Simple + SpEL in same enrichment
-- [ ] Nested target: `target-field: '#data.result.status'`
-- [ ] Method calls: `source-field: '#data.currency.toUpperCase()'`
+- [ ] Nested target: `target-field: '#result.status'`
+- [ ] Method calls: `source-field: '#currency.toUpperCase()'`
 
 ### Integration Tests
 

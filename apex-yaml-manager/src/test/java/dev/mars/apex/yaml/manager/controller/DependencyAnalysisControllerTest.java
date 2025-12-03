@@ -445,6 +445,7 @@ class DependencyAnalysisControllerTest {
         // Validate response
         assertEquals(HttpStatus.OK, response.getStatusCode());
         Map<String, Object> body = response.getBody();
+        assertNotNull(body, "Response body should not be null");
         Map<String, Object> validation = (Map<String, Object>) body.get("validation");
         assertNotNull(validation);
         // Validation should contain integrity checks
@@ -547,8 +548,6 @@ class DependencyAnalysisControllerTest {
     @DisplayName("scan-folder: returns YAML file list for non-empty folder")
     @SuppressWarnings("unchecked")
     void testScanFolder_withYamlFiles_returnsList(@TempDir Path tempDir) throws IOException {
-        // Arrange: create two YAML files and one non-yaml file
-        File f1 = createTestYamlFile(tempDir, "a.yaml");
         File f2 = createTestYamlFile(tempDir, "b.yml");
         File txt = tempDir.resolve("note.txt").toFile();
         try (FileWriter w = new FileWriter(txt)) { w.write("ignore me"); }
@@ -1019,7 +1018,7 @@ class DependencyAnalysisControllerTest {
             java.util.List<?> children = (java.util.List<?>) childrenObj;
             for (Object child : children) {
                 if (child instanceof Map) {
-                    Map childNode = (Map) child;
+                    Map<?, ?> childNode = (Map<?, ?>) child;
                     Integer childDepth = (Integer) childNode.get("depth");
                     assertEquals(depth + 1, childDepth,
                         "Child node depth should be parent depth + 1");

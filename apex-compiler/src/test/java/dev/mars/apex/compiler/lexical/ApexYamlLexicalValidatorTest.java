@@ -33,7 +33,7 @@ class ApexYamlLexicalValidatorTest {
             rules:
               - id: "test-rule"
                 name: "Test Rule"
-                condition: "#data.amount > 1000"
+                condition: "#amount > 1000"
                 message: "Amount must be greater than 1000"
                 severity: "ERROR"
             """;
@@ -55,7 +55,7 @@ class ApexYamlLexicalValidatorTest {
         String invalidYaml = """
             rules:
               - id: "test-rule"
-                condition: "#data.amount > 1000"
+                condition: "#amount > 1000"
             """;
         
         Path yamlFile = tempDir.resolve("invalid.yaml");

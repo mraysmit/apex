@@ -73,8 +73,8 @@ public class ValidationBuilder {
      * 
      * @example
      * <pre>
-     * builder.that("#data.age >= 18", "Must be at least 18 years old")
-     *        .that("#data.email != null", "Email is required");
+     * builder.that("#age >= 18", "Must be at least 18 years old")
+     *        .that("#email != null", "Email is required");
      * </pre>
      */
     public ValidationBuilder that(String condition, String errorMessage) {
@@ -90,8 +90,8 @@ public class ValidationBuilder {
      * 
      * @example
      * <pre>
-     * builder.that("#data.age >= 18")
-     *        .that("#data.email != null");
+     * builder.that("#age >= 18")
+     *        .that("#email != null");
      * </pre>
      */
     public ValidationBuilder that(String condition) {
@@ -106,11 +106,11 @@ public class ValidationBuilder {
      * 
      * @example
      * <pre>
-     * builder.minimumAge(18); // Checks #data.age >= 18
+     * builder.minimumAge(18); // Checks #age >= 18
      * </pre>
      */
     public ValidationBuilder minimumAge(int minimumAge) {
-        return that("#data.age >= " + minimumAge, "Must be at least " + minimumAge + " years old");
+        return that("#age >= " + minimumAge, "Must be at least " + minimumAge + " years old");
     }
     
     /**
@@ -120,11 +120,11 @@ public class ValidationBuilder {
      * 
      * @example
      * <pre>
-     * builder.emailRequired(); // Checks #data.email != null && #data.email.length() > 0
+     * builder.emailRequired(); // Checks #email != null && #email.length() > 0
      * </pre>
      */
     public ValidationBuilder emailRequired() {
-        return that("#data.email != null && #data.email.length() > 0", "Email address is required");
+        return that("#email != null && #email.length() > 0", "Email address is required");
     }
     
     /**
@@ -134,11 +134,11 @@ public class ValidationBuilder {
      * 
      * @example
      * <pre>
-     * builder.phoneRequired(); // Checks #data.phone != null && #data.phone.length() > 0
+     * builder.phoneRequired(); // Checks #phone != null && #phone.length() > 0
      * </pre>
      */
     public ValidationBuilder phoneRequired() {
-        return that("#data.phone != null && #data.phone.length() > 0", "Phone number is required");
+        return that("#phone != null && #phone.length() > 0", "Phone number is required");
     }
     
     /**
@@ -149,11 +149,11 @@ public class ValidationBuilder {
      * 
      * @example
      * <pre>
-     * builder.minimumBalance(1000.0); // Checks #data.balance >= 1000.0
+     * builder.minimumBalance(1000.0); // Checks #balance >= 1000.0
      * </pre>
      */
     public ValidationBuilder minimumBalance(double minimumBalance) {
-        return that("#data.balance >= " + minimumBalance, "Minimum balance of $" + minimumBalance + " required");
+        return that("#balance >= " + minimumBalance, "Minimum balance of $" + minimumBalance + " required");
     }
     
     /**
@@ -164,11 +164,11 @@ public class ValidationBuilder {
      * 
      * @example
      * <pre>
-     * builder.notNull("name"); // Checks #data.name != null
+     * builder.notNull("name"); // Checks #name != null
      * </pre>
      */
     public ValidationBuilder notNull(String fieldName) {
-        return that("#data." + fieldName + " != null", fieldName + " is required");
+        return that("#" + fieldName + " != null", fieldName + " is required");
     }
     
     /**
@@ -179,11 +179,11 @@ public class ValidationBuilder {
      * 
      * @example
      * <pre>
-     * builder.notEmpty("name"); // Checks #data.name != null && #data.name.length() > 0
+     * builder.notEmpty("name"); // Checks #name != null && #name.length() > 0
      * </pre>
      */
     public ValidationBuilder notEmpty(String fieldName) {
-        return that("#data." + fieldName + " != null && #data." + fieldName + ".length() > 0", 
+        return that("#" + fieldName + " != null && #" + fieldName + ".length() > 0", 
                    fieldName + " cannot be empty");
     }
     

@@ -64,7 +64,7 @@ class EnrichmentDebugTest {
             String[] expressions = {
                 "#currency",
                 "currency",
-                "#data.currency",
+                "#currency",
                 "data.currency",
                 "${currency}",
                 "#{currency}"

@@ -70,7 +70,7 @@ class ScenarioConfigurationSpelValidationTest {
         logger.info("TEST: Triggering intentional error - Missing closing bracket in SpEL");
         
         // Given: SpEL with missing closing bracket
-        scenario.setClassificationRuleCondition("#data['field' == 'value'");
+        scenario.setClassificationRuleCondition("#'field' == 'value'");
 
         // When: Evaluate against data
         Map<String, Object> data = new HashMap<>();
@@ -87,7 +87,7 @@ class ScenarioConfigurationSpelValidationTest {
         logger.info("TEST: Triggering intentional error - Missing opening bracket in SpEL");
         
         // Given: SpEL with missing opening bracket
-        scenario.setClassificationRuleCondition("#datafield'] == 'value'");
+        scenario.setClassificationRuleCondition("#datafield == 'value'");
 
         // When: Evaluate against data
         Map<String, Object> data = new HashMap<>();
@@ -104,7 +104,7 @@ class ScenarioConfigurationSpelValidationTest {
         logger.info("TEST: Triggering intentional error - Unclosed string literal in SpEL");
         
         // Given: SpEL with unclosed string
-        scenario.setClassificationRuleCondition("#data['field'] == 'value");
+        scenario.setClassificationRuleCondition("#field == 'value");
 
         // When: Evaluate against data
         Map<String, Object> data = new HashMap<>();
@@ -125,7 +125,7 @@ class ScenarioConfigurationSpelValidationTest {
         logger.info("TEST: Triggering intentional error - Invalid operator in SpEL");
         
         // Given: SpEL with invalid operator (==> instead of ==)
-        scenario.setClassificationRuleCondition("#data['field'] ==> 'value'");
+        scenario.setClassificationRuleCondition("#'field'] ==> 'value'");
 
         // When: Evaluate against data
         Map<String, Object> data = new HashMap<>();
@@ -142,7 +142,7 @@ class ScenarioConfigurationSpelValidationTest {
         logger.info("TEST: Triggering intentional error - Malformed AND operator");
         
         // Given: SpEL with malformed AND (& instead of &&)
-        scenario.setClassificationRuleCondition("#data['a'] == 'x' & #data['b'] == 'y'");
+        scenario.setClassificationRuleCondition("#'a'] == 'x' & #'b'] == 'y'");
 
         // When: Evaluate against data
         Map<String, Object> data = new HashMap<>();
@@ -164,7 +164,7 @@ class ScenarioConfigurationSpelValidationTest {
         logger.info("TEST: Triggering intentional error - Type mismatch in comparison");
         
         // Given: SpEL comparing number to string
-        scenario.setClassificationRuleCondition("#data['amount'] > 'string'");
+        scenario.setClassificationRuleCondition("#'amount'] > 'string'");
 
         // When: Evaluate against data
         Map<String, Object> data = new HashMap<>();
@@ -181,7 +181,7 @@ class ScenarioConfigurationSpelValidationTest {
         logger.info("TEST: Triggering intentional error - Incompatible type comparison");
         
         // Given: SpEL comparing list to string
-        scenario.setClassificationRuleCondition("#data['items'] == 'string'");
+        scenario.setClassificationRuleCondition("#'items'] == 'string'");
 
         // When: Evaluate against data with list
         Map<String, Object> data = new HashMap<>();
@@ -199,8 +199,8 @@ class ScenarioConfigurationSpelValidationTest {
     @Test
     @DisplayName("Should still match valid SpEL after testing invalid ones")
     void testValidSpelStillWorks() {
-        // Given: Valid SpEL expression
-        scenario.setClassificationRuleCondition("#data['tradeType'] == 'OTCOption'");
+        // Given: Valid SpEL expression (using direct field access)
+        scenario.setClassificationRuleCondition("['tradeType'] == 'OTCOption'");
 
         // When: Evaluate against matching data
         Map<String, Object> data = new HashMap<>();
@@ -214,9 +214,9 @@ class ScenarioConfigurationSpelValidationTest {
     @Test
     @DisplayName("Should handle complex valid SpEL with multiple conditions")
     void testComplexValidSpel() {
-        // Given: Complex valid SpEL
+        // Given: Complex valid SpEL (using direct field access)
         scenario.setClassificationRuleCondition(
-            "#data['tradeType'] == 'OTCOption' && #data['notional'] > 100000000 && #data['region'] == 'US'");
+            "['tradeType'] == 'OTCOption' && ['notional'] > 100000000 && ['region'] == 'US'");
 
         // When: Evaluate against matching data
         Map<String, Object> data = new HashMap<>();

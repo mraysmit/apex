@@ -60,7 +60,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
         
         Rule rule = new Rule(
             "missing-property-test",
-            "#data.nonExistentProperty != null",
+            "#nonExistentProperty != null",
             "Property should exist",
             "ERROR"
         );
@@ -87,7 +87,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
         
         Rule rule = new Rule(
             "nested-null-access-test",
-            "#data.nullObject.someProperty != null",
+            "#nullObject.someProperty != null",
             "Nested property should be accessible",
             "ERROR"
         );
@@ -116,7 +116,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
         
         Rule rule = new Rule(
             "invalid-method-test",
-            "#data.amount.nonExistentMethod() > 0",
+            "#amount.nonExistentMethod() > 0",
             "Method should exist",
             "ERROR"
         );
@@ -140,7 +140,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
         
         Rule rule = new Rule(
             "wrong-params-test",
-            "#data.customerName.substring(10, 20, 30) != null",  // substring doesn't take 3 params
+            "#customerName.substring(10, 20, 30) != null",  // substring doesn't take 3 params
             "Method parameters should be correct",
             "ERROR"
         );
@@ -168,7 +168,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
         
         Rule rule = new Rule(
             "type-conversion-test",
-            "#data.customerName + 100 > 0",  // String + Number will cause type error
+            "#customerName + 100 > 0",  // String + Number will cause type error
             "Type conversion should work",
             "ERROR"
         );
@@ -192,7 +192,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
 
         Rule rule = new Rule(
             "arithmetic-error-test",
-            "#data.amount.invalidArithmeticMethod() > 0",  // Invalid arithmetic method
+            "#amount.invalidArithmeticMethod() > 0",  // Invalid arithmetic method
             "Arithmetic should work",
             "ERROR"
         );
@@ -220,7 +220,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
         
         Rule rule = new Rule(
             "array-bounds-test",
-            "#data.tags[10] != null",  // Array only has 2 elements
+            "#tags[10] != null",  // Array only has 2 elements
             "Array access should be valid",
             "ERROR"
         );
@@ -248,7 +248,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
 
         Rule rule = new Rule(
             "map-key-test",
-            "#data.metadata['nonExistentKey'].toString().length() > 0",
+            "#metadata['nonExistentKey'].toString().length() > 0",
             "Map key should exist",
             "ERROR"
         );
@@ -276,7 +276,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
 
         Rule rule = new Rule(
             "invalid-cast-test",
-            "((java.util.Date) #data.customerName).getTime() > 0",  // String cannot be cast to Date
+            "((java.util.Date) #customerName).getTime() > 0",  // String cannot be cast to Date
             "Casting should work",
             "ERROR"
         );
@@ -304,7 +304,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
 
         Rule rule = new Rule(
             "complex-expression-test",
-            "#data.customer.address.street.substring(#data.nonExistent.length()).toUpperCase() != null",
+            "#customer.address.street.substring(#nonExistent.length()).toUpperCase() != null",
             "Complex expression should work",
             "ERROR"
         );
@@ -331,10 +331,10 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
         logger.info("Testing multiple SpEL errors in rule list");
 
         List<Rule> rules = Arrays.asList(
-            new Rule("error-rule-1", "#data.missing1.toString()", "Error 1", "ERROR"),
-            new Rule("success-rule", "#data.amount > 50", "Success rule", "INFO"),
-            new Rule("error-rule-2", "#data.missing2.length()", "Error 2", "ERROR"),
-            new Rule("another-success", "#data.customerName != null", "Another success", "INFO")
+            new Rule("error-rule-1", "#missing1.toString()", "Error 1", "ERROR"),
+            new Rule("success-rule", "#amount > 50", "Success rule", "INFO"),
+            new Rule("error-rule-2", "#missing2.length()", "Error 2", "ERROR"),
+            new Rule("another-success", "#customerName != null", "Another success", "INFO")
         );
 
         Map<String, Object> facts = createTestData();
@@ -372,20 +372,20 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
         Map<String, Rule> errorRules = new HashMap<>();
 
         // Property not found errors
-        errorRules.put("property-not-found", new Rule("prop-test", "#data.missing != null", "Property test", "ERROR"));
-        errorRules.put("nested-property-not-found", new Rule("nested-test", "#data.missing.field != null", "Nested test", "ERROR"));
+        errorRules.put("property-not-found", new Rule("prop-test", "#missing != null", "Property test", "ERROR"));
+        errorRules.put("nested-property-not-found", new Rule("nested-test", "#missing.field != null", "Nested test", "ERROR"));
 
         // Method not found errors
-        errorRules.put("method-not-found", new Rule("method-test", "#data.amount.invalidMethod()", "Method test", "ERROR"));
+        errorRules.put("method-not-found", new Rule("method-test", "#amount.invalidMethod()", "Method test", "ERROR"));
 
         // Type conversion errors
-        errorRules.put("type-conversion", new Rule("type-test", "#data.customerName + 100", "Type test", "ERROR"));
+        errorRules.put("type-conversion", new Rule("type-test", "#customerName + 100", "Type test", "ERROR"));
 
         // Arithmetic errors
-        errorRules.put("arithmetic-error", new Rule("arith-test", "#data.amount / 0", "Arithmetic test", "ERROR"));
+        errorRules.put("arithmetic-error", new Rule("arith-test", "#amount / 0", "Arithmetic test", "ERROR"));
 
         // Array access errors
-        errorRules.put("array-bounds", new Rule("array-test", "#data.tags[99]", "Array test", "ERROR"));
+        errorRules.put("array-bounds", new Rule("array-test", "#tags[99]", "Array test", "ERROR"));
 
         Map<String, Object> facts = createTestData();
 

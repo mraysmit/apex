@@ -62,8 +62,8 @@ class ScenarioConfigurationClassificationTest {
     @Test
     @DisplayName("Should match simple single-field classification rule")
     void testSimpleSingleFieldClassification() {
-        // Given: Scenario with simple classification rule
-        scenario.setClassificationRuleCondition("#data['tradeType'] == 'OTCOption'");
+        // Given: Scenario with simple classification rule (using direct field access)
+        scenario.setClassificationRuleCondition("['tradeType'] == 'OTCOption'");
         scenario.setClassificationRuleDescription("Matches OTC option trades");
 
         // When: Evaluate against matching data
@@ -78,8 +78,8 @@ class ScenarioConfigurationClassificationTest {
     @Test
     @DisplayName("Should not match when field value differs")
     void testSimpleSingleFieldNoMatch() {
-        // Given: Scenario with simple classification rule
-        scenario.setClassificationRuleCondition("#data['tradeType'] == 'OTCOption'");
+        // Given: Scenario with simple classification rule (using direct field access)
+        scenario.setClassificationRuleCondition("['tradeType'] == 'OTCOption'");
 
         // When: Evaluate against non-matching data
         Map<String, Object> nonMatchingData = new HashMap<>();
@@ -93,8 +93,8 @@ class ScenarioConfigurationClassificationTest {
     @Test
     @DisplayName("Should not match when field is missing")
     void testSimpleSingleFieldMissingField() {
-        // Given: Scenario with simple classification rule
-        scenario.setClassificationRuleCondition("#data['tradeType'] == 'OTCOption'");
+        // Given: Scenario with simple classification rule (using direct field access)
+        scenario.setClassificationRuleCondition("['tradeType'] == 'OTCOption'");
 
         // When: Evaluate against data without the field
         Map<String, Object> dataWithoutField = new HashMap<>();
@@ -112,9 +112,9 @@ class ScenarioConfigurationClassificationTest {
     @Test
     @DisplayName("Should match multiple field AND conditions")
     void testMultipleFieldAndConditions() {
-        // Given: Scenario with AND condition
+        // Given: Scenario with AND condition (using direct field access)
         scenario.setClassificationRuleCondition(
-            "#data['tradeType'] == 'OTCOption' && #data['region'] == 'US'");
+            "['tradeType'] == 'OTCOption' && ['region'] == 'US'");
 
         // When: Evaluate against matching data
         Map<String, Object> matchingData = new HashMap<>();
@@ -129,9 +129,9 @@ class ScenarioConfigurationClassificationTest {
     @Test
     @DisplayName("Should not match when one AND condition fails")
     void testMultipleFieldAndConditionsPartialMatch() {
-        // Given: Scenario with AND condition
+        // Given: Scenario with AND condition (using direct field access)
         scenario.setClassificationRuleCondition(
-            "#data['tradeType'] == 'OTCOption' && #data['region'] == 'US'");
+            "['tradeType'] == 'OTCOption' && ['region'] == 'US'");
 
         // When: Evaluate against partially matching data
         Map<String, Object> partialData = new HashMap<>();
@@ -150,9 +150,9 @@ class ScenarioConfigurationClassificationTest {
     @Test
     @DisplayName("Should match numeric comparison")
     void testNumericComparison() {
-        // Given: Scenario with numeric condition
+        // Given: Scenario with numeric condition (using direct field access)
         scenario.setClassificationRuleCondition(
-            "#data['tradeType'] == 'OTCOption' && #data['notional'] > 100000000");
+            "['tradeType'] == 'OTCOption' && ['notional'] > 100000000");
 
         // When: Evaluate against high-value trade
         Map<String, Object> highValueTrade = new HashMap<>();
@@ -167,9 +167,9 @@ class ScenarioConfigurationClassificationTest {
     @Test
     @DisplayName("Should not match when numeric threshold not met")
     void testNumericComparisonBelowThreshold() {
-        // Given: Scenario with numeric condition
+        // Given: Scenario with numeric condition (using direct field access)
         scenario.setClassificationRuleCondition(
-            "#data['tradeType'] == 'OTCOption' && #data['notional'] > 100000000");
+            "['tradeType'] == 'OTCOption' && ['notional'] > 100000000");
 
         // When: Evaluate against low-value trade
         Map<String, Object> lowValueTrade = new HashMap<>();
@@ -207,8 +207,8 @@ class ScenarioConfigurationClassificationTest {
         assertFalse(scenario.hasClassificationRule(),
             "Should return false when no classification rule");
 
-        // When: Set classification rule
-        scenario.setClassificationRuleCondition("#data['tradeType'] == 'OTCOption'");
+        // When: Set classification rule (using direct field access)
+        scenario.setClassificationRuleCondition("['tradeType'] == 'OTCOption'");
 
         // Then: Should detect it exists
         assertTrue(scenario.hasClassificationRule(),
@@ -218,8 +218,8 @@ class ScenarioConfigurationClassificationTest {
     @Test
     @DisplayName("Should validate scenario with classification rule")
     void testValidateWithClassificationRule() {
-        // Given: Scenario with classification rule (no data-types)
-        scenario.setClassificationRuleCondition("#data['tradeType'] == 'OTCOption'");
+        // Given: Scenario with classification rule (no data-types, using direct field access)
+        scenario.setClassificationRuleCondition("['tradeType'] == 'OTCOption'");
 
         // When/Then: Should pass validation
         assertDoesNotThrow(() -> scenario.validate(),
@@ -267,8 +267,8 @@ class ScenarioConfigurationClassificationTest {
     @Test
     @DisplayName("Should handle null data gracefully")
     void testNullDataHandling() {
-        // Given: Scenario with classification rule
-        scenario.setClassificationRuleCondition("#data['tradeType'] == 'OTCOption'");
+        // Given: Scenario with classification rule (using direct field access)
+        scenario.setClassificationRuleCondition("['tradeType'] == 'OTCOption'");
 
         // When: Evaluate against null data
         // Then: Should not throw exception, should return false

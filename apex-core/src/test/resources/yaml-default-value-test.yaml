@@ -14,34 +14,34 @@ rules:
   # Rule with boolean default value
   - id: "age-validation"
     name: "Age Validation Rule"
-    condition: "#data.age != null && #data.age >= 18"
+    condition: "age != null && age >= 18"
     severity: "WARNING"
     default-value: false
     message: "Customer age validation failed"
     description: "Validates customer is at least 18 years old"
-    
+
   # Rule with string default value
   - id: "email-format-check"
     name: "Email Format Validation"
-    condition: "#data.email != null && #data.email.contains('@') && #data.email.contains('.')"
+    condition: "email != null && email.contains('@') && email.contains('.')"
     severity: "INFO"
     default-value: "INVALID_EMAIL"
     message: "Email format validation"
     description: "Validates email has basic format requirements"
-    
+
   # Rule with numeric default value
   - id: "credit-score-check"
     name: "Credit Score Validation"
-    condition: "#data.creditScore != null && #data.creditScore >= 600"
+    condition: "creditScore != null && creditScore >= 600"
     severity: "WARNING"
     default-value: 0
     message: "Credit score validation failed"
     description: "Validates minimum credit score requirement"
-    
+
   # Rule without default value (backward compatible)
   - id: "mandatory-field-check"
     name: "Mandatory Field Validation"
-    condition: "#data.customerId != null && #data.customerId != ''"
+    condition: "customerId != null && customerId != ''"
     severity: "ERROR"
     message: "Customer ID is mandatory"
     description: "Critical validation that must not be bypassed"
@@ -54,52 +54,52 @@ enrichments:
     name: "Interest Calculation"
     type: "calculation-enrichment"
     description: "Calculate interest amount with safe default"
-    condition: "#data.principal != null && #data.interestRate != null"
-    
+    condition: "principal != null && interestRate != null"
+
     calculation-config:
-      expression: "#data.principal * #data.interestRate / 100"
+      expression: "principal * interestRate / 100"
       result-field: "interestAmount"
       default-value: 0.0
       dependencies:
         - "principal"
         - "interestRate"
-    
+
     field-mappings:
       - source-field: "interestAmount"
         target-field: "calculatedInterest"
         default-value: 0.0
-        
+
   # Calculation enrichment with string default
   - id: "customer-classification"
     name: "Customer Classification"
     type: "calculation-enrichment"
     description: "Classify customer with safe default"
-    condition: "#data.customerId != null"
-    
+    condition: "customerId != null"
+
     calculation-config:
-      expression: "#data.creditScore >= 750 ? 'PREMIUM' : (#data.creditScore >= 600 ? 'STANDARD' : 'BASIC')"
+      expression: "creditScore >= 750 ? 'PREMIUM' : (creditScore >= 600 ? 'STANDARD' : 'BASIC')"
       result-field: "customerTier"
       default-value: "UNKNOWN"
       dependencies:
         - "creditScore"
-    
+
     field-mappings:
       - source-field: "customerTier"
         target-field: "finalTier"
         default-value: "UNCLASSIFIED"
-        
+
   # Calculation enrichment without default (backward compatible)
   - id: "simple-calculation"
     name: "Simple Calculation"
     type: "calculation-enrichment"
     description: "Simple calculation without default value"
-    condition: "#data.value != null"
-    
+    condition: "value != null"
+
     calculation-config:
-      expression: "#data.value * 2"
+      expression: "value * 2"
       result-field: "doubledValue"
       # No default-value specified
-    
+
     field-mappings:
       - source-field: "doubledValue"
         target-field: "result"

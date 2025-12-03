@@ -134,6 +134,6 @@ rules:
   - id: "user-validation"
     name: "User Validation Rule"
     description: "Validate user data before processing"
-    condition: "#data != null"
+    condition: "#name != null"
     priority: 100
 

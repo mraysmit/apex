@@ -578,9 +578,16 @@ public class DataTypeScenarioService {
             // Create rules engine and execute
             RulesEngine engine = new RulesEngine(ruleFactory.createRulesEngineConfiguration(mergedConfig));
 
-            // Create facts map
+            // Create facts map - add data fields directly at root level
             Map<String, Object> facts = new HashMap<>();
-            facts.put("data", data);
+            if (data instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> dataMap = (Map<String, Object>) data;
+                facts.putAll(dataMap);
+            } else {
+                // For non-Map data, wrap it
+                facts.put("data", data);
+            }
             facts.put("scenarioId", scenario.getScenarioId());
             facts.put("dataType", determineDataType(data));
 

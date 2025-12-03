@@ -238,7 +238,7 @@ public class SimpleRulesEngine {
             .withCategory("validation")
             .withName("Required Field Check: " + fieldName)
             .withDescription("Check if required field is present and not empty")
-            .withCondition("#data." + fieldName + " != null && #data." + fieldName + " != ''")
+            .withCondition("#" + fieldName + " != null && #" + fieldName + " != ''")
             .withMessage("Required field '" + fieldName + "' is present")
             .withPriority(1)
             .build();

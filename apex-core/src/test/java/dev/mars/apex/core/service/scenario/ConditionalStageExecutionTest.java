@@ -77,12 +77,12 @@ class ConditionalStageExecutionTest {
     void testStageExecutesWhenConditionTrue() throws Exception {
         // Arrange
         ScenarioStage stage = new ScenarioStage("validation", "config/validation.yaml", 1);
-        stage.setCondition("#data['region'] == 'US'");  // Condition will be true
-        
+        stage.setCondition("#region == 'US'");  // Condition will be true (using direct field access)
+
         List<ScenarioStage> stages = Arrays.asList(stage);
         ScenarioConfiguration scenario = ScenarioConfiguration.withStages(
             "test-scenario", "Test Scenario", Arrays.asList("TestData"), stages);
-        
+
         configLoader.addSuccess("config/validation.yaml");
 
         Map<String, Object> testData = new HashMap<>();
@@ -102,7 +102,7 @@ class ConditionalStageExecutionTest {
     void testStageSkippedWhenConditionFalse() throws Exception {
         // Arrange
         ScenarioStage stage = new ScenarioStage("us-compliance", "config/us-compliance.yaml", 1);
-        stage.setCondition("#data['region'] == 'US'");  // Condition will be false
+        stage.setCondition("#region == 'US'");  // Condition will be false (using direct field access)
 
         List<ScenarioStage> stages = Arrays.asList(stage);
         ScenarioConfiguration scenario = ScenarioConfiguration.withStages(
@@ -156,7 +156,7 @@ class ConditionalStageExecutionTest {
     void testStageSkippedWhenConditionEvaluationFails() throws Exception {
         // Arrange
         ScenarioStage stage = new ScenarioStage("validation", "config/validation.yaml", 1);
-        stage.setCondition("#data['nonExistentField'].someMethod()");  // Will cause evaluation error
+        stage.setCondition("#nonExistentField.someMethod()");  // Will cause evaluation error (using direct field access)
 
         List<ScenarioStage> stages = Arrays.asList(stage);
         ScenarioConfiguration scenario = ScenarioConfiguration.withStages(
@@ -186,7 +186,7 @@ class ConditionalStageExecutionTest {
     void testComplexSpelCondition() throws Exception {
         // Arrange
         ScenarioStage stage = new ScenarioStage("high-value-check", "config/high-value.yaml", 1);
-        stage.setCondition("#data['region'] == 'US' && #data['amount'] > 10000");  // Complex condition
+        stage.setCondition("#region == 'US' && #amount > 10000");  // Complex condition (using direct field access)
 
         List<ScenarioStage> stages = Arrays.asList(stage);
         ScenarioConfiguration scenario = ScenarioConfiguration.withStages(
@@ -211,7 +211,7 @@ class ConditionalStageExecutionTest {
     void testComplexSpelConditionFalse() throws Exception {
         // Arrange
         ScenarioStage stage = new ScenarioStage("high-value-check", "config/high-value.yaml", 1);
-        stage.setCondition("#data['region'] == 'US' && #data['amount'] > 10000");  // Complex condition
+        stage.setCondition("#region == 'US' && #amount > 10000");  // Complex condition (using direct field access)
 
         List<ScenarioStage> stages = Arrays.asList(stage);
         ScenarioConfiguration scenario = ScenarioConfiguration.withStages(
@@ -239,7 +239,7 @@ class ConditionalStageExecutionTest {
         // No condition on stage1
 
         ScenarioStage stage2 = new ScenarioStage("us-compliance", "config/us-compliance.yaml", 2);
-        stage2.setCondition("#data['region'] == 'US'");  // Condition on stage2
+        stage2.setCondition("['region'] == 'US'");  // Condition on stage2 (using direct field access)
         stage2.addDependency("validation");  // Depends on stage1
 
         List<ScenarioStage> stages = Arrays.asList(stage1, stage2);
@@ -270,7 +270,7 @@ class ConditionalStageExecutionTest {
         // No condition on stage1
 
         ScenarioStage stage2 = new ScenarioStage("us-compliance", "config/us-compliance.yaml", 2);
-        stage2.setCondition("#data['region'] == 'US'");  // Condition on stage2
+        stage2.setCondition("#region == 'US'");  // Condition on stage2 (using direct field access)
         stage2.addDependency("validation");  // Depends on stage1
 
         List<ScenarioStage> stages = Arrays.asList(stage1, stage2);
@@ -298,13 +298,13 @@ class ConditionalStageExecutionTest {
     void testMultipleStagesWithDifferentConditions() throws Exception {
         // Arrange
         ScenarioStage stage1 = new ScenarioStage("us-compliance", "config/us-compliance.yaml", 1);
-        stage1.setCondition("#data['region'] == 'US'");
+        stage1.setCondition("#region == 'US'");  // Using direct field access
 
         ScenarioStage stage2 = new ScenarioStage("emea-compliance", "config/emea-compliance.yaml", 2);
-        stage2.setCondition("#data['region'] == 'EMEA'");
+        stage2.setCondition("#region == 'EMEA'");  // Using direct field access
 
         ScenarioStage stage3 = new ScenarioStage("apac-compliance", "config/apac-compliance.yaml", 3);
-        stage3.setCondition("#data['region'] == 'APAC'");
+        stage3.setCondition("#region == 'APAC'");  // Using direct field access
 
         List<ScenarioStage> stages = Arrays.asList(stage1, stage2, stage3);
         ScenarioConfiguration scenario = ScenarioConfiguration.withStages(

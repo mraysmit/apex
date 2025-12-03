@@ -36,7 +36,7 @@ scenario:
     - stage-name: "us-compliance"
       config-file: "src/test/java/dev/mars/apex/demo/scenario/ConditionalStageExecutionTest-us-compliance.yaml"
       execution-order: 2
-      condition: "#data['region'] == 'US'"
+      condition: "#'region'] == 'US'"
       failure-policy: "terminate"
       depends-on: ["base-validation"]
       stage-metadata:
@@ -48,7 +48,7 @@ scenario:
     - stage-name: "emea-compliance"
       config-file: "src/test/java/dev/mars/apex/demo/scenario/ConditionalStageExecutionTest-emea-compliance.yaml"
       execution-order: 3
-      condition: "#data['region'] == 'EMEA'"
+      condition: "#'region'] == 'EMEA'"
       failure-policy: "terminate"
       depends-on: ["base-validation"]
       stage-metadata:
@@ -60,7 +60,7 @@ scenario:
     - stage-name: "high-value-validation"
       config-file: "src/test/java/dev/mars/apex/demo/scenario/ConditionalStageExecutionTest-high-value.yaml"
       execution-order: 4
-      condition: "#data['notionalAmount'] > 10000000"
+      condition: "#'notionalAmount'] > 10000000"
       failure-policy: "flag-for-review"
       depends-on: ["base-validation"]
       stage-metadata:

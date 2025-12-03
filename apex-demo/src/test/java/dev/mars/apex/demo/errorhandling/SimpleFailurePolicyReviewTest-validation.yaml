@@ -20,21 +20,21 @@ metadata:
 rules:
   - id: "required-amount-check"
     name: "Required Amount Check"
-    condition: "#data.amount != null && #data.amount > 0"
+    condition: "amount != null && amount > 0"
     message: "Amount is required and must be greater than zero for transaction processing"
     severity: "ERROR"
     enabled: true
 
   - id: "required-customer-name-check"
     name: "Required Customer Name Check"
-    condition: "#data.customerName != null && #data.customerName.length() > 0"
+    condition: "customerName != null && customerName.length() > 0"
     message: "Customer name is required for all transactions"
     severity: "ERROR"
     enabled: true
 
   - id: "transaction-type-validation"
     name: "Transaction Type Validation"
-    condition: "#data.transactionType != null && #data.transactionType.length() > 0"
+    condition: "transactionType != null && transactionType.length() > 0"
     message: "Transaction type should be specified for proper categorization"
     severity: "WARNING"
     enabled: true

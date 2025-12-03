@@ -27,27 +27,24 @@ class ExpressionEvaluatorServiceEnhancedTest {
     @Test
     @DisplayName("Should evaluate HashMap properties using enhanced context")
     void testEnhancedContextWithHashMapProperties() {
-        // Given
-        Map<String, Object> testData = new HashMap<>();
-        testData.put("quantity", 1000);
-        testData.put("instrumentType", "EQUITY");
-        
+        // Given - pass data directly as root context
         Map<String, Object> facts = new HashMap<>();
-        facts.put("data", testData);
+        facts.put("quantity", 1000);
+        facts.put("instrumentType", "EQUITY");
 
         // When & Then - Test simple property access
-        Boolean result1 = expressionEvaluator.evaluateWithEnhancedContext("#data.quantity > 500", facts, Boolean.class);
+        Boolean result1 = expressionEvaluator.evaluateWithEnhancedContext("#quantity > 500", facts, Boolean.class);
         assertNotNull(result1, "Result should not be null");
         assertTrue(result1, "Quantity should be greater than 500");
 
         // Test string property access
-        Boolean result2 = expressionEvaluator.evaluateWithEnhancedContext("#data.instrumentType == 'EQUITY'", facts, Boolean.class);
+        Boolean result2 = expressionEvaluator.evaluateWithEnhancedContext("#instrumentType == 'EQUITY'", facts, Boolean.class);
         assertNotNull(result2, "Result should not be null");
         assertTrue(result2, "Instrument type should be EQUITY");
 
         // Test combined expression
         Boolean result3 = expressionEvaluator.evaluateWithEnhancedContext(
-            "#data.quantity > 500 && #data.instrumentType == 'EQUITY'", facts, Boolean.class);
+            "#quantity > 500 && #instrumentType == 'EQUITY'", facts, Boolean.class);
         assertNotNull(result3, "Result should not be null");
         assertTrue(result3, "Combined expression should match");
     }

@@ -12,9 +12,9 @@ scenario:
   name: "US OTC Option Processing"
   description: "Processes US OTC option trades with region-specific rules"
   
-  # Embedded classification rule with AND condition (Option B)
+  # Embedded classification rule with AND condition (Option B) - using direct field access
   classification-rule:
-    condition: "#data['tradeType'] == 'OTCOption' && #data['region'] == 'US'"
+    condition: "#tradeType == 'OTCOption' && #region == 'US'"
     description: "Matches US OTC option trades (trade type AND region)"
   
   # Stage-based processing configuration

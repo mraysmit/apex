@@ -1832,7 +1832,7 @@ public class RulesEngine {
      * <p><b>Usage Example:</b></p>
      * <pre>
      * // Registry contains scenarios with classification rules like:
-     * // "#data['tradeType'] == 'OTCOption' && #data['region'] == 'US'"
+     * // "#'tradeType'] == 'OTCOption' && #'region'] == 'US'"
      *
      * RulesEngine engine = RulesEngine.fromScenarioRegistry("registry.yaml");
      * Map&lt;String, Object&gt; data = new HashMap&lt;&gt;();

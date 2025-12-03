@@ -539,11 +539,11 @@ SpEL is now used consistently across ALL APEX features:
 
 | Feature | SpEL Support | Example |
 |---------|--------------|---------|
-| **Conditions** | ✅ Yes | `condition: '#data.currency != null'` |
-| **Transformations** | ✅ Yes | `expression: '#data.currency'` |
+| **Conditions** | ✅ Yes | `condition: '#currency != null'` |
+| **Transformations** | ✅ Yes | `expression: '#currency'` |
 | **Lookup Keys** | ✅ Yes | `lookup-key: '#symbol'` |
 | **Calculations** | ✅ Yes | `expression: '#amount * 0.01'` |
-| **Field Mappings** | ✅ **NEW!** | `source-field: '#data.currency'` |
+| **Field Mappings** | ✅ **NEW!** | `source-field: '#currency'` |
 
 ### Basic SpEL Field Mapping
 
@@ -551,13 +551,13 @@ SpEL is now used consistently across ALL APEX features:
 enrichments:
   - id: "nested-field-access"
     type: "field-enrichment"
-    condition: "#data != null"
+    condition: "#field != null"
     field-mappings:
       # ✅ Access nested fields with SpEL (use # prefix)
-      - source-field: "#data.currency"
+      - source-field: "#currency"
         target-field: "buy_currency"
 
-      - source-field: "#data.trade.counterparty"
+      - source-field: "#trade.counterparty"
         target-field: "counterparty_name"
 ```
 
@@ -568,13 +568,12 @@ Prevent null pointer exceptions with safe navigation operator (`?.`):
 ```yaml
 field-mappings:
   # Safe navigation - returns null if any level is null
-  - source-field: "#data?.trade?.amount"
+  - source-field: "#trade?.amount"
     target-field: "trade_amount"
 
-  - source-field: "#data?.pricing?.bid"
+  - source-field: "#pricing?.bid"
     target-field: "bid_price"
 ```
-
 ### Array and Collection Access
 
 ```yaml
@@ -614,12 +613,12 @@ field-mappings:
 ```yaml
 field-mappings:
   # SpEL source-field + transformation
-  - source-field: "#data.amount"
+  - source-field: "#amount"
     target-field: "adjusted_amount"
     expression: "#value * 1.1"  # Apply 10% markup
 
   # SpEL source-field + conditional transformation
-  - source-field: "#data.trade.notional"
+  - source-field: "#trade.notional"
     target-field: "fee"
     expression: "#value > 1000000 ? #value * 0.001 : #value * 0.002"
 ```
@@ -640,13 +639,13 @@ enrichments:
     condition: "#ruleResults['high-value-rule'] == true"
     field-mappings:
       # Extract nested fields only for high-value transactions
-      - source-field: "#data.trade.counterparty.lei"
+      - source-field: "#trade.counterparty.lei"
         target-field: "counterparty_lei"
 
-      - source-field: "#data.trade.legs.![notionalAmount].sum()"
+      - source-field: "#trade.legs.![notionalAmount].sum()"
         target-field: "total_notional"
 
-      - source-field: "#data.pricing?.bid"
+      - source-field: "#pricing?.bid"
         target-field: "bid_price"
 ```
 
@@ -659,13 +658,13 @@ field-mappings:
     target-field: "currency_code"
 
   # New style (with # prefix) - SpEL expression
-  - source-field: "#data.currency"
+  - source-field: "#currency"
     target-field: "currency_code"
 
   # Both can be used in the same enrichment
   - source-field: "status"              # Simple field
     target-field: "trade_status"
-  - source-field: "#data.nested.field"  # SpEL expression
+  - source-field: "#nested.field"  # SpEL expression
     target-field: "nested_value"
 ```
 
@@ -1177,7 +1176,7 @@ enrichments:
   - id: "cache-calculation"
     type: "calculation-enrichment"
     calculation-config:
-      expression: "#complexCalculation(#data)"
+      expression: "#complexCalculation(#field)"
       result-field: "expensiveResult"
     field-mappings:
       - source-field: "expensiveResult"

@@ -59,14 +59,14 @@ public class YamlRuleDefaultValueTest {
         YamlRule rule = new YamlRule();
         rule.setId("test-rule");
         rule.setName("Test Rule");
-        rule.setCondition("#data.value > 0");
+        rule.setCondition("#value > 0");
         rule.setSeverity("WARNING");
         rule.setDefaultValue(false);
         
         // Verify all fields are set correctly
         assertEquals("test-rule", rule.getId());
         assertEquals("Test Rule", rule.getName());
-        assertEquals("#data.value > 0", rule.getCondition());
+        assertEquals("#value > 0", rule.getCondition());
         assertEquals("WARNING", rule.getSeverity());
         assertEquals(false, rule.getDefaultValue());
     }
@@ -113,7 +113,7 @@ public class YamlRuleDefaultValueTest {
         // Set traditional fields without default-value
         rule.setId("legacy-rule");
         rule.setName("Legacy Rule");
-        rule.setCondition("#data.field != null");
+        rule.setCondition("#field != null");
         rule.setSeverity("ERROR");
         
         // Verify default-value is null (backward compatible)
@@ -122,7 +122,7 @@ public class YamlRuleDefaultValueTest {
         // Verify other fields work as expected
         assertEquals("legacy-rule", rule.getId());
         assertEquals("Legacy Rule", rule.getName());
-        assertEquals("#data.field != null", rule.getCondition());
+        assertEquals("#field != null", rule.getCondition());
         assertEquals("ERROR", rule.getSeverity());
     }
 
@@ -131,7 +131,7 @@ public class YamlRuleDefaultValueTest {
         YamlRule rule = new YamlRule();
         rule.setId("metadata-rule");
         rule.setName("Rule with Metadata");
-        rule.setCondition("#data.amount >= 1000");
+        rule.setCondition("#amount >= 1000");
         rule.setSeverity("INFO");
         rule.setDefaultValue("APPROVED");
         rule.setBusinessDomain("finance");
@@ -140,7 +140,7 @@ public class YamlRuleDefaultValueTest {
         // Verify all fields including default-value
         assertEquals("metadata-rule", rule.getId());
         assertEquals("Rule with Metadata", rule.getName());
-        assertEquals("#data.amount >= 1000", rule.getCondition());
+        assertEquals("#amount >= 1000", rule.getCondition());
         assertEquals("INFO", rule.getSeverity());
         assertEquals("APPROVED", rule.getDefaultValue());
         assertEquals("finance", rule.getBusinessDomain());

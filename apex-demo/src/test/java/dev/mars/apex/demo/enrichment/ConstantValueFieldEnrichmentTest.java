@@ -49,7 +49,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * 1. Constant string assignment (e.g., status codes, categories)
  * 2. Constant numeric assignment (integers, decimals, booleans)
  * 3. Conditional constant assignment (based on conditions)
- * 4. Nested field constant assignment (using #data.field notation)
+ * 4. Nested field constant assignment (using #field notation)
  * 5. Multiple constant assignments in single enrichment
  * 6. OTC Options trade processing example (domain-specific)
  *

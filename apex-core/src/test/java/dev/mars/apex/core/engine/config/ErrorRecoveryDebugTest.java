@@ -61,7 +61,7 @@ class ErrorRecoveryDebugTest {
         logger.info("Testing ERROR severity rule evaluation");
 
         // Create a rule that will fail with ERROR severity
-        Rule rule = new Rule("test-rule", "#data.missing != null", "Test", "ERROR");
+        Rule rule = new Rule("test-rule", "#missing != null", "Test", "ERROR");
         Map<String, Object> facts = createEmptyFacts();
 
         logger.info("Executing rule: {}", rule.getName());
@@ -84,7 +84,7 @@ class ErrorRecoveryDebugTest {
         logger.info("Testing CRITICAL severity rule evaluation");
 
         // Create a rule that will fail with CRITICAL severity
-        Rule rule = new Rule("test-rule", "#data.missing != null", "Test", "CRITICAL");
+        Rule rule = new Rule("test-rule", "#missing != null", "Test", "CRITICAL");
         Map<String, Object> facts = createEmptyFacts();
 
         logger.info("Executing rule: {}", rule.getName());
@@ -107,7 +107,7 @@ class ErrorRecoveryDebugTest {
         logger.info("Testing WARNING severity rule evaluation");
         
         // Create a rule that will fail with WARNING severity
-        Rule rule = new Rule("warning-rule", "#data.missing != null", "Test", "WARNING");
+        Rule rule = new Rule("warning-rule", "#missing != null", "Test", "WARNING");
         Map<String, Object> facts = createEmptyFacts();
         
         logger.info("Executing rule: {}", rule.getName());
@@ -127,7 +127,7 @@ class ErrorRecoveryDebugTest {
         logger.info("Testing exact replication of ErrorHandlingProofTestRunner logic");
 
         // This is the exact same test that's failing in ErrorHandlingProofTestRunner
-        Rule rule = new Rule("test-rule", "#data.missing != null", "Test", "CRITICAL");
+        Rule rule = new Rule("test-rule", "#missing != null", "Test", "CRITICAL");
         Map<String, Object> facts = createEmptyFacts();
 
         logger.info("Executing rule: {}", rule.getName());
@@ -147,8 +147,6 @@ class ErrorRecoveryDebugTest {
     }
 
     private Map<String, Object> createEmptyFacts() {
-        Map<String, Object> facts = new HashMap<>();
-        facts.put("data", new HashMap<String, Object>());
-        return facts;
+        return new HashMap<>();
     }
 }

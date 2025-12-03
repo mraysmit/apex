@@ -183,7 +183,7 @@ A standalone web application for browsing, searching, and analyzing APEX YAML co
 │ 12    - id: "validate-trade-amount"                                          │
 │ 13      name: "Validate Trade Amount"                                        │
 │ 14      category: "trading-validation"                                       │
-│ 15      condition: "#data.amount > 0"                                        │
+│ 15      condition: "#amount > 0"                                        │
 │ 16      ...                                                                  │
 │                                                                               │
 └─────────────────────────────────────────────────────────────────────────────┘

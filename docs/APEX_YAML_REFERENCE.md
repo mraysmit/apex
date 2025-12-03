@@ -6,7 +6,7 @@
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 **Change Summary:** Added comprehensive `error-handling` keyword documentation for rule-groups and enrichment-groups (Sections 5.2.5 and 7.2); updated Quick Keyword Reference table
 
-> **✅ SYNTAX VERIFIED**: This document has been updated and verified to use the correct APEX SpEL syntax. APEX processes HashMap data where fields are accessed using `#fieldName` syntax, NOT `#data.fieldName`. All examples in this document use the correct `#fieldName` syntax for field access in APEX YAML configurations.
+> **✅ SYNTAX VERIFIED**: This document has been updated and verified to use the correct APEX SpEL syntax. APEX processes HashMap data where fields are accessed using `#fieldName` syntax, NOT `#fieldName`. All examples in this document use the correct `#fieldName` syntax for field access in APEX YAML configurations.
 
 ## Table of Contents
 This section provides a definitive reference for APEX YAML keywords based on actual APEX core engine implementation. Approximately **155 keywords** are defined in apex-core, with **~140 functionally implemented** in execution logic. See Appendix C for planned/future keywords.
@@ -175,12 +175,12 @@ APEX YAML follows these core principles:
 
 #### Critical Syntax Note
 
-**⚠️ Field Access Syntax**: APEX processes HashMap data where fields are accessed using `#fieldName` syntax, **NOT** `#data.fieldName`. This is the correct syntax for all APEX YAML configurations:
+**⚠️ Field Access Syntax**: APEX processes HashMap data where fields are accessed using `#fieldName` syntax, **NOT** `#fieldName`. This is the correct syntax for all APEX YAML configurations:
 
 - ✅ **Correct**: `#currencyCode != null`
-- X **Incorrect**: `#data.currencyCode != null`
+- X **Incorrect**: `#currencyCode != null`
 - ✅ **Correct**: `lookup-key: "#customerId"`
-- X **Incorrect**: `lookup-key: "#data.customerId"`
+- X **Incorrect**: `lookup-key: "#customerId"`
 
 ### Relationship to Spring Expression Language (SpEL)
 
@@ -543,7 +543,7 @@ condition: "#trade.security.instrumentId != null"
 expression: "#quantity * #price"
 ```
 
-> **⚠️ CRITICAL SYNTAX NOTE**: APEX processes HashMap data structures where field names are accessed directly using `#fieldName` syntax. Do **NOT** use `#data.fieldName` syntax as this will cause SpEL evaluation errors. The correct pattern is always `#fieldName` for HashMap keys.
+> **⚠️ CRITICAL SYNTAX NOTE**: APEX processes HashMap data structures where field names are accessed directly using `#fieldName` syntax. Do **NOT** use `#fieldName` syntax as this will cause SpEL evaluation errors. The correct pattern is always `#fieldName` for HashMap keys.
 
 #### Nested Field Access with Dot Notation
 
@@ -2183,11 +2183,11 @@ enrichments:
                 ask: 150.30
     field-mappings:
       # ✅ NEW: Access nested fields in lookup result with SpEL
-      - source-field: "#data.instrument.name"
+      - source-field: "#instrument.name"
         target-field: "instrument_name"
-      - source-field: "#data.instrument.type"
+      - source-field: "#instrument.type"
         target-field: "instrument_type"
-      - source-field: "#data.pricing.bid"
+      - source-field: "#pricing.bid"
         target-field: "bid_price"
 ```
 
@@ -2196,11 +2196,11 @@ enrichments:
 ```yaml
 field-mappings:
   # Nested field access
-  - source-field: "#data.trade.counterparty"
+  - source-field: "#trade.counterparty"
     target-field: "counterparty_name"
 
   # Safe navigation (prevents null pointer exceptions)
-  - source-field: "#data?.pricing?.bid"
+  - source-field: "#pricing?.bid"
     target-field: "bid_price"
 
   # Array indexing
@@ -2216,7 +2216,7 @@ field-mappings:
     target-field: "current_price"
 
   # Combination with transformations
-  - source-field: "#data.amount"
+  - source-field: "#amount"
     target-field: "adjusted_amount"
     expression: "#value * 1.1"
 ```
@@ -2230,7 +2230,7 @@ field-mappings:
     target-field: "counterparty_lei"
 
   # New style (with # prefix) - SpEL expression
-  - source-field: "#data.lei"
+  - source-field: "#lei"
     target-field: "counterparty_lei"
 ```
 
@@ -2479,17 +2479,17 @@ enrichments:
 enrichments:
   - id: "nested-field-mapping"
     type: "field-enrichment"
-    condition: "#data != null"
+    condition: "#field != null"
     field-mappings:
       # ✅ NEW: Access nested fields with SpEL (use # prefix)
-      - source-field: "#data.currency"
+      - source-field: "#currency"
         target-field: "buy_currency"
 
-      - source-field: "#data.trade.counterparty"
+      - source-field: "#trade.counterparty"
         target-field: "counterparty_name"
 
       # Safe navigation prevents null pointer exceptions
-      - source-field: "#data?.trade?.amount"
+      - source-field: "#trade?.amount"
         target-field: "trade_amount"
 
       # Array indexing
@@ -2505,7 +2505,7 @@ enrichments:
         target-field: "current_price"
 
       # Combine SpEL source-field with transformation
-      - source-field: "#data.amount"
+      - source-field: "#amount"
         target-field: "adjusted_amount"
         expression: "#value * 1.1"  # Apply 10% markup
 ```
@@ -2519,13 +2519,13 @@ field-mappings:
     target-field: "currency_code"
 
   # New style (with # prefix) - SpEL expression
-  - source-field: "#data.currency"
+  - source-field: "#currency"
     target-field: "currency_code"
 
   # Both can be used in the same enrichment
   - source-field: "status"              # Simple field
     target-field: "trade_status"
-  - source-field: "#data.nested.field"  # SpEL expression
+  - source-field: "#nested.field"  # SpEL expression
     target-field: "nested_value"
 ```
 
@@ -2955,7 +2955,7 @@ scenario:
     - stage-name: "us-regulatory-check"
       config-file: "config/us-regulatory.yaml"
       execution-order: 4
-      condition: "#data['region'] == 'US'"  # Conditional execution
+      condition: "#'region'] == 'US'"  # Conditional execution
       failure-policy: "terminate"
       depends-on: ["compliance-check"]
       stage-metadata:
@@ -3013,19 +3013,19 @@ processing-stages:
   - stage-name: "us-compliance"
     config-file: "config/us-compliance.yaml"
     execution-order: 2
-    condition: "#data['region'] == 'US'"  # Only execute for US region
+    condition: "#'region'] == 'US'"  # Only execute for US region
     failure-policy: "terminate"
 
   - stage-name: "emea-compliance"
     config-file: "config/emea-compliance.yaml"
     execution-order: 3
-    condition: "#data['region'] == 'EMEA'"  # Only execute for EMEA region
+    condition: "#'region'] == 'EMEA'"  # Only execute for EMEA region
     failure-policy: "terminate"
 
   - stage-name: "high-value-check"
     config-file: "config/high-value-validation.yaml"
     execution-order: 4
-    condition: "#data['amount'] > 10000"  # Only for high-value trades
+    condition: "#'amount'] > 10000"  # Only for high-value trades
     failure-policy: "flag-for-review"
 ```
 
@@ -3038,18 +3038,18 @@ processing-stages:
 
 **Complex Conditions:**
 
-Conditions support full SpEL syntax with access to `#data`, `#context`, and other variables:
+Conditions support full SpEL syntax with access to `#context`, and other variables:
 
 ```yaml
 processing-stages:
   - stage-name: "us-high-value-compliance"
     config-file: "config/us-high-value.yaml"
-    condition: "#data['region'] == 'US' && #data['amount'] > 10000"
+    condition: "#'region'] == 'US' && #'amount'] > 10000"
     failure-policy: "terminate"
 
   - stage-name: "exotic-options-pricing"
     config-file: "config/exotic-pricing.yaml"
-    condition: "#data['productType'] == 'EXOTIC' && #data['underlyingAsset'] != null"
+    condition: "#'productType'] == 'EXOTIC' && #'underlyingAsset'] != null"
     failure-policy: "continue-with-warnings"
 ```
 
@@ -3067,7 +3067,7 @@ processing-stages:
   - stage-name: "us-compliance"
     config-file: "config/us-compliance.yaml"
     execution-order: 2
-    condition: "#data['region'] == 'US'"  # Checked first
+    condition: "#'region'] == 'US'"  # Checked first
     depends-on: ["validation"]            # Checked only if condition is true
     failure-policy: "terminate"
 ```
@@ -5684,7 +5684,6 @@ APEX YAML supports these SpEL features:
 
 APEX adds these extensions to standard SpEL:
 
-- **Data context**: Automatic `#data` variable for input data
 - **Field references**: Direct field access in lookup keys
 - **Enrichment chaining**: Reference fields created by previous enrichments
 - **Null-safe operations**: Enhanced null safety beyond standard SpEL

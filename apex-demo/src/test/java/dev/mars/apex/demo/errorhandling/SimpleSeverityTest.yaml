@@ -47,37 +47,37 @@ rules:
   - id: "critical-amount-validation"
     name: "Critical Amount Validation"
     description: "Amount must be positive - critical error"
-    condition: "#data.amount != null && T(java.lang.Double).parseDouble(#data.amount.toString()) > 0"
-    message: "CRITICAL: Amount must be positive, got: {{#data.amount}}"
+    condition: "amount != null && T(java.lang.Double).parseDouble(amount.toString()) > 0"
+    message: "CRITICAL: Amount must be positive, got: {{amount}}"
     severity: "ERROR"
     priority: 1
     enabled: true
-    
+
   - id: "mandatory-field-validation"
     name: "Mandatory Field Validation"
     description: "Trade ID must be present - critical error"
-    condition: "#data.tradeId != null && !#data.tradeId.toString().isEmpty()"
+    condition: "tradeId != null && !tradeId.toString().isEmpty()"
     message: "CRITICAL: Trade ID is mandatory"
     severity: "ERROR"
     priority: 1
     enabled: true
-    
+
   # Business Warning Rules (severity: WARNING) - These log warnings but don't fail stage
   - id: "unusual-amount-warning"
     name: "Unusual Amount Warning"
     description: "Amount is unusually high - warning"
-    condition: "#data.amount == null || T(java.lang.Double).parseDouble(#data.amount.toString()) <= 1000000"
-    message: "WARNING: Amount {{#data.amount}} is unusually high - please verify"
+    condition: "amount == null || T(java.lang.Double).parseDouble(amount.toString()) <= 1000000"
+    message: "WARNING: Amount {{amount}} is unusually high - please verify"
     severity: "WARNING"
     priority: 2
     enabled: true
-    
+
   - id: "missing-optional-field-warning"
     name: "Missing Optional Field Warning"
     description: "Optional reference field is missing - warning"
-    condition: "#data.reference == null || true"  # Always passes but demonstrates warning usage
+    condition: "reference == null || true"  # Always passes but demonstrates warning usage
     message: "WARNING: Optional reference field is missing"
-    severity: "WARNING" 
+    severity: "WARNING"
     priority: 3
     enabled: true
     

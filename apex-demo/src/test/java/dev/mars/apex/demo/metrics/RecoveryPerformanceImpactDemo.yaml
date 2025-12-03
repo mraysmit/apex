@@ -50,25 +50,25 @@ rules:
   # Fast recovery scenario: Uses Phase 3A default-value recovery
   - id: "fast-recovery-rule"
     name: "Fast Default-Value Recovery Rule"
-    condition: "#data.riskScore != null && #data.riskScore > 0"
+    condition: "riskScore != null && riskScore > 0"
     severity: "ERROR"
     message: "Risk score validation failed"
     description: "Rule that fails when riskScore is missing, triggers fast default-value recovery"
     default-value: "75"  # Phase 3A: Default value for fast recovery
-    
+
   # Medium recovery scenario: Uses service-based recovery (simulated with complex expression)
   - id: "medium-recovery-rule"
     name: "Medium Service Recovery Rule"
-    condition: "#data.creditRating != null && #data.creditRating.matches('[A-C]')"
+    condition: "creditRating != null && creditRating.matches('[A-C]')"
     severity: "WARNING"
     message: "Credit rating validation failed"
     description: "Rule that fails when creditRating is missing, triggers service-based recovery"
     default-value: "B"  # Fallback credit rating
-    
+
   # Success scenario: No recovery needed
   - id: "success-rule"
     name: "Successful Rule (No Recovery)"
-    condition: "#data.customerId != null && #data.amount != null && #data.amount > 0"
+    condition: "customerId != null && amount != null && amount > 0"
     severity: "INFO"
     message: "Basic validation passed"
     description: "Rule that succeeds with complete data, no recovery needed"
@@ -76,15 +76,15 @@ rules:
 # Additional rules for comprehensive performance testing
   - id: "complex-calculation-rule"
     name: "Complex Calculation Rule"
-    condition: "#data.amount != null && #data.riskScore != null ? (#data.amount * #data.riskScore / 100) < 50000 : false"
+    condition: "amount != null && riskScore != null ? (amount * riskScore / 100) < 50000 : false"
     severity: "WARNING"
     message: "Risk-adjusted amount exceeds threshold"
     description: "Complex calculation that may fail and trigger recovery"
     default-value: "true"  # Default to passing the risk check
-    
+
   - id: "data-quality-rule"
     name: "Data Quality Validation Rule"
-    condition: "#data.customerId != null && #data.customerId.length() >= 5"
+    condition: "customerId != null && customerId.length() >= 5"
     severity: "INFO"
     message: "Customer ID format validation"
     description: "Data quality rule for customer ID format"
@@ -96,26 +96,26 @@ enrichments:
     name: "Risk Calculation with Recovery"
     type: "calculation-enrichment"
     description: "Calculate risk metrics with recovery support"
-    condition: "#data.amount != null"
-    
+    condition: "amount != null"
+
     calculation-config:
-      expression: "#data.riskScore != null ? (#data.amount * #data.riskScore / 100) : (#data.amount * 75 / 100)"
+      expression: "riskScore != null ? (amount * riskScore / 100) : (amount * 75 / 100)"
       result-field: "calculatedRisk"
-    
+
     field-mappings:
       - source-field: "calculatedRisk"
         target-field: "riskAmount"
-        
+
   - id: "customer-enrichment"
     name: "Customer Data Enrichment with Recovery"
     type: "calculation-enrichment"
     description: "Enrich customer data with recovery fallbacks"
-    condition: "#data.customerId != null"
-    
+    condition: "customerId != null"
+
     calculation-config:
-      expression: "#data.customerId + '-' + (#data.creditRating != null ? #data.creditRating : 'UNKNOWN')"
+      expression: "customerId + '-' + (creditRating != null ? creditRating : 'UNKNOWN')"
       result-field: "customerKey"
-    
+
     field-mappings:
       - source-field: "customerKey"
         target-field: "enrichedCustomerKey"

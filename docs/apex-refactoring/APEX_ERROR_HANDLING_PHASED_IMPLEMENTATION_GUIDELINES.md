@@ -33,7 +33,7 @@
 - Fix: Changed catch blocks to re-throw as `RuntimeException`
 
 **Bug 2: Test Design Issue**
-- Problem: Tests used enrichment SpEL syntax (`#data.amount`) instead of transformation syntax
+- Problem: Tests used enrichment SpEL syntax (`#amount`) instead of transformation syntax
 - Fix: Updated to use `sourceField` + `#value` pattern
 
 ### 📚 Root Cause: Why Tests Were Not Created First

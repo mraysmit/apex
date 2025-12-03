@@ -22,8 +22,8 @@ public class SpelFieldMappingIntegrationTest {
         System.out.println("=== Testing Original Issue Scenario (SOLVED!) ===");
         System.out.println("This test demonstrates the exact scenario from the issue document:");
         System.out.println("- Nested data structure: { data: { currency: 'USD', amount: 1000 } }");
-        System.out.println("- Condition uses SpEL: #data.currency != null");
-        System.out.println("- Field mapping NOW uses SpEL: source-field: '#data.currency'");
+        System.out.println("- Condition uses SpEL: #currency != null");
+        System.out.println("- Field mapping NOW uses SpEL: source-field: '#currency'");
         System.out.println();
         
         String yamlConfig = """
@@ -40,12 +40,12 @@ public class SpelFieldMappingIntegrationTest {
                 description: "field-enrichment-demo"
                 enabled: true
                 type: "field-enrichment"
-                condition: "#data.currency != null"
+                condition: "#currency != null"
                 field-mappings:
                   # ✅ NOW WORKS! Access nested field with SpEL
-                  - source-field: "#data.currency"
+                  - source-field: "#currency"
                     target-field: "buy_currency"
-                  - source-field: "#data.amount"
+                  - source-field: "#amount"
                     target-field: "trade_amount"
             """;
 
@@ -53,12 +53,10 @@ public class SpelFieldMappingIntegrationTest {
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
         // Create input data with nested structure (exactly as in the issue)
-        Map<String, Object> data = new HashMap<>();
-        data.put("currency", "USD");
-        data.put("amount", 1000);
-
+        // Pass data directly without wrapper - # now accesses root context
         Map<String, Object> inputData = new HashMap<>();
-        inputData.put("data", data);
+        inputData.put("currency", "USD");
+        inputData.put("amount", 1000);
 
         System.out.println("Input data: " + inputData);
 
@@ -107,20 +105,19 @@ public class SpelFieldMappingIntegrationTest {
                     key-field: "symbol"
                     data:
                       - symbol: "AAPL"
-                        data:
-                          instrument:
-                            name: "Apple Inc."
-                            type: "EQUITY"
-                          pricing:
-                            bid: 150.25
-                            ask: 150.30
+                        instrument:
+                          name: "Apple Inc."
+                          type: "EQUITY"
+                        pricing:
+                          bid: 150.25
+                          ask: 150.30
                 field-mappings:
                   # ✅ Access nested fields in lookup result with SpEL
-                  - source-field: "#data.instrument.name"
+                  - source-field: "#instrument.name"
                     target-field: "instrument_name"
-                  - source-field: "#data.instrument.type"
+                  - source-field: "#instrument.type"
                     target-field: "instrument_type"
-                  - source-field: "#data.pricing.bid"
+                  - source-field: "#pricing.bid"
                     target-field: "bid_price"
             """;
 
@@ -171,37 +168,34 @@ public class SpelFieldMappingIntegrationTest {
               - id: "consistency-demo"
                 type: "field-enrichment"
                 # ✅ SpEL in condition
-                condition: "#data.trade.status == 'ACTIVE'"
+                condition: "#trade.status == 'ACTIVE'"
                 field-mappings:
                   # ✅ SpEL in source-field (NEW!)
-                  - source-field: "#data.trade.counterparty"
+                  - source-field: "#trade.counterparty"
                     target-field: "counterparty_name"
 
                   # ✅ SpEL in source-field + expression
-                  - source-field: "#data.trade.amount"
+                  - source-field: "#trade.amount"
                     target-field: "adjusted_amount"
                     expression: "#value * 1.1"  # ✅ SpEL in expression
 
                   # ✅ Complex SpEL expression in source-field
-                  - source-field: "#data.trade.currency.toUpperCase()"
+                  - source-field: "#trade.currency.toUpperCase()"
                     target-field: "currency_code"
             """;
 
         YamlConfigurationLoader loader = new YamlConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
-        // Create nested input data
+        // Create nested input data - pass trade directly at root level
         Map<String, Object> trade = new HashMap<>();
         trade.put("status", "ACTIVE");
         trade.put("counterparty", "JP Morgan");
         trade.put("amount", 1000000);
         trade.put("currency", "usd");
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("trade", trade);
-
         Map<String, Object> inputData = new HashMap<>();
-        inputData.put("data", data);
+        inputData.put("trade", trade);  // trade is now a top-level key, accessible via #trade
 
         System.out.println("Input data: " + inputData);
 
@@ -251,7 +245,7 @@ public class SpelFieldMappingIntegrationTest {
                     target-field: "trade_amount"
 
                   # New style (with # prefix) - also works
-                  - source-field: "#data.nested_field"
+                  - source-field: "#nested_field"
                     target-field: "nested_value"
             """;
 
@@ -259,13 +253,10 @@ public class SpelFieldMappingIntegrationTest {
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
         // Create input data with both simple and nested fields
-        Map<String, Object> data = new HashMap<>();
-        data.put("nested_field", "nested_value");
-
         Map<String, Object> inputData = new HashMap<>();
         inputData.put("currency", "EUR");
         inputData.put("amount", 5000);
-        inputData.put("data", data);
+        inputData.put("nested_field", "nested_value");
 
         System.out.println("Input data: " + inputData);
 

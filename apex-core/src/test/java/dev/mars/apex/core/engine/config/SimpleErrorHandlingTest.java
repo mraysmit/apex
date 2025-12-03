@@ -33,18 +33,15 @@ class SimpleErrorHandlingTest {
         // Create rule that accesses missing property
         Rule rule = new Rule(
             "missing-property-test",
-            "#data.nonExistentField != null",
+            "#nonExistentField != null",
             "Property should exist",
             "ERROR"
         );
         
         // Create facts without the property
-        Map<String, Object> data = new HashMap<>();
-        data.put("quantity", 100);
-        // Missing "nonExistentField"
-        
         Map<String, Object> facts = new HashMap<>();
-        facts.put("data", data);
+        facts.put("quantity", 100);
+        // Missing "nonExistentField"
         
         // Execute rule
         RuleResult result = rulesEngine.executeRule(rule, facts);
@@ -66,17 +63,14 @@ class SimpleErrorHandlingTest {
         // Create rule that accesses null field
         Rule rule = new Rule(
             "null-access-test",
-            "#data.nullField.toString() != null",
+            "#nullField.toString() != null",
             "Null field access",
             "ERROR"
         );
         
         // Create facts with null field
-        Map<String, Object> data = new HashMap<>();
-        data.put("nullField", null);
-        
         Map<String, Object> facts = new HashMap<>();
-        facts.put("data", data);
+        facts.put("nullField", null);
         
         // Execute rule
         RuleResult result = rulesEngine.executeRule(rule, facts);
@@ -97,17 +91,14 @@ class SimpleErrorHandlingTest {
         // Create rule that causes type error
         Rule rule = new Rule(
             "type-error-test",
-            "#data.stringField > 100",
+            "#stringField > 100",
             "Type error test",
             "WARNING"
         );
         
         // Create facts with string field
-        Map<String, Object> data = new HashMap<>();
-        data.put("stringField", "not-a-number");
-        
         Map<String, Object> facts = new HashMap<>();
-        facts.put("data", data);
+        facts.put("stringField", "not-a-number");
         
         // Execute rule
         RuleResult result = rulesEngine.executeRule(rule, facts);
@@ -128,17 +119,14 @@ class SimpleErrorHandlingTest {
         // Create rule that calls non-existent method
         Rule rule = new Rule(
             "method-not-found-test",
-            "#data.value.nonExistentMethod() > 0",
+            "#value.nonExistentMethod() > 0",
             "Method not found test",
             "CRITICAL"
         );
         
         // Create facts with valid data
-        Map<String, Object> data = new HashMap<>();
-        data.put("value", 100);
-        
         Map<String, Object> facts = new HashMap<>();
-        facts.put("data", data);
+        facts.put("value", 100);
         
         // Execute rule
         RuleResult result = rulesEngine.executeRule(rule, facts);

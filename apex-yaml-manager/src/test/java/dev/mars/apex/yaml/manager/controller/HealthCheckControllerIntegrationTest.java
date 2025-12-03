@@ -89,11 +89,12 @@ class HealthCheckControllerIntegrationTest {
 
         // Validate response
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertNotNull(response.getBody().getFilePath());
-        assertTrue(response.getBody().getOverallScore() >= 0, "Score should be non-negative");
-        assertTrue(response.getBody().getOverallScore() <= 100, "Score should be at most 100");
-        assertNotNull(response.getBody().getGrade(), "Grade should not be null");
+        var body = response.getBody();
+        assertNotNull(body);
+        assertNotNull(body.getFilePath());
+        assertTrue(body.getOverallScore() >= 0, "Score should be non-negative");
+        assertTrue(body.getOverallScore() <= 100, "Score should be at most 100");
+        assertNotNull(body.getGrade(), "Grade should not be null");
     }
 
     @Test
@@ -116,8 +117,9 @@ class HealthCheckControllerIntegrationTest {
 
         // Validate response
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().getOverallScore() >= 0, "Score should be non-negative");
+        var body = response.getBody();
+        assertNotNull(body);
+        assertTrue(body.getOverallScore() >= 0, "Score should be non-negative");
     }
 
     @Test
@@ -175,9 +177,10 @@ class HealthCheckControllerIntegrationTest {
 
         // Validate response
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().getOverallScore() >= 0, "Overall score should be non-negative");
-        assertNotNull(response.getBody().getHealthLevel(), "Health level should not be null");
+        var body = response.getBody();
+        assertNotNull(body);
+        assertTrue(body.getOverallScore() >= 0, "Overall score should be non-negative");
+        assertNotNull(body.getHealthLevel(), "Health level should not be null");
     }
 
     @Test
@@ -227,9 +230,10 @@ class HealthCheckControllerIntegrationTest {
 
         // Validate response
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().getOverallScore() >= 0, "Score should be non-negative");
-        assertTrue(response.getBody().getOverallScore() <= 100, "Score should be at most 100");
+        var body = response.getBody();
+        assertNotNull(body);
+        assertTrue(body.getOverallScore() >= 0, "Score should be non-negative");
+        assertTrue(body.getOverallScore() <= 100, "Score should be at most 100");
     }
 
     @Test

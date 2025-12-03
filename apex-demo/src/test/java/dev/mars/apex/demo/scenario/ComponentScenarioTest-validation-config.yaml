@@ -31,7 +31,7 @@ rules:
   - id: "trade-id-required"
     name: "Trade ID Required"
     description: "Detect when trade ID is missing or empty"
-    condition: "#data['tradeId'] == null || #data['tradeId'].toString().isEmpty()"
+    condition: "['tradeId'] == null || ['tradeId'].toString().isEmpty()"
     message: "Trade ID is required and cannot be empty"
     severity: "INFO"
     enabled: true
@@ -39,7 +39,7 @@ rules:
   - id: "amount-positive"
     name: "Amount Positive"
     description: "Detect when amount is missing or not positive"
-    condition: "#data['amount'] == null || T(java.lang.Double).parseDouble(#data['amount'].toString()) <= 0"
+    condition: "['amount'] == null || T(java.lang.Double).parseDouble(['amount'].toString()) <= 0"
     message: "Amount must be positive"
     severity: "INFO"
     enabled: true
@@ -47,7 +47,7 @@ rules:
   - id: "currency-required"
     name: "Currency Required"
     description: "Detect when currency is missing or empty"
-    condition: "#data['currency'] == null || #data['currency'].toString().isEmpty()"
+    condition: "['currency'] == null || ['currency'].toString().isEmpty()"
     message: "Currency is required"
     severity: "INFO"
     enabled: true
@@ -55,7 +55,7 @@ rules:
   - id: "counterparty-required"
     name: "Counterparty Required"
     description: "Detect when counterparty is missing or empty"
-    condition: "#data['counterparty'] == null || #data['counterparty'].toString().isEmpty()"
+    condition: "['counterparty'] == null || ['counterparty'].toString().isEmpty()"
     message: "Counterparty is required"
     severity: "INFO"
     enabled: true
@@ -63,7 +63,7 @@ rules:
   - id: "trade-type-required"
     name: "Trade Type Required"
     description: "Detect when trade type is missing or empty"
-    condition: "#data['tradeType'] == null || #data['tradeType'].toString().isEmpty()"
+    condition: "['tradeType'] == null || ['tradeType'].toString().isEmpty()"
     message: "Trade type is required"
     severity: "INFO"
     enabled: true

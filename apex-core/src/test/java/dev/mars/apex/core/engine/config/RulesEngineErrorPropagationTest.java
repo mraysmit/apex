@@ -232,7 +232,7 @@ class RulesEngineErrorPropagationTest {
         transformation.setId("invalid-expression-transformation");
         transformation.setType("field-transformation");
         transformation.setTargetField("result");
-        transformation.setExpression("#data.amount.nonExistentMethod()"); // Invalid method call
+        transformation.setExpression("#amount.nonExistentMethod()"); // Invalid method call
 
         config.setTransformations(Collections.singletonList(transformation));
         return config;

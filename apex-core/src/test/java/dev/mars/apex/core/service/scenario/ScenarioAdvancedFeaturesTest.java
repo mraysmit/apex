@@ -69,48 +69,48 @@ class ScenarioAdvancedFeaturesTest {
     @Nested
     @DisplayName("OR Condition Tests")
     class OrConditionTests {
-        
+
         @Test
         @DisplayName("Should match when first OR condition is true")
         void testOrConditionFirstTrue() {
             logger.info("TEST: OR condition - first condition true");
-            
-            // Given: OR condition where first part is true
-            scenario.setClassificationRuleCondition("#data['type'] == 'OTC' || #data['type'] == 'LISTED'");
-            
+
+            // Given: OR condition where first part is true (using direct field access)
+            scenario.setClassificationRuleCondition("['type'] == 'OTC' || ['type'] == 'LISTED'");
+
             // When: Evaluate with matching data
             Map<String, Object> data = new HashMap<>();
             data.put("type", "OTC");
-            
+
             // Then: Should match
             assertTrue(scenario.matchesClassificationRule(data),
                 "Should match when first OR condition is true");
         }
-        
+
         @Test
         @DisplayName("Should match when second OR condition is true")
         void testOrConditionSecondTrue() {
             logger.info("TEST: OR condition - second condition true");
-            
-            // Given: OR condition where second part is true
-            scenario.setClassificationRuleCondition("#data['type'] == 'OTC' || #data['type'] == 'LISTED'");
-            
+
+            // Given: OR condition where second part is true (using direct field access)
+            scenario.setClassificationRuleCondition("['type'] == 'OTC' || ['type'] == 'LISTED'");
+
             // When: Evaluate with matching data
             Map<String, Object> data = new HashMap<>();
             data.put("type", "LISTED");
-            
+
             // Then: Should match
             assertTrue(scenario.matchesClassificationRule(data),
                 "Should match when second OR condition is true");
         }
-        
+
         @Test
         @DisplayName("Should not match when no OR conditions are true")
         void testOrConditionNoneTrue() {
             logger.info("TEST: OR condition - no conditions true");
 
-            // Given: OR condition where neither part is true
-            scenario.setClassificationRuleCondition("#data['type'] == 'OTC' || #data['type'] == 'LISTED'");
+            // Given: OR condition where neither part is true (using direct field access)
+            scenario.setClassificationRuleCondition("['type'] == 'OTC' || ['type'] == 'LISTED'");
 
             // When: Evaluate with non-matching data
             Map<String, Object> data = new HashMap<>();
@@ -126,8 +126,8 @@ class ScenarioAdvancedFeaturesTest {
         void testOrConditionWithNullValue() {
             logger.info("TEST: OR condition - null value handling");
 
-            // Given: OR condition with null-safe navigation
-            scenario.setClassificationRuleCondition("#data['type'] == 'OTC' || #data['type'] == null");
+            // Given: OR condition with null-safe navigation (using direct field access)
+            scenario.setClassificationRuleCondition("['type'] == 'OTC' || ['type'] == null");
 
             // When: Evaluate with null data
             Map<String, Object> data = new HashMap<>();
@@ -143,8 +143,8 @@ class ScenarioAdvancedFeaturesTest {
         void testOrConditionWithMissingField() {
             logger.info("TEST: OR condition - missing field handling");
 
-            // Given: OR condition referencing potentially missing field
-            scenario.setClassificationRuleCondition("#data['type'] == 'OTC' || #data['category'] == 'EQUITY'");
+            // Given: OR condition referencing potentially missing field (using direct field access)
+            scenario.setClassificationRuleCondition("['type'] == 'OTC' || ['category'] == 'EQUITY'");
 
             // When: Evaluate with data missing one field
             Map<String, Object> data = new HashMap<>();
@@ -164,34 +164,34 @@ class ScenarioAdvancedFeaturesTest {
     @Nested
     @DisplayName("Nested Field Access Tests")
     class NestedFieldAccessTests {
-        
+
         @Test
         @DisplayName("Should access single-level nested field")
         void testSingleLevelNestedField() {
             logger.info("TEST: Nested field access - single level");
-            
-            // Given: Condition accessing nested field
-            scenario.setClassificationRuleCondition("#data['trade']['type'] == 'OTC'");
-            
+
+            // Given: Condition accessing nested field (using direct field access)
+            scenario.setClassificationRuleCondition("['trade']['type'] == 'OTC'");
+
             // When: Evaluate with nested data
             Map<String, Object> data = new HashMap<>();
             Map<String, Object> trade = new HashMap<>();
             trade.put("type", "OTC");
             data.put("trade", trade);
-            
+
             // Then: Should match
             assertTrue(scenario.matchesClassificationRule(data),
                 "Should access single-level nested field");
         }
-        
+
         @Test
         @DisplayName("Should access multi-level nested field")
         void testMultiLevelNestedField() {
             logger.info("TEST: Nested field access - multi-level");
-            
-            // Given: Condition accessing multi-level nested field
-            scenario.setClassificationRuleCondition("#data['trade']['counterparty']['region'] == 'US'");
-            
+
+            // Given: Condition accessing multi-level nested field (using direct field access)
+            scenario.setClassificationRuleCondition("['trade']['counterparty']['region'] == 'US'");
+
             // When: Evaluate with deeply nested data
             Map<String, Object> data = new HashMap<>();
             Map<String, Object> trade = new HashMap<>();
@@ -199,19 +199,19 @@ class ScenarioAdvancedFeaturesTest {
             counterparty.put("region", "US");
             trade.put("counterparty", counterparty);
             data.put("trade", trade);
-            
+
             // Then: Should match
             assertTrue(scenario.matchesClassificationRule(data),
                 "Should access multi-level nested field");
         }
-        
+
         @Test
         @DisplayName("Should handle null nested fields gracefully")
         void testNullNestedField() {
             logger.info("TEST: Nested field access - null handling");
 
-            // Given: Condition with null-safe navigation
-            scenario.setClassificationRuleCondition("#data['trade']?.['type'] == 'OTC'");
+            // Given: Condition with null-safe navigation (using direct field access)
+            scenario.setClassificationRuleCondition("['trade']?.['type'] == 'OTC'");
 
             // When: Evaluate with null nested field
             Map<String, Object> data = new HashMap<>();
@@ -227,8 +227,8 @@ class ScenarioAdvancedFeaturesTest {
         void testMissingNestedObject() {
             logger.info("TEST: Nested field access - missing object handling");
 
-            // Given: Condition accessing nested field
-            scenario.setClassificationRuleCondition("#data['trade']['counterparty']['region'] == 'US'");
+            // Given: Condition accessing nested field (using direct field access)
+            scenario.setClassificationRuleCondition("['trade']['counterparty']['region'] == 'US'");
 
             // When: Evaluate with missing nested object
             Map<String, Object> data = new HashMap<>();
@@ -244,8 +244,8 @@ class ScenarioAdvancedFeaturesTest {
         void testPartialNestedStructure() {
             logger.info("TEST: Nested field access - partial structure handling");
 
-            // Given: Condition accessing deeply nested field
-            scenario.setClassificationRuleCondition("#data['trade']['counterparty']['region'] == 'US'");
+            // Given: Condition accessing deeply nested field (using direct field access)
+            scenario.setClassificationRuleCondition("['trade']['counterparty']['region'] == 'US'");
 
             // When: Evaluate with incomplete nested structure
             Map<String, Object> data = new HashMap<>();
@@ -267,48 +267,48 @@ class ScenarioAdvancedFeaturesTest {
     @Nested
     @DisplayName("String Operations Tests")
     class StringOperationsTests {
-        
+
         @Test
         @DisplayName("Should support .contains() string operation")
         void testStringContains() {
             logger.info("TEST: String operation - contains");
-            
-            // Given: Condition using .contains()
-            scenario.setClassificationRuleCondition("#data['description'].contains('urgent')");
-            
+
+            // Given: Condition using .contains() (using direct field access)
+            scenario.setClassificationRuleCondition("['description'].contains('urgent')");
+
             // When: Evaluate with matching data
             Map<String, Object> data = new HashMap<>();
             data.put("description", "This is an urgent trade");
-            
+
             // Then: Should match
             assertTrue(scenario.matchesClassificationRule(data),
                 "Should support .contains() string operation");
         }
-        
+
         @Test
         @DisplayName("Should support .startsWith() string operation")
         void testStringStartsWith() {
             logger.info("TEST: String operation - startsWith");
-            
-            // Given: Condition using .startsWith()
-            scenario.setClassificationRuleCondition("#data['code'].startsWith('OTC')");
-            
+
+            // Given: Condition using .startsWith() (using direct field access)
+            scenario.setClassificationRuleCondition("['code'].startsWith('OTC')");
+
             // When: Evaluate with matching data
             Map<String, Object> data = new HashMap<>();
             data.put("code", "OTC-12345");
-            
+
             // Then: Should match
             assertTrue(scenario.matchesClassificationRule(data),
                 "Should support .startsWith() string operation");
         }
-        
+
         @Test
         @DisplayName("Should support .length() string operation")
         void testStringLength() {
             logger.info("TEST: String operation - length");
 
-            // Given: Condition using .length()
-            scenario.setClassificationRuleCondition("#data['name'].length() > 5");
+            // Given: Condition using .length() (using direct field access)
+            scenario.setClassificationRuleCondition("['name'].length() > 5");
 
             // When: Evaluate with matching data
             Map<String, Object> data = new HashMap<>();
@@ -324,8 +324,8 @@ class ScenarioAdvancedFeaturesTest {
         void testStringOperationWithNull() {
             logger.info("TEST: String operation - null handling");
 
-            // Given: Condition using string operation with null-safe check
-            scenario.setClassificationRuleCondition("#data['description'] != null && #data['description'].contains('urgent')");
+            // Given: Condition using string operation with null-safe check (using direct field access)
+            scenario.setClassificationRuleCondition("['description'] != null && ['description'].contains('urgent')");
 
             // When: Evaluate with null string
             Map<String, Object> data = new HashMap<>();
@@ -341,8 +341,8 @@ class ScenarioAdvancedFeaturesTest {
         void testStringOperationWithEmpty() {
             logger.info("TEST: String operation - empty string handling");
 
-            // Given: Condition checking string length
-            scenario.setClassificationRuleCondition("#data['code'].length() > 0");
+            // Given: Condition checking string length (using direct field access)
+            scenario.setClassificationRuleCondition("['code'].length() > 0");
 
             // When: Evaluate with empty string
             Map<String, Object> data = new HashMap<>();
@@ -358,8 +358,8 @@ class ScenarioAdvancedFeaturesTest {
         void testStringOperationCaseSensitive() {
             logger.info("TEST: String operation - case sensitivity");
 
-            // Given: Condition using startsWith (case-sensitive)
-            scenario.setClassificationRuleCondition("#data['code'].startsWith('OTC')");
+            // Given: Condition using startsWith (case-sensitive) (using direct field access)
+            scenario.setClassificationRuleCondition("['code'].startsWith('OTC')");
 
             // When: Evaluate with different case
             Map<String, Object> data = new HashMap<>();

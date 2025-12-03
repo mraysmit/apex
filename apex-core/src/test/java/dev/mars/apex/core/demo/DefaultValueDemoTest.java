@@ -87,7 +87,7 @@ class DefaultValueDemoTest {
             rules:
               - id: "simple-rule"
                 name: "Simple Rule"
-                condition: "#data.field != null"
+                condition: "#field != null"
                 message: "Field is not null"
                 severity: "INFO"
                 # Note: no default-value specified

@@ -5415,7 +5415,7 @@ APEX provides comprehensive REST API integration capabilities that enable seamle
 
 **Parameter Substitution**: APEX REST API lookups use simple parameter substitution where `{key}` in the endpoint URL is replaced with the lookup value. The lookup key is passed as a parameter named `key` by default.
 
-**Field Access**: In APEX YAML configurations, fields are accessed using `#fieldName` syntax (not `#data.fieldName`). This applies to all conditions, lookup keys, and expressions.
+**Field Access**: In APEX YAML configurations, fields are accessed using `#fieldName` syntax (not `#fieldName`). This applies to all conditions, lookup keys, and expressions.
 
 **Endpoint Structure**: APEX supports two REST API configuration approaches:
 - **Simple endpoints** (recommended): Direct URL templates with parameter substitution

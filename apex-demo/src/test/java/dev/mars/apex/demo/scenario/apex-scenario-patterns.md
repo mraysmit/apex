@@ -137,7 +137,7 @@ scenario:
 
   # Classification rule - REQUIRED for automatic routing
   classification-rule:
-    condition: "#data['tradeType'] == 'OTCOption' && #data['region'] == 'US'"
+    condition: "#'tradeType'] == 'OTCOption' && #'region'] == 'US'"
     description: "US OTC option trades"
 
   processing-stages:
@@ -170,26 +170,26 @@ scenario:
 - **Automatic Data Routing**: Incoming data automatically routed to matching scenarios
 - **Content-Based Selection**: Scenarios selected based on actual data content and values
 - **Multi-Condition Logic**: Complex AND/OR conditions for precise business rule matching
-- **Field Access**: Direct access to data fields using `#data['fieldName']` syntax
+- **Field Access**: Direct access to data fields using `#'fieldName']` syntax
 - **Numeric Comparisons**: Support for `>`, `<`, `>=`, `<=`, `==` operations
 - **String Operations**: Pattern matching, contains, startsWith, endsWith operations
 
 **Advanced Classification Examples:**
 ```yaml
 # Simple field matching
-condition: "#data['tradeType'] == 'OTCOption'"
+condition: "#'tradeType'] == 'OTCOption'"
 
 # Multiple field AND conditions
-condition: "#data['tradeType'] == 'OTCOption' && #data['region'] == 'US'"
+condition: "#'tradeType'] == 'OTCOption' && #'region'] == 'US'"
 
 # Numeric threshold conditions
-condition: "#data['tradeType'] == 'OTCOption' && #data['notional'] > 100000000"
+condition: "#'tradeType'] == 'OTCOption' && #'notional'] > 100000000"
 
 # String pattern matching
-condition: "#data['instrumentId'].startsWith('USD') && #data['maturity'] > '2025-01-01'"
+condition: "#'instrumentId'].startsWith('USD') && #'maturity'] > '2025-01-01'"
 
 # Complex OR conditions
-condition: "#data['assetClass'] == 'Equity' || #data['assetClass'] == 'Bond'"
+condition: "#'assetClass'] == 'Equity' || #'assetClass'] == 'Bond'"
 ```
 
 **Usage Example:**
@@ -235,14 +235,14 @@ scenarios:
 scenario:
   scenario-id: "otc-option-us"
   classification-rule:
-    condition: "#data['tradeType'] == 'OTCOption' && #data['assetClass'] == 'Derivative'"
+    condition: "#'tradeType'] == 'OTCOption' && #'assetClass'] == 'Derivative'"
     description: "OTC derivative option trades"
 
 # Scenario 2: Bonds (MUST have classification rule)
 scenario:
   scenario-id: "bond-us"
   classification-rule:
-    condition: "#data['tradeType'] == 'Bond' && #data['assetClass'] == 'FixedIncome'"
+    condition: "#'tradeType'] == 'Bond' && #'assetClass'] == 'FixedIncome'"
     description: "Fixed income bond trades"
 ```
 
@@ -267,9 +267,9 @@ routing:
 
   # Optional: Custom routing rules (rarely used)
   rules:
-    - condition: "#data['priority'] == 'HIGH'"
+    - condition: "#'priority'] == 'HIGH'"
       target-scenario: "high-priority-scenario"
-    - condition: "#data['region'] == 'APAC'"
+    - condition: "#'region'] == 'APAC'"
       target-scenario: "apac-scenario"
 ```
 

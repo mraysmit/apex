@@ -74,17 +74,13 @@ public class ScenarioBasedRulesEngineTest {
         // Create RulesEngine from configuration
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
         
-        // Test data - valid OTC option trade
+        // Test data - valid OTC option trade (pass directly as root context)
         Map<String, Object> validTrade = new HashMap<>();
         validTrade.put("tradeId", "OTC-2025-001");
         validTrade.put("tradeType", "OTCOption");
         
-        // Wrap in "data" key for SpEL expressions that reference #data
-        Map<String, Object> inputData = new HashMap<>();
-        inputData.put("data", validTrade);
-        
-        // Execute rules
-        RuleResult result = engine.evaluate(inputData);
+        // Execute rules - pass data directly without wrapper
+        RuleResult result = engine.evaluate(validTrade);
         
         // Debug output
         logger.info("Result: triggered={}, isSuccess={}, hasFailures={}, failureMessages={}",
@@ -111,17 +107,13 @@ public class ScenarioBasedRulesEngineTest {
         
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
         
-        // Test data - missing tradeType (invalid)
+        // Test data - missing tradeType (invalid, pass directly as root context)
         Map<String, Object> invalidTrade = new HashMap<>();
         invalidTrade.put("tradeId", "OTC-2025-002");
         // tradeType is missing - should fail validation
         
-        // Wrap in "data" key for SpEL expressions
-        Map<String, Object> inputData = new HashMap<>();
-        inputData.put("data", invalidTrade);
-        
-        // Execute rules
-        RuleResult result = engine.evaluate(inputData);
+        // Execute rules - pass data directly without wrapper
+        RuleResult result = engine.evaluate(invalidTrade);
         
         // Debug output
         logger.info("Result details:");
@@ -164,12 +156,8 @@ public class ScenarioBasedRulesEngineTest {
         minimalData.put("tradeId", "TEST-001");
         // Missing: currency, instrumentType, quantity, price (will trigger SpEL errors)
         
-        // Wrap in "data" key for SpEL expressions
-        Map<String, Object> inputData = new HashMap<>();
-        inputData.put("data", minimalData);
-        
-        // Execute rules - SpEL errors should be caught and propagated
-        RuleResult result = engine.evaluate(inputData);
+        // Execute rules - SpEL errors should be caught and propagated (pass data directly)
+        RuleResult result = engine.evaluate(minimalData);
         
         // Verify errors were captured
         assertNotNull(result, "Result should not be null");
@@ -197,19 +185,15 @@ public class ScenarioBasedRulesEngineTest {
         
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
         
-        // Test data - high-notional OTC option trade
+        // Test data - high-notional OTC option trade (pass directly as root context)
         Map<String, Object> highNotionalTrade = new HashMap<>();
         highNotionalTrade.put("tradeId", "HIGH-NOTIONAL-001");
         highNotionalTrade.put("tradeType", "OTCOption");
         highNotionalTrade.put("notional", 10000000.0); // $10M
         highNotionalTrade.put("jurisdiction", "US");
         
-        // Wrap in "data" key for SpEL expressions
-        Map<String, Object> inputData = new HashMap<>();
-        inputData.put("data", highNotionalTrade);
-        
-        // Execute rules
-        RuleResult result = engine.evaluate(inputData);
+        // Execute rules - pass data directly without wrapper
+        RuleResult result = engine.evaluate(highNotionalTrade);
         
         // Verify processing
         assertNotNull(result, "Result should not be null");
@@ -231,19 +215,15 @@ public class ScenarioBasedRulesEngineTest {
         
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
         
-        // Test data - commodity swap trade
+        // Test data - commodity swap trade (pass directly as root context)
         Map<String, Object> swapTrade = new HashMap<>();
         swapTrade.put("tradeId", "SWAP-2025-001");
         swapTrade.put("tradeType", "CommoditySwap");
         swapTrade.put("commodity", "GOLD");
         swapTrade.put("notional", 5000000.0);
         
-        // Wrap in "data" key for SpEL expressions
-        Map<String, Object> inputData = new HashMap<>();
-        inputData.put("data", swapTrade);
-        
-        // Execute rules
-        RuleResult result = engine.evaluate(inputData);
+        // Execute rules - pass data directly without wrapper
+        RuleResult result = engine.evaluate(swapTrade);
         
         // Verify validation passed
         assertNotNull(result, "Result should not be null");
@@ -266,18 +246,14 @@ public class ScenarioBasedRulesEngineTest {
         // Create RulesEngine with enrichment configuration
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
         
-        // Test data - trade that needs enrichment
+        // Test data - trade that needs enrichment (pass directly as root context)
         Map<String, Object> trade = new HashMap<>();
         trade.put("tradeId", "ENRICH-001");
         trade.put("tradeType", "OTCOption");
         trade.put("amount", 50000.0);
         
-        // Wrap in "data" key for SpEL expressions
-        Map<String, Object> inputData = new HashMap<>();
-        inputData.put("data", trade);
-        
-        // Execute enrichments
-        RuleResult result = engine.evaluate(inputData);
+        // Execute enrichments - pass data directly without wrapper
+        RuleResult result = engine.evaluate(trade);
         
         // Verify enrichment execution
         assertNotNull(result, "Result should not be null");
@@ -285,8 +261,8 @@ public class ScenarioBasedRulesEngineTest {
         // Check if enriched data is available
         Map<String, Object> enrichedData = result.getEnrichedData();
         assertNotNull(enrichedData, "Enriched data should not be null");
-        // The input was wrapped in "data", so check for the "data" key
-        assertTrue(enrichedData.containsKey("data"), "Data wrapper should be preserved");
+        // Data is now passed directly, no "data" wrapper
+        assertTrue(enrichedData.containsKey("tradeId"), "Trade data should be accessible");
         
         logger.info("✅ Trade enrichment rules processed successfully");
         logger.info("   Enriched data fields: {}", enrichedData.keySet());
@@ -304,16 +280,12 @@ public class ScenarioBasedRulesEngineTest {
         
         RulesEngine validationEngine = RulesEngine.fromYamlConfig(validationConfig);
         
-        // Test with data that will pass trade ID validation but fail others
+        // Test with data that will pass trade ID validation but fail others (pass directly as root context)
         Map<String, Object> testData = new HashMap<>();
         testData.put("tradeId", "STAGE-TEST-001");
         
-        // Wrap in "data" key for SpEL expressions
-        Map<String, Object> inputData = new HashMap<>();
-        inputData.put("data", testData);
-        
-        // Execute validation stage
-        RuleResult validationResult = validationEngine.evaluate(inputData);
+        // Execute validation stage - pass data directly without wrapper
+        RuleResult validationResult = validationEngine.evaluate(testData);
         
         // Verify validation stage behavior
         assertNotNull(validationResult, "Validation result should not be null");

@@ -38,7 +38,7 @@ class ApexYamlValidatorDemoTest {
               - id: "trade-amount-validation"
                 name: "Trade Amount Validation"
                 description: "Validates trade amount is positive and within limits"
-                condition: "#data.amount > 0 && #data.amount <= 1000000"
+                condition: "#amount > 0 && #amount <= 1000000"
                 message: "Trade amount must be positive and not exceed $1M"
                 severity: "ERROR"
                 priority: 100
@@ -47,7 +47,7 @@ class ApexYamlValidatorDemoTest {
               - id: "currency-validation"
                 name: "Currency Validation"
                 description: "Validates currency code is provided and valid"
-                condition: "#data.currency != null && #data.currency.matches('[A-Z]{3}')"
+                condition: "#currency != null && #currency.matches('[A-Z]{3}')"
                 message: "Currency must be a valid 3-letter ISO code"
                 severity: "ERROR"
                 priority: 200
@@ -56,7 +56,7 @@ class ApexYamlValidatorDemoTest {
               - id: "counterparty-check"
                 name: "Counterparty Check"
                 description: "Validates counterparty is approved"
-                condition: "#data.counterparty != null && #context.approvedCounterparties.contains(#data.counterparty)"
+                condition: "#counterparty != null && #context.approvedCounterparties.contains(#counterparty)"
                 message: "Counterparty must be pre-approved"
                 severity: "WARNING"
                 priority: 300
@@ -65,19 +65,19 @@ class ApexYamlValidatorDemoTest {
             enrichments:
               - type: "lookup-enrichment"
                 source: "fx-rates"
-                lookup-key: "#data.currency"
+                lookup-key: "#currency"
                 target-field: "exchangeRate"
                 description: "Lookup current FX rate"
                 cache-ttl: 300000
                 
               - type: "lookup-enrichment"
                 source: "counterparty-data"
-                lookup-key: "#data.counterparty"
+                lookup-key: "#counterparty"
                 target-field: "counterpartyProfile"
                 description: "Enrich with counterparty profile data"
                 
               - type: "calculation-enrichment"
-                expression: "#data.amount * #enriched.exchangeRate"
+                expression: "#amount * #enriched.exchangeRate"
                 target-field: "usdEquivalent"
                 description: "Calculate USD equivalent amount"
             """;
@@ -174,15 +174,15 @@ class ApexYamlValidatorDemoTest {
             rules:
               - id: "valid-expression"
                 name: "Valid Expression"
-                condition: "#data.amount > 1000 && #data.currency == 'USD'"
+                condition: "#amount > 1000 && #currency == 'USD'"
                 
               - id: "invalid-expression"
                 name: "Invalid Expression"
-                condition: "#data.amount > && #invalid.syntax"  # Invalid syntax
+                condition: "#amount > && #invalid.syntax"  # Invalid syntax
                 
               - id: "unmatched-parentheses"
                 name: "Unmatched Parentheses"
-                condition: "#data.amount > (1000 + #data.fee"  # Missing closing parenthesis
+                condition: "#amount > (1000 + #fee"  # Missing closing parenthesis
             """;
         
         Path yamlFile = tempDir.resolve("spel-demo.yaml");

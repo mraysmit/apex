@@ -13,23 +13,23 @@ rules:
   # Rule with string default value
   - id: "customer-validation"
     name: "Customer Validation Rule"
-    condition: "#data.customer != null && #data.customer.name != null"
+    condition: "customer != null && customer.name != null"
     message: "Customer validation passed"
     severity: "INFO"
     default-value: "Customer validation skipped - using default"
-    
-  # Rule with boolean default value  
+
+  # Rule with boolean default value
   - id: "age-check"
     name: "Age Verification Rule"
-    condition: "#data.customer.age >= 18"
+    condition: "customer.age >= 18"
     message: "Customer is of legal age"
     severity: "WARNING"
     default-value: true
-    
+
   # Rule with numeric default value
   - id: "credit-score"
     name: "Credit Score Rule"
-    condition: "#data.customer.creditScore >= 650"
+    condition: "customer.creditScore >= 650"
     message: "Credit score is acceptable"
     severity: "ERROR"
     default-value: 600
@@ -39,9 +39,9 @@ enrichments:
   - id: "risk-calculation"
     name: "Risk Score Calculation"
     type: "calculation-enrichment"
-    condition: "#data.customer != null"
+    condition: "customer != null"
     calculation-config:
-      expression: "#data.customer.creditScore * 0.7 + #data.customer.age * 0.3"
+      expression: "customer.creditScore * 0.7 + customer.age * 0.3"
       result-field: "riskScore"
       default-value: 500.0
     field-mappings:
@@ -53,9 +53,9 @@ enrichments:
   - id: "customer-tier"
     name: "Customer Tier Assignment"
     type: "calculation-enrichment"
-    condition: "#data.customer != null"
+    condition: "customer != null"
     calculation-config:
-      expression: "#data.customer.creditScore > 750 ? 'PREMIUM' : 'STANDARD'"
+      expression: "customer.creditScore > 750 ? 'PREMIUM' : 'STANDARD'"
       result-field: "customerTier"
       default-value: "UNKNOWN"
     field-mappings:

@@ -14,7 +14,7 @@ rules:
   # Initial validation
   - id: "initial-validation"
     name: "Initial Data Validation"
-    condition: "#data['type'] != null && #data['id'] != null"
+    condition: "#type != null && #id != null"
     message: "Initial validation passed"
     severity: "INFO"
 

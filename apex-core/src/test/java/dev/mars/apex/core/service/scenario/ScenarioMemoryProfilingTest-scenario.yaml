@@ -12,7 +12,7 @@ scenario:
   description: "Tests memory usage during repeated scenario execution"
   
   classification-rule:
-    condition: "#data['type'] == 'OTC'"
+    condition: "#type == 'OTC'"
     description: "Classify OTC trades"
   
   processing-stages:

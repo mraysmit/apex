@@ -34,7 +34,7 @@ rules:
   # Test Case 3: Rule with very complex condition that might fail
   - id: "complex-failing-rule"
     name: "Complex Failing Rule"
-    condition: "#data != null && #data.nested.deep.property.value > 100"
+    condition: "nested != null && nested.deep.property.value > 100"
     message: "This rule has a complex condition that might fail"
     severity: "INFO"
     priority: 3

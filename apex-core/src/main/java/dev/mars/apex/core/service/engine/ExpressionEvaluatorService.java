@@ -193,7 +193,7 @@ public class ExpressionEvaluatorService {
     public StandardEvaluationContext createEvaluationContext(Object rootObject) {
         StandardEvaluationContext context = new StandardEvaluationContext(rootObject);
 
-        // Add custom property accessor for Maps (enables #data.property syntax)
+        // Add custom property accessor for Maps (enables #property syntax)
         context.addPropertyAccessor(new MapPropertyAccessor());
 
         // If root object is a Map, add entries as variables for backward compatibility

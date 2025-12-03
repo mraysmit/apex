@@ -163,13 +163,13 @@ public class RulesController {
                           "validationRules": [
                             {
                               "name": "age-check",
-                              "condition": "#data.age >= 18",
+                              "condition": "#age >= 18",
                               "message": "Customer must be at least 18 years old",
                               "severity": "ERROR"
                             },
                             {
                               "name": "email-check",
-                              "condition": "#data.email != null",
+                              "condition": "#email != null",
                               "message": "Email address is required",
                               "severity": "ERROR"
                             }

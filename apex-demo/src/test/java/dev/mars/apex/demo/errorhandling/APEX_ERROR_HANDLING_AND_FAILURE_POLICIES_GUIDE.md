@@ -14,7 +14,7 @@ APEX successfully handles all SpEL evaluation exceptions without stack trace dum
 rules:
   - id: "property-validation"
     name: "Property Validation Rule"
-    condition: "#data.amount != null && #data.amount > 0"
+    condition: "#amount != null && #amount > 0"
     message: "Amount is required and must be positive"
     severity: "ERROR"
     enabled: true
@@ -32,12 +32,12 @@ rules:
 rules:
   # CRITICAL - No recovery, returns ERROR result
   - id: "critical-validation"
-    condition: "#data.mandatoryField != null"
+    condition: "#mandatoryField != null"
     severity: "ERROR"     # Causes stage failure
     
   # WARNING - Logged but doesn't fail stage
   - id: "business-warning"
-    condition: "#data.amount <= 1000000"
+    condition: "#amount <= 1000000"
     severity: "WARNING"   # Logs warning, continues
     
   # INFO - Audit information only
@@ -129,14 +129,14 @@ metadata:
 rules:
   - id: "required-field-check"
     name: "Required Field Validation"
-    condition: "#data.requiredField != null"
+    condition: "#requiredField != null"
     message: "Required field must be present"
     severity: "ERROR"
     enabled: true
     
   - id: "business-rule-check"
     name: "Business Rule Validation"
-    condition: "#data.amount > 0 && #data.amount <= 1000000"
+    condition: "#amount > 0 && #amount <= 1000000"
     message: "Amount must be positive and within limits"
     severity: "WARNING"
     enabled: true

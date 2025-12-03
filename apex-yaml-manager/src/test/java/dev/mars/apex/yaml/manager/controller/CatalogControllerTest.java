@@ -16,7 +16,6 @@ package dev.mars.apex.yaml.manager.controller;
  * limitations under the License.
  */
 
-import dev.mars.apex.yaml.manager.model.YamlCatalog;
 import dev.mars.apex.yaml.manager.model.YamlConfigMetadata;
 import dev.mars.apex.yaml.manager.service.CatalogService;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,14 +29,8 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 /**

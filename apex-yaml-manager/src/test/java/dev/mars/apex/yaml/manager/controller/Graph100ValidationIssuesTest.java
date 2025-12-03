@@ -47,19 +47,23 @@ class Graph100ValidationIssuesTest {
         File registry = datasetFolder.resolve("00-scenario-registry.yaml").toFile();
         assertTrue(registry.exists(), "registry file must exist");
 
-        ResponseEntity<Map> validation = restTemplate.postForEntity(
+        @SuppressWarnings("unchecked")
+        ResponseEntity<Map<String, Object>> validation = restTemplate.postForEntity(
                 baseUrl + "/validate-tree?rootFile=" + registry.getAbsolutePath(),
                 null,
-                Map.class
+                (Class<Map<String, Object>>) (Class<?>) Map.class
         );
         assertEquals(HttpStatus.OK, validation.getStatusCode());
         assertEquals("success", validation.getBody().get("status"));
 
-        Map validationMap = (Map) validation.getBody().get("validation");
+        @SuppressWarnings("unchecked")
+        Map<String, Object> validationMap = (Map<String, Object>) validation.getBody().get("validation");
         assertNotNull(validationMap);
-        Map issues = (Map) validationMap.get("issues");
+        @SuppressWarnings("unchecked")
+        Map<String, Object> issues = (Map<String, Object>) validationMap.get("issues");
         assertNotNull(issues);
-        Map stats = (Map) validationMap.get("stats");
+        @SuppressWarnings("unchecked")
+        Map<String, Object> stats = (Map<String, Object>) validationMap.get("stats");
         assertNotNull(stats);
         Number nodeCount = (Number) stats.get("nodeCount");
         Number maxDepthObserved = (Number) stats.get("maxDepthObserved");
@@ -75,19 +79,24 @@ class Graph100ValidationIssuesTest {
         File registry = datasetFolder.resolve("00-scenario-registry.yaml").toFile();
         assertTrue(registry.exists(), "registry file must exist");
 
-        ResponseEntity<Map> validation = restTemplate.postForEntity(
+        @SuppressWarnings("unchecked")
+        ResponseEntity<Map<String, Object>> validation = restTemplate.postForEntity(
                 baseUrl + "/validate-tree?rootFile=" + registry.getAbsolutePath(),
                 null,
-                Map.class
+                (Class<Map<String, Object>>) (Class<?>) Map.class
         );
         assertEquals(HttpStatus.OK, validation.getStatusCode());
-        assertEquals("success", validation.getBody().get("status"));
+        Map<String, Object> body = validation.getBody();
+        assertNotNull(body);
+        assertEquals("success", body.get("status"));
 
-        Map validationMap = (Map) validation.getBody().get("validation");
+        @SuppressWarnings("unchecked")
+        Map<String, Object> validationMap = (Map<String, Object>) body.get("validation");
         assertNotNull(validationMap);
-        Map issues = (Map) validationMap.get("issues");
+        @SuppressWarnings("unchecked")
+        Map<String, Object> issues = (Map<String, Object>) validationMap.get("issues");
         assertNotNull(issues);
-        List high = (List) issues.get("HIGH");
+        List<?> high = (List<?>) issues.get("HIGH");
         assertNotNull(high);
         assertTrue(!high.isEmpty(), "expected at least one HIGH issue");
         boolean mentionsInvalid = high.stream().anyMatch(o -> String.valueOf(o).contains("98-invalid.yaml"));
@@ -101,19 +110,24 @@ class Graph100ValidationIssuesTest {
         File registry = datasetFolder.resolve("00-scenario-registry.yaml").toFile();
         assertTrue(registry.exists(), "registry file must exist");
 
-        ResponseEntity<Map> validation = restTemplate.postForEntity(
+        @SuppressWarnings("unchecked")
+        ResponseEntity<Map<String, Object>> validation = restTemplate.postForEntity(
                 baseUrl + "/validate-tree?rootFile=" + registry.getAbsolutePath(),
                 null,
-                Map.class
+                (Class<Map<String, Object>>) (Class<?>) Map.class
         );
         assertEquals(HttpStatus.OK, validation.getStatusCode());
-        assertEquals("success", validation.getBody().get("status"));
+        Map<String, Object> body = validation.getBody();
+        assertNotNull(body);
+        assertEquals("success", body.get("status"));
 
-        Map validationMap = (Map) validation.getBody().get("validation");
+        @SuppressWarnings("unchecked")
+        Map<String, Object> validationMap = (Map<String, Object>) body.get("validation");
         assertNotNull(validationMap);
-        Map issues = (Map) validationMap.get("issues");
+        @SuppressWarnings("unchecked")
+        Map<String, Object> issues = (Map<String, Object>) validationMap.get("issues");
         assertNotNull(issues);
-        List high = (List) issues.get("HIGH");
+        List<?> high = (List<?>) issues.get("HIGH");
         assertNotNull(high);
         boolean hasFormatted = high.stream()
                 .anyMatch(o -> {

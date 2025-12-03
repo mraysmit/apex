@@ -14,14 +14,14 @@ rules:
   # Simple validation rule
   - id: "type-validation"
     name: "Type Validation"
-    condition: "#data['type'] != null"
+    condition: "#type != null"
     message: "Type field is present"
     severity: "INFO"
 
   # OTC type check
   - id: "otc-check"
     name: "OTC Type Check"
-    condition: "#data['type'] == 'OTC'"
+    condition: "#type == 'OTC'"
     message: "Data is OTC type"
     severity: "INFO"
 

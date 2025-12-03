@@ -138,7 +138,7 @@ rules:
   - id: "complete-override-rule"
     name: "Rule with Complete Metadata Override"
     category: "data-quality"  # Still uses category for grouping/priority
-    condition: "#dataCompleteness >= 0.95"
+    condition: "#Completeness >= 0.95"
     message: "Data completeness meets quality standards"
     severity: "INFO"
     enabled: true

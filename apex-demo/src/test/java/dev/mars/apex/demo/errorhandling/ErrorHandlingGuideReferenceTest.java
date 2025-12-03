@@ -63,7 +63,7 @@ class ErrorHandlingGuideReferenceTest extends DemoTestBase {
     // ========================================
     // EXAMPLE 1: Trade ID Validation
     // Business Rule: tradeId must not be null
-    // Condition: #data['tradeId'] != null
+    // Condition: #'tradeId'] != null
     // ========================================
 
     @Test

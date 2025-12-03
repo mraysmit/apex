@@ -265,7 +265,7 @@ boolean hasBalance = Rules.check("#balance > 1000", Map.of("balance", 500)); // 
 
 // Working with objects instead of simple values
 Customer customer = new Customer("John", 25, "john@example.com");
-boolean valid = Rules.check("#data.age >= 18 && #data.email != null", customer); // returns true
+boolean valid = Rules.check("#age >= 18 && #email != null", customer); // returns true
 ```
 
 **What's happening here:**
@@ -334,19 +334,19 @@ metadata:
 rules:
   - id: "age-check"                                    # Unique identifier
     name: "Age Validation"                             # Human-readable name
-    condition: "#data.age >= 18"                       # The actual rule logic
+    condition: "#age >= 18"                       # The actual rule logic
     message: "Customer must be at least 18 years old"  # Error message if rule fails
     severity: "ERROR"                                  # How serious is a failure?
 
   - id: "email-check"
     name: "Email Validation"
-    condition: "#data.email != null && #data.email.contains('@')"
+    condition: "#email != null && #email.contains('@')"
     message: "Valid email address is required"
     severity: "ERROR"
 
   - id: "name-check"
     name: "Name Validation"
-    condition: "#data.name != null && #data.name.length() > 0"
+    condition: "#name != null && #name.length() > 0"
     message: "Customer name is required"
     severity: "ERROR"
 ```
@@ -394,10 +394,10 @@ if (!result2.isSuccess()) {
 **Understanding Rule Conditions:**
 
 Rules use Spring Expression Language (SpEL) for conditions:
-- `#data.age >= 18` - Access the 'age' field and check if it's 18 or greater
-- `#data.email != null` - Check if the 'email' field exists and is not null
-- `#data.email.contains('@')` - Check if the email contains an @ symbol
-- `#data.name.length() > 0` - Check if the name has at least one character
+- `#age >= 18` - Access the 'age' field and check if it's 18 or greater
+- `#email != null` - Check if the 'email' field exists and is not null
+- `#email.contains('@')` - Check if the email contains an @ symbol
+- `#name.length() > 0` - Check if the name has at least one character
 
 **Common Rule Patterns:**
 - **Validation**: `#age >= 18` (must be 18 or older)
@@ -1648,25 +1648,25 @@ enrichments:
 rules:
   - id: "age-check"
     name: "Age Validation"
-    condition: "#data.age >= 18"
+    condition: "#age >= 18"
     message: "Customer must be at least 18 years old"
     severity: "ERROR"
 
   - id: "transaction-permission-check"
     name: "Transaction Permission Check"
-    condition: "#data.canTransact == true"  # Uses enriched field!
+    condition: "#canTransact == true"  # Uses enriched field!
     message: "Customer status does not allow transactions"
     severity: "ERROR"
 
   - id: "credit-limit-check"
     name: "Credit Limit Validation"
-    condition: "#data.requestedAmount <= #data.maxCredit"  # Uses enriched field!
+    condition: "#requestedAmount <= #maxCredit"  # Uses enriched field!
     message: "Requested amount exceeds customer credit limit"
     severity: "ERROR"
 
   - id: "email-check"
     name: "Email Validation"
-    condition: "#data.email != null && #data.email.contains('@')"
+    condition: "#email != null && #email.contains('@')"
     message: "Valid email address is required"
     severity: "WARNING"
 ```
@@ -1800,9 +1800,9 @@ scenario:
     enrichment-config: "config/otc-options-enrichment.yaml"
 
   routing-rules:
-    - condition: "#data.optionType == 'Call'"
+    - condition: "#optionType == 'Call'"
       config-override: "config/call-options-specific.yaml"
-    - condition: "#data.underlyingAsset.assetClass == 'Energy'"
+    - condition: "#underlyingAsset.assetClass == 'Energy'"
       enrichment-override: "config/energy-commodities-enrichment.yaml"
 ```
 
@@ -1920,14 +1920,14 @@ Scenarios can include conditional routing rules that modify processing based on 
 
 ```yaml
 routing-rules:
-  - condition: "#data.notionalAmount > 10000000"
+  - condition: "#notionalAmount > 10000000"
     config-override: "config/high-value-validation.yaml"
     enrichment-override: "config/enhanced-enrichment.yaml"
 
-  - condition: "#data.counterparty.riskRating == 'HIGH'"
+  - condition: "#counterparty.riskRating == 'HIGH'"
     validation-override: "config/high-risk-validation.yaml"
 
-  - condition: "#data.jurisdiction == 'US'"
+  - condition: "#jurisdiction == 'US'"
     compliance-config: "config/us-regulatory-compliance.yaml"
 ```
 
@@ -2232,20 +2232,20 @@ metadata:
 rules:
   - id: "threshold-check"
     name: "Generic Threshold Validation"
-    condition: "#data.value >= #data.threshold"
-    message: "Value {{#data.value}} meets threshold {{#data.threshold}}"
+    condition: "#value >= #threshold"
+    message: "Value {{#value}} meets threshold {{#threshold}}"
     severity: "ERROR"
 
   - id: "percentage-check"
     name: "Generic Percentage Validation"
-    condition: "#data.percentage >= #data.minPercentage && #data.percentage <= #data.maxPercentage"
-    message: "Percentage {{#data.percentage}} is within range {{#data.minPercentage}}-{{#data.maxPercentage}}"
+    condition: "#percentage >= #minPercentage && #percentage <= #maxPercentage"
+    message: "Percentage {{#percentage}} is within range {{#minPercentage}}-{{#maxPercentage}}"
     severity: "WARNING"
 
   - id: "tier-based-limit"
     name: "Customer Tier Based Limit"
-    condition: "#data.amount <= (#data.customerTier == 'PLATINUM' ? #data.platinumLimit : (#data.customerTier == 'GOLD' ? #data.goldLimit : #data.standardLimit))"
-    message: "Amount {{#data.amount}} exceeds limit for tier {{#data.customerTier}}"
+    condition: "#amount <= (#customerTier == 'PLATINUM' ? #platinumLimit : (#customerTier == 'GOLD' ? #goldLimit : #standardLimit))"
+    message: "Amount {{#amount}} exceeds limit for tier {{#customerTier}}"
     severity: "ERROR"
 ```
 
@@ -2340,20 +2340,20 @@ configuration:
 rules:
   - id: "high-value-transaction-check"
     name: "High Value Transaction Validation"
-    condition: "#data.amount >= #config.thresholds.highValueAmount"
-    message: "Transaction amount {{#data.amount}} exceeds high-value threshold"
+    condition: "#amount >= #config.thresholds.highValueAmount"
+    message: "Transaction amount {{#amount}} exceeds high-value threshold"
     severity: "ERROR"
 
   - id: "repair-approval-check"
     name: "Automated Repair Approval"
-    condition: "#data.repairScore >= #config.thresholds.repairApprovalScore"
-    message: "Repair automatically approved with score {{#data.repairScore}}"
+    condition: "#repairScore >= #config.thresholds.repairApprovalScore"
+    message: "Repair automatically approved with score {{#repairScore}}"
     severity: "INFO"
 
   - id: "asian-market-settlement"
     name: "Asian Market Settlement Cycle"
-    condition: "#config.asianMarkets.supportedMarkets.contains(#data.market)"
-    message: "Settlement cycle for {{#data.market}} is {{#config.asianMarkets.settlementCycles[#data.market]}} days"
+    condition: "#config.asianMarkets.supportedMarkets.contains(#market)"
+    message: "Settlement cycle for {{#market}} is {{#config.asianMarkets.settlementCycles[#market]}} days"
     severity: "INFO"
 ```
 
@@ -2435,14 +2435,14 @@ enrichments:
 rules:
   - id: "credit-risk-check"
     name: "Credit Risk Validation"
-    condition: "#data.customerCreditRating >= 'BBB' && #data.customerRiskProfile != 'HIGH'"
+    condition: "#customerCreditRating >= 'BBB' && #customerRiskProfile != 'HIGH'"
     message: "Customer credit risk is acceptable"
     severity: "INFO"
 
   - id: "market-volatility-check"
     name: "Market Volatility Check"
-    condition: "#data.tradingVolume > 1000000"
-    message: "High trading volume detected: {{#data.tradingVolume}}"
+    condition: "#tradingVolume > 1000000"
+    message: "High trading volume detected: {{#tradingVolume}}"
     severity: "WARNING"
 ```
 
@@ -2826,20 +2826,20 @@ enrichments:
 rules:
   - id: "credit-limit-check"
     name: "Dynamic Credit Limit Validation"
-    condition: "#data.requestedAmount <= #data.creditLimit"
-    message: "Requested amount {{#data.requestedAmount}} is within credit limit {{#data.creditLimit}}"
+    condition: "#requestedAmount <= #creditLimit"
+    message: "Requested amount {{#requestedAmount}} is within credit limit {{#creditLimit}}"
     severity: "ERROR"
 
   - id: "transaction-pattern-analysis"
     name: "Transaction Pattern Analysis"
-    condition: "#data.requestedAmount <= #data.maxTransactionAmount * 2"
-    message: "Transaction amount is consistent with recent patterns (max: {{#data.maxTransactionAmount}})"
+    condition: "#requestedAmount <= #maxTransactionAmount * 2"
+    message: "Transaction amount is consistent with recent patterns (max: {{#maxTransactionAmount}})"
     severity: "WARNING"
 
   - id: "environment-specific-validation"
     name: "Environment-Specific Limit Check"
-    condition: "#data.requestedAmount <= #data.configuredMaxLimit"
-    message: "Amount within configured limit for {{#data.environment}} environment"
+    condition: "#requestedAmount <= #configuredMaxLimit"
+    message: "Amount within configured limit for {{#environment}} environment"
     severity: "ERROR"
 ```
 
@@ -2967,7 +2967,7 @@ Rules are where you define your business logic. Each rule is like a question you
 rules:
   - id: "unique-rule-id"                    # Required: Unique identifier (like a name tag)
     name: "Human Readable Name"             # Required: What this rule does in plain English
-    condition: "#data.field > 100"          # Required: The actual business logic to check
+    condition: "#field > 100"          # Required: The actual business logic to check
     message: "Validation message"           # Optional: What to show if the rule fails
     severity: "ERROR"                       # Optional: How serious is a failure? (ERROR, WARNING, INFO)
     enabled: true                           # Optional: Turn this rule on/off (default: true)
@@ -3521,11 +3521,11 @@ SpEL is now used consistently across ALL APEX features:
 
 | Feature | SpEL Support | Example |
 |---------|--------------|---------|
-| **Conditions** | ✅ Yes | `condition: '#data.currency != null'` |
-| **Transformations** | ✅ Yes | `expression: '#data.currency'` |
+| **Conditions** | ✅ Yes | `condition: '#currency != null'` |
+| **Transformations** | ✅ Yes | `expression: '#currency'` |
 | **Lookup Keys** | ✅ Yes | `lookup-key: '#symbol'` |
 | **Calculations** | ✅ Yes | `expression: '#amount * 0.01'` |
-| **Field Mappings** | ✅ **NEW!** | `source-field: '#data.currency'` |
+| **Field Mappings** | ✅ **NEW!** | `source-field: '#currency'` |
 
 #### Basic Nested Field Access
 
@@ -3535,17 +3535,17 @@ Access nested fields using the `#` prefix to indicate a SpEL expression:
 enrichments:
   - id: "nested-field-mapping"
     type: "field-enrichment"
-    condition: "#data != null"
+    condition: "#field != null"
     field-mappings:
       # ✅ Access nested fields with SpEL (use # prefix)
-      - source-field: "#data.currency"
+      - source-field: "#currency"
         target-field: "buy_currency"
 
-      - source-field: "#data.trade.counterparty"
+      - source-field: "#trade.counterparty"
         target-field: "counterparty_name"
 
       # Safe navigation prevents null pointer exceptions
-      - source-field: "#data?.trade?.amount"
+      - source-field: "#field?.trade?.amount"
         target-field: "trade_amount"
 ```
 
@@ -3596,12 +3596,12 @@ field-mappings:
 ```yaml
 field-mappings:
   # SpEL source-field + transformation
-  - source-field: "#data.amount"
+  - source-field: "#amount"
     target-field: "adjusted_amount"
     expression: "#value * 1.1"  # Apply 10% markup
 
   # SpEL source-field + conditional transformation
-  - source-field: "#data.trade.notional"
+  - source-field: "#trade.notional"
     target-field: "fee"
     expression: "#value > 1000000 ? #value * 0.001 : #value * 0.002"
 ```
@@ -3631,11 +3631,11 @@ enrichments:
                 ask: 150.30
     field-mappings:
       # ✅ Access nested fields in lookup result with SpEL
-      - source-field: "#data.instrument.name"
+      - source-field: "#instrument.name"
         target-field: "instrument_name"
-      - source-field: "#data.instrument.type"
+      - source-field: "#instrument.type"
         target-field: "instrument_type"
-      - source-field: "#data.pricing.bid"
+      - source-field: "#pricing.bid"
         target-field: "bid_price"
 ```
 
@@ -3648,13 +3648,13 @@ field-mappings:
     target-field: "currency_code"
 
   # New style (with # prefix) - SpEL expression
-  - source-field: "#data.currency"
+  - source-field: "#currency"
     target-field: "currency_code"
 
   # Both can be used in the same enrichment
   - source-field: "status"              # Simple field
     target-field: "trade_status"
-  - source-field: "#data.nested.field"  # SpEL expression
+  - source-field: "#nested.field"  # SpEL expression
     target-field: "nested_value"
 ```
 
@@ -6794,7 +6794,7 @@ rule-chains:
           name: "Initial Data Check"
           rules:
             - id: "check-data-presence"
-              condition: "#data != null"
+              condition: "#field != null"
               message: "Data is present"
 
         - stage: "deep-validation"
@@ -6803,7 +6803,7 @@ rule-chains:
           depends-on: "initial-check"
           rules:
             - id: "check-validity"
-              condition: "#data.isValid == true"
+              condition: "#isValid == true"
               message: "Data is valid"
 ```
 
@@ -7987,21 +7987,21 @@ This section covers the most frequently encountered issues when working with APE
 
 **Error Symptoms:**
 ```
-WARNING: Error evaluating enrichment condition '#data.amount != null' for enrichment expression-evaluation:
+WARNING: Error evaluating enrichment condition '#amount != null' for enrichment expression-evaluation:
 EL1007E: Property or field 'amount' cannot be found on null
 org.springframework.expression.spel.SpelEvaluationException: EL1007E: Property or field 'amount' cannot be found on null
 ```
 
-**Root Cause**: Using `#data.fieldName` syntax when data is passed as a HashMap where fields should be accessed directly as `#fieldName`.
+**Root Cause**: Using `#fieldName` syntax when data is passed as a HashMap where fields should be accessed directly as `#fieldName`.
 
 **Resolution:**
 1. **Identify the data structure**: APEX typically processes HashMap objects where keys are accessed directly
-2. **Fix field references**: Change `#data.fieldName` to `#fieldName` in all SpEL expressions
+2. **Fix field references**: Change `#fieldName` to `#fieldName` in all SpEL expressions
 3. **Common patterns to fix**:
-   - **Conditions**: `#data.amount != null` → `#amount != null`
-   - **Calculations**: `#data.amount * #data.rate` → `#amount * #rate`
-   - **Method calls**: `#data.currency.length()` → `#currency.length()`
-   - **Ternary operators**: `#data.amount > 1000 ? 'HIGH' : 'LOW'` → `#amount > 1000 ? 'HIGH' : 'LOW'`
+   - **Conditions**: `#amount != null` → `#amount != null`
+   - **Calculations**: `#amount * #rate` → `#amount * #rate`
+   - **Method calls**: `#currency.length()` → `#currency.length()`
+   - **Ternary operators**: `#amount > 1000 ? 'HIGH' : 'LOW'` → `#amount > 1000 ? 'HIGH' : 'LOW'`
 
 **Prevention**: Always verify field names match your actual data structure before writing SpEL expressions.
 
@@ -8069,7 +8069,7 @@ divide(java.math.BigDecimal,int,int) in java.math.BigDecimal has been deprecated
 #### Runtime Issues
 
 **Enrichment not working**:
-- Verify condition expressions use correct field syntax (`#fieldName` not `#data.fieldName`)
+- Verify condition expressions use correct field syntax (`#fieldName` not `#fieldName`)
 - Check field mappings match your data structure
 - Ensure enrichment conditions evaluate to true for your test data
 
@@ -8138,7 +8138,7 @@ divide(java.math.BigDecimal,int,int) in java.math.BigDecimal has been deprecated
 
 **YAML Configuration Checklist:**
 - ✅ All enrichments have required `id`, `name`, and `type` fields
-- ✅ SpEL expressions use `#fieldName` syntax (not `#data.fieldName`)
+- ✅ SpEL expressions use `#fieldName` syntax (not `#fieldName`)
 - ✅ Field names match actual data structure exactly
 - ✅ Enrichment types are valid (`field-enrichment`, `lookup-enrichment`, `calculation-enrichment`)
 - ✅ Required field mappings are present for field enrichments

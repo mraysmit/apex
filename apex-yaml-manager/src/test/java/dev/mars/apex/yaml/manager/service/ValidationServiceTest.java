@@ -16,7 +16,6 @@ package dev.mars.apex.yaml.manager.service;
  * limitations under the License.
  */
 
-import dev.mars.apex.yaml.manager.model.ValidationIssue;
 import dev.mars.apex.yaml.manager.model.ValidationResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

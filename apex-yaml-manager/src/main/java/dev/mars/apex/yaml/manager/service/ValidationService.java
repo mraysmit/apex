@@ -76,6 +76,7 @@ public class ValidationService {
                         "Add metadata section with id, name, and version"
                     ));
                 } else {
+                    @SuppressWarnings("unchecked")
                     Map<String, Object> metadata = (Map<String, Object>) data.get("metadata");
                     
                     // Check for required metadata fields
@@ -153,6 +154,7 @@ public class ValidationService {
             if (data != null) {
                 // Check scenario-refs
                 if (data.containsKey("scenario-refs")) {
+                    @SuppressWarnings("unchecked")
                     List<String> refs = (List<String>) data.get("scenario-refs");
                     for (String ref : refs) {
                         File refFile = new File(baseDir, ref);
@@ -171,6 +173,7 @@ public class ValidationService {
                 
                 // Check enrichment-refs
                 if (data.containsKey("enrichment-refs")) {
+                    @SuppressWarnings("unchecked")
                     List<String> refs = (List<String>) data.get("enrichment-refs");
                     for (String ref : refs) {
                         File refFile = new File(baseDir, ref);
@@ -189,6 +192,7 @@ public class ValidationService {
                 
                 // Check config-files
                 if (data.containsKey("config-files")) {
+                    @SuppressWarnings("unchecked")
                     List<String> refs = (List<String>) data.get("config-files");
                     for (String ref : refs) {
                         File refFile = new File(baseDir, ref);
@@ -225,6 +229,7 @@ public class ValidationService {
             Map<String, Object> data = yaml.load(fis);
             
             if (data != null && data.containsKey("metadata")) {
+                @SuppressWarnings("unchecked")
                 Map<String, Object> metadata = (Map<String, Object>) data.get("metadata");
                 String id = (String) metadata.get("id");
                 

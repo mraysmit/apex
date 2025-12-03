@@ -221,7 +221,6 @@ public class D3TreeViewerResizerUITest {
 
         WebElement treePanel = wait.until(ExpectedConditions.presenceOfElementLocated(
             By.cssSelector(".tree-panel")));
-        WebElement contentPanel = driver.findElement(By.cssSelector(".content-panel"));
         WebElement resizer = driver.findElement(By.id("resizer"));
 
         // Try to drag far to the left (should hit minimum tree width)

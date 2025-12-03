@@ -430,7 +430,7 @@ enrichments:
   - id: "operations-data-enrichment"
     category: "operations-enrichments"  # Category inheritance for enrichments
     type: "field-enrichment"
-    condition: "#data != null"
+    condition: "#field != null"
 
 # Enrichment groups reference categories
 enrichment-groups:
@@ -502,7 +502,7 @@ enrichments:
   - id: "risk-score-calculation"
     category: "risk-enrichment"  # References main file category
     type: "field-enrichment"
-    condition: "#data != null"
+    condition: "#field != null"
     # Inherits metadata from risk-enrichment category
 
 enrichment-groups:
@@ -836,7 +836,7 @@ metadata:
 scenario:
   scenario-id: "fx-trading-processing"
   classification-rule:
-    condition: "#data['tradeType'] == 'FX'"
+    condition: "#'tradeType'] == 'FX'"
 
   processing-stages:
     - stage-name: "validation"
@@ -920,7 +920,7 @@ enrichments:
   - id: "risk-score-calculation"
     category: "risk-enrichment"       # Enrichments inherit from categories
     type: "field-enrichment"
-    condition: "#data != null"
+    condition: "#field != null"
 
 enrichment-groups:
   - id: "risk-enrichment-group"
@@ -1310,7 +1310,7 @@ rules:
   - id: "standalone-rule"
     name: "Standalone Validation"
     business-owner: "direct-team@bank.com"
-    condition: "#data.value > 1000"
+    condition: "#value > 1000"
     message: "Value exceeds threshold"
     # No category assignment - no inheritance
 

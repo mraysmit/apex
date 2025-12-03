@@ -169,7 +169,7 @@ scenario:
 
   # OPTION A: Modern classification-based routing
   classification-rule:
-    condition: "#data['tradeType'] == 'OTCOption' && #data['region'] == 'US'"
+    condition: "#'tradeType'] == 'OTCOption' && #'region'] == 'US'"
     description: "Route OTC Option US trades"
 
   # OPTION B: Legacy data-type routing
@@ -208,7 +208,7 @@ metadata:
 
 rules:
   - id: "validate-notional"
-    condition: "#data['notional'] > 0"
+    condition: "#'notional'] > 0"
     message: "Notional must be positive"
     severity: "ERROR"
 ```

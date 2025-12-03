@@ -12,7 +12,7 @@ scenario:
   description: "Tests concurrent scenario execution with multiple threads"
   
   classification-rule:
-    condition: "#data['type'] == 'OTC'"
+    condition: "#type == 'OTC'"
     description: "Classify OTC trades"
   
   processing-stages:

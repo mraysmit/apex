@@ -12,9 +12,9 @@ scenario:
   name: "OTC Option Processing"
   description: "Processes OTC option trades"
   
-  # Embedded classification rule (Option B)
+  # Embedded classification rule (Option B) - using direct field access
   classification-rule:
-    condition: "#data['tradeType'] == 'OTCOption'"
+    condition: "#tradeType == 'OTCOption'"
     description: "Matches OTC option trades"
   
   # Stage-based processing configuration

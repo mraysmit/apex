@@ -42,23 +42,20 @@ public class SpelFieldMappingTest {
             enrichments:
               - id: "nested-field-enrichment"
                 type: "field-enrichment"
-                condition: "#data != null && #data['currency'] != null"
+                condition: "#currency != null"
                 field-mappings:
-                  - source-field: "#data.currency"
+                  - source-field: "#currency"
                     target-field: "buy_currency"
-                  - source-field: "#data.amount"
+                  - source-field: "#amount"
                     target-field: "trade_amount"
             """;
 
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
-        // Create input data with nested structure
-        Map<String, Object> data = new HashMap<>();
-        data.put("currency", "USD");
-        data.put("amount", 1000);
-
+        // Create input data - pass directly as root context
         Map<String, Object> inputData = new HashMap<>();
-        inputData.put("data", data);
+        inputData.put("currency", "USD");
+        inputData.put("amount", 1000);
 
         System.out.println("Input data: " + inputData);
 
@@ -96,9 +93,9 @@ public class SpelFieldMappingTest {
                 type: "field-enrichment"
                 condition: "true"
                 field-mappings:
-                  - source-field: "#data.trade.counterparty"
+                  - source-field: "#trade.counterparty"
                     target-field: "counterparty_name"
-                  - source-field: "#data.trade.amount"
+                  - source-field: "#trade.amount"
                     target-field: "trade_amount"
             """;
 
@@ -109,11 +106,8 @@ public class SpelFieldMappingTest {
         trade.put("counterparty", "Goldman Sachs");
         trade.put("amount", 5000000);
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("trade", trade);
-
         Map<String, Object> inputData = new HashMap<>();
-        inputData.put("data", data);
+        inputData.put("trade", trade);
 
         System.out.println("Input data: " + inputData);
 
@@ -150,20 +144,17 @@ public class SpelFieldMappingTest {
                 type: "field-enrichment"
                 condition: "true"
                 field-mappings:
-                  - source-field: "#data?.currency"
+                  - source-field: "#?currency"
                     target-field: "currency_code"
-                  - source-field: "#data?.trade?.amount"
+                  - source-field: "#?trade?.amount"
                     target-field: "trade_amount"
             """;
 
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
-        // Create input data with missing nested fields
-        Map<String, Object> data = new HashMap<>();
-        // Note: currency and trade are NOT present
-
+        // Create input data with missing fields (empty map)
         Map<String, Object> inputData = new HashMap<>();
-        inputData.put("data", data);
+        // Note: currency and trade are NOT present
 
         System.out.println("Input data: " + inputData);
 
@@ -297,25 +288,22 @@ public class SpelFieldMappingTest {
                 field-mappings:
                   - source-field: "status"
                     target-field: "trade_status"
-                  - source-field: "#data.currency"
+                  - source-field: "#currency"
                     target-field: "buy_currency"
                   - source-field: "type"
                     target-field: "trade_type"
-                  - source-field: "#data.amount"
+                  - source-field: "#amount"
                     target-field: "trade_amount"
             """;
 
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
         // Create input data with both simple and nested fields
-        Map<String, Object> data = new HashMap<>();
-        data.put("currency", "GBP");
-        data.put("amount", 7500);
-
         Map<String, Object> inputData = new HashMap<>();
         inputData.put("status", "ACTIVE");
         inputData.put("type", "SPOT");
-        inputData.put("data", data);
+        inputData.put("currency", "GBP");
+        inputData.put("amount", 7500);
 
         System.out.println("Input data: " + inputData);
 
@@ -440,7 +428,7 @@ public class SpelFieldMappingTest {
                 type: "field-enrichment"
                 condition: "true"
                 field-mappings:
-                  - source-field: "#data.amount"
+                  - source-field: "#amount"
                     target-field: "adjusted_amount"
                     expression: "#value * 1.1"
             """;
@@ -448,11 +436,8 @@ public class SpelFieldMappingTest {
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
         // Create input data
-        Map<String, Object> data = new HashMap<>();
-        data.put("amount", 1000);
-
         Map<String, Object> inputData = new HashMap<>();
-        inputData.put("data", data);
+        inputData.put("amount", 1000);
 
         System.out.println("Input data: " + inputData);
 
@@ -530,17 +515,18 @@ public class SpelFieldMappingTest {
                 type: "field-enrichment"
                 condition: "true"
                 field-mappings:
-                  - source-field: "#data.currency"
+                  - source-field: "#currency"
                     target-field: "currency_code"
-                  - source-field: "#data.amount"
+                  - source-field: "#amount"
                     target-field: "trade_amount"
             """;
 
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
-        // Create input data with null nested object
+        // Create input data with null fields
         Map<String, Object> inputData = new HashMap<>();
-        inputData.put("data", null);
+        inputData.put("currency", null);
+        inputData.put("amount", null);
 
         System.out.println("Input data: " + inputData);
 

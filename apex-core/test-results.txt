@@ -1,0 +1,920 @@
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/C:/Users/markr/scoop/apps/maven/current/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------------< com.apex:apex-core >-------------------------
+[INFO] Building apex-core 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.13:prepare-agent (prepare-agent) @ apex-core ---
+[INFO] argLine set to -javaagent:C:\\Users\\markr\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.13\\org.jacoco.agent-0.8.13-runtime.jar=destfile=C:\\Users\\markr\\dev\\java\\corejava\\apex-rules-engine\\apex-core\\target\\jacoco.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ apex-core ---
+[INFO] Copying 7 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ apex-core ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ apex-core ---
+[INFO] Copying 70 resources from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ apex-core ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- surefire:3.1.2:test (default-test) @ apex-core ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.mars.apex.core.api.RuleSetTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.212 s -- in dev.mars.apex.core.api.RuleSetTest
+[INFO] Running dev.mars.apex.core.api.ValidationBuilderTest
+[INFO] Running dev.mars.apex.core.api.ValidationBuilderTest$EdgeCasesTests
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.169 s -- in dev.mars.apex.core.api.ValidationBuilderTest$EdgeCasesTests
+[INFO] Running dev.mars.apex.core.api.ValidationBuilderTest$ValidationExecutionTests
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.014 s -- in dev.mars.apex.core.api.ValidationBuilderTest$ValidationExecutionTests
+[INFO] Running dev.mars.apex.core.api.ValidationBuilderTest$BuiltInValidationTests
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in dev.mars.apex.core.api.ValidationBuilderTest$BuiltInValidationTests
+[INFO] Running dev.mars.apex.core.api.ValidationBuilderTest$RuleAdditionTests
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in dev.mars.apex.core.api.ValidationBuilderTest$RuleAdditionTests
+[INFO] Running dev.mars.apex.core.api.ValidationBuilderTest$FluentApiTests
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.mars.apex.core.api.ValidationBuilderTest$FluentApiTests
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.294 s -- in dev.mars.apex.core.api.ValidationBuilderTest
+[INFO] Running dev.mars.apex.core.api.ValidationResultTest
+[INFO] Running dev.mars.apex.core.api.ValidationResultTest$EdgeCasesTests
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in dev.mars.apex.core.api.ValidationResultTest$EdgeCasesTests
+[INFO] Running dev.mars.apex.core.api.ValidationResultTest$IntegrationTests
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in dev.mars.apex.core.api.ValidationResultTest$IntegrationTests
+[INFO] Running dev.mars.apex.core.api.ValidationResultTest$StatisticsTests
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.mars.apex.core.api.ValidationResultTest$StatisticsTests
+[INFO] Running dev.mars.apex.core.api.ValidationResultTest$ErrorManagementTests
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.mars.apex.core.api.ValidationResultTest$ErrorManagementTests
+[INFO] Running dev.mars.apex.core.api.ValidationResultTest$MultipleErrorsTests
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.mars.apex.core.api.ValidationResultTest$MultipleErrorsTests
+[INFO] Running dev.mars.apex.core.api.ValidationResultTest$FailureStateTests
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.mars.apex.core.api.ValidationResultTest$FailureStateTests
+[INFO] Running dev.mars.apex.core.api.ValidationResultTest$SuccessStateTests
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.mars.apex.core.api.ValidationResultTest$SuccessStateTests
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.033 s -- in dev.mars.apex.core.api.ValidationResultTest
+[INFO] Running dev.mars.apex.core.cache.ApexCacheManagerTest
+[INFO] Tests run: 19, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.069 s -- in dev.mars.apex.core.cache.ApexCacheManagerTest
+[INFO] Running dev.mars.apex.core.config.component.ComponentFailurePolicyTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.975 s -- in dev.mars.apex.core.config.component.ComponentFailurePolicyTest
+[INFO] Running dev.mars.apex.core.config.component.ComponentLoaderTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.090 s -- in dev.mars.apex.core.config.component.ComponentLoaderTest
+[INFO] Running dev.mars.apex.core.config.datasource.AuthenticationConfigTest
+[INFO] Tests run: 80, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.094 s -- in dev.mars.apex.core.config.datasource.AuthenticationConfigTest
+[INFO] Running dev.mars.apex.core.config.datasource.CacheConfigTest
+[INFO] Tests run: 53, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.048 s -- in dev.mars.apex.core.config.datasource.CacheConfigTest
+[INFO] Running dev.mars.apex.core.config.datasource.ConnectionConfigTest
+[INFO] Tests run: 46, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.047 s -- in dev.mars.apex.core.config.datasource.ConnectionConfigTest
+[INFO] Running dev.mars.apex.core.config.datasource.DataSourceConfigurationTest
+[INFO] Tests run: 53, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.042 s -- in dev.mars.apex.core.config.datasource.DataSourceConfigurationTest
+[INFO] Running dev.mars.apex.core.config.datasource.FileFormatConfigTest
+[INFO] Tests run: 66, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.038 s -- in dev.mars.apex.core.config.datasource.FileFormatConfigTest
+[INFO] Running dev.mars.apex.core.config.datasource.HealthCheckConfigTest
+[INFO] Tests run: 56, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.038 s -- in dev.mars.apex.core.config.datasource.HealthCheckConfigTest
+[INFO] Running dev.mars.apex.core.config.error.ErrorRecoveryConfigTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in dev.mars.apex.core.config.error.ErrorRecoveryConfigTest
+[INFO] Running dev.mars.apex.core.config.error.SeverityRecoveryPolicyTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in dev.mars.apex.core.config.error.SeverityRecoveryPolicyTest
+[INFO] Running dev.mars.apex.core.config.yaml.CategoryMetadataInheritanceIntegrationTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.095 s -- in dev.mars.apex.core.config.yaml.CategoryMetadataInheritanceIntegrationTest
+[INFO] Running dev.mars.apex.core.config.yaml.CircularReferenceDetectionTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.029 s -- in dev.mars.apex.core.config.yaml.CircularReferenceDetectionTest
+[INFO] Running dev.mars.apex.core.config.yaml.ClasspathRefsWithGroupReferencesTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.043 s -- in dev.mars.apex.core.config.yaml.ClasspathRefsWithGroupReferencesTest
+[INFO] Running dev.mars.apex.core.config.yaml.ConfigurationValidationTest
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.637 s -- in dev.mars.apex.core.config.yaml.ConfigurationValidationTest
+[INFO] Running dev.mars.apex.core.config.yaml.EnrichmentCategoryInheritanceIntegrationTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.135 s -- in dev.mars.apex.core.config.yaml.EnrichmentCategoryInheritanceIntegrationTest
+[INFO] Running dev.mars.apex.core.config.yaml.EnrichmentGroupErrorHandlingConfigTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.080 s -- in dev.mars.apex.core.config.yaml.EnrichmentGroupErrorHandlingConfigTest
+[INFO] Running dev.mars.apex.core.config.yaml.EnrichmentMetadataInheritanceComprehensiveTest
+[INFO] Running dev.mars.apex.core.config.yaml.EnrichmentMetadataInheritanceComprehensiveTest$EdgeCasesAndComplexScenarios
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.016 s -- in dev.mars.apex.core.config.yaml.EnrichmentMetadataInheritanceComprehensiveTest$EdgeCasesAndComplexScenarios
+[INFO] Running dev.mars.apex.core.config.yaml.EnrichmentMetadataInheritanceComprehensiveTest$EnrichmentGroupInheritanceTests
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.100 s -- in dev.mars.apex.core.config.yaml.EnrichmentMetadataInheritanceComprehensiveTest$EnrichmentGroupInheritanceTests
+[INFO] Running dev.mars.apex.core.config.yaml.EnrichmentMetadataInheritanceComprehensiveTest$EnrichmentInheritanceTests
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.136 s -- in dev.mars.apex.core.config.yaml.EnrichmentMetadataInheritanceComprehensiveTest$EnrichmentInheritanceTests
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.255 s -- in dev.mars.apex.core.config.yaml.EnrichmentMetadataInheritanceComprehensiveTest
+[INFO] Running dev.mars.apex.core.config.yaml.EnrichmentRefsWithGroupReferencesTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.043 s -- in dev.mars.apex.core.config.yaml.EnrichmentRefsWithGroupReferencesTest
+[INFO] Running dev.mars.apex.core.config.yaml.EnrichmentRuleCategoryConsistencyTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.068 s -- in dev.mars.apex.core.config.yaml.EnrichmentRuleCategoryConsistencyTest
+[INFO] Running dev.mars.apex.core.config.yaml.GroupReferencesGroupsOnlyLogicTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.242 s -- in dev.mars.apex.core.config.yaml.GroupReferencesGroupsOnlyLogicTest
+[INFO] Running dev.mars.apex.core.config.yaml.ImplicitConstantValidationTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.135 s -- in dev.mars.apex.core.config.yaml.ImplicitConstantValidationTest
+[INFO] Running dev.mars.apex.core.config.yaml.MetadataInheritanceComprehensiveTest
+[INFO] Running dev.mars.apex.core.config.yaml.MetadataInheritanceComprehensiveTest$EdgeCasesAndComplexScenarios
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.077 s -- in dev.mars.apex.core.config.yaml.MetadataInheritanceComprehensiveTest$EdgeCasesAndComplexScenarios
+[INFO] Running dev.mars.apex.core.config.yaml.MetadataInheritanceComprehensiveTest$RuleGroupInheritanceTests
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.065 s -- in dev.mars.apex.core.config.yaml.MetadataInheritanceComprehensiveTest$RuleGroupInheritanceTests
+[INFO] Running dev.mars.apex.core.config.yaml.MetadataInheritanceComprehensiveTest$RuleInheritanceTests
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.051 s -- in dev.mars.apex.core.config.yaml.MetadataInheritanceComprehensiveTest$RuleInheritanceTests
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.198 s -- in dev.mars.apex.core.config.yaml.MetadataInheritanceComprehensiveTest
+[INFO] Running dev.mars.apex.core.config.yaml.MetadataInheritanceCrossEntityTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.040 s -- in dev.mars.apex.core.config.yaml.MetadataInheritanceCrossEntityTest
+[INFO] Running dev.mars.apex.core.config.yaml.MetadataInheritancePerformanceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.999 s -- in dev.mars.apex.core.config.yaml.MetadataInheritancePerformanceTest
+[INFO] Running dev.mars.apex.core.config.yaml.MixedRefsWithGroupReferencesTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.037 s -- in dev.mars.apex.core.config.yaml.MixedRefsWithGroupReferencesTest
+[INFO] Running dev.mars.apex.core.config.yaml.NestedRefsWithGroupReferencesTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.027 s -- in dev.mars.apex.core.config.yaml.NestedRefsWithGroupReferencesTest
+[INFO] Running dev.mars.apex.core.config.yaml.OrderedYamlParserItemOrderTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.060 s -- in dev.mars.apex.core.config.yaml.OrderedYamlParserItemOrderTest
+[INFO] Running dev.mars.apex.core.config.yaml.ProcessingItemTest
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.021 s -- in dev.mars.apex.core.config.yaml.ProcessingItemTest
+[INFO] Running dev.mars.apex.core.config.yaml.PropertyResolutionEndToEndTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.083 s -- in dev.mars.apex.core.config.yaml.PropertyResolutionEndToEndTest
+[INFO] Running dev.mars.apex.core.config.yaml.PropertyResolutionIntegrationTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.073 s -- in dev.mars.apex.core.config.yaml.PropertyResolutionIntegrationTest
+[INFO] Running dev.mars.apex.core.config.yaml.PropertyResolutionTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.031 s -- in dev.mars.apex.core.config.yaml.PropertyResolutionTest
+[INFO] Running dev.mars.apex.core.config.yaml.RuleGroupCategoryInheritanceIntegrationTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.020 s -- in dev.mars.apex.core.config.yaml.RuleGroupCategoryInheritanceIntegrationTest
+[INFO] Running dev.mars.apex.core.config.yaml.RuleGroupErrorHandlingConfigTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.026 s -- in dev.mars.apex.core.config.yaml.RuleGroupErrorHandlingConfigTest
+[INFO] Running dev.mars.apex.core.config.yaml.SequentialYamlProcessorRuleResultTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.027 s -- in dev.mars.apex.core.config.yaml.SequentialYamlProcessorRuleResultTest
+[INFO] Running dev.mars.apex.core.config.yaml.YamlCalculationConfigDefaultValueTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.mars.apex.core.config.yaml.YamlCalculationConfigDefaultValueTest
+[INFO] Running dev.mars.apex.core.config.yaml.YamlConfigurationLoaderConsistencyTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.045 s -- in dev.mars.apex.core.config.yaml.YamlConfigurationLoaderConsistencyTest
+[INFO] Running dev.mars.apex.core.config.yaml.YamlConfigurationLoaderRuleReferencesTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.059 s -- in dev.mars.apex.core.config.yaml.YamlConfigurationLoaderRuleReferencesTest
+[INFO] Running dev.mars.apex.core.config.yaml.YamlConfigurationLoaderTest
+[INFO] Tests run: 19, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.161 s -- in dev.mars.apex.core.config.yaml.YamlConfigurationLoaderTest
+[INFO] Running dev.mars.apex.core.config.yaml.YamlDataSinkConfigurationTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s -- in dev.mars.apex.core.config.yaml.YamlDataSinkConfigurationTest
+[INFO] Running dev.mars.apex.core.config.yaml.YamlDataSinkIntegrationTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.042 s -- in dev.mars.apex.core.config.yaml.YamlDataSinkIntegrationTest
+[INFO] Running dev.mars.apex.core.config.yaml.YamlDataSourceTest
+[INFO] Tests run: 28, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.016 s -- in dev.mars.apex.core.config.yaml.YamlDataSourceTest
+[INFO] Running dev.mars.apex.core.config.yaml.YamlDefaultValueIntegrationTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.047 s -- in dev.mars.apex.core.config.yaml.YamlDefaultValueIntegrationTest
+[INFO] Running dev.mars.apex.core.config.yaml.YamlEnrichmentGroupMappingTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in dev.mars.apex.core.config.yaml.YamlEnrichmentGroupMappingTest
+[INFO] Running dev.mars.apex.core.config.yaml.YamlEnrichmentValidationTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.100 s -- in dev.mars.apex.core.config.yaml.YamlEnrichmentValidationTest
+[INFO] Running dev.mars.apex.core.config.yaml.YamlErrorRecoveryConfigTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.mars.apex.core.config.yaml.YamlErrorRecoveryConfigTest
+[INFO] Running dev.mars.apex.core.config.yaml.YamlErrorRecoveryIntegrationTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.048 s -- in dev.mars.apex.core.config.yaml.YamlErrorRecoveryIntegrationTest
+[INFO] Running dev.mars.apex.core.config.yaml.YamlRuleChainTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in dev.mars.apex.core.config.yaml.YamlRuleChainTest
+[INFO] Running dev.mars.apex.core.config.yaml.YamlRuleConfigurationEnrichmentGroupsTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.mars.apex.core.config.yaml.YamlRuleConfigurationEnrichmentGroupsTest
+[INFO] Running dev.mars.apex.core.config.yaml.YamlRuleConfigurationTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in dev.mars.apex.core.config.yaml.YamlRuleConfigurationTest
+[INFO] Running dev.mars.apex.core.config.yaml.YamlRuleDefaultValueTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in dev.mars.apex.core.config.yaml.YamlRuleDefaultValueTest
+[INFO] Running dev.mars.apex.core.config.yaml.YamlRuleGroupAdvancedTest
+[INFO] Running dev.mars.apex.core.config.yaml.YamlRuleGroupAdvancedTest$GetterSetterTests
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.mars.apex.core.config.yaml.YamlRuleGroupAdvancedTest$GetterSetterTests
+[INFO] Running dev.mars.apex.core.config.yaml.YamlRuleGroupAdvancedTest$ComplexConfigurationTests
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.mars.apex.core.config.yaml.YamlRuleGroupAdvancedTest$ComplexConfigurationTests
+[INFO] Running dev.mars.apex.core.config.yaml.YamlRuleGroupAdvancedTest$SystemPropertyTests
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.mars.apex.core.config.yaml.YamlRuleGroupAdvancedTest$SystemPropertyTests
+[INFO] Running dev.mars.apex.core.config.yaml.YamlRuleGroupAdvancedTest$DefaultValuesTests
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.mars.apex.core.config.yaml.YamlRuleGroupAdvancedTest$DefaultValuesTests
+[INFO] Running dev.mars.apex.core.config.yaml.YamlRuleGroupAdvancedTest$YamlConfigurationTests
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.mars.apex.core.config.yaml.YamlRuleGroupAdvancedTest$YamlConfigurationTests
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s -- in dev.mars.apex.core.config.yaml.YamlRuleGroupAdvancedTest
+[INFO] Running dev.mars.apex.core.config.yaml.YamlRuleGroupMappingTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.mars.apex.core.config.yaml.YamlRuleGroupMappingTest
+[INFO] Running dev.mars.apex.core.config.yaml.YamlRuleRefTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.mars.apex.core.config.yaml.YamlRuleRefTest
+[INFO] Running dev.mars.apex.core.constants.SeverityConstantsTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.mars.apex.core.constants.SeverityConstantsTest
+[INFO] Running dev.mars.apex.core.demo.DefaultValueDemoTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s -- in dev.mars.apex.core.demo.DefaultValueDemoTest
+[INFO] Running dev.mars.apex.core.engine.config.DefinitiveErrorHandlingProofTest
+[ERROR] Tests run: 6, Failures: 3, Errors: 0, Skipped: 0, Time elapsed: 0.026 s <<< FAILURE! -- in dev.mars.apex.core.engine.config.DefinitiveErrorHandlingProofTest
+[ERROR] dev.mars.apex.core.engine.config.DefinitiveErrorHandlingProofTest.testNonCriticalErrorsAreLoggedAndRecovered -- Time elapsed: 0.009 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Non-critical errors should be recovered to NO_MATCH ==> expected: <NO_MATCH> but was: <ERROR>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.mars.apex.core.engine.config.DefinitiveErrorHandlingProofTest.testNonCriticalErrorsAreLoggedAndRecovered(DefinitiveErrorHandlingProofTest.java:105)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.mars.apex.core.engine.config.DefinitiveErrorHandlingProofTest.testSummaryAllErrorPathsWork -- Time elapsed: 0.004 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: All non-critical errors should be recovered to NO_MATCH ==> expected: <6> but was: <4>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:563)
+	at dev.mars.apex.core.engine.config.DefinitiveErrorHandlingProofTest.testSummaryAllErrorPathsWork(DefinitiveErrorHandlingProofTest.java:280)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.mars.apex.core.engine.config.DefinitiveErrorHandlingProofTest.testErrorHandlingPreservesContext -- Time elapsed: 0.002 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Should have structured error message ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at dev.mars.apex.core.engine.config.DefinitiveErrorHandlingProofTest.testErrorHandlingPreservesContext(DefinitiveErrorHandlingProofTest.java:221)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.mars.apex.core.engine.config.ErrorRecoveryDebugTest
+[ERROR] Tests run: 5, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.003 s <<< FAILURE! -- in dev.mars.apex.core.engine.config.ErrorRecoveryDebugTest
+[ERROR] dev.mars.apex.core.engine.config.ErrorRecoveryDebugTest.testWarningSeverityRuleEvaluation -- Time elapsed: 0 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: WARNING severity rule should be recovered and return NO_MATCH ==> expected: <NO_MATCH> but was: <ERROR>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.mars.apex.core.engine.config.ErrorRecoveryDebugTest.testWarningSeverityRuleEvaluation(ErrorRecoveryDebugTest.java:121)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.mars.apex.core.engine.config.InvalidConfigurationTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in dev.mars.apex.core.engine.config.InvalidConfigurationTest
+[INFO] Running dev.mars.apex.core.engine.config.RuleEvaluationErrorHandlingComprehensiveTest
+[ERROR] Tests run: 8, Failures: 5, Errors: 0, Skipped: 0, Time elapsed: 0.015 s <<< FAILURE! -- in dev.mars.apex.core.engine.config.RuleEvaluationErrorHandlingComprehensiveTest
+[ERROR] dev.mars.apex.core.engine.config.RuleEvaluationErrorHandlingComprehensiveTest.testExecuteRule_MissingProperty_ErrorSeverity -- Time elapsed: 0.001 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Should have descriptive error message ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at dev.mars.apex.core.engine.config.RuleEvaluationErrorHandlingComprehensiveTest.testExecuteRule_MissingProperty_ErrorSeverity(RuleEvaluationErrorHandlingComprehensiveTest.java:86)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.mars.apex.core.engine.config.RuleEvaluationErrorHandlingComprehensiveTest.testExecuteRulesList_FirstRuleFails -- Time elapsed: 0.002 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Should have descriptive error message ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at dev.mars.apex.core.engine.config.RuleEvaluationErrorHandlingComprehensiveTest.testExecuteRulesList_FirstRuleFails(RuleEvaluationErrorHandlingComprehensiveTest.java:179)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.mars.apex.core.engine.config.RuleEvaluationErrorHandlingComprehensiveTest.testExecuteRules_MixedRuleFailure -- Time elapsed: 0.001 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Should have descriptive error message ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at dev.mars.apex.core.engine.config.RuleEvaluationErrorHandlingComprehensiveTest.testExecuteRules_MixedRuleFailure(RuleEvaluationErrorHandlingComprehensiveTest.java:210)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.mars.apex.core.engine.config.RuleEvaluationErrorHandlingComprehensiveTest.testExecuteRule_MissingProperty_CriticalSeverity -- Time elapsed: 0.001 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Should have descriptive error message ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at dev.mars.apex.core.engine.config.RuleEvaluationErrorHandlingComprehensiveTest.testExecuteRule_MissingProperty_CriticalSeverity(RuleEvaluationErrorHandlingComprehensiveTest.java:118)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.mars.apex.core.engine.config.RuleEvaluationErrorHandlingComprehensiveTest.testRuleEngineService_EvaluateRules_ErrorInResultsList -- Time elapsed: 0.004 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Should have an error result ==> expected: not <null>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:152)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertNotNull.failNull(AssertNotNull.java:49)
+	at org.junit.jupiter.api.AssertNotNull.assertNotNull(AssertNotNull.java:35)
+	at org.junit.jupiter.api.Assertions.assertNotNull(Assertions.java:312)
+	at dev.mars.apex.core.engine.config.RuleEvaluationErrorHandlingComprehensiveTest.testRuleEngineService_EvaluateRules_ErrorInResultsList(RuleEvaluationErrorHandlingComprehensiveTest.java:249)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.mars.apex.core.engine.config.RulesEngineErrorPropagationTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.019 s -- in dev.mars.apex.core.engine.config.RulesEngineErrorPropagationTest
+[INFO] Running dev.mars.apex.core.engine.config.RulesEngineErrorRecoveryConfigTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.035 s -- in dev.mars.apex.core.engine.config.RulesEngineErrorRecoveryConfigTest
+[INFO] Running dev.mars.apex.core.engine.config.RulesEngineEvaluateTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.mars.apex.core.engine.config.RulesEngineEvaluateTest
+[INFO] Running dev.mars.apex.core.engine.config.RulesEngineExecutionTraceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.014 s -- in dev.mars.apex.core.engine.config.RulesEngineExecutionTraceTest
+[INFO] Running dev.mars.apex.core.engine.config.RulesEnginePipelineIntegrationTest
+[INFO] Running dev.mars.apex.core.engine.config.RulesEnginePipelineIntegrationTest$ResourceManagementTests
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.709 s -- in dev.mars.apex.core.engine.config.RulesEnginePipelineIntegrationTest$ResourceManagementTests
+[INFO] Running dev.mars.apex.core.engine.config.RulesEnginePipelineIntegrationTest$ErrorHandlingTests
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.072 s -- in dev.mars.apex.core.engine.config.RulesEnginePipelineIntegrationTest$ErrorHandlingTests
+[INFO] Running dev.mars.apex.core.engine.config.RulesEnginePipelineIntegrationTest$DocumentOrderTests
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.044 s -- in dev.mars.apex.core.engine.config.RulesEnginePipelineIntegrationTest$DocumentOrderTests
+[INFO] Running dev.mars.apex.core.engine.config.RulesEnginePipelineIntegrationTest$PipelineExecutionTests
+[WARNING] Tests run: 6, Failures: 0, Errors: 0, Skipped: 2, Time elapsed: 3.036 s -- in dev.mars.apex.core.engine.config.RulesEnginePipelineIntegrationTest$PipelineExecutionTests
+[INFO] Running dev.mars.apex.core.engine.config.RulesEnginePipelineIntegrationTest$ConfigurationLoadingTests
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.040 s -- in dev.mars.apex.core.engine.config.RulesEnginePipelineIntegrationTest$ConfigurationLoadingTests
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 9.906 s -- in dev.mars.apex.core.engine.config.RulesEnginePipelineIntegrationTest
+[INFO] Running dev.mars.apex.core.engine.config.RulesEngineRuleGroupErrorHandlingTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.037 s -- in dev.mars.apex.core.engine.config.RulesEngineRuleGroupErrorHandlingTest
+[INFO] Running dev.mars.apex.core.engine.config.RulesEngineSpelErrorHandlingTest
+[ERROR] Tests run: 4, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.007 s <<< FAILURE! -- in dev.mars.apex.core.engine.config.RulesEngineSpelErrorHandlingTest
+[ERROR] dev.mars.apex.core.engine.config.RulesEngineSpelErrorHandlingTest.shouldReturnErrorResultForSpelPropertyNotFound -- Time elapsed: 0.001 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Error message should indicate evaluation error ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at dev.mars.apex.core.engine.config.RulesEngineSpelErrorHandlingTest.shouldReturnErrorResultForSpelPropertyNotFound(RulesEngineSpelErrorHandlingTest.java:70)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.mars.apex.core.engine.config.RulesEngineStaticFactoryMethodsTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.086 s -- in dev.mars.apex.core.engine.config.RulesEngineStaticFactoryMethodsTest
+[INFO] Running dev.mars.apex.core.engine.config.ScenarioBasedRulesEngineTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.060 s -- in dev.mars.apex.core.engine.config.ScenarioBasedRulesEngineTest
+[INFO] Running dev.mars.apex.core.engine.config.SimpleErrorHandlingTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.mars.apex.core.engine.config.SimpleErrorHandlingTest
+[INFO] Running dev.mars.apex.core.engine.executor.ExecutorIntegrationTest
+[INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.031 s -- in dev.mars.apex.core.engine.executor.ExecutorIntegrationTest
+[INFO] Running dev.mars.apex.core.engine.executor.RuleChainExecutorTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in dev.mars.apex.core.engine.executor.RuleChainExecutorTest
+[INFO] Running dev.mars.apex.core.engine.model.EnrichmentGroupModelTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.mars.apex.core.engine.model.EnrichmentGroupModelTest
+[INFO] Running dev.mars.apex.core.engine.model.EnrichmentGroupResultAggregationTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.mars.apex.core.engine.model.EnrichmentGroupResultAggregationTest
+[INFO] Running dev.mars.apex.core.engine.model.RuleGroupAdvancedTest
+[INFO] Running dev.mars.apex.core.engine.model.RuleGroupAdvancedTest$IntegrationTests
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.mars.apex.core.engine.model.RuleGroupAdvancedTest$IntegrationTests
+[INFO] Running dev.mars.apex.core.engine.model.RuleGroupAdvancedTest$ParallelExecutionTests
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.mars.apex.core.engine.model.RuleGroupAdvancedTest$ParallelExecutionTests
+[INFO] Running dev.mars.apex.core.engine.model.RuleGroupAdvancedTest$DebugModeTests
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.mars.apex.core.engine.model.RuleGroupAdvancedTest$DebugModeTests
+[INFO] Running dev.mars.apex.core.engine.model.RuleGroupAdvancedTest$ShortCircuitTests
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.mars.apex.core.engine.model.RuleGroupAdvancedTest$ShortCircuitTests
+[INFO] Running dev.mars.apex.core.engine.model.RuleGroupAdvancedTest$AdvancedConstructorTests
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.mars.apex.core.engine.model.RuleGroupAdvancedTest$AdvancedConstructorTests
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in dev.mars.apex.core.engine.model.RuleGroupAdvancedTest
+[INFO] Running dev.mars.apex.core.engine.model.RuleResultExtensionTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.mars.apex.core.engine.model.RuleResultExtensionTest
+[INFO] Running dev.mars.apex.core.engine.RulesEngineTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in dev.mars.apex.core.engine.RulesEngineTest
+[INFO] Running dev.mars.apex.core.exception.RuleConfigurationExceptionTest
+[INFO] Running dev.mars.apex.core.exception.RuleConfigurationExceptionTest$EdgeCasesTests
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.mars.apex.core.exception.RuleConfigurationExceptionTest$EdgeCasesTests
+[INFO] Running dev.mars.apex.core.exception.RuleConfigurationExceptionTest$RealWorldScenarioTests
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.mars.apex.core.exception.RuleConfigurationExceptionTest$RealWorldScenarioTests
+[INFO] Running dev.mars.apex.core.exception.RuleConfigurationExceptionTest$ErrorContextTests
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.mars.apex.core.exception.RuleConfigurationExceptionTest$ErrorContextTests
+[INFO] Running dev.mars.apex.core.exception.RuleConfigurationExceptionTest$InheritanceTests
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.mars.apex.core.exception.RuleConfigurationExceptionTest$InheritanceTests
+[INFO] Running dev.mars.apex.core.exception.RuleConfigurationExceptionTest$ExpectedFormatTests
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.mars.apex.core.exception.RuleConfigurationExceptionTest$ExpectedFormatTests
+[INFO] Running dev.mars.apex.core.exception.RuleConfigurationExceptionTest$ConfigurationElementTests
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.mars.apex.core.exception.RuleConfigurationExceptionTest$ConfigurationElementTests
+[INFO] Running dev.mars.apex.core.exception.RuleConfigurationExceptionTest$ConstructorTests
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in dev.mars.apex.core.exception.RuleConfigurationExceptionTest$ConstructorTests
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in dev.mars.apex.core.exception.RuleConfigurationExceptionTest
+[INFO] Running dev.mars.apex.core.exception.RuleEngineExceptionTest
+[INFO] Running dev.mars.apex.core.exception.RuleEngineExceptionTest$EdgeCasesTests
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.mars.apex.core.exception.RuleEngineExceptionTest$EdgeCasesTests
+[INFO] Running dev.mars.apex.core.exception.RuleEngineExceptionTest$SerializationTests
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in dev.mars.apex.core.exception.RuleEngineExceptionTest$SerializationTests
+[INFO] Running dev.mars.apex.core.exception.RuleEngineExceptionTest$InheritanceTests
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.mars.apex.core.exception.RuleEngineExceptionTest$InheritanceTests
+[INFO] Running dev.mars.apex.core.exception.RuleEngineExceptionTest$CauseChainTests
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.mars.apex.core.exception.RuleEngineExceptionTest$CauseChainTests
+[INFO] Running dev.mars.apex.core.exception.RuleEngineExceptionTest$MessageTests
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in dev.mars.apex.core.exception.RuleEngineExceptionTest$MessageTests
+[INFO] Running dev.mars.apex.core.exception.RuleEngineExceptionTest$ContextTests
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in dev.mars.apex.core.exception.RuleEngineExceptionTest$ContextTests
+[INFO] Running dev.mars.apex.core.exception.RuleEngineExceptionTest$ErrorCodeTests
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.mars.apex.core.exception.RuleEngineExceptionTest$ErrorCodeTests
+[INFO] Running dev.mars.apex.core.exception.RuleEngineExceptionTest$ConstructorTests
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in dev.mars.apex.core.exception.RuleEngineExceptionTest$ConstructorTests
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.015 s -- in dev.mars.apex.core.exception.RuleEngineExceptionTest
+[INFO] Running dev.mars.apex.core.integration.ApexNegativeCasesTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.014 s -- in dev.mars.apex.core.integration.ApexNegativeCasesTest
+[INFO] Running dev.mars.apex.core.integration.ClasspathRuleGroupProcessingTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.021 s -- in dev.mars.apex.core.integration.ClasspathRuleGroupProcessingTest
+[INFO] Running dev.mars.apex.core.integration.EnrichmentGroupsEndToEndIntegrationTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s -- in dev.mars.apex.core.integration.EnrichmentGroupsEndToEndIntegrationTest
+[INFO] Running dev.mars.apex.core.integration.EnrichmentReferenceErrorHandlingTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.247 s -- in dev.mars.apex.core.integration.EnrichmentReferenceErrorHandlingTest
+[INFO] Running dev.mars.apex.core.integration.ExternalDataSourceFileSystemIntegrationTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.070 s -- in dev.mars.apex.core.integration.ExternalDataSourceFileSystemIntegrationTest
+[INFO] Running dev.mars.apex.core.integration.MultiFileRuleReferenceIntegrationTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.084 s -- in dev.mars.apex.core.integration.MultiFileRuleReferenceIntegrationTest
+[INFO] Running dev.mars.apex.core.integration.RecoveryMetricsIntegrationTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.mars.apex.core.integration.RecoveryMetricsIntegrationTest
+[INFO] Running dev.mars.apex.core.integration.RuleReferenceErrorHandlingTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.167 s -- in dev.mars.apex.core.integration.RuleReferenceErrorHandlingTest
+[INFO] Running dev.mars.apex.core.integration.RuleReferencePerformanceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.216 s -- in dev.mars.apex.core.integration.RuleReferencePerformanceTest
+[INFO] Running dev.mars.apex.core.integration.SingleFileRuleReferenceIntegrationTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.086 s -- in dev.mars.apex.core.integration.SingleFileRuleReferenceIntegrationTest
+[INFO] Running dev.mars.apex.core.performance.ErrorHandlingPerformanceBenchmarkTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.976 s -- in dev.mars.apex.core.performance.ErrorHandlingPerformanceBenchmarkTest
+[INFO] Running dev.mars.apex.core.service.data.CustomDataSourceTest
+[INFO] Tests run: 32, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.029 s -- in dev.mars.apex.core.service.data.CustomDataSourceTest
+[INFO] Running dev.mars.apex.core.service.data.external.cache.CacheDataSourceTest
+[INFO] Tests run: 35, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.030 s -- in dev.mars.apex.core.service.data.external.cache.CacheDataSourceTest
+[INFO] Running dev.mars.apex.core.service.data.external.cache.CacheManagerTest
+[INFO] Tests run: 22, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.123 s -- in dev.mars.apex.core.service.data.external.cache.CacheManagerTest
+[INFO] Running dev.mars.apex.core.service.data.external.cache.CacheStatisticsTest
+[INFO] Tests run: 22, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.020 s -- in dev.mars.apex.core.service.data.external.cache.CacheStatisticsTest
+[INFO] Running dev.mars.apex.core.service.data.external.cache.EnhancedCacheManagerTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.363 s -- in dev.mars.apex.core.service.data.external.cache.EnhancedCacheManagerTest
+[INFO] Running dev.mars.apex.core.service.data.external.cache.InMemoryCacheManagerTest
+[INFO] Tests run: 36, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.737 s -- in dev.mars.apex.core.service.data.external.cache.InMemoryCacheManagerTest
+[INFO] Running dev.mars.apex.core.service.data.external.ConcurrencyIntegrationTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.203 s -- in dev.mars.apex.core.service.data.external.ConcurrencyIntegrationTest
+[INFO] Running dev.mars.apex.core.service.data.external.config.DataSourceConfigurationEventTest
+[INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.042 s -- in dev.mars.apex.core.service.data.external.config.DataSourceConfigurationEventTest
+[INFO] Running dev.mars.apex.core.service.data.external.config.DataSourceConfigurationListenerTest
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.134 s -- in dev.mars.apex.core.service.data.external.config.DataSourceConfigurationListenerTest
+[INFO] Running dev.mars.apex.core.service.data.external.config.DataSourceConfigurationServiceTest
+[INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.071 s -- in dev.mars.apex.core.service.data.external.config.DataSourceConfigurationServiceTest
+[INFO] Running dev.mars.apex.core.service.data.external.ConnectionStatusTest
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in dev.mars.apex.core.service.data.external.ConnectionStatusTest
+[INFO] Running dev.mars.apex.core.service.data.external.database.DatabaseDataSourceTest
+[INFO] Tests run: 27, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.221 s -- in dev.mars.apex.core.service.data.external.database.DatabaseDataSourceTest
+[INFO] Running dev.mars.apex.core.service.data.external.database.DatabaseErrorHandlingIntegrationTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.038 s -- in dev.mars.apex.core.service.data.external.database.DatabaseErrorHandlingIntegrationTest
+[INFO] Running dev.mars.apex.core.service.data.external.database.DatabaseErrorHandlingProofTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.039 s -- in dev.mars.apex.core.service.data.external.database.DatabaseErrorHandlingProofTest
+[INFO] Running dev.mars.apex.core.service.data.external.database.DatabaseHealthIndicatorTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.307 s -- in dev.mars.apex.core.service.data.external.database.DatabaseHealthIndicatorTest
+[INFO] Running dev.mars.apex.core.service.data.external.database.H2ConnectionStringTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.570 s -- in dev.mars.apex.core.service.data.external.database.H2ConnectionStringTest
+[INFO] Running dev.mars.apex.core.service.data.external.database.JdbcParameterUtilsTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.047 s -- in dev.mars.apex.core.service.data.external.database.JdbcParameterUtilsTest
+[INFO] Running dev.mars.apex.core.service.data.external.database.JdbcTemplateFactoryTest
+[INFO] Tests run: 18, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.000 s -- in dev.mars.apex.core.service.data.external.database.JdbcTemplateFactoryTest
+[INFO] Running dev.mars.apex.core.service.data.external.database.ParameterProcessingComparisonTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.024 s -- in dev.mars.apex.core.service.data.external.database.ParameterProcessingComparisonTest
+[INFO] Running dev.mars.apex.core.service.data.external.database.ParameterProcessingIntegrationTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.022 s -- in dev.mars.apex.core.service.data.external.database.ParameterProcessingIntegrationTest
+[INFO] Running dev.mars.apex.core.service.data.external.database.PostgreSQLIntegrationTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.338 s -- in dev.mars.apex.core.service.data.external.database.PostgreSQLIntegrationTest
+[INFO] Running dev.mars.apex.core.service.data.external.database.SqlErrorClassifierTest
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.021 s -- in dev.mars.apex.core.service.data.external.database.SqlErrorClassifierTest
+[INFO] Running dev.mars.apex.core.service.data.external.DataSourceExceptionTest
+[INFO] Tests run: 25, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.028 s -- in dev.mars.apex.core.service.data.external.DataSourceExceptionTest
+[INFO] Running dev.mars.apex.core.service.data.external.DataSourceMetricsTest
+[INFO] Tests run: 32, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.034 s -- in dev.mars.apex.core.service.data.external.DataSourceMetricsTest
+[INFO] Running dev.mars.apex.core.service.data.external.DataSourceResolverEnhancedTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.082 s -- in dev.mars.apex.core.service.data.external.DataSourceResolverEnhancedTest
+[INFO] Running dev.mars.apex.core.service.data.external.DataSourceTypeTest
+[INFO] Tests run: 33, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s -- in dev.mars.apex.core.service.data.external.DataSourceTypeTest
+[INFO] Running dev.mars.apex.core.service.data.external.ExternalDataSourceIntegrationTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.301 s -- in dev.mars.apex.core.service.data.external.ExternalDataSourceIntegrationTest
+[INFO] Running dev.mars.apex.core.service.data.external.factory.DataSourceFactoryTest
+[INFO] Tests run: 23, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.836 s -- in dev.mars.apex.core.service.data.external.factory.DataSourceFactoryTest
+[INFO] Running dev.mars.apex.core.service.data.external.file.CsvDataLoaderTest
+[INFO] Tests run: 27, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.278 s -- in dev.mars.apex.core.service.data.external.file.CsvDataLoaderTest
+[INFO] Running dev.mars.apex.core.service.data.external.file.JsonDataLoaderTest
+[INFO] Tests run: 27, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.214 s -- in dev.mars.apex.core.service.data.external.file.JsonDataLoaderTest
+[INFO] Running dev.mars.apex.core.service.data.external.LoadTestingIntegrationTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.669 s -- in dev.mars.apex.core.service.data.external.LoadTestingIntegrationTest
+[INFO] Running dev.mars.apex.core.service.data.external.SecurityIntegrationTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 22.89 s -- in dev.mars.apex.core.service.data.external.SecurityIntegrationTest
+[INFO] Running dev.mars.apex.core.service.data.yaml.YamlDataLookupIntegrationTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.617 s -- in dev.mars.apex.core.service.data.yaml.YamlDataLookupIntegrationTest
+[INFO] Running dev.mars.apex.core.service.data.yaml.YamlMultiSourceLookupTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.083 s -- in dev.mars.apex.core.service.data.yaml.YamlMultiSourceLookupTest
+[INFO] Running dev.mars.apex.core.service.data.yaml.YamlParameterBindingTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.130 s -- in dev.mars.apex.core.service.data.yaml.YamlParameterBindingTest
+[INFO] Running dev.mars.apex.core.service.data.yaml.YamlPostgreSQLLookupTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.484 s -- in dev.mars.apex.core.service.data.yaml.YamlPostgreSQLLookupTest
+[INFO] Running dev.mars.apex.core.service.data.yaml.YamlRestApiLookupTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.081 s -- in dev.mars.apex.core.service.data.yaml.YamlRestApiLookupTest
+[INFO] Running dev.mars.apex.core.service.engine.ConfigurableErrorRecoveryIntegrationTest
+[ERROR] Tests run: 7, Failures: 5, Errors: 0, Skipped: 0, Time elapsed: 0.019 s <<< FAILURE! -- in dev.mars.apex.core.service.engine.ConfigurableErrorRecoveryIntegrationTest
+[ERROR] dev.mars.apex.core.service.engine.ConfigurableErrorRecoveryIntegrationTest.testDifferentRecoveryStrategiesPerSeverity -- Time elapsed: 0.003 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: ERROR severity should be recovered with RETRY_WITH_SAFE_EXPRESSION strategy ==> expected: <NO_MATCH> but was: <ERROR>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.mars.apex.core.service.engine.ConfigurableErrorRecoveryIntegrationTest.testDifferentRecoveryStrategiesPerSeverity(ConfigurableErrorRecoveryIntegrationTest.java:171)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.mars.apex.core.service.engine.ConfigurableErrorRecoveryIntegrationTest.testDefaultBackwardCompatibleConfiguration -- Time elapsed: 0.002 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: WARNING severity should be recovered to NO_MATCH ==> expected: <NO_MATCH> but was: <ERROR>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.mars.apex.core.service.engine.ConfigurableErrorRecoveryIntegrationTest.testDefaultBackwardCompatibleConfiguration(ConfigurableErrorRecoveryIntegrationTest.java:84)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.mars.apex.core.service.engine.ConfigurableErrorRecoveryIntegrationTest.testCustomErrorRecoveryConfiguration -- Time elapsed: 0.002 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: ERROR severity should be recovered with custom configuration ==> expected: <NO_MATCH> but was: <ERROR>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.mars.apex.core.service.engine.ConfigurableErrorRecoveryIntegrationTest.testCustomErrorRecoveryConfiguration(ConfigurableErrorRecoveryIntegrationTest.java:113)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.mars.apex.core.service.engine.ConfigurableErrorRecoveryIntegrationTest.testCompleteEndToEndConfigurableRecovery -- Time elapsed: 0.002 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: WARNING severity should return NO_MATCH result ==> expected: <NO_MATCH> but was: <ERROR>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.mars.apex.core.service.engine.ConfigurableErrorRecoveryIntegrationTest.testCompleteEndToEndConfigurableRecovery(ConfigurableErrorRecoveryIntegrationTest.java:283)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.mars.apex.core.service.engine.ConfigurableErrorRecoveryIntegrationTest.testGlobalErrorRecoveryEnableDisable -- Time elapsed: 0.002 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: WARNING severity should be recovered when globally enabled ==> expected: <NO_MATCH> but was: <ERROR>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.mars.apex.core.service.engine.ConfigurableErrorRecoveryIntegrationTest.testGlobalErrorRecoveryEnableDisable(ConfigurableErrorRecoveryIntegrationTest.java:144)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.mars.apex.core.service.engine.ExpressionEvaluatorServiceEnhancedTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.mars.apex.core.service.engine.ExpressionEvaluatorServiceEnhancedTest
+[INFO] Running dev.mars.apex.core.service.engine.ExpressionEvaluatorServiceTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in dev.mars.apex.core.service.engine.ExpressionEvaluatorServiceTest
+[INFO] Running dev.mars.apex.core.service.engine.UnifiedRuleEvaluatorTest
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.019 s -- in dev.mars.apex.core.service.engine.UnifiedRuleEvaluatorTest
+[INFO] Running dev.mars.apex.core.service.enrichment.CalculationFieldMappingTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s -- in dev.mars.apex.core.service.enrichment.CalculationFieldMappingTest
+[INFO] Running dev.mars.apex.core.service.enrichment.ConditionalMappingEnrichmentTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.032 s -- in dev.mars.apex.core.service.enrichment.ConditionalMappingEnrichmentTest
+[INFO] Running dev.mars.apex.core.service.enrichment.ConditionalMappingsTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.046 s -- in dev.mars.apex.core.service.enrichment.ConditionalMappingsTest
+[INFO] Running dev.mars.apex.core.service.enrichment.EnrichmentGroupExecutionTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.054 s -- in dev.mars.apex.core.service.enrichment.EnrichmentGroupExecutionTest
+[INFO] Running dev.mars.apex.core.service.enrichment.EnrichmentGroupFactoryTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.078 s -- in dev.mars.apex.core.service.enrichment.EnrichmentGroupFactoryTest
+[INFO] Running dev.mars.apex.core.service.enrichment.EnrichmentServiceRuleResultTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.047 s -- in dev.mars.apex.core.service.enrichment.EnrichmentServiceRuleResultTest
+[INFO] Running dev.mars.apex.core.service.enrichment.EnrichmentServiceTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.042 s -- in dev.mars.apex.core.service.enrichment.EnrichmentServiceTest
+[INFO] Running dev.mars.apex.core.service.enrichment.FieldMappingTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.025 s -- in dev.mars.apex.core.service.enrichment.FieldMappingTest
+[INFO] Running dev.mars.apex.core.service.enrichment.JsonFieldMappingTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.042 s -- in dev.mars.apex.core.service.enrichment.JsonFieldMappingTest
+[INFO] Running dev.mars.apex.core.service.enrichment.SpelFieldMappingIntegrationTest
+[ERROR] Tests run: 4, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.078 s <<< FAILURE! -- in dev.mars.apex.core.service.enrichment.SpelFieldMappingIntegrationTest
+[ERROR] dev.mars.apex.core.service.enrichment.SpelFieldMappingIntegrationTest.testLookupEnrichmentWithNestedResults -- Time elapsed: 0.018 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Should extract nested instrument name from lookup result ==> expected: <Apple Inc.> but was: <null>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1156)
+	at dev.mars.apex.core.service.enrichment.SpelFieldMappingIntegrationTest.testLookupEnrichmentWithNestedResults(SpelFieldMappingIntegrationTest.java:141)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.mars.apex.core.service.enrichment.SpelFieldMappingTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.127 s -- in dev.mars.apex.core.service.enrichment.SpelFieldMappingTest
+[INFO] Running dev.mars.apex.core.service.lookup.DatasetSignatureIntegrationTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.mars.apex.core.service.lookup.DatasetSignatureIntegrationTest
+[INFO] Running dev.mars.apex.core.service.lookup.DatasetSignatureTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in dev.mars.apex.core.service.lookup.DatasetSignatureTest
+[INFO] Running dev.mars.apex.core.service.lookup.LookupServiceRegistryTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.015 s -- in dev.mars.apex.core.service.lookup.LookupServiceRegistryTest
+[INFO] Running dev.mars.apex.core.service.monitoring.PerformanceSnapshotRecoveryTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in dev.mars.apex.core.service.monitoring.PerformanceSnapshotRecoveryTest
+[INFO] Running dev.mars.apex.core.service.monitoring.RulePerformanceMetricsRecoveryTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.mars.apex.core.service.monitoring.RulePerformanceMetricsRecoveryTest
+[INFO] Running dev.mars.apex.core.service.monitoring.RulePerformanceMonitorTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.074 s -- in dev.mars.apex.core.service.monitoring.RulePerformanceMonitorTest
+[INFO] Running dev.mars.apex.core.service.scenario.ConditionalStageExecutionTest
+[ERROR] Tests run: 9, Failures: 4, Errors: 0, Skipped: 0, Time elapsed: 0.027 s <<< FAILURE! -- in dev.mars.apex.core.service.scenario.ConditionalStageExecutionTest
+[ERROR] dev.mars.apex.core.service.scenario.ConditionalStageExecutionTest.testComplexSpelCondition -- Time elapsed: 0.002 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Stage should execute when complex condition is true ==> expected: <1> but was: <0>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:563)
+	at dev.mars.apex.core.service.scenario.ConditionalStageExecutionTest.testComplexSpelCondition(ConditionalStageExecutionTest.java:206)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.mars.apex.core.service.scenario.ConditionalStageExecutionTest.testMultipleStagesWithDifferentConditions -- Time elapsed: 0.002 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Only EMEA stage should execute ==> expected: <1> but was: <0>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:563)
+	at dev.mars.apex.core.service.scenario.ConditionalStageExecutionTest.testMultipleStagesWithDifferentConditions(ConditionalStageExecutionTest.java:325)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.mars.apex.core.service.scenario.ConditionalStageExecutionTest.testConditionWithDependencies -- Time elapsed: 0.007 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Both stages should execute ==> expected: <2> but was: <1>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:563)
+	at dev.mars.apex.core.service.scenario.ConditionalStageExecutionTest.testConditionWithDependencies(ConditionalStageExecutionTest.java:260)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.mars.apex.core.service.scenario.ConditionalStageExecutionTest.testStageExecutesWhenConditionTrue -- Time elapsed: 0.002 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Stage should execute when condition is true ==> expected: <1> but was: <0>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:563)
+	at dev.mars.apex.core.service.scenario.ConditionalStageExecutionTest.testStageExecutesWhenConditionTrue(ConditionalStageExecutionTest.java:96)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.mars.apex.core.service.scenario.DataTypeScenarioServiceClassificationTest
+[ERROR] Tests run: 8, Failures: 6, Errors: 0, Skipped: 0, Time elapsed: 0.136 s <<< FAILURE! -- in dev.mars.apex.core.service.scenario.DataTypeScenarioServiceClassificationTest
+[ERROR] dev.mars.apex.core.service.scenario.DataTypeScenarioServiceClassificationTest.testLevel1_SimpleCommoditySwapClassification -- Time elapsed: 0.021 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Scenario should complete successfully ==> expected: <false> but was: <true>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertFalse.failNotFalse(AssertFalse.java:63)
+	at org.junit.jupiter.api.AssertFalse.assertFalse(AssertFalse.java:36)
+	at org.junit.jupiter.api.Assertions.assertFalse(Assertions.java:239)
+	at dev.mars.apex.core.service.scenario.DataTypeScenarioServiceClassificationTest.testLevel1_SimpleCommoditySwapClassification(DataTypeScenarioServiceClassificationTest.java:121)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.mars.apex.core.service.scenario.DataTypeScenarioServiceClassificationTest.testLevel2_UsOtcOptionAndConditions -- Time elapsed: 0.021 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Scenario should complete successfully ==> expected: <false> but was: <true>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertFalse.failNotFalse(AssertFalse.java:63)
+	at org.junit.jupiter.api.AssertFalse.assertFalse(AssertFalse.java:36)
+	at org.junit.jupiter.api.Assertions.assertFalse(Assertions.java:239)
+	at dev.mars.apex.core.service.scenario.DataTypeScenarioServiceClassificationTest.testLevel2_UsOtcOptionAndConditions(DataTypeScenarioServiceClassificationTest.java:157)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.mars.apex.core.service.scenario.DataTypeScenarioServiceClassificationTest.testLevel3_HighNotionalOtcOption -- Time elapsed: 0.020 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Scenario should complete successfully ==> expected: <false> but was: <true>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertFalse.failNotFalse(AssertFalse.java:63)
+	at org.junit.jupiter.api.AssertFalse.assertFalse(AssertFalse.java:36)
+	at org.junit.jupiter.api.Assertions.assertFalse(Assertions.java:239)
+	at dev.mars.apex.core.service.scenario.DataTypeScenarioServiceClassificationTest.testLevel3_HighNotionalOtcOption(DataTypeScenarioServiceClassificationTest.java:223)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.mars.apex.core.service.scenario.DataTypeScenarioServiceClassificationTest.testLevel1_SimpleOtcOptionClassification -- Time elapsed: 0.014 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Scenario should complete successfully ==> expected: <false> but was: <true>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertFalse.failNotFalse(AssertFalse.java:63)
+	at org.junit.jupiter.api.AssertFalse.assertFalse(AssertFalse.java:36)
+	at org.junit.jupiter.api.Assertions.assertFalse(Assertions.java:239)
+	at dev.mars.apex.core.service.scenario.DataTypeScenarioServiceClassificationTest.testLevel1_SimpleOtcOptionClassification(DataTypeScenarioServiceClassificationTest.java:86)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.mars.apex.core.service.scenario.DataTypeScenarioServiceClassificationTest.testLevel2_NonUsOtcOptionFallback -- Time elapsed: 0.015 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Scenario should complete successfully ==> expected: <false> but was: <true>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertFalse.failNotFalse(AssertFalse.java:63)
+	at org.junit.jupiter.api.AssertFalse.assertFalse(AssertFalse.java:36)
+	at org.junit.jupiter.api.Assertions.assertFalse(Assertions.java:239)
+	at dev.mars.apex.core.service.scenario.DataTypeScenarioServiceClassificationTest.testLevel2_NonUsOtcOptionFallback(DataTypeScenarioServiceClassificationTest.java:188)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.mars.apex.core.service.scenario.DataTypeScenarioServiceClassificationTest.testLevel3_LowNotionalOtcOptionFallback -- Time elapsed: 0.037 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Scenario should complete successfully ==> expected: <false> but was: <true>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertFalse.failNotFalse(AssertFalse.java:63)
+	at org.junit.jupiter.api.AssertFalse.assertFalse(AssertFalse.java:36)
+	at org.junit.jupiter.api.Assertions.assertFalse(Assertions.java:239)
+	at dev.mars.apex.core.service.scenario.DataTypeScenarioServiceClassificationTest.testLevel3_LowNotionalOtcOptionFallback(DataTypeScenarioServiceClassificationTest.java:254)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.mars.apex.core.service.scenario.DataTypeScenarioServiceMalformedRegistryTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.070 s -- in dev.mars.apex.core.service.scenario.DataTypeScenarioServiceMalformedRegistryTest
+[INFO] Running dev.mars.apex.core.service.scenario.DataTypeScenarioServiceStageTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.124 s -- in dev.mars.apex.core.service.scenario.DataTypeScenarioServiceStageTest
+[INFO] Running dev.mars.apex.core.service.scenario.DataTypeScenarioServiceTest
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.091 s -- in dev.mars.apex.core.service.scenario.DataTypeScenarioServiceTest
+[INFO] Running dev.mars.apex.core.service.scenario.ResultThreadSafetyTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.275 s -- in dev.mars.apex.core.service.scenario.ResultThreadSafetyTest
+[INFO] Running dev.mars.apex.core.service.scenario.ScenarioAdvancedFeaturesTest
+[INFO] Running dev.mars.apex.core.service.scenario.ScenarioAdvancedFeaturesTest$ContextSharingTests
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in dev.mars.apex.core.service.scenario.ScenarioAdvancedFeaturesTest$ContextSharingTests
+[INFO] Running dev.mars.apex.core.service.scenario.ScenarioAdvancedFeaturesTest$FlagForReviewTests
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.mars.apex.core.service.scenario.ScenarioAdvancedFeaturesTest$FlagForReviewTests
+[INFO] Running dev.mars.apex.core.service.scenario.ScenarioAdvancedFeaturesTest$StringOperationsTests
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in dev.mars.apex.core.service.scenario.ScenarioAdvancedFeaturesTest$StringOperationsTests
+[INFO] Running dev.mars.apex.core.service.scenario.ScenarioAdvancedFeaturesTest$NestedFieldAccessTests
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s -- in dev.mars.apex.core.service.scenario.ScenarioAdvancedFeaturesTest$NestedFieldAccessTests
+[INFO] Running dev.mars.apex.core.service.scenario.ScenarioAdvancedFeaturesTest$OrConditionTests
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in dev.mars.apex.core.service.scenario.ScenarioAdvancedFeaturesTest$OrConditionTests
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.043 s -- in dev.mars.apex.core.service.scenario.ScenarioAdvancedFeaturesTest
+[INFO] Running dev.mars.apex.core.service.scenario.ScenarioConcurrentAccessTest
+[INFO] Running dev.mars.apex.core.service.scenario.ScenarioConcurrentAccessTest$ConcurrentAccessTests
+[ERROR] Tests run: 4, Failures: 3, Errors: 0, Skipped: 0, Time elapsed: 0.415 s <<< FAILURE! -- in dev.mars.apex.core.service.scenario.ScenarioConcurrentAccessTest$ConcurrentAccessTests
+[ERROR] dev.mars.apex.core.service.scenario.ScenarioConcurrentAccessTest$ConcurrentAccessTests.testConcurrentCacheAccess -- Time elapsed: 0.106 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: All concurrent cache accesses should succeed ==> expected: <50> but was: <0>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:563)
+	at dev.mars.apex.core.service.scenario.ScenarioConcurrentAccessTest$ConcurrentAccessTests.testConcurrentCacheAccess(ScenarioConcurrentAccessTest.java:300)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.mars.apex.core.service.scenario.ScenarioConcurrentAccessTest$ConcurrentAccessTests.testResultIsolationBetweenThreads -- Time elapsed: 0.036 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Thread 0 execution should succeed ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at dev.mars.apex.core.service.scenario.ScenarioConcurrentAccessTest$ConcurrentAccessTests.testResultIsolationBetweenThreads(ScenarioConcurrentAccessTest.java:224)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[ERROR] dev.mars.apex.core.service.scenario.ScenarioConcurrentAccessTest$ConcurrentAccessTests.testMultiThreadedScenarioExecution -- Time elapsed: 0.212 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: All concurrent executions should succeed ==> expected: <100> but was: <0>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:563)
+	at dev.mars.apex.core.service.scenario.ScenarioConcurrentAccessTest$ConcurrentAccessTests.testMultiThreadedScenarioExecution(ScenarioConcurrentAccessTest.java:115)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.417 s -- in dev.mars.apex.core.service.scenario.ScenarioConcurrentAccessTest
+[INFO] Running dev.mars.apex.core.service.scenario.ScenarioConfigurationClassificationTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.024 s -- in dev.mars.apex.core.service.scenario.ScenarioConfigurationClassificationTest
+[INFO] Running dev.mars.apex.core.service.scenario.ScenarioConfigurationSpelValidationTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.021 s -- in dev.mars.apex.core.service.scenario.ScenarioConfigurationSpelValidationTest
+[INFO] Running dev.mars.apex.core.service.scenario.ScenarioConfigurationStageTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.022 s -- in dev.mars.apex.core.service.scenario.ScenarioConfigurationStageTest
+[INFO] Running dev.mars.apex.core.service.scenario.ScenarioPerformanceMonitoringTest
+[INFO] Running dev.mars.apex.core.service.scenario.ScenarioPerformanceMonitoringTest$PerformanceMonitoringTests
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.164 s -- in dev.mars.apex.core.service.scenario.ScenarioPerformanceMonitoringTest$PerformanceMonitoringTests
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.166 s -- in dev.mars.apex.core.service.scenario.ScenarioPerformanceMonitoringTest
+[INFO] Running dev.mars.apex.core.service.scenario.ScenarioSlaTimeoutEnforcementTest
+[INFO] Running dev.mars.apex.core.service.scenario.ScenarioSlaTimeoutEnforcementTest$SlaTimeoutTests
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.101 s -- in dev.mars.apex.core.service.scenario.ScenarioSlaTimeoutEnforcementTest$SlaTimeoutTests
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.102 s -- in dev.mars.apex.core.service.scenario.ScenarioSlaTimeoutEnforcementTest
+[INFO] Running dev.mars.apex.core.service.scenario.ScenarioStageCircularDependencyTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s -- in dev.mars.apex.core.service.scenario.ScenarioStageCircularDependencyTest
+[INFO] Running dev.mars.apex.core.service.scenario.ScenarioStageExecutorFileHandlingTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.698 s -- in dev.mars.apex.core.service.scenario.ScenarioStageExecutorFileHandlingTest
+[INFO] Running dev.mars.apex.core.service.scenario.ScenarioStageExecutorTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in dev.mars.apex.core.service.scenario.ScenarioStageExecutorTest
+[INFO] Running dev.mars.apex.core.service.scenario.ScenarioStageMissingDependencyTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in dev.mars.apex.core.service.scenario.ScenarioStageMissingDependencyTest
+[INFO] Running dev.mars.apex.core.service.scenario.ScenarioStageSpelErrorPropagationTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.045 s -- in dev.mars.apex.core.service.scenario.ScenarioStageSpelErrorPropagationTest
+[INFO] Running dev.mars.apex.core.service.scenario.ScenarioStageTest
+[INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.021 s -- in dev.mars.apex.core.service.scenario.ScenarioStageTest
+[INFO] Running dev.mars.apex.core.service.scenario.ScenarioTracingTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.014 s -- in dev.mars.apex.core.service.scenario.ScenarioTracingTest
+[INFO] Running dev.mars.apex.core.service.transform.GenericTransformerServiceTest
+[INFO] Tests run: 18, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.030 s -- in dev.mars.apex.core.service.transform.GenericTransformerServiceTest
+[INFO] Running dev.mars.apex.core.service.transformation.YamlConditionalTransformationTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.mars.apex.core.service.transformation.YamlConditionalTransformationTest
+[INFO] Running dev.mars.apex.core.service.transformation.YamlTransformationProcessorDeprecationTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in dev.mars.apex.core.service.transformation.YamlTransformationProcessorDeprecationTest
+[INFO] Running dev.mars.apex.core.service.transformation.YamlTransformationProcessorErrorHandlingTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.mars.apex.core.service.transformation.YamlTransformationProcessorErrorHandlingTest
+[INFO] Running dev.mars.apex.core.service.transformation.YamlTransformationProcessorRuleResultTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.mars.apex.core.service.transformation.YamlTransformationProcessorRuleResultTest
+[INFO] Running dev.mars.apex.core.service.validation.ValidationServiceTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.018 s -- in dev.mars.apex.core.service.validation.ValidationServiceTest
+[INFO] Running dev.mars.apex.core.severity.SeverityIntegrationTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.047 s -- in dev.mars.apex.core.severity.SeverityIntegrationTest
+[INFO] Running dev.mars.apex.core.util.ComprehensiveYamlValidationTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.107 s -- in dev.mars.apex.core.util.ComprehensiveYamlValidationTest
+[INFO] Running dev.mars.apex.core.util.YamlDependencyAnalyzerRealFilesTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.023 s -- in dev.mars.apex.core.util.YamlDependencyAnalyzerRealFilesTest
+[INFO] Running dev.mars.apex.core.util.YamlDependencyAnalyzerTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.452 s -- in dev.mars.apex.core.util.YamlDependencyAnalyzerTest
+[INFO] Running dev.mars.apex.core.util.YamlMetadataValidatorStageTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.259 s -- in dev.mars.apex.core.util.YamlMetadataValidatorStageTest
+[INFO] Running dev.mars.apex.core.util.YamlMetadataValidatorTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.184 s -- in dev.mars.apex.core.util.YamlMetadataValidatorTest
+[INFO] Running dev.mars.apex.core.util.YamlProcessingSequenceAnalyzerTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.058 s -- in dev.mars.apex.core.util.YamlProcessingSequenceAnalyzerTest
+[INFO] Running dev.mars.apex.core.util.YamlStageValidationIntegrationTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in dev.mars.apex.core.util.YamlStageValidationIntegrationTest
+[INFO] Running dev.mars.apex.core.util.YamlValidationIntegrationTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in dev.mars.apex.core.util.YamlValidationIntegrationTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   DefinitiveErrorHandlingProofTest.testErrorHandlingPreservesContext:221 Should have structured error message ==> expected: <true> but was: <false>
+[ERROR]   DefinitiveErrorHandlingProofTest.testNonCriticalErrorsAreLoggedAndRecovered:105 Non-critical errors should be recovered to NO_MATCH ==> expected: <NO_MATCH> but was: <ERROR>
+[ERROR]   DefinitiveErrorHandlingProofTest.testSummaryAllErrorPathsWork:280 All non-critical errors should be recovered to NO_MATCH ==> expected: <6> but was: <4>
+[ERROR]   ErrorRecoveryDebugTest.testWarningSeverityRuleEvaluation:121 WARNING severity rule should be recovered and return NO_MATCH ==> expected: <NO_MATCH> but was: <ERROR>
+[ERROR]   RuleEvaluationErrorHandlingComprehensiveTest.testExecuteRule_MissingProperty_CriticalSeverity:118 Should have descriptive error message ==> expected: <true> but was: <false>
+[ERROR]   RuleEvaluationErrorHandlingComprehensiveTest.testExecuteRule_MissingProperty_ErrorSeverity:86 Should have descriptive error message ==> expected: <true> but was: <false>
+[ERROR]   RuleEvaluationErrorHandlingComprehensiveTest.testExecuteRulesList_FirstRuleFails:179 Should have descriptive error message ==> expected: <true> but was: <false>
+[ERROR]   RuleEvaluationErrorHandlingComprehensiveTest.testExecuteRules_MixedRuleFailure:210 Should have descriptive error message ==> expected: <true> but was: <false>
+[ERROR]   RuleEvaluationErrorHandlingComprehensiveTest.testRuleEngineService_EvaluateRules_ErrorInResultsList:249 Should have an error result ==> expected: not <null>
+[ERROR]   RulesEngineSpelErrorHandlingTest.shouldReturnErrorResultForSpelPropertyNotFound:70 Error message should indicate evaluation error ==> expected: <true> but was: <false>
+[ERROR]   ConfigurableErrorRecoveryIntegrationTest.testCompleteEndToEndConfigurableRecovery:283 WARNING severity should return NO_MATCH result ==> expected: <NO_MATCH> but was: <ERROR>
+[ERROR]   ConfigurableErrorRecoveryIntegrationTest.testCustomErrorRecoveryConfiguration:113 ERROR severity should be recovered with custom configuration ==> expected: <NO_MATCH> but was: <ERROR>
+[ERROR]   ConfigurableErrorRecoveryIntegrationTest.testDefaultBackwardCompatibleConfiguration:84 WARNING severity should be recovered to NO_MATCH ==> expected: <NO_MATCH> but was: <ERROR>
+[ERROR]   ConfigurableErrorRecoveryIntegrationTest.testDifferentRecoveryStrategiesPerSeverity:171 ERROR severity should be recovered with RETRY_WITH_SAFE_EXPRESSION strategy ==> expected: <NO_MATCH> but was: <ERROR>
+[ERROR]   ConfigurableErrorRecoveryIntegrationTest.testGlobalErrorRecoveryEnableDisable:144 WARNING severity should be recovered when globally enabled ==> expected: <NO_MATCH> but was: <ERROR>
+[ERROR]   SpelFieldMappingIntegrationTest.testLookupEnrichmentWithNestedResults:141 Should extract nested instrument name from lookup result ==> expected: <Apple Inc.> but was: <null>
+[ERROR]   ConditionalStageExecutionTest.testComplexSpelCondition:206 Stage should execute when complex condition is true ==> expected: <1> but was: <0>
+[ERROR]   ConditionalStageExecutionTest.testConditionWithDependencies:260 Both stages should execute ==> expected: <2> but was: <1>
+[ERROR]   ConditionalStageExecutionTest.testMultipleStagesWithDifferentConditions:325 Only EMEA stage should execute ==> expected: <1> but was: <0>
+[ERROR]   ConditionalStageExecutionTest.testStageExecutesWhenConditionTrue:96 Stage should execute when condition is true ==> expected: <1> but was: <0>
+[ERROR]   DataTypeScenarioServiceClassificationTest.testLevel1_SimpleCommoditySwapClassification:121 Scenario should complete successfully ==> expected: <false> but was: <true>
+[ERROR]   DataTypeScenarioServiceClassificationTest.testLevel1_SimpleOtcOptionClassification:86 Scenario should complete successfully ==> expected: <false> but was: <true>
+[ERROR]   DataTypeScenarioServiceClassificationTest.testLevel2_NonUsOtcOptionFallback:188 Scenario should complete successfully ==> expected: <false> but was: <true>
+[ERROR]   DataTypeScenarioServiceClassificationTest.testLevel2_UsOtcOptionAndConditions:157 Scenario should complete successfully ==> expected: <false> but was: <true>
+[ERROR]   DataTypeScenarioServiceClassificationTest.testLevel3_HighNotionalOtcOption:223 Scenario should complete successfully ==> expected: <false> but was: <true>
+[ERROR]   DataTypeScenarioServiceClassificationTest.testLevel3_LowNotionalOtcOptionFallback:254 Scenario should complete successfully ==> expected: <false> but was: <true>
+[ERROR]   ScenarioConcurrentAccessTest$ConcurrentAccessTests.testConcurrentCacheAccess:300 All concurrent cache accesses should succeed ==> expected: <50> but was: <0>
+[ERROR]   ScenarioConcurrentAccessTest$ConcurrentAccessTests.testMultiThreadedScenarioExecution:115 All concurrent executions should succeed ==> expected: <100> but was: <0>
+[ERROR]   ScenarioConcurrentAccessTest$ConcurrentAccessTests.testResultIsolationBetweenThreads:224 Thread 0 execution should succeed ==> expected: <true> but was: <false>
+[INFO] 
+[ERROR] Tests run: 2084, Failures: 29, Errors: 0, Skipped: 2
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  01:46 min
+[INFO] Finished at: 2025-12-03T14:21:54+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.1.2:test (default-test) on project apex-core: There are test failures.
+[ERROR] 
+[ERROR] Please refer to C:\Users\markr\dev\java\corejava\apex-rules-engine\apex-core\target\surefire-reports for the individual test results.
+[ERROR] Please refer to dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

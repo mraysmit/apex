@@ -123,7 +123,7 @@ scenario:
   
   # Classification rule for automatic routing
   classification-rule:
-    condition: "#data['tradeType'] == 'OTCOption' && #data['region'] == 'US'"
+    condition: "#'tradeType'] == 'OTCOption' && #'region'] == 'US'"
     description: "Matches US OTC option trades"
 
   processing-stages:
@@ -212,7 +212,7 @@ scenario:
   
   # Required: Classification rule for routing
   classification-rule:
-    condition: "#data['field'] == 'value'"
+    condition: "#'field'] == 'value'"
     description: "When this scenario applies"
   
   # Required: At least one processing stage
@@ -248,11 +248,11 @@ Classification rules use **SpEL (Spring Expression Language)** expressions to au
 
 ### Basic Syntax
 
-The data being evaluated is available as `#data` in SpEL expressions:
+The data being evaluated is available as #context in SpEL expressions:
 
 ```yaml
 classification-rule:
-  condition: "#data['fieldName'] == 'expectedValue'"
+  condition: "#'fieldName'] == 'expectedValue'"
   description: "Human-readable explanation"
 ```
 
@@ -260,40 +260,40 @@ classification-rule:
 
 **Simple field match:**
 ```yaml
-condition: "#data['tradeType'] == 'OTCOption'"
+condition: "#'tradeType'] == 'OTCOption'"
 ```
 
 **AND conditions:**
 ```yaml
-condition: "#data['tradeType'] == 'OTCOption' && #data['region'] == 'US'"
+condition: "#'tradeType'] == 'OTCOption' && #'region'] == 'US'"
 ```
 
 **OR conditions:**
 ```yaml
-condition: "#data['region'] == 'US' || #data['currency'] == 'USD'"
+condition: "#'region'] == 'US' || #'currency'] == 'USD'"
 ```
 
 **Numeric comparisons:**
 ```yaml
-condition: "#data['notional'] > 100000000"
+condition: "#'notional'] > 100000000"
 ```
 
 **String operations:**
 ```yaml
-condition: "#data['tradeId'].startsWith('TR-') && #data['tradeId'].length() == 10"
+condition: "#'tradeId'].startsWith('TR-') && #'tradeId'].length() == 10"
 ```
 
 **Complex business logic:**
 ```yaml
 condition: |
-  #data['tradeType'] == 'OTCOption' &&
-  #data['notional'] > 50000000 &&
-  (#data['region'] == 'US' || #data['currency'] == 'USD')
+  #'tradeType'] == 'OTCOption' &&
+  #'notional'] > 50000000 &&
+  (#'region'] == 'US' || #'currency'] == 'USD')
 ```
 
 **Null checks:**
 ```yaml
-condition: "#data['counterparty'] != null && !#data['counterparty'].isEmpty()"
+condition: "#'counterparty'] != null && !#'counterparty'].isEmpty()"
 ```
 
 ### Best Practices for Classification Rules
@@ -301,25 +301,25 @@ condition: "#data['counterparty'] != null && !#data['counterparty'].isEmpty()"
 ✅ **Be specific** - Make rules as specific as possible to avoid ambiguity
 ```yaml
 # Good
-condition: "#data['tradeType'] == 'OTCOption' && #data['region'] == 'US' && #data['assetClass'] == 'Equity'"
+condition: "#'tradeType'] == 'OTCOption' && #'region'] == 'US' && #'assetClass'] == 'Equity'"
 
 # Too broad
-condition: "#data['tradeType'] == 'OTCOption'"
+condition: "#'tradeType'] == 'OTCOption'"
 ```
 
 ✅ **Test null values** - Always check for null before accessing properties
 ```yaml
 # Good
-condition: "#data['region'] != null && #data['region'] == 'US'"
+condition: "#'region'] != null && #'region'] == 'US'"
 
 # Risky (NullPointerException if region is null)
-condition: "#data['region'] == 'US'"
+condition: "#'region'] == 'US'"
 ```
 
 ✅ **Document the logic** - Use clear descriptions
 ```yaml
 classification-rule:
-  condition: "#data['tradeType'] == 'OTCOption' && #data['notional'] > 50000000"
+  condition: "#'tradeType'] == 'OTCOption' && #'notional'] > 50000000"
   description: "Large OTC option trades (notional > 50M)"
 ```
 
@@ -328,11 +328,11 @@ classification-rule:
 scenarios:
   # More specific scenario first
   - scenario-id: "otc-option-us-large"
-    condition: "#data['tradeType'] == 'OTCOption' && #data['region'] == 'US' && #data['notional'] > 100000000"
+    condition: "#'tradeType'] == 'OTCOption' && #'region'] == 'US' && #'notional'] > 100000000"
   
   # More general scenario second
   - scenario-id: "otc-option-us"
-    condition: "#data['tradeType'] == 'OTCOption' && #data['region'] == 'US'"
+    condition: "#'tradeType'] == 'OTCOption' && #'region'] == 'US'"
 ```
 
 ---
@@ -350,7 +350,7 @@ processing-stages:
   - stage-name: "validation"              # Required: Unique stage name
     config-file: "path/to/config.yaml"    # Required: Configuration file path
     execution-order: 1                    # Required: Numeric execution order
-    condition: "#data['region'] == 'US'"  # Optional: SpEL condition for execution
+    condition: "#'region'] == 'US'"  # Optional: SpEL condition for execution
     failure-policy: "terminate"           # Optional: Override default policy
     depends-on: []                        # Optional: List of prerequisite stages
     required: true                        # Optional: Whether stage is mandatory
@@ -430,13 +430,13 @@ processing-stages:
   - stage-name: "us-compliance"
     config-file: "config/us-compliance.yaml"
     execution-order: 2
-    condition: "#data['region'] == 'US'"
+    condition: "#'region'] == 'US'"
 
   # Only executes if notional > $10M
   - stage-name: "high-value-checks"
     config-file: "config/high-value.yaml"
     execution-order: 3
-    condition: "#data['notionalAmount'] > 10000000"
+    condition: "#'notionalAmount'] > 10000000"
 ```
 
 **How Conditions Work:**
@@ -444,26 +444,26 @@ processing-stages:
 2. **Boolean result** - Must evaluate to true/false
 3. **Skip if false** - Stage skipped if condition is false or evaluation fails
 4. **No condition = always execute** - Backward compatible (stages without conditions always run)
-5. **Access to data** - Condition has full access to `#data` context
+5. **Access to data** - Condition has full access to `#context` and other variables in context
 
 **Condition Examples:**
 
 ```yaml
 # Region-based conditions
-condition: "#data['region'] == 'US'"
-condition: "#data['region'] == 'EMEA' || #data['region'] == 'APAC'"
+condition: "#'region'] == 'US'"
+condition: "#'region'] == 'EMEA' || #'region'] == 'APAC'"
 
 # Value-based conditions
-condition: "#data['notionalAmount'] > 10000000"
-condition: "#data['quantity'] >= 1000"
+condition: "#'notionalAmount'] > 10000000"
+condition: "#'quantity'] >= 1000"
 
 # Type-based conditions
-condition: "#data['productType'] == 'OTC_OPTION'"
-condition: "#data['instrumentType'] == 'EQUITY' || #data['instrumentType'] == 'BOND'"
+condition: "#'productType'] == 'OTC_OPTION'"
+condition: "#'instrumentType'] == 'EQUITY' || #'instrumentType'] == 'BOND'"
 
 # Complex conditions
-condition: "#data['region'] == 'US' && #data['notionalAmount'] > 10000000"
-condition: "#data['approvedBy'] != null && #data['creditLimitChecked'] == true"
+condition: "#'region'] == 'US' && #'notionalAmount'] > 10000000"
+condition: "#'approvedBy'] != null && #'creditLimitChecked'] == true"
 ```
 
 ---
@@ -895,7 +895,7 @@ scenario:
   scenario-id: "trade-validation"
   
   classification-rule:
-    condition: "#data['dataType'] == 'trade'"
+    condition: "#'dataType'] == 'trade'"
     description: "All trade data"
 
   processing-stages:
@@ -948,7 +948,7 @@ processing-stages:
   - stage-name: "us-compliance"
     config-file: "config/us-compliance.yaml"
     execution-order: 2
-    condition: "#data['region'] == 'US'"
+    condition: "#'region'] == 'US'"
     failure-policy: "terminate"
     depends-on: ["base-validation"]
 
@@ -956,7 +956,7 @@ processing-stages:
   - stage-name: "emea-compliance"
     config-file: "config/emea-compliance.yaml"
     execution-order: 3
-    condition: "#data['region'] == 'EMEA'"
+    condition: "#'region'] == 'EMEA'"
     failure-policy: "terminate"
     depends-on: ["base-validation"]
 
@@ -964,7 +964,7 @@ processing-stages:
   - stage-name: "high-value-validation"
     config-file: "config/high-value.yaml"
     execution-order: 4
-    condition: "#data['notionalAmount'] > 10000000"
+    condition: "#'notionalAmount'] > 10000000"
     failure-policy: "flag-for-review"
     depends-on: ["base-validation"]
 ```
@@ -1152,7 +1152,7 @@ Object result = parser.parseExpression(ruleCondition).getValue(context);
 **Solutions:**
 1. Check logs for condition evaluation:
 ```
-INFO: Stage 'us-compliance' condition not met - skipping: #data['region'] == 'US'
+INFO: Stage 'us-compliance' condition not met - skipping: #'region'] == 'US'
 ```
 2. Verify field names match exactly (case-sensitive)
 3. Check data types (string vs number)
@@ -1167,10 +1167,10 @@ INFO: Stage 'us-compliance' condition not met - skipping: #data['region'] == 'US
 1. Check for null values in condition:
 ```yaml
 # Bad (fails if region is null)
-condition: "#data['region'] == 'US'"
+condition: "#'region'] == 'US'"
 
 # Good (handles null)
-condition: "#data['region'] != null && #data['region'] == 'US'"
+condition: "#'region'] != null && #'region'] == 'US'"
 ```
 2. Verify field exists in data
 3. Check data types match condition expectations
@@ -1188,7 +1188,7 @@ logging.level.dev.mars.apex.core.engine=DEBUG
 ```
 DEBUG - Loading scenario registry: config/scenario-registry.yaml
 DEBUG - Loaded 5 scenarios from registry
-DEBUG - Scenario 'otc-option-us' classification rule: #data['tradeType'] == 'OTCOption'
+DEBUG - Scenario 'otc-option-us' classification rule: #'tradeType'] == 'OTCOption'
 ```
 
 **Monitor stage execution:**

@@ -66,8 +66,8 @@ class ScenarioSlaTimeoutEnforcementTest {
         void testScenarioCompletesWithinSlaTimeout() {
             logger.info("TEST: Scenario execution within SLA timeout");
 
-            // Given: Scenario with reasonable SLA timeout (5 seconds)
-            scenario.setClassificationRuleCondition("#data['type'] == 'OTC'");
+            // Given: Scenario with reasonable SLA timeout (5 seconds) (using direct field access)
+            scenario.setClassificationRuleCondition("['type'] == 'OTC'");
             Map<String, Object> metadata = new HashMap<>();
             metadata.put("processing-sla-ms", 5000);
             scenario.setMetadata(metadata);
@@ -104,8 +104,8 @@ class ScenarioSlaTimeoutEnforcementTest {
         void testStageExecutionTimeTracking() {
             logger.info("TEST: Stage execution time tracking");
 
-            // Given: Scenario with multiple stages
-            scenario.setClassificationRuleCondition("#data['type'] == 'OTC'");
+            // Given: Scenario with multiple stages (using direct field access)
+            scenario.setClassificationRuleCondition("['type'] == 'OTC'");
             Map<String, Object> metadata = new HashMap<>();
             metadata.put("processing-sla-ms", 5000);
             scenario.setMetadata(metadata);
@@ -138,8 +138,8 @@ class ScenarioSlaTimeoutEnforcementTest {
         void testTightSlaTimeoutHandling() {
             logger.info("TEST: Tight SLA timeout handling");
 
-            // Given: Scenario with very tight SLA (100ms)
-            scenario.setClassificationRuleCondition("#data['type'] == 'OTC'");
+            // Given: Scenario with very tight SLA (100ms) (using direct field access)
+            scenario.setClassificationRuleCondition("['type'] == 'OTC'");
             Map<String, Object> metadata = new HashMap<>();
             metadata.put("processing-sla-ms", 100);
             scenario.setMetadata(metadata);
@@ -174,8 +174,8 @@ class ScenarioSlaTimeoutEnforcementTest {
         void testTotalExecutionTimeAccumulation() {
             logger.info("TEST: Total execution time accumulation");
 
-            // Given: Scenario with multiple stages
-            scenario.setClassificationRuleCondition("#data['type'] == 'OTC'");
+            // Given: Scenario with multiple stages (using direct field access)
+            scenario.setClassificationRuleCondition("['type'] == 'OTC'");
             Map<String, Object> metadata = new HashMap<>();
             metadata.put("processing-sla-ms", 5000);
             scenario.setMetadata(metadata);

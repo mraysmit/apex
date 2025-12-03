@@ -42,14 +42,14 @@ public class YamlDefaultValueIntegrationTest {
             rules:
               - id: "age-validation"
                 name: "Age Validation Rule"
-                condition: "#data.age != null && #data.age >= 18"
+                condition: "#age != null && #age >= 18"
                 severity: "WARNING"
                 default-value: false
                 message: "Age validation failed"
                 
               - id: "email-check"
                 name: "Email Format Check"
-                condition: "#data.email != null && #data.email.contains('@')"
+                condition: "#email != null && #email.contains('@')"
                 severity: "INFO"
                 default-value: true
                 message: "Email format check"
@@ -81,7 +81,7 @@ public class YamlDefaultValueIntegrationTest {
         YamlRule yamlRule = new YamlRule();
         yamlRule.setId("test-rule");
         yamlRule.setName("Test Rule");
-        yamlRule.setCondition("#data.field != null");
+        yamlRule.setCondition("#field != null");
         yamlRule.setSeverity("WARNING");
         yamlRule.setDefaultValue("DEFAULT_RESULT");
 
@@ -91,7 +91,7 @@ public class YamlDefaultValueIntegrationTest {
         assertEquals("DEFAULT_RESULT", rule.getDefaultValue());
         assertEquals("test-rule", rule.getId());
         assertEquals("Test Rule", rule.getName());
-        assertEquals("#data.field != null", rule.getCondition());
+        assertEquals("#field != null", rule.getCondition());
         assertEquals("WARNING", rule.getSeverity());
     }
 
@@ -106,10 +106,9 @@ public class YamlDefaultValueIntegrationTest {
               - id: "safe-calculation"
                 name: "Safe Calculation Enrichment"
                 type: "calculation-enrichment"
-                condition: "#data != null"
                 
                 calculation-config:
-                  expression: "#data.amount * #data.rate / 100"
+                  expression: "#amount * #rate / 100"
                   result-field: "calculatedValue"
                   default-value: 0.0
                 
@@ -129,7 +128,7 @@ public class YamlDefaultValueIntegrationTest {
         assertEquals("safe-calculation", enrichment.getId());
         assertNotNull(enrichment.getCalculationConfig());
         assertEquals(0.0, enrichment.getCalculationConfig().getDefaultValue());
-        assertEquals("#data.amount * #data.rate / 100", enrichment.getCalculationConfig().getExpression());
+        assertEquals("#amount * #rate / 100", enrichment.getCalculationConfig().getExpression());
         assertEquals("calculatedValue", enrichment.getCalculationConfig().getResultField());
     }
 
@@ -143,7 +142,7 @@ public class YamlDefaultValueIntegrationTest {
             rules:
               - id: "legacy-rule"
                 name: "Legacy Rule"
-                condition: "#data.field != null"
+                condition: "#field != null"
                 severity: "ERROR"
                 message: "Legacy rule message"
             
@@ -153,7 +152,7 @@ public class YamlDefaultValueIntegrationTest {
                 type: "calculation-enrichment"
                 
                 calculation-config:
-                  expression: "#data.value * 2"
+                  expression: "#value * 2"
                   result-field: "doubledValue"
                 
                 field-mappings:
@@ -186,13 +185,13 @@ public class YamlDefaultValueIntegrationTest {
             rules:
               - id: "rule-with-default"
                 name: "Rule With Default"
-                condition: "#data.field1 > 0"
+                condition: "#field1 > 0"
                 severity: "WARNING"
                 default-value: "SAFE_DEFAULT"
                 
               - id: "rule-without-default"
                 name: "Rule Without Default"
-                condition: "#data.field2 != null"
+                condition: "#field2 != null"
                 severity: "ERROR"
                 # No default-value specified
             """;
@@ -223,22 +222,22 @@ public class YamlDefaultValueIntegrationTest {
             rules:
               - id: "string-default"
                 name: "String Default Rule"
-                condition: "#data.field1 != null"
+                condition: "#field1 != null"
                 default-value: "STRING_DEFAULT"
 
               - id: "boolean-default"
                 name: "Boolean Default Rule"
-                condition: "#data.field2 != null"
+                condition: "#field2 != null"
                 default-value: true
 
               - id: "numeric-default"
                 name: "Numeric Default Rule"
-                condition: "#data.field3 != null"
+                condition: "#field3 != null"
                 default-value: 42
 
               - id: "decimal-default"
                 name: "Decimal Default Rule"
-                condition: "#data.field4 != null"
+                condition: "#field4 != null"
                 default-value: 3.14
             """;
 

@@ -78,7 +78,7 @@ ELSE IF rule condition evaluates to FALSE:
 
 **CRITICAL PRINCIPLE**: Business rule conditions are fixed business logic from your catalogue. You cannot change them. You must match your test data and configuration to the condition.
 
-##### Example 1: Business Rule Condition `#data['tradeId'] != null`
+##### Example 1: Business Rule Condition `#'tradeId'] != null`
 
 | Test Data (tradeId) | Condition Result | Severity | Recovery | Outcome | What This Tests |
 |---------------------|------------------|----------|----------|---------|-----------------|
@@ -87,7 +87,7 @@ ELSE IF rule condition evaluates to FALSE:
 | "TRADE-001" | TRUE | WARNING | enabled | SUCCESS | Business rule matches - happy path |
 | null | FALSE | WARNING | enabled | CONTINUE | Business rule doesn't match - recovery works |
 
-##### Example 2: Business Rule Condition `#data['tradeId'] == null`
+##### Example 2: Business Rule Condition `#'tradeId'] == null`
 
 | Test Data (tradeId) | Condition Result | Severity | Recovery | Outcome | What This Tests |
 |---------------------|------------------|----------|----------|---------|-----------------|
@@ -181,7 +181,7 @@ if (itemResult.getResultType() == RuleResult.ResultType.ERROR) {
 ```yaml
 rules:
   - id: "trade-id-required"
-    condition: "#data['tradeId'] != null"
+    condition: "#'tradeId'] != null"
     severity: "ERROR"
 ```
 
@@ -217,7 +217,7 @@ try {
 ```yaml
 rules:
   - id: "email-format-check"
-    condition: "#data['email'] != null && #data['email'].contains('@')"
+    condition: "#'email'] != null && #'email'].contains('@')"
     severity: "WARNING"
 ```
 
@@ -407,7 +407,7 @@ error-recovery:
 
 rules:
   - name: "my-rule"
-    condition: "#data.amount > 1000"
+    condition: "#amount > 1000"
     message: "High value transaction"
     severity: "ERROR"
 ```
@@ -653,7 +653,7 @@ error-recovery:
 rules:
   # Validation rule: Condition evaluates to TRUE when accountId exists
   - name: "critical-validation"
-    condition: "#data.accountId != null"  # TRUE when accountId exists
+    condition: "#accountId != null"  # TRUE when accountId exists
     message: "Account ID is required"
     severity: "ERROR"
     # When accountId exists: condition TRUE → rule matches → success
@@ -661,7 +661,7 @@ rules:
 
   # Optional validation: Condition evaluates to TRUE when email format is correct
   - name: "optional-check"
-    condition: "#data.email != null && #data.email.contains('@')"  # TRUE when email has @
+    condition: "#email != null && #email.contains('@')"  # TRUE when email has @
     message: "Email format validation"
     severity: "WARNING"
     # When email has @: condition TRUE → rule matches → success
@@ -731,8 +731,8 @@ Enrichments can specify required fields that must be present in the data:
 enrichments:
   - id: "calculate-premium"
     type: "calculation"
-    condition: "#data['notional'] != null"
-    expression: "#data['notional'] * 0.05"
+    condition: "#'notional'] != null"
+    expression: "#'notional'] * 0.05"
     result-field: "premium"
     required-fields:
       - "notional"
@@ -831,8 +831,8 @@ metadata:
 enrichments:
   - id: "calculate-notional"
     type: "calculation"
-    condition: "#data['quantity'] != null && #data['price'] != null"
-    expression: "#data['quantity'] * #data['price']"
+    condition: "#'quantity'] != null && #'price'] != null"
+    expression: "#'quantity'] * #'price']"
     result-field: "notional"
     required-fields:
       - "quantity"
@@ -862,8 +862,8 @@ transformations:
    ```yaml
    enrichments:
      - id: "safe-calculation"
-       condition: "#data['amount'] != null && #data['amount'] > 0"
-       expression: "#data['amount'] * 1.1"
+       condition: "#'amount'] != null && #'amount'] > 0"
+       expression: "#'amount'] * 1.1"
        result-field: "adjustedAmount"
    ```
 
@@ -874,7 +874,7 @@ transformations:
        required-fields:
          - "notional"
          - "rate"
-       expression: "#data['notional'] * #data['rate']"
+       expression: "#'notional'] * #'rate']"
        result-field: "premium"
    ```
 
@@ -882,7 +882,7 @@ transformations:
    ```yaml
    enrichments:
      - id: "safe-string-operation"
-       expression: "#data['name'] != null ? #data['name'].toUpperCase() : 'UNKNOWN'"
+       expression: "#'name'] != null ? #'name'].toUpperCase() : 'UNKNOWN'"
        result-field: "upperName"
    ```
 
@@ -1002,7 +1002,7 @@ void testErrorRecoveryForWarnings() {
 # ✅ CORRECT: Returns TRUE for valid data
 rules:
   - id: "amount-validation"
-    condition: "#data.amount != null && #data.amount > 0"
+    condition: "#amount != null && #amount > 0"
     message: "Amount must be positive"
     severity: "ERROR"
     # Valid data (amount > 0): condition TRUE → success
@@ -1011,7 +1011,7 @@ rules:
 # ❌ INCORRECT: Returns TRUE for invalid data
 rules:
   - id: "amount-validation-wrong"
-    condition: "#data.amount == null || #data.amount <= 0"
+    condition: "#amount == null || #amount <= 0"
     message: "Amount must be positive"
     severity: "ERROR"
     # Valid data (amount > 0): condition FALSE → unexpected behavior
@@ -1379,7 +1379,7 @@ public class RuleEvaluationException extends RuleEngineException {
 ```java
 throw new RuleEvaluationException(
     "validate-amount",
-    "#data.amount > 1000",
+    "#amount > 1000",
     "Property 'amount' not found in data context"
 );
 ```
@@ -1676,13 +1676,13 @@ try {
 
 ```yaml
 # Example 1: Detect when field is PRESENT (rule matches when tradeId exists)
-- condition: "#data['tradeId'] != null && !#data['tradeId'].toString().trim().isEmpty()"
+- condition: "#'tradeId'] != null && !#'tradeId'].toString().trim().isEmpty()"
   severity: "ERROR"
   # tradeId present → condition TRUE → rule matches → success ✓
   # tradeId missing → condition FALSE → rule doesn't match + ERROR severity → fail-fast ✓
 
 # Example 2: Detect when field is MISSING (rule matches when tradeId is null)
-- condition: "#data['tradeId'] == null"
+- condition: "#'tradeId'] == null"
   severity: "ERROR"
   # tradeId missing → condition TRUE → rule matches → success ✓
   # tradeId present → condition FALSE → rule doesn't match + ERROR severity → fail-fast ✓

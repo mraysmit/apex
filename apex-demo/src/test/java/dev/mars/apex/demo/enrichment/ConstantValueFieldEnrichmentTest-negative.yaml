@@ -30,5 +30,5 @@ enrichments:
       # ❌ INCORRECT PATTERN - This is the user's original issue
       # This will try to lookup a field named '''e1''' instead of assigning constant 'e1'
       - source-field: '''e1'''
-        target-field: '#data.a_field'
+        target-field: 'a_field'
 

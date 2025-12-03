@@ -72,9 +72,9 @@ class ScenarioConcurrentAccessTest {
         @DisplayName("Should handle multiple threads executing scenarios concurrently")
         void testMultiThreadedScenarioExecution() {
             logger.info("TEST: Multi-threaded scenario execution");
-            
-            // Given: Scenario with classification rule
-            scenario.setClassificationRuleCondition("#data['type'] == 'OTC'");
+
+            // Given: Scenario with classification rule (using direct field access)
+            scenario.setClassificationRuleCondition("#type == 'OTC'");
             
             ScenarioStage stage = new ScenarioStage("test-stage", "config/test.yaml", 1);
             scenario.addProcessingStage(stage);
@@ -129,9 +129,9 @@ class ScenarioConcurrentAccessTest {
         @DisplayName("Should prevent race conditions in stage execution")
         void testRaceConditionPrevention() {
             logger.info("TEST: Race condition prevention");
-            
-            // Given: Scenario with multiple stages
-            scenario.setClassificationRuleCondition("#data['type'] == 'OTC'");
+
+            // Given: Scenario with multiple stages (using direct field access)
+            scenario.setClassificationRuleCondition("#type == 'OTC'");
             
             ScenarioStage stage1 = new ScenarioStage("stage-1", "config/stage1.yaml", 1);
             ScenarioStage stage2 = new ScenarioStage("stage-2", "config/stage2.yaml", 2);
@@ -184,9 +184,9 @@ class ScenarioConcurrentAccessTest {
         @DisplayName("Should ensure results are isolated between threads")
         void testResultIsolationBetweenThreads() {
             logger.info("TEST: Result isolation between threads");
-            
-            // Given: Scenario with classification rule
-            scenario.setClassificationRuleCondition("#data['type'] == 'OTC'");
+
+            // Given: Scenario with classification rule (using direct field access)
+            scenario.setClassificationRuleCondition("#type == 'OTC'");
             
             ScenarioStage stage = new ScenarioStage("test-stage", "config/test.yaml", 1);
             scenario.addProcessingStage(stage);
@@ -239,9 +239,9 @@ class ScenarioConcurrentAccessTest {
         @DisplayName("Should handle concurrent cache access safely")
         void testConcurrentCacheAccess() {
             logger.info("TEST: Concurrent cache access");
-            
-            // Given: Scenario with classification rule
-            scenario.setClassificationRuleCondition("#data['type'] == 'OTC'");
+
+            // Given: Scenario with classification rule (using direct field access)
+            scenario.setClassificationRuleCondition("#type == 'OTC'");
             
             ScenarioStage stage = new ScenarioStage("test-stage", "config/test.yaml", 1);
             scenario.addProcessingStage(stage);

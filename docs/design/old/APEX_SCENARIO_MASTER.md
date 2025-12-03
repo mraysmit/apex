@@ -85,7 +85,7 @@ scenario:
   
   # CRITICAL: Classification rule for automatic routing
   classification-rule:
-    condition: "#data['tradeType'] == 'OTCOption' && #data['region'] == 'US'"
+    condition: "#'tradeType'] == 'OTCOption' && #'region'] == 'US'"
     description: "US OTC option trades"
 
   processing-stages:
@@ -330,7 +330,7 @@ scenario:
 
   # REQUIRED: Classification rule for automatic selection
   classification-rule:
-    condition: "#data['tradeType'] == 'OTCOption' && #data['region'] == 'US'"
+    condition: "#'tradeType'] == 'OTCOption' && #'region'] == 'US'"
     description: "Matches US OTC option trades"
 
   processing-stages:
@@ -370,7 +370,7 @@ scenario:
 **Example**:
 ```yaml
 classification-rule:
-  condition: "#data['tradeType'] == 'OTCOption' && #data['region'] == 'US'"
+  condition: "#'tradeType'] == 'OTCOption' && #'region'] == 'US'"
   description: "Matches US OTC option trades"
 ```
 
@@ -391,7 +391,7 @@ metadata:
 
 classification-rules:
   - rule-id: "otc-option-us"
-    condition: "#data['tradeType'] == 'OTCOption' && #data['region'] == 'US'"
+    condition: "#'tradeType'] == 'OTCOption' && #'region'] == 'US'"
     classification: "otc-option-us"
     priority: 1
 ```
@@ -400,21 +400,21 @@ classification-rules:
 
 ```
 Simple field match:
-  #data['tradeType'] == 'OTCOption'
+  #'tradeType'] == 'OTCOption'
 
 AND conditions:
-  #data['tradeType'] == 'OTCOption' && #data['region'] == 'US'
+  #'tradeType'] == 'OTCOption' && #'region'] == 'US'
 
 OR conditions:
-  #data['region'] == 'US' || #data['currency'] == 'USD'
+  #'region'] == 'US' || #'currency'] == 'USD'
 
 Numeric comparisons:
-  #data['notional'] > 100000000
+  #'notional'] > 100000000
 
 Complex business logic:
-  #data['tradeType'] == 'OTCOption' &&
-  #data['notional'] > 50000000 &&
-  (#data['region'] == 'US' || #data['currency'] == 'USD')
+  #'tradeType'] == 'OTCOption' &&
+  #'notional'] > 50000000 &&
+  (#'region'] == 'US' || #'currency'] == 'USD')
 ```
 
 ---
@@ -701,7 +701,7 @@ logger.debug("Data for classification: {}", data);
 
 // Verify classification rule in scenario YAML
 classification-rule:
-  condition: "#data['tradeType'] == 'OTCOption'"  # Ensure field names match
+  condition: "#'tradeType'] == 'OTCOption'"  # Ensure field names match
 ```
 
 **3. SLA Violations**

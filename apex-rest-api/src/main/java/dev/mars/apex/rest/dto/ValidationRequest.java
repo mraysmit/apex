@@ -123,7 +123,7 @@ public class ValidationRequest {
         @JsonProperty("name")
         private String name;
         
-        @Schema(description = "SpEL condition to evaluate", example = "#data.age >= 18")
+        @Schema(description = "SpEL condition to evaluate", example = "#age >= 18")
         @JsonProperty("condition")
         private String condition;
         

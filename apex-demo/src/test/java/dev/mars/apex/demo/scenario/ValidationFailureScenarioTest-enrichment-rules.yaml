@@ -39,7 +39,7 @@ rules:
   - id: "market-determination-check"
     name: "Market Determination Check"
     description: "Verify market classification is determined (simulates enrichment)"
-    condition: "#data.instrumentType != null"
+    condition: "#instrumentType != null"
     severity: "INFO"
     category: "enrichment"
     message: "Market classification determined successfully"

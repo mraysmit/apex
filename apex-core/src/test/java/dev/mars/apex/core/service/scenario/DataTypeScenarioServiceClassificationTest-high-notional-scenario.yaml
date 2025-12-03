@@ -12,9 +12,9 @@ scenario:
   name: "High-Notional OTC Option Processing"
   description: "Processes high-value OTC option trades (> $100M)"
   
-  # Embedded classification rule with numeric comparison (Option B)
+  # Embedded classification rule with numeric comparison (Option B) - using direct field access
   classification-rule:
-    condition: "#data['tradeType'] == 'OTCOption' && #data['notional'] > 100000000"
+    condition: "#tradeType == 'OTCOption' && #notional > 100000000"
     description: "Matches high-notional OTC option trades (notional > $100M)"
   
   # Stage-based processing configuration

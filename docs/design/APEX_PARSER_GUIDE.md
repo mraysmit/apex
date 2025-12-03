@@ -129,7 +129,7 @@ IF enrichment.source-field = X
 THEN X MUST BE DEFINED IN (input_schema OR previous_enrichment_output)
 
 Context-Sensitive Rule 3: SpEL Variable Scope
-IF spel_expression CONTAINS "#data.field"
+IF spel_expression CONTAINS "#field"
 THEN "field" MUST BE VALID IN current_data_context
 ```
 
@@ -153,7 +153,7 @@ Execution Model: Interpreted at runtime by apex-core
    # Business concept: "High-value trades require additional approval"
    rules:
      - id: "high-value-approval"
-       condition: "#data.tradeAmount > 1000000"
+       condition: "#tradeAmount > 1000000"
        action: "require-approval"
    ```
 
@@ -603,8 +603,8 @@ The compiler applies optimization techniques for better performance:
 
 1. **Constant Folding**: Evaluate constant expressions at compile time
    ```java
-   // Transform: #data.amount > (100 + 50)
-   // Into: #data.amount > 150
+   // Transform: #amount > (100 + 50)
+   // Into: #amount > 150
    ```
 
 2. **Dead Code Elimination**: Remove unreachable rules
@@ -614,8 +614,8 @@ The compiler applies optimization techniques for better performance:
 
 3. **Common Subexpression Elimination**: Factor out repeated expressions
    ```java
-   // Transform: #data.amount > 1000 && #data.amount < 5000
-   // Into: temp = #data.amount; temp > 1000 && temp < 5000
+   // Transform: #amount > 1000 && #amount < 5000
+   // Into: temp = #amount; temp > 1000 && temp < 5000
    ```
 
 #### 9. **Metamodel and Model-Driven Engineering**
@@ -967,7 +967,7 @@ type SpELDenote = DataContext -> Bool
   Rule i (⟦cond⟧ˢ) p e
 
 ⟦_⟧ˢ : SpELExpression -> SpELDenote
-⟦#data.amount > 1000⟧ˢ = λctx ->
+⟦#amount > 1000⟧ˢ = λctx ->
   case lookup "amount" (dataFields ctx) of
     Just (NumericValue n) -> n > 1000
     _ -> False
@@ -1355,7 +1355,7 @@ String yamlContent = """
     
     rules:
       - id: "test-rule"
-        condition: "#data.amount > 1000"
+        condition: "#amount > 1000"
         enabled: true
     """;
 
@@ -1459,18 +1459,18 @@ rules:
 **Valid SpEL Expressions:**
 ```yaml
 rules:
-  - condition: "#data.amount > 1000"                    # Simple comparison
-  - condition: "#data.amount > 1000 && #data.currency == 'USD'"  # Logical operators
-  - condition: "#data.amount > (#data.threshold * 1.1)" # Arithmetic with parentheses
-  - condition: "#data.status?.toUpperCase() == 'ACTIVE'" # Safe navigation
+  - condition: "#amount > 1000"                    # Simple comparison
+  - condition: "#amount > 1000 && #currency == 'USD'"  # Logical operators
+  - condition: "#amount > (#threshold * 1.1)" # Arithmetic with parentheses
+  - condition: "#status?.toUpperCase() == 'ACTIVE'" # Safe navigation
 ```
 
 **Invalid SpEL (caught by compiler):**
 ```yaml
 rules:
-  - condition: "#data.amount > && #invalid"     # Syntax error
-  - condition: "#data.amount > (1000 + #data"   # Unmatched parentheses
-  - condition: "#data.amount >"                 # Incomplete expression
+  - condition: "#amount > && #invalid"     # Syntax error
+  - condition: "#amount > (1000 + #field"   # Unmatched parentheses
+  - condition: "#amount >"                 # Incomplete expression
 ```
 
 ### 5. Cross-Reference Validation
@@ -1508,14 +1508,14 @@ rules:
   - id: "high-value-trade"
     name: "High Value Trade Detection"
     description: "Detect trades above $1M threshold"
-    condition: "#data.tradeAmount > 1000000"
+    condition: "#tradeAmount > 1000000"
     priority: 1
     enabled: true
     
   - id: "currency-validation"
     name: "Currency Code Validation"
     description: "Ensure valid ISO currency codes"
-    condition: "#data.currency matches '[A-Z]{3}'"
+    condition: "#currency matches '[A-Z]{3}'"
     priority: 2
     enabled: true
 
@@ -1524,7 +1524,7 @@ enrichments:
     name: "Trade Classification Enrichment"
     type: "lookup-enrichment"
     description: "Classify trades by type and risk level"
-    condition: "#data.tradeType != null"
+    condition: "#tradeType != null"
     source-field: "tradeType"
     target-field: "riskLevel"
 ```
@@ -1791,16 +1791,16 @@ metadata:
 **Common Issues:**
 ```yaml
 # X Incomplete expression
-condition: "#data.amount >"
+condition: "#amount >"
 
 # X Unmatched parentheses
-condition: "#data.amount > (1000 + #data.fee"
+condition: "#amount > (1000 + #fee"
 
 # X Invalid operators
-condition: "#data.amount > && #data.currency"
+condition: "#amount > && #currency"
 
 # ✅ Correct
-condition: "#data.amount > 1000 && #data.currency == 'USD'"
+condition: "#amount > 1000 && #currency == 'USD'"
 ```
 
 ### Debug Mode
