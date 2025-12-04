@@ -112,7 +112,8 @@ class SimpleValidationRuleTest {
 
             // Validate result
             assertFalse(result.isTriggered(), "Rule should not trigger for missing age");
-            assertFalse(result.isSuccess(), "Rule execution should fail for missing data");
+            // SpEL null-safe: condition evaluates to false when age is null, no error
+            assertTrue(result.isSuccess(), "Rule execution should succeed (null-safe condition)");
             assertEquals("Age Validation", result.getRuleName(), "Rule name should match");
         } catch (Exception e) {
             fail("Test should not throw exception: " + e.getMessage());

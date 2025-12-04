@@ -72,7 +72,8 @@ class MinimalYamlValidationTest {
             RuleResult emptyResult = engine.executeRule(rule, emptyData);
 
             assertFalse(emptyResult.isTriggered(), "Rule should not trigger for missing age");
-            assertFalse(emptyResult.isSuccess(), "Rule execution should fail for missing data");
+            // SpEL null-safe: #age >= 18 evaluates to false when age is null, no error
+            assertTrue(emptyResult.isSuccess(), "Rule execution should succeed (null-safe condition)");
 
         } catch (Exception e) {
             fail("Failed to execute minimal rule functionality test: " + e.getMessage());

@@ -27,7 +27,7 @@ enrichments:
     type: field-enrichment
     field-mappings:
         - source-field: '''e3'''
-          target-field: '#rbresult'
+          target-field: 'rbresult'
 enrichment-groups:
   - id: rbg1
     name: Is Source Identifier Valid enrichment group 1

@@ -225,7 +225,7 @@ validations:
 data-sources:
   - id: "customer-reference-data"
     name: "Customer Reference Data"
-    type: "inline-dataset"
+    type: "yaml-dataset"
     description: "Inline customer reference data for enrichment testing"
     
     dataset:
@@ -244,7 +244,7 @@ data-sources:
         
   - id: "currency-reference-data"
     name: "Currency Reference Data"
-    type: "inline-dataset"
+    type: "yaml-dataset"
     description: "Inline currency reference data for validation testing"
     
     dataset:
