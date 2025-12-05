@@ -57,6 +57,9 @@ module dev.mars.apex.playground {
     // Micrometer for metrics
     requires micrometer.core;
 
+    // HikariCP for database connection pooling
+    requires com.zaxxer.hikari;
+
     // Export packages for Spring and other frameworks
     exports dev.mars.apex.playground;
     exports dev.mars.apex.playground.controller;

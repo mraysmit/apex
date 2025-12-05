@@ -489,6 +489,224 @@
                 max-height: none !important;
                 overflow: visible !important;
             }
+
+            /* Data Sources Accordion */
+            .datasource-panel {
+                display: none;
+                flex: 1;
+                overflow: auto;
+                padding: 0.75rem;
+            }
+
+            .datasource-panel.active {
+                display: flex;
+                flex-direction: column;
+            }
+
+            /* SQL Editor */
+            #sqlEditor {
+                flex: 1;
+                min-height: 200px;
+                background: #1a1a1a;
+                border: 1px solid #3a3a3a;
+                border-radius: 4px;
+                font-family: 'Courier New', monospace;
+                font-size: 13px;
+                color: #d4d4d4;
+                padding: 0.5rem;
+                resize: vertical;
+                line-height: 1.5;
+            }
+
+            #sqlEditor:focus {
+                outline: none;
+                border-color: #3498db;
+            }
+
+            .sql-editor-toolbar {
+                display: flex;
+                gap: 0.5rem;
+                margin-bottom: 0.5rem;
+                align-items: center;
+            }
+
+            #activeConnectionSelect {
+                max-width: 250px;
+                background: #2a2a2a;
+                border: 1px solid #3a3a3a;
+                color: #d4d4d4;
+            }
+
+            .query-stats {
+                display: flex;
+                justify-content: space-between;
+                padding: 0.5rem;
+                background: #2a2a2a;
+                border-radius: 4px;
+            }
+
+            /* Table View */
+            .datasource-table-container {
+                flex: 1;
+                overflow: auto;
+                max-height: 400px;
+            }
+
+            .table-dark {
+                color: #d4d4d4;
+                background-color: #1a1a1a;
+            }
+
+            .table-dark thead th {
+                background-color: #2a2a2a;
+                border-color: #3a3a3a;
+                font-weight: 600;
+                position: sticky;
+                top: 0;
+                z-index: 10;
+            }
+
+            .table-dark tbody td {
+                border-color: #3a3a3a;
+                font-family: 'Courier New', monospace;
+                font-size: 12px;
+            }
+
+            .table-dark tbody tr:hover {
+                background-color: #2a2a2a;
+            }
+
+            .table-pagination {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* Connections List */
+            .connection-list {
+                display: flex;
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .connection-card {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 1rem;
+                background: #2a2a2a;
+                border: 1px solid #3a3a3a;
+                border-radius: 6px;
+                transition: all 0.2s;
+            }
+
+            .connection-card:hover {
+                background: #333;
+                border-color: #555;
+            }
+
+            .connection-card.active {
+                border-color: #3498db;
+                background: rgba(52, 152, 219, 0.1);
+            }
+
+            .connection-info {
+                flex: 1;
+            }
+
+            .connection-name {
+                color: #d4d4d4;
+                font-size: 1rem;
+                font-weight: 600;
+                margin-bottom: 0.25rem;
+            }
+
+            .connection-details {
+                color: #888;
+                font-size: 0.85rem;
+            }
+
+            .connection-status {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.25rem;
+                padding: 0.25rem 0.5rem;
+                border-radius: 12px;
+                font-size: 0.75rem;
+                margin-top: 0.25rem;
+            }
+
+            .connection-status.connected {
+                background: rgba(26, 188, 156, 0.2);
+                color: #1abc9c;
+            }
+
+            .connection-status.disconnected {
+                background: rgba(231, 76, 60, 0.2);
+                color: #e74c3c;
+            }
+
+            .connection-actions {
+                display: flex;
+                gap: 0.5rem;
+                align-items: center;
+            }
+
+            .connection-card .btn {
+                padding: 0.25rem 0.75rem;
+                font-size: 0.85rem;
+            }
+
+            /* Connection Dialog */
+            .modal-content {
+                background: #2d2d2d;
+                border: 1px solid #3a3a3a;
+            }
+
+            .modal-header {
+                border-bottom-color: #3a3a3a;
+            }
+
+            .modal-footer {
+                border-top-color: #3a3a3a;
+            }
+
+            .connection-dialog .form-label {
+                color: #d4d4d4;
+                font-size: 0.9rem;
+                margin-bottom: 0.25rem;
+            }
+
+            .connection-dialog .form-control,
+            .connection-dialog .form-select {
+                background: #1a1a1a;
+                border: 1px solid #3a3a3a;
+                color: #d4d4d4;
+            }
+
+            .connection-dialog .form-control:focus,
+            .connection-dialog .form-select:focus {
+                background: #1a1a1a;
+                border-color: #3498db;
+                color: #d4d4d4;
+                box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+            }
+
+            .test-connection-result {
+                padding: 0.75rem;
+                border-radius: 4px;
+                margin-top: 0.5rem;
+            }
+
+            .test-connection-result.success {
+                background: rgba(26, 188, 156, 0.2);
+                color: #1abc9c;
+            }
+
+            .test-connection-result.error {
+                background: rgba(231, 76, 60, 0.2);
+                color: #e74c3c;
+            }
         </style>
     </head>
 
@@ -561,6 +779,65 @@
                     <div class="modal-footer border-secondary">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="button" class="btn btn-primary" onclick="saveTemplate()">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Connection Modal -->
+        <div class="modal fade" id="createConnectionModal" tabindex="-1" aria-labelledby="createConnectionModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content connection-dialog">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createConnectionModalLabel">Create Database Connection</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="connectionForm">
+                            <div class="mb-3">
+                                <label for="connectionName" class="form-label">Connection Name *</label>
+                                <input type="text" class="form-control" id="connectionName" required placeholder="My Database">
+                            </div>
+                            <div class="mb-3">
+                                <label for="connectionType" class="form-label">Database Type *</label>
+                                <select class="form-select" id="connectionType" required>
+                                    <option value="">Select database type...</option>
+                                    <option value="POSTGRESQL">PostgreSQL</option>
+                                    <option value="MYSQL">MySQL</option>
+                                    <option value="H2">H2 (Embedded)</option>
+                                    <option value="SQLSERVER">SQL Server</option>
+                                    <option value="ORACLE">Oracle</option>
+                                </select>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-8 mb-3">
+                                    <label for="connectionHost" class="form-label">Host *</label>
+                                    <input type="text" class="form-control" id="connectionHost" required placeholder="localhost">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="connectionPort" class="form-label">Port *</label>
+                                    <input type="number" class="form-control" id="connectionPort" required placeholder="5432">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="connectionDatabase" class="form-label">Database Name *</label>
+                                <input type="text" class="form-control" id="connectionDatabase" required placeholder="mydb">
+                            </div>
+                            <div class="mb-3">
+                                <label for="connectionUsername" class="form-label">Username *</label>
+                                <input type="text" class="form-control" id="connectionUsername" required placeholder="postgres">
+                            </div>
+                            <div class="mb-3">
+                                <label for="connectionPassword" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="connectionPassword" placeholder="Password (optional for H2)">
+                            </div>
+                            <div id="testConnectionResult"></div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-info" onclick="testConnection()">Test Connection</button>
+                        <button type="button" class="btn btn-primary" onclick="saveConnection()">Create Connection</button>
                     </div>
                 </div>
             </div>
@@ -662,6 +939,88 @@
                                     <button class="btn btn-outline-primary" onclick="document.getElementById('evalFileInput').click()">Browse Files</button>
                                 </div>
                                 <div class="eval-file-list" id="evalFileList"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Sources Accordion Section -->
+                <div id="dataSourcesSection" class="accordion-section">
+                    <div class="accordion-header" onclick="toggleAccordion('dataSourcesSection')">
+                        <h2><span class="accordion-arrow">&#9654;</span> Data Sources</h2>
+                        <div class="d-flex gap-1 align-items-center" onclick="event.stopPropagation()">
+                            <button class="btn btn-success btn-sm" onclick="loadSchemaIntoEditor()" title="Load database schema into Field blocks">Load Schema</button>
+                            <button class="btn btn-outline-light btn-sm" onclick="executeQuery()" title="Execute SQL query">Execute</button>
+                            <button class="btn btn-outline-light btn-sm" onclick="clearDataSources()" title="Clear all">Clear</button>
+                        </div>
+                    </div>
+                    <div class="accordion-content">
+                        <div id="dataSourcesOutput">
+                            <!-- Tabs -->
+                            <ul class="nav nav-tabs nav-tabs-dark" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" onclick="switchDataSourceTab('sql')">SQL Editor</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" onclick="switchDataSourceTab('table')">Table View</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" onclick="switchDataSourceTab('connections')">Connections</button>
+                                </li>
+                            </ul>
+
+                            <!-- SQL Editor Panel -->
+                            <div id="sqlEditorPanel" class="datasource-panel active">
+                                <div class="sql-editor-toolbar">
+                                    <select id="activeConnectionSelect" class="form-select form-select-sm">
+                                        <option value="">Select connection...</option>
+                                    </select>
+                                    <div class="btn-group btn-group-sm ms-2">
+                                        <button class="btn btn-outline-light" onclick="formatSql()" title="Format SQL">Format</button>
+                                        <button class="btn btn-outline-light" onclick="loadSampleQuery()" title="Load sample query">Sample</button>
+                                    </div>
+                                </div>
+                                <textarea id="sqlEditor" class="form-control bg-dark text-light font-monospace" placeholder="SELECT * FROM customers WHERE active = true" rows="10"></textarea>
+                                <div id="sqlError" class="alert alert-danger mt-2 small" style="display: none;"></div>
+                                <div id="queryStats" class="query-stats mt-2" style="display: none;">
+                                    <small class="text-muted">
+                                        <span id="rowCount">0</span> rows • 
+                                        <span id="execTime">0</span>ms
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Table View Panel -->
+                            <div id="tableViewPanel" class="datasource-panel">
+                                <div class="table-responsive datasource-table-container">
+                                    <table id="queryResultsTable" class="table table-dark table-sm table-hover">
+                                        <thead id="tableHeaders"></thead>
+                                        <tbody id="tableBody"></tbody>
+                                    </table>
+                                    <div id="emptyTableMessage" class="text-muted fst-italic text-center py-4">
+                                        Execute a query to see results
+                                    </div>
+                                </div>
+                                <div class="table-pagination mt-2" id="tablePagination" style="display: none;">
+                                    <button class="btn btn-sm btn-outline-light" onclick="loadPreviousPage()">Previous</button>
+                                    <span class="mx-3 text-muted">Page <span id="currentPage">1</span></span>
+                                    <button class="btn btn-sm btn-outline-light" onclick="loadNextPage()">Next</button>
+                                </div>
+                            </div>
+
+                            <!-- Connections Panel -->
+                            <div id="connectionsPanel" class="datasource-panel">
+                                <div class="connection-actions mb-3">
+                                    <button class="btn btn-primary" onclick="showCreateConnectionDialog()">
+                                        <i class="fas fa-plus"></i> Create Connection
+                                    </button>
+                                    <button class="btn btn-outline-light" onclick="refreshConnections()">
+                                        <i class="fas fa-sync"></i> Refresh
+                                    </button>
+                                </div>
+                                <div class="connection-list" id="connectionList">
+                                    <div class="text-muted text-center py-4">No connections configured. Click "Create Connection" to add one.</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -3655,6 +4014,440 @@
                     document.getElementById('evalFilesPanel').classList.add('active');
                 }
             }
+
+            // ============================================================================
+            // DATA SOURCES MANAGEMENT
+            // ============================================================================
+
+            let connections = [];
+            let activeConnection = null;
+            let currentQueryResult = null;
+            let currentPage = 1;
+            const rowsPerPage = 50;
+
+            // Tab Switching
+            function switchDataSourceTab(tabName) {
+                // Update tab buttons
+                document.querySelectorAll('#dataSourcesSection .nav-link').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                event.target.classList.add('active');
+
+                // Update panels
+                document.querySelectorAll('.datasource-panel').forEach(panel => {
+                    panel.classList.remove('active');
+                });
+
+                if (tabName === 'sql') {
+                    document.getElementById('sqlEditorPanel').classList.add('active');
+                } else if (tabName === 'table') {
+                    document.getElementById('tableViewPanel').classList.add('active');
+                } else if (tabName === 'connections') {
+                    document.getElementById('connectionsPanel').classList.add('active');
+                }
+            }
+
+            // Connection Management
+            function showCreateConnectionDialog() {
+                // Reset form
+                document.getElementById('connectionForm').reset();
+                document.getElementById('testConnectionResult').innerHTML = '';
+                
+                // Set default ports based on database type
+                document.getElementById('connectionType').addEventListener('change', function() {
+                    const type = this.value;
+                    const portInput = document.getElementById('connectionPort');
+                    const hostInput = document.getElementById('connectionHost');
+                    const dbInput = document.getElementById('connectionDatabase');
+                    
+                    switch(type) {
+                        case 'POSTGRESQL':
+                            portInput.value = '5432';
+                            hostInput.value = 'localhost';
+                            dbInput.placeholder = 'postgres';
+                            break;
+                        case 'MYSQL':
+                            portInput.value = '3306';
+                            hostInput.value = 'localhost';
+                            dbInput.placeholder = 'mysql';
+                            break;
+                        case 'H2':
+                            portInput.value = '';
+                            hostInput.value = 'mem';
+                            dbInput.placeholder = 'testdb';
+                            break;
+                        case 'SQLSERVER':
+                            portInput.value = '1433';
+                            hostInput.value = 'localhost';
+                            dbInput.placeholder = 'master';
+                            break;
+                        case 'ORACLE':
+                            portInput.value = '1521';
+                            hostInput.value = 'localhost';
+                            dbInput.placeholder = 'ORCL';
+                            break;
+                    }
+                });
+                
+                const modal = new bootstrap.Modal(document.getElementById('createConnectionModal'));
+                modal.show();
+            }
+
+            async function testConnection() {
+                const resultDiv = document.getElementById('testConnectionResult');
+                resultDiv.innerHTML = '<div class="spinner-border spinner-border-sm text-info" role="status"></div> Testing connection...';
+                
+                const connectionData = {
+                    name: document.getElementById('connectionName').value,
+                    type: document.getElementById('connectionType').value,
+                    host: document.getElementById('connectionHost').value,
+                    port: parseInt(document.getElementById('connectionPort').value) || null,
+                    database: document.getElementById('connectionDatabase').value,
+                    username: document.getElementById('connectionUsername').value,
+                    password: document.getElementById('connectionPassword').value
+                };
+
+                try {
+                    const response = await fetch('/api/datasources/test', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(connectionData)
+                    });
+
+                    const result = await response.json();
+                    
+                    if (response.ok && result.success) {
+                        resultDiv.innerHTML = `<div class="test-connection-result success">
+                            <i class="bi bi-check-circle"></i> Connection successful!
+                            ${result.message ? '<br>' + result.message : ''}
+                        </div>`;
+                    } else {
+                        resultDiv.innerHTML = `<div class="test-connection-result error">
+                            <i class="bi bi-x-circle"></i> Connection failed: ${result.message || 'Unknown error'}
+                        </div>`;
+                    }
+                } catch (error) {
+                    resultDiv.innerHTML = `<div class="test-connection-result error">
+                        <i class="bi bi-x-circle"></i> Error: ${error.message}
+                    </div>`;
+                }
+            }
+
+            async function saveConnection() {
+                const form = document.getElementById('connectionForm');
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+
+                const connectionData = {
+                    name: document.getElementById('connectionName').value,
+                    type: document.getElementById('connectionType').value,
+                    host: document.getElementById('connectionHost').value,
+                    port: parseInt(document.getElementById('connectionPort').value) || null,
+                    database: document.getElementById('connectionDatabase').value,
+                    username: document.getElementById('connectionUsername').value,
+                    password: document.getElementById('connectionPassword').value
+                };
+
+                try {
+                    const response = await fetch('/api/datasources/connections', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(connectionData)
+                    });
+
+                    if (response.ok) {
+                        const connection = await response.json();
+                        showToast('Connection created successfully', 'success');
+                        bootstrap.Modal.getInstance(document.getElementById('createConnectionModal')).hide();
+                        await refreshConnections();
+                    } else {
+                        const error = await response.json();
+                        showToast('Failed to create connection: ' + error.message, 'error');
+                    }
+                } catch (error) {
+                    showToast('Error creating connection: ' + error.message, 'error');
+                }
+            }
+
+            async function refreshConnections() {
+                try {
+                    const response = await fetch('/api/datasources/connections');
+                    if (response.ok) {
+                        connections = await response.json();
+                        renderConnectionsList();
+                        updateConnectionSelector();
+                    } else {
+                        showToast('Failed to load connections', 'error');
+                    }
+                } catch (error) {
+                    showToast('Error loading connections: ' + error.message, 'error');
+                }
+            }
+
+            function renderConnectionsList() {
+                const listContainer = document.getElementById('connectionsList');
+                
+                if (connections.length === 0) {
+                    listContainer.innerHTML = '<p class="text-muted text-center">No connections configured. Create one to get started.</p>';
+                    return;
+                }
+
+                listContainer.innerHTML = connections.map(conn => `
+                    <div class="connection-card ${activeConnection && activeConnection.id === conn.id ? 'active' : ''}">
+                        <div class="connection-info">
+                            <div class="connection-name">${conn.name}</div>
+                            <div class="connection-details">
+                                ${conn.type} • ${conn.username}@${conn.host}${conn.port ? ':' + conn.port : ''}/${conn.database}
+                            </div>
+                            <span class="connection-status ${conn.active ? 'connected' : 'disconnected'}">
+                                <i class="bi bi-circle-fill"></i>
+                                ${conn.active ? 'Connected' : 'Disconnected'}
+                            </span>
+                        </div>
+                        <div class="connection-actions">
+                            <button class="btn btn-sm btn-outline-primary" onclick="selectConnection(${conn.id})">
+                                ${activeConnection && activeConnection.id === conn.id ? 'Active' : 'Use'}
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteConnection(${conn.id})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            function updateConnectionSelector() {
+                const selector = document.getElementById('activeConnectionSelect');
+                
+                if (connections.length === 0) {
+                    selector.innerHTML = '<option value="">No connections available</option>';
+                    selector.disabled = true;
+                    return;
+                }
+
+                selector.disabled = false;
+                selector.innerHTML = '<option value="">Select a connection...</option>' +
+                    connections.map(conn => 
+                        `<option value="${conn.id}" ${activeConnection && activeConnection.id === conn.id ? 'selected' : ''}>
+                            ${conn.name} (${conn.type})
+                        </option>`
+                    ).join('');
+            }
+
+            async function selectConnection(id) {
+                const connection = connections.find(c => c.id === id);
+                if (!connection) return;
+
+                activeConnection = connection;
+                renderConnectionsList();
+                updateConnectionSelector();
+                showToast(`Connected to ${connection.name}`, 'success');
+                
+                // Load schema into Blockly Field dropdown
+                await loadSchemaIntoEditor(id);
+            }
+
+            async function deleteConnection(id) {
+                if (!confirm('Are you sure you want to delete this connection?')) return;
+
+                try {
+                    const response = await fetch(`/api/datasources/connections/${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        showToast('Connection deleted', 'success');
+                        if (activeConnection && activeConnection.id === id) {
+                            activeConnection = null;
+                        }
+                        await refreshConnections();
+                    } else {
+                        showToast('Failed to delete connection', 'error');
+                    }
+                } catch (error) {
+                    showToast('Error deleting connection: ' + error.message, 'error');
+                }
+            }
+
+            // Query Execution
+            async function executeQuery() {
+                const sql = document.getElementById('sqlEditor').value.trim();
+                if (!sql) {
+                    showToast('Please enter a SQL query', 'warning');
+                    return;
+                }
+
+                if (!activeConnection) {
+                    showToast('Please select a connection first', 'warning');
+                    return;
+                }
+
+                const queryRequest = {
+                    connectionId: activeConnection.id,
+                    sql: sql
+                };
+
+                try {
+                    const startTime = performance.now();
+                    const response = await fetch('/api/datasources/query', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(queryRequest)
+                    });
+
+                    const endTime = performance.now();
+                    const duration = ((endTime - startTime) / 1000).toFixed(2);
+
+                    if (response.ok) {
+                        currentQueryResult = await response.json();
+                        currentPage = 1;
+                        renderTableView();
+                        
+                        // Show stats
+                        showToast(`Query executed successfully in ${duration}s - ${currentQueryResult.rowCount} rows`, 'success');
+                        
+                        // Switch to table view
+                        document.querySelector('#dataSourcesSection .nav-link[onclick*="table"]').click();
+                    } else {
+                        const error = await response.json();
+                        showToast('Query failed: ' + error.message, 'error');
+                    }
+                } catch (error) {
+                    showToast('Error executing query: ' + error.message, 'error');
+                }
+            }
+
+            function renderTableView() {
+                const tableBody = document.getElementById('queryResultsTable').querySelector('tbody');
+                const tableHead = document.getElementById('queryResultsTable').querySelector('thead tr');
+                const paginationInfo = document.getElementById('paginationInfo');
+
+                if (!currentQueryResult || !currentQueryResult.rows || currentQueryResult.rows.length === 0) {
+                    tableHead.innerHTML = '<th>No data</th>';
+                    tableBody.innerHTML = '<tr><td>Execute a query to see results</td></tr>';
+                    paginationInfo.textContent = 'No results';
+                    return;
+                }
+
+                // Render headers
+                tableHead.innerHTML = currentQueryResult.columns.map(col => `<th>${col}</th>`).join('');
+
+                // Pagination
+                const totalRows = currentQueryResult.rows.length;
+                const totalPages = Math.ceil(totalRows / rowsPerPage);
+                const startIdx = (currentPage - 1) * rowsPerPage;
+                const endIdx = Math.min(startIdx + rowsPerPage, totalRows);
+                const pageRows = currentQueryResult.rows.slice(startIdx, endIdx);
+
+                // Render rows
+                tableBody.innerHTML = pageRows.map(row => 
+                    '<tr>' + row.map(cell => `<td>${cell !== null && cell !== undefined ? cell : '<span class="text-muted">NULL</span>'}</td>`).join('') + '</tr>'
+                ).join('');
+
+                // Update pagination info
+                paginationInfo.textContent = `Showing ${startIdx + 1}-${endIdx} of ${totalRows} rows`;
+
+                // Update pagination buttons
+                document.getElementById('prevPageBtn').disabled = currentPage === 1;
+                document.getElementById('nextPageBtn').disabled = currentPage === totalPages;
+            }
+
+            function previousPage() {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTableView();
+                }
+            }
+
+            function nextPage() {
+                const totalPages = Math.ceil(currentQueryResult.rows.length / rowsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderTableView();
+                }
+            }
+
+            function formatSql() {
+                const editor = document.getElementById('sqlEditor');
+                let sql = editor.value;
+                
+                // Basic SQL formatting
+                sql = sql.replace(/\bSELECT\b/gi, 'SELECT')
+                         .replace(/\bFROM\b/gi, '\nFROM')
+                         .replace(/\bWHERE\b/gi, '\nWHERE')
+                         .replace(/\bJOIN\b/gi, '\nJOIN')
+                         .replace(/\bINNER JOIN\b/gi, '\nINNER JOIN')
+                         .replace(/\bLEFT JOIN\b/gi, '\nLEFT JOIN')
+                         .replace(/\bRIGHT JOIN\b/gi, '\nRIGHT JOIN')
+                         .replace(/\bORDER BY\b/gi, '\nORDER BY')
+                         .replace(/\bGROUP BY\b/gi, '\nGROUP BY')
+                         .replace(/\bHAVING\b/gi, '\nHAVING')
+                         .replace(/\bLIMIT\b/gi, '\nLIMIT');
+                
+                editor.value = sql.trim();
+            }
+
+            function loadSampleQuery() {
+                if (!activeConnection) {
+                    showToast('Please select a connection first', 'warning');
+                    return;
+                }
+
+                const sampleQueries = {
+                    'POSTGRESQL': 'SELECT table_name, table_type\nFROM information_schema.tables\nWHERE table_schema = \'public\'\nORDER BY table_name\nLIMIT 10;',
+                    'MYSQL': 'SELECT table_name, table_type\nFROM information_schema.tables\nWHERE table_schema = DATABASE()\nLIMIT 10;',
+                    'H2': 'SELECT TABLE_NAME, TABLE_TYPE\nFROM INFORMATION_SCHEMA.TABLES\nWHERE TABLE_SCHEMA = \'PUBLIC\'\nLIMIT 10;',
+                    'SQLSERVER': 'SELECT TOP 10 TABLE_NAME, TABLE_TYPE\nFROM INFORMATION_SCHEMA.TABLES\nWHERE TABLE_SCHEMA = \'dbo\'\nORDER BY TABLE_NAME;',
+                    'ORACLE': 'SELECT table_name, table_type\nFROM user_tables\nWHERE ROWNUM <= 10\nORDER BY table_name;'
+                };
+
+                const sampleQuery = sampleQueries[activeConnection.type] || 'SELECT * FROM information_schema.tables LIMIT 10;';
+                document.getElementById('sqlEditor').value = sampleQuery;
+            }
+
+            // Schema Loading into Blockly
+            async function loadSchemaIntoEditor(connectionId) {
+                try {
+                    const response = await fetch(`/api/datasources/connections/${connectionId}/schema`);
+                    if (response.ok) {
+                        const schema = await response.json();
+                        
+                        // Build field paths from schema
+                        const fieldPaths = [];
+                        schema.tables.forEach(table => {
+                            table.columns.forEach(column => {
+                                fieldPaths.push(`${table.name}.${column.name}`);
+                            });
+                        });
+
+                        // Update the Field block dropdown
+                        if (typeof loadedFieldPaths !== 'undefined') {
+                            loadedFieldPaths.push(...fieldPaths);
+                            
+                            // Refresh Field dropdown if it exists
+                            if (typeof Blockly !== 'undefined' && Blockly.getMainWorkspace()) {
+                                const workspace = Blockly.getMainWorkspace();
+                                workspace.getAllBlocks().forEach(block => {
+                                    if (block.type === 'apex_field') {
+                                        block.getField('PATH').menuGenerator_ = getFieldOptions;
+                                    }
+                                });
+                            }
+                            
+                            showToast(`Loaded ${fieldPaths.length} fields from ${activeConnection.name}`, 'success');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading schema:', error);
+                }
+            }
+
+            // Initialize Data Sources on page load
+            document.addEventListener('DOMContentLoaded', function() {
+                refreshConnections();
+            });
 
             function getEvalJsonFromEditor() {
                 return document.getElementById('evalJsonEditor').value;
