@@ -452,6 +452,16 @@ public class ScenarioRegistryLoader {
             }
         }
 
+        // Set enabled flag (default: true)
+        Object enabled = stageData.get("enabled");
+        if (enabled != null) {
+            if (enabled instanceof Boolean) {
+                stage.setEnabled((Boolean) enabled);
+            } else if (enabled instanceof String) {
+                stage.setEnabled(Boolean.parseBoolean((String) enabled));
+            }
+        }
+
         // Set description - try both direct "description" and nested "stage-metadata.description"
         String description = (String) stageData.get("description");
         if (description == null) {

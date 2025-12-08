@@ -178,7 +178,7 @@ public class ScenarioStageExecutor {
     }
     
     /**
-     * Checks if a stage should be executed based on its condition and dependencies.
+     * Checks if a stage should be executed based on its enabled flag, condition and dependencies.
      *
      * @param stage the stage to check
      * @param data the input data for condition evaluation
@@ -186,7 +186,13 @@ public class ScenarioStageExecutor {
      * @return true if the stage should be executed
      */
     private boolean shouldExecuteStage(ScenarioStage stage, Object data, ScenarioExecutionResult result) {
-        // First check condition (if specified)
+        // First check if stage is enabled
+        if (!stage.isEnabled()) {
+            logger.debug("Stage '{}' is disabled", stage.getStageName());
+            return false;
+        }
+
+        // Second, check condition (if specified)
         if (stage.hasCondition()) {
             try {
                 Map<String, Object> facts = createFactsMap(data, result);
@@ -224,7 +230,7 @@ public class ScenarioStageExecutor {
     }
 
     /**
-     * Gets the reason why a stage is being skipped (condition or dependency failure).
+     * Gets the reason why a stage is being skipped (disabled, condition, or dependency failure).
      *
      * @param stage the stage
      * @param data the input data for condition evaluation
@@ -232,7 +238,12 @@ public class ScenarioStageExecutor {
      * @return reason for skipping the stage
      */
     private String getSkipReason(ScenarioStage stage, Object data, ScenarioExecutionResult result) {
-        // Check condition first
+        // Check enabled flag first
+        if (!stage.isEnabled()) {
+            return "Stage is disabled (enabled: false)";
+        }
+
+        // Check condition second
         if (stage.hasCondition()) {
             try {
                 Map<String, Object> facts = createFactsMap(data, result);

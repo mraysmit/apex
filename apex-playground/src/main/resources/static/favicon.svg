@@ -1,13 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <!-- Background circle -->
   <circle cx="16" cy="16" r="15" fill="#1a1a2e"/>
-  
-  <!-- Stylized "A" for APEX -->
-  <path d="M16 5 L8 26 L11 26 L12.5 22 L19.5 22 L21 26 L24 26 L16 5 Z M13.5 19 L16 11 L18.5 19 Z" fill="#4fc3f7"/>
-  
-  <!-- Small blocks representing visual editor -->
-  <rect x="6" y="6" width="4" height="3" rx="0.5" fill="#81c784"/>
-  <rect x="22" y="6" width="4" height="3" rx="0.5" fill="#ffb74d"/>
-  <rect x="22" y="23" width="4" height="3" rx="0.5" fill="#f48fb1"/>
+
+  <!-- Stylized "A" for APEX - rotated 90 degrees clockwise -->
+  <path d="M16 5 L8 26 L11 26 L12.5 22 L19.5 22 L21 26 L24 26 L16 5 Z M13.5 19 L16 11 L18.5 19 Z" fill="#4fc3f7" transform="rotate(90, 16, 16)"/>
+
+  <!-- Scattered blocks representing visual editor -->
+  <rect x="4" y="4" width="5" height="3" rx="0.5" fill="#81c784"/>
+  <rect x="23" y="5" width="4" height="2.5" rx="0.5" fill="#ffb74d"/>
+  <rect x="5" y="24" width="3" height="4" rx="0.5" fill="#f48fb1"/>
+  <rect x="24" y="22" width="4" height="3" rx="0.5" fill="#ce93d8"/>
+  <rect x="3" y="13" width="3" height="2" rx="0.5" fill="#90caf9"/>
+  <rect x="26" y="14" width="2.5" height="3" rx="0.5" fill="#a5d6a7"/>
+  <rect x="6" y="8" width="2" height="2" rx="0.3" fill="#ffe082"/>
+  <rect x="24" y="9" width="3" height="2" rx="0.4" fill="#ef9a9a"/>
+  <rect x="4" y="19" width="2.5" height="2.5" rx="0.4" fill="#80deea"/>
+  <rect x="25" y="18" width="2" height="2" rx="0.3" fill="#c5e1a5"/>
 </svg>
 

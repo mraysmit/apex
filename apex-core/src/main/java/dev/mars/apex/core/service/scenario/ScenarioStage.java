@@ -30,6 +30,7 @@ import java.util.*;
  * - Configurable failure policies (terminate, continue-with-warnings, flag-for-review)
  * - Stage metadata for monitoring and SLA tracking
  * - Validation of stage configuration integrity
+ * - Enabled flag to control whether stage is active (default: true)
  *
  * CONDITIONAL EXECUTION:
  * - Optional SpEL condition that controls whether stage executes
@@ -76,6 +77,7 @@ public class ScenarioStage {
     private String condition;
     private List<String> dependsOn;
     private boolean required;
+    private boolean enabled;  // NEW: Controls whether stage is active (default: true)
     private Map<String, Object> stageMetadata;
     
     // Constructors
@@ -84,6 +86,7 @@ public class ScenarioStage {
         this.stageMetadata = new HashMap<>();
         this.failurePolicy = FAILURE_POLICY_CONTINUE_WITH_WARNINGS; // Default
         this.required = false; // Default
+        this.enabled = true; // Default - stages are enabled unless explicitly disabled
     }
     
     public ScenarioStage(String stageName, String configFile, int executionOrder) {
@@ -153,6 +156,30 @@ public class ScenarioStage {
     
     public void setRequired(boolean required) {
         this.required = required;
+    }
+
+    /**
+     * Checks if this stage is enabled.
+     *
+     * <p>Disabled stages are skipped during scenario execution. This allows stages
+     * to be temporarily disabled without removing them from the scenario configuration.</p>
+     *
+     * @return true if the stage is enabled (default), false if disabled
+     */
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    /**
+     * Sets whether this stage is enabled.
+     *
+     * <p>When set to false, the stage will be skipped during scenario execution
+     * and recorded in the execution results as skipped.</p>
+     *
+     * @param enabled true to enable the stage, false to disable it
+     */
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
     
     public Map<String, Object> getStageMetadata() {
@@ -317,6 +344,7 @@ public class ScenarioStage {
                 ", condition='" + condition + '\'' +
                 ", dependsOn=" + dependsOn +
                 ", required=" + required +
+                ", enabled=" + enabled +
                 ", description='" + getDescription() + '\'' +
                 '}';
     }
@@ -328,6 +356,7 @@ public class ScenarioStage {
         ScenarioStage that = (ScenarioStage) o;
         return executionOrder == that.executionOrder &&
                 required == that.required &&
+                enabled == that.enabled &&
                 Objects.equals(stageName, that.stageName) &&
                 Objects.equals(configFile, that.configFile) &&
                 Objects.equals(failurePolicy, that.failurePolicy) &&
@@ -337,6 +366,6 @@ public class ScenarioStage {
 
     @Override
     public int hashCode() {
-        return Objects.hash(stageName, configFile, executionOrder, failurePolicy, condition, dependsOn, required);
+        return Objects.hash(stageName, configFile, executionOrder, failurePolicy, condition, dependsOn, required, enabled);
     }
 }

@@ -350,10 +350,11 @@ processing-stages:
   - stage-name: "validation"              # Required: Unique stage name
     config-file: "path/to/config.yaml"    # Required: Configuration file path
     execution-order: 1                    # Required: Numeric execution order
+    enabled: true                         # Optional: Whether stage is active (default: true)
     condition: "#'region'] == 'US'"  # Optional: SpEL condition for execution
     failure-policy: "terminate"           # Optional: Override default policy
     depends-on: []                        # Optional: List of prerequisite stages
-    required: true                        # Optional: Whether stage is mandatory
+    required: false                       # Optional: Whether stage is mandatory (default: false)
     stage-metadata:                       # Optional: Stage-specific metadata
       description: "Validate trade data"
       sla-ms: 1000
@@ -367,10 +368,11 @@ processing-stages:
 | `stage-name` | Required | Unique identifier for the stage |
 | `config-file` | Required | Path to rule/enrichment configuration file |
 | `execution-order` | Required | Numeric order (1, 2, 3, ...) |
+| `enabled` | Optional | Whether stage is active (default: true) |
 | `condition` | Optional | SpEL expression controlling stage execution |
 | `failure-policy` | Optional | How to handle failures (see below) |
 | `depends-on` | Optional | Array of stage names that must succeed first |
-| `required` | Optional | Whether stage must succeed (default: true) |
+| `required` | Optional | Whether stage failure fails entire scenario (default: false) |
 | `stage-metadata` | Optional | Additional metadata for monitoring |
 
 ### Execution Order
@@ -464,6 +466,428 @@ condition: "#'instrumentType'] == 'EQUITY' || #'instrumentType'] == 'BOND'"
 # Complex conditions
 condition: "#'region'] == 'US' && #'notionalAmount'] > 10000000"
 condition: "#'approvedBy'] != null && #'creditLimitChecked'] == true"
+```
+
+---
+
+### Stage Enabled Flag
+
+**Overview:**
+
+The `enabled` flag provides granular control over whether individual processing stages execute. This allows stages to be temporarily disabled without removing them from the configuration, making it ideal for feature toggles, debugging, and gradual rollouts.
+
+**Key Points:**
+- **Default:** `true` (stages are enabled by default)
+- **Behavior:** When `enabled: false`, the stage is **completely skipped**
+- **Execution Order:** Enabled check happens **before** condition evaluation and dependency checks
+- **Backward Compatible:** Existing configurations work unchanged (default is `true`)
+
+**Configuration:**
+
+```yaml
+processing-stages:
+  # Enabled stage (explicit - optional, since true is default)
+  - stage-name: "validation"
+    config-file: "config/validation.yaml"
+    execution-order: 1
+    enabled: true
+
+  # Disabled stage (will be skipped)
+  - stage-name: "experimental-feature"
+    config-file: "config/experimental.yaml"
+    execution-order: 2
+    enabled: false
+
+  # Default enabled (no need to specify)
+  - stage-name: "settlement"
+    config-file: "config/settlement.yaml"
+    execution-order: 3
+    # enabled: true is implied
+```
+
+**Supported YAML Types:**
+
+```yaml
+# Boolean format (recommended)
+enabled: true
+enabled: false
+
+# String format (also supported)
+enabled: "true"
+enabled: "false"
+```
+
+**Disabled Stage Behavior:**
+
+When a stage is disabled (`enabled: false`):
+
+1. ✅ **Stage is skipped entirely** - No rules or enrichments execute
+2. ✅ **Condition is NOT evaluated** - Enabled check happens first
+3. ✅ **Dependencies are NOT checked** - Stage bypass is immediate
+4. ✅ **Skip reason is logged** - `"Stage is disabled (enabled: false)"`
+5. ✅ **Execution continues** - Next stage in sequence processes (unless failure policy says otherwise)
+6. ✅ **Tracked in results** - Disabled stages appear as "skipped" in execution results
+
+**Execution Flow:**
+
+```
+┌─────────────────────────┐
+│  Is stage enabled?      │ ──> NO ──> Skip stage, log reason
+└─────────────────────────┘
+           │ YES
+           ▼
+┌─────────────────────────┐
+│  Evaluate condition     │ ──> FALSE ──> Skip stage
+└─────────────────────────┘
+           │ TRUE
+           ▼
+┌─────────────────────────┐
+│  Check dependencies     │ ──> FAILED ──> Skip stage
+└─────────────────────────┘
+           │ PASSED
+           ▼
+┌─────────────────────────┐
+│  Execute stage          │
+└─────────────────────────┘
+```
+
+**Use Cases:**
+
+**1. Feature Toggles**
+```yaml
+processing-stages:
+  - stage-name: "legacy-compliance"
+    config-file: "config/legacy-compliance.yaml"
+    execution-order: 1
+    enabled: false  # Disabled - migrating to new system
+
+  - stage-name: "new-compliance"
+    config-file: "config/new-compliance.yaml"
+    execution-order: 2
+    enabled: true  # New system active
+```
+
+**2. Debugging / Troubleshooting**
+```yaml
+processing-stages:
+  - stage-name: "validation"
+    config-file: "config/validation.yaml"
+    execution-order: 1
+    enabled: true
+
+  - stage-name: "enrichment"
+    config-file: "config/enrichment.yaml"
+    execution-order: 2
+    enabled: false  # Temporarily disabled to isolate validation issues
+
+  - stage-name: "settlement"
+    config-file: "config/settlement.yaml"
+    execution-order: 3
+    enabled: true
+```
+
+**3. Gradual Rollout**
+```yaml
+processing-stages:
+  - stage-name: "standard-processing"
+    config-file: "config/standard.yaml"
+    execution-order: 1
+    enabled: true
+
+  - stage-name: "beta-feature"
+    config-file: "config/beta-feature.yaml"
+    execution-order: 2
+    enabled: false  # Enable in production after beta testing
+```
+
+**4. Optional Enrichments**
+```yaml
+processing-stages:
+  - stage-name: "core-validation"
+    config-file: "config/core-validation.yaml"
+    execution-order: 1
+    enabled: true  # Always required
+
+  - stage-name: "market-data-enrichment"
+    config-file: "config/market-data.yaml"
+    execution-order: 2
+    enabled: false  # Temporarily disabled due to market data outage
+
+  - stage-name: "settlement"
+    config-file: "config/settlement.yaml"
+    execution-order: 3
+    enabled: true  # Continues even if enrichment disabled
+```
+
+**Interaction with Other Features:**
+
+| Feature | Interaction |
+|---------|-------------|
+| **Condition** | ❌ NOT evaluated if stage is disabled (enabled check is first) |
+| **Dependencies** | ❌ NOT checked if stage is disabled |
+| **Failure Policy** | ❌ NOT applied (stage doesn't execute) |
+| **Required Flag** | ❌ Irrelevant (stage doesn't execute) |
+| **Stage Metadata** | ✅ Still accessible (for documentation/monitoring) |
+
+**Best Practices:**
+
+✅ **Use for temporary disabling** - Quick way to disable stages without deleting configuration  
+✅ **Document why disabled** - Add comments explaining why stage is disabled  
+✅ **Review regularly** - Check disabled stages periodically and remove if no longer needed  
+✅ **Use with feature flags** - Combine with external feature flag systems for dynamic control  
+✅ **Test before disabling** - Ensure disabling the stage doesn't break downstream dependencies  
+
+❌ **Don't use for permanent removal** - Delete the stage configuration instead  
+❌ **Don't forget to re-enable** - Set reminders to review disabled stages  
+❌ **Don't disable critical stages** - Consider using `condition` instead for selective execution  
+
+---
+
+### Stage Required Flag
+
+**Overview:**
+
+The `required` flag controls whether a stage's failure causes the **entire scenario** to fail. This provides semantic control over which stages are mandatory vs. optional, independent of the failure policy.
+
+**Key Points:**
+- **Default:** `false` (stages are **NOT required** by default)
+- **Purpose:** Distinguishes **business-critical** stages from **optional/nice-to-have** stages
+- **Semantics:** Affects overall scenario success/failure status
+- **Independent:** Works alongside `failure-policy` but serves different purpose
+
+**Configuration:**
+
+```yaml
+processing-stages:
+  # Critical stage - scenario fails if this fails
+  - stage-name: "validation"
+    config-file: "config/validation.yaml"
+    execution-order: 1
+    required: true  # Scenario cannot succeed if validation fails
+    failure-policy: "terminate"
+
+  # Optional stage - scenario can succeed even if this fails
+  - stage-name: "market-data-enrichment"
+    config-file: "config/market-data.yaml"
+    execution-order: 2
+    required: false  # Scenario can succeed without enrichment
+    failure-policy: "continue-with-warnings"
+
+  # Another critical stage
+  - stage-name: "settlement"
+    config-file: "config/settlement.yaml"
+    execution-order: 3
+    required: true  # Scenario must succeed at settlement
+    failure-policy: "terminate"
+```
+
+**Supported YAML Types:**
+
+```yaml
+# Boolean format (recommended)
+required: true
+required: false
+
+# String format (also supported)
+required: "true"
+required: "false"
+```
+
+**Required vs Optional Stages:**
+
+| Stage Type | `required` Value | Behavior | Use Case |
+|------------|------------------|----------|----------|
+| **Required** | `true` | Failure marks **entire scenario as failed** | Validation, compliance, settlement |
+| **Optional** | `false` (default) | Failure does NOT fail scenario (may log warning) | Enrichments, notifications, auditing |
+
+**Critical Stages:**
+
+A stage is considered **critical** when:
+```java
+required == true && failure-policy == "terminate"
+```
+
+Use the `isCritical()` method:
+```java
+ScenarioStage stage = ...;
+boolean isCritical = stage.isCritical();  // true if required=true AND failure-policy=terminate
+```
+
+**Required Flag Behavior:**
+
+```yaml
+# ✅ SCENARIO SUCCEEDS - Optional stage fails but doesn't fail scenario
+processing-stages:
+  - stage-name: "validation"
+    required: true
+    # SUCCESS
+
+  - stage-name: "enrichment"
+    required: false  # Optional
+    # FAILURE - But scenario can still succeed
+
+  - stage-name: "settlement"
+    required: true
+    # SUCCESS
+
+# Result: SCENARIO SUCCEEDS (only optional stage failed)
+```
+
+```yaml
+# ❌ SCENARIO FAILS - Required stage fails
+processing-stages:
+  - stage-name: "validation"
+    required: true
+    # SUCCESS
+
+  - stage-name: "enrichment"
+    required: false
+    # FAILURE - Optional, doesn't affect scenario
+
+  - stage-name: "settlement"
+    required: true
+    # FAILURE - Required stage failed!
+
+# Result: SCENARIO FAILS (required stage failed)
+```
+
+**Interaction with Failure Policy:**
+
+The `required` flag and `failure-policy` serve **different purposes**:
+
+| Aspect | `required` Flag | `failure-policy` |
+|--------|----------------|------------------|
+| **Purpose** | Semantic importance | Execution control |
+| **Affects** | Overall scenario status | Stage execution flow |
+| **Question** | "Is this stage mandatory?" | "What to do if it fails?" |
+
+**Common Combinations:**
+
+```yaml
+# 1. CRITICAL STAGE - Must succeed, stop immediately if fails
+- stage-name: "core-validation"
+  required: true
+  failure-policy: "terminate"
+  # isCritical() = true
+
+# 2. REQUIRED BUT CONTINUE - Must succeed, but continue processing
+- stage-name: "audit-logging"
+  required: true
+  failure-policy: "continue-with-warnings"
+  # Scenario fails, but other stages still execute
+
+# 3. OPTIONAL BEST-EFFORT - Nice to have, don't fail scenario
+- stage-name: "market-data-enrichment"
+  required: false
+  failure-policy: "continue-with-warnings"
+  # Most common for enrichments
+
+# 4. OPTIONAL WITH REVIEW - Non-critical, but flag for manual review
+- stage-name: "risk-scoring"
+  required: false
+  failure-policy: "flag-for-review"
+  # Doesn't fail scenario, but someone should look at it
+```
+
+**Use Cases:**
+
+**1. Mandatory Validation**
+```yaml
+processing-stages:
+  - stage-name: "data-validation"
+    config-file: "config/validation.yaml"
+    execution-order: 1
+    required: true  # Trade CANNOT proceed without valid data
+    failure-policy: "terminate"
+```
+
+**2. Optional Enrichment**
+```yaml
+processing-stages:
+  - stage-name: "market-data-enrichment"
+    config-file: "config/market-data.yaml"
+    execution-order: 2
+    required: false  # Trade CAN proceed without enrichment
+    failure-policy: "continue-with-warnings"
+```
+
+**3. Required But Non-Blocking**
+```yaml
+processing-stages:
+  - stage-name: "audit-trail"
+    config-file: "config/audit.yaml"
+    execution-order: 3
+    required: true  # Audit is legally required
+    failure-policy: "continue-with-warnings"  # But don't block other stages
+```
+
+**4. Mixed Requirements**
+```yaml
+processing-stages:
+  # MUST SUCCEED
+  - stage-name: "compliance-validation"
+    required: true
+    failure-policy: "terminate"
+
+  # NICE TO HAVE
+  - stage-name: "counterparty-enrichment"
+    required: false
+    failure-policy: "continue-with-warnings"
+
+  # MUST SUCCEED
+  - stage-name: "booking"
+    required: true
+    failure-policy: "terminate"
+
+  # NICE TO HAVE
+  - stage-name: "notification"
+    required: false
+    failure-policy: "continue-with-warnings"
+```
+
+**Default Value Clarification:**
+
+⚠️ **IMPORTANT:** The default value for `required` is **`false`**, not `true`:
+
+```yaml
+# These are equivalent
+- stage-name: "enrichment"
+  config-file: "config/enrichment.yaml"
+  # required: false is implied
+
+- stage-name: "enrichment"
+  config-file: "config/enrichment.yaml"
+  required: false  # Explicit, same as above
+```
+
+This default makes stages **optional by default**, which is the safest choice. You must **explicitly set `required: true`** for mandatory stages.
+
+**Best Practices:**
+
+✅ **Mark validation as required** - Data validation should typically be `required: true`  
+✅ **Mark enrichments as optional** - Enrichments are usually `required: false`  
+✅ **Mark settlement as required** - Final booking/settlement should be `required: true`  
+✅ **Use with failure-policy** - Combine both for precise control  
+✅ **Document critical stages** - Add comments explaining why stage is required  
+✅ **Review regularly** - Ensure requirements match business needs  
+
+❌ **Don't mark everything required** - Only truly mandatory stages should be `required: true`  
+❌ **Don't confuse with failure-policy** - They serve different purposes  
+❌ **Don't assume default is true** - Default is `false` (optional)  
+
+**Migration Note:**
+
+If you have existing configurations that relied on the old (incorrect) documented default of `true`, you should explicitly add `required: true` to those stages:
+
+```yaml
+# OLD (assuming default was true)
+- stage-name: "validation"
+  config-file: "config/validation.yaml"
+
+# NEW (explicit required flag)
+- stage-name: "validation"
+  config-file: "config/validation.yaml"
+  required: true  # Explicitly set if you want it required
 ```
 
 ---
