@@ -114,8 +114,12 @@ public class ComponentConfiguration {
         @JsonProperty("created")
         private String created;
 
+        @JsonProperty("enabled")
+        private Boolean enabled;  // Default: true if not specified
+
         public Metadata() {
             this.tags = new ArrayList<>();
+            this.enabled = true;  // Default to enabled
         }
 
         // Getters and setters
@@ -221,6 +225,25 @@ public class ComponentConfiguration {
 
         public void setCreated(String created) {
             this.created = created;
+        }
+
+        /**
+         * Check if this component is enabled.
+         * Components are enabled by default if not explicitly specified.
+         *
+         * @return true if enabled (default), false if explicitly disabled
+         */
+        public boolean isEnabled() {
+            return enabled == null || enabled;
+        }
+
+        /**
+         * Set whether this component is enabled.
+         *
+         * @param enabled true to enable, false to disable
+         */
+        public void setEnabled(Boolean enabled) {
+            this.enabled = enabled;
         }
     }
 

@@ -31,7 +31,10 @@ public class DataSourceConnection {
     
     @JsonProperty("database")
     private String database;
-    
+
+    @JsonProperty("schema")
+    private String schema;
+
     @JsonProperty("username")
     private String username;
     
@@ -110,7 +113,15 @@ public class DataSourceConnection {
     public void setDatabase(String database) {
         this.database = database;
     }
-    
+
+    public String getSchema() {
+        return schema;
+    }
+
+    public void setSchema(String schema) {
+        this.schema = schema;
+    }
+
     public String getUsername() {
         return username;
     }
@@ -168,6 +179,7 @@ public class DataSourceConnection {
                 ", host='" + host + '\'' +
                 ", port=" + port +
                 ", database='" + database + '\'' +
+                ", schema='" + schema + '\'' +
                 ", username='" + username + '\'' +
                 ", connected=" + connected +
                 ", createdAt=" + createdAt +

@@ -207,12 +207,75 @@ public class DataSourceController {
     )
     public ResponseEntity<Void> deleteConnection(
             @Parameter(description = "Connection ID") @PathVariable String connectionId) {
-        
+
         logger.info("Deleting connection: {}", connectionId);
         dataSourceService.deleteConnection(connectionId);
         return ResponseEntity.noContent().build();
     }
-    
+
+    /**
+     * Connect to a database (establish connection pool).
+     */
+    @PostMapping("/connections/{connectionId}/connect")
+    @Operation(
+        summary = "Connect to database",
+        description = "Establish a connection to the database and create connection pool"
+    )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Connected successfully"
+    )
+    @ApiResponse(
+        responseCode = "404",
+        description = "Connection not found"
+    )
+    @ApiResponse(
+        responseCode = "500",
+        description = "Failed to connect"
+    )
+    public ResponseEntity<DataSourceConnection> connect(
+            @Parameter(description = "Connection ID") @PathVariable String connectionId) {
+
+        logger.info("Connecting to: {}", connectionId);
+        try {
+            DataSourceConnection connection = dataSourceService.connect(connectionId);
+            if (connection == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(connection);
+        } catch (Exception e) {
+            logger.error("Failed to connect: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Disconnect from a database (close connection pool).
+     */
+    @PostMapping("/connections/{connectionId}/disconnect")
+    @Operation(
+        summary = "Disconnect from database",
+        description = "Close the connection pool and disconnect from the database"
+    )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Disconnected successfully"
+    )
+    @ApiResponse(
+        responseCode = "404",
+        description = "Connection not found"
+    )
+    public ResponseEntity<DataSourceConnection> disconnect(
+            @Parameter(description = "Connection ID") @PathVariable String connectionId) {
+
+        logger.info("Disconnecting from: {}", connectionId);
+        DataSourceConnection connection = dataSourceService.disconnect(connectionId);
+        if (connection == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(connection);
+    }
+
     /**
      * Execute a SQL query.
      */
@@ -263,14 +326,74 @@ public class DataSourceController {
     )
     public ResponseEntity<DatabaseSchema> getSchema(
             @Parameter(description = "Connection ID") @PathVariable String connectionId) {
-        
+
         logger.info("Getting schema for connection: {}", connectionId);
-        
+
         try {
             DatabaseSchema schema = dataSourceService.getSchema(connectionId);
             return ResponseEntity.ok(schema);
         } catch (Exception e) {
             logger.error("Schema introspection failed for connection {}: {}", connectionId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Get list of available schemas for a connection.
+     */
+    @GetMapping("/connections/{connectionId}/schemas")
+    @Operation(
+        summary = "List database schemas",
+        description = "Retrieve list of available schemas in the database"
+    )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Schema list retrieved successfully"
+    )
+    @ApiResponse(
+        responseCode = "500",
+        description = "Schema listing failed"
+    )
+    public ResponseEntity<List<String>> getSchemas(
+            @Parameter(description = "Connection ID") @PathVariable String connectionId) {
+
+        logger.info("Getting schemas for connection: {}", connectionId);
+
+        try {
+            List<String> schemas = dataSourceService.getSchemas(connectionId);
+            return ResponseEntity.ok(schemas);
+        } catch (Exception e) {
+            logger.error("Schema listing failed for connection {}: {}", connectionId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Get list of available schemas using test connection parameters.
+     */
+    @PostMapping("/test/schemas")
+    @Operation(
+        summary = "List schemas from test connection",
+        description = "Test connection and retrieve list of available schemas"
+    )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Schema list retrieved successfully"
+    )
+    @ApiResponse(
+        responseCode = "500",
+        description = "Connection or schema listing failed"
+    )
+    public ResponseEntity<List<String>> getSchemasFromTestConnection(
+            @RequestBody DataSourceConnection connection) {
+
+        logger.info("Getting schemas from test connection to: {}", connection.getHost());
+
+        try {
+            List<String> schemas = dataSourceService.getSchemasFromConnection(connection);
+            return ResponseEntity.ok(schemas);
+        } catch (Exception e) {
+            logger.error("Schema listing failed for test connection: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

@@ -359,4 +359,70 @@ class ComponentLoaderTest {
         logger.info("Partial sections component loaded successfully with {} total references", allRefs.size());
         logger.info("Component demonstrates flexibility: only config-files section used (no component-refs, rule-configurations, or enrichment-refs)");
     }
+
+    // ========================================
+    // Component Enabled Field Tests
+    // ========================================
+
+    @Test
+    @DisplayName("Should default to enabled=true when not specified")
+    void testComponentEnabledDefaultTrue() {
+        logger.info("=== Testing Component Enabled Default ===");
+
+        ComponentConfiguration component = new ComponentConfiguration();
+        ComponentConfiguration.Metadata metadata = new ComponentConfiguration.Metadata();
+        metadata.setId("test-component");
+        metadata.setName("Test Component");
+        metadata.setType("component");
+        component.setMetadata(metadata);
+
+        assertTrue(metadata.isEnabled(), "Component should be enabled by default");
+        assertTrue(loader.isComponentEnabled(component), "ComponentLoader should report component as enabled");
+    }
+
+    @Test
+    @DisplayName("Should respect enabled=false in metadata")
+    void testComponentEnabledFalse() {
+        logger.info("=== Testing Component Enabled=false ===");
+
+        ComponentConfiguration component = new ComponentConfiguration();
+        ComponentConfiguration.Metadata metadata = new ComponentConfiguration.Metadata();
+        metadata.setId("disabled-component");
+        metadata.setName("Disabled Component");
+        metadata.setType("component");
+        metadata.setEnabled(false);
+        component.setMetadata(metadata);
+
+        assertFalse(metadata.isEnabled(), "Component should be disabled when enabled=false");
+        assertFalse(loader.isComponentEnabled(component), "ComponentLoader should report component as disabled");
+    }
+
+    @Test
+    @DisplayName("Should respect enabled=true in metadata")
+    void testComponentEnabledTrue() {
+        logger.info("=== Testing Component Enabled=true ===");
+
+        ComponentConfiguration component = new ComponentConfiguration();
+        ComponentConfiguration.Metadata metadata = new ComponentConfiguration.Metadata();
+        metadata.setId("enabled-component");
+        metadata.setName("Enabled Component");
+        metadata.setType("component");
+        metadata.setEnabled(true);
+        component.setMetadata(metadata);
+
+        assertTrue(metadata.isEnabled(), "Component should be enabled when enabled=true");
+        assertTrue(loader.isComponentEnabled(component), "ComponentLoader should report component as enabled");
+    }
+
+    @Test
+    @DisplayName("Should handle null metadata gracefully")
+    void testComponentEnabledNullMetadata() {
+        logger.info("=== Testing Component Enabled with Null Metadata ===");
+
+        ComponentConfiguration component = new ComponentConfiguration();
+        // Don't set metadata
+
+        assertTrue(loader.isComponentEnabled(component),
+            "Component with null metadata should default to enabled");
+    }
 }

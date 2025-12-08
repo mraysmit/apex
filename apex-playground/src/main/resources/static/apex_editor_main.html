@@ -503,10 +503,38 @@
                 flex-direction: column;
             }
 
+            /* Table Accordion Styles */
+            .table-accordion-item {
+                border: 1px solid #444;
+                border-radius: 4px;
+            }
+
+            .table-accordion-header:hover {
+                background-color: #2a2a2a;
+            }
+
+            .table-accordion-body {
+                background-color: #1a1a1a;
+                border-top: 1px solid #333;
+            }
+
+            .column-list .form-check {
+                margin-bottom: 4px;
+            }
+
+            .column-list .form-check-label {
+                font-size: 0.85rem;
+            }
+
+            .btn-xs {
+                padding: 0.15rem 0.4rem;
+                font-size: 0.75rem;
+            }
+
             /* SQL Editor */
             #sqlEditor {
-                flex: 1;
-                min-height: 200px;
+                height: 200px;
+                min-height: 100px;
                 background: #1a1a1a;
                 border: 1px solid #3a3a3a;
                 border-radius: 4px;
@@ -514,7 +542,8 @@
                 font-size: 13px;
                 color: #d4d4d4;
                 padding: 0.5rem;
-                resize: vertical;
+                resize: vertical !important;
+                overflow-y: auto !important;
                 line-height: 1.5;
             }
 
@@ -591,8 +620,7 @@
 
             .connection-card {
                 display: flex;
-                justify-content: space-between;
-                align-items: center;
+                flex-direction: column;
                 padding: 1rem;
                 background: #2a2a2a;
                 border: 1px solid #3a3a3a;
@@ -611,7 +639,8 @@
             }
 
             .connection-info {
-                flex: 1;
+                width: 100%;
+                margin-bottom: 0.75rem;
             }
 
             .connection-name {
@@ -624,6 +653,7 @@
             .connection-details {
                 color: #888;
                 font-size: 0.85rem;
+                word-break: break-all;
             }
 
             .connection-status {
@@ -831,6 +861,13 @@
                                 <label for="connectionPassword" class="form-label">Password</label>
                                 <input type="password" class="form-control" id="connectionPassword" placeholder="Password (optional for H2)">
                             </div>
+                            <div class="mb-3" id="schemaSelectContainer" style="display: none;">
+                                <label for="connectionSchema" class="form-label">Schema</label>
+                                <select class="form-select" id="connectionSchema">
+                                    <option value="">Default schema</option>
+                                </select>
+                                <small class="text-muted">Click "Test Connection" to load available schemas</small>
+                            </div>
                             <div id="testConnectionResult"></div>
                         </form>
                     </div>
@@ -950,7 +987,6 @@
                         <h2><span class="accordion-arrow">&#9654;</span> Data Sources</h2>
                         <div class="d-flex gap-1 align-items-center" onclick="event.stopPropagation()">
                             <button class="btn btn-success btn-sm" onclick="loadSchemaIntoEditor()" title="Load database schema into Field blocks">Load Schema</button>
-                            <button class="btn btn-outline-light btn-sm" onclick="executeQuery()" title="Execute SQL query">Execute</button>
                             <button class="btn btn-outline-light btn-sm" onclick="clearDataSources()" title="Clear all">Clear</button>
                         </div>
                     </div>
@@ -977,34 +1013,79 @@
                                     </select>
                                     <div class="btn-group btn-group-sm ms-2">
                                         <button class="btn btn-outline-light" onclick="formatSql()" title="Format SQL">Format</button>
-                                        <button class="btn btn-outline-light" onclick="loadSampleQuery()" title="Load sample query">Sample</button>
+                                        <button class="btn btn-outline-light" onclick="copySqlToClipboard()" title="Copy SQL to clipboard">Copy</button>
                                     </div>
                                 </div>
-                                <textarea id="sqlEditor" class="form-control bg-dark text-light font-monospace" placeholder="SELECT * FROM customers WHERE active = true" rows="10"></textarea>
+                                <textarea id="sqlEditor" class="form-control bg-dark text-light font-monospace" placeholder="SELECT * FROM customers WHERE active = true"></textarea>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <button class="btn btn-success btn-sm" onclick="createQueryBlock()">
+                                        <i class="bi bi-plus-square"></i> Create Query Block
+                                    </button>
+                                    <div id="queryStats" class="query-stats" style="display: none;">
+                                        <small class="text-muted">
+                                            <span id="rowCount">0</span> rows in
+                                            <span id="execTime">0</span>ms
+                                        </small>
+                                    </div>
+                                </div>
                                 <div id="sqlError" class="alert alert-danger mt-2 small" style="display: none;"></div>
-                                <div id="queryStats" class="query-stats mt-2" style="display: none;">
-                                    <small class="text-muted">
-                                        <span id="rowCount">0</span> rows • 
-                                        <span id="execTime">0</span>ms
-                                    </small>
+
+                                <!-- Query Results Panel -->
+                                <div id="queryResultsPanel" class="mt-3" style="display: none;">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <strong class="text-light">Query Results</strong>
+                                        <div>
+                                            <button class="btn btn-xs btn-outline-light" onclick="exportResultsCSV()" title="Export to CSV">
+                                                <i class="fas fa-download"></i> CSV
+                                            </button>
+                                            <button class="btn btn-xs btn-outline-secondary ms-1" onclick="clearQueryResults()">
+                                                <i class="fas fa-times"></i> Clear
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                                        <table class="table table-dark table-striped table-sm table-bordered" id="queryResultsTable">
+                                            <thead id="queryResultsHead"></thead>
+                                            <tbody id="queryResultsBody"></tbody>
+                                        </table>
+                                    </div>
+                                    <div id="paginationControls" class="d-flex justify-content-between align-items-center mt-2" style="display: none;">
+                                        <small class="text-muted" id="paginationInfo">Showing 0 rows</small>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-light" onclick="prevPage()" id="prevPageBtn" disabled>Prev</button>
+                                            <button class="btn btn-outline-light" onclick="nextPage()" id="nextPageBtn" disabled>Next</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
                             <!-- Table View Panel -->
                             <div id="tableViewPanel" class="datasource-panel">
-                                <div class="table-responsive datasource-table-container">
-                                    <table id="queryResultsTable" class="table table-dark table-sm table-hover">
-                                        <thead id="tableHeaders"></thead>
-                                        <tbody id="tableBody"></tbody>
-                                    </table>
-                                    <div id="emptyTableMessage" class="text-muted fst-italic text-center py-4">
-                                        Execute a query to see results
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div>
+                                        <span class="text-muted">Schema: </span>
+                                        <strong id="currentSchemaName">-</strong>
+                                        <span class="ms-3 text-muted">Tables: </span>
+                                        <strong id="tableCount">0</strong>
+                                        <span class="ms-3 badge bg-info" id="columnSelectionSummary" style="display: none;">0 column(s) selected</span>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-sm btn-success me-2" onclick="loadSelectedColumnsToEditor()" id="loadColumnsBtn" style="display: none;">
+                                            <i class="fas fa-arrow-right"></i> Load to Editor
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-light" onclick="loadSchemaTables()">
+                                            <i class="fas fa-sync"></i> Refresh
+                                        </button>
                                     </div>
                                 </div>
-                                <div class="table-pagination mt-2" id="tablePagination" style="display: none;">
-                                    <button class="btn btn-sm btn-outline-light" onclick="loadPreviousPage()">Previous</button>
-                                    <span class="mx-3 text-muted">Page <span id="currentPage">1</span></span>
-                                    <button class="btn btn-sm btn-outline-light" onclick="loadNextPage()">Next</button>
+                                <div id="schemaTablesContainer" style="max-height: 500px; overflow-y: auto;">
+                                    <div id="schemaTablesLoading" class="text-center py-4" style="display: none;">
+                                        <span class="spinner-border text-light"></span> Loading tables...
+                                    </div>
+                                    <div id="schemaTablesEmpty" class="text-muted fst-italic text-center py-4">
+                                        Select a connection to view tables
+                                    </div>
+                                    <div id="schemaTablesList" class="list-group list-group-flush" style="display: none;"></div>
                                 </div>
                             </div>
 
@@ -3626,6 +3707,8 @@
                 'apex_data_source_database': { prefix: 'datasource-', field: 'ID' },
                 'apex_data_source_rest': { prefix: 'datasource-', field: 'ID' },
                 'apex_data_source_file': { prefix: 'datasource-', field: 'ID' },
+                'apex_data_source_query': { prefix: 'query-', field: 'ID' },
+                'apex_data_source_endpoint': { prefix: 'endpoint-', field: 'ID' },
                 // Scenario blocks
                 'apex_scenario_config': { prefix: 'scenario-', field: 'ID' },
                 'apex_scenario_registry': { prefix: 'registry-', field: 'ID' },
@@ -4027,11 +4110,13 @@
 
             // Tab Switching
             function switchDataSourceTab(tabName) {
-                // Update tab buttons
-                document.querySelectorAll('#dataSourcesSection .nav-link').forEach(tab => {
+                // Update tab buttons - handle both section selectors for compatibility
+                document.querySelectorAll('#dataSourcesSection .nav-link, #dataSourcesOutput .nav-link').forEach(tab => {
                     tab.classList.remove('active');
                 });
-                event.target.classList.add('active');
+                // Find and activate the correct tab button
+                const btn = document.querySelector(`button[onclick="switchDataSourceTab('${tabName}')"]`);
+                if (btn) btn.classList.add('active');
 
                 // Update panels
                 document.querySelectorAll('.datasource-panel').forEach(panel => {
@@ -4040,10 +4125,13 @@
 
                 if (tabName === 'sql') {
                     document.getElementById('sqlEditorPanel').classList.add('active');
+                    populateConnectionSelect();
                 } else if (tabName === 'table') {
                     document.getElementById('tableViewPanel').classList.add('active');
+                    loadSchemaTables();
                 } else if (tabName === 'connections') {
                     document.getElementById('connectionsPanel').classList.add('active');
+                    refreshConnections();
                 }
             }
 
@@ -4052,7 +4140,11 @@
                 // Reset form
                 document.getElementById('connectionForm').reset();
                 document.getElementById('testConnectionResult').innerHTML = '';
-                
+
+                // Reset schema dropdown
+                document.getElementById('schemaSelectContainer').style.display = 'none';
+                document.getElementById('connectionSchema').innerHTML = '<option value="">Default schema</option>';
+
                 // Set default ports based on database type
                 document.getElementById('connectionType').addEventListener('change', function() {
                     const type = this.value;
@@ -4095,8 +4187,11 @@
 
             async function testConnection() {
                 const resultDiv = document.getElementById('testConnectionResult');
+                const schemaContainer = document.getElementById('schemaSelectContainer');
+                const schemaSelect = document.getElementById('connectionSchema');
+
                 resultDiv.innerHTML = '<div class="spinner-border spinner-border-sm text-info" role="status"></div> Testing connection...';
-                
+
                 const connectionData = {
                     name: document.getElementById('connectionName').value,
                     type: document.getElementById('connectionType').value,
@@ -4107,26 +4202,69 @@
                     password: document.getElementById('connectionPassword').value
                 };
 
+                // Debug logging
+                console.log('Test Connection Data:', {
+                    ...connectionData,
+                    password: connectionData.password ? '***' : '(empty)'
+                });
+
                 try {
-                    const response = await fetch('/api/datasources/test', {
+                    const response = await fetch('/playground/api/datasources/test', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(connectionData)
                     });
 
                     const result = await response.json();
-                    
+
                     if (response.ok && result.success) {
                         resultDiv.innerHTML = `<div class="test-connection-result success">
-                            <i class="bi bi-check-circle"></i> Connection successful!
-                            ${result.message ? '<br>' + result.message : ''}
+                            <i class="bi bi-check-circle"></i> Connection successful! Loading schemas...
                         </div>`;
+
+                        // Fetch available schemas
+                        try {
+                            const schemasResponse = await fetch('/playground/api/datasources/test/schemas', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(connectionData)
+                            });
+
+                            if (schemasResponse.ok) {
+                                const schemas = await schemasResponse.json();
+                                schemaSelect.innerHTML = '<option value="">Default schema</option>';
+                                schemas.forEach(schema => {
+                                    schemaSelect.innerHTML += `<option value="${schema}">${schema}</option>`;
+                                });
+                                schemaContainer.style.display = 'block';
+
+                                resultDiv.innerHTML = `<div class="test-connection-result success">
+                                    <i class="bi bi-check-circle"></i> Connection successful! Found ${schemas.length} schemas.
+                                    ${result.message ? '<br>' + result.message : ''}
+                                </div>`;
+                            } else {
+                                // Connection worked but schema listing failed - still show success
+                                resultDiv.innerHTML = `<div class="test-connection-result success">
+                                    <i class="bi bi-check-circle"></i> Connection successful!
+                                    ${result.message ? '<br>' + result.message : ''}
+                                </div>`;
+                            }
+                        } catch (schemaError) {
+                            console.warn('Could not load schemas:', schemaError);
+                            // Connection worked but schema listing failed - still show success
+                            resultDiv.innerHTML = `<div class="test-connection-result success">
+                                <i class="bi bi-check-circle"></i> Connection successful!
+                                ${result.message ? '<br>' + result.message : ''}
+                            </div>`;
+                        }
                     } else {
+                        schemaContainer.style.display = 'none';
                         resultDiv.innerHTML = `<div class="test-connection-result error">
                             <i class="bi bi-x-circle"></i> Connection failed: ${result.message || 'Unknown error'}
                         </div>`;
                     }
                 } catch (error) {
+                    schemaContainer.style.display = 'none';
                     resultDiv.innerHTML = `<div class="test-connection-result error">
                         <i class="bi bi-x-circle"></i> Error: ${error.message}
                     </div>`;
@@ -4146,12 +4284,13 @@
                     host: document.getElementById('connectionHost').value,
                     port: parseInt(document.getElementById('connectionPort').value) || null,
                     database: document.getElementById('connectionDatabase').value,
+                    schema: document.getElementById('connectionSchema').value || null,
                     username: document.getElementById('connectionUsername').value,
                     password: document.getElementById('connectionPassword').value
                 };
 
                 try {
-                    const response = await fetch('/api/datasources/connections', {
+                    const response = await fetch('/playground/api/datasources/connections', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(connectionData)
@@ -4160,7 +4299,17 @@
                     if (response.ok) {
                         const connection = await response.json();
                         showToast('Connection created successfully', 'success');
-                        bootstrap.Modal.getInstance(document.getElementById('createConnectionModal')).hide();
+
+                        // Close modal and wait for animation to complete before refreshing
+                        const modalEl = document.getElementById('createConnectionModal');
+                        const modal = bootstrap.Modal.getInstance(modalEl);
+                        if (modal) {
+                            // Wait for modal to fully hide before refreshing connections
+                            await new Promise(resolve => {
+                                modalEl.addEventListener('hidden.bs.modal', resolve, { once: true });
+                                modal.hide();
+                            });
+                        }
                         await refreshConnections();
                     } else {
                         const error = await response.json();
@@ -4172,45 +4321,74 @@
             }
 
             async function refreshConnections() {
+                const listContainer = document.getElementById('connectionList');
+                // Show loading indicator
+                listContainer.innerHTML = '<div class="text-center py-4"><span class="spinner-border text-light"></span> Loading connections...</div>';
+
                 try {
-                    const response = await fetch('/api/datasources/connections');
+                    const response = await fetch('/playground/api/datasources/connections');
+                    console.log('Refresh connections response status:', response.status);
                     if (response.ok) {
                         connections = await response.json();
+                        console.log('Loaded connections:', connections);
                         renderConnectionsList();
                         updateConnectionSelector();
+                        // Also update the SQL editor dropdown
+                        populateConnectionSelect();
                     } else {
+                        console.error('Failed to load connections, status:', response.status);
+                        listContainer.innerHTML = '<div class="alert alert-danger">Failed to load connections</div>';
                         showToast('Failed to load connections', 'error');
                     }
                 } catch (error) {
+                    console.error('Error loading connections:', error);
+                    listContainer.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
                     showToast('Error loading connections: ' + error.message, 'error');
                 }
             }
 
             function renderConnectionsList() {
-                const listContainer = document.getElementById('connectionsList');
-                
-                if (connections.length === 0) {
-                    listContainer.innerHTML = '<p class="text-muted text-center">No connections configured. Create one to get started.</p>';
+                const listContainer = document.getElementById('connectionList');
+
+                if (!connections || connections.length === 0) {
+                    listContainer.innerHTML = '<p class="text-muted text-center">No connections configured. Click "Create Connection" to add one.</p>';
                     return;
                 }
 
+                const isActive = (conn) => activeConnection && activeConnection.id === conn.id;
+
                 listContainer.innerHTML = connections.map(conn => `
-                    <div class="connection-card ${activeConnection && activeConnection.id === conn.id ? 'active' : ''}">
+                    <div class="connection-card ${isActive(conn) ? 'active' : ''}">
                         <div class="connection-info">
-                            <div class="connection-name">${conn.name}</div>
+                            <div class="connection-name">
+                                <span class="connection-status ${conn.connected ? 'connected' : 'disconnected'}">
+                                    <i class="bi bi-circle-fill"></i>
+                                </span>
+                                ${conn.name}
+                            </div>
                             <div class="connection-details">
                                 ${conn.type} • ${conn.username}@${conn.host}${conn.port ? ':' + conn.port : ''}/${conn.database}
                             </div>
-                            <span class="connection-status ${conn.active ? 'connected' : 'disconnected'}">
-                                <i class="bi bi-circle-fill"></i>
-                                ${conn.active ? 'Connected' : 'Disconnected'}
-                            </span>
                         </div>
                         <div class="connection-actions">
-                            <button class="btn btn-sm btn-outline-primary" onclick="selectConnection(${conn.id})">
-                                ${activeConnection && activeConnection.id === conn.id ? 'Active' : 'Use'}
+                            <button class="btn btn-sm ${conn.connected ? 'btn-warning' : 'btn-outline-success'}"
+                                    onclick="toggleConnection('${conn.id}')"
+                                    title="${conn.connected ? 'Disconnect from database' : 'Connect to database'}">
+                                ${conn.connected ? 'Disconnect' : 'Connect'}
                             </button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteConnection(${conn.id})">
+                            <button class="btn btn-sm ${isActive(conn) ? 'btn-primary' : 'btn-outline-primary'}"
+                                    onclick="toggleActiveConnection('${conn.id}')"
+                                    title="${isActive(conn) ? 'Deactivate this connection' : 'Set as active connection for Tables tab'}">
+                                ${isActive(conn) ? 'Active' : 'Set Active'}
+                            </button>
+                            <button class="btn btn-sm btn-outline-success"
+                                    onclick="createDatabaseSourceBlock('${conn.id}')"
+                                    title="Create Database Source block from this connection">
+                                Create Block
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger"
+                                    onclick="deleteConnection('${conn.id}')"
+                                    title="Delete this connection">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </div>
@@ -4220,16 +4398,15 @@
 
             function updateConnectionSelector() {
                 const selector = document.getElementById('activeConnectionSelect');
-                
+
                 if (connections.length === 0) {
                     selector.innerHTML = '<option value="">No connections available</option>';
-                    selector.disabled = true;
+                    // Keep selector enabled so it remains interactive for UI testing
                     return;
                 }
 
-                selector.disabled = false;
                 selector.innerHTML = '<option value="">Select a connection...</option>' +
-                    connections.map(conn => 
+                    connections.map(conn =>
                         `<option value="${conn.id}" ${activeConnection && activeConnection.id === conn.id ? 'selected' : ''}>
                             ${conn.name} (${conn.type})
                         </option>`
@@ -4244,16 +4421,67 @@
                 renderConnectionsList();
                 updateConnectionSelector();
                 showToast(`Connected to ${connection.name}`, 'success');
-                
+
                 // Load schema into Blockly Field dropdown
                 await loadSchemaIntoEditor(id);
+            }
+
+            // Toggle active connection (activate/deactivate)
+            async function toggleActiveConnection(id) {
+                if (activeConnection && activeConnection.id === id) {
+                    // Deactivate
+                    activeConnection = null;
+                    renderConnectionsList();
+                    updateConnectionSelector();
+                    showToast('Connection deactivated', 'info');
+                } else {
+                    // Activate
+                    await selectConnection(id);
+                }
+            }
+
+            // Toggle database connection (connect/disconnect)
+            async function toggleConnection(id) {
+                const connection = connections.find(c => c.id === id);
+                if (!connection) return;
+
+                try {
+                    if (connection.connected) {
+                        // Disconnect
+                        const response = await fetch(`/playground/api/datasources/connections/${id}/disconnect`, {
+                            method: 'POST'
+                        });
+                        if (response.ok) {
+                            connection.connected = false;
+                            renderConnectionsList();
+                            showToast(`Disconnected from ${connection.name}`, 'info');
+                        } else {
+                            showToast('Failed to disconnect', 'error');
+                        }
+                    } else {
+                        // Connect
+                        const response = await fetch(`/playground/api/datasources/connections/${id}/connect`, {
+                            method: 'POST'
+                        });
+                        if (response.ok) {
+                            connection.connected = true;
+                            renderConnectionsList();
+                            showToast(`Connected to ${connection.name}`, 'success');
+                        } else {
+                            const error = await response.text();
+                            showToast('Failed to connect: ' + error, 'error');
+                        }
+                    }
+                } catch (error) {
+                    showToast('Error: ' + error.message, 'error');
+                }
             }
 
             async function deleteConnection(id) {
                 if (!confirm('Are you sure you want to delete this connection?')) return;
 
                 try {
-                    const response = await fetch(`/api/datasources/connections/${id}`, {
+                    const response = await fetch(`/playground/api/datasources/connections/${id}`, {
                         method: 'DELETE'
                     });
 
@@ -4271,10 +4499,334 @@
                 }
             }
 
+            // Create Database Source Block from Connection
+            function createDatabaseSourceBlock(connectionId) {
+                const conn = connections.find(c => c.id === connectionId);
+                if (!conn) {
+                    showToast('Connection not found', 'error');
+                    return;
+                }
+
+                // Create a new Database Source block
+                const block = workspace.newBlock('apex_data_source_database');
+
+                // Fill in the connection details
+                block.setFieldValue('ds-' + conn.name.toLowerCase().replace(/[^a-z0-9]/g, '-'), 'ID');
+                block.setFieldValue(conn.name, 'NAME');
+                block.setFieldValue(true, 'ENABLED');
+                block.setFieldValue(conn.type + ' database connection', 'DESCRIPTION');
+                block.setFieldValue(conn.host || 'localhost', 'HOST');
+                block.setFieldValue(conn.port || 5432, 'PORT');
+                block.setFieldValue(conn.database || '', 'DATABASE');
+                block.setFieldValue(conn.username || '', 'USERNAME');
+                block.setFieldValue('', 'PASSWORD'); // Don't copy password for security
+
+                // Initialize the block and position it
+                block.initSvg();
+                block.render();
+
+                // Position the block in a visible area
+                const metrics = workspace.getMetrics();
+                const x = metrics.viewLeft + 50;
+                const y = metrics.viewTop + 50;
+                block.moveBy(x, y);
+
+                // Select the new block
+                Blockly.common.setSelected(block);
+
+                showToast(`Created Database Source block for "${conn.name}"`, 'success');
+            }
+
+            // Schema Tables View
+            let selectedColumns = {}; // { 'schema.table': ['col1', 'col2'] }
+            let currentSchemaData = null;
+
+            async function loadSchemaTables() {
+                const loadingDiv = document.getElementById('schemaTablesLoading');
+                const emptyDiv = document.getElementById('schemaTablesEmpty');
+                const listDiv = document.getElementById('schemaTablesList');
+                const schemaNameSpan = document.getElementById('currentSchemaName');
+                const tableCountSpan = document.getElementById('tableCount');
+
+                // Check if we have an active connection
+                if (!activeConnection) {
+                    loadingDiv.style.display = 'none';
+                    listDiv.style.display = 'none';
+                    emptyDiv.style.display = 'block';
+                    emptyDiv.textContent = 'Select a connection to view tables';
+                    schemaNameSpan.textContent = '-';
+                    tableCountSpan.textContent = '0';
+                    return;
+                }
+
+                // Show loading
+                loadingDiv.style.display = 'block';
+                emptyDiv.style.display = 'none';
+                listDiv.style.display = 'none';
+
+                try {
+                    const response = await fetch(`/playground/api/datasources/connections/${activeConnection.id}/schema`);
+
+                    if (!response.ok) {
+                        throw new Error('Failed to load schema');
+                    }
+
+                    const schema = await response.json();
+                    currentSchemaData = schema;
+                    const tables = schema.tables || [];
+
+                    // Update header info
+                    schemaNameSpan.textContent = activeConnection.schema || schema.database || 'default';
+                    tableCountSpan.textContent = tables.length;
+
+                    loadingDiv.style.display = 'none';
+
+                    if (tables.length === 0) {
+                        emptyDiv.style.display = 'block';
+                        emptyDiv.textContent = 'No tables found in this schema';
+                        listDiv.style.display = 'none';
+                        return;
+                    }
+
+                    // Render tables list with accordion
+                    listDiv.innerHTML = tables.map((table, idx) => {
+                        const tableKey = `${table.schema || ''}.${table.name}`;
+                        const columns = table.columns || [];
+                        return `
+                        <div class="table-accordion-item bg-dark text-light border-secondary mb-1">
+                            <div class="table-accordion-header d-flex align-items-center p-2"
+                                 style="cursor: pointer; border-bottom: 1px solid #444;">
+                                <button class="btn btn-sm btn-link text-light p-0 me-2"
+                                        onclick="toggleTableAccordion(event, 'tableColumns_${idx}')"
+                                        style="text-decoration: none; width: 20px;">
+                                    <i class="fas fa-chevron-right" id="tableChevron_${idx}"></i>
+                                </button>
+                                <i class="fas fa-table text-info me-2"></i>
+                                <strong class="flex-grow-1" onclick="toggleTableAccordion(event, 'tableColumns_${idx}')">${table.name}</strong>
+                                ${table.schema ? `<small class="text-muted me-2">(${table.schema})</small>` : ''}
+                                <span class="badge bg-secondary me-2">${columns.length} cols</span>
+                                <button class="btn btn-sm btn-outline-info"
+                                        onclick="generateSelectQuery(event, '${table.name}', '${table.schema || ''}')"
+                                        title="Generate SELECT query">
+                                    <i class="fas fa-code"></i>
+                                </button>
+                            </div>
+                            <div class="table-accordion-body" id="tableColumns_${idx}" style="display: none; padding: 8px 8px 8px 32px;">
+                                <div class="mb-2">
+                                    <button class="btn btn-xs btn-outline-light me-1" onclick="selectAllColumns(event, '${tableKey}', ${idx})">
+                                        Select All
+                                    </button>
+                                    <button class="btn btn-xs btn-outline-light" onclick="deselectAllColumns(event, '${tableKey}', ${idx})">
+                                        Deselect All
+                                    </button>
+                                </div>
+                                <div class="column-list" style="max-height: 200px; overflow-y: auto;">
+                                    ${columns.map((col, colIdx) => `
+                                        <div class="form-check form-check-inline" style="min-width: 180px;">
+                                            <input class="form-check-input column-checkbox" type="checkbox"
+                                                   id="col_${idx}_${colIdx}"
+                                                   data-table="${tableKey}"
+                                                   data-column="${col.name}"
+                                                   onchange="updateColumnSelection('${tableKey}', '${col.name}', this.checked)">
+                                            <label class="form-check-label ${col.primaryKey ? 'text-warning' : ''}"
+                                                   for="col_${idx}_${colIdx}"
+                                                   title="${col.type}${col.nullable ? ' (nullable)' : ' (not null)'}${col.primaryKey ? ' [PK]' : ''}">
+                                                ${col.primaryKey ? '<i class="fas fa-key text-warning me-1" style="font-size: 0.7em;"></i>' : ''}
+                                                ${col.name}
+                                                <small class="text-muted">(${col.type})</small>
+                                            </label>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `}).join('');
+
+                    listDiv.style.display = 'block';
+                    emptyDiv.style.display = 'none';
+
+                } catch (error) {
+                    console.error('Error loading schema tables:', error);
+                    loadingDiv.style.display = 'none';
+                    emptyDiv.style.display = 'block';
+                    emptyDiv.textContent = 'Error loading tables: ' + error.message;
+                    listDiv.style.display = 'none';
+                }
+            }
+
+            function toggleTableAccordion(event, bodyId) {
+                event.stopPropagation();
+                const body = document.getElementById(bodyId);
+                const chevronId = bodyId.replace('tableColumns_', 'tableChevron_');
+                const chevron = document.getElementById(chevronId);
+
+                if (body.style.display === 'none') {
+                    body.style.display = 'block';
+                    chevron.classList.remove('fa-chevron-right');
+                    chevron.classList.add('fa-chevron-down');
+                } else {
+                    body.style.display = 'none';
+                    chevron.classList.remove('fa-chevron-down');
+                    chevron.classList.add('fa-chevron-right');
+                }
+            }
+
+            function updateColumnSelection(tableKey, columnName, isSelected) {
+                if (!selectedColumns[tableKey]) {
+                    selectedColumns[tableKey] = [];
+                }
+
+                if (isSelected) {
+                    if (!selectedColumns[tableKey].includes(columnName)) {
+                        selectedColumns[tableKey].push(columnName);
+                    }
+                } else {
+                    selectedColumns[tableKey] = selectedColumns[tableKey].filter(c => c !== columnName);
+                }
+
+                updateSelectionSummary();
+            }
+
+            function selectAllColumns(event, tableKey, tableIdx) {
+                event.stopPropagation();
+                const checkboxes = document.querySelectorAll(`#tableColumns_${tableIdx} .column-checkbox`);
+                selectedColumns[tableKey] = [];
+                checkboxes.forEach(cb => {
+                    cb.checked = true;
+                    selectedColumns[tableKey].push(cb.dataset.column);
+                });
+                updateSelectionSummary();
+            }
+
+            function deselectAllColumns(event, tableKey, tableIdx) {
+                event.stopPropagation();
+                const checkboxes = document.querySelectorAll(`#tableColumns_${tableIdx} .column-checkbox`);
+                checkboxes.forEach(cb => cb.checked = false);
+                selectedColumns[tableKey] = [];
+                updateSelectionSummary();
+            }
+
+            function updateSelectionSummary() {
+                let totalSelected = 0;
+                let tablesWithSelections = 0;
+                for (const tableKey in selectedColumns) {
+                    if (selectedColumns[tableKey].length > 0) {
+                        totalSelected += selectedColumns[tableKey].length;
+                        tablesWithSelections++;
+                    }
+                }
+
+                const summaryEl = document.getElementById('columnSelectionSummary');
+                const loadBtn = document.getElementById('loadColumnsBtn');
+
+                if (summaryEl) {
+                    if (totalSelected > 0) {
+                        summaryEl.textContent = `${totalSelected} column(s) from ${tablesWithSelections} table(s)`;
+                        summaryEl.style.display = 'inline';
+                    } else {
+                        summaryEl.style.display = 'none';
+                    }
+                }
+
+                if (loadBtn) {
+                    loadBtn.style.display = totalSelected > 0 ? 'inline-block' : 'none';
+                }
+            }
+
+            function generateSelectQuery(event, tableName, schemaName) {
+                event.stopPropagation();
+                const tableKey = `${schemaName}.${tableName}`;
+                const qualifiedName = schemaName ? `${schemaName}.${tableName}` : tableName;
+
+                let columns = '*';
+                if (selectedColumns[tableKey] && selectedColumns[tableKey].length > 0) {
+                    columns = selectedColumns[tableKey].join(', ');
+                }
+
+                document.getElementById('sqlEditor').value = `SELECT ${columns} FROM ${qualifiedName} LIMIT 100;`;
+                switchDataSourceTab('sql');
+                showToast(`Query prepared for table: ${tableName}`, 'info');
+            }
+
+            function loadSelectedColumnsToEditor() {
+                // Build SQL SELECT statement from selected columns
+                const tableColumns = {};
+
+                for (const tableKey in selectedColumns) {
+                    if (selectedColumns[tableKey].length > 0) {
+                        const [schemaName, tableName] = tableKey.split('.');
+                        const qualifiedName = schemaName ? `${schemaName}.${tableName}` : tableName;
+
+                        if (!tableColumns[qualifiedName]) {
+                            tableColumns[qualifiedName] = [];
+                        }
+
+                        selectedColumns[tableKey].forEach(colName => {
+                            tableColumns[qualifiedName].push(colName);
+                        });
+                    }
+                }
+
+                const tables = Object.keys(tableColumns);
+                if (tables.length === 0) {
+                    showToast('No columns selected', 'warning');
+                    return;
+                }
+
+                // Build SELECT statement
+                let sql = 'SELECT\n';
+                const allColumns = [];
+
+                tables.forEach(tableName => {
+                    tableColumns[tableName].forEach(colName => {
+                        // Use table alias if multiple tables
+                        if (tables.length > 1) {
+                            allColumns.push(`    ${tableName}.${colName}`);
+                        } else {
+                            allColumns.push(`    ${colName}`);
+                        }
+                    });
+                });
+
+                sql += allColumns.join(',\n');
+                sql += '\nFROM ' + tables[0];
+
+                // Add JOINs for additional tables (user will need to specify join conditions)
+                if (tables.length > 1) {
+                    for (let i = 1; i < tables.length; i++) {
+                        sql += `\n    JOIN ${tables[i]} ON /* specify join condition */`;
+                    }
+                }
+
+                sql += '\nWHERE 1=1\nLIMIT 100;';
+
+                // Set SQL in editor
+                const sqlEditor = document.getElementById('sqlEditor');
+                sqlEditor.value = sql;
+
+                switchDataSourceTab('sql');
+                showToast(`Generated SELECT with ${allColumns.length} column(s) from ${tables.length} table(s)`, 'success');
+            }
+
+            function showTableDetails(tableName, schemaName) {
+                // Switch to SQL tab and populate with a SELECT query for this table
+                const qualifiedName = schemaName ? `${schemaName}.${tableName}` : tableName;
+                document.getElementById('sqlEditor').value = `SELECT * FROM ${qualifiedName} LIMIT 100;`;
+                switchDataSourceTab('sql');
+                showToast(`Query prepared for table: ${tableName}`, 'info');
+            }
+
             // Query Execution
             async function executeQuery() {
                 const sql = document.getElementById('sqlEditor').value.trim();
-                if (!sql) {
+                const errorDiv = document.getElementById('sqlError');
+                const statsDiv = document.getElementById('queryStats');
+                const resultsPanel = document.getElementById('queryResultsPanel');
+
+                // Strip SQL comments for execution
+                const executableSql = sql.split('\n').filter(line => !line.trim().startsWith('--')).join('\n').trim();
+
+                if (!executableSql) {
                     showToast('Please enter a SQL query', 'warning');
                     return;
                 }
@@ -4284,89 +4836,157 @@
                     return;
                 }
 
+                // Hide previous errors, show loading
+                errorDiv.style.display = 'none';
+                statsDiv.style.display = 'none';
+
                 const queryRequest = {
                     connectionId: activeConnection.id,
-                    sql: sql
+                    sql: executableSql
                 };
 
                 try {
                     const startTime = performance.now();
-                    const response = await fetch('/api/datasources/query', {
+                    const response = await fetch('/playground/api/datasources/query', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(queryRequest)
                     });
 
                     const endTime = performance.now();
-                    const duration = ((endTime - startTime) / 1000).toFixed(2);
+                    const duration = Math.round(endTime - startTime);
 
                     if (response.ok) {
                         currentQueryResult = await response.json();
                         currentPage = 1;
-                        renderTableView();
-                        
+
+                        // Show results panel and render
+                        resultsPanel.style.display = 'block';
+                        renderQueryResults();
+
                         // Show stats
-                        showToast(`Query executed successfully in ${duration}s - ${currentQueryResult.rowCount} rows`, 'success');
-                        
-                        // Switch to table view
-                        document.querySelector('#dataSourcesSection .nav-link[onclick*="table"]').click();
+                        document.getElementById('rowCount').textContent = currentQueryResult.rowCount || (currentQueryResult.rows ? currentQueryResult.rows.length : 0);
+                        document.getElementById('execTime').textContent = duration;
+                        statsDiv.style.display = 'block';
+
+                        showToast(`Query executed: ${currentQueryResult.rowCount || 0} rows in ${duration}ms`, 'success');
                     } else {
                         const error = await response.json();
-                        showToast('Query failed: ' + error.message, 'error');
+                        errorDiv.textContent = error.message || 'Query execution failed';
+                        errorDiv.style.display = 'block';
+                        showToast('Query failed: ' + (error.message || 'Unknown error'), 'error');
                     }
                 } catch (error) {
+                    errorDiv.textContent = error.message;
+                    errorDiv.style.display = 'block';
                     showToast('Error executing query: ' + error.message, 'error');
                 }
             }
 
-            function renderTableView() {
-                const tableBody = document.getElementById('queryResultsTable').querySelector('tbody');
-                const tableHead = document.getElementById('queryResultsTable').querySelector('thead tr');
+            function renderQueryResults() {
+                const tableHead = document.getElementById('queryResultsHead');
+                const tableBody = document.getElementById('queryResultsBody');
                 const paginationInfo = document.getElementById('paginationInfo');
+                const paginationControls = document.getElementById('paginationControls');
 
                 if (!currentQueryResult || !currentQueryResult.rows || currentQueryResult.rows.length === 0) {
-                    tableHead.innerHTML = '<th>No data</th>';
-                    tableBody.innerHTML = '<tr><td>Execute a query to see results</td></tr>';
-                    paginationInfo.textContent = 'No results';
+                    tableHead.innerHTML = '<tr><th>No data</th></tr>';
+                    tableBody.innerHTML = '<tr><td class="text-muted">Query returned no results</td></tr>';
+                    paginationControls.style.display = 'none';
                     return;
                 }
 
                 // Render headers
-                tableHead.innerHTML = currentQueryResult.columns.map(col => `<th>${col}</th>`).join('');
+                const columns = currentQueryResult.columns || [];
+                tableHead.innerHTML = '<tr>' + columns.map(col => `<th>${col}</th>`).join('') + '</tr>';
 
                 // Pagination
-                const totalRows = currentQueryResult.rows.length;
+                const rows = currentQueryResult.rows;
+                const totalRows = rows.length;
                 const totalPages = Math.ceil(totalRows / rowsPerPage);
                 const startIdx = (currentPage - 1) * rowsPerPage;
                 const endIdx = Math.min(startIdx + rowsPerPage, totalRows);
-                const pageRows = currentQueryResult.rows.slice(startIdx, endIdx);
+                const pageRows = rows.slice(startIdx, endIdx);
 
-                // Render rows
-                tableBody.innerHTML = pageRows.map(row => 
-                    '<tr>' + row.map(cell => `<td>${cell !== null && cell !== undefined ? cell : '<span class="text-muted">NULL</span>'}</td>`).join('') + '</tr>'
-                ).join('');
+                // Render rows - handle both array and object row formats
+                tableBody.innerHTML = pageRows.map(row => {
+                    if (Array.isArray(row)) {
+                        return '<tr>' + row.map(cell =>
+                            `<td>${cell !== null && cell !== undefined ? cell : '<span class="text-muted">NULL</span>'}</td>`
+                        ).join('') + '</tr>';
+                    } else {
+                        // Object format - use columns order
+                        return '<tr>' + columns.map(col => {
+                            const val = row[col];
+                            return `<td>${val !== null && val !== undefined ? val : '<span class="text-muted">NULL</span>'}</td>`;
+                        }).join('') + '</tr>';
+                    }
+                }).join('');
 
-                // Update pagination info
+                // Update pagination
                 paginationInfo.textContent = `Showing ${startIdx + 1}-${endIdx} of ${totalRows} rows`;
-
-                // Update pagination buttons
+                paginationControls.style.display = totalRows > rowsPerPage ? 'flex' : 'none';
                 document.getElementById('prevPageBtn').disabled = currentPage === 1;
-                document.getElementById('nextPageBtn').disabled = currentPage === totalPages;
+                document.getElementById('nextPageBtn').disabled = currentPage >= totalPages;
             }
 
-            function previousPage() {
+            function prevPage() {
                 if (currentPage > 1) {
                     currentPage--;
-                    renderTableView();
+                    renderQueryResults();
                 }
             }
 
             function nextPage() {
-                const totalPages = Math.ceil(currentQueryResult.rows.length / rowsPerPage);
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    renderTableView();
+                if (currentQueryResult && currentQueryResult.rows) {
+                    const totalPages = Math.ceil(currentQueryResult.rows.length / rowsPerPage);
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        renderQueryResults();
+                    }
                 }
+            }
+
+            function clearQueryResults() {
+                currentQueryResult = null;
+                currentPage = 1;
+                document.getElementById('queryResultsPanel').style.display = 'none';
+                document.getElementById('queryResultsHead').innerHTML = '';
+                document.getElementById('queryResultsBody').innerHTML = '';
+                document.getElementById('queryStats').style.display = 'none';
+            }
+
+            function exportResultsCSV() {
+                if (!currentQueryResult || !currentQueryResult.rows || currentQueryResult.rows.length === 0) {
+                    showToast('No results to export', 'warning');
+                    return;
+                }
+
+                const columns = currentQueryResult.columns || [];
+                const rows = currentQueryResult.rows;
+
+                // Build CSV
+                let csv = columns.join(',') + '\n';
+                rows.forEach(row => {
+                    if (Array.isArray(row)) {
+                        csv += row.map(cell => `"${(cell !== null && cell !== undefined ? cell : '').toString().replace(/"/g, '""')}"`).join(',') + '\n';
+                    } else {
+                        csv += columns.map(col => {
+                            const val = row[col];
+                            return `"${(val !== null && val !== undefined ? val : '').toString().replace(/"/g, '""')}"`;
+                        }).join(',') + '\n';
+                    }
+                });
+
+                // Download
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'query_results.csv';
+                a.click();
+                URL.revokeObjectURL(url);
+                showToast('Results exported to CSV', 'success');
             }
 
             function formatSql() {
@@ -4389,28 +5009,79 @@
                 editor.value = sql.trim();
             }
 
-            function loadSampleQuery() {
-                if (!activeConnection) {
-                    showToast('Please select a connection first', 'warning');
+            function copySqlToClipboard() {
+                const sql = document.getElementById('sqlEditor').value.trim();
+                if (!sql) {
+                    showToast('No SQL to copy', 'warning');
                     return;
                 }
 
-                const sampleQueries = {
-                    'POSTGRESQL': 'SELECT table_name, table_type\nFROM information_schema.tables\nWHERE table_schema = \'public\'\nORDER BY table_name\nLIMIT 10;',
-                    'MYSQL': 'SELECT table_name, table_type\nFROM information_schema.tables\nWHERE table_schema = DATABASE()\nLIMIT 10;',
-                    'H2': 'SELECT TABLE_NAME, TABLE_TYPE\nFROM INFORMATION_SCHEMA.TABLES\nWHERE TABLE_SCHEMA = \'PUBLIC\'\nLIMIT 10;',
-                    'SQLSERVER': 'SELECT TOP 10 TABLE_NAME, TABLE_TYPE\nFROM INFORMATION_SCHEMA.TABLES\nWHERE TABLE_SCHEMA = \'dbo\'\nORDER BY TABLE_NAME;',
-                    'ORACLE': 'SELECT table_name, table_type\nFROM user_tables\nWHERE ROWNUM <= 10\nORDER BY table_name;'
-                };
+                navigator.clipboard.writeText(sql).then(() => {
+                    showToast('SQL copied to clipboard', 'success');
+                }).catch(err => {
+                    console.error('Failed to copy SQL:', err);
+                    showToast('Failed to copy to clipboard', 'error');
+                });
+            }
 
-                const sampleQuery = sampleQueries[activeConnection.type] || 'SELECT * FROM information_schema.tables LIMIT 10;';
-                document.getElementById('sqlEditor').value = sampleQuery;
+            function createQueryBlock() {
+                const sql = document.getElementById('sqlEditor').value.trim();
+                if (!sql) {
+                    showToast('Please enter a SQL query first', 'warning');
+                    return;
+                }
+
+                // Generate unique query ID
+                const queryId = generateUniqueId(workspace, 'apex_data_source_query') || 'query-1';
+                const queryName = 'query-' + Date.now();
+
+                // Create the query block
+                const queryBlock = workspace.newBlock('apex_data_source_query');
+                queryBlock.setFieldValue(queryId, 'ID');
+                queryBlock.setFieldValue(queryName, 'NAME');
+                queryBlock.setFieldValue(sql, 'QUERY');
+                queryBlock.initSvg();
+                queryBlock.render();
+
+                // Try to find a Database Source block with an empty QUERIES area
+                const allBlocks = workspace.getAllBlocks(false);
+                let targetDbBlock = null;
+
+                for (const block of allBlocks) {
+                    if (block.type === 'apex_data_source_database') {
+                        // Check if QUERIES input is empty
+                        const queriesInput = block.getInput('QUERIES');
+                        if (queriesInput && !queriesInput.connection.targetConnection) {
+                            targetDbBlock = block;
+                            break;
+                        }
+                    }
+                }
+
+                if (targetDbBlock) {
+                    // Connect the query block to the Database Source's QUERIES input
+                    const queriesInput = targetDbBlock.getInput('QUERIES');
+                    if (queriesInput && queriesInput.connection) {
+                        queriesInput.connection.connect(queryBlock.previousConnection);
+                        showToast(`Created Query block and connected to "${targetDbBlock.getFieldValue('NAME')}"`, 'success');
+                    }
+                } else {
+                    // Position the block in a visible area
+                    const metrics = workspace.getMetrics();
+                    const x = metrics.viewLeft + 50;
+                    const y = metrics.viewTop + 50;
+                    queryBlock.moveBy(x, y);
+                    showToast('Created Query block (no Database Source with empty Queries found)', 'info');
+                }
+
+                // Select the new block
+                Blockly.common.setSelected(queryBlock);
             }
 
             // Schema Loading into Blockly
             async function loadSchemaIntoEditor(connectionId) {
                 try {
-                    const response = await fetch(`/api/datasources/connections/${connectionId}/schema`);
+                    const response = await fetch(`/playground/api/datasources/connections/${connectionId}/schema`);
                     if (response.ok) {
                         const schema = await response.json();
                         
@@ -6038,6 +6709,72 @@
             } else {
                 updateYaml();
             }
+            // --- DATA SOURCE & SQL EDITOR IMPLEMENTATION ---
+
+            const API_BASE = '/playground/api/datasources';
+            let currentConnections = [];
+
+            // Helper for API calls
+            async function fetchAPI(endpoint, options = {}) {
+                const url = API_BASE + endpoint;
+                try {
+                    const response = await fetch(url, options);
+                    
+                    if (response.status === 204) {
+                        return null;
+                    }
+
+                    const contentType = response.headers.get("content-type");
+                    if (contentType && contentType.indexOf("application/json") !== -1) {
+                        const data = await response.json();
+                        if (!response.ok) {
+                            throw new Error(data.message || `Error ${response.status}`);
+                        }
+                        return data;
+                    } else {
+                        if (!response.ok) {
+                            throw new Error(`Error ${response.status}`);
+                        }
+                        return await response.text();
+                    }
+                } catch (error) {
+                    console.error("API Call Failed:", error);
+                    showToast(error.message, 'danger', 'Error');
+                    throw error;
+                }
+            }
+
+            // --- Query Execution ---
+
+            function populateConnectionSelect() {
+                const select = document.getElementById('activeConnectionSelect');
+                const currentVal = select.value;
+
+                let html = '<option value="">Select connection...</option>';
+                connections.forEach(conn => {
+                    html += `<option value="${conn.id}">${conn.name} (${conn.database})</option>`;
+                });
+                select.innerHTML = html;
+
+                if (currentVal && connections.find(c => c.id === currentVal)) {
+                    select.value = currentVal;
+                }
+            }
+
+            // --- UI Helpers ---
+
+            function clearDataSources() {
+                document.getElementById('sqlEditor').value = '';
+                clearQueryResults();
+                document.getElementById('sqlError').style.display = 'none';
+                document.getElementById('queryStats').style.display = 'none';
+            }
+
+            function loadSchemaIntoEditor() {
+                // Placeholder - implementation would inspect schema and create blocks
+                showToast("Schema loading logic not yet implemented", "info");
+            }
+
         </script>
 
         <!-- Bootstrap JS -->

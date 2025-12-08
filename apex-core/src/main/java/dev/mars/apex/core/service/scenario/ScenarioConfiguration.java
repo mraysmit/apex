@@ -76,10 +76,14 @@ public class ScenarioConfiguration {
     // NEW: Classification rule support for Map-based data routing
     private String classificationRuleCondition;
     private String classificationRuleDescription;
-    
+
+    // NEW: Enabled flag to control whether scenario is active (default: true)
+    private boolean enabled = true;
+
     // Constructors
     public ScenarioConfiguration() {
         this.processingStages = new ArrayList<>();
+        this.enabled = true;
     }
 
     public ScenarioConfiguration(String scenarioId, String name, List<String> dataTypes, List<String> ruleConfigurations) {
@@ -211,6 +215,31 @@ public class ScenarioConfiguration {
      */
     public void setClassificationRuleDescription(String classificationRuleDescription) {
         this.classificationRuleDescription = classificationRuleDescription;
+    }
+
+    /**
+     * Checks if this scenario is enabled.
+     *
+     * <p>Disabled scenarios are loaded but not considered for classification-based
+     * routing or direct execution. This allows scenarios to be temporarily disabled
+     * without removing them from the registry.</p>
+     *
+     * @return true if the scenario is enabled (default), false if disabled
+     */
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    /**
+     * Sets whether this scenario is enabled.
+     *
+     * <p>When set to false, the scenario will be skipped during classification-based
+     * routing and will throw an exception if executed directly by ID.</p>
+     *
+     * @param enabled true to enable the scenario, false to disable it
+     */
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     /**

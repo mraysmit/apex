@@ -173,29 +173,34 @@ public class DataSourceService {
     
     /**
      * Get database schema information including tables and columns.
-     * 
+     * If the connection has a schema configured, only tables from that schema are returned.
+     *
      * @param connectionId The connection ID to introspect
      * @return Database schema with table and column metadata
      * @throws RuntimeException if schema introspection fails
      */
     public DatabaseSchema getSchema(String connectionId) {
         HikariDataSource dataSource = getDataSource(connectionId);
-        
+        DataSourceConnection connectionConfig = connections.get(connectionId);
+        String targetSchema = connectionConfig != null ? connectionConfig.getSchema() : null;
+
         try (Connection conn = dataSource.getConnection()) {
             DatabaseMetaData metaData = conn.getMetaData();
-            
+
             DatabaseSchema schema = new DatabaseSchema();
             schema.setDatabase(conn.getCatalog());
-            
+
             List<DatabaseSchema.TableInfo> tables = new ArrayList<>();
-            
-            // Get all tables
-            try (ResultSet rs = metaData.getTables(null, null, "%", new String[]{"TABLE"})) {
+
+            // Get tables - filter by schema if configured
+            // Pass schema pattern to getTables for efficiency
+            String schemaPattern = (targetSchema != null && !targetSchema.isEmpty()) ? targetSchema : null;
+            try (ResultSet rs = metaData.getTables(null, schemaPattern, "%", new String[]{"TABLE"})) {
                 while (rs.next()) {
                     DatabaseSchema.TableInfo table = new DatabaseSchema.TableInfo();
                     table.setName(rs.getString("TABLE_NAME"));
                     table.setSchema(rs.getString("TABLE_SCHEM"));
-                    
+
                     // Get columns for this table
                     List<DatabaseSchema.ColumnInfo> columns = new ArrayList<>();
                     try (ResultSet colRs = metaData.getColumns(null, table.getSchema(), table.getName(), "%")) {
@@ -207,7 +212,7 @@ public class DataSourceService {
                             columns.add(column);
                         }
                     }
-                    
+
                     // Get primary keys for this table
                     try (ResultSet pkRs = metaData.getPrimaryKeys(null, table.getSchema(), table.getName())) {
                         Set<String> pkColumns = new HashSet<>();
@@ -216,25 +221,111 @@ public class DataSourceService {
                         }
                         columns.forEach(col -> col.setPrimaryKey(pkColumns.contains(col.getName())));
                     }
-                    
+
                     table.setColumns(columns);
                     tables.add(table);
                 }
             }
-            
+
             schema.setTables(tables);
-            logger.info("Retrieved schema for connection {}: {} tables", connectionId, tables.size());
+            logger.info("Retrieved schema for connection {} (schema: {}): {} tables",
+                    connectionId, targetSchema != null ? targetSchema : "all", tables.size());
             return schema;
-            
+
         } catch (SQLException e) {
             logger.error("Schema introspection failed for connection {}: {}", connectionId, e.getMessage());
             throw new RuntimeException("Failed to get schema: " + e.getMessage(), e);
         }
     }
-    
+
+    /**
+     * Get list of available schemas for a connection.
+     *
+     * @param connectionId The connection ID to introspect
+     * @return List of schema names available in the database
+     * @throws RuntimeException if schema listing fails
+     */
+    public List<String> getSchemas(String connectionId) {
+        HikariDataSource dataSource = getDataSource(connectionId);
+
+        try (Connection conn = dataSource.getConnection()) {
+            DatabaseMetaData metaData = conn.getMetaData();
+            List<String> schemas = new ArrayList<>();
+
+            try (ResultSet rs = metaData.getSchemas()) {
+                while (rs.next()) {
+                    String schemaName = rs.getString("TABLE_SCHEM");
+                    if (schemaName != null && !schemaName.isEmpty()) {
+                        schemas.add(schemaName);
+                    }
+                }
+            }
+
+            // Sort schemas alphabetically, but put common ones first
+            schemas.sort((a, b) -> {
+                // Prioritize common schemas
+                if ("public".equalsIgnoreCase(a)) return -1;
+                if ("public".equalsIgnoreCase(b)) return 1;
+                if ("dbo".equalsIgnoreCase(a)) return -1;
+                if ("dbo".equalsIgnoreCase(b)) return 1;
+                return a.compareToIgnoreCase(b);
+            });
+
+            logger.info("Retrieved {} schemas for connection {}", schemas.size(), connectionId);
+            return schemas;
+
+        } catch (SQLException e) {
+            logger.error("Schema listing failed for connection {}: {}", connectionId, e.getMessage());
+            throw new RuntimeException("Failed to list schemas: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Get list of available schemas using connection parameters (for test connection).
+     *
+     * @param connection The connection parameters to use
+     * @return List of schema names available in the database
+     * @throws RuntimeException if schema listing fails
+     */
+    public List<String> getSchemasFromConnection(DataSourceConnection connection) {
+        String jdbcUrl = buildJdbcUrl(connection);
+
+        try (Connection conn = DriverManager.getConnection(
+                jdbcUrl, connection.getUsername(), connection.getPassword())) {
+
+            DatabaseMetaData metaData = conn.getMetaData();
+            List<String> schemas = new ArrayList<>();
+
+            try (ResultSet rs = metaData.getSchemas()) {
+                while (rs.next()) {
+                    String schemaName = rs.getString("TABLE_SCHEM");
+                    if (schemaName != null && !schemaName.isEmpty()) {
+                        schemas.add(schemaName);
+                    }
+                }
+            }
+
+            // Sort schemas alphabetically, but put common ones first
+            schemas.sort((a, b) -> {
+                if ("public".equalsIgnoreCase(a)) return -1;
+                if ("public".equalsIgnoreCase(b)) return 1;
+                if ("dbo".equalsIgnoreCase(a)) return -1;
+                if ("dbo".equalsIgnoreCase(b)) return 1;
+                return a.compareToIgnoreCase(b);
+            });
+
+            logger.info("Retrieved {} schemas from test connection", schemas.size());
+            return schemas;
+
+        } catch (SQLException e) {
+            logger.error("Schema listing failed for test connection: {}", e.getMessage());
+            throw new RuntimeException("Failed to list schemas: " + e.getMessage(), e);
+        }
+    }
+
     /**
      * Get all registered connections.
-     * 
+     *
      * @return List of all connections
      */
     public List<DataSourceConnection> getAllConnections() {
@@ -253,7 +344,7 @@ public class DataSourceService {
     
     /**
      * Delete a connection and close its connection pool.
-     * 
+     *
      * @param connectionId The connection ID to delete
      */
     public void deleteConnection(String connectionId) {
@@ -266,7 +357,64 @@ public class DataSourceService {
             logger.info("Deleted connection: {} ({})", removed.getName(), connectionId);
         }
     }
-    
+
+    /**
+     * Connect to a database (establish connection pool).
+     *
+     * @param connectionId The connection ID to connect
+     * @return The connection with updated status, or null if not found
+     */
+    public DataSourceConnection connect(String connectionId) {
+        DataSourceConnection connection = connections.get(connectionId);
+        if (connection == null) {
+            return null;
+        }
+
+        // Check if already connected
+        if (connectionPools.containsKey(connectionId)) {
+            HikariDataSource existing = connectionPools.get(connectionId);
+            if (existing != null && !existing.isClosed()) {
+                connection.setConnected(true);
+                return connection;
+            }
+        }
+
+        // Create new connection pool
+        HikariDataSource dataSource = createDataSource(connection);
+        try (Connection conn = dataSource.getConnection()) {
+            connection.setConnected(conn.isValid(5));
+        } catch (SQLException e) {
+            dataSource.close();
+            throw new RuntimeException("Failed to connect: " + e.getMessage(), e);
+        }
+
+        connectionPools.put(connectionId, dataSource);
+        logger.info("Connected to: {} ({})", connection.getName(), connectionId);
+        return connection;
+    }
+
+    /**
+     * Disconnect from a database (close connection pool).
+     *
+     * @param connectionId The connection ID to disconnect
+     * @return The connection with updated status, or null if not found
+     */
+    public DataSourceConnection disconnect(String connectionId) {
+        DataSourceConnection connection = connections.get(connectionId);
+        if (connection == null) {
+            return null;
+        }
+
+        HikariDataSource dataSource = connectionPools.remove(connectionId);
+        if (dataSource != null) {
+            dataSource.close();
+        }
+
+        connection.setConnected(false);
+        logger.info("Disconnected from: {} ({})", connection.getName(), connectionId);
+        return connection;
+    }
+
     /**
      * Update an existing connection.
      * Note: This closes the old pool and creates a new one.
@@ -295,9 +443,21 @@ public class DataSourceService {
     private HikariDataSource createDataSource(DataSourceConnection connection) {
         HikariConfig config = new HikariConfig();
         
-        config.setJdbcUrl(buildJdbcUrl(connection));
-        config.setUsername(connection.getUsername());
-        config.setPassword(connection.getPassword());
+        String jdbcUrl = buildJdbcUrl(connection);
+        String username = connection.getUsername();
+        String password = connection.getPassword();
+        
+        logger.debug("Creating datasource - URL: {}, Username: {}, Password length: {}", 
+            jdbcUrl, username, password != null ? password.length() : "null");
+        
+        // Validate required fields
+        if (username == null || username.trim().isEmpty()) {
+            throw new IllegalArgumentException("Username is required for database connection");
+        }
+        
+        config.setJdbcUrl(jdbcUrl);
+        config.setUsername(username);
+        config.setPassword(password != null ? password : "");
         
         // Connection pool settings
         config.setMaximumPoolSize(5);

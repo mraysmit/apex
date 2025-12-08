@@ -11,6 +11,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -27,6 +30,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class DataSourceControllerIntegrationTest {
 
+    // Optional Testcontainer - only used if Docker is available
+    private static PostgreSQLContainer<?> postgresContainer;
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -42,17 +48,57 @@ class DataSourceControllerIntegrationTest {
     // Test data
     private static final String H2_CONNECTION_NAME = "Test H2 Database";
     private static final String POSTGRES_CONNECTION_NAME = "Test PostgreSQL Database";
-    private static final String POSTGRES_HOST = "localhost";
-    private static final int POSTGRES_PORT = 5432;
-    private static final String POSTGRES_DATABASE = "postgres";
-    private static final String POSTGRES_USERNAME = "postgres";
-    private static final String POSTGRES_PASSWORD = "postgres";
+    
+    // PostgreSQL connection details - populated from Testcontainers
+    private static String POSTGRES_HOST;
+    private static int POSTGRES_PORT;
+    private static String POSTGRES_DATABASE;
+    private static String POSTGRES_USERNAME;
+    private static String POSTGRES_PASSWORD;
 
     @BeforeAll
     static void setupTestData() {
         System.out.println("\n========================================");
         System.out.println("Data Sources Integration Test Suite");
         System.out.println("========================================\n");
+        
+        // Try to start Testcontainer if Docker is available
+        try {
+            postgresContainer = new PostgreSQLContainer<>("postgres:15-alpine")
+                    .withDatabaseName("testdb")
+                    .withUsername("test")
+                    .withPassword("test");
+            postgresContainer.start();
+            
+            POSTGRES_HOST = postgresContainer.getHost();
+            POSTGRES_PORT = postgresContainer.getFirstMappedPort();
+            POSTGRES_DATABASE = postgresContainer.getDatabaseName();
+            POSTGRES_USERNAME = postgresContainer.getUsername();
+            POSTGRES_PASSWORD = postgresContainer.getPassword();
+            System.out.println("✓ PostgreSQL Testcontainer started at " + POSTGRES_HOST + ":" + POSTGRES_PORT);
+        } catch (Exception e) {
+            // Docker not available, try local PostgreSQL
+            System.out.println("⚠ Docker not available, checking for local PostgreSQL...");
+            POSTGRES_HOST = "localhost";
+            POSTGRES_PORT = 5432;
+            POSTGRES_DATABASE = "postgres";
+            POSTGRES_USERNAME = "postgres";
+            POSTGRES_PASSWORD = "postgres";
+            
+            if (isLocalPostgreSQLAvailable()) {
+                System.out.println("✓ Local PostgreSQL found at " + POSTGRES_HOST + ":" + POSTGRES_PORT);
+            } else {
+                System.out.println("⚠ No PostgreSQL available (Docker or local)");
+            }
+        }
+    }
+    
+    @AfterAll
+    static void tearDown() {
+        if (postgresContainer != null && postgresContainer.isRunning()) {
+            postgresContainer.stop();
+            System.out.println("✓ PostgreSQL Testcontainer stopped");
+        }
     }
 
     @Test
@@ -62,7 +108,7 @@ class DataSourceControllerIntegrationTest {
         DataSourceConnection h2Connection = new DataSourceConnection();
         h2Connection.setName(H2_CONNECTION_NAME);
         h2Connection.setType(DatabaseType.H2);
-        h2Connection.setDatabase("mem:testdb");
+        h2Connection.setDatabase("mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1");
         h2Connection.setUsername("sa");
         h2Connection.setPassword("");
 
@@ -91,7 +137,7 @@ class DataSourceControllerIntegrationTest {
         DataSourceConnection h2Connection = new DataSourceConnection();
         h2Connection.setName(H2_CONNECTION_NAME);
         h2Connection.setType(DatabaseType.H2);
-        h2Connection.setDatabase("mem:testdb");
+        h2Connection.setDatabase("mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1");
         h2Connection.setUsername("sa");
         h2Connection.setPassword("");
 
@@ -210,6 +256,13 @@ class DataSourceControllerIntegrationTest {
     @Order(8)
     @DisplayName("8. Create PostgreSQL Connection")
     void testCreatePostgreSQLConnection() throws Exception {
+        // Check if PostgreSQL is available before attempting connection
+        if (!isPostgreSQLAvailable()) {
+            System.out.println("⚠ PostgreSQL connection skipped - server not available at " + POSTGRES_HOST + ":" + POSTGRES_PORT);
+            Assumptions.assumeTrue(false, "PostgreSQL not available");
+            return;
+        }
+
         DataSourceConnection pgConnection = new DataSourceConnection();
         pgConnection.setName(POSTGRES_CONNECTION_NAME);
         pgConnection.setType(DatabaseType.POSTGRESQL);
@@ -219,26 +272,21 @@ class DataSourceControllerIntegrationTest {
         pgConnection.setUsername(POSTGRES_USERNAME);
         pgConnection.setPassword(POSTGRES_PASSWORD);
 
-        try {
-            String result = mockMvc.perform(post(API_BASE + "/connections")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(pgConnection)))
-                    .andDo(print())
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.id").exists())
-                    .andExpect(jsonPath("$.name").value(POSTGRES_CONNECTION_NAME))
-                    .andReturn()
-                    .getResponse()
-                    .getContentAsString();
+        String result = mockMvc.perform(post(API_BASE + "/connections")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(pgConnection)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.name").value(POSTGRES_CONNECTION_NAME))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
 
-            DataSourceConnection created = objectMapper.readValue(result, DataSourceConnection.class);
-            postgresConnectionId = created.getId();
+        DataSourceConnection created = objectMapper.readValue(result, DataSourceConnection.class);
+        postgresConnectionId = created.getId();
 
-            System.out.println("✓ PostgreSQL Connection created with ID: " + postgresConnectionId);
-        } catch (Exception e) {
-            System.out.println("⚠ PostgreSQL connection skipped - server not available");
-            Assumptions.assumeTrue(false, "PostgreSQL not available");
-        }
+        System.out.println("✓ PostgreSQL Connection created with ID: " + postgresConnectionId);
     }
 
     @Test
@@ -328,5 +376,29 @@ class DataSourceControllerIntegrationTest {
         System.out.println("\n========================================");
         System.out.println("Data Sources Tests Complete");
         System.out.println("========================================\n");
+    }
+
+    /**
+     * Check if PostgreSQL is available (Testcontainer or local).
+     */
+    private boolean isPostgreSQLAvailable() {
+        // Check Testcontainer first
+        if (postgresContainer != null && postgresContainer.isRunning()) {
+            return true;
+        }
+        // Fallback to local PostgreSQL
+        return isLocalPostgreSQLAvailable();
+    }
+    
+    /**
+     * Check if local PostgreSQL is available by attempting a socket connection.
+     */
+    private static boolean isLocalPostgreSQLAvailable() {
+        try (java.net.Socket socket = new java.net.Socket()) {
+            socket.connect(new java.net.InetSocketAddress("localhost", 5432), 1000);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

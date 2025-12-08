@@ -97,19 +97,32 @@ public class ComponentLoader {
 
         try {
             ComponentConfiguration component = loadComponentFile(componentFilePath);
-            
+
             // Validate the component
             component.validate();
-            
+
             // Detect circular references
             detectCircularReferences(component, componentFilePath);
-            
-            logger.info("Successfully loaded component: {} (id: {})", component.getName(), component.getId());
+
+            // Log enabled status
+            boolean enabled = component.getMetadata() != null && component.getMetadata().isEnabled();
+            logger.info("Successfully loaded component: {} (id: {}, enabled: {})",
+                       component.getName(), component.getId(), enabled);
             return component;
-            
+
         } catch (Exception e) {
             throw new YamlConfigurationException("Failed to load component from: " + componentFilePath, e);
         }
+    }
+
+    /**
+     * Check if a component is enabled.
+     *
+     * @param component the component to check
+     * @return true if enabled (default), false if explicitly disabled
+     */
+    public boolean isComponentEnabled(ComponentConfiguration component) {
+        return component.getMetadata() == null || component.getMetadata().isEnabled();
     }
 
     /**
@@ -158,6 +171,7 @@ public class ComponentLoader {
 
     /**
      * Recursively resolve component references with nesting depth tracking.
+     * Disabled components are skipped during resolution.
      */
     private void resolveReferencesRecursive(
             ComponentConfiguration component,
@@ -165,20 +179,26 @@ public class ComponentLoader {
             Set<String> visitedComponents,
             List<ResolvedFileReference> resolvedFiles,
             int depth) throws YamlConfigurationException, IOException {
-        
+
+        // Skip disabled components
+        if (!isComponentEnabled(component)) {
+            logger.debug("Skipping disabled component: {} (id: {})", componentFilePath, component.getId());
+            return;
+        }
+
         // Check nesting depth
         validateNestingDepth(component.getId(), depth);
-        
+
         // Mark this component as visited
         visitedComponents.add(componentFilePath);
-        
+
         // Get all references in execution order
         List<ComponentConfiguration.FileReference> allRefs = component.getAllReferences();
-        
+
         for (ComponentConfiguration.FileReference ref : allRefs) {
             String filePath = ref.getFile();
             String resolvedPath = resolveRelativePath(componentFilePath, filePath);
-            
+
             // Check if this is a component reference
             if (isComponentFile(resolvedPath)) {
                 // Load and recursively resolve nested component

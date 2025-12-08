@@ -587,7 +587,7 @@ class VisualEditorUITest {
 
     @Test
     @Order(19)
-    @DisplayName("Accordion toggle function works")
+    @DisplayName("Accordion toggle function works via direct call")
     void testAccordionToggle() {
         driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
@@ -609,6 +609,97 @@ class VisualEditorUITest {
             "return !document.getElementById('evalDataSection').classList.contains('expanded');"
         );
         assertTrue(evalCollapsed, "Eval Data section should be collapsed after toggle");
+    }
+
+    @Test
+    @Order(50)
+    @DisplayName("Accordion header click triggers toggle - YAML section")
+    void testAccordionHeaderClickYamlSection() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        // Verify the toggleAccordion function exists
+        Boolean functionExists = (Boolean) js.executeScript(
+            "return typeof toggleAccordion === 'function';"
+        );
+        assertTrue(functionExists, "toggleAccordion function should be defined");
+
+        // Verify YAML section starts expanded
+        Boolean initiallyExpanded = (Boolean) js.executeScript(
+            "return document.getElementById('yamlSection').classList.contains('expanded');"
+        );
+        assertTrue(initiallyExpanded, "YAML section should be expanded initially");
+
+        // Click directly on the accordion-header div (not the h2)
+        WebElement yamlHeader = driver.findElement(By.cssSelector("#yamlSection .accordion-header"));
+        yamlHeader.click();
+        try { Thread.sleep(300); } catch (InterruptedException e) {}
+
+        // Verify section is now collapsed
+        Boolean nowCollapsed = (Boolean) js.executeScript(
+            "return !document.getElementById('yamlSection').classList.contains('expanded');"
+        );
+        assertTrue(nowCollapsed, "YAML section should be collapsed after clicking header");
+
+        // Click again to expand
+        yamlHeader.click();
+        try { Thread.sleep(300); } catch (InterruptedException e) {}
+
+        // Verify section is expanded again
+        Boolean expandedAgain = (Boolean) js.executeScript(
+            "return document.getElementById('yamlSection').classList.contains('expanded');"
+        );
+        assertTrue(expandedAgain, "YAML section should be expanded after clicking header again");
+    }
+
+    @Test
+    @Order(51)
+    @DisplayName("Accordion header click triggers toggle - Eval Data section")
+    void testAccordionHeaderClickEvalDataSection() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        // Verify Eval Data section starts expanded
+        Boolean initiallyExpanded = (Boolean) js.executeScript(
+            "return document.getElementById('evalDataSection').classList.contains('expanded');"
+        );
+        assertTrue(initiallyExpanded, "Eval Data section should be expanded initially");
+
+        // Click directly on the accordion-header div
+        WebElement evalHeader = driver.findElement(By.cssSelector("#evalDataSection .accordion-header"));
+        evalHeader.click();
+        try { Thread.sleep(300); } catch (InterruptedException e) {}
+
+        // Verify section is now collapsed
+        Boolean nowCollapsed = (Boolean) js.executeScript(
+            "return !document.getElementById('evalDataSection').classList.contains('expanded');"
+        );
+        assertTrue(nowCollapsed, "Eval Data section should be collapsed after clicking header");
+    }
+
+    @Test
+    @Order(52)
+    @DisplayName("Accordion header click triggers toggle - Data Sources section")
+    void testAccordionHeaderClickDataSourcesSection() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        // Verify Data Sources section starts collapsed (not expanded by default)
+        Boolean initiallyCollapsed = (Boolean) js.executeScript(
+            "return !document.getElementById('dataSourcesSection').classList.contains('expanded');"
+        );
+        assertTrue(initiallyCollapsed, "Data Sources section should be collapsed initially");
+
+        // Click directly on the accordion-header div
+        WebElement dsHeader = driver.findElement(By.cssSelector("#dataSourcesSection .accordion-header"));
+        dsHeader.click();
+        try { Thread.sleep(300); } catch (InterruptedException e) {}
+
+        // Verify section is now expanded
+        Boolean nowExpanded = (Boolean) js.executeScript(
+            "return document.getElementById('dataSourcesSection').classList.contains('expanded');"
+        );
+        assertTrue(nowExpanded, "Data Sources section should be expanded after clicking header");
     }
 
     @Test
@@ -725,9 +816,9 @@ class VisualEditorUITest {
         js.executeScript("toggleAccordion('evalDataSection');");
         try { Thread.sleep(100); } catch (InterruptedException e) {}
 
-        // Check tabs exist (Bootstrap nav-link tabs)
-        Long tabCount = (Long) js.executeScript("return document.querySelectorAll('.nav-tabs-dark .nav-link').length;");
-        assertEquals(3L, tabCount, "Should have 3 tabs (Editor, Tree, Files)");
+        // Check tabs exist (Bootstrap nav-link tabs) - specifically in evalDataOutput section
+        Long tabCount = (Long) js.executeScript("return document.querySelectorAll('#evalDataOutput .nav-tabs-dark .nav-link').length;");
+        assertEquals(3L, tabCount, "Should have 3 tabs (Editor, Tree, Files) in eval data section");
 
         // Check editor panel is active by default
         Boolean editorActive = (Boolean) js.executeScript(

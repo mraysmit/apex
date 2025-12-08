@@ -136,26 +136,29 @@ public class ScenarioRegistryLoader {
             for (Map<String, Object> registryEntry : scenarioRegistry) {
                 String scenarioId = (String) registryEntry.get("scenario-id");
                 String configFile = (String) registryEntry.get("config-file");
-                
+
                 if (scenarioId == null || scenarioId.trim().isEmpty()) {
                     logger.warn("Skipping registry entry with missing or empty scenario-id");
                     continue;
                 }
-                
+
                 if (configFile == null || configFile.trim().isEmpty()) {
                     throw new YamlConfigurationException(
                         "Scenario '" + scenarioId + "' in registry has missing or empty config-file"
                     );
                 }
-                
-                logger.debug("Loading scenario '{}' from file: {}", scenarioId, configFile);
-                
+
+                // Parse enabled flag from registry entry (default: true)
+                boolean enabled = parseEnabledFlag(registryEntry);
+
+                logger.debug("Loading scenario '{}' from file: {} (enabled: {})", scenarioId, configFile, enabled);
+
                 // Resolve config file path relative to registry directory
                 String resolvedConfigPath = resolveConfigFilePath(configFile, registryDir);
-                
+
                 // Load the scenario configuration
                 ScenarioConfiguration scenario = loadScenarioFromFile(resolvedConfigPath);
-                
+
                 // Validate that scenario-id matches
                 if (scenario.getScenarioId() != null && !scenario.getScenarioId().equals(scenarioId)) {
                     logger.warn(
@@ -163,13 +166,16 @@ public class ScenarioRegistryLoader {
                         scenarioId, scenario.getScenarioId()
                     );
                 }
-                
+
                 // Ensure scenario has the correct ID from registry
                 scenario.setScenarioId(scenarioId);
-                
+
+                // Set enabled flag from registry entry
+                scenario.setEnabled(enabled);
+
                 // Store in map
                 scenarios.put(scenarioId, scenario);
-                logger.debug("Successfully loaded scenario: {}", scenarioId);
+                logger.debug("Successfully loaded scenario: {} (enabled: {})", scenarioId, enabled);
             }
             
             logger.info("Successfully loaded {} scenarios from registry: {}", scenarios.size(), registryPath);
@@ -203,12 +209,44 @@ public class ScenarioRegistryLoader {
         String type = (String) metadata.get("type");
         if (type != null && !"scenario-registry".equals(type)) {
             logger.warn(
-                "Registry metadata type is '{}' but expected 'scenario-registry': {}", 
+                "Registry metadata type is '{}' but expected 'scenario-registry': {}",
                 type, registryPath
             );
         }
     }
-    
+
+    /**
+     * Parse the enabled flag from a registry entry.
+     *
+     * <p>The enabled flag controls whether a scenario is active and can be used
+     * for classification-based routing or direct execution. If not specified,
+     * the default value is true (enabled).</p>
+     *
+     * @param registryEntry The registry entry map
+     * @return true if enabled (default), false if explicitly disabled
+     */
+    private boolean parseEnabledFlag(Map<String, Object> registryEntry) {
+        Object enabledValue = registryEntry.get("enabled");
+
+        if (enabledValue == null) {
+            // Default to enabled if not specified
+            return true;
+        }
+
+        if (enabledValue instanceof Boolean) {
+            return (Boolean) enabledValue;
+        }
+
+        if (enabledValue instanceof String) {
+            return Boolean.parseBoolean((String) enabledValue);
+        }
+
+        // For any other type, default to enabled
+        logger.warn("Invalid 'enabled' value type: {}. Defaulting to true.",
+                   enabledValue.getClass().getSimpleName());
+        return true;
+    }
+
     /**
      * Resolve config file path relative to registry directory.
      *
@@ -340,7 +378,18 @@ public class ScenarioRegistryLoader {
         if (ruleConfigurations != null) {
             scenario.setRuleConfigurations(ruleConfigurations);
         }
-        
+
+        // Parse enabled flag from scenario file (default: true)
+        // Note: This can be overridden by the registry entry's enabled flag
+        Object enabledValue = scenarioData.get("enabled");
+        if (enabledValue != null) {
+            if (enabledValue instanceof Boolean) {
+                scenario.setEnabled((Boolean) enabledValue);
+            } else if (enabledValue instanceof String) {
+                scenario.setEnabled(Boolean.parseBoolean((String) enabledValue));
+            }
+        }
+
         return scenario;
     }
     

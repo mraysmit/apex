@@ -22,8 +22,13 @@ import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.info.License;
 import io.swagger.v3.oas.annotations.servers.Server;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.core.env.Environment;
 
 /**
  * Spring Boot application for the APEX Playground.
@@ -85,7 +90,35 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 )
 public class PlaygroundApplication {
 
+    private static final Logger log = LoggerFactory.getLogger(PlaygroundApplication.class);
+
+    private final Environment environment;
+
+    public PlaygroundApplication(Environment environment) {
+        this.environment = environment;
+    }
+
     public static void main(String[] args) {
         SpringApplication.run(PlaygroundApplication.class, args);
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void onApplicationReady() {
+        String port = environment.getProperty("server.port", "8081");
+        String contextPath = environment.getProperty("server.servlet.context-path", "");
+        // Remove trailing slash from context path to avoid double slashes
+        if (contextPath.equals("/")) {
+            contextPath = "";
+        }
+        String baseUrl = "http://localhost:" + port + contextPath;
+
+        log.info("");
+        log.info("=".repeat(60));
+        log.info("  APEX Playground is ready!");
+        log.info("  UI:      {}/playground/apex_editor_main.html", baseUrl);
+        log.info("  Swagger: {}/swagger-ui.html", baseUrl);
+        log.info("  API:     {}/playground/api", baseUrl);
+        log.info("=".repeat(60));
+        log.info("");
     }
 }

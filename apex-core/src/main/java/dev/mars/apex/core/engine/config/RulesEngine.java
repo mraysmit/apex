@@ -2006,9 +2006,13 @@ public class RulesEngine {
     /**
      * Get a scenario by ID from the scenario registry.
      *
+     * <p>This method retrieves a scenario by its ID and validates that it is enabled.
+     * Disabled scenarios cannot be executed directly by ID.</p>
+     *
      * @param scenarioId The scenario ID to look up
      * @return The scenario configuration
-     * @throws IllegalArgumentException if scenario not found
+     * @throws IllegalArgumentException if scenario not found or is disabled
+     * @throws IllegalStateException if scenario registry is not initialized
      */
     private dev.mars.apex.core.service.scenario.ScenarioConfiguration getScenario(String scenarioId) {
         if (this.scenarioRegistry == null) {
@@ -2024,6 +2028,14 @@ public class RulesEngine {
             );
         }
 
+        // Check if scenario is enabled
+        if (!scenario.isEnabled()) {
+            throw new IllegalArgumentException(
+                "Scenario '" + scenarioId + "' is disabled and cannot be executed. " +
+                "Enable the scenario in the registry or use a different scenario."
+            );
+        }
+
         return scenario;
     }
 
@@ -2032,8 +2044,11 @@ public class RulesEngine {
      * Iterates through all scenarios in the registry and evaluates their classification rules
      * against the provided input data using SpEL expressions.
      *
+     * <p>Only enabled scenarios are considered for matching. Disabled scenarios are skipped
+     * during classification-based routing.</p>
+     *
      * @param inputData The input data to match against classification rules
-     * @return The first matching scenario, or null if no match found
+     * @return The first matching enabled scenario, or null if no match found
      */
     private dev.mars.apex.core.service.scenario.ScenarioConfiguration findMatchingScenario(
             Map<String, Object> inputData) {
@@ -2046,6 +2061,12 @@ public class RulesEngine {
         logger.debug("Evaluating {} scenarios for classification match", this.scenarioRegistry.size());
 
         for (dev.mars.apex.core.service.scenario.ScenarioConfiguration scenario : this.scenarioRegistry.values()) {
+            // Skip disabled scenarios
+            if (!scenario.isEnabled()) {
+                logger.debug("Scenario {} is disabled - skipping", scenario.getScenarioId());
+                continue;
+            }
+
             if (scenario.hasClassificationRule()) {
                 logger.debug("Evaluating classification rule for scenario: {}", scenario.getScenarioId());
 
