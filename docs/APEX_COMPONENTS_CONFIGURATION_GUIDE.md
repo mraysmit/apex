@@ -103,8 +103,11 @@ rule-configurations:
 ```yaml
 # rules/trade-id-validation.yaml
 metadata:
-  type: "rule-config"
   id: "trade-id-validation"
+  name: "Trade ID Validation"
+  version: "1.0.0"
+  description: "Validates that trade ID is present and not empty"
+  type: "rule-config"
 
 rules:
   - id: "trade-id-required"
@@ -116,8 +119,11 @@ rules:
 ```yaml
 # rules/amount-validation.yaml
 metadata:
-  type: "rule-config"
   id: "amount-validation"
+  name: "Amount Validation"
+  version: "1.0.0"
+  description: "Validates that amount is positive"
+  type: "rule-config"
 
 rules:
   - id: "amount-positive"
@@ -131,12 +137,15 @@ rules:
 ```yaml
 # scenarios/trade-processing.yaml
 metadata:
-  type: "scenario"
   id: "trade-processing"
+  name: "Trade Processing Scenario"
+  version: "1.0.0"
+  description: "Basic trade processing with validation"
+  type: "scenario"
 
 scenario:
   scenario-id: "trade-processing"
-  
+
   processing-stages:
     - stage-name: "validation"
       config-file: "components/basic-trade-validation.yaml"
@@ -977,16 +986,12 @@ metadata:
 rule-configurations:
   - file: "rules/basic-validation.yaml"
     execution-order: 1
-
-enrichment-refs:
-  - file: "enrichments/reference-data.yaml"
-    execution-order: 10
-
-rule-configurations:
   - file: "rules/advanced-validation.yaml"
     execution-order: 20
 
 enrichment-refs:
+  - file: "enrichments/reference-data.yaml"
+    execution-order: 10
   - file: "enrichments/market-data.yaml"
     execution-order: 30
 ```
