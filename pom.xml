@@ -20,7 +20,7 @@
         <jackson.version>2.18.2</jackson.version>
         <springdoc.version>2.7.0</springdoc.version>
         <micrometer.version>1.14.2</micrometer.version>
-        <testcontainers.version>1.21.3</testcontainers.version>
+        <testcontainers.version>2.0.2</testcontainers.version>
 
         <awaitility.version>4.2.0</awaitility.version>
         <postgresql.version>42.7.7</postgresql.version>
