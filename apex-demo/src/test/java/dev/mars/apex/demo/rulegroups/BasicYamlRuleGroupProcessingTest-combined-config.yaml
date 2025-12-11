@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX YAML Configuration File
 # ============================================================================
 # Used by: BasicYamlRuleGroupProcessingTest$AndGroupTests.testAndGroupAllTrue
@@ -13,7 +13,7 @@ metadata:
   description: "Combined configuration for testing separate rule group processing"
   type: "rule-config"
   author: "APEX Demo Team"
-  created-date: "2025-01-15"
+  created: "2025-01-15"
   tags: ["demo", "rule-groups", "separate-rules"]
 
 rules:

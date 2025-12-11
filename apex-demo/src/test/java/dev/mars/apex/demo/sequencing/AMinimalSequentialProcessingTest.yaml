@@ -1,11 +1,11 @@
-metadata:
+﻿metadata:
   id: "minimal-sequential-processing-test"
   name: "Minimal Sequential Processing Test"
   version: "1.0.0"
   description: "Demonstrates sequential processing where rule depends on enrichment result"
   type: "rule-config"
   author: "APEX Demo Team"
-  created-date: "2025-10-30"
+  created: "2025-10-30"
   business-domain: "demo"
   tags: ["sequential", "minimal", "demo"]
   processing-mode: "sequential"

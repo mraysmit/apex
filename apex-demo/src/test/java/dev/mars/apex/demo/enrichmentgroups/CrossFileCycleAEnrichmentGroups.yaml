@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # Cross-file cycle group A (references group B)
 # ============================================================================
 metadata:
@@ -8,7 +8,7 @@ metadata:
   type: "rule-config"
   description: "Cycle A enrichment groups for cross-file circular dependency testing"
   author: "APEX Demo Team"
-  created-date: "2025-01-15"
+  created: "2025-01-15"
   tags: ["demo", "enrichment-groups", "cross-file", "cycle-a"]
 
 enrichment-groups:

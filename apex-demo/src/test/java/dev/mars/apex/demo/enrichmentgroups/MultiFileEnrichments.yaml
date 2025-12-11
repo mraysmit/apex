@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # Enrichments (separate file)
 # ============================================================================
 metadata:
@@ -8,7 +8,7 @@ metadata:
   type: "rule-config"
   description: "Multi-file enrichments configuration"
   author: "APEX Demo Team"
-  created-date: "2025-01-15"
+  created: "2025-01-15"
   tags: ["demo", "enrichments", "multi-file"]
 
 enrichments:

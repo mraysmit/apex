@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX ETL Pipeline Configuration - Empty CSV Extract Step Test
 # ============================================================================
 #
@@ -32,7 +32,7 @@ metadata:
   description: "Test pipeline for validating empty CSV extract step functionality"
   type: "pipeline-config"
   author: "apex-test-suite@example.com"
-  created-date: "2025-09-28"
+  created: "2025-09-28"
   tags: ["apex-test", "pipeline", "extract", "csv", "empty-data"]
 
 # Pipeline definition - single extract step

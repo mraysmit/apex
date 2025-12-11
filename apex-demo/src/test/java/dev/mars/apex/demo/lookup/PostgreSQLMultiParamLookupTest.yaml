@@ -1,4 +1,4 @@
-# PostgreSQL Multi-Parameter Lookup Configuration
+﻿# PostgreSQL Multi-Parameter Lookup Configuration
 # Demonstrates complex database data source with multiple parameters and advanced SQL queries
 # Use Case: Trade settlement instruction data source for multi-parameter lookups with real PostgreSQL
 
@@ -19,7 +19,7 @@ metadata:
   description: "Data source configuration for complex database lookups with multiple parameters using real PostgreSQL database"
   type: "enrichment"
   author: "apex.demo.team@company.com"
-  created-date: "2024-12-24"
+  created: "2024-12-24"
   updated-date: "2025-09-20"
   tags: ["apex-demo", "lookup", "postgresql", "multi-parameter", "testcontainers", "phase-1"]
 

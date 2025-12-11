@@ -5,7 +5,7 @@ metadata:
 
 data-sources:
   - name: "test-data"
-    type: "memory"
+    type: "cache"
 
 # SECTION ORDER: enrichments BEFORE rules
 # Expected execution: enrichments execute FIRST, then rules

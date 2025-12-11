@@ -1,4 +1,4 @@
-# Basic Usage Examples Data Configuration
+﻿# Basic Usage Examples Data Configuration
 # Test data scenarios for BasicUsageExamples.java
 # NO HARDCODED SIMULATION - Real APEX data processing
 
@@ -20,7 +20,7 @@ metadata:
   type: "dataset"
   author: "apex.demo.team@company.com"
   source: "APEX Demo Data Generator"
-  created-date: "2024-12-24"
+  created: "2024-12-24"
   tags: ["apex-demo", "validation", "test-data"]
 
 # Basic Validation Test Scenarios

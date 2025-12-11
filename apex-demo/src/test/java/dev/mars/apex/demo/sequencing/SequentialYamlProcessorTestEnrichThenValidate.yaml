@@ -6,7 +6,7 @@ metadata:
 
 data-sources:
   - name: "customer-db"
-    type: "memory"
+    type: "cache"
     data:
       - customerId: "CUST001"
         customerName: "John Doe"

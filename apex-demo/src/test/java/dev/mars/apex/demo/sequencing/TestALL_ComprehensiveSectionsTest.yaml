@@ -1,4 +1,4 @@
-name: "Test ALL: Comprehensive All-Sections Test"
+﻿name: "Test ALL: Comprehensive All-Sections Test"
 description: "Tests ALL APEX section keywords with multiple items in each section"
 
 # ============================================================================
@@ -10,7 +10,7 @@ metadata:
   version: "1.0.0"
   type: "rule-config"
   author: "apex.test@company.com"
-  created-date: "2025-11-07"
+  created: "2025-11-07"
   business-domain: "Testing"
   owner: "test.team@company.com"
   tags: ["test", "comprehensive", "all-sections"]

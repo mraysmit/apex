@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX ETL Pipeline Configuration - Advanced Database Extract Test
 # ============================================================================
 #
@@ -38,7 +38,7 @@ metadata:
   version: "1.0.0"
   description: "Test pipeline for advanced database extraction with joins and aggregations"
   author: "APEX Test Suite"
-  created-date: "2025-10-27"
+  created: "2025-10-27"
 
 # Pipeline definition
 pipeline:

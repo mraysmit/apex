@@ -1,4 +1,4 @@
-# PostgreSQL Simple Lookup Configuration
+﻿# PostgreSQL Simple Lookup Configuration
 # Demonstrates real PostgreSQL database integration using Testcontainers
 # Use Case: Customer profile data source for enrichment lookups with real PostgreSQL
 
@@ -18,7 +18,7 @@ metadata:
   description: "Data source configuration for real PostgreSQL database with Testcontainers integration"
   type: "enrichment"
   author: "apex.demo.team@company.com"
-  created-date: "2024-12-24"
+  created: "2024-12-24"
   updated-date: "2025-09-20"
   tags: ["apex-demo", "lookup", "postgresql", "testcontainers", "phase-1"]
 

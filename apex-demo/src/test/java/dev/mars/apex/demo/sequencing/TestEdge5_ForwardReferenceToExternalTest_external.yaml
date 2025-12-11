@@ -1,5 +1,8 @@
-name: "External Enrichments for Edge Case Test 5"
-description: "External file with enrichment referenced by main file's group"
+metadata:
+  name: "External Enrichments for Edge Case Test 5"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "External file with enrichment referenced by main file's group"
 
 enrichments:
   - id: "external-1"

@@ -1,4 +1,4 @@
-# Mathematical Operations in Lookup Keys Demo
+﻿# Mathematical Operations in Lookup Keys Demo
 # Demonstrates SpEL mathematical expressions in lookup-key configurations
 # Use Case: Dynamic pricing and financial calculations using mathematical operations
 
@@ -19,7 +19,7 @@ metadata:
   description: "Demonstrates SpEL mathematical expressions in lookup keys for dynamic pricing and financial calculations"
   type: "enrichment"
   author: "apex.demo.team@company.com"
-  created-date: "2025-01-13"
+  created: "2025-01-13"
   tags: ["apex-demo", "mathematical-operations", "spel", "pricing"]
 
 # Mathematical operations enrichment demonstrations

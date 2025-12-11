@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX YAML Configuration File
 # ============================================================================
 # Used by: ORPHANED - No Java test currently uses this file
@@ -15,7 +15,7 @@ metadata:
   description: "Simple customer profile enrichment using H2 database (PostgreSQL mode) with real SQL queries"
   type: "enrichment"
   author: "apex.demo.team@company.com"
-  created-date: "2024-12-24"
+  created: "2024-12-24"
   tags: ["apex-demo", "lookup", "database", "postgresql"]
 
 # External data source configuration for H2 database

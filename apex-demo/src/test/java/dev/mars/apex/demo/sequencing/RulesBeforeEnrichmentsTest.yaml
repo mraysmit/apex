@@ -40,20 +40,22 @@ rules:
     severity: "ERROR"
     enabled: true
 
-# PHASE 3: Inline rule group (RG3)
+  - id: "validate-required-fields"
+    name: "Validate Required Fields"
+    condition: "#underlying != null && #counterparty != null && #notionalAmount != null && #strike != null && #optionType != null"
+    message: "All required input fields present"
+    severity: "INFO"
+    enabled: true
+
+# PHASE 3: Inline rule group (RG3) - references rule defined above
 rule-groups:
   - id: "input-validation-group"
     name: "Input Validation Group"
     description: "Validates input data before enrichment"
     execution-mode: "sequential"
     stop-on-first-failure: false
-    rules:
-      - id: "validate-required-fields"
-        name: "Validate Required Fields"
-        condition: "#underlying != null && #counterparty != null && #notionalAmount != null && #strike != null && #optionType != null"
-        message: "All required input fields present"
-        severity: "INFO"
-        enabled: true
+    rule-ids:
+      - "validate-required-fields"
 
 # PHASE 4: Load external enrichments (E1, E2) and enrichment groups (EG1, EG2)
 enrichment-refs:

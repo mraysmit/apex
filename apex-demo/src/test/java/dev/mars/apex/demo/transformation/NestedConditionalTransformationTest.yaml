@@ -1,0 +1,41 @@
+metadata:
+  type: "transformation-config"
+  description: "Test configuration for nested conditional transformations"
+
+transformations:
+  - id: "nested-discount-logic"
+    type: "conditional-transformation"
+    transformation-rules:
+      - condition: "#root['region'] == 'NA'"
+        actions-true:
+          - type: "set-field"
+            field: "regionCheck"
+            value: "passed"
+          - type: "conditional-transformation"
+            transformation-rules:
+              - condition: "#root['amount'] > 1000"
+                actions-true:
+                  - type: "set-field"
+                    field: "amountCheck"
+                    value: "passed"
+                  - type: "conditional-transformation"
+                    transformation-rules:
+                      - condition: "#root['currency'] == 'USD'"
+                        actions-true:
+                          - type: "set-field"
+                            field: "currencyCheck"
+                            value: "passed"
+                          - type: "conditional-transformation"
+                            transformation-rules:
+                              - condition: "#root['customerType'] == 'VIP'"
+                                actions-true:
+                                  - type: "set-field"
+                                    field: "discount"
+                                    value: 0.20
+                                  - type: "set-field"
+                                    field: "finalCheck"
+                                    value: "passed"
+                        actions-false:
+                          - type: "set-field"
+                            field: "currencyCheck"
+                            value: "failed-currency-mismatch"

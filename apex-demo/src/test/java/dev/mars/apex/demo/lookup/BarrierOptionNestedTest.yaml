@@ -1,4 +1,4 @@
-# APEX Nested Data Processing Validation Configuration
+﻿# APEX Nested Data Processing Validation Configuration
 # Validates APEX enrichment engine can handle complex nested XML structures
 
 metadata:
@@ -8,7 +8,7 @@ metadata:
   description: "Validates APEX enrichment engine nested data processing capabilities"
   business-domain: "Financial Derivatives - Barrier Options"
   author: "apex.validation.team@company.com"
-  created-date: "2025-09-19"
+  created: "2025-09-19"
   tags: ["apex-validation", "nested-data", "barrier-options", "enrichment"]
 
 # APEX Enrichment Rules - All processing logic defined here

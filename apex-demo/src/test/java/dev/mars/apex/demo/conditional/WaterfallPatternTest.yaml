@@ -1,4 +1,4 @@
-# ==================================================================================
+﻿# ==================================================================================
 # WATERFALL PATTERN TEST CONFIGURATION
 # ==================================================================================
 # This configuration demonstrates a "Waterfall" processing pattern using
@@ -18,7 +18,7 @@ metadata:
   version: "1.0"
   type: "rule-config"
   author: "apex.demo.team@company.com"
-  created-date: "2025-10-30"
+  created: "2025-10-30"
 
 
 rule-chains:

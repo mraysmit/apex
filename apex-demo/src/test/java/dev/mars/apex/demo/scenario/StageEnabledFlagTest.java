@@ -169,7 +169,7 @@ class StageEnabledFlagTest {
               name: "Feature Toggle Test"
               
               classification-rule:
-                condition: "#tradeType == 'EquityTrade'"
+                condition: "#root['tradeType'] == 'EquityTrade'"
                 description: "Equity trades"
 
               processing-stages:
@@ -221,7 +221,7 @@ class StageEnabledFlagTest {
             rules:
               - id: "new-check"
                 name: "New Compliance Check"
-                condition: "#'notional'] > 0"
+                condition: "#root['notional'] > 0"
                 message: "New compliance checked"
                 enabled: true
             """;

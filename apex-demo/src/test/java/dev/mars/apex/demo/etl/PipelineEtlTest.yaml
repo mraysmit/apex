@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX ETL Pipeline Configuration - Advanced Customer Data Processing
 # ============================================================================
 #
@@ -58,7 +58,7 @@ metadata:
   description: "Test pipeline document with complete ETL workflow orchestration"
   type: "pipeline"
   author: "apex-test-suite@example.com"
-  created-date: "2025-09-14"
+  created: "2025-09-14"
   tags: ["apex-test", "pipeline", "etl", "workflow"]
 
 # Pipeline orchestration - defines the complete ETL workflow

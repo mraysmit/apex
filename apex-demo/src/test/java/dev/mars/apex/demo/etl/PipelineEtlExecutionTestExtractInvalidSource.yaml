@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX ETL Pipeline Configuration - Invalid Source Extract Step Test
 # ============================================================================
 #
@@ -32,7 +32,7 @@ metadata:
   description: "Test pipeline for validating invalid source extract step error handling"
   type: "pipeline-config"
   author: "apex-test-suite@example.com"
-  created-date: "2025-09-28"
+  created: "2025-09-28"
   tags: ["apex-test", "pipeline", "extract", "error-handling", "invalid-source"]
 
 # Pipeline definition - single extract step with invalid source

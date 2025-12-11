@@ -193,7 +193,7 @@ class ScenarioEndToEndIntegrationComplexTest {
               name: "OTC Option US Processing"
 
               classification-rule:
-                condition: "#'tradeType'] == 'OTCOption' && #'region'] == 'US'"
+                condition: "#root['tradeType'] == 'OTCOption' && #root['region'] == 'US'"
                 description: "US OTC option trades"
 
               processing-stages:
@@ -220,7 +220,7 @@ class ScenarioEndToEndIntegrationComplexTest {
               name: "Bond US Processing"
 
               classification-rule:
-                condition: "#'tradeType'] == 'Bond' && #'region'] == 'US'"
+                condition: "#root['tradeType'] == 'Bond' && #root['region'] == 'US'"
                 description: "US bond trades"
 
               processing-stages:
@@ -242,7 +242,7 @@ class ScenarioEndToEndIntegrationComplexTest {
             rules:
               - id: "validate-amount"
                 name: "Validate Amount"
-                condition: "#'amount'] > 0"
+                condition: "#root['amount'] > 0"
                 message: "Amount must be positive"
                 enabled: true
             """;
@@ -274,7 +274,7 @@ class ScenarioEndToEndIntegrationComplexTest {
             rules:
               - id: "validate-amount"
                 name: "Validate Amount"
-                condition: "#'amount'] > 0"
+                condition: "#root['amount'] > 0"
                 message: "Amount must be positive"
                 enabled: true
             """;

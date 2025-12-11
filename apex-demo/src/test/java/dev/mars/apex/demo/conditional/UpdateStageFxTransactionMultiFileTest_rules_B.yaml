@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX YAML Configuration File - FX Processing Rules (Multi-File Architecture)
 # ============================================================================
 # Used by: UpdateStageFxTransactionMultiFileTest.java
@@ -13,7 +13,7 @@ metadata:
   description: "Reusable FX processing rules with aligned IDs"
   type: "rule-config"
   author: "APEX Demo Team"
-  created-date: "2025-09-23"
+  created: "2025-09-23"
   tags: ["fx-transaction", "processing", "multi-file", "reusable-rules"]
 
 # Reusable FX processing rules - ALIGNED IDs

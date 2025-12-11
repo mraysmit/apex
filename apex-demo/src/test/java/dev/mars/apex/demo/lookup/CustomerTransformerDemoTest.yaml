@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX YAML Configuration File
 # ============================================================================
 # Used by: YamlConfigurationValidationTest.java (testCustomerTransformerFunctionality method)
@@ -14,7 +14,7 @@ metadata:
   description: "APEX-compliant customer transformer with real enrichment services"
   type: "enrichment"
   author: "apex.demo.team@company.com"
-  created-date: "2024-12-24"
+  created: "2024-12-24"
   tags: ["apex-demo", "enrichment", "customer", "transformer"]
 
 # ============================================================================

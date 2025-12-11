@@ -1,4 +1,4 @@
-# External Data Source Working Demo Enrichment
+﻿# External Data Source Working Demo Enrichment
 # Demonstrates external data source working functionality with business logic enrichments
 # Use Case: External data source working demonstration using APEX enrichment services
 
@@ -9,7 +9,7 @@ metadata:
   description: "External data source working demonstration with business logic enrichments"
   type: "enrichment"
   author: "apex.demo.team@company.com"
-  created-date: "2024-12-24"
+  created: "2024-12-24"
   tags: ["apex-demo", "external-data-source", "working", "calculation"]
 
 # Database configuration for customer data (using same database as other demos)

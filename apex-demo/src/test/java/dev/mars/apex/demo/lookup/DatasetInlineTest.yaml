@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX YAML Configuration File
 # ============================================================================
 # Used by: ORPHANED - No Java test currently uses this file
@@ -16,7 +16,7 @@ metadata:
   type: "dataset"
   source: "Test Reference Data Service"
   created-by: "APEX Test Suite"
-  created-date: "2025-01-14"
+  created: "2025-01-14"
   business-domain: "Testing"
 
 data:

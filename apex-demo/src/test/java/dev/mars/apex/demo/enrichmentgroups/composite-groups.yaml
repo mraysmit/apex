@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX YAML Configuration File
 # ============================================================================
 # Used by: ORPHANED - No Java test currently uses this file
@@ -15,7 +15,7 @@ metadata:
   description: "Composite enrichment groups that reference other enrichment groups to create hierarchical data enrichment"
   type: "rule-config"
   author: "APEX Demo Team"
-  created-date: "2025-01-15"
+  created: "2025-01-15"
   tags: ["demo", "hierarchical", "composite-groups", "enrichment"]
 
 enrichment-groups:

@@ -1,4 +1,4 @@
-# H2 Custom Parameters Enrichment Demo
+﻿# H2 Custom Parameters Enrichment Demo
 # Demonstrates H2 database custom parameters functionality with business logic enrichments
 # Use Case: Test H2 custom parameter processing with calculated business results
 
@@ -9,7 +9,7 @@ metadata:
   description: "Demonstrates H2 database custom parameters functionality with business logic enrichments"
   type: "enrichment"
   author: "apex.demo.team@company.com"
-  created-date: "2024-12-24"
+  created: "2024-12-24"
   tags: ["apex-demo", "h2", "custom-parameters", "calculation"]
 
 # Database configuration for customer data (using same database as customer-profile-enrichment)

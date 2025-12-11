@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX YAML Configuration File - Enrichment Groups
 # ============================================================================
 # Mirrors the rule-groups combined config example, but for enrichments
@@ -12,7 +12,7 @@ metadata:
   type: "rule-config"
   description: "Combined configuration for testing enrichment group processing"
   author: "APEX Demo Team"
-  created-date: "2025-01-15"
+  created: "2025-01-15"
   tags: ["demo", "enrichment-groups", "combined-config"]
 
 enrichments:

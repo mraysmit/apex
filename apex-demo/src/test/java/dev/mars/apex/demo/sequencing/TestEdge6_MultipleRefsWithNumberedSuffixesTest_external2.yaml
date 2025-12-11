@@ -1,4 +1,8 @@
-name: "External Enrichments 2 for Edge Case Test 6"
+metadata:
+  name: "External Enrichments 2 for Edge Case Test 6"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "External enrichments for numbered suffixes test"
 
 enrichments:
   - id: "external-2-item-1"

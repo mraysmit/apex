@@ -1,5 +1,8 @@
-name: "Test 3 External: Minimal Enrichment-Group"
-description: "External file with ONE enrichment-group containing ONE lookup enrichment"
+metadata:
+  name: "Test 3 External: Minimal Enrichment-Group"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "External file with ONE enrichment-group containing ONE lookup enrichment"
 
 # Enrichment-group that references the enrichment
 enrichment-groups:

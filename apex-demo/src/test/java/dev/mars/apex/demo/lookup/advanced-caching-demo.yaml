@@ -1,4 +1,4 @@
-# Advanced Parameter-Aware Caching Demo
+﻿# Advanced Parameter-Aware Caching Demo
 # Demonstrates sophisticated caching strategies with parameter isolation
 # Use Case: Enterprise-grade caching with parameter-aware key generation
 
@@ -19,7 +19,7 @@ metadata:
   description: "Demonstrates advanced caching features including parameter-aware caching, eviction policies, and statistics collection"
   type: "enrichment"
   author: "apex.demo.team@company.com"
-  created-date: "2025-01-13"
+  created: "2025-01-13"
   tags: ["apex-demo", "caching", "performance", "parameters"]
 
 # External data source with advanced caching configuration

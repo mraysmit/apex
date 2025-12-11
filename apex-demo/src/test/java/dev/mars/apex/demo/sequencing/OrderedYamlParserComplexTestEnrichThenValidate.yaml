@@ -5,7 +5,7 @@ metadata:
 
 data-sources:
   - name: "customer-lookup"
-    type: "memory"
+    type: "cache"
     data:
       - customerId: "CUST001"
         customerProfile: "PREMIUM"

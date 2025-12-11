@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX ETL Pipeline Configuration - CSV Extract Step Test
 # ============================================================================
 #
@@ -33,7 +33,7 @@ metadata:
   description: "Test pipeline for validating CSV extract step functionality"
   type: "pipeline-config"
   author: "apex-test-suite@example.com"
-  created-date: "2025-09-28"
+  created: "2025-09-28"
   tags: ["apex-test", "pipeline", "extract", "csv"]
 
 # Pipeline definition - single extract step

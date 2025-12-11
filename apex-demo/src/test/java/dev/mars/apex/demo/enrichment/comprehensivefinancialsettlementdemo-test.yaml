@@ -155,7 +155,7 @@ rule-groups:
     name: "Settlement Enrichment Group"
     description: "Settlement processing enrichments"
     type: "sequential-group"
-    rules:
+    enrichment-ids:
       - "settlement-type-classification"
       - "settlement-priority-calculation"
       - "risk-assessment-enrichment"

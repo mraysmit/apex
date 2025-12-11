@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX YAML Configuration File - Simple Inline Rule Group Test
 # ============================================================================
 # Purpose: Demonstrates inline rule-group-id references within same file
@@ -12,7 +12,7 @@ metadata:
   description: "Simple test with 2 rules and inline rule-group references"
   type: "rule-config"
   author: "APEX Demo Team"
-  created-date: "2025-01-15"
+  created: "2025-01-15"
   tags: ["demo", "rule-groups", "inline-references", "simple"]
 
 rules:

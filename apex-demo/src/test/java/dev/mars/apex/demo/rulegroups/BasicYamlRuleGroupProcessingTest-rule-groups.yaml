@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX YAML Configuration File - Rule Groups Only
 # ============================================================================
 # Used by: BasicYamlRuleGroupProcessingTest$AndGroupTests.testAndGroupOneFalse
@@ -13,7 +13,7 @@ metadata:
   description: "Rule groups-only configuration for testing separate file loading"
   type: "rule-config"
   author: "APEX Demo Team"
-  created-date: "2025-01-15"
+  created: "2025-01-15"
   tags: ["demo", "rule-groups", "separate-files", "groups-only"]
 
 rule-groups:

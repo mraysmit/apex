@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX ETL Pipeline Configuration - Batch Load Step Test
 # ============================================================================
 #
@@ -35,7 +35,7 @@ metadata:
   description: "Test pipeline for batch loading operations"  # Purpose description
   type: "pipeline"                                # Configuration type indicator
   author: "apex-etl-test-suite@example.com"     # Configuration author/maintainer
-  created-date: "2025-09-28"                    # Creation date for documentation
+  created: "2025-09-28"                    # Creation date for documentation
   tags: ["apex-test", "etl", "load", "batch"]   # Tags for categorization and search
 
 # ============================================================================

@@ -1,4 +1,4 @@
-
+﻿
 
 # ============================================================================
 # APEX YAML Configuration File
@@ -17,7 +17,7 @@ metadata:
   description: "File system data source for products JSON files"
   type: "external-data-config"
   author: "apex.demo.team@company.com"
-  created-date: "2025-09-05"
+  created: "2025-09-05"
   tags: ["apex-demo", "data-source", "json", "products"]
 
 # Data source definitions

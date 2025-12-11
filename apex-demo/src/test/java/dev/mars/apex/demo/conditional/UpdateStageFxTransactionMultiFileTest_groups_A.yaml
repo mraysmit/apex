@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX YAML Configuration File - SWIFT Rule Groups (Multi-File Architecture)
 # ============================================================================
 # Used by: UpdateStageFxTransactionMultiFileTest.java
@@ -13,7 +13,7 @@ metadata:
   description: "SWIFT-specific rule orchestration with aligned rule references"
   type: "rule-config"
   author: "APEX Demo Team"
-  created-date: "2025-09-23"
+  created: "2025-09-23"
   tags: ["swift", "rule-groups", "multi-file", "cross-file-references"]
 
 # Cross-file rule references - VERIFIED APEX SYNTAX

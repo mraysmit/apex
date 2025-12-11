@@ -1,4 +1,4 @@
-# Comprehensive Lookup Enrichment Demo
+﻿# Comprehensive Lookup Enrichment Demo
 # Demonstrates all core APEX lookup functionality with business logic enrichments
 # Use Case: Consolidated test for all essential lookup operations
 
@@ -9,7 +9,7 @@ metadata:
   description: "Consolidated test for all core APEX lookup functionality with business logic enrichments"
   type: "enrichment"
   author: "apex.demo.team@company.com"
-  created-date: "2024-12-24"
+  created: "2024-12-24"
   tags: ["apex-demo", "lookup", "comprehensive", "calculation"]
 
 # Database configuration for customer data (using same database as customer-profile-enrichment)

@@ -91,7 +91,7 @@ rule-refs:
   - name: "external-rule-groups"
     source: "src/test/java/dev/mars/apex/demo/sequencing/external-rule-groups-otc.yaml"
 
-# PHASE 5: Inline rule (R3)
+# PHASE 5: Inline rules (R3, R4)
 rules:
   - id: "validate-product-type"
     name: "Validate Product Type"
@@ -100,18 +100,20 @@ rules:
     severity: "ERROR"
     enabled: true
 
-# PHASE 6: Inline rule group (RG3)
+  - id: "validate-all-enrichments-complete"
+    name: "Validate All Enrichments Complete"
+    condition: "#currentSpotPrice != null && #optionDelta != null && #counterpartyRating != null && #impliedVolatility != null && #valueAtRisk != null && #productCategory != null"
+    message: "All enrichments completed successfully"
+    severity: "INFO"
+    enabled: true
+
+# PHASE 6: Inline rule group (RG3) - references rule defined above
 rule-groups:
   - id: "final-validation-group"
     name: "Final Validation Group"
     description: "Final validation checks after all processing"
     execution-mode: "sequential"
     stop-on-first-failure: false
-    rules:
-      - id: "validate-all-enrichments-complete"
-        name: "Validate All Enrichments Complete"
-        condition: "#currentSpotPrice != null && #optionDelta != null && #counterpartyRating != null && #impliedVolatility != null && #valueAtRisk != null && #productCategory != null"
-        message: "All enrichments completed successfully"
-        severity: "INFO"
-        enabled: true
+    rule-ids:
+      - "validate-all-enrichments-complete"
 

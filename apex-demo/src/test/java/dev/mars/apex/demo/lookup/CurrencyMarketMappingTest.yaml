@@ -1,4 +1,4 @@
-# Currency to Market Mapping Configuration
+﻿# Currency to Market Mapping Configuration
 # Demonstrates YAML-based business logic instead of hardcoded switch statements
 # Use Case: Map trading currencies to their primary stock exchanges/markets
 
@@ -19,7 +19,7 @@ metadata:
   description: "Maps trading currencies to their primary stock exchanges using APEX YAML processing"
   type: "enrichment"
   author: "apex.demo.team@company.com"
-  created-date: "2024-12-24"
+  created: "2024-12-24"
   tags: ["apex-demo", "lookup", "currency", "market"]
 
 # Enrichment rules using verified APEX syntax

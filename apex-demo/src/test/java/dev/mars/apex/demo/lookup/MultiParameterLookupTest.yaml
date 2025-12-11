@@ -1,4 +1,4 @@
-
+﻿
 
 # ============================================================================
 # APEX YAML Configuration File
@@ -16,7 +16,7 @@ metadata:
   description: "Simple demo showing database lookup with multiple parameters"
   type: "enrichment"
   author: "apex.demo.team@company.com"
-  created-date: "2025-09-05"
+  created: "2025-09-05"
   tags: ["apex-demo", "lookup", "database", "multi-parameter"]
 
 # External data source configuration

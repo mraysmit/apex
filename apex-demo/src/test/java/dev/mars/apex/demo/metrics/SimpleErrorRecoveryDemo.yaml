@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX YAML Configuration File - Simple Error Recovery Demo
 # ============================================================================
 # Used by: SimpleErrorRecoveryDemo.java
@@ -14,7 +14,7 @@ metadata:
   description: "Introduction to APEX error recovery with simple default value strategies"
   type: "rule-config"
   author: "apex.demo.team@company.com"
-  created-date: "2025-09-27"
+  created: "2025-09-27"
   tags: ["apex-demo", "error-recovery", "beginner", "resilience"]
 
 # Basic error recovery configuration

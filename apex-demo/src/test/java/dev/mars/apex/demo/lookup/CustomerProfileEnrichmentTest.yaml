@@ -1,4 +1,4 @@
-# Customer Profile Enrichment Rules - Database Version
+﻿# Customer Profile Enrichment Rules - Database Version
 # Demonstrates database lookup enrichment using APEX YAML processing with real H2 database
 # Use Case: Enrich transactions with customer profile data from database
 
@@ -19,7 +19,7 @@ metadata:
   description: "Demonstrates database lookup enrichment using APEX YAML processing with real H2 database"
   type: "enrichment"
   author: "apex.demo.team@company.com"
-  created-date: "2024-12-24"
+  created: "2024-12-24"
   tags: ["apex-demo", "lookup", "database", "customer"]
 
 # Database configuration for customer data

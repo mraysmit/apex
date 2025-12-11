@@ -10,7 +10,7 @@ data-sources:
     name: "Test Data Source"
     type: "inline"
     connection-config:
-      type: "memory"
+      type: "cache"
     enabled: true
 
 # Section 2: enrichments (should be in both sectionOrder and itemOrder)

@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # Enrichments (separate file) for negative validation test
 # ============================================================================
 metadata:
@@ -8,7 +8,7 @@ metadata:
   type: "rule-config"
   description: "Negative test case for missing enrichment validation"
   author: "APEX Demo Team"
-  created-date: "2025-01-15"
+  created: "2025-01-15"
   tags: ["demo", "enrichments", "negative-test", "validation"]
 
 enrichments:

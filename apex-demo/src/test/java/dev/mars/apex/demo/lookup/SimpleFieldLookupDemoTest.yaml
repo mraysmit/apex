@@ -1,4 +1,4 @@
-# Simple Field Lookup Example Configuration
+﻿# Simple Field Lookup Example Configuration
 # Demonstrates basic lookup-key usage with currency code enrichment
 # Use Case: Enrich currency transactions with detailed currency information
 
@@ -19,7 +19,7 @@ metadata:
   description: "Demonstrates basic field lookup using currency codes"
   type: "enrichment"
   author: "apex.demo.team@company.com"
-  created-date: "2024-12-24"
+  created: "2024-12-24"
   tags: ["apex-demo", "lookup", "currency"]
 
 # Define the enrichment rules

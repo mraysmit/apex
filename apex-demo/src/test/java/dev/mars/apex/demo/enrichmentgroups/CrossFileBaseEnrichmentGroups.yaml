@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # Cross-file base enrichment groups (defines base_and)
 # ============================================================================
 metadata:
@@ -8,7 +8,7 @@ metadata:
   type: "rule-config"
   description: "Base enrichment groups for cross-file testing"
   author: "APEX Demo Team"
-  created-date: "2025-01-15"
+  created: "2025-01-15"
   tags: ["demo", "enrichment-groups", "cross-file", "base"]
 
 enrichment-groups:

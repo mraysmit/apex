@@ -1,4 +1,4 @@
-# Basic Usage Examples Configuration
+﻿# Basic Usage Examples Configuration
 # Real APEX YAML configuration for BasicUsageExamples.java
 # NO HARDCODED SIMULATION - Uses authentic APEX services
 
@@ -19,7 +19,7 @@ metadata:
   description: "Real APEX basic usage demonstration with field validations, business object processing, and expression evaluation"
   type: "enrichment"
   author: "apex.demo.team@company.com"
-  created-date: "2024-12-24"
+  created: "2024-12-24"
   tags: ["apex-demo", "validation", "basic-usage"]
 
 # Basic Validation Enrichments

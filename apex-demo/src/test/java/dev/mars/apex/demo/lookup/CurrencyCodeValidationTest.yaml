@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX YAML Configuration File - Currency Code Format Validation Test
 # ============================================================================
 # Purpose: Demonstrates simple currency code format validation using APEX
@@ -12,7 +12,7 @@ metadata:
   description: "Simple currency code format validation using APEX validation rules"
   type: "rule-config"
   author: "apex.demo.team@company.com"
-  created-date: "2025-09-20"
+  created: "2025-09-20"
   tags: ["validation", "currency", "rest-api", "format-validation"]
 
 # REST API data source for context (not used in validation, but available for future enrichment)

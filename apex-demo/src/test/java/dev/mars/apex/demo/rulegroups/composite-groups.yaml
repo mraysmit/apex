@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX YAML Configuration File
 # ============================================================================
 # Used by: ORPHANED - No Java test currently uses this file
@@ -15,7 +15,7 @@ metadata:
   description: "Composite rule groups that reference other rule groups to create hierarchical validation"
   type: "rule-config"
   author: "APEX Demo Team"
-  created-date: "2025-01-15"
+  created: "2025-01-15"
   tags: ["demo", "hierarchical", "composite-groups", "validation"]
 
 rule-groups:

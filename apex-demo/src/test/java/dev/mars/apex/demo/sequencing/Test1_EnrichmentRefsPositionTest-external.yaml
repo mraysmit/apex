@@ -1,5 +1,8 @@
-name: "Test 1: External Enrichments"
-description: "External enrichments referenced by test1-main.yaml"
+metadata:
+  name: "Test 1: External Enrichments"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "External enrichments referenced by test1-main.yaml"
 
 enrichments:
   - id: "external-1"

@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX YAML Configuration File - Customer Name Enrichment Test
 # ============================================================================
 # Purpose: Demonstrates customer name enrichment using APEX lookup-enrichment
@@ -12,7 +12,7 @@ metadata:
   description: "Customer name enrichment using REST API lookup for blank customer names"
   type: "enrichment"
   author: "apex.demo.team@company.com"
-  created-date: "2025-09-20"
+  created: "2025-09-20"
   tags: ["enrichment", "customer", "rest-api", "lookup-enrichment"]
 
 # REST API data source for customer enrichment

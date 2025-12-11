@@ -1,4 +1,4 @@
-# DESIGN FLAW DEMONSTRATION: Same YAML, Different Results
+﻿# DESIGN FLAW DEMONSTRATION: Same YAML, Different Results
 # This YAML file will produce DIFFERENT results depending on which processor is used
 #
 # Developer Intent: Process enrichments FIRST, then rules
@@ -11,7 +11,7 @@ metadata:
   description: "Proves different processors produce different results from same YAML"
   type: "rule-config"
   author: "apex.demo.team@company.com"
-  created-date: "2025-10-30"
+  created: "2025-10-30"
   tags: ["design-flaw", "processor-comparison", "demo"]
 
 # DEVELOPER INTENT: Calculate risk score FIRST

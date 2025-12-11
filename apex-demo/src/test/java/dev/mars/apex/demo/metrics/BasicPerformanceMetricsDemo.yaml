@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX YAML Configuration File - Basic Performance Metrics Demo
 # ============================================================================
 # Used by: BasicPerformanceMetricsDemo.java
@@ -14,7 +14,7 @@ metadata:
   description: "Introduction to APEX performance monitoring with simple and complex rules for comparison"
   type: "rule-config"
   author: "apex.demo.team@company.com"
-  created-date: "2025-09-27"
+  created: "2025-09-27"
   tags: ["apex-demo", "performance", "metrics", "beginner"]
 
 # Simple rules for performance comparison

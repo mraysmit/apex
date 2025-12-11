@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX YAML Configuration File - FX Transaction Multi-File Scenario
 # ============================================================================
 # Used by: UpdateStageFxTransactionMultiFileTest.java
@@ -13,7 +13,7 @@ metadata:
   description: "Complete FX transaction scenario using multi-file architecture"
   type: "scenario"
   author: "APEX Demo Team"
-  created-date: "2025-09-23"
+  created: "2025-09-23"
   tags: ["fx-transaction", "multi-file", "scenario", "cross-file-references"]
 
 # Cross-file rule group references - VERIFIED APEX SYNTAX

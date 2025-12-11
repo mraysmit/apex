@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX YAML Configuration File - Validation Rule Groups (Multi-File Architecture)
 # ============================================================================
 # Used by: UpdateStageFxTransactionMultiFileTest.java
@@ -13,7 +13,7 @@ metadata:
   description: "Cross-system validation groups with aligned rule references"
   type: "rule-config"
   author: "APEX Demo Team"
-  created-date: "2025-09-23"
+  created: "2025-09-23"
   tags: ["validation", "rule-groups", "multi-file", "cross-system"]
 
 # Cross-file rule references - VERIFIED APEX SYNTAX

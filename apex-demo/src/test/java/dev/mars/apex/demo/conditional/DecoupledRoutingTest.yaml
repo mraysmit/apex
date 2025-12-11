@@ -1,4 +1,4 @@
-# ==================================================================================
+﻿# ==================================================================================
 # DECOUPLED ROUTING PATTERN TEST CONFIGURATION
 # ==================================================================================
 # This configuration demonstrates the "Decoupled Decision & Routing" pattern.
@@ -17,7 +17,7 @@ metadata:
   version: "1.0"
   type: "rule-config"
   author: "apex.demo.team@company.com"
-  created-date: "2025-11-24"
+  created: "2025-11-24"
 
 # Phase 1: The Decision
 enrichments:

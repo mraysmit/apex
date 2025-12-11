@@ -24,7 +24,10 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.service.data.external.DataSourceException;
 import dev.mars.apex.core.service.data.external.ExternalDataSource;
 import dev.mars.apex.core.service.data.external.factory.DataSourceFactory;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -66,12 +69,6 @@ class YamlPostgreSQLLookupTest {
     private DataSourceFactory factory;
     private ExternalDataSource postgresSource;
     private YamlConfigurationLoader yamlLoader;
-
-    @BeforeAll
-    static void setUpContainer() {
-        // Container is automatically started by @Testcontainers
-        System.out.println("TEST: PostgreSQL container started at " + postgres.getJdbcUrl());
-    }
 
     @BeforeEach
     void setUp() throws Exception {

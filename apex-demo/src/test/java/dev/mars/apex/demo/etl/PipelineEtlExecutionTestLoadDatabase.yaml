@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX ETL Pipeline Configuration - Database Load Step Test
 # ============================================================================
 #
@@ -35,7 +35,7 @@ metadata:
   description: "Test pipeline for loading data to database sink"  # Purpose description
   type: "pipeline"                                 # Configuration type indicator
   author: "apex-etl-test-suite@example.com"      # Configuration author/maintainer
-  created-date: "2025-09-28"                     # Creation date for documentation
+  created: "2025-09-28"                     # Creation date for documentation
   tags: ["apex-test", "etl", "load", "database"] # Tags for categorization and search
 
 # ============================================================================

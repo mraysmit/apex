@@ -1,5 +1,8 @@
-name: "Test 2: External File with Groups"
-description: "External file with BOTH enrichments and enrichment-groups"
+metadata:
+  name: "Test 2: External File with Groups"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "External file with BOTH enrichments and enrichment-groups"
 
 # enrichment-groups section: Controls EXECUTION
 # This section defines HOW and WHEN enrichments execute

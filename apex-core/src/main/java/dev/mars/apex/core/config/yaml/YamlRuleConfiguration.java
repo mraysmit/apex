@@ -1,5 +1,6 @@
 package dev.mars.apex.core.config.yaml;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dev.mars.apex.core.config.pipeline.PipelineConfiguration;
 
@@ -308,6 +309,7 @@ public class YamlRuleConfiguration {
         private String author;
         
         @JsonProperty("created")
+        @JsonAlias("created-date")
         private String created;
         
         @JsonProperty("last-modified")

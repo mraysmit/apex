@@ -1,4 +1,4 @@
-# EnrichmentFailureDemosTest.yaml
+﻿# EnrichmentFailureDemosTest.yaml
 # APEX Enrichment Failure Scenarios Demo Configuration
 # Demonstrates realistic enrichment failure handling with comprehensive error reporting
 
@@ -10,7 +10,7 @@ metadata:
   type: "enrichment"
   business-domain: "Financial Transaction Processing - Enrichment Failure Management"
   author: "Mark Andrew Ray-Smith Cityline Ltd"
-  created-date: "2025-09-22"
+  created: "2025-09-22"
   tags: ["apex-demo", "negative-cases", "enrichment-failures", "error-handling"]
 
 # Enrichments that will detect and report enrichment failures
@@ -221,42 +221,6 @@ validations:
           max: 1000000
           message: "Transaction amount must not exceed $1,000,000"
 
-# Data sources for external lookup simulation (optional - for future enhancement)
-data-sources:
-  - id: "customer-reference-data"
-    name: "Customer Reference Data"
-    type: "yaml-dataset"
-    description: "Inline customer reference data for enrichment testing"
-    
-    dataset:
-      - customerId: "CUST001"
-        customerName: "John Smith"
-        customerType: "PREMIUM"
-        status: "ACTIVE"
-      - customerId: "CUST002"
-        customerName: "Jane Doe"
-        customerType: "STANDARD"
-        status: "ACTIVE"
-      - customerId: "CUST003"
-        customerName: "Bob Johnson"
-        customerType: "STANDARD"
-        status: "INACTIVE"
-        
-  - id: "currency-reference-data"
-    name: "Currency Reference Data"
-    type: "yaml-dataset"
-    description: "Inline currency reference data for validation testing"
-    
-    dataset:
-      - currencyCode: "USD"
-        currencyName: "US Dollar"
-        decimalPlaces: 2
-        symbol: "$"
-      - currencyCode: "EUR"
-        currencyName: "Euro"
-        decimalPlaces: 2
-        symbol: "€"
-      - currencyCode: "GBP"
-        currencyName: "British Pound"
-        decimalPlaces: 2
-        symbol: "£"
+# Note: Data sources are not needed for calculation-enrichments
+# The enrichments above use SpEL expressions to directly calculate values
+# For actual lookup-enrichments with external data, use lookup-config with inline datasets

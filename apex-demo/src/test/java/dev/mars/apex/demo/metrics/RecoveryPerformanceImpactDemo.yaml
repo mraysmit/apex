@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX YAML Configuration File - Phase 3B Recovery Performance Impact Demo
 # ============================================================================
 # Used by: RecoveryPerformanceImpactDemo.java
@@ -15,7 +15,7 @@ metadata:
   description: "Phase 3B demo showing performance impact of recovery operations"
   type: "rule-config"
   author: "apex.demo.team@company.com"
-  created-date: "2025-09-27"
+  created: "2025-09-27"
   tags: ["apex-demo", "phase-3b", "recovery", "performance", "metrics"]
 
 # Phase 3B: Error recovery configuration with metrics enabled

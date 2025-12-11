@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX Dynamic Array Index Test Configuration
 # ============================================================================
 # Minimal test to prove dynamic array indexing functionality in SpEL expressions
@@ -11,7 +11,7 @@ metadata:
   description: "Minimal test proving dynamic array indexing in APEX SpEL expressions"
   type: "validation"
   author: "apex.demo.team@company.com"
-  created-date: "2025-09-29"
+  created: "2025-09-29"
   tags: ["apex-demo", "spel", "dynamic-arrays", "indexing"]
 
 # ============================================================================

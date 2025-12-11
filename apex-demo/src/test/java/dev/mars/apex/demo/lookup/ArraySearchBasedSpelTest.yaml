@@ -1,4 +1,4 @@
-# Search-Based SpEL Demonstration Configuration
+﻿# Search-Based SpEL Demonstration Configuration
 # Demonstrates SpEL search patterns: .^[condition], .$[condition], .?[condition]
 # Use Case: Find array elements by business criteria rather than fixed indices
 
@@ -18,7 +18,7 @@ metadata:
   description: "Demonstrates SpEL search patterns for finding array elements by criteria"
   type: "enrichment"
   author: "apex.demo.team@company.com"
-  created-date: "2025-01-29"
+  created: "2025-01-29"
   tags: ["apex-demo", "spel", "search", "array"]
 
 # Define enrichments that demonstrate search patterns

@@ -1,4 +1,4 @@
-# Conditional Expression Lookup Example Configuration
+﻿# Conditional Expression Lookup Example Configuration
 # Demonstrates conditional expression evaluation in lookup-key with H2 database
 # Use Case: Risk-based loan assessment with conditional credit score categorization
 
@@ -19,7 +19,7 @@ metadata:
   description: "Demonstrates conditional expression lookup using credit score-based risk categorization with H2 database"
   type: "enrichment"
   author: "apex.demo.team@company.com"
-  created-date: "2024-12-24"
+  created: "2024-12-24"
   tags: ["apex-demo", "lookup", "conditional", "h2-database"]
 
 # Data source configuration using H2 database

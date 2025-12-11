@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # USE CASE 3: Mixed Processing
 # ============================================================================
 # Business Scenario: Complex international transaction processing
@@ -20,7 +20,7 @@ metadata:
   description: "Demonstrates complex multi-phase processing with interleaved enrichment and validation"
   type: "rule-config"
   author: "apex.demo.team@company.com"
-  created-date: "2025-10-30"
+  created: "2025-10-30"
   business-domain: "International Transaction Processing"
   tags: ["use-case", "mixed-processing", "multi-phase", "sequential-processing"]
   processing-mode: "sequential"

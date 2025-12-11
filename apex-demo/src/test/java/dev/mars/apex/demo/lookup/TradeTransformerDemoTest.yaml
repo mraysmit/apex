@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX YAML Configuration File
 # ============================================================================
 # Used by: ORPHANED - No Java test currently uses this file
@@ -15,7 +15,7 @@ metadata:
   description: "APEX-compliant trade transformer with real enrichment services"
   type: "enrichment"
   author: "apex.demo.team@company.com"
-  created-date: "2024-12-24"
+  created: "2024-12-24"
   tags: ["apex-demo", "enrichment", "trade", "transformer"]
 
 # APEX enrichment processing for trade transformer

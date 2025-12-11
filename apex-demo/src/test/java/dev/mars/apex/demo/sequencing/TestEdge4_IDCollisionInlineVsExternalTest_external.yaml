@@ -1,5 +1,8 @@
-name: "External Enrichments for Edge Case Test 4"
-description: "External file with enrichment ID that collides with main file"
+metadata:
+  name: "External Enrichments for Edge Case Test 4"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "External file with enrichment ID that collides with main file"
 
 # External enrichment with ID "collision-id" (SAME as in main file!)
 enrichments:

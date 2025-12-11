@@ -1,4 +1,4 @@
-# JSON File Lookup Example Configuration
+﻿# JSON File Lookup Example Configuration
 # Demonstrates file-system data source lookup using JSON files
 # Use Case: Enrich product data using JSON file lookup
 
@@ -19,7 +19,7 @@ metadata:
   description: "Demonstrates file-system lookup using JSON files from demo-data/json"
   type: "enrichment"
   author: "apex.demo.team@company.com"
-  created-date: "2025-09-05"
+  created: "2025-09-05"
   tags: ["apex-demo", "lookup", "json", "file-system"]
 
 # Note: Using inline data for simplicity in this test

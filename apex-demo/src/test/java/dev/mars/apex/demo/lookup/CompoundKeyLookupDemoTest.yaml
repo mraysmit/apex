@@ -1,4 +1,4 @@
-# Compound Key Lookup Demo Configuration
+﻿# Compound Key Lookup Demo Configuration
 # Demonstrates compound key lookup using H2 database with customer-region composite keys
 # Use Case: Customer-region specific pricing and tier information lookup from database
 
@@ -19,7 +19,7 @@ metadata:
   description: "Demonstrates compound key lookup using H2 database with customer-region composite keys"
   type: "enrichment"
   author: "apex.demo.team@company.com"
-  created-date: "2024-12-24"
+  created: "2024-12-24"
   tags: ["apex-demo", "compound-key", "database", "lookup"]
 
 # H2 database configuration for customer-region data

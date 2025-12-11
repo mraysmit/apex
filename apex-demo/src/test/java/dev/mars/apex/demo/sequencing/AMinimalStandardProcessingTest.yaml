@@ -1,11 +1,11 @@
-metadata:
+﻿metadata:
   id: "minimal-standard-processing-test"
   name: "Minimal Standard Processing Test"
   version: "1.0.0"
   description: "Demonstrates standard processing where rule depends on enrichment result"
   type: "rule-config"
   author: "APEX Demo Team"
-  created-date: "2025-10-30"
+  created: "2025-10-30"
   business-domain: "demo"
   tags: ["standard", "minimal", "demo"]
   processing-mode: "standard"

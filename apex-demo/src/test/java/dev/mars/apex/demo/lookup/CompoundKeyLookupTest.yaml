@@ -1,4 +1,4 @@
-# Compound Key Lookup Example Configuration
+﻿# Compound Key Lookup Example Configuration
 # Demonstrates compound lookup-key using string concatenation
 # Use Case: Customer-region specific pricing and tier information lookup
 
@@ -19,7 +19,7 @@ metadata:
   description: "Demonstrates compound key lookup using customer ID and region concatenation"
   type: "enrichment"
   author: "apex.demo.team@company.com"
-  created-date: "2024-12-24"
+  created: "2024-12-24"
   tags: ["apex-demo", "lookup", "compound-key"]
 
 # Define the enrichment rules

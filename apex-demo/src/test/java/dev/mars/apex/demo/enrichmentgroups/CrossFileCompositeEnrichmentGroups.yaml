@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # Cross-file composite enrichment groups (references base_and from another file)
 # ============================================================================
 metadata:
@@ -8,7 +8,7 @@ metadata:
   type: "rule-config"
   description: "Composite enrichment groups for cross-file testing"
   author: "APEX Demo Team"
-  created-date: "2025-01-15"
+  created: "2025-01-15"
   tags: ["demo", "enrichment-groups", "cross-file", "composite"]
 
 enrichment-groups:

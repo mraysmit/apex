@@ -1,4 +1,4 @@
-# Nested Field Reference Lookup Example Configuration
+﻿# Nested Field Reference Lookup Example Configuration
 # Demonstrates REAL nested field navigation in APEX enrichments
 # Use Case: Financial trade processing with nested counterparty and settlement data
 
@@ -18,7 +18,7 @@ metadata:
   description: "Demonstrates real nested field navigation for trade settlement processing"
   type: "enrichment"
   author: "apex.demo.team@company.com"
-  created-date: "2024-12-24"
+  created: "2024-12-24"
   tags: ["apex-demo", "lookup", "nested-fields", "real-navigation"]
 
 # Define the enrichment rules - REAL nested field navigation

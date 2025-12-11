@@ -1,4 +1,4 @@
-# Database Connection Test Configuration
+﻿# Database Connection Test Configuration
 # Demonstrates database connectivity testing using APEX lookup enrichments
 # Use Case: Verify database connection isolation and data access patterns
 
@@ -19,7 +19,7 @@ metadata:
   description: "Demonstrates database connectivity testing using H2 database with APEX enrichments"
   type: "enrichment"
   author: "apex.demo.team@company.com"
-  created-date: "2024-12-24"
+  created: "2024-12-24"
   tags: ["apex-demo", "lookup", "database", "h2-database", "connectivity"]
 
 # Data source configuration using H2 database

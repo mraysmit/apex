@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX Category Metadata Inheritance Examples
 # ============================================================================
 # This file demonstrates various metadata inheritance patterns:
@@ -15,7 +15,7 @@ metadata:
   description: "Comprehensive examples of metadata inheritance and override patterns"
   type: "inheritance-demo"
   author: "APEX Architecture Team"
-  created-date: "2025-01-01"
+  created: "2025-01-01"
 
 # ============================================================================
 # CATEGORY DEFINITIONS WITH RICH METADATA

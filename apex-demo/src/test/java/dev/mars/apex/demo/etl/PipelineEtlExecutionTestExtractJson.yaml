@@ -1,4 +1,4 @@
-# ============================================================================
+﻿# ============================================================================
 # APEX ETL Pipeline Configuration - JSON Extract Step Test
 # ============================================================================
 #
@@ -39,7 +39,7 @@ metadata:
   version: "1.0.0"
   description: "Test pipeline for JSON OTC options trade data extraction"
   author: "APEX Test Suite"
-  created-date: "2025-10-27"
+  created: "2025-10-27"
 
 # Pipeline definition
 pipeline:

@@ -1,4 +1,4 @@
-# Settlement Instruction Multi-Parameter Enrichment Rules - Database Version
+﻿# Settlement Instruction Multi-Parameter Enrichment Rules - Database Version
 # Demonstrates complex multi-parameter database lookup enrichment using APEX YAML processing
 # Use Case: Enrich trades with settlement instructions and risk assessment data from database
 
@@ -19,7 +19,7 @@ metadata:
   description: "Demonstrates complex multi-parameter database lookup enrichment using APEX YAML processing"
   type: "enrichment"
   author: "apex.demo.team@company.com"
-  created-date: "2024-12-24"
+  created: "2024-12-24"
   tags: ["apex-demo", "lookup", "settlement", "multi-parameter"]
 
 # Database configuration for settlement and risk data
