@@ -3112,6 +3112,223 @@ rule-groups:
 - **Line 44**: Number of retry attempts if execution fails
 - **Line 45**: Whether to use circuit breaker pattern for fault tolerance
 
+### Mixing Internal and External Rules in RuleGroups
+
+One common requirement in enterprise systems is combining rules loaded from YAML configuration files (external rules) with rules created programmatically at runtime (internal rules). This pattern is essential for scenarios where:
+
+- **Runtime validation**: Dynamic rules based on system state or external conditions
+- **Multi-source rules**: Combining static configuration with database-driven rules
+- **Hybrid systems**: YAML-defined business rules + code-defined technical rules
+- **A/B testing**: Injecting experimental rules into existing rule groups
+
+**Important Constraint**: You cannot directly reference programmatically-created Rule objects in YAML configuration because `YamlRuleFactory` resolves rule references by looking up IDs in the `RulesEngineConfiguration` created from YAML. Rules created in code don't exist in that configuration.
+
+#### Pattern 1: Add Internal Rules After YAML Loading (Recommended)
+
+This is the simplest and most flexible approach. Load your YAML configuration first, then add programmatic rules to the resulting RuleGroup objects.
+
+```java
+// Load YAML configuration with external rules
+YamlConfigurationLoader loader = new YamlConfigurationLoader();
+YamlRuleConfiguration yamlConfig = loader.fromFile("customer-validation.yaml");
+
+// Create configuration from YAML (includes all YAML-defined rules)
+YamlRuleFactory factory = new YamlRuleFactory();
+RulesEngineConfiguration config = factory.createRulesEngineConfiguration(yamlConfig);
+
+// Get the RuleGroup from YAML configuration
+List<RuleGroup> groups = factory.createRuleGroups(yamlConfig, config);
+RuleGroup validationGroup = groups.stream()
+    .filter(g -> g.getId().equals("customer-validation"))
+    .findFirst()
+    .orElseThrow(() -> new IllegalStateException("Group not found"));
+
+// Create internal/runtime rules programmatically
+Rule runtimeCheck = new Rule(
+    "runtime-threshold-check",
+    "#transactionAmount > " + getDynamicThreshold(),  // Dynamic threshold from system state
+    "Transaction exceeds dynamic threshold",
+    "ERROR"
+);
+
+Rule experimentalRule = new Rule(
+    "experimental-fraud-check",
+    "#fraudScore > 85 && #countryCode in {'RU', 'CN', 'NG'}",
+    "High-risk country with elevated fraud score",
+    "WARNING"
+);
+
+// Add internal rules to the YAML-loaded group
+// Use high sequence numbers to execute after YAML rules
+int nextSequence = validationGroup.getRules().size() + 1;
+validationGroup.addRule(runtimeCheck, nextSequence++);
+validationGroup.addRule(experimentalRule, nextSequence++);
+
+// Now the group contains both YAML rules + programmatic rules
+System.out.println("Total rules in group: " + validationGroup.getRules().size());
+// Output: Total rules in group: 5 (3 from YAML + 2 programmatic)
+```
+
+**Use cases for Pattern 1:**
+- Adding runtime-configured rules based on system properties or database settings
+- Injecting temporary experimental rules for A/B testing
+- Supplementing static YAML rules with dynamic business logic
+- Adding audit or logging rules at startup
+
+#### Pattern 2: Register Internal Rules Before YAML Processing
+
+This pattern adds programmatically-created rules to the YAML configuration object before it's processed into a `RulesEngineConfiguration`. This allows YAML-defined RuleGroups to reference internal rules by ID.
+
+```java
+// Load YAML configuration
+YamlConfigurationLoader loader = new YamlConfigurationLoader();
+YamlRuleConfiguration yamlConfig = loader.fromFile("customer-validation.yaml");
+
+// Create internal rules and convert to YamlRule objects
+YamlRule internalRule = new YamlRule();
+internalRule.setId("internal-compliance-check");
+internalRule.setName("Internal Compliance Check");
+internalRule.setCondition("#accountStatus == 'ACTIVE' && #complianceScore > 75");
+internalRule.setMessage("Account must be active with compliance score > 75");
+internalRule.setSeverity("ERROR");
+internalRule.setCategory("compliance");
+internalRule.setPriority(100);
+
+YamlRule dynamicRule = new YamlRule();
+dynamicRule.setId("dynamic-region-check");
+dynamicRule.setName("Dynamic Region Validation");
+dynamicRule.setCondition(buildRegionCondition());  // Dynamic SpEL from method
+dynamicRule.setMessage("Region validation failed");
+dynamicRule.setSeverity("WARNING");
+dynamicRule.setCategory("validation");
+
+// Add internal rules to YAML config's rule list
+if (yamlConfig.getRules() == null) {
+    yamlConfig.setRules(new ArrayList<>());
+}
+yamlConfig.getRules().add(internalRule);
+yamlConfig.getRules().add(dynamicRule);
+
+// Now create configuration - includes both YAML file rules + internal rules
+YamlRuleFactory factory = new YamlRuleFactory();
+RulesEngineConfiguration config = factory.createRulesEngineConfiguration(yamlConfig);
+
+// RuleGroups defined in YAML can now reference internal rules by ID
+// For example, in YAML:
+// rule-groups:
+//   - id: "complete-validation"
+//     rule-ids:
+//       - "email-validation"          # From YAML file
+//       - "age-validation"            # From YAML file
+//       - "internal-compliance-check" # Added programmatically
+//       - "dynamic-region-check"      # Added programmatically
+
+List<RuleGroup> groups = factory.createRuleGroups(yamlConfig, config);
+```
+
+**Use cases for Pattern 2:**
+- Database-driven rules that need to be referenced in YAML group definitions
+- Multi-tenant systems where each tenant has custom rules
+- Rules generated from business rule management systems (BRMS)
+- Converting legacy rules from other systems into APEX format at startup
+
+#### Pattern 3: Hybrid Configuration with External References
+
+For complex scenarios, you can combine both approaches - some rules referenced in YAML, others added post-load.
+
+```java
+// Load base YAML configuration
+YamlConfigurationLoader loader = new YamlConfigurationLoader();
+YamlRuleConfiguration yamlConfig = loader.fromFile("base-rules.yaml");
+
+// Load additional rules from database and add to YAML config
+List<DatabaseRule> dbRules = ruleRepository.findActiveRules();
+for (DatabaseRule dbRule : dbRules) {
+    YamlRule yamlRule = convertDatabaseRuleToYaml(dbRule);
+    yamlConfig.getRules().add(yamlRule);
+}
+
+// Create configuration (now includes YAML + database rules)
+YamlRuleFactory factory = new YamlRuleFactory();
+RulesEngineConfiguration config = factory.createRulesEngineConfiguration(yamlConfig);
+
+// Create rule groups
+List<RuleGroup> groups = factory.createRuleGroups(yamlConfig, config);
+
+// Add runtime-only rules (not from database or YAML)
+for (RuleGroup group : groups) {
+    if (group.getId().equals("real-time-validation")) {
+        // Add system-generated rules
+        Rule cacheValidation = new Rule(
+            "cache-freshness-check",
+            "#cacheAge < " + cacheTimeout,
+            "Cache data is stale",
+            "WARNING"
+        );
+        
+        int nextSeq = group.getRules().size() + 1;
+        group.addRule(cacheValidation, nextSeq);
+    }
+}
+```
+
+**Use cases for Pattern 3:**
+- Enterprise systems with rules from multiple sources (files, database, runtime)
+- Microservices aggregating rules from different services
+- Rules engines with plugin architectures
+- Gradual migration from legacy systems to YAML-based configuration
+
+#### Best Practices
+
+1. **Sequence Numbers**: When adding rules to YAML-loaded groups, use sequence numbers higher than existing rules to ensure they execute after YAML-defined rules:
+   ```java
+   int nextSequence = group.getRules().size() + 1;
+   group.addRule(newRule, nextSequence);
+   ```
+
+2. **ID Uniqueness**: Ensure programmatically-created rule IDs don't conflict with YAML-defined rule IDs. Use prefixes:
+   ```java
+   Rule rule = new Rule(
+       "runtime-" + UUID.randomUUID().toString().substring(0, 8),
+       condition, message, severity
+   );
+   ```
+
+3. **Documentation**: Document which rules come from which source:
+   ```java
+   // Rules loaded from YAML: customer-validation.yaml (sequences 1-10)
+   // Rules from database: customer_rules table (sequences 11-20)
+   // Runtime rules: dynamic threshold checks (sequences 21+)
+   ```
+
+4. **Testing**: Test YAML loading and programmatic additions separately:
+   ```java
+   @Test
+   void testYamlRulesLoadCorrectly() {
+       // Test YAML loading
+   }
+   
+   @Test
+   void testRuntimeRulesAddedCorrectly() {
+       // Test programmatic additions
+   }
+   
+   @Test
+   void testMixedRulesExecuteCorrectly() {
+       // Test combined execution
+   }
+   ```
+
+5. **Error Handling**: Validate that YAML groups exist before adding runtime rules:
+   ```java
+   RuleGroup group = groups.stream()
+       .filter(g -> g.getId().equals("target-group"))
+       .findFirst()
+       .orElseThrow(() -> new ConfigurationException(
+           "RuleGroup 'target-group' not found in YAML configuration"
+       ));
+   ```
+
 ### Execution Patterns
 
 APEX RuleGroup implementation supports multiple execution strategies with configurable behavior.

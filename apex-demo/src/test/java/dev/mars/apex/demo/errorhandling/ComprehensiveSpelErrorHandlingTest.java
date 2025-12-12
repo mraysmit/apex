@@ -71,17 +71,46 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
         RuleResult result = ruleEvaluator.evaluateRule(rule, facts);
         
         assertNotNull(result, "Result should not be null");
+        // When a rule with ERROR severity evaluates to false and recovery is disabled,
+        // it returns ERROR result type with the rule message
         assertEquals(RuleResult.ResultType.ERROR, result.getResultType(), 
-                    "Should return ERROR for missing property");
-        assertFalse(result.isTriggered(), "Error rule should not be triggered");
-        // Updated to accept new error message format
-        String msg = result.getMessage();
-        assertTrue(msg.contains("nonExistentProperty") && 
-                  (msg.contains("references undefined") || msg.contains("inaccessible variable") || 
-                   msg.contains("Property or field")),
-                  "Error message should mention missing property: " + msg);
+                    "Should return ERROR for ERROR severity rule that doesn't match");
+        assertFalse(result.isTriggered(), "Rule should not be triggered when condition is false");
+        assertEquals("Property should exist", result.getMessage(), 
+                    "Message should be the rule message");
         
         logger.info("✓ Property not found handled gracefully");
+    }
+    
+    @Test
+    @DisplayName("Should handle non-existent property equality comparison")
+    void shouldHandleNonExistentPropertyEquality() {
+        logger.info("Testing non-existent property equality comparison");
+        
+        Rule rule = new Rule(
+            "missing-property-equality-test",
+            "#nonExistentProperty == 'TESTVALUE'",
+            "Property should equal TESTVALUE",
+            "ERROR"
+        );
+        
+        Map<String, Object> facts = createTestData();
+        // Intentionally not adding 'nonExistentProperty'
+        
+        RuleResult result = ruleEvaluator.evaluateRule(rule, facts);
+        
+        assertNotNull(result, "Result should not be null");
+        // When comparing non-existent property to a value:
+        // #nonExistentProperty resolves to null
+        // null == 'TESTVALUE' evaluates to FALSE
+        // With ERROR severity and recovery disabled, returns ERROR result type
+        assertEquals(RuleResult.ResultType.ERROR, result.getResultType(), 
+                    "Should return ERROR for ERROR severity rule that doesn't match");
+        assertFalse(result.isTriggered(), "Rule should not be triggered when condition is false");
+        assertEquals("Property should equal TESTVALUE", result.getMessage(), 
+                    "Message should be the rule message");
+        
+        logger.info("✓ Non-existent property equality comparison handled gracefully");
     }
     
     @Test

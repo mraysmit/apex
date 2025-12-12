@@ -183,7 +183,7 @@ data-sinks:
         INSERT INTO customers (
           customer_id, customer_name, email, phone, processed_at, customer_score
         ) VALUES (
-          :column_1, :column_2, :column_3, :column_4, CURRENT_TIMESTAMP, :column_6
+          :customer_id, :customer_name, :email, :phone, CURRENT_TIMESTAMP, :creditScore
         )
 
   - name: "audit-log-file"

@@ -26,6 +26,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Unified Rule Evaluator - Single evaluation engine for all APEX rule evaluation paths.
@@ -58,6 +60,12 @@ public class UnifiedRuleEvaluator {
      * Standard error message format for consistency across all evaluation paths.
      */
     private static final String ERROR_MESSAGE_FORMAT = "Rule evaluation failed: %s - %s";
+    
+    /**
+     * Pattern to extract variable names from SpEL expressions.
+     * Matches #variableName patterns.
+     */
+    private static final Pattern SPEL_VARIABLE_PATTERN = Pattern.compile("#(\\w+)");
     
     /**
      * Create a new UnifiedRuleEvaluator with default components.
@@ -341,9 +349,6 @@ public class UnifiedRuleEvaluator {
      * @return The error result or recovered result
      */
     private RuleResult handleEvaluationError(Rule rule, Exception exception, RulePerformanceMetrics.Builder metricsBuilder) {
-        // Log the error using the rules engine logger
-        rulesLogger.ruleEvaluationError(rule.getName(), exception);
-
         // Phase 3B: Initialize recovery tracking variables
         boolean recoveryAttempted = false;
         boolean recoverySuccessful = false;
@@ -352,9 +357,15 @@ public class UnifiedRuleEvaluator {
         Instant recoveryStartTime = null;
         Duration recoveryTime = null;
 
-        // Create standardized error message
-        String errorMessage = String.format(ERROR_MESSAGE_FORMAT, rule.getName(), exception.getMessage());
+        // Create enhanced error message with undefined variable detection
+        String errorMessage = createEnhancedErrorMessage(rule, exception);
         String severity = rule.getSeverity() != null ? rule.getSeverity() : SeverityConstants.ERROR;
+        
+        // Log the enhanced error message
+        if (rulesLogger.getLogger().isInfoEnabled()) {
+            rulesLogger.getLogger().info("[CLEAN-TEST-OUTPUT] Rule evaluation issue for '{}': {}", 
+                rule.getName(), errorMessage);
+        }
 
         // Attempt error recovery based on configurable severity policies
         if (errorRecoveryConfig.isRecoveryEnabledForSeverity(severity)) {
@@ -409,8 +420,19 @@ public class UnifiedRuleEvaluator {
                 RulePerformanceMetrics metrics = buildMetricsWithRecovery(metricsBuilder, rule, exception,
                     recoveryAttempted, recoverySuccessful, recoveryStrategy, recoveryReason, recoveryTime);
 
+                // Preserve original rule severity in recovery result
+                RuleResult originalResult = recoveryResult.getRuleResult();
+                RuleResult resultWithCorrectSeverity = new RuleResult(
+                    originalResult.getRuleName(),
+                    originalResult.getMessage(),
+                    severity,  // Use original rule severity, not hardcoded INFO
+                    false,     // Not triggered
+                    originalResult.getResultType(),
+                    metrics
+                );
+                
                 LoggingContext.clearContext();
-                return recoveryResult.getRuleResult();
+                return resultWithCorrectSeverity;
             } else {
                 // Recovery failed
                 recoverySuccessful = false;
@@ -422,13 +444,13 @@ public class UnifiedRuleEvaluator {
             }
         }
         
-        // Log error details at appropriate level based on severity
+        // Log error details at appropriate level based on severity, using enhanced message
         if (SeverityConstants.CRITICAL.equalsIgnoreCase(severity)) {
-            rulesLogger.error("CRITICAL rule evaluation error for '{}': {}", rule.getName(), exception.getMessage());
+            rulesLogger.error("CRITICAL rule evaluation error for '{}': {}", rule.getName(), errorMessage);
         } else if (SeverityConstants.WARNING.equalsIgnoreCase(severity)) {
-            rulesLogger.info("Rule evaluation warning for '{}': {}", rule.getName(), exception.getMessage());
+            rulesLogger.info("Rule evaluation warning for '{}': {}", rule.getName(), errorMessage);
         } else {
-            rulesLogger.info("Rule evaluation error for '{}': {}", rule.getName(), exception.getMessage());
+            rulesLogger.info("Rule evaluation error for '{}': {}", rule.getName(), errorMessage);
         }
 
         // Always log full exception details at DEBUG level for troubleshooting
@@ -714,6 +736,39 @@ public class UnifiedRuleEvaluator {
         } catch (Exception e) {
             rulesLogger.warn("Error applying field mapping '{}': {}", mapping, e.getMessage());
         }
+    }
+    
+    /**
+     * Create enhanced error message that provides helpful context about undefined variables.
+     * Detects SpEL errors related to undefined/null variables and enhances the message.
+     *
+     * @param rule The rule that failed
+     * @param exception The exception that occurred
+     * @return Enhanced error message with undefined variable details
+     */
+    private String createEnhancedErrorMessage(Rule rule, Exception exception) {
+        String baseMessage = exception.getMessage();
+        
+        // Check if this is a "null context object" error (EL1011E) which typically means undefined variable
+        if (baseMessage != null && (baseMessage.contains("EL1011E") || 
+                                   baseMessage.contains("null context object") ||
+                                   baseMessage.contains("Attempted to call method"))) {
+            
+            // Try to extract the variable name from the rule condition
+            String condition = rule.getCondition();
+            if (condition != null && condition.contains("#")) {
+                // Find all #variable references in the condition
+                Matcher matcher = SPEL_VARIABLE_PATTERN.matcher(condition);
+                if (matcher.find()) {
+                    String varName = matcher.group(1);
+                    return String.format("Rule evaluation failed: %s - Rule references undefined or inaccessible variable '%s' in condition: %s",
+                        rule.getName(), varName, baseMessage);
+                }
+            }
+        }
+        
+        // For other exceptions, use standard format
+        return String.format(ERROR_MESSAGE_FORMAT, rule.getName(), baseMessage);
     }
     
     /**
