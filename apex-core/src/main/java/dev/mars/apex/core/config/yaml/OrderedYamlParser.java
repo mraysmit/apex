@@ -34,6 +34,21 @@ public class OrderedYamlParser {
     
     private static final Logger logger = LoggerFactory.getLogger(OrderedYamlParser.class);
     
+    /**
+     * CRITICAL PERFORMANCE FIX: Singleton ObjectMapper instance.
+     *
+     * Previously, ObjectMapper was instantiated per-request in the constructor,
+     * causing catastrophic latency at high throughput (1000s req/sec).
+     *
+     * ObjectMapper creation is extremely expensive (classpath scanning, introspection).
+     * Making it a static singleton eliminates this overhead entirely.
+     *
+     * ObjectMapper is thread-safe after configuration, making it ideal for reuse.
+     *
+     * @see apex_architecture_and_code_review.md - Section 1: ObjectMapper Anti-Pattern
+     */
+    private static final ObjectMapper YAML_MAPPER = createYamlMapper();
+
     // Known YAML section names in APEX
     private static final Set<String> KNOWN_SECTIONS = Set.of(
         "metadata", "data-sources", "data-source-refs", "rule-refs", "enrichment-refs",
@@ -46,11 +61,9 @@ public class OrderedYamlParser {
         "enrichments", "rules", "enrichment-groups", "rule-groups",
         "transformations", "rule-chains", "enrichment-refs", "rule-refs"
     );
-    
-    private final ObjectMapper yamlMapper;
 
     public OrderedYamlParser() {
-        this.yamlMapper = createYamlMapper();
+        // No-op constructor - ObjectMapper now static singleton
     }
     
     /**
@@ -118,7 +131,7 @@ public class OrderedYamlParser {
             logger.debug("Detected item order: " + itemOrder.size() + " items");
 
             // Step 4: Parse with Jackson for full object mapping
-            YamlRuleConfiguration config = yamlMapper.readValue(yamlContent, YamlRuleConfiguration.class);
+            YamlRuleConfiguration config = YAML_MAPPER.readValue(yamlContent, YamlRuleConfiguration.class);
 
             // Step 4.5: Merge numbered suffix sections into base sections
             mergeNumberedSections(orderedMap, config);
@@ -362,7 +375,7 @@ public class OrderedYamlParser {
      *
      * @return Configured ObjectMapper for YAML processing
      */
-    private ObjectMapper createYamlMapper() {
+    private static ObjectMapper createYamlMapper() {
         YAMLFactory yamlFactory = new YAMLFactory()
                 .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
                 .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
@@ -383,7 +396,6 @@ public class OrderedYamlParser {
      * Merge enrichments from numbered sections into the main enrichments list.
      */
     private void mergeEnrichments(YamlRuleConfiguration config, List<Object> itemsToAdd) {
-        ObjectMapper mapper = createYamlMapper();
         List<YamlEnrichment> existingEnrichments = config.getEnrichments();
         if (existingEnrichments == null) {
             existingEnrichments = new ArrayList<>();
@@ -391,7 +403,7 @@ public class OrderedYamlParser {
         }
 
         for (Object item : itemsToAdd) {
-            YamlEnrichment enrichment = mapper.convertValue(item, YamlEnrichment.class);
+            YamlEnrichment enrichment = YAML_MAPPER.convertValue(item, YamlEnrichment.class);
             existingEnrichments.add(enrichment);
         }
 
@@ -402,7 +414,6 @@ public class OrderedYamlParser {
      * Merge rules from numbered sections into the main rules list.
      */
     private void mergeRules(YamlRuleConfiguration config, List<Object> itemsToAdd) {
-        ObjectMapper mapper = createYamlMapper();
         List<YamlRule> existingRules = config.getRules();
         if (existingRules == null) {
             existingRules = new ArrayList<>();
@@ -410,7 +421,7 @@ public class OrderedYamlParser {
         }
 
         for (Object item : itemsToAdd) {
-            YamlRule rule = mapper.convertValue(item, YamlRule.class);
+            YamlRule rule = YAML_MAPPER.convertValue(item, YamlRule.class);
             existingRules.add(rule);
         }
 
@@ -421,7 +432,6 @@ public class OrderedYamlParser {
      * Merge enrichment-groups from numbered sections into the main enrichment-groups list.
      */
     private void mergeEnrichmentGroups(YamlRuleConfiguration config, List<Object> itemsToAdd) {
-        ObjectMapper mapper = createYamlMapper();
         List<YamlEnrichmentGroup> existingGroups = config.getEnrichmentGroups();
         if (existingGroups == null) {
             existingGroups = new ArrayList<>();
@@ -429,7 +439,7 @@ public class OrderedYamlParser {
         }
 
         for (Object item : itemsToAdd) {
-            YamlEnrichmentGroup group = mapper.convertValue(item, YamlEnrichmentGroup.class);
+            YamlEnrichmentGroup group = YAML_MAPPER.convertValue(item, YamlEnrichmentGroup.class);
             existingGroups.add(group);
         }
 
@@ -440,7 +450,6 @@ public class OrderedYamlParser {
      * Merge rule-groups from numbered sections into the main rule-groups list.
      */
     private void mergeRuleGroups(YamlRuleConfiguration config, List<Object> itemsToAdd) {
-        ObjectMapper mapper = createYamlMapper();
         List<YamlRuleGroup> existingGroups = config.getRuleGroups();
         if (existingGroups == null) {
             existingGroups = new ArrayList<>();
@@ -448,7 +457,7 @@ public class OrderedYamlParser {
         }
 
         for (Object item : itemsToAdd) {
-            YamlRuleGroup group = mapper.convertValue(item, YamlRuleGroup.class);
+            YamlRuleGroup group = YAML_MAPPER.convertValue(item, YamlRuleGroup.class);
             existingGroups.add(group);
         }
 
@@ -459,7 +468,6 @@ public class OrderedYamlParser {
      * Merge transformations from numbered sections into the main transformations list.
      */
     private void mergeTransformations(YamlRuleConfiguration config, List<Object> itemsToAdd) {
-        ObjectMapper mapper = createYamlMapper();
         List<YamlTransformation> existingTransformations = config.getTransformations();
         if (existingTransformations == null) {
             existingTransformations = new ArrayList<>();
@@ -467,7 +475,7 @@ public class OrderedYamlParser {
         }
 
         for (Object item : itemsToAdd) {
-            YamlTransformation transformation = mapper.convertValue(item, YamlTransformation.class);
+            YamlTransformation transformation = YAML_MAPPER.convertValue(item, YamlTransformation.class);
             existingTransformations.add(transformation);
         }
 
@@ -478,7 +486,6 @@ public class OrderedYamlParser {
      * Merge rule-chains from numbered sections into the main rule-chains list.
      */
     private void mergeRuleChains(YamlRuleConfiguration config, List<Object> itemsToAdd) {
-        ObjectMapper mapper = createYamlMapper();
         List<YamlRuleChain> existingChains = config.getRuleChains();
         if (existingChains == null) {
             existingChains = new ArrayList<>();
@@ -486,7 +493,7 @@ public class OrderedYamlParser {
         }
 
         for (Object item : itemsToAdd) {
-            YamlRuleChain chain = mapper.convertValue(item, YamlRuleChain.class);
+            YamlRuleChain chain = YAML_MAPPER.convertValue(item, YamlRuleChain.class);
             existingChains.add(chain);
         }
 
@@ -497,7 +504,6 @@ public class OrderedYamlParser {
      * Merge enrichment-refs from numbered sections into the main enrichment-refs list.
      */
     private void mergeEnrichmentRefs(YamlRuleConfiguration config, List<Object> itemsToAdd) {
-        ObjectMapper mapper = createYamlMapper();
         List<YamlEnrichmentRef> existingRefs = config.getEnrichmentRefs();
         if (existingRefs == null) {
             existingRefs = new ArrayList<>();
@@ -505,7 +511,7 @@ public class OrderedYamlParser {
         }
 
         for (Object item : itemsToAdd) {
-            YamlEnrichmentRef ref = mapper.convertValue(item, YamlEnrichmentRef.class);
+            YamlEnrichmentRef ref = YAML_MAPPER.convertValue(item, YamlEnrichmentRef.class);
             existingRefs.add(ref);
         }
 
@@ -516,7 +522,6 @@ public class OrderedYamlParser {
      * Merge rule-refs from numbered sections into the main rule-refs list.
      */
     private void mergeRuleRefs(YamlRuleConfiguration config, List<Object> itemsToAdd) {
-        ObjectMapper mapper = createYamlMapper();
         List<YamlRuleRef> existingRefs = config.getRuleRefs();
         if (existingRefs == null) {
             existingRefs = new ArrayList<>();
@@ -524,7 +529,7 @@ public class OrderedYamlParser {
         }
 
         for (Object item : itemsToAdd) {
-            YamlRuleRef ref = mapper.convertValue(item, YamlRuleRef.class);
+            YamlRuleRef ref = YAML_MAPPER.convertValue(item, YamlRuleRef.class);
             existingRefs.add(ref);
         }
 
