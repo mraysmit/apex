@@ -102,12 +102,12 @@ class DefinitiveErrorHandlingProofTest {
         
         // Then: Should recover gracefully (error recovery for non-critical)
         assertNotNull(result, "Result should not be null");
-        assertEquals(RuleResult.ResultType.NO_MATCH, result.getResultType(), 
+        assertEquals(RuleResult.ResultType.NO_MATCH, result.getResultType(),
                     "Non-critical errors should be recovered to NO_MATCH");
-        assertEquals("No matching rules found", result.getMessage(), 
+        assertEquals("No matching rules found", result.getMessage(),
                     "Should have recovery message");
-        assertEquals("INFO", result.getSeverity(), 
-                    "Should have recovery severity");
+        assertEquals("WARNING", result.getSeverity(),
+                    "Should preserve original rule severity after recovery");
         assertFalse(result.isTriggered(), "Rule should not be triggered");
         assertTrue(result.isSuccess(), "Recovery should be successful");
         

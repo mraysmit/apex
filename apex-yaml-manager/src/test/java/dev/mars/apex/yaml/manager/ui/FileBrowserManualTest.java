@@ -3,6 +3,7 @@ package dev.mars.apex.yaml.manager.ui;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -22,6 +23,7 @@ import java.time.Duration;
 import java.util.List;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Disabled("Manual test for interactive browser debugging - not for automated test runs")
 public class FileBrowserManualTest {
 
     @LocalServerPort

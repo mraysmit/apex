@@ -425,7 +425,7 @@ public class UnifiedRuleEvaluator {
                 RuleResult resultWithCorrectSeverity = new RuleResult(
                     originalResult.getRuleName(),
                     originalResult.getMessage(),
-                    severity,  // Use original rule severity, not hardcoded INFO
+                    severity,  // Preserve original rule severity, not recovery default
                     false,     // Not triggered
                     originalResult.getResultType(),
                     metrics

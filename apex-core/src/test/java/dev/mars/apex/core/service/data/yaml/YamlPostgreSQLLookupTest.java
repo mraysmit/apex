@@ -28,7 +28,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import dev.mars.apex.core.test.TestContainerImages;
@@ -60,7 +60,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class YamlPostgreSQLLookupTest {
 
     @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(TestContainerImages.POSTGRES)
+    static PostgreSQLContainer postgres = new PostgreSQLContainer(TestContainerImages.POSTGRES)
             .withDatabaseName("testdb")
             .withUsername("testuser")
             .withPassword("testpass");

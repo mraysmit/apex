@@ -18,7 +18,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.logging.Level;
 
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -47,7 +47,7 @@ class PostgreSQLConnectionE2ETest {
     private String baseUrl;
 
     @Container
-    public static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
+    public static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:15-alpine")
             .withDatabaseName("testdb")
             .withUsername("testuser")
             .withPassword("testpass");

@@ -548,6 +548,7 @@ class DependencyAnalysisControllerTest {
     @DisplayName("scan-folder: returns YAML file list for non-empty folder")
     @SuppressWarnings("unchecked")
     void testScanFolder_withYamlFiles_returnsList(@TempDir Path tempDir) throws IOException {
+        File f1 = createTestYamlFile(tempDir, "a.yaml");
         File f2 = createTestYamlFile(tempDir, "b.yml");
         File txt = tempDir.resolve("note.txt").toFile();
         try (FileWriter w = new FileWriter(txt)) { w.write("ignore me"); }
@@ -943,6 +944,7 @@ class DependencyAnalysisControllerTest {
             writer.write("  id: test-config\n");
             writer.write("  name: Test Configuration\n");
             writer.write("  version: 1.0.0\n");
+            writer.write("  description: Test configuration for dependency analysis\n");
             writer.write("  type: rule-config\n");
         }
         return yamlFile;

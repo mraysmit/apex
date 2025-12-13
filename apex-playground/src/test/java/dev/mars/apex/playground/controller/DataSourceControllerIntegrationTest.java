@@ -12,8 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -50,11 +48,11 @@ class DataSourceControllerIntegrationTest {
     private static final String POSTGRES_CONNECTION_NAME = "Test PostgreSQL Database";
     
     // PostgreSQL connection details - populated from Testcontainers
-    private static String POSTGRES_HOST;
-    private static int POSTGRES_PORT;
-    private static String POSTGRES_DATABASE;
-    private static String POSTGRES_USERNAME;
-    private static String POSTGRES_PASSWORD;
+    private static String postgresHost;
+    private static int postgresPort;
+    private static String postgresDatabase;
+    private static String postgresUsername;
+    private static String postgresPassword;
 
     @BeforeAll
     static void setupTestData() {
@@ -70,23 +68,23 @@ class DataSourceControllerIntegrationTest {
                     .withPassword("test");
             postgresContainer.start();
             
-            POSTGRES_HOST = postgresContainer.getHost();
-            POSTGRES_PORT = postgresContainer.getFirstMappedPort();
-            POSTGRES_DATABASE = postgresContainer.getDatabaseName();
-            POSTGRES_USERNAME = postgresContainer.getUsername();
-            POSTGRES_PASSWORD = postgresContainer.getPassword();
-            System.out.println("✓ PostgreSQL Testcontainer started at " + POSTGRES_HOST + ":" + POSTGRES_PORT);
+            postgresHost = postgresContainer.getHost();
+            postgresPort = postgresContainer.getFirstMappedPort();
+            postgresDatabase = postgresContainer.getDatabaseName();
+            postgresUsername = postgresContainer.getUsername();
+            postgresPassword = postgresContainer.getPassword();
+            System.out.println("✓ PostgreSQL Testcontainer started at " + postgresHost + ":" + postgresPort);
         } catch (Exception e) {
             // Docker not available, try local PostgreSQL
             System.out.println("⚠ Docker not available, checking for local PostgreSQL...");
-            POSTGRES_HOST = "localhost";
-            POSTGRES_PORT = 5432;
-            POSTGRES_DATABASE = "postgres";
-            POSTGRES_USERNAME = "postgres";
-            POSTGRES_PASSWORD = "postgres";
-            
+            postgresHost = "localhost";
+            postgresPort = 5432;
+            postgresDatabase = "postgres";
+            postgresUsername = "postgres";
+            postgresPassword = "postgres";
+
             if (isLocalPostgreSQLAvailable()) {
-                System.out.println("✓ Local PostgreSQL found at " + POSTGRES_HOST + ":" + POSTGRES_PORT);
+                System.out.println("✓ Local PostgreSQL found at " + postgresHost + ":" + postgresPort);
             } else {
                 System.out.println("⚠ No PostgreSQL available (Docker or local)");
             }
@@ -258,19 +256,19 @@ class DataSourceControllerIntegrationTest {
     void testCreatePostgreSQLConnection() throws Exception {
         // Check if PostgreSQL is available before attempting connection
         if (!isPostgreSQLAvailable()) {
-            System.out.println("⚠ PostgreSQL connection skipped - server not available at " + POSTGRES_HOST + ":" + POSTGRES_PORT);
-            Assumptions.assumeTrue(false, "PostgreSQL not available");
+            System.out.println("⚠ PostgreSQL connection skipped - server not available at " + postgresHost + ":" + postgresPort);
+            Assumptions.assumeFalse(true, "PostgreSQL not available");
             return;
         }
 
         DataSourceConnection pgConnection = new DataSourceConnection();
         pgConnection.setName(POSTGRES_CONNECTION_NAME);
         pgConnection.setType(DatabaseType.POSTGRESQL);
-        pgConnection.setHost(POSTGRES_HOST);
-        pgConnection.setPort(POSTGRES_PORT);
-        pgConnection.setDatabase(POSTGRES_DATABASE);
-        pgConnection.setUsername(POSTGRES_USERNAME);
-        pgConnection.setPassword(POSTGRES_PASSWORD);
+        pgConnection.setHost(postgresHost);
+        pgConnection.setPort(postgresPort);
+        pgConnection.setDatabase(postgresDatabase);
+        pgConnection.setUsername(postgresUsername);
+        pgConnection.setPassword(postgresPassword);
 
         String result = mockMvc.perform(post(API_BASE + "/connections")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -297,11 +295,11 @@ class DataSourceControllerIntegrationTest {
 
         DataSourceConnection pgConnection = new DataSourceConnection();
         pgConnection.setType(DatabaseType.POSTGRESQL);
-        pgConnection.setHost(POSTGRES_HOST);
-        pgConnection.setPort(POSTGRES_PORT);
-        pgConnection.setDatabase(POSTGRES_DATABASE);
-        pgConnection.setUsername(POSTGRES_USERNAME);
-        pgConnection.setPassword(POSTGRES_PASSWORD);
+        pgConnection.setHost(postgresHost);
+        pgConnection.setPort(postgresPort);
+        pgConnection.setDatabase(postgresDatabase);
+        pgConnection.setUsername(postgresUsername);
+        pgConnection.setPassword(postgresPassword);
 
         mockMvc.perform(post(API_BASE + "/test")
                         .contentType(MediaType.APPLICATION_JSON)
