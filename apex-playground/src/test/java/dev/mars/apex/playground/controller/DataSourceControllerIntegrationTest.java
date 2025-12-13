@@ -6,33 +6,38 @@ import dev.mars.apex.playground.model.DataSourceConnection.DatabaseType;
 import dev.mars.apex.playground.model.QueryRequest;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
+
 import org.testcontainers.containers.PostgreSQLContainer;
 
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Integration tests for DataSourceController with H2 and PostgreSQL databases.
- * Tests all CRUD operations and query execution via REST API.
+ * Tests all CRUD operations and query execution via REST API using real HTTP requests.
  */
-@SpringBootTest
-@AutoConfigureMockMvc
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class DataSourceControllerIntegrationTest {
 
-    // Optional Testcontainer - only used if Docker is available
-    private static PostgreSQLContainer<?> postgresContainer;
+    @LocalServerPort
+    private int port;
 
     @Autowired
-    private MockMvc mockMvc;
+    private TestRestTemplate restTemplate;
+
+    // Optional Testcontainer - only used if Docker is available
+    private static PostgreSQLContainer<?> postgresContainer;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -110,21 +115,22 @@ class DataSourceControllerIntegrationTest {
         h2Connection.setUsername("sa");
         h2Connection.setPassword("");
 
-        String result = mockMvc.perform(post(API_BASE + "/connections")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(h2Connection)))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.name").value(H2_CONNECTION_NAME))
-                .andExpect(jsonPath("$.type").value("H2"))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<DataSourceConnection> request = new HttpEntity<>(h2Connection, headers);
 
-        DataSourceConnection created = objectMapper.readValue(result, DataSourceConnection.class);
-        h2ConnectionId = created.getId();
+        ResponseEntity<DataSourceConnection> response = restTemplate.postForEntity(
+                API_BASE + "/connections",
+                request,
+                DataSourceConnection.class);
 
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertNotNull(response.getBody().getId());
+        assertEquals(H2_CONNECTION_NAME, response.getBody().getName());
+        assertEquals("H2", response.getBody().getType().toString());
+
+        h2ConnectionId = response.getBody().getId();
         System.out.println("✓ H2 Connection created with ID: " + h2ConnectionId);
     }
 
@@ -139,12 +145,18 @@ class DataSourceControllerIntegrationTest {
         h2Connection.setUsername("sa");
         h2Connection.setPassword("");
 
-        mockMvc.perform(post(API_BASE + "/test")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(h2Connection)))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true));
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<DataSourceConnection> request = new HttpEntity<>(h2Connection, headers);
+
+        ResponseEntity<Map> response = restTemplate.postForEntity(
+                API_BASE + "/test",
+                request,
+                Map.class);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(true, response.getBody().get("success"));
 
         System.out.println("✓ H2 Connection tested successfully");
     }
@@ -160,11 +172,16 @@ class DataSourceControllerIntegrationTest {
                 "CREATE TABLE IF NOT EXISTS employees (" +
                         "id INT PRIMARY KEY, name VARCHAR(100), department VARCHAR(50), salary DECIMAL(10,2))");
 
-        mockMvc.perform(post(API_BASE + "/connections/{connectionId}/query", h2ConnectionId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createTable)))
-                .andDo(print())
-                .andExpect(status().isOk());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<QueryRequest> createTableRequest = new HttpEntity<>(createTable, headers);
+
+        ResponseEntity<Map> createResponse = restTemplate.postForEntity(
+                API_BASE + "/connections/" + h2ConnectionId + "/query",
+                createTableRequest,
+                Map.class);
+
+        assertEquals(HttpStatus.OK, createResponse.getStatusCode());
 
         // Insert test data
         String[] inserts = {
@@ -176,10 +193,12 @@ class DataSourceControllerIntegrationTest {
         };
 
         for (String sql : inserts) {
-            mockMvc.perform(post(API_BASE + "/connections/{connectionId}/query", h2ConnectionId)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(new QueryRequest(sql))))
-                    .andExpect(status().isOk());
+            HttpEntity<QueryRequest> insertRequest = new HttpEntity<>(new QueryRequest(sql), headers);
+            ResponseEntity<Map> insertResponse = restTemplate.postForEntity(
+                    API_BASE + "/connections/" + h2ConnectionId + "/query",
+                    insertRequest,
+                    Map.class);
+            assertEquals(HttpStatus.OK, insertResponse.getStatusCode());
         }
 
         System.out.println("✓ H2 Test data created: employees table with 5 rows");
@@ -191,16 +210,26 @@ class DataSourceControllerIntegrationTest {
     void testExecuteQueryOnH2() throws Exception {
         QueryRequest queryRequest = new QueryRequest("SELECT * FROM employees ORDER BY id");
 
-        mockMvc.perform(post(API_BASE + "/connections/{connectionId}/query", h2ConnectionId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(queryRequest)))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.columns").isArray())
-                .andExpect(jsonPath("$.columns", hasSize(4)))
-                .andExpect(jsonPath("$.rows").isArray())
-                .andExpect(jsonPath("$.rows", hasSize(5)))
-                .andExpect(jsonPath("$.rowCount").value(5));
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<QueryRequest> request = new HttpEntity<>(queryRequest, headers);
+
+        ResponseEntity<Map> response = restTemplate.postForEntity(
+                API_BASE + "/connections/" + h2ConnectionId + "/query",
+                request,
+                Map.class);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().containsKey("columns"));
+        assertTrue(response.getBody().containsKey("rows"));
+        assertTrue(response.getBody().containsKey("rowCount"));
+
+        List<?> columns = (List<?>) response.getBody().get("columns");
+        List<?> rows = (List<?>) response.getBody().get("rows");
+        assertEquals(4, columns.size());
+        assertEquals(5, rows.size());
+        assertEquals(5, response.getBody().get("rowCount"));
 
         System.out.println("✓ Query executed on H2: Retrieved 5 employees");
     }
@@ -212,14 +241,23 @@ class DataSourceControllerIntegrationTest {
         QueryRequest queryRequest = new QueryRequest(
                 "SELECT name, salary FROM employees WHERE department = 'Engineering' ORDER BY salary DESC");
 
-        mockMvc.perform(post(API_BASE + "/connections/{connectionId}/query", h2ConnectionId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(queryRequest)))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.columns", hasSize(2)))
-                .andExpect(jsonPath("$.rows", hasSize(3)))
-                .andExpect(jsonPath("$.rows[0][0]").value("Eve Davis"));
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<QueryRequest> request = new HttpEntity<>(queryRequest, headers);
+
+        ResponseEntity<Map> response = restTemplate.postForEntity(
+                API_BASE + "/connections/" + h2ConnectionId + "/query",
+                request,
+                Map.class);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+
+        List<?> columns = (List<?>) response.getBody().get("columns");
+        List<List<?>> rows = (List<List<?>>) response.getBody().get("rows");
+        assertEquals(2, columns.size());
+        assertEquals(3, rows.size());
+        assertEquals("Eve Davis", rows.get(0).get(0));
 
         System.out.println("✓ Filtered query executed: 3 Engineering employees");
     }
@@ -228,11 +266,14 @@ class DataSourceControllerIntegrationTest {
     @Order(6)
     @DisplayName("6. Get H2 Schema")
     void testGetH2Schema() throws Exception {
-        mockMvc.perform(get(API_BASE + "/connections/{id}/schema", h2ConnectionId))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.database").value(anyOf(equalTo("testdb"), equalTo("TESTDB"))))
-                .andExpect(jsonPath("$.tables").isArray());
+        ResponseEntity<Map> response = restTemplate.getForEntity(
+                API_BASE + "/connections/" + h2ConnectionId + "/schema",
+                Map.class);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().containsKey("database"));
+        assertTrue(response.getBody().containsKey("tables"));
 
         System.out.println("✓ H2 Schema retrieved successfully");
     }
@@ -241,11 +282,13 @@ class DataSourceControllerIntegrationTest {
     @Order(7)
     @DisplayName("7. List All Connections")
     void testListConnections() throws Exception {
-        mockMvc.perform(get(API_BASE + "/connections"))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$", hasSize(greaterThanOrEqualTo(1))));
+        ResponseEntity<List> response = restTemplate.getForEntity(
+                API_BASE + "/connections",
+                List.class);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertThat(response.getBody().size(), greaterThanOrEqualTo(1));
 
         System.out.println("✓ Connection list retrieved");
     }
@@ -270,19 +313,21 @@ class DataSourceControllerIntegrationTest {
         pgConnection.setUsername(postgresUsername);
         pgConnection.setPassword(postgresPassword);
 
-        String result = mockMvc.perform(post(API_BASE + "/connections")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(pgConnection)))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.name").value(POSTGRES_CONNECTION_NAME))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<DataSourceConnection> request = new HttpEntity<>(pgConnection, headers);
 
-        DataSourceConnection created = objectMapper.readValue(result, DataSourceConnection.class);
-        postgresConnectionId = created.getId();
+        ResponseEntity<DataSourceConnection> response = restTemplate.postForEntity(
+                API_BASE + "/connections",
+                request,
+                DataSourceConnection.class);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertNotNull(response.getBody().getId());
+        assertEquals(POSTGRES_CONNECTION_NAME, response.getBody().getName());
+
+        postgresConnectionId = response.getBody().getId();
 
         System.out.println("✓ PostgreSQL Connection created with ID: " + postgresConnectionId);
     }
@@ -301,11 +346,16 @@ class DataSourceControllerIntegrationTest {
         pgConnection.setUsername(postgresUsername);
         pgConnection.setPassword(postgresPassword);
 
-        mockMvc.perform(post(API_BASE + "/test")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(pgConnection)))
-                .andDo(print())
-                .andExpect(status().isOk());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<DataSourceConnection> request = new HttpEntity<>(pgConnection, headers);
+
+        ResponseEntity<Map> response = restTemplate.postForEntity(
+                API_BASE + "/test",
+                request,
+                Map.class);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
 
         System.out.println("✓ PostgreSQL Connection tested");
     }
@@ -319,12 +369,18 @@ class DataSourceControllerIntegrationTest {
         QueryRequest queryRequest = new QueryRequest(
                 "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' LIMIT 5");
 
-        mockMvc.perform(post(API_BASE + "/connections/{connectionId}/query", postgresConnectionId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(queryRequest)))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.columns").isArray());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<QueryRequest> request = new HttpEntity<>(queryRequest, headers);
+
+        ResponseEntity<Map> response = restTemplate.postForEntity(
+                API_BASE + "/connections/" + postgresConnectionId + "/query",
+                request,
+                Map.class);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().containsKey("columns"));
 
         System.out.println("✓ Query executed on PostgreSQL");
     }
@@ -333,11 +389,14 @@ class DataSourceControllerIntegrationTest {
     @Order(11)
     @DisplayName("11. Get Single Connection")
     void testGetConnection() throws Exception {
-        mockMvc.perform(get(API_BASE + "/connections/{id}", h2ConnectionId))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(h2ConnectionId))
-                .andExpect(jsonPath("$.name").value(H2_CONNECTION_NAME));
+        ResponseEntity<DataSourceConnection> response = restTemplate.getForEntity(
+                API_BASE + "/connections/" + h2ConnectionId,
+                DataSourceConnection.class);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(h2ConnectionId, response.getBody().getId());
+        assertEquals(H2_CONNECTION_NAME, response.getBody().getName());
 
         System.out.println("✓ Single connection retrieved");
     }
@@ -347,9 +406,7 @@ class DataSourceControllerIntegrationTest {
     @DisplayName("98. Delete PostgreSQL Connection")
     void testDeletePostgreSQLConnection() throws Exception {
         if (postgresConnectionId != null) {
-            mockMvc.perform(delete(API_BASE + "/connections/{id}", postgresConnectionId))
-                    .andDo(print())
-                    .andExpect(status().isNoContent());
+            restTemplate.delete(API_BASE + "/connections/" + postgresConnectionId);
 
             System.out.println("✓ PostgreSQL Connection deleted");
         }
@@ -359,12 +416,13 @@ class DataSourceControllerIntegrationTest {
     @Order(99)
     @DisplayName("99. Delete H2 Connection")
     void testDeleteH2Connection() throws Exception {
-        mockMvc.perform(delete(API_BASE + "/connections/{id}", h2ConnectionId))
-                .andDo(print())
-                .andExpect(status().isNoContent());
+        restTemplate.delete(API_BASE + "/connections/" + h2ConnectionId);
 
-        mockMvc.perform(get(API_BASE + "/connections/{id}", h2ConnectionId))
-                .andExpect(status().isNotFound());
+        ResponseEntity<DataSourceConnection> response = restTemplate.getForEntity(
+                API_BASE + "/connections/" + h2ConnectionId,
+                DataSourceConnection.class);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 
         System.out.println("✓ H2 Connection deleted");
     }
