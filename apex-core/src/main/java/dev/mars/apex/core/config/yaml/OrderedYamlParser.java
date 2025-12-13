@@ -104,6 +104,9 @@ public class OrderedYamlParser {
     /**
      * Parse YAML string preserving section order with source identification.
      * 
+     * CRITICAL PERFORMANCE FIX: Now uses single-pass parsing via SequentialConfigDeserializer
+     * instead of double-parsing (SnakeYAML + Jackson).
+     *
      * @param yamlContent YAML content as string
      * @param source Source identifier for error reporting
      * @return OrderedYamlConfiguration with preserved section order
@@ -113,45 +116,37 @@ public class OrderedYamlParser {
         try {
             logger.debug("Parsing YAML content with order preservation from: " + source);
 
-            // Step 1: Parse with SnakeYAML to get ordered structure
-            // Create a new Yaml instance for each parse operation to ensure thread-safety
-            // SnakeYAML's Yaml class is not thread-safe and maintains mutable state
-            Yaml snakeYaml = new Yaml();
-            Map<String, Object> orderedMap = snakeYaml.load(yamlContent);
-            if (orderedMap == null) {
-                throw new YamlConfigurationException("Empty or invalid YAML content in: " + source);
-            }
+            // SINGLE-PASS PARSING: Custom deserializer captures order during Jackson parsing
+            // This replaces the previous two-pass approach:
+            // OLD: Parse 1 (SnakeYAML) + Parse 2 (Jackson) = 100% overhead
+            // NEW: Single Jackson parse with custom deserializer = 0% overhead
+            OrderedYamlConfiguration orderedConfig = YAML_MAPPER.readValue(yamlContent, OrderedYamlConfiguration.class);
 
-            // Step 2: Extract section order from the ordered map
-            List<String> sectionOrder = extractSectionOrder(orderedMap);
-            logger.debug("Detected section order: " + sectionOrder);
-
-            // Step 3: Extract item-level order from the ordered map
-            List<ProcessingItem> itemOrder = extractItemOrder(orderedMap);
-            logger.debug("Detected item order: " + itemOrder.size() + " items");
-
-            // Step 4: Parse with Jackson for full object mapping
-            YamlRuleConfiguration config = YAML_MAPPER.readValue(yamlContent, YamlRuleConfiguration.class);
-
-            // Step 4.5: Merge numbered suffix sections into base sections
-            mergeNumberedSections(orderedMap, config);
-
-            // Step 5: Create ordered configuration with both section and item order
-            OrderedYamlConfiguration orderedConfig = new OrderedYamlConfiguration(config, sectionOrder, itemOrder);
+            // Merge numbered suffix sections into base sections
+            // Still requires raw YAML map, but now obtained from deserializer, not separate parse
+            mergeNumberedSections(orderedConfig.getRawYamlMap(), orderedConfig.getConfig());
 
             logger.info("Successfully parsed YAML with preserved order from: " + source +
-                       " (sections: " + sectionOrder.size() + ", items: " + itemOrder.size() + ")");
+                       " (sections: " + orderedConfig.getSectionOrder().size() +
+                       ", items: " + orderedConfig.getItemOrder().size() + ")");
 
             return orderedConfig;
 
-        } catch (org.yaml.snakeyaml.scanner.ScannerException e) {
+        } catch (com.fasterxml.jackson.core.JsonParseException e) {
+            // Jackson parse errors (malformed JSON/YAML syntax)
             throw new YamlConfigurationException("YAML syntax error in " + source + ": " + e.getMessage(), e);
-        } catch (org.yaml.snakeyaml.parser.ParserException e) {
+        } catch (com.fasterxml.jackson.databind.JsonMappingException e) {
+            // Jackson mapping errors (structure issues)
             throw new YamlConfigurationException("YAML parsing error in " + source + ": " + e.getMessage(), e);
-        } catch (org.yaml.snakeyaml.constructor.ConstructorException e) {
-            throw new YamlConfigurationException("YAML construction error in " + source + ": " + e.getMessage(), e);
         } catch (JsonProcessingException e) {
-            throw new YamlConfigurationException("JSON processing error in YAML content from: " + source + ". Error: " + e.getMessage(), e);
+            // Other Jackson processing errors
+            throw new YamlConfigurationException("YAML parsing error in " + source + ": " + e.getMessage(), e);
+        } catch (IOException e) {
+            // IO errors (shouldn't happen for string parsing, but catch anyway)
+            throw new YamlConfigurationException("YAML parsing error in " + source + ": " + e.getMessage(), e);
+        } catch (Exception e) {
+            // Catch-all for any other exceptions during deserialization
+            throw new YamlConfigurationException("YAML parsing error in " + source + ": " + e.getMessage(), e);
         }
     }
     
@@ -388,6 +383,12 @@ public class OrderedYamlParser {
         // handled manually by mergeNumberedSections() but would cause Jackson to fail
         mapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
+
+        // CRITICAL PERFORMANCE FIX: Register custom deserializer for single-pass parsing
+        // This eliminates the double-parsing overhead (SnakeYAML + Jackson)
+        com.fasterxml.jackson.databind.module.SimpleModule module = new com.fasterxml.jackson.databind.module.SimpleModule();
+        module.addDeserializer(OrderedYamlConfiguration.class, new SequentialConfigDeserializer());
+        mapper.registerModule(module);
 
         return mapper;
     }

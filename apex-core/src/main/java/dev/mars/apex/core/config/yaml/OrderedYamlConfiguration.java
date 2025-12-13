@@ -8,9 +8,6 @@ import org.slf4j.LoggerFactory;
  * Wrapper for YamlRuleConfiguration that preserves the natural order of YAML sections
  * as they appear in the document, enabling sequential processing that respects developer intent.
  * 
- * This class fixes APEX's fundamental design flaw by maintaining section order information
- * that was lost during Jackson's @JsonProperty parsing process.
- * 
  * Key Features:
  * - Preserves exact section order from YAML document
  * - Provides access to sections in document order for sequential processing
@@ -28,6 +25,7 @@ public class OrderedYamlConfiguration {
     private final List<String> sectionOrder;
     private final Map<String, Integer> sectionPositions;
     private final List<ProcessingItem> itemOrder;
+    private final Map<String, Object> rawYamlMap; // For numbered sections merging
 
     /**
      * Create an ordered YAML configuration (backward compatibility constructor).
@@ -49,14 +47,38 @@ public class OrderedYamlConfiguration {
      * @param itemOrder The order of individual items as they appear in the YAML document
      */
     public OrderedYamlConfiguration(YamlRuleConfiguration configuration, List<String> sectionOrder, List<ProcessingItem> itemOrder) {
+        this(configuration, sectionOrder, itemOrder, new LinkedHashMap<>());
+    }
+
+    /**
+     * Create an ordered YAML configuration with section order, item order, and raw YAML map.
+     * This constructor is used by SequentialConfigDeserializer for single-pass parsing.
+     *
+     * @param configuration The parsed YAML configuration
+     * @param sectionOrder The order of sections as they appear in the YAML document
+     * @param itemOrder The order of individual items as they appear in the YAML document
+     * @param rawYamlMap The raw YAML map for numbered sections merging
+     */
+    public OrderedYamlConfiguration(YamlRuleConfiguration configuration, List<String> sectionOrder,
+                                   List<ProcessingItem> itemOrder, Map<String, Object> rawYamlMap) {
         this.configuration = configuration;
         this.sectionOrder = new ArrayList<>(sectionOrder);
         this.sectionPositions = createPositionMap(sectionOrder);
         this.itemOrder = new ArrayList<>(itemOrder);
+        this.rawYamlMap = new LinkedHashMap<>(rawYamlMap);
 
         logger.debug("Created OrderedYamlConfiguration with " + sectionOrder.size() + " sections and " + itemOrder.size() + " items");
     }
-    
+
+    /**
+     * Get the raw YAML map (for numbered sections merging).
+     *
+     * @return The raw YAML map
+     */
+    public Map<String, Object> getRawYamlMap() {
+        return Collections.unmodifiableMap(rawYamlMap);
+    }
+
     /**
      * Get the underlying YamlRuleConfiguration.
      * 
@@ -65,7 +87,16 @@ public class OrderedYamlConfiguration {
     public YamlRuleConfiguration getConfiguration() {
         return configuration;
     }
-    
+
+    /**
+     * Convenience method to get the config (alias for getConfiguration).
+     *
+     * @return The configuration object
+     */
+    public YamlRuleConfiguration getConfig() {
+        return configuration;
+    }
+
     /**
      * Get the order of sections as they appear in the YAML document.
      *
