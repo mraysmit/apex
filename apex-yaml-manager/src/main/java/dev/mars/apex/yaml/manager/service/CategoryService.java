@@ -227,9 +227,11 @@ public class CategoryService {
                 }
             }
         } catch (IOException e) {
-            logger.warn("Failed to extract categories from file: {}", filePath, e);
+            logger.warn("Failed to extract categories from file: {}", filePath);
+            logger.debug("Full exception details:", e);
         } catch (Exception e) {
-            logger.warn("Error parsing categories from file: {}", filePath, e);
+            logger.warn("Error parsing categories from file: {}", filePath);
+            logger.debug("Full exception details:", e);
         }
     }
 

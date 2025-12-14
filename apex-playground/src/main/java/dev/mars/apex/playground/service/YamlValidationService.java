@@ -109,7 +109,8 @@ public class YamlValidationService {
             }
 
         } catch (Exception e) {
-            logger.error("Unexpected error during YAML validation", e);
+            logger.error("Unexpected error during YAML validation: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             response.setValid(false);
             response.setMessage("Validation failed: " + e.getMessage());
             response.addError("Unexpected validation error: " + e.getMessage(), 0, 0);

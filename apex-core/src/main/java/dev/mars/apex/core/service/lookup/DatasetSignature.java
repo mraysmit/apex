@@ -146,7 +146,8 @@ public class DatasetSignature {
             return hexHash.substring(0, Math.min(8, hexHash.length()));
             
         } catch (Exception e) {
-            logger.warn("Failed to hash inline data: " + e.getMessage());
+            logger.warn("Failed to hash inline data: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return "hash-error-" + data.size();
         }
     }
@@ -205,7 +206,8 @@ public class DatasetSignature {
             String hexHash = bytesToHex(hash);
             return hexHash.substring(0, Math.min(8, hexHash.length()));
         } catch (Exception e) {
-            logger.warn("Failed to hash database config: " + e.getMessage());
+            logger.warn("Failed to hash database config: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return "db-hash-error";
         }
     }
@@ -243,7 +245,8 @@ public class DatasetSignature {
             String hexHash = bytesToHex(hash);
             return hexHash.substring(0, Math.min(8, hexHash.length()));
         } catch (Exception e) {
-            logger.warn("Failed to hash REST API config: " + e.getMessage());
+            logger.warn("Failed to hash REST API config: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return "api-hash-error";
         }
     }

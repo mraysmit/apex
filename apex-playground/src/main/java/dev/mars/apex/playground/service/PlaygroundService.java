@@ -207,7 +207,8 @@ public class PlaygroundService {
                 "system"
             ));
         } catch (Exception e) {
-            logger.error("Processing error: {}", e.getMessage(), e);
+            logger.error("Processing error: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             response.setSuccess(false);
             response.setMessage("Processing failed: " + e.getMessage());
             response.addError("Processing error: " + e.getMessage());

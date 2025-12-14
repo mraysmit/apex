@@ -437,7 +437,8 @@ public class RuleGroup implements RuleBase {
             } catch (Exception e) {
                 evaluatedCount++;
                 failedCount++;
-                logger.error("Error evaluating rule '{}' in group '{}': {}", rule.getName(), name, e.getMessage(), e);
+                logger.error("Error evaluating rule '{}' in group '{}': {}", rule.getName(), name, e.getMessage());
+                logger.debug("Full exception details:", e);
 
                 if (isAndOperator) {
                     // For AND groups, any error means the group fails
@@ -547,7 +548,8 @@ public class RuleGroup implements RuleBase {
             } catch (Exception e) {
                 evaluatedCount++;
                 failedCount++;
-                logger.error("Error evaluating rule '{}' in group '{}': {}", rule.getName(), name, e.getMessage(), e);
+                logger.error("Error evaluating rule '{}' in group '{}': {}", rule.getName(), name, e.getMessage());
+                logger.debug("Full exception details:", e);
 
                 // Create error RuleResult object
                 RuleResult errorResult = RuleResult.error(rule.getName(),
@@ -620,7 +622,8 @@ public class RuleGroup implements RuleBase {
 
                     return ruleResult;
                 } catch (Exception e) {
-                    logger.error("Error evaluating rule '{}' in group '{}' (parallel): {}", rule.getName(), name, e.getMessage(), e);
+                    logger.error("Error evaluating rule '{}' in group '{}' (parallel): {}", rule.getName(), name, e.getMessage());
+                    logger.debug("Full exception details:", e);
                     return false; // Treat exceptions as false
                 }
             });
@@ -647,7 +650,8 @@ public class RuleGroup implements RuleBase {
                     // Store individual rule result
                     ruleResults.put(ruleIds.get(i), result);
                 } catch (Exception e) {
-                    logger.error("Error getting result for rule '{}' in group '{}': {}", ruleNames.get(i), name, e.getMessage(), e);
+                    logger.error("Error getting result for rule '{}' in group '{}': {}", ruleNames.get(i), name, e.getMessage());
+                    logger.debug("Full exception details:", e);
                     results.add(false);
                     // Store failed result
                     ruleResults.put(ruleIds.get(i), false);
@@ -685,7 +689,8 @@ public class RuleGroup implements RuleBase {
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            logger.error("Parallel evaluation interrupted for group '{}': {}", name, e.getMessage(), e);
+            logger.error("Parallel evaluation interrupted for group '{}': {}", name, e.getMessage());
+            logger.debug("Full exception details:", e);
             return false;
         } finally {
             executor.shutdown();
@@ -740,7 +745,8 @@ public class RuleGroup implements RuleBase {
                         RuleResult.noMatch(rule.getName(), rule.getMessage(), rule.getSeverity());
 
                 } catch (Exception e) {
-                    logger.error("Error evaluating rule '{}' in group '{}' (parallel): {}", rule.getName(), name, e.getMessage(), e);
+                    logger.error("Error evaluating rule '{}' in group '{}' (parallel): {}", rule.getName(), name, e.getMessage());
+                    logger.debug("Full exception details:", e);
                     return RuleResult.error(rule.getName(), "Error evaluating rule: " + e.getMessage(), rule.getSeverity());
                 }
             });
@@ -771,7 +777,8 @@ public class RuleGroup implements RuleBase {
                     // Store individual rule result
                     ruleResults.put(ruleIds.get(i), boolResult);
                 } catch (Exception e) {
-                    logger.error("Error getting result for rule '{}' in group '{}': {}", ruleNames.get(i), name, e.getMessage(), e);
+                    logger.error("Error getting result for rule '{}' in group '{}': {}", ruleNames.get(i), name, e.getMessage());
+                    logger.debug("Full exception details:", e);
 
                     // Create error result
                     RuleResult errorResult = RuleResult.error(ruleNames.get(i),
@@ -814,7 +821,8 @@ public class RuleGroup implements RuleBase {
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            logger.error("Parallel evaluation interrupted for group '{}': {}", name, e.getMessage(), e);
+            logger.error("Parallel evaluation interrupted for group '{}': {}", name, e.getMessage());
+            logger.debug("Full exception details:", e);
             return false;
         } finally {
             executor.shutdown();

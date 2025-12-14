@@ -108,7 +108,8 @@ public class DependencyAnalysisController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Failed to analyze dependencies", e);
+            logger.error("Failed to analyze dependencies: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest().body(Map.of(
                     "status", "error",
                     "message", e.getMessage()
@@ -161,7 +162,8 @@ public class DependencyAnalysisController {
                 Files.deleteIfExists(tempFile);
             }
         } catch (Exception e) {
-            logger.error("Failed to analyze dependencies from content", e);
+            logger.error("Failed to analyze dependencies from content: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest().body(Map.of(
                     "status", "error",
                     "message", e.getMessage()
@@ -208,7 +210,8 @@ public class DependencyAnalysisController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Failed to analyze impact", e);
+            logger.error("Failed to analyze impact: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest().body(Map.of(
                     "status", "error",
                     "message", e.getMessage()
@@ -245,7 +248,8 @@ public class DependencyAnalysisController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Failed to get metrics", e);
+            logger.error("Failed to get metrics: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest().body(Map.of(
                     "status", "error",
                     "message", e.getMessage()
@@ -283,7 +287,8 @@ public class DependencyAnalysisController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Failed to get circular dependencies", e);
+            logger.error("Failed to get circular dependencies: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest().body(Map.of(
                     "status", "error",
                     "message", e.getMessage()
@@ -321,7 +326,8 @@ public class DependencyAnalysisController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Failed to get orphaned files", e);
+            logger.error("Failed to get orphaned files: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest().body(Map.of(
                     "status", "error",
                     "message", e.getMessage()
@@ -359,7 +365,8 @@ public class DependencyAnalysisController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Failed to get critical files", e);
+            logger.error("Failed to get critical files: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest().body(Map.of(
                     "status", "error",
                     "message", e.getMessage()
@@ -396,7 +403,8 @@ public class DependencyAnalysisController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Failed to generate report", e);
+            logger.error("Failed to generate report: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest().body(Map.of(
                     "status", "error",
                     "message", e.getMessage()
@@ -440,7 +448,8 @@ public class DependencyAnalysisController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Failed to get detailed circular dependencies", e);
+            logger.error("Failed to get detailed circular dependencies: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest().body(Map.of(
                     "status", "error",
                     "message", e.getMessage()
@@ -492,7 +501,8 @@ public class DependencyAnalysisController {
                     "message", "Invalid severity. Must be one of: CRITICAL, HIGH, MEDIUM, LOW"
             ));
         } catch (Exception e) {
-            logger.error("Failed to get circular dependencies by severity", e);
+            logger.error("Failed to get circular dependencies by severity: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest().body(Map.of(
                     "status", "error",
                     "message", e.getMessage()
@@ -540,7 +550,8 @@ public class DependencyAnalysisController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Failed to get circular dependencies for file", e);
+            logger.error("Failed to get circular dependencies for file: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest().body(Map.of(
                     "status", "error",
                     "message", e.getMessage()
@@ -577,7 +588,8 @@ public class DependencyAnalysisController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Failed to generate circular dependency report", e);
+            logger.error("Failed to generate circular dependency report: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest().body(Map.of(
                     "status", "error",
                     "message", e.getMessage()
@@ -697,7 +709,8 @@ public class DependencyAnalysisController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Failed to scan folder", e);
+            logger.error("Failed to scan folder: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest().body(Map.of(
                     "status", "error",
                     "message", e.getMessage()
@@ -759,7 +772,8 @@ public class DependencyAnalysisController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Failed to list sample directories", e);
+            logger.error("Failed to list sample directories: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest().body(Map.of(
                     "status", "error",
                     "message", e.getMessage()
@@ -829,7 +843,8 @@ public class DependencyAnalysisController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Failed to generate dependency tree", e);
+            logger.error("Failed to generate dependency tree: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest().body(Map.of(
                     "status", "error",
                     "message", e.getMessage()
@@ -871,7 +886,8 @@ public class DependencyAnalysisController {
             response.put("timestamp", System.currentTimeMillis());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Failed to validate dependency tree", e);
+            logger.error("Failed to validate dependency tree: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest().body(Map.of(
                     "status", "error",
                     "message", e.getMessage()
