@@ -2,6 +2,7 @@ package dev.mars.apex.core.engine.model;
 
 import dev.mars.apex.core.constants.ErrorHandlingConstants;
 import dev.mars.apex.core.constants.SeverityConstants;
+import dev.mars.apex.core.util.RulesEngineLogger;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -37,6 +38,7 @@ import java.util.stream.Collectors;
  */
 public class RuleGroup implements RuleBase {
     private static final ExpressionParser parser = new SpelExpressionParser();
+    private final RulesEngineLogger logger = new RulesEngineLogger(RuleGroup.class);
 
     private final UUID uuid;
     private final String id;
@@ -239,7 +241,7 @@ public class RuleGroup implements RuleBase {
      */
     public void addRule(Rule rule, int sequenceNumber) {
         if (rule == null) {
-            System.err.println("Cannot add null rule to group '" + name + "'");
+            logger.error("Cannot add null rule to group '{}'", name);
             return;
         }
         rulesBySequence.put(sequenceNumber, rule);
@@ -387,7 +389,7 @@ public class RuleGroup implements RuleBase {
         for (Integer seq : sequenceNumbers) {
             Rule rule = rulesBySequence.get(seq);
             if (rule == null) {
-                System.err.println("Null rule found at sequence " + seq + " in group '" + name + "', skipping");
+                logger.error("Null rule found at sequence {} in group '{}', skipping", seq, name);
                 continue;
             }
 
@@ -410,7 +412,7 @@ public class RuleGroup implements RuleBase {
                 }
 
                 if (debugMode) {
-                    System.out.println("DEBUG: Rule '" + rule.getName() + "' in group '" + name + "' evaluated to: " + ruleResult);
+                    logger.debug("Rule '{}' in group '{}' evaluated to: {}", rule.getName(), name, ruleResult);
                 }
 
                 if (isAndOperator) {
@@ -418,7 +420,7 @@ public class RuleGroup implements RuleBase {
                     result = result && ruleResult;
                     if (!result && useShortCircuit) {
                         if (debugMode) {
-                            System.out.println("DEBUG: AND group '" + name + "' short-circuited after " + evaluatedCount + " rules");
+                            logger.debug("AND group '{}' short-circuited after {} rules", name, evaluatedCount);
                         }
                         break; // Short-circuit for AND
                     }
@@ -427,7 +429,7 @@ public class RuleGroup implements RuleBase {
                     result = result || ruleResult;
                     if (result && useShortCircuit) {
                         if (debugMode) {
-                            System.out.println("DEBUG: OR group '" + name + "' short-circuited after " + evaluatedCount + " rules");
+                            logger.debug("OR group '{}' short-circuited after {} rules", name, evaluatedCount);
                         }
                         break; // Short-circuit for OR
                     }
@@ -435,7 +437,7 @@ public class RuleGroup implements RuleBase {
             } catch (Exception e) {
                 evaluatedCount++;
                 failedCount++;
-                System.err.println("Error evaluating rule '" + rule.getName() + "' in group '" + name + "': " + e.getMessage());
+                logger.error("Error evaluating rule '{}' in group '{}': {}", rule.getName(), name, e.getMessage(), e);
 
                 if (isAndOperator) {
                     // For AND groups, any error means the group fails
@@ -449,9 +451,8 @@ public class RuleGroup implements RuleBase {
         }
 
         if (debugMode) {
-            System.out.println("DEBUG: Group '" + name + "' evaluation complete. " +
-                             "Evaluated: " + evaluatedCount + ", Passed: " + passedCount +
-                             ", Failed: " + failedCount + ", Final result: " + result);
+            logger.debug("Group '{}' evaluation complete. Evaluated: {}, Passed: {}, Failed: {}, Final result: {}",
+                name, evaluatedCount, passedCount, failedCount, result);
         }
 
         // Store group result
@@ -486,13 +487,13 @@ public class RuleGroup implements RuleBase {
 
         // Debug logging for empty groups
         if (sequenceNumbers.isEmpty()) {
-            System.out.println("DEBUG: Empty group '" + name + "' with operator: " + (isAndOperator ? "AND" : "OR") + ", initial result: " + result);
+            logger.debug("Empty group '{}' with operator: {}, initial result: {}", name, (isAndOperator ? "AND" : "OR"), result);
         }
 
         for (Integer seq : sequenceNumbers) {
             Rule rule = rulesBySequence.get(seq);
             if (rule == null) {
-                System.err.println("Null rule found at sequence " + seq + " in group '" + name + "', skipping");
+                logger.error("Null rule found at sequence {} in group '{}', skipping", seq, name);
                 continue;
             }
 
@@ -521,7 +522,7 @@ public class RuleGroup implements RuleBase {
                 }
 
                 if (debugMode) {
-                    System.out.println("DEBUG: Rule '" + rule.getName() + "' in group '" + name + "' evaluated to: " + ruleResult + " (severity: " + rule.getSeverity() + ")");
+                    logger.debug("Rule '{}' in group '{}' evaluated to: {} (severity: {})", rule.getName(), name, ruleResult, rule.getSeverity());
                 }
 
                 if (isAndOperator) {
@@ -529,7 +530,7 @@ public class RuleGroup implements RuleBase {
                     result = result && ruleResult;
                     if (!result && useShortCircuit) {
                         if (debugMode) {
-                            System.out.println("DEBUG: AND group '" + name + "' short-circuited after " + evaluatedCount + " rules");
+                            logger.debug("AND group '{}' short-circuited after {} rules", name, evaluatedCount);
                         }
                         break; // Short-circuit for AND
                     }
@@ -538,7 +539,7 @@ public class RuleGroup implements RuleBase {
                     result = result || ruleResult;
                     if (result && useShortCircuit) {
                         if (debugMode) {
-                            System.out.println("DEBUG: OR group '" + name + "' short-circuited after " + evaluatedCount + " rules");
+                            logger.debug("OR group '{}' short-circuited after {} rules", name, evaluatedCount);
                         }
                         break; // Short-circuit for OR
                     }
@@ -546,7 +547,7 @@ public class RuleGroup implements RuleBase {
             } catch (Exception e) {
                 evaluatedCount++;
                 failedCount++;
-                System.err.println("Error evaluating rule '" + rule.getName() + "' in group '" + name + "': " + e.getMessage());
+                logger.error("Error evaluating rule '{}' in group '{}': {}", rule.getName(), name, e.getMessage(), e);
 
                 // Create error RuleResult object
                 RuleResult errorResult = RuleResult.error(rule.getName(),
@@ -565,9 +566,8 @@ public class RuleGroup implements RuleBase {
         }
 
         if (debugMode) {
-            System.out.println("DEBUG: Group '" + name + "' evaluation complete. " +
-                             "Evaluated: " + evaluatedCount + ", Passed: " + passedCount +
-                             ", Failed: " + failedCount + ", Final result: " + result);
+            logger.debug("Group '{}' evaluation complete. Evaluated: {}, Passed: {}, Failed: {}, Final result: {}",
+                name, evaluatedCount, passedCount, failedCount, result);
         }
 
         // Store group result
@@ -599,7 +599,7 @@ public class RuleGroup implements RuleBase {
         for (Integer seq : sequenceNumbers) {
             Rule rule = rulesBySequence.get(seq);
             if (rule == null) {
-                System.err.println("Null rule found at sequence " + seq + " in group '" + name + "', skipping");
+                logger.error("Null rule found at sequence {} in group '{}', skipping", seq, name);
                 continue;
             }
 
@@ -615,12 +615,12 @@ public class RuleGroup implements RuleBase {
                     }
 
                     if (debugMode) {
-                        System.out.println("DEBUG: Rule '" + rule.getName() + "' in group '" + name + "' (parallel) evaluated to: " + ruleResult);
+                        logger.debug("Rule '{}' in group '{}' (parallel) evaluated to: {}", rule.getName(), name, ruleResult);
                     }
 
                     return ruleResult;
                 } catch (Exception e) {
-                    System.err.println("Error evaluating rule '" + rule.getName() + "' in group '" + name + "' (parallel): " + e.getMessage());
+                    logger.error("Error evaluating rule '{}' in group '{}' (parallel): {}", rule.getName(), name, e.getMessage(), e);
                     return false; // Treat exceptions as false
                 }
             });
@@ -647,7 +647,7 @@ public class RuleGroup implements RuleBase {
                     // Store individual rule result
                     ruleResults.put(ruleIds.get(i), result);
                 } catch (Exception e) {
-                    System.err.println("Error getting result for rule '" + ruleNames.get(i) + "' in group '" + name + "': " + e.getMessage());
+                    logger.error("Error getting result for rule '{}' in group '{}': {}", ruleNames.get(i), name, e.getMessage(), e);
                     results.add(false);
                     // Store failed result
                     ruleResults.put(ruleIds.get(i), false);
@@ -674,9 +674,8 @@ public class RuleGroup implements RuleBase {
             }
 
             if (debugMode) {
-                System.out.println("DEBUG: Group '" + name + "' parallel evaluation complete. " +
-                                 "Total: " + results.size() + ", Passed: " + passedCount +
-                                 ", Failed: " + failedCount + ", Final result: " + finalResult);
+                logger.debug("Group '{}' parallel evaluation complete. Total: {}, Passed: {}, Failed: {}, Final result: {}",
+                    name, results.size(), passedCount, failedCount, finalResult);
             }
 
             // Store group result
@@ -686,7 +685,7 @@ public class RuleGroup implements RuleBase {
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            System.err.println("Parallel evaluation interrupted for group '" + name + "': " + e.getMessage());
+            logger.error("Parallel evaluation interrupted for group '{}': {}", name, e.getMessage(), e);
             return false;
         } finally {
             executor.shutdown();
@@ -716,7 +715,7 @@ public class RuleGroup implements RuleBase {
         for (Integer seq : sequenceNumbers) {
             Rule rule = rulesBySequence.get(seq);
             if (rule == null) {
-                System.err.println("Null rule found at sequence " + seq + " in group '" + name + "', skipping");
+                logger.error("Null rule found at sequence {} in group '{}', skipping", seq, name);
                 continue;
             }
 
@@ -732,7 +731,7 @@ public class RuleGroup implements RuleBase {
                     }
 
                     if (debugMode) {
-                        System.out.println("DEBUG: Rule '" + rule.getName() + "' in group '" + name + "' (parallel) evaluated to: " + ruleResult + " (severity: " + rule.getSeverity() + ")");
+                        logger.debug("Rule '{}' in group '{}' (parallel) evaluated to: {} (severity: {})", rule.getName(), name, ruleResult, rule.getSeverity());
                     }
 
                     // Create RuleResult object
@@ -741,7 +740,7 @@ public class RuleGroup implements RuleBase {
                         RuleResult.noMatch(rule.getName(), rule.getMessage(), rule.getSeverity());
 
                 } catch (Exception e) {
-                    System.err.println("Error evaluating rule '" + rule.getName() + "' in group '" + name + "' (parallel): " + e.getMessage());
+                    logger.error("Error evaluating rule '{}' in group '{}' (parallel): {}", rule.getName(), name, e.getMessage(), e);
                     return RuleResult.error(rule.getName(), "Error evaluating rule: " + e.getMessage(), rule.getSeverity());
                 }
             });
@@ -772,7 +771,7 @@ public class RuleGroup implements RuleBase {
                     // Store individual rule result
                     ruleResults.put(ruleIds.get(i), boolResult);
                 } catch (Exception e) {
-                    System.err.println("Error getting result for rule '" + ruleNames.get(i) + "' in group '" + name + "': " + e.getMessage());
+                    logger.error("Error getting result for rule '{}' in group '{}': {}", ruleNames.get(i), name, e.getMessage(), e);
 
                     // Create error result
                     RuleResult errorResult = RuleResult.error(ruleNames.get(i),
@@ -804,9 +803,8 @@ public class RuleGroup implements RuleBase {
             }
 
             if (debugMode) {
-                System.out.println("DEBUG: Group '" + name + "' parallel evaluation complete. " +
-                                 "Total: " + booleanResults.size() + ", Passed: " + passedCount +
-                                 ", Failed: " + failedCount + ", Final result: " + finalResult);
+                logger.debug("Group '{}' parallel evaluation complete. Total: {}, Passed: {}, Failed: {}, Final result: {}",
+                    name, booleanResults.size(), passedCount, failedCount, finalResult);
             }
 
             // Store group result
@@ -816,7 +814,7 @@ public class RuleGroup implements RuleBase {
 
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            System.err.println("Parallel evaluation interrupted for group '" + name + "': " + e.getMessage());
+            logger.error("Parallel evaluation interrupted for group '{}': {}", name, e.getMessage(), e);
             return false;
         } finally {
             executor.shutdown();

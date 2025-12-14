@@ -269,6 +269,18 @@ public class RulesEngineLogger {
     }
 
     /**
+     * Log debug message with exception.
+     *
+     * @param message The message
+     * @param throwable The exception
+     */
+    public void debug(String message, Throwable throwable) {
+        if (logger.isDebugEnabled()) {
+            logger.debug(message, throwable);
+        }
+    }
+
+    /**
      * Log info message with lazy evaluation.
      * 
      * @param messageSupplier Supplier for the log message
