@@ -38,6 +38,11 @@ public class SequentialConfigDeserializer extends JsonDeserializer<OrderedYamlCo
 
     private static final Logger logger = LoggerFactory.getLogger(SequentialConfigDeserializer.class);
 
+    /**
+     * STEP 3 OPTIMIZATION: Use SectionRegistry for O(1) lookups.
+     */
+    private static final SectionRegistry SECTION_REGISTRY = SectionRegistry.getInstance();
+
     // Known YAML section names - must match OrderedYamlParser.KNOWN_SECTIONS
     private static final Set<String> KNOWN_SECTIONS = Set.of(
         "metadata", "data-sources", "data-source-refs", "rule-refs", "enrichment-refs",
@@ -151,20 +156,15 @@ public class SequentialConfigDeserializer extends JsonDeserializer<OrderedYamlCo
 
     /**
      * Normalize section name by removing numeric suffix.
+     *
+     * STEP 3 OPTIMIZATION: Now uses SectionRegistry for O(1) cached lookups.
      */
     private String normalizeSectionName(String sectionName) {
         if (sectionName == null) {
             return null;
         }
-
-        if (sectionName.matches(".*-\\d+$")) {
-            String baseName = sectionName.replaceAll("-\\d+$", "");
-            if (NUMBERED_SUFFIX_SECTIONS.contains(baseName)) {
-                return baseName;
-            }
-        }
-
-        return sectionName;
+        // O(1) cached lookup - replaces regex + string allocation
+        return SECTION_REGISTRY.getNormalizedName(sectionName);
     }
 }
 

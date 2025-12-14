@@ -191,7 +191,6 @@ class YamlConfigurationLoaderTest {
                 loader.loadFromStream(emptyStream);
             }, "Should throw exception for empty stream");
 
-            System.out.println("ACTUAL EXCEPTION MESSAGE: " + exception.getMessage());
             assertTrue(exception.getMessage().contains("Empty") || exception.getMessage().contains("empty") ||
                       exception.getMessage().contains("invalid") || exception.getMessage().contains("YAML"),
                       "Exception message should indicate empty/invalid YAML");
