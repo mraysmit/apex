@@ -2,20 +2,20 @@ COMPREHENSIVE APEX YAML VALIDATION REPORT
 =========================================
 
 OVERALL STATISTICS:
-  Total YAML files: 95
+  Total YAML files: 92
   Fully valid files: 55
   Structurally valid: 55
   Dependency issues only: 0
-  Invalid files: 40
+  Invalid files: 37
 
 SUCCESS RATES:
-  Overall success rate: 57.9%
-  Structural success rate: 57.9%
+  Overall success rate: 59.8%
+  Structural success rate: 59.8%
 
 ERROR BREAKDOWN:
   Other Issues: 19 occurrences
   Document Type Issues: 13 occurrences
-  Missing Required Fields: 10 occurrences
+  Missing Required Fields: 7 occurrences
 
 SAMPLE VALID FILES:
   • composite-rulegroup-enrichmentgroup.yaml
@@ -43,5 +43,5 @@ SAMPLE INVALID FILES:
 
 BULK FIX IMPACT ASSESSMENT:
   Previous estimated rate: 21.3%
-  Current actual rate: 57.9%
-  Improvement: +36.6 percentage points
+  Current actual rate: 59.8%
+  Improvement: +38.5 percentage points
