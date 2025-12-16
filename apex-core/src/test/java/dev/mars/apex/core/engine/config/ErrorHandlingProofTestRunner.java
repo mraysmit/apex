@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author GitHub Copilot
  * @since 2025-09-26
  */
-@DisplayName("🎯 DEFINITIVE PROOF: All Error Paths Return Structured Results")
+@DisplayName("  DEFINITIVE PROOF: All Error Paths Return Structured Results")
 class ErrorHandlingProofTestRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(ErrorHandlingProofTestRunner.class);
@@ -60,7 +60,7 @@ class ErrorHandlingProofTestRunner {
     }
     
     @Test
-    @DisplayName("🎯 PROOF: All execution paths handle errors gracefully")
+    @DisplayName("  PROOF: All execution paths handle errors gracefully")
     void proveAllExecutionPathsHandleErrorsGracefully() {
         logger.info("📋 Testing all rule evaluation execution paths...");
         

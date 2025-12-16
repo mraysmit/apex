@@ -20,7 +20,7 @@
 
 **Code Changes**:
 ```java
-// BEFORE: Per-request instantiation (CATASTROPHIC at high throughput)
+// BEFORE: Per-request instantiation (problematic at high throughput)
 public OrderedYamlParser() {
     this.yamlMapper = createYamlMapper(); // NEW OBJECT EVERY TIME!
 }

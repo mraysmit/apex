@@ -1664,4 +1664,532 @@ class VisualEditorUITest {
         );
         assertEquals("defined", result, "AUTO_FILL_MAP should include apex_error_recovery");
     }
+
+    // --- Owner Field Tests ---
+
+    @Test
+    @Order(67)
+    @DisplayName("Test 67: apex_rule_config block has OWNER field")
+    void testRuleConfigBlockHasOwnerField() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean hasOwnerField = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_rule_config');" +
+            "block.initSvg(); block.render();" +
+            "var hasOwner = block.getField('OWNER') !== null;" +
+            "block.dispose();" +
+            "return hasOwner;"
+        );
+        assertTrue(hasOwnerField, "apex_rule_config should have OWNER field");
+    }
+
+    @Test
+    @Order(68)
+    @DisplayName("Test 68: apex_rule_config generator includes owner in output")
+    void testRuleConfigGeneratorIncludesOwner() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String generatedCode = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_rule_config');" +
+            "block.setFieldValue('test-config', 'ID');" +
+            "block.setFieldValue('Test Config', 'NAME');" +
+            "block.setFieldValue('1.0.0', 'VERSION');" +
+            "block.setFieldValue('john.doe@example.com', 'OWNER');" +
+            "block.initSvg(); block.render();" +
+            "var code = apexGenerator.blockToCode(block);" +
+            "block.dispose();" +
+            "return code;"
+        );
+
+        assertNotNull(generatedCode, "Generated code should not be null");
+        assertTrue(generatedCode.contains("\"owner\""), "Generated code should contain owner field");
+        assertTrue(generatedCode.contains("john.doe@example.com"), "Generated code should contain owner value");
+    }
+
+    @Test
+    @Order(69)
+    @DisplayName("Test 69: apex_data_source_config block has OWNER field")
+    void testDataSourceConfigBlockHasOwnerField() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean hasOwnerField = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_data_source_config');" +
+            "block.initSvg(); block.render();" +
+            "var hasOwner = block.getField('OWNER') !== null;" +
+            "block.dispose();" +
+            "return hasOwner;"
+        );
+        assertTrue(hasOwnerField, "apex_data_source_config should have OWNER field");
+    }
+
+    @Test
+    @Order(70)
+    @DisplayName("Test 70: apex_data_source_config generator includes owner in output")
+    void testDataSourceConfigGeneratorIncludesOwner() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String generatedCode = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_data_source_config');" +
+            "block.setFieldValue('test-ds-config', 'ID');" +
+            "block.setFieldValue('1.0.0', 'VERSION');" +
+            "block.setFieldValue('data-team@example.com', 'OWNER');" +
+            "block.initSvg(); block.render();" +
+            "var code = apexGenerator.blockToCode(block);" +
+            "block.dispose();" +
+            "return code;"
+        );
+
+        assertNotNull(generatedCode, "Generated code should not be null");
+        assertTrue(generatedCode.contains("\"owner\""), "Generated code should contain owner field");
+        assertTrue(generatedCode.contains("data-team@example.com"), "Generated code should contain owner value");
+    }
+
+    // --- Rule Group / Enrichment Group New Fields Tests ---
+
+    @Test
+    @Order(71)
+    @DisplayName("Test 71: apex_rule_group block has STOP_ON_FIRST_FAILURE field")
+    void testRuleGroupBlockHasStopOnFirstFailureField() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean hasField = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_rule_group');" +
+            "block.initSvg(); block.render();" +
+            "var hasStopOnFirstFailure = block.getField('STOP_ON_FIRST_FAILURE') !== null;" +
+            "block.dispose();" +
+            "return hasStopOnFirstFailure;"
+        );
+        assertTrue(hasField, "apex_rule_group should have STOP_ON_FIRST_FAILURE field");
+    }
+
+    @Test
+    @Order(72)
+    @DisplayName("Test 72: apex_rule_group block has PARALLEL_EXECUTION field")
+    void testRuleGroupBlockHasParallelExecutionField() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean hasField = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_rule_group');" +
+            "block.initSvg(); block.render();" +
+            "var hasParallelExecution = block.getField('PARALLEL_EXECUTION') !== null;" +
+            "block.dispose();" +
+            "return hasParallelExecution;"
+        );
+        assertTrue(hasField, "apex_rule_group should have PARALLEL_EXECUTION field");
+    }
+
+    @Test
+    @Order(73)
+    @DisplayName("Test 73: apex_rule_group block has ERROR_HANDLING dropdown")
+    void testRuleGroupBlockHasErrorHandlingDropdown() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean hasDropdown = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_rule_group');" +
+            "block.initSvg(); block.render();" +
+            "var field = block.getField('ERROR_HANDLING');" +
+            "var isDropdown = field instanceof Blockly.FieldDropdown;" +
+            "block.dispose();" +
+            "return isDropdown;"
+        );
+        assertTrue(hasDropdown, "apex_rule_group ERROR_HANDLING should be a dropdown");
+    }
+
+    @Test
+    @Order(74)
+    @DisplayName("Test 74: apex_rule_group generator includes new fields in output")
+    void testRuleGroupGeneratorIncludesNewFields() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String generatedCode = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_rule_group');" +
+            "block.setFieldValue('test-group', 'ID');" +
+            "block.setFieldValue('Test Group', 'NAME');" +
+            "block.setFieldValue('TRUE', 'STOP_ON_FIRST_FAILURE');" +
+            "block.setFieldValue('TRUE', 'PARALLEL_EXECUTION');" +
+            "block.setFieldValue('continue-on-error', 'ERROR_HANDLING');" +
+            "block.initSvg(); block.render();" +
+            "var code = apexGenerator.blockToCode(block);" +
+            "block.dispose();" +
+            "return code;"
+        );
+
+        assertNotNull(generatedCode, "Generated code should not be null");
+        assertTrue(generatedCode.contains("\"stop-on-first-failure\""), "Generated code should contain stop-on-first-failure");
+        assertTrue(generatedCode.contains("\"parallel-execution\""), "Generated code should contain parallel-execution");
+        assertTrue(generatedCode.contains("\"error-handling\""), "Generated code should contain error-handling");
+        assertTrue(generatedCode.contains("continue-on-error"), "Generated code should contain continue-on-error value");
+    }
+
+    @Test
+    @Order(75)
+    @DisplayName("Test 75: apex_enrichment_group block has STOP_ON_FIRST_FAILURE field")
+    void testEnrichmentGroupBlockHasStopOnFirstFailureField() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean hasField = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_enrichment_group');" +
+            "block.initSvg(); block.render();" +
+            "var hasStopOnFirstFailure = block.getField('STOP_ON_FIRST_FAILURE') !== null;" +
+            "block.dispose();" +
+            "return hasStopOnFirstFailure;"
+        );
+        assertTrue(hasField, "apex_enrichment_group should have STOP_ON_FIRST_FAILURE field");
+    }
+
+    @Test
+    @Order(76)
+    @DisplayName("Test 76: apex_enrichment_group block has PARALLEL_EXECUTION field")
+    void testEnrichmentGroupBlockHasParallelExecutionField() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean hasField = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_enrichment_group');" +
+            "block.initSvg(); block.render();" +
+            "var hasParallelExecution = block.getField('PARALLEL_EXECUTION') !== null;" +
+            "block.dispose();" +
+            "return hasParallelExecution;"
+        );
+        assertTrue(hasField, "apex_enrichment_group should have PARALLEL_EXECUTION field");
+    }
+
+    @Test
+    @Order(77)
+    @DisplayName("Test 77: apex_enrichment_group block has ERROR_HANDLING dropdown")
+    void testEnrichmentGroupBlockHasErrorHandlingDropdown() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean hasDropdown = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_enrichment_group');" +
+            "block.initSvg(); block.render();" +
+            "var field = block.getField('ERROR_HANDLING');" +
+            "var isDropdown = field instanceof Blockly.FieldDropdown;" +
+            "block.dispose();" +
+            "return isDropdown;"
+        );
+        assertTrue(hasDropdown, "apex_enrichment_group ERROR_HANDLING should be a dropdown");
+    }
+
+    @Test
+    @Order(78)
+    @DisplayName("Test 78: apex_enrichment_group generator includes new fields in output")
+    void testEnrichmentGroupGeneratorIncludesNewFields() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String generatedCode = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_enrichment_group');" +
+            "block.setFieldValue('test-enrich-group', 'ID');" +
+            "block.setFieldValue('Test Enrichment Group', 'NAME');" +
+            "block.setFieldValue('TRUE', 'STOP_ON_FIRST_FAILURE');" +
+            "block.setFieldValue('TRUE', 'PARALLEL_EXECUTION');" +
+            "block.setFieldValue('skip-on-error', 'ERROR_HANDLING');" +
+            "block.initSvg(); block.render();" +
+            "var code = apexGenerator.blockToCode(block);" +
+            "block.dispose();" +
+            "return code;"
+        );
+
+        assertNotNull(generatedCode, "Generated code should not be null");
+        assertTrue(generatedCode.contains("\"stop-on-first-failure\""), "Generated code should contain stop-on-first-failure");
+        assertTrue(generatedCode.contains("\"parallel-execution\""), "Generated code should contain parallel-execution");
+        assertTrue(generatedCode.contains("\"error-handling\""), "Generated code should contain error-handling");
+        assertTrue(generatedCode.contains("skip-on-error"), "Generated code should contain skip-on-error value");
+    }
+
+    // --- Field Mapping New Fields Tests ---
+
+    @Test
+    @Order(79)
+    @DisplayName("Test 79: apex_field_mapping block has DEFAULT_VALUE field")
+    void testFieldMappingBlockHasDefaultValueField() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean hasField = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_field_mapping');" +
+            "block.initSvg(); block.render();" +
+            "var hasDefaultValue = block.getField('DEFAULT_VALUE') !== null;" +
+            "block.dispose();" +
+            "return hasDefaultValue;"
+        );
+        assertTrue(hasField, "apex_field_mapping should have DEFAULT_VALUE field");
+    }
+
+    @Test
+    @Order(80)
+    @DisplayName("Test 80: apex_field_mapping block has REQUIRED checkbox")
+    void testFieldMappingBlockHasRequiredCheckbox() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean hasCheckbox = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_field_mapping');" +
+            "block.initSvg(); block.render();" +
+            "var field = block.getField('REQUIRED');" +
+            "var isCheckbox = field instanceof Blockly.FieldCheckbox;" +
+            "block.dispose();" +
+            "return isCheckbox;"
+        );
+        assertTrue(hasCheckbox, "apex_field_mapping REQUIRED should be a checkbox");
+    }
+
+    @Test
+    @Order(81)
+    @DisplayName("Test 81: apex_field_mapping generator includes default-value in output")
+    void testFieldMappingGeneratorIncludesDefaultValue() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String generatedCode = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_field_mapping');" +
+            "block.setFieldValue('sourceField', 'SOURCE');" +
+            "block.setFieldValue('targetField', 'TARGET');" +
+            "block.setFieldValue('N/A', 'DEFAULT_VALUE');" +
+            "block.initSvg(); block.render();" +
+            "var code = apexGenerator.blockToCode(block);" +
+            "block.dispose();" +
+            "return code;"
+        );
+
+        assertNotNull(generatedCode, "Generated code should not be null");
+        assertTrue(generatedCode.contains("\"default-value\""), "Generated code should contain default-value field");
+        assertTrue(generatedCode.contains("N/A"), "Generated code should contain default value");
+    }
+
+    @Test
+    @Order(82)
+    @DisplayName("Test 82: apex_field_mapping generator includes required in output when checked")
+    void testFieldMappingGeneratorIncludesRequired() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String generatedCode = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_field_mapping');" +
+            "block.setFieldValue('sourceField', 'SOURCE');" +
+            "block.setFieldValue('targetField', 'TARGET');" +
+            "block.setFieldValue('TRUE', 'REQUIRED');" +
+            "block.initSvg(); block.render();" +
+            "var code = apexGenerator.blockToCode(block);" +
+            "block.dispose();" +
+            "return code;"
+        );
+
+        assertNotNull(generatedCode, "Generated code should not be null");
+        assertTrue(generatedCode.contains("\"required\""), "Generated code should contain required field");
+        assertTrue(generatedCode.contains("true"), "Generated code should contain required: true");
+    }
+
+    @Test
+    @Order(83)
+    @DisplayName("Test 83: apex_field_mapping generator omits required when unchecked")
+    void testFieldMappingGeneratorOmitsRequiredWhenFalse() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String generatedCode = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_field_mapping');" +
+            "block.setFieldValue('sourceField', 'SOURCE');" +
+            "block.setFieldValue('targetField', 'TARGET');" +
+            "block.setFieldValue('FALSE', 'REQUIRED');" +
+            "block.initSvg(); block.render();" +
+            "var code = apexGenerator.blockToCode(block);" +
+            "block.dispose();" +
+            "return code;"
+        );
+
+        assertNotNull(generatedCode, "Generated code should not be null");
+        assertFalse(generatedCode.contains("\"required\""), "Generated code should NOT contain required field when false");
+    }
+
+    // --- YAML Import Tests for New Fields ---
+
+    @Test
+    @Order(84)
+    @DisplayName("Test 84: YAML import restores owner field for rule config")
+    void testYamlImportRestoresOwnerForRuleConfig() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        // Create a rule config with owner, export, clear, and reimport
+        String ownerValue = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            // Create block with owner
+            "var block = workspace.newBlock('apex_rule_config');" +
+            "block.setFieldValue('test-config', 'ID');" +
+            "block.setFieldValue('Test Config', 'NAME');" +
+            "block.setFieldValue('1.0.0', 'VERSION');" +
+            "block.setFieldValue('owner@test.com', 'OWNER');" +
+            "block.initSvg(); block.render();" +
+            // Get generated YAML/JSON
+            "var code = apexGenerator.blockToCode(block);" +
+            "var config = JSON.parse(code);" +
+            // Clear workspace
+            "workspace.clear();" +
+            // Reimport using createRuleConfigBlock
+            "createRuleConfigBlock(config);" +
+            // Get the owner value from the new block
+            "var blocks = workspace.getBlocksByType('apex_rule_config', false);" +
+            "return blocks.length > 0 ? blocks[0].getFieldValue('OWNER') : null;"
+        );
+
+        assertEquals("owner@test.com", ownerValue, "Owner field should be restored after YAML import");
+    }
+
+    @Test
+    @Order(85)
+    @DisplayName("Test 85: YAML import restores new fields for rule group")
+    void testYamlImportRestoresNewFieldsForRuleGroup() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        // Create a rule group with new fields, export, clear, and reimport
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            // Create block with new fields
+            "var block = workspace.newBlock('apex_rule_group');" +
+            "block.setFieldValue('test-group', 'ID');" +
+            "block.setFieldValue('Test Group', 'NAME');" +
+            "block.setFieldValue('TRUE', 'STOP_ON_FIRST_FAILURE');" +
+            "block.setFieldValue('TRUE', 'PARALLEL_EXECUTION');" +
+            "block.setFieldValue('continue-on-error', 'ERROR_HANDLING');" +
+            "block.initSvg(); block.render();" +
+            // Get generated JSON (remove trailing comma)
+            "var code = apexGenerator.blockToCode(block).replace(/,\\s*$/, '');" +
+            "var groupData = JSON.parse(code);" +
+            // Clear workspace
+            "workspace.clear();" +
+            // Reimport using createRuleGroupBlock
+            "createRuleGroupBlock(groupData);" +
+            // Get the field values from the new block
+            "var blocks = workspace.getBlocksByType('apex_rule_group', false);" +
+            "if (blocks.length === 0) return 'no blocks';" +
+            "var b = blocks[0];" +
+            "return b.getFieldValue('STOP_ON_FIRST_FAILURE') + '|' + " +
+            "       b.getFieldValue('PARALLEL_EXECUTION') + '|' + " +
+            "       b.getFieldValue('ERROR_HANDLING');"
+        );
+
+        assertEquals("TRUE|TRUE|continue-on-error", result, "New fields should be restored after YAML import");
+    }
+
+    @Test
+    @Order(86)
+    @DisplayName("Test 86: YAML import restores new fields for enrichment group")
+    void testYamlImportRestoresNewFieldsForEnrichmentGroup() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            // Create block with new fields
+            "var block = workspace.newBlock('apex_enrichment_group');" +
+            "block.setFieldValue('test-enrich-group', 'ID');" +
+            "block.setFieldValue('Test Enrichment Group', 'NAME');" +
+            "block.setFieldValue('TRUE', 'STOP_ON_FIRST_FAILURE');" +
+            "block.setFieldValue('TRUE', 'PARALLEL_EXECUTION');" +
+            "block.setFieldValue('skip-on-error', 'ERROR_HANDLING');" +
+            "block.initSvg(); block.render();" +
+            // Get generated JSON (remove trailing comma)
+            "var code = apexGenerator.blockToCode(block).replace(/,\\s*$/, '');" +
+            "var groupData = JSON.parse(code);" +
+            // Clear workspace
+            "workspace.clear();" +
+            // Reimport using createEnrichmentGroupBlock
+            "createEnrichmentGroupBlock(groupData);" +
+            // Get the field values from the new block
+            "var blocks = workspace.getBlocksByType('apex_enrichment_group', false);" +
+            "if (blocks.length === 0) return 'no blocks';" +
+            "var b = blocks[0];" +
+            "return b.getFieldValue('STOP_ON_FIRST_FAILURE') + '|' + " +
+            "       b.getFieldValue('PARALLEL_EXECUTION') + '|' + " +
+            "       b.getFieldValue('ERROR_HANDLING');"
+        );
+
+        assertEquals("TRUE|TRUE|skip-on-error", result, "New fields should be restored after YAML import");
+    }
+
+    @Test
+    @Order(87)
+    @DisplayName("Test 87: YAML import restores new fields for field mapping")
+    void testYamlImportRestoresNewFieldsForFieldMapping() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            // Create block with new fields
+            "var block = workspace.newBlock('apex_field_mapping');" +
+            "block.setFieldValue('sourceField', 'SOURCE');" +
+            "block.setFieldValue('targetField', 'TARGET');" +
+            "block.setFieldValue('default-val', 'DEFAULT_VALUE');" +
+            "block.setFieldValue('TRUE', 'REQUIRED');" +
+            "block.initSvg(); block.render();" +
+            // Get generated JSON (remove trailing comma)
+            "var code = apexGenerator.blockToCode(block).replace(/,\\s*$/, '');" +
+            "var mappingData = JSON.parse(code);" +
+            // Clear workspace
+            "workspace.clear();" +
+            // Reimport using createFieldMappingBlock
+            "createFieldMappingBlock(mappingData);" +
+            // Get the field values from the new block
+            "var blocks = workspace.getBlocksByType('apex_field_mapping', false);" +
+            "if (blocks.length === 0) return 'no blocks';" +
+            "var b = blocks[0];" +
+            "return b.getFieldValue('DEFAULT_VALUE') + '|' + b.getFieldValue('REQUIRED');"
+        );
+
+        assertEquals("default-val|TRUE", result, "New fields should be restored after YAML import");
+    }
+
+    @Test
+    @Order(88)
+    @DisplayName("Test 88: Error handling dropdown has correct options")
+    void testErrorHandlingDropdownOptions() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String options = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_rule_group');" +
+            "block.initSvg(); block.render();" +
+            "var field = block.getField('ERROR_HANDLING');" +
+            "var opts = field.getOptions();" +
+            "var values = opts.map(function(o) { return o[1]; });" +
+            "block.dispose();" +
+            "return values.join(',');"
+        );
+
+        assertTrue(options.contains("fail-fast"), "Should have fail-fast option");
+        assertTrue(options.contains("continue-on-error"), "Should have continue-on-error option");
+        assertTrue(options.contains("skip-on-error"), "Should have skip-on-error option");
+    }
 }

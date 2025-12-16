@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author GitHub Copilot
  * @since 2025-09-26
  */
-@DisplayName("🎯 DEFINITIVE PROOF: Error Handling Works Correctly")
+@DisplayName("  DEFINITIVE PROOF: Error Handling Works Correctly")
 class DefinitiveErrorHandlingProofTest {
 
     private static final Logger logger = LoggerFactory.getLogger(DefinitiveErrorHandlingProofTest.class);
@@ -44,7 +44,7 @@ class DefinitiveErrorHandlingProofTest {
     }
     
     @Test
-    @DisplayName("🎯 PROOF 1: CRITICAL errors return ERROR RuleResult (no recovery)")
+    @DisplayName("  PROOF 1: CRITICAL errors return ERROR RuleResult (no recovery)")
     void testCriticalErrorsReturnErrorResult() {
         logger.info("📋 Testing CRITICAL error handling - should return ERROR result");
         
@@ -81,7 +81,7 @@ class DefinitiveErrorHandlingProofTest {
     }
     
     @Test
-    @DisplayName("🎯 PROOF 2: Non-critical errors are logged and recovered gracefully")
+    @DisplayName("  PROOF 2: Non-critical errors are logged and recovered gracefully")
     void testNonCriticalErrorsAreLoggedAndRecovered() {
         logger.info("📋 Testing non-critical error handling - should log error and recover");
 
@@ -115,7 +115,7 @@ class DefinitiveErrorHandlingProofTest {
     }
     
     @Test
-    @DisplayName("🎯 PROOF 3: WARNING errors are logged at appropriate level")
+    @DisplayName("  PROOF 3: WARNING errors are logged at appropriate level")
     void testWarningErrorsAreLoggedAppropriately() {
         logger.info("📋 Testing WARNING error handling - should log at INFO level and recover");
         
@@ -146,7 +146,7 @@ class DefinitiveErrorHandlingProofTest {
     }
     
     @Test
-    @DisplayName("🎯 PROOF 4: Multiple CRITICAL errors in sequence return ERROR results")
+    @DisplayName("  PROOF 4: Multiple CRITICAL errors in sequence return ERROR results")
     void testMultipleCriticalErrorsReturnErrorResults() {
         logger.info("📋 Testing multiple CRITICAL errors - all should return ERROR results");
         
@@ -191,7 +191,7 @@ class DefinitiveErrorHandlingProofTest {
     }
     
     @Test
-    @DisplayName("🎯 PROOF 5: Error handling preserves rule context and performance metrics")
+    @DisplayName("  PROOF 5: Error handling preserves rule context and performance metrics")
     void testErrorHandlingPreservesContext() {
         logger.info("📋 Testing error context preservation - should maintain rule information");
         
@@ -229,7 +229,7 @@ class DefinitiveErrorHandlingProofTest {
     }
     
     @Test
-    @DisplayName("🎯 SUMMARY: All error handling paths work correctly")
+    @DisplayName("  SUMMARY: All error handling paths work correctly")
     void testSummaryAllErrorPathsWork() {
         logger.info("📊 SUMMARY: Demonstrating all error handling paths work correctly");
         

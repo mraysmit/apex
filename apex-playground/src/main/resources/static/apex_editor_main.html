@@ -1519,6 +1519,10 @@
                         .appendField('Tags (comma-sep):')
                         .appendField(new Blockly.FieldTextInput('tag1, tag2'), 'TAGS');
 
+                    this.appendDummyInput('ROW_OWNER')
+                        .appendField('Owner:')
+                        .appendField(new Blockly.FieldTextInput(''), 'OWNER');
+
                     // Sections input (always visible)
                     this.appendStatementInput('SECTIONS')
                         .setCheck('Section')
@@ -1587,6 +1591,10 @@
                     this.appendDummyInput('ROW_TAGS')
                         .appendField('Tags (comma-sep):')
                         .appendField(new Blockly.FieldTextInput('tag1, tag2'), 'TAGS');
+
+                    this.appendDummyInput('ROW_OWNER')
+                        .appendField('Owner:')
+                        .appendField(new Blockly.FieldTextInput(''), 'OWNER');
 
                     this.appendStatementInput('DATA_SOURCES')
                         .setCheck('DataSource')
@@ -1970,7 +1978,7 @@
                 },
                 {
                     "type": "apex_rule_group",
-                    "message0": "Rule Group %1 ID: %2 %3 Name: %4 %5 Enabled: %6 %7 Operator: %8 %9 Rules: %10",
+                    "message0": "Rule Group %1 ID: %2 %3 Name: %4 %5 Enabled: %6 %7 Operator: %8 %9 Stop on First Failure: %10 %11 Parallel Execution: %12 %13 Error Handling: %14 %15 Rules: %16",
                     "args0": [
                         { "type": "input_dummy" },
                         { "type": "field_input", "name": "ID", "text": "rule-group-1" },
@@ -1980,6 +1988,12 @@
                         { "type": "field_checkbox", "name": "ENABLED", "checked": true },
                         { "type": "input_dummy" },
                         { "type": "field_dropdown", "name": "OPERATOR", "options": [["AND", "AND"], ["OR", "OR"]] },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "STOP_ON_FIRST_FAILURE", "checked": false },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "PARALLEL_EXECUTION", "checked": false },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "ERROR_HANDLING", "options": [["fail-fast", "fail-fast"], ["continue-on-error", "continue-on-error"], ["skip-on-error", "skip-on-error"]] },
                         { "type": "input_dummy" },
                         { "type": "input_statement", "name": "RULE_IDS", "check": "RuleRef" }
                     ],
@@ -1992,7 +2006,7 @@
 
                 {
                     "type": "apex_enrichment_group",
-                    "message0": "Enrichment Group %1 ID: %2 %3 Name: %4 %5 Enabled: %6 %7 Operator: %8 %9 Enrichments: %10",
+                    "message0": "Enrichment Group %1 ID: %2 %3 Name: %4 %5 Enabled: %6 %7 Operator: %8 %9 Stop on First Failure: %10 %11 Parallel Execution: %12 %13 Error Handling: %14 %15 Enrichments: %16",
                     "args0": [
                         { "type": "input_dummy" },
                         { "type": "field_input", "name": "ID", "text": "enrichment-group-1" },
@@ -2002,6 +2016,12 @@
                         { "type": "field_checkbox", "name": "ENABLED", "checked": true },
                         { "type": "input_dummy" },
                         { "type": "field_dropdown", "name": "OPERATOR", "options": [["AND", "AND"], ["OR", "OR"]] },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "STOP_ON_FIRST_FAILURE", "checked": false },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "PARALLEL_EXECUTION", "checked": false },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "ERROR_HANDLING", "options": [["fail-fast", "fail-fast"], ["continue-on-error", "continue-on-error"], ["skip-on-error", "skip-on-error"]] },
                         { "type": "input_dummy" },
                         { "type": "input_statement", "name": "ENRICHMENT_IDS", "check": "EnrichmentRef" }
                     ],
@@ -2065,12 +2085,16 @@
                 },
                 {
                     "type": "apex_field_mapping",
-                    "message0": "Mapping %1 Source: %2 %3 Target: %4 %5 Expression: %6",
+                    "message0": "Mapping %1 Source: %2 %3 Target: %4 %5 Default Value: %6 %7 Required: %8 %9 Expression: %10",
                     "args0": [
                         { "type": "input_dummy" },
                         { "type": "field_input", "name": "SOURCE", "text": "sourceField" },
                         { "type": "input_dummy" },
                         { "type": "field_input", "name": "TARGET", "text": "targetField" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DEFAULT_VALUE", "text": "" },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "REQUIRED", "checked": false },
                         { "type": "input_dummy" },
                         { "type": "input_value", "name": "EXPRESSION", "check": ["String", "Number"] }
                     ],
@@ -2770,6 +2794,7 @@
                 const effectiveDate = block.getFieldValue('EFFECTIVE_DATE');
                 const expirationDate = block.getFieldValue('EXPIRATION_DATE');
                 const tagsStr = block.getFieldValue('TAGS');
+                const owner = block.getFieldValue('OWNER');
                 const sectionsCode = generator.statementToCode(block, 'SECTIONS');
 
                 // Parse sections
@@ -2813,6 +2838,7 @@
                 if (effectiveDate) metadata["effective-date"] = effectiveDate;
                 if (expirationDate) metadata["expiration-date"] = expirationDate;
                 if (tags.length > 0) metadata.tags = tags;
+                if (owner) metadata.owner = owner;
 
                 const config = {
                     metadata: metadata
@@ -2869,6 +2895,7 @@
                 const effectiveDate = block.getFieldValue('EFFECTIVE_DATE');
                 const expirationDate = block.getFieldValue('EXPIRATION_DATE');
                 const tagsStr = block.getFieldValue('TAGS');
+                const owner = block.getFieldValue('OWNER');
                 const dataSourcesCode = generator.statementToCode(block, 'DATA_SOURCES');
 
                 const dataSources = dataSourcesCode ? JSON.parse(`[${dataSourcesCode.replace(/,\s*$/, '')}]`) : [];
@@ -2890,6 +2917,7 @@
                 if (effectiveDate) metadata["effective-date"] = effectiveDate;
                 if (expirationDate) metadata["expiration-date"] = expirationDate;
                 if (tags.length > 0) metadata.tags = tags;
+                if (owner) metadata.owner = owner;
 
                 const config = {
                     metadata: metadata,
@@ -3081,6 +3109,9 @@
                 const name = block.getFieldValue('NAME');
                 const enabled = block.getFieldValue('ENABLED') === 'TRUE';
                 const operator = block.getFieldValue('OPERATOR');
+                const stopOnFirstFailure = block.getFieldValue('STOP_ON_FIRST_FAILURE') === 'TRUE';
+                const parallelExecution = block.getFieldValue('PARALLEL_EXECUTION') === 'TRUE';
+                const errorHandling = block.getFieldValue('ERROR_HANDLING');
                 const ruleIdsCode = generator.statementToCode(block, 'RULE_IDS');
 
                 const ruleIds = ruleIdsCode ? JSON.parse(`[${ruleIdsCode.replace(/,\s*$/, '')}]`) : [];
@@ -3092,6 +3123,11 @@
                     operator: operator,
                     "rule-ids": ruleIds
                 };
+
+                // Conditionally add optional fields
+                if (stopOnFirstFailure) groupObj["stop-on-first-failure"] = stopOnFirstFailure;
+                if (parallelExecution) groupObj["parallel-execution"] = parallelExecution;
+                if (errorHandling && errorHandling !== 'fail-fast') groupObj["error-handling"] = errorHandling;
 
                 return JSON.stringify(groupObj) + ',';
             };
@@ -3106,6 +3142,9 @@
                 const name = block.getFieldValue('NAME');
                 const enabled = block.getFieldValue('ENABLED') === 'TRUE';
                 const operator = block.getFieldValue('OPERATOR');
+                const stopOnFirstFailure = block.getFieldValue('STOP_ON_FIRST_FAILURE') === 'TRUE';
+                const parallelExecution = block.getFieldValue('PARALLEL_EXECUTION') === 'TRUE';
+                const errorHandling = block.getFieldValue('ERROR_HANDLING');
                 const enrichmentIdsCode = generator.statementToCode(block, 'ENRICHMENT_IDS');
 
                 const enrichmentIds = enrichmentIdsCode ? JSON.parse(`[${enrichmentIdsCode.replace(/,\s*$/, '')}]`) : [];
@@ -3117,6 +3156,11 @@
                     operator: operator,
                     "enrichment-ids": enrichmentIds
                 };
+
+                // Conditionally add optional fields
+                if (stopOnFirstFailure) groupObj["stop-on-first-failure"] = stopOnFirstFailure;
+                if (parallelExecution) groupObj["parallel-execution"] = parallelExecution;
+                if (errorHandling && errorHandling !== 'fail-fast') groupObj["error-handling"] = errorHandling;
 
                 return JSON.stringify(groupObj) + ',';
             };
@@ -3253,12 +3297,16 @@
             apexGenerator.forBlock['apex_field_mapping'] = function (block, generator) {
                 const source = block.getFieldValue('SOURCE');
                 const target = block.getFieldValue('TARGET');
+                const defaultValue = block.getFieldValue('DEFAULT_VALUE');
+                const required = block.getFieldValue('REQUIRED') === 'TRUE';
                 const expression = generator.valueToCode(block, 'EXPRESSION', 0);
 
                 const mappingObj = {
                     "target-field": target
                 };
                 if (source) mappingObj["source-field"] = source;
+                if (defaultValue) mappingObj["default-value"] = defaultValue;
+                if (required) mappingObj["required"] = required;
                 if (expression) mappingObj["expression"] = expression.replace(/^"|"$/g, '');
 
                 return JSON.stringify(mappingObj) + ',';
@@ -5920,6 +5968,7 @@
                 block.setFieldValue(meta['effective-date'] || '', 'EFFECTIVE_DATE');
                 block.setFieldValue(meta['expiration-date'] || '', 'EXPIRATION_DATE');
                 block.setFieldValue((meta.tags || []).join(', '), 'TAGS');
+                block.setFieldValue(meta.owner || '', 'OWNER');
 
                 block.initSvg();
                 block.render();
@@ -6031,6 +6080,7 @@
                 block.setFieldValue(meta['effective-date'] || '', 'EFFECTIVE_DATE');
                 block.setFieldValue(meta['expiration-date'] || '', 'EXPIRATION_DATE');
                 block.setFieldValue((meta.tags || []).join(', '), 'TAGS');
+                block.setFieldValue(meta.owner || '', 'OWNER');
 
                 block.initSvg();
                 block.render();
@@ -6121,6 +6171,9 @@
                 block.setFieldValue(group.name || '', 'NAME');
                 block.setFieldValue(group.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
                 block.setFieldValue(group.operator || 'AND', 'OPERATOR');
+                block.setFieldValue(group['stop-on-first-failure'] ? 'TRUE' : 'FALSE', 'STOP_ON_FIRST_FAILURE');
+                block.setFieldValue(group['parallel-execution'] ? 'TRUE' : 'FALSE', 'PARALLEL_EXECUTION');
+                block.setFieldValue(group['error-handling'] || 'fail-fast', 'ERROR_HANDLING');
                 block.initSvg();
                 block.render();
 
@@ -6145,6 +6198,9 @@
                 block.setFieldValue(group.name || '', 'NAME');
                 block.setFieldValue(group.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
                 block.setFieldValue(group.operator || 'AND', 'OPERATOR');
+                block.setFieldValue(group['stop-on-first-failure'] ? 'TRUE' : 'FALSE', 'STOP_ON_FIRST_FAILURE');
+                block.setFieldValue(group['parallel-execution'] ? 'TRUE' : 'FALSE', 'PARALLEL_EXECUTION');
+                block.setFieldValue(group['error-handling'] || 'fail-fast', 'ERROR_HANDLING');
                 block.initSvg();
                 block.render();
 
@@ -6337,6 +6393,8 @@
                 const block = workspace.newBlock('apex_field_mapping');
                 block.setFieldValue(mapping['source-field'] || '', 'SOURCE');
                 block.setFieldValue(mapping['target-field'] || '', 'TARGET');
+                block.setFieldValue(mapping['default-value'] || '', 'DEFAULT_VALUE');
+                block.setFieldValue(mapping['required'] ? 'TRUE' : 'FALSE', 'REQUIRED');
                 block.initSvg();
                 block.render();
 
