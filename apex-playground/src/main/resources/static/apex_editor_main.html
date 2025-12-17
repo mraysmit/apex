@@ -1196,6 +1196,7 @@
                 <block type="apex_section_enrichments"></block>
                 <block type="apex_section_rule_groups"></block>
                 <block type="apex_section_rules"></block>
+                <block type="apex_section_rule_chains"></block>
                 <block type="apex_section_transformations"></block>
                 <block type="apex_error_recovery"></block>
             </category>
@@ -1209,11 +1210,26 @@
                 <block type="apex_data_source_query"></block>
                 <block type="apex_data_source_endpoint"></block>
                 <block type="apex_data_source_ref"></block>
+                <block type="apex_cache_config"></block>
+                <block type="apex_circuit_breaker"></block>
+                <block type="apex_authentication"></block>
             </category>
             <category name="Rules" colour="#5CA681">
                 <block type="apex_rule"></block>
                 <block type="apex_rule_group"></block>
                 <block type="apex_rule_ref"></block>
+            </category>
+            <category name="Rule Chains" colour="#B8860B">
+                <block type="apex_section_rule_chains"></block>
+                <block type="apex_conditional_chain"></block>
+                <block type="apex_sequential_dependency"></block>
+                <block type="apex_chain_stage"></block>
+                <block type="apex_result_routing"></block>
+                <block type="apex_route"></block>
+                <block type="apex_accumulative_chain"></block>
+                <block type="apex_accumulation_rule"></block>
+                <block type="apex_fluent_builder"></block>
+                <block type="apex_decision_step"></block>
             </category>
             <category name="Transformations" colour="#A6815C">
                 <block type="apex_conditional_transformation"></block>
@@ -1231,6 +1247,21 @@
                 <block type="apex_lookup_dataset_reference"></block>
                 <block type="apex_lookup_dataset_database"></block>
                 <block type="apex_lookup_parameter"></block>
+            </category>
+            <category name="Categories" colour="#8B4513">
+                <block type="apex_section_categories"></block>
+                <block type="apex_category"></block>
+            </category>
+            <category name="Data Sinks" colour="#2F4F4F">
+                <block type="apex_section_data_sinks"></block>
+                <block type="apex_data_sink_database"></block>
+                <block type="apex_data_sink_file"></block>
+                <block type="apex_data_sink_rest"></block>
+                <block type="apex_data_sink_queue"></block>
+            </category>
+            <category name="Pipeline" colour="#4A90E2">
+                <block type="apex_pipeline_config"></block>
+                <block type="apex_pipeline_stage"></block>
             </category>
             <category name="Logic" colour="#5C81A6">
                 <block type="apex_condition_compare"></block>
@@ -1838,7 +1869,7 @@
                     this.appendDummyInput('OPTIONS_HEADER')
                         .appendField(new FieldCollapsibleSection(
                             'Options',
-                            ['ROW_ENABLED', 'ROW_MESSAGE', 'ROW_SEVERITY', 'ROW_PRIORITY', 'ROW_CATEGORY', 'ROW_RESULT_FIELD'],
+                            ['ROW_ENABLED', 'ROW_MESSAGE', 'ROW_SEVERITY', 'ROW_PRIORITY', 'ROW_CATEGORY', 'ROW_BUSINESS_OWNER', 'ROW_ERROR_CODE', 'ROW_SUCCESS_CODE', 'ROW_RESULT_FIELD'],
                             true
                         ), 'OPTIONS_TOGGLE');
 
@@ -1865,6 +1896,18 @@
                     this.appendDummyInput('ROW_CATEGORY')
                         .appendField('Category:')
                         .appendField(new Blockly.FieldTextInput(''), 'CATEGORY');
+
+                    this.appendDummyInput('ROW_BUSINESS_OWNER')
+                        .appendField('Business Owner:')
+                        .appendField(new Blockly.FieldTextInput(''), 'BUSINESS_OWNER');
+
+                    this.appendDummyInput('ROW_ERROR_CODE')
+                        .appendField('Error Code:')
+                        .appendField(new Blockly.FieldTextInput(''), 'ERROR_CODE');
+
+                    this.appendDummyInput('ROW_SUCCESS_CODE')
+                        .appendField('Success Code:')
+                        .appendField(new Blockly.FieldTextInput(''), 'SUCCESS_CODE');
 
                     this.appendValueInput('ROW_RESULT_FIELD')
                         .setCheck(['String', 'Number', 'Boolean'])
@@ -2045,12 +2088,18 @@
                 },
                 {
                     "type": "apex_enrichment_calculation",
-                    "message0": "Calculation Enrichment %1 ID: %2 %3 Enabled: %4 %5 Condition: %6 %7 Expression: %8 %9 Result Field: %10",
+                    "message0": "Calculation Enrichment %1 ID: %2 %3 Enabled: %4 %5 Priority: %6 %7 Error Code: %8 %9 Success Code: %10 %11 Condition: %12 %13 Expression: %14 %15 Result Field: %16",
                     "args0": [
                         { "type": "input_dummy" },
                         { "type": "field_input", "name": "ID", "text": "enrichment-1" },
                         { "type": "input_dummy" },
                         { "type": "field_checkbox", "name": "ENABLED", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "field_number", "name": "PRIORITY", "value": 0, "min": 0 },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ERROR_CODE", "text": "" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "SUCCESS_CODE", "text": "" },
                         { "type": "input_dummy" },
                         { "type": "input_value", "name": "CONDITION", "check": ["Boolean", "String"] },
                         { "type": "input_dummy" },
@@ -2216,7 +2265,7 @@
                 },
                 {
                     "type": "apex_data_source_rest",
-                    "message0": "REST API Source %1 ID: %2 %3 Name: %4 %5 Enabled: %6 %7 Description: %8 %9 Base URL: %10 %11 Timeout (ms): %12 %13 Endpoints: %14",
+                    "message0": "REST API Source %1 ID: %2 %3 Name: %4 %5 Enabled: %6 %7 Description: %8 %9 Base URL: %10 %11 Timeout (ms): %12 %13 Authentication: %14 %15 Cache: %16 %17 Circuit Breaker: %18 %19 Endpoints: %20",
                     "args0": [
                         { "type": "input_dummy" },
                         { "type": "field_input", "name": "ID", "text": "ds-rest-1" },
@@ -2231,17 +2280,23 @@
                         { "type": "input_dummy" },
                         { "type": "field_number", "name": "TIMEOUT", "value": 30000 },
                         { "type": "input_dummy" },
+                        { "type": "input_value", "name": "AUTHENTICATION", "check": "Authentication" },
+                        { "type": "input_dummy" },
+                        { "type": "input_value", "name": "CACHE", "check": "CacheConfig" },
+                        { "type": "input_dummy" },
+                        { "type": "input_value", "name": "CIRCUIT_BREAKER", "check": "CircuitBreaker" },
+                        { "type": "input_dummy" },
                         { "type": "input_statement", "name": "ENDPOINTS", "check": "DataSourceEndpoint" }
                     ],
                     "previousStatement": "DataSource",
                     "nextStatement": "DataSource",
                     "colour": 0,
-                    "tooltip": "Defines a REST API data source",
+                    "tooltip": "Defines a REST API data source with authentication, caching, and circuit breaker support",
                     "helpUrl": ""
                 },
                 {
                     "type": "apex_data_source_file",
-                    "message0": "File Source %1 ID: %2 %3 Name: %4 %5 Enabled: %6 %7 Description: %8 %9 Base Path: %10 %11 File Pattern: %12 %13 Format: %14",
+                    "message0": "File Source %1 ID: %2 %3 Name: %4 %5 Enabled: %6 %7 Description: %8 %9 Base Path: %10 %11 File Pattern: %12 %13 Format: %14 %15 Encoding: %16 %17 Polling Interval (ms): %18",
                     "args0": [
                         { "type": "input_dummy" },
                         { "type": "field_input", "name": "ID", "text": "ds-file-1" },
@@ -2256,12 +2311,16 @@
                         { "type": "input_dummy" },
                         { "type": "field_input", "name": "FILE_PATTERN", "text": "*.csv" },
                         { "type": "input_dummy" },
-                        { "type": "field_dropdown", "name": "FORMAT", "options": [["CSV", "csv"], ["JSON", "json"], ["XML", "xml"]] }
+                        { "type": "field_dropdown", "name": "FORMAT", "options": [["CSV", "csv"], ["JSON", "json"], ["XML", "xml"]] },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "ENCODING", "options": [["UTF-8", "UTF-8"], ["ISO-8859-1", "ISO-8859-1"], ["US-ASCII", "US-ASCII"], ["UTF-16", "UTF-16"]] },
+                        { "type": "input_dummy" },
+                        { "type": "field_number", "name": "POLLING_INTERVAL", "value": 5000, "min": 100 }
                     ],
                     "previousStatement": "DataSource",
                     "nextStatement": "DataSource",
                     "colour": 0,
-                    "tooltip": "Defines a File System data source",
+                    "tooltip": "Defines a File System data source with encoding and polling support",
                     "helpUrl": ""
                 },
                 {
@@ -2296,6 +2355,64 @@
                     "nextStatement": "DataSourceQuery",
                     "colour": 0,
                     "tooltip": "Defines a query for the data source",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_cache_config",
+                    "message0": "Cache Config %1 Enabled: %2 %3 TTL (seconds): %4 %5 Max Size: %6 %7 Eviction Policy: %8",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "ENABLED", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "field_number", "name": "TTL", "value": 300, "min": 0 },
+                        { "type": "input_dummy" },
+                        { "type": "field_number", "name": "MAX_SIZE", "value": 1000, "min": 1 },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "EVICTION_POLICY", "options": [["LRU", "LRU"], ["LFU", "LFU"], ["FIFO", "FIFO"]] }
+                    ],
+                    "output": "CacheConfig",
+                    "colour": 0,
+                    "tooltip": "Cache configuration for data sources",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_circuit_breaker",
+                    "message0": "Circuit Breaker %1 Enabled: %2 %3 Failure Threshold: %4 %5 Reset Timeout (ms): %6 %7 Half-Open Requests: %8",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "ENABLED", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "field_number", "name": "FAILURE_THRESHOLD", "value": 5, "min": 1 },
+                        { "type": "input_dummy" },
+                        { "type": "field_number", "name": "RESET_TIMEOUT", "value": 30000, "min": 1000 },
+                        { "type": "input_dummy" },
+                        { "type": "field_number", "name": "HALF_OPEN_REQUESTS", "value": 3, "min": 1 }
+                    ],
+                    "output": "CircuitBreaker",
+                    "colour": 0,
+                    "tooltip": "Circuit breaker configuration for resilience",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_authentication",
+                    "message0": "Authentication %1 Type: %2 %3 Username: %4 %5 Password: %6 %7 Token: %8 %9 API Key Header: %10 %11 API Key Value: %12",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "AUTH_TYPE", "options": [["none", "none"], ["basic", "basic"], ["bearer", "bearer"], ["api-key", "api-key"]] },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "USERNAME", "text": "" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "PASSWORD", "text": "" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "TOKEN", "text": "" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "API_KEY_HEADER", "text": "X-API-Key" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "API_KEY_VALUE", "text": "" }
+                    ],
+                    "output": "Authentication",
+                    "colour": 0,
+                    "tooltip": "Authentication configuration for REST APIs",
                     "helpUrl": ""
                 },
                 {
@@ -2530,6 +2647,414 @@
                     "nextStatement": "SeverityPolicy",
                     "colour": 0,
                     "tooltip": "Severity-specific error recovery policy",
+                    "helpUrl": ""
+                },
+                // --- Rule Chain Blocks ---
+                {
+                    "type": "apex_section_rule_chains",
+                    "message0": "Rule Chains Section %1 %2",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "RULE_CHAINS", "check": "RuleChain" }
+                    ],
+                    "previousStatement": "Section",
+                    "nextStatement": "Section",
+                    "colour": 45,
+                    "tooltip": "Container for rule chain definitions",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_conditional_chain",
+                    "message0": "Conditional Chain %1 ID: %2 %3 Name: %4 %5 Enabled: %6 %7 Trigger Rule ID: %8 %9 On Trigger (rule IDs, comma-sep): %10 %11 On No Trigger (rule IDs, comma-sep): %12",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "chain-1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "My Conditional Chain" },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "ENABLED", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "TRIGGER_RULE", "text": "trigger-rule-id" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ON_TRIGGER", "text": "" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ON_NO_TRIGGER", "text": "" }
+                    ],
+                    "previousStatement": "RuleChain",
+                    "nextStatement": "RuleChain",
+                    "colour": 45,
+                    "tooltip": "Conditional chaining - execute rules based on trigger rule result",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_sequential_dependency",
+                    "message0": "Sequential Dependency Chain %1 ID: %2 %3 Name: %4 %5 Enabled: %6 %7 Output Variable: %8 %9 Stages: %10",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "seq-chain-1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "My Sequential Chain" },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "ENABLED", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "OUTPUT_VARIABLE", "text": "stageResult" },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "STAGES", "check": "ChainStage" }
+                    ],
+                    "previousStatement": "RuleChain",
+                    "nextStatement": "RuleChain",
+                    "colour": 45,
+                    "tooltip": "Sequential dependency - execute stages in order with dependencies",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_chain_stage",
+                    "message0": "Stage %1 ID: %2 %3 Rule IDs (comma-sep): %4 %5 Depends On (comma-sep): %6",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "stage-1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "RULE_IDS", "text": "rule-1, rule-2" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DEPENDS_ON", "text": "" }
+                    ],
+                    "previousStatement": "ChainStage",
+                    "nextStatement": "ChainStage",
+                    "colour": 45,
+                    "tooltip": "A stage in a sequential dependency chain",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_result_routing",
+                    "message0": "Result-Based Routing %1 ID: %2 %3 Name: %4 %5 Enabled: %6 %7 Router Condition: %8 %9 Routes: %10",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "routing-chain-1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "My Routing Chain" },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "ENABLED", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ROUTER_CONDITION", "text": "#processingPath" },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "ROUTES", "check": "Route" }
+                    ],
+                    "previousStatement": "RuleChain",
+                    "nextStatement": "RuleChain",
+                    "colour": 45,
+                    "tooltip": "Result-based routing - route to different rule sets based on condition result",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_route",
+                    "message0": "Route %1 Value: %2 %3 Rule IDs (comma-sep): %4 %5 Enrichment Group Refs (comma-sep): %6",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "VALUE", "text": "ROUTE_A" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "RULE_IDS", "text": "" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ENRICHMENT_GROUP_REFS", "text": "" }
+                    ],
+                    "previousStatement": "Route",
+                    "nextStatement": "Route",
+                    "colour": 45,
+                    "tooltip": "A route in result-based routing",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_accumulative_chain",
+                    "message0": "Accumulative Chain %1 ID: %2 %3 Name: %4 %5 Enabled: %6 %7 Accumulator Variable: %8 %9 Initial Value: %10 %11 Accumulation Rules: %12 %13 Final Decision Condition: %14",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "accum-chain-1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "My Accumulative Chain" },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "ENABLED", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ACCUMULATOR_VARIABLE", "text": "totalScore" },
+                        { "type": "input_dummy" },
+                        { "type": "field_number", "name": "INITIAL_VALUE", "value": 0 },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "ACCUMULATION_RULES", "check": "AccumulationRule" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "FINAL_DECISION", "text": "#totalScore >= 60 ? 'APPROVED' : 'DENIED'" }
+                    ],
+                    "previousStatement": "RuleChain",
+                    "nextStatement": "RuleChain",
+                    "colour": 45,
+                    "tooltip": "Accumulative chaining - build up scores across multiple rules",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_accumulation_rule",
+                    "message0": "Accumulation Rule %1 ID: %2 %3 Condition: %4 %5 Weight: %6",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "score-component" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "CONDITION", "text": "#creditScore >= 700 ? 25 : 15" },
+                        { "type": "input_dummy" },
+                        { "type": "field_number", "name": "WEIGHT", "value": 1.0, "min": 0, "precision": 0.1 }
+                    ],
+                    "previousStatement": "AccumulationRule",
+                    "nextStatement": "AccumulationRule",
+                    "colour": 45,
+                    "tooltip": "An accumulation rule with weight",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_fluent_builder",
+                    "message0": "Fluent Builder Chain %1 ID: %2 %3 Name: %4 %5 Enabled: %6 %7 Builder Target: %8 %9 Decision Steps: %10",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "fluent-chain-1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "My Fluent Builder Chain" },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "ENABLED", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "BUILDER_TARGET", "text": "decisionResult" },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "DECISION_STEPS", "check": "DecisionStep" }
+                    ],
+                    "previousStatement": "RuleChain",
+                    "nextStatement": "RuleChain",
+                    "colour": 45,
+                    "tooltip": "Fluent builder - decision tree pattern with nested rules",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_decision_step",
+                    "message0": "Decision Step %1 ID: %2 %3 Condition: %4 %5 On Success (rule IDs, comma-sep): %6 %7 On Failure (rule IDs, comma-sep): %8",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "step-1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "CONDITION", "text": "#amount > 1000" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ON_SUCCESS", "text": "" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ON_FAILURE", "text": "" }
+                    ],
+                    "previousStatement": "DecisionStep",
+                    "nextStatement": "DecisionStep",
+                    "colour": 45,
+                    "tooltip": "A decision step in a fluent builder chain",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_section_categories",
+                    "message0": "Categories Section %1 Categories: %2",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "CATEGORIES", "check": "Category" }
+                    ],
+                    "previousStatement": "Section",
+                    "nextStatement": "Section",
+                    "colour": 139,
+                    "tooltip": "Categories section - define rule/enrichment categories",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_category",
+                    "message0": "Category %1 Name: %2 %3 Description: %4 %5 Priority: %6 %7 Business Domain: %8 %9 Business Owner: %10 %11 Created By: %12 %13 Enabled: %14",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "validation" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DESCRIPTION", "text": "Data validation checks" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "PRIORITY", "text": "10" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "BUSINESS_DOMAIN", "text": "Trade Processing" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "BUSINESS_OWNER", "text": "team@example.com" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "CREATED_BY", "text": "" },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "ENABLED", "checked": true }
+                    ],
+                    "previousStatement": "Category",
+                    "nextStatement": "Category",
+                    "colour": 139,
+                    "tooltip": "Define a category for grouping rules or enrichments",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_section_data_sinks",
+                    "message0": "Data Sinks Section %1 Data Sinks: %2",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "DATA_SINKS", "check": "DataSink" }
+                    ],
+                    "previousStatement": "Section",
+                    "nextStatement": "Section",
+                    "colour": 47,
+                    "tooltip": "Data sinks section - output destinations for processed data",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_data_sink_database",
+                    "message0": "Database Data Sink %1 Name: %2 %3 Type: %4 %5 Source Type: %6 %7 Enabled: %8 %9 Description: %10 %11 Database: %12 %13 Username: %14 %15 Password: %16 %17 Table Name: %18 %19 Operation: %20",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "db-sink-1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "TYPE", "options": [["database", "database"]] },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "SOURCE_TYPE", "options": [["postgresql", "postgresql"], ["h2", "h2"], ["mysql", "mysql"]] },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "ENABLED", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DESCRIPTION", "text": "Database output sink" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DATABASE", "text": "jdbc:postgresql://localhost:5432/mydb" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "USERNAME", "text": "user" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "PASSWORD", "text": "" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "TABLE_NAME", "text": "output_table" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "OPERATION", "text": "INSERT" }
+                    ],
+                    "previousStatement": "DataSink",
+                    "nextStatement": "DataSink",
+                    "colour": 47,
+                    "tooltip": "Database data sink for output",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_data_sink_file",
+                    "message0": "File Data Sink %1 Name: %2 %3 Type: %4 %5 Source Type: %6 %7 Enabled: %8 %9 Description: %10 %11 Base Path: %12 %13 File Pattern: %14 %15 Encoding: %16 %17 Format: %18",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "file-sink-1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "TYPE", "options": [["file-system", "file-system"]] },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "SOURCE_TYPE", "options": [["json", "json"], ["csv", "csv"], ["xml", "xml"]] },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "ENABLED", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DESCRIPTION", "text": "File system output sink" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "BASE_PATH", "text": "./output" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "FILE_PATTERN", "text": "output_{timestamp}.json" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ENCODING", "text": "UTF-8" },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "FORMAT", "options": [["json", "json"], ["csv", "csv"], ["xml", "xml"]] }
+                    ],
+                    "previousStatement": "DataSink",
+                    "nextStatement": "DataSink",
+                    "colour": 47,
+                    "tooltip": "File system data sink for output",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_data_sink_rest",
+                    "message0": "REST Data Sink %1 Name: %2 %3 Type: %4 %5 Enabled: %6 %7 Description: %8 %9 Base URL: %10 %11 Endpoint: %12 %13 Method: %14 %15 Content Type: %16",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "rest-sink-1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "TYPE", "options": [["rest-api", "rest-api"]] },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "ENABLED", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DESCRIPTION", "text": "REST API output sink" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "BASE_URL", "text": "https://api.example.com" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ENDPOINT", "text": "/output" },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "METHOD", "options": [["POST", "POST"], ["PUT", "PUT"], ["PATCH", "PATCH"]] },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "CONTENT_TYPE", "options": [["application/json", "application/json"], ["application/xml", "application/xml"]] }
+                    ],
+                    "previousStatement": "DataSink",
+                    "nextStatement": "DataSink",
+                    "colour": 47,
+                    "tooltip": "REST API data sink for output",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_data_sink_queue",
+                    "message0": "Message Queue Data Sink %1 Name: %2 %3 Type: %4 %5 Enabled: %6 %7 Description: %8 %9 Queue Type: %10 %11 Queue Name: %12 %13 Connection String: %14",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "queue-sink-1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "TYPE", "options": [["message-queue", "message-queue"]] },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "ENABLED", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DESCRIPTION", "text": "Message queue output sink" },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "QUEUE_TYPE", "options": [["kafka", "kafka"], ["rabbitmq", "rabbitmq"], ["azure-servicebus", "azure-servicebus"]] },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "QUEUE_NAME", "text": "output-queue" },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "CONNECTION_STRING", "text": "localhost:9092" }
+                    ],
+                    "previousStatement": "DataSink",
+                    "nextStatement": "DataSink",
+                    "colour": 47,
+                    "tooltip": "Message queue data sink for output",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_pipeline_config",
+                    "message0": "Pipeline Configuration %1 ID: %2 %3 Mode: %4 %5 Error Handling: %6 %7 Max Retries: %8 %9 Retry Delay (ms): %10 %11 Collect Metrics: %12 %13 Stages: %14",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "ID", "text": "my-pipeline" },
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "MODE", "options": [
+                            ["sequential", "sequential"],
+                            ["parallel", "parallel"]
+                        ]},
+                        { "type": "input_dummy" },
+                        { "type": "field_dropdown", "name": "ERROR_HANDLING", "options": [
+                            ["fail-fast", "fail-fast"],
+                            ["continue-on-error", "continue-on-error"]
+                        ]},
+                        { "type": "input_dummy" },
+                        { "type": "field_number", "name": "MAX_RETRIES", "value": 3, "min": 0 },
+                        { "type": "input_dummy" },
+                        { "type": "field_number", "name": "RETRY_DELAY_MS", "value": 1000, "min": 0 },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "COLLECT_METRICS", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "input_statement", "name": "STAGES", "check": "PipelineStage" }
+                    ],
+                    "previousStatement": null,
+                    "nextStatement": null,
+                    "colour": 75,
+                    "tooltip": "Pipeline configuration for orchestrating data processing stages",
+                    "helpUrl": ""
+                },
+                {
+                    "type": "apex_pipeline_stage",
+                    "message0": "Stage %1 Name: %2 %3 Order: %4 %5 Enabled: %6 %7 Depends On: %8",
+                    "args0": [
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "NAME", "text": "stage-1" },
+                        { "type": "input_dummy" },
+                        { "type": "field_number", "name": "ORDER", "value": 1, "min": 1 },
+                        { "type": "input_dummy" },
+                        { "type": "field_checkbox", "name": "ENABLED", "checked": true },
+                        { "type": "input_dummy" },
+                        { "type": "field_input", "name": "DEPENDS_ON", "text": "" }
+                    ],
+                    "previousStatement": "PipelineStage",
+                    "nextStatement": "PipelineStage",
+                    "colour": 75,
+                    "tooltip": "Individual pipeline stage definition with dependencies",
                     "helpUrl": ""
                 },
             ]);
@@ -2968,6 +3493,9 @@
                 const description = block.getFieldValue('DESCRIPTION');
                 const baseUrl = block.getFieldValue('BASE_URL');
                 const timeout = block.getFieldValue('TIMEOUT');
+                const authCode = generator.valueToCode(block, 'AUTHENTICATION', 0);
+                const cacheCode = generator.valueToCode(block, 'CACHE', 0);
+                const circuitBreakerCode = generator.valueToCode(block, 'CIRCUIT_BREAKER', 0);
                 const endpointsCode = generator.statementToCode(block, 'ENDPOINTS');
 
                 const endpoints = endpointsCode ? JSON.parse(`[${endpointsCode.replace(/,\s*$/, '')}]`) : [];
@@ -2985,8 +3513,74 @@
                 };
 
                 if (description) dsObj.description = description;
+                if (authCode) {
+                    try { dsObj.authentication = JSON.parse(authCode); } catch(e) {}
+                }
+                if (cacheCode) {
+                    try { dsObj.cache = JSON.parse(cacheCode); } catch(e) {}
+                }
+                if (circuitBreakerCode) {
+                    try { dsObj["circuit-breaker"] = JSON.parse(circuitBreakerCode); } catch(e) {}
+                }
 
                 return JSON.stringify(dsObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_cache_config'] = function (block, generator) {
+                const enabled = block.getFieldValue('ENABLED') === 'TRUE';
+                const ttl = block.getFieldValue('TTL');
+                const maxSize = block.getFieldValue('MAX_SIZE');
+                const evictionPolicy = block.getFieldValue('EVICTION_POLICY');
+
+                const cacheObj = {
+                    enabled: enabled,
+                    ttl: parseInt(ttl),
+                    "max-size": parseInt(maxSize),
+                    "eviction-policy": evictionPolicy
+                };
+
+                return JSON.stringify(cacheObj);
+            };
+
+            apexGenerator.forBlock['apex_circuit_breaker'] = function (block, generator) {
+                const enabled = block.getFieldValue('ENABLED') === 'TRUE';
+                const failureThreshold = block.getFieldValue('FAILURE_THRESHOLD');
+                const resetTimeout = block.getFieldValue('RESET_TIMEOUT');
+                const halfOpenRequests = block.getFieldValue('HALF_OPEN_REQUESTS');
+
+                const cbObj = {
+                    enabled: enabled,
+                    "failure-threshold": parseInt(failureThreshold),
+                    "reset-timeout": parseInt(resetTimeout),
+                    "half-open-requests": parseInt(halfOpenRequests)
+                };
+
+                return JSON.stringify(cbObj);
+            };
+
+            apexGenerator.forBlock['apex_authentication'] = function (block, generator) {
+                const authType = block.getFieldValue('AUTH_TYPE');
+                const username = block.getFieldValue('USERNAME');
+                const password = block.getFieldValue('PASSWORD');
+                const token = block.getFieldValue('TOKEN');
+                const apiKeyHeader = block.getFieldValue('API_KEY_HEADER');
+                const apiKeyValue = block.getFieldValue('API_KEY_VALUE');
+
+                const authObj = {
+                    type: authType
+                };
+
+                if (authType === 'basic') {
+                    if (username) authObj.username = username;
+                    if (password) authObj.password = password;
+                } else if (authType === 'bearer') {
+                    if (token) authObj.token = token;
+                } else if (authType === 'api-key') {
+                    if (apiKeyHeader) authObj["api-key-header"] = apiKeyHeader;
+                    if (apiKeyValue) authObj["api-key-value"] = apiKeyValue;
+                }
+
+                return JSON.stringify(authObj);
             };
 
             apexGenerator.forBlock['apex_data_source_file'] = function (block, generator) {
@@ -2997,6 +3591,8 @@
                 const basePath = block.getFieldValue('BASE_PATH');
                 const filePattern = block.getFieldValue('FILE_PATTERN');
                 const format = block.getFieldValue('FORMAT');
+                const encoding = block.getFieldValue('ENCODING');
+                const pollingInterval = block.getFieldValue('POLLING_INTERVAL');
 
                 const dsObj = {
                     id: id,
@@ -3006,7 +3602,9 @@
                     "connection-config": {
                         "base-path": basePath,
                         "file-pattern": filePattern,
-                        format: format
+                        format: format,
+                        encoding: encoding,
+                        "polling-interval": parseInt(pollingInterval)
                     }
                 };
 
@@ -3073,6 +3671,183 @@
                 return JSON.stringify({ type: 'transformations', content: transformations }) + ',';
             };
 
+            // --- Rule Chain Generator Functions ---
+            apexGenerator.forBlock['apex_section_rule_chains'] = function (block, generator) {
+                const ruleChainsCode = generator.statementToCode(block, 'RULE_CHAINS');
+                const ruleChains = ruleChainsCode ? JSON.parse(`[${ruleChainsCode.replace(/,\s*$/, '')}]`) : [];
+                return JSON.stringify({ type: 'rule-chains', content: ruleChains }) + ',';
+            };
+
+            apexGenerator.forBlock['apex_conditional_chain'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const name = block.getFieldValue('NAME');
+                const enabled = block.getFieldValue('ENABLED') === 'TRUE';
+                const triggerRule = block.getFieldValue('TRIGGER_RULE');
+                const onTrigger = block.getFieldValue('ON_TRIGGER');
+                const onNoTrigger = block.getFieldValue('ON_NO_TRIGGER');
+
+                const chainObj = {
+                    id: id,
+                    pattern: 'conditional-chaining',
+                    configuration: {
+                        'trigger-rule': triggerRule,
+                        'conditional-rules': {}
+                    }
+                };
+                if (name) chainObj.name = name;
+                if (!enabled) chainObj.enabled = false;
+                if (onTrigger) chainObj.configuration['conditional-rules']['on-trigger'] = onTrigger.split(',').map(s => s.trim()).filter(s => s);
+                if (onNoTrigger) chainObj.configuration['conditional-rules']['on-no-trigger'] = onNoTrigger.split(',').map(s => s.trim()).filter(s => s);
+
+                return JSON.stringify(chainObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_sequential_dependency'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const name = block.getFieldValue('NAME');
+                const enabled = block.getFieldValue('ENABLED') === 'TRUE';
+                const outputVariable = block.getFieldValue('OUTPUT_VARIABLE');
+                const stagesCode = generator.statementToCode(block, 'STAGES');
+                const stages = stagesCode ? JSON.parse(`[${stagesCode.replace(/,\s*$/, '')}]`) : [];
+
+                const chainObj = {
+                    id: id,
+                    pattern: 'sequential-dependency',
+                    configuration: {
+                        stages: stages
+                    }
+                };
+                if (name) chainObj.name = name;
+                if (!enabled) chainObj.enabled = false;
+                if (outputVariable) chainObj.configuration['output-variable'] = outputVariable;
+
+                return JSON.stringify(chainObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_chain_stage'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const ruleIds = block.getFieldValue('RULE_IDS');
+                const dependsOn = block.getFieldValue('DEPENDS_ON');
+
+                const stageObj = { id: id };
+                if (ruleIds) stageObj['rule-ids'] = ruleIds.split(',').map(s => s.trim()).filter(s => s);
+                if (dependsOn) stageObj['depends-on'] = dependsOn.split(',').map(s => s.trim()).filter(s => s);
+
+                return JSON.stringify(stageObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_result_routing'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const name = block.getFieldValue('NAME');
+                const enabled = block.getFieldValue('ENABLED') === 'TRUE';
+                const routerCondition = block.getFieldValue('ROUTER_CONDITION');
+                const routesCode = generator.statementToCode(block, 'ROUTES');
+                const routes = routesCode ? JSON.parse(`[${routesCode.replace(/,\s*$/, '')}]`) : [];
+
+                const chainObj = {
+                    id: id,
+                    pattern: 'result-based-routing',
+                    configuration: {
+                        'routing-rule': routerCondition,
+                        routes: routes
+                    }
+                };
+                if (name) chainObj.name = name;
+                if (!enabled) chainObj.enabled = false;
+
+                return JSON.stringify(chainObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_route'] = function (block, generator) {
+                const value = block.getFieldValue('VALUE');
+                const ruleIds = block.getFieldValue('RULE_IDS');
+                const enrichmentGroupRefs = block.getFieldValue('ENRICHMENT_GROUP_REFS');
+
+                const routeObj = { value: value };
+                if (ruleIds) routeObj['rule-ids'] = ruleIds.split(',').map(s => s.trim()).filter(s => s);
+                if (enrichmentGroupRefs) routeObj['enrichment-group-refs'] = enrichmentGroupRefs.split(',').map(s => s.trim()).filter(s => s);
+
+                return JSON.stringify(routeObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_accumulative_chain'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const name = block.getFieldValue('NAME');
+                const enabled = block.getFieldValue('ENABLED') === 'TRUE';
+                const accumulatorVariable = block.getFieldValue('ACCUMULATOR_VARIABLE');
+                const initialValue = block.getFieldValue('INITIAL_VALUE');
+                const finalDecision = block.getFieldValue('FINAL_DECISION');
+                const rulesCode = generator.statementToCode(block, 'ACCUMULATION_RULES');
+                const rules = rulesCode ? JSON.parse(`[${rulesCode.replace(/,\s*$/, '')}]`) : [];
+
+                const chainObj = {
+                    id: id,
+                    pattern: 'accumulative-chaining',
+                    configuration: {
+                        'accumulator-variable': accumulatorVariable,
+                        'initial-value': initialValue,
+                        'accumulation-rules': rules,
+                        'final-decision-rule': { condition: finalDecision }
+                    }
+                };
+                if (name) chainObj.name = name;
+                if (!enabled) chainObj.enabled = false;
+
+                return JSON.stringify(chainObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_accumulation_rule'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const condition = block.getFieldValue('CONDITION');
+                const weight = block.getFieldValue('WEIGHT');
+
+                const ruleObj = {
+                    id: id,
+                    condition: condition,
+                    weight: weight
+                };
+
+                return JSON.stringify(ruleObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_fluent_builder'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const name = block.getFieldValue('NAME');
+                const enabled = block.getFieldValue('ENABLED') === 'TRUE';
+                const builderTarget = block.getFieldValue('BUILDER_TARGET');
+                const stepsCode = generator.statementToCode(block, 'DECISION_STEPS');
+                const steps = stepsCode ? JSON.parse(`[${stepsCode.replace(/,\s*$/, '')}]`) : [];
+
+                const chainObj = {
+                    id: id,
+                    pattern: 'fluent-builder',
+                    configuration: {
+                        'builder-target': builderTarget,
+                        'decision-steps': steps
+                    }
+                };
+                if (name) chainObj.name = name;
+                if (!enabled) chainObj.enabled = false;
+
+                return JSON.stringify(chainObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_decision_step'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const condition = block.getFieldValue('CONDITION');
+                const onSuccess = block.getFieldValue('ON_SUCCESS');
+                const onFailure = block.getFieldValue('ON_FAILURE');
+
+                const stepObj = {
+                    id: id,
+                    condition: condition
+                };
+                if (onSuccess) stepObj['on-success'] = onSuccess.split(',').map(s => s.trim()).filter(s => s);
+                if (onFailure) stepObj['on-failure'] = onFailure.split(',').map(s => s.trim()).filter(s => s);
+
+                return JSON.stringify(stepObj) + ',';
+            };
+
             apexGenerator.forBlock['apex_rule'] = function (block, generator) {
                 const id = block.getFieldValue('ID');
                 const name = block.getFieldValue('NAME');
@@ -3081,6 +3856,9 @@
                 const severity = block.getFieldValue('SEVERITY');
                 const priority = block.getFieldValue('PRIORITY');
                 const category = block.getFieldValue('CATEGORY');
+                const businessOwner = block.getFieldValue('BUSINESS_OWNER');
+                const errorCode = block.getFieldValue('ERROR_CODE');
+                const successCode = block.getFieldValue('SUCCESS_CODE');
                 const resultFieldCode = generator.valueToCode(block, 'ROW_RESULT_FIELD', 0);
                 const condition = generator.valueToCode(block, 'CONDITION', 0) || "true";
 
@@ -3097,6 +3875,9 @@
                     ruleObj.priority = parseInt(priority);
                 }
                 if (category) ruleObj.category = category;
+                if (businessOwner) ruleObj["business-owner"] = businessOwner;
+                if (errorCode) ruleObj["error-code"] = errorCode;
+                if (successCode) ruleObj["success-code"] = successCode;
                 if (resultFieldCode) {
                     ruleObj["result-field"] = resultFieldCode.replace(/^['"]|['"]$/g, '');
                 }
@@ -3173,6 +3954,9 @@
             apexGenerator.forBlock['apex_enrichment_calculation'] = function (block, generator) {
                 const id = block.getFieldValue('ID');
                 const enabled = block.getFieldValue('ENABLED') === 'TRUE';
+                const priority = block.getFieldValue('PRIORITY');
+                const errorCode = block.getFieldValue('ERROR_CODE');
+                const successCode = block.getFieldValue('SUCCESS_CODE');
                 const condition = generator.valueToCode(block, 'CONDITION', 0);
                 const expression = generator.valueToCode(block, 'EXPRESSION', 0) || "null";
                 const resultField = block.getFieldValue('RESULT_FIELD');
@@ -3189,6 +3973,11 @@
                 if (condition) {
                     enrichmentObj.condition = condition.replace(/^"|"$/g, '');
                 }
+                if (priority && parseInt(priority) > 0) {
+                    enrichmentObj.priority = parseInt(priority);
+                }
+                if (errorCode) enrichmentObj["error-code"] = errorCode;
+                if (successCode) enrichmentObj["success-code"] = successCode;
 
                 return JSON.stringify(enrichmentObj) + ',';
             };
@@ -3755,6 +4544,180 @@
                 return JSON.stringify(policyObj) + ',';
             };
 
+            // --- Categories Section Generators ---
+            apexGenerator.forBlock['apex_section_categories'] = function (block, generator) {
+                const categoriesCode = generator.statementToCode(block, 'CATEGORIES');
+                
+                if (!categoriesCode) {
+                    return JSON.stringify({ type: 'categories', content: [] }) + ',';
+                }
+
+                try {
+                    const categories = JSON.parse(`[${categoriesCode.replace(/,\s*$/, '')}]`);
+                    return JSON.stringify({ type: 'categories', content: categories }) + ',';
+                } catch (e) {
+                    console.error("Error parsing categories", e);
+                    return JSON.stringify({ type: 'categories', content: [] }) + ',';
+                }
+            };
+
+            apexGenerator.forBlock['apex_category'] = function (block, generator) {
+                const name = block.getFieldValue('NAME');
+                const description = block.getFieldValue('DESCRIPTION');
+                const severity = block.getFieldValue('SEVERITY');
+
+                const categoryObj = {
+                    name: name,
+                    description: description,
+                    severity: severity
+                };
+
+                return JSON.stringify(categoryObj) + ',';
+            };
+
+            // --- Data Sinks Section Generators ---
+            apexGenerator.forBlock['apex_section_data_sinks'] = function (block, generator) {
+                const sinksCode = generator.statementToCode(block, 'DATA_SINKS');
+                
+                if (!sinksCode) {
+                    return JSON.stringify({ type: 'data-sinks', content: [] }) + ',';
+                }
+
+                try {
+                    const sinks = JSON.parse(`[${sinksCode.replace(/,\s*$/, '')}]`);
+                    return JSON.stringify({ type: 'data-sinks', content: sinks }) + ',';
+                } catch (e) {
+                    console.error("Error parsing data sinks", e);
+                    return JSON.stringify({ type: 'data-sinks', content: [] }) + ',';
+                }
+            };
+
+            apexGenerator.forBlock['apex_data_sink_database'] = function (block, generator) {
+                const id = block.getFieldValue('NAME');
+                const enabled = block.getFieldValue('ENABLED') === 'TRUE';
+                const dataSourceRef = block.getFieldValue('DATA_SOURCE_REF');
+                const table = block.getFieldValue('TABLE');
+                const batchSize = block.getFieldValue('BATCH_SIZE');
+
+                const sinkObj = {
+                    id: id,
+                    type: 'database-sink',
+                    enabled: enabled,
+                    "data-source-ref": dataSourceRef,
+                    table: table,
+                    "batch-size": parseInt(batchSize)
+                };
+
+                return JSON.stringify(sinkObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_data_sink_file'] = function (block, generator) {
+                const id = block.getFieldValue('NAME');
+                const enabled = block.getFieldValue('ENABLED') === 'TRUE';
+                const path = block.getFieldValue('PATH');
+                const format = block.getFieldValue('FORMAT');
+                const append = block.getFieldValue('APPEND') === 'TRUE';
+
+                const sinkObj = {
+                    id: id,
+                    type: 'file-sink',
+                    enabled: enabled,
+                    path: path,
+                    format: format,
+                    append: append
+                };
+
+                return JSON.stringify(sinkObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_data_sink_rest'] = function (block, generator) {
+                const id = block.getFieldValue('NAME');
+                const enabled = block.getFieldValue('ENABLED') === 'TRUE';
+                const url = block.getFieldValue('URL');
+                const method = block.getFieldValue('METHOD');
+                const timeout = block.getFieldValue('TIMEOUT');
+
+                const sinkObj = {
+                    id: id,
+                    type: 'rest-sink',
+                    enabled: enabled,
+                    url: url,
+                    method: method,
+                    timeout: parseInt(timeout)
+                };
+
+                return JSON.stringify(sinkObj) + ',';
+            };
+
+            apexGenerator.forBlock['apex_data_sink_queue'] = function (block, generator) {
+                const id = block.getFieldValue('NAME');
+                const enabled = block.getFieldValue('ENABLED') === 'TRUE';
+                const queueName = block.getFieldValue('QUEUE_NAME');
+                const connection = block.getFieldValue('CONNECTION');
+                const persistent = block.getFieldValue('PERSISTENT') === 'TRUE';
+
+                const sinkObj = {
+                    id: id,
+                    type: 'queue-sink',
+                    enabled: enabled,
+                    "queue-name": queueName,
+                    connection: connection,
+                    persistent: persistent
+                };
+
+                return JSON.stringify(sinkObj) + ',';
+            };
+
+            // Pipeline Configuration generator
+            apexGenerator.forBlock['apex_pipeline_config'] = function (block, generator) {
+                const id = block.getFieldValue('ID');
+                const mode = block.getFieldValue('MODE');
+                const errorHandling = block.getFieldValue('ERROR_HANDLING');
+                const maxRetries = parseInt(block.getFieldValue('MAX_RETRIES'));
+                const retryDelayMs = parseInt(block.getFieldValue('RETRY_DELAY_MS'));
+                const collectMetrics = block.getFieldValue('COLLECT_METRICS') === 'TRUE';
+
+                const pipelineObj = {
+                    pipeline: {
+                        id: id,
+                        mode: mode,
+                        "error-handling": errorHandling,
+                        "max-retries": maxRetries,
+                        "retry-delay-ms": retryDelayMs,
+                        "collect-metrics": collectMetrics
+                    }
+                };
+
+                // Process stages
+                const stagesCode = generator.statementToCode(block, 'STAGES');
+                if (stagesCode) {
+                    const stagesArray = stagesCode.split(',').filter(s => s.trim()).map(s => JSON.parse(s));
+                    pipelineObj.pipeline.stages = stagesArray;
+                }
+
+                return JSON.stringify(pipelineObj);
+            };
+
+            // Pipeline Stage generator
+            apexGenerator.forBlock['apex_pipeline_stage'] = function (block, generator) {
+                const name = block.getFieldValue('NAME');
+                const order = parseInt(block.getFieldValue('ORDER'));
+                const enabled = block.getFieldValue('ENABLED') === 'TRUE';
+                const dependsOn = block.getFieldValue('DEPENDS_ON');
+
+                const stageObj = {
+                    name: name,
+                    order: order,
+                    enabled: enabled
+                };
+
+                if (dependsOn && dependsOn.trim()) {
+                    stageObj['depends-on'] = dependsOn.trim();
+                }
+
+                return JSON.stringify(stageObj) + ',';
+            };
+
             apexGenerator.scrub_ = function (block, code) {
                 const nextBlock = block.nextConnection && block.nextConnection.targetBlock();
                 const nextCode = apexGenerator.blockToCode(nextBlock);
@@ -3768,9 +4731,12 @@
                     { input: 'SECTIONS', type: 'apex_section_data_source_refs', text: "Add Data Source Refs Section" },
                     { input: 'SECTIONS', type: 'apex_section_rules', text: "Add Rules Section" },
                     { input: 'SECTIONS', type: 'apex_section_rule_groups', text: "Add Rule Groups Section" },
+                    { input: 'SECTIONS', type: 'apex_section_rule_chains', text: "Add Rule Chains Section" },
                     { input: 'SECTIONS', type: 'apex_section_enrichments', text: "Add Enrichments Section" },
                     { input: 'SECTIONS', type: 'apex_section_enrichment_groups', text: "Add Enrichment Groups Section" },
                     { input: 'SECTIONS', type: 'apex_section_transformations', text: "Add Transformations Section" },
+                    { input: 'SECTIONS', type: 'apex_section_categories', text: "Add Categories Section" },
+                    { input: 'SECTIONS', type: 'apex_section_data_sinks', text: "Add Data Sinks Section" },
                     { input: 'SECTIONS', type: 'apex_error_recovery', text: "Add Error Recovery Section" }
                 ],
                 'apex_data_source_config': [
@@ -3798,6 +4764,37 @@
                 'apex_section_transformations': [
                     { input: 'TRANSFORMATIONS', type: 'apex_conditional_transformation', text: 'Add Conditional Transformation' },
                     { input: 'TRANSFORMATIONS', type: 'apex_action_set_field', text: 'Add Set Field Action' }
+                ],
+                'apex_section_rule_chains': [
+                    { input: 'RULE_CHAINS', type: 'apex_conditional_chain', text: 'Add Conditional Chain' },
+                    { input: 'RULE_CHAINS', type: 'apex_sequential_dependency', text: 'Add Sequential Dependency Chain' },
+                    { input: 'RULE_CHAINS', type: 'apex_result_routing', text: 'Add Result-Based Routing' },
+                    { input: 'RULE_CHAINS', type: 'apex_accumulative_chain', text: 'Add Accumulative Chain' },
+                    { input: 'RULE_CHAINS', type: 'apex_fluent_builder', text: 'Add Fluent Builder Chain' }
+                ],
+                'apex_sequential_dependency': [
+                    { input: 'STAGES', type: 'apex_chain_stage', text: 'Add Stage' }
+                ],
+                'apex_result_routing': [
+                    { input: 'ROUTES', type: 'apex_route', text: 'Add Route' }
+                ],
+                'apex_accumulative_chain': [
+                    { input: 'ACCUMULATION_RULES', type: 'apex_accumulation_rule', text: 'Add Accumulation Rule' }
+                ],
+                'apex_fluent_builder': [
+                    { input: 'DECISION_STEPS', type: 'apex_decision_step', text: 'Add Decision Step' }
+                ],
+                'apex_section_categories': [
+                    { input: 'CATEGORIES', type: 'apex_category', text: 'Add Category' }
+                ],
+                'apex_section_data_sinks': [
+                    { input: 'DATA_SINKS', type: 'apex_data_sink_database', text: 'Add Database Sink' },
+                    { input: 'DATA_SINKS', type: 'apex_data_sink_file', text: 'Add File Sink' },
+                    { input: 'DATA_SINKS', type: 'apex_data_sink_rest', text: 'Add REST Sink' },
+                    { input: 'DATA_SINKS', type: 'apex_data_sink_queue', text: 'Add Queue Sink' }
+                ],
+                'apex_pipeline_config': [
+                    { input: 'STAGES', type: 'apex_pipeline_stage', text: 'Add Pipeline Stage' }
                 ],
                 'apex_rule': [
                     { input: 'CONDITION', type: 'apex_condition_compare', text: 'Add Condition (Compare)' },
@@ -3834,7 +4831,10 @@
                     { input: 'QUERIES', type: 'apex_data_source_query', text: 'Add Query' }
                 ],
                 'apex_data_source_rest': [
-                    { input: 'ENDPOINTS', type: 'apex_data_source_endpoint', text: 'Add Endpoint' }
+                    { input: 'ENDPOINTS', type: 'apex_data_source_endpoint', text: 'Add Endpoint' },
+                    { input: 'AUTHENTICATION', type: 'apex_authentication', text: 'Add Authentication' },
+                    { input: 'CACHE', type: 'apex_cache_config', text: 'Add Cache Config' },
+                    { input: 'CIRCUIT_BREAKER', type: 'apex_circuit_breaker', text: 'Add Circuit Breaker' }
                 ],
                 'apex_lookup_dataset_database': [
                     { input: 'PARAMETERS', type: 'apex_lookup_parameter', text: 'Add Parameter' }
@@ -6022,6 +7022,19 @@
                     });
                 }
 
+                // Create Rule Chains Section
+                if (config['rule-chains'] && config['rule-chains'].length > 0) {
+                    const sectionBlock = createSectionBlock('apex_section_rule_chains', block, 'SECTIONS', lastSectionBlock);
+                    lastSectionBlock = sectionBlock;
+
+                    let lastChainBlock = null;
+                    config['rule-chains'].forEach(chain => {
+                        const chainBlock = createRuleChainBlock(chain);
+                        connectToStatement(sectionBlock, 'RULE_CHAINS', chainBlock, lastChainBlock);
+                        lastChainBlock = chainBlock;
+                    });
+                }
+
                 // Create Enrichments Section
                 if (config.enrichments && config.enrichments.length > 0) {
                     const sectionBlock = createSectionBlock('apex_section_enrichments', block, 'SECTIONS', lastSectionBlock);
@@ -6136,6 +7149,9 @@
                 block.setFieldValue(rule.severity || 'ERROR', 'SEVERITY');
                 block.setFieldValue(rule.priority !== undefined ? String(rule.priority) : '', 'PRIORITY');
                 block.setFieldValue(rule.category || '', 'CATEGORY');
+                block.setFieldValue(rule['business-owner'] || '', 'BUSINESS_OWNER');
+                block.setFieldValue(rule['error-code'] || '', 'ERROR_CODE');
+                block.setFieldValue(rule['success-code'] || '', 'SUCCESS_CODE');
                 block.initSvg();
                 block.render();
 
@@ -6192,6 +7208,113 @@
                 return block;
             }
 
+            function createRuleChainBlock(chain) {
+                const pattern = chain.pattern || 'conditional-chaining';
+                const config = chain.configuration || {};
+                let block;
+
+                if (pattern === 'conditional-chaining') {
+                    block = workspace.newBlock('apex_conditional_chain');
+                    block.setFieldValue(chain.id || '', 'ID');
+                    block.setFieldValue(chain.name || '', 'NAME');
+                    block.setFieldValue(chain.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                    block.setFieldValue(config['trigger-rule'] || '', 'TRIGGER_RULE');
+                    const condRules = config['conditional-rules'] || {};
+                    block.setFieldValue((condRules['on-trigger'] || []).join(', '), 'ON_TRIGGER');
+                    block.setFieldValue((condRules['on-no-trigger'] || []).join(', '), 'ON_NO_TRIGGER');
+                } else if (pattern === 'sequential-dependency') {
+                    block = workspace.newBlock('apex_sequential_dependency');
+                    block.setFieldValue(chain.id || '', 'ID');
+                    block.setFieldValue(chain.name || '', 'NAME');
+                    block.setFieldValue(chain.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                    block.setFieldValue(config['output-variable'] || '', 'OUTPUT_VARIABLE');
+                    // Create stages
+                    const stages = config.stages || [];
+                    let lastStageBlock = null;
+                    stages.forEach(stage => {
+                        const stageBlock = workspace.newBlock('apex_chain_stage');
+                        stageBlock.setFieldValue(stage.id || '', 'ID');
+                        stageBlock.setFieldValue((stage['rule-ids'] || []).join(', '), 'RULE_IDS');
+                        stageBlock.setFieldValue((stage['depends-on'] || []).join(', '), 'DEPENDS_ON');
+                        stageBlock.initSvg();
+                        stageBlock.render();
+                        connectToStatement(block, 'STAGES', stageBlock, lastStageBlock);
+                        lastStageBlock = stageBlock;
+                    });
+                } else if (pattern === 'result-based-routing') {
+                    block = workspace.newBlock('apex_result_routing');
+                    block.setFieldValue(chain.id || '', 'ID');
+                    block.setFieldValue(chain.name || '', 'NAME');
+                    block.setFieldValue(chain.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                    block.setFieldValue(config['routing-rule'] || '', 'ROUTER_CONDITION');
+                    // Create routes
+                    const routes = config.routes || [];
+                    let lastRouteBlock = null;
+                    routes.forEach(route => {
+                        const routeBlock = workspace.newBlock('apex_route');
+                        routeBlock.setFieldValue(route.value || '', 'VALUE');
+                        routeBlock.setFieldValue((route['rule-ids'] || []).join(', '), 'RULE_IDS');
+                        routeBlock.setFieldValue((route['enrichment-group-refs'] || []).join(', '), 'ENRICHMENT_GROUP_REFS');
+                        routeBlock.initSvg();
+                        routeBlock.render();
+                        connectToStatement(block, 'ROUTES', routeBlock, lastRouteBlock);
+                        lastRouteBlock = routeBlock;
+                    });
+                } else if (pattern === 'accumulative-chaining') {
+                    block = workspace.newBlock('apex_accumulative_chain');
+                    block.setFieldValue(chain.id || '', 'ID');
+                    block.setFieldValue(chain.name || '', 'NAME');
+                    block.setFieldValue(chain.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                    block.setFieldValue(config['accumulator-variable'] || '', 'ACCUMULATOR_VARIABLE');
+                    block.setFieldValue(config['initial-value'] !== undefined ? config['initial-value'] : 0, 'INITIAL_VALUE');
+                    const finalDecision = config['final-decision-rule'] || {};
+                    block.setFieldValue(finalDecision.condition || '', 'FINAL_DECISION');
+                    // Create accumulation rules
+                    const accumRules = config['accumulation-rules'] || [];
+                    let lastAccumBlock = null;
+                    accumRules.forEach(rule => {
+                        const accumBlock = workspace.newBlock('apex_accumulation_rule');
+                        accumBlock.setFieldValue(rule.id || '', 'ID');
+                        accumBlock.setFieldValue(rule.condition || '', 'CONDITION');
+                        accumBlock.setFieldValue(rule.weight !== undefined ? rule.weight : 1.0, 'WEIGHT');
+                        accumBlock.initSvg();
+                        accumBlock.render();
+                        connectToStatement(block, 'ACCUMULATION_RULES', accumBlock, lastAccumBlock);
+                        lastAccumBlock = accumBlock;
+                    });
+                } else if (pattern === 'fluent-builder') {
+                    block = workspace.newBlock('apex_fluent_builder');
+                    block.setFieldValue(chain.id || '', 'ID');
+                    block.setFieldValue(chain.name || '', 'NAME');
+                    block.setFieldValue(chain.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                    block.setFieldValue(config['builder-target'] || '', 'BUILDER_TARGET');
+                    // Create decision steps
+                    const steps = config['decision-steps'] || [];
+                    let lastStepBlock = null;
+                    steps.forEach(step => {
+                        const stepBlock = workspace.newBlock('apex_decision_step');
+                        stepBlock.setFieldValue(step.id || '', 'ID');
+                        stepBlock.setFieldValue(step.condition || '', 'CONDITION');
+                        stepBlock.setFieldValue((step['on-success'] || []).join(', '), 'ON_SUCCESS');
+                        stepBlock.setFieldValue((step['on-failure'] || []).join(', '), 'ON_FAILURE');
+                        stepBlock.initSvg();
+                        stepBlock.render();
+                        connectToStatement(block, 'DECISION_STEPS', stepBlock, lastStepBlock);
+                        lastStepBlock = stepBlock;
+                    });
+                } else {
+                    // Default to conditional chain for unknown patterns
+                    block = workspace.newBlock('apex_conditional_chain');
+                    block.setFieldValue(chain.id || '', 'ID');
+                    block.setFieldValue(chain.name || '', 'NAME');
+                    block.setFieldValue(chain.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                }
+
+                block.initSvg();
+                block.render();
+                return block;
+            }
+
             function createEnrichmentGroupBlock(group) {
                 const block = workspace.newBlock('apex_enrichment_group');
                 block.setFieldValue(group.id || '', 'ID');
@@ -6237,6 +7360,9 @@
                 const block = workspace.newBlock('apex_enrichment_calculation');
                 block.setFieldValue(enrich.id || '', 'ID');
                 block.setFieldValue(enrich.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                block.setFieldValue(enrich.priority !== undefined ? enrich.priority : 0, 'PRIORITY');
+                block.setFieldValue(enrich['error-code'] || '', 'ERROR_CODE');
+                block.setFieldValue(enrich['success-code'] || '', 'SUCCESS_CODE');
 
                 const calcConfig = enrich['calculation-config'] || {};
                 block.setFieldValue(calcConfig['result-field'] || '', 'RESULT_FIELD');
@@ -6561,6 +7687,53 @@
                     block.initSvg();
                     block.render();
 
+                    // Create authentication block if present
+                    if (ds.authentication) {
+                        const authBlock = workspace.newBlock('apex_authentication');
+                        authBlock.setFieldValue(ds.authentication.type || 'none', 'AUTH_TYPE');
+                        authBlock.setFieldValue(ds.authentication.username || '', 'USERNAME');
+                        authBlock.setFieldValue(ds.authentication.password || '', 'PASSWORD');
+                        authBlock.setFieldValue(ds.authentication.token || '', 'TOKEN');
+                        authBlock.setFieldValue(ds.authentication['api-key-header'] || 'X-API-Key', 'API_KEY_HEADER');
+                        authBlock.setFieldValue(ds.authentication['api-key-value'] || '', 'API_KEY_VALUE');
+                        authBlock.initSvg();
+                        authBlock.render();
+                        const authInput = block.getInput('AUTHENTICATION');
+                        if (authInput && authInput.connection) {
+                            authInput.connection.connect(authBlock.outputConnection);
+                        }
+                    }
+
+                    // Create cache block if present
+                    if (ds.cache) {
+                        const cacheBlock = workspace.newBlock('apex_cache_config');
+                        cacheBlock.setFieldValue(ds.cache.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                        cacheBlock.setFieldValue(ds.cache.ttl || 300, 'TTL');
+                        cacheBlock.setFieldValue(ds.cache['max-size'] || 1000, 'MAX_SIZE');
+                        cacheBlock.setFieldValue(ds.cache['eviction-policy'] || 'LRU', 'EVICTION_POLICY');
+                        cacheBlock.initSvg();
+                        cacheBlock.render();
+                        const cacheInput = block.getInput('CACHE');
+                        if (cacheInput && cacheInput.connection) {
+                            cacheInput.connection.connect(cacheBlock.outputConnection);
+                        }
+                    }
+
+                    // Create circuit breaker block if present
+                    if (ds['circuit-breaker']) {
+                        const cbBlock = workspace.newBlock('apex_circuit_breaker');
+                        cbBlock.setFieldValue(ds['circuit-breaker'].enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                        cbBlock.setFieldValue(ds['circuit-breaker']['failure-threshold'] || 5, 'FAILURE_THRESHOLD');
+                        cbBlock.setFieldValue(ds['circuit-breaker']['reset-timeout'] || 30000, 'RESET_TIMEOUT');
+                        cbBlock.setFieldValue(ds['circuit-breaker']['half-open-requests'] || 3, 'HALF_OPEN_REQUESTS');
+                        cbBlock.initSvg();
+                        cbBlock.render();
+                        const cbInput = block.getInput('CIRCUIT_BREAKER');
+                        if (cbInput && cbInput.connection) {
+                            cbInput.connection.connect(cbBlock.outputConnection);
+                        }
+                    }
+
                     // Create endpoints
                     const endpoints = ds.endpoints || [];
                     let lastEndpointBlock = null;
@@ -6711,6 +7884,7 @@
                         'apex_section_data_source_refs',
                         'apex_section_rules',
                         'apex_section_rule_groups',
+                        'apex_section_rule_chains',
                         'apex_section_enrichments',
                         'apex_section_enrichment_groups',
                         'apex_section_transformations'
@@ -6737,13 +7911,26 @@
                     ]
                 },
                 'apex_section_enrichment_groups': { 'ENRICHMENT_GROUPS': 'apex_enrichment_group' },
-                'apex_section_transformations': { 
+                'apex_section_transformations': {
                     'TRANSFORMATIONS': [
                         'apex_conditional_transformation',
                         'apex_action_set_field'
                     ]
                 },
-                
+                'apex_section_rule_chains': {
+                    'RULE_CHAINS': [
+                        'apex_conditional_chain',
+                        'apex_sequential_dependency',
+                        'apex_result_routing',
+                        'apex_accumulative_chain',
+                        'apex_fluent_builder'
+                    ]
+                },
+                'apex_sequential_dependency': { 'STAGES': 'apex_chain_stage' },
+                'apex_result_routing': { 'ROUTES': 'apex_route' },
+                'apex_accumulative_chain': { 'ACCUMULATION_RULES': 'apex_accumulation_rule' },
+                'apex_fluent_builder': { 'DECISION_STEPS': 'apex_decision_step' },
+
                 'apex_rule': {
                     'CONDITION': 'apex_condition_compare',
                     'RESULT_FIELD': 'text'
@@ -6767,7 +7954,12 @@
                 },
                 
                 'apex_data_source_database': { 'QUERIES': 'apex_data_source_query' },
-                'apex_data_source_rest': { 'ENDPOINTS': 'apex_data_source_endpoint' },
+                'apex_data_source_rest': {
+                    'ENDPOINTS': 'apex_data_source_endpoint',
+                    'AUTHENTICATION': 'apex_authentication',
+                    'CACHE': 'apex_cache_config',
+                    'CIRCUIT_BREAKER': 'apex_circuit_breaker'
+                },
                 'apex_lookup_dataset_database': { 'PARAMETERS': 'apex_lookup_parameter' },
                 
                 'apex_conditional_transformation': {

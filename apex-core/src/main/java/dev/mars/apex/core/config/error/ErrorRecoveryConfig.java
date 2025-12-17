@@ -56,7 +56,7 @@ import java.util.Map;
  * config.setSeverityPolicy(SeverityConstants.WARNING, warningPolicy);
  * }</pre>
  *
- * @author APEX Rules Engine
+ * @author Mark A Ray-Smith
  * @since 1.0
  * @version 1.0
  */

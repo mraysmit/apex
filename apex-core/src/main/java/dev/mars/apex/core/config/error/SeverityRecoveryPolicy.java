@@ -48,7 +48,7 @@ import dev.mars.apex.core.service.error.ErrorRecoveryService;
  * errorPolicy.setStrategy("FAIL_FAST");
  * }</pre>
  *
- * @author APEX Rules Engine
+ * @author Mark A Ray-Smith
  * @since 1.0
  * @version 1.0
  */

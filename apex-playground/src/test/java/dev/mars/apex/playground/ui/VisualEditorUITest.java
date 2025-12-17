@@ -61,7 +61,6 @@ class VisualEditorUITest {
     @BeforeEach
     void setUp() {
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-gpu");
@@ -107,7 +106,7 @@ class VisualEditorUITest {
         Boolean configExists = (Boolean) js.executeScript(
             "return typeof BLOCK_ID_CONFIG !== 'undefined' && " +
             "BLOCK_ID_CONFIG['apex_rule'] !== undefined && " +
-            "BLOCK_ID_CONFIG['apex_rule'].prefix === 'rule-'"
+            "BLOCK_ID_CONFIG['apex_rule'].idPrefix === 'rule-'"
         );
         assertTrue(configExists, "BLOCK_ID_CONFIG should be defined with apex_rule entry");
     }
@@ -577,12 +576,12 @@ class VisualEditorUITest {
         );
         assertTrue(yamlSectionExpanded, "YAML section should exist and be expanded by default");
 
-        // Check Eval Data section exists and is expanded (both sections are expanded by default)
+        // Check Eval Data section exists (it is collapsed by default)
         Boolean evalSectionExists = (Boolean) js.executeScript(
             "var section = document.getElementById('evalDataSection');" +
-            "return section && section.classList.contains('expanded');"
+            "return section !== null;"
         );
-        assertTrue(evalSectionExists, "Eval Data section should exist and be expanded by default");
+        assertTrue(evalSectionExists, "Eval Data section should exist");
     }
 
     @Test
@@ -601,14 +600,14 @@ class VisualEditorUITest {
         );
         assertTrue(yamlCollapsed, "YAML section should be collapsed after toggle");
 
-        // Toggle Eval Data section (should collapse it since it starts expanded)
+        // Toggle Eval Data section (should expand it since it starts collapsed)
         js.executeScript("toggleAccordion('evalDataSection');");
         try { Thread.sleep(100); } catch (InterruptedException e) {}
 
-        Boolean evalCollapsed = (Boolean) js.executeScript(
-            "return !document.getElementById('evalDataSection').classList.contains('expanded');"
+        Boolean evalExpanded = (Boolean) js.executeScript(
+            "return document.getElementById('evalDataSection').classList.contains('expanded');"
         );
-        assertTrue(evalCollapsed, "Eval Data section should be collapsed after toggle");
+        assertTrue(evalExpanded, "Eval Data section should be expanded after toggle");
     }
 
     @Test
@@ -659,22 +658,22 @@ class VisualEditorUITest {
         driver.get(baseUrl + "/apex_editor_main.html");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
 
-        // Verify Eval Data section starts expanded
-        Boolean initiallyExpanded = (Boolean) js.executeScript(
-            "return document.getElementById('evalDataSection').classList.contains('expanded');"
+        // Verify Eval Data section starts collapsed (not expanded by default)
+        Boolean initiallyCollapsed = (Boolean) js.executeScript(
+            "return !document.getElementById('evalDataSection').classList.contains('expanded');"
         );
-        assertTrue(initiallyExpanded, "Eval Data section should be expanded initially");
+        assertTrue(initiallyCollapsed, "Eval Data section should be collapsed initially");
 
-        // Click directly on the accordion-header div
+        // Click directly on the accordion-header div to expand
         WebElement evalHeader = driver.findElement(By.cssSelector("#evalDataSection .accordion-header"));
         evalHeader.click();
         try { Thread.sleep(300); } catch (InterruptedException e) {}
 
-        // Verify section is now collapsed
-        Boolean nowCollapsed = (Boolean) js.executeScript(
-            "return !document.getElementById('evalDataSection').classList.contains('expanded');"
+        // Verify section is now expanded
+        Boolean nowExpanded = (Boolean) js.executeScript(
+            "return document.getElementById('evalDataSection').classList.contains('expanded');"
         );
-        assertTrue(nowCollapsed, "Eval Data section should be collapsed after clicking header");
+        assertTrue(nowExpanded, "Eval Data section should be expanded after clicking header");
     }
 
     @Test
@@ -1089,9 +1088,9 @@ class VisualEditorUITest {
 
         Boolean hasComponentConfig = (Boolean) js.executeScript(
             "return BLOCK_ID_CONFIG['apex_component_config'] !== undefined && " +
-            "BLOCK_ID_CONFIG['apex_component_config'].prefix === 'component-';"
+            "BLOCK_ID_CONFIG['apex_component_config'].idPrefix === 'component-';"
         );
-        assertTrue(hasComponentConfig, "BLOCK_ID_CONFIG should include apex_component_config with prefix 'component-'");
+        assertTrue(hasComponentConfig, "BLOCK_ID_CONFIG should include apex_component_config with idPrefix 'component-'");
     }
 
     // --- Error Recovery Block Tests ---
@@ -2192,4 +2191,2167 @@ class VisualEditorUITest {
         assertTrue(options.contains("continue-on-error"), "Should have continue-on-error option");
         assertTrue(options.contains("skip-on-error"), "Should have skip-on-error option");
     }
+
+    // ==================== Tests 89-95: Rule Block New Fields ====================
+
+    @Test
+    @Order(89)
+    @DisplayName("Test 89: apex_rule block has BUSINESS_OWNER field")
+    void testRuleBlockHasBusinessOwnerField() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean hasField = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_rule');" +
+            "block.initSvg(); block.render();" +
+            "var field = block.getField('BUSINESS_OWNER');" +
+            "block.dispose();" +
+            "return field !== null;"
+        );
+
+        assertTrue(hasField, "apex_rule block should have BUSINESS_OWNER field");
+    }
+
+    @Test
+    @Order(90)
+    @DisplayName("Test 90: apex_rule block has ERROR_CODE field")
+    void testRuleBlockHasErrorCodeField() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean hasField = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_rule');" +
+            "block.initSvg(); block.render();" +
+            "var field = block.getField('ERROR_CODE');" +
+            "block.dispose();" +
+            "return field !== null;"
+        );
+
+        assertTrue(hasField, "apex_rule block should have ERROR_CODE field");
+    }
+
+    @Test
+    @Order(91)
+    @DisplayName("Test 91: apex_rule block has SUCCESS_CODE field")
+    void testRuleBlockHasSuccessCodeField() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean hasField = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_rule');" +
+            "block.initSvg(); block.render();" +
+            "var field = block.getField('SUCCESS_CODE');" +
+            "block.dispose();" +
+            "return field !== null;"
+        );
+
+        assertTrue(hasField, "apex_rule block should have SUCCESS_CODE field");
+    }
+
+    @Test
+    @Order(92)
+    @DisplayName("Test 92: apex_rule generator includes business-owner in output")
+    void testRuleGeneratorIncludesBusinessOwner() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String output = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_rule');" +
+            "block.setFieldValue('test-rule', 'ID');" +
+            "block.setFieldValue('Test Rule', 'NAME');" +
+            "block.setFieldValue('John Smith', 'BUSINESS_OWNER');" +
+            "block.initSvg(); block.render();" +
+            "var code = apexGenerator.blockToCode(block);" +
+            "block.dispose();" +
+            "return code;"
+        );
+
+        assertTrue(output.contains("\"business-owner\":\"John Smith\""),
+            "Generator output should include business-owner field");
+    }
+
+    @Test
+    @Order(93)
+    @DisplayName("Test 93: apex_rule generator includes error-code in output")
+    void testRuleGeneratorIncludesErrorCode() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String output = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_rule');" +
+            "block.setFieldValue('test-rule', 'ID');" +
+            "block.setFieldValue('Test Rule', 'NAME');" +
+            "block.setFieldValue('ERR-001', 'ERROR_CODE');" +
+            "block.initSvg(); block.render();" +
+            "var code = apexGenerator.blockToCode(block);" +
+            "block.dispose();" +
+            "return code;"
+        );
+
+        assertTrue(output.contains("\"error-code\":\"ERR-001\""),
+            "Generator output should include error-code field");
+    }
+
+    @Test
+    @Order(94)
+    @DisplayName("Test 94: apex_rule generator includes success-code in output")
+    void testRuleGeneratorIncludesSuccessCode() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String output = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_rule');" +
+            "block.setFieldValue('test-rule', 'ID');" +
+            "block.setFieldValue('Test Rule', 'NAME');" +
+            "block.setFieldValue('SUC-001', 'SUCCESS_CODE');" +
+            "block.initSvg(); block.render();" +
+            "var code = apexGenerator.blockToCode(block);" +
+            "block.dispose();" +
+            "return code;"
+        );
+
+        assertTrue(output.contains("\"success-code\":\"SUC-001\""),
+            "Generator output should include success-code field");
+    }
+
+    @Test
+    @Order(95)
+    @DisplayName("Test 95: YAML import restores new fields for rule")
+    void testYamlImportRestoresNewFieldsForRule() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            // Create block with new fields
+            "var block = workspace.newBlock('apex_rule');" +
+            "block.setFieldValue('test-rule', 'ID');" +
+            "block.setFieldValue('Test Rule', 'NAME');" +
+            "block.setFieldValue('Jane Doe', 'BUSINESS_OWNER');" +
+            "block.setFieldValue('ERR-100', 'ERROR_CODE');" +
+            "block.setFieldValue('SUC-100', 'SUCCESS_CODE');" +
+            "block.initSvg(); block.render();" +
+            // Get generated JSON (remove trailing comma)
+            "var code = apexGenerator.blockToCode(block).replace(/,\\s*$/, '');" +
+            "var ruleData = JSON.parse(code);" +
+            // Clear workspace
+            "workspace.clear();" +
+            // Reimport using createRuleBlock
+            "createRuleBlock(ruleData);" +
+            // Get the field values from the new block
+            "var blocks = workspace.getBlocksByType('apex_rule', false);" +
+            "if (blocks.length === 0) return 'no blocks';" +
+            "var b = blocks[0];" +
+            "return b.getFieldValue('BUSINESS_OWNER') + '|' + " +
+            "       b.getFieldValue('ERROR_CODE') + '|' + " +
+            "       b.getFieldValue('SUCCESS_CODE');"
+        );
+
+        assertEquals("Jane Doe|ERR-100|SUC-100", result, "New fields should be restored after YAML import");
+    }
+
+    // ========================================================================
+    // Tests 96-110: Data Sources - Cache, Circuit Breaker, Authentication
+    // ========================================================================
+
+    @Test
+    @Order(96)
+    @DisplayName("Test 96: Cache Config block exists in toolbox")
+    void testCacheConfigBlockExistsInToolbox() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "return Blockly.Blocks['apex_cache_config'] ? 'exists' : 'missing';"
+        );
+        assertEquals("exists", result, "apex_cache_config block should exist");
+    }
+
+    @Test
+    @Order(97)
+    @DisplayName("Test 97: Circuit Breaker block exists in toolbox")
+    void testCircuitBreakerBlockExistsInToolbox() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "return Blockly.Blocks['apex_circuit_breaker'] ? 'exists' : 'missing';"
+        );
+        assertEquals("exists", result, "apex_circuit_breaker block should exist");
+    }
+
+    @Test
+    @Order(98)
+    @DisplayName("Test 98: Authentication block exists in toolbox")
+    void testAuthenticationBlockExistsInToolbox() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "return Blockly.Blocks['apex_authentication'] ? 'exists' : 'missing';"
+        );
+        assertEquals("exists", result, "apex_authentication block should exist");
+    }
+
+    @Test
+    @Order(99)
+    @DisplayName("Test 99: REST data source has Authentication input")
+    void testRestDataSourceHasAuthenticationInput() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_data_source_rest');" +
+            "block.initSvg(); block.render();" +
+            "var input = block.getInput('AUTHENTICATION');" +
+            "return input ? 'exists' : 'missing';"
+        );
+        assertEquals("exists", result, "REST data source should have AUTHENTICATION input");
+    }
+
+    @Test
+    @Order(100)
+    @DisplayName("Test 100: REST data source has Cache input")
+    void testRestDataSourceHasCacheInput() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_data_source_rest');" +
+            "block.initSvg(); block.render();" +
+            "var input = block.getInput('CACHE');" +
+            "return input ? 'exists' : 'missing';"
+        );
+        assertEquals("exists", result, "REST data source should have CACHE input");
+    }
+
+    @Test
+    @Order(101)
+    @DisplayName("Test 101: REST data source has Circuit Breaker input")
+    void testRestDataSourceHasCircuitBreakerInput() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_data_source_rest');" +
+            "block.initSvg(); block.render();" +
+            "var input = block.getInput('CIRCUIT_BREAKER');" +
+            "return input ? 'exists' : 'missing';"
+        );
+        assertEquals("exists", result, "REST data source should have CIRCUIT_BREAKER input");
+    }
+
+    @Test
+    @Order(102)
+    @DisplayName("Test 102: Cache Config generator outputs correct JSON")
+    void testCacheConfigGeneratorOutputsCorrectJson() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_cache_config');" +
+            "block.setFieldValue('TRUE', 'ENABLED');" +
+            "block.setFieldValue(600, 'TTL');" +
+            "block.setFieldValue(2000, 'MAX_SIZE');" +
+            "block.setFieldValue('LFU', 'EVICTION_POLICY');" +
+            "block.initSvg(); block.render();" +
+            "return apexGenerator.forBlock['apex_cache_config'](block, apexGenerator);"
+        );
+        assertTrue(result.contains("\"enabled\":true"), "Should contain enabled:true");
+        assertTrue(result.contains("\"ttl\":600"), "Should contain ttl:600");
+        assertTrue(result.contains("\"max-size\":2000"), "Should contain max-size:2000");
+        assertTrue(result.contains("\"eviction-policy\":\"LFU\""), "Should contain eviction-policy:LFU");
+    }
+
+    @Test
+    @Order(103)
+    @DisplayName("Test 103: Circuit Breaker generator outputs correct JSON")
+    void testCircuitBreakerGeneratorOutputsCorrectJson() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_circuit_breaker');" +
+            "block.setFieldValue('TRUE', 'ENABLED');" +
+            "block.setFieldValue(10, 'FAILURE_THRESHOLD');" +
+            "block.setFieldValue(60000, 'RESET_TIMEOUT');" +
+            "block.setFieldValue(5, 'HALF_OPEN_REQUESTS');" +
+            "block.initSvg(); block.render();" +
+            "return apexGenerator.forBlock['apex_circuit_breaker'](block, apexGenerator);"
+        );
+        assertTrue(result.contains("\"enabled\":true"), "Should contain enabled:true");
+        assertTrue(result.contains("\"failure-threshold\":10"), "Should contain failure-threshold:10");
+        assertTrue(result.contains("\"reset-timeout\":60000"), "Should contain reset-timeout:60000");
+        assertTrue(result.contains("\"half-open-requests\":5"), "Should contain half-open-requests:5");
+    }
+
+    @Test
+    @Order(104)
+    @DisplayName("Test 104: Authentication generator outputs correct JSON for basic auth")
+    void testAuthenticationGeneratorOutputsCorrectJsonForBasicAuth() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_authentication');" +
+            "block.setFieldValue('basic', 'AUTH_TYPE');" +
+            "block.setFieldValue('admin', 'USERNAME');" +
+            "block.setFieldValue('secret123', 'PASSWORD');" +
+            "block.initSvg(); block.render();" +
+            "return apexGenerator.forBlock['apex_authentication'](block, apexGenerator);"
+        );
+        assertTrue(result.contains("\"type\":\"basic\""), "Should contain type:basic");
+        assertTrue(result.contains("\"username\":\"admin\""), "Should contain username:admin");
+        assertTrue(result.contains("\"password\":\"secret123\""), "Should contain password:secret123");
+    }
+
+    @Test
+    @Order(105)
+    @DisplayName("Test 105: Authentication generator outputs correct JSON for bearer token")
+    void testAuthenticationGeneratorOutputsCorrectJsonForBearerToken() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_authentication');" +
+            "block.setFieldValue('bearer', 'AUTH_TYPE');" +
+            "block.setFieldValue('my-jwt-token', 'TOKEN');" +
+            "block.initSvg(); block.render();" +
+            "return apexGenerator.forBlock['apex_authentication'](block, apexGenerator);"
+        );
+        assertTrue(result.contains("\"type\":\"bearer\""), "Should contain type:bearer");
+        assertTrue(result.contains("\"token\":\"my-jwt-token\""), "Should contain token:my-jwt-token");
+    }
+
+    @Test
+    @Order(106)
+    @DisplayName("Test 106: Authentication generator outputs correct JSON for API key")
+    void testAuthenticationGeneratorOutputsCorrectJsonForApiKey() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_authentication');" +
+            "block.setFieldValue('api-key', 'AUTH_TYPE');" +
+            "block.setFieldValue('X-Custom-Key', 'API_KEY_HEADER');" +
+            "block.setFieldValue('abc123', 'API_KEY_VALUE');" +
+            "block.initSvg(); block.render();" +
+            "return apexGenerator.forBlock['apex_authentication'](block, apexGenerator);"
+        );
+        assertTrue(result.contains("\"type\":\"api-key\""), "Should contain type:api-key");
+        assertTrue(result.contains("\"api-key-header\":\"X-Custom-Key\""), "Should contain api-key-header");
+        assertTrue(result.contains("\"api-key-value\":\"abc123\""), "Should contain api-key-value");
+    }
+
+    // ========================================================================
+    // Tests 107-112: Enrichment Calculation - Priority, Error Code, Success Code
+    // ========================================================================
+
+    @Test
+    @Order(107)
+    @DisplayName("Test 107: Calculation Enrichment has Priority field")
+    void testCalculationEnrichmentHasPriorityField() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_enrichment_calculation');" +
+            "block.initSvg(); block.render();" +
+            "var field = block.getField('PRIORITY');" +
+            "return field ? 'exists' : 'missing';"
+        );
+        assertEquals("exists", result, "Calculation enrichment should have PRIORITY field");
+    }
+
+    @Test
+    @Order(108)
+    @DisplayName("Test 108: Calculation Enrichment has Error Code field")
+    void testCalculationEnrichmentHasErrorCodeField() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_enrichment_calculation');" +
+            "block.initSvg(); block.render();" +
+            "var field = block.getField('ERROR_CODE');" +
+            "return field ? 'exists' : 'missing';"
+        );
+        assertEquals("exists", result, "Calculation enrichment should have ERROR_CODE field");
+    }
+
+    @Test
+    @Order(109)
+    @DisplayName("Test 109: Calculation Enrichment has Success Code field")
+    void testCalculationEnrichmentHasSuccessCodeField() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_enrichment_calculation');" +
+            "block.initSvg(); block.render();" +
+            "var field = block.getField('SUCCESS_CODE');" +
+            "return field ? 'exists' : 'missing';"
+        );
+        assertEquals("exists", result, "Calculation enrichment should have SUCCESS_CODE field");
+    }
+
+    @Test
+    @Order(110)
+    @DisplayName("Test 110: Calculation Enrichment generator includes priority")
+    void testCalculationEnrichmentGeneratorIncludesPriority() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_enrichment_calculation');" +
+            "block.setFieldValue('calc-1', 'ID');" +
+            "block.setFieldValue('TRUE', 'ENABLED');" +
+            "block.setFieldValue(5, 'PRIORITY');" +
+            "block.setFieldValue('result', 'RESULT_FIELD');" +
+            "block.initSvg(); block.render();" +
+            "return apexGenerator.forBlock['apex_enrichment_calculation'](block, apexGenerator);"
+        );
+        assertTrue(result.contains("\"priority\":5"), "Generator should include priority:5");
+    }
+
+    @Test
+    @Order(111)
+    @DisplayName("Test 111: Calculation Enrichment generator includes error-code")
+    void testCalculationEnrichmentGeneratorIncludesErrorCode() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_enrichment_calculation');" +
+            "block.setFieldValue('calc-1', 'ID');" +
+            "block.setFieldValue('TRUE', 'ENABLED');" +
+            "block.setFieldValue('CALC-ERR-001', 'ERROR_CODE');" +
+            "block.setFieldValue('result', 'RESULT_FIELD');" +
+            "block.initSvg(); block.render();" +
+            "return apexGenerator.forBlock['apex_enrichment_calculation'](block, apexGenerator);"
+        );
+        assertTrue(result.contains("\"error-code\":\"CALC-ERR-001\""), "Generator should include error-code");
+    }
+
+    @Test
+    @Order(112)
+    @DisplayName("Test 112: Calculation Enrichment generator includes success-code")
+    void testCalculationEnrichmentGeneratorIncludesSuccessCode() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_enrichment_calculation');" +
+            "block.setFieldValue('calc-1', 'ID');" +
+            "block.setFieldValue('TRUE', 'ENABLED');" +
+            "block.setFieldValue('CALC-SUC-001', 'SUCCESS_CODE');" +
+            "block.setFieldValue('result', 'RESULT_FIELD');" +
+            "block.initSvg(); block.render();" +
+            "return apexGenerator.forBlock['apex_enrichment_calculation'](block, apexGenerator);"
+        );
+        assertTrue(result.contains("\"success-code\":\"CALC-SUC-001\""), "Generator should include success-code");
+    }
+
+    // ==================== RULE CHAINS TESTS (Tests 113-127) ====================
+
+    @Test
+    @Order(113)
+    @DisplayName("Test 113: Rule Chains Section block exists in toolbox")
+    void testRuleChainsSectionBlockExists() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean exists = (Boolean) js.executeScript(
+            "return typeof Blockly.Blocks['apex_section_rule_chains'] !== 'undefined';"
+        );
+        assertTrue(exists, "apex_section_rule_chains block should be defined");
+    }
+
+    @Test
+    @Order(114)
+    @DisplayName("Test 114: Conditional Chain block exists")
+    void testConditionalChainBlockExists() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean exists = (Boolean) js.executeScript(
+            "return typeof Blockly.Blocks['apex_conditional_chain'] !== 'undefined';"
+        );
+        assertTrue(exists, "apex_conditional_chain block should be defined");
+    }
+
+    @Test
+    @Order(115)
+    @DisplayName("Test 115: Sequential Dependency block exists")
+    void testSequentialDependencyBlockExists() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean exists = (Boolean) js.executeScript(
+            "return typeof Blockly.Blocks['apex_sequential_dependency'] !== 'undefined';"
+        );
+        assertTrue(exists, "apex_sequential_dependency block should be defined");
+    }
+
+    @Test
+    @Order(116)
+    @DisplayName("Test 116: Chain Stage block exists")
+    void testChainStageBlockExists() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean exists = (Boolean) js.executeScript(
+            "return typeof Blockly.Blocks['apex_chain_stage'] !== 'undefined';"
+        );
+        assertTrue(exists, "apex_chain_stage block should be defined");
+    }
+
+    @Test
+    @Order(117)
+    @DisplayName("Test 117: Result Routing block exists")
+    void testResultRoutingBlockExists() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean exists = (Boolean) js.executeScript(
+            "return typeof Blockly.Blocks['apex_result_routing'] !== 'undefined';"
+        );
+        assertTrue(exists, "apex_result_routing block should be defined");
+    }
+
+    @Test
+    @Order(118)
+    @DisplayName("Test 118: Route block exists")
+    void testRouteBlockExists() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean exists = (Boolean) js.executeScript(
+            "return typeof Blockly.Blocks['apex_route'] !== 'undefined';"
+        );
+        assertTrue(exists, "apex_route block should be defined");
+    }
+
+    @Test
+    @Order(119)
+    @DisplayName("Test 119: Accumulative Chain block exists")
+    void testAccumulativeChainBlockExists() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean exists = (Boolean) js.executeScript(
+            "return typeof Blockly.Blocks['apex_accumulative_chain'] !== 'undefined';"
+        );
+        assertTrue(exists, "apex_accumulative_chain block should be defined");
+    }
+
+    @Test
+    @Order(120)
+    @DisplayName("Test 120: Accumulation Rule block exists")
+    void testAccumulationRuleBlockExists() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean exists = (Boolean) js.executeScript(
+            "return typeof Blockly.Blocks['apex_accumulation_rule'] !== 'undefined';"
+        );
+        assertTrue(exists, "apex_accumulation_rule block should be defined");
+    }
+
+    @Test
+    @Order(121)
+    @DisplayName("Test 121: Fluent Builder block exists")
+    void testFluentBuilderBlockExists() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean exists = (Boolean) js.executeScript(
+            "return typeof Blockly.Blocks['apex_fluent_builder'] !== 'undefined';"
+        );
+        assertTrue(exists, "apex_fluent_builder block should be defined");
+    }
+
+    @Test
+    @Order(122)
+    @DisplayName("Test 122: Decision Step block exists")
+    void testDecisionStepBlockExists() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean exists = (Boolean) js.executeScript(
+            "return typeof Blockly.Blocks['apex_decision_step'] !== 'undefined';"
+        );
+        assertTrue(exists, "apex_decision_step block should be defined");
+    }
+
+    @Test
+    @Order(123)
+    @DisplayName("Test 123: Conditional Chain generator outputs correct JSON")
+    void testConditionalChainGeneratorOutput() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_conditional_chain');" +
+            "block.setFieldValue('chain-1', 'ID');" +
+            "block.setFieldValue('My Chain', 'NAME');" +
+            "block.setFieldValue('TRUE', 'ENABLED');" +
+            "block.setFieldValue('trigger-rule-1', 'TRIGGER_RULE');" +
+            "block.setFieldValue('rule-a,rule-b', 'ON_TRIGGER');" +
+            "block.setFieldValue('rule-c', 'ON_NO_TRIGGER');" +
+            "block.initSvg(); block.render();" +
+            "return apexGenerator.forBlock['apex_conditional_chain'](block, apexGenerator);"
+        );
+        assertTrue(result.contains("\"pattern\":\"conditional-chaining\""), "Generator should output conditional-chaining pattern");
+        assertTrue(result.contains("\"trigger-rule\":\"trigger-rule-1\""), "Generator should include trigger-rule");
+    }
+
+    @Test
+    @Order(124)
+    @DisplayName("Test 124: Sequential Dependency generator outputs correct JSON")
+    void testSequentialDependencyGeneratorOutput() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_sequential_dependency');" +
+            "block.setFieldValue('seq-1', 'ID');" +
+            "block.setFieldValue('Sequential Chain', 'NAME');" +
+            "block.setFieldValue('TRUE', 'ENABLED');" +
+            "block.initSvg(); block.render();" +
+            "return apexGenerator.forBlock['apex_sequential_dependency'](block, apexGenerator);"
+        );
+        assertTrue(result.contains("\"pattern\":\"sequential-dependency\""), "Generator should output sequential-dependency pattern");
+    }
+
+    @Test
+    @Order(125)
+    @DisplayName("Test 125: Result Routing generator outputs correct JSON")
+    void testResultRoutingGeneratorOutput() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_result_routing');" +
+            "block.setFieldValue('routing-1', 'ID');" +
+            "block.setFieldValue('Routing Chain', 'NAME');" +
+            "block.setFieldValue(true, 'ENABLED');" +
+            "block.setFieldValue('#processingPath', 'ROUTER_CONDITION');" +
+            "block.initSvg(); block.render();" +
+            "return apexGenerator.forBlock['apex_result_routing'](block, apexGenerator);"
+        );
+        assertTrue(result.contains("\"pattern\":\"result-based-routing\""), "Generator should output result-based-routing pattern");
+        assertTrue(result.contains("\"routing-rule\":\"#processingPath\""), "Generator should include routing-rule");
+    }
+
+    @Test
+    @Order(126)
+    @DisplayName("Test 126: Accumulative Chain generator outputs correct JSON")
+    void testAccumulativeChainGeneratorOutput() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_accumulative_chain');" +
+            "block.setFieldValue('accum-1', 'ID');" +
+            "block.setFieldValue('Accumulative Chain', 'NAME');" +
+            "block.setFieldValue(true, 'ENABLED');" +
+            "block.setFieldValue('totalScore', 'ACCUMULATOR_VARIABLE');" +
+            "block.setFieldValue(0, 'INITIAL_VALUE');" +
+            "block.setFieldValue('#totalScore >= 60', 'FINAL_DECISION');" +
+            "block.initSvg(); block.render();" +
+            "return apexGenerator.forBlock['apex_accumulative_chain'](block, apexGenerator);"
+        );
+        assertTrue(result.contains("\"pattern\":\"accumulative-chaining\""), "Generator should output accumulative-chaining pattern");
+        assertTrue(result.contains("\"accumulator-variable\":\"totalScore\""), "Generator should include accumulator-variable");
+    }
+
+    @Test
+    @Order(127)
+    @DisplayName("Test 127: Fluent Builder generator outputs correct JSON")
+    void testFluentBuilderGeneratorOutput() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_fluent_builder');" +
+            "block.setFieldValue('fluent-1', 'ID');" +
+            "block.setFieldValue('Fluent Builder', 'NAME');" +
+            "block.setFieldValue(true, 'ENABLED');" +
+            "block.setFieldValue('decisionResult', 'BUILDER_TARGET');" +
+            "block.initSvg(); block.render();" +
+            "return apexGenerator.forBlock['apex_fluent_builder'](block, apexGenerator);"
+        );
+        assertTrue(result.contains("\"pattern\":\"fluent-builder\""), "Generator should output fluent-builder pattern");
+        assertTrue(result.contains("\"builder-target\":\"decisionResult\""), "Generator should include builder-target");
+    }
+
+    // ==================== COMPREHENSIVE RULE CHAINS TESTS (Tests 128-175) ====================
+
+    // --- Rule Chains Section Block Tests ---
+
+    @Test
+    @Order(128)
+    @DisplayName("Test 128: Rule Chains Section block appears in Sections toolbox category")
+    void testRuleChainsSectionInToolbox() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean inToolbox = (Boolean) js.executeScript(
+            "var toolbox = Blockly.getMainWorkspace().getToolbox();" +
+            "var contents = toolbox.getToolboxItems();" +
+            "for (var i = 0; i < contents.length; i++) {" +
+            "  var item = contents[i];" +
+            "  if (item.getName && item.getName() === 'Sections') {" +
+            "    var flyout = item.getContents ? item.getContents() : [];" +
+            "    for (var j = 0; j < flyout.length; j++) {" +
+            "      if (flyout[j].type === 'apex_section_rule_chains') return true;" +
+            "    }" +
+            "  }" +
+            "}" +
+            "return false;"
+        );
+        assertTrue(inToolbox, "apex_section_rule_chains should be in Sections toolbox category");
+    }
+
+    @Test
+    @Order(129)
+    @DisplayName("Test 129: Rule Chains Section block has RULE_CHAINS statement input")
+    void testRuleChainsSectionHasStatementInput() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean hasInput = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_section_rule_chains');" +
+            "block.initSvg(); block.render();" +
+            "return block.getInput('RULE_CHAINS') !== null;"
+        );
+        assertTrue(hasInput, "apex_section_rule_chains should have RULE_CHAINS statement input");
+    }
+
+    @Test
+    @Order(130)
+    @DisplayName("Test 130: Rule Chains Section generator outputs rule-chains array")
+    void testRuleChainsSectionGeneratorOutput() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_section_rule_chains');" +
+            "block.initSvg(); block.render();" +
+            "return apexGenerator.forBlock['apex_section_rule_chains'](block, apexGenerator);"
+        );
+        assertTrue(result.contains("\"rule-chains\""), "Generator should output rule-chains key");
+    }
+
+    // --- Conditional Chain Block Tests ---
+
+    @Test
+    @Order(131)
+    @DisplayName("Test 131: Conditional Chain block has all required fields")
+    void testConditionalChainHasAllFields() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean hasAllFields = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_conditional_chain');" +
+            "block.initSvg(); block.render();" +
+            "return block.getField('ID') !== null && " +
+            "       block.getField('NAME') !== null && " +
+            "       block.getField('ENABLED') !== null && " +
+            "       block.getField('TRIGGER_RULE') !== null && " +
+            "       block.getField('ON_TRIGGER') !== null && " +
+            "       block.getField('ON_NO_TRIGGER') !== null;"
+        );
+        assertTrue(hasAllFields, "apex_conditional_chain should have ID, NAME, ENABLED, TRIGGER_RULE, ON_TRIGGER, ON_NO_TRIGGER fields");
+    }
+
+    @Test
+    @Order(132)
+    @DisplayName("Test 132: Conditional Chain block can connect to Rule Chains Section")
+    void testConditionalChainConnectsToSection() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean canConnect = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var section = workspace.newBlock('apex_section_rule_chains');" +
+            "var chain = workspace.newBlock('apex_conditional_chain');" +
+            "section.initSvg(); section.render();" +
+            "chain.initSvg(); chain.render();" +
+            "try {" +
+            "  section.getInput('RULE_CHAINS').connection.connect(chain.previousConnection);" +
+            "  return chain.getParent() === section;" +
+            "} catch(e) { return false; }"
+        );
+        assertTrue(canConnect, "apex_conditional_chain should connect to apex_section_rule_chains");
+    }
+
+    @Test
+    @Order(133)
+    @DisplayName("Test 133: Conditional Chain generator includes on-trigger rules")
+    void testConditionalChainGeneratorIncludesOnTrigger() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_conditional_chain');" +
+            "block.setFieldValue('chain-1', 'ID');" +
+            "block.setFieldValue('Test Chain', 'NAME');" +
+            "block.setFieldValue('TRUE', 'ENABLED');" +
+            "block.setFieldValue('trigger-rule', 'TRIGGER_RULE');" +
+            "block.setFieldValue('rule-a,rule-b', 'ON_TRIGGER');" +
+            "block.setFieldValue('rule-c', 'ON_NO_TRIGGER');" +
+            "block.initSvg(); block.render();" +
+            "return apexGenerator.forBlock['apex_conditional_chain'](block, apexGenerator);"
+        );
+        assertTrue(result.contains("\"on-trigger\""), "Generator should include on-trigger");
+        assertTrue(result.contains("\"on-no-trigger\""), "Generator should include on-no-trigger");
+    }
+
+    // --- Sequential Dependency Block Tests ---
+
+    @Test
+    @Order(134)
+    @DisplayName("Test 134: Sequential Dependency block has all required fields")
+    void testSequentialDependencyHasAllFields() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean hasAllFields = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_sequential_dependency');" +
+            "block.initSvg(); block.render();" +
+            "return block.getField('ID') !== null && " +
+            "       block.getField('NAME') !== null && " +
+            "       block.getField('ENABLED') !== null && " +
+            "       block.getInput('STAGES') !== null;"
+        );
+        assertTrue(hasAllFields, "apex_sequential_dependency should have ID, NAME, ENABLED fields and STAGES input");
+    }
+
+    @Test
+    @Order(135)
+    @DisplayName("Test 135: Sequential Dependency block has STAGES statement input")
+    void testSequentialDependencyHasStagesInput() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean hasInput = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_sequential_dependency');" +
+            "block.initSvg(); block.render();" +
+            "var input = block.getInput('STAGES');" +
+            "return input !== null && input.connection !== null;"
+        );
+        assertTrue(hasInput, "apex_sequential_dependency should have STAGES statement input");
+    }
+
+    @Test
+    @Order(136)
+    @DisplayName("Test 136: Sequential Dependency can connect to Rule Chains Section")
+    void testSequentialDependencyConnectsToSection() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean canConnect = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var section = workspace.newBlock('apex_section_rule_chains');" +
+            "var chain = workspace.newBlock('apex_sequential_dependency');" +
+            "section.initSvg(); section.render();" +
+            "chain.initSvg(); chain.render();" +
+            "try {" +
+            "  section.getInput('RULE_CHAINS').connection.connect(chain.previousConnection);" +
+            "  return chain.getParent() === section;" +
+            "} catch(e) { return false; }"
+        );
+        assertTrue(canConnect, "apex_sequential_dependency should connect to apex_section_rule_chains");
+    }
+
+    // --- Chain Stage Block Tests ---
+
+    @Test
+    @Order(137)
+    @DisplayName("Test 137: Chain Stage block has all required fields")
+    void testChainStageHasAllFields() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean hasAllFields = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_chain_stage');" +
+            "block.initSvg(); block.render();" +
+            "return block.getField('ID') !== null && " +
+            "       block.getField('RULE_IDS') !== null && " +
+            "       block.getField('DEPENDS_ON') !== null;"
+        );
+        assertTrue(hasAllFields, "apex_chain_stage should have ID, RULE_IDS, DEPENDS_ON fields");
+    }
+
+    @Test
+    @Order(138)
+    @DisplayName("Test 138: Chain Stage block can connect to Sequential Dependency")
+    void testChainStageConnectsToSequentialDependency() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean canConnect = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var parent = workspace.newBlock('apex_sequential_dependency');" +
+            "var stage = workspace.newBlock('apex_chain_stage');" +
+            "parent.initSvg(); parent.render();" +
+            "stage.initSvg(); stage.render();" +
+            "try {" +
+            "  parent.getInput('STAGES').connection.connect(stage.previousConnection);" +
+            "  return stage.getParent() === parent;" +
+            "} catch(e) { return false; }"
+        );
+        assertTrue(canConnect, "apex_chain_stage should connect to apex_sequential_dependency STAGES input");
+    }
+
+    @Test
+    @Order(139)
+    @DisplayName("Test 139: Chain Stage generator outputs correct JSON")
+    void testChainStageGeneratorOutput() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_chain_stage');" +
+            "block.setFieldValue('stage-1', 'ID');" +
+            "block.setFieldValue('rule-1, rule-2', 'RULE_IDS');" +
+            "block.setFieldValue('stage-0', 'DEPENDS_ON');" +
+            "block.initSvg(); block.render();" +
+            "return apexGenerator.forBlock['apex_chain_stage'](block, apexGenerator);"
+        );
+        assertTrue(result.contains("\"id\":\"stage-1\""), "Generator should include id");
+        assertTrue(result.contains("\"rule-ids\""), "Generator should include rule-ids");
+        assertTrue(result.contains("\"depends-on\""), "Generator should include depends-on");
+    }
+
+    // --- Result Routing Block Tests ---
+
+    @Test
+    @Order(140)
+    @DisplayName("Test 140: Result Routing block has all required fields")
+    void testResultRoutingHasAllFields() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean hasAllFields = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_result_routing');" +
+            "block.initSvg(); block.render();" +
+            "return block.getField('ID') !== null && " +
+            "       block.getField('NAME') !== null && " +
+            "       block.getField('ENABLED') !== null && " +
+            "       block.getField('ROUTER_CONDITION') !== null && " +
+            "       block.getInput('ROUTES') !== null;"
+        );
+        assertTrue(hasAllFields, "apex_result_routing should have ID, NAME, ENABLED, ROUTER_CONDITION fields and ROUTES input");
+    }
+
+    @Test
+    @Order(141)
+    @DisplayName("Test 141: Result Routing block has ROUTES statement input")
+    void testResultRoutingHasRoutesInput() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean hasInput = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_result_routing');" +
+            "block.initSvg(); block.render();" +
+            "var input = block.getInput('ROUTES');" +
+            "return input !== null && input.connection !== null;"
+        );
+        assertTrue(hasInput, "apex_result_routing should have ROUTES statement input");
+    }
+
+    @Test
+    @Order(142)
+    @DisplayName("Test 142: Result Routing can connect to Rule Chains Section")
+    void testResultRoutingConnectsToSection() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean canConnect = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var section = workspace.newBlock('apex_section_rule_chains');" +
+            "var chain = workspace.newBlock('apex_result_routing');" +
+            "section.initSvg(); section.render();" +
+            "chain.initSvg(); chain.render();" +
+            "try {" +
+            "  section.getInput('RULE_CHAINS').connection.connect(chain.previousConnection);" +
+            "  return chain.getParent() === section;" +
+            "} catch(e) { return false; }"
+        );
+        assertTrue(canConnect, "apex_result_routing should connect to apex_section_rule_chains");
+    }
+
+    // --- Route Block Tests ---
+
+    @Test
+    @Order(143)
+    @DisplayName("Test 143: Route block has all required fields")
+    void testRouteHasAllFields() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean hasAllFields = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_route');" +
+            "block.initSvg(); block.render();" +
+            "return block.getField('VALUE') !== null && " +
+            "       block.getField('RULE_IDS') !== null && " +
+            "       block.getField('ENRICHMENT_GROUP_REFS') !== null;"
+        );
+        assertTrue(hasAllFields, "apex_route should have VALUE, RULE_IDS, ENRICHMENT_GROUP_REFS fields");
+    }
+
+    @Test
+    @Order(144)
+    @DisplayName("Test 144: Route block can connect to Result Routing")
+    void testRouteConnectsToResultRouting() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean canConnect = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var parent = workspace.newBlock('apex_result_routing');" +
+            "var route = workspace.newBlock('apex_route');" +
+            "parent.initSvg(); parent.render();" +
+            "route.initSvg(); route.render();" +
+            "try {" +
+            "  parent.getInput('ROUTES').connection.connect(route.previousConnection);" +
+            "  return route.getParent() === parent;" +
+            "} catch(e) { return false; }"
+        );
+        assertTrue(canConnect, "apex_route should connect to apex_result_routing ROUTES input");
+    }
+
+    @Test
+    @Order(145)
+    @DisplayName("Test 145: Route generator outputs correct JSON")
+    void testRouteGeneratorOutput() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_route');" +
+            "block.setFieldValue('ROUTE_A', 'VALUE');" +
+            "block.setFieldValue('rule-a,rule-b', 'RULE_IDS');" +
+            "block.setFieldValue('enrichment-1', 'ENRICHMENT_GROUP_REFS');" +
+            "block.initSvg(); block.render();" +
+            "return apexGenerator.forBlock['apex_route'](block, apexGenerator);"
+        );
+        assertTrue(result.contains("\"value\":\"ROUTE_A\""), "Generator should include value");
+        assertTrue(result.contains("\"rule-ids\""), "Generator should include rule-ids");
+        assertTrue(result.contains("\"enrichment-group-refs\""), "Generator should include enrichment-group-refs");
+    }
+
+    // --- Accumulative Chain Block Tests ---
+
+    @Test
+    @Order(146)
+    @DisplayName("Test 146: Accumulative Chain block has all required fields")
+    void testAccumulativeChainHasAllFields() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean hasAllFields = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_accumulative_chain');" +
+            "block.initSvg(); block.render();" +
+            "return block.getField('ID') !== null && " +
+            "       block.getField('NAME') !== null && " +
+            "       block.getField('ENABLED') !== null && " +
+            "       block.getField('ACCUMULATOR_VARIABLE') !== null && " +
+            "       block.getField('INITIAL_VALUE') !== null && " +
+            "       block.getField('FINAL_DECISION') !== null && " +
+            "       block.getInput('ACCUMULATION_RULES') !== null;"
+        );
+        assertTrue(hasAllFields, "apex_accumulative_chain should have all required fields and ACCUMULATION_RULES input");
+    }
+
+    @Test
+    @Order(147)
+    @DisplayName("Test 147: Accumulative Chain block has ACCUMULATION_RULES statement input")
+    void testAccumulativeChainHasAccumulationRulesInput() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean hasInput = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_accumulative_chain');" +
+            "block.initSvg(); block.render();" +
+            "var input = block.getInput('ACCUMULATION_RULES');" +
+            "return input !== null && input.connection !== null;"
+        );
+        assertTrue(hasInput, "apex_accumulative_chain should have ACCUMULATION_RULES statement input");
+    }
+
+    @Test
+    @Order(148)
+    @DisplayName("Test 148: Accumulative Chain can connect to Rule Chains Section")
+    void testAccumulativeChainConnectsToSection() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean canConnect = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var section = workspace.newBlock('apex_section_rule_chains');" +
+            "var chain = workspace.newBlock('apex_accumulative_chain');" +
+            "section.initSvg(); section.render();" +
+            "chain.initSvg(); chain.render();" +
+            "try {" +
+            "  section.getInput('RULE_CHAINS').connection.connect(chain.previousConnection);" +
+            "  return chain.getParent() === section;" +
+            "} catch(e) { return false; }"
+        );
+        assertTrue(canConnect, "apex_accumulative_chain should connect to apex_section_rule_chains");
+    }
+
+    @Test
+    @Order(149)
+    @DisplayName("Test 149: Accumulative Chain generator includes initial-value and final-decision")
+    void testAccumulativeChainGeneratorIncludesAllFields() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_accumulative_chain');" +
+            "block.setFieldValue('accum-1', 'ID');" +
+            "block.setFieldValue('Score Chain', 'NAME');" +
+            "block.setFieldValue(true, 'ENABLED');" +
+            "block.setFieldValue('totalScore', 'ACCUMULATOR_VARIABLE');" +
+            "block.setFieldValue(0, 'INITIAL_VALUE');" +
+            "block.setFieldValue('#totalScore >= 60', 'FINAL_DECISION');" +
+            "block.initSvg(); block.render();" +
+            "return apexGenerator.forBlock['apex_accumulative_chain'](block, apexGenerator);"
+        );
+        assertTrue(result.contains("\"initial-value\""), "Generator should include initial-value");
+        assertTrue(result.contains("\"final-decision-rule\""), "Generator should include final-decision-rule");
+    }
+
+    // --- Accumulation Rule Block Tests ---
+
+    @Test
+    @Order(150)
+    @DisplayName("Test 150: Accumulation Rule block has all required fields")
+    void testAccumulationRuleHasAllFields() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean hasAllFields = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_accumulation_rule');" +
+            "block.initSvg(); block.render();" +
+            "return block.getField('ID') !== null && " +
+            "       block.getField('CONDITION') !== null && " +
+            "       block.getField('WEIGHT') !== null;"
+        );
+        assertTrue(hasAllFields, "apex_accumulation_rule should have ID, CONDITION, WEIGHT fields");
+    }
+
+    @Test
+    @Order(151)
+    @DisplayName("Test 151: Accumulation Rule block can connect to Accumulative Chain")
+    void testAccumulationRuleConnectsToAccumulativeChain() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean canConnect = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var parent = workspace.newBlock('apex_accumulative_chain');" +
+            "var rule = workspace.newBlock('apex_accumulation_rule');" +
+            "parent.initSvg(); parent.render();" +
+            "rule.initSvg(); rule.render();" +
+            "try {" +
+            "  parent.getInput('ACCUMULATION_RULES').connection.connect(rule.previousConnection);" +
+            "  return rule.getParent() === parent;" +
+            "} catch(e) { return false; }"
+        );
+        assertTrue(canConnect, "apex_accumulation_rule should connect to apex_accumulative_chain ACCUMULATION_RULES input");
+    }
+
+    @Test
+    @Order(152)
+    @DisplayName("Test 152: Accumulation Rule generator outputs correct JSON")
+    void testAccumulationRuleGeneratorOutput() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_accumulation_rule');" +
+            "block.setFieldValue('credit-check', 'ID');" +
+            "block.setFieldValue('#creditScore >= 700 ? 25 : 15', 'CONDITION');" +
+            "block.setFieldValue(1.5, 'WEIGHT');" +
+            "block.initSvg(); block.render();" +
+            "return apexGenerator.forBlock['apex_accumulation_rule'](block, apexGenerator);"
+        );
+        assertTrue(result.contains("\"id\":\"credit-check\""), "Generator should include id");
+        assertTrue(result.contains("\"condition\""), "Generator should include condition");
+        assertTrue(result.contains("\"weight\""), "Generator should include weight");
+    }
+
+    // --- Fluent Builder Block Tests ---
+
+    @Test
+    @Order(153)
+    @DisplayName("Test 153: Fluent Builder block has all required fields")
+    void testFluentBuilderHasAllFields() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean hasAllFields = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_fluent_builder');" +
+            "block.initSvg(); block.render();" +
+            "return block.getField('ID') !== null && " +
+            "       block.getField('NAME') !== null && " +
+            "       block.getField('ENABLED') !== null && " +
+            "       block.getField('BUILDER_TARGET') !== null && " +
+            "       block.getInput('DECISION_STEPS') !== null;"
+        );
+        assertTrue(hasAllFields, "apex_fluent_builder should have all required fields and DECISION_STEPS input");
+    }
+
+    @Test
+    @Order(154)
+    @DisplayName("Test 154: Fluent Builder block has DECISION_STEPS statement input")
+    void testFluentBuilderHasDecisionStepsInput() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean hasInput = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_fluent_builder');" +
+            "block.initSvg(); block.render();" +
+            "var input = block.getInput('DECISION_STEPS');" +
+            "return input !== null && input.connection !== null;"
+        );
+        assertTrue(hasInput, "apex_fluent_builder should have DECISION_STEPS statement input");
+    }
+
+    @Test
+    @Order(155)
+    @DisplayName("Test 155: Fluent Builder can connect to Rule Chains Section")
+    void testFluentBuilderConnectsToSection() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean canConnect = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var section = workspace.newBlock('apex_section_rule_chains');" +
+            "var chain = workspace.newBlock('apex_fluent_builder');" +
+            "section.initSvg(); section.render();" +
+            "chain.initSvg(); chain.render();" +
+            "try {" +
+            "  section.getInput('RULE_CHAINS').connection.connect(chain.previousConnection);" +
+            "  return chain.getParent() === section;" +
+            "} catch(e) { return false; }"
+        );
+        assertTrue(canConnect, "apex_fluent_builder should connect to apex_section_rule_chains");
+    }
+
+    // --- Decision Step Block Tests ---
+
+    @Test
+    @Order(156)
+    @DisplayName("Test 156: Decision Step block has all required fields")
+    void testDecisionStepHasAllFields() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean hasAllFields = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_decision_step');" +
+            "block.initSvg(); block.render();" +
+            "return block.getField('ID') !== null && " +
+            "       block.getField('CONDITION') !== null && " +
+            "       block.getField('ON_SUCCESS') !== null && " +
+            "       block.getField('ON_FAILURE') !== null;"
+        );
+        assertTrue(hasAllFields, "apex_decision_step should have ID, CONDITION, ON_SUCCESS, ON_FAILURE fields");
+    }
+
+    @Test
+    @Order(157)
+    @DisplayName("Test 157: Decision Step block can connect to Fluent Builder")
+    void testDecisionStepConnectsToFluentBuilder() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean canConnect = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var parent = workspace.newBlock('apex_fluent_builder');" +
+            "var step = workspace.newBlock('apex_decision_step');" +
+            "parent.initSvg(); parent.render();" +
+            "step.initSvg(); step.render();" +
+            "try {" +
+            "  parent.getInput('DECISION_STEPS').connection.connect(step.previousConnection);" +
+            "  return step.getParent() === parent;" +
+            "} catch(e) { return false; }"
+        );
+        assertTrue(canConnect, "apex_decision_step should connect to apex_fluent_builder DECISION_STEPS input");
+    }
+
+    @Test
+    @Order(158)
+    @DisplayName("Test 158: Decision Step generator outputs correct JSON")
+    void testDecisionStepGeneratorOutput() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_decision_step');" +
+            "block.setFieldValue('step-1', 'ID');" +
+            "block.setFieldValue('#amount > 1000', 'CONDITION');" +
+            "block.setFieldValue('step-2', 'ON_SUCCESS');" +
+            "block.setFieldValue('reject', 'ON_FAILURE');" +
+            "block.initSvg(); block.render();" +
+            "return apexGenerator.forBlock['apex_decision_step'](block, apexGenerator);"
+        );
+        assertTrue(result.contains("\"id\":\"step-1\""), "Generator should include id");
+        assertTrue(result.contains("\"condition\""), "Generator should include condition");
+        assertTrue(result.contains("\"on-success\""), "Generator should include on-success");
+        assertTrue(result.contains("\"on-failure\""), "Generator should include on-failure");
+    }
+
+    // --- Rule Chains Toolbox Category Tests ---
+
+    @Test
+    @Order(159)
+    @DisplayName("Test 159: Rule Chains toolbox category exists")
+    void testRuleChainsToolboxCategoryExists() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean categoryExists = (Boolean) js.executeScript(
+            "var toolbox = Blockly.getMainWorkspace().getToolbox();" +
+            "var contents = toolbox.getToolboxItems();" +
+            "for (var i = 0; i < contents.length; i++) {" +
+            "  if (contents[i].getName && contents[i].getName() === 'Rule Chains') return true;" +
+            "}" +
+            "return false;"
+        );
+        assertTrue(categoryExists, "Rule Chains toolbox category should exist");
+    }
+
+    @Test
+    @Order(160)
+    @DisplayName("Test 160: Rule Chains toolbox category contains all chain blocks")
+    void testRuleChainsToolboxContainsAllBlocks() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Long blockCount = (Long) js.executeScript(
+            "var toolbox = Blockly.getMainWorkspace().getToolbox();" +
+            "var contents = toolbox.getToolboxItems();" +
+            "for (var i = 0; i < contents.length; i++) {" +
+            "  if (contents[i].getName && contents[i].getName() === 'Rule Chains') {" +
+            "    var flyout = contents[i].getContents ? contents[i].getContents() : [];" +
+            "    return flyout.length;" +
+            "  }" +
+            "}" +
+            "return 0;"
+        );
+        assertTrue(blockCount >= 9, "Rule Chains category should contain at least 9 blocks, found: " + blockCount);
+    }
+
+    // --- Multiple Chains in Section Tests ---
+
+    @Test
+    @Order(161)
+    @DisplayName("Test 161: Multiple chain blocks can connect in sequence")
+    void testMultipleChainsCanConnectInSequence() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean canChain = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var chain1 = workspace.newBlock('apex_conditional_chain');" +
+            "var chain2 = workspace.newBlock('apex_sequential_dependency');" +
+            "chain1.initSvg(); chain1.render();" +
+            "chain2.initSvg(); chain2.render();" +
+            "try {" +
+            "  chain1.nextConnection.connect(chain2.previousConnection);" +
+            "  return chain2.getPreviousBlock() === chain1;" +
+            "} catch(e) { return false; }"
+        );
+        assertTrue(canChain, "Multiple chain blocks should be able to connect in sequence");
+    }
+
+    @Test
+    @Order(162)
+    @DisplayName("Test 162: Multiple stages can connect in sequence")
+    void testMultipleStagesCanConnectInSequence() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean canChain = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var stage1 = workspace.newBlock('apex_chain_stage');" +
+            "var stage2 = workspace.newBlock('apex_chain_stage');" +
+            "stage1.initSvg(); stage1.render();" +
+            "stage2.initSvg(); stage2.render();" +
+            "try {" +
+            "  stage1.nextConnection.connect(stage2.previousConnection);" +
+            "  return stage2.getPreviousBlock() === stage1;" +
+            "} catch(e) { return false; }"
+        );
+        assertTrue(canChain, "Multiple stage blocks should be able to connect in sequence");
+    }
+
+    @Test
+    @Order(163)
+    @DisplayName("Test 163: Multiple routes can connect in sequence")
+    void testMultipleRoutesCanConnectInSequence() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean canChain = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var route1 = workspace.newBlock('apex_route');" +
+            "var route2 = workspace.newBlock('apex_route');" +
+            "route1.initSvg(); route1.render();" +
+            "route2.initSvg(); route2.render();" +
+            "try {" +
+            "  route1.nextConnection.connect(route2.previousConnection);" +
+            "  return route2.getPreviousBlock() === route1;" +
+            "} catch(e) { return false; }"
+        );
+        assertTrue(canChain, "Multiple route blocks should be able to connect in sequence");
+    }
+
+    @Test
+    @Order(164)
+    @DisplayName("Test 164: Multiple accumulation rules can connect in sequence")
+    void testMultipleAccumulationRulesCanConnectInSequence() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean canChain = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var rule1 = workspace.newBlock('apex_accumulation_rule');" +
+            "var rule2 = workspace.newBlock('apex_accumulation_rule');" +
+            "rule1.initSvg(); rule1.render();" +
+            "rule2.initSvg(); rule2.render();" +
+            "try {" +
+            "  rule1.nextConnection.connect(rule2.previousConnection);" +
+            "  return rule2.getPreviousBlock() === rule1;" +
+            "} catch(e) { return false; }"
+        );
+        assertTrue(canChain, "Multiple accumulation rule blocks should be able to connect in sequence");
+    }
+
+    @Test
+    @Order(165)
+    @DisplayName("Test 165: Multiple decision steps can connect in sequence")
+    void testMultipleDecisionStepsCanConnectInSequence() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean canChain = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var step1 = workspace.newBlock('apex_decision_step');" +
+            "var step2 = workspace.newBlock('apex_decision_step');" +
+            "step1.initSvg(); step1.render();" +
+            "step2.initSvg(); step2.render();" +
+            "try {" +
+            "  step1.nextConnection.connect(step2.previousConnection);" +
+            "  return step2.getPreviousBlock() === step1;" +
+            "} catch(e) { return false; }"
+        );
+        assertTrue(canChain, "Multiple decision step blocks should be able to connect in sequence");
+    }
+
+    // --- YAML Import Tests ---
+
+    @Test
+    @Order(166)
+    @DisplayName("Test 166: Conditional Chain block can be created and rendered")
+    void testConditionalChainCanBeCreatedAndRendered() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean blockCreated = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "workspace.clear();" +
+            "var block = workspace.newBlock('apex_conditional_chain');" +
+            "block.setFieldValue('chain-1', 'ID');" +
+            "block.setFieldValue('Test Chain', 'NAME');" +
+            "block.setFieldValue('trigger-1', 'TRIGGER_RULE');" +
+            "block.setFieldValue('rule-a,rule-b', 'ON_TRIGGER');" +
+            "block.setFieldValue('rule-c', 'ON_NO_TRIGGER');" +
+            "block.initSvg(); block.render();" +
+            "var blocks = workspace.getBlocksByType('apex_conditional_chain');" +
+            "return blocks.length > 0 && blocks[0].getFieldValue('ID') === 'chain-1';"
+        );
+        assertTrue(blockCreated, "Conditional Chain block should be created with correct field values");
+    }
+
+    @Test
+    @Order(167)
+    @DisplayName("Test 167: Sequential Dependency block can be created and rendered")
+    void testSequentialDependencyCanBeCreatedAndRendered() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean blockCreated = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "workspace.clear();" +
+            "var block = workspace.newBlock('apex_sequential_dependency');" +
+            "block.setFieldValue('seq-1', 'ID');" +
+            "block.setFieldValue('Sequential Chain', 'NAME');" +
+            "block.initSvg(); block.render();" +
+            "var blocks = workspace.getBlocksByType('apex_sequential_dependency');" +
+            "return blocks.length > 0 && blocks[0].getFieldValue('ID') === 'seq-1';"
+        );
+        assertTrue(blockCreated, "Sequential Dependency block should be created with correct field values");
+    }
+
+    @Test
+    @Order(168)
+    @DisplayName("Test 168: Result Routing block can be created and rendered")
+    void testResultRoutingCanBeCreatedAndRendered() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean blockCreated = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "workspace.clear();" +
+            "var block = workspace.newBlock('apex_result_routing');" +
+            "block.setFieldValue('routing-1', 'ID');" +
+            "block.setFieldValue('Routing Chain', 'NAME');" +
+            "block.setFieldValue('#path', 'ROUTER_CONDITION');" +
+            "block.initSvg(); block.render();" +
+            "var blocks = workspace.getBlocksByType('apex_result_routing');" +
+            "return blocks.length > 0 && blocks[0].getFieldValue('ID') === 'routing-1';"
+        );
+        assertTrue(blockCreated, "Result Routing block should be created with correct field values");
+    }
+
+    @Test
+    @Order(169)
+    @DisplayName("Test 169: Accumulative Chain block can be created and rendered")
+    void testAccumulativeChainCanBeCreatedAndRendered() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean blockCreated = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "workspace.clear();" +
+            "var block = workspace.newBlock('apex_accumulative_chain');" +
+            "block.setFieldValue('accum-1', 'ID');" +
+            "block.setFieldValue('Accumulative Chain', 'NAME');" +
+            "block.setFieldValue('score', 'ACCUMULATOR_VARIABLE');" +
+            "block.setFieldValue(0, 'INITIAL_VALUE');" +
+            "block.setFieldValue('#score >= 60', 'FINAL_DECISION');" +
+            "block.initSvg(); block.render();" +
+            "var blocks = workspace.getBlocksByType('apex_accumulative_chain');" +
+            "return blocks.length > 0 && blocks[0].getFieldValue('ID') === 'accum-1';"
+        );
+        assertTrue(blockCreated, "Accumulative Chain block should be created with correct field values");
+    }
+
+    @Test
+    @Order(170)
+    @DisplayName("Test 170: Fluent Builder block can be created and rendered")
+    void testFluentBuilderCanBeCreatedAndRendered() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean blockCreated = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "workspace.clear();" +
+            "var block = workspace.newBlock('apex_fluent_builder');" +
+            "block.setFieldValue('fluent-1', 'ID');" +
+            "block.setFieldValue('Fluent Builder', 'NAME');" +
+            "block.setFieldValue('result', 'BUILDER_TARGET');" +
+            "block.initSvg(); block.render();" +
+            "var blocks = workspace.getBlocksByType('apex_fluent_builder');" +
+            "return blocks.length > 0 && blocks[0].getFieldValue('ID') === 'fluent-1';"
+        );
+        assertTrue(blockCreated, "Fluent Builder block should be created with correct field values");
+    }
+
+    // --- Toolbox Category Tests ---
+
+    @Test
+    @Order(171)
+    @DisplayName("Test 171: Conditional Chain block is defined and can be instantiated")
+    void testConditionalChainBlockIsDefined() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean isDefined = (Boolean) js.executeScript(
+            "return typeof Blockly.Blocks['apex_conditional_chain'] !== 'undefined' && " +
+            "       typeof apexGenerator.forBlock['apex_conditional_chain'] === 'function';"
+        );
+        assertTrue(isDefined, "apex_conditional_chain should be defined with block and generator");
+    }
+
+    @Test
+    @Order(172)
+    @DisplayName("Test 172: Sequential Dependency block is defined and can be instantiated")
+    void testSequentialDependencyBlockIsDefined() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean isDefined = (Boolean) js.executeScript(
+            "return typeof Blockly.Blocks['apex_sequential_dependency'] !== 'undefined' && " +
+            "       typeof apexGenerator.forBlock['apex_sequential_dependency'] === 'function';"
+        );
+        assertTrue(isDefined, "apex_sequential_dependency should be defined with block and generator");
+    }
+
+    // --- AUTO_FILL_MAP Tests ---
+
+    @Test
+    @Order(173)
+    @DisplayName("Test 173: Rule Chain section has AUTO_FILL_MAP entry for child blocks")
+    void testRuleChainSectionInAutoFillMap() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean inMap = (Boolean) js.executeScript(
+            "return typeof AUTO_FILL_MAP !== 'undefined' && " +
+            "       AUTO_FILL_MAP.hasOwnProperty('apex_section_rule_chains') && " +
+            "       AUTO_FILL_MAP['apex_section_rule_chains'].hasOwnProperty('RULE_CHAINS');"
+        );
+        assertTrue(inMap, "apex_section_rule_chains should be in AUTO_FILL_MAP with RULE_CHAINS entry");
+    }
+
+    @Test
+    @Order(174)
+    @DisplayName("Test 174: Parent chain blocks have AUTO_FILL_MAP entries for child blocks")
+    void testParentChainBlocksInAutoFillMap() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean inMap = (Boolean) js.executeScript(
+            "return typeof AUTO_FILL_MAP !== 'undefined' && " +
+            "       AUTO_FILL_MAP.hasOwnProperty('apex_sequential_dependency') && " +
+            "       AUTO_FILL_MAP.hasOwnProperty('apex_result_routing') && " +
+            "       AUTO_FILL_MAP.hasOwnProperty('apex_accumulative_chain') && " +
+            "       AUTO_FILL_MAP.hasOwnProperty('apex_fluent_builder');"
+        );
+        assertTrue(inMap, "Parent chain blocks should be in AUTO_FILL_MAP");
+    }
+
+    // --- Full Integration Test ---
+
+    @Test
+    @Order(175)
+    @DisplayName("Test 175: Full rule chain structure generates valid JSON")
+    void testFullRuleChainStructureGeneratesValidJson() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "workspace.clear();" +
+            // Create section
+            "var section = workspace.newBlock('apex_section_rule_chains');" +
+            "section.initSvg(); section.render();" +
+            // Create conditional chain
+            "var chain = workspace.newBlock('apex_conditional_chain');" +
+            "chain.setFieldValue('chain-1', 'ID');" +
+            "chain.setFieldValue('Test Chain', 'NAME');" +
+            "chain.setFieldValue('TRUE', 'ENABLED');" +
+            "chain.setFieldValue('trigger-rule', 'TRIGGER_RULE');" +
+            "chain.setFieldValue('rule-a,rule-b', 'ON_TRIGGER');" +
+            "chain.setFieldValue('rule-c', 'ON_NO_TRIGGER');" +
+            "chain.initSvg(); chain.render();" +
+            // Connect chain to section
+            "section.getInput('RULE_CHAINS').connection.connect(chain.previousConnection);" +
+            // Generate
+            "return apexGenerator.forBlock['apex_section_rule_chains'](section, apexGenerator);"
+        );
+        assertTrue(result.contains("\"rule-chains\""), "Full structure should contain rule-chains");
+        assertTrue(result.contains("\"pattern\":\"conditional-chaining\""), "Full structure should contain pattern");
+        assertTrue(result.contains("\"trigger-rule\":\"trigger-rule\""), "Full structure should contain trigger-rule");
+    }
+
+    @Test
+    @Order(176)
+    @DisplayName("Test 176: Categories section block exists in toolbox")
+    void testCategoriesSectionBlockExistsInToolbox() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean exists = (Boolean) js.executeScript(
+            "return Blockly.Blocks['apex_section_categories'] !== undefined;"
+        );
+        assertTrue(exists, "apex_section_categories block should be defined");
+    }
+
+    @Test
+    @Order(177)
+    @DisplayName("Test 177: Category block exists in toolbox")
+    void testCategoryBlockExistsInToolbox() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean exists = (Boolean) js.executeScript(
+            "return Blockly.Blocks['apex_category'] !== undefined;"
+        );
+        assertTrue(exists, "apex_category block should be defined");
+    }
+
+    @Test
+    @Order(178)
+    @DisplayName("Test 178: Categories section generates valid JSON")
+    void testCategoriesSectionGeneratesValidJson() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "workspace.clear();" +
+            "var section = workspace.newBlock('apex_section_categories');" +
+            "section.initSvg(); section.render();" +
+            "return apexGenerator.forBlock['apex_section_categories'](section, apexGenerator);"
+        );
+        assertTrue(result.contains("\"type\":\"categories\""), "Should contain categories type");
+    }
+
+    @Test
+    @Order(179)
+    @DisplayName("Test 179: Category block generates valid JSON")
+    void testCategoryBlockGeneratesValidJson() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "workspace.clear();" +
+            "var category = workspace.newBlock('apex_category');" +
+            "category.setFieldValue('cat-1', 'NAME');" +
+            "category.setFieldValue('Test Category', 'DESCRIPTION');" +
+            "category.setFieldValue('10', 'PRIORITY');" +
+            "category.initSvg(); category.render();" +
+            "return apexGenerator.forBlock['apex_category'](category, apexGenerator);"
+        );
+        assertTrue(result.contains("\"name\":\"cat-1\""), "Should contain category name");
+        assertTrue(result.contains("\"description\":\"Test Category\""), "Should contain description");
+        assertTrue(result.contains("\"priority\":10"), "Should contain priority");
+    }
+
+    @Test
+    @Order(180)
+    @DisplayName("Test 180: Data Sinks section block exists in toolbox")
+    void testDataSinksSectionBlockExistsInToolbox() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean exists = (Boolean) js.executeScript(
+            "return Blockly.Blocks['apex_section_data_sinks'] !== undefined;"
+        );
+        assertTrue(exists, "apex_section_data_sinks block should be defined");
+    }
+
+    @Test
+    @Order(181)
+    @DisplayName("Test 181: Database sink block exists in toolbox")
+    void testDatabaseSinkBlockExistsInToolbox() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean exists = (Boolean) js.executeScript(
+            "return Blockly.Blocks['apex_data_sink_database'] !== undefined;"
+        );
+        assertTrue(exists, "apex_data_sink_database block should be defined");
+    }
+
+    @Test
+    @Order(182)
+    @DisplayName("Test 182: File sink block exists in toolbox")
+    void testFileSinkBlockExistsInToolbox() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean exists = (Boolean) js.executeScript(
+            "return Blockly.Blocks['apex_data_sink_file'] !== undefined;"
+        );
+        assertTrue(exists, "apex_data_sink_file block should be defined");
+    }
+
+    @Test
+    @Order(183)
+    @DisplayName("Test 183: REST sink block exists in toolbox")
+    void testRestSinkBlockExistsInToolbox() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean exists = (Boolean) js.executeScript(
+            "return Blockly.Blocks['apex_data_sink_rest'] !== undefined;"
+        );
+        assertTrue(exists, "apex_data_sink_rest block should be defined");
+    }
+
+    @Test
+    @Order(184)
+    @DisplayName("Test 184: Queue sink block exists in toolbox")
+    void testQueueSinkBlockExistsInToolbox() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean exists = (Boolean) js.executeScript(
+            "return Blockly.Blocks['apex_data_sink_queue'] !== undefined;"
+        );
+        assertTrue(exists, "apex_data_sink_queue block should be defined");
+    }
+
+    @Test
+    @Order(185)
+    @DisplayName("Test 185: Database sink generates valid JSON")
+    void testDatabaseSinkGeneratesValidJson() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "workspace.clear();" +
+            "var sink = workspace.newBlock('apex_data_sink_database');" +
+            "sink.setFieldValue('db-sink-1', 'NAME');" +
+            "sink.setFieldValue('TRUE', 'ENABLED');" +
+            "sink.setFieldValue('my-db', 'DATA_SOURCE_REF');" +
+            "sink.setFieldValue('results_table', 'TABLE');" +
+            "sink.setFieldValue('100', 'BATCH_SIZE');" +
+            "sink.initSvg(); sink.render();" +
+            "return apexGenerator.forBlock['apex_data_sink_database'](sink, apexGenerator);"
+        );
+        assertTrue(result.contains("\"id\":\"db-sink-1\""), "Should contain sink id");
+        assertTrue(result.contains("\"type\":\"database-sink\""), "Should contain sink type");
+        assertTrue(result.contains("\"enabled\":true"), "Should contain enabled flag");
+        assertTrue(result.contains("\"data-source-ref\":\"my-db\""), "Should contain data-source-ref");
+        assertTrue(result.contains("\"table\":\"results_table\""), "Should contain table");
+        assertTrue(result.contains("\"batch-size\":100"), "Should contain batch-size");
+    }
+
+    @Test
+    @Order(186)
+    @DisplayName("Test 186: File sink generates valid JSON")
+    void testFileSinkGeneratesValidJson() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "workspace.clear();" +
+            "var sink = workspace.newBlock('apex_data_sink_file');" +
+            "sink.setFieldValue('file-sink-1', 'NAME');" +
+            "sink.setFieldValue('TRUE', 'ENABLED');" +
+            "sink.setFieldValue('/output/results.csv', 'PATH');" +
+            "sink.setFieldValue('csv', 'FORMAT');" +
+            "sink.setFieldValue('TRUE', 'APPEND');" +
+            "sink.initSvg(); sink.render();" +
+            "return apexGenerator.forBlock['apex_data_sink_file'](sink, apexGenerator);"
+        );
+        assertTrue(result.contains("\"id\":\"file-sink-1\""), "Should contain sink id");
+        assertTrue(result.contains("\"type\":\"file-sink\""), "Should contain sink type");
+        assertTrue(result.contains("\"path\":\"/output/results.csv\""), "Should contain path");
+        assertTrue(result.contains("\"format\":\"csv\""), "Should contain format");
+        assertTrue(result.contains("\"append\":true"), "Should contain append");
+    }
+
+    @Test
+    @Order(187)
+    @DisplayName("Test 187: REST sink generates valid JSON")
+    void testRestSinkGeneratesValidJson() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "workspace.clear();" +
+            "var sink = workspace.newBlock('apex_data_sink_rest');" +
+            "sink.setFieldValue('rest-sink-1', 'NAME');" +
+            "sink.setFieldValue('TRUE', 'ENABLED');" +
+            "sink.setFieldValue('https://api.example.com/results', 'URL');" +
+            "sink.setFieldValue('POST', 'METHOD');" +
+            "sink.setFieldValue('30000', 'TIMEOUT');" +
+            "sink.initSvg(); sink.render();" +
+            "return apexGenerator.forBlock['apex_data_sink_rest'](sink, apexGenerator);"
+        );
+        assertTrue(result.contains("\"id\":\"rest-sink-1\""), "Should contain sink id");
+        assertTrue(result.contains("\"type\":\"rest-sink\""), "Should contain sink type");
+        assertTrue(result.contains("\"url\":\"https://api.example.com/results\""), "Should contain url");
+        assertTrue(result.contains("\"method\":\"POST\""), "Should contain method");
+        assertTrue(result.contains("\"timeout\":30000"), "Should contain timeout");
+    }
+
+    @Test
+    @Order(188)
+    @DisplayName("Test 188: Queue sink generates valid JSON")
+    void testQueueSinkGeneratesValidJson() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "workspace.clear();" +
+            "var sink = workspace.newBlock('apex_data_sink_queue');" +
+            "sink.setFieldValue('queue-sink-1', 'NAME');" +
+            "sink.setFieldValue('TRUE', 'ENABLED');" +
+            "sink.setFieldValue('results-queue', 'QUEUE_NAME');" +
+            "sink.setFieldValue('rabbitmq-connection', 'CONNECTION');" +
+            "sink.setFieldValue('TRUE', 'PERSISTENT');" +
+            "sink.initSvg(); sink.render();" +
+            "return apexGenerator.forBlock['apex_data_sink_queue'](sink, apexGenerator);"
+        );
+        assertTrue(result.contains("\"id\":\"queue-sink-1\""), "Should contain sink id");
+        assertTrue(result.contains("\"type\":\"queue-sink\""), "Should contain sink type");
+        assertTrue(result.contains("\"queue-name\":\"results-queue\""), "Should contain queue-name");
+        assertTrue(result.contains("\"connection\":\"rabbitmq-connection\""), "Should contain connection");
+        assertTrue(result.contains("\"persistent\":true"), "Should contain persistent");
+    }
+
+    @Test
+    @Order(189)
+    @DisplayName("Test 189: File source with encoding and polling-interval")
+    void testFileSourceWithEncodingAndPollingInterval() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "workspace.clear();" +
+            "var fileSource = workspace.newBlock('apex_data_source_file');" +
+            "fileSource.setFieldValue('file-1', 'ID');" +
+            "fileSource.setFieldValue('File Source', 'NAME');" +
+            "fileSource.setFieldValue('TRUE', 'ENABLED');" +
+            "fileSource.setFieldValue('Test Description', 'DESCRIPTION');" +
+            "fileSource.setFieldValue('/data/files', 'BASE_PATH');" +
+            "fileSource.setFieldValue('*.csv', 'FILE_PATTERN');" +
+            "fileSource.setFieldValue('csv', 'FORMAT');" +
+            "fileSource.setFieldValue('UTF-8', 'ENCODING');" +
+            "fileSource.setFieldValue('5000', 'POLLING_INTERVAL');" +
+            "fileSource.initSvg(); fileSource.render();" +
+            "return apexGenerator.forBlock['apex_data_source_file'](fileSource, apexGenerator);"
+        );
+        assertTrue(result.contains("\"encoding\":\"UTF-8\""), "Should contain encoding");
+        assertTrue(result.contains("\"polling-interval\":5000"), "Should contain polling-interval");
+    }
+
+    @Test
+    @Order(190)
+    @DisplayName("Test 190: Pipeline config block exists in toolbox")
+    void testPipelineConfigBlockExists() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean blockExists = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_pipeline_config');" +
+            "return block !== null && block.type === 'apex_pipeline_config';"
+        );
+        assertTrue(blockExists, "apex_pipeline_config block should exist");
+    }
+
+    @Test
+    @Order(191)
+    @DisplayName("Test 191: Pipeline stage block exists in toolbox")
+    void testPipelineStageBlockExists() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        Boolean blockExists = (Boolean) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "var block = workspace.newBlock('apex_pipeline_stage');" +
+            "return block !== null && block.type === 'apex_pipeline_stage';"
+        );
+        assertTrue(blockExists, "apex_pipeline_stage block should exist");
+    }
+
+    @Test
+    @Order(192)
+    @DisplayName("Test 192: Pipeline config generates correct JSON")
+    void testPipelineConfigGeneratesCorrectJson() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "workspace.clear();" +
+            "var pipeline = workspace.newBlock('apex_pipeline_config');" +
+            "pipeline.setFieldValue('my-pipeline', 'ID');" +
+            "pipeline.setFieldValue('sequential', 'MODE');" +
+            "pipeline.setFieldValue('fail-fast', 'ERROR_HANDLING');" +
+            "pipeline.setFieldValue('3', 'MAX_RETRIES');" +
+            "pipeline.setFieldValue('1000', 'RETRY_DELAY_MS');" +
+            "pipeline.setFieldValue('TRUE', 'COLLECT_METRICS');" +
+            "pipeline.initSvg(); pipeline.render();" +
+            "return apexGenerator.forBlock['apex_pipeline_config'](pipeline, apexGenerator);"
+        );
+        assertTrue(result.contains("\"pipeline\""), "Should contain pipeline object");
+        assertTrue(result.contains("\"id\":\"my-pipeline\""), "Should contain pipeline id");
+        assertTrue(result.contains("\"mode\":\"sequential\""), "Should contain mode");
+        assertTrue(result.contains("\"error-handling\":\"fail-fast\""), "Should contain error-handling");
+        assertTrue(result.contains("\"max-retries\":3"), "Should contain max-retries");
+        assertTrue(result.contains("\"retry-delay-ms\":1000"), "Should contain retry-delay-ms");
+        assertTrue(result.contains("\"collect-metrics\":true"), "Should contain collect-metrics");
+    }
+
+    @Test
+    @Order(193)
+    @DisplayName("Test 193: Pipeline stage generates correct JSON")
+    void testPipelineStageGeneratesCorrectJson() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "workspace.clear();" +
+            "var stage = workspace.newBlock('apex_pipeline_stage');" +
+            "stage.setFieldValue('validation-stage', 'NAME');" +
+            "stage.setFieldValue('1', 'ORDER');" +
+            "stage.setFieldValue('TRUE', 'ENABLED');" +
+            "stage.setFieldValue('', 'DEPENDS_ON');" +
+            "stage.initSvg(); stage.render();" +
+            "return apexGenerator.forBlock['apex_pipeline_stage'](stage, apexGenerator);"
+        );
+        assertTrue(result.contains("\"name\":\"validation-stage\""), "Should contain stage name");
+        assertTrue(result.contains("\"order\":1"), "Should contain order");
+        assertTrue(result.contains("\"enabled\":true"), "Should contain enabled");
+    }
+
+    @Test
+    @Order(194)
+    @DisplayName("Test 194: Pipeline stage with depends-on")
+    void testPipelineStageWithDependsOn() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "workspace.clear();" +
+            "var stage = workspace.newBlock('apex_pipeline_stage');" +
+            "stage.setFieldValue('enrichment-stage', 'NAME');" +
+            "stage.setFieldValue('2', 'ORDER');" +
+            "stage.setFieldValue('TRUE', 'ENABLED');" +
+            "stage.setFieldValue('validation-stage', 'DEPENDS_ON');" +
+            "stage.initSvg(); stage.render();" +
+            "return apexGenerator.forBlock['apex_pipeline_stage'](stage, apexGenerator);"
+        );
+        assertTrue(result.contains("\"name\":\"enrichment-stage\""), "Should contain stage name");
+        assertTrue(result.contains("\"depends-on\":\"validation-stage\""), "Should contain depends-on");
+    }
+
+    @Test
+    @Order(195)
+    @DisplayName("Test 195: Pipeline config with parallel mode")
+    void testPipelineConfigWithParallelMode() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "workspace.clear();" +
+            "var pipeline = workspace.newBlock('apex_pipeline_config');" +
+            "pipeline.setFieldValue('parallel-pipeline', 'ID');" +
+            "pipeline.setFieldValue('parallel', 'MODE');" +
+            "pipeline.setFieldValue('continue-on-error', 'ERROR_HANDLING');" +
+            "pipeline.setFieldValue('5', 'MAX_RETRIES');" +
+            "pipeline.setFieldValue('2000', 'RETRY_DELAY_MS');" +
+            "pipeline.setFieldValue('FALSE', 'COLLECT_METRICS');" +
+            "pipeline.initSvg(); pipeline.render();" +
+            "return apexGenerator.forBlock['apex_pipeline_config'](pipeline, apexGenerator);"
+        );
+        assertTrue(result.contains("\"mode\":\"parallel\""), "Should contain parallel mode");
+        assertTrue(result.contains("\"error-handling\":\"continue-on-error\""), "Should contain continue-on-error");
+        assertTrue(result.contains("\"collect-metrics\":false"), "Should contain false metrics");
+    }
+
+    @Test
+    @Order(196)
+    @DisplayName("Test 196: Pipeline config with stages")
+    void testPipelineConfigWithStages() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "workspace.clear();" +
+            "var pipeline = workspace.newBlock('apex_pipeline_config');" +
+            "pipeline.setFieldValue('staged-pipeline', 'ID');" +
+            "var stage1 = workspace.newBlock('apex_pipeline_stage');" +
+            "stage1.setFieldValue('stage-1', 'NAME');" +
+            "stage1.setFieldValue('1', 'ORDER');" +
+            "stage1.setFieldValue('TRUE', 'ENABLED');" +
+            "var stage2 = workspace.newBlock('apex_pipeline_stage');" +
+            "stage2.setFieldValue('stage-2', 'NAME');" +
+            "stage2.setFieldValue('2', 'ORDER');" +
+            "stage2.setFieldValue('TRUE', 'ENABLED');" +
+            "stage2.setFieldValue('stage-1', 'DEPENDS_ON');" +
+            "pipeline.getInput('STAGES').connection.connect(stage1.previousConnection);" +
+            "stage1.nextConnection.connect(stage2.previousConnection);" +
+            "pipeline.initSvg(); pipeline.render();" +
+            "stage1.initSvg(); stage1.render();" +
+            "stage2.initSvg(); stage2.render();" +
+            "return apexGenerator.forBlock['apex_pipeline_config'](pipeline, apexGenerator);"
+        );
+        assertTrue(result.contains("\"stages\""), "Should contain stages array");
+        assertTrue(result.contains("\"name\":\"stage-1\""), "Should contain stage-1");
+        assertTrue(result.contains("\"name\":\"stage-2\""), "Should contain stage-2");
+        assertTrue(result.contains("\"depends-on\":\"stage-1\""), "Should contain dependency");
+    }
+
+    @Test
+    @Order(197)
+    @DisplayName("Test 197: Pipeline stage disabled")
+    void testPipelineStageDisabled() {
+        driver.get(baseUrl + "/apex_editor_main.html");
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("blocklyDiv")));
+
+        String result = (String) js.executeScript(
+            "var workspace = Blockly.getMainWorkspace();" +
+            "workspace.clear();" +
+            "var stage = workspace.newBlock('apex_pipeline_stage');" +
+            "stage.setFieldValue('disabled-stage', 'NAME');" +
+            "stage.setFieldValue('3', 'ORDER');" +
+            "stage.setFieldValue('FALSE', 'ENABLED');" +
+            "stage.initSvg(); stage.render();" +
+            "return apexGenerator.forBlock['apex_pipeline_stage'](stage, apexGenerator);"
+        );
+        assertTrue(result.contains("\"enabled\":false"), "Should contain enabled false");
+    }
 }
+

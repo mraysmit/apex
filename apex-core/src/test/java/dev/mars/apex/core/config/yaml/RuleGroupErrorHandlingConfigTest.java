@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * 
  * Tests that the error-handling field is properly parsed from YAML and applied to RuleGroup instances.
  *
- * @author APEX Rules Engine
+ * @author Mark A Ray-Smith
  * @since 1.0
  * @version 1.0
  */

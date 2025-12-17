@@ -10,9 +10,7 @@ import dev.mars.apex.core.service.monitoring.RulePerformanceMetrics;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
 import dev.mars.apex.core.util.RulesEngineLogger;
 import dev.mars.apex.core.util.TestAwareLogger;
-import dev.mars.apex.core.util.RuleParameterExtractor;
 import dev.mars.apex.core.util.LoggingContext;
-import dev.mars.apex.core.engine.config.MapPropertyAccessor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -22,10 +20,8 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,7 +38,7 @@ import java.util.regex.Pattern;
  * - Comprehensive logging and metrics
  * - Graceful error handling following APEX principles
  *
- * @author APEX Rules Engine
+ * @author Mark A Ray-Smith
  * @since 1.0
  * @version 1.0
  */

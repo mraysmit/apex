@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Performance monitoring
  * - Consistent error message formatting
  * 
- * @author APEX Rules Engine
+ * @author Mark A Ray-Smith
  * @since Phase 1 - Unified Evaluation Engine
  */
 @DisplayName("Unified Rule Evaluator Tests")

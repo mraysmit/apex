@@ -196,11 +196,11 @@
         </dependency>
 
 
-        <!-- Selenium WebDriver for UI testing -->
+        <!-- Selenium WebDriver for UI testing (4.39.0 adds CDP support for Chrome 143) -->
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
-            <version>4.15.0</version>
+            <version>4.39.0</version>
             <scope>test</scope>
         </dependency>
 
