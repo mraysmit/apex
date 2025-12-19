@@ -1,0 +1,20 @@
+metadata:
+  name: "Basic Rules Test"
+  version: "1.0"
+  description: "Test basic rule block import"
+
+rules:
+  - id: "rule-001"
+    condition: "#cusip != null"
+    message: "CUSIP is required"
+    severity: "ERROR"
+  
+  - id: "rule-002"
+    condition: "#quantity > 0"
+    message: "Quantity must be positive"
+    severity: "WARNING"
+  
+  - id: "rule-003"
+    condition: "#price >= 0.01"
+    message: "Price must be at least 0.01"
+    severity: "INFO"

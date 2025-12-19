@@ -1,0 +1,15 @@
+metadata:
+  name: "Scenario Test"
+  version: "1.0"
+
+scenario:
+  name: "Trade Classification"
+  classification:
+    field-name: "tradeType"
+    classifications:
+      - value: "EQUITY"
+        rules-ref: "equity-rules.yaml"
+      - value: "BOND"
+        rules-ref: "bond-rules.yaml"
+      - value: "DERIVATIVE"
+        rules-ref: "derivative-rules.yaml"

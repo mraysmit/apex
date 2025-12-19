@@ -1,0 +1,83 @@
+metadata:
+  name: "Multiple Data Source References Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test configuration with multiple external data source references"
+
+data-source-refs:
+  - name: "customer-database"
+    source: "data-sources/customer-db.yaml"
+    enabled: true
+    priority: 1
+    cache-enabled: true
+    cache-ttl-seconds: 300
+  
+  - name: "product-database"
+    source: "data-sources/product-db.yaml"
+    enabled: true
+    priority: 2
+    cache-enabled: true
+    cache-ttl-seconds: 600
+  
+  - name: "pricing-service"
+    source: "data-sources/pricing-api.yaml"
+    enabled: true
+    priority: 3
+    cache-enabled: false
+    timeout-ms: 5000
+  
+  - name: "inventory-service"
+    source: "data-sources/inventory-api.yaml"
+    enabled: false
+    priority: 4
+    fallback-enabled: true
+    fallback-data-source: "inventory-cache"
+
+enrichments:
+  - id: "customer-enrichment"
+    type: "lookup-enrichment"
+    source-field: "#customerId"
+    lookup-config:
+      lookup-dataset:
+        data-source-ref: "customer-database"
+        query-ref: "getCustomerByPK"
+      lookup-key-field: "customer_id"
+      result-mapping:
+        - source-field: "customer_name"
+          target-field: "customerName"
+        - source-field: "customer_tier"
+          target-field: "customerTier"
+
+  - id: "product-enrichment"
+    type: "lookup-enrichment"
+    source-field: "#productId"
+    lookup-config:
+      lookup-dataset:
+        data-source-ref: "product-database"
+        query-ref: "getProductByPK"
+      lookup-key-field: "product_id"
+      result-mapping:
+        - source-field: "product_name"
+          target-field: "productName"
+        - source-field: "category"
+          target-field: "productCategory"
+
+  - id: "pricing-enrichment"
+    type: "lookup-enrichment"
+    source-field: "#productId"
+    lookup-config:
+      lookup-dataset:
+        data-source-ref: "pricing-service"
+        query-ref: "getCurrentPrice"
+      lookup-key-field: "product_id"
+      result-mapping:
+        - source-field: "price"
+          target-field: "currentPrice"
+        - source-field: "discount_pct"
+          target-field: "discountPercentage"
+
+rules:
+  - id: "multi-datasource-rule-001"
+    condition: "#customerName != null && #productName != null"
+    message: "Both customer and product must be enriched"
+    severity: "ERROR"

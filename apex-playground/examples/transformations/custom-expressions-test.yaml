@@ -1,0 +1,54 @@
+metadata:
+  name: "Custom Expression Transformations Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test custom SpEL expression-based transformations"
+
+transformations:
+  - id: "custom-expression-transform"
+    name: "Custom Expression Transformations"
+    description: "Complex transformations using SpEL expressions"
+    type: "expression-based"
+    expressions:
+      - expression: "#firstName + ' ' + #lastName"
+        result-field: "fullName"
+        description: "Concatenate first and last name"
+      
+      - expression: "#amount * (1 + #taxRate)"
+        result-field: "amountWithTax"
+        description: "Calculate amount including tax"
+      
+      - expression: "#price * #quantity * (1 - #discountRate)"
+        result-field: "netAmount"
+        description: "Calculate net amount after discount"
+      
+      - expression: "#email.toLowerCase().trim()"
+        result-field: "normalizedEmail"
+        description: "Normalize email address"
+      
+      - expression: "#phone.replaceAll('[^0-9]', '')"
+        result-field: "cleanedPhone"
+        description: "Remove non-numeric characters from phone"
+      
+      - expression: "#description.substring(0, Math.min(#description.length(), 100))"
+        result-field: "truncatedDescription"
+        description: "Truncate description to 100 characters"
+      
+      - expression: "T(java.time.LocalDate).now().plusDays(#paymentTermDays)"
+        result-field: "dueDate"
+        description: "Calculate payment due date"
+      
+      - expression: "#riskScore > 0.8 ? 'HIGH' : (#riskScore > 0.5 ? 'MEDIUM' : 'LOW')"
+        result-field: "riskCategory"
+        description: "Categorize risk level"
+
+rules:
+  - id: "custom-expression-rule-001"
+    condition: "#fullName != null && #fullName.length() > 0"
+    message: "Full name must be generated"
+    severity: "ERROR"
+  
+  - id: "custom-expression-rule-002"
+    condition: "#amountWithTax >= #amount"
+    message: "Amount with tax should be greater than or equal to base amount"
+    severity: "ERROR"

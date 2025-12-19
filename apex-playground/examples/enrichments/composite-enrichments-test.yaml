@@ -1,0 +1,57 @@
+metadata:
+  name: "Composite Enrichments Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test composite enrichment combining multiple enrichment types"
+
+enrichments:
+  - id: "composite-customer-enrichment"
+    name: "Composite Customer Enrichment"
+    description: "Multi-stage customer data enrichment"
+    type: "composite-enrichment"
+    enrichment-chain:
+      - id: "lookup-customer-base"
+        type: "lookup-enrichment"
+        source-field: "#customerId"
+        lookup-config:
+          lookup-dataset:
+            type: "yaml-data"
+            data:
+              - key: "CUST001"
+                name: "Acme Corp"
+                tier: "GOLD"
+                creditLimit: 50000
+              - key: "CUST002"
+                name: "Beta LLC"
+                tier: "SILVER"
+                creditLimit: 25000
+          lookup-key-field: "key"
+          result-mapping:
+            - source-field: "name"
+              target-field: "customerName"
+            - source-field: "tier"
+              target-field: "customerTier"
+            - source-field: "creditLimit"
+              target-field: "creditLimit"
+      
+      - id: "calculate-available-credit"
+        type: "calculation-enrichment"
+        source-fields:
+          - "#creditLimit"
+          - "#currentBalance"
+        calculation:
+          expression: "#creditLimit - #currentBalance"
+          result-field: "availableCredit"
+      
+      - id: "transform-customer-name"
+        type: "transformation-enrichment"
+        transformations:
+          - source-field: "#customerName"
+            target-field: "normalizedCustomerName"
+            transformation-type: "UPPERCASE"
+
+rules:
+  - id: "composite-enrichment-rule-001"
+    condition: "#customerName != null && #availableCredit != null"
+    message: "Composite enrichment should provide both customer name and available credit"
+    severity: "ERROR"

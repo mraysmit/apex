@@ -1,0 +1,29 @@
+metadata:
+  name: "Scenario Rule Reference Routing Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test scenario-based routing using external rule file references"
+
+scenario:
+  name: "Product Type Routing"
+  description: "Route to different rule sets based on product type"
+  classification:
+    field-name: "productType"
+    classifications:
+      - value: "ELECTRONICS"
+        rules-ref: "rules/electronics-validation.yaml"
+      
+      - value: "CLOTHING"
+        rules-ref: "rules/clothing-validation.yaml"
+      
+      - value: "FOOD"
+        rules-ref: "rules/food-validation.yaml"
+      
+      - value: "BOOKS"
+        rules-ref: "rules/books-validation.yaml"
+
+rules:
+  - id: "product-routing-fallback"
+    condition: "#productType == null || #productType.isEmpty()"
+    message: "Product type is required for routing"
+    severity: "ERROR"

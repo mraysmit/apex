@@ -1,0 +1,46 @@
+metadata:
+  name: "Conditional Rules Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test conditional rule execution based on runtime context"
+
+rules:
+  - id: "conditional-rule-001"
+    condition: "#environment == 'PRODUCTION' && #amount > 10000"
+    message: "Production: Large amounts require additional validation"
+    severity: "ERROR"
+    enabled: "${ENV == 'PRODUCTION'}"
+  
+  - id: "conditional-rule-002"
+    condition: "#debugMode == true"
+    message: "Debug mode enabled - this is a test warning"
+    severity: "WARNING"
+    enabled: "${DEBUG_ENABLED == 'true'}"
+  
+  - id: "conditional-rule-003"
+    condition: "#userRole in {'ADMIN', 'SUPERVISOR'} implies #approvalOverride != null"
+    message: "Admin/Supervisor overrides must be documented"
+    severity: "ERROR"
+    enabled: true
+  
+  - id: "conditional-rule-004"
+    condition: "#businessHours == true && #urgentFlag == true"
+    message: "Urgent requests during business hours require immediate processing"
+    severity: "WARNING"
+    enabled: "${BUSINESS_HOURS_RULES == 'true'}"
+  
+  - id: "conditional-rule-005"
+    condition: "#complianceMode == 'STRICT'"
+    message: "Strict compliance mode activated"
+    severity: "INFO"
+    enabled: "${COMPLIANCE_MODE == 'STRICT'}"
+
+rule-groups:
+  - id: "environment-specific-group"
+    name: "Environment Specific Rules"
+    enabled: "${ENV != 'DEV'}"
+    rules:
+      - id: "env-specific-001"
+        condition: "#securityToken != null"
+        message: "Security token required in non-dev environments"
+        severity: "ERROR"

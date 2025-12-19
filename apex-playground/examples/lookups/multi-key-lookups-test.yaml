@@ -1,0 +1,62 @@
+metadata:
+  name: "Multi-Key Lookups Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test lookup enrichments with multiple key fields"
+
+enrichments:
+  - id: "multi-key-product-pricing-lookup"
+    type: "lookup-enrichment"
+    source-fields:
+      - "#productId"
+      - "#region"
+      - "#customerTier"
+    lookup-config:
+      lookup-dataset:
+        type: "yaml-data"
+        data:
+          - productId: "PROD001"
+            region: "US"
+            tier: "GOLD"
+            price: 99.99
+            discount: 0.15
+          - productId: "PROD001"
+            region: "US"
+            tier: "SILVER"
+            price: 99.99
+            discount: 0.10
+          - productId: "PROD001"
+            region: "EU"
+            tier: "GOLD"
+            price: 89.99
+            discount: 0.15
+          - productId: "PROD002"
+            region: "US"
+            tier: "GOLD"
+            price: 149.99
+            discount: 0.20
+      lookup-key-fields:
+        - "productId"
+        - "region"
+        - "tier"
+      result-mapping:
+        - source-field: "price"
+          target-field: "basePrice"
+        - source-field: "discount"
+          target-field: "discountRate"
+  
+  - id: "calculate-final-price"
+    type: "calculation-enrichment"
+    source-fields:
+      - "#basePrice"
+      - "#discountRate"
+      - "#quantity"
+    calculation:
+      expression: "#basePrice * (1 - #discountRate) * #quantity"
+      result-field: "finalPrice"
+
+rules:
+  - id: "multi-key-lookup-rule-001"
+    condition: "#basePrice != null && #discountRate != null"
+    message: "Multi-key lookup should find pricing data"
+    severity: "ERROR"

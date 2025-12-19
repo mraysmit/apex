@@ -1,0 +1,51 @@
+metadata:
+  name: "Inline Rules Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test inline rule definitions within components and scenarios"
+
+components:
+  - id: "inline-rules-component"
+    name: "Inline Rules Component"
+    description: "Component with inline rule definitions"
+    enabled: true
+    rules:
+      - id: "inline-comp-rule-001"
+        condition: "#status == 'ACTIVE'"
+        message: "Record must be active"
+        severity: "ERROR"
+      
+      - id: "inline-comp-rule-002"
+        condition: "#lastModified != null"
+        message: "Last modified timestamp required"
+        severity: "WARNING"
+
+scenario:
+  name: "Inline Rules Scenario"
+  classification:
+    field-name: "category"
+    classifications:
+      - value: "STANDARD"
+        rules:
+          - id: "inline-scenario-rule-001"
+            condition: "#priority in {1, 2, 3}"
+            message: "Standard items must have priority 1-3"
+            severity: "ERROR"
+      
+      - value: "PREMIUM"
+        rules:
+          - id: "inline-scenario-rule-002"
+            condition: "#priority == 1"
+            message: "Premium items must have priority 1"
+            severity: "ERROR"
+          
+          - id: "inline-scenario-rule-003"
+            condition: "#premiumFeatures != null && !#premiumFeatures.isEmpty()"
+            message: "Premium items must have features defined"
+            severity: "WARNING"
+
+rules:
+  - id: "standalone-rule-001"
+    condition: "#category != null"
+    message: "Category required for classification"
+    severity: "ERROR"

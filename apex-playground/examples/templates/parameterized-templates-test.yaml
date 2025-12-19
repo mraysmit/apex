@@ -1,0 +1,94 @@
+metadata:
+  name: "Parameterized Templates Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test parameterized templates with type safety and validation"
+
+templates:
+  rule-templates:
+    - id: "field-comparison-template"
+      name: "Field Comparison Template"
+      description: "Compare two fields with configurable operator"
+      parameters:
+        - name: "leftField"
+          type: "string"
+          required: true
+        - name: "operator"
+          type: "enum"
+          enum-values: ["EQUALS", "NOT_EQUALS", "GREATER_THAN", "LESS_THAN", "GREATER_EQUAL", "LESS_EQUAL"]
+          required: true
+        - name: "rightField"
+          type: "string"
+          required: true
+        - name: "message"
+          type: "string"
+          required: true
+      rule-definition:
+        condition: "${leftField} ${operatorSymbol} ${rightField}"
+        message: "${message}"
+        severity: "ERROR"
+      derived-parameters:
+        operatorSymbol: "switch(${operator}) { case 'EQUALS': '=='; case 'NOT_EQUALS': '!='; case 'GREATER_THAN': '>'; case 'LESS_THAN': '<'; case 'GREATER_EQUAL': '>='; case 'LESS_EQUAL': '<='; }"
+    
+    - id: "list-membership-template"
+      name: "List Membership Template"
+      description: "Validate field value is in allowed list"
+      parameters:
+        - name: "fieldName"
+          type: "string"
+          required: true
+        - name: "allowedValues"
+          type: "array"
+          required: true
+        - name: "errorMessage"
+          type: "string"
+          required: true
+      rule-definition:
+        condition: "#{${fieldName}} in {${allowedValues}}"
+        message: "${errorMessage}"
+        severity: "ERROR"
+
+  enrichment-templates:
+    - id: "calculation-template"
+      name: "Calculation Template"
+      description: "Generic calculation enrichment"
+      parameters:
+        - name: "expression"
+          type: "string"
+          required: true
+        - name: "resultField"
+          type: "string"
+          required: true
+        - name: "sourceFields"
+          type: "array"
+          required: true
+      enrichment-definition:
+        type: "calculation-enrichment"
+        source-fields: "${sourceFields}"
+        calculation:
+          expression: "${expression}"
+          result-field: "${resultField}"
+
+rules:
+  - template-ref: "field-comparison-template"
+    id: "effective-date-check"
+    parameters:
+      leftField: "#effectiveDate"
+      operator: "LESS_EQUAL"
+      rightField: "#expiryDate"
+      message: "Effective date must be before expiry date"
+  
+  - template-ref: "list-membership-template"
+    id: "status-validation"
+    parameters:
+      fieldName: "status"
+      allowedValues: ["ACTIVE", "INACTIVE", "PENDING", "SUSPENDED"]
+      errorMessage: "Status must be ACTIVE, INACTIVE, PENDING, or SUSPENDED"
+
+enrichments:
+  - template-ref: "calculation-template"
+    id: "total-amount-calc"
+    parameters:
+      expression: "#quantity * #price * (1 - #discount)"
+      resultField: "totalAmount"
+      sourceFields: ["#quantity", "#price", "#discount"]

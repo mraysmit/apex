@@ -1,0 +1,60 @@
+metadata:
+  name: "Advanced Rule Groups Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test advanced rule group features with priorities and dependencies"
+
+rule-groups:
+  - id: "critical-validation-group"
+    name: "Critical Validation Rules"
+    description: "Must pass before other groups execute"
+    priority: 1
+    stop-on-first-failure: true
+    execution-mode: "SEQUENTIAL"
+    rules:
+      - id: "critical-001"
+        condition: "#recordId != null"
+        message: "Record ID is mandatory"
+        severity: "ERROR"
+      
+      - id: "critical-002"
+        condition: "#recordType != null"
+        message: "Record type is mandatory"
+        severity: "ERROR"
+
+  - id: "business-rules-group"
+    name: "Business Rules"
+    description: "Standard business validation rules"
+    priority: 2
+    stop-on-first-failure: false
+    execution-mode: "PARALLEL"
+    depends-on:
+      - "critical-validation-group"
+    rules:
+      - id: "business-001"
+        condition: "#amount > 0"
+        message: "Amount must be positive"
+        severity: "ERROR"
+      
+      - id: "business-002"
+        condition: "#currency != null"
+        message: "Currency required"
+        severity: "ERROR"
+      
+      - id: "business-003"
+        condition: "#effectiveDate <= #today"
+        message: "Effective date cannot be in the future"
+        severity: "WARNING"
+
+  - id: "quality-checks-group"
+    name: "Data Quality Checks"
+    description: "Optional quality validation"
+    priority: 3
+    stop-on-first-failure: false
+    execution-mode: "PARALLEL"
+    enabled: "${QUALITY_CHECKS_ENABLED == 'true'}"
+    rules:
+      - id: "quality-001"
+        condition: "#description != null && #description.length() > 10"
+        message: "Description should be meaningful"
+        severity: "INFO"

@@ -1,0 +1,71 @@
+metadata:
+  name: "Fallback Values Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test lookup enrichments with fallback and default values"
+
+enrichments:
+  - id: "lookup-with-fallback"
+    type: "lookup-enrichment"
+    source-field: "#countryCode"
+    lookup-config:
+      lookup-dataset:
+        type: "yaml-data"
+        data:
+          - key: "US"
+            name: "United States"
+            currency: "USD"
+            taxRate: 0.08
+          - key: "UK"
+            name: "United Kingdom"
+            currency: "GBP"
+            taxRate: 0.20
+          - key: "DE"
+            name: "Germany"
+            currency: "EUR"
+            taxRate: 0.19
+      lookup-key-field: "key"
+      fallback-on-miss: true
+      fallback-values:
+        name: "Unknown Country"
+        currency: "USD"
+        taxRate: 0.10
+      result-mapping:
+        - source-field: "name"
+          target-field: "countryName"
+        - source-field: "currency"
+          target-field: "currency"
+        - source-field: "taxRate"
+          target-field: "taxRate"
+  
+  - id: "lookup-with-default-values"
+    type: "lookup-enrichment"
+    source-field: "#productCategory"
+    lookup-config:
+      lookup-dataset:
+        type: "yaml-data"
+        data:
+          - key: "ELECTRONICS"
+            warranty: 24
+            shippingClass: "FRAGILE"
+          - key: "CLOTHING"
+            warranty: 6
+            shippingClass: "STANDARD"
+      lookup-key-field: "key"
+      allow-null-result: true
+      default-values:
+        warranty: 12
+        shippingClass: "STANDARD"
+      result-mapping:
+        - source-field: "warranty"
+          target-field: "warrantyMonths"
+          default-value: 12
+        - source-field: "shippingClass"
+          target-field: "shippingClass"
+          default-value: "STANDARD"
+
+rules:
+  - id: "fallback-rule-001"
+    condition: "#countryName != null && #currency != null"
+    message: "Lookup should always provide values (via fallback if needed)"
+    severity: "INFO"

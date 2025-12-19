@@ -1,0 +1,64 @@
+metadata:
+  name: "Component Dependencies Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test component dependency chains and failure propagation"
+
+components:
+  - id: "foundation-component"
+    name: "Foundation Component"
+    description: "Base component with no dependencies"
+    enabled: true
+    execution-policy: "REQUIRED"
+    on-failure: "ABORT"
+    rules:
+      - id: "foundation-001"
+        condition: "#sourceSystem != null"
+        message: "Source system must be specified"
+        severity: "ERROR"
+
+  - id: "dependent-component-a"
+    name: "Dependent Component A"
+    description: "Depends on foundation component"
+    enabled: true
+    execution-policy: "REQUIRED"
+    depends-on:
+      - "foundation-component"
+    on-failure: "SKIP_DEPENDENT"
+    enrichments:
+      - id: "source-system-validation"
+        type: "calculation-enrichment"
+        source-fields:
+          - "#sourceSystem"
+        calculation:
+          expression: "#sourceSystem.toUpperCase()"
+          result-field: "normalizedSourceSystem"
+
+  - id: "dependent-component-b"
+    name: "Dependent Component B"
+    description: "Depends on foundation component"
+    enabled: true
+    execution-policy: "REQUIRED"
+    depends-on:
+      - "foundation-component"
+    on-failure: "CONTINUE"
+    rules:
+      - id: "dependent-b-001"
+        condition: "#sourceSystem in {'SYSTEM_A', 'SYSTEM_B', 'SYSTEM_C'}"
+        message: "Source system must be recognized"
+        severity: "WARNING"
+
+  - id: "final-component"
+    name: "Final Component"
+    description: "Depends on both A and B"
+    enabled: true
+    execution-policy: "OPTIONAL"
+    depends-on:
+      - "dependent-component-a"
+      - "dependent-component-b"
+    on-failure: "LOG_ONLY"
+    rules:
+      - id: "final-001"
+        condition: "#normalizedSourceSystem != null"
+        message: "Normalized source system should be available"
+        severity: "INFO"

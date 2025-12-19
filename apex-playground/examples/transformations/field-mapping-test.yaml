@@ -1,0 +1,56 @@
+metadata:
+  name: "Field Mapping Transformation Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test field mapping and renaming transformations"
+
+transformations:
+  - id: "field-mapping-transform"
+    name: "Field Mapping Transformation"
+    description: "Maps source fields to target schema"
+    type: "field-mapping"
+    mappings:
+      - source-field: "#custId"
+        target-field: "customerId"
+        required: true
+      
+      - source-field: "#custName"
+        target-field: "customerName"
+        required: true
+      
+      - source-field: "#orderAmt"
+        target-field: "orderAmount"
+        required: true
+      
+      - source-field: "#orderDt"
+        target-field: "orderDate"
+        required: true
+      
+      - source-field: "#shpAddr"
+        target-field: "shippingAddress"
+        required: false
+      
+      - source-field: "#billAddr"
+        target-field: "billingAddress"
+        required: false
+        default-value: "${shippingAddress}"
+
+enrichments:
+  - id: "post-mapping-enrichment"
+    type: "calculation-enrichment"
+    source-fields:
+      - "#customerName"
+    calculation:
+      expression: "#customerName.toUpperCase()"
+      result-field: "normalizedCustomerName"
+
+rules:
+  - id: "field-mapping-rule-001"
+    condition: "#customerId != null"
+    message: "Customer ID must be mapped"
+    severity: "ERROR"
+  
+  - id: "field-mapping-rule-002"
+    condition: "#orderAmount > 0"
+    message: "Order amount must be positive after mapping"
+    severity: "ERROR"

@@ -1,0 +1,28 @@
+metadata:
+  name: "Execution Options Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test various execution and performance options"
+
+execution-options:
+  continue-on-error: false
+  fail-fast: true
+  log-level: "DEBUG"
+  timeout-seconds: 600
+  retry-attempts: 5
+  retry-delay-ms: 1000
+  cache-enabled: true
+  cache-size: 1000
+  performance-monitoring: true
+  metrics-enabled: true
+
+rules:
+  - id: "exec-opt-rule-001"
+    condition: "#timestamp != null"
+    message: "Timestamp required"
+    severity: "ERROR"
+
+  - id: "exec-opt-rule-002"
+    condition: "#processingTime < 5000"
+    message: "Processing time must be under 5 seconds"
+    severity: "WARNING"
