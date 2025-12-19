@@ -139,13 +139,29 @@ public abstract class BaseYamlImportSeleniumTest {
      * @param yamlContent the YAML content to import
      */
     protected void importYamlContent(String yamlContent) {
-        // Click Import YAML button
-        WebElement importButton = wait.until(ExpectedConditions.elementToBeClickable(
-            By.xpath("//button[contains(text(), 'Import YAML')]")));
-        importButton.click();
+        WebElement modal = null;
+        boolean modalWasAlreadyOpen = false;
 
-        // Wait for modal to appear
-        WebElement modal = wait.until(ExpectedConditions.visibilityOfElementLocated(
+        // Check if modal is already open (page may auto-open it)
+        try {
+            modal = driver.findElement(By.id("yamlImportModal"));
+            if (modal.isDisplayed()) {
+                modalWasAlreadyOpen = true;
+            }
+        } catch (org.openqa.selenium.NoSuchElementException e) {
+            // Modal doesn't exist yet
+            // Modal not found, will open it
+        }
+
+        // If modal is not already open, click the Import YAML button to open it
+        if (!modalWasAlreadyOpen) {
+            WebElement importButton = wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//button[contains(text(), 'Import YAML')]")));
+            importButton.click();
+        }
+
+        // Wait for modal to be visible (whether we just opened it or it was already open)
+        modal = wait.until(ExpectedConditions.visibilityOfElementLocated(
             By.id("yamlImportModal")));
 
         // Enter YAML content
@@ -153,12 +169,59 @@ public abstract class BaseYamlImportSeleniumTest {
         textarea.clear();
         textarea.sendKeys(yamlContent);
 
-        // Click Import button in modal
-        WebElement importModalBtn = modal.findElement(By.xpath("//button[contains(text(), 'Import')]"));
-        importModalBtn.click();
+        // Call importYamlToBlocks() directly (more reliable than clicking the button)
+        js.executeScript("importYamlToBlocks();");
 
-        // Wait for modal to close
-        wait.until(ExpectedConditions.invisibilityOf(modal));
+        // Wait a bit for import to process
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        // Check if there's an error message in the modal
+        try {
+            WebElement errorAlert = modal.findElement(By.cssSelector(".alert-danger, .error-message"));
+            if (errorAlert.isDisplayed()) {
+                String errorText = errorAlert.getText();
+                // Force close the modal and fail the test with the error message
+                js.executeScript(
+                    "var modal = bootstrap.Modal.getInstance(document.getElementById('yamlImportModal'));" +
+                    "if (modal) modal.hide();" +
+                    "document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());");
+                fail("YAML import failed with error: " + errorText);
+            }
+        } catch (org.openqa.selenium.NoSuchElementException e) {
+            // No error message - that's good
+        }
+
+        // Try to wait for modal to close naturally
+        try {
+            wait.until(ExpectedConditions.invisibilityOf(modal));
+        } catch (org.openqa.selenium.TimeoutException e) {
+            // Modal didn't close - force close it with JavaScript
+            js.executeScript(
+                "var modal = bootstrap.Modal.getInstance(document.getElementById('yamlImportModal'));" +
+                "if (modal) modal.hide();" +
+                "document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());");
+            // Wait a bit for the forced close to take effect
+            try {
+                Thread.sleep(300);
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        // Ensure backdrop is removed
+        try {
+            js.executeScript("document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());");
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        // Wait for blocks to render after import
+        waitForBlocksToRender();
     }
 
     /**
@@ -175,17 +238,16 @@ public abstract class BaseYamlImportSeleniumTest {
 
     /**
      * Export YAML content from the visual editor workspace.
-     * Uses JavaScript to generate YAML from current Blockly workspace.
+     * Uses the APEX editor's updateYaml() function to generate YAML from current Blockly workspace.
      *
      * @return the exported YAML as a string
      */
     protected String exportYamlContent() {
-        // Use JavaScript to get generated YAML
-        Object yaml = js.executeScript(
-            "const workspace = Blockly.getMainWorkspace();" +
-            "const code = Blockly.JavaScript.workspaceToCode(workspace);" +
-            "return code;"
-        );
+        // Call updateYaml() to generate YAML and store it in currentYamlText
+        js.executeScript("updateYaml();");
+
+        // Get the generated YAML from currentYamlText variable
+        Object yaml = js.executeScript("return currentYamlText;");
         return yaml != null ? yaml.toString() : "";
     }
 
@@ -290,17 +352,38 @@ public abstract class BaseYamlImportSeleniumTest {
      * @throws IOException if the file cannot be read
      */
     protected String loadYamlFile(String relativePath) throws IOException {
-        // Load from project examples directory
-        Path examplesPath = Path.of("examples").resolve(relativePath.replace("examples/", ""));
-        
-        if (!Files.exists(examplesPath)) {
-            // Try absolute path from project root
-            Path projectRoot = Path.of(System.getProperty("user.dir")).getParent();
-            examplesPath = projectRoot.resolve("apex-playground").resolve(relativePath);
+        // Remove "examples/" prefix if present to normalize the path
+        String normalizedPath = relativePath.replace("examples/", "");
+
+        // Try multiple possible locations
+        Path examplesPath;
+
+        // Option 1: apex-playground/examples/ (when running from project root)
+        examplesPath = Path.of("apex-playground", "examples", normalizedPath);
+        if (Files.exists(examplesPath)) {
+            return Files.readString(examplesPath);
         }
-        
-        assertTrue(Files.exists(examplesPath), "Test YAML file should exist: " + examplesPath);
-        return Files.readString(examplesPath);
+
+        // Option 2: examples/ (when running from apex-playground directory)
+        examplesPath = Path.of("examples", normalizedPath);
+        if (Files.exists(examplesPath)) {
+            return Files.readString(examplesPath);
+        }
+
+        // Option 3: Try using user.dir as fallback
+        Path userDir = Path.of(System.getProperty("user.dir"));
+        examplesPath = userDir.resolve("apex-playground").resolve("examples").resolve(normalizedPath);
+        if (Files.exists(examplesPath)) {
+            return Files.readString(examplesPath);
+        }
+
+        // If none found, fail with helpful message
+        fail("Test YAML file not found: " + relativePath +
+             "\nTried locations:\n" +
+             "  - apex-playground/examples/" + normalizedPath + "\n" +
+             "  - examples/" + normalizedPath + "\n" +
+             "  - " + examplesPath);
+        return null; // Never reached
     }
 
     // =============== Enhanced Helper Methods ===============

@@ -1,0 +1,51 @@
+# Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# ============================================================================
+# LIMITATION: Dot-path without SpEL prefix creates a literal key
+# ============================================================================
+# Tests: testDotPathWithoutSpelCreatesLiteralKey
+#
+# PROBLEM:
+# When target-field is "nested.field" (without the # SpEL prefix), APEX treats
+# the entire string "nested.field" as a literal map key, NOT as a path to
+# navigate into a nested structure.
+#
+# RESULT:
+# Instead of creating: { "nested": { "field": "value" } }
+# You get:             { "nested.field": "value" }
+#
+# CORRECT APPROACH:
+# Use SpEL prefix "#" to indicate path navigation:
+#   target-field: "#nested.field"    <- navigates into nested.field
+#   target-field: "nested.field"     <- creates literal key "nested.field"
+#
+# NOTE: Even with SpEL prefix, the intermediate structure must exist.
+# See NestedTargetFieldEnrichmentTest-missing-structure.yaml for that limitation.
+# ============================================================================
+
+metadata:
+  id: "literal-key-demo"
+  name: "Literal Key Demonstration"
+  version: "1.0.0"
+  description: "Demonstrates that dot-paths without SpEL prefix are treated as literal keys"
+
+enrichments:
+  - id: "literal-key-enrichment"
+    type: "field-enrichment"
+    condition: "true"
+    field-mappings:
+      - source-field: "value"
+        target-field: "nested.field"
+

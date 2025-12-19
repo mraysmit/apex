@@ -1,5 +1,7 @@
 metadata:
+  id: "component-datasource-test"
   name: "Component Test"
+  type: "rule-config"
   version: "1.0"
 
 data-source-refs:
@@ -16,3 +18,5 @@ components:
         condition: "#tradeId != null"
         message: "Trade ID required"
         severity: "ERROR"
+
+# Modified by Selenium Test
