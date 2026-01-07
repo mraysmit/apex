@@ -1,0 +1,55 @@
+# Complex Rules Scenario for Stream Loading Tests
+# Referenced by test-registry.yaml
+
+metadata:
+  id: "complex-rules"
+  name: "Complex Rules Scenario"
+  description: "Complex scenario with multiple rule groups for testing stream loading"
+  type: "scenario"
+  version: "1.0.0"
+
+scenario:
+  scenario-id: "complex-rules"
+  business-domain: "Testing"
+  classification: "rules"
+
+rule-groups:
+  - group-id: "amount-validation"
+    name: "Amount Validation Rules"
+    description: "Rules for validating amount fields"
+    rules:
+      - id: "amount-range-rule"
+        name: "Amount Range Check"
+        condition: "#amount >= 0 && #amount <= 1000000"
+        message: "Amount must be between 0 and 1,000,000"
+        severity: "ERROR"
+      
+      - id: "amount-precision-rule"
+        name: "Amount Precision Check"
+        condition: "T(java.math.BigDecimal).valueOf(#amount).scale() <= 2"
+        message: "Amount cannot have more than 2 decimal places"
+        severity: "WARNING"
+
+  - group-id: "date-validation"
+    name: "Date Validation Rules"
+    description: "Rules for validating date fields"
+    rules:
+      - id: "trade-date-rule"
+        name: "Trade Date Check"
+        condition: "#tradeDate != null"
+        message: "Trade date is required"
+        severity: "ERROR"
+      
+      - id: "settlement-date-rule"
+        name: "Settlement Date After Trade"
+        condition: "#settlementDate == null || #settlementDate.isAfter(#tradeDate)"
+        message: "Settlement date must be after trade date"
+        severity: "ERROR"
+
+rules:
+  - id: "standalone-rule-1"
+    name: "Overall Status Check"
+    description: "Checks overall transaction status"
+    condition: "#status != 'REJECTED'"
+    message: "Transaction has been rejected"
+    severity: "INFO"

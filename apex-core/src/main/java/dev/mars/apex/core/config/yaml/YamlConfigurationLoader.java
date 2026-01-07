@@ -319,7 +319,59 @@ public class YamlConfigurationLoader {
         }
     }
 
+    /**
+     * Load raw YAML content as a Map from an InputStream.
+     * 
+     * <p>This method is useful for loading YAML content from classpath resources
+     * or other stream-based sources, such as JAR-packaged resources.</p>
+     *
+     * @param inputStream The input stream containing YAML content
+     * @return The YAML content as a Map
+     * @throws YamlConfigurationException if loading fails or inputStream is null
+     */
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> loadAsMap(InputStream inputStream) throws YamlConfigurationException {
+        if (inputStream == null) {
+            throw new YamlConfigurationException("Input stream cannot be null");
+        }
+        
+        try {
+            logger.info("Loading YAML from input stream as Map");
+            Map<String, Object> yamlContent = yamlMapper.readValue(inputStream, Map.class);
 
+            // Validate metadata using YamlMetadataValidator
+            YamlMetadataValidator.validateMetadataAndThrow(yamlContent, "<stream>");
+
+            return yamlContent;
+
+        } catch (IOException e) {
+            throw new YamlConfigurationException("Failed to load YAML from input stream as Map", e);
+        }
+    }
+
+    /**
+     * Load raw YAML content as a Map from a classpath resource.
+     * 
+     * <p>This is a convenience method that combines resource lookup and
+     * stream-based loading for classpath resources.</p>
+     *
+     * @param resourcePath The classpath resource path
+     * @return The YAML content as a Map
+     * @throws YamlConfigurationException if the resource is not found or loading fails
+     */
+    public Map<String, Object> loadAsMapFromClasspath(String resourcePath) throws YamlConfigurationException {
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
+            if (inputStream == null) {
+                throw new YamlConfigurationException("Classpath resource not found: " + resourcePath);
+            }
+
+            logger.info("Loading YAML from classpath as Map: " + resourcePath);
+            return loadAsMap(inputStream);
+
+        } catch (IOException e) {
+            throw new YamlConfigurationException("Failed to load YAML from classpath as Map: " + resourcePath, e);
+        }
+    }
 
     /**
      * Check if a YAML file is a component file by examining its type field.
