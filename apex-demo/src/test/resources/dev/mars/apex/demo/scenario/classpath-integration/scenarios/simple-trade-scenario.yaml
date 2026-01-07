@@ -1,0 +1,60 @@
+# Simple Trade Scenario for Classpath Integration Tests
+# Basic validation scenario for testing classpath loading
+# Part of the Unified Resource Loading for APEX Configuration implementation
+
+metadata:
+  id: "simple-trade-validation"
+  name: "Simple Trade Validation Scenario"
+  description: "Basic trade validation scenario loaded from classpath"
+  type: "scenario"
+  version: "1.0.0"
+  owner: "APEX Test Team"
+  business-domain: "Trading"
+
+scenario:
+  scenario-id: "simple-trade-validation"
+  business-domain: "Trading"
+  classification: "simple-trade"
+  
+  data-types:
+    - "java.util.Map"
+  
+  stages:
+    - stage-id: "validation"
+      name: "Basic Validation"
+      description: "Basic trade validation rules"
+      order: 1
+      failure-policy: "terminate"
+
+  # Embedded rule configurations
+  rule-configurations:
+    - id: "simple-validation-rules"
+      stage: "validation"
+      rules:
+        - id: "trade-id-check"
+          name: "Trade ID Required"
+          description: "Validates that trade ID is present"
+          condition: "#tradeId != null && !#tradeId.isEmpty()"
+          message: "Trade ID is required"
+          severity: "ERROR"
+
+        - id: "trade-quantity-check"
+          name: "Quantity Positive"
+          description: "Validates that quantity is positive"
+          condition: "#quantity != null && #quantity > 0"
+          message: "Quantity must be positive"
+          severity: "ERROR"
+
+        - id: "trade-price-check"
+          name: "Price Positive"
+          description: "Validates that price is positive"
+          condition: "#price != null && #price > 0"
+          message: "Price must be positive"
+          severity: "ERROR"
+
+        - id: "trade-currency-check"
+          name: "Currency Format"
+          description: "Validates currency code format"
+          condition: "#currency != null && #currency matches '^[A-Z]{3}$'"
+          message: "Currency must be a valid 3-letter ISO code"
+          severity: "WARNING"
