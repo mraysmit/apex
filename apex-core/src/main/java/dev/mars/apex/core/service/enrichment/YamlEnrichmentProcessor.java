@@ -857,15 +857,20 @@ public class YamlEnrichmentProcessor {
                         hasRequiredFieldFailure = true;
                     }
                 } else {
-                    // SERIOUS ERROR: Field mapping produced null value - this likely means:
-                    // 1. Source field lookup failed (field doesn't exist)
-                    // 2. Expression evaluation returned null
-                    // 3. No default value was provided
-                    logger.error("FIELD MAPPING FAILED: source-field '" + mapping.getSourceField() +
-                               "' -> target-field '" + mapping.getTargetField() +
-                               "' produced NULL value. Target field was NOT set. " +
-                               "Check: (1) source field exists, (2) expression is valid, (3) default-value is provided if needed.");
-                    hasRequiredFieldFailure = true;
+                    // Value is null - check if the field is required
+                    boolean isRequired = mapping.getRequired() != null && mapping.getRequired();
+                    if (isRequired) {
+                        // Required field produced null - this is a failure
+                        logger.error("REQUIRED FIELD MAPPING FAILED: source-field '" + mapping.getSourceField() +
+                                   "' -> target-field '" + mapping.getTargetField() +
+                                   "' produced NULL value but field is marked as required. " +
+                                   "Check: (1) source field exists, (2) expression is valid, (3) default-value is provided.");
+                        hasRequiredFieldFailure = true;
+                    } else {
+                        // Non-required field with null value - just skip it (this is OK)
+                        logger.debug("Field mapping skipped (null value, not required): source-field '" + 
+                                   mapping.getSourceField() + "' -> target-field '" + mapping.getTargetField() + "'");
+                    }
                 }
 
             } catch (Exception e) {
