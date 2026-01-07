@@ -2,7 +2,9 @@
 
 **Version:** 2.0
 **Date:** 2025-12-07
-**Status:** Prototype
+**Status:** Definitive Reference
+
+> **📘 Note**: This is the authoritative documentation for the APEX Visual Editor (Blockly-based). For historical keyword coverage analysis
 
 ## Overview
 
@@ -842,6 +844,211 @@ The following table illustrates how visual blocks map to the APEX YAML specifica
 *   **Customization**: The block definitions and code generators are located in the `<script>` section of the HTML file.
 *   **Collapsible Sections**: Uses custom `FieldCollapsibleSection` field for collapsing optional metadata.
 *   **Dynamic Dropdowns**: Rule Reference and Field Reference blocks use dynamic dropdowns populated from workspace content.
+
+## YAML Import Validation
+
+This section provides a comprehensive testing framework for validating that YAML files correctly import into the visual editor and generate the appropriate block structures. This enables verification that the block definitions accurately represent YAML configurations and supports round-trip testing (YAML → Blocks → YAML).
+
+### Import Testing Overview
+
+The visual editor should be able to:
+1. **Parse valid YAML** configurations and convert them into the corresponding block structures
+2. **Populate block fields** with values from the YAML (IDs, conditions, messages, etc.)
+3. **Reconstruct nested structures** (enrichments, lookups, scenarios, error recovery)
+4. **Handle SpEL expressions** within condition blocks and field references
+5. **Support round-trip conversion** (imported YAML → blocks → exported YAML should match semantically)
+
+### Test YAML Samples
+
+The following YAML samples should be used to validate import functionality. Each sample tests specific block categories and structures.
+
+#### Test 1: Basic Rules Configuration
+
+**File:** `examples/validation/basic-rules-test.yaml`
+
+**Expected Blocks:**
+- 1 Configuration block (metadata populated)
+- 3 Rule blocks with:
+  - ID field populated
+  - Condition as SpEL expression
+  - Message text
+  - Severity dropdown set correctly (ERROR/WARNING/INFO)
+
+---
+
+#### Test 2: Lookup Enrichment
+
+**File:** `examples/lookup/lookup-enrichment-test.yaml`
+
+**Expected Blocks:**
+- 1 Configuration block
+- 1 Lookup Enrichment block with:
+  - ID: "currency-lookup"
+  - Source Field: "#currencyCode"
+  - Nested Lookup Dataset block (type: yaml-data)
+  - Lookup Key Field: "code"
+  - 2 Result Mapping blocks correctly populated
+
+---
+
+#### Test 3: Calculation Enrichment
+
+**File:** `examples/enrichment/calculation-enrichment-test.yaml`
+
+**Expected Blocks:**
+- 1 Configuration block
+- 1 Calculation Enrichment block with:
+  - ID: "total-value-calc"
+  - Source Fields list: ["#quantity", "#price"]
+  - Calculation block with:
+    - Expression: "#quantity * #price"
+    - Result Field: "totalValue"
+
+---
+
+#### Test 4: Scenario with Classification
+
+**File:** `examples/conditional/scenario-classification-test.yaml`
+
+**Expected Blocks:**
+- 1 Configuration block
+- 1 Scenario block with:
+  - Name: "Trade Classification"
+  - 1 Classification block with:
+    - Field Name: "tradeType"
+    - 3 Classification Entry blocks (EQUITY, BOND, DERIVATIVE)
+    - Each entry with value and rules reference
+
+---
+
+#### Test 5: Error Recovery with Severity Policies
+
+**File:** `examples/validation/error-recovery-test.yaml`
+
+**Expected Blocks:**
+- 1 Configuration block
+- 1 Error Recovery block with:
+  - Default Action: "CONTINUE"
+  - 2 Severity Policy blocks:
+    - ERROR policy (action: FAIL, max: 0)
+    - WARNING policy (action: CONTINUE, max: 10, log-level: WARN)
+
+---
+
+#### Test 6: Component with External Data Source Reference
+
+**File:** `examples/basic/component-datasource-test.yaml`
+
+**Expected Blocks:**
+- 1 Configuration block with metadata
+- 1 Data Source Reference block:
+  - Name: "trade-database"
+  - Source: "data-sources/trade-db.yaml"
+  - Enabled: true
+- 1 Component block:
+  - ID: "trade-validator"
+  - Name and description populated
+  - 1 nested Rule block (trade-001)
+
+---
+
+### Validation Checklist
+
+When testing YAML import, verify the following:
+
+#### Block Structure
+- [ ] Correct block types are created for each YAML section
+- [ ] Block nesting matches YAML structure (enrichments contain lookups, scenarios contain stages, etc.)
+- [ ] Block count matches expected count from YAML
+
+#### Field Population
+- [ ] All ID fields are correctly populated
+- [ ] Text fields (name, description, message) contain correct values
+- [ ] Dropdown fields are set to correct options (severity, action, type)
+- [ ] File paths and references are preserved
+
+#### Expression Handling
+- [ ] SpEL expressions in conditions are correctly imported (e.g., `#cusip != null`)
+- [ ] Field references maintain `#` prefix
+- [ ] Complex expressions with operators are preserved
+
+#### Nested Structures
+- [ ] Lookup configurations with result mappings are complete
+- [ ] Scenario classifications with entries are fully constructed
+- [ ] Error recovery severity policies are nested correctly
+- [ ] Components contain their child rules/enrichments
+
+#### Round-Trip Testing
+- [ ] Import YAML → Generate blocks → Export YAML produces semantically equivalent output
+- [ ] Field values are preserved through round-trip
+- [ ] Structure and nesting remain consistent
+- [ ] No data loss during conversion
+
+### Testing Procedure
+
+1. **Prepare Test Files**
+   - Save each test YAML sample to a `.yaml` file in your workspace
+   - Ensure files are syntactically valid (use YAML validator if needed)
+
+2. **Import YAML**
+   - Open the APEX Visual Editor (http://localhost:8081/playground)
+   - Click "Import YAML" button
+   - Select one of the test YAML files
+   - Observe the block workspace
+
+3. **Inspect Generated Blocks**
+   - Verify block types match expected blocks from test specification
+   - Open each block and check field values against YAML
+   - Expand collapsible sections to verify metadata population
+   - Check nested blocks (enrichments, lookups, scenarios)
+
+4. **Export and Compare**
+   - Click "Generate YAML" to export the block structure
+   - Compare exported YAML with original import file
+   - Verify semantic equivalence (formatting differences are acceptable)
+   - Check for data loss or field corruption
+
+5. **Test Edge Cases**
+   - Empty optional fields
+   - Complex SpEL expressions with multiple operators
+   - Deeply nested structures (3+ levels)
+   - Special characters in strings (quotes, colons)
+   - Large lists (10+ items)
+
+### Known Limitations
+
+The current visual editor has the following import limitations:
+
+1. **Rule Chains** - Not yet supported in visual editor
+2. **Rule Pipelines** - Not supported in block interface
+3. **Advanced SpEL** - Some complex SpEL functions may not parse correctly
+4. **Custom Extensions** - Plugin-based extensions not represented as blocks
+5. **Comments** - YAML comments are not preserved during import
+
+These limitations are documented in the "Future Improvements" section.
+
+### Troubleshooting Import Issues
+
+| Issue | Possible Cause | Solution |
+|-------|----------------|----------|
+| No blocks generated | Invalid YAML syntax | Validate YAML with linter; check console for errors |
+| Missing fields | Block definition incomplete | Review block XML and field definitions |
+| Wrong block types | Type mapping incorrect | Check block-to-YAML mapping table |
+| Nested blocks missing | Parent-child not established | Verify statement connections in block definitions |
+| Expressions corrupted | SpEL parsing error | Escape special characters; simplify expression |
+| Dropdown shows wrong value | Option not in dropdown list | Add missing option to dropdown definition |
+
+### Next Steps for Validation
+
+After completing basic import testing:
+
+1. **Create automated test suite** - Selenium/Puppeteer tests for headless validation
+2. **Build test harness** - Batch import/export with diff comparison
+3. **Document edge cases** - Capture and document any import failures
+4. **Expand test coverage** - Add tests for all 50+ block types
+5. **Performance testing** - Test import of large YAML files (1000+ rules)
+
+---
 
 ## Future Improvements
 *   Support for `error-handling` configuration in Rule Groups.

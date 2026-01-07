@@ -409,9 +409,11 @@ public class YamlEnrichmentProcessor {
 
         // If applyFieldMappings returns null, it means a required field mapping failed
         if (result == null) {
-            logger.error("CRITICAL: Enrichment '" + enrichment.getId() + "' failed due to required field mapping failure");
-            // Return original target object to continue processing other enrichments
-            return targetObject;
+            // CRITICAL: Field mapping failed - throw exception to propagate failure to RuleResult
+            String errorMsg = "Lookup enrichment '" + enrichment.getId() + "' failed: one or more field mappings could not be applied. " +
+                             "Check: (1) target paths exist, (2) intermediate structures are pre-created, (3) SpEL expressions are valid.";
+            logger.error("CRITICAL: " + errorMsg);
+            throw new EnrichmentException(errorMsg);
         }
 
         return result;
@@ -445,9 +447,11 @@ public class YamlEnrichmentProcessor {
             if (enrichment.getFieldMappings() != null && !enrichment.getFieldMappings().isEmpty()) {
                 Object mappedResult = applyFieldMappings(enrichment.getFieldMappings(), targetObject, targetObject);
                 if (mappedResult == null) {
-                    logger.error("CRITICAL: Calculation enrichment '" + enrichment.getId() + "' failed due to required field mapping failure");
-                    // Return original target object to continue processing other enrichments
-                    return targetObject;
+                    // CRITICAL: Field mapping failed - throw exception to propagate failure to RuleResult
+                    String errorMsg = "Calculation enrichment '" + enrichment.getId() + "' failed: one or more field mappings could not be applied. " +
+                                     "Check: (1) target paths exist, (2) intermediate structures are pre-created, (3) SpEL expressions are valid.";
+                    logger.error("CRITICAL: " + errorMsg);
+                    throw new EnrichmentException(errorMsg);
                 }
                 targetObject = mappedResult;
             }
@@ -500,8 +504,11 @@ public class YamlEnrichmentProcessor {
             if (result != null) {
                 targetObject = result;
             } else {
-                logger.error("CRITICAL: Field enrichment '" + enrichment.getId() + "' failed due to required field mapping failure");
-                // Keep original targetObject to preserve partial data
+                // CRITICAL: Field mapping failed - throw exception to propagate failure to RuleResult
+                String errorMsg = "Field enrichment '" + enrichment.getId() + "' failed: one or more field mappings could not be applied. " +
+                                 "Check: (1) target paths exist, (2) intermediate structures are pre-created, (3) SpEL expressions are valid.";
+                logger.error("CRITICAL: " + errorMsg);
+                throw new EnrichmentException(errorMsg);
             }
         }
 
@@ -835,9 +842,20 @@ public class YamlEnrichmentProcessor {
 
                 // Set the target field only if we have a value to set
                 if (valueToSet != null) {
-                    setFieldValue(targetObject, mapping.getTargetField(), valueToSet);
-                    logger.debug("Successfully mapped field: " + mapping.getSourceField() + " -> " +
-                               mapping.getTargetField() + " (value: " + valueToSet + ")");
+                    boolean setSuccess = setFieldValue(targetObject, mapping.getTargetField(), valueToSet);
+                    if (setSuccess) {
+                        logger.debug("Successfully mapped field: " + mapping.getSourceField() + " -> " +
+                                   mapping.getTargetField() + " (value: " + valueToSet + ")");
+                    } else {
+                        // CRITICAL: setFieldValue failed - this is a serious error
+                        // The target field could not be set (e.g., SpEL path to non-existent structure)
+                        logger.error("FIELD SET FAILED: source-field '" + mapping.getSourceField() +
+                                   "' -> target-field '" + mapping.getTargetField() +
+                                   "' with value '" + valueToSet + "'. The setFieldValue operation failed. " +
+                                   "Check: (1) target path exists, (2) intermediate structures are pre-created, " +
+                                   "(3) SpEL expression is valid. This failure will be reported in the RuleResult.");
+                        hasRequiredFieldFailure = true;
+                    }
                 } else {
                     // SERIOUS ERROR: Field mapping produced null value - this likely means:
                     // 1. Source field lookup failed (field doesn't exist)
@@ -847,16 +865,18 @@ public class YamlEnrichmentProcessor {
                                "' -> target-field '" + mapping.getTargetField() +
                                "' produced NULL value. Target field was NOT set. " +
                                "Check: (1) source field exists, (2) expression is valid, (3) default-value is provided if needed.");
+                    hasRequiredFieldFailure = true;
                 }
 
             } catch (Exception e) {
-                logger.warn("Failed to apply field mapping: " +
+                logger.error("FIELD MAPPING EXCEPTION: Failed to apply field mapping: " +
                           mapping.getSourceField() + " -> " + mapping.getTargetField() +
-                          ": " + e.getMessage(), e);
+                          ": " + e.getMessage() + ". This failure will be reported in the RuleResult.", e);
+                hasRequiredFieldFailure = true;
             }
         }
 
-        // Return null if any required field mapping failed to signal enrichment failure
+        // Return null if any field mapping failed to signal enrichment failure
         if (hasRequiredFieldFailure) {
             return null;
         }
@@ -958,11 +978,14 @@ public class YamlEnrichmentProcessor {
      * @param object The object to set the field on
      * @param fieldName The field name
      * @param value The value to set
+     * @return true if the field was set successfully, false if it failed
      */
-    private void setFieldValue(Object object, String fieldName, Object value) {
+    private boolean setFieldValue(Object object, String fieldName, Object value) {
         if (object == null || fieldName == null) {
-            logger.debug("setFieldValue called with null object or fieldName");
-            return;
+            logger.error("FIELD SET FAILED: setFieldValue called with null object or fieldName. " +
+                        "object=" + (object == null ? "null" : object.getClass().getSimpleName()) +
+                        ", fieldName=" + fieldName);
+            return false;
         }
 
         // NEW: If fieldName starts with #, treat it as a SpEL expression for setting
@@ -973,13 +996,14 @@ public class YamlEnrichmentProcessor {
                 Expression expr = getOrCompileExpression(fieldName);
                 expr.setValue(context, value);
                 logger.trace("Successfully set field via SpEL '" + fieldName + "' to: " + value);
-                return;
+                return true;
             } catch (Exception e) {
                 logger.error("SPEL EXPRESSION SET FAILED: Failed to set field via SpEL expression '" + fieldName +
                            "' to value '" + value + "'. Error: " + e.getMessage() + ". " +
                            "Check: (1) expression syntax is correct, (2) target field/property exists and is writable, " +
-                           "(3) value type is compatible with target field type. Field was NOT set.");
-                return;
+                           "(3) value type is compatible with target field type, (4) intermediate structures exist. " +
+                           "Field was NOT set. This is a CRITICAL error that will be reported in the RuleResult.");
+                return false;
             }
         }
 
@@ -993,7 +1017,7 @@ public class YamlEnrichmentProcessor {
             Map<String, Object> map = (Map<String, Object>) object;
             map.put(fieldName, value);
             logger.trace("Successfully set map key '" + fieldName + "' to: " + value);
-            return;
+            return true;
         }
 
         // Handle regular objects using proper setter methods instead of reflection
@@ -1003,6 +1027,7 @@ public class YamlEnrichmentProcessor {
             Method setter = object.getClass().getMethod(setterName, value.getClass());
             setter.invoke(object, value);
             logger.trace("Successfully set field '" + fieldName + "' to: " + value);
+            return true;
         } catch (NoSuchMethodException e) {
             // Try with different parameter types if exact match fails
             try {
@@ -1014,7 +1039,7 @@ public class YamlEnrichmentProcessor {
                         if (paramType.isAssignableFrom(value.getClass())) {
                             method.invoke(object, value);
                             logger.trace("Successfully set field '" + fieldName + "' to: " + value);
-                            return;
+                            return true;
                         }
                     }
                 }
@@ -1023,15 +1048,18 @@ public class YamlEnrichmentProcessor {
                            "Check: (1) setter method exists (e.g., set" + Character.toUpperCase(fieldName.charAt(0)) +
                            fieldName.substring(1) + "), (2) field name is correct, (3) object type supports this field. " +
                            "Field was NOT set.");
+                return false;
             } catch (IllegalAccessException | InvocationTargetException e2) {
                 logger.error("SETTER INVOCATION FAILED: Could not invoke setter for field '" + fieldName +
                            "' on object of type " + object.getClass().getSimpleName() + ". Error: " + e2.getMessage() + ". " +
                            "Check: (1) setter method is accessible, (2) value type is compatible. Field was NOT set.", e2);
+                return false;
             }
         } catch (IllegalAccessException | InvocationTargetException e) {
             logger.error("SETTER INVOCATION FAILED: Could not invoke setter for field '" + fieldName +
                        "' on object of type " + object.getClass().getSimpleName() + ". Error: " + e.getMessage() + ". " +
                        "Check: (1) setter method is accessible, (2) value type is compatible. Field was NOT set.", e);
+            return false;
         }
     }
 

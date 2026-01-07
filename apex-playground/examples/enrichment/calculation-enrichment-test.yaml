@@ -1,0 +1,13 @@
+metadata:
+  name: "Calculation Test"
+  version: "1.0"
+
+enrichments:
+  - id: "total-value-calc"
+    type: "calculation-enrichment"
+    source-fields:
+      - "#quantity"
+      - "#price"
+    calculation:
+      expression: "#quantity * #price"
+      result-field: "totalValue"

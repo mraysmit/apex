@@ -83,7 +83,8 @@ public class YamlContentAnalyzer {
                 logger.debug("Final file type determined: {}", summary.getFileType());
             }
         } catch (IOException e) {
-            logger.error("Error reading YAML file: {}", filePath, e);
+            logger.error("Error reading YAML file: {}", filePath);
+            logger.debug("Full exception details:", e);
         }
 
         logger.debug("=== CONTENT ANALYSIS COMPLETE ===");

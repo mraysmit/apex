@@ -1,0 +1,57 @@
+metadata:
+  name: "Custom Error Handlers Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test custom error handling strategies and recovery procedures"
+
+error-recovery:
+  default-action: "CONTINUE"
+  
+  custom-handlers:
+    - error-type: "VALIDATION_ERROR"
+      handler-class: "dev.mars.apex.handlers.ValidationErrorHandler"
+      retry-enabled: true
+      retry-attempts: 3
+      retry-delay-ms: 1000
+      fallback-action: "SKIP"
+    
+    - error-type: "LOOKUP_FAILURE"
+      handler-class: "dev.mars.apex.handlers.LookupFailureHandler"
+      retry-enabled: true
+      retry-attempts: 5
+      retry-delay-ms: 2000
+      use-cache-fallback: true
+      fallback-action: "USE_DEFAULT"
+    
+    - error-type: "CALCULATION_ERROR"
+      handler-class: "dev.mars.apex.handlers.CalculationErrorHandler"
+      retry-enabled: false
+      log-stack-trace: true
+      fallback-action: "ABORT"
+  
+  severity-policies:
+    - severity: "ERROR"
+      action: "CUSTOM"
+      custom-handler-ref: "VALIDATION_ERROR"
+      max-errors: 10
+      log-level: "ERROR"
+
+rules:
+  - id: "custom-handler-rule-001"
+    condition: "#validationResult == 'SUCCESS'"
+    message: "Validation must succeed"
+    severity: "ERROR"
+    error-type: "VALIDATION_ERROR"
+
+enrichments:
+  - id: "risky-calculation"
+    type: "calculation-enrichment"
+    source-fields:
+      - "#numerator"
+      - "#denominator"
+    calculation:
+      expression: "#numerator / #denominator"
+      result-field: "ratio"
+    error-handling:
+      error-type: "CALCULATION_ERROR"
+      on-error: "USE_CUSTOM_HANDLER"

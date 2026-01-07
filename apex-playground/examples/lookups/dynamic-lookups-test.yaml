@@ -1,0 +1,66 @@
+metadata:
+  name: "Dynamic Lookups Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test dynamic lookup configuration based on runtime conditions"
+
+enrichments:
+  - id: "dynamic-datasource-lookup"
+    type: "lookup-enrichment"
+    source-field: "#customerId"
+    lookup-config:
+      lookup-dataset:
+        type: "dynamic"
+        datasource-selector: "#environment == 'PROD' ? 'prod-db' : 'test-db'"
+        query-selector: "#customerType == 'CORPORATE' ? 'getCorporateCustomer' : 'getRetailCustomer'"
+      lookup-key-field: "id"
+      result-mapping:
+        - source-field: "name"
+          target-field: "customerName"
+  
+  - id: "conditional-lookup-path"
+    type: "lookup-enrichment"
+    source-field: "#productId"
+    lookup-config:
+      lookup-dataset:
+        type: "conditional"
+        conditions:
+          - condition: "#region == 'US'"
+            datasource: "us-product-catalog"
+            query: "getUSProduct"
+          - condition: "#region == 'EU'"
+            datasource: "eu-product-catalog"
+            query: "getEUProduct"
+          - condition: "#region == 'APAC'"
+            datasource: "apac-product-catalog"
+            query: "getAPACProduct"
+          - default: true
+            datasource: "global-product-catalog"
+            query: "getGlobalProduct"
+      lookup-key-field: "productId"
+      result-mapping:
+        - source-field: "name"
+          target-field: "productName"
+        - source-field: "price"
+          target-field: "regionPrice"
+  
+  - id: "runtime-query-builder"
+    type: "lookup-enrichment"
+    source-field: "#searchCriteria"
+    lookup-config:
+      lookup-dataset:
+        type: "dynamic-query"
+        query-template: "SELECT * FROM orders WHERE {criteriaFields} ORDER BY {sortField} {sortDirection}"
+        parameter-binding:
+          criteriaFields: "#searchCriteria.buildWhereClause()"
+          sortField: "#sortBy != null ? #sortBy : 'order_date'"
+          sortDirection: "#sortOrder == 'ASC' ? 'ASC' : 'DESC'"
+      result-mapping:
+        - source-field: "*"
+          target-field: "searchResults"
+
+rules:
+  - id: "dynamic-lookup-rule-001"
+    condition: "#customerName != null"
+    message: "Dynamic lookup should resolve correct datasource and retrieve data"
+    severity: "INFO"

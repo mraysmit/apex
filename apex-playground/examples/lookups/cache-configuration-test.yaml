@@ -1,0 +1,76 @@
+metadata:
+  name: "Cache Configuration Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test lookup caching strategies and configuration"
+
+enrichments:
+  - id: "cached-lookup-with-ttl"
+    type: "lookup-enrichment"
+    source-field: "#customerId"
+    lookup-config:
+      lookup-dataset:
+        type: "external-api"
+        endpoint: "https://api.example.com/customers/{customerId}"
+      cache-config:
+        enabled: true
+        cache-name: "customer-cache"
+        ttl-seconds: 300
+        max-size: 1000
+        eviction-policy: "LRU"
+      lookup-key-field: "id"
+      result-mapping:
+        - source-field: "name"
+          target-field: "customerName"
+        - source-field: "tier"
+          target-field: "customerTier"
+  
+  - id: "cache-with-invalidation"
+    type: "lookup-enrichment"
+    source-field: "#productId"
+    lookup-config:
+      lookup-dataset:
+        type: "database"
+        query: "SELECT * FROM products WHERE id = ?"
+      cache-config:
+        enabled: true
+        cache-name: "product-cache"
+        ttl-seconds: 600
+        max-size: 5000
+        eviction-policy: "LFU"
+        invalidate-on-update: true
+        invalidation-events:
+          - "PRODUCT_UPDATED"
+          - "PRICE_CHANGED"
+      lookup-key-field: "id"
+      result-mapping:
+        - source-field: "name"
+          target-field: "productName"
+        - source-field: "price"
+          target-field: "currentPrice"
+  
+  - id: "distributed-cache-lookup"
+    type: "lookup-enrichment"
+    source-field: "#sessionId"
+    lookup-config:
+      lookup-dataset:
+        type: "redis"
+        connection-string: "${REDIS_URL}"
+      cache-config:
+        enabled: true
+        cache-type: "DISTRIBUTED"
+        cache-name: "session-cache"
+        ttl-seconds: 1800
+        key-prefix: "session:"
+      lookup-key-field: "sessionId"
+      result-mapping:
+        - source-field: "userId"
+          target-field: "userId"
+        - source-field: "sessionData"
+          target-field: "sessionData"
+
+rules:
+  - id: "cache-rule-001"
+    condition: "#customerName != null"
+    message: "Cached lookup should provide customer data"
+    severity: "INFO"

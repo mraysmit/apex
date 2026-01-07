@@ -1,0 +1,36 @@
+# Basic Validation Scenario for Stream Loading Tests
+# Referenced by test-registry.yaml
+
+metadata:
+  id: "basic-validation"
+  name: "Basic Validation Scenario"
+  description: "Simple validation scenario for testing stream loading"
+  type: "scenario"
+  version: "1.0.0"
+
+scenario:
+  scenario-id: "basic-validation"
+  business-domain: "Testing"
+  classification: "validation"
+
+rules:
+  - id: "basic-rule-1"
+    name: "Amount Positive Check"
+    description: "Validates that amount is positive"
+    condition: "#amount > 0"
+    message: "Amount must be positive"
+    severity: "ERROR"
+
+  - id: "basic-rule-2"
+    name: "Name Required Check"
+    description: "Validates that name is not empty"
+    condition: "#name != null && !#name.isEmpty()"
+    message: "Name is required"
+    severity: "ERROR"
+
+  - id: "basic-rule-3"
+    name: "Currency Valid Check"
+    description: "Validates that currency is a known code"
+    condition: "#currency matches '^[A-Z]{3}$'"
+    message: "Currency must be a valid 3-letter code"
+    severity: "WARNING"

@@ -1,0 +1,58 @@
+metadata:
+  name: "Data Type Conversion Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test data type conversion transformations"
+
+transformations:
+  - id: "type-conversion-transform"
+    name: "Data Type Conversion"
+    description: "Converts field data types"
+    type: "type-conversion"
+    conversions:
+      - source-field: "#amountString"
+        target-field: "amountNumeric"
+        source-type: "STRING"
+        target-type: "DECIMAL"
+        format: "#,##0.00"
+      
+      - source-field: "#dateString"
+        target-field: "dateObject"
+        source-type: "STRING"
+        target-type: "DATE"
+        format: "yyyy-MM-dd"
+      
+      - source-field: "#timestampString"
+        target-field: "timestampObject"
+        source-type: "STRING"
+        target-type: "TIMESTAMP"
+        format: "yyyy-MM-dd'T'HH:mm:ss'Z'"
+      
+      - source-field: "#flagString"
+        target-field: "flagBoolean"
+        source-type: "STRING"
+        target-type: "BOOLEAN"
+        true-values: ["true", "TRUE", "yes", "YES", "1"]
+        false-values: ["false", "FALSE", "no", "NO", "0"]
+      
+      - source-field: "#quantityString"
+        target-field: "quantityInteger"
+        source-type: "STRING"
+        target-type: "INTEGER"
+      
+      - source-field: "#percentageDecimal"
+        target-field: "percentageString"
+        source-type: "DECIMAL"
+        target-type: "STRING"
+        format: "0.00%"
+
+rules:
+  - id: "type-conversion-rule-001"
+    condition: "#amountNumeric != null && #amountNumeric > 0"
+    message: "Converted amount must be positive"
+    severity: "ERROR"
+  
+  - id: "type-conversion-rule-002"
+    condition: "#dateObject != null"
+    message: "Date conversion must succeed"
+    severity: "ERROR"

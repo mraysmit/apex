@@ -1,0 +1,71 @@
+metadata:
+  name: "Async Enrichment Patterns Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test asynchronous enrichment execution patterns"
+
+enrichments:
+  - id: "async-external-api-enrichment"
+    type: "lookup-enrichment"
+    execution-mode: "ASYNC"
+    timeout-ms: 5000
+    fallback-on-timeout: true
+    source-field: "#customerId"
+    lookup-config:
+      lookup-dataset:
+        type: "external-api"
+        endpoint: "https://api.example.com/customer/{customerId}"
+        method: "GET"
+      lookup-key-field: "customerId"
+      result-mapping:
+        - source-field: "creditScore"
+          target-field: "creditScore"
+  
+  - id: "async-batch-enrichment"
+    type: "batch-lookup-enrichment"
+    execution-mode: "ASYNC_BATCH"
+    batch-size: 100
+    batch-timeout-ms: 10000
+    source-field: "#productIds"
+    lookup-config:
+      lookup-dataset:
+        type: "external-api"
+        endpoint: "https://api.example.com/products/batch"
+        method: "POST"
+      result-mapping:
+        - source-field: "products"
+          target-field: "enrichedProducts"
+  
+  - id: "async-parallel-enrichment"
+    type: "composite-enrichment"
+    execution-mode: "ASYNC_PARALLEL"
+    enrichment-chain:
+      - id: "async-customer-lookup"
+        type: "lookup-enrichment"
+        source-field: "#customerId"
+        lookup-config:
+          lookup-dataset:
+            type: "database"
+            query: "SELECT * FROM customers WHERE id = ?"
+          lookup-key-field: "id"
+          result-mapping:
+            - source-field: "name"
+              target-field: "customerName"
+      
+      - id: "async-product-lookup"
+        type: "lookup-enrichment"
+        source-field: "#productId"
+        lookup-config:
+          lookup-dataset:
+            type: "database"
+            query: "SELECT * FROM products WHERE id = ?"
+          lookup-key-field: "id"
+          result-mapping:
+            - source-field: "name"
+              target-field: "productName"
+
+rules:
+  - id: "async-enrichment-rule-001"
+    condition: "#creditScore != null || #enrichmentTimedOut == true"
+    message: "Async enrichment should complete or timeout gracefully"
+    severity: "INFO"

@@ -28,6 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 /**
  * REST API controller for validation operations.
  *
@@ -75,8 +77,12 @@ public class ValidationController {
             ValidationResult result = validationService.validateStructure(filePath);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
-            logger.error("Error validating structure: {}", e.getMessage(), e);
-            return ResponseEntity.status(500).body("Error validating structure: " + e.getMessage());
+            logger.error("Error validating structure: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
+            return ResponseEntity.badRequest().body(Map.of(
+                    "status", "error",
+                    "message", e.getMessage()
+            ));
         }
     }
 
@@ -107,8 +113,12 @@ public class ValidationController {
             ValidationResult result = validationService.validateReferences(filePath, baseDir);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
-            logger.error("Error validating references: {}", e.getMessage(), e);
-            return ResponseEntity.status(500).body("Error validating references: " + e.getMessage());
+            logger.error("Error validating references: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
+            return ResponseEntity.badRequest().body(Map.of(
+                    "status", "error",
+                    "message", e.getMessage()
+            ));
         }
     }
 
@@ -137,8 +147,12 @@ public class ValidationController {
             ValidationResult result = validationService.validateConsistency(filePath);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
-            logger.error("Error validating consistency: {}", e.getMessage(), e);
-            return ResponseEntity.status(500).body("Error validating consistency: " + e.getMessage());
+            logger.error("Error validating consistency: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
+            return ResponseEntity.badRequest().body(Map.of(
+                    "status", "error",
+                    "message", e.getMessage()
+            ));
         }
     }
 
@@ -180,8 +194,12 @@ public class ValidationController {
             
             return ResponseEntity.ok(combined);
         } catch (Exception e) {
-            logger.error("Error performing full validation: {}", e.getMessage(), e);
-            return ResponseEntity.status(500).body("Error performing full validation: " + e.getMessage());
+            logger.error("Error performing full validation: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
+            return ResponseEntity.badRequest().body(Map.of(
+                    "status", "error",
+                    "message", e.getMessage()
+            ));
         }
     }
 
@@ -216,8 +234,12 @@ public class ValidationController {
             boolean isValid = structural.isValid() && references.isValid() && consistency.isValid();
             return ResponseEntity.ok(isValid);
         } catch (Exception e) {
-            logger.error("Error checking validity: {}", e.getMessage(), e);
-            return ResponseEntity.status(500).body("Error checking validity: " + e.getMessage());
+            logger.error("Error checking validity: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
+            return ResponseEntity.badRequest().body(Map.of(
+                    "status", "error",
+                    "message", e.getMessage()
+            ));
         }
     }
 }

@@ -1,0 +1,74 @@
+metadata:
+  name: "Component Execution Order Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test explicit component execution ordering and dependencies"
+
+components:
+  - id: "preprocessing-component"
+    name: "Preprocessing Component"
+    description: "Runs first to prepare data"
+    enabled: true
+    execution-order: 1
+    execution-policy: "REQUIRED"
+    enrichments:
+      - id: "data-normalization"
+        type: "transformation-enrichment"
+        transformations:
+          - source-field: "#customerName"
+            target-field: "normalizedCustomerName"
+            transformation-type: "UPPERCASE"
+
+  - id: "validation-component"
+    name: "Validation Component"
+    description: "Runs second to validate normalized data"
+    enabled: true
+    execution-order: 2
+    execution-policy: "REQUIRED"
+    depends-on:
+      - "preprocessing-component"
+    rules:
+      - id: "validation-comp-001"
+        condition: "#normalizedCustomerName != null"
+        message: "Normalized customer name required"
+        severity: "ERROR"
+
+  - id: "enrichment-component"
+    name: "Enrichment Component"
+    description: "Runs third to add additional data"
+    enabled: true
+    execution-order: 3
+    execution-policy: "OPTIONAL"
+    depends-on:
+      - "preprocessing-component"
+      - "validation-component"
+    enrichments:
+      - id: "customer-lookup"
+        type: "lookup-enrichment"
+        source-field: "#customerId"
+        lookup-config:
+          lookup-dataset:
+            type: "yaml-data"
+            data:
+              - key: "CUST001"
+                tier: "GOLD"
+              - key: "CUST002"
+                tier: "SILVER"
+          lookup-key-field: "key"
+          result-mapping:
+            - source-field: "tier"
+              target-field: "customerTier"
+
+  - id: "postprocessing-component"
+    name: "Postprocessing Component"
+    description: "Runs last to finalize results"
+    enabled: true
+    execution-order: 4
+    execution-policy: "OPTIONAL"
+    depends-on:
+      - "enrichment-component"
+    rules:
+      - id: "postprocess-001"
+        condition: "#customerTier != null"
+        message: "Customer tier should be set by enrichment"
+        severity: "INFO"

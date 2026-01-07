@@ -107,7 +107,8 @@ public class ApiController {
             PlaygroundResponse response = playgroundService.processData(request);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Error processing data", e);
+            logger.error("Error processing data: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             PlaygroundResponse errorResponse = new PlaygroundResponse(false, "Processing failed: " + e.getMessage());
             errorResponse.addError(e.getMessage());
             return ResponseEntity.ok(errorResponse);
@@ -140,7 +141,8 @@ public class ApiController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error validating YAML", e);
+            logger.error("Error validating YAML: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             YamlValidationResponse errorResponse = new YamlValidationResponse(false, "Validation failed: " + e.getMessage());
             errorResponse.addError("Validation error: " + e.getMessage(), 0, 0);
             return ResponseEntity.ok(errorResponse);
@@ -167,7 +169,8 @@ public class ApiController {
             return ResponseEntity.ok(examples);
 
         } catch (Exception e) {
-            logger.error("Error loading examples", e);
+            logger.error("Error loading examples: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("error", "Failed to load examples: " + e.getMessage());
             errorResponse.put("timestamp", System.currentTimeMillis());
@@ -201,7 +204,8 @@ public class ApiController {
             return ResponseEntity.ok(example);
 
         } catch (Exception e) {
-            logger.error("Error loading example {}/{}", category, name, e);
+            logger.error("Error loading example {}/{}: {}", category, name, e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("error", "Failed to load example: " + e.getMessage());
             return ResponseEntity.status(500).body(errorResponse);
@@ -235,7 +239,8 @@ public class ApiController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error saving example YAML {}/{}", category, name, e);
+            logger.error("Error saving example YAML {}/{}: {}", category, name, e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Failed to save example: " + e.getMessage());
@@ -270,7 +275,8 @@ public class ApiController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error saving example data {}/{}", category, name, e);
+            logger.error("Error saving example data {}/{}: {}", category, name, e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Failed to save example: " + e.getMessage());
@@ -324,7 +330,8 @@ public class ApiController {
             return ResponseEntity.badRequest().body(errorResponse);
 
         } catch (Exception e) {
-            logger.error("Error uploading data file", e);
+            logger.error("Error uploading data file: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Failed to upload file: " + e.getMessage());
@@ -380,7 +387,8 @@ public class ApiController {
             return ResponseEntity.badRequest().body(errorResponse);
 
         } catch (Exception e) {
-            logger.error("Error uploading YAML file", e);
+            logger.error("Error uploading YAML file: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Failed to upload file: " + e.getMessage());

@@ -1,0 +1,99 @@
+metadata:
+  name: "Template Inheritance Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test template inheritance and extension patterns"
+
+templates:
+  base-templates:
+    - id: "base-validation-template"
+      name: "Base Validation Template"
+      description: "Base template for all validations"
+      parameters:
+        - name: "fieldName"
+          type: "string"
+          required: true
+        - name: "errorMessage"
+          type: "string"
+          required: true
+        - name: "severity"
+          type: "string"
+          default: "ERROR"
+      rule-definition:
+        message: "${errorMessage}"
+        severity: "${severity}"
+  
+  derived-templates:
+    - id: "string-length-validation-template"
+      name: "String Length Validation Template"
+      description: "Extends base validation for string length checks"
+      extends: "base-validation-template"
+      parameters:
+        - name: "minLength"
+          type: "number"
+          default: 0
+        - name: "maxLength"
+          type: "number"
+          required: true
+      rule-definition:
+        condition: "#{${fieldName}} != null && #{${fieldName}}.length() >= ${minLength} && #{${fieldName}}.length() <= ${maxLength}"
+    
+    - id: "numeric-range-validation-template"
+      name: "Numeric Range Validation Template"
+      description: "Extends base validation for numeric range checks"
+      extends: "base-validation-template"
+      parameters:
+        - name: "minValue"
+          type: "number"
+          required: true
+        - name: "maxValue"
+          type: "number"
+          required: true
+        - name: "inclusive"
+          type: "boolean"
+          default: true
+      rule-definition:
+        condition: "${inclusive ? '#{' + fieldName + '} >= ' + minValue + ' && #{' + fieldName + '} <= ' + maxValue : '#{' + fieldName + '} > ' + minValue + ' && #{' + fieldName + '} < ' + maxValue}"
+    
+    - id: "date-range-validation-template"
+      name: "Date Range Validation Template"
+      description: "Extends base validation for date range checks"
+      extends: "base-validation-template"
+      parameters:
+        - name: "startDate"
+          type: "date"
+          required: true
+        - name: "endDate"
+          type: "date"
+          required: true
+      rule-definition:
+        condition: "#{${fieldName}} >= T(java.time.LocalDate).parse('${startDate}') && #{${fieldName}} <= T(java.time.LocalDate).parse('${endDate}')"
+
+rules:
+  - template-ref: "string-length-validation-template"
+    id: "customer-name-length"
+    parameters:
+      fieldName: "customerName"
+      minLength: 2
+      maxLength: 100
+      errorMessage: "Customer name must be 2-100 characters"
+      severity: "ERROR"
+  
+  - template-ref: "numeric-range-validation-template"
+    id: "age-range"
+    parameters:
+      fieldName: "age"
+      minValue: 18
+      maxValue: 120
+      inclusive: true
+      errorMessage: "Age must be between 18 and 120"
+      severity: "ERROR"
+  
+  - template-ref: "date-range-validation-template"
+    id: "order-date-range"
+    parameters:
+      fieldName: "orderDate"
+      startDate: "2024-01-01"
+      endDate: "2025-12-31"
+      errorMessage: "Order date must be in 2024-2025"
+      severity: "WARNING"

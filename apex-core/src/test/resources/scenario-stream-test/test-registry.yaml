@@ -1,0 +1,33 @@
+# Test Scenario Registry for Stream Loading Tests
+# Used by YamlConfigurationLoaderStreamTest and ScenarioRegistryLoaderStreamTest
+
+metadata:
+  id: "test-scenario-registry"
+  name: "Test Scenario Registry for Stream Loading"
+  description: "Registry for testing stream-based and classpath-based loading"
+  type: "scenario-registry"
+  version: "1.0.0"
+
+scenarios:
+  - scenario-id: "basic-validation"
+    config-file: "basic-validation-scenario.yaml"
+    business-domain: "Testing"
+    classification: "validation"
+    enabled: true
+    description: "Basic validation scenario for stream loading tests"
+
+  - scenario-id: "complex-rules"
+    config-file: "complex-rules-scenario.yaml"
+    business-domain: "Testing"
+    classification: "rules"
+    enabled: true
+    description: "Complex rules scenario for stream loading tests"
+
+routing:
+  strategy: "classification-based"
+  default-scenario: "basic-validation"
+  classification-rules:
+    - pattern: ".*validation.*"
+      scenario-id: "basic-validation"
+    - pattern: ".*rules.*"
+      scenario-id: "complex-rules"

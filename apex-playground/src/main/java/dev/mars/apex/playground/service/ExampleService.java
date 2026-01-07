@@ -75,7 +75,8 @@ public class ExampleService {
             logger.info("Loaded examples from {}", EXAMPLES_DIR);
             
         } catch (Exception e) {
-            logger.error("Error loading examples", e);
+            logger.error("Error loading examples: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             examples.put("error", "Failed to load examples: " + e.getMessage());
         }
         
@@ -101,7 +102,8 @@ public class ExampleService {
             return example;
             
         } catch (Exception e) {
-            logger.error("Error loading example {}/{}", category, name, e);
+            logger.error("Error loading example {}/{}: {}", category, name, e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorExample = new HashMap<>();
             errorExample.put("error", "Failed to load example: " + e.getMessage());
             return errorExample;

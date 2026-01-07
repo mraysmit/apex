@@ -1,0 +1,46 @@
+metadata:
+  name: "Hybrid Classification Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test scenario with both classification and inline rules"
+
+scenario:
+  name: "Risk Assessment Hybrid"
+  description: "Combines classification routing with inline rule processing"
+  
+  classification:
+    field-name: "riskLevel"
+    classifications:
+      - value: "HIGH"
+        rules-ref: "rules/high-risk-validation.yaml"
+      
+      - value: "MEDIUM"
+        rules-ref: "rules/medium-risk-validation.yaml"
+      
+      - value: "LOW"
+        rules:
+          - id: "low-risk-inline-001"
+            condition: "#amount < 1000"
+            message: "Low risk: amount validation"
+            severity: "INFO"
+
+rules:
+  - id: "pre-classification-rule-001"
+    condition: "#riskLevel != null"
+    message: "Risk level must be set before classification"
+    severity: "ERROR"
+
+  - id: "pre-classification-rule-002"
+    condition: "#riskLevel in {'HIGH', 'MEDIUM', 'LOW'}"
+    message: "Risk level must be HIGH, MEDIUM, or LOW"
+    severity: "ERROR"
+
+enrichments:
+  - id: "risk-score-calculation"
+    type: "calculation-enrichment"
+    source-fields:
+      - "#amount"
+      - "#creditScore"
+    calculation:
+      expression: "(#amount / 10000) + (700 - #creditScore) / 100"
+      result-field: "calculatedRiskScore"

@@ -225,7 +225,7 @@ public class GenericTransformerService {
 
         // Check if the transformer can handle this type
         if (value != null && !transformer.getType().isInstance(value)) {
-            logger.warn("Transformer " + transformerName + " cannot handle type: " + value.getClass().getName());
+            logger.warn("Transformer {} cannot handle type: {}", transformerName, value.getClass().getName());
             return RuleResult.error(transformerName, "Transformer cannot handle type: " + value.getClass().getName());
         }
 
@@ -235,7 +235,8 @@ public class GenericTransformerService {
             GenericTransformer<T> typedTransformer = (GenericTransformer<T>) transformer;
             return typedTransformer.transformWithResult(value);
         } catch (Exception e) {
-            logger.warn("Error transforming value: " + e.getMessage(), e);
+            logger.warn("Error transforming value: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return RuleResult.error(transformerName, "Error transforming value: " + e.getMessage());
         }
     }

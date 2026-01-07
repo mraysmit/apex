@@ -1,0 +1,22 @@
+metadata:
+  id: "component-datasource-test"
+  name: "Component Test"
+  type: "rule-config"
+  version: "1.0"
+
+data-source-refs:
+  - name: "trade-database"
+    source: "data-sources/trade-db.yaml"
+    enabled: true
+
+components:
+  - id: "trade-validator"
+    name: "Trade Validation Component"
+    description: "Validates trade data"
+    rules:
+      - id: "trade-001"
+        condition: "#tradeId != null"
+        message: "Trade ID required"
+        severity: "ERROR"
+
+# Modified by Selenium Test

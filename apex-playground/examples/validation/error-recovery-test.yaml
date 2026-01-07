@@ -1,0 +1,15 @@
+metadata:
+  name: "Error Recovery Test"
+  version: "1.0"
+
+error-recovery:
+  default-action: "CONTINUE"
+  severity-policies:
+    - severity: "ERROR"
+      action: "FAIL"
+      max-errors: 0
+    
+    - severity: "WARNING"
+      action: "CONTINUE"
+      max-errors: 10
+      log-level: "WARN"

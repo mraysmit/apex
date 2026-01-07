@@ -1,0 +1,44 @@
+metadata:
+  name: "Nested Scenarios Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test nested scenario structures with multi-level classification"
+
+scenario:
+  name: "Transaction Processing Multi-Level"
+  description: "Nested scenario for transaction type → payment method classification"
+  
+  classification:
+    field-name: "transactionType"
+    classifications:
+      - value: "PURCHASE"
+        nested-scenario:
+          name: "Payment Method Classification"
+          classification:
+            field-name: "paymentMethod"
+            classifications:
+              - value: "CREDIT_CARD"
+                rules-ref: "rules/cc-purchase-validation.yaml"
+              
+              - value: "DEBIT_CARD"
+                rules-ref: "rules/debit-purchase-validation.yaml"
+              
+              - value: "BANK_TRANSFER"
+                rules-ref: "rules/transfer-purchase-validation.yaml"
+      
+      - value: "REFUND"
+        rules-ref: "rules/refund-validation.yaml"
+      
+      - value: "EXCHANGE"
+        rules-ref: "rules/exchange-validation.yaml"
+
+rules:
+  - id: "nested-scenario-pre-001"
+    condition: "#transactionType != null"
+    message: "Transaction type required"
+    severity: "ERROR"
+
+  - id: "nested-scenario-pre-002"
+    condition: "#transactionType == 'PURCHASE' implies #paymentMethod != null"
+    message: "Payment method required for purchases"
+    severity: "ERROR"

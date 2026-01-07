@@ -1,0 +1,18 @@
+metadata:
+  name: "Lookup Enrichment Test"
+  version: "1.0"
+
+enrichments:
+  - id: "currency-lookup"
+    type: "lookup-enrichment"
+    source-field: "#currencyCode"
+    lookup-config:
+      lookup-dataset:
+        type: "yaml-data"
+        yaml-data-file: "data/currencies.yaml"
+      lookup-key-field: "code"
+      result-mapping:
+        - source-field: "name"
+          target-field: "currencyName"
+        - source-field: "symbol"
+          target-field: "currencySymbol"

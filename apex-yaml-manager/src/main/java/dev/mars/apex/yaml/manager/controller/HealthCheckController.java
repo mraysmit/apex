@@ -31,6 +31,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 /**
  * REST API controller for health check operations.
  *
@@ -81,8 +83,12 @@ public class HealthCheckController {
             HealthScore score = healthCheckService.performHealthCheck(filePath, baseDir);
             return ResponseEntity.ok(score);
         } catch (Exception e) {
-            logger.error("Error performing health check: {}", e.getMessage(), e);
-            return ResponseEntity.status(500).body("Error performing health check: " + e.getMessage());
+            logger.error("Error performing health check: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
+            return ResponseEntity.status(500).body(Map.of(
+                    "status", "error",
+                    "message", e.getMessage()
+            ));
         }
     }
 
@@ -113,8 +119,12 @@ public class HealthCheckController {
             HealthReport report = healthCheckService.generateHealthReport(filePath, baseDir);
             return ResponseEntity.ok(report);
         } catch (Exception e) {
-            logger.error("Error generating health report: {}", e.getMessage(), e);
-            return ResponseEntity.status(500).body("Error generating health report: " + e.getMessage());
+            logger.error("Error generating health report: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
+            return ResponseEntity.status(500).body(Map.of(
+                    "status", "error",
+                    "message", e.getMessage()
+            ));
         }
     }
 
@@ -145,8 +155,12 @@ public class HealthCheckController {
             HealthScore score = healthCheckService.performHealthCheck(filePath, baseDir);
             return ResponseEntity.ok(score);
         } catch (Exception e) {
-            logger.error("Error getting health score: {}", e.getMessage(), e);
-            return ResponseEntity.status(500).body("Error getting health score: " + e.getMessage());
+            logger.error("Error getting health score: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
+            return ResponseEntity.status(500).body(Map.of(
+                    "status", "error",
+                    "message", e.getMessage()
+            ));
         }
     }
 
@@ -177,8 +191,12 @@ public class HealthCheckController {
             HealthScore score = healthCheckService.performHealthCheck(filePath, baseDir);
             return ResponseEntity.ok(score.isHealthy());
         } catch (Exception e) {
-            logger.error("Error checking health status: {}", e.getMessage(), e);
-            return ResponseEntity.status(500).body("Error checking health status: " + e.getMessage());
+            logger.error("Error checking health status: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
+            return ResponseEntity.status(500).body(Map.of(
+                    "status", "error",
+                    "message", e.getMessage()
+            ));
         }
     }
 }

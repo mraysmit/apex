@@ -125,7 +125,8 @@ public class GenericTransformer<T> implements NamedService {
 
             return transformedValue;
         } catch (Exception e) {
-            logger.warn("Error transforming value: " + e.getMessage(), e);
+            logger.warn("Error transforming value: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return value; // Return the original value if transformation fails
         }
     }
@@ -210,7 +211,8 @@ public class GenericTransformer<T> implements NamedService {
             // Set the new field value on the transformed object
             action.getFieldValueSetter().accept(transformedValue, newFieldValue);
         } catch (Exception e) {
-            logger.warn("Error applying field transformation action: " + e.getMessage(), e);
+            logger.warn("Error applying field transformation action: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
         }
     }
 

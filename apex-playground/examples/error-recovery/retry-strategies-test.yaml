@@ -1,0 +1,64 @@
+metadata:
+  name: "Retry Strategies Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test various retry strategies for transient failures"
+
+error-recovery:
+  default-action: "RETRY"
+  
+  retry-config:
+    max-retry-attempts: 5
+    base-delay-ms: 1000
+    max-delay-ms: 60000
+    backoff-strategy: "EXPONENTIAL"
+    backoff-multiplier: 2.0
+    jitter-enabled: true
+    jitter-factor: 0.1
+  
+  retry-policies:
+    - error-type: "NETWORK_TIMEOUT"
+      max-attempts: 10
+      backoff-strategy: "EXPONENTIAL"
+      base-delay-ms: 500
+      max-delay-ms: 30000
+    
+    - error-type: "DATABASE_LOCK"
+      max-attempts: 20
+      backoff-strategy: "LINEAR"
+      base-delay-ms: 100
+      max-delay-ms: 5000
+    
+    - error-type: "RATE_LIMIT_EXCEEDED"
+      max-attempts: 3
+      backoff-strategy: "FIXED"
+      base-delay-ms: 10000
+      respect-retry-after-header: true
+  
+  circuit-breaker:
+    enabled: true
+    failure-threshold: 10
+    success-threshold: 3
+    timeout-ms: 60000
+    half-open-max-calls: 5
+
+data-source-refs:
+  - name: "external-service"
+    source: "data-sources/external-api.yaml"
+    enabled: true
+    retry-policy-ref: "NETWORK_TIMEOUT"
+
+enrichments:
+  - id: "external-lookup-with-retry"
+    type: "lookup-enrichment"
+    source-field: "#customerId"
+    lookup-config:
+      lookup-dataset:
+        data-source-ref: "external-service"
+        query-ref: "getCustomerDetails"
+      lookup-key-field: "id"
+      result-mapping:
+        - source-field: "name"
+          target-field: "customerName"
+    retry-enabled: true
+    retry-policy-ref: "NETWORK_TIMEOUT"

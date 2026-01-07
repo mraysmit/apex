@@ -4,6 +4,8 @@ import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
 import dev.mars.apex.core.service.scenario.ScenarioStage;
 import dev.mars.apex.core.util.RulesEngineLogger;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -186,6 +188,295 @@ public class ScenarioRegistryLoader {
         } catch (Exception e) {
             throw new YamlConfigurationException("Failed to load scenario registry from: " + registryPath, e);
         }
+    }
+
+    /**
+     * Load a scenario registry from an InputStream.
+     * 
+     * <p>This method enables loading scenario registries from classpath resources
+     * or other stream-based sources, such as JAR-packaged resources. When loading
+     * from a stream, scenario file references (config-file) are resolved as classpath
+     * resources.</p>
+     * 
+     * <p><b>Note:</b> When using this method, all scenario config-file references
+     * in the registry must be resolvable as classpath resources, since there is
+     * no filesystem context for relative path resolution.</p>
+     * 
+     * @param inputStream The input stream containing the registry YAML content
+     * @return A map of scenario configurations indexed by scenario-id
+     * @throws YamlConfigurationException if the registry cannot be loaded or parsed
+     */
+    public Map<String, ScenarioConfiguration> loadRegistry(InputStream inputStream) throws YamlConfigurationException {
+        return loadRegistry(inputStream, null);
+    }
+
+    /**
+     * Load a scenario registry from an InputStream with a classpath base for resolving
+     * relative scenario file references.
+     * 
+     * <p>This method enables loading scenario registries from classpath resources
+     * while supporting relative path resolution. The classpathBase parameter specifies
+     * the base path for resolving relative config-file references.</p>
+     * 
+     * <p><b>Example:</b></p>
+     * <pre>
+     * // If registry is at "scenarios/registry.yaml" and contains:
+     * //   config-file: "trade-processing.yaml"
+     * // Use classpathBase = "scenarios/" to resolve to "scenarios/trade-processing.yaml"
+     * 
+     * InputStream is = getClass().getClassLoader().getResourceAsStream("scenarios/registry.yaml");
+     * Map&lt;String, ScenarioConfiguration&gt; scenarios = loader.loadRegistry(is, "scenarios/");
+     * </pre>
+     * 
+     * @param inputStream The input stream containing the registry YAML content
+     * @param classpathBase The base path for resolving relative config-file references
+     *                      (e.g., "scenarios/"). Can be null if all paths are absolute.
+     * @return A map of scenario configurations indexed by scenario-id
+     * @throws YamlConfigurationException if the registry cannot be loaded or parsed
+     */
+    public Map<String, ScenarioConfiguration> loadRegistry(InputStream inputStream, String classpathBase) 
+            throws YamlConfigurationException {
+        
+        if (inputStream == null) {
+            throw new YamlConfigurationException("Input stream cannot be null");
+        }
+        
+        logger.info("Loading scenario registry from input stream (classpathBase: {})", 
+                   classpathBase != null ? classpathBase : "<none>");
+        
+        try {
+            // Load the registry YAML configuration as a Map from stream
+            Map<String, Object> registryConfig = configLoader.loadAsMap(inputStream);
+            
+            // Validate registry metadata
+            validateRegistryMetadata(registryConfig, "<stream>");
+            
+            // Parse scenarios section
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> scenarioRegistry = (List<Map<String, Object>>) registryConfig.get("scenarios");
+            
+            if (scenarioRegistry == null || scenarioRegistry.isEmpty()) {
+                throw new YamlConfigurationException(
+                    "Scenario registry does not contain a 'scenarios' section or it is empty"
+                );
+            }
+            
+            // Load all referenced scenario files
+            Map<String, ScenarioConfiguration> scenarios = new LinkedHashMap<>();
+            
+            for (Map<String, Object> registryEntry : scenarioRegistry) {
+                String scenarioId = (String) registryEntry.get("scenario-id");
+                String configFile = (String) registryEntry.get("config-file");
+
+                if (scenarioId == null || scenarioId.trim().isEmpty()) {
+                    logger.warn("Skipping registry entry with missing or empty scenario-id");
+                    continue;
+                }
+
+                if (configFile == null || configFile.trim().isEmpty()) {
+                    throw new YamlConfigurationException(
+                        "Scenario '" + scenarioId + "' in registry has missing or empty config-file"
+                    );
+                }
+
+                // Parse enabled flag from registry entry (default: true)
+                boolean enabled = parseEnabledFlag(registryEntry);
+
+                logger.debug("Loading scenario '{}' from classpath: {} (enabled: {})", scenarioId, configFile, enabled);
+
+                // Resolve config file path with classpath base
+                String resolvedPath = resolveClasspathConfigFile(configFile, classpathBase);
+
+                // Load the scenario configuration from classpath
+                ScenarioConfiguration scenario = loadScenarioFromClasspath(resolvedPath);
+
+                // Validate that scenario-id matches
+                if (scenario.getScenarioId() != null && !scenario.getScenarioId().equals(scenarioId)) {
+                    logger.warn(
+                        "Scenario ID mismatch: registry specifies '{}' but config file contains '{}'. Using registry ID.",
+                        scenarioId, scenario.getScenarioId()
+                    );
+                }
+
+                // Ensure scenario has the correct ID from registry
+                scenario.setScenarioId(scenarioId);
+
+                // Set enabled flag from registry entry
+                scenario.setEnabled(enabled);
+
+                // Store in map
+                scenarios.put(scenarioId, scenario);
+                logger.debug("Successfully loaded scenario from classpath: {} (enabled: {})", scenarioId, enabled);
+            }
+            
+            logger.info("Successfully loaded {} scenarios from registry stream", scenarios.size());
+            return scenarios;
+            
+        } catch (YamlConfigurationException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new YamlConfigurationException("Failed to load scenario registry from input stream", e);
+        }
+    }
+
+    /**
+     * Load a scenario registry from a classpath resource.
+     * 
+     * <p>This is a convenience method that combines resource lookup and stream-based
+     * loading. The classpath base is automatically derived from the resource path
+     * for resolving relative scenario file references.</p>
+     * 
+     * <p><b>Example:</b></p>
+     * <pre>
+     * // Load registry from classpath, automatically resolving relative paths
+     * Map&lt;String, ScenarioConfiguration&gt; scenarios = 
+     *     loader.loadRegistryFromClasspath("scenarios/registry.yaml");
+     * </pre>
+     * 
+     * @param resourcePath The classpath resource path to the registry file
+     * @return A map of scenario configurations indexed by scenario-id
+     * @throws YamlConfigurationException if the resource is not found or loading fails
+     */
+    public Map<String, ScenarioConfiguration> loadRegistryFromClasspath(String resourcePath) 
+            throws YamlConfigurationException {
+        
+        if (resourcePath == null || resourcePath.trim().isEmpty()) {
+            throw new YamlConfigurationException("Resource path cannot be null or empty");
+        }
+        
+        logger.info("Loading scenario registry from classpath: {}", resourcePath);
+        
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
+            if (inputStream == null) {
+                throw new YamlConfigurationException("Scenario registry resource not found: " + resourcePath);
+            }
+            
+            // Derive classpath base from resource path
+            String classpathBase = deriveClasspathBase(resourcePath);
+            
+            return loadRegistry(inputStream, classpathBase);
+            
+        } catch (IOException e) {
+            throw new YamlConfigurationException("Failed to load scenario registry from classpath: " + resourcePath, e);
+        }
+    }
+
+    /**
+     * Load a scenario configuration from a classpath resource.
+     * 
+     * @param resourcePath The classpath resource path to the scenario file
+     * @return The loaded ScenarioConfiguration
+     * @throws YamlConfigurationException if the resource is not found or loading fails
+     */
+    public ScenarioConfiguration loadScenarioFromClasspath(String resourcePath) throws YamlConfigurationException {
+        if (resourcePath == null || resourcePath.trim().isEmpty()) {
+            throw new YamlConfigurationException("Resource path cannot be null or empty");
+        }
+        
+        logger.debug("Loading scenario from classpath: {}", resourcePath);
+        
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
+            if (inputStream == null) {
+                throw new YamlConfigurationException("Scenario resource not found: " + resourcePath);
+            }
+            
+            return loadScenarioFromStream(inputStream);
+            
+        } catch (IOException e) {
+            throw new YamlConfigurationException("Failed to load scenario from classpath: " + resourcePath, e);
+        }
+    }
+
+    /**
+     * Load a scenario configuration from an InputStream.
+     * 
+     * @param inputStream The input stream containing the scenario YAML content
+     * @return The loaded ScenarioConfiguration
+     * @throws YamlConfigurationException if the stream cannot be parsed
+     */
+    public ScenarioConfiguration loadScenarioFromStream(InputStream inputStream) throws YamlConfigurationException {
+        if (inputStream == null) {
+            throw new YamlConfigurationException("Input stream cannot be null");
+        }
+        
+        try {
+            // Load the YAML content as a Map from stream
+            Map<String, Object> config = configLoader.loadAsMap(inputStream);
+            
+            // Look for 'scenario' section
+            @SuppressWarnings("unchecked")
+            Map<String, Object> scenarioData = (Map<String, Object>) config.get("scenario");
+            
+            if (scenarioData != null) {
+                ScenarioConfiguration scenario = parseScenarioConfiguration(scenarioData);
+                
+                // Also parse metadata from the file level if scenario doesn't have it
+                @SuppressWarnings("unchecked")
+                Map<String, Object> fileMetadata = (Map<String, Object>) config.get("metadata");
+                if (fileMetadata != null && scenario.getMetadata() == null) {
+                    scenario.setMetadata(fileMetadata);
+                }
+                
+                return scenario;
+            } else {
+                throw new YamlConfigurationException(
+                    "Scenario configuration does not contain a 'scenario' section"
+                );
+            }
+            
+        } catch (YamlConfigurationException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new YamlConfigurationException("Failed to load scenario from input stream", e);
+        }
+    }
+
+    /**
+     * Resolve a config file path for classpath loading.
+     * 
+     * @param configFile The config file path from the registry
+     * @param classpathBase The classpath base for relative resolution (can be null)
+     * @return The resolved classpath resource path
+     */
+    private String resolveClasspathConfigFile(String configFile, String classpathBase) {
+        // If it looks like an absolute classpath path (starts with /), strip the leading /
+        if (configFile.startsWith("/")) {
+            return configFile.substring(1);
+        }
+        
+        // If no classpath base, use the config file as-is
+        if (classpathBase == null || classpathBase.isEmpty()) {
+            return configFile;
+        }
+        
+        // If the config file already starts with the base, use as-is
+        if (configFile.startsWith(classpathBase)) {
+            return configFile;
+        }
+        
+        // Resolve relative to classpath base
+        String base = classpathBase.endsWith("/") ? classpathBase : classpathBase + "/";
+        
+        // Handle "./" prefix
+        if (configFile.startsWith("./")) {
+            configFile = configFile.substring(2);
+        }
+        
+        return base + configFile;
+    }
+
+    /**
+     * Derive the classpath base directory from a resource path.
+     * 
+     * @param resourcePath The full resource path
+     * @return The base directory path (with trailing slash) or empty string if at root
+     */
+    private String deriveClasspathBase(String resourcePath) {
+        int lastSlash = resourcePath.lastIndexOf('/');
+        if (lastSlash > 0) {
+            return resourcePath.substring(0, lastSlash + 1);
+        }
+        return "";
     }
     
     /**

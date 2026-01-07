@@ -1,0 +1,57 @@
+metadata:
+  name: "Conditional Enrichment Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test conditional enrichment execution based on runtime conditions"
+
+enrichments:
+  - id: "conditional-premium-enrichment"
+    type: "lookup-enrichment"
+    enabled: "#customerTier == 'PREMIUM'"
+    source-field: "#customerId"
+    lookup-config:
+      lookup-dataset:
+        type: "yaml-data"
+        data:
+          - key: "PREM001"
+            rewardsPoints: 5000
+            vipStatus: true
+      lookup-key-field: "key"
+      result-mapping:
+        - source-field: "rewardsPoints"
+          target-field: "rewardsPoints"
+        - source-field: "vipStatus"
+          target-field: "vipStatus"
+  
+  - id: "conditional-standard-enrichment"
+    type: "calculation-enrichment"
+    enabled: "#customerTier == 'STANDARD'"
+    source-fields:
+      - "#orderCount"
+    calculation:
+      expression: "#orderCount * 10"
+      result-field: "standardPoints"
+  
+  - id: "conditional-high-value-enrichment"
+    type: "lookup-enrichment"
+    enabled: "#orderAmount > 10000"
+    source-field: "#productId"
+    lookup-config:
+      lookup-dataset:
+        type: "yaml-data"
+        data:
+          - key: "PROD001"
+            specialHandling: true
+            insuranceRequired: true
+      lookup-key-field: "key"
+      result-mapping:
+        - source-field: "specialHandling"
+          target-field: "requiresSpecialHandling"
+        - source-field: "insuranceRequired"
+          target-field: "requiresInsurance"
+
+rules:
+  - id: "conditional-enrichment-rule-001"
+    condition: "#customerTier == 'PREMIUM' implies #rewardsPoints != null"
+    message: "Premium customers should have rewards points enriched"
+    severity: "WARNING"

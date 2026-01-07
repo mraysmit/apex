@@ -1,0 +1,61 @@
+metadata:
+  name: "Notification Policies Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test error recovery with notification and alerting policies"
+
+error-recovery:
+  default-action: "CONTINUE"
+  
+  severity-policies:
+    - severity: "CRITICAL"
+      action: "ABORT"
+      max-errors: 0
+      log-level: "ERROR"
+      notification-enabled: true
+      notification-channels:
+        - "EMAIL"
+        - "SLACK"
+        - "PAGERDUTY"
+      alert-threshold: 1
+    
+    - severity: "ERROR"
+      action: "FAIL"
+      max-errors: 5
+      log-level: "ERROR"
+      notification-enabled: true
+      notification-channels:
+        - "EMAIL"
+        - "SLACK"
+      alert-threshold: 3
+    
+    - severity: "WARNING"
+      action: "CONTINUE"
+      max-errors: 20
+      log-level: "WARN"
+      notification-enabled: true
+      notification-channels:
+        - "EMAIL"
+      alert-threshold: 10
+    
+    - severity: "INFO"
+      action: "CONTINUE"
+      max-errors: -1
+      log-level: "INFO"
+      notification-enabled: false
+
+rules:
+  - id: "notify-critical-001"
+    condition: "#balance < 0"
+    message: "Critical: Negative balance detected"
+    severity: "CRITICAL"
+
+  - id: "notify-error-001"
+    condition: "#fraudScore > 0.9"
+    message: "Error: High fraud score"
+    severity: "ERROR"
+
+  - id: "notify-warning-001"
+    condition: "#transactionAmount > 5000"
+    message: "Warning: Large transaction"
+    severity: "WARNING"

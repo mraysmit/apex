@@ -1,0 +1,53 @@
+metadata:
+  name: "Conditional Data Source Enablement Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test conditional enabling/disabling of data sources based on context"
+
+data-source-refs:
+  - name: "production-database"
+    source: "data-sources/prod-db.yaml"
+    enabled: "${ENV == 'PRODUCTION'}"
+    priority: 1
+    connection-pool-size: 50
+  
+  - name: "staging-database"
+    source: "data-sources/staging-db.yaml"
+    enabled: "${ENV == 'STAGING'}"
+    priority: 1
+    connection-pool-size: 20
+  
+  - name: "test-database"
+    source: "data-sources/test-db.yaml"
+    enabled: "${ENV == 'TEST' || ENV == 'DEV'}"
+    priority: 1
+    connection-pool-size: 5
+  
+  - name: "cache-service"
+    source: "data-sources/redis-cache.yaml"
+    enabled: "${CACHE_ENABLED == 'true'}"
+    priority: 2
+  
+  - name: "fallback-filesystem"
+    source: "data-sources/filesystem-fallback.yaml"
+    enabled: true
+    priority: 999
+
+enrichments:
+  - id: "environment-aware-lookup"
+    type: "lookup-enrichment"
+    source-field: "#referenceId"
+    lookup-config:
+      lookup-dataset:
+        data-source-ref: "${ENV == 'PRODUCTION' ? 'production-database' : 'test-database'}"
+        query-ref: "getReferenceData"
+      lookup-key-field: "ref_id"
+      result-mapping:
+        - source-field: "ref_value"
+          target-field: "referenceValue"
+
+rules:
+  - id: "conditional-ds-rule-001"
+    condition: "#referenceValue != null"
+    message: "Reference data should be available from environment-specific database"
+    severity: "WARNING"

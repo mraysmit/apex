@@ -1,0 +1,21 @@
+metadata:
+  name: "Metadata Edge Cases Test"
+  version: "2.1.0-SNAPSHOT"
+  type: "rule-config"
+  description: "Testing special characters: <>&\"'@#$%^*()[]{}|\\~`"
+  author: "Test User <test@example.com>"
+  created: "2025-12-19T10:30:00Z"
+  tags:
+    - "validation"
+    - "edge-case"
+    - "special-chars"
+  custom-properties:
+    environment: "test"
+    region: "us-east-1"
+    cost-center: "CC-12345"
+
+rules:
+  - id: "metadata-edge-001"
+    condition: "#status == 'active'"
+    message: "Status validation with special chars: <>&\"'"
+    severity: "WARNING"

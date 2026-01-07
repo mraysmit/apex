@@ -1,0 +1,26 @@
+metadata:
+  name: "Global Settings Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test configuration with global settings and execution options"
+  author: "APEX Test Suite"
+  created: "2025-12-19"
+
+global-settings:
+  strict-mode: true
+  fail-fast: false
+  max-errors: 10
+  parallel-execution: true
+  thread-pool-size: 4
+
+execution-options:
+  continue-on-error: true
+  log-level: "INFO"
+  timeout-seconds: 300
+  retry-attempts: 3
+
+rules:
+  - id: "global-settings-rule-001"
+    condition: "#value != null"
+    message: "Value must be present"
+    severity: "ERROR"

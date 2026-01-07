@@ -2,8 +2,7 @@ package dev.mars.apex.core.service.data.external;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import dev.mars.apex.core.util.RulesEngineLogger;
 
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -31,8 +30,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DataSourceResolver {
     
-    private static final Logger logger = LoggerFactory.getLogger(DataSourceResolver.class);
-    
+    private final RulesEngineLogger logger = new RulesEngineLogger(DataSourceResolver.class);
+
     private final ObjectMapper yamlMapper;
     private final Map<String, ExternalDataSourceConfig> configCache;
     
@@ -99,11 +98,14 @@ public class DataSourceResolver {
                 e.getMessage().contains("name is missing") ||
                 e.getMessage().contains("spec is missing")) {
                 logger.debug("Validation error from file system, not trying classpath: {}", e.getMessage());
+                logger.debug("Full validation exception details:", e);
                 throw e; // Re-throw validation errors immediately
             }
             logger.debug("Failed to load from file system, trying classpath: {}", e.getMessage());
+            logger.debug("Full exception details from file system attempt:", e);
         } catch (Exception e) {
-            logger.debug("Failed to load from file system, trying classpath: {}", e.getMessage());
+            logger.debug("Failed to load from file system (unexpected error), trying classpath: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
         }
 
         // Fall back to classpath
@@ -113,6 +115,7 @@ public class DataSourceResolver {
             return config;
         } catch (Exception e) {
             logger.debug("Failed to load from classpath: {}", e.getMessage());
+            logger.debug("Full exception details from classpath attempt:", e);
         }
 
         // Both failed

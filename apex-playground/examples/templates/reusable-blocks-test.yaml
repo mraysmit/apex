@@ -1,0 +1,90 @@
+metadata:
+  name: "Reusable Blocks Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test template definitions for reusable rule and enrichment blocks"
+
+templates:
+  rule-templates:
+    - id: "not-null-validation-template"
+      name: "Not Null Validation Template"
+      description: "Reusable template for field presence validation"
+      parameters:
+        - name: "fieldName"
+          type: "string"
+          required: true
+        - name: "displayName"
+          type: "string"
+          required: true
+        - name: "severity"
+          type: "string"
+          default: "ERROR"
+      rule-definition:
+        condition: "#{${fieldName}} != null"
+        message: "${displayName} is required"
+        severity: "${severity}"
+    
+    - id: "range-validation-template"
+      name: "Range Validation Template"
+      description: "Validates numeric fields within range"
+      parameters:
+        - name: "fieldName"
+          type: "string"
+          required: true
+        - name: "minValue"
+          type: "number"
+          required: true
+        - name: "maxValue"
+          type: "number"
+          required: true
+      rule-definition:
+        condition: "#{${fieldName}} >= ${minValue} && #{${fieldName}} <= ${maxValue}"
+        message: "${fieldName} must be between ${minValue} and ${maxValue}"
+        severity: "ERROR"
+
+  enrichment-templates:
+    - id: "uppercase-transform-template"
+      name: "Uppercase Transformation Template"
+      description: "Reusable uppercase transformation"
+      parameters:
+        - name: "sourceField"
+          type: "string"
+          required: true
+        - name: "targetField"
+          type: "string"
+          required: true
+      enrichment-definition:
+        type: "transformation-enrichment"
+        transformations:
+          - source-field: "${sourceField}"
+            target-field: "${targetField}"
+            transformation-type: "UPPERCASE"
+
+rules:
+  - template-ref: "not-null-validation-template"
+    id: "customer-id-required"
+    parameters:
+      fieldName: "customerId"
+      displayName: "Customer ID"
+      severity: "ERROR"
+  
+  - template-ref: "not-null-validation-template"
+    id: "order-date-required"
+    parameters:
+      fieldName: "orderDate"
+      displayName: "Order Date"
+      severity: "ERROR"
+  
+  - template-ref: "range-validation-template"
+    id: "quantity-range"
+    parameters:
+      fieldName: "quantity"
+      minValue: 1
+      maxValue: 1000
+
+enrichments:
+  - template-ref: "uppercase-transform-template"
+    id: "normalize-customer-name"
+    parameters:
+      sourceField: "#customerName"
+      targetField: "normalizedCustomerName"

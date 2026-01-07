@@ -130,7 +130,8 @@ public class DependencyAnalysisService {
 
             return enhancedGraph;
         } catch (Exception e) {
-            logger.error("Failed to analyze dependencies for: {}", rootFilePath, e);
+            logger.error("Failed to analyze dependencies for: {}", rootFilePath);
+            logger.debug("Full exception details:", e);
             throw new RuntimeException("Dependency analysis failed", e);
         }
     }
