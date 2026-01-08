@@ -1,0 +1,17 @@
+# Simple registry without search-paths
+# Uses default resolution (relative to registry location)
+
+metadata:
+  id: "simple-registry"
+  name: "Simple Registry"
+  type: "scenario-registry"
+  version: "1.0"
+  description: "Registry without search-paths section"
+  created-by: "Mars Development Team"
+
+scenarios:
+  - scenario-id: "basic-scenario"
+    name: "Basic Scenario"
+    description: "Simple test scenario"
+    config-file: "scenarios/scenario-a.yaml"
+    enabled: true

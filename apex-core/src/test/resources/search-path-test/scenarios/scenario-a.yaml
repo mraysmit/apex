@@ -1,0 +1,29 @@
+# Scenario A Configuration
+# Located in scenarios/ subdirectory to test search path resolution
+
+metadata:
+  id: "scenario-a"
+  name: "Scenario A Configuration"
+  type: "scenario"
+  version: "1.0"
+  description: "Test scenario A for search path resolution"
+  owner: "Mars Development Team"
+  business-domain: "Testing"
+
+scenario:
+  scenario-id: "scenario-a"
+  name: "Scenario A"
+  description: "First test scenario for search path resolution"
+  business-domain: "Testing"
+  
+  data-types:
+    - "java.util.Map"
+  
+  rule-configurations:
+    - id: "scenario-a-rules"
+      rules:
+        - id: "amount-check"
+          name: "Amount Positive Check"
+          condition: "#amount > 0"
+          message: "Amount is positive"
+          severity: "INFO"

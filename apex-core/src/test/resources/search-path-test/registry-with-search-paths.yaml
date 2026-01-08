@@ -1,0 +1,32 @@
+# Registry with search-paths configuration
+# This registry demonstrates the external search-paths feature
+# where config files can be resolved from multiple locations
+
+metadata:
+  id: "search-path-test-registry"
+  name: "Search Path Test Registry"
+  type: "scenario-registry"
+  version: "1.0"
+  description: "Tests registry-level search path configuration"
+  created-by: "Mars Development Team"
+
+search-paths:
+  filesystem:
+    - "${APEX_TEST_PATH}/configs"
+    - "/opt/apex/test-configs"
+  classpath:
+    - "search-path-test/scenarios/"
+    - "apex/test/"
+
+scenarios:
+  - scenario-id: "scenario-a"
+    name: "Scenario A"
+    description: "First test scenario"
+    config-file: "scenario-a.yaml"
+    enabled: true
+
+  - scenario-id: "scenario-b"
+    name: "Scenario B"
+    description: "Second test scenario"
+    config-file: "scenario-b.yaml"
+    enabled: true

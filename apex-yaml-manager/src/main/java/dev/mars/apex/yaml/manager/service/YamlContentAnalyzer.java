@@ -93,6 +93,63 @@ public class YamlContentAnalyzer {
     }
 
     /**
+     * Analyze YAML content from an InputStream and generate a content summary.
+     * 
+     * <p>This method enables analyzing classpath resources and other stream-based
+     * content sources without requiring file system access.</p>
+     *
+     * @param inputStream The InputStream containing YAML content
+     * @param resourcePath The resource path for identification (e.g., "classpath:config/rules.yaml")
+     * @return YamlContentSummary containing analysis results
+     * @throws java.io.IOException if an error occurs reading the stream
+     */
+    public YamlContentSummary analyzeYamlContent(java.io.InputStream inputStream, String resourcePath) 
+            throws java.io.IOException {
+        logger.debug("=== ANALYZING YAML CONTENT FROM STREAM ===");
+        logger.debug("Resource path: {}", resourcePath);
+
+        YamlContentSummary summary = new YamlContentSummary(resourcePath);
+
+        try {
+            // Read raw content from stream
+            String rawContent = new String(inputStream.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            summary.setRawContent(rawContent);
+            logger.debug("Raw content read, length: {} characters", rawContent.length());
+
+            // Parse YAML from the string content
+            Map<String, Object> data = yaml.load(rawContent);
+            if (data == null) {
+                logger.warn("YAML data is null for resource: {}", resourcePath);
+                return summary;
+            }
+
+            logger.debug("YAML loaded successfully, top-level keys: {}", data.keySet());
+
+            // Extract metadata
+            extractMetadata(summary, data);
+            logger.debug("Metadata extracted: id={}, type={}", summary.getId(), summary.getFileType());
+
+            // Analyze content
+            analyzeContent(summary, data);
+            logger.debug("Content analyzed: rules={}, enrichments={}, groups={}",
+                summary.getRuleCount(), summary.getEnrichmentCount(), summary.getRuleGroupCount());
+
+            // Determine file type
+            determineFileType(summary, data);
+            logger.debug("Final file type determined: {}", summary.getFileType());
+
+        } catch (Exception e) {
+            logger.error("Error analyzing YAML from stream: {}", resourcePath);
+            logger.debug("Full exception details:", e);
+            throw new java.io.IOException("Failed to analyze YAML content from: " + resourcePath, e);
+        }
+
+        logger.debug("=== CONTENT ANALYSIS COMPLETE ===");
+        logger.debug("Summary: {}", summary);
+        return summary;
+    }
+
+    /**
      * Extract metadata from YAML.
      */
     @SuppressWarnings("unchecked")

@@ -1,0 +1,29 @@
+# Alternate configuration for Builder tests
+# Located in path-b subdirectory to test search path order
+
+metadata:
+  id: "builder-alt-config"
+  name: "Builder Alternate Configuration"
+  type: "scenario"
+  version: "1.0"
+  description: "Alternate configuration for search path order tests"
+  owner: "Mars Development Team"
+  business-domain: "Testing"
+
+scenario:
+  scenario-id: "alt-scenario"
+  name: "Alternate Scenario"
+  description: "Alternate test scenario for builder tests"
+  business-domain: "Testing"
+  
+  data-types:
+    - "java.util.Map"
+  
+  rule-configurations:
+    - id: "alt-rules"
+      rules:
+        - id: "alt-rule-1"
+          name: "Type Check"
+          condition: "#type == 'SPECIAL'"
+          message: "Special type detected"
+          severity: "INFO"

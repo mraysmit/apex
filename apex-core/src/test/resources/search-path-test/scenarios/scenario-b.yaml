@@ -1,0 +1,29 @@
+# Scenario B Configuration
+# Located in scenarios/ subdirectory to test search path resolution
+
+metadata:
+  id: "scenario-b"
+  name: "Scenario B Configuration"
+  type: "scenario"
+  version: "1.0"
+  description: "Test scenario B for search path resolution"
+  owner: "Mars Development Team"
+  business-domain: "Testing"
+
+scenario:
+  scenario-id: "scenario-b"
+  name: "Scenario B"
+  description: "Second test scenario for search path resolution"
+  business-domain: "Testing"
+  
+  data-types:
+    - "java.util.Map"
+  
+  rule-configurations:
+    - id: "scenario-b-rules"
+      rules:
+        - id: "status-check"
+          name: "Status Active Check"
+          condition: "#status == 'ACTIVE'"
+          message: "Status is active"
+          severity: "INFO"

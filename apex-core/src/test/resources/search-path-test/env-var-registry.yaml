@@ -1,0 +1,24 @@
+# Registry with env var expansion in search-paths
+# Tests ${VAR} expansion functionality
+
+metadata:
+  id: "env-var-registry"
+  name: "Environment Variable Registry"
+  type: "scenario-registry"
+  version: "1.0"
+  description: "Registry demonstrating env var expansion in search paths"
+  created-by: "Mars Development Team"
+
+search-paths:
+  filesystem:
+    - "${APEX_CONFIG_DIR}/scenarios"
+    - "${user.home}/.apex/configs"
+  classpath:
+    - "search-path-test/scenarios/"
+
+scenarios:
+  - scenario-id: "env-scenario"
+    name: "Environment Scenario"
+    description: "Scenario using env var paths"
+    config-file: "scenario-a.yaml"
+    enabled: true

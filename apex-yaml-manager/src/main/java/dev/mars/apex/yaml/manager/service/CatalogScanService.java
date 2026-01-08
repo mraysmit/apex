@@ -21,15 +21,22 @@ import dev.mars.apex.yaml.manager.model.YamlContentSummary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Service;
 import org.yaml.snakeyaml.error.Mark;
 import org.yaml.snakeyaml.error.MarkedYAMLException;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -110,6 +117,265 @@ public class CatalogScanService {
             filesIndexed, errors.size(), duration);
         
         return result;
+    }
+
+    /**
+     * Scan classpath for YAML files under the specified prefix.
+     * 
+     * <p>Uses Spring's PathMatchingResourcePatternResolver to find all YAML resources
+     * matching the prefix pattern. This enables scanning JAR-packaged resources and
+     * test resources on the classpath.</p>
+     *
+     * @param classpathPrefix The classpath prefix to scan (e.g., "config/", "META-INF/apex/")
+     * @return Map containing scan results (resourcesScanned, resourcesIndexed, errors, duration)
+     */
+    public Map<String, Object> scanClasspath(String classpathPrefix) {
+        return scanClasspath(classpathPrefix, Thread.currentThread().getContextClassLoader());
+    }
+
+    /**
+     * Scan classpath for YAML files under the specified prefix using a specific ClassLoader.
+     * 
+     * <p>Uses Spring's PathMatchingResourcePatternResolver to find all YAML resources
+     * matching the prefix pattern. This enables scanning JAR-packaged resources and
+     * test resources on the classpath.</p>
+     *
+     * @param classpathPrefix The classpath prefix to scan (e.g., "config/", "META-INF/apex/")
+     * @param classLoader The ClassLoader to use for resource resolution
+     * @return Map containing scan results (resourcesScanned, resourcesIndexed, errors, duration)
+     */
+    public Map<String, Object> scanClasspath(String classpathPrefix, ClassLoader classLoader) {
+        logger.info("Starting classpath scan for prefix: {}", classpathPrefix);
+        
+        long startTime = System.currentTimeMillis();
+        Map<String, Object> result = new HashMap<>();
+        List<String> errors = new ArrayList<>();
+        
+        // Validate prefix
+        if (classpathPrefix == null || classpathPrefix.trim().isEmpty()) {
+            String error = "Classpath prefix cannot be null or empty";
+            logger.error(error);
+            result.put("success", false);
+            result.put("error", error);
+            return result;
+        }
+        
+        // Normalize prefix (ensure no leading slash, ensure trailing slash for directories)
+        String normalizedPrefix = classpathPrefix.startsWith("/") 
+            ? classpathPrefix.substring(1) 
+            : classpathPrefix;
+        if (!normalizedPrefix.isEmpty() && !normalizedPrefix.endsWith("/")) {
+            normalizedPrefix = normalizedPrefix + "/";
+        }
+        
+        int resourcesScanned = 0;
+        int resourcesIndexed = 0;
+        
+        try {
+            ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(classLoader);
+            
+            // Scan for both .yaml and .yml files
+            String[] patterns = {
+                "classpath*:" + normalizedPrefix + "**/*.yaml",
+                "classpath*:" + normalizedPrefix + "**/*.yml"
+            };
+            
+            for (String pattern : patterns) {
+                logger.debug("Scanning classpath pattern: {}", pattern);
+                
+                try {
+                    Resource[] resources = resolver.getResources(pattern);
+                    resourcesScanned += resources.length;
+                    
+                    for (Resource resource : resources) {
+                        if (resource.isReadable()) {
+                            if (indexClasspathResource(resource, normalizedPrefix, errors)) {
+                                resourcesIndexed++;
+                            }
+                        }
+                    }
+                } catch (IOException e) {
+                    String error = "Error scanning pattern '" + pattern + "': " + e.getMessage();
+                    logger.warn(error);
+                    errors.add(error);
+                }
+            }
+            
+        } catch (Exception e) {
+            String error = "Classpath scan failed: " + e.getMessage();
+            logger.error(error, e);
+            result.put("success", false);
+            result.put("error", error);
+            result.put("errors", errors);
+            return result;
+        }
+        
+        long duration = System.currentTimeMillis() - startTime;
+        
+        // Build result
+        result.put("success", true);
+        result.put("classpathPrefix", classpathPrefix);
+        result.put("resourcesScanned", resourcesScanned);
+        result.put("resourcesIndexed", resourcesIndexed);
+        result.put("errorCount", errors.size());
+        result.put("errors", errors);
+        result.put("durationMs", duration);
+        
+        logger.info("Classpath scan complete: {} resources indexed, {} errors, {} ms",
+            resourcesIndexed, errors.size(), duration);
+        
+        return result;
+    }
+
+    /**
+     * Scan both filesystem directories and classpath prefixes for YAML files.
+     * 
+     * <p>This method combines filesystem and classpath scanning, providing a unified
+     * way to discover all YAML configuration files regardless of their location.</p>
+     *
+     * @param filesystemPaths List of filesystem directory paths to scan
+     * @param classpathPrefixes List of classpath prefixes to scan
+     * @return Map containing combined scan results
+     */
+    public Map<String, Object> scanAll(List<String> filesystemPaths, List<String> classpathPrefixes) {
+        logger.info("Starting combined scan: {} filesystem paths, {} classpath prefixes",
+            filesystemPaths != null ? filesystemPaths.size() : 0,
+            classpathPrefixes != null ? classpathPrefixes.size() : 0);
+        
+        long startTime = System.currentTimeMillis();
+        Map<String, Object> result = new HashMap<>();
+        List<String> allErrors = new ArrayList<>();
+        List<Map<String, Object>> filesystemResults = new ArrayList<>();
+        List<Map<String, Object>> classpathResults = new ArrayList<>();
+        
+        int totalFilesIndexed = 0;
+        int totalResourcesIndexed = 0;
+        
+        // Scan filesystem paths
+        if (filesystemPaths != null) {
+            for (String path : filesystemPaths) {
+                Map<String, Object> scanResult = scanDirectory(path);
+                filesystemResults.add(scanResult);
+                
+                if (Boolean.TRUE.equals(scanResult.get("success"))) {
+                    totalFilesIndexed += ((Number) scanResult.getOrDefault("filesIndexed", 0)).intValue();
+                }
+                
+                @SuppressWarnings("unchecked")
+                List<String> errors = (List<String>) scanResult.get("errors");
+                if (errors != null) {
+                    allErrors.addAll(errors);
+                }
+            }
+        }
+        
+        // Scan classpath prefixes
+        if (classpathPrefixes != null) {
+            for (String prefix : classpathPrefixes) {
+                Map<String, Object> scanResult = scanClasspath(prefix);
+                classpathResults.add(scanResult);
+                
+                if (Boolean.TRUE.equals(scanResult.get("success"))) {
+                    totalResourcesIndexed += ((Number) scanResult.getOrDefault("resourcesIndexed", 0)).intValue();
+                }
+                
+                @SuppressWarnings("unchecked")
+                List<String> errors = (List<String>) scanResult.get("errors");
+                if (errors != null) {
+                    allErrors.addAll(errors);
+                }
+            }
+        }
+        
+        long duration = System.currentTimeMillis() - startTime;
+        
+        // Build combined result
+        result.put("success", true);
+        result.put("filesystemResults", filesystemResults);
+        result.put("classpathResults", classpathResults);
+        result.put("totalFilesIndexed", totalFilesIndexed);
+        result.put("totalResourcesIndexed", totalResourcesIndexed);
+        result.put("totalIndexed", totalFilesIndexed + totalResourcesIndexed);
+        result.put("errorCount", allErrors.size());
+        result.put("errors", allErrors);
+        result.put("durationMs", duration);
+        
+        logger.info("Combined scan complete: {} files + {} classpath resources indexed, {} errors, {} ms",
+            totalFilesIndexed, totalResourcesIndexed, allErrors.size(), duration);
+        
+        return result;
+    }
+
+    /**
+     * Index a classpath resource into the catalog.
+     *
+     * @param resource The Spring Resource to index
+     * @param classpathPrefix The prefix used for scanning (for metadata)
+     * @param errors List to collect error messages
+     * @return true if resource was successfully indexed, false otherwise
+     */
+    private boolean indexClasspathResource(Resource resource, String classpathPrefix, List<String> errors) {
+        try {
+            String resourcePath = getResourcePath(resource);
+            logger.debug("Indexing classpath resource: {}", resourcePath);
+            
+            // Analyze content from input stream
+            try (InputStream is = resource.getInputStream()) {
+                YamlContentSummary summary = contentAnalyzer.analyzeYamlContent(is, resourcePath);
+                
+                // Create metadata from summary
+                YamlConfigMetadata metadata = createMetadataFromSummary(summary, "classpath:" + resourcePath);
+                
+                // Mark as classpath resource
+                metadata.setClasspathResource(true);
+                metadata.setClasspathPrefix(classpathPrefix);
+                
+                // Add to catalog
+                catalogService.addConfiguration(metadata);
+                
+                return true;
+            }
+        } catch (MarkedYAMLException e) {
+            // Parser validation error - capture detailed location information
+            Mark problemMark = e.getProblemMark();
+            
+            StringBuilder errorMsg = new StringBuilder();
+            errorMsg.append(String.format("YAML validation error in classpath resource '%s'", 
+                getResourcePath(resource)));
+            
+            if (problemMark != null) {
+                errorMsg.append(String.format(" at line %d, column %d",
+                    problemMark.getLine() + 1, problemMark.getColumn() + 1));
+            }
+            
+            errorMsg.append(String.format(": %s", e.getProblem()));
+            
+            String error = errorMsg.toString();
+            logger.info(error);
+            errors.add(error);
+            return false;
+        } catch (Exception e) {
+            String error = String.format("Error processing classpath resource '%s': %s", 
+                getResourcePath(resource), e.getMessage());
+            logger.info(error);
+            errors.add(error);
+            return false;
+        }
+    }
+
+    /**
+     * Get the path string for a Spring Resource.
+     *
+     * @param resource The Spring Resource
+     * @return The resource path or a descriptive string
+     */
+    private String getResourcePath(Resource resource) {
+        try {
+            URL url = resource.getURL();
+            return url.toString();
+        } catch (IOException e) {
+            return resource.getDescription();
+        }
     }
 
     /**

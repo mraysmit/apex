@@ -1,0 +1,19 @@
+# Simple component for stream-based loading test
+# Tests loadComponent(InputStream) method
+
+metadata:
+  id: stream-load-component
+  name: Stream Load Component
+  type: component
+  version: "1.0.0"
+  description: Tests loadComponent(InputStream) method
+  business-domain: testing
+  owner: APEX Test Team
+  criticality: medium
+  sla-ms: 50
+  enabled: true
+
+rule-configurations:
+  - file: stream-rules.yaml
+    execution-order: 1
+    failure-policy: terminate

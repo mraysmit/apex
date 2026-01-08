@@ -59,6 +59,8 @@ public class YamlConfigMetadata {
     private LocalDateTime lastValidated;
     private boolean isOrphaned;
     private boolean isCritical;
+    private boolean isClasspathResource; // True if loaded from classpath
+    private String classpathPrefix; // The prefix used when scanning (e.g., "config/", "META-INF/apex/")
 
     public YamlConfigMetadata() {
         this.tags = new HashSet<>();
@@ -72,6 +74,8 @@ public class YamlConfigMetadata {
         this.healthScore = 50;
         this.isOrphaned = false;
         this.isCritical = false;
+        this.isClasspathResource = false;
+        this.classpathPrefix = null;
     }
 
     // Getters and Setters
@@ -258,6 +262,22 @@ public class YamlConfigMetadata {
 
     public void setCritical(boolean critical) {
         isCritical = critical;
+    }
+
+    public boolean isClasspathResource() {
+        return isClasspathResource;
+    }
+
+    public void setClasspathResource(boolean classpathResource) {
+        isClasspathResource = classpathResource;
+    }
+
+    public String getClasspathPrefix() {
+        return classpathPrefix;
+    }
+
+    public void setClasspathPrefix(String classpathPrefix) {
+        this.classpathPrefix = classpathPrefix;
     }
 
     // Utility methods

@@ -1,0 +1,18 @@
+# Rules configuration for child component in classpath test
+# Simple validation rules
+
+metadata:
+  id: child-rules
+  name: Child Component Rules
+  version: "1.0.0"
+  description: Rules for child component test
+  type: rule-config
+  author: APEX Test
+
+rules:
+  - id: child-rule-1
+    name: Currency Required
+    description: Validate that currency is not null
+    condition: "#currency != null"
+    message: "Currency is required"
+    severity: ERROR

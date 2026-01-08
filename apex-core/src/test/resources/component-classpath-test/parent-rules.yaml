@@ -1,0 +1,18 @@
+# Rules configuration for parent component in classpath test
+# Simple validation rules
+
+metadata:
+  id: parent-rules
+  name: Parent Component Rules
+  version: "1.0.0"
+  description: Rules for parent component test
+  type: rule-config
+  author: APEX Test
+
+rules:
+  - id: parent-rule-1
+    name: Amount Must Be Positive
+    description: Validate that amount is positive
+    condition: "#amount > 0"
+    message: "Amount must be positive"
+    severity: ERROR

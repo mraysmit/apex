@@ -2653,4 +2653,415 @@ public class RulesEngine {
             return RuleResult.noMatch(chain.getId(), "Rule chain not triggered", SeverityConstants.INFO);
         }
     }
+
+    // ========================================================================
+    // Builder Pattern for Fluent API Configuration
+    // ========================================================================
+
+    /**
+     * Create a new Builder for fluent RulesEngine configuration.
+     * 
+     * <p>The Builder pattern provides a fluent API for configuring search paths
+     * and building a RulesEngine from various sources.</p>
+     * 
+     * <p><b>Example Usage:</b></p>
+     * <pre>{@code
+     * // Basic usage with search paths
+     * RulesEngine engine = RulesEngine.builder()
+     *     .addSearchPath("/etc/apex/trading")
+     *     .addSearchPath("/opt/apex/configs")
+     *     .addClasspathPrefix("apex/trading/")
+     *     .fromScenarioRegistry("scenario-registry.yaml")
+     *     .build();
+     * 
+     * // With EvaluationContext for variable substitution
+     * RulesEngine engine = RulesEngine.builder()
+     *     .addSearchPath("${APEX_HOME}/configs")
+     *     .withContext("environment", "production")
+     *     .withContext("region", "us-east-1")
+     *     .fromFile("trading-rules.yaml")
+     *     .build();
+     * }</pre>
+     *
+     * @return A new Builder instance
+     * @since 3.0
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /**
+     * Fluent builder for RulesEngine configuration.
+     * 
+     * <p>Provides a clean API for configuring search paths, classpath prefixes,
+     * context variables, and building a RulesEngine from various sources.</p>
+     * 
+     * <p><b>Search Path Precedence:</b></p>
+     * <ol>
+     *   <li>Registry-level paths (from registry YAML {@code search-paths} section)</li>
+     *   <li>Programmatic paths (via {@code addSearchPath()}, {@code addClasspathPrefix()})</li>
+     *   <li>System property paths ({@code apex.config.searchPaths})</li>
+     *   <li>Environment variable paths ({@code APEX_CONFIG_SEARCH_PATHS})</li>
+     *   <li>Default resolution (relative to source file)</li>
+     * </ol>
+     *
+     * @since 3.0
+     */
+    public static class Builder {
+        private static final RulesEngineLogger builderLogger = new RulesEngineLogger(Builder.class);
+        
+        private final List<String> filesystemPaths = new ArrayList<>();
+        private final List<String> classpathPrefixes = new ArrayList<>();
+        private final Map<String, Object> contextVariables = new HashMap<>();
+        private String sourcePath;
+        private SourceType sourceType;
+
+        private enum SourceType {
+            FILE, SCENARIO_REGISTRY, YAML_CONFIG
+        }
+
+        /**
+         * Create a new Builder instance.
+         * Typically accessed via {@link RulesEngine#builder()}.
+         */
+        public Builder() {
+            builderLogger.debug("Created new RulesEngine.Builder");
+        }
+
+        /**
+         * Add a filesystem search path for config file resolution.
+         * 
+         * <p>Paths are searched in the order they are added. Supports environment
+         * variable expansion using {@code ${VAR_NAME}} syntax.</p>
+         *
+         * @param path The filesystem path (absolute or relative)
+         * @return this builder for method chaining
+         */
+        public Builder addSearchPath(String path) {
+            if (path != null && !path.trim().isEmpty()) {
+                String expanded = expandEnvironmentVariables(path.trim());
+                filesystemPaths.add(expanded);
+                builderLogger.debug("Added filesystem search path: {}", expanded);
+            }
+            return this;
+        }
+
+        /**
+         * Add multiple filesystem search paths.
+         *
+         * @param paths The filesystem paths to add
+         * @return this builder for method chaining
+         */
+        public Builder addSearchPaths(String... paths) {
+            if (paths != null) {
+                for (String path : paths) {
+                    addSearchPath(path);
+                }
+            }
+            return this;
+        }
+
+        /**
+         * Add multiple filesystem search paths from a collection.
+         *
+         * @param paths The filesystem paths to add
+         * @return this builder for method chaining
+         */
+        public Builder addSearchPaths(Collection<String> paths) {
+            if (paths != null) {
+                for (String path : paths) {
+                    addSearchPath(path);
+                }
+            }
+            return this;
+        }
+
+        /**
+         * Add a classpath prefix for config file resolution.
+         * 
+         * <p>Prefixes are searched in the order they are added.</p>
+         *
+         * @param prefix The classpath prefix (e.g., "apex/", "META-INF/apex/")
+         * @return this builder for method chaining
+         */
+        public Builder addClasspathPrefix(String prefix) {
+            if (prefix != null && !prefix.trim().isEmpty()) {
+                String normalized = prefix.trim();
+                // Ensure prefix ends with /
+                if (!normalized.endsWith("/")) {
+                    normalized = normalized + "/";
+                }
+                classpathPrefixes.add(normalized);
+                builderLogger.debug("Added classpath prefix: {}", normalized);
+            }
+            return this;
+        }
+
+        /**
+         * Add multiple classpath prefixes.
+         *
+         * @param prefixes The classpath prefixes to add
+         * @return this builder for method chaining
+         */
+        public Builder addClasspathPrefixes(String... prefixes) {
+            if (prefixes != null) {
+                for (String prefix : prefixes) {
+                    addClasspathPrefix(prefix);
+                }
+            }
+            return this;
+        }
+
+        /**
+         * Add a context variable for environment variable substitution.
+         * 
+         * <p>Context variables can be used in YAML files with {@code ${name}} syntax.</p>
+         *
+         * @param name The variable name
+         * @param value The variable value
+         * @return this builder for method chaining
+         */
+        public Builder withContext(String name, Object value) {
+            if (name != null && !name.trim().isEmpty()) {
+                contextVariables.put(name.trim(), value);
+                builderLogger.debug("Added context variable: {} = {}", name, value);
+            }
+            return this;
+        }
+
+        /**
+         * Add multiple context variables from a map.
+         *
+         * @param context The context variables map
+         * @return this builder for method chaining
+         */
+        public Builder withContext(Map<String, Object> context) {
+            if (context != null) {
+                contextVariables.putAll(context);
+                builderLogger.debug("Added {} context variables", context.size());
+            }
+            return this;
+        }
+
+        /**
+         * Configure the builder to load from a scenario registry.
+         *
+         * @param registryPath The path to the scenario registry YAML file
+         * @return this builder for method chaining
+         */
+        public Builder fromScenarioRegistry(String registryPath) {
+            this.sourcePath = registryPath;
+            this.sourceType = SourceType.SCENARIO_REGISTRY;
+            builderLogger.debug("Set source: scenario registry at {}", registryPath);
+            return this;
+        }
+
+        /**
+         * Configure the builder to load from a YAML configuration file.
+         *
+         * @param filePath The path to the YAML configuration file
+         * @return this builder for method chaining
+         */
+        public Builder fromFile(String filePath) {
+            this.sourcePath = filePath;
+            this.sourceType = SourceType.FILE;
+            builderLogger.debug("Set source: file at {}", filePath);
+            return this;
+        }
+
+        /**
+         * Get the configured filesystem search paths.
+         *
+         * @return An unmodifiable list of search paths
+         */
+        public List<String> getSearchPaths() {
+            return Collections.unmodifiableList(filesystemPaths);
+        }
+
+        /**
+         * Get the configured classpath prefixes.
+         *
+         * @return An unmodifiable list of classpath prefixes
+         */
+        public List<String> getClasspathPrefixes() {
+            return Collections.unmodifiableList(classpathPrefixes);
+        }
+
+        /**
+         * Get the configured context variables.
+         *
+         * @return An unmodifiable map of context variables
+         */
+        public Map<String, Object> getContextVariables() {
+            return Collections.unmodifiableMap(contextVariables);
+        }
+
+        /**
+         * Build the RulesEngine with the configured options.
+         *
+         * @return A configured RulesEngine instance
+         * @throws YamlConfigurationException if configuration fails
+         * @throws IllegalStateException if no source is configured
+         */
+        public RulesEngine build() throws YamlConfigurationException {
+            if (sourceType == null || sourcePath == null) {
+                throw new IllegalStateException(
+                    "No source configured. Call fromFile(), fromScenarioRegistry(), or fromYamlConfig() before build()."
+                );
+            }
+
+            builderLogger.info("Building RulesEngine from {} at {}", sourceType, sourcePath);
+
+            switch (sourceType) {
+                case SCENARIO_REGISTRY:
+                    return buildFromScenarioRegistry();
+                case FILE:
+                    return buildFromFile();
+                default:
+                    throw new IllegalStateException("Unknown source type: " + sourceType);
+            }
+        }
+
+        /**
+         * Build RulesEngine from scenario registry with configured search paths.
+         */
+        private RulesEngine buildFromScenarioRegistry() throws YamlConfigurationException {
+            builderLogger.debug("Creating ScenarioRegistryLoader with {} filesystem paths, {} classpath prefixes",
+                              filesystemPaths.size(), classpathPrefixes.size());
+
+            ScenarioRegistryLoader loader = new ScenarioRegistryLoader();
+            
+            // Apply configured search paths to the loader
+            loader.setSearchPaths(filesystemPaths);
+            loader.setClasspathPrefixes(classpathPrefixes);
+
+            Map<String, dev.mars.apex.core.service.scenario.ScenarioConfiguration> scenarios;
+
+            // Try classpath first
+            try (java.io.InputStream is = RulesEngine.class.getClassLoader().getResourceAsStream(sourcePath)) {
+                if (is != null) {
+                    String classpathBase = deriveClasspathBase(sourcePath);
+                    scenarios = loader.loadRegistry(is, classpathBase);
+                    builderLogger.info("Loaded {} scenarios from classpath registry: {}", scenarios.size(), sourcePath);
+                } else {
+                    // Fallback to filesystem
+                    scenarios = loader.loadRegistry(sourcePath);
+                    builderLogger.info("Loaded {} scenarios from filesystem registry: {}", scenarios.size(), sourcePath);
+                }
+            } catch (java.io.IOException e) {
+                throw new YamlConfigurationException("Failed to load scenario registry: " + sourcePath, e);
+            }
+
+            if (scenarios == null || scenarios.isEmpty()) {
+                throw new YamlConfigurationException(
+                    "Scenario registry is empty or failed to load: " + sourcePath
+                );
+            }
+
+            RulesEngineConfiguration config = new RulesEngineConfiguration();
+            return new RulesEngine(config, null, scenarios);
+        }
+
+        /**
+         * Build RulesEngine from YAML file with configured search paths.
+         */
+        private RulesEngine buildFromFile() throws YamlConfigurationException {
+            builderLogger.debug("Loading YAML configuration from: {}", sourcePath);
+
+            // Resolve the file using search paths
+            String resolvedPath = resolveFilePath(sourcePath);
+            if (resolvedPath == null) {
+                throw new YamlConfigurationException("Config file not found: " + sourcePath);
+            }
+
+            return RulesEngine.fromFile(resolvedPath);
+        }
+
+        /**
+         * Resolve a file path using configured search paths.
+         */
+        private String resolveFilePath(String filePath) {
+            // Check if path is absolute
+            if (isAbsolutePath(filePath)) {
+                return java.nio.file.Files.exists(java.nio.file.Paths.get(filePath)) ? filePath : null;
+            }
+
+            // Try each search path
+            for (String searchPath : filesystemPaths) {
+                String candidate = combinePath(searchPath, filePath);
+                if (java.nio.file.Files.exists(java.nio.file.Paths.get(candidate))) {
+                    builderLogger.debug("Resolved {} to {}", filePath, candidate);
+                    return candidate;
+                }
+            }
+
+            // Try classpath prefixes
+            for (String prefix : classpathPrefixes) {
+                String candidate = combineClasspath(prefix, filePath);
+                if (getClass().getClassLoader().getResource(candidate) != null) {
+                    builderLogger.debug("Resolved {} to classpath:{}", filePath, candidate);
+                    return "classpath:" + candidate;
+                }
+            }
+
+            // Fallback: check if file exists as-is
+            if (java.nio.file.Files.exists(java.nio.file.Paths.get(filePath))) {
+                return filePath;
+            }
+
+            // Check classpath as-is
+            if (getClass().getClassLoader().getResource(filePath) != null) {
+                return "classpath:" + filePath;
+            }
+
+            return null;
+        }
+
+        private boolean isAbsolutePath(String path) {
+            if (path == null || path.isEmpty()) return false;
+            if (path.startsWith("/")) return true;
+            if (path.length() >= 3 && path.charAt(1) == ':' && (path.charAt(2) == '\\' || path.charAt(2) == '/')) {
+                return true;
+            }
+            return false;
+        }
+
+        private String combinePath(String basePath, String relativePath) {
+            if (basePath == null || basePath.isEmpty()) return relativePath;
+            String base = basePath.endsWith("/") || basePath.endsWith("\\") 
+                         ? basePath : basePath + "/";
+            return base + relativePath;
+        }
+
+        private String combineClasspath(String prefix, String resourcePath) {
+            if (prefix == null || prefix.isEmpty()) return resourcePath;
+            String base = prefix.endsWith("/") ? prefix : prefix + "/";
+            String resource = resourcePath.startsWith("/") ? resourcePath.substring(1) : resourcePath;
+            return base + resource;
+        }
+
+        private String expandEnvironmentVariables(String value) {
+            if (value == null || !value.contains("${")) {
+                return value;
+            }
+            
+            String result = value;
+            int start;
+            while ((start = result.indexOf("${")) != -1) {
+                int end = result.indexOf("}", start);
+                if (end == -1) break;
+                
+                String varName = result.substring(start + 2, end);
+                String varValue = contextVariables.containsKey(varName) 
+                                 ? String.valueOf(contextVariables.get(varName))
+                                 : System.getenv(varName);
+                if (varValue == null) {
+                    varValue = System.getProperty(varName, "");
+                }
+                result = result.substring(0, start) + varValue + result.substring(end + 1);
+            }
+            
+            return result;
+        }
+    }
 }

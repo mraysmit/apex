@@ -1,0 +1,28 @@
+# Scenario registry for Builder tests
+# Tests Builder.fromScenarioRegistry() with search paths
+
+metadata:
+  id: "builder-scenario-registry"
+  name: "Builder Scenario Registry"
+  type: "scenario-registry"
+  version: "1.0"
+  description: "Scenario registry for Builder API tests"
+  created-by: "Mars Development Team"
+
+search-paths:
+  classpath:
+    - "builder-test/path-a/"
+    - "builder-test/path-b/"
+
+scenarios:
+  - scenario-id: "main-scenario"
+    name: "Main Scenario"
+    description: "Primary test scenario"
+    config-file: "main-config.yaml"
+    enabled: true
+
+  - scenario-id: "alt-scenario"
+    name: "Alternate Scenario"
+    description: "Alternate test scenario"
+    config-file: "alt-config.yaml"
+    enabled: true

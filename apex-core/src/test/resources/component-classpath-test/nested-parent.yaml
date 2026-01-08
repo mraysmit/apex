@@ -1,0 +1,24 @@
+# Parent component for classpath loading tests
+# Tests nested component resolution from classpath
+
+metadata:
+  id: nested-parent
+  name: Nested Parent Component
+  type: component
+  version: "1.0.0"
+  description: Tests nested component resolution from classpath
+  business-domain: testing
+  owner: APEX Test Team
+  criticality: low
+  sla-ms: 100
+  enabled: true
+
+component-refs:
+  - file: nested-child.yaml
+    execution-order: 1
+    failure-policy: terminate
+
+rule-configurations:
+  - file: parent-rules.yaml
+    execution-order: 2
+    failure-policy: terminate

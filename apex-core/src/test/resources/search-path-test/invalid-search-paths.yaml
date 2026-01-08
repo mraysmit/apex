@@ -1,0 +1,22 @@
+# Registry with invalid search-paths configuration
+# For testing error handling
+
+metadata:
+  id: "invalid-registry"
+  name: "Invalid Registry"
+  type: "scenario-registry"
+  version: "1.0"
+  description: "Registry with invalid configuration"
+
+search-paths:
+  # Invalid: should be a list, not a string
+  filesystem: "/invalid/single/path"
+  classpath:
+    - "valid/prefix/"
+
+scenarios:
+  - id: "test-scenario"
+    name: "Test Scenario"
+    description: "Test"
+    config-file: "nonexistent.yaml"
+    enabled: true

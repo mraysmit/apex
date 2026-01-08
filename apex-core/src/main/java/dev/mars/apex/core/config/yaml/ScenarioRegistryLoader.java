@@ -54,6 +54,18 @@ import java.util.*;
  *   default-scenario: "basic-trade-processing"
  * </pre>
  * 
+ * <p><b>Search Paths Configuration (Optional):</b></p>
+ * <p>Each registry can define its own search paths for resolving scenario files:</p>
+ * <pre>
+ * search-paths:
+ *   filesystem:
+ *     - "/etc/apex/trading"
+ *     - "./configs/trading"
+ *   classpath:
+ *     - "trading/"
+ *     - "META-INF/apex/trading/"
+ * </pre>
+ * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 3.0
  * @see ScenarioConfiguration
@@ -64,11 +76,18 @@ public class ScenarioRegistryLoader {
     
     private final YamlConfigurationLoader configLoader;
     
+    // Global search paths (can be set programmatically or via environment)
+    private final List<String> globalFilesystemPaths;
+    private final List<String> globalClasspathPrefixes;
+    
     /**
      * Create a new ScenarioRegistryLoader with default configuration loader.
      */
     public ScenarioRegistryLoader() {
         this.configLoader = new YamlConfigurationLoader();
+        this.globalFilesystemPaths = new ArrayList<>();
+        this.globalClasspathPrefixes = new ArrayList<>();
+        initializeFromEnvironment();
     }
     
     /**
@@ -78,6 +97,9 @@ public class ScenarioRegistryLoader {
      */
     public ScenarioRegistryLoader(YamlConfigurationLoader configLoader) {
         this.configLoader = configLoader;
+        this.globalFilesystemPaths = new ArrayList<>();
+        this.globalClasspathPrefixes = new ArrayList<>();
+        initializeFromEnvironment();
     }
     
     /**
@@ -121,6 +143,9 @@ public class ScenarioRegistryLoader {
             // Validate registry metadata
             validateRegistryMetadata(registryConfig, registryPath);
             
+            // Parse search-paths from registry (Phase 6 feature)
+            SearchPathConfig registrySearchPaths = parseSearchPaths(registryConfig);
+            
             // Parse scenarios section
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> scenarioRegistry = (List<Map<String, Object>>) registryConfig.get("scenarios");
@@ -134,6 +159,7 @@ public class ScenarioRegistryLoader {
             // Load all referenced scenario files
             Map<String, ScenarioConfiguration> scenarios = new LinkedHashMap<>();
             Path registryDir = registryFilePath.getParent();
+            String registryDirStr = registryDir != null ? registryDir.toString() : "";
             
             for (Map<String, Object> registryEntry : scenarioRegistry) {
                 String scenarioId = (String) registryEntry.get("scenario-id");
@@ -155,11 +181,26 @@ public class ScenarioRegistryLoader {
 
                 logger.debug("Loading scenario '{}' from file: {} (enabled: {})", scenarioId, configFile, enabled);
 
-                // Resolve config file path relative to registry directory
-                String resolvedConfigPath = resolveConfigFilePath(configFile, registryDir);
-
-                // Load the scenario configuration
-                ScenarioConfiguration scenario = loadScenarioFromFile(resolvedConfigPath);
+                // Try to resolve using search paths first (Phase 6 feature)
+                ResolvedPath resolved = resolveConfigFileWithSearchPaths(configFile, registrySearchPaths, registryDirStr, false);
+                
+                String resolvedConfigPath;
+                ScenarioConfiguration scenario;
+                
+                if (resolved != null) {
+                    resolvedConfigPath = resolved.path();
+                    if (resolved.isClasspath()) {
+                        // Load from classpath
+                        scenario = loadScenarioFromClasspath(resolvedConfigPath);
+                    } else {
+                        // Load from filesystem
+                        scenario = loadScenarioFromFile(resolvedConfigPath);
+                    }
+                } else {
+                    // Fallback to legacy resolution
+                    resolvedConfigPath = resolveConfigFilePath(configFile, registryDir);
+                    scenario = loadScenarioFromFile(resolvedConfigPath);
+                }
 
                 // Validate that scenario-id matches
                 if (scenario.getScenarioId() != null && !scenario.getScenarioId().equals(scenarioId)) {
@@ -251,6 +292,9 @@ public class ScenarioRegistryLoader {
             // Validate registry metadata
             validateRegistryMetadata(registryConfig, "<stream>");
             
+            // Parse search-paths from registry (Phase 6 feature)
+            SearchPathConfig registrySearchPaths = parseSearchPaths(registryConfig);
+            
             // Parse scenarios section
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> scenarioRegistry = (List<Map<String, Object>>) registryConfig.get("scenarios");
@@ -284,11 +328,22 @@ public class ScenarioRegistryLoader {
 
                 logger.debug("Loading scenario '{}' from classpath: {} (enabled: {})", scenarioId, configFile, enabled);
 
-                // Resolve config file path with classpath base
-                String resolvedPath = resolveClasspathConfigFile(configFile, classpathBase);
-
-                // Load the scenario configuration from classpath
-                ScenarioConfiguration scenario = loadScenarioFromClasspath(resolvedPath);
+                // Try to resolve using search paths first (Phase 6 feature)
+                ResolvedPath resolved = resolveConfigFileWithSearchPaths(configFile, registrySearchPaths, classpathBase, true);
+                
+                ScenarioConfiguration scenario;
+                
+                if (resolved != null) {
+                    if (resolved.isClasspath()) {
+                        scenario = loadScenarioFromClasspath(resolved.path());
+                    } else {
+                        scenario = loadScenarioFromFile(resolved.path());
+                    }
+                } else {
+                    // Fallback to legacy resolution
+                    String resolvedPath = resolveClasspathConfigFile(configFile, classpathBase);
+                    scenario = loadScenarioFromClasspath(resolvedPath);
+                }
 
                 // Validate that scenario-id matches
                 if (scenario.getScenarioId() != null && !scenario.getScenarioId().equals(scenarioId)) {
@@ -800,6 +855,456 @@ public class ScenarioRegistryLoader {
             logger.warn("Unable to validate config file '{}' for stage '{}': {}",
                        configFile, stageName, e.getMessage());
         }
+    }
+
+    // ========================================================================
+    // Search Path Configuration Methods
+    // ========================================================================
+
+    /**
+     * Initialize search paths from environment variables and system properties.
+     * 
+     * <p>Precedence (highest to lowest):</p>
+     * <ol>
+     *   <li>System properties: {@code apex.config.searchPaths}, {@code apex.config.classpathPrefixes}</li>
+     *   <li>Environment variables: {@code APEX_CONFIG_SEARCH_PATHS}, {@code APEX_CONFIG_CLASSPATH_PREFIXES}</li>
+     * </ol>
+     */
+    private void initializeFromEnvironment() {
+        // System properties take precedence over environment variables
+        String sysPropPaths = System.getProperty("apex.config.searchPaths");
+        String sysPropPrefixes = System.getProperty("apex.config.classpathPrefixes");
+        
+        String envPaths = System.getenv("APEX_CONFIG_SEARCH_PATHS");
+        String envPrefixes = System.getenv("APEX_CONFIG_CLASSPATH_PREFIXES");
+        
+        // Use system property if set, otherwise use environment variable
+        String filesystemPaths = sysPropPaths != null ? sysPropPaths : envPaths;
+        String classpathPrefixes = sysPropPrefixes != null ? sysPropPrefixes : envPrefixes;
+        
+        if (filesystemPaths != null && !filesystemPaths.trim().isEmpty()) {
+            String separator = filesystemPaths.contains(";") ? ";" : 
+                              (filesystemPaths.contains(":") && !filesystemPaths.matches("^[A-Za-z]:.*") ? ":" : ",");
+            for (String path : filesystemPaths.split(separator)) {
+                String trimmed = path.trim();
+                if (!trimmed.isEmpty()) {
+                    globalFilesystemPaths.add(trimmed);
+                    logger.debug("Added global filesystem search path from environment: {}", trimmed);
+                }
+            }
+        }
+        
+        if (classpathPrefixes != null && !classpathPrefixes.trim().isEmpty()) {
+            String separator = classpathPrefixes.contains(";") ? ";" : 
+                              (classpathPrefixes.contains(":") ? ":" : ",");
+            for (String prefix : classpathPrefixes.split(separator)) {
+                String trimmed = prefix.trim();
+                if (!trimmed.isEmpty()) {
+                    globalClasspathPrefixes.add(trimmed);
+                    logger.debug("Added global classpath prefix from environment: {}", trimmed);
+                }
+            }
+        }
+    }
+
+    /**
+     * Add a global filesystem search path.
+     * 
+     * <p>Global paths are searched after registry-specific paths.</p>
+     *
+     * @param path The filesystem path to add
+     * @return this loader for method chaining
+     */
+    public ScenarioRegistryLoader addSearchPath(String path) {
+        if (path != null && !path.trim().isEmpty()) {
+            globalFilesystemPaths.add(path.trim());
+            logger.debug("Added global filesystem search path: {}", path);
+        }
+        return this;
+    }
+
+    /**
+     * Add a global classpath prefix.
+     * 
+     * <p>Global prefixes are searched after registry-specific prefixes.</p>
+     *
+     * @param prefix The classpath prefix to add (e.g., "apex/", "META-INF/apex/")
+     * @return this loader for method chaining
+     */
+    public ScenarioRegistryLoader addClasspathPrefix(String prefix) {
+        if (prefix != null && !prefix.trim().isEmpty()) {
+            globalClasspathPrefixes.add(prefix.trim());
+            logger.debug("Added global classpath prefix: {}", prefix);
+        }
+        return this;
+    }
+
+    /**
+     * Set global filesystem search paths, replacing any existing paths.
+     *
+     * @param paths The list of filesystem paths
+     * @return this loader for method chaining
+     */
+    public ScenarioRegistryLoader setSearchPaths(List<String> paths) {
+        globalFilesystemPaths.clear();
+        if (paths != null) {
+            for (String path : paths) {
+                addSearchPath(path);
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Set global classpath prefixes, replacing any existing prefixes.
+     *
+     * @param prefixes The list of classpath prefixes
+     * @return this loader for method chaining
+     */
+    public ScenarioRegistryLoader setClasspathPrefixes(List<String> prefixes) {
+        globalClasspathPrefixes.clear();
+        if (prefixes != null) {
+            for (String prefix : prefixes) {
+                addClasspathPrefix(prefix);
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Get the configured global filesystem search paths.
+     *
+     * @return An unmodifiable list of search paths
+     */
+    public List<String> getSearchPaths() {
+        return Collections.unmodifiableList(globalFilesystemPaths);
+    }
+
+    /**
+     * Get the configured global classpath prefixes.
+     *
+     * @return An unmodifiable list of classpath prefixes
+     */
+    public List<String> getClasspathPrefixes() {
+        return Collections.unmodifiableList(globalClasspathPrefixes);
+    }
+
+    /**
+     * Parse search-paths configuration from registry YAML.
+     *
+     * @param registryConfig The registry configuration map
+     * @return SearchPathConfig containing parsed paths
+     */
+    @SuppressWarnings("unchecked")
+    private SearchPathConfig parseSearchPaths(Map<String, Object> registryConfig) {
+        SearchPathConfig config = new SearchPathConfig();
+        
+        Map<String, Object> searchPaths = (Map<String, Object>) registryConfig.get("search-paths");
+        if (searchPaths == null) {
+            return config;
+        }
+        
+        // Parse filesystem paths
+        Object filesystemObj = searchPaths.get("filesystem");
+        if (filesystemObj instanceof List) {
+            for (Object pathObj : (List<?>) filesystemObj) {
+                if (pathObj != null) {
+                    String path = expandEnvironmentVariables(pathObj.toString().trim());
+                    if (!path.isEmpty()) {
+                        config.filesystemPaths.add(path);
+                        logger.debug("Registry search path (filesystem): {}", path);
+                    }
+                }
+            }
+        }
+        
+        // Parse classpath prefixes
+        Object classpathObj = searchPaths.get("classpath");
+        if (classpathObj instanceof List) {
+            for (Object prefixObj : (List<?>) classpathObj) {
+                if (prefixObj != null) {
+                    String prefix = expandEnvironmentVariables(prefixObj.toString().trim());
+                    if (!prefix.isEmpty()) {
+                        config.classpathPrefixes.add(prefix);
+                        logger.debug("Registry search path (classpath): {}", prefix);
+                    }
+                }
+            }
+        }
+        
+        return config;
+    }
+
+    /**
+     * Expand environment variables in a path string.
+     * Supports ${VAR_NAME} syntax.
+     *
+     * @param path The path that may contain environment variables
+     * @return The path with environment variables expanded
+     */
+    private String expandEnvironmentVariables(String path) {
+        if (path == null || !path.contains("${")) {
+            return path;
+        }
+        
+        String result = path;
+        int start;
+        while ((start = result.indexOf("${")) != -1) {
+            int end = result.indexOf("}", start);
+            if (end == -1) break;
+            
+            String varName = result.substring(start + 2, end);
+            String value = System.getenv(varName);
+            if (value == null) {
+                value = System.getProperty(varName, "");
+            }
+            result = result.substring(0, start) + value + result.substring(end + 1);
+        }
+        
+        return result;
+    }
+
+    /**
+     * Resolve a config file using search paths.
+     * 
+     * <p>Resolution order:</p>
+     * <ol>
+     *   <li>Absolute path or classpath: prefix - use directly</li>
+     *   <li>Registry-level filesystem paths (in order)</li>
+     *   <li>Registry-level classpath prefixes (in order)</li>
+     *   <li>Global filesystem paths (in order)</li>
+     *   <li>Global classpath prefixes (in order)</li>
+     *   <li>Relative to fallback base (filesystem or classpath)</li>
+     * </ol>
+     *
+     * @param configFile The config file reference from the registry
+     * @param searchPathConfig The registry-specific search paths
+     * @param fallbackBase The fallback base path (registry directory or classpath base)
+     * @param useClasspath If true, fallback is a classpath base; if false, filesystem
+     * @return The resolved config file path/resource, or null if not found
+     */
+    private ResolvedPath resolveConfigFileWithSearchPaths(
+            String configFile, 
+            SearchPathConfig searchPathConfig,
+            String fallbackBase,
+            boolean useClasspath) {
+        
+        logger.debug("Resolving config file '{}' with search paths", configFile);
+        
+        // 1. Check for absolute path
+        if (isAbsolutePath(configFile)) {
+            logger.debug("Config file is absolute path: {}", configFile);
+            return new ResolvedPath(configFile, false);
+        }
+        
+        // 2. Check for explicit classpath: prefix
+        if (configFile.startsWith("classpath:")) {
+            String classpathResource = configFile.substring("classpath:".length());
+            logger.debug("Config file uses classpath: prefix: {}", classpathResource);
+            return new ResolvedPath(classpathResource, true);
+        }
+        
+        // 3. Try registry-level filesystem paths
+        for (String searchPath : searchPathConfig.filesystemPaths) {
+            String candidate = combinePath(searchPath, configFile);
+            if (fileExists(candidate)) {
+                logger.debug("Found config file in registry filesystem path: {}", candidate);
+                return new ResolvedPath(candidate, false);
+            }
+        }
+        
+        // 4. Try registry-level classpath prefixes
+        for (String prefix : searchPathConfig.classpathPrefixes) {
+            String candidate = combineClasspath(prefix, configFile);
+            if (classpathResourceExists(candidate)) {
+                logger.debug("Found config file in registry classpath prefix: {}", candidate);
+                return new ResolvedPath(candidate, true);
+            }
+        }
+        
+        // 5. Try global filesystem paths
+        for (String searchPath : globalFilesystemPaths) {
+            String candidate = combinePath(searchPath, configFile);
+            if (fileExists(candidate)) {
+                logger.debug("Found config file in global filesystem path: {}", candidate);
+                return new ResolvedPath(candidate, false);
+            }
+        }
+        
+        // 6. Try global classpath prefixes
+        for (String prefix : globalClasspathPrefixes) {
+            String candidate = combineClasspath(prefix, configFile);
+            if (classpathResourceExists(candidate)) {
+                logger.debug("Found config file in global classpath prefix: {}", candidate);
+                return new ResolvedPath(candidate, true);
+            }
+        }
+        
+        // 7. Fallback to base path
+        if (fallbackBase != null && !fallbackBase.isEmpty()) {
+            if (useClasspath) {
+                String candidate = combineClasspath(fallbackBase, configFile);
+                if (classpathResourceExists(candidate)) {
+                    logger.debug("Found config file relative to classpath base: {}", candidate);
+                    return new ResolvedPath(candidate, true);
+                }
+            } else {
+                String candidate = combinePath(fallbackBase, configFile);
+                if (fileExists(candidate)) {
+                    logger.debug("Found config file relative to registry directory: {}", candidate);
+                    return new ResolvedPath(candidate, false);
+                }
+            }
+        }
+        
+        // Not found - return null to allow caller to handle
+        logger.warn("Config file '{}' not found in any search path", configFile);
+        return null;
+    }
+
+    /**
+     * Check if a path is absolute.
+     */
+    private boolean isAbsolutePath(String path) {
+        if (path == null || path.isEmpty()) return false;
+        // Unix absolute path
+        if (path.startsWith("/")) return true;
+        // Windows absolute path (C:\, D:\, etc.)
+        if (path.length() >= 3 && path.charAt(1) == ':' && (path.charAt(2) == '\\' || path.charAt(2) == '/')) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Combine a base path with a relative path.
+     */
+    private String combinePath(String basePath, String relativePath) {
+        if (basePath == null || basePath.isEmpty()) return relativePath;
+        String base = basePath.endsWith("/") || basePath.endsWith("\\") 
+                     ? basePath : basePath + "/";
+        return base + relativePath;
+    }
+
+    /**
+     * Combine a classpath prefix with a resource path.
+     */
+    private String combineClasspath(String prefix, String resourcePath) {
+        if (prefix == null || prefix.isEmpty()) return resourcePath;
+        String base = prefix.endsWith("/") ? prefix : prefix + "/";
+        // Remove leading slash from resource if present
+        String resource = resourcePath.startsWith("/") ? resourcePath.substring(1) : resourcePath;
+        return base + resource;
+    }
+
+    /**
+     * Check if a filesystem file exists.
+     */
+    private boolean fileExists(String path) {
+        try {
+            return Files.exists(Paths.get(path));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Check if a classpath resource exists.
+     */
+    private boolean classpathResourceExists(String resourcePath) {
+        return getClass().getClassLoader().getResource(resourcePath) != null;
+    }
+
+    /**
+     * Configuration holder for registry-specific search paths.
+     */
+    private static class SearchPathConfig {
+        final List<String> filesystemPaths = new ArrayList<>();
+        final List<String> classpathPrefixes = new ArrayList<>();
+    }
+
+    /**
+     * Resolved path holder indicating whether path is filesystem or classpath.
+     * This class is public to allow testing and external resolution queries.
+     */
+    public static class ResolvedPath {
+        private final String path;
+        private final Type type;
+        
+        /**
+         * The type of resolved path.
+         */
+        public enum Type {
+            /** Path is a filesystem path */
+            FILESYSTEM,
+            /** Path is a classpath resource */
+            CLASSPATH
+        }
+        
+        ResolvedPath(String path, boolean isClasspath) {
+            this.path = path;
+            this.type = isClasspath ? Type.CLASSPATH : Type.FILESYSTEM;
+        }
+        
+        /**
+         * Get the resolved path string.
+         * @return The path
+         */
+        public String path() {
+            return path;
+        }
+        
+        /**
+         * Get the type of resolution (filesystem or classpath).
+         * @return The resolution type
+         */
+        public Type type() {
+            return type;
+        }
+        
+        /**
+         * Check if this is a classpath resource.
+         * @return true if classpath, false if filesystem
+         */
+        public boolean isClasspath() {
+            return type == Type.CLASSPATH;
+        }
+    }
+    
+    /**
+     * Resolve a config file using search paths.
+     * 
+     * <p>This is a public API for testing and external use. It uses the provided
+     * registry and classpath paths along with any configured global paths.</p>
+     * 
+     * <p>Resolution order:</p>
+     * <ol>
+     *   <li>Absolute path - used directly</li>
+     *   <li>Registry-level filesystem paths (in order)</li>
+     *   <li>Global filesystem paths (in order)</li>
+     *   <li>Registry-level classpath prefixes (in order)</li>
+     *   <li>Global classpath prefixes (in order)</li>
+     * </ol>
+     *
+     * @param configFile The config file reference
+     * @param registryFilesystemPaths Registry-specific filesystem paths
+     * @param registryClasspathPrefixes Registry-specific classpath prefixes
+     * @return The resolved path, or null if not found
+     */
+    public ResolvedPath resolveConfigFileWithSearchPaths(
+            String configFile, 
+            List<String> registryFilesystemPaths,
+            List<String> registryClasspathPrefixes) {
+        
+        SearchPathConfig searchPathConfig = new SearchPathConfig();
+        if (registryFilesystemPaths != null) {
+            searchPathConfig.filesystemPaths.addAll(registryFilesystemPaths);
+        }
+        if (registryClasspathPrefixes != null) {
+            searchPathConfig.classpathPrefixes.addAll(registryClasspathPrefixes);
+        }
+        
+        return resolveConfigFileWithSearchPaths(configFile, searchPathConfig, null, false);
     }
 }
 

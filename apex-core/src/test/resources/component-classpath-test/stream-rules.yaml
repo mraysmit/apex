@@ -1,0 +1,17 @@
+# Rules configuration for stream load test
+
+metadata:
+  id: stream-rules
+  name: Stream Load Rules
+  version: "1.0.0"
+  description: Rules for stream load test
+  type: rule-config
+  author: APEX Test
+
+rules:
+  - id: stream-rule-1
+    name: Value Threshold Check
+    description: Check if value exceeds threshold
+    condition: "#value > 100"
+    message: "Value exceeds threshold"
+    severity: WARNING

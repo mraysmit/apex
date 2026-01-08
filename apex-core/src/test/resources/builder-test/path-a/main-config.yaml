@@ -1,0 +1,30 @@
+# Main configuration for Builder tests
+# Located in path-a subdirectory
+
+metadata:
+  id: "builder-main-config"
+  name: "Builder Main Configuration"
+  type: "scenario"
+  version: "1.0"
+  description: "Configuration for RulesEngine.Builder tests"
+  owner: "Mars Development Team"
+  business-domain: "Testing"
+
+scenario:
+  scenario-id: "main-scenario"
+  name: "Main Scenario"
+  description: "Primary test scenario for builder tests"
+  business-domain: "Testing"
+  
+  data-types:
+    - "java.util.Map"
+  
+  rule-configurations:
+    - id: "main-rules"
+      rules:
+        - id: "main-rule-1"
+          name: "Enabled Check"
+          condition: "#enabled == true"
+          message: "Feature is enabled"
+          severity: "INFO"
+

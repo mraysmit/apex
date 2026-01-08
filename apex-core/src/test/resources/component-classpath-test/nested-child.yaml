@@ -1,0 +1,19 @@
+# Child component for classpath loading tests
+# Tests that child component is resolved from same classpath base
+
+metadata:
+  id: nested-child
+  name: Nested Child Component
+  type: component
+  version: "1.0.0"
+  description: Tests that child component is resolved from same classpath base
+  business-domain: testing
+  owner: APEX Test Team
+  criticality: low
+  sla-ms: 100
+  enabled: true
+
+rule-configurations:
+  - file: child-rules.yaml
+    execution-order: 1
+    failure-policy: terminate

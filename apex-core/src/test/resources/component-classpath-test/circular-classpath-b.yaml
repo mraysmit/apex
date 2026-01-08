@@ -1,0 +1,19 @@
+# Circular component B for classpath circular reference test
+# References back to circular-a creating a cycle
+
+metadata:
+  id: circular-classpath-b
+  name: Circular Component B
+  type: component
+  version: "1.0.0"
+  description: References back to circular-a creating a cycle
+  business-domain: testing
+  owner: APEX Test Team
+  criticality: low
+  sla-ms: 100
+  enabled: true
+
+component-refs:
+  - file: circular-classpath-a.yaml
+    execution-order: 1
+    failure-policy: terminate
