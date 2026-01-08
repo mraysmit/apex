@@ -447,9 +447,24 @@ public class RulesEngine {
     public static RulesEngine fromScenarioRegistry(String registryPath) throws YamlConfigurationException {
         logger.info("Creating RulesEngine from scenario registry: {}", registryPath);
 
-        // Load scenario registry using ScenarioRegistryLoader
         ScenarioRegistryLoader loader = new ScenarioRegistryLoader();
-        Map<String, dev.mars.apex.core.service.scenario.ScenarioConfiguration> scenarios = loader.loadRegistry(registryPath);
+        Map<String, dev.mars.apex.core.service.scenario.ScenarioConfiguration> scenarios;
+        
+        // Try classpath first (enables JAR-packaged resources and test resources)
+        try (java.io.InputStream is = RulesEngine.class.getClassLoader().getResourceAsStream(registryPath)) {
+            if (is != null) {
+                // Derive classpath base for relative path resolution
+                String classpathBase = deriveClasspathBase(registryPath);
+                scenarios = loader.loadRegistry(is, classpathBase);
+                logger.info("Loaded {} scenarios from classpath registry: {}", scenarios.size(), registryPath);
+            } else {
+                // Fallback to filesystem loading (existing behavior)
+                scenarios = loader.loadRegistry(registryPath);
+                logger.info("Loaded {} scenarios from filesystem registry: {}", scenarios.size(), registryPath);
+            }
+        } catch (java.io.IOException e) {
+            throw new YamlConfigurationException("Failed to load scenario registry: " + registryPath, e);
+        }
 
         if (scenarios == null || scenarios.isEmpty()) {
             throw new YamlConfigurationException(
@@ -457,13 +472,23 @@ public class RulesEngine {
             );
         }
 
-        logger.info("Loaded {} scenarios from registry: {}", scenarios.size(), registryPath);
-
         // Create a minimal RulesEngineConfiguration for scenario-only engine
         RulesEngineConfiguration config = new RulesEngineConfiguration();
 
         // Create RulesEngine with scenario registry
         return new RulesEngine(config, null, scenarios);
+    }
+
+    /**
+     * Derive the classpath base directory from a resource path.
+     * Used for resolving relative config-file references in scenario registries.
+     * 
+     * @param resourcePath The full resource path
+     * @return The base directory path (with trailing slash) or empty string if at root
+     */
+    private static String deriveClasspathBase(String resourcePath) {
+        int lastSlash = resourcePath.lastIndexOf('/');
+        return lastSlash > 0 ? resourcePath.substring(0, lastSlash + 1) : "";
     }
 
     /**
@@ -482,6 +507,20 @@ public class RulesEngine {
      */
     public RulePerformanceMonitor getPerformanceMonitor() {
         return performanceMonitor;
+    }
+
+    /**
+     * Get the scenario registry for this rules engine.
+     * 
+     * <p>The scenario registry maps scenario IDs to their configurations.
+     * This is only populated when the engine is created via 
+     * {@link #fromScenarioRegistry(String)}.</p>
+     *
+     * @return The scenario registry map, or null if not a scenario-based engine
+     * @since 3.0
+     */
+    public Map<String, dev.mars.apex.core.service.scenario.ScenarioConfiguration> getScenarioRegistry() {
+        return scenarioRegistry;
     }
 
     // Rule Execution Methods
