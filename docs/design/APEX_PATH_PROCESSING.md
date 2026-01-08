@@ -140,6 +140,55 @@ private InputStream resolveFileReference(String fileRef, String basePath) {
 - Use `ResourceResolver` for consistent file/classpath resolution
 - Maintain existing `configCache` for performance
 
+#### 2.5 Enhance `RulesEngine.fromScenarioRegistry()` for classpath support
+**File:** `apex-core/src/main/java/dev/mars/apex/core/engine/config/RulesEngine.java`
+
+The `fromScenarioRegistry(String registryPath)` static factory method currently only supports filesystem paths. This prevents loading scenario registries from JAR-packaged resources or classpath locations.
+
+**Enhancement:** Modify to try classpath first, then filesystem (consistent with APEX resolution strategy):
+
+```java
+public static RulesEngine fromScenarioRegistry(String registryPath) throws YamlConfigurationException {
+    logger.info("Creating RulesEngine from scenario registry: {}", registryPath);
+
+    ScenarioRegistryLoader loader = new ScenarioRegistryLoader();
+    Map<String, ScenarioConfiguration> scenarios;
+    
+    // Try classpath first (enables JAR-packaged resources)
+    try (InputStream is = RulesEngine.class.getClassLoader().getResourceAsStream(registryPath)) {
+        if (is != null) {
+            // Derive classpath base for relative path resolution
+            String classpathBase = deriveClasspathBase(registryPath);
+            scenarios = loader.loadRegistry(is, classpathBase);
+            logger.info("Loaded {} scenarios from classpath registry: {}", scenarios.size(), registryPath);
+        } else {
+            // Fallback to filesystem loading (existing behavior)
+            scenarios = loader.loadRegistry(registryPath);
+            logger.info("Loaded {} scenarios from filesystem registry: {}", scenarios.size(), registryPath);
+        }
+    } catch (IOException e) {
+        throw new YamlConfigurationException("Failed to load scenario registry: " + registryPath, e);
+    }
+
+    if (scenarios == null || scenarios.isEmpty()) {
+        throw new YamlConfigurationException("Scenario registry is empty or failed to load: " + registryPath);
+    }
+
+    return new RulesEngine(new RulesEngineConfiguration(), null, scenarios);
+}
+
+private static String deriveClasspathBase(String resourcePath) {
+    int lastSlash = resourcePath.lastIndexOf('/');
+    return lastSlash > 0 ? resourcePath.substring(0, lastSlash + 1) : "";
+}
+```
+
+**Benefits:**
+- Test code can use simple classpath paths like `"config/scenario-registry.yaml"`
+- JAR-packaged applications work without modification
+- Backward compatible with existing filesystem paths
+- Follows APEX resolution strategy: classpath first, then filesystem
+
 ---
 
 ### Part 3: Classpath Scanning
