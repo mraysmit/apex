@@ -76,7 +76,8 @@ class ScenarioConcurrentAccessTest {
             // Given: Scenario with classification rule (using direct field access)
             scenario.setClassificationRuleCondition("#type == 'OTC'");
             
-            ScenarioStage stage = new ScenarioStage("test-stage", "config/test.yaml", 1);
+            // Use standalone YAML without external database dependencies
+            ScenarioStage stage = new ScenarioStage("test-stage", "scenario/concurrent-test-simple.yaml", 1);
             scenario.addProcessingStage(stage);
             
             // When: Execute from multiple threads
@@ -188,7 +189,8 @@ class ScenarioConcurrentAccessTest {
             // Given: Scenario with classification rule (using direct field access)
             scenario.setClassificationRuleCondition("#type == 'OTC'");
             
-            ScenarioStage stage = new ScenarioStage("test-stage", "config/test.yaml", 1);
+            // Use standalone YAML without external database dependencies
+            ScenarioStage stage = new ScenarioStage("test-stage", "scenario/concurrent-test-simple.yaml", 1);
             scenario.addProcessingStage(stage);
             
             // When: Execute from multiple threads with different data
@@ -243,7 +245,8 @@ class ScenarioConcurrentAccessTest {
             // Given: Scenario with classification rule (using direct field access)
             scenario.setClassificationRuleCondition("#type == 'OTC'");
             
-            ScenarioStage stage = new ScenarioStage("test-stage", "config/test.yaml", 1);
+            // Use standalone YAML without external database dependencies
+            ScenarioStage stage = new ScenarioStage("test-stage", "scenario/concurrent-test-simple.yaml", 1);
             scenario.addProcessingStage(stage);
             
             // When: Execute same scenario from multiple threads (cache hit scenario)

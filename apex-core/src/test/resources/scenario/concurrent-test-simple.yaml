@@ -1,0 +1,46 @@
+# Simple standalone YAML for concurrent access testing
+# No external database dependencies - pure in-memory processing
+metadata:
+  id: concurrent-test-simple
+  name: Simple Concurrent Test Configuration
+  version: 1.0.0
+  description: Minimal configuration for testing concurrent scenario execution
+  type: rule-config
+  author: APEX Test Team
+  created: '2026-01-09'
+  tags:
+    - test
+    - concurrent
+    - standalone
+
+# Simple rules for concurrent testing - no external dependencies
+rules:
+  - id: type-validation
+    name: Type Validation Rule
+    description: Validates that type field equals expected value
+    condition: "#type == 'OTC'"
+    message: "Type validation passed"
+    severity: INFO
+    priority: 1
+    enabled: true
+
+  - id: thread-validation
+    name: Thread Validation Rule  
+    description: Validates thread data is present
+    condition: "#threadId != null"
+    message: "Thread validation passed"
+    severity: INFO
+    priority: 2
+    enabled: true
+
+# Simple enrichment that doesn't require external data
+enrichments:
+  - id: timestamp-enrichment
+    name: Timestamp Enrichment
+    description: Adds processing timestamp to data
+    enabled: true
+    condition: "true"
+    type: field-enrichment
+    field-mappings:
+      - source-field: "T(java.time.Instant).now().toString()"
+        target-field: "processedAt"

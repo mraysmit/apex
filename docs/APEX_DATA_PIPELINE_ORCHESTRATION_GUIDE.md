@@ -1902,6 +1902,69 @@ For migration assistance:
 
 ---
 
+## 19. Known Issues & Anomalies
+
+This section documents known inconsistencies, deprecated patterns, and issues discovered during code review (January 2026).
+
+### 19.1 Deprecated Classes (Scheduled for Removal)
+
+| Class | Deprecation | Replacement | Status |
+|-------|-------------|-------------|--------|
+| `DataPipelineEngine` | @Deprecated(since="3.0", forRemoval=true) | `RulesEngine` | Internal use only |
+| `YamlPipelineExecutionResult` | @Deprecated(since="3.0", forRemoval=true) | `RuleResult` | Internal use only |
+| `YamlRulesEngineService.createRulesEngineFromYamlConfig()` | @Deprecated(since="3.0", forRemoval=true) | `RulesEngine.fromFile()` or `RulesEngine.fromYamlConfig()` | Legacy pattern |
+
+**Note:** Tests and production code should use `RulesEngine.fromFile()` as the primary entry point.
+
+### 19.2 Documentation vs Code Discrepancies
+
+The following items were found in older design documents but do **not exist** in the current codebase:
+
+| Referenced Item | Location | Status |
+|-----------------|----------|--------|
+| `SequentialYamlRulesEngineService` | docs-design/tasks/old/*.md | **Does not exist** - functionality merged into `RulesEngineService` with `processing-mode` metadata field |
+
+**Recommendation:** Ignore references to `SequentialYamlRulesEngineService` in any documentation. Use `RulesEngineService` with `metadata.processing-mode: "sequential"` instead.
+
+### 19.3 Test Data Date Dependencies
+
+Some PostgreSQL integration tests use date-bounded test data. If tests fail with `null` values when expected data should be returned, check for expired date ranges in:
+
+- **File:** `apex-demo/src/test/resources/postgresql-test-data.sql`
+- **Tables affected:** `risk_assessments` (has `effective_date` and `expiry_date` columns)
+- **SQL filter:** `AND (ra.expiry_date IS NULL OR ra.expiry_date > CURRENT_DATE)`
+
+**Resolution:** Extend `expiry_date` values to a future date (e.g., `2027-12-31`).
+
+### 19.4 Service Pattern Recommendations
+
+For consistency across the codebase, use the following patterns:
+
+```java
+// ✅ RECOMMENDED: Modern pattern
+RulesEngine engine = RulesEngine.fromFile("path/to/config.yaml");
+RuleResult result = engine.evaluate(inputData);
+
+// ✅ ACCEPTABLE: When you need to inspect configuration
+YamlConfigurationLoader loader = new YamlConfigurationLoader();
+YamlRuleConfiguration config = loader.loadFromFile("path/to/config.yaml");
+RulesEngine engine = RulesEngine.fromYamlConfig(config);
+
+// ❌ DEPRECATED: Avoid in new code
+YamlRulesEngineService service = new YamlRulesEngineService();
+RulesEngine engine = service.createRulesEngineFromYamlConfig(config);
+```
+
+### 19.5 Test YAML Dependencies
+
+Tests should use standalone YAML configurations without external database dependencies where possible. For concurrent access testing, use:
+
+- **Standalone config:** `src/test/resources/scenario/concurrent-test-simple.yaml`
+
+Avoid referencing YAML files that require external databases (e.g., PostgreSQL) in unit tests unless the test is specifically designed for database integration testing with Testcontainers.
+
+---
+
 ## Conclusion
 
 This comprehensive guide demonstrates APEX Pipeline Orchestration as a **complete and working system**. The CSV to H2 pipeline demo shows how APEX can successfully orchestrate complex data processing workflows using pure YAML configuration, achieving the core APEX principle of eliminating hardcoded orchestration logic.
