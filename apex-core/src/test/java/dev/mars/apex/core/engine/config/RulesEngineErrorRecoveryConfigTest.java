@@ -21,7 +21,7 @@ class RulesEngineErrorRecoveryConfigTest {
     void testRulesEngineLoadsErrorRecoveryConfigFromYaml() throws YamlConfigurationException {
         // Load YAML configuration with error-recovery section
         YamlConfigurationLoader loader = new YamlConfigurationLoader();
-        YamlRuleConfiguration yamlConfig = loader.loadFromClasspath("yaml-error-recovery-test.yaml");
+        YamlRuleConfiguration yamlConfig = loader.loadFromClasspath("error-handling/yaml-error-recovery-test.yaml");
         
         assertNotNull(yamlConfig);
         assertNotNull(yamlConfig.getErrorRecovery(), "YAML should have error-recovery section");
@@ -54,7 +54,7 @@ class RulesEngineErrorRecoveryConfigTest {
     @Test
     void testRulesEngineFromFileLoadsErrorRecoveryConfig() throws YamlConfigurationException {
         // Test the fromFile() static factory method
-        String filePath = "src/test/resources/yaml-error-recovery-test.yaml";
+        String filePath = "src/test/resources/error-handling/yaml-error-recovery-test.yaml";
         
         // Create RulesEngine from file
         RulesEngine engine = RulesEngine.fromFile(filePath);

@@ -202,7 +202,7 @@ class YamlConfigurationLoaderStreamTest {
         logger.info("=== Testing loadAsMapFromClasspath() ===");
 
         // Use an existing test resource
-        String resourcePath = "scenario-stream-test/test-registry.yaml";
+        String resourcePath = "scenario/test-registry.yaml";
         
         Map<String, Object> result = loader.loadAsMapFromClasspath(resourcePath);
 

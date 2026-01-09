@@ -14,7 +14,7 @@ metadata:
 # Reference level 1 file (which itself has enrichment-refs to level 2)
 enrichment-refs:
   - name: "level1-enrichments"
-    source: "config/groups-only-logic/nested-level1.yaml"
+    source: "config/nested-level1.yaml"
     enabled: true
     description: "Load level 1 enrichments (which loads level 2)"
 

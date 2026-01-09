@@ -37,7 +37,7 @@ class MixedRefsWithGroupReferencesTest {
     @DisplayName("EDGE CASE: enrichment-groups from mixed references (file system + classpath) should be filtered")
     void testMixedReferencesWithGroupsOnlyLogic() throws Exception {
         // Load the main file that references both file system and classpath files
-        YamlRuleConfiguration config = loader.loadFromClasspath("config/groups-only-logic/mixed-main.yaml");
+        YamlRuleConfiguration config = loader.loadFromClasspath("config/mixed-main.yaml");
 
         logger.info("=== MIXED REFERENCES WITH GROUPS-ONLY LOGIC TEST ===");
 

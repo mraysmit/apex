@@ -13,11 +13,11 @@ metadata:
 # Reference file from file system (using relative path)
 enrichment-refs:
   - name: "filesystem-enrichments"
-    source: "src/test/resources/config/groups-only-logic/mixed-filesystem.yaml"
+    source: "src/test/resources/config/mixed-filesystem.yaml"
     enabled: true
     description: "Load enrichments from file system"
   - name: "classpath-enrichments"
-    source: "config/groups-only-logic/mixed-classpath.yaml"
+    source: "config/mixed-classpath.yaml"
     enabled: true
     description: "Load enrichments from classpath"
 

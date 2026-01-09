@@ -78,7 +78,7 @@ class YamlDataLookupIntegrationTest {
         testDataSources = new HashMap<>();
 
         // Load YAML configuration from file
-        yamlConfig = yamlLoader.loadFromClasspath("data-lookup-integration-test.yaml");
+        yamlConfig = yamlLoader.loadFromClasspath("lookups/data-lookup-integration-test.yaml");
         assertNotNull(yamlConfig, "YAML configuration should be loaded");
         assertNotNull(yamlConfig.getDataSources(), "Data sources should be present");
         assertFalse(yamlConfig.getDataSources().isEmpty(), "Should have at least one data source");
@@ -143,7 +143,7 @@ class YamlDataLookupIntegrationTest {
 
         // Reload YAML to pick up property
         try {
-            yamlConfig = yamlLoader.loadFromClasspath("data-lookup-integration-test.yaml");
+            yamlConfig = yamlLoader.loadFromClasspath("lookups/data-lookup-integration-test.yaml");
         } catch (Exception e) {
             fail("Failed to reload YAML: " + e.getMessage());
         }
@@ -178,7 +178,7 @@ class YamlDataLookupIntegrationTest {
         // Set base path property and reload YAML
         System.setProperty("TEST_FILE_BASE_PATH", jsonFile.getParent().toString());
         try {
-            yamlConfig = yamlLoader.loadFromClasspath("data-lookup-integration-test.yaml");
+            yamlConfig = yamlLoader.loadFromClasspath("lookups/data-lookup-integration-test.yaml");
         } catch (Exception e) {
             fail("Failed to reload YAML: " + e.getMessage());
         }
@@ -210,7 +210,7 @@ class YamlDataLookupIntegrationTest {
         // Set base path property and reload YAML
         System.setProperty("TEST_FILE_BASE_PATH", csvFile.getParent().toString());
         try {
-            yamlConfig = yamlLoader.loadFromClasspath("data-lookup-integration-test.yaml");
+            yamlConfig = yamlLoader.loadFromClasspath("lookups/data-lookup-integration-test.yaml");
         } catch (Exception e) {
             fail("Failed to reload YAML: " + e.getMessage());
         }

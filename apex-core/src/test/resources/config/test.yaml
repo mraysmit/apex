@@ -1,33 +1,38 @@
-# Test Configuration for Scenario Tests
-# Minimal configuration for concurrent and load testing
-
 metadata:
-  id: "test-stage-config"
-  name: "Test Stage Configuration"
-  description: "Minimal configuration for scenario testing"
-  version: "1.0"
-  type: "rule-config"
-  author: "Test Suite"
-
-
-rules:
-  # Simple validation rule
-  - id: "type-validation"
-    name: "Type Validation"
-    condition: "#type != null"
-    message: "Type field is present"
-    severity: "INFO"
-
-  # OTC type check
-  - id: "otc-check"
-    name: "OTC Type Check"
-    condition: "#type == 'OTC'"
-    message: "Data is OTC type"
-    severity: "INFO"
-
-enrichments: []
-
-error-recovery:
-  enabled: true
-  default-strategy: "CONTINUE_WITH_DEFAULT"
-
+  id: test-external-enrichments
+  name: Is Source Identifier Valid
+  version: 1.0.0
+  description: Is Source Identifier Valid
+  type: external-data-config
+  author: APEX Demo Team
+  created: '2025-10-28 18:04:16'
+  tags:
+    - external-data
+    - database
+    - rest-api
+    - caching
+    - monitoring
+data-source-refs:
+  - name: postgres-database
+    source: DB/database-postgres.yaml
+    enabled: true
+    description: postgres database
+enrichment-refs: []
+enrichments:
+  - id: e3
+    name: e3
+    description: Is_Source_Identifier_Valid?_rulebuilder rule 1 EXISTS lookup
+    enabled: true
+    condition: true
+    type: field-enrichment
+    field-mappings:
+        - source-field: '''e3'''
+          target-field: 'rbresult'
+enrichment-groups:
+  - id: rbg1
+    name: Is Source Identifier Valid enrichment group 1
+    operator: AND
+    stop-on-first-failure: true
+    error-handling: fail-fast
+    enrichment-ids:
+      - e3

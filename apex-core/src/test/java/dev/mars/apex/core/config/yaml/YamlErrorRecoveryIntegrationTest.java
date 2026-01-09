@@ -39,7 +39,7 @@ class YamlErrorRecoveryIntegrationTest {
     @Test
     void testLoadYamlConfigurationWithErrorRecoverySection() throws Exception {
         // Load YAML configuration with error-recovery section
-        YamlRuleConfiguration config = loader.loadFromClasspath("yaml-error-recovery-test.yaml");
+        YamlRuleConfiguration config = loader.loadFromClasspath("error-handling/yaml-error-recovery-test.yaml");
         
         assertNotNull(config);
         assertNotNull(config.getMetadata());
@@ -88,7 +88,7 @@ class YamlErrorRecoveryIntegrationTest {
     @Test
     void testConvertYamlErrorRecoveryToInternalConfig() throws Exception {
         // Load YAML configuration
-        YamlRuleConfiguration config = loader.loadFromClasspath("yaml-error-recovery-test.yaml");
+        YamlRuleConfiguration config = loader.loadFromClasspath("error-handling/yaml-error-recovery-test.yaml");
         YamlErrorRecoveryConfig yamlErrorRecovery = config.getErrorRecovery();
         
         // Convert to internal ErrorRecoveryConfig
@@ -151,7 +151,7 @@ class YamlErrorRecoveryIntegrationTest {
     @Test
     void testYamlConfigurationWithRulesAndErrorRecovery() throws Exception {
         // Load configuration with both rules and error-recovery
-        YamlRuleConfiguration config = loader.loadFromClasspath("yaml-error-recovery-test.yaml");
+        YamlRuleConfiguration config = loader.loadFromClasspath("error-handling/yaml-error-recovery-test.yaml");
         
         assertNotNull(config);
         
@@ -185,7 +185,7 @@ class YamlErrorRecoveryIntegrationTest {
     @Test
     void testYamlConfigurationValidation() throws Exception {
         // Load and validate configuration
-        YamlRuleConfiguration config = loader.loadFromClasspath("yaml-error-recovery-test.yaml");
+        YamlRuleConfiguration config = loader.loadFromClasspath("error-handling/yaml-error-recovery-test.yaml");
         
         assertNotNull(config);
         

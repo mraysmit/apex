@@ -64,8 +64,8 @@ class ResourceResolverTest {
     private static final Logger logger = LoggerFactory.getLogger(ResourceResolverTest.class);
 
     // Classpath resource path (uses existing test resources)
-    private static final String CLASSPATH_RESOURCE = "scenario-stream-test/test-registry.yaml";
-    private static final String CLASSPATH_RESOURCE_NESTED = "scenario-stream-test/basic-validation-scenario.yaml";
+    private static final String CLASSPATH_RESOURCE = "scenario/test-registry.yaml";
+    private static final String CLASSPATH_RESOURCE_NESTED = "scenario/basic-validation-scenario.yaml";
 
     private ResourceResolver resolver;
 
@@ -105,7 +105,7 @@ class ResourceResolverTest {
         void testResolveFromClasspathWithPrefix() throws Exception {
             logger.info("=== Testing resolve() with classpath prefix ===");
 
-            resolver.addClasspathPrefix("scenario-stream-test/");
+            resolver.addClasspathPrefix("scenario/");
 
             try (InputStream is = resolver.resolve("test-registry.yaml")) {
                 assertNotNull(is, "InputStream should not be null");
@@ -264,9 +264,9 @@ class ResourceResolverTest {
         void testResolveRelativePathWithBasePath() throws Exception {
             logger.info("=== Testing resolve() with relative path and base path ===");
 
-            // The test-registry.yaml is in scenario-stream-test/
-            // basic-validation-scenario.yaml is also in scenario-stream-test/
-            try (InputStream is = resolver.resolve("basic-validation-scenario.yaml", "scenario-stream-test/")) {
+            // The test-registry.yaml is in scenario/
+            // basic-validation-scenario.yaml is also in scenario/
+            try (InputStream is = resolver.resolve("basic-validation-scenario.yaml", "scenario/")) {
                 assertNotNull(is, "InputStream should not be null");
                 logger.info("✓ Successfully resolved relative path with base");
             }
@@ -277,7 +277,7 @@ class ResourceResolverTest {
         void testResolveRelativePathWithDotSlash() throws Exception {
             logger.info("=== Testing resolve() with ./ prefix ===");
 
-            try (InputStream is = resolver.resolve("./basic-validation-scenario.yaml", "scenario-stream-test/")) {
+            try (InputStream is = resolver.resolve("./basic-validation-scenario.yaml", "scenario/")) {
                 assertNotNull(is, "InputStream should not be null");
                 logger.info("✓ Successfully handled ./ prefix");
             }
@@ -346,7 +346,7 @@ class ResourceResolverTest {
             resolver.addSearchPath(tempDir.toString());
 
             // With CLASSPATH_FIRST, should get the classpath version
-            try (InputStream is = resolver.resolve("scenario-stream-test/test-registry.yaml")) {
+            try (InputStream is = resolver.resolve("scenario/test-registry.yaml")) {
                 String content = readStream(is);
                 // Should be the classpath version which contains "scenario-registry"
                 assertTrue(content.contains("scenario-registry"), 
@@ -361,7 +361,7 @@ class ResourceResolverTest {
             logger.info("=== Testing FILESYSTEM_FIRST strategy ===");
 
             // Create a file on filesystem
-            Path configDir = tempDir.resolve("scenario-stream-test");
+            Path configDir = tempDir.resolve("scenario");
             Files.createDirectories(configDir);
             Path testFile = configDir.resolve("test-registry.yaml");
             Files.writeString(testFile, "metadata:\n  id: filesystem-version\n");
@@ -370,7 +370,7 @@ class ResourceResolverTest {
             resolver.addSearchPath(tempDir.toString());
 
             // With FILESYSTEM_FIRST, should get the filesystem version
-            try (InputStream is = resolver.resolve("scenario-stream-test/test-registry.yaml")) {
+            try (InputStream is = resolver.resolve("scenario/test-registry.yaml")) {
                 String content = readStream(is);
                 assertTrue(content.contains("filesystem-version"), 
                           "Should resolve from filesystem first");
@@ -635,13 +635,13 @@ class ResourceResolverTest {
 
             ResourceResolver builtResolver = ResourceResolver.builder()
                 .strategy(ResourceResolver.ResolutionStrategy.CLASSPATH_FIRST)
-                .addClasspathPrefix("scenario-stream-test/")
+                .addClasspathPrefix("scenario/")
                 .build();
 
             assertNotNull(builtResolver);
             assertEquals(ResourceResolver.ResolutionStrategy.CLASSPATH_FIRST, 
                         builtResolver.getResolutionStrategy());
-            assertTrue(builtResolver.getClasspathPrefixes().contains("scenario-stream-test/"));
+            assertTrue(builtResolver.getClasspathPrefixes().contains("scenario/"));
 
             // Should be able to resolve with the prefix
             try (InputStream is = builtResolver.resolve("test-registry.yaml")) {

@@ -55,7 +55,7 @@ class ScenarioRegistryLoaderStreamTest {
 
     private static final Logger logger = LoggerFactory.getLogger(ScenarioRegistryLoaderStreamTest.class);
     
-    private static final String TEST_RESOURCE_BASE = "scenario-stream-test/";
+    private static final String TEST_RESOURCE_BASE = "scenario/";
     private static final String TEST_REGISTRY_PATH = TEST_RESOURCE_BASE + "test-registry.yaml";
     
     private ScenarioRegistryLoader loader;
@@ -275,8 +275,8 @@ class ScenarioRegistryLoaderStreamTest {
         void testAutoDerivesClasspathBase() throws Exception {
             logger.info("=== Testing classpath base auto-derivation ===");
 
-            // When loading from "scenario-stream-test/test-registry.yaml",
-            // the loader should automatically use "scenario-stream-test/" as the base
+            // When loading from "scenario/test-registry.yaml",
+            // the loader should automatically use "scenario/" as the base
             Map<String, ScenarioConfiguration> scenarios = 
                 loader.loadRegistryFromClasspath(TEST_REGISTRY_PATH);
 

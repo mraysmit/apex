@@ -13,7 +13,7 @@ metadata:
 # This file references circular-a.yaml (CIRCULAR REFERENCE!)
 enrichment-refs:
   - name: "circular-a-enrichments"
-    source: "config/groups-only-logic/circular-a.yaml"
+    source: "config/circular-a.yaml"
     enabled: true
     description: "Load enrichments from file A (circular!)"
 

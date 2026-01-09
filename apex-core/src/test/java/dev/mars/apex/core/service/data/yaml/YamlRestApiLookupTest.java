@@ -67,7 +67,7 @@ class YamlRestApiLookupTest {
         System.setProperty("API_BASE_URL", MOCK_API_URL);
 
         // Load YAML configuration from file
-        yamlConfig = yamlLoader.loadFromClasspath("rest-api-lookup-test.yaml");
+        yamlConfig = yamlLoader.loadFromClasspath("lookups/rest-api-lookup-test.yaml");
         assertNotNull(yamlConfig, "YAML configuration should be loaded");
         assertNotNull(yamlConfig.getDataSources(), "Data sources should be present");
 

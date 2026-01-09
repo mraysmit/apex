@@ -74,7 +74,7 @@ class YamlMultiSourceLookupTest {
         dataSources = new HashMap<>();
 
         // Load YAML configuration from file
-        yamlConfig = yamlLoader.loadFromClasspath("multi-source-lookup-test.yaml");
+        yamlConfig = yamlLoader.loadFromClasspath("lookups/multi-source-lookup-test.yaml");
         assertNotNull(yamlConfig, "YAML configuration should be loaded");
         assertNotNull(yamlConfig.getDataSources(), "Data sources should be present");
         assertFalse(yamlConfig.getDataSources().isEmpty(), "Should have at least one data source");
@@ -282,7 +282,7 @@ class YamlMultiSourceLookupTest {
 
         // Set base path property and reload YAML
         System.setProperty("PROFILE_FILE_BASE_PATH", profileFile.getParent().toString());
-        yamlConfig = yamlLoader.loadFromClasspath("multi-source-lookup-test.yaml");
+        yamlConfig = yamlLoader.loadFromClasspath("lookups/multi-source-lookup-test.yaml");
 
         // Get file data source from YAML
         YamlDataSource yamlFile = findDataSourceByName("profile-files");

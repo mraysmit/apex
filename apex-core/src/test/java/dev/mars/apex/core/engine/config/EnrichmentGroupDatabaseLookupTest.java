@@ -117,7 +117,7 @@ public class EnrichmentGroupDatabaseLookupTest {
         
         // Load configuration with enrichment-group containing database lookup
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
-            "src/test/resources/enrichment-group-database-lookup-test.yaml"
+            "src/test/resources/lookups/enrichment-group-database-lookup-test.yaml"
         );
         
         assertNotNull(config, "Configuration should load successfully");
@@ -181,7 +181,7 @@ public class EnrichmentGroupDatabaseLookupTest {
         
         // Load configuration
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
-            "src/test/resources/enrichment-group-database-lookup-test.yaml"
+            "src/test/resources/lookups/enrichment-group-database-lookup-test.yaml"
         );
         
         // Create rules engine
@@ -224,7 +224,7 @@ public class EnrichmentGroupDatabaseLookupTest {
         
         // Load configuration
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
-            "src/test/resources/enrichment-group-database-lookup-test.yaml"
+            "src/test/resources/lookups/enrichment-group-database-lookup-test.yaml"
         );
         
         // Create rules engine

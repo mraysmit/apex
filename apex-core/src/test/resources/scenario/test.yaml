@@ -1,0 +1,33 @@
+# Test Configuration for Scenario Tests
+# Minimal configuration for concurrent and load testing
+
+metadata:
+  id: "test-stage-config"
+  name: "Test Stage Configuration"
+  description: "Minimal configuration for scenario testing"
+  version: "1.0"
+  type: "rule-config"
+  author: "Test Suite"
+
+
+rules:
+  # Simple validation rule
+  - id: "type-validation"
+    name: "Type Validation"
+    condition: "#type != null"
+    message: "Type field is present"
+    severity: "INFO"
+
+  # OTC type check
+  - id: "otc-check"
+    name: "OTC Type Check"
+    condition: "#type == 'OTC'"
+    message: "Data is OTC type"
+    severity: "INFO"
+
+enrichments: []
+
+error-recovery:
+  enabled: true
+  default-strategy: "CONTINUE_WITH_DEFAULT"
+

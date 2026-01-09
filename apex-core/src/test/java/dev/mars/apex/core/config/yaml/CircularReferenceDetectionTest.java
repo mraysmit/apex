@@ -44,7 +44,7 @@ class CircularReferenceDetectionTest {
 
         YamlConfigurationException exception = assertThrows(
             YamlConfigurationException.class,
-            () -> loader.loadFromClasspath("config/groups-only-logic/circular-a.yaml"),
+            () -> loader.loadFromClasspath("config/circular-a.yaml"),
             "Circular reference should cause duplicate ID validation error"
         );
 

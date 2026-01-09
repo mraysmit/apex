@@ -61,7 +61,7 @@ class YamlParameterBindingTest {
         yamlLoader = new YamlConfigurationLoader();
 
         // Load YAML configuration from file
-        yamlConfig = yamlLoader.loadFromClasspath("parameter-binding-test.yaml");
+        yamlConfig = yamlLoader.loadFromClasspath("lookups/parameter-binding-test.yaml");
         assertNotNull(yamlConfig, "YAML configuration should be loaded");
         assertNotNull(yamlConfig.getDataSources(), "Data sources should be present");
 

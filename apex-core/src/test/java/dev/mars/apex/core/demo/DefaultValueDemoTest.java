@@ -25,7 +25,7 @@ class DefaultValueDemoTest {
     void testDefaultValueEnhancementDemo() throws Exception {
         // Load the demo configuration
         YamlConfigurationLoader loader = new YamlConfigurationLoader();
-        YamlRuleConfiguration config = loader.loadFromClasspath("demo-default-value.yaml");
+        YamlRuleConfiguration config = loader.loadFromClasspath("error-handling/demo-default-value.yaml");
         
         assertNotNull(config);
         assertEquals("demo-default-value", config.getMetadata().getId());

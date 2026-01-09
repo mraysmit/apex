@@ -44,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * 
  * <p><b>Test Resources:</b></p>
  * <pre>
- * src/test/resources/scenario-stream-test/
+ * src/test/resources/scenario/
  *   ├── test-registry.yaml
  *   ├── basic-validation-scenario.yaml
  *   └── complex-rules-scenario.yaml
@@ -60,7 +60,7 @@ class RulesEngineFromScenarioRegistryTest {
     private static final Logger logger = LoggerFactory.getLogger(RulesEngineFromScenarioRegistryTest.class);
 
     // Classpath resource path (relative to src/test/resources)
-    private static final String CLASSPATH_REGISTRY = "scenario-stream-test/test-registry.yaml";
+    private static final String CLASSPATH_REGISTRY = "scenario/test-registry.yaml";
 
     // ========================================================================
     // Classpath Loading Tests

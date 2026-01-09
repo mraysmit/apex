@@ -34,7 +34,7 @@ class GroupReferencesGroupsOnlyLogicTest {
     @DisplayName("Enrichment-groups referenced by other enrichment-groups should be filtered from itemOrder")
     void testEnrichmentGroupReferencesFiltering() throws Exception {
         // Load the test YAML file
-        File yamlFile = new File("src/test/resources/config/groups-only-logic/enrichment-group-references.yaml");
+        File yamlFile = new File("src/test/resources/config/enrichment-group-references.yaml");
         YamlRuleConfiguration config = loader.loadFromFile(yamlFile);
 
         // Get the filtered itemOrder
@@ -85,7 +85,7 @@ class GroupReferencesGroupsOnlyLogicTest {
     @DisplayName("Rule-groups referenced by other rule-groups should be filtered from itemOrder")
     void testRuleGroupReferencesFiltering() throws Exception {
         // Load the test YAML file
-        File yamlFile = new File("src/test/resources/config/groups-only-logic/rule-group-references.yaml");
+        File yamlFile = new File("src/test/resources/config/rule-group-references.yaml");
         YamlRuleConfiguration config = loader.loadFromFile(yamlFile);
 
         // Get the filtered itemOrder
@@ -127,7 +127,7 @@ class GroupReferencesGroupsOnlyLogicTest {
     @DisplayName("Multiple levels of group references should all be filtered correctly")
     void testMultipleLevelsOfGroupReferences() throws Exception {
         // Load the test YAML file
-        File yamlFile = new File("src/test/resources/config/groups-only-logic/nested-group-references.yaml");
+        File yamlFile = new File("src/test/resources/config/nested-group-references.yaml");
         YamlRuleConfiguration config = loader.loadFromFile(yamlFile);
 
         // Get the filtered itemOrder
@@ -162,7 +162,7 @@ class GroupReferencesGroupsOnlyLogicTest {
     @DisplayName("Groups not referenced by other groups should remain in itemOrder")
     void testUnreferencedGroupsRemainInItemOrder() throws Exception {
         // Load the test YAML file
-        File yamlFile = new File("src/test/resources/config/groups-only-logic/enrichment-group-references.yaml");
+        File yamlFile = new File("src/test/resources/config/enrichment-group-references.yaml");
         YamlRuleConfiguration config = loader.loadFromFile(yamlFile);
 
         // Get the filtered itemOrder
@@ -184,7 +184,7 @@ class GroupReferencesGroupsOnlyLogicTest {
         // This test verifies that the log messages are correct
         // The actual log output is checked manually, but we can verify the configuration is loaded correctly
         
-        File yamlFile = new File("src/test/resources/config/groups-only-logic/enrichment-group-references.yaml");
+        File yamlFile = new File("src/test/resources/config/enrichment-group-references.yaml");
         YamlRuleConfiguration config = loader.loadFromFile(yamlFile);
 
         // Verify configuration has the expected structure
@@ -205,7 +205,7 @@ class GroupReferencesGroupsOnlyLogicTest {
     @DisplayName("Enrichments referenced via enrichment-references (structured objects) should be filtered from itemOrder")
     void testEnrichmentReferencesFiltering() throws Exception {
         // Load the test YAML file
-        File yamlFile = new File("src/test/resources/config/groups-only-logic/enrichment-references.yaml");
+        File yamlFile = new File("src/test/resources/config/enrichment-references.yaml");
         YamlRuleConfiguration config = loader.loadFromFile(yamlFile);
 
         // Get the filtered itemOrder
@@ -243,7 +243,7 @@ class GroupReferencesGroupsOnlyLogicTest {
     @DisplayName("Rules referenced via rule-references (structured objects) should be filtered from itemOrder")
     void testRuleReferencesFiltering() throws Exception {
         // Load the test YAML file
-        File yamlFile = new File("src/test/resources/config/groups-only-logic/rule-references.yaml");
+        File yamlFile = new File("src/test/resources/config/rule-references.yaml");
         YamlRuleConfiguration config = loader.loadFromFile(yamlFile);
 
         // Get the filtered itemOrder
@@ -281,7 +281,7 @@ class GroupReferencesGroupsOnlyLogicTest {
     @DisplayName("User Example: enrichment-group-references should filter rbg1 from itemOrder")
     void testUserExampleEnrichmentGroupReferences() throws Exception {
         // Load the test YAML file that precisely replicates the user's example
-        File yamlFile = new File("src/test/resources/config/groups-only-logic/user-example-enrichment-group-refs.yaml");
+        File yamlFile = new File("src/test/resources/config/user-example-enrichment-group-refs.yaml");
         YamlRuleConfiguration config = loader.loadFromFile(yamlFile);
 
         // Get the filtered itemOrder

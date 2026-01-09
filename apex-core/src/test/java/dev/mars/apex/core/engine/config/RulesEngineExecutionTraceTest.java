@@ -18,7 +18,7 @@ public class RulesEngineExecutionTraceTest {
         // The workspace root is c:\Users\markr\dev\java\corejava\apex-rules-engine
         // So the file is at apex-core/src/test/resources/trace-test.yaml
         
-        RulesEngine engine = RulesEngine.fromFile("src/test/resources/trace-test.yaml");
+        RulesEngine engine = RulesEngine.fromFile("src/test/resources/tracing/trace-test.yaml");
         Map<String, Object> data = new HashMap<>();
         
         RuleResult result = engine.evaluate(data);
@@ -36,7 +36,7 @@ public class RulesEngineExecutionTraceTest {
     @Test
     public void testExecutionTraceLegacy() throws Exception {
         dev.mars.apex.core.config.yaml.YamlConfigurationLoader loader = new dev.mars.apex.core.config.yaml.YamlConfigurationLoader();
-        dev.mars.apex.core.config.yaml.YamlRuleConfiguration config = loader.loadFromFile("src/test/resources/trace-test-legacy.yaml");
+        dev.mars.apex.core.config.yaml.YamlRuleConfiguration config = loader.loadFromFile("src/test/resources/tracing/trace-test-legacy.yaml");
         
         // Force legacy mode by clearing item order
         config.setItemOrder(null);

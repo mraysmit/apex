@@ -51,8 +51,8 @@ class DataTypeScenarioServiceStageTest {
     @Test
     void testProcessData_WithStageBasedScenario() throws Exception {
         // Arrange
-        ScenarioStage validationStage = new ScenarioStage("validation", resourcePath("yaml-default-value-test.yaml"), 1);
-        ScenarioStage enrichmentStage = new ScenarioStage("enrichment", resourcePath("yaml-default-value-test.yaml"), 2);
+        ScenarioStage validationStage = new ScenarioStage("validation", resourcePath("error-handling/yaml-default-value-test.yaml"), 1);
+        ScenarioStage enrichmentStage = new ScenarioStage("enrichment", resourcePath("error-handling/yaml-default-value-test.yaml"), 2);
 
         List<ScenarioStage> stages = Arrays.asList(validationStage, enrichmentStage);
         ScenarioConfiguration stageScenario = ScenarioConfiguration.withStages("stage-scenario", "Stage Scenario",
@@ -82,7 +82,7 @@ class DataTypeScenarioServiceStageTest {
         legacyScenario.setScenarioId("legacy-scenario");
         legacyScenario.setName("Legacy Scenario");
         legacyScenario.setDataTypes(Arrays.asList("TestData"));
-        legacyScenario.setRuleConfigurations(Arrays.asList(resourcePath("yaml-default-value-test.yaml")));
+        legacyScenario.setRuleConfigurations(Arrays.asList(resourcePath("error-handling/yaml-default-value-test.yaml")));
 
         // Register the scenario
         service.getClass().getDeclaredMethod("registerScenario", ScenarioConfiguration.class).setAccessible(true);
@@ -101,7 +101,7 @@ class DataTypeScenarioServiceStageTest {
     @Test
     void testProcessDataWithStages_Success() throws Exception {
         // Arrange
-        ScenarioStage stage = new ScenarioStage("test-stage", resourcePath("yaml-default-value-test.yaml"), 1);
+        ScenarioStage stage = new ScenarioStage("test-stage", resourcePath("error-handling/yaml-default-value-test.yaml"), 1);
         List<ScenarioStage> stages = Arrays.asList(stage);
         ScenarioConfiguration stageScenario = ScenarioConfiguration.withStages("test-scenario", "Test Scenario",
                                                                               Arrays.asList("TestData"), stages);
@@ -149,7 +149,7 @@ class DataTypeScenarioServiceStageTest {
     @Test
     void testProcessDataWithScenario_StageBasedProcessing() throws Exception {
         // Arrange
-        ScenarioStage stage = new ScenarioStage("validation", resourcePath("yaml-default-value-test.yaml"), 1);
+        ScenarioStage stage = new ScenarioStage("validation", resourcePath("error-handling/yaml-default-value-test.yaml"), 1);
         List<ScenarioStage> stages = Arrays.asList(stage);
         ScenarioConfiguration stageScenario = ScenarioConfiguration.withStages("stage-scenario", "Stage Scenario",
                                                                               Arrays.asList("TestData"), stages);
@@ -173,7 +173,7 @@ class DataTypeScenarioServiceStageTest {
         ScenarioConfiguration legacyScenario = new ScenarioConfiguration();
         legacyScenario.setScenarioId("legacy-scenario");
         legacyScenario.setDataTypes(Arrays.asList("TestData"));
-        legacyScenario.setRuleConfigurations(Arrays.asList(resourcePath("yaml-default-value-test.yaml")));
+        legacyScenario.setRuleConfigurations(Arrays.asList(resourcePath("error-handling/yaml-default-value-test.yaml")));
 
         Object testData = new TestData();
 

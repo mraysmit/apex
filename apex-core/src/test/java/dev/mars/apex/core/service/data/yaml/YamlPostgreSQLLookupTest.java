@@ -92,7 +92,7 @@ class YamlPostgreSQLLookupTest {
         System.out.println("  Username: " + postgres.getUsername());
 
         // Load YAML configuration from file
-        YamlRuleConfiguration yamlConfig = yamlLoader.loadFromClasspath("postgresql-lookup-test.yaml");
+        YamlRuleConfiguration yamlConfig = yamlLoader.loadFromClasspath("lookups/postgresql-lookup-test.yaml");
         assertNotNull(yamlConfig, "YAML configuration should be loaded");
         assertNotNull(yamlConfig.getDataSources(), "Data sources should be present");
         assertFalse(yamlConfig.getDataSources().isEmpty(), "Should have at least one data source");

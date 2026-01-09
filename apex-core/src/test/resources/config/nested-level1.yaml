@@ -14,7 +14,7 @@ metadata:
 # This file itself has enrichment-refs to another file (nested reference)
 enrichment-refs:
   - name: "level2-enrichments"
-    source: "config/groups-only-logic/nested-level2.yaml"
+    source: "config/nested-level2.yaml"
     enabled: true
     description: "Load level 2 enrichments"
 

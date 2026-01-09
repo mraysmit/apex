@@ -39,8 +39,8 @@ class ClasspathRefsWithGroupReferencesTest {
     @DisplayName("EDGE CASE: enrichment-group from CLASSPATH enrichment-refs should be filtered when referenced")
     void testClasspathEnrichmentRefsWithGroupReferences() throws Exception {
         // Load the main file from classpath
-        // This file references "config/groups-only-logic/classpath-external.yaml" from classpath
-        YamlRuleConfiguration config = loader.loadFromClasspath("config/groups-only-logic/classpath-main.yaml");
+        // This file references "config/classpath-external.yaml" from classpath
+        YamlRuleConfiguration config = loader.loadFromClasspath("config/classpath-main.yaml");
 
         // Get the filtered itemOrder
         List<ProcessingItem> itemOrder = config.getItemOrder();

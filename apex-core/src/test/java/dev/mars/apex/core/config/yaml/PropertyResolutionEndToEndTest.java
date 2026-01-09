@@ -58,7 +58,7 @@ public class PropertyResolutionEndToEndTest {
         LOGGER.info("TEST: Complete property resolution end-to-end");
         
         // Load the test configuration file with property placeholders
-        YamlRuleConfiguration config = loader.loadFromClasspath("test-config-with-properties.yaml");
+        YamlRuleConfiguration config = loader.loadFromClasspath("lookups/test-config-with-properties.yaml");
         
         // Verify configuration loaded successfully
         assertNotNull(config);
@@ -146,7 +146,7 @@ public class PropertyResolutionEndToEndTest {
         System.clearProperty("TEST_DB_PATH");
         System.clearProperty("TEST_DB_USER");
         
-        YamlRuleConfiguration config = loader.loadFromClasspath("test-config-with-properties.yaml");
+        YamlRuleConfiguration config = loader.loadFromClasspath("lookups/test-config-with-properties.yaml");
         
         // Verify PostgreSQL database uses defaults where properties are missing
         YamlDataSource userDatabase = config.getDataSources().stream()
@@ -192,7 +192,7 @@ public class PropertyResolutionEndToEndTest {
         
         // This should throw an exception because required properties are missing
         Exception exception = assertThrows(YamlConfigurationException.class, () -> {
-            loader.loadFromClasspath("test-config-with-properties.yaml");
+            loader.loadFromClasspath("lookups/test-config-with-properties.yaml");
         });
         
         // Verify the exception message indicates which property is missing

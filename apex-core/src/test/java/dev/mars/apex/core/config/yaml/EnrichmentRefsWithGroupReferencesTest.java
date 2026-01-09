@@ -35,7 +35,7 @@ class EnrichmentRefsWithGroupReferencesTest {
     @DisplayName("CRITICAL BUG: enrichment-group from enrichment-refs should be filtered when referenced by main file")
     void testEnrichmentRefsWithGroupReferences() throws Exception {
         // Load the main file that has enrichment-refs and enrichment-group-references
-        File yamlFile = new File("src/test/resources/config/groups-only-logic/composite-rulegroup-enrichmentgroup.yaml");
+        File yamlFile = new File("src/test/resources/config/composite-rulegroup-enrichmentgroup.yaml");
         YamlRuleConfiguration config = loader.loadFromFile(yamlFile);
 
         // Get the filtered itemOrder

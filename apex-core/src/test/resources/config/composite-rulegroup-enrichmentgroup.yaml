@@ -9,7 +9,7 @@ metadata:
 
 enrichment-refs:
   - name: rule builder
-    source: config/groups-only-logic/test.yaml
+    source: config/test.yaml
     enabled: true
     description: Map Currency Code
 

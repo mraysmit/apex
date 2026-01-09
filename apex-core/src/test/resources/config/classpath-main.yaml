@@ -14,7 +14,7 @@ metadata:
 # Reference external file using CLASSPATH path (not file system path)
 enrichment-refs:
   - name: "classpath-external-enrichments"
-    source: "config/groups-only-logic/classpath-external.yaml"
+    source: "config/classpath-external.yaml"
     enabled: true
     description: "Load enrichments from classpath"
 

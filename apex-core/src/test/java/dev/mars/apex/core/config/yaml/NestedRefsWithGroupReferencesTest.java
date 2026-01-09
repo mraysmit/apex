@@ -42,7 +42,7 @@ class NestedRefsWithGroupReferencesTest {
     void testNestedEnrichmentRefsWithGroupReferences() throws Exception {
         // Load the main file from classpath
         // This file references level1 which references level2 (nested refs)
-        YamlRuleConfiguration config = loader.loadFromClasspath("config/groups-only-logic/nested-main.yaml");
+        YamlRuleConfiguration config = loader.loadFromClasspath("config/nested-main.yaml");
 
         // Get the filtered itemOrder
         List<ProcessingItem> itemOrder = config.getItemOrder();
