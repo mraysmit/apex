@@ -40,6 +40,12 @@ import java.util.*;
  * but specialized for financial trade processing workflows. Handles stage dependencies,
  * conditional execution, failure policies, and provides comprehensive result tracking.
  *
+ * DATA PERSISTENCE:
+ * - Stage outputs and enriched data are persisted back to the data context after each stage
+ * - Subsequent stages can access enriched data from previous stages via the facts map
+ * - Partial enrichments are captured even when stages fail (for debugging/recovery)
+ * - Original input data is preserved and augmented with stage outputs
+ *
  * EXECUTION FEATURES:
  * - Conditional stage execution via SpEL expressions
  * - Dependency-aware stage execution
@@ -130,6 +136,28 @@ public class ScenarioStageExecutor {
             stageResult.setExecutionTimeMs(duration);
 
             result.addStageResult(stageResult);
+            
+            // Persist stage outputs and enriched data back into the data map for subsequent stages
+            if (data instanceof Map && stageResult.isSuccessful()) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> dataMap = (Map<String, Object>) data;
+                
+                // Merge stage outputs directly (without prefix) for seamless data flow
+                if (!stageResult.getStageOutputs().isEmpty()) {
+                    dataMap.putAll(stageResult.getStageOutputs());
+                    logger.debug("Persisted {} outputs from stage '{}' to data context", 
+                                stageResult.getStageOutputs().size(), stage.getStageName());
+                }
+                
+                // Also merge enriched data from rule result if available
+                if (stageResult.getRuleResult() != null && 
+                    stageResult.getRuleResult().getEnrichedData() != null &&
+                    !stageResult.getRuleResult().getEnrichedData().isEmpty()) {
+                    dataMap.putAll(stageResult.getRuleResult().getEnrichedData());
+                    logger.debug("Persisted {} enriched fields from stage '{}' to data context",
+                                stageResult.getRuleResult().getEnrichedData().size(), stage.getStageName());
+                }
+            }
             
             // Add trace step for executed stage
             result.addExecutionStep(new ExecutionStep(
@@ -358,9 +386,16 @@ public class ScenarioStageExecutor {
                 errorMessage += " - " + String.join(", ", ruleResult.getFailureMessages());
             }
 
-            return stage.isRequired() ?
+            // Even on failure, capture any partial enriched data that was produced
+            StageExecutionResult failureResult = stage.isRequired() ?
                 StageExecutionResult.criticalFailure(stage.getStageName(), errorMessage) :
                 StageExecutionResult.nonCriticalFailure(stage.getStageName(), errorMessage);
+            
+            if (ruleResult.getEnrichedData() != null && !ruleResult.getEnrichedData().isEmpty()) {
+                failureResult.setStageOutputs(ruleResult.getEnrichedData());
+            }
+            
+            return failureResult;
         }
     }
 
@@ -411,6 +446,15 @@ public class ScenarioStageExecutor {
             // Aggregate outputs
             if (fileResult.getStageOutputs() != null) {
                 aggregatedOutputs.putAll(fileResult.getStageOutputs());
+                
+                // Persist file outputs back to data for subsequent files in the component
+                if (data instanceof Map) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> dataMap = (Map<String, Object>) data;
+                    dataMap.putAll(fileResult.getStageOutputs());
+                    logger.debug("Persisted {} outputs from component file '{}' to data context",
+                                fileResult.getStageOutputs().size(), fileRef.getFilePath());
+                }
             }
 
             // Check if we should terminate based on failure policy
@@ -478,9 +522,16 @@ public class ScenarioStageExecutor {
                 errorMessage += " - " + String.join(", ", ruleResult.getFailureMessages());
             }
 
-            return "terminate".equals(failurePolicy) ?
+            StageExecutionResult failureResult = "terminate".equals(failurePolicy) ?
                 StageExecutionResult.criticalFailure(stageName, errorMessage) :
                 StageExecutionResult.nonCriticalFailure(stageName, errorMessage);
+            
+            // Capture any partial enriched data even on failure
+            if (ruleResult.getEnrichedData() != null && !ruleResult.getEnrichedData().isEmpty()) {
+                failureResult.setStageOutputs(ruleResult.getEnrichedData());
+            }
+            
+            return failureResult;
         }
     }
     

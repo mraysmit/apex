@@ -297,7 +297,7 @@ public class ScenarioExecutionResult {
         summary.append(getExecutionStatus());
         summary.append(" (").append(totalExecutionTimeMs).append("ms)");
         
-        summary.append(" - Stages: ").append(stageResults.size());
+        summary.append(" - Stages: ").append(getSuccessfulStages().size());
         summary.append(" successful, ").append(getFailedStages().size()).append(" failed");
         
         if (!skippedStages.isEmpty()) {
