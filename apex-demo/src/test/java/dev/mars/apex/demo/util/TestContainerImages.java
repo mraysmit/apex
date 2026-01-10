@@ -95,6 +95,16 @@ public final class TestContainerImages {
     public static final String REDIS = System.getProperty("docker.redis.version", "redis:6-alpine");
 
     /**
+     * Microsoft SQL Server Docker image version for database integration tests.
+     * 
+     * <p>Uses SQL Server 2022 (CU15) with Ubuntu 22.04 base for testing
+     * SQL Server to PostgreSQL sync scenarios in APEX applications.</p>
+     * 
+     * <p>Defined in root pom.xml as: {@code <docker.sqlserver.version>mcr.microsoft.com/mssql/server:2022-CU15-ubuntu-22.04</docker.sqlserver.version>}</p>
+     */
+    public static final String SQLSERVER = System.getProperty("docker.sqlserver.version", "mcr.microsoft.com/mssql/server:2022-CU15-ubuntu-22.04");
+
+    /**
      * Private constructor to prevent instantiation of utility class.
      */
     private TestContainerImages() {
@@ -119,6 +129,9 @@ public final class TestContainerImages {
         if (REDIS == null || REDIS.trim().isEmpty()) {
             throw new IllegalStateException("Redis Docker image version is not defined");
         }
+        if (SQLSERVER == null || SQLSERVER.trim().isEmpty()) {
+            throw new IllegalStateException("SQL Server Docker image version is not defined");
+        }
     }
 
     /**
@@ -133,8 +146,9 @@ public final class TestContainerImages {
             "Docker Image Versions:%n" +
             "  PostgreSQL: %s%n" +
             "  Vault: %s%n" +
-            "  Redis: %s",
-            POSTGRES, VAULT, REDIS
+            "  Redis: %s%n" +
+            "  SQL Server: %s",
+            POSTGRES, VAULT, REDIS, SQLSERVER
         );
     }
 }

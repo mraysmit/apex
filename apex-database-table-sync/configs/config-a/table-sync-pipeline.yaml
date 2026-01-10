@@ -1,0 +1,84 @@
+# APEX Database Table Sync - Standardized Core Pipeline
+# Replaces custom sync-pipeline logic with standard APEX Core ETL steps.
+
+metadata:
+  id: "simple-sync-example"
+  name: "Simple Sync Example"
+  version: "1.0"
+  type: "pipeline"
+  description: "Standardized APEX Core pipeline for table sync"
+
+data-sources:
+  - name: "sqlserver-source"
+    type: "database"
+    source-type: "sqlserver"
+    connection:
+      url: "${SQLSERVER_URL:jdbc:sqlserver://localhost:1433;databaseName=SourceDB}"
+      username: "${SQLSERVER_USERNAME:sa}"
+      password: "${SQLSERVER_PASSWORD:Password123}"
+    enabled: true
+    queries:
+      extractCustomers: "SELECT customer_id, customer_name, email, phone, status FROM dbo.Customers"
+      extractProducts: "SELECT product_id, product_name, category, unit_price, status FROM dbo.Products"
+
+data-sinks:
+  - name: "postgresql-target"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      url: "${POSTGRES_URL:jdbc:postgresql://localhost:5432/TargetDB}"
+      username: "${POSTGRES_USERNAME:postgres}"
+      password: "${POSTGRES_PASSWORD:postgres}"
+    enabled: true
+    operations:
+      upsertCustomer: |
+        INSERT INTO customers (customer_id, customer_name, email, phone, status)
+        VALUES (:customer_id, :customer_name, :email, :phone, :status)
+        ON CONFLICT (customer_id) DO UPDATE SET
+          customer_name = EXCLUDED.customer_name,
+          email = EXCLUDED.email,
+          phone = EXCLUDED.phone,
+          status = EXCLUDED.status
+      upsertProduct: |
+        INSERT INTO products (product_id, product_name, category, unit_price, status)
+        VALUES (:product_id, :product_name, :category, :unit_price, :status)
+        ON CONFLICT (product_id) DO UPDATE SET
+          product_name = EXCLUDED.product_name,
+          category = EXCLUDED.category,
+          unit_price = EXCLUDED.unit_price,
+          status = EXCLUDED.status
+    batch:
+      enabled: true
+      batch-size: 1000
+
+pipeline:
+  name: "sync-pipeline"
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+  steps:
+    - name: "extract-customers"
+      type: "extract"
+      source: "sqlserver-source"
+      operation: "extractCustomers"
+      description: "Extract customers from SQL Server"
+      
+    - name: "load-customers"
+      type: "load"
+      sink: "postgresql-target"
+      operation: "upsertCustomer"
+      description: "Load customers into PostgreSQL"
+      depends-on: ["extract-customers"]
+
+    - name: "extract-products"
+      type: "extract"
+      source: "sqlserver-source"
+      operation: "extractProducts"
+      description: "Extract products from SQL Server"
+      
+    - name: "load-products"
+      type: "load"
+      sink: "postgresql-target"
+      operation: "upsertProduct"
+      description: "Load products into PostgreSQL"
+      depends-on: ["extract-products"]

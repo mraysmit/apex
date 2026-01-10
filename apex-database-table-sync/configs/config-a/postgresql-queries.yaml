@@ -1,0 +1,34 @@
+# PostgreSQL Upsert Queries - Simple Example
+metadata:
+  name: "postgresql-queries-simple"
+  version: "1.0"
+  type: "query-config"
+  description: "Simple PostgreSQL upsert queries"
+
+dataSourceRefs:
+  - name: "postgresql-target"
+    source: "data-sources/postgresql-datasource.yaml"
+    enabled: true
+
+queries:
+  - name: "upsertCustomer"
+    dataSourceRef: "postgresql-target"
+    sql: |
+      INSERT INTO customers (customer_id, customer_name, email, phone, status)
+      VALUES (:customer_id, :customer_name, :email, :phone, :status)
+      ON CONFLICT (customer_id) DO UPDATE SET
+        customer_name = EXCLUDED.customer_name,
+        email = EXCLUDED.email,
+        phone = EXCLUDED.phone,
+        status = EXCLUDED.status
+
+  - name: "upsertProduct"
+    dataSourceRef: "postgresql-target"
+    sql: |
+      INSERT INTO products (product_id, product_name, category, unit_price, status)
+      VALUES (:product_id, :product_name, :category, :unit_price, :status)
+      ON CONFLICT (product_id) DO UPDATE SET
+        product_name = EXCLUDED.product_name,
+        category = EXCLUDED.category,
+        unit_price = EXCLUDED.unit_price,
+        status = EXCLUDED.status

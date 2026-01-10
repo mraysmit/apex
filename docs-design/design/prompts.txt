@@ -873,3 +873,124 @@ Required fields:
    - APEX has strict validation requirements
    - Missing required fields cause `YamlConfigurationException`
    - Check validation code in `YamlConfigurationLoader.java` when in doubt
+
+---
+
+## **🚨 CRITICAL: YAML Configuration File Location**
+
+**YAML configuration files are NEVER packaged in the JAR file.**
+
+APEX is designed so that all YAML configurations are **external to the application at runtime**. This is a fundamental architectural principle.
+
+### **Correct File Placement:**
+
+| Location | What Goes Here |
+|----------|----------------|
+| `src/main/resources/` | **ONLY** logback.xml, application.properties - things that ARE packaged in JAR |
+| `src/test/resources/` | Test-specific YAML configs for unit/integration tests |
+| `configs/` (module root) | Example YAML configs for documentation/demos - NOT in src folder |
+| `demo-data/`, `demo-reports/` | External data and output folders - NOT in src folder |
+
+### **Why This Matters:**
+- Production deployments load YAML from external filesystem paths
+- Users configure their own data sources, pipelines, rules externally
+- The JAR contains only the engine code, not configuration
+- Test configs in `src/test/resources` are for testing the engine, not for production use
+
+### **Example Module Structure:**
+```
+apex-database-table-sync/
+├── configs/                    # External example configs (NOT packaged)
+│   ├── config-a/
+│   ├── config-b/
+│   └── data-sources/
+├── demo-reports/               # External output folder (NOT packaged)
+├── src/
+│   ├── main/
+│   │   ├── java/               # Engine code
+│   │   └── resources/
+│   │       └── logback.xml     # ONLY logging config
+│   └── test/
+│       ├── java/               # Test code
+│       └── resources/          # Test-specific YAML configs
+│           ├── config-a/
+│           └── data-sources/
+└── pom.xml
+```
+
+**NEVER put YAML pipeline/data-source configs in `src/main/resources` - they will NOT be used in production.**
+
+----------
+
+## How to Force AI to Read Documentation First (Prevent Hallucinated Keywords)
+
+### The Problem
+AI models pattern-match from training data. When asked about "database sync", the AI recalls patterns 
+from Kubernetes, Terraform, Airflow, etc., and hallucinates similar syntax that DOESN'T EXIST in APEX.
+
+### Solution 1: Explicit "Read First" Instructions
+Start prompts with:
+```
+BEFORE answering, read these files completely:
+- docs/APEX_YAML_REFERENCE.md (lines 1-500 for keywords)
+- apex-demo/src/test/resources/*.yaml (for real examples)
+
+DO NOT propose any YAML keyword that doesn't appear in these files.
+```
+
+### Solution 2: Demand Proof of Reading
+Ask:
+```
+List the EXACT keywords you found in APEX_YAML_REFERENCE.md Section 13 (Pipeline).
+Quote the line numbers.
+```
+
+### Solution 3: Challenge Invented Terms Immediately
+When AI proposes something like `behaviors:` or `stage-refs:`, immediately ask:
+```
+Show me the grep result for "behaviors:" in APEX_YAML_REFERENCE.md
+```
+
+### Solution 4: Add to Copilot Instructions
+In `.github/copilot-instructions.md`:
+```markdown
+## CRITICAL: YAML Keywords
+NEVER invent APEX YAML keywords. Before proposing ANY YAML:
+1. grep for the keyword in docs/APEX_YAML_REFERENCE.md
+2. If not found, DO NOT USE IT
+3. Only use keywords from the ~155 documented in Appendix A
+```
+
+### Solution 5: Incremental Validation
+Instead of asking for a full plan, ask:
+```
+First, list only the APEX pipeline keywords from Section 13 of APEX_YAML_REFERENCE.md.
+Do not propose anything yet.
+```
+
+### Solution 6: Force Tool Use Before Answering
+```
+Before answering, you MUST:
+1. Run: grep_search for the keyword in docs/APEX_YAML_REFERENCE.md
+2. Show me the results
+3. Only then propose YAML that uses keywords found in step 1
+```
+
+### Common Hallucinated Keywords to Watch For
+These are NOT in APEX - challenge if AI proposes them:
+- `behaviors:` - DOES NOT EXIST
+- `stage-refs:` - DOES NOT EXIST  
+- `sync-stages:` - DOES NOT EXIST
+- `spec:` - DOES NOT EXIST (was removed in refactoring)
+
+### Valid APEX Keywords (from APEX_YAML_REFERENCE.md)
+These ARE real - AI should use these:
+- `metadata:`, `data-source-refs:`, `data-sources:`, `data-sinks:`
+- `pipeline:` with `steps:`, `execution:`
+- `processing-stages:` with `stage-name:`, `config-file:`, `depends-on:`
+- `enrichments:`, `rules:`, `rule-groups:`
+- Step types: `extract`, `load`, `transform`, `audit`
+
+### Root Cause Understanding
+LLMs don't "know" your codebase - they pattern-match from training data.
+The ONLY defense is forcing explicit reading of YOUR documentation before ANY proposal.

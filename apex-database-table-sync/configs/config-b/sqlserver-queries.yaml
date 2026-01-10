@@ -1,0 +1,88 @@
+# SQL Server Extraction Queries
+# References the data source defined in sqlserver-datasource.yaml
+metadata:
+  name: "sqlserver-extraction-queries"
+  version: "1.0"
+  type: "query-config"
+  description: "SQL Server extraction queries for table sync (config-b)"
+
+dataSourceRefs:
+  - name: "sqlserver-source"
+    source: "data-sources/sqlserver-datasource.yaml"
+    enabled: true
+
+queries:
+  - name: "extractCustomers"
+    dataSourceRef: "sqlserver-source"
+    sql: |
+      SELECT 
+        customer_id,
+        customer_name,
+        email,
+        phone,
+        created_date,
+        modified_date,
+        status
+      FROM dbo.Customers
+      WHERE modified_date > :lastSyncDate
+      ORDER BY customer_id
+    
+  - name: "extractOrders"
+    dataSourceRef: "sqlserver-source"
+    sql: |
+      SELECT 
+        order_id,
+        customer_id,
+        order_date,
+        total_amount,
+        currency,
+        status,
+        modified_date
+      FROM dbo.Orders
+      WHERE modified_date > :lastSyncDate
+      ORDER BY order_id
+
+  - name: "extractOrderItems"
+    dataSourceRef: "sqlserver-source"
+    sql: |
+      SELECT 
+        item_id,
+        order_id,
+        product_id,
+        quantity,
+        unit_price,
+        discount,
+        modified_date
+      FROM dbo.OrderItems
+      WHERE modified_date > :lastSyncDate
+      ORDER BY item_id
+
+  - name: "extractProducts"
+    dataSourceRef: "sqlserver-source"
+    sql: |
+      SELECT 
+        product_id,
+        product_name,
+        category,
+        unit_price,
+        stock_quantity,
+        status,
+        modified_date
+      FROM dbo.Products
+      WHERE modified_date > :lastSyncDate
+      ORDER BY product_id
+
+  - name: "extractAuditLog"
+    dataSourceRef: "sqlserver-source"
+    sql: |
+      SELECT 
+        log_id,
+        table_name,
+        record_id,
+        action,
+        action_date,
+        user_id,
+        details
+      FROM dbo.AuditLog
+      WHERE action_date > :lastSyncDate
+      ORDER BY log_id

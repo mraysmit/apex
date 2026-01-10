@@ -179,6 +179,7 @@ public class DataSourceResolver {
     
     /**
      * Validate the loaded external data-source configuration.
+     * Uses standard APEX format: metadata + data-sources array.
      */
     private void validateConfiguration(ExternalDataSourceConfig config, String reference) {
         if (config == null) {
@@ -193,8 +194,8 @@ public class DataSourceResolver {
             throw new DataSourceResolutionException("Configuration name is missing for reference: " + reference);
         }
         
-        if (config.getSpec() == null) {
-            throw new DataSourceResolutionException("Configuration spec is missing for reference: " + reference);
+        if (config.getDataSources() == null || config.getDataSources().isEmpty()) {
+            throw new DataSourceResolutionException("Configuration data-sources is missing for reference: " + reference);
         }
         
         logger.debug("Configuration validation passed for reference: {}", reference);

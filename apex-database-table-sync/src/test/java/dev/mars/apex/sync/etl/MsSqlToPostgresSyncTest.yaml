@@ -1,0 +1,68 @@
+metadata:
+  id: "customer-sync-pipeline"
+  type: "pipeline-config"
+  author: "Integration Team"
+  description: "Pipeline to sync Customers from Legacy SQL Server to Modern PostgreSQL"
+
+data-source-refs:
+  - name: "legacy-sqlserver"
+    source: "src/test/java/dev/mars/apex/sync/etl/MsSqlToPostgresSyncTest-source.yaml"
+
+data-sinks:
+  - name: "modern-postgres-sink"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      url: "${POSTGRES_URL}"
+      username: "${POSTGRES_USER}"
+      password: "${POSTGRES_PASS}"
+    operations:
+      upsertCustomer: |
+        INSERT INTO customers (id, name, status, email, synced_at)
+        VALUES (:customer_id, :name, :status, :email, CURRENT_TIMESTAMP)
+        ON CONFLICT (id) DO UPDATE 
+        SET name = EXCLUDED.name, status = EXCLUDED.status, synced_at = CURRENT_TIMESTAMP
+    schema:
+      auto-create: true
+      init-script: |
+        CREATE TABLE IF NOT EXISTS customers (
+          id VARCHAR(50) PRIMARY KEY,
+          name VARCHAR(255),
+          email VARCHAR(255),
+          status VARCHAR(20),
+          synced_at TIMESTAMP
+        );
+
+pipeline:
+  name: "customer-sync-orchestration"
+  execution:
+    mode: "sequential"
+    max-retries: 3
+    error-handling: "continue-on-error"
+
+  steps:
+    - name: "fetch-delta-changes"
+      type: "extract"
+      source: "legacy-sqlserver"
+      operation: "extractCustomersBatch"
+
+    - name: "validate-clean-data"
+      type: "transform"
+      depends-on: ["fetch-delta-changes"]
+      transformations:
+        - type: "field-transformation"
+          field: "email"
+          expression: "#email != null ? #email.toLowerCase().trim() : 'unknown@domain.com'"
+        
+    - name: "push-to-postgres"
+      type: "load"
+      sink: "modern-postgres-sink"
+      operation: "upsertCustomer"
+      depends-on: ["validate-clean-data"]
+
+    - name: "audit-sync-job"
+      type: "audit"
+      sink: "modern-postgres-sink"
+      operation: "upsertCustomer" # Reusing simply for the test logic example
+      optional: true
+      depends-on: ["push-to-postgres"]

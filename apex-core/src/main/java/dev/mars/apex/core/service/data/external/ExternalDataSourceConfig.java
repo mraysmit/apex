@@ -10,73 +10,54 @@ import java.util.Map;
  * Represents the structure of external data-source YAML files that can be
  * referenced from enrichment configurations for infrastructure separation.
  * 
+ * Uses standard APEX YAML format with metadata and data-sources sections.
+ * 
  * Example YAML structure:
  * <pre>
- * apiVersion: "apex.dev/v1"
- * kind: "DataSource"
  * metadata:
+ *   id: "customer-database-config"
  *   name: "customer-database"
+ *   type: "external-data-config"
  *   version: "1.0.0"
  *   description: "Customer database configuration"
- * spec:
- *   type: "database"
- *   source-type: "h2"
- *   connection:
- *     database: "apex_demo_shared"
- *     username: "sa"
- *     password: ""
- *   queries:
- *     getCustomerById: "SELECT * FROM customers WHERE customer_id = :customerId"
- *   cache:
+ * 
+ * data-sources:
+ *   - name: "customer-database"
+ *     type: "database"
+ *     source-type: "h2"
  *     enabled: true
- *     ttlSeconds: 300
+ *     connection:
+ *       database: "apex_demo_shared"
+ *       username: "sa"
+ *       password: ""
+ *     queries:
+ *       getCustomerById: "SELECT * FROM customers WHERE customer_id = :customerId"
+ *     cache:
+ *       enabled: true
+ *       ttlSeconds: 300
  * </pre>
  * 
  * @author APEX Core Team
  * @since 2025-08-28
- * @version 1.0.0
+ * @version 2.0.0
  */
 public class ExternalDataSourceConfig {
-    
-    @JsonProperty("apiVersion")
-    private String apiVersion;
-    
-    @JsonProperty("kind")
-    private String kind;
     
     @JsonProperty("metadata")
     private DataSourceMetadata metadata;
     
-    @JsonProperty("spec")
-    private DataSourceSpec spec;
+    @JsonProperty("data-sources")
+    private java.util.List<DataSourceSpec> dataSources;
     
     // Constructors
     public ExternalDataSourceConfig() {}
     
-    public ExternalDataSourceConfig(String apiVersion, String kind, DataSourceMetadata metadata, DataSourceSpec spec) {
-        this.apiVersion = apiVersion;
-        this.kind = kind;
+    public ExternalDataSourceConfig(DataSourceMetadata metadata, java.util.List<DataSourceSpec> dataSources) {
         this.metadata = metadata;
-        this.spec = spec;
+        this.dataSources = dataSources;
     }
     
     // Getters and Setters
-    public String getApiVersion() {
-        return apiVersion;
-    }
-    
-    public void setApiVersion(String apiVersion) {
-        this.apiVersion = apiVersion;
-    }
-    
-    public String getKind() {
-        return kind;
-    }
-    
-    public void setKind(String kind) {
-        this.kind = kind;
-    }
-    
     public DataSourceMetadata getMetadata() {
         return metadata;
     }
@@ -85,21 +66,39 @@ public class ExternalDataSourceConfig {
         this.metadata = metadata;
     }
     
-    public DataSourceSpec getSpec() {
-        return spec;
+    public java.util.List<DataSourceSpec> getDataSources() {
+        return dataSources;
     }
     
-    public void setSpec(DataSourceSpec spec) {
-        this.spec = spec;
+    public void setDataSources(java.util.List<DataSourceSpec> dataSources) {
+        this.dataSources = dataSources;
+    }
+    
+    /**
+     * Get the first (primary) data source spec.
+     * Convenience method for configurations with a single data source.
+     */
+    public DataSourceSpec getSpec() {
+        if (dataSources != null && !dataSources.isEmpty()) {
+            return dataSources.get(0);
+        }
+        return null;
     }
     
     /**
      * Metadata section of external data-source configuration.
+     * Uses standard APEX metadata format.
      */
     public static class DataSourceMetadata {
         
+        @JsonProperty("id")
+        private String id;
+        
         @JsonProperty("name")
         private String name;
+        
+        @JsonProperty("type")
+        private String type;
         
         @JsonProperty("version")
         private String version;
@@ -107,11 +106,14 @@ public class ExternalDataSourceConfig {
         @JsonProperty("description")
         private String description;
         
-        @JsonProperty("environment")
-        private String environment;
+        @JsonProperty("author")
+        private String author;
         
-        @JsonProperty("labels")
-        private Map<String, String> labels;
+        @JsonProperty("created-date")
+        private String createdDate;
+        
+        @JsonProperty("tags")
+        private java.util.List<String> tags;
         
         // Constructors
         public DataSourceMetadata() {}
@@ -120,15 +122,32 @@ public class ExternalDataSourceConfig {
             this.name = name;
             this.version = version;
             this.description = description;
+            this.type = "external-data-config";
         }
         
         // Getters and Setters
+        public String getId() {
+            return id;
+        }
+        
+        public void setId(String id) {
+            this.id = id;
+        }
+        
         public String getName() {
             return name;
         }
         
         public void setName(String name) {
             this.name = name;
+        }
+        
+        public String getType() {
+            return type;
+        }
+        
+        public void setType(String type) {
+            this.type = type;
         }
         
         public String getVersion() {
@@ -147,27 +166,39 @@ public class ExternalDataSourceConfig {
             this.description = description;
         }
         
-        public String getEnvironment() {
-            return environment;
+        public String getAuthor() {
+            return author;
         }
         
-        public void setEnvironment(String environment) {
-            this.environment = environment;
+        public void setAuthor(String author) {
+            this.author = author;
         }
         
-        public Map<String, String> getLabels() {
-            return labels;
+        public String getCreatedDate() {
+            return createdDate;
         }
         
-        public void setLabels(Map<String, String> labels) {
-            this.labels = labels;
+        public void setCreatedDate(String createdDate) {
+            this.createdDate = createdDate;
+        }
+        
+        public java.util.List<String> getTags() {
+            return tags;
+        }
+        
+        public void setTags(java.util.List<String> tags) {
+            this.tags = tags;
         }
     }
     
     /**
-     * Specification section of external data-source configuration.
+     * Data source specification within external data-source configuration.
+     * Matches standard APEX data-sources array element format.
      */
     public static class DataSourceSpec {
+        
+        @JsonProperty("name")
+        private String name;
         
         @JsonProperty("type")
         private String type;
@@ -177,6 +208,9 @@ public class ExternalDataSourceConfig {
         
         @JsonProperty("enabled")
         private Boolean enabled;
+        
+        @JsonProperty("description")
+        private String description;
         
         @JsonProperty("connection")
         private Map<String, Object> connection;
@@ -190,10 +224,21 @@ public class ExternalDataSourceConfig {
         @JsonProperty("parameters")
         private Map<String, Object> parameters;
         
+        @JsonProperty("connection-pool")
+        private Map<String, Object> connectionPool;
+        
         // Constructors
         public DataSourceSpec() {}
         
         // Getters and Setters
+        public String getName() {
+            return name;
+        }
+        
+        public void setName(String name) {
+            this.name = name;
+        }
+        
         public String getType() {
             return type;
         }
@@ -216,6 +261,14 @@ public class ExternalDataSourceConfig {
         
         public void setEnabled(Boolean enabled) {
             this.enabled = enabled;
+        }
+        
+        public String getDescription() {
+            return description;
+        }
+        
+        public void setDescription(String description) {
+            this.description = description;
         }
         
         public Map<String, Object> getConnection() {
@@ -248,6 +301,14 @@ public class ExternalDataSourceConfig {
         
         public void setParameters(Map<String, Object> parameters) {
             this.parameters = parameters;
+        }
+        
+        public Map<String, Object> getConnectionPool() {
+            return connectionPool;
+        }
+        
+        public void setConnectionPool(Map<String, Object> connectionPool) {
+            this.connectionPool = connectionPool;
         }
     }
 }

@@ -5846,7 +5846,6 @@ This appendix provides an alphabetical reference of **functionally implemented**
 - **actions-false** - Actions to execute when transformation rule condition evaluates to false (alias for else-actions)
 - **actions-true** - Actions to execute when transformation rule condition evaluates to true (takes precedence over actions)
 - **alert-on-failure** - Boolean flag to trigger alerts when processing fails (used in health checks and pipeline monitoring)
-- **apiVersion** - API version for external data source configurations (type: external-data-config)
 - **authentication** - Authentication configuration for external data sources (username, password, tokens)
 
 ### B
@@ -6388,15 +6387,6 @@ Keywords for monitoring and observability:
 - **metrics-enabled** - Enable metrics collection
 - **collect-metrics** - Collect metrics flag
 - **monitoring** - Monitoring configuration
-
-### External Data Source Configuration Keywords
-
-Keywords specific to external data source configuration files (type: external-data-config):
-
-- **apiVersion** - API version for external data source config
-- **kind** - Resource kind (always "DataSource" for external configs)
-- **spec** - Specification object containing data source details
-- **labels** - Key-value labels for external data source classification
 
 ### Data Sink Keywords
 

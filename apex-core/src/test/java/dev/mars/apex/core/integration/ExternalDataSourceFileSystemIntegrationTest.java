@@ -39,28 +39,29 @@ public class ExternalDataSourceFileSystemIntegrationTest {
     @Test
     @DisplayName("Should resolve external data source references when loading from file system")
     void testExternalDataSourceReferencesWithFileSystemLoading() throws Exception {
-        // Create external data source configuration
+        // Create external data source configuration using standard APEX format
         String externalDataSourceConfig = """
-            apiVersion: "apex.dev/v1"
-            kind: "DataSource"
             metadata:
+              id: "customer-database-config"
               name: "customer-database"
+              type: "external-data-config"
               version: "1.0.0"
               description: "Customer database configuration"
-            spec:
-              type: "database"
-              source-type: "h2"
-              enabled: true
-              connection:
-                database: "customer_db"
-                username: "sa"
-                password: ""
-              queries:
-                getCustomerById: "SELECT * FROM customers WHERE id = :id"
-                getCustomerByEmail: "SELECT * FROM customers WHERE email = :email"
-              cache:
+            data-sources:
+              - name: "customer-database"
+                type: "database"
+                source-type: "h2"
                 enabled: true
-                ttlSeconds: 300
+                connection:
+                  database: "customer_db"
+                  username: "sa"
+                  password: ""
+                queries:
+                  getCustomerById: "SELECT * FROM customers WHERE id = :id"
+                  getCustomerByEmail: "SELECT * FROM customers WHERE email = :email"
+                cache:
+                  enabled: true
+                  ttlSeconds: 300
             """;
 
         // Write files to temporary directory
@@ -132,17 +133,18 @@ public class ExternalDataSourceFileSystemIntegrationTest {
     @Test
     @DisplayName("Should handle multiple files with external data source references")
     void testMultipleFilesWithExternalDataSourceReferences() throws Exception {
-        // External data source
+        // External data source using standard APEX format
         String externalDataSource = """
-            apiVersion: "apex.dev/v1"
-            kind: "DataSource"
             metadata:
+              id: "product-database-config"
               name: "product-database"
+              type: "external-data-config"
               version: "1.0.0"
-            spec:
-              type: "database"
-              source-type: "h2"
-              enabled: true
+            data-sources:
+              - name: "product-database"
+                type: "database"
+                source-type: "h2"
+                enabled: true
             """;
 
         // Write all files

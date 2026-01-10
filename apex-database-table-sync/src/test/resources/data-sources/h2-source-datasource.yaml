@@ -1,0 +1,49 @@
+# H2 Source Data Source Configuration (for testing)
+# Uses H2-compatible SQL syntax with expected service name
+metadata:
+  name: "h2-source-datasource"
+  version: "1.0"
+  type: "external-data-config"
+  description: "H2 source database connection and extraction queries (test)"
+
+dataSources:
+  - name: "sqlserver-source"
+    type: "jdbc"
+    driver: "org.h2.Driver"
+    url: "jdbc:h2:./target/h2-sync-test/sourcedb;MODE=MSSQLServer;AUTO_SERVER=TRUE"
+    username: "sa"
+    password: ""
+    connectionPool:
+      initialSize: 2
+      maxSize: 10
+      maxIdleTime: 300000
+      connectionTimeout: 30000
+      validationTimeout: 5000
+    queries:
+      - name: "extractCustomers"
+        sql: |
+          SELECT customer_id, customer_name, email, phone, status
+          FROM customers
+          WHERE status = 'ACTIVE'
+
+      - name: "extractProducts"
+        sql: |
+          SELECT product_id, product_name, category, unit_price, status
+          FROM products
+          WHERE status = 'ACTIVE'
+
+      - name: "extractOrders"
+        sql: |
+          SELECT order_id, customer_id, order_date, total_amount, status
+          FROM orders
+          WHERE status IN ('PENDING', 'CONFIRMED')
+
+      - name: "extractOrderItems"
+        sql: |
+          SELECT item_id, order_id, product_id, quantity, unit_price
+          FROM order_items
+
+      - name: "extractAuditLog"
+        sql: |
+          SELECT log_id, table_name, operation, record_id, change_timestamp, change_data
+          FROM audit_log

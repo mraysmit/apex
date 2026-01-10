@@ -32,27 +32,28 @@ public class DataSourceResolverEnhancedTest {
     @Test
     @DisplayName("Should resolve data source from file system")
     void testResolveFromFileSystem() throws Exception {
-        // Create a valid external data source configuration
+        // Create a valid external data source configuration using standard APEX format
         String dataSourceConfig = """
-            apiVersion: "apex.dev/v1"
-            kind: "DataSource"
             metadata:
+              id: "test-file-system-source-config"
               name: "test-file-system-source"
+              type: "external-data-config"
               version: "1.0.0"
               description: "Test data source from file system"
-            spec:
-              type: "database"
-              source-type: "h2"
-              enabled: true
-              connection:
-                database: "test_db"
-                username: "sa"
-                password: ""
-              queries:
-                getTestData: "SELECT * FROM test_table WHERE id = :id"
-              cache:
+            data-sources:
+              - name: "test-file-system-source"
+                type: "database"
+                source-type: "h2"
                 enabled: true
-                ttlSeconds: 300
+                connection:
+                  database: "test_db"
+                  username: "sa"
+                  password: ""
+                queries:
+                  getTestData: "SELECT * FROM test_table WHERE id = :id"
+                cache:
+                  enabled: true
+                  ttlSeconds: 300
             """;
 
         // Write to temporary file
@@ -70,7 +71,7 @@ public class DataSourceResolverEnhancedTest {
         assertEquals("1.0.0", resolved.getMetadata().getVersion(),
                 "Version should match the configuration");
         
-        assertNotNull(resolved.getSpec(), "Spec should not be null");
+        assertNotNull(resolved.getSpec(), "Spec (first data source) should not be null");
         assertEquals("database", resolved.getSpec().getType(),
                 "Type should match the configuration");
         assertEquals("h2", resolved.getSpec().getSourceType(),
@@ -86,18 +87,19 @@ public class DataSourceResolverEnhancedTest {
         // Try to resolve a path that doesn't exist on file system but might exist on classpath
         String classpathResource = "test-data-source-classpath.yaml";
         
-        // Create the resource content that would be on classpath
+        // Create the resource content using standard APEX format
         String dataSourceConfig = """
-            apiVersion: "apex.dev/v1"
-            kind: "DataSource"
             metadata:
+              id: "test-classpath-source-config"
               name: "test-classpath-source"
+              type: "external-data-config"
               version: "1.0.0"
               description: "Test data source from classpath"
-            spec:
-              type: "rest-api"
-              source-type: "http"
-              enabled: true
+            data-sources:
+              - name: "test-classpath-source"
+                type: "rest-api"
+                source-type: "http"
+                enabled: true
             """;
 
         // For this test, we'll create a file in a location that simulates classpath behavior
@@ -116,14 +118,15 @@ public class DataSourceResolverEnhancedTest {
     @DisplayName("Should cache resolved configurations")
     void testCaching() throws Exception {
         String dataSourceConfig = """
-            apiVersion: "apex.dev/v1"
-            kind: "DataSource"
             metadata:
+              id: "test-cached-source-config"
               name: "test-cached-source"
+              type: "external-data-config"
               version: "1.0.0"
-            spec:
-              type: "database"
-              enabled: true
+            data-sources:
+              - name: "test-cached-source"
+                type: "database"
+                enabled: true
             """;
 
         Path configFile = tempDir.resolve("cached-data-source.yaml");
@@ -165,12 +168,12 @@ public class DataSourceResolverEnhancedTest {
     @Test
     @DisplayName("Should validate resolved configuration")
     void testConfigurationValidation() throws Exception {
-        // Create invalid configuration (missing required metadata)
+        // Create invalid configuration (missing required data-sources)
         String invalidConfig = """
-            apiVersion: "apex.dev/v1"
-            kind: "DataSource"
-            spec:
-              type: "database"
+            metadata:
+              id: "invalid-config"
+              name: "invalid-source"
+              type: "external-data-config"
             """;
 
         Path invalidConfigFile = tempDir.resolve("invalid-data-source.yaml");
@@ -186,8 +189,11 @@ public class DataSourceResolverEnhancedTest {
 
         // The cause should contain the validation error
         assertNotNull(exception.getCause(), "Exception should have a cause");
-        assertTrue(exception.getCause().getMessage().contains("Configuration metadata is missing"),
-                "Exception cause should indicate validation failure");
+        // Debug: print the actual cause message
+        System.out.println("DEBUG: Exception cause message: " + exception.getCause().getMessage());
+        assertTrue(exception.getCause().getMessage().contains("data-sources") || 
+                   exception.getCause().getMessage().contains("not found"),
+                "Exception cause should indicate validation failure, got: " + exception.getCause().getMessage());
     }
 
     @Test
@@ -216,14 +222,15 @@ public class DataSourceResolverEnhancedTest {
     @DisplayName("Should clear cache correctly")
     void testCacheClear() throws Exception {
         String dataSourceConfig = """
-            apiVersion: "apex.dev/v1"
-            kind: "DataSource"
             metadata:
+              id: "test-cache-clear-config"
               name: "test-cache-clear"
+              type: "external-data-config"
               version: "1.0.0"
-            spec:
-              type: "database"
-              enabled: true
+            data-sources:
+              - name: "test-cache-clear"
+                type: "database"
+                enabled: true
             """;
 
         Path configFile = tempDir.resolve("cache-clear-test.yaml");

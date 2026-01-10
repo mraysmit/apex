@@ -442,14 +442,29 @@ public class DatabaseDataSource implements ExternalDataSource {
                 try (Statement statement = connection.createStatement();
                      ResultSet resultSet = statement.executeQuery(query)) {
                     
-                    return resultSet.next() ? mapResultSetToObject(resultSet) : null;
+                    List<Object> results = new ArrayList<>();
+                    while (resultSet.next()) {
+                        results.add(mapResultSetToObject(resultSet));
+                    }
+                    
+                    if (results.isEmpty()) return null;
+                    if (results.size() == 1) return results.get(0);
+                    return results;
                 }
             } else {
                 // Parameterized query
                 Map<String, Object> paramMap = buildParameterMap(parameters);
                 try (PreparedStatement statement = prepareStatement(connection, query, paramMap)) {
                     ResultSet resultSet = statement.executeQuery();
-                    return resultSet.next() ? mapResultSetToObject(resultSet) : null;
+                    
+                    List<Object> results = new ArrayList<>();
+                    while (resultSet.next()) {
+                        results.add(mapResultSetToObject(resultSet));
+                    }
+                    
+                    if (results.isEmpty()) return null;
+                    if (results.size() == 1) return results.get(0);
+                    return results;
                 }
             }
         }

@@ -1,0 +1,59 @@
+# APEX Database Table Sync - H2 Test Pipeline
+# Simulated SQL Server to PostgreSQL sync using H2 Compatibility Modes.
+
+metadata:
+  id: "test-sync-pipeline-h2"
+  name: "H2 Test Sync Pipeline"
+  version: "1.0"
+  type: "pipeline-config"
+  author: "Test User"
+  description: "H2 Simulated pipeline"
+
+data-sources:
+  - name: "sqlserver-source"
+    type: "database"
+    source-type: "h2"
+    connection:
+      # Using H2 MSSQLServer compatibility mode
+      database: "mem:source_sqlserver;MODE=MSSQLServer;DB_CLOSE_DELAY=-1"
+      username: "sa"
+      password: ""
+    enabled: true
+    queries:
+      extractCustomers: "SELECT id, name FROM customers"
+
+data-sinks:
+  - name: "postgresql-target"
+    type: "database"
+    source-type: "h2"
+    connection:
+      # Using H2 PostgreSQL compatibility mode
+      database: "mem:target_postgres;MODE=PostgreSQL;DB_CLOSE_DELAY=-1"
+      username: "sa"
+      password: ""
+    enabled: true
+    operations:
+      # Standard INSERT - PostgreSQL compatibility handles specific dialect needs
+      upsertCustomer: "INSERT INTO customers (id, name) VALUES (:ID, :NAME)"
+    schema:
+      auto-create: true
+      table-name: "customers"
+      init-script: "CREATE TABLE IF NOT EXISTS customers (id INT PRIMARY KEY, name VARCHAR(255))"
+
+pipeline:
+  name: "h2-simulated-sync"
+  execution:
+    mode: "sequential"
+    max-retries: 3
+    error-handling: "continue-on-error"
+  steps:
+    - name: "extract-from-sqlserver"
+      type: "extract"
+      source: "sqlserver-source"
+      operation: "extractCustomers"
+
+    - name: "load-into-postgresql"
+      type: "load"
+      sink: "postgresql-target"
+      operation: "upsertCustomer"
+      depends-on: ["extract-from-sqlserver"]

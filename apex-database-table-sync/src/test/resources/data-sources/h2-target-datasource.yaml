@@ -1,0 +1,51 @@
+# H2 Target Data Source Configuration (for testing)
+# Uses H2-compatible SQL syntax (MERGE INTO instead of ON CONFLICT)
+metadata:
+  name: "h2-target-datasource"
+  version: "1.0"
+  type: "external-data-config"
+  description: "H2 target database connection and load queries (test)"
+
+dataSources:
+  - name: "postgresql-target"
+    type: "jdbc"
+    driver: "org.h2.Driver"
+    url: "jdbc:h2:./target/h2-sync-test/targetdb;MODE=PostgreSQL;AUTO_SERVER=TRUE"
+    username: "sa"
+    password: ""
+    connectionPool:
+      initialSize: 2
+      maxSize: 10
+      maxIdleTime: 300000
+      connectionTimeout: 30000
+      validationTimeout: 5000
+    queries:
+      # H2-compatible upsert using MERGE INTO
+      - name: "upsertCustomer"
+        sql: |
+          MERGE INTO customers (customer_id, customer_name, email, phone, status)
+          KEY (customer_id)
+          VALUES (:customer_id, :customer_name, :email, :phone, :status)
+
+      - name: "upsertProduct"
+        sql: |
+          MERGE INTO products (product_id, product_name, category, unit_price, status)
+          KEY (product_id)
+          VALUES (:product_id, :product_name, :category, :unit_price, :status)
+
+      - name: "upsertOrder"
+        sql: |
+          MERGE INTO orders (order_id, customer_id, order_date, total_amount, status)
+          KEY (order_id)
+          VALUES (:order_id, :customer_id, :order_date, :total_amount, :status)
+
+      - name: "upsertOrderItem"
+        sql: |
+          MERGE INTO order_items (item_id, order_id, product_id, quantity, unit_price)
+          KEY (item_id)
+          VALUES (:item_id, :order_id, :product_id, :quantity, :unit_price)
+
+      - name: "insertAuditLog"
+        sql: |
+          INSERT INTO audit_log (log_id, table_name, operation, record_id, change_timestamp, change_data)
+          VALUES (:log_id, :table_name, :operation, :record_id, :change_timestamp, :change_data)
