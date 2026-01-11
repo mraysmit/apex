@@ -1,0 +1,31 @@
+metadata:
+  name: "Large CSV Schema Reader Test"
+  description: "Test configuration for reading schema from CSV with 11 columns"
+  version: "1.0"
+
+data-sources:
+  - name: "csv-large-test-source"
+    type: "file-system"
+    source-type: "csv"
+    connection:
+      base-path: "."
+      formats: ["csv"]
+    settings:
+      delimiter: ","
+      has-header: true
+      encoding: "UTF-8"
+    enabled: true
+
+pipeline:
+  name: "read-large-csv-schema"
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+  
+  steps:
+    - name: "read-schema-from-large-csv"
+      type: "read-schema"
+      source: "csv-large-test-source"
+      description: "Read schema metadata from large CSV file with 11 columns"
+      parameters:
+        file: "test-employees-large.csv"

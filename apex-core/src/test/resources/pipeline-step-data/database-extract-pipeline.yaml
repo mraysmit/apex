@@ -1,0 +1,51 @@
+# ============================================================================
+# Database Extract Pipeline - Test Configuration
+# ============================================================================
+#
+# PURPOSE:
+# Tests pipeline execution with database data source.
+# Verifies that database query results are captured correctly.
+#
+# NOTE: Database is initialized in setupDatabaseExtractDatabase() method.
+#
+# USED BY: RulesEnginePipelineStepDataIntegrationTest.java
+# ============================================================================
+
+metadata:
+  id: "database-extract-pipeline-test"
+  name: "Database Extract Pipeline Test"
+  version: "1.0"
+  description: "Test pipeline for capturing data from database extracts"
+
+# Database data source
+data-sources:
+  - name: "h2-test-database"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "H2 Test Database"
+
+    connection:
+      database: "mem:database_extract_test;DB_CLOSE_DELAY=-1"
+      username: "sa"
+      password: ""
+
+    queries:
+      getAllProducts: "SELECT id, name, price, category FROM products ORDER BY id"
+
+# Pipeline with database extract
+pipeline:
+  name: "database-extract-test"
+  description: "Extract data from H2 database"
+
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+
+  steps:
+    - name: "extract-from-database"
+      type: "extract"
+      source: "h2-test-database"
+      operation: "getAllProducts"
+      description: "Extract all products from database"
+

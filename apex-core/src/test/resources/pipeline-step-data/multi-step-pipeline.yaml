@@ -1,0 +1,120 @@
+# ============================================================================
+# Multi-Step Pipeline - Test Configuration
+# ============================================================================
+#
+# PURPOSE:
+# Tests multi-step pipeline execution with step data capture.
+# This pipeline has Extract → Transform → Load steps.
+#
+# USED BY: RulesEnginePipelineStepDataIntegrationTest.java
+# ============================================================================
+
+metadata:
+  id: "multi-step-pipeline-test"
+  name: "Multi-Step Pipeline Test"
+  version: "1.0"
+  description: "Test pipeline for capturing step data from multi-step operations"
+
+# Data source
+data-sources:
+  - name: "multi-step-source"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "H2 in-memory database with test items"
+
+    connection:
+      database: "mem:multi_step_test"
+      username: "sa"
+      password: ""
+
+    custom-properties:
+      schema:
+        auto-create: true
+        init-script: |
+          CREATE TABLE IF NOT EXISTS source_items (
+            id INTEGER PRIMARY KEY,
+            name VARCHAR(255),
+            quantity INTEGER,
+            price DECIMAL(10,2)
+          );
+
+          INSERT INTO source_items (id, name, quantity, price) VALUES
+            (1, 'Item A', 10, 25.50),
+            (2, 'Item B', 5, 50.00),
+            (3, 'Item C', 15, 10.75);
+
+    queries:
+      getAllData: "SELECT id, name, quantity, price FROM source_items"
+
+# Data sink (for load step)
+data-sinks:
+  - name: "multi-step-sink"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "H2 in-memory database sink for testing"
+
+    connection:
+      database: "mem:multi_step_test"
+      username: "sa"
+      password: ""
+
+    custom-properties:
+      schema:
+        auto-create: true
+        init-script: |
+          CREATE TABLE IF NOT EXISTS target_items (
+            id INTEGER PRIMARY KEY,
+            name VARCHAR(255),
+            quantity INTEGER,
+            price DECIMAL(10,2),
+            total_value DECIMAL(10,2),
+            processed_at VARCHAR(255)
+          );
+
+    operations:
+      insertItem: |
+        INSERT INTO target_items (id, name, quantity, price, total_value, processed_at)
+        VALUES (:id, :name, :quantity, :price, :total_value, :processed_at)
+
+# Pipeline with multiple steps
+pipeline:
+  name: "multi-step-etl"
+  description: "Extract, Transform, and Load data"
+
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+
+  steps:
+    # Step 1: Extract
+    - name: "extract-items"
+      type: "extract"
+      source: "multi-step-source"
+      operation: "getAllData"
+      description: "Extract all items from source"
+
+    # Step 2: Transform
+    - name: "transform-items"
+      type: "transform"
+      description: "Calculate total value for each item"
+      depends-on: ["extract-items"]
+      transformations:
+        - name: "calculate-total"
+          type: "calculation"
+          field: "total_value"
+          expression: "#quantity * #price"
+        - name: "add-timestamp"
+          type: "calculation"
+          field: "processed_at"
+          expression: "T(java.time.Instant).now().toString()"
+
+    # Step 3: Load
+    - name: "load-items"
+      type: "load"
+      sink: "multi-step-sink"
+      operation: "insertItem"
+      description: "Load transformed items to sink"
+      depends-on: ["transform-items"]
+

@@ -1,0 +1,80 @@
+# APEX Complete Pipeline with Schema Reading
+# Demonstrates a full ETL pipeline with schema validation
+
+metadata:
+  id: "complete-pipeline-with-schema"
+  name: "Complete Pipeline with Schema Reading"
+  version: "1.0"
+  type: "pipeline-config"
+  author: "APEX Team"
+  description: "Full ETL pipeline that reads schema before processing data"
+
+data-sources:
+  - name: "source-database"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "mem:source_db;MODE=MSSQLServer;DB_CLOSE_DELAY=-1"
+      username: "sa"
+      password: ""
+    enabled: true
+    queries:
+      extractCustomers: "SELECT id, name, email FROM customers"
+
+data-sinks:
+  - name: "target-database"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "mem:target_db;MODE=PostgreSQL;DB_CLOSE_DELAY=-1"
+      username: "sa"
+      password: ""
+    enabled: true
+    operations:
+      insertCustomer: "INSERT INTO customers (id, name, email) VALUES (:ID, :NAME, :EMAIL)"
+    schema:
+      auto-create: true
+      table-name: "customers"
+      init-script: "CREATE TABLE IF NOT EXISTS customers (id INT PRIMARY KEY, name VARCHAR(255), email VARCHAR(255))"
+
+pipeline:
+  name: "etl-with-schema-validation"
+  execution:
+    mode: "sequential"
+    max-retries: 2
+    error-handling: "stop-on-error"
+  
+  steps:
+    # Step 1: Read schema from source
+    - name: "read-source-schema"
+      type: "read-schema"
+      source: "source-database"
+      description: "Validate source table schema before extraction"
+      parameters:
+        table: "customers"
+    
+    # Step 2: Extract data from source
+    - name: "extract-from-source"
+      type: "extract"
+      source: "source-database"
+      operation: "extractCustomers"
+      description: "Extract customer data from source database"
+      depends-on: ["read-source-schema"]
+    
+    # Step 3: Transform data (optional)
+    - name: "transform-data"
+      type: "transform"
+      description: "Apply transformations to customer data"
+      depends-on: ["extract-from-source"]
+      transformations:
+        - type: "field-addition"
+          field: "processed_timestamp"
+          value: "CURRENT_TIMESTAMP"
+    
+    # Step 4: Load data to target
+    - name: "load-to-target"
+      type: "load"
+      sink: "target-database"
+      operation: "insertCustomer"
+      description: "Load transformed data to target database"
+      depends-on: ["transform-data"]

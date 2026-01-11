@@ -1,0 +1,99 @@
+# ============================================================================
+# Null Data Pipeline - Test Configuration
+# ============================================================================
+#
+# PURPOSE:
+# Tests pipeline execution where some steps don't return data (e.g., load steps).
+# Verifies that null data is handled gracefully without NPE.
+#
+# USED BY: RulesEnginePipelineStepDataIntegrationTest.java
+# ============================================================================
+
+metadata:
+  id: "null-data-pipeline-test"
+  name: "Null Data Pipeline Test"
+  version: "1.0"
+  description: "Test pipeline for handling steps that don't return data"
+
+# Data source
+data-sources:
+  - name: "null-test-source"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "H2 in-memory database with test data"
+
+    connection:
+      database: "mem:null_data_test"
+      username: "sa"
+      password: ""
+
+    custom-properties:
+      schema:
+        auto-create: true
+        init-script: |
+          CREATE TABLE IF NOT EXISTS test_data (
+            id INTEGER PRIMARY KEY,
+            name VARCHAR(255),
+            amount INTEGER
+          );
+
+          INSERT INTO test_data (id, name, amount) VALUES
+            (1, 'Test Record', 100);
+
+    queries:
+      getAllData: "SELECT id, name, amount FROM test_data"
+
+# Data sink
+data-sinks:
+  - name: "null-test-sink"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "H2 in-memory database sink for testing"
+
+    connection:
+      database: "mem:null_data_test"
+      username: "sa"
+      password: ""
+
+    custom-properties:
+      schema:
+        auto-create: true
+        init-script: |
+          CREATE TABLE IF NOT EXISTS target_data (
+            id INTEGER PRIMARY KEY,
+            name VARCHAR(255),
+            amount INTEGER
+          );
+
+    operations:
+      insertData: |
+        INSERT INTO target_data (id, name, amount)
+        VALUES (:id, :name, :amount)
+
+# Pipeline with load step (typically doesn't return data)
+pipeline:
+  name: "null-data-test"
+  description: "Pipeline with steps that may not return data"
+
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+
+  steps:
+    # Step 1: Extract (returns data)
+    - name: "extract-data"
+      type: "extract"
+      source: "null-test-source"
+      operation: "getAllData"
+      description: "Extract data"
+
+    # Step 2: Load (typically doesn't return data)
+    - name: "load-data"
+      type: "load"
+      sink: "null-test-sink"
+      operation: "insertData"
+      description: "Load data to sink (no data returned)"
+      depends-on: ["extract-data"]
+

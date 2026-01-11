@@ -75,6 +75,12 @@ public final class JdbcParameterUtils {
         LOGGER.debug("Preparing statement with SQL: {}", sql);
         LOGGER.debug("Parameters: {}", parameters);
 
+        // Create a case-insensitive parameter map for lookup
+        Map<String, Object> caseInsensitiveParams = new HashMap<>();
+        for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+            caseInsensitiveParams.put(entry.getKey().toLowerCase(), entry.getValue());
+        }
+
         // Find and replace named parameters (:paramName) with ? placeholders
         int searchIndex = 0;
         while (searchIndex < processedSql.length()) {
@@ -85,8 +91,8 @@ public final class JdbcParameterUtils {
 
             // Find the end of the parameter name
             int endIndex = colonIndex + 1;
-            while (endIndex < processedSql.length() && 
-                   (Character.isLetterOrDigit(processedSql.charAt(endIndex)) || 
+            while (endIndex < processedSql.length() &&
+                   (Character.isLetterOrDigit(processedSql.charAt(endIndex)) ||
                     processedSql.charAt(endIndex) == '_')) {
                 endIndex++;
             }
@@ -94,8 +100,10 @@ public final class JdbcParameterUtils {
             String paramName = processedSql.substring(colonIndex + 1, endIndex);
             LOGGER.debug("Found parameter: {} at position {}-{}", paramName, colonIndex, endIndex);
 
-            if (parameters.containsKey(paramName)) {
-                Object paramValue = parameters.get(paramName);
+            // Try case-insensitive lookup
+            String paramNameLower = paramName.toLowerCase();
+            if (caseInsensitiveParams.containsKey(paramNameLower)) {
+                Object paramValue = caseInsensitiveParams.get(paramNameLower);
                 LOGGER.debug("Replacing parameter {} with value: {}", paramName, paramValue);
 
                 // Replace this occurrence with ?

@@ -7,7 +7,7 @@
     </appender>
 
     <!-- Standard APEX Logging -->
-    <logger name="dev.mars.apex" level="INFO"/>
+    <logger name="dev.mars.apex" level="DEBUG"/>
     
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>

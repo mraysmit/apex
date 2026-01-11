@@ -1,0 +1,21 @@
+metadata:
+  id: "mssql-legacy-source"
+  name: "mssql-legacy-source"
+  type: "external-data-config"
+  author: "Integration Team"
+  version: "1.0"
+
+data-sources:
+  - name: "legacy-sqlserver"
+    type: "database"
+    source-type: "h2"
+    connection:
+      # Using H2 database parameter format (not full JDBC URL)
+      database: "mem:mssql_test;MODE=MSSQLServer;DB_CLOSE_DELAY=-1"
+      username: "sa"
+      password: "pass"
+    enabled: true
+    queries:
+      extractCustomersBatch: |
+        SELECT customer_id AS id, name, status, email
+        FROM dbo.Customers

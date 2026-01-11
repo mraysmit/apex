@@ -218,4 +218,11 @@ public class PipelineStep {
     public boolean isAuditStep() {
         return "audit".equalsIgnoreCase(type);
     }
+    
+    /**
+     * Check if this step is a read-schema step.
+     */
+    public boolean isReadSchemaStep() {
+        return "read-schema".equalsIgnoreCase(type);
+    }
 }

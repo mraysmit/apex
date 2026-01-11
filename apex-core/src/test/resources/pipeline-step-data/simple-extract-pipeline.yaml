@@ -1,0 +1,67 @@
+# ============================================================================
+# Simple Extract Pipeline - Test Configuration
+# ============================================================================
+#
+# PURPOSE:
+# Tests basic pipeline execution with step data capture.
+# This pipeline extracts data from an inline data source.
+#
+# USED BY: RulesEnginePipelineStepDataIntegrationTest.java
+# ============================================================================
+
+metadata:
+  id: "simple-extract-pipeline-test"
+  name: "Simple Extract Pipeline Test"
+  version: "1.0"
+  description: "Test pipeline for capturing step data from simple extract operation"
+
+# Data source with H2 in-memory database
+data-sources:
+  - name: "test-inline-source"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "H2 in-memory database with test data"
+
+    connection:
+      database: "mem:simple_extract_test"
+      username: "sa"
+      password: ""
+
+    custom-properties:
+      schema:
+        auto-create: true
+        init-script: |
+          CREATE TABLE IF NOT EXISTS test_records (
+            id INTEGER PRIMARY KEY,
+            name VARCHAR(255),
+            amount INTEGER,
+            status VARCHAR(50)
+          );
+
+          INSERT INTO test_records (id, name, amount, status) VALUES
+            (1, 'Record 1', 100, 'active'),
+            (2, 'Record 2', 200, 'active'),
+            (3, 'Record 3', 300, 'inactive'),
+            (4, 'Record 4', 400, 'active'),
+            (5, 'Record 5', 500, 'active');
+
+    queries:
+      getAllData: "SELECT id, name, amount, status FROM test_records"
+
+# Pipeline with single extract step
+pipeline:
+  name: "simple-extract"
+  description: "Extract data from H2 database source"
+
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+
+  steps:
+    - name: "extract-test-data"
+      type: "extract"
+      source: "test-inline-source"
+      operation: "getAllData"
+      description: "Extract all records from test data source"
+

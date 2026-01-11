@@ -148,20 +148,26 @@ public class DatabaseDataSink implements DataSink {
         if (shutdown) {
             return;
         }
-        
+
         LOGGER.info("Shutting down database sink: {}", getName());
-        
+
         try {
             // Close data source if it's closeable
             if (dataSource instanceof AutoCloseable) {
                 ((AutoCloseable) dataSource).close();
             }
-            
+
+            // Remove from cache to prevent reuse of closed DataSource
+            if (configuration != null) {
+                DataSourceConfiguration dataSourceConfig = convertToDataSourceConfiguration(configuration);
+                JdbcTemplateFactory.removeFromCache(dataSourceConfig);
+            }
+
             this.connectionStatus = ConnectionStatus.shutdown();
             this.shutdown = true;
-            
+
             LOGGER.info("Database sink shutdown completed: {}", getName());
-            
+
         } catch (Exception e) {
             LOGGER.error("Error during database sink shutdown", e);
         }

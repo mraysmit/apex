@@ -1,0 +1,31 @@
+metadata:
+  name: "Multi-Table Enumeration with HTML Report Test"
+  description: "Test configuration for enumerating all tables and generating HTML report"
+  version: "1.0"
+
+data-sources:
+  - name: "h2-enumeration-db"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "mem:enumeration_test;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      username: "sa"
+      password: ""
+    enabled: true
+
+pipeline:
+  name: "enumerate-and-report"
+  execution:
+    mode: "sequential"
+    error-handling: "continue-on-error"
+  
+  steps:
+    # Enumerate all tables without specifying individual table names
+    - name: "enumerate-all-tables"
+      type: "read-schema"
+      source: "h2-enumeration-db"
+      description: "Enumerate all tables in database and generate HTML report"
+      parameters:
+        # No table parameter - this triggers enumeration
+        schema: "test_schema"  # Only enumerate tables in test_schema (not system tables)
+        report-output: "target/reports/all-tables-schema-report.html"

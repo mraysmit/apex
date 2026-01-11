@@ -1,0 +1,78 @@
+# ============================================================================
+# Partial Failure Pipeline - Test Configuration
+# ============================================================================
+#
+# PURPOSE:
+# Tests pipeline execution with partial failures to verify metrics capture.
+# Some records succeed, some fail - tests recordsProcessed and recordsFailed.
+#
+# USED BY: RulesEnginePipelineStepDataIntegrationTest.java
+# ============================================================================
+
+metadata:
+  id: "partial-failure-pipeline-test"
+  name: "Partial Failure Pipeline Test"
+  version: "1.0"
+  description: "Test pipeline for capturing metrics when some records fail"
+
+# Data source with mixed valid/invalid data
+data-sources:
+  - name: "mixed-data-source"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    description: "H2 in-memory database with mixed valid/invalid data"
+
+    connection:
+      database: "mem:partial_failure_test"
+      username: "sa"
+      password: ""
+
+    custom-properties:
+      schema:
+        auto-create: true
+        init-script: |
+          CREATE TABLE IF NOT EXISTS mixed_records (
+            id INTEGER PRIMARY KEY,
+            name VARCHAR(255),
+            amount INTEGER,
+            status VARCHAR(50)
+          );
+
+          INSERT INTO mixed_records (id, name, amount, status) VALUES
+            (1, 'Valid Record 1', 100, 'valid'),
+            (2, 'Valid Record 2', 200, 'valid'),
+            (3, 'Invalid Record', NULL, 'invalid'),
+            (4, 'Valid Record 3', 300, 'valid');
+
+    queries:
+      getAllData: "SELECT id, name, amount, status FROM mixed_records"
+
+# Pipeline with transformation that may fail on some records
+pipeline:
+  name: "partial-failure-test"
+  description: "Pipeline that processes some records successfully and fails others"
+
+  execution:
+    mode: "sequential"
+    error-handling: "continue-on-error"
+
+  steps:
+    # Step 1: Extract all data
+    - name: "extract-mixed-data"
+      type: "extract"
+      source: "mixed-data-source"
+      operation: "getAllData"
+      description: "Extract all records including invalid ones"
+
+    # Step 2: Transform with potential failures
+    - name: "transform-with-validation"
+      type: "transform"
+      description: "Transform data with validation (may fail on invalid records)"
+      depends-on: ["extract-mixed-data"]
+      transformations:
+        - name: "validate-and-double"
+          type: "calculation"
+          field: "doubled_value"
+          expression: "#amount != null ? #amount * 2 : 0"
+

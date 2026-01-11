@@ -1,0 +1,33 @@
+metadata:
+  name: "PostgreSQL: Multi-Table Enumeration with HTML Report Test"
+  description: "PostgreSQL test configuration for enumerating all tables and generating HTML report"
+  version: "1.0"
+
+data-sources:
+  - name: "postgresql-enumeration-db"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      host: "${PG_HOST:localhost}"
+      port: ${PG_PORT:5432}
+      database: "${PG_DATABASE:test_db}"
+      username: "${PG_USERNAME:postgres}"
+      password: "${PG_PASSWORD:postgres}"
+    enabled: true
+
+pipeline:
+  name: "enumerate-and-report"
+  execution:
+    mode: "sequential"
+    error-handling: "continue-on-error"
+  
+  steps:
+    # Enumerate all tables without specifying individual table names
+    - name: "enumerate-all-tables"
+      type: "read-schema"
+      source: "postgresql-enumeration-db"
+      description: "Enumerate all tables in database and generate HTML report"
+      parameters:
+        # No table parameter - this triggers enumeration
+        schema: "test_schema"  # Only enumerate tables in test_schema (not system tables)
+        report-output: "target/reports/postgresql-all-tables-schema-report.html"

@@ -1,0 +1,33 @@
+metadata:
+  name: "Oracle: Multi-Table Enumeration with HTML Report Test"
+  description: "Oracle test configuration for enumerating all tables and generating HTML report"
+  version: "1.0"
+
+data-sources:
+  - name: "oracle-enumeration-db"
+    type: "database"
+    source-type: "oracle"
+    connection:
+      host: "localhost"
+      port: 1521
+      database: "TESTDB"  # Oracle service name or SID
+      username: "${ORACLE_USER:system}"
+      password: "${ORACLE_PASSWORD:oracle}"
+    enabled: true
+
+pipeline:
+  name: "enumerate-and-report"
+  execution:
+    mode: "sequential"
+    error-handling: "continue-on-error"
+  
+  steps:
+    # Enumerate all tables without specifying individual table names
+    - name: "enumerate-all-tables"
+      type: "read-schema"
+      source: "oracle-enumeration-db"
+      description: "Enumerate all tables in database and generate HTML report"
+      parameters:
+        # No table parameter - this triggers enumeration
+        schema: "TEST_SCHEMA"  # Oracle schema (usually uppercase)
+        report-output: "target/reports/oracle-all-tables-schema-report.html"

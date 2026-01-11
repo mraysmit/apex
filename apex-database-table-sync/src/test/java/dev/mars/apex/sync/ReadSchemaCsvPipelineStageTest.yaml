@@ -1,0 +1,32 @@
+# APEX Read Schema Pipeline - CSV Test
+# Demonstrates reading schema from a CSV file
+
+metadata:
+  id: "test-read-schema-csv"
+  name: "CSV Schema Reader Test"
+  version: "1.0"
+  type: "pipeline-config"
+  author: "APEX Team"
+  description: "Test pipeline for reading CSV file schema"
+
+data-sources:
+  - name: "csv-test-source"
+    type: "file-system"
+    source-type: "file"
+    enabled: true
+    connection:
+      base-path: "."  # Current directory
+
+pipeline:
+  name: "read-csv-schema"
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+  
+  steps:
+    - name: "read-schema-from-csv-file"
+      type: "read-schema"
+      source: "csv-test-source"
+      description: "Read schema metadata from CSV file"
+      parameters:
+        file: "test-customers.csv"

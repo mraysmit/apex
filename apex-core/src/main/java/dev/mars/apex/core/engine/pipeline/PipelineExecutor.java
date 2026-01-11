@@ -6,9 +6,20 @@ import dev.mars.apex.core.service.data.external.ExternalDataSource;
 import dev.mars.apex.core.service.data.external.DataSink;
 import dev.mars.apex.core.service.data.external.DataSinkException;
 import dev.mars.apex.core.service.data.external.manager.ExternalDataSourceManager;
+import dev.mars.apex.core.service.data.external.DataSourceType;
+import dev.mars.apex.core.service.schema.SchemaMetadata;
+import dev.mars.apex.core.service.schema.SchemaReaderService;
+import dev.mars.apex.core.service.schema.SchemaHtmlReportGenerator;
+import dev.mars.apex.core.service.schema.DataSourceContext;
+import dev.mars.apex.core.service.data.external.database.DatabaseDataSource;
+import dev.mars.apex.core.config.datasource.ConnectionConfig;
 import dev.mars.apex.core.util.TestAwareLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,20 +33,26 @@ import java.util.stream.Collectors;
  * @since 1.0.0
  */
 public class PipelineExecutor {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(PipelineExecutor.class);
-    
+
     private final ExternalDataSourceManager dataSourceManager;
     private final Map<String, DataSink> dataSinks;
     private final Map<String, Object> pipelineContext;
     private final Map<String, PipelineStepResult> stepResults;
     private PipelineConfiguration currentPipeline; // Store current pipeline for access to execution config
+    private final ExpressionParser expressionParser;
+    private final SchemaReaderService schemaReaderService;
+    private final SchemaHtmlReportGenerator reportGenerator;
 
     public PipelineExecutor(ExternalDataSourceManager dataSourceManager) {
         this.dataSourceManager = dataSourceManager;
         this.dataSinks = new ConcurrentHashMap<>();
         this.pipelineContext = new ConcurrentHashMap<>();
         this.stepResults = new ConcurrentHashMap<>();
+        this.expressionParser = new SpelExpressionParser();
+        this.schemaReaderService = new SchemaReaderService();
+        this.reportGenerator = new SchemaHtmlReportGenerator();
     }
 
     /**
@@ -95,8 +112,8 @@ public class PipelineExecutor {
                 throw new DataPipelineException("Pipeline execution failed: " + e.getMessage(), e);
             }
         } finally {
-            // Cleanup resources
-            shutdownDataSinks();
+            // Note: Data sinks are NOT shut down here - they are managed by the RulesEngine
+            // and will be shut down when RulesEngine.shutdown() is called
             this.currentPipeline = null;
         }
 
@@ -140,6 +157,13 @@ public class PipelineExecutor {
         if (step.isLoadStep() && step.getSink() == null) {
             throw new DataPipelineException("Load step requires sink: " + step.getName());
         }
+        
+        if (step.isReadSchemaStep() && step.getSource() == null) {
+            LOGGER.error("[Pipeline.Validation] Read-schema step '{}' is missing required 'source' property", step.getName());
+            throw new DataPipelineException("Read-schema step requires source: " + step.getName());
+        }
+        
+        LOGGER.debug("[Pipeline.Validation] Step '{}' validation passed", step.getName());
     }
     
     /**
@@ -288,6 +312,12 @@ public class PipelineExecutor {
                     if (stepData != null) {
                         pipelineContext.put("extractedData", stepData);
                     }
+                    // Set metrics for extract step
+                    if (stepData instanceof List) {
+                        stepResult.setRecordsProcessed(((List<?>) stepData).size());
+                    } else if (stepData != null) {
+                        stepResult.setRecordsProcessed(1);
+                    }
                 } else if (step.isTransformStep()) {
                     // Get data from previous extract/transform step
                     Object dataToTransform = pipelineContext.get("extractedData");
@@ -296,14 +326,68 @@ public class PipelineExecutor {
                     if (stepData != null) {
                         pipelineContext.put("extractedData", stepData);
                     }
+                    // Set metrics for transform step
+                    if (stepData instanceof List) {
+                        stepResult.setRecordsProcessed(((List<?>) stepData).size());
+                    } else if (stepData != null) {
+                        stepResult.setRecordsProcessed(1);
+                    }
                 } else if (step.isLoadStep()) {
                     // Get data from previous extract/transform step
                     Object dataToLoad = pipelineContext.get("extractedData");
-                    executeLoadStep(step, dataToLoad);
+                    int recordsProcessed = executeLoadStep(step, dataToLoad);
+                    // Set metrics for load step
+                    stepResult.setRecordsProcessed(recordsProcessed);
+                    stepResult.setRecordsFailed(0); // Failed records are not currently tracked for load steps
                 } else if (step.isAuditStep()) {
                     // Get data from previous steps for auditing
                     Object dataToAudit = pipelineContext.get("extractedData");
                     executeAuditStep(step, dataToAudit);
+                    // Metrics for audit step are set inside executeAuditStep
+                } else if (step.isReadSchemaStep()) {
+                    // Read schema from data source (single table/file or multiple tables)
+                    LOGGER.debug("[Pipeline.Execute] Executing read-schema step: {}", step.getName());
+                    stepData = executeReadSchemaStep(step);
+                    
+                    // Handle both single schema and map of schemas
+                    if (stepData != null) {
+                        if (stepData instanceof Map) {
+                            // Multiple tables enumerated
+                            @SuppressWarnings("unchecked")
+                            Map<String, SchemaMetadata> tableSchemas = (Map<String, SchemaMetadata>) stepData;
+                            LOGGER.debug("[Pipeline.Execute] Storing map of table schemas in pipeline context");
+                            pipelineContext.put("tableSchemas", stepData);
+                            LOGGER.info("[Pipeline.Execute] Enumerated {} tables", tableSchemas.size());
+                            
+                            // Log details of each table
+                            tableSchemas.forEach((tableName, schema) -> {
+                                LOGGER.info("[Pipeline.Execute] Table: {} - {} columns", 
+                                           tableName, schema.getColumns().size());
+                            });
+                            
+                            // Calculate total columns across all tables
+                            int totalColumns = tableSchemas.values().stream()
+                                .mapToInt(schema -> schema.getColumns().size())
+                                .sum();
+                            LOGGER.info("[Pipeline.Execute] Total: {} tables, {} columns", 
+                                       tableSchemas.size(), totalColumns);
+                            
+                        } else if (stepData instanceof SchemaMetadata) {
+                            // Single table/file
+                            LOGGER.debug("[Pipeline.Execute] Storing schema metadata in pipeline context");
+                            pipelineContext.put("schemaMetadata", stepData);
+                            SchemaMetadata schema = (SchemaMetadata) stepData;
+                            LOGGER.info("[Pipeline.Execute] Schema metadata stored: {} columns from {}", 
+                                       schema.getColumns().size(), schema.getSourceName());
+                        } else {
+                            LOGGER.warn("[Pipeline.Execute] Read-schema step returned unexpected type: {}", 
+                                       stepData.getClass().getName());
+                        }
+                    } else {
+                        LOGGER.warn("[Pipeline.Execute] Read-schema step returned null data");
+                    }
+                    // Set metrics for read-schema step
+                    stepResult.setRecordsProcessed(1);
                 }
 
                 stepResult.setSuccess(true);
@@ -532,25 +616,29 @@ public class PipelineExecutor {
             return;
         }
 
-        // Simple expression evaluation for basic calculations
-        // For now, support simple expressions like "#value * 1.1"
-        if (expression.contains("#value")) {
-            Object sourceValue = record.get("value");
-            if (sourceValue instanceof Number) {
-                double numValue = ((Number) sourceValue).doubleValue();
-                // Extract multiplier from expression (simplified)
-                if (expression.contains("*")) {
-                    String[] parts = expression.split("\\*");
-                    if (parts.length == 2) {
-                        try {
-                            double multiplier = Double.parseDouble(parts[1].trim());
-                            record.put(field, numValue * multiplier);
-                        } catch (NumberFormatException e) {
-                            LOGGER.warn("Failed to parse multiplier from expression: {}", expression);
-                        }
-                    }
-                }
+        try {
+            // Create evaluation context with record fields as variables
+            StandardEvaluationContext context = new StandardEvaluationContext();
+
+            // Add all record fields as variables (both original case and lowercase)
+            for (Map.Entry<String, Object> entry : record.entrySet()) {
+                // Add with original case
+                context.setVariable(entry.getKey(), entry.getValue());
+                // Also add with lowercase for case-insensitive access
+                context.setVariable(entry.getKey().toLowerCase(), entry.getValue());
             }
+
+            // Parse and evaluate the expression
+            Expression exp = expressionParser.parseExpression(expression);
+            Object result = exp.getValue(context);
+
+            // Store the result in the record (use lowercase key to match database column names)
+            record.put(field.toLowerCase(), result);
+
+            LOGGER.debug("Calculated field '{}' = {} using expression: {}", field, result, expression);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to evaluate calculation expression '{}' for field '{}': {}",
+                expression, field, e.getMessage());
         }
     }
 
@@ -586,8 +674,10 @@ public class PipelineExecutor {
 
     /**
      * Execute a load step.
+     *
+     * @return the number of records successfully processed
      */
-    private void executeLoadStep(PipelineStep step, Object data) throws DataPipelineException {
+    private int executeLoadStep(PipelineStep step, Object data) throws DataPipelineException {
         LOGGER.info("Looking for data sink: '{}' in available sinks: {}", step.getSink(), dataSinks.keySet());
         DataSink dataSink = dataSinks.get(step.getSink());
         if (dataSink == null) {
@@ -598,6 +688,8 @@ public class PipelineExecutor {
         if (data == null) {
             throw new DataPipelineException("No data available for load step: " + step.getName());
         }
+
+        int totalRecordsProcessed = 0;
 
         try {
             LOGGER.info("Loading data to sink '{}' using operation '{}'",
@@ -639,16 +731,20 @@ public class PipelineExecutor {
                     LOGGER.warn("All {} records were skipped due to data integrity violations in step '{}'",
                                skippedCount, step.getName());
                 }
+
+                totalRecordsProcessed = successCount;
             } else {
                 // Single record
                 try {
                     dataSink.write(step.getOperation(), data);
                     LOGGER.info("Successfully loaded single record to sink '{}'", step.getSink());
+                    totalRecordsProcessed = 1;
                 } catch (DataSinkException e) {
                     if (e.getErrorType() == DataSinkException.ErrorType.DATA_INTEGRITY_ERROR) {
                         // Log and continue for data integrity violations
                         LOGGER.warn("Skipped single record due to data integrity violation: {} - Record: {}",
                                    e.getMessage(), data);
+                        totalRecordsProcessed = 0;
                     } else {
                         // Re-throw other types of errors
                         throw e;
@@ -658,6 +754,8 @@ public class PipelineExecutor {
         } catch (Exception e) {
             throw new DataPipelineException("Load step failed: " + step.getName(), e);
         }
+
+        return totalRecordsProcessed;
     }
     
     /**
@@ -712,6 +810,276 @@ public class PipelineExecutor {
             }
         } catch (Exception e) {
             throw new DataPipelineException("Audit step failed: " + step.getName(), e);
+        }
+    }
+    
+    /**
+     * Execute a read-schema step.
+     * Reads schema metadata from a data source (database table or CSV file).
+     * For databases, if 'table' parameter is missing, enumerates all tables.
+     *
+     * @param step the read-schema step configuration
+     * @return SchemaMetadata for single table/file, or Map<String, SchemaMetadata> for table enumeration
+     * @throws DataPipelineException if schema reading fails
+     */
+    private Object executeReadSchemaStep(PipelineStep step) throws DataPipelineException {
+        LOGGER.info("Executing read-schema step: {}", step.getName());
+        LOGGER.debug("[Pipeline.ReadSchema] Step details: type={}, source={}, description={}", 
+                    step.getType(), step.getSource(), step.getDescription());
+
+        // Get the data source
+        String sourceName = step.getSource();
+        if (sourceName == null || sourceName.trim().isEmpty()) {
+            LOGGER.error("[Pipeline.ReadSchema] No source specified for step: {}", step.getName());
+            throw new DataPipelineException("Read-schema step requires a source: " + step.getName());
+        }
+        LOGGER.debug("[Pipeline.ReadSchema] Retrieving data source: {}", sourceName);
+
+        ExternalDataSource dataSource = dataSourceManager.getDataSource(sourceName);
+        if (dataSource == null) {
+            LOGGER.error("[Pipeline.ReadSchema] Data source not found: {}", sourceName);
+            throw new DataPipelineException("Data source not found: " + sourceName);
+        }
+        LOGGER.debug("[Pipeline.ReadSchema] Data source retrieved: {} (type: {})", 
+                    dataSource.getName(), dataSource.getSourceType());
+
+        // Get parameters (e.g., table name for database, file path for CSV)
+        Map<String, Object> parameters = step.getParameters();
+        if (parameters == null) {
+            LOGGER.debug("[Pipeline.ReadSchema] No parameters provided, using empty map");
+            parameters = new HashMap<>();
+        } else {
+            LOGGER.debug("[Pipeline.ReadSchema] Parameters: {}", parameters);
+        }
+
+        try {
+            LOGGER.debug("[Pipeline.ReadSchema] Invoking SchemaReaderService...");
+            long startTime = System.currentTimeMillis();
+            
+            // Check if this is a database source and table parameter is missing (= enumerate all tables)
+            boolean isDatabaseSource = dataSource.getSourceType() == DataSourceType.DATABASE;
+            boolean hasTableParam = parameters.containsKey("table");
+            
+            if (isDatabaseSource && !hasTableParam) {
+                LOGGER.info("[Pipeline.ReadSchema] Table parameter not specified - enumerating all tables");
+                
+                // Enumerate all tables
+                Map<String, SchemaMetadata> tableSchemas = schemaReaderService.enumerateAllTables(dataSource, parameters);
+                
+                long duration = System.currentTimeMillis() - startTime;
+                LOGGER.info("Successfully enumerated {} tables from source '{}' (took {} ms)",
+                           tableSchemas.size(), sourceName, duration);
+                
+                // Log summary of enumerated tables
+                LOGGER.debug("[Pipeline.ReadSchema] Enumerated tables:");
+                for (Map.Entry<String, SchemaMetadata> entry : tableSchemas.entrySet()) {
+                    LOGGER.debug("[Pipeline.ReadSchema]   - {} ({} columns)",
+                                entry.getKey(), entry.getValue().getColumns().size());
+                }
+                
+                // Generate HTML report if requested
+                generateSchemaReportIfRequested(step, dataSource, tableSchemas);
+                
+                LOGGER.debug("[Pipeline.ReadSchema] Returning map of table schemas");
+                return tableSchemas;
+                
+            } else {
+                // Single table/file read
+                LOGGER.debug("[Pipeline.ReadSchema] Reading schema for single table/file");
+                
+                SchemaMetadata schema = schemaReaderService.readSchema(dataSource, parameters);
+                
+                long duration = System.currentTimeMillis() - startTime;
+                LOGGER.info("Successfully read schema from source '{}': {} columns (took {} ms)",
+                           sourceName, schema.getColumns().size(), duration);
+                
+                // Log column details
+                LOGGER.debug("[Pipeline.ReadSchema] Schema details:");
+                for (int i = 0; i < schema.getColumns().size(); i++) {
+                    SchemaMetadata.ColumnDefinition column = schema.getColumns().get(i);
+                    LOGGER.debug("[Pipeline.ReadSchema]   [{}] {} ({}) - nullable: {}, pk: {}, maxLen: {}, precision: {}, scale: {}",
+                                i, column.getName(), column.getDataType(), column.isNullable(), 
+                                column.isPrimaryKey(), column.getMaxLength(), column.getPrecision(), column.getScale());
+                }
+
+                // Generate HTML report if requested
+                generateSchemaReportIfRequested(step, dataSource, schema);
+
+                LOGGER.debug("[Pipeline.ReadSchema] Returning schema metadata");
+                return schema;
+            }
+
+        } catch (Exception e) {
+            LOGGER.error("[Pipeline.ReadSchema] Read-schema step failed for '{}': {}", 
+                        step.getName(), e.getMessage(), e);
+            throw new DataPipelineException("Read-schema step failed: " + step.getName(), e);
+        }
+    }
+    
+    /**
+     * Generate HTML report for schema if requested via parameters.
+     *
+     * @param step the pipeline step
+     * @param dataSource the data source being read
+     * @param stepData the step data (SchemaMetadata or Map of schemas)
+     */
+    private void generateSchemaReportIfRequested(PipelineStep step, ExternalDataSource dataSource, Object stepData) {
+        if (stepData == null) {
+            return;
+        }
+        
+        Map<String, Object> parameters = step.getParameters();
+        if (parameters == null) {
+            return;
+        }
+        
+        String reportPath = (String) parameters.get("report-output");
+        if (reportPath == null || reportPath.trim().isEmpty()) {
+            return; // No report requested
+        }
+        
+        try {
+            LOGGER.info("[Pipeline.ReadSchema] Generating HTML schema report: {}", reportPath);
+            
+            // Build DataSourceContext for the report
+            DataSourceContext dsContext = buildDataSourceContext(dataSource, parameters);
+            LOGGER.debug("[Pipeline.ReadSchema] DataSourceContext built: name={}, type={}, dbType={}, host={}, port={}, database={}, schema={}, schemaFilter={}",
+                dsContext.getDataSourceName(), dsContext.getDataSourceType(), dsContext.getDatabaseType(),
+                dsContext.getHost(), dsContext.getPort(), dsContext.getDatabaseName(),
+                dsContext.getSchemaName(), dsContext.getSchemaFilter());
+            
+            if (stepData instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, SchemaMetadata> tableSchemas = (Map<String, SchemaMetadata>) stepData;
+                reportGenerator.generateReport(tableSchemas, dsContext, reportPath);
+            } else if (stepData instanceof SchemaMetadata) {
+                SchemaMetadata schema = (SchemaMetadata) stepData;
+                reportGenerator.generateReport(schema, dsContext, reportPath);
+            }
+            
+            LOGGER.info("[Pipeline.ReadSchema] HTML report generated successfully: {}", reportPath);
+        } catch (Exception e) {
+            LOGGER.warn("[Pipeline.ReadSchema] Failed to generate HTML report: {}", e.getMessage());
+            // Don't fail the pipeline if report generation fails
+        }
+    }
+    
+    /**
+     * Build DataSourceContext from data source and parameters.
+     *
+     * @param dataSource the data source
+     * @param parameters the step parameters
+     * @return DataSourceContext with connection details
+     */
+    private DataSourceContext buildDataSourceContext(ExternalDataSource dataSource, Map<String, Object> parameters) {
+        DataSourceContext context = new DataSourceContext();
+        
+        // Common fields
+        context.dataSourceName(dataSource.getName());
+        
+        // Handle database data sources
+        if (dataSource instanceof DatabaseDataSource) {
+            DatabaseDataSource dbDataSource = (DatabaseDataSource) dataSource;
+            context.dataSourceType("database");
+            
+            // Get configuration details
+            if (dbDataSource.getConfiguration() != null) {
+                var config = dbDataSource.getConfiguration();
+                
+                // Database type from type/sourceType
+                if (config.getSourceType() != null) {
+                    context.databaseType(config.getSourceType());
+                } else if (config.getType() != null) {
+                    context.databaseType(config.getType());
+                }
+                
+                // Connection details
+                ConnectionConfig connConfig = config.getConnection();
+                if (connConfig != null) {
+                    context.host(connConfig.getHost());
+                    context.port(connConfig.getPort());
+                    context.databaseName(connConfig.getDatabase());
+                    context.schemaName(connConfig.getSchema());
+                    context.username(connConfig.getUsername());
+                    
+                    // Build JDBC URL if we have the components
+                    if (connConfig.getHost() != null) {
+                        String jdbcUrl = buildJdbcUrl(config.getSourceType(), connConfig);
+                        context.jdbcUrl(jdbcUrl);
+                    }
+                }
+            }
+        } else if (dataSource.getSourceType() == DataSourceType.FILE_SYSTEM) {
+            context.dataSourceType("file");
+            
+            // File source details
+            if (parameters != null) {
+                String filePath = (String) parameters.get("file");
+                if (filePath != null) {
+                    context.filePath(filePath);
+                    
+                    // Extract filename and directory
+                    java.io.File file = new java.io.File(filePath);
+                    context.fileName(file.getName());
+                    if (file.getParentFile() != null) {
+                        context.fileDirectory(file.getParentFile().getAbsolutePath());
+                    }
+                }
+            }
+        }
+        
+        // Add filter parameters if present
+        if (parameters != null) {
+            String schemaFilter = (String) parameters.get("schema");
+            if (schemaFilter != null) {
+                context.schemaFilter(schemaFilter);
+            }
+            
+            String tablePattern = (String) parameters.get("table-pattern");
+            if (tablePattern != null) {
+                context.tablePattern(tablePattern);
+            }
+            
+            @SuppressWarnings("unchecked")
+            List<String> excludeTables = (List<String>) parameters.get("exclude-tables");
+            if (excludeTables != null && !excludeTables.isEmpty()) {
+                context.excludeTables(excludeTables);
+            }
+        }
+        
+        return context;
+    }
+    
+    /**
+     * Build a JDBC URL from configuration components.
+     */
+    private String buildJdbcUrl(String databaseType, ConnectionConfig connConfig) {
+        if (databaseType == null || connConfig.getHost() == null) {
+            return null;
+        }
+        
+        String host = connConfig.getHost();
+        Integer port = connConfig.getPort();
+        String database = connConfig.getDatabase();
+        
+        switch (databaseType.toLowerCase()) {
+            case "postgresql":
+                return String.format("jdbc:postgresql://%s:%d/%s", 
+                    host, port != null ? port : 5432, database != null ? database : "");
+            case "mysql":
+                return String.format("jdbc:mysql://%s:%d/%s", 
+                    host, port != null ? port : 3306, database != null ? database : "");
+            case "h2":
+                return String.format("jdbc:h2:mem:%s", database != null ? database : "testdb");
+            case "oracle":
+                return String.format("jdbc:oracle:thin:@%s:%d/%s", 
+                    host, port != null ? port : 1521, database != null ? database : "");
+            case "sqlserver":
+                return String.format("jdbc:sqlserver://%s:%d;databaseName=%s", 
+                    host, port != null ? port : 1433, database != null ? database : "");
+            default:
+                return String.format("jdbc:%s://%s:%s/%s", 
+                    databaseType, host, port != null ? port.toString() : "?", database != null ? database : "");
         }
     }
     

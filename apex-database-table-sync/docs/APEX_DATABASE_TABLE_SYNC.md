@@ -52,9 +52,105 @@ Connection profiles are defined as `external-data-config` documents, keeping dat
 
 ### 3.2 Pipelines
 Synchronization is orchestrated through standard `pipeline` document types using tiered steps:
-1. **Extract**: Fetching records from the source naming specific queries.
-2. **Transform**: Applying SpEL-based data mapping and inline validation rules.
-3. **Load**: Writing validated records to the target sink using upsert operations.
+1. **Read-Schema**: Introspecting database tables or CSV files to retrieve column metadata.
+2. **Extract**: Fetching records from the source naming specific queries.
+3. **Transform**: Applying SpEL-based data mapping and inline validation rules.
+4. **Load**: Writing validated records to the target sink using upsert operations.
+
+### 3.3 Schema Reading
+The `read-schema` pipeline stage enables automatic schema discovery from databases and CSV files, providing comprehensive metadata about columns, types, and constraints. This capability is essential for:
+- **Pre-sync validation**: Verifying schema compatibility before data movement
+- **Dynamic mapping**: Generating transformation rules based on discovered schemas
+- **Change detection**: Identifying schema drift between source and target
+- **Documentation**: Automatically cataloging data structures
+
+#### Database Schema Reading
+Introspect database tables to retrieve complete column metadata including names, types, nullability, and constraints.
+
+```yaml
+metadata:
+  type: "pipeline"
+
+data-source-refs:
+  - name: "sqlserver-source"
+    source: "data-sources/sqlserver-datasource.yaml"
+    enabled: true
+
+pipeline:
+  name: "read-schema-from-database"
+  execution: "sequential"
+  steps:
+    - name: "read-customers-schema"
+      type: "read-schema"
+      data-source-ref: "sqlserver-source"
+      parameters:
+        table: "dbo.Customers"
+```
+
+**Output Schema Metadata** (stored in pipeline context):
+- `columnName`: The database column name
+- `dataType`: SQL data type (e.g., VARCHAR, INTEGER, DECIMAL)
+- `size`: Column size/precision
+- `nullable`: Whether NULL values are allowed
+- `primaryKey`: Whether the column is part of the primary key
+- `autoIncrement`: Whether the column auto-increments
+
+#### CSV Schema Reading
+Analyze CSV files with automatic type inference based on data patterns.
+
+```yaml
+metadata:
+  type: "pipeline"
+
+data-source-refs:
+  - name: "employee-csv"
+    source: "data-sources/employee-csv-datasource.yaml"
+    enabled: true
+
+pipeline:
+  name: "read-schema-from-csv"
+  execution: "sequential"
+  steps:
+    - name: "read-employee-schema"
+      type: "read-schema"
+      data-source-ref: "employee-csv"
+      parameters:
+        file: "employees.csv"
+```
+
+**Automatic Type Inference**:
+- `INTEGER`: Numeric values without decimals (e.g., "123", "-456")
+- `DECIMAL`: Numeric values with decimals (e.g., "123.45", "-0.99")
+- `BOOLEAN`: True/false values (e.g., "true", "false", "yes", "no")
+- `TIMESTAMP`: Date/time patterns (e.g., "2024-01-15", "2024-01-15 10:30:00")
+- `VARCHAR`: Default type for text values
+
+#### Multi-Source Schema Reading
+Read schemas from multiple tables or files in a single pipeline for comprehensive analysis.
+
+```yaml
+pipeline:
+  name: "read-multiple-schemas"
+  execution: "sequential"
+  steps:
+    - name: "read-customers-schema"
+      type: "read-schema"
+      data-source-ref: "sqlserver-source"
+      parameters:
+        table: "dbo.Customers"
+    
+    - name: "read-orders-schema"
+      type: "read-schema"
+      data-source-ref: "sqlserver-source"
+      parameters:
+        table: "dbo.Orders"
+    
+    - name: "read-products-schema"
+      type: "read-schema"
+      data-source-ref: "sqlserver-source"
+      parameters:
+        table: "dbo.Products"
+```
 
 ## 4. Operational Guide
 
@@ -75,6 +171,75 @@ The project includes a `TableSyncIntegrationTestH2` that simulates a SQL Server 
 - **Target Simulation**: `jdbc:h2:mem:...;MODE=PostgreSQL`
 
 This ensures that pipeline logic is verified against database-specific dialects without requiring a full live infrastructure.
+
+### 5.2 Schema Reading Tests
+The `ReadSchemaPipelineStageTest` provides comprehensive validation of schema reading capabilities:
+
+#### Single Table Schema Reading
+```java
+@Test
+void shouldReadSchemaFromDatabase() {
+    // Reads schema from H2 database table
+    // Verifies: ID (INTEGER), NAME (VARCHAR), EMAIL (VARCHAR)
+}
+```
+
+#### CSV File Schema Reading
+```java
+@Test
+void shouldReadSchemaFromCsv() {
+    // Reads schema from CSV file with type inference
+    // Verifies: column_a (VARCHAR), column_b (INTEGER), 
+    //          column_c (DECIMAL), column_d (BOOLEAN)
+}
+```
+
+#### Multi-Table Schema Reading
+```java
+@Test
+void shouldReadSchemaFromMultipleTables() {
+    // Reads schemas from 5 tables (30 total columns)
+    // Tables: customers(5), orders(6), products(7), 
+    //         inventory(4), transactions(8)
+}
+```
+
+#### Large CSV Schema Reading
+```java
+@Test
+void shouldReadSchemaFromLargeCsv() {
+    // Reads schema from 11-column CSV file
+    // Demonstrates type inference: INTEGER, DECIMAL, 
+    //                              BOOLEAN, TIMESTAMP, VARCHAR
+}
+```
+
+### 5.3 Debug Logging
+Comprehensive DEBUG-level logging is available for troubleshooting schema reading operations:
+
+```bash
+# Run tests with console debug output
+mvn test -Dtest=ReadSchemaPipelineStageTest -Dsurefire.useFile=false
+```
+
+**Log Prefixes**:
+- `[SchemaReader]`: Entry/exit points and routing decisions
+- `[SchemaReader.DB]`: Database-specific operations and column processing
+- `[SchemaReader.CSV]`: CSV file operations and type inference decisions
+- `[Pipeline.ReadSchema]`: Pipeline step validation and execution
+- `[Pipeline.Execute]`: Schema metadata storage and timing
+- `[Pipeline.Validation]`: Step validation status
+
+**Example Debug Output**:
+```
+[SchemaReader] readSchema() called with dataSource=h2-test-database, parameters={table=customers}
+[SchemaReader.DB] Executing metadata query for table: customers
+[SchemaReader.DB] Processing column: ID (INTEGER)
+[SchemaReader.DB] Processing column: NAME (VARCHAR)
+[Pipeline.Execute] Schema metadata stored: 2 columns from h2-test-database
+```
+
+See [README-TESTING.md](../README-TESTING.md) for complete testing and debugging documentation.
 
 
 # APEX Database Table Sync
@@ -99,7 +264,38 @@ data-sources:
       extractCustomers: "SELECT * FROM dbo.Customers"
 ```
 
-### 2. Define the Pipeline
+### 2. Read Schema (Optional)
+Introspect source and target schemas before synchronization.
+
+```yaml
+# configs/schema-discovery-pipeline.yaml
+metadata:
+  type: "pipeline"
+
+data-source-refs:
+  - name: "sqlserver-source"
+    source: "data-sources/sqlserver-datasource.yaml"
+  - name: "postgresql-target"
+    source: "data-sources/postgresql-datasource.yaml"
+
+pipeline:
+  name: "schema-discovery"
+  execution: "sequential"
+  steps:
+    - name: "read-source-schema"
+      type: "read-schema"
+      data-source-ref: "sqlserver-source"
+      parameters:
+        table: "dbo.Customers"
+    
+    - name: "read-target-schema"
+      type: "read-schema"
+      data-source-ref: "postgresql-target"
+      parameters:
+        table: "public.customers"
+```
+
+### 3. Define the Pipeline
 Orchestrate the sync using standard pipeline steps.
 
 ```yaml
@@ -107,6 +303,8 @@ Orchestrate the sync using standard pipeline steps.
 metadata:
   type: "pipeline"
 pipeline:
+  name: "customer-sync"
+  execution: "sequential"
   steps:
     - name: "extract-customers"
       type: "extract"
@@ -119,7 +317,7 @@ pipeline:
       depends-on: ["extract-customers"]
 ```
 
-### 3. Execute
+### 4. Execute
 Run the sync using the minimalist CLI runner:
 
 ```bash

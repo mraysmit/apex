@@ -276,15 +276,19 @@ public class RulesEngine {
             if (result.getStepResults() != null) {
                 for (dev.mars.apex.core.engine.pipeline.PipelineStepResult stepResult : result.getStepResults()) {
                     String status = stepResult.isSuccess() ? "SUCCESS" : (stepResult.isSkipped() ? "SKIPPED" : "FAILURE");
-                    String message = stepResult.getError() != null ? stepResult.getError() : 
+                    String message = stepResult.getError() != null ? stepResult.getError() :
                                    (stepResult.isSkipped() ? "Step skipped" : "Step completed successfully");
-                    
+
+                    // Use new constructor that captures step data and metrics
                     pipelineSteps.add(new ExecutionStep(
                         stepResult.getStepName(),
                         "PIPELINE_STEP",
                         status,
                         message,
-                        stepResult.getDurationMs()
+                        stepResult.getDurationMs(),
+                        stepResult.getData(),              // Capture step data
+                        stepResult.getRecordsProcessed(),  // Capture metrics
+                        stepResult.getRecordsFailed()      // Capture metrics
                     ));
                 }
             }

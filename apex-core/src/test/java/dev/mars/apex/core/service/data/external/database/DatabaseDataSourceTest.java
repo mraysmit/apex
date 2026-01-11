@@ -205,10 +205,11 @@ class DatabaseDataSourceTest {
     @DisplayName("Should handle getData with non-existent query name")
     void testGetDataWithNonExistentQueryName() {
         // When query name doesn't exist, it falls back to "default" query
+        // The default query is "SELECT * FROM test_users" which returns multiple rows (a List)
         Object result = databaseDataSource.getData("nonexistent", 1);
 
         assertNotNull(result); // Falls back to default query
-        assertTrue(result instanceof Map);
+        assertTrue(result instanceof List); // Default query returns multiple rows
     }
 
     // ========================================

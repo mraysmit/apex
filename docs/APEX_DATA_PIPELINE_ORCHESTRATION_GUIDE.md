@@ -2,9 +2,10 @@
 
 # APEX Pipeline Orchestration Guide
 
-**Version:** 2.0
-**Date:** 2025-11-02
-**Author:** Mark A Ray-Smith Cityline Ltd.
+**Version:** 2.1  
+**Date:** 2026-01-11  
+**Author:** Mark A Ray-Smith Cityline Ltd.  
+**Updated date:** 2026-01-11
 
 > **⚠️ IMPORTANT API UPDATE**
 >
@@ -56,7 +57,7 @@ This comprehensive guide provides complete coverage of APEX's pipeline orchestra
 
 **Pipeline Execution Engine:**
 - PipelineExecutor with step validation and execution
-- YamlPipelineExecutionResult with detailed metrics
+- RuleResult with detailed step-level data and metrics via ExecutionStep
 - Sequential and parallel execution modes
 - Built-in monitoring and performance tracking
 
@@ -163,7 +164,8 @@ A **pipeline** is a complete data processing workflow consisting of multiple ste
 
 ### Steps
 
-**Steps** are individual processing units within a pipeline. APEX supports four step types:
+**Steps** are individual processing units within a pipeline. APEX supports five step types:
+- **Read-Schema**: Introspect data sources to retrieve schema metadata
 - **Extract**: Read data from external sources
 - **Load**: Write data to external destinations
 - **Transform**: Modify data between steps
@@ -238,6 +240,7 @@ The APEX Pipeline Orchestration system consists of several key components that w
 - Configurable through YAML with connection pooling and health checks
 
 #### 3.3 Step Types
+- **Read-Schema**: Introspect data sources to retrieve column metadata and data types
 - **Extract**: Read data from external data sources
 - **Transform**: Modify, validate, or enrich data
 - **Load**: Write data to external data sinks
@@ -517,9 +520,294 @@ pipeline:
 
 ## 6. Step Types and Configuration
 
+This section provides comprehensive reference information for all APEX pipeline step types and their configuration keywords.
+
+### 6.1 Pipeline Step Keywords Reference
+
+#### Common Keywords (All Step Types)
+
+These keywords are available for **all** pipeline step types (extract, transform, load, audit):
+
+| Keyword | Type | Required | Default | Description |
+|---------|------|----------|---------|-------------|
+| `name` | String | ✅ Yes | - | Unique identifier for the step within the pipeline |
+| `type` | String | ✅ Yes | - | Step type: `read-schema`, `extract`, `transform`, `load`, or `audit` |
+| `description` | String | ❌ No | - | Human-readable description of what the step does |
+| `depends-on` | List<String> | ❌ No | `[]` | List of step names that must complete before this step runs |
+| `optional` | Boolean | ❌ No | `false` | If `true`, pipeline continues even if this step fails |
+| `condition` | String (SpEL) | ❌ No | - | SpEL expression; step only executes if condition evaluates to `true` |
+| `parameters` | Map<String, Object> | ❌ No | `{}` | Step-specific parameters passed to the operation |
+| `retry` | Object | ❌ No | - | Retry configuration for this step (see below) |
+
+#### Read-Schema Step Specific Keywords
+
+Additional keywords specific to `type: "read-schema"` steps:
+
+| Keyword | Type | Required | Default | Description |
+|---------|------|----------|---------|-------------|
+| `data-source-ref` | String | ✅ Yes | - | Name of the data source reference (from `data-source-refs` section) |
+| `parameters` | Map<String, Object> | ✅ Yes | - | Parameters specifying what to introspect (e.g., `table` name, `file` path) |
+
+**Parameters Map (for database sources):**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `table` | String | ✅ Yes | Table name to introspect (can be schema-qualified: `schema.table`) |
+
+**Parameters Map (for CSV sources):**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `file` | String | ✅ Yes | CSV file name or path to introspect |
+
+#### Extract Step Specific Keywords
+
+Additional keywords specific to `type: "extract"` steps:
+
+| Keyword | Type | Required | Default | Description |
+|---------|------|----------|---------|-------------|
+| `source` | String | ✅ Yes | - | Name of the data source (references `data-sources` section) |
+| `operation` | String | ✅ Yes | - | Named query/operation to execute from the data source |
+
+#### Transform Step Specific Keywords
+
+Additional keywords specific to `type: "transform"` steps:
+
+| Keyword | Type | Required | Default | Description |
+|---------|------|----------|---------|-------------|
+| `transformations` | List<Object> | ✅ Yes | - | List of transformation operations to apply |
+
+**Transformation Object Keywords:**
+
+Each transformation in the `transformations` list supports:
+
+| Keyword | Type | Required | Description |
+|---------|------|----------|-------------|
+| `name` | String | ✅ Yes | Unique name for this transformation |
+| `type` | String | ✅ Yes | Transformation type (see below) |
+| `field` | String | ✅ Yes | Target field name to transform/create |
+| `expression` | String (SpEL) | Conditional | SpEL expression for calculations/transformations |
+| `value` | Any | Conditional | Static value to assign |
+| `rule` | String | Conditional | Validation rule name |
+
+**Transformation Types:**
+
+| Type | Purpose | Required Fields | Example |
+|------|---------|----------------|---------|
+| `field-addition` | Add new field | `field`, `value` or `expression` | Add timestamp |
+| `field-transformation` | Modify existing field | `field`, `expression` | Lowercase email |
+| `calculation` | Calculate derived value | `field`, `expression` | Total = qty × price |
+| `validation` | Validate field value | `field`, `rule` | Email format check |
+
+#### Load Step Specific Keywords
+
+Additional keywords specific to `type: "load"` steps:
+
+| Keyword | Type | Required | Default | Description |
+|---------|------|----------|---------|-------------|
+| `sink` | String | ✅ Yes | - | Name of the data sink (references `data-sinks` section) |
+| `operation` | String | ✅ Yes | - | Named operation to execute (e.g., SQL statement, API endpoint) |
+
+#### Audit Step Specific Keywords
+
+Additional keywords specific to `type: "audit"` steps:
+
+| Keyword | Type | Required | Default | Description |
+|---------|------|----------|---------|-------------|
+| `sink` | String | ✅ Yes | - | Name of the audit sink (references `data-sinks` section) |
+| `operation` | String | ✅ Yes | - | Named audit operation to execute |
+
+#### Retry Configuration Keywords
+
+The `retry` object supports the following keywords:
+
+| Keyword | Type | Required | Default | Description |
+|---------|------|----------|---------|-------------|
+| `max-attempts` | Integer | ❌ No | `3` | Maximum number of retry attempts |
+| `delay-ms` | Long | ❌ No | `1000` | Initial delay between retries (milliseconds) |
+| `backoff-multiplier` | Double | ❌ No | `2.0` | Multiplier for exponential backoff |
+| `max-delay-ms` | Long | ❌ No | `30000` | Maximum delay between retries (milliseconds) |
+
+#### Quick Reference Table
+
+| Keyword | Read-Schema | Extract | Transform | Load | Audit | Notes |
+|---------|-------------|---------|-----------|------|-------|-------|
+| `name` | ✅ | ✅ | ✅ | ✅ | ✅ | Required for all |
+| `type` | ✅ | ✅ | ✅ | ✅ | ✅ | Required for all |
+| `description` | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ | Optional for all |
+| `data-source-ref` | ✅ | ❌ | ❌ | ❌ | ❌ | Read-Schema only |
+| `source` | ❌ | ✅ | ❌ | ❌ | ❌ | Extract only |
+| `sink` | ❌ | ❌ | ❌ | ✅ | ✅ | Load & Audit only |
+| `operation` | ❌ | ✅ | ❌ | ✅ | ✅ | Extract, Load & Audit |
+| `transformations` | ❌ | ❌ | ✅ | ❌ | ❌ | Transform only |
+| `depends-on` | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ | Optional for all |
+| `optional` | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ | Optional for all |
+| `condition` | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ | Optional for all |
+| `parameters` | ✅ | ⭐ | ❌ | ⭐ | ⭐ | Required for Read-Schema, optional for others |
+| `retry` | ⭐ | ⭐ | ❌ | ⭐ | ⭐ | Not for Transform |
+
+**Legend**:
+- ✅ = Required
+- ⭐ = Optional/Common
+- ❌ = Not applicable
+
+### 6.2 Step Type Examples
+
+### Read-Schema Steps
+
+Read-schema steps introspect data sources to retrieve metadata about columns, data types, nullability, and constraints. This is essential for:
+- **Pre-sync validation**: Verifying schema compatibility before data movement
+- **Dynamic mapping**: Generating transformation rules based on discovered schemas
+- **Change detection**: Identifying schema drift between environments
+- **Documentation**: Automatically cataloging data structures
+
+**Common Read-Schema Patterns:**
+- Database table introspection
+- CSV file structure analysis with type inference
+- Multi-table schema discovery
+- Schema comparison between source and target
+
+**Database Schema Reading Example:**
+
+```yaml
+metadata:
+  type: "pipeline"
+
+data-source-refs:
+  - name: "customer-database"
+    source: "data-sources/customer-database.yaml"
+    enabled: true
+
+pipeline:
+  name: "read-customer-schema"
+  execution: "sequential"
+  steps:
+    - name: "read-customers-table-schema"    # Unique name for this read-schema step
+      type: "read-schema"                     # Step type: read-schema introspects sources
+      data-source-ref: "customer-database"    # References data source by name
+      description: "Introspect customer table schema"  # Step description
+      parameters:                             # Parameters specify what to introspect
+        table: "dbo.Customers"                # Table name (schema-qualified)
+```
+
+**Schema Metadata Output** (stored in pipeline context):
+- `columnName`: Database column name
+- `dataType`: SQL data type (VARCHAR, INTEGER, DECIMAL, etc.)
+- `size`: Column size/precision
+- `nullable`: Whether NULL values are allowed
+- `primaryKey`: Whether column is part of primary key
+- `autoIncrement`: Whether column auto-increments
+
+**CSV File Schema Reading Example:**
+
+```yaml
+metadata:
+  type: "pipeline"
+
+data-source-refs:
+  - name: "employee-csv"
+    source: "data-sources/employee-csv.yaml"
+    enabled: true
+
+pipeline:
+  name: "read-employee-csv-schema"
+  execution: "sequential"
+  steps:
+    - name: "read-csv-schema"                # Unique name for this read-schema step
+      type: "read-schema"                     # Step type: read-schema introspects sources
+      data-source-ref: "employee-csv"         # References CSV data source by name
+      description: "Analyze employee CSV structure"  # Step description
+      parameters:                             # Parameters specify what to introspect
+        file: "employees.csv"                 # CSV file name or path
+```
+
+**Automatic Type Inference** (for CSV files):
+- `INTEGER`: Numeric values without decimals (e.g., "123", "-456")
+- `DECIMAL`: Numeric values with decimals (e.g., "123.45", "-0.99")
+- `BOOLEAN`: True/false values (e.g., "true", "false", "yes", "no")
+- `TIMESTAMP`: Date/time patterns (e.g., "2024-01-15", "2024-01-15 10:30:00")
+- `VARCHAR`: Default type for text values
+
+**Multi-Table Schema Reading Example:**
+
+```yaml
+pipeline:
+  name: "read-multiple-schemas"
+  execution: "sequential"
+  steps:
+    - name: "read-customers-schema"
+      type: "read-schema"
+      data-source-ref: "database-source"
+      parameters:
+        table: "dbo.Customers"
+    
+    - name: "read-orders-schema"
+      type: "read-schema"
+      data-source-ref: "database-source"
+      parameters:
+        table: "dbo.Orders"
+      depends-on: ["read-customers-schema"]   # Optional: sequential execution
+    
+    - name: "read-products-schema"
+      type: "read-schema"
+      data-source-ref: "database-source"
+      parameters:
+        table: "dbo.Products"
+      depends-on: ["read-orders-schema"]      # Chain schema reads
+```
+
+**Use Cases:**
+
+1. **Pre-Migration Schema Validation:**
+```yaml
+pipeline:
+  name: "validate-migration-schemas"
+  steps:
+    - name: "read-source-schema"
+      type: "read-schema"
+      data-source-ref: "legacy-sqlserver"
+      parameters:
+        table: "dbo.Customers"
+    
+    - name: "read-target-schema"
+      type: "read-schema"
+      data-source-ref: "modern-postgresql"
+      parameters:
+        table: "public.customers"
+      depends-on: ["read-source-schema"]
+    
+    # Compare schemas and identify differences before data migration
+```
+
+2. **Dynamic ETL Pipeline Generation:**
+```yaml
+pipeline:
+  name: "discover-and-extract"
+  steps:
+    - name: "discover-schema"
+      type: "read-schema"
+      data-source-ref: "source-database"
+      parameters:
+        table: "dbo.Orders"
+    
+    - name: "extract-data"
+      type: "extract"
+      source: "source-database"
+      operation: "getAllOrders"
+      depends-on: ["discover-schema"]         # Use schema metadata to validate extraction
+```
+
 ### Extract Steps
 
-Extract steps read data from external data sources:
+Extract steps read data from external data sources.
+
+**Common Extract Patterns:**
+- CSV file extraction
+- Database query execution
+- REST API data retrieval
+- JSON/XML file parsing
+
+**Configuration Example:**
 
 ```yaml
 steps:
@@ -534,15 +822,17 @@ steps:
       filter: "status = 'ACTIVE'"          # Filter condition for data extraction
 ```
 
-**Common Extract Patterns:**
-- CSV file extraction
-- Database query execution
-- REST API data retrieval
-- JSON/XML file parsing
-
 ### Load Steps
 
-Load steps write data to external data sinks:
+Load steps write data to external data sinks.
+
+**Common Load Patterns:**
+- Database record insertion/update
+- File output generation
+- REST API data posting
+- Message queue publishing
+
+**Configuration Example:**
 
 ```yaml
 steps:
@@ -558,15 +848,11 @@ steps:
       conflict-resolution: "update"        # How to handle existing records
 ```
 
-**Common Load Patterns:**
-- Database record insertion/update
-- File output generation
-- REST API data posting
-- Message queue publishing
-
 ### Transform Steps
 
-Transform steps modify data between extraction and loading:
+Transform steps modify data between extraction and loading.
+
+**Configuration Example:**
 
 ```yaml
 steps:
@@ -601,7 +887,9 @@ steps:
 
 ### Audit Steps
 
-Audit steps create audit trails and compliance records:
+Audit steps create audit trails and compliance records.
+
+**Configuration Example:**
 
 ```yaml
 steps:
@@ -949,31 +1237,52 @@ pipeline:
 
 ### Execution Results
 
-Pipeline execution returns detailed results:
+Pipeline execution returns detailed results through the `RuleResult` API:
 
 ```java
-YamlPipelineExecutionResult result = pipelineEngine.executePipeline("pipeline-name");
+RulesEngine rulesEngine = RulesEngine.fromFile("pipeline.yaml");
+RuleResult result = rulesEngine.evaluate(new HashMap<>());
 
 // Check overall success
-boolean success = result.isSuccess();
+boolean success = result.getResultType() == RuleResult.ResultType.MATCH;
 
-// Get execution metrics
-long durationMs = result.getDurationMs();
-int totalSteps = result.getTotalSteps();
-int successfulSteps = result.getSuccessfulSteps();
-int failedSteps = result.getFailedSteps();
+// Access step-level data and metrics
+for (ExecutionStep step : result.getExecutionPath()) {
+    if ("PIPELINE_STEP".equals(step.getType())) {
+        // Step identification
+        String stepName = step.getName();
+        String status = step.getStatus();
+        long durationMs = step.getDurationMs();
 
-// Get step-level details
-List<StepExecutionResult> stepResults = result.getStepResults();
+        // Access step data
+        if (step.hasStepData()) {
+            Object stepData = step.getStepData();
+            // Process the data extracted/transformed by this step
+        }
+
+        // Access step metrics
+        if (step.getRecordsProcessed() != null) {
+            int recordsProcessed = step.getRecordsProcessed();
+            int recordsFailed = step.getRecordsFailed();
+            double successRate = step.getSuccessRate();
+        }
+    }
+}
+
+// Cleanup
+rulesEngine.shutdown();
 ```
 
 ### Performance Metrics
 
-- **Pipeline Duration**: Total execution time
-- **Step Duration**: Individual step execution times
-- **Record Counts**: Number of records processed per step
-- **Error Rates**: Success/failure ratios
-- **Resource Usage**: Memory and CPU utilization
+The `ExecutionStep` class provides comprehensive metrics for each pipeline step:
+
+- **Step Duration**: Individual step execution times via `getDurationMs()`
+- **Record Counts**: Number of records processed via `getRecordsProcessed()`
+- **Failure Counts**: Number of records failed via `getRecordsFailed()`
+- **Success Rate**: Calculated success percentage via `getSuccessRate()`
+- **Step Data**: Actual data produced by the step via `getStepData()`
+- **Execution Status**: Step status (SUCCESS, FAILED, SKIPPED) via `getStatus()`
 
 ---
 
@@ -1574,17 +1883,22 @@ pipeline:
 
 #### Check Execution Results
 ```java
-YamlPipelineExecutionResult result = pipelineEngine.executePipeline("pipeline-name");
+RulesEngine rulesEngine = RulesEngine.fromFile("pipeline.yaml");
+RuleResult result = rulesEngine.evaluate(new HashMap<>());
 
-if (!result.isSuccess()) {
-    System.out.println("Pipeline failed:");
-    for (StepExecutionResult stepResult : result.getStepResults()) {
-        if (!stepResult.isSuccess()) {
-            System.out.println("Failed step: " + stepResult.getStepName());
-            System.out.println("Error: " + stepResult.getErrorMessage());
+if (result.getResultType() != RuleResult.ResultType.MATCH) {
+    System.out.println("Pipeline failed: " + result.getMessage());
+
+    // Check individual step results
+    for (ExecutionStep step : result.getExecutionPath()) {
+        if ("PIPELINE_STEP".equals(step.getType()) && !"SUCCESS".equals(step.getStatus())) {
+            System.out.println("Failed step: " + step.getName());
+            System.out.println("Error: " + step.getMessage());
         }
     }
 }
+
+rulesEngine.shutdown();
 ```
 
 #### Validate Configuration
@@ -1850,8 +2164,10 @@ rulesEngine.shutdown();
 | **Result Type** | `YamlPipelineExecutionResult` | `RuleResult` |
 | **Success Check** | `result.isSuccess()` | `result.getResultType() == MATCH` |
 | **Error Handling** | Throws `DataPipelineException` | Returns `RuleResult` with ERROR type |
-| **Step-Level Data** | `result.getStepResults().get(i).getData()` | Not available (high-level result only) |
-| **Metrics** | `getDurationMs()`, `getSuccessfulSteps()` | Not available in `RuleResult` |
+| **Step-Level Data** | `result.getStepResults().get(i).getData()` | `result.getExecutionPath().get(i).getStepData()` ✅ |
+| **Step Metrics** | `stepResult.getRecordsProcessed()` | `step.getRecordsProcessed()` ✅ |
+| **Success Rate** | `stepResult.getSuccessRate()` | `step.getSuccessRate()` ✅ |
+| **Execution Trace** | Not available | `result.getExecutionPath()` ✅ |
 
 ### Migration Checklist
 
@@ -1859,20 +2175,97 @@ rulesEngine.shutdown();
 - [ ] Change `executePipeline()` calls to `evaluate()`
 - [ ] Update result type from `YamlPipelineExecutionResult` to `RuleResult`
 - [ ] Change success checks from `isSuccess()` to `getResultType() == MATCH`
-- [ ] Remove step-level data access (if used)
+- [ ] Update step-level data access to use `result.getExecutionPath()` (if used)
 - [ ] Update error handling to check `ResultType.ERROR`
 - [ ] Add `rulesEngine.shutdown()` in cleanup code
 - [ ] Update imports
 - [ ] Test thoroughly
 
-### Handling Step-Level Data
+### Accessing Step-Level Data
 
-**Important Limitation:** The new `RuleResult` API does not provide access to individual step results or extracted data. This is by design to maintain a universal result interface.
+**Good News:** The new `RuleResult` API provides full access to step-level data, metrics, and execution details through the `getExecutionPath()` method!
 
-**If you need step-level data:**
-1. **Option 1**: Store data in external storage (database, file) during pipeline execution
-2. **Option 2**: Use data sinks to write step results to accessible locations
-3. **Option 3**: Keep using `DataPipelineEngine` temporarily (not recommended)
+**Accessing Step Data:**
+
+```java
+RuleResult result = rulesEngine.evaluate(new HashMap<>());
+
+// Access step-level data and metrics
+for (ExecutionStep step : result.getExecutionPath()) {
+    if ("PIPELINE_STEP".equals(step.getType())) {
+        System.out.println("Step: " + step.getName());
+        System.out.println("  Status: " + step.getStatus());
+        System.out.println("  Duration: " + step.getDurationMs() + "ms");
+
+        // Access the actual data produced by the step
+        if (step.hasStepData()) {
+            Object stepData = step.getStepData();
+            if (stepData instanceof List) {
+                List<?> records = (List<?>) stepData;
+                System.out.println("  Records: " + records.size());
+
+                // Process each record
+                for (Object record : records) {
+                    // Your processing logic here
+                }
+            }
+        }
+
+        // Access step metrics
+        if (step.getRecordsProcessed() != null) {
+            System.out.println("  Records Processed: " + step.getRecordsProcessed());
+            System.out.println("  Records Failed: " + step.getRecordsFailed());
+            System.out.println("  Success Rate: " + step.getSuccessRate() + "%");
+        }
+    }
+}
+```
+
+**Migration Note:** This provides feature parity with the old `YamlPipelineExecutionResult.getStepResults()` API!
+
+#### Old API vs New API Comparison
+
+**Old API (Deprecated):**
+```java
+YamlPipelineExecutionResult result = pipelineEngine.executePipeline("my-pipeline");
+
+// Access step results
+for (PipelineStepResult stepResult : result.getStepResults()) {
+    String stepName = stepResult.getStepName();
+    Object data = stepResult.getData();
+    int processed = stepResult.getRecordsProcessed();
+    int failed = stepResult.getRecordsFailed();
+    double successRate = stepResult.getSuccessRate();
+
+    System.out.println(stepName + ": " + processed + " processed, " +
+                      failed + " failed, " + successRate + "% success");
+}
+```
+
+**New API (Current):**
+```java
+RuleResult result = rulesEngine.evaluate(new HashMap<>());
+
+// Access step results via execution path
+for (ExecutionStep step : result.getExecutionPath()) {
+    if ("PIPELINE_STEP".equals(step.getType())) {
+        String stepName = step.getName();
+        Object data = step.getStepData();
+        Integer processed = step.getRecordsProcessed();
+        Integer failed = step.getRecordsFailed();
+        double successRate = step.getSuccessRate();
+
+        System.out.println(stepName + ": " + processed + " processed, " +
+                          failed + " failed, " + successRate + "% success");
+    }
+}
+```
+
+**Key Points:**
+- ✅ Same data available in both APIs
+- ✅ Same metrics available in both APIs
+- ✅ New API adds execution trace for better debugging
+- ⚠️ New API uses `Integer` (nullable) instead of `int` for metrics
 
 ### Testing Your Migration
 
@@ -1902,11 +2295,93 @@ For migration assistance:
 
 ---
 
-## 19. Known Issues & Anomalies
+## 19. Recent Improvements & Known Issues
 
-This section documents known inconsistencies, deprecated patterns, and issues discovered during code review (January 2026).
+This section documents recent bug fixes, improvements, and known issues (January 2026).
+
+### 19.0 Recent Bug Fixes (Version 3.1 - January 2026)
+
+The following critical issues were identified and resolved in version 3.1:
+
+#### 19.0.1 SpEL Expression Evaluation in Transform Steps
+
+**Issue:** Transform steps with calculations using SpEL expressions (e.g., `#quantity * #price`) were failing because the `applyCalculation()` method had a simplistic implementation that couldn't handle complex expressions.
+
+**Resolution:**
+- Added Spring Expression Language (SpEL) support to `PipelineExecutor`
+- Updated `applyCalculation()` to use `SpelExpressionParser` for proper expression evaluation
+- Made variable lookup case-insensitive to handle uppercase database column names
+- **File:** `apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java`
+
+**Impact:** Transform steps can now use full SpEL expressions including:
+- Arithmetic operations: `#quantity * #price`
+- String operations: `#name.toUpperCase()`
+- Date/time functions: `T(java.time.Instant).now().toString()`
+- Conditional logic: `#amount > 100 ? 'HIGH' : 'LOW'`
+
+#### 19.0.2 Case-Insensitive Parameter Matching for Database Operations
+
+**Issue:** H2 database in PostgreSQL mode converts unquoted identifiers to uppercase, but SQL INSERT statements used lowercase parameter names (`:id`, `:name`), causing parameter binding failures.
+
+**Resolution:**
+- Updated `JdbcParameterUtils.prepareStatement()` to perform case-insensitive parameter matching
+- Parameters are now matched regardless of case (`:id` matches `ID`, `Id`, or `id`)
+- **File:** `apex-core/src/main/java/dev/mars/apex/core/service/data/external/database/JdbcParameterUtils.java`
+
+**Impact:** Database load steps now work correctly with H2 in PostgreSQL mode and other databases that normalize identifier case.
+
+#### 19.0.3 Data Sink Caching Issue
+
+**Issue:** When a `RulesEngine` was shut down, it closed the HikariDataSource, but the closed DataSource remained in the `JdbcTemplateFactory` cache. When a new `RulesEngine` was created with the same configuration, it retrieved the closed DataSource from the cache, causing connection failures.
+
+**Resolution:**
+- Updated `DatabaseDataSink.shutdown()` to remove the DataSource from the cache when it's closed
+- **File:** `apex-core/src/main/java/dev/mars/apex/core/service/data/external/database/DatabaseDataSink.java`
+
+**Impact:** Multiple `RulesEngine` instances can now be created and destroyed in the same JVM without connection pool issues.
+
+#### 19.0.4 Pipeline Executor Shutdown Issue
+
+**Issue:** `PipelineExecutor` was shutting down data sinks after each pipeline execution, but the data sinks are owned by the `RulesEngine`, not the `PipelineExecutor`. This caused premature resource cleanup.
+
+**Resolution:**
+- Removed the `shutdownDataSinks()` call from the `PipelineExecutor.executePipeline()` finally block
+- Data sinks are now only shut down when `RulesEngine.shutdown()` is called
+- **File:** `apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java`
+
+**Impact:** Data sinks can now be reused across multiple pipeline executions within the same `RulesEngine` instance.
+
+#### 19.0.5 Missing Metrics for Pipeline Steps
+
+**Issue:** The `recordsProcessed` metric was not being set for extract and transform steps, making it impossible to track how many records were processed by each step.
+
+**Resolution:**
+- Updated pipeline step execution code to set `recordsProcessed` based on the size of the data returned
+- Metrics are now captured for all step types (extract, transform, load, audit)
+- **File:** `apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java`
+
+**Impact:** Full metrics are now available for all pipeline steps via `ExecutionStep.getRecordsProcessed()`.
+
+#### 19.0.6 Step-Level Data Access Enhancement
+
+**Issue:** The `RuleResult` API was discarding step-level data when converting from `YamlPipelineExecutionResult`, forcing developers to add explicit data sinks to access intermediate data.
+
+**Resolution:**
+- Enhanced `ExecutionStep` class with new fields:
+  - `stepData` (Object) - stores actual data from pipeline step
+  - `recordsProcessed` (Integer) - tracks successful records
+  - `recordsFailed` (Integer) - tracks failed records
+- Updated `RulesEngine` to capture and pass step data to `ExecutionStep`
+- Added helper methods: `hasStepData()`, `getSuccessRate()`
+- **Files:**
+  - `apex-core/src/main/java/dev/mars/apex/core/engine/model/ExecutionStep.java`
+  - `apex-core/src/main/java/dev/mars/apex/core/engine/config/RulesEngine.java`
+
+**Impact:** The new `RuleResult` API now provides **feature parity** with the deprecated `DataPipelineEngine` API. Developers can access step-level data and metrics through `result.getExecutionPath()`.
 
 ### 19.1 Deprecated Classes (Scheduled for Removal)
+
+### 19.7 Deprecated Classes (Scheduled for Removal)
 
 | Class | Deprecation | Replacement | Status |
 |-------|-------------|-------------|--------|
@@ -1916,7 +2391,7 @@ This section documents known inconsistencies, deprecated patterns, and issues di
 
 **Note:** Tests and production code should use `RulesEngine.fromFile()` as the primary entry point.
 
-### 19.2 Documentation vs Code Discrepancies
+### 19.8 Documentation vs Code Discrepancies
 
 The following items were found in older design documents but do **not exist** in the current codebase:
 
@@ -1926,7 +2401,7 @@ The following items were found in older design documents but do **not exist** in
 
 **Recommendation:** Ignore references to `SequentialYamlRulesEngineService` in any documentation. Use `RulesEngineService` with `metadata.processing-mode: "sequential"` instead.
 
-### 19.3 Test Data Date Dependencies
+### 19.9 Test Data Date Dependencies
 
 Some PostgreSQL integration tests use date-bounded test data. If tests fail with `null` values when expected data should be returned, check for expired date ranges in:
 
@@ -1936,7 +2411,7 @@ Some PostgreSQL integration tests use date-bounded test data. If tests fail with
 
 **Resolution:** Extend `expiry_date` values to a future date (e.g., `2027-12-31`).
 
-### 19.4 Service Pattern Recommendations
+### 19.10 Service Pattern Recommendations
 
 For consistency across the codebase, use the following patterns:
 
@@ -1955,7 +2430,7 @@ YamlRulesEngineService service = new YamlRulesEngineService();
 RulesEngine engine = service.createRulesEngineFromYamlConfig(config);
 ```
 
-### 19.5 Test YAML Dependencies
+### 19.11 Test YAML Dependencies
 
 Tests should use standalone YAML configurations without external database dependencies where possible. For concurrent access testing, use:
 
@@ -1976,6 +2451,19 @@ This comprehensive guide demonstrates APEX Pipeline Orchestration as a **complet
 3. **High Performance**: Sub-second processing for typical batch sizes
 4. **Robust Error Handling**: Comprehensive error handling and recovery mechanisms
 5. **Extensible Architecture**: Easy to add new data sources, sinks, and step types
+6. **Full Step-Level Data Access**: Complete access to intermediate data and metrics via `ExecutionStep`
+
+### Recent Improvements (Version 3.1)
+
+Version 3.1 includes significant improvements to pipeline execution:
+
+- **Enhanced SpEL Support**: Full Spring Expression Language support in transform steps
+- **Case-Insensitive Parameters**: Robust parameter matching for database operations
+- **Fixed Data Sink Caching**: Proper resource cleanup and reuse across multiple executions
+- **Complete Metrics**: All pipeline steps now report `recordsProcessed` and `recordsFailed`
+- **Step-Level Data Access**: Full feature parity with deprecated `DataPipelineEngine` API
+
+These improvements make the `RulesEngine` API a complete and robust replacement for the deprecated `DataPipelineEngine`.
 
 ### Advanced Capabilities
 
@@ -1983,8 +2471,9 @@ The system supports advanced features like:
 - Scheduled pipeline execution
 - Advanced monitoring and alerting
 - Multiple data sink types (databases, files, message queues, cloud storage)
-- Complex transformation capabilities
+- Complex transformation capabilities with full SpEL expression support
 - Enterprise-grade security and compliance features
+- Comprehensive step-level data and metrics access
 
 This guide provides a solid foundation for understanding APEX's comprehensive data processing capabilities while maintaining its core strength: **simple, declarative, YAML-driven configuration**.
 

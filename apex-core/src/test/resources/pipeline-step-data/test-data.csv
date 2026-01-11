@@ -1,0 +1,12 @@
+id,name,value,status
+1,Product A,99.99,active
+2,Product B,149.50,active
+3,Product C,75.25,inactive
+4,Product D,200.00,active
+5,Product E,50.00,active
+6,Product F,125.75,active
+7,Product G,89.99,inactive
+8,Product H,175.50,active
+9,Product I,95.00,active
+10,Product J,110.25,active
+

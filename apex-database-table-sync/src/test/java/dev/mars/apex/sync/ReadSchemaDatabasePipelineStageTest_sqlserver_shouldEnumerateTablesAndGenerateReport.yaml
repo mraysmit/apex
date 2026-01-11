@@ -1,0 +1,33 @@
+metadata:
+  name: "SQL Server: Multi-Table Enumeration with HTML Report Test"
+  description: "SQL Server test configuration for enumerating all tables and generating HTML report"
+  version: "1.0"
+
+data-sources:
+  - name: "sqlserver-enumeration-db"
+    type: "database"
+    source-type: "sqlserver"
+    connection:
+      host: "localhost"
+      port: 1433
+      database: "test_db"
+      username: "${SQLSERVER_USER:sa}"
+      password: "${SQLSERVER_PASSWORD:YourStrong@Passw0rd}"
+    enabled: true
+
+pipeline:
+  name: "enumerate-and-report"
+  execution:
+    mode: "sequential"
+    error-handling: "continue-on-error"
+  
+  steps:
+    # Enumerate all tables without specifying individual table names
+    - name: "enumerate-all-tables"
+      type: "read-schema"
+      source: "sqlserver-enumeration-db"
+      description: "Enumerate all tables in database and generate HTML report"
+      parameters:
+        # No table parameter - this triggers enumeration
+        schema: "dbo"  # SQL Server default schema
+        report-output: "target/reports/sqlserver-all-tables-schema-report.html"

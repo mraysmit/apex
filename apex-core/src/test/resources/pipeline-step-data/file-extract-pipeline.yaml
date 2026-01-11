@@ -1,0 +1,66 @@
+# ============================================================================
+# File Extract Pipeline - Test Configuration
+# ============================================================================
+#
+# PURPOSE:
+# Tests pipeline execution with file-based data source (CSV/JSON).
+# Verifies that file data is captured correctly.
+#
+# USED BY: RulesEnginePipelineStepDataIntegrationTest.java
+# ============================================================================
+
+metadata:
+  id: "file-extract-pipeline-test"
+  name: "File Extract Pipeline Test"
+  version: "1.0"
+  description: "Test pipeline for capturing data from file extracts"
+
+# File-based data source
+data-sources:
+  - name: "csv-file-source"
+    type: "file-system"
+    enabled: true
+    description: "CSV File Data Source"
+
+    connection:
+      base-path: "src/test/resources/pipeline-step-data"
+      file-pattern: "test-data.csv"
+      encoding: "UTF-8"
+
+    file-format:
+      format: "csv"
+      delimiter: ","
+      has-header: true
+      encoding: "UTF-8"
+
+    custom-properties:
+      schema:
+        fields:
+          - name: "id"
+            type: "integer"
+          - name: "name"
+            type: "string"
+          - name: "value"
+            type: "double"
+          - name: "status"
+            type: "string"
+
+    queries:
+      getAllData: "readAll"
+
+# Pipeline with file extract
+pipeline:
+  name: "file-extract-test"
+  description: "Extract data from CSV file"
+
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+
+  steps:
+    - name: "extract-from-csv"
+      type: "extract"
+      source: "csv-file-source"
+      operation: "getAllData"
+      description: "Extract all records from CSV file"
+

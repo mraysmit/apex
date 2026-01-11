@@ -2,6 +2,7 @@ package dev.mars.apex.sync;
 
 import dev.mars.apex.core.config.yaml.RulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.model.ExecutionStep;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.Test;
 
@@ -13,8 +14,8 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.HashMap;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+
 
 /**
  * Integration test for Table Sync simulating SQL Server to PostgreSQL flow.
@@ -48,9 +49,44 @@ public class TableSyncIntegrationTestH2 {
         // 4. Verify Result
         assertTrue(result.isSuccess(), "Sync failed: " + result.getMessage());
 
+        // 4a. Verify Step-Level Metrics
+        System.out.println("\n=== Pipeline Execution Metrics ===");
+        int extractStepRecords = 0;
+        int loadStepRecords = 0;
+
+        for (ExecutionStep step : result.getExecutionPath()) {
+            if ("PIPELINE_STEP".equals(step.getType())) {
+                System.out.printf("Step: %s - Status: %s - Duration: %d ms%n",
+                    step.getName(), step.getStatus(), step.getDurationMs());
+
+                if (step.getRecordsProcessed() != null) {
+                    System.out.printf("  Records Processed: %d%n", step.getRecordsProcessed());
+
+                    if ("extract-from-sqlserver".equals(step.getName())) {
+                        extractStepRecords = step.getRecordsProcessed();
+                    } else if ("load-into-postgresql".equals(step.getName())) {
+                        loadStepRecords = step.getRecordsProcessed();
+                    }
+                }
+
+                if (step.getRecordsFailed() != null) {
+                    System.out.printf("  Records Failed: %d%n", step.getRecordsFailed());
+                }
+
+                if (step.getRecordsProcessed() != null && step.getRecordsFailed() != null) {
+                    System.out.printf("  Success Rate: %.2f%%%n", step.getSuccessRate());
+                }
+            }
+        }
+        System.out.println("==================================\n");
+
+        // Verify that we extracted and loaded the expected number of records
+        assertEquals(2, extractStepRecords, "Extract step should have processed 2 records");
+        assertEquals(2, loadStepRecords, "Load step should have processed 2 records");
+
         // 5. Verify Target Data (Simulating PostgreSQL via H2 MODE=PostgreSQL)
-        String targetUrl = "jdbc:h2:mem:target_postgres;MODE=PostgreSQL;DB_CLOSE_DELAY=-1"; 
-        
+        String targetUrl = "jdbc:h2:mem:target_postgres;MODE=PostgreSQL;DB_CLOSE_DELAY=-1";
+
         try (Connection conn = DriverManager.getConnection(targetUrl, "sa", "")) {
             try (Statement stmt = conn.createStatement()) {
                 try (ResultSet rs = stmt.executeQuery("SELECT name FROM customers WHERE id = 1")) {
@@ -66,5 +102,8 @@ public class TableSyncIntegrationTestH2 {
                 }
             }
         }
+
+        // 6. Cleanup
+        engine.shutdown();
     }
 }

@@ -196,6 +196,12 @@
                 <version>${testcontainers.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-mssqlserver</artifactId>
+                <version>${testcontainers.version}</version>
+                <scope>test</scope>
+            </dependency>
 
             <!-- Database dependencies -->
             <dependency>
@@ -241,7 +247,7 @@
                     <version>3.1.2</version>
                     <configuration>
                         <!-- Permanent Test Logging Configuration -->
-                        <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                        <redirectTestOutputToFile>false</redirectTestOutputToFile>
                         <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
 
                         <!-- Detailed logging for all test output -->
