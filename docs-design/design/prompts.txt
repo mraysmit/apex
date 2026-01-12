@@ -899,7 +899,7 @@ APEX is designed so that all YAML configurations are **external to the applicati
 
 ### **Example Module Structure:**
 ```
-apex-database-table-sync/
+apex-data-sync/
 ├── configs/                    # External example configs (NOT packaged)
 │   ├── config-a/
 │   ├── config-b/

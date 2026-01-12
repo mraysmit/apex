@@ -39,7 +39,7 @@
         <module>apex-rest-api</module>
         <module>apex-playground</module>
         <module>apex-yaml-manager</module>
-        <module>apex-database-table-sync</module>
+        <module>apex-data-sync</module>
     </modules>
 
     <dependencyManagement>

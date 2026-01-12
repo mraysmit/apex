@@ -1,0 +1,30 @@
+# Clean Enrichment Demo Test Configuration
+# Tests that enrichments are applied AND metadata is filtered
+
+metadata:
+  id: clean-enrichment-demo
+  name: Clean Enrichment Demo
+  version: 1.0.0
+  description: Demo config that adds enrichment fields
+  type: rule-config
+  author: APEX Core Team
+  created: '2026-01-12'
+  tags:
+    - test
+    - enrichment
+    - demo
+
+enrichments:
+  - id: risk-categorisation
+    name: Risk Categorisation
+    description: Categorises trade by risk level based on amount
+    enabled: true
+    condition: "true"
+    type: field-enrichment
+    field-mappings:
+      - source-field: "constant"
+        expression: "'HIGH_VALUE'"
+        target-field: 'riskCategory'
+      - source-field: "constant"
+        expression: "'APPROVED'"
+        target-field: 'status'

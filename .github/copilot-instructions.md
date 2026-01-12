@@ -11,6 +11,7 @@ APEX is a comprehensive Java-based rules engine (v2.1) for financial services wi
 - **`apex-playground`**: Interactive Spring Boot web UI (port 8081) for development
 - **`apex-rest-api`**: Complete REST API with OpenAPI/Swagger (port 8080)
 - **`apex-compiler`**: YAML validation and compilation tools
+- **`apex-data-sync`**: Data synchronization runner with schema analysis and HTML report generation
 
 ### External Data-Source Reference System (APEX 2.1)
 The defining architectural pattern separating infrastructure from business logic:
@@ -76,6 +77,25 @@ data-source-refs:
 - **Enrichments**: `id`, `type: "lookup-enrichment"`, `lookup-config`
 - **Rule Groups**: Collections with aggregated validation
 - **Rule Chains**: 6 patterns including `sequential-dependency`, `conditional-chaining`
+- **Pipelines**: `read-schema`, `extract`, `transform`, `load` with automatic report generation
+
+### Schema Analysis & Reporting
+APEX includes comprehensive schema reading with automatic HTML report generation:
+
+```yaml
+steps:
+  - name: "analyze-schema"
+    type: "read-schema"
+    source: "my-database"
+    parameters:
+      table: "customers"
+      report-output: "schema-report.html"  # → reports/schema-report.html (auto-created)
+```
+
+**Report Path Conventions**:
+- Filename only → saved to `reports/` directory (created automatically)
+- Relative path → creates necessary directories
+- Supports database enumeration and CSV schema analysis
 
 ## Financial Services Domain Knowledge
 
