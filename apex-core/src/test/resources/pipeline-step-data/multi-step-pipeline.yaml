@@ -10,9 +10,11 @@
 # ============================================================================
 
 metadata:
+  type: "pipeline-config"
   id: "multi-step-pipeline-test"
   name: "Multi-Step Pipeline Test"
   version: "1.0"
+  author: "APEX Core Team"
   description: "Test pipeline for capturing step data from multi-step operations"
 
 # Data source

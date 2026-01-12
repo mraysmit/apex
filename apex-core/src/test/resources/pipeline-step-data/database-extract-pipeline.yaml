@@ -12,6 +12,12 @@
 # ============================================================================
 
 metadata:
+  type: "pipeline-config"
+  id: "database-extract-pipeline-test"
+  name: "Database Extract Pipeline Test"
+  version: "1.0"
+  author: "APEX Core Team"
+  description: "Test pipeline for database extraction with step data capture"
   id: "database-extract-pipeline-test"
   name: "Database Extract Pipeline Test"
   version: "1.0"

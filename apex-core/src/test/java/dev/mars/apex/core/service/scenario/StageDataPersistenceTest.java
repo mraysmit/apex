@@ -52,6 +52,39 @@ class StageDataPersistenceTest {
     private static final Logger logger = LoggerFactory.getLogger(StageDataPersistenceTest.class);
 
     // ========================================
+    // Test Utilities
+    // ========================================
+    
+    // Test loader that returns in-memory configs (shared across test classes)
+    private static class TestConfigLoader extends YamlConfigurationLoader {
+        private final Map<String, YamlRuleConfiguration> configs = new HashMap<>();
+        private final Map<String, Boolean> failures = new HashMap<>();
+
+        public void addSuccess(String path) {
+            configs.put(path, new YamlRuleConfiguration());
+            failures.put(path, false);
+        }
+        
+        public void addSuccess(String path, YamlRuleConfiguration config) {
+            configs.put(path, config);
+            failures.put(path, false);
+        }
+        
+        public void addFailure(String path, YamlRuleConfiguration config) {
+            configs.put(path, config);
+            failures.put(path, true);
+        }
+
+        @Override
+        public YamlRuleConfiguration loadFromFile(String filePath) {
+            if (failures.getOrDefault(filePath, false)) {
+                throw new RuntimeException("Simulated config load failure for: " + filePath);
+            }
+            return configs.getOrDefault(filePath, new YamlRuleConfiguration());
+        }
+    }
+
+    // ========================================
     // StageExecutionResult Unit Tests
     // ========================================
     
@@ -234,20 +267,6 @@ class StageDataPersistenceTest {
         private YamlRuleFactory ruleFactory;
         private ScenarioStageExecutor executor;
 
-        // Test loader that returns in-memory configs (same pattern as other tests)
-        private static class TestConfigLoader extends YamlConfigurationLoader {
-            private final Map<String, YamlRuleConfiguration> configs = new HashMap<>();
-
-            public void addSuccess(String path) {
-                configs.put(path, new YamlRuleConfiguration());
-            }
-
-            @Override
-            public YamlRuleConfiguration loadFromFile(String filePath) {
-                return configs.getOrDefault(filePath, new YamlRuleConfiguration());
-            }
-        }
-
         @BeforeEach
         void setUp() {
             configLoader = new TestConfigLoader();
@@ -409,6 +428,437 @@ class StageDataPersistenceTest {
             assertEquals(2, result.getStageResults().size(), "Both stages should execute");
             
             logger.info("✓ Continued execution after non-critical failure policy");
+        }
+    }
+
+    // ========================================
+    // Scenario Metadata Isolation Tests
+    // ========================================
+    
+    @Nested
+    @DisplayName("Scenario Metadata Isolation Tests")
+    class ScenarioMetadataIsolationTests {
+        
+        private ScenarioStageExecutor executor;
+        private TestConfigLoader configLoader;
+        private YamlRuleFactory ruleFactory;
+        
+        @BeforeEach
+        void setUp() {
+            logger.info("Setting up scenario metadata isolation tests");
+            configLoader = new TestConfigLoader();
+            ruleFactory = new YamlRuleFactory();
+            executor = new ScenarioStageExecutor(configLoader, ruleFactory);
+        }
+        
+        @Test
+        @DisplayName("Should NOT pollute input dataObjectMap with scenarioContext")
+        void testScenarioContextNotInInputData() {
+            logger.info("TEST: scenarioContext should not pollute input data");
+            
+            // Create a simple scenario with enrichment
+            ScenarioStage stage = new ScenarioStage();
+            stage.setStageName("test-stage");
+            stage.setConfigFile("test-config.yaml");
+            stage.setEnabled(true);
+            stage.setRequired(true);
+            
+            ScenarioConfiguration scenario = ScenarioConfiguration.withStages(
+                "test-scenario",
+                "Test Scenario",
+                Collections.singletonList("TEST_TYPE"),
+                Collections.singletonList(stage)
+            );
+            
+            // Mock config with enrichment
+            YamlRuleConfiguration config = new YamlRuleConfiguration();
+            configLoader.addSuccess("test-config.yaml", config);
+            
+            // Create input data with some fields
+            Map<String, Object> inputData = new HashMap<>();
+            inputData.put("customerId", "CUST123");
+            inputData.put("amount", 1000);
+            
+            // Store original keys for comparison
+            Set<String> originalKeys = new HashSet<>(inputData.keySet());
+            
+            // Execute scenario
+            ScenarioExecutionResult result = executor.executeStages(scenario, inputData);
+            
+            // CRITICAL ASSERTION: scenarioContext should NOT be in input data
+            assertFalse(inputData.containsKey("scenarioContext"),
+                "Input dataObjectMap should NOT contain scenarioContext");
+            assertNull(inputData.get("scenarioContext"),
+                "scenarioContext should be null in input data");
+            
+            logger.info("✓ scenarioContext not present in input data");
+        }
+        
+        @Test
+        @DisplayName("Should NOT pollute input dataObjectMap with previousStageResults")
+        void testPreviousStageResultsNotInInputData() {
+            logger.info("TEST: previousStageResults should not pollute input data");
+            
+            ScenarioStage stage1 = new ScenarioStage();
+            stage1.setStageName("stage1");
+            stage1.setConfigFile("config1.yaml");
+            stage1.setEnabled(true);
+            
+            ScenarioStage stage2 = new ScenarioStage();
+            stage2.setStageName("stage2");
+            stage2.setConfigFile("config2.yaml");
+            stage2.setEnabled(true);
+            
+            ScenarioConfiguration scenario = ScenarioConfiguration.withStages(
+                "multi-stage-scenario",
+                "Multi Stage Test",
+                Collections.singletonList("TEST_TYPE"),
+                Arrays.asList(stage1, stage2)
+            );
+            
+            YamlRuleConfiguration config1 = new YamlRuleConfiguration();
+            configLoader.addSuccess("config1.yaml", config1);
+            
+            YamlRuleConfiguration config2 = new YamlRuleConfiguration();
+            configLoader.addSuccess("config2.yaml", config2);
+            
+            Map<String, Object> inputData = new HashMap<>();
+            inputData.put("testField", "testValue");
+            
+            executor.executeStages(scenario, inputData);
+            
+            // CRITICAL ASSERTION: previousStageResults should NOT be in input data
+            assertFalse(inputData.containsKey("previousStageResults"),
+                "Input dataObjectMap should NOT contain previousStageResults");
+            assertNull(inputData.get("previousStageResults"),
+                "previousStageResults should be null in input data");
+            
+            logger.info("✓ previousStageResults not present in input data");
+        }
+        
+        @Test
+        @DisplayName("Should NOT pollute input dataObjectMap with scenarioId")
+        void testScenarioIdNotInInputData() {
+            logger.info("TEST: scenarioId should not pollute input data");
+            
+            ScenarioStage stage = new ScenarioStage();
+            stage.setStageName("test-stage");
+            stage.setConfigFile("test-config.yaml");
+            stage.setEnabled(true);
+            
+            ScenarioConfiguration scenario = ScenarioConfiguration.withStages(
+                "unique-scenario-id",
+                "Test Scenario",
+                Collections.singletonList("TEST_TYPE"),
+                Collections.singletonList(stage)
+            );
+            
+            YamlRuleConfiguration config = new YamlRuleConfiguration();
+            configLoader.addSuccess("test-config.yaml", config);
+            
+            Map<String, Object> inputData = new HashMap<>();
+            inputData.put("originalField", "originalValue");
+            
+            executor.executeStages(scenario, inputData);
+            
+            // CRITICAL ASSERTION: scenarioId should NOT be in input data
+            assertFalse(inputData.containsKey("scenarioId"),
+                "Input dataObjectMap should NOT contain scenarioId");
+            assertNull(inputData.get("scenarioId"),
+                "scenarioId should be null in input data");
+            
+            logger.info("✓ scenarioId not present in input data");
+        }
+        
+        @Test
+        @DisplayName("Should NOT pollute input dataObjectMap with executionStartTime")
+        void testExecutionStartTimeNotInInputData() {
+            logger.info("TEST: executionStartTime should not pollute input data");
+            
+            ScenarioStage stage = new ScenarioStage();
+            stage.setStageName("test-stage");
+            stage.setConfigFile("test-config.yaml");
+            stage.setEnabled(true);
+            
+            ScenarioConfiguration scenario = ScenarioConfiguration.withStages(
+                "test-scenario",
+                "Test Scenario",
+                Collections.singletonList("TEST_TYPE"),
+                Collections.singletonList(stage)
+            );
+            
+            YamlRuleConfiguration config = new YamlRuleConfiguration();
+            configLoader.addSuccess("test-config.yaml", config);
+            
+            Map<String, Object> inputData = new HashMap<>();
+            inputData.put("data", "value");
+            
+            executor.executeStages(scenario, inputData);
+            
+            // CRITICAL ASSERTION: executionStartTime should NOT be in input data
+            assertFalse(inputData.containsKey("executionStartTime"),
+                "Input dataObjectMap should NOT contain executionStartTime");
+            assertNull(inputData.get("executionStartTime"),
+                "executionStartTime should be null in input data");
+            
+            logger.info("✓ executionStartTime not present in input data");
+        }
+        
+        @Test
+        @DisplayName("Should NOT pollute input data with ANY scenario metadata fields")
+        void testNoScenarioMetadataPollution() {
+            logger.info("TEST: No scenario metadata should pollute input data");
+            
+            ScenarioStage stage = new ScenarioStage();
+            stage.setStageName("enrichment-stage");
+            stage.setConfigFile("enrichment-config.yaml");
+            stage.setEnabled(true);
+            
+            ScenarioConfiguration scenario = ScenarioConfiguration.withStages(
+                "comprehensive-test",
+                "Comprehensive Metadata Test",
+                Collections.singletonList("TEST_TYPE"),
+                Collections.singletonList(stage)
+            );
+            
+            YamlRuleConfiguration config = new YamlRuleConfiguration();
+            configLoader.addSuccess("enrichment-config.yaml", config);
+            
+            Map<String, Object> inputData = new HashMap<>();
+            inputData.put("customerId", "C001");
+            inputData.put("amount", 5000);
+            inputData.put("currency", "USD");
+            
+            // Store original key count
+            int originalKeyCount = inputData.keySet().size();
+            Set<String> originalKeys = new HashSet<>(inputData.keySet());
+            
+            executor.executeStages(scenario, inputData);
+            
+            // CRITICAL ASSERTIONS: None of the metadata fields should be present
+            List<String> metadataFields = Arrays.asList(
+                "scenarioContext",
+                "previousStageResults", 
+                "scenarioId",
+                "executionStartTime"
+            );
+            
+            for (String metadataField : metadataFields) {
+                assertFalse(inputData.containsKey(metadataField),
+                    "Input dataObjectMap should NOT contain: " + metadataField);
+            }
+            
+            // Verify only legitimate fields remain
+            Set<String> currentKeys = new HashSet<>(inputData.keySet());
+            currentKeys.removeAll(originalKeys);
+            
+            // Any new keys should be legitimate enriched data, not metadata
+            for (String newKey : currentKeys) {
+                assertFalse(metadataFields.contains(newKey),
+                    "New key '" + newKey + "' should not be scenario metadata");
+            }
+            
+            logger.info("✓ Input data contains {} fields, none are scenario metadata", inputData.size());
+            logger.info("✓ All scenario metadata fields successfully filtered");
+        }
+        
+        @Test
+        @DisplayName("Should preserve legitimate enriched data while filtering metadata")
+        void testLegitimateEnrichedDataPreserved() {
+            logger.info("TEST: Legitimate enriched data should be preserved");
+            
+            ScenarioStage stage = new ScenarioStage();
+            stage.setStageName("enrichment-stage");
+            stage.setConfigFile("enrichment.yaml");
+            stage.setEnabled(true);
+            
+            ScenarioConfiguration scenario = ScenarioConfiguration.withStages(
+                "enrichment-scenario",
+                "Enrichment Test",
+                Collections.singletonList("TEST_TYPE"),
+                Collections.singletonList(stage)
+            );
+            
+            // Create a config that will produce enriched data
+            YamlRuleConfiguration config = new YamlRuleConfiguration();
+            
+            // Mock enrichment result that would normally add fields
+            configLoader.addSuccess("enrichment.yaml", config);
+            
+            Map<String, Object> inputData = new HashMap<>();
+            inputData.put("customerId", "CUST123");
+            
+            executor.executeStages(scenario, inputData);
+            
+            // Original field should still be there
+            assertEquals("CUST123", inputData.get("customerId"),
+                "Original input data should be preserved");
+            
+            // Metadata should NOT be there
+            assertFalse(inputData.containsKey("scenarioContext"));
+            assertFalse(inputData.containsKey("previousStageResults"));
+            assertFalse(inputData.containsKey("scenarioId"));
+            assertFalse(inputData.containsKey("executionStartTime"));
+            
+            logger.info("✓ Legitimate data preserved while metadata filtered");
+        }
+        
+        @Test
+        @DisplayName("Should filter metadata across multiple stages")
+        void testMetadataFilteringAcrossMultipleStages() {
+            logger.info("TEST: Metadata filtering across multiple stages");
+            
+            ScenarioStage stage1 = new ScenarioStage();
+            stage1.setStageName("stage-1");
+            stage1.setConfigFile("stage1.yaml");
+            stage1.setEnabled(true);
+            
+            ScenarioStage stage2 = new ScenarioStage();
+            stage2.setStageName("stage-2");
+            stage2.setConfigFile("stage2.yaml");
+            stage2.setEnabled(true);
+            
+            ScenarioStage stage3 = new ScenarioStage();
+            stage3.setStageName("stage-3");
+            stage3.setConfigFile("stage3.yaml");
+            stage3.setEnabled(true);
+            
+            ScenarioConfiguration scenario = ScenarioConfiguration.withStages(
+                "multi-stage-test",
+                "Multi-Stage Metadata Test",
+                Collections.singletonList("TEST_TYPE"),
+                Arrays.asList(stage1, stage2, stage3)
+            );
+            
+            YamlRuleConfiguration config1 = new YamlRuleConfiguration();
+            configLoader.addSuccess("stage1.yaml", config1);
+            
+            YamlRuleConfiguration config2 = new YamlRuleConfiguration();
+            configLoader.addSuccess("stage2.yaml", config2);
+            
+            YamlRuleConfiguration config3 = new YamlRuleConfiguration();
+            configLoader.addSuccess("stage3.yaml", config3);
+            
+            Map<String, Object> inputData = new HashMap<>();
+            inputData.put("initialData", "value");
+            
+            executor.executeStages(scenario, inputData);
+            
+            // After ALL stages, metadata should still be filtered
+            assertFalse(inputData.containsKey("scenarioContext"),
+                "scenarioContext should not appear after any stage");
+            assertFalse(inputData.containsKey("previousStageResults"),
+                "previousStageResults should not appear after any stage");
+            assertFalse(inputData.containsKey("scenarioId"),
+                "scenarioId should not appear after any stage");
+            assertFalse(inputData.containsKey("executionStartTime"),
+                "executionStartTime should not appear after any stage");
+            
+            logger.info("✓ Metadata successfully filtered across all {} stages", 3);
+        }
+        
+        @Test
+        @DisplayName("Should filter metadata even when stage fails")
+        void testMetadataFilteringOnStageFailure() {
+            logger.info("TEST: Metadata filtering on stage failure");
+            
+            ScenarioStage stage = new ScenarioStage();
+            stage.setStageName("failing-stage");
+            stage.setConfigFile("failing-config.yaml");
+            stage.setEnabled(true);
+            stage.setRequired(false); // Allow continuation
+            
+            ScenarioConfiguration scenario = ScenarioConfiguration.withStages(
+                "failure-test",
+                "Failure Metadata Test",
+                Collections.singletonList("TEST_TYPE"),
+                Collections.singletonList(stage)
+            );
+            
+            // Config that will fail
+            YamlRuleConfiguration config = new YamlRuleConfiguration();
+            configLoader.addFailure("failing-config.yaml", config);
+            
+            Map<String, Object> inputData = new HashMap<>();
+            inputData.put("testData", "value");
+            
+            executor.executeStages(scenario, inputData);
+            
+            // Even on failure, metadata should not pollute input
+            assertFalse(inputData.containsKey("scenarioContext"),
+                "scenarioContext should not appear even on failure");
+            assertFalse(inputData.containsKey("previousStageResults"),
+                "previousStageResults should not appear even on failure");
+            assertFalse(inputData.containsKey("scenarioId"),
+                "scenarioId should not appear even on failure");
+            assertFalse(inputData.containsKey("executionStartTime"),
+                "executionStartTime should not appear even on failure");
+            
+            logger.info("✓ Metadata successfully filtered even on stage failure");
+        }
+        
+        @Test
+        @DisplayName("Should NOT contain ANY scenario infrastructure objects (type-based detection)")
+        void testNoInfrastructureObjectsInInputData() {
+            logger.info("TEST: No scenario infrastructure objects should pollute input data");
+            
+            // Create scenario
+            ScenarioStage stage = new ScenarioStage();
+            stage.setStageName("test-stage");
+            stage.setConfigFile("test-config.yaml");
+            stage.setEnabled(true);
+            
+            ScenarioConfiguration scenario = ScenarioConfiguration.withStages(
+                "test-scenario",
+                "Test Scenario",
+                Collections.singletonList("TEST_TYPE"),
+                Collections.singletonList(stage)
+            );
+            
+            YamlRuleConfiguration config = new YamlRuleConfiguration();
+            configLoader.addSuccess("test-config.yaml", config);
+            
+            // Create input data
+            Map<String, Object> inputData = new HashMap<>();
+            inputData.put("customerId", "CUST123");
+            inputData.put("amount", 1000);
+            inputData.put("region", "EMEA");
+            
+            // Execute scenario
+            executor.executeStages(scenario, inputData);
+            
+            // CRITICAL: Check for ANY infrastructure object types
+            // This catches future metadata regardless of field name
+            for (Map.Entry<String, Object> entry : inputData.entrySet()) {
+                Object value = entry.getValue();
+                String key = entry.getKey();
+                
+                // Check for specific infrastructure types that should NEVER leak
+                assertFalse(value instanceof ScenarioExecutionResult,
+                    "ScenarioExecutionResult leaked into input data as key: " + key);
+                    
+                assertFalse(value instanceof StageExecutionResult,
+                    "StageExecutionResult leaked into input data as key: " + key);
+                
+                // Check for lists of infrastructure objects
+                if (value instanceof List) {
+                    List<?> list = (List<?>) value;
+                    if (!list.isEmpty()) {
+                        Object firstItem = list.get(0);
+                        assertFalse(firstItem instanceof StageExecutionResult,
+                            "List<StageExecutionResult> leaked into input data as key: " + key);
+                    }
+                }
+                
+                // Check for scenario service classes (shouldn't be in business data)
+                assertFalse(value instanceof ScenarioStageExecutor,
+                    "ScenarioStageExecutor leaked into input data as key: " + key);
+                    
+                assertFalse(value instanceof ScenarioConfiguration,
+                    "ScenarioConfiguration leaked into input data as key: " + key);
+            }
+            
+            logger.info("✓ No infrastructure objects found in input data (type-based check passed)");
         }
     }
 }

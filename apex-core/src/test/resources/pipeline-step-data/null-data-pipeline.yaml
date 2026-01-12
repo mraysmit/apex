@@ -10,6 +10,12 @@
 # ============================================================================
 
 metadata:
+  type: "pipeline-config"
+  id: "null-data-pipeline-test"
+  name: "Null Data Pipeline Test"
+  version: "1.0"
+  author: "APEX Core Team"
+  description: "Test pipeline for handling null data scenarios"
   id: "null-data-pipeline-test"
   name: "Null Data Pipeline Test"
   version: "1.0"

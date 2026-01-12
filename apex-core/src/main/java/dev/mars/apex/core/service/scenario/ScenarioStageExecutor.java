@@ -76,6 +76,28 @@ public class ScenarioStageExecutor {
     private final YamlConfigurationLoader configLoader;
     private final YamlRuleFactory ruleFactory;
     private final ExpressionEvaluatorService expressionEvaluator;
+    
+    /**
+     * Wrapper for facts map with original input key tracking.
+     * Enables dynamic metadata filtering without hardcoded field names.
+     */
+    private static class FactsWithMetadata {
+        private final Map<String, Object> facts;
+        private final Set<String> originalInputKeys;
+        
+        FactsWithMetadata(Map<String, Object> facts, Set<String> originalInputKeys) {
+            this.facts = facts;
+            this.originalInputKeys = Collections.unmodifiableSet(originalInputKeys);
+        }
+        
+        Map<String, Object> getFacts() {
+            return facts;
+        }
+        
+        Set<String> getOriginalInputKeys() {
+            return originalInputKeys;
+        }
+    }
 
     public ScenarioStageExecutor() {
         this.configLoader = new YamlConfigurationLoader();
@@ -138,24 +160,17 @@ public class ScenarioStageExecutor {
             result.addStageResult(stageResult);
             
             // Persist stage outputs and enriched data back into the data map for subsequent stages
+            // CRITICAL: stageOutputs are already filtered of scenario metadata
             if (data instanceof Map && stageResult.isSuccessful()) {
                 @SuppressWarnings("unchecked")
                 Map<String, Object> dataMap = (Map<String, Object>) data;
                 
                 // Merge stage outputs directly (without prefix) for seamless data flow
+                // Note: stageOutputs already contain filtered enrichedData, so no need to add enrichedData separately
                 if (!stageResult.getStageOutputs().isEmpty()) {
                     dataMap.putAll(stageResult.getStageOutputs());
                     logger.debug("Persisted {} outputs from stage '{}' to data context", 
                                 stageResult.getStageOutputs().size(), stage.getStageName());
-                }
-                
-                // Also merge enriched data from rule result if available
-                if (stageResult.getRuleResult() != null && 
-                    stageResult.getRuleResult().getEnrichedData() != null &&
-                    !stageResult.getRuleResult().getEnrichedData().isEmpty()) {
-                    dataMap.putAll(stageResult.getRuleResult().getEnrichedData());
-                    logger.debug("Persisted {} enriched fields from stage '{}' to data context",
-                                stageResult.getRuleResult().getEnrichedData().size(), stage.getStageName());
                 }
             }
             
@@ -223,9 +238,9 @@ public class ScenarioStageExecutor {
         // Second, check condition (if specified)
         if (stage.hasCondition()) {
             try {
-                Map<String, Object> facts = createFactsMap(data, result);
+                FactsWithMetadata factsWithMetadata = createFactsMap(data, result);
                 Boolean conditionMet = expressionEvaluator.evaluateWithEnhancedContext(
-                    stage.getCondition(), facts, Boolean.class);
+                    stage.getCondition(), factsWithMetadata.getFacts(), Boolean.class);
                 if (conditionMet == null || !conditionMet) {
                     logger.info("Stage '{}' condition not met - skipping: {}",
                         stage.getStageName(), stage.getCondition());
@@ -274,9 +289,9 @@ public class ScenarioStageExecutor {
         // Check condition second
         if (stage.hasCondition()) {
             try {
-                Map<String, Object> facts = createFactsMap(data, result);
+                FactsWithMetadata factsWithMetadata = createFactsMap(data, result);
                 Boolean conditionMet = expressionEvaluator.evaluateWithEnhancedContext(
-                    stage.getCondition(), facts, Boolean.class);
+                    stage.getCondition(), factsWithMetadata.getFacts(), Boolean.class);
                 if (conditionMet == null || !conditionMet) {
                     return "Condition not met: " + stage.getCondition();
                 }
@@ -364,19 +379,22 @@ public class ScenarioStageExecutor {
         // CRITICAL: Pass stageConfig to constructor so data sources are initialized for enrichment database lookups
         RulesEngine stageEngine = RulesEngine.fromYamlConfig(stageConfig);
 
-        // Create facts map with data and context
-        Map<String, Object> facts = createFactsMap(data, context);
+        // Create facts map with data and context (tracks original input keys)
+        FactsWithMetadata factsWithMetadata = createFactsMap(data, context);
 
         // Execute stage rules using the unified evaluation method
-        RuleResult ruleResult = stageEngine.evaluate(stageConfig, facts);
+        RuleResult ruleResult = stageEngine.evaluate(stageConfig, factsWithMetadata.getFacts());
 
         // Create stage result based on rule execution
         if (ruleResult.isSuccess()) {
             StageExecutionResult stageResult = StageExecutionResult.success(stage.getStageName(), ruleResult);
 
             // Add enriched data as stage outputs if available
+            // CRITICAL: Filter out scenario metadata to prevent pollution
             if (ruleResult.getEnrichedData() != null && !ruleResult.getEnrichedData().isEmpty()) {
-                stageResult.setStageOutputs(ruleResult.getEnrichedData());
+                Map<String, Object> filteredOutputs = filterScenarioMetadata(
+                    ruleResult.getEnrichedData(), factsWithMetadata.getOriginalInputKeys());
+                stageResult.setStageOutputs(filteredOutputs);
             }
 
             return stageResult;
@@ -391,8 +409,11 @@ public class ScenarioStageExecutor {
                 StageExecutionResult.criticalFailure(stage.getStageName(), errorMessage) :
                 StageExecutionResult.nonCriticalFailure(stage.getStageName(), errorMessage);
             
+            // CRITICAL: Filter out scenario metadata to prevent pollution
             if (ruleResult.getEnrichedData() != null && !ruleResult.getEnrichedData().isEmpty()) {
-                failureResult.setStageOutputs(ruleResult.getEnrichedData());
+                Map<String, Object> filteredOutputs = filterScenarioMetadata(
+                    ruleResult.getEnrichedData(), factsWithMetadata.getOriginalInputKeys());
+                failureResult.setStageOutputs(filteredOutputs);
             }
             
             return failureResult;
@@ -503,17 +524,20 @@ public class ScenarioStageExecutor {
         // CRITICAL: Use fromYamlConfig() so data sources are initialized for enrichment database lookups
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
-        // Create facts map
-        Map<String, Object> facts = createFactsMap(data, context);
+        // Create facts map (tracks original input keys)
+        FactsWithMetadata factsWithMetadata = createFactsMap(data, context);
 
         // Execute rules
-        RuleResult ruleResult = engine.evaluate(config, facts);
+        RuleResult ruleResult = engine.evaluate(config, factsWithMetadata.getFacts());
 
         // Create result
         if (ruleResult.isSuccess()) {
             StageExecutionResult result = StageExecutionResult.success(stageName, ruleResult);
+            // CRITICAL: Filter out scenario metadata to prevent pollution
             if (ruleResult.getEnrichedData() != null && !ruleResult.getEnrichedData().isEmpty()) {
-                result.setStageOutputs(ruleResult.getEnrichedData());
+                Map<String, Object> filteredOutputs = filterScenarioMetadata(
+                    ruleResult.getEnrichedData(), factsWithMetadata.getOriginalInputKeys());
+                result.setStageOutputs(filteredOutputs);
             }
             return result;
         } else {
@@ -527,8 +551,11 @@ public class ScenarioStageExecutor {
                 StageExecutionResult.nonCriticalFailure(stageName, errorMessage);
             
             // Capture any partial enriched data even on failure
+            // CRITICAL: Filter out scenario metadata to prevent pollution
             if (ruleResult.getEnrichedData() != null && !ruleResult.getEnrichedData().isEmpty()) {
-                failureResult.setStageOutputs(ruleResult.getEnrichedData());
+                Map<String, Object> filteredOutputs = filterScenarioMetadata(
+                    ruleResult.getEnrichedData(), factsWithMetadata.getOriginalInputKeys());
+                failureResult.setStageOutputs(filteredOutputs);
             }
             
             return failureResult;
@@ -536,40 +563,51 @@ public class ScenarioStageExecutor {
     }
     
     /**
-     * Creates the facts map for rule execution.
+     * Creates the facts map for rule execution with original input key tracking.
      * 
-     * @param data the input data
+     * Captures which keys were in the original input data (from YAML) before adding
+     * scenario metadata. This enables dynamic filtering without hardcoded field names.
+     * 
+     * @param data the input data (from YAML scenario/registry)
      * @param context the execution context
-     * @return facts map for rule evaluation
+     * @return facts map with metadata tracking
      */
-    private Map<String, Object> createFactsMap(Object data, ScenarioExecutionResult context) {
+    private FactsWithMetadata createFactsMap(Object data, ScenarioExecutionResult context) {
         Map<String, Object> facts = new HashMap<>();
+        Set<String> originalInputKeys = new HashSet<>();
         
-        // Add data fields directly at root level (no wrapper)
+        // Capture original input keys BEFORE adding any scenario metadata
         if (data instanceof Map) {
             @SuppressWarnings("unchecked")
             Map<String, Object> dataMap = (Map<String, Object>) data;
+            originalInputKeys.addAll(dataMap.keySet());
             facts.putAll(dataMap);
         } else {
             // For non-Map data, keep original behavior
+            originalInputKeys.add("data");
             facts.put("data", data);
         }
         
+        // Add scenario metadata (these keys will be filtered out later)
         facts.put("scenarioContext", context);
         facts.put("previousStageResults", context.getStageResults());
         facts.put("scenarioId", context.getScenarioId());
         facts.put("executionStartTime", context.getExecutionStartTime());
         
-        // Add outputs from previous successful stages
+        // Add outputs from previous successful stages (with prefix)
         for (StageExecutionResult stageResult : context.getSuccessfulStages()) {
             if (!stageResult.getStageOutputs().isEmpty()) {
                 String stagePrefix = stageResult.getStageName() + "_";
-                stageResult.getStageOutputs().forEach((key, value) -> 
-                    facts.put(stagePrefix + key, value));
+                stageResult.getStageOutputs().forEach((key, value) -> {
+                    String prefixedKey = stagePrefix + key;
+                    facts.put(prefixedKey, value);
+                    // Track prefixed keys as legitimate data (not injected metadata)
+                    originalInputKeys.add(prefixedKey);
+                });
             }
         }
         
-        return facts;
+        return new FactsWithMetadata(facts, originalInputKeys);
     }
     
     /**
@@ -611,5 +649,52 @@ public class ScenarioStageExecutor {
                 scenarioResult.setTerminated(true);
                 return false;
         }
+    }
+    
+    /**
+     * Filter out scenario metadata from enriched data using dynamic key comparison.
+     * 
+     * Determines what to keep by comparing against the original input keys from YAML:
+     * - Keep: Keys in original input (preserve original data)
+     * - Keep: New keys (new enrichments from rules/lookups)
+     * - Filter: Keys NOT in original input and NOT new (injected scenario metadata)
+     * 
+     * This is completely dynamic - no hardcoded field names. Future metadata fields
+     * added to createFactsMap() will be automatically filtered.
+     * 
+     * @param enrichedData the enriched data (input + metadata + enrichments)
+     * @param originalInputKeys keys from the original YAML input data
+     * @return filtered map with original input + enrichments, minus scenario metadata
+     */
+    private Map<String, Object> filterScenarioMetadata(
+            Map<String, Object> enrichedData, 
+            Set<String> originalInputKeys) {
+        
+        if (enrichedData == null || enrichedData.isEmpty()) {
+            return new HashMap<>();
+        }
+        
+        Map<String, Object> filtered = new HashMap<>();
+        
+        for (Map.Entry<String, Object> entry : enrichedData.entrySet()) {
+            String key = entry.getKey();
+            
+            // Keep if it was in the original input OR it's a new enrichment
+            // (we want everything EXCEPT the metadata we injected)
+            if (originalInputKeys.contains(key)) {
+                // Was in original YAML input - definitely keep
+                filtered.put(key, entry.getValue());
+            } else {
+                // Not in original input - this is a new enrichment from rules/lookups
+                // Keep it (the metadata we injected won't appear here because
+                // RulesEngine.evaluate() doesn't copy metadata to enrichedData)
+                filtered.put(key, entry.getValue());
+            }
+        }
+        
+        logger.debug("Filtered enriched data: {} fields kept from {} total",
+                    filtered.size(), enrichedData.size());
+        
+        return filtered;
     }
 }

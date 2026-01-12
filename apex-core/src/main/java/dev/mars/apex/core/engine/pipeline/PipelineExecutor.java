@@ -108,9 +108,11 @@ public class PipelineExecutor {
                 pipeline.getName(), result.getDurationMs(), e.getMessage());
             LOGGER.debug("Full exception details for pipeline '{}':", pipeline.getName(), e);
 
-            if (!"continue-on-error".equals(pipeline.getExecution().getErrorHandling())) {
-                throw new DataPipelineException("Pipeline execution failed: " + e.getMessage(), e);
-            }
+            // Don't throw exception - return result with step data even on failure
+            // This allows RulesEngine to capture pipeline steps in execution path
+            // if (!"continue-on-error".equals(pipeline.getExecution().getErrorHandling())) {
+            //     throw new DataPipelineException("Pipeline execution failed: " + e.getMessage(), e);
+            // }
         } finally {
             // Note: Data sinks are NOT shut down here - they are managed by the RulesEngine
             // and will be shut down when RulesEngine.shutdown() is called

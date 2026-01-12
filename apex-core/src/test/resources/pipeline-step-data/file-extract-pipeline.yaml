@@ -10,6 +10,12 @@
 # ============================================================================
 
 metadata:
+  type: "pipeline-config"
+  id: "file-extract-pipeline-test"
+  name: "File Extract Pipeline Test"
+  version: "1.0"
+  author: "APEX Core Team"
+  description: "Test pipeline for file extraction with step data capture"
   id: "file-extract-pipeline-test"
   name: "File Extract Pipeline Test"
   version: "1.0"
