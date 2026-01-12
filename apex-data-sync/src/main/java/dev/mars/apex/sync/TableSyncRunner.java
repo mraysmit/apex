@@ -20,7 +20,7 @@ public class TableSyncRunner {
 
     public static void main(String[] args) {
         if (args.length == 0) {
-            System.out.println("Usage: java -jar apex-database-table-sync.jar --config=<path>");
+            System.out.println("Usage: java -jar apex-data-sync.jar --config=<path>");
             System.exit(1);
         }
 

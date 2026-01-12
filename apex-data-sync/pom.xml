@@ -10,9 +10,9 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>apex-database-table-sync</artifactId>
-    <name>APEX Database Table Sync</name>
-    <description>Zero-Custom Table Sync Runner - Powered by APEX Core</description>
+    <artifactId>apex-data-sync</artifactId>
+    <name>APEX Data Sync</name>
+    <description>Zero-Custom Data Sync Runner - Powered by APEX Core</description>
 
     <dependencies>
         <!-- The ONE and ONLY primary dependency -->

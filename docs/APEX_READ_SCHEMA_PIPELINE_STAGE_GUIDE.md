@@ -262,7 +262,7 @@ WHERE TABLE_NAME = ?
 ## Testing
 
 Comprehensive integration tests are available in:
-- `apex-database-table-sync/src/test/java/dev/mars/apex/sync/ReadSchemaPipelineStageTest.java`
+- `apex-data-sync/src/test/java/dev/mars/apex/sync/ReadSchemaPipelineStageTest.java`
 
 Test coverage includes:
 - ✅ Reading schema from H2 database
@@ -273,7 +273,7 @@ Test coverage includes:
 
 Run tests with:
 ```bash
-cd apex-database-table-sync
+cd apex-data-sync
 mvn test -Dtest=ReadSchemaPipelineStageTest
 ```
 
@@ -301,4 +301,4 @@ Potential improvements for future versions:
 
 - [APEX Pipeline Orchestration Guide](APEX_DATA_PIPELINE_ORCHESTRATION_GUIDE.md)
 - [APEX External Data Source Guide](APEX_README.md)
-- [APEX Database Table Sync Module](../apex-database-table-sync/README.md)
+- [APEX Data Sync Module](../apex-data-sync/README.md)

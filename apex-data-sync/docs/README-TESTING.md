@@ -1,4 +1,4 @@
-# APEX Database Table Sync - Testing Guide
+# APEX Data Sync - Testing Guide
 
 ## Console Logging for Tests
 
@@ -90,6 +90,28 @@ Get-Content target/surefire-reports/*.txt | Select-String -Pattern "\[SchemaRead
 ```
 
 ## Test Organization
+
+### Report Output Configuration
+
+Schema analysis reports can be generated automatically during test execution. The report output path can be configured with automatic directory handling:
+
+**Configuration Options**:
+```yaml
+parameters:
+  # Option 1: Filename only - saved to default 'reports/' directory
+  report-output: "schema-report.html"  # → reports/schema-report.html
+  
+  # Option 2: Relative path - creates directories as needed
+  report-output: "target/reports/analysis.html"  # → target/reports/analysis.html
+  
+  # Option 3: Full path with subdirectories
+  report-output: "output/database-analysis/schema.html"  # → output/database-analysis/schema.html
+```
+
+**Automatic Behavior**:
+- If only a filename is provided, the report is saved to the `reports/` directory
+- Parent directories are automatically created if they don't exist
+- No manual directory creation needed
 
 ### Database Schema Tests
 **ReadSchemaDatabasePipelineStageTest**: Tests for reading schema from database tables

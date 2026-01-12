@@ -1,8 +1,8 @@
-# APEX Database Table Sync
+# APEX Data Sync
 
 ## 1. Executive Summary
 
-The `apex-database-table-sync` module is a synchronization runner designed to move and validate data between heterogenous database environments using the APEX Core 2.0 platform. 
+The `apex-data-sync` module is a synchronization runner designed to move and validate data between heterogenous database environments using the APEX Core 2.0 platform. 
 
 By primary design, it facilitates the synchronization of enterprise data from **Microsoft SQL Server (Legacy Source)** to **PostgreSQL (Modern Target)** without requiring custom Java development for connectivity, validation, or orchestration.
 
@@ -152,12 +152,39 @@ pipeline:
         table: "dbo.Products"
 ```
 
+#### Schema Report Generation
+Generate comprehensive HTML reports for schema analysis. Reports are automatically saved to the configured location with automatic directory creation.
+
+```yaml
+pipeline:
+  name: "schema-with-report"
+  execution: "sequential"
+  steps:
+    - name: "read-and-report-schema"
+      type: "read-schema"
+      data-source-ref: "postgresql-source"
+      parameters:
+        table: "public.customers"
+        report-output: "customer-schema.html"  # Saved to reports/customer-schema.html
+        # Or specify full path:
+        # report-output: "output/analysis/customer-schema.html"
+```
+
+**Report Output Behavior**:
+- **Filename only** (e.g., `"schema-report.html"`): Automatically saved to `reports/` directory
+- **Relative path** (e.g., `"output/schema.html"`): Saved to specified path, creates directories as needed
+- **Absolute path** (e.g., `"/var/reports/schema.html"`): Saved to exact location
+- **Default directory**: `reports/` (automatically created if it doesn't exist)
+      parameters:
+        table: "dbo.Products"
+```
+
 ## 4. Operational Guide
 
 ### 4.1 Running the Sync
 Sync operations are triggered via the CLI using a configuration path:
 ```bash
-java -jar apex-database-table-sync.jar --config=configs/config-b/table-sync-pipeline.yaml
+java -jar apex-data-sync.jar --config=configs/config-b/table-sync-pipeline.yaml
 ```
 
 ### 4.2 Dependency Management
@@ -242,7 +269,7 @@ mvn test -Dtest=ReadSchemaPipelineStageTest -Dsurefire.useFile=false
 See [README-TESTING.md](../README-TESTING.md) for complete testing and debugging documentation.
 
 
-# APEX Database Table Sync
+# APEX Data Sync
 
 This module is a synchronization runner built on the **APEX Core 2.0** platform. It specializes in rule-based data movement between heterogenous database environments, specifically **Microsoft SQL Server** and **PostgreSQL**.
 
@@ -321,7 +348,7 @@ pipeline:
 Run the sync using the minimalist CLI runner:
 
 ```bash
-java -jar apex-database-table-sync.jar --config=configs/config-b/table-sync-pipeline.yaml
+java -jar apex-data-sync.jar --config=configs/config-b/table-sync-pipeline.yaml
 ```
 
 ## Project Layout
