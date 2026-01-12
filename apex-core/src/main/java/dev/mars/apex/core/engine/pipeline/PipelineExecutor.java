@@ -940,6 +940,9 @@ public class PipelineExecutor {
             return; // No report requested
         }
         
+        // Normalize and ensure report directory exists
+        reportPath = normalizeReportPath(reportPath);
+        
         try {
             LOGGER.info("[Pipeline.ReadSchema] Generating HTML schema report: {}", reportPath);
             
@@ -964,6 +967,43 @@ public class PipelineExecutor {
             LOGGER.warn("[Pipeline.ReadSchema] Failed to generate HTML report: {}", e.getMessage());
             // Don't fail the pipeline if report generation fails
         }
+    }
+    
+    /**
+     * Normalize report path to ensure it uses the correct directory structure.
+     * If the path doesn't specify a directory or just specifies a filename,
+     * it will be placed in the default 'reports/' directory.
+     * 
+     * @param reportPath the original report path from configuration
+     * @return normalized path with directory structure
+     */
+    private String normalizeReportPath(String reportPath) {
+        if (reportPath == null || reportPath.trim().isEmpty()) {
+            return reportPath;
+        }
+        
+        reportPath = reportPath.trim();
+        
+        // Check if path already contains a directory separator
+        if (!reportPath.contains("/") && !reportPath.contains("\\")) {
+            // Just a filename - prepend default directory
+            reportPath = "reports/" + reportPath;
+            LOGGER.debug("[Pipeline.ReadSchema] Report path normalized to default directory: {}", reportPath);
+        }
+        
+        // Ensure parent directory exists
+        try {
+            java.nio.file.Path path = java.nio.file.Paths.get(reportPath);
+            java.nio.file.Path parentDir = path.getParent();
+            if (parentDir != null && !java.nio.file.Files.exists(parentDir)) {
+                java.nio.file.Files.createDirectories(parentDir);
+                LOGGER.debug("[Pipeline.ReadSchema] Created report directory: {}", parentDir);
+            }
+        } catch (Exception e) {
+            LOGGER.warn("[Pipeline.ReadSchema] Could not create report directory: {}", e.getMessage());
+        }
+        
+        return reportPath;
     }
     
     /**
