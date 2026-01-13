@@ -1,0 +1,28 @@
+metadata:
+  id: "rules-engine-classification-test-validation-rules"
+  name: "RulesEngine Classification Test Validation Rules"
+  version: "1.0.0"
+  description: "Validation rules for RulesEngine classification routing tests"
+  type: "rule-config"
+  author: "test@example.com"
+
+rules:
+  # Basic trade ID validation - returns TRUE when trade ID is present (valid), FALSE when missing (invalid)
+  - id: "trade-id-required"
+    name: "Trade ID Required"
+    description: "Validates that trade ID is present"
+    condition: "#tradeId != null && !#tradeId.toString().trim().isEmpty()"
+    message: "Trade ID is required"
+    severity: "ERROR"
+    category: "VALIDATION"
+    enabled: true
+  
+  # Trade type validation - returns TRUE when trade type is present (valid), FALSE when missing (invalid)
+  - id: "trade-type-required"
+    name: "Trade Type Required"
+    description: "Validates that trade type is present"
+    condition: "#tradeType != null && !#tradeType.toString().trim().isEmpty()"
+    message: "Trade type is required"
+    severity: "ERROR"
+    category: "VALIDATION"
+    enabled: true

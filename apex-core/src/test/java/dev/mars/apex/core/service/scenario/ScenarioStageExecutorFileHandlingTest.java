@@ -216,7 +216,7 @@ class ScenarioStageExecutorFileHandlingTest {
     void testValidConfigFileExecution() {
         // Given: Scenario with stage having valid config file
         ScenarioStage stage = new ScenarioStage("validation",
-            "src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-validation-rules.yaml", 1);
+            "src/test/java/dev/mars/apex/core/service/scenario/ScenarioStageExecutorFileHandlingTest-validation-rules.yaml", 1);
 
         ScenarioConfiguration scenario = ScenarioConfiguration.withStages("valid-file-test", "Valid File Test",
             Arrays.asList("TestData"), Arrays.asList(stage));

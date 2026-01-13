@@ -37,13 +37,13 @@ class Phase1ClassificationYamlValidationTest {
         System.out.println("\n=== VALIDATING PHASE 1 CLASSIFICATION YAML FILES ===\n");
         
         List<String> yamlFiles = List.of(
-            "apex-core/src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-registry.yaml",
-            "apex-core/src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-otc-scenario.yaml",
-            "apex-core/src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-us-otc-scenario.yaml",
-            "apex-core/src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-high-notional-scenario.yaml",
-            "apex-core/src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-swap-scenario.yaml",
-            "apex-core/src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-validation-rules.yaml",
-            "apex-core/src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-enrichment-rules.yaml"
+            "apex-core/src/test/java/dev/mars/apex/core/service/scenario/RulesEngineClassificationRoutingTest-registry.yaml",
+            "apex-core/src/test/java/dev/mars/apex/core/service/scenario/RulesEngineClassificationRoutingTest-otc-scenario.yaml",
+            "apex-core/src/test/java/dev/mars/apex/core/service/scenario/RulesEngineClassificationRoutingTest-us-otc-scenario.yaml",
+            "apex-core/src/test/java/dev/mars/apex/core/service/scenario/RulesEngineClassificationRoutingTest-high-notional-scenario.yaml",
+            "apex-core/src/test/java/dev/mars/apex/core/service/scenario/RulesEngineClassificationRoutingTest-swap-scenario.yaml",
+            "apex-core/src/test/java/dev/mars/apex/core/service/scenario/RulesEngineClassificationRoutingTest-validation-rules.yaml",
+            "apex-core/src/test/java/dev/mars/apex/core/service/scenario/RulesEngineClassificationRoutingTest-enrichment-rules.yaml"
         );
         
         int validCount = 0;

@@ -33,17 +33,26 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Comprehensive unit tests for DataTypeScenarioService.
  * 
- * Tests cover:
- * - Service initialization and configuration loading
- * - Scenario registration and retrieval
- * - Data type routing and scenario matching
- * - Routing rules and configuration parsing
- * - Error handling and edge cases
- * - Complex routing scenarios
+ * <p><b>DEPRECATED:</b> This test class tests the deprecated {@link DataTypeScenarioService}.
+ * Use {@link dev.mars.apex.core.engine.config.RulesEngineScenarioRegistryTest} instead,
+ * which tests the same functionality using the new {@link dev.mars.apex.core.engine.config.RulesEngine} API.</p>
+ * 
+ * <p>Tests cover:</p>
+ * <ul>
+ *   <li>Service initialization and configuration loading</li>
+ *   <li>Scenario registration and retrieval</li>
+ *   <li>Data type routing and scenario matching</li>
+ *   <li>Routing rules and configuration parsing</li>
+ *   <li>Error handling and edge cases</li>
+ *   <li>Complex routing scenarios</li>
+ * </ul>
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
+ * @deprecated since 3.0, for removal in 4.0. Use {@link dev.mars.apex.core.engine.config.RulesEngineScenarioRegistryTest} instead.
+ * @see dev.mars.apex.core.engine.config.RulesEngine#fromScenarioRegistry(String)
  */
+@Deprecated(since = "3.0", forRemoval = true)
 class DataTypeScenarioServiceTest {
 
     @TempDir

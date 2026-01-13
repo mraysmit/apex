@@ -1,5 +1,24 @@
 package dev.mars.apex.core.service.scenario;
 
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
+import dev.mars.apex.core.service.scenario.StageExecutionResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,47 +32,45 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Integration tests for DataTypeScenarioService classification-based routing (Phase 1).
+ * Integration tests for RulesEngine classification-based routing.
  * 
- * <p><b>DEPRECATED:</b> This test class tests the deprecated {@link DataTypeScenarioService}.
- * Use {@link dev.mars.apex.core.engine.config.RulesEngineClassificationRoutingTest} instead,
- * which tests the same functionality using the new {@link dev.mars.apex.core.engine.config.RulesEngine} API.</p>
+ * <p>Migrated from DataTypeScenarioServiceClassificationTest to use the new RulesEngine API.</p>
  * 
  * <p>Tests the complete end-to-end flow:</p>
  * <ol>
- *   <li>Load scenarios with embedded classification rules from YAML</li>
- *   <li>Route Map data to scenarios based on SpEL classification rule evaluation</li>
+ *   <li>Load scenarios with embedded classification rules from YAML via RulesEngine.fromScenarioRegistry()</li>
+ *   <li>Route Map data to scenarios based on SpEL classification rule evaluation via evaluateWithClassification()</li>
  *   <li>Execute processing stages for matched scenarios</li>
  *   <li>Verify results and error handling</li>
  * </ol>
  * 
- * <p>PROGRESSIVE COMPLEXITY:</p>
+ * <p><b>PROGRESSIVE COMPLEXITY:</b></p>
  * <ul>
  *   <li>Level 1: Simple single-field classification</li>
  *   <li>Level 2: Multiple field AND conditions</li>
  *   <li>Level 3: Numeric comparisons</li>
  *   <li>Level 4: No match scenarios and error handling</li>
- *   <li>Level 5: Backward compatibility with data-types</li>
  * </ul>
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
- * @deprecated since 3.0, for removal in 4.0. Use {@link dev.mars.apex.core.engine.config.RulesEngineClassificationRoutingTest} instead.
- * @see dev.mars.apex.core.engine.config.RulesEngine#fromScenarioRegistry(String)
- * @see dev.mars.apex.core.engine.config.RulesEngine#evaluateWithClassification(java.util.Map)
+ * @since 3.0
+ * @see RulesEngine#fromScenarioRegistry(String)
+ * @see RulesEngine#evaluateWithClassification(Map)
  */
-@Deprecated(since = "3.0", forRemoval = true)
-@DisplayName("DataTypeScenarioService Classification-Based Routing Integration Tests")
-class DataTypeScenarioServiceClassificationTest {
+@DisplayName("RulesEngine Classification-Based Routing Integration Tests")
+class RulesEngineClassificationRoutingTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(DataTypeScenarioServiceClassificationTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(RulesEngineClassificationRoutingTest.class);
     
-    private DataTypeScenarioService scenarioService;
+    private static final String REGISTRY_PATH = 
+        "src/test/java/dev/mars/apex/core/service/scenario/RulesEngineClassificationRoutingTest-registry.yaml";
+    
+    private RulesEngine engine;
     
     @BeforeEach
-    void setUp() {
-        scenarioService = new DataTypeScenarioService();
-        logger.info("Initialized DataTypeScenarioService for classification routing tests");
+    void setUp() throws Exception {
+        engine = RulesEngine.fromScenarioRegistry(REGISTRY_PATH);
+        logger.info("Initialized RulesEngine from scenario registry for classification routing tests");
     }
     
     // ========================================
@@ -65,11 +82,10 @@ class DataTypeScenarioServiceClassificationTest {
     void testLevel1_SimpleOtcOptionClassification() throws Exception {
         logger.info("=== Level 1: Simple OTC Option Classification ===");
 
-        // 1. Load scenarios with embedded classification rules
-        String registryPath = "src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-registry.yaml";
-        logger.info("✓ STEP 1: Loading scenario registry from: {}", registryPath);
-        scenarioService.loadScenarios(registryPath);
-        logger.info("  - Scenario registry loaded successfully");
+        // 1. Verify engine is loaded with scenarios
+        assertNotNull(engine.getScenarioRegistry(), "Scenario registry should be loaded");
+        assertFalse(engine.getScenarioRegistry().isEmpty(), "Scenario registry should not be empty");
+        logger.info("✓ STEP 1: Loaded {} scenarios from registry", engine.getScenarioRegistry().size());
 
         // 2. Create simple OTC Option trade data
         Map<String, Object> otcOptionData = new HashMap<>();
@@ -81,10 +97,10 @@ class DataTypeScenarioServiceClassificationTest {
         logger.info("  - Trade Type: OTCOption");
         logger.info("  - Trade ID: OTC-001");
         
-        // 3. Process data - should match otc-option-scenario
+        // 3. Process data using classification-based routing
         logger.info("✓ STEP 3: Processing data through classification-based routing");
         long startTime = System.currentTimeMillis();
-        ScenarioExecutionResult result = scenarioService.processMapData(otcOptionData);
+        ScenarioExecutionResult result = engine.evaluateWithClassification(otcOptionData);
         long executionTime = System.currentTimeMillis() - startTime;
         
         logger.info("  - Execution completed in {}ms", executionTime);
@@ -110,11 +126,7 @@ class DataTypeScenarioServiceClassificationTest {
     void testLevel1_SimpleCommoditySwapClassification() throws Exception {
         logger.info("=== Level 1: Simple Commodity Swap Classification ===");
         
-        // 1. Load scenarios
-        String registryPath = "src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-registry.yaml";
-        scenarioService.loadScenarios(registryPath);
-        
-        // 2. Create Commodity Swap trade data
+        // Create Commodity Swap trade data
         Map<String, Object> commoditySwapData = new HashMap<>();
         commoditySwapData.put("tradeType", "CommoditySwap");
         commoditySwapData.put("tradeId", "SWAP-001");
@@ -123,10 +135,10 @@ class DataTypeScenarioServiceClassificationTest {
         logger.info("✓ Created Commodity Swap trade data");
         logger.info("  - Trade Type: CommoditySwap");
         
-        // 3. Process data - should match commodity-swap-scenario
-        ScenarioExecutionResult result = scenarioService.processMapData(commoditySwapData);
+        // Process data using classification-based routing
+        ScenarioExecutionResult result = engine.evaluateWithClassification(commoditySwapData);
         
-        // 4. Verify correct scenario was selected
+        // Verify correct scenario was selected
         assertNotNull(result, "Result should not be null");
         assertEquals("commodity-swap-scenario", result.getScenarioId(),
             "Should match commodity-swap-scenario via classification rule");
@@ -144,11 +156,7 @@ class DataTypeScenarioServiceClassificationTest {
     void testLevel2_UsOtcOptionAndConditions() throws Exception {
         logger.info("=== Level 2: US OTC Option AND Conditions ===");
         
-        // 1. Load scenarios
-        String registryPath = "src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-registry.yaml";
-        scenarioService.loadScenarios(registryPath);
-        
-        // 2. Create US OTC Option trade data
+        // Create US OTC Option trade data
         Map<String, Object> usOtcOptionData = new HashMap<>();
         usOtcOptionData.put("tradeType", "OTCOption");
         usOtcOptionData.put("region", "US");
@@ -159,10 +167,10 @@ class DataTypeScenarioServiceClassificationTest {
         logger.info("  - Trade Type: OTCOption");
         logger.info("  - Region: US");
         
-        // 3. Process data - should match otc-option-us-scenario (more specific)
-        ScenarioExecutionResult result = scenarioService.processMapData(usOtcOptionData);
+        // Process data using classification-based routing
+        ScenarioExecutionResult result = engine.evaluateWithClassification(usOtcOptionData);
         
-        // 4. Verify correct scenario was selected
+        // Verify correct scenario was selected
         assertNotNull(result, "Result should not be null");
         assertEquals("otc-option-us-scenario", result.getScenarioId(),
             "Should match otc-option-us-scenario via AND condition (tradeType && region)");
@@ -176,11 +184,7 @@ class DataTypeScenarioServiceClassificationTest {
     void testLevel2_NonUsOtcOptionFallback() throws Exception {
         logger.info("=== Level 2: Non-US OTC Option Fallback ===");
         
-        // 1. Load scenarios
-        String registryPath = "src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-registry.yaml";
-        scenarioService.loadScenarios(registryPath);
-        
-        // 2. Create EMEA OTC Option trade data
+        // Create EMEA OTC Option trade data
         Map<String, Object> emeaOtcOptionData = new HashMap<>();
         emeaOtcOptionData.put("tradeType", "OTCOption");
         emeaOtcOptionData.put("region", "EMEA");
@@ -190,10 +194,10 @@ class DataTypeScenarioServiceClassificationTest {
         logger.info("  - Trade Type: OTCOption");
         logger.info("  - Region: EMEA (should NOT match US-specific scenario)");
         
-        // 3. Process data - should match generic otc-option-scenario (not US-specific)
-        ScenarioExecutionResult result = scenarioService.processMapData(emeaOtcOptionData);
+        // Process data using classification-based routing
+        ScenarioExecutionResult result = engine.evaluateWithClassification(emeaOtcOptionData);
         
-        // 4. Verify correct scenario was selected
+        // Verify correct scenario was selected
         assertNotNull(result, "Result should not be null");
         assertEquals("otc-option-scenario", result.getScenarioId(),
             "Should match generic otc-option-scenario when region is not US");
@@ -211,11 +215,7 @@ class DataTypeScenarioServiceClassificationTest {
     void testLevel3_HighNotionalOtcOption() throws Exception {
         logger.info("=== Level 3: High-Notional OTC Option Numeric Comparison ===");
         
-        // 1. Load scenarios
-        String registryPath = "src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-registry.yaml";
-        scenarioService.loadScenarios(registryPath);
-        
-        // 2. Create high-notional OTC Option trade data (> $100M)
+        // Create high-notional OTC Option trade data (> $100M)
         Map<String, Object> highNotionalData = new HashMap<>();
         highNotionalData.put("tradeType", "OTCOption");
         highNotionalData.put("notional", 150000000.0);  // $150M
@@ -225,10 +225,10 @@ class DataTypeScenarioServiceClassificationTest {
         logger.info("  - Trade Type: OTCOption");
         logger.info("  - Notional: $150M (> $100M threshold)");
         
-        // 3. Process data - should match high-notional-otc-scenario
-        ScenarioExecutionResult result = scenarioService.processMapData(highNotionalData);
+        // Process data using classification-based routing
+        ScenarioExecutionResult result = engine.evaluateWithClassification(highNotionalData);
         
-        // 4. Verify correct scenario was selected
+        // Verify correct scenario was selected
         assertNotNull(result, "Result should not be null");
         assertEquals("high-notional-otc-scenario", result.getScenarioId(),
             "Should match high-notional-otc-scenario via numeric comparison (notional > 100000000)");
@@ -242,11 +242,7 @@ class DataTypeScenarioServiceClassificationTest {
     void testLevel3_LowNotionalOtcOptionFallback() throws Exception {
         logger.info("=== Level 3: Low-Notional OTC Option Fallback ===");
         
-        // 1. Load scenarios
-        String registryPath = "src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-registry.yaml";
-        scenarioService.loadScenarios(registryPath);
-        
-        // 2. Create low-notional OTC Option trade data (< $100M)
+        // Create low-notional OTC Option trade data (< $100M)
         Map<String, Object> lowNotionalData = new HashMap<>();
         lowNotionalData.put("tradeType", "OTCOption");
         lowNotionalData.put("notional", 50000000.0);  // $50M
@@ -256,10 +252,10 @@ class DataTypeScenarioServiceClassificationTest {
         logger.info("  - Trade Type: OTCOption");
         logger.info("  - Notional: $50M (< $100M threshold)");
         
-        // 3. Process data - should match generic otc-option-scenario
-        ScenarioExecutionResult result = scenarioService.processMapData(lowNotionalData);
+        // Process data using classification-based routing
+        ScenarioExecutionResult result = engine.evaluateWithClassification(lowNotionalData);
         
-        // 4. Verify correct scenario was selected
+        // Verify correct scenario was selected
         assertNotNull(result, "Result should not be null");
         assertEquals("otc-option-scenario", result.getScenarioId(),
             "Should match generic otc-option-scenario when notional < 100000000");
@@ -273,15 +269,11 @@ class DataTypeScenarioServiceClassificationTest {
     // ========================================
     
     @Test
-    @DisplayName("Level 4: Should handle no matching scenario gracefully")
+    @DisplayName("Level 4: Should throw exception when no matching scenario found")
     void testLevel4_NoMatchingScenario() throws Exception {
         logger.info("=== Level 4: No Matching Scenario ===");
         
-        // 1. Load scenarios
-        String registryPath = "src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-registry.yaml";
-        scenarioService.loadScenarios(registryPath);
-        
-        // 2. Create data that doesn't match any classification rule
+        // Create data that doesn't match any classification rule
         Map<String, Object> unknownTradeData = new HashMap<>();
         unknownTradeData.put("tradeType", "UnknownInstrument");
         unknownTradeData.put("tradeId", "UNKNOWN-001");
@@ -289,33 +281,83 @@ class DataTypeScenarioServiceClassificationTest {
         logger.info("✓ Created unknown trade data");
         logger.info("  - Trade Type: UnknownInstrument (no matching scenario)");
         
-        // 3. Process data - should return result with warning
-        ScenarioExecutionResult result = scenarioService.processMapData(unknownTradeData);
+        // RulesEngine.evaluateWithClassification() throws IllegalStateException when no scenario matches
+        assertThrows(IllegalStateException.class, () -> {
+            engine.evaluateWithClassification(unknownTradeData);
+        }, "Should throw IllegalStateException when no scenario matches");
         
-        // 4. Verify graceful handling
-        assertNotNull(result, "Result should not be null");
-        assertTrue(result.isTerminated(), "Should be terminated when no scenario matches");
-        assertFalse(result.getWarnings().isEmpty(), "Should have warning about no matching scenario");
-        
-        logger.info("✓ VERIFICATION: No matching scenario handled gracefully");
-        logger.info("  - Warnings: {}", result.getWarnings());
+        logger.info("✓ VERIFICATION: No matching scenario throws IllegalStateException as expected");
     }
     
     @Test
-    @DisplayName("Level 4: Should handle null data gracefully")
+    @DisplayName("Level 4: Should throw exception for null data")
     void testLevel4_NullDataHandling() {
         logger.info("=== Level 4: Null Data Handling ===");
         
-        // Process null data - should return result with warning
-        ScenarioExecutionResult result = scenarioService.processMapData(null);
+        // RulesEngine.evaluateWithClassification() throws NullPointerException for null data
+        assertThrows(NullPointerException.class, () -> {
+            engine.evaluateWithClassification(null);
+        }, "Should throw NullPointerException for null data");
         
-        // Verify graceful handling
+        logger.info("✓ VERIFICATION: Null data throws NullPointerException as expected");
+    }
+    
+    // ========================================
+    // Additional RulesEngine-specific Tests
+    // ========================================
+    
+    @Test
+    @DisplayName("Should provide access to scenario registry")
+    void testScenarioRegistryAccess() {
+        logger.info("=== Testing scenario registry access ===");
+        
+        Map<String, dev.mars.apex.core.service.scenario.ScenarioConfiguration> registry = engine.getScenarioRegistry();
+        
+        assertNotNull(registry, "Scenario registry should not be null");
+        assertFalse(registry.isEmpty(), "Scenario registry should not be empty");
+        
+        // Verify expected scenarios are in registry
+        assertTrue(registry.containsKey("otc-option-scenario"), "Should contain otc-option-scenario");
+        assertTrue(registry.containsKey("commodity-swap-scenario"), "Should contain commodity-swap-scenario");
+        assertTrue(registry.containsKey("otc-option-us-scenario"), "Should contain otc-option-us-scenario");
+        assertTrue(registry.containsKey("high-notional-otc-scenario"), "Should contain high-notional-otc-scenario");
+        
+        logger.info("✓ Scenario registry contains {} scenarios", registry.size());
+        registry.keySet().forEach(id -> logger.info("  - {}", id));
+    }
+    
+    @Test
+    @DisplayName("Should evaluate specific scenario by ID using evaluateScenario()")
+    void testEvaluateScenarioById() throws Exception {
+        logger.info("=== Testing evaluateScenario() by ID ===");
+        
+        // Create trade data
+        Map<String, Object> tradeData = new HashMap<>();
+        tradeData.put("tradeType", "OTCOption");
+        tradeData.put("tradeId", "DIRECT-001");
+        
+        // Directly evaluate a specific scenario by ID
+        ScenarioExecutionResult result = engine.evaluateScenario("otc-option-scenario", tradeData);
+        
         assertNotNull(result, "Result should not be null");
-        assertTrue(result.isTerminated(), "Should be terminated for null data");
-        assertFalse(result.getWarnings().isEmpty(), "Should have warning about null data");
+        assertEquals("otc-option-scenario", result.getScenarioId(), "Should execute the specified scenario");
         
-        logger.info("✓ VERIFICATION: Null data handled gracefully");
-        logger.info("  - Warnings: {}", result.getWarnings());
+        logger.info("✓ Successfully evaluated scenario by ID: {}", result.getScenarioId());
+    }
+    
+    @Test
+    @DisplayName("Should throw exception for non-existent scenario ID")
+    void testEvaluateNonExistentScenario() {
+        logger.info("=== Testing evaluateScenario() with non-existent ID ===");
+        
+        Map<String, Object> tradeData = new HashMap<>();
+        tradeData.put("tradeType", "OTCOption");
+        
+        // Should throw IllegalArgumentException for non-existent scenario
+        assertThrows(IllegalArgumentException.class, () -> {
+            engine.evaluateScenario("non-existent-scenario", tradeData);
+        }, "Should throw IllegalArgumentException for non-existent scenario ID");
+        
+        logger.info("✓ Non-existent scenario ID throws IllegalArgumentException as expected");
     }
 }
-

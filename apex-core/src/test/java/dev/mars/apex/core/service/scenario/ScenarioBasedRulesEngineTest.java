@@ -1,4 +1,4 @@
-package dev.mars.apex.core.engine.config;
+package dev.mars.apex.core.service.scenario;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -19,6 +19,7 @@ package dev.mars.apex.core.engine.config;
 import dev.mars.apex.core.cache.ApexCacheManager;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -68,7 +69,7 @@ public class ScenarioBasedRulesEngineTest {
         
         // Load the validation rules from the scenario YAML
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
-            "src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-validation-rules.yaml"
+            "src/test/java/dev/mars/apex/core/service/scenario/ScenarioBasedRulesEngineTest-validation-rules.yaml"
         );
         
         // Create RulesEngine from configuration
@@ -102,7 +103,7 @@ public class ScenarioBasedRulesEngineTest {
         
         // Load the validation rules
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
-            "src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-validation-rules.yaml"
+            "src/test/java/dev/mars/apex/core/service/scenario/ScenarioBasedRulesEngineTest-validation-rules.yaml"
         );
         
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
@@ -146,7 +147,7 @@ public class ScenarioBasedRulesEngineTest {
         
         // Load the SpEL error test validation rules
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
-            "src/test/java/dev/mars/apex/core/service/scenario/ScenarioStageSpelErrorPropagationTest-validation-rules.yaml"
+            "src/test/java/dev/mars/apex/core/service/scenario/ScenarioBasedRulesEngineTest-spel-error-validation-rules.yaml"
         );
         
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
@@ -180,7 +181,7 @@ public class ScenarioBasedRulesEngineTest {
         // For this test, we'll use the validation rules and verify the engine
         // can handle different trade scenarios based on data content
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
-            "src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-validation-rules.yaml"
+            "src/test/java/dev/mars/apex/core/service/scenario/ScenarioBasedRulesEngineTest-validation-rules.yaml"
         );
         
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
@@ -210,7 +211,7 @@ public class ScenarioBasedRulesEngineTest {
         
         // Load validation rules (same rules work for different trade types)
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
-            "src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-validation-rules.yaml"
+            "src/test/java/dev/mars/apex/core/service/scenario/ScenarioBasedRulesEngineTest-validation-rules.yaml"
         );
         
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
@@ -240,7 +241,7 @@ public class ScenarioBasedRulesEngineTest {
         
         // Load the enrichment rules from the scenario YAML
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
-            "src/test/java/dev/mars/apex/core/service/scenario/DataTypeScenarioServiceClassificationTest-enrichment-rules.yaml"
+            "src/test/java/dev/mars/apex/core/service/scenario/ScenarioBasedRulesEngineTest-enrichment-rules.yaml"
         );
         
         // Create RulesEngine with enrichment configuration
@@ -275,7 +276,7 @@ public class ScenarioBasedRulesEngineTest {
         
         // First stage: Validation (terminate on failure)
         YamlRuleConfiguration validationConfig = yamlLoader.loadFromFile(
-            "src/test/java/dev/mars/apex/core/service/scenario/ScenarioStageSpelErrorPropagationTest-validation-rules.yaml"
+            "src/test/java/dev/mars/apex/core/service/scenario/ScenarioBasedRulesEngineTest-spel-error-validation-rules.yaml"
         );
         
         RulesEngine validationEngine = RulesEngine.fromYamlConfig(validationConfig);
@@ -302,7 +303,7 @@ public class ScenarioBasedRulesEngineTest {
             
             // Load enrichment stage configuration
             YamlRuleConfiguration enrichmentConfig = yamlLoader.loadFromFile(
-                "src/test/java/dev/mars/apex/core/service/scenario/ScenarioStageSpelErrorPropagationTest-enrichment-rules.yaml"
+                "src/test/java/dev/mars/apex/core/service/scenario/ScenarioBasedRulesEngineTest-spel-error-enrichment-rules.yaml"
             );
             
             RulesEngine enrichmentEngine = RulesEngine.fromYamlConfig(enrichmentConfig);
