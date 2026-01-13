@@ -1,0 +1,51 @@
+metadata:
+  name: "Schema Diff - Type Widening"
+  description: "Validate compatible type widening changes"
+  version: "2.1"
+
+data-sources:
+  - name: "source-db"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    connection:
+      url: "jdbc:h2:mem:migration_source_widening;DB_CLOSE_DELAY=-1"
+      username: "sa"
+      password: ""
+
+  - name: "target-db"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    connection:
+      url: "jdbc:h2:mem:migration_target_widening;DB_CLOSE_DELAY=-1"
+      username: "sa"
+      password: ""
+
+pipeline:
+  name: "type-widening-validation"
+  description: "Validate safe type widening (VARCHAR 100→200)"
+  execution:
+    mode: "sequential"
+  steps:
+    - name: "read-source-schema"
+      type: "read-schema"
+      source: "source-db"
+      parameters:
+        table: "customers"
+
+    - name: "read-target-schema"
+      type: "read-schema"
+      source: "target-db"
+      parameters:
+        table: "customers"
+
+    - name: "compare-schemas"
+      type: "schema-diff"
+      description: "Compare type changes - widening"
+      parameters:
+        source-step: "read-source-schema"
+        target-step: "read-target-schema"
+        case-insensitive-names: true
+        inferred-type-tolerance: true
+        report-output: "target/reports/type-widening-migration-report.html"

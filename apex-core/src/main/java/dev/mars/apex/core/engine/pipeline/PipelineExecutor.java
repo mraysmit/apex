@@ -11,6 +11,10 @@ import dev.mars.apex.core.service.schema.SchemaMetadata;
 import dev.mars.apex.core.service.schema.SchemaReaderService;
 import dev.mars.apex.core.service.schema.SchemaHtmlReportGenerator;
 import dev.mars.apex.core.service.schema.DataSourceContext;
+import dev.mars.apex.core.service.schema.diff.SchemaDiffService;
+import dev.mars.apex.core.service.schema.diff.SchemaComparisonResult;
+import dev.mars.apex.core.service.schema.diff.ComparisonOptions;
+import dev.mars.apex.core.service.schema.diff.SchemaDiffHtmlReportGenerator;
 import dev.mars.apex.core.service.data.external.database.DatabaseDataSource;
 import dev.mars.apex.core.config.datasource.ConnectionConfig;
 import dev.mars.apex.core.util.TestAwareLogger;
@@ -44,6 +48,7 @@ public class PipelineExecutor {
     private final ExpressionParser expressionParser;
     private final SchemaReaderService schemaReaderService;
     private final SchemaHtmlReportGenerator reportGenerator;
+    private final SchemaDiffService schemaDiffService;
 
     public PipelineExecutor(ExternalDataSourceManager dataSourceManager) {
         this.dataSourceManager = dataSourceManager;
@@ -53,6 +58,7 @@ public class PipelineExecutor {
         this.expressionParser = new SpelExpressionParser();
         this.schemaReaderService = new SchemaReaderService();
         this.reportGenerator = new SchemaHtmlReportGenerator();
+        this.schemaDiffService = new SchemaDiffService();
     }
 
     /**
@@ -389,6 +395,16 @@ public class PipelineExecutor {
                         LOGGER.warn("[Pipeline.Execute] Read-schema step returned null data");
                     }
                     // Set metrics for read-schema step
+                    stepResult.setRecordsProcessed(1);
+                } else if ("schema-diff".equalsIgnoreCase(step.getType())) {
+                    // Compare two schemas from previous read-schema steps
+                    LOGGER.debug("[Pipeline.Execute] Executing schema-diff step: {}", step.getName());
+                    stepData = executeSchemaDiffStep(step);
+                    
+                    if (stepData != null) {
+                        pipelineContext.put("schemaDiffResult", stepData);
+                        LOGGER.info("[Pipeline.Execute] Schema comparison complete, result stored in context");
+                    }
                     stepResult.setRecordsProcessed(1);
                 }
 
@@ -904,6 +920,12 @@ public class PipelineExecutor {
                                 column.isPrimaryKey(), column.getMaxLength(), column.getPrecision(), column.getScale());
                 }
 
+                // Store DataSourceContext for later use (e.g., in schema-diff reports)
+                DataSourceContext dsContext = buildDataSourceContext(dataSource, parameters);
+                String contextKey = step.getName() + "_dataSourceContext";
+                pipelineContext.put(contextKey, dsContext);
+                LOGGER.debug("[Pipeline.ReadSchema] Stored DataSourceContext with key: {}", contextKey);
+
                 // Generate HTML report if requested
                 generateSchemaReportIfRequested(step, dataSource, schema);
 
@@ -1123,6 +1145,156 @@ public class PipelineExecutor {
                 return String.format("jdbc:%s://%s:%s/%s", 
                     databaseType, host, port != null ? port.toString() : "?", database != null ? database : "");
         }
+    }
+    
+    /**
+     * Execute a schema-diff step to compare two schemas.
+     *
+     * @param step the schema-diff pipeline step
+     * @return SchemaComparisonResult containing diff details
+     * @throws DataPipelineException if comparison fails
+     */
+    private SchemaComparisonResult executeSchemaDiffStep(PipelineStep step) throws DataPipelineException {
+        LOGGER.info("Executing schema-diff step: {}", step.getName());
+
+        Map<String, Object> parameters = step.getParameters();
+        if (parameters == null) {
+            throw new DataPipelineException("Schema-diff step requires parameters: " + step.getName());
+        }
+
+        // Get source and target step names from parameters
+        String sourceStepName = (String) parameters.get("source-step");
+        String targetStepName = (String) parameters.get("target-step");
+
+        if (sourceStepName == null || targetStepName == null) {
+            throw new DataPipelineException(
+                "Schema-diff step requires both 'source-step' and 'target-step' parameters: " + step.getName());
+        }
+
+        LOGGER.debug("[Pipeline.SchemaDiff] Retrieving schemas from steps: source={}, target={}",
+                    sourceStepName, targetStepName);
+
+        // Retrieve SchemaMetadata from previous steps
+        SchemaMetadata sourceSchema = retrieveSchemaFromStep(sourceStepName);
+        SchemaMetadata targetSchema = retrieveSchemaFromStep(targetStepName);
+
+        if (sourceSchema == null) {
+            throw new DataPipelineException(
+                "Source schema not found from step: " + sourceStepName);
+        }
+
+        if (targetSchema == null) {
+            throw new DataPipelineException(
+                "Target schema not found from step: " + targetStepName);
+        }
+
+        // Build comparison options from parameters
+        ComparisonOptions options = buildComparisonOptions(parameters);
+
+        // Perform comparison
+        LOGGER.debug("[Pipeline.SchemaDiff] Comparing schemas: {} ({} columns) vs {} ({} columns)",
+                    sourceSchema.getSourceName(), sourceSchema.getColumns().size(),
+                    targetSchema.getSourceName(), targetSchema.getColumns().size());
+
+        SchemaComparisonResult result = schemaDiffService.compareSchemas(sourceSchema, targetSchema, options);
+
+        LOGGER.info("Schema comparison complete: {} matching, {} added, {} removed, {} changed, {} breaking changes",
+                   result.getMatchingColumns().size(),
+                   result.getAddedColumns().size(),
+                   result.getRemovedColumns().size(),
+                   result.getChangedColumns().size(),
+                   result.getBreakingChanges().size());
+
+        // Generate HTML report if report-output parameter is specified
+        String reportPath = (String) parameters.get("report-output");
+        LOGGER.debug("[Pipeline.SchemaDiff] report-output parameter: {}", reportPath);
+        if (reportPath != null && !reportPath.trim().isEmpty()) {
+            LOGGER.info("[Pipeline.SchemaDiff] Generating HTML report to: {}", reportPath);
+            try {
+                // Retrieve DataSourceContext from source and target steps
+                DataSourceContext sourceContext = (DataSourceContext) pipelineContext.get(sourceStepName + "_dataSourceContext");
+                DataSourceContext targetContext = (DataSourceContext) pipelineContext.get(targetStepName + "_dataSourceContext");
+                
+                LOGGER.debug("[Pipeline.SchemaDiff] Retrieved DataSourceContext: source={}, target={}", 
+                    sourceContext != null ? sourceContext.getDataSourceName() : "null",
+                    targetContext != null ? targetContext.getDataSourceName() : "null");
+                
+                SchemaDiffHtmlReportGenerator reportGenerator = new SchemaDiffHtmlReportGenerator();
+                String generatedReportPath = reportGenerator.generateReport(result, sourceContext, targetContext, reportPath);
+                LOGGER.info("[Pipeline.SchemaDiff] HTML report generated: {}", generatedReportPath);
+                
+                // Store report path in context for reference
+                pipelineContext.put("schema-diff-report", generatedReportPath);
+            } catch (Exception e) {
+                LOGGER.warn("[Pipeline.SchemaDiff] Failed to generate HTML report: {}", e.getMessage(), e);
+                // Don't fail the pipeline for report generation errors
+            }
+        } else {
+            LOGGER.debug("[Pipeline.SchemaDiff] No report-output parameter specified, skipping HTML report generation");
+        }
+
+        // Check fail-on-incompatibility flag
+        Boolean failOnIncompatibility = (Boolean) parameters.get("fail-on-incompatibility");
+        if (Boolean.TRUE.equals(failOnIncompatibility) && !result.isCompatible()) {
+            throw new DataPipelineException(
+                "Schema incompatibility detected with " + result.getBreakingChanges().size() + 
+                " breaking changes: " + step.getName());
+        }
+
+        return result;
+    }
+
+    /**
+     * Retrieve SchemaMetadata from a previous pipeline step's result.
+     */
+    private SchemaMetadata retrieveSchemaFromStep(String stepName) throws DataPipelineException {
+        PipelineStepResult stepResult = stepResults.get(stepName);
+        if (stepResult == null) {
+            throw new DataPipelineException("Step not found: " + stepName);
+        }
+
+        Object stepData = stepResult.getData();
+        if (stepData instanceof SchemaMetadata) {
+            return (SchemaMetadata) stepData;
+        } else if (stepData != null) {
+            throw new DataPipelineException(
+                "Step '" + stepName + "' did not produce SchemaMetadata (found: " + 
+                stepData.getClass().getSimpleName() + ")");
+        } else {
+            throw new DataPipelineException("Step '" + stepName + "' produced null data");
+        }
+    }
+
+    /**
+     * Build ComparisonOptions from step parameters.
+     */
+    private ComparisonOptions buildComparisonOptions(Map<String, Object> parameters) {
+        ComparisonOptions options = ComparisonOptions.defaults();
+
+        if (parameters.containsKey("case-insensitive-names")) {
+            options.setCaseInsensitiveNames((Boolean) parameters.get("case-insensitive-names"));
+        }
+
+        if (parameters.containsKey("inferred-type-tolerance")) {
+            options.setInferredTypeTolerance((Boolean) parameters.get("inferred-type-tolerance"));
+        }
+
+        if (parameters.containsKey("allow-added-columns")) {
+            options.setAllowAddedColumns((Boolean) parameters.get("allow-added-columns"));
+        }
+
+        if (parameters.containsKey("allow-removed-columns")) {
+            options.setAllowRemovedColumns((Boolean) parameters.get("allow-removed-columns"));
+        }
+
+        // Type mappings (e.g., NVARCHAR → VARCHAR)
+        @SuppressWarnings("unchecked")
+        Map<String, String> typeMappings = (Map<String, String>) parameters.get("type-mappings");
+        if (typeMappings != null) {
+            options.setTypeMappings(typeMappings);
+        }
+
+        return options;
     }
     
     /**

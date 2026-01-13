@@ -1,0 +1,51 @@
+metadata:
+  name: "Schema Diff - Breaking Changes (Removed Columns)"
+  description: "Detect breaking changes when columns are removed"
+  version: "2.1"
+
+data-sources:
+  - name: "source-db"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    connection:
+      url: "jdbc:h2:mem:migration_source_removed;DB_CLOSE_DELAY=-1"
+      username: "sa"
+      password: ""
+
+  - name: "target-db"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    connection:
+      url: "jdbc:h2:mem:migration_target_removed;DB_CLOSE_DELAY=-1"
+      username: "sa"
+      password: ""
+
+pipeline:
+  name: "breaking-changes-validation"
+  description: "Detect removed columns as breaking changes"
+  execution:
+    mode: "sequential"
+  steps:
+    - name: "read-source-schema"
+      type: "read-schema"
+      source: "source-db"
+      parameters:
+        table: "customers"
+
+    - name: "read-target-schema"
+      type: "read-schema"
+      source: "target-db"
+      parameters:
+        table: "customers"
+
+    - name: "compare-schemas"
+      type: "schema-diff"
+      description: "Detect removed columns"
+      parameters:
+        source-step: "read-source-schema"
+        target-step: "read-target-schema"
+        case-insensitive-names: true
+        allow-removed-columns: false
+        report-output: "target/reports/breaking-changes-migration-report.html"

@@ -1,0 +1,60 @@
+# APEX Data Sync - SQL Server to PostgreSQL Migration
+# Real-world use case: Cross-platform migration with type mappings
+
+metadata:
+  id: "sqlserver-postgres-migration"
+  name: "SQL Server to PostgreSQL Migration Validator"
+  version: "1.0"
+  type: "pipeline-config"
+  description: "Validate SQL Server to PostgreSQL migration with type mappings"
+
+data-sources:
+  - name: "sqlserver-source"
+    type: "file-system"
+    source-type: "csv"
+    enabled: true
+    connection:
+      base-path: "src/test/resources"
+
+  - name: "postgres-target"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "mem:cross_platform;DB_CLOSE_DELAY=-1"
+      username: "sa"
+      password: ""
+    enabled: true
+
+pipeline:
+  name: "sqlserver-postgres-migration"
+  execution:
+    mode: "sequential"
+  
+  steps:
+    - name: "read-sqlserver-schema"
+      type: "read-schema"
+      source: "sqlserver-source"
+      description: "Read SQL Server schema (simulated via CSV)"
+      parameters:
+        file: "src/test/resources/test-data/sqlserver-customers.csv"
+
+    - name: "read-postgres-schema"
+      type: "read-schema"
+      source: "postgres-target"
+      description: "Read PostgreSQL target schema"
+      parameters:
+        table: "target_customers"
+
+    - name: "validate-cross-platform-migration"
+      type: "schema-diff"
+      description: "Validate with SQL Server to PostgreSQL type mappings"
+      parameters:
+        source-step: "read-sqlserver-schema"
+        target-step: "read-postgres-schema"
+        type-mappings:
+          NVARCHAR: VARCHAR
+          BIT: BOOLEAN
+          DATETIME2: TIMESTAMP
+          INT: INTEGER
+        case-insensitive-names: true
+        fail-on-incompatibility: true

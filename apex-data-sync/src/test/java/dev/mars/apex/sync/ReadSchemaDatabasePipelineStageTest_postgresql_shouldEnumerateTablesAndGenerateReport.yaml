@@ -30,4 +30,4 @@ pipeline:
       parameters:
         # No table parameter - this triggers enumeration
         schema: "test_schema"  # Only enumerate tables in test_schema (not system tables)
-        report-output: "target/reports/postgresql-all-tables-schema-report.html"
+        report-output: "reports/postgresql-all-tables-schema-report.html"

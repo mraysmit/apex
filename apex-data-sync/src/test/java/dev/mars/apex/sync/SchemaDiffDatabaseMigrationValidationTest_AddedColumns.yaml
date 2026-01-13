@@ -1,0 +1,52 @@
+metadata:
+  name: "Schema Diff - Safe Evolution (Added Columns)"
+  description: "Validate migration with added nullable columns"
+  version: "2.1"
+
+data-sources:
+  - name: "source-db"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    connection:
+      url: "jdbc:h2:./target/test/schema-diff/migration_source_added;DB_CLOSE_DELAY=-1"
+      username: "sa"
+      password: ""
+
+  - name: "target-db"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    connection:
+      url: "jdbc:h2:./target/test/schema-diff/migration_target_added;DB_CLOSE_DELAY=-1"
+      username: "sa"
+      password: ""
+
+pipeline:
+  name: "safe-evolution-validation"
+  description: "Validate safe schema evolution with added columns"
+  execution:
+    mode: "sequential"
+  steps:
+    - name: "read-source-schema"
+      type: "read-schema"
+      source: "source-db"
+      parameters:
+        table: "CUSTOMERS"
+
+    - name: "read-target-schema"
+      type: "read-schema"
+      source: "target-db"
+      parameters:
+        table: "CUSTOMERS"
+
+    - name: "compare-schemas"
+      type: "schema-diff"
+      description: "Compare v1 vs v2 (added columns)"
+      parameters:
+        source-step: "read-source-schema"
+        target-step: "read-target-schema"
+        case-insensitive-names: true
+        allow-added-columns: true
+        allow-removed-columns: false
+        report-output: "target/reports/safe-evolution-migration-report.html"

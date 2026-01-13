@@ -133,7 +133,7 @@ public class ReadSchemaDatabasePipelineStageTest_postgresql_shouldEnumerateTable
         assertTrue(result.isSuccess(), "Pipeline should execute successfully");
         
         // Verify HTML report was generated
-        Path reportPath = Path.of("target/reports/postgresql-all-tables-schema-report.html");
+        Path reportPath = Path.of("reports/postgresql-all-tables-schema-report.html");
         assertTrue(Files.exists(reportPath), "HTML report should be generated");
         
         File reportFile = reportPath.toFile();

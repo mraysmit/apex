@@ -1,0 +1,73 @@
+metadata:
+  name: "Schema Diff - Multi-Table Migration"
+  description: "Validate multiple tables in migration"
+  version: "2.1"
+
+data-sources:
+  - name: "source-db"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    connection:
+      url: "jdbc:h2:mem:migration_source_multitable;DB_CLOSE_DELAY=-1"
+      username: "sa"
+      password: ""
+
+  - name: "target-db"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    connection:
+      url: "jdbc:h2:mem:migration_target_multitable;DB_CLOSE_DELAY=-1"
+      username: "sa"
+      password: ""
+
+pipeline:
+  name: "multi-table-validation"
+  description: "Validate schema diff for multiple tables"
+  execution:
+    mode: "sequential"
+  steps:
+    # Customers table comparison
+    - name: "read-source-customers"
+      type: "read-schema"
+      source: "source-db"
+      parameters:
+        table: "customers"
+
+    - name: "read-target-customers"
+      type: "read-schema"
+      source: "target-db"
+      parameters:
+        table: "customers"
+
+    - name: "compare-customers"
+      type: "schema-diff"
+      description: "Compare customers table"
+      parameters:
+        source-step: "read-source-customers"
+        target-step: "read-target-customers"
+        case-insensitive-names: true
+        report-output: "target/reports/customers-migration-diff.html"
+
+    # Orders table comparison
+    - name: "read-source-orders"
+      type: "read-schema"
+      source: "source-db"
+      parameters:
+        table: "orders"
+
+    - name: "read-target-orders"
+      type: "read-schema"
+      source: "target-db"
+      parameters:
+        table: "orders"
+
+    - name: "compare-orders"
+      type: "schema-diff"
+      description: "Compare orders table"
+      parameters:
+        source-step: "read-source-orders"
+        target-step: "read-target-orders"
+        case-insensitive-names: true
+        report-output: "target/reports/orders-migration-diff.html"

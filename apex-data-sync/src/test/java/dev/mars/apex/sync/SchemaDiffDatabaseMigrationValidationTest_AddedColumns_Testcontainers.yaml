@@ -1,0 +1,56 @@
+metadata:
+  name: "Schema Diff - Safe Evolution (Added Columns) - Testcontainers"
+  description: "Validate migration with added nullable columns using real PostgreSQL"
+  version: "2.1"
+
+data-sources:
+  - name: "source-db"
+    type: "database"
+    source-type: "postgresql"
+    enabled: true
+    connection:
+      host: "${SOURCE_DB_HOST:localhost}"
+      port: ${SOURCE_DB_PORT:5432}
+      database: "${SOURCE_DB_NAME:source_db}"
+      username: "${SOURCE_DB_USER:test}"
+      password: "${SOURCE_DB_PASS:test}"
+
+  - name: "target-db"
+    type: "database"
+    source-type: "postgresql"
+    enabled: true
+    connection:
+      host: "${TARGET_DB_HOST:localhost}"
+      port: ${TARGET_DB_PORT:5432}
+      database: "${TARGET_DB_NAME:target_db}"
+      username: "${TARGET_DB_USER:test}"
+      password: "${TARGET_DB_PASS:test}"
+
+pipeline:
+  name: "safe-evolution-validation"
+  description: "Validate safe schema evolution with added columns"
+  execution:
+    mode: "sequential"
+  steps:
+    - name: "read-source-schema"
+      type: "read-schema"
+      source: "source-db"
+      parameters:
+        table: "customers"
+
+    - name: "read-target-schema"
+      type: "read-schema"
+      source: "target-db"
+      parameters:
+        table: "customers"
+
+    - name: "compare-schemas"
+      type: "schema-diff"
+      description: "Compare v1 vs v2 (added columns)"
+      parameters:
+        source-step: "read-source-schema"
+        target-step: "read-target-schema"
+        case-insensitive-names: true
+        allow-added-columns: true
+        allow-removed-columns: false
+        report-output: "target/reports/safe-evolution-migration-report-testcontainers.html"
