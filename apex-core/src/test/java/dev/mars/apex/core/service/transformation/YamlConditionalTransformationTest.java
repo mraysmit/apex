@@ -165,6 +165,7 @@ class YamlConditionalTransformationTest {
     @Test
     @DisplayName("Test Error Handling in Conditional Transformation")
     void testErrorHandling() {
+        logger.info("=== INTENTIONAL ERROR TEST: Division by zero in conditional transformation ===");
         YamlTransformation transformation = new YamlTransformation();
         transformation.setId("error-trans");
         transformation.setType("conditional-transformation");

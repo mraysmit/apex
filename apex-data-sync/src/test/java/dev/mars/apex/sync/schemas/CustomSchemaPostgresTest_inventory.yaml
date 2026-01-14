@@ -1,0 +1,33 @@
+# Custom Schema Test - INVENTORY Schema (PostgreSQL)
+# Tests reading schema from non-default inventory schema
+
+metadata:
+  name: "Custom Schema Test - INVENTORY"
+  description: "Read schema from inventory.products table"
+  version: "1.0"
+
+data-sources:
+  - name: "inventory-db"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      host: "localhost"
+      port: 5432
+      database: "custom_schema_test"
+      username: "test"
+      password: "test"
+      schema: "inventory"
+
+pipeline:
+  name: "read-inventory-schema"
+  execution:
+    mode: "sequential"
+    max-retries: 1
+    error-handling: "fail-fast"
+  steps:
+    - name: "read-products-schema"
+      type: "read-schema"
+      source: "inventory-db"
+      parameters:
+        table: "products"
+        schema: "inventory"

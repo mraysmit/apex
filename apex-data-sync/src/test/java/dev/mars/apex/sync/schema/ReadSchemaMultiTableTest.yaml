@@ -1,0 +1,61 @@
+metadata:
+  name: "Multi-Table Schema Reader Test"
+  description: "Test configuration for reading schemas from 5 H2 database tables"
+  version: "1.0"
+
+data-sources:
+  - name: "h2-multi-table-db"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "mem:multi_table_test;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      username: "sa"
+      password: ""
+    enabled: true
+
+pipeline:
+  name: "read-multi-table-schemas"
+  execution:
+    mode: "sequential"
+    error-handling: "continue-on-error"
+  
+  steps:
+    # Table 1: customers (5 columns)
+    - name: "read-schema-customers"
+      type: "read-schema"
+      source: "h2-multi-table-db"
+      description: "Read schema from customers table"
+      parameters:
+        table: "CUSTOMERS"
+
+    # Table 2: orders (6 columns)
+    - name: "read-schema-orders"
+      type: "read-schema"
+      source: "h2-multi-table-db"
+      description: "Read schema from orders table"
+      parameters:
+        table: "ORDERS"
+
+    # Table 3: products (7 columns)
+    - name: "read-schema-products"
+      type: "read-schema"
+      source: "h2-multi-table-db"
+      description: "Read schema from products table"
+      parameters:
+        table: "PRODUCTS"
+
+    # Table 4: inventory (4 columns)
+    - name: "read-schema-inventory"
+      type: "read-schema"
+      source: "h2-multi-table-db"
+      description: "Read schema from inventory table"
+      parameters:
+        table: "INVENTORY"
+
+    # Table 5: transactions (8 columns)
+    - name: "read-schema-transactions"
+      type: "read-schema"
+      source: "h2-multi-table-db"
+      description: "Read schema from transactions table"
+      parameters:
+        table: "TRANSACTIONS"

@@ -1,0 +1,63 @@
+# APEX Database Table Sync - Containers Test Pipeline
+# Real SQL Server to PostgreSQL sync using TestContainers.
+# Connection details are populated programmatically by the test.
+
+metadata:
+  id: "test-sync-pipeline-containers"
+  name: "Containers Test Sync Pipeline"
+  version: "1.0"
+  type: "pipeline-config"
+  author: "Test User"
+  description: "Real database pipeline via TestContainers"
+
+data-sources:
+  - name: "sqlserver-source"
+    type: "database"
+    source-type: "sqlserver"
+    connection:
+      # These values are overwritten programmatically by the test
+      host: "localhost"
+      port: 1433
+      database: "master"
+      username: "sa"
+      password: "placeholder"
+    enabled: true
+    queries:
+      extractCustomers: "SELECT id, name FROM customers"
+
+data-sinks:
+  - name: "postgresql-target"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      # These values are overwritten programmatically by the test
+      host: "localhost"
+      port: 5432
+      database: "test"
+      username: "test"
+      password: "placeholder"
+    enabled: true
+    operations:
+      upsertCustomer: "INSERT INTO customers (id, name) VALUES (:id, :name)"
+    schema:
+      auto-create: true
+      table-name: "customers"
+      init-script: "CREATE TABLE IF NOT EXISTS customers (id INT PRIMARY KEY, name VARCHAR(255))"
+
+pipeline:
+  name: "containers-sync"
+  execution:
+    mode: "sequential"
+    max-retries: 3
+    error-handling: "continue-on-error"
+  steps:
+    - name: "extract-from-sqlserver"
+      type: "extract"
+      source: "sqlserver-source"
+      operation: "extractCustomers"
+
+    - name: "load-into-postgresql"
+      type: "load"
+      sink: "postgresql-target"
+      operation: "upsertCustomer"
+      depends-on: ["extract-from-sqlserver"]

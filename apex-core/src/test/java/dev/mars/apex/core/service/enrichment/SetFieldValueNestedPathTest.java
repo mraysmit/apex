@@ -8,6 +8,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("SetFieldValue Nested Path Tests")
 public class SetFieldValueNestedPathTest {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SetFieldValueNestedPathTest.class);
     private YamlConfigurationLoader loader;
 
     @BeforeEach
@@ -174,6 +177,7 @@ public class SetFieldValueNestedPathTest {
         @Test
         @DisplayName("SpEL fails silently when intermediate map is missing")
         void testSpelMissingMap() throws Exception {
+            LOGGER.info("=== INTENTIONAL ERROR TEST: SpEL with missing intermediate map ===");
             String yaml = createEnrichmentYaml("#missing.field");
             YamlRuleConfiguration config = loader.fromYamlString(yaml);
 
@@ -192,6 +196,7 @@ public class SetFieldValueNestedPathTest {
         @Test
         @DisplayName("SpEL fails silently when list is missing")
         void testSpelMissingList() throws Exception {
+            LOGGER.info("=== INTENTIONAL ERROR TEST: SpEL with missing list ===");
             String yaml = createEnrichmentYaml("#items[0].value");
             YamlRuleConfiguration config = loader.fromYamlString(yaml);
 
@@ -209,6 +214,7 @@ public class SetFieldValueNestedPathTest {
         @Test
         @DisplayName("SpEL fails silently when deep path has missing intermediate")
         void testSpelDeepPathMissingIntermediate() throws Exception {
+            LOGGER.info("=== INTENTIONAL ERROR TEST: SpEL deep path with missing intermediate ===");
             String yaml = createEnrichmentYaml("#a.b.c.d");
             YamlRuleConfiguration config = loader.fromYamlString(yaml);
 

@@ -8,7 +8,7 @@ import java.util.Objects;
  * Represents schema metadata for a data source.
  * Contains information about columns, types, and constraints.
  *
- * @author APEX Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2.1.0
  */
 public class SchemaMetadata {

@@ -210,7 +210,12 @@ public class JdbcTemplateFactory {
      * Create simple DataSource (fallback when HikariCP is not available).
      */
     private static DataSource createSimpleDataSource(DataSourceConfiguration config) throws DataSourceException {
-        return new SimpleDataSource(config);
+        try {
+            return new SimpleDataSource(config);
+        } catch (Exception e) {
+            LOGGER.error("Failed to create SimpleDataSource for '{}': {}", config.getName(), e.getMessage(), e);
+            throw e;
+        }
     }
     
     /**
@@ -227,6 +232,15 @@ public class JdbcTemplateFactory {
         
         switch (sourceType) {
             case "postgresql":
+                // PostgreSQL JDBC supports currentSchema parameter to set the default search_path
+                // This allows queries to reference tables without schema prefix
+                String schema = conn.getSchema();
+                if (schema != null && !schema.trim().isEmpty()) {
+                    String urlWithSchema = String.format("jdbc:postgresql://%s:%d/%s?currentSchema=%s", 
+                        conn.getHost(), conn.getPort(), conn.getDatabase(), schema);
+                    LOGGER.debug("Built PostgreSQL JDBC URL with schema: {}", urlWithSchema);
+                    return urlWithSchema;
+                }
                 return String.format("jdbc:postgresql://%s:%d/%s", 
                     conn.getHost(), conn.getPort(), conn.getDatabase());
                     
@@ -239,7 +253,8 @@ public class JdbcTemplateFactory {
                     conn.getHost(), conn.getPort(), conn.getDatabase());
                     
             case "sqlserver":
-                return String.format("jdbc:sqlserver://%s:%d;databaseName=%s", 
+                // SQL Server 2022+ requires encrypt=false for non-SSL connections
+                return String.format("jdbc:sqlserver://%s:%d;databaseName=%s;encrypt=false;trustServerCertificate=true", 
                     conn.getHost(), conn.getPort(), conn.getDatabase());
                     
             case "h2":
@@ -429,11 +444,31 @@ public class JdbcTemplateFactory {
             throws DataSourceException {
         try (Connection connection = dataSource.getConnection()) {
             if (connection == null || connection.isClosed()) {
+                // FATAL: Database connection failed - log for platform support team
+                LOGGER.error("FATAL DATABASE CONNECTION FAILURE - DataSource: '{}', Type: {}, Host: {}, Database: {} - Connection returned null or closed",
+                    config.getName(),
+                    config.getSourceType(),
+                    config.getConnection() != null ? config.getConnection().getHost() : "unknown",
+                    config.getConnection() != null ? config.getConnection().getDatabase() : "unknown");
                 throw new DataSourceException(DataSourceException.ErrorType.CONNECTION_ERROR,
                     "Failed to establish database connection", null, config.getName(), "testConnection", true);
             }
             LOGGER.debug("Successfully tested DataSource connection for '{}'", config.getName());
         } catch (SQLException e) {
+            // FATAL: Database connection failed - log structured error for platform support team
+            // Stack trace logged at DEBUG level only to avoid noise in test output
+            String errorDetails = String.format(
+                "FATAL DATABASE CONNECTION FAILURE - DataSource: '%s', Type: %s, Host: %s, Database: %s, Error: %s",
+                config.getName(),
+                config.getSourceType(),
+                config.getConnection() != null ? config.getConnection().getHost() : "unknown",
+                config.getConnection() != null ? config.getConnection().getDatabase() : "unknown",
+                e.getMessage()
+            );
+            
+            LOGGER.error(errorDetails);
+            LOGGER.debug("Database connection failure stack trace for troubleshooting:", e);
+            
             throw new DataSourceException(DataSourceException.ErrorType.CONNECTION_ERROR,
                 "Database connection test failed", e, config.getName(), "testConnection", true);
         }
@@ -441,6 +476,7 @@ public class JdbcTemplateFactory {
     
     /**
      * Generate cache key for DataSource.
+     * Includes schema to ensure different schemas produce different cached DataSources.
      */
     private static String generateCacheKey(DataSourceConfiguration config) {
         ConnectionConfig conn = config.getConnection();
@@ -449,12 +485,15 @@ public class JdbcTemplateFactory {
                 config.getName(),
                 config.getSourceType());
         }
-        return String.format("%s:%s:%s:%d:%s",
+        // Include schema in cache key to prevent cross-schema cache pollution
+        String schema = conn.getSchema();
+        return String.format("%s:%s:%s:%d:%s:%s",
             config.getName(),
             config.getSourceType(),
             conn.getHost(),
             conn.getPort(),
-            conn.getDatabase());
+            conn.getDatabase(),
+            schema != null ? schema : "default");
     }
     
     /**
@@ -488,6 +527,7 @@ public class JdbcTemplateFactory {
         
         public SimpleDataSource(DataSourceConfiguration config) throws DataSourceException {
             this.jdbcUrl = buildJdbcUrl(config);
+            LOGGER.info("SimpleDataSource built JDBC URL: {}", jdbcUrl);
             this.username = config.getConnection().getUsername();
             this.password = config.getConnection().getPassword();
             this.properties = new Properties();
@@ -498,6 +538,7 @@ public class JdbcTemplateFactory {
         
         @Override
         public Connection getConnection() throws SQLException {
+            LOGGER.debug("SimpleDataSource.getConnection() called for URL: {}", jdbcUrl);
             return java.sql.DriverManager.getConnection(jdbcUrl, properties);
         }
         

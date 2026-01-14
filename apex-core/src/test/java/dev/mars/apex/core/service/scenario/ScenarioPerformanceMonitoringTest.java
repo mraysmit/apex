@@ -97,6 +97,7 @@ class ScenarioPerformanceMonitoringTest {
         @Test
         @DisplayName("Should collect performance metrics for each stage")
         void testStagePerformanceMetrics() {
+            logger.info("=== INTENTIONAL ERROR TEST: Missing stage config files ===");
             logger.info("TEST: Stage performance metrics collection");
 
             // Given: Scenario with multiple stages (using direct field access)
@@ -134,6 +135,7 @@ class ScenarioPerformanceMonitoringTest {
         @Test
         @DisplayName("Should calculate average execution time across multiple runs")
         void testAverageExecutionTimeCalculation() {
+            logger.info("=== INTENTIONAL ERROR TEST: Missing config file in performance test ===");
             logger.info("TEST: Average execution time calculation");
 
             // Given: Scenario with classification rule (using direct field access)

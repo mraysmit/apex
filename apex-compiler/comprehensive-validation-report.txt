@@ -2,46 +2,46 @@ COMPREHENSIVE APEX YAML VALIDATION REPORT
 =========================================
 
 OVERALL STATISTICS:
-  Total YAML files: 134
-  Fully valid files: 58
-  Structurally valid: 58
+  Total YAML files: 159
+  Fully valid files: 77
+  Structurally valid: 77
   Dependency issues only: 0
-  Invalid files: 76
+  Invalid files: 82
 
 SUCCESS RATES:
-  Overall success rate: 43.3%
-  Structural success rate: 43.3%
+  Overall success rate: 48.4%
+  Structural success rate: 48.4%
 
 ERROR BREAKDOWN:
-  Missing Required Fields: 83 occurrences
+  Missing Required Fields: 84 occurrences
   Other Issues: 25 occurrences
-  Document Type Issues: 13 occurrences
+  Document Type Issues: 18 occurrences
 
 SAMPLE VALID FILES:
+  • builder-registry.yaml
+  • main-config.yaml
+  • alt-config.yaml
+  • child-rules.yaml
+  • parent-rules.yaml
+  • stream-rules.yaml
   • composite-rulegroup-enrichmentgroup.yaml
   • enrichment-group-references.yaml
   • enrichment-references.yaml
   • nested-group-references.yaml
-  • rule-group-references.yaml
-  • rule-references.yaml
-  • user-example-enrichment-group-refs.yaml
-  • stage1.yaml
-  • stage2.yaml
-  • test.yaml
 
 SAMPLE INVALID FILES:
-  • circular-a.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\circular-a.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
-  • circular-b.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\circular-b.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
-  • classpath-external.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\classpath-external.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
-  • classpath-main.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\classpath-main.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
-  • mixed-classpath.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\mixed-classpath.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
-  • mixed-filesystem.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\mixed-filesystem.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
-  • mixed-main.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\mixed-main.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
-  • nested-level1.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\nested-level1.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
-  • nested-level2.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\nested-level2.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
-  • nested-main.yaml - ..\apex-core\src\test\resources\config\groups-only-logic\nested-main.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
+  • circular-classpath-a.yaml - ..\apex-core\src\test\resources\component-classpath-test\circular-classpath-a.yaml: Invalid document type: component. Valid types: [rule-config, enrichment, external-data-config, dataset, scenario-registry, pipeline-config, scenario, rule-chain]
+  • circular-classpath-b.yaml - ..\apex-core\src\test\resources\component-classpath-test\circular-classpath-b.yaml: Invalid document type: component. Valid types: [rule-config, enrichment, external-data-config, dataset, scenario-registry, pipeline-config, scenario, rule-chain]
+  • nested-child.yaml - ..\apex-core\src\test\resources\component-classpath-test\nested-child.yaml: Invalid document type: component. Valid types: [rule-config, enrichment, external-data-config, dataset, scenario-registry, pipeline-config, scenario, rule-chain]
+  • nested-parent.yaml - ..\apex-core\src\test\resources\component-classpath-test\nested-parent.yaml: Invalid document type: component. Valid types: [rule-config, enrichment, external-data-config, dataset, scenario-registry, pipeline-config, scenario, rule-chain]
+  • stream-load-component.yaml - ..\apex-core\src\test\resources\component-classpath-test\stream-load-component.yaml: Invalid document type: component. Valid types: [rule-config, enrichment, external-data-config, dataset, scenario-registry, pipeline-config, scenario, rule-chain]
+  • circular-a.yaml - ..\apex-core\src\test\resources\config\circular-a.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
+  • circular-b.yaml - ..\apex-core\src\test\resources\config\circular-b.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
+  • classpath-external.yaml - ..\apex-core\src\test\resources\config\classpath-external.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
+  • classpath-main.yaml - ..\apex-core\src\test\resources\config\classpath-main.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
+  • mixed-classpath.yaml - ..\apex-core\src\test\resources\config\mixed-classpath.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
 
 BULK FIX IMPACT ASSESSMENT:
   Previous estimated rate: 21.3%
-  Current actual rate: 43.3%
-  Improvement: +22.0 percentage points
+  Current actual rate: 48.4%
+  Improvement: +27.1 percentage points

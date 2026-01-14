@@ -20,6 +20,8 @@ package dev.mars.apex.core.service.scenario;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.io.TempDir;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 import java.io.IOException;
@@ -54,6 +56,8 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @Deprecated(since = "3.0", forRemoval = true)
 class DataTypeScenarioServiceTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataTypeScenarioServiceTest.class);
 
     @TempDir
     Path tempDir;
@@ -104,9 +108,9 @@ class DataTypeScenarioServiceTest {
     }
 
     @Test
-    @DisplayName("Should handle missing registry file gracefully")
-    void testLoadScenariosWithMissingFile() {
-        System.out.println("TEST: Triggering intentional error - testing scenario loading with missing file");
+    @DisplayName("Should fail when registry file missing (Intentional Error)")
+    void testLoadScenariosWithMissingFileIntentional() {
+        LOGGER.info("=== INTENTIONAL ERROR TEST: Scenario loading with missing registry file ===");
         
         assertThrows(RuntimeException.class, () -> {
             scenarioService.loadScenarios("nonexistent/path/registry.yaml");
@@ -114,9 +118,9 @@ class DataTypeScenarioServiceTest {
     }
 
     @Test
-    @DisplayName("Should handle invalid registry configuration")
-    void testLoadScenariosWithInvalidConfig() throws IOException {
-        System.out.println("TEST: Triggering intentional error - testing scenario loading with invalid configuration");
+    @DisplayName("Should fail with invalid registry configuration (Intentional Error)")
+    void testLoadScenariosWithInvalidConfigIntentional() throws IOException {
+        LOGGER.info("=== INTENTIONAL ERROR TEST: Scenario loading with invalid configuration ===");
         
         // Create invalid registry file
         String invalidRegistryPath = createInvalidRegistryFile();

@@ -1,0 +1,89 @@
+# APEX Data Sync - Multi-Table Migration Validation
+# Real-world use case: Validate multiple table migrations in one pipeline
+
+metadata:
+  id: "multi-table-migration-validation"
+  name: "Multi-Table Migration Validator"
+  version: "1.0"
+  type: "pipeline-config"
+  description: "Validate schemas for multiple table migrations"
+
+data-sources:
+  - name: "source-db"
+    type: "file-system"
+    source-type: "csv"
+    enabled: true
+    connection:
+      base-path: "src/test/resources"
+
+  - name: "target-db"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "mem:multi_table_migration;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      username: "sa"
+      password: ""
+    enabled: true
+
+pipeline:
+  name: "multi-table-validation"
+  execution:
+    mode: "sequential"
+  
+  steps:
+    # Table 1: customers
+    - name: "read-source-customers"
+      type: "read-schema"
+      source: "source-db"
+      parameters:
+        file: "src/test/resources/test-data/migration-customers.csv"
+
+    - name: "read-target-customers"
+      type: "read-schema"
+      source: "target-db"
+      parameters:
+        table: "CUSTOMERS"
+
+    - name: "compare-customers-schema"
+      type: "schema-diff"
+      parameters:
+        source-step: "read-source-customers"
+        target-step: "read-target-customers"
+
+    # Table 2: orders
+    - name: "read-source-orders"
+      type: "read-schema"
+      source: "source-db"
+      parameters:
+        file: "src/test/resources/test-data/migration-orders.csv"
+
+    - name: "read-target-orders"
+      type: "read-schema"
+      source: "target-db"
+      parameters:
+        table: "ORDERS"
+
+    - name: "compare-orders-schema"
+      type: "schema-diff"
+      parameters:
+        source-step: "read-source-orders"
+        target-step: "read-target-orders"
+
+    # Table 3: products
+    - name: "read-source-products"
+      type: "read-schema"
+      source: "source-db"
+      parameters:
+        file: "src/test/resources/test-data/migration-products.csv"
+
+    - name: "read-target-products"
+      type: "read-schema"
+      source: "target-db"
+      parameters:
+        table: "PRODUCTS"
+
+    - name: "compare-products-schema"
+      type: "schema-diff"
+      parameters:
+        source-step: "read-source-products"
+        target-step: "read-target-products"

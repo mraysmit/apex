@@ -20,6 +20,8 @@ package dev.mars.apex.core.service.data.external.cache;
 import dev.mars.apex.core.config.datasource.*;
 import dev.mars.apex.core.service.data.external.*;
 import org.junit.jupiter.api.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 import java.util.*;
@@ -44,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class CacheDataSourceTest {
 
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(CacheDataSourceTest.class);
 
     private CacheDataSource cacheDataSource;
     private DataSourceConfiguration validConfig;
@@ -208,6 +210,7 @@ class CacheDataSourceTest {
     @Test
     @DisplayName("Should handle getData with null cache manager")
     void testGetDataWithNullCacheManager() {
+        LOGGER.info("=== INTENTIONAL ERROR TEST: getData with null cache manager ===");
         Object result = cacheDataSource.getData("memory", "test-key");
         assertNull(result);
     }
@@ -215,6 +218,7 @@ class CacheDataSourceTest {
     @Test
     @DisplayName("Should handle getData with unsupported data type")
     void testGetDataWithUnsupportedType() {
+        LOGGER.info("=== INTENTIONAL ERROR TEST: getData with unsupported type ===");
         Object result = cacheDataSource.getData("database", "test-key");
         assertNull(result);
     }

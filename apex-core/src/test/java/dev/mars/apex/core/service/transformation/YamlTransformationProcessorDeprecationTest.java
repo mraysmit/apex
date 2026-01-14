@@ -94,6 +94,7 @@ class YamlTransformationProcessorDeprecationTest {
     @Test
     @DisplayName("Test 3: Deprecated method cannot propagate errors (returns original object)")
     void testDeprecatedMethodCannotPropagateErrors() {
+        logger.info("=== INTENTIONAL ERROR TEST: Deprecated method with invalid transformation ===");
         logger.info("=== Test 3: Testing deprecated method cannot propagate errors ===");
 
         // Given: An invalid transformation that will fail
@@ -123,6 +124,7 @@ class YamlTransformationProcessorDeprecationTest {
     @Test
     @DisplayName("Test 4: New method properly propagates errors via RuleResult")
     void testNewMethodPropagatesErrors() {
+        logger.info("=== INTENTIONAL ERROR TEST: Transformation with invalid type ===");
         logger.info("=== Test 4: Testing new method propagates errors ===");
 
         // Given: An invalid transformation that will fail

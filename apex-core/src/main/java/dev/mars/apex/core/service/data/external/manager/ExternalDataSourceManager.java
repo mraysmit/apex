@@ -6,7 +6,7 @@ import dev.mars.apex.core.service.data.external.ExternalDataSource;
  * Manager interface for external data sources.
  * Provides access to configured data sources by name.
  * 
- * @author APEX Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
 public interface ExternalDataSourceManager {

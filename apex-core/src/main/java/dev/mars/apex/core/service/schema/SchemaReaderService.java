@@ -16,7 +16,7 @@ import java.util.*;
  * Service for reading schema metadata from various data sources.
  * Supports databases and CSV files.
  *
- * @author APEX Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2.1.0
  */
 public class SchemaReaderService {
@@ -120,9 +120,12 @@ public class SchemaReaderService {
                 LOGGER.debug("[SchemaReader] Reading schema for table: {}", tableName);
                 
                 try {
-                    // Create parameters for single table read
+                    // Create parameters for single table read, including schema filter
                     Map<String, Object> tableParams = new HashMap<>();
                     tableParams.put("table", tableName);
+                    if (schemaFilter != null) {
+                        tableParams.put("schema", schemaFilter);
+                    }
                     
                     SchemaMetadata tableSchema = readDatabaseSchema(dataSource, tableParams);
                     tableSchemas.put(tableName, tableSchema);
@@ -148,17 +151,19 @@ public class SchemaReaderService {
     }
 
     /**
-     * Build query to get all tables from INFORMATION_SCHEMA.
+     * Build query to get all tables and views from INFORMATION_SCHEMA.
      * Note: Uses case-sensitive comparison to support both PostgreSQL (lowercase) 
      * and H2/SQL Server (uppercase).
+     * Includes both BASE TABLE and VIEW types to support querying views.
      */
     private String buildTablesQuery(String schemaFilter, String tablePattern) {
         StringBuilder query = new StringBuilder();
-        query.append("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'");
+        // Include both tables AND views - many users query views, not just tables
+        query.append("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE IN ('BASE TABLE', 'VIEW')");
         
         if (schemaFilter != null && !schemaFilter.trim().isEmpty()) {
-            // Preserve original case - PostgreSQL uses lowercase, H2/SQL Server use uppercase
-            query.append(" AND TABLE_SCHEMA = '").append(schemaFilter.trim()).append("'");
+            // Use case-insensitive comparison for schema to support both H2 (PUBLIC) and PostgreSQL (public)
+            query.append(" AND LOWER(TABLE_SCHEMA) = LOWER('").append(schemaFilter.trim()).append("')");
         }
         
         if (tablePattern != null && !tablePattern.trim().isEmpty()) {
@@ -258,7 +263,13 @@ public class SchemaReaderService {
             throw new DataPipelineException("Table name cannot be null or empty");
         }
         
-        LOGGER.debug("[SchemaReader.DB] Reading schema for table: {}", tableName);
+        // Get schema filter if provided (defaults to PUBLIC for H2 to avoid INFORMATION_SCHEMA tables)
+        String schemaFilter = (String) parameters.get("schema");
+        if (schemaFilter == null || schemaFilter.trim().isEmpty()) {
+            schemaFilter = "PUBLIC";  // Default to PUBLIC schema
+        }
+        
+        LOGGER.debug("[SchemaReader.DB] Reading schema for table: {} in schema: {}", tableName, schemaFilter);
 
         SchemaMetadata schema = new SchemaMetadata(dataSource.getName(), dataSource.getSourceType().toString());
 
@@ -266,7 +277,7 @@ public class SchemaReaderService {
         // We'll use a metadata query approach
         try {
             // Query information_schema to get column metadata
-            String metadataQuery = buildSchemaQuery(tableName);
+            String metadataQuery = buildSchemaQuery(tableName, schemaFilter);
             LOGGER.debug("[SchemaReader.DB] Executing metadata query: {}", metadataQuery);
             
             List<Map<String, Object>> columns = dbDataSource.query(metadataQuery, new HashMap<>());
@@ -335,20 +346,28 @@ public class SchemaReaderService {
     /**
      * Build a database-agnostic query for schema metadata.
      * Uses INFORMATION_SCHEMA which is supported by most databases.
+     * Uses case-insensitive schema comparison to work with both H2 (PUBLIC) and PostgreSQL (public).
      */
-    private String buildSchemaQuery(String tableName) {
+    private String buildSchemaQuery(String tableName, String schemaFilter) {
         // Standard SQL INFORMATION_SCHEMA query
         // Note: Preserve table name case - PostgreSQL uses lowercase, H2/SQL Server use uppercase
-        return "SELECT " +
-               "COLUMN_NAME, " +
-               "DATA_TYPE, " +
-               "IS_NULLABLE, " +
-               "CHARACTER_MAXIMUM_LENGTH, " +
-               "NUMERIC_PRECISION, " +
-               "NUMERIC_SCALE " +
-               "FROM INFORMATION_SCHEMA.COLUMNS " +
-               "WHERE TABLE_NAME = '" + tableName + "' " +
-               "ORDER BY ORDINAL_POSITION";
+        // Use LOWER() for case-insensitive schema comparison (H2 uses PUBLIC, PostgreSQL uses public)
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT ");
+        query.append("COLUMN_NAME, ");
+        query.append("DATA_TYPE, ");
+        query.append("IS_NULLABLE, ");
+        query.append("CHARACTER_MAXIMUM_LENGTH, ");
+        query.append("NUMERIC_PRECISION, ");
+        query.append("NUMERIC_SCALE ");
+        query.append("FROM INFORMATION_SCHEMA.COLUMNS ");
+        query.append("WHERE TABLE_NAME = '").append(tableName).append("'");
+        if (schemaFilter != null && !schemaFilter.trim().isEmpty()) {
+            // Use case-insensitive comparison for schema to support both H2 and PostgreSQL
+            query.append(" AND LOWER(TABLE_SCHEMA) = LOWER('").append(schemaFilter.trim()).append("')");
+        }
+        query.append(" ORDER BY ORDINAL_POSITION");
+        return query.toString();
     }
 
     /**

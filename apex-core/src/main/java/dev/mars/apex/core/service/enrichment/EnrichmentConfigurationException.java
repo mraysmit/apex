@@ -5,7 +5,7 @@ package dev.mars.apex.core.service.enrichment;
  * This represents a critical configuration error that should be logged at ERROR/SEVERE level
  * rather than WARNING level.
  * 
- * @author APEX Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  */
 public class EnrichmentConfigurationException extends RuntimeException {
     

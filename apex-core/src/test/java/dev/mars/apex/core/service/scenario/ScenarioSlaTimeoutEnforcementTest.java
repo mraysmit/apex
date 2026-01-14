@@ -102,6 +102,7 @@ class ScenarioSlaTimeoutEnforcementTest {
         @Test
         @DisplayName("Should track execution time for each stage")
         void testStageExecutionTimeTracking() {
+            logger.info("=== INTENTIONAL ERROR TEST: Missing stage config files ===");
             logger.info("TEST: Stage execution time tracking");
 
             // Given: Scenario with multiple stages (using direct field access)
@@ -136,6 +137,7 @@ class ScenarioSlaTimeoutEnforcementTest {
         @Test
         @DisplayName("Should handle tight SLA timeout gracefully")
         void testTightSlaTimeoutHandling() {
+            logger.info("=== INTENTIONAL ERROR TEST: Tight SLA with missing config file ===");
             logger.info("TEST: Tight SLA timeout handling");
 
             // Given: Scenario with very tight SLA (100ms) (using direct field access)

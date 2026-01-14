@@ -270,6 +270,7 @@ class ScenarioStageExecutorFileHandlingTest {
     @Test
     @DisplayName("Should handle file path with spaces")
     void testFilePathWithSpaces() {
+        logger.info("=== INTENTIONAL ERROR TEST: File path with spaces (file doesn't exist) ===");
         logger.info("TEST: Triggering intentional error - File path with spaces");
 
         // Given: Scenario with stage having file path containing spaces

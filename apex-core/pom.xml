@@ -39,6 +39,12 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.4.11</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
         </dependency>
@@ -146,6 +152,10 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+                    <argLine>
+                        --add-reads dev.mars.apex.core=ch.qos.logback.classic
+                        --add-opens ch.qos.logback.classic/ch.qos.logback.classic=dev.mars.apex.core
+                    </argLine>
                     <systemPropertyVariables>
                         <docker.postgres.version>${docker.postgres.version}</docker.postgres.version>
                         <docker.vault.version>${docker.vault.version}</docker.vault.version>

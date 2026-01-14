@@ -8,6 +8,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +30,8 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @DisplayName("Nested Target-Field Tests")
 public class NestedTargetFieldTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NestedTargetFieldTest.class);
 
     private YamlConfigurationLoader loader;
 
@@ -158,6 +162,7 @@ public class NestedTargetFieldTest {
         @Test
         @DisplayName("Dot notation target-field WITH SpEL prefix - missing structure")
         void testDotNotationWithSpelPrefixMissingStructure() throws Exception {
+            LOGGER.info("=== INTENTIONAL ERROR TEST: SpEL with missing structure ===");
             String yamlConfig = """
                 metadata:
                   id: "spel-missing-structure-test"
@@ -250,6 +255,7 @@ public class NestedTargetFieldTest {
         @Test
         @DisplayName("Array index target-field - missing list")
         void testArrayIndexWithMissingList() throws Exception {
+            LOGGER.info("=== INTENTIONAL ERROR TEST: Array index with missing list ===");
             String yamlConfig = """
                 metadata:
                   id: "array-missing-list-test"
@@ -419,6 +425,7 @@ public class NestedTargetFieldTest {
         @Test
         @DisplayName("Array index out of bounds should be handled gracefully")
         void testArrayIndexOutOfBounds() throws Exception {
+            LOGGER.info("=== INTENTIONAL ERROR TEST: Array index out of bounds ===");
             String yamlConfig = """
                 metadata:
                   id: "array-oob-test"
@@ -456,6 +463,7 @@ public class NestedTargetFieldTest {
         @Test
         @DisplayName("Type mismatch - setting on non-map should be handled gracefully")
         void testTypeMismatchNonMap() throws Exception {
+            LOGGER.info("=== INTENTIONAL ERROR TEST: Type mismatch setting on string ===");
             String yamlConfig = """
                 metadata:
                   id: "type-mismatch-test"

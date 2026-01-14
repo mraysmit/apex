@@ -20,6 +20,8 @@ package dev.mars.apex.core.service.data.external.file;
 import dev.mars.apex.core.config.datasource.FileFormatConfig;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.io.TempDir;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -45,6 +47,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 1.0.0
  */
 class JsonDataLoaderTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonDataLoaderTest.class);
 
     @TempDir
     Path tempDir;
@@ -488,8 +492,10 @@ class JsonDataLoaderTest {
     }
 
     @Test
-    @DisplayName("Should handle missing file")
-    void testMissingFile() {
+    @DisplayName("Should fail when JSON file missing (Intentional Error)")
+    void testMissingFileIntentional() {
+        LOGGER.info("=== INTENTIONAL ERROR TEST: JSON file missing ===");
+        
         Path nonExistentFile = tempDir.resolve("nonexistent.json");
 
         IOException exception = assertThrows(IOException.class, () -> {
@@ -514,8 +520,10 @@ class JsonDataLoaderTest {
     }
 
     @Test
-    @DisplayName("Should handle invalid encoding")
-    void testInvalidEncoding() throws IOException {
+    @DisplayName("Should fail with invalid encoding (Intentional Error)")
+    void testInvalidEncodingIntentional() throws IOException {
+        LOGGER.info("=== INTENTIONAL ERROR TEST: JSON file with invalid encoding ===");
+        
         String jsonContent = """
             {
                 "message": "Hello World"

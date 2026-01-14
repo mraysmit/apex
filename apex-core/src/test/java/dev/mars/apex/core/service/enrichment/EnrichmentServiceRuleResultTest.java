@@ -8,6 +8,8 @@ import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class EnrichmentServiceRuleResultTest {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnrichmentServiceRuleResultTest.class);
     private YamlConfigurationLoader loader;
 
     @BeforeEach
@@ -88,6 +91,7 @@ class EnrichmentServiceRuleResultTest {
     @Test
     @DisplayName("Should return failure RuleResult for required field mapping failure")
     void testEnrichObjectWithResult_RequiredFieldFailure() throws Exception {
+        LOGGER.info("=== INTENTIONAL ERROR TEST: Required field mapping failure ===");
         String yamlConfig = """
             metadata:
               name: "Required Field Test"

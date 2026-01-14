@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  * Executes APEX pipelines based on YAML configuration.
  * Handles step dependencies, error handling, and monitoring.
  * 
- * @author APEX Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
 public class PipelineExecutor {

@@ -42,6 +42,7 @@ class YamlTransformationProcessorErrorHandlingTest {
     @Test
     @DisplayName("Test 1: Catch block handles exception during transformation processing")
     void testCatchBlockHandlesTransformationException() {
+        logger.info("=== INTENTIONAL ERROR TEST: Invalid SpEL accessing null object ===");
         logger.info("=== Test 1: Testing catch block with transformation processing exception ===");
 
         // Given: Transformation with invalid SpEL expression that will cause exception
@@ -120,6 +121,7 @@ class YamlTransformationProcessorErrorHandlingTest {
     @Test
     @DisplayName("Test 4: Error result contains proper error message and metadata")
     void testErrorResultContainsProperErrorMessage() {
+        logger.info("=== INTENTIONAL ERROR TEST: Division by zero in transformation ===");
         logger.info("=== Test 4: Testing error result contains proper error message and metadata ===");
 
         // Given: Transformation with invalid SpEL expression

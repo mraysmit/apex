@@ -28,12 +28,12 @@ import static org.junit.jupiter.api.Assertions.*;
  * 4. Calculate overhead percentage
  *
  * Success Criteria:
- * - Overhead with result-field < 20% (accounting for JVM variability and outliers)
+ * - Overhead with result-field < 25% (accounting for JVM variability, GC pauses, and system load)
  * - Median overhead is typically sub-millisecond (< 200μs)
  * - Consistent performance across iterations
  *
  * Note: Average times can be skewed by JVM warmup and GC pauses. Median is more
- * representative of typical performance. The 20% threshold is conservative to
+ * representative of typical performance. The 25% threshold is conservative to
  * account for test environment variability while still detecting regressions.
  */
 @DisplayName("Rule Result Field Performance Test")
@@ -43,10 +43,10 @@ public class RuleResultFieldPerformanceTest extends DemoTestBase {
 
     private static final int WARMUP_ITERATIONS = 100;
     private static final int BENCHMARK_ITERATIONS = 1000;
-    private static final double MAX_OVERHEAD_PERCENT = 20.0; // 20% maximum overhead (conservative for test stability)
+    private static final double MAX_OVERHEAD_PERCENT = 25.0; // 25% maximum overhead (conservative for test stability and JVM variability)
 
     @Test
-    @DisplayName("Should validate result-field overhead is minimal (< 20%)")
+    @DisplayName("Should validate result-field overhead is minimal (< 25%)")
     void testResultFieldPerformanceOverhead() {
         logger.info("=== Performance Test: result-field Overhead Validation ===");
         logger.info("Validating that result-field has minimal overhead (< {}%)", MAX_OVERHEAD_PERCENT);

@@ -15,6 +15,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -220,6 +221,7 @@ public class EnrichmentGroupDatabaseLookupTest {
     @Test
     @DisplayName("EDGE CASE: Enrichment-group with database lookup should handle missing customer gracefully")
     void testEnrichmentGroupWithDatabaseLookupMissingCustomer() throws Exception {
+        logger.info("=== INTENTIONAL ERROR TEST: Database lookup for non-existent customer ===");
         logger.info("TEST START: Enrichment-group with database lookup for non-existent customer");
         
         // Load configuration
@@ -239,17 +241,27 @@ public class EnrichmentGroupDatabaseLookupTest {
         // Execute - should handle gracefully (no exception)
         RuleResult result = engine.evaluate(config, inputData);
         
-        // Should succeed but with no enriched values (or default values if configured)
+        // VERIFY PROPER ERROR HANDLING:
         assertNotNull(result, "Result should not be null");
         
+        // 1. Result should indicate failure (exception was caught and propagated)
+        assertTrue(result.hasFailures(), "Result should indicate failure for non-existent customer lookup");
+        
+        // 2. Failure messages should contain enrichment error details
+        List<String> failureMessages = result.getFailureMessages();
+        assertNotNull(failureMessages, "Failure messages should not be null");
+        assertFalse(failureMessages.isEmpty(), "Failure messages should not be empty");
+        logger.info("  Failure messages: " + failureMessages);
+        
+        // 3. Verify enriched data is still available (even with failures)
         Map<String, Object> enrichedData = result.getEnrichedData();
         assertNotNull(enrichedData, "Enriched data should not be null");
         
-        // Customer name should either be null or have default value
+        // Customer name should either be null or have default value (lookup failed)
         Object customerName = enrichedData.get("customerName");
         logger.info("  customerName for non-existent customer: " + customerName);
         
-        logger.info("✓ TEST PASSED: Enrichment-group handled missing customer gracefully");
+        logger.info("✓ TEST PASSED: Enrichment-group handled missing customer with proper error reporting");
         engine.shutdown();
     }
 }

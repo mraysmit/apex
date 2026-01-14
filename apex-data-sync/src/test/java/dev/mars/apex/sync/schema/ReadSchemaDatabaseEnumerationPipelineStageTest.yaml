@@ -1,0 +1,31 @@
+metadata:
+  id: "test-db-enumeration"
+  name: "Database Table Enumeration Test"
+  type: "pipeline-config"
+  version: "1.0"
+  description: "Test pipeline for database table enumeration without filters"
+
+data-sources:
+  - name: "test-h2-db"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "./target/h2-demo/schema_enum_test"
+      username: "sa"
+      password: ""
+    enabled: true
+
+pipeline:
+  name: "enumerate-all-tables"
+  execution:
+    max-retries: 0
+    timeout-seconds: 30
+  steps:
+    - name: "read-all-table-schemas"
+      type: "read-schema"
+      source: "test-h2-db"
+      description: "Enumerate all tables in the database"
+      # No 'table' parameter - triggers enumeration
+      # schema: "PUBLIC" filters to only user tables (excludes INFORMATION_SCHEMA)
+      parameters:
+        schema: "PUBLIC"

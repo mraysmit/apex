@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * CRITICAL REQUIREMENT: All SpEL exceptions must be converted to RuleResult.error()
  * with appropriate severity levels, never thrown as stack dumps.
  * 
- * @author APEX Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
 @DisplayName("Comprehensive SpEL Error Handling Tests")

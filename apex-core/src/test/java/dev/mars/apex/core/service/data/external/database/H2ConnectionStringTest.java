@@ -294,9 +294,9 @@ class H2ConnectionStringTest {
     // ========================================
 
     @Test
-    @DisplayName("Should handle H2 TCP server connection configuration (expected to fail)")
-    void testH2TcpServerConnection() throws Exception {
-        LOGGER.info("Testing H2 TCP server connection (expected to fail - no server running)");
+    @DisplayName("Should fail H2 TCP server connection when server not running (Intentional Error)")
+    void testH2TcpServerConnectionIntentionalFailure() throws Exception {
+        LOGGER.info("=== INTENTIONAL ERROR TEST: H2 TCP server connection (no server running) ===");
 
         String yamlContent = """
             metadata:

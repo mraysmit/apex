@@ -8,7 +8,7 @@ import java.util.Map;
  * Configuration for a single step in an APEX pipeline.
  * Each step represents a unit of work (extract, transform, load, etc.).
  * 
- * @author APEX Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
 public class PipelineStep {

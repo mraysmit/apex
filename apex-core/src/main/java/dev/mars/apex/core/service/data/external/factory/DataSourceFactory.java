@@ -484,6 +484,7 @@ public class DataSourceFactory {
 
     /**
      * Generate cache key for JDBC DataSource.
+     * Includes schema in key to ensure different schemas produce different data sources.
      */
     private String generateJdbcCacheKey(DataSourceConfiguration configuration) {
         StringBuilder key = new StringBuilder();
@@ -493,7 +494,10 @@ public class DataSourceFactory {
             key.append(configuration.getConnection().getHost()).append(":");
             key.append(configuration.getConnection().getPort()).append(":");
             key.append(configuration.getConnection().getDatabase()).append(":");
-            key.append(configuration.getConnection().getUsername());
+            key.append(configuration.getConnection().getUsername()).append(":");
+            // Include schema in cache key - different schemas need different data sources
+            String schema = configuration.getConnection().getSchema();
+            key.append(schema != null ? schema : "default");
         }
 
         return key.toString();

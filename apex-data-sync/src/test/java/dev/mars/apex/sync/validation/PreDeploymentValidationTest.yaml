@@ -1,0 +1,58 @@
+# APEX Data Sync - Pre-Deployment Schema Validation
+# Real-world use case: Validate new schema before production deployment
+
+metadata:
+  id: "pre-deployment-validation"
+  name: "Pre-Deployment Schema Validator"
+  version: "1.0"
+  type: "pipeline-config"
+  description: "Validate new schema changes before production deployment"
+
+data-sources:
+  - name: "production-db"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "mem:pre_deployment;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      username: "sa"
+      password: ""
+    enabled: true
+
+  - name: "staging-db"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "mem:pre_deployment;DB_CLOSE_DELAY=-1"
+      username: "sa"
+      password: ""
+    enabled: true
+
+pipeline:
+  name: "pre-deployment-validation"
+  execution:
+    mode: "sequential"
+  
+  steps:
+    - name: "read-production-schema"
+      type: "read-schema"
+      source: "production-db"
+      description: "Read current production schema"
+      parameters:
+        table: "PRODUCTION_SCHEMA"
+
+    - name: "read-staging-schema"
+      type: "read-schema"
+      source: "staging-db"
+      description: "Read new staging schema"
+      parameters:
+        table: "NEW_SCHEMA"
+
+    - name: "validate-deployment-safety"
+      type: "schema-diff"
+      description: "Validate schema changes are safe for production deployment"
+      parameters:
+        source-step: "read-production-schema"
+        target-step: "read-staging-schema"
+        allow-added-columns: true
+        allow-removed-columns: false
+        fail-on-incompatibility: false

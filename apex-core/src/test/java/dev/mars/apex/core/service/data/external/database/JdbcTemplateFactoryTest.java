@@ -22,6 +22,8 @@ import dev.mars.apex.core.config.datasource.ConnectionPoolConfig;
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
 import dev.mars.apex.core.service.data.external.DataSourceException;
 import org.junit.jupiter.api.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -49,6 +51,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 1.0.0
  */
 class JdbcTemplateFactoryTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JdbcTemplateFactoryTest.class);
 
     @BeforeEach
     void setUp() {
@@ -208,8 +212,10 @@ class JdbcTemplateFactoryTest {
     }
 
     @Test
-    @DisplayName("Should build H2 TCP JDBC URL correctly")
-    void testH2TcpJdbcUrl() throws DataSourceException {
+    @DisplayName("Should fail H2 TCP connection when server not running (Intentional Error)")
+    void testH2TcpJdbcUrlIntentionalFailure() throws DataSourceException {
+        LOGGER.info("=== INTENTIONAL ERROR TEST: H2 TCP connection failure - no server running ===");
+        
         DataSourceConfiguration config = createH2Configuration();
         config.getConnection().setHost("localhost");
         config.getConnection().setPort(9092);
@@ -338,8 +344,10 @@ class JdbcTemplateFactoryTest {
     // ========================================
 
     @Test
-    @DisplayName("Should handle invalid database configuration")
-    void testInvalidDatabaseConfiguration() {
+    @DisplayName("Should fail PostgreSQL connection with invalid host (Intentional Error)")
+    void testInvalidDatabaseConfigurationIntentionalFailure() {
+        LOGGER.info("=== INTENTIONAL ERROR TEST: PostgreSQL connection failure - invalid host ===");
+        
         DataSourceConfiguration config = createH2Configuration();
         config.setSourceType("postgresql"); // Use PostgreSQL but with invalid connection details
         config.getConnection().setHost("invalid-host-that-does-not-exist");
@@ -356,8 +364,10 @@ class JdbcTemplateFactoryTest {
     }
 
     @Test
-    @DisplayName("Should handle connection failure gracefully")
-    void testConnectionFailure() {
+    @DisplayName("Should fail PostgreSQL connection to non-existent host (Intentional Error)")
+    void testConnectionFailureIntentional() {
+        LOGGER.info("=== INTENTIONAL ERROR TEST: PostgreSQL connection failure - non-existent host ===");
+        
         DataSourceConfiguration config = createH2Configuration();
         config.setSourceType("postgresql"); // Will fail since PostgreSQL is not running
         config.getConnection().setHost("nonexistent-host");

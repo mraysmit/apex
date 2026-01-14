@@ -20,7 +20,7 @@ import java.util.Map;
  * This test demonstrates that critical business logic failures are now logged
  * at ERROR/SEVERE level instead of WARNING level.
  * 
- * @author APEX Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  */
 public class LoggingSeverityFixTest {
     

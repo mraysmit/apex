@@ -20,6 +20,8 @@ package dev.mars.apex.core.service.data.external.file;
 import dev.mars.apex.core.config.datasource.FileFormatConfig;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.io.TempDir;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -36,6 +38,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * @version 1.0
  */
 class CsvDataLoaderTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CsvDataLoaderTest.class);
 
     @TempDir
     Path tempDir;
@@ -535,8 +539,10 @@ class CsvDataLoaderTest {
     // ========================================
 
     @Test
-    @DisplayName("Should handle missing file")
-    void testMissingFile() {
+    @DisplayName("Should fail when CSV file missing (Intentional Error)")
+    void testMissingFileIntentional() {
+        LOGGER.info("=== INTENTIONAL ERROR TEST: CSV file missing ===");
+        
         Path nonExistentFile = tempDir.resolve("nonexistent.csv");
 
         IOException exception = assertThrows(IOException.class, () -> {

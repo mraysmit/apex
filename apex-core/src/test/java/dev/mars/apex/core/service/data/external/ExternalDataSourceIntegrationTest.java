@@ -27,6 +27,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.io.TempDir;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -54,6 +56,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 1.0.0
  */
 class ExternalDataSourceIntegrationTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExternalDataSourceIntegrationTest.class);
 
     @TempDir
     Path tempDir;
@@ -211,7 +215,7 @@ class ExternalDataSourceIntegrationTest {
 
     @Test
     void testErrorHandlingAndResilience() throws DataSourceException {
-        System.out.println("TEST: Triggering intentional error - testing external data source error handling and resilience");
+        LOGGER.info("=== INTENTIONAL ERROR TEST: External data source error handling ===");
 
         // Test error handling from External Data Sources Guide Section 9
         DataSourceConfiguration config = createInvalidRestApiConfiguration();
@@ -236,6 +240,7 @@ class ExternalDataSourceIntegrationTest {
 
     @Test
     void testCircuitBreakerPattern() throws DataSourceException {
+        LOGGER.info("=== INTENTIONAL ERROR TEST: Circuit breaker with multiple failures ===");
         // Test circuit breaker from External Data Sources Guide Section 9
         DataSourceConfiguration config = createCircuitBreakerConfiguration();
         ExternalDataSource dataSource = factory.createDataSource(config);

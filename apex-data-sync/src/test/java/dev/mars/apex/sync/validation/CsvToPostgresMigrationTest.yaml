@@ -1,0 +1,59 @@
+# APEX Data Sync - CSV to PostgreSQL Migration Validation
+# Real-world use case: Validating legacy CSV data migration to PostgreSQL
+
+metadata:
+  id: "csv-to-postgres-migration-validation"
+  name: "CSV to PostgreSQL Migration Validator"
+  version: "1.0"
+  type: "pipeline-config"
+  author: "APEX Team"
+  description: "Validate CSV schema compatibility with PostgreSQL target"
+
+data-sources:
+  - name: "legacy-csv"
+    type: "file-system"
+    source-type: "csv"
+    enabled: true
+    connection:
+      base-path: "src/test/resources"
+
+  - name: "postgres-target"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "mem:postgres_target;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      username: "sa"
+      password: ""
+    enabled: true
+
+pipeline:
+  name: "csv-postgres-migration-validation"
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+  
+  steps:
+    - name: "read-legacy-csv-schema"
+      type: "read-schema"
+      source: "legacy-csv"
+      description: "Read schema from legacy CSV file"
+      parameters:
+        file: "src/test/resources/test-data/legacy-customers.csv"
+
+    - name: "read-postgres-target-schema"
+      type: "read-schema"
+      source: "postgres-target"
+      description: "Read schema from PostgreSQL target table"
+      parameters:
+        table: "CUSTOMERS"
+
+    - name: "validate-migration-compatibility"
+      type: "schema-diff"
+      description: "Validate CSV schema is compatible with PostgreSQL target"
+      parameters:
+        source-step: "read-legacy-csv-schema"
+        target-step: "read-postgres-target-schema"
+        case-insensitive-names: true
+        inferred-type-tolerance: true
+        allow-added-columns: true
+        fail-on-incompatibility: false

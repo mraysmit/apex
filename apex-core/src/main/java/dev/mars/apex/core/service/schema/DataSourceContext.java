@@ -7,7 +7,7 @@ import java.util.Map;
  * Holds context information about the data source used for schema enumeration.
  * This information is included in generated reports for traceability.
  *
- * @author APEX Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2.1.0
  */
 public class DataSourceContext {

@@ -674,26 +674,33 @@ public class ScenarioStageExecutor {
             return new HashMap<>();
         }
         
+        // Define the metadata keys that were injected in createFactsMap()
+        // These must be excluded from the output
+        Set<String> metadataKeys = Set.of(
+            "scenarioContext", 
+            "previousStageResults", 
+            "scenarioId", 
+            "executionStartTime"
+        );
+        
         Map<String, Object> filtered = new HashMap<>();
         
         for (Map.Entry<String, Object> entry : enrichedData.entrySet()) {
             String key = entry.getKey();
             
-            // Keep if it was in the original input OR it's a new enrichment
-            // (we want everything EXCEPT the metadata we injected)
-            if (originalInputKeys.contains(key)) {
-                // Was in original YAML input - definitely keep
-                filtered.put(key, entry.getValue());
-            } else {
-                // Not in original input - this is a new enrichment from rules/lookups
-                // Keep it (the metadata we injected won't appear here because
-                // RulesEngine.evaluate() doesn't copy metadata to enrichedData)
-                filtered.put(key, entry.getValue());
+            // Skip metadata keys that we injected
+            if (metadataKeys.contains(key)) {
+                logger.debug("Filtering out scenario metadata key: {}", key);
+                continue;
             }
+            
+            // Keep all other keys (original input + enrichments from rules/lookups)
+            filtered.put(key, entry.getValue());
         }
         
-        logger.debug("Filtered enriched data: {} fields kept from {} total",
-                    filtered.size(), enrichedData.size());
+        logger.debug("Filtered enriched data: {} fields kept from {} total (excluded {} metadata keys)",
+                    filtered.size(), enrichedData.size(), 
+                    enrichedData.size() - filtered.size());
         
         return filtered;
     }

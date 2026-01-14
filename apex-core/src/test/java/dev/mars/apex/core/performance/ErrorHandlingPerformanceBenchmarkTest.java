@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * 
  * Tests verify that error handling adds < 5ms overhead per operation.
  * 
- * @author APEX Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.1.0
  */
 class ErrorHandlingPerformanceBenchmarkTest {

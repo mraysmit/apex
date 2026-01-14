@@ -72,6 +72,7 @@ class YamlTransformationProcessorRuleResultTest {
     @Test
     @DisplayName("Test 2: Errors should be tracked in RuleResult.failureMessages when exceptions occur")
     void testErrorsTrackedInFailureMessages() {
+        logger.info("=== INTENTIONAL ERROR TEST: SpEL accessing missing property ===");
         logger.info("=== Test 2: Testing errors tracked in RuleResult.failureMessages ===");
 
         // Create transformation that will cause an actual exception during processing
@@ -118,6 +119,7 @@ class YamlTransformationProcessorRuleResultTest {
     @Test
     @DisplayName("Test 3: RuleResult.resultType should be ERROR on transformation errors")
     void testResultTypeErrorOnTransformationErrors() {
+        logger.info("=== INTENTIONAL ERROR TEST: Null expression in transformation ===");
         logger.info("=== Test 3: Testing RuleResult.resultType = ERROR on transformation errors ===");
 
         // Create transformation with null expression (will cause error)

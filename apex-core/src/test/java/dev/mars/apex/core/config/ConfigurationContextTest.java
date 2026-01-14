@@ -21,6 +21,8 @@ import dev.mars.apex.core.config.yaml.YamlDataSource;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
 import org.junit.jupiter.api.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -48,6 +50,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("ConfigurationContext Tests")
 class ConfigurationContextTest {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationContextTest.class);
     private ConfigurationContext context;
 
     @BeforeEach
@@ -441,6 +444,7 @@ class ConfigurationContextTest {
         @Test
         @DisplayName("Should load configurations from search path")
         void testLoadAllFromSearchPaths() throws Exception {
+            LOGGER.info("=== INTENTIONAL ERROR TEST: Loading invalid YAML from search path ===");
             // Create a test YAML file with full metadata section
             String yamlContent = """
                 metadata:
@@ -491,6 +495,7 @@ class ConfigurationContextTest {
         @Test
         @DisplayName("Should load configurations from classpath prefix")
         void testLoadAllFromClasspath() {
+            LOGGER.info("=== INTENTIONAL ERROR TEST: Loading classpath with circular component references ===");
             // Use existing test resources
             ConfigurationContext loadContext = ConfigurationContext.builder()
                     .addClasspathPrefix("component-classpath-test/")

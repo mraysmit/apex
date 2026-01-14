@@ -15,7 +15,7 @@ import java.util.Map;
  * Generates HTML reports for database schema metadata.
  * Creates detailed reports showing tables, columns, data types, keys, and other schema information.
  *
- * @author APEX Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2.1.0
  */
 public class SchemaHtmlReportGenerator {

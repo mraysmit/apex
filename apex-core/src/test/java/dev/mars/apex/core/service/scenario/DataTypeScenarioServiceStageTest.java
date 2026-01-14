@@ -19,6 +19,8 @@ package dev.mars.apex.core.service.scenario;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -41,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Deprecated(since = "1.0.0", forRemoval = true)
 class DataTypeScenarioServiceStageTest {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataTypeScenarioServiceStageTest.class);
     private DataTypeScenarioService service;
 
     @BeforeEach
@@ -50,6 +53,7 @@ class DataTypeScenarioServiceStageTest {
 
     @Test
     void testProcessData_WithStageBasedScenario() throws Exception {
+        LOGGER.info("=== INTENTIONAL ERROR TEST: Stage-based scenario with error-handling YAML ===");
         // Arrange
         ScenarioStage validationStage = new ScenarioStage("validation", resourcePath("error-handling/yaml-default-value-test.yaml"), 1);
         ScenarioStage enrichmentStage = new ScenarioStage("enrichment", resourcePath("error-handling/yaml-default-value-test.yaml"), 2);
@@ -77,6 +81,7 @@ class DataTypeScenarioServiceStageTest {
 
     @Test
     void testProcessData_WithLegacyScenario() throws Exception {
+        LOGGER.info("=== INTENTIONAL ERROR TEST: Legacy scenario with error-handling YAML ===");
         // Arrange
         ScenarioConfiguration legacyScenario = new ScenarioConfiguration();
         legacyScenario.setScenarioId("legacy-scenario");
@@ -100,6 +105,7 @@ class DataTypeScenarioServiceStageTest {
 
     @Test
     void testProcessDataWithStages_Success() throws Exception {
+        LOGGER.info("=== INTENTIONAL ERROR TEST: Processing with error-handling YAML ===");
         // Arrange
         ScenarioStage stage = new ScenarioStage("test-stage", resourcePath("error-handling/yaml-default-value-test.yaml"), 1);
         List<ScenarioStage> stages = Arrays.asList(stage);
@@ -148,6 +154,7 @@ class DataTypeScenarioServiceStageTest {
 
     @Test
     void testProcessDataWithScenario_StageBasedProcessing() throws Exception {
+        LOGGER.info("=== INTENTIONAL ERROR TEST: Stage-based processing with error-handling YAML ===");
         // Arrange
         ScenarioStage stage = new ScenarioStage("validation", resourcePath("error-handling/yaml-default-value-test.yaml"), 1);
         List<ScenarioStage> stages = Arrays.asList(stage);
@@ -169,6 +176,7 @@ class DataTypeScenarioServiceStageTest {
 
     @Test
     void testProcessDataWithScenario_LegacyProcessing() throws Exception {
+        LOGGER.info("=== INTENTIONAL ERROR TEST: Legacy processing with error-handling YAML ===");
         // Arrange
         ScenarioConfiguration legacyScenario = new ScenarioConfiguration();
         legacyScenario.setScenarioId("legacy-scenario");

@@ -92,6 +92,15 @@ public abstract class DemoTestBase {
         } catch (Exception e) {
             logger.warn("Error clearing JDBC DataSource cache", e);
         }
+        
+        // Clear DataSourceFactory cache to ensure proper isolation between tests
+        // This is separate from JdbcTemplateFactory and holds its own cached DataSources
+        try {
+            dev.mars.apex.core.service.data.external.factory.DataSourceFactory.getInstance().clearCache();
+            logger.info("DataSourceFactory cache cleared for test isolation");
+        } catch (Exception e) {
+            logger.warn("Error clearing DataSourceFactory cache", e);
+        }
 
         // Shutdown H2 database to release locks and close connections
         try {

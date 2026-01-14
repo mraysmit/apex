@@ -1,0 +1,58 @@
+# Custom Schema Test - Cross Schema Comparison (PostgreSQL)
+# Tests comparing schemas across different custom schemas
+
+metadata:
+  name: "Custom Schema Test - Cross Schema"
+  description: "Compare schemas from sales and inventory schemas"
+  version: "1.0"
+
+data-sources:
+  - name: "sales-db"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      host: "localhost"
+      port: 5432
+      database: "custom_schema_test"
+      username: "test"
+      password: "test"
+      schema: "sales"
+
+  - name: "inventory-db"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      host: "localhost"
+      port: 5432
+      database: "custom_schema_test"
+      username: "test"
+      password: "test"
+      schema: "inventory"
+
+pipeline:
+  name: "cross-schema-comparison"
+  execution:
+    mode: "sequential"
+    max-retries: 1
+    error-handling: "fail-fast"
+  steps:
+    - name: "read-sales-orders"
+      type: "read-schema"
+      source: "sales-db"
+      parameters:
+        table: "orders"
+        schema: "sales"
+
+    - name: "read-inventory-products"
+      type: "read-schema"
+      source: "inventory-db"
+      parameters:
+        table: "products"
+        schema: "inventory"
+
+    - name: "compare-schemas"
+      type: "schema-diff"
+      source-schema: "sales-db"
+      target-schema: "inventory-db"
+      parameters:
+        fail-on-breaking-changes: false

@@ -48,6 +48,7 @@ class RulesEngineErrorPropagationTest {
     @Test
     @DisplayName("Test 1: RulesEngine should handle enrichment with missing datasource gracefully")
     void testRulesEngineHandlesMissingDatasource() {
+        logger.info("=== INTENTIONAL ERROR TEST: Enrichment with missing datasource ===");
         logger.info("=== Test 1: Testing enrichment with missing datasource ===");
 
         // Create YAML configuration with enrichment referencing non-existent datasource
@@ -94,6 +95,7 @@ class RulesEngineErrorPropagationTest {
     @Test
     @DisplayName("Test 2: RulesEngine should handle transformation with invalid expression")
     void testRulesEngineHandlesInvalidTransformationExpression() {
+        logger.info("=== INTENTIONAL ERROR TEST: Invalid SpEL transformation expression ===");
         logger.info("=== Test 2: Testing transformation with invalid expression ===");
 
         // Create YAML configuration with transformation that has invalid SpEL expression

@@ -8,7 +8,7 @@ import java.util.Map;
  * Configuration for APEX pipeline orchestration.
  * Defines the complete workflow including steps, execution settings, and transformations.
  * 
- * @author APEX Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
 public class PipelineConfiguration {

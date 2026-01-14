@@ -3,7 +3,7 @@ package dev.mars.apex.core.engine.pipeline;
 /**
  * Result of a single pipeline step execution.
  *
- * @author APEX Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  * @deprecated since 3.0, for removal in 4.0. This result type is specific to the deprecated
  *             {@link DataPipelineEngine} and {@link YamlPipelineExecutionResult}. Use

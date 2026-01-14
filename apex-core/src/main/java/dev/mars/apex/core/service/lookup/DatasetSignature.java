@@ -16,7 +16,9 @@ package dev.mars.apex.core.service.lookup;
  * limitations under the License.
  */
 
+import dev.mars.apex.core.config.yaml.YamlDataSource;
 import dev.mars.apex.core.config.yaml.YamlEnrichment.LookupDataset;
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,6 +77,19 @@ public class DatasetSignature {
      * @throws IllegalArgumentException if dataset is null or invalid
      */
     public static DatasetSignature from(LookupDataset dataset) {
+        return from(dataset, null);
+    }
+    
+    /**
+     * Create a signature from a dataset configuration with access to the full YAML configuration.
+     * This overload allows resolving data source properties like schema for database datasets.
+     * 
+     * @param dataset The dataset configuration
+     * @param configuration The full YAML configuration (optional, can be null)
+     * @return DatasetSignature for the dataset
+     * @throws IllegalArgumentException if dataset is null or invalid
+     */
+    public static DatasetSignature from(LookupDataset dataset, YamlRuleConfiguration configuration) {
         if (dataset == null) {
             throw new IllegalArgumentException("Dataset cannot be null");
         }
@@ -90,7 +105,7 @@ public class DatasetSignature {
             keyField = "unknown";
         }
         
-        String contentHash = generateContentHash(dataset);
+        String contentHash = generateContentHash(dataset, configuration);
         
         return new DatasetSignature(type.toLowerCase(), contentHash, keyField);
     }
@@ -98,7 +113,7 @@ public class DatasetSignature {
     /**
      * Generate content hash based on dataset type.
      */
-    private static String generateContentHash(LookupDataset dataset) {
+    private static String generateContentHash(LookupDataset dataset, YamlRuleConfiguration configuration) {
         String type = dataset.getType().toLowerCase();
         
         switch (type) {
@@ -111,7 +126,7 @@ public class DatasetSignature {
                 return hashFilePath(dataset.getFilePath());
                 
             case "database":
-                return hashDatabaseConfig(dataset);
+                return hashDatabaseConfig(dataset, configuration);
                 
             case "rest-api":
                 return hashRestApiConfig(dataset);
@@ -166,8 +181,10 @@ public class DatasetSignature {
     
     /**
      * Generate hash for database datasets.
+     * Includes schema from the resolved data source configuration to ensure different
+     * schemas produce different signatures.
      */
-    private static String hashDatabaseConfig(LookupDataset dataset) {
+    private static String hashDatabaseConfig(LookupDataset dataset, YamlRuleConfiguration configuration) {
         StringBuilder sb = new StringBuilder();
         
         // Include connection identifier
@@ -176,6 +193,13 @@ public class DatasetSignature {
         }
         if (dataset.getDataSourceRef() != null) {
             sb.append("ds:").append(dataset.getDataSourceRef()).append(";");
+        }
+        
+        // Include schema from the resolved data source configuration
+        // This is critical for ensuring different schemas produce different cache keys
+        String schema = resolveSchemaFromDataSource(dataset, configuration);
+        if (schema != null && !schema.trim().isEmpty()) {
+            sb.append("schema:").append(schema).append(";");
         }
         
         // Include query
@@ -210,6 +234,43 @@ public class DatasetSignature {
             logger.debug("Full exception details:", e);
             return "db-hash-error";
         }
+    }
+    
+    /**
+     * Resolve schema from the data source configuration.
+     * Returns null if not found or configuration is not available.
+     */
+    private static String resolveSchemaFromDataSource(LookupDataset dataset, YamlRuleConfiguration configuration) {
+        if (configuration == null || configuration.getDataSources() == null) {
+            return null;
+        }
+        
+        // Determine the data source name to look up
+        String dataSourceName = dataset.getDataSourceRef();
+        if (dataSourceName == null || dataSourceName.trim().isEmpty()) {
+            dataSourceName = dataset.getConnectionName();
+        }
+        if (dataSourceName == null || dataSourceName.trim().isEmpty()) {
+            return null;
+        }
+        
+        // Find the data source configuration
+        for (YamlDataSource ds : configuration.getDataSources()) {
+            if (dataSourceName.equals(ds.getName())) {
+                Map<String, Object> connection = ds.getConnection();
+                if (connection != null && connection.containsKey("schema")) {
+                    Object schemaObj = connection.get("schema");
+                    if (schemaObj != null) {
+                        String schema = schemaObj.toString();
+                        logger.debug("Resolved schema '{}' for data source '{}'", schema, dataSourceName);
+                        return schema;
+                    }
+                }
+                break;
+            }
+        }
+        
+        return null;
     }
     
     /**

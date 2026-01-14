@@ -1183,7 +1183,8 @@ public class YamlEnrichmentProcessor {
             YamlEnrichment.LookupDataset dataset = lookupConfig.getLookupDataset();
 
             // Generate content-based signature for the dataset
-            DatasetSignature signature = DatasetSignature.from(dataset);
+            // Pass the configuration to include schema in the signature for database datasets
+            DatasetSignature signature = DatasetSignature.from(dataset, this.currentConfiguration);
             String cacheKey = signature.toString();
 
             // Check cache first
