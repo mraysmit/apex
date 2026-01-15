@@ -60,10 +60,15 @@ class ScenarioStageMissingDependencyTest {
     // Single Missing Dependency Tests
     // ========================================
     
+    /**
+     * Tests graceful handling of stage dependencies referencing non-existent stages.
+     * ScenarioStageExecutor should skip stages with missing dependencies.
+     * This is INTENTIONAL ERROR TEST.
+     */
     @Test
-    @DisplayName("Should handle stage depending on non-existent stage")
-    void testStageDependsOnMissingStage() {
-        logger.info("TEST: Triggering intentional error - Stage depends on non-existent stage");
+    @DisplayName("Should handle stage depending on non-existent stage (Intentional Error)")
+    void testStageDependsOnMissingStageIntentional() {
+        logger.info("=== INTENTIONAL ERROR TEST: Stage depends on non-existent stage - tests graceful error handling ===");
         
         // Given: Stage that depends on a non-existent stage
         ScenarioStage validStage = new ScenarioStage("valid-stage", "config/valid.yaml", 1);
@@ -118,10 +123,15 @@ class ScenarioStageMissingDependencyTest {
     // Mixed Valid and Missing Dependencies Tests
     // ========================================
     
+    /**
+     * Tests graceful handling of stages with both valid and missing dependencies.
+     * ScenarioStageExecutor should handle mixed dependencies appropriately.
+     * This is INTENTIONAL ERROR TEST.
+     */
     @Test
-    @DisplayName("Should handle stage with mix of valid and missing dependencies")
-    void testStageMixedValidAndMissingDependencies() {
-        logger.info("TEST: Triggering intentional error - Stage with mixed valid and missing dependencies");
+    @DisplayName("Should handle stage with mix of valid and missing dependencies (Intentional Error)")
+    void testStageMixedValidAndMissingDependenciesIntentional() {
+        logger.info("=== INTENTIONAL ERROR TEST: Stage with mixed valid/missing dependencies - tests graceful error handling ===");
         
         // Given: Stage with both valid and missing dependencies
         ScenarioStage validStage = new ScenarioStage("valid-stage", "config/valid.yaml", 1);
@@ -150,10 +160,15 @@ class ScenarioStageMissingDependencyTest {
     // Dependency Chain with Missing Link Tests
     // ========================================
     
+    /**
+     * Tests graceful handling of dependency chains where a middle stage is missing.
+     * ScenarioStageExecutor should skip stages depending on missing chain elements.
+     * This is INTENTIONAL ERROR TEST.
+     */
     @Test
-    @DisplayName("Should handle dependency chain with missing middle stage")
-    void testDependencyChainWithMissingMiddleStage() {
-        logger.info("TEST: Triggering intentional error - Dependency chain with missing middle stage");
+    @DisplayName("Should handle dependency chain with missing middle stage (Intentional Error)")
+    void testDependencyChainWithMissingMiddleStageIntentional() {
+        logger.info("=== INTENTIONAL ERROR TEST: Dependency chain with missing middle stage - tests graceful error handling ===");
         
         // Given: Dependency chain A → B (missing) → C
         ScenarioStage stageA = new ScenarioStage("stage-a", "config/a.yaml", 1);
@@ -211,10 +226,15 @@ class ScenarioStageMissingDependencyTest {
     // Case Sensitivity Tests
     // ========================================
     
+    /**
+     * Tests graceful handling of case-sensitive stage name mismatches in dependencies.
+     * ScenarioStageExecutor should treat case-mismatched dependencies as missing.
+     * This is INTENTIONAL ERROR TEST.
+     */
     @Test
-    @DisplayName("Should handle case-sensitive stage name mismatch in dependency")
-    void testCaseSensitiveStageDependency() {
-        logger.info("TEST: Triggering intentional error - Case-sensitive stage name mismatch");
+    @DisplayName("Should handle case-sensitive stage name mismatch in dependency (Intentional Error)")
+    void testCaseSensitiveStageDependencyIntentional() {
+        logger.info("=== INTENTIONAL ERROR TEST: Case-sensitive stage name mismatch - tests graceful error handling ===");
         
         // Given: Stage with case-mismatched dependency
         ScenarioStage stageA = new ScenarioStage("Stage-A", "config/a.yaml", 1);

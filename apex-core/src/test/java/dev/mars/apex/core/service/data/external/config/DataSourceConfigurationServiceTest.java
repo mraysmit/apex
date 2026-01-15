@@ -50,6 +50,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 1.0.0
  */
 class DataSourceConfigurationServiceTest {
+    
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DataSourceConfigurationServiceTest.class);
 
     private DataSourceConfigurationService service;
     private TestConfigurationListener testListener;
@@ -561,9 +563,23 @@ class DataSourceConfigurationServiceTest {
         assertTrue(service.isRunning());
     }
 
+    /**
+     * INTENTIONAL ERROR TEST: Verifies that exceptions thrown by listeners
+     * are caught and don't propagate, ensuring error isolation.
+     * 
+     * <p>Creates a listener that throws RuntimeException during notification.
+     * Verifies that:
+     * - Exception is caught and logged (doesn't propagate)
+     * - Other listeners still receive events (not blocked by failing listener)
+     * - Service operation completes successfully
+     * 
+     * <p>This tests error resilience in the listener notification system.
+     */
     @Test
-    @DisplayName("Should handle listener exceptions gracefully")
-    void testListenerExceptionHandling() throws DataSourceException {
+    @DisplayName("Should handle listener exceptions gracefully (Intentional Error)")
+    void testListenerExceptionHandlingIntentionalError() throws DataSourceException {
+        LOGGER.info("=== INTENTIONAL ERROR TEST: Listener throws exception ===");
+        
         // Add a listener that throws exceptions
         ExceptionThrowingListener exceptionListener = new ExceptionThrowingListener();
         service.addListener(exceptionListener);

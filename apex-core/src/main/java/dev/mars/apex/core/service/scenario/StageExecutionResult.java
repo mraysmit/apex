@@ -180,6 +180,16 @@ public class StageExecutionResult {
     }
     
     /**
+     * Sets the rule result for this stage execution.
+     * Useful for attaching rule results to failure scenarios.
+     *
+     * @param ruleResult the rule result to attach
+     */
+    public void setRuleResult(RuleResult ruleResult) {
+        this.ruleResult = ruleResult;
+    }
+    
+    /**
      * Adds a stage output. Thread-safe using ConcurrentHashMap.
      *
      * @param key the output key

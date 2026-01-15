@@ -538,6 +538,16 @@ class CsvDataLoaderTest {
     // Error Handling Tests
     // ========================================
 
+    /**
+     * INTENTIONAL ERROR TEST: Verifies IOException when CSV file doesn't exist.
+     * 
+     * <p>Attempts to load non-existent CSV file.
+     * Verifies that:
+     * - IOException is thrown
+     * - Exception has descriptive message
+     * 
+     * <p>This tests file not found error handling.
+     */
     @Test
     @DisplayName("Should fail when CSV file missing (Intentional Error)")
     void testMissingFileIntentional() {

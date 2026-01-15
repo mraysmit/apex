@@ -155,6 +155,20 @@ public class CacheDataSource implements ExternalDataSource {
     public <T> T getData(String dataType, Object... parameters) {
         long startTime = System.currentTimeMillis();
         
+        // Handle null cache manager gracefully
+        if (cacheManager == null) {
+            LOGGER.warn("Cache manager is null, returning null for dataType: {}", dataType);
+            metrics.recordFailedRequest(System.currentTimeMillis() - startTime);
+            return null;
+        }
+        
+        // Handle unsupported data types gracefully
+        if (!supportsDataType(dataType)) {
+            LOGGER.warn("Unsupported data type: {}, returning null", dataType);
+            metrics.recordFailedRequest(System.currentTimeMillis() - startTime);
+            return null;
+        }
+        
         try {
             String key = buildCacheKey(dataType, parameters);
             Object result = cacheManager.get(key);

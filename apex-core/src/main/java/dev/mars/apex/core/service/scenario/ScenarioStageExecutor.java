@@ -409,6 +409,9 @@ public class ScenarioStageExecutor {
                 StageExecutionResult.criticalFailure(stage.getStageName(), errorMessage) :
                 StageExecutionResult.nonCriticalFailure(stage.getStageName(), errorMessage);
             
+            // CRITICAL: Attach RuleResult to failure result so consumers can access detailed error messages
+            failureResult.setRuleResult(ruleResult);
+            
             // CRITICAL: Filter out scenario metadata to prevent pollution
             if (ruleResult.getEnrichedData() != null && !ruleResult.getEnrichedData().isEmpty()) {
                 Map<String, Object> filteredOutputs = filterScenarioMetadata(
@@ -541,7 +544,7 @@ public class ScenarioStageExecutor {
             }
             return result;
         } else {
-            String errorMessage = "Config file execution failed: " + ruleResult.getMessage();
+            String errorMessage = "Stage execution failed: " + ruleResult.getMessage();
             if (!ruleResult.getFailureMessages().isEmpty()) {
                 errorMessage += " - " + String.join(", ", ruleResult.getFailureMessages());
             }
@@ -549,6 +552,9 @@ public class ScenarioStageExecutor {
             StageExecutionResult failureResult = "terminate".equals(failurePolicy) ?
                 StageExecutionResult.criticalFailure(stageName, errorMessage) :
                 StageExecutionResult.nonCriticalFailure(stageName, errorMessage);
+            
+            // CRITICAL: Attach RuleResult to failure result so consumers can access detailed error messages
+            failureResult.setRuleResult(ruleResult);
             
             // Capture any partial enriched data even on failure
             // CRITICAL: Filter out scenario metadata to prevent pollution

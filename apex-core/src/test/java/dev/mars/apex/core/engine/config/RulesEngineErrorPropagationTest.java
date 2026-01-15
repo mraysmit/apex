@@ -15,7 +15,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Comprehensive test suite for Phase 1 Day 3: RulesEngine Error Propagation
+ * Comprehensive test suite for RulesEngine Error Propagation
  *
  * Tests that RulesEngine properly propagates errors from:
  * - YamlEnrichmentProcessor.processEnrichmentsWithResult()
@@ -45,9 +45,20 @@ class RulesEngineErrorPropagationTest {
     // Test 1: RulesEngine handles enrichment with missing datasource
     // ========================================
 
+    /**
+     * INTENTIONAL ERROR TEST: Verifies RulesEngine gracefully handles enrichment
+     * with missing datasource reference.
+     * 
+     * <p>Creates enrichment configuration referencing non-existent lookup service.
+     * Verifies that the error is caught and reported through RuleResult API:
+     * - RuleResult.isSuccess() returns false
+     * - RuleResult.getFailureMessages() contains error details about missing datasource
+     * 
+     * <p>This tests error propagation from EnrichmentProcessor to RulesEngine.
+     */
     @Test
-    @DisplayName("Test 1: RulesEngine should handle enrichment with missing datasource gracefully")
-    void testRulesEngineHandlesMissingDatasource() {
+    @DisplayName("Test 1: RulesEngine should handle enrichment with missing datasource gracefully (Intentional Error)")
+    void testRulesEngineHandlesMissingDatasourceIntentionalError() {
         logger.info("=== INTENTIONAL ERROR TEST: Enrichment with missing datasource ===");
         logger.info("=== Test 1: Testing enrichment with missing datasource ===");
 
@@ -92,9 +103,21 @@ class RulesEngineErrorPropagationTest {
     // Test 2: RulesEngine handles transformation with invalid expression
     // ========================================
 
+    /**
+     * INTENTIONAL ERROR TEST: Verifies RulesEngine gracefully handles transformation
+     * with invalid SpEL expression.
+     * 
+     * <p>Creates transformation configuration with SpEL expression calling non-existent method.
+     * Verifies that the error is caught and reported through RuleResult API:
+     * - RuleResult.isSuccess() returns false
+     * - RuleResult.getFailureMessages() contains error details about invalid expression
+     * - Error codes like "EL1007E" or "Transformation processing failed" are present
+     * 
+     * <p>This tests error propagation from TransformationProcessor to RulesEngine.
+     */
     @Test
-    @DisplayName("Test 2: RulesEngine should handle transformation with invalid expression")
-    void testRulesEngineHandlesInvalidTransformationExpression() {
+    @DisplayName("Test 2: RulesEngine should handle transformation with invalid expression (Intentional Error)")
+    void testRulesEngineHandlesInvalidTransformationExpressionIntentionalError() {
         logger.info("=== INTENTIONAL ERROR TEST: Invalid SpEL transformation expression ===");
         logger.info("=== Test 2: Testing transformation with invalid expression ===");
 

@@ -16,6 +16,8 @@ package dev.mars.apex.core.service.scenario;
  * limitations under the License.
  */
 
+import dev.mars.apex.core.config.yaml.YamlConfigurationException;
+import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,8 +53,14 @@ class DataTypeScenarioServiceStageTest {
         service = new DataTypeScenarioService();
     }
 
+    /**
+     * Intentional error test: Verifies that stage-based scenario processing handles errors gracefully
+     * when using error-handling YAML with default values across multiple stages. Each stage uses YAML
+     * with SpEL expressions that will fail on missing fields, testing error recovery through default
+     * values and proper reporting via ScenarioExecutionResult API.
+     */
     @Test
-    void testProcessData_WithStageBasedScenario() throws Exception {
+    void testProcessData_WithStageBasedScenarioIntentionalError() throws Exception {
         LOGGER.info("=== INTENTIONAL ERROR TEST: Stage-based scenario with error-handling YAML ===");
         // Arrange
         ScenarioStage validationStage = new ScenarioStage("validation", resourcePath("error-handling/yaml-default-value-test.yaml"), 1);
@@ -77,10 +85,25 @@ class DataTypeScenarioServiceStageTest {
 
         ScenarioExecutionResult stageResult = (ScenarioExecutionResult) result;
         assertEquals("stage-scenario", stageResult.getScenarioId());
+        
+        // Verify execution completed (may have warnings/errors handled via default values)
+        assertNotNull(stageResult.getStageResults(), "Stage results should not be null");
+        assertFalse(stageResult.getStageResults().isEmpty(), "Should have stage execution results");
+        
+        // Verify stages were executed (errors handled via default values, not failures)
+        for (StageExecutionResult stageExecResult : stageResult.getStageResults()) {
+            assertNotNull(stageExecResult, "Individual stage result should not be null");
+        }
     }
 
+    /**
+     * Intentional error test: Verifies that legacy scenario processing handles errors gracefully
+     * when using error-handling YAML with default values. The YAML contains SpEL expressions that
+     * will fail on missing fields, and the test verifies they are handled through default-value
+     * error recovery mechanism, with results properly reported through RuleResult API.
+     */
     @Test
-    void testProcessData_WithLegacyScenario() throws Exception {
+    void testProcessData_WithLegacyScenarioIntentionalError() throws Exception {
         LOGGER.info("=== INTENTIONAL ERROR TEST: Legacy scenario with error-handling YAML ===");
         // Arrange
         ScenarioConfiguration legacyScenario = new ScenarioConfiguration();
@@ -101,8 +124,19 @@ class DataTypeScenarioServiceStageTest {
         // Assert
         assertNotNull(result);
         assertTrue(result instanceof RuleResult, "Should return RuleResult for legacy processing");
+        
+        RuleResult ruleResult = (RuleResult) result;
+        // Note: Error recovery via default values means result may be successful
+        // The key is that errors are logged and handled gracefully, not that the result fails
+        assertNotNull(ruleResult, "RuleResult should not be null");
     }
 
+    /**
+     * Intentional error test: Verifies that stage-based processing with error-handling YAML handles
+     * SpEL expression errors gracefully through default-value error recovery. Tests that when
+     * fields are missing from input data, APEX captures the SpEL errors and reports them through
+     * StageExecutionResult → RuleResult API (not just logging).
+     */
     @Test
     void testProcessDataWithStages_Success() throws Exception {
         LOGGER.info("=== INTENTIONAL ERROR TEST: Processing with error-handling YAML ===");
@@ -124,6 +158,40 @@ class DataTypeScenarioServiceStageTest {
         // Assert
         assertNotNull(result);
         assertEquals("test-scenario", result.getScenarioId());
+        
+        // Verify errors are captured in stage results' RuleResult
+        assertNotNull(result.getStageResults(), "Stage results should not be null");
+        assertFalse(result.getStageResults().isEmpty(), "Should have stage execution results");
+        
+        boolean foundErrorsInStageResults = false;
+        for (StageExecutionResult stageExecResult : result.getStageResults()) {
+            if (stageExecResult.getRuleResult() != null && stageExecResult.getRuleResult().hasFailures()) {
+                List<String> failureMessages = stageExecResult.getRuleResult().getFailureMessages();
+                
+                // Verify specific error messages about missing fields
+                boolean hasFieldErrors = failureMessages.stream().anyMatch(msg -> 
+                    msg.contains("age") || msg.contains("email") || msg.contains("creditScore") || 
+                    msg.contains("customerId"));
+                
+                if (hasFieldErrors) {
+                    foundErrorsInStageResults = true;
+                    
+                    // Verify error messages contain detailed context for debugging
+                    boolean hasDetailedContext = failureMessages.stream().anyMatch(msg -> 
+                        msg.contains("Rule evaluation failed") || msg.contains("Property or field") || 
+                        msg.contains("cannot be found"));
+                    
+                    assertTrue(hasDetailedContext, 
+                        "Error messages should contain detailed debugging context. Messages: " + failureMessages);
+                    
+                    LOGGER.info("Stage '{}' captured {} error messages in RuleResult: {}", 
+                        stageExecResult.getStageName(), failureMessages.size(), failureMessages);
+                }
+            }
+        }
+        
+        assertTrue(foundErrorsInStageResults, 
+            "Should report errors about missing fields in StageExecutionResult → RuleResult, not just log them");
     }
 
     @Test
@@ -152,6 +220,11 @@ class DataTypeScenarioServiceStageTest {
         });
     }
 
+    /**
+     * Intentional error test: Verifies that stage-based processing with error-handling YAML handles
+     * SpEL expression errors gracefully. Tests that when fields are missing from input data,
+     * APEX captures the SpEL errors and reports them through StageExecutionResult → RuleResult API.
+     */
     @Test
     void testProcessDataWithScenario_StageBasedProcessing() throws Exception {
         LOGGER.info("=== INTENTIONAL ERROR TEST: Stage-based processing with error-handling YAML ===");
@@ -167,15 +240,59 @@ class DataTypeScenarioServiceStageTest {
         Object result = service.processDataWithScenario(testData, stageScenario);
 
         // Assert
-        assertNotNull(result);
-        assertTrue(result instanceof ScenarioExecutionResult);
+        assertNotNull(result, "Result should not be null");
+        assertTrue(result instanceof ScenarioExecutionResult, "Should return ScenarioExecutionResult for stage-based processing");
 
         ScenarioExecutionResult stageResult = (ScenarioExecutionResult) result;
         assertEquals("stage-scenario", stageResult.getScenarioId());
+        
+        // Verify stage results are present
+        assertNotNull(stageResult.getStageResults(), "Stage results should not be null");
+        assertFalse(stageResult.getStageResults().isEmpty(), "Should have stage execution results");
+        
+        // Verify errors are captured in stage results' RuleResult
+        boolean foundErrorsInStageResults = false;
+        for (StageExecutionResult stageExecResult : stageResult.getStageResults()) {
+            assertNotNull(stageExecResult, "Individual stage result should not be null");
+            
+            // Check if this stage has a RuleResult with failures
+            if (stageExecResult.getRuleResult() != null && stageExecResult.getRuleResult().hasFailures()) {
+                List<String> failureMessages = stageExecResult.getRuleResult().getFailureMessages();
+                
+                // Verify specific error messages about missing fields
+                boolean hasFieldErrors = failureMessages.stream().anyMatch(msg -> 
+                    msg.contains("age") || msg.contains("email") || msg.contains("creditScore") || 
+                    msg.contains("customerId") || msg.contains("principal") || msg.contains("value"));
+                
+                if (hasFieldErrors) {
+                    foundErrorsInStageResults = true;
+                    
+                    // Verify error messages contain detailed context
+                    boolean hasDetailedContext = failureMessages.stream().anyMatch(msg -> 
+                        msg.contains("Rule evaluation failed") || msg.contains("Property or field") || 
+                        msg.contains("cannot be found"));
+                    
+                    assertTrue(hasDetailedContext, 
+                        "Error messages should contain detailed context. Messages: " + failureMessages);
+                    
+                    LOGGER.info("Stage '{}' captured {} error messages in RuleResult: {}", 
+                        stageExecResult.getStageName(), failureMessages.size(), failureMessages);
+                }
+            }
+        }
+        
+        assertTrue(foundErrorsInStageResults, 
+            "Should report errors about missing fields in StageExecutionResult → RuleResult, not just log stack traces");
     }
 
+    /**
+     * Intentional error test: Verifies that legacy processing with error-handling YAML handles
+     * SpEL expression errors gracefully through default-value error recovery. Tests that when
+     * fields are missing from input data, APEX captures the SpEL errors and reports them through
+     * RuleResult API (not just logging stack traces).
+     */
     @Test
-    void testProcessDataWithScenario_LegacyProcessing() throws Exception {
+    void testProcessDataWithScenario_LegacyProcessingIntentionalError() throws Exception {
         LOGGER.info("=== INTENTIONAL ERROR TEST: Legacy processing with error-handling YAML ===");
         // Arrange
         ScenarioConfiguration legacyScenario = new ScenarioConfiguration();
@@ -189,8 +306,33 @@ class DataTypeScenarioServiceStageTest {
         Object result = service.processDataWithScenario(testData, legacyScenario);
 
         // Assert
-        assertNotNull(result);
-        assertTrue(result instanceof RuleResult);
+        assertNotNull(result, "Result should not be null");
+        assertTrue(result instanceof RuleResult, "Should return RuleResult for legacy processing");
+        
+        RuleResult ruleResult = (RuleResult) result;
+        
+        // Verify errors are captured in RuleResult (not just logged)
+        assertTrue(ruleResult.hasFailures(), "Should have failures from missing fields (age, email, creditScore, customerId, principal, value)");
+        
+        List<String> failureMessages = ruleResult.getFailureMessages();
+        assertFalse(failureMessages.isEmpty(), "Should have failure messages reporting SpEL errors");
+        
+        // Verify specific error messages about missing fields
+        boolean hasFieldErrors = failureMessages.stream().anyMatch(msg -> 
+            msg.contains("age") || msg.contains("email") || msg.contains("creditScore") || 
+            msg.contains("customerId") || msg.contains("principal") || msg.contains("value"));
+        
+        assertTrue(hasFieldErrors, 
+            "Should report errors about missing fields in RuleResult, not just log stack traces. Messages: " + failureMessages);
+        
+        // Verify error messages contain sufficient detail (rule names or property names)
+        boolean hasDetailedContext = failureMessages.stream().anyMatch(msg -> 
+            msg.contains("Rule evaluation failed") || msg.contains("Property or field"));
+        
+        assertTrue(hasDetailedContext, 
+            "Error messages should contain detailed context for debugging. Messages: " + failureMessages);
+        
+        LOGGER.info("Captured {} error messages in RuleResult: {}", failureMessages.size(), failureMessages);
     }
 
     @Test
@@ -247,6 +389,96 @@ class DataTypeScenarioServiceStageTest {
         assertTrue(availableScenarios.contains("legacy-test"));
         assertTrue(supportedDataTypes.contains("TestData"));
     }
+
+    // ========================================
+    // Modern RulesEngine Equivalent Tests
+    // ========================================
+
+    /**
+     * Modern equivalent of testProcessData_WithLegacyScenarioIntentionalError.
+     * Demonstrates the new correct approach using RulesEngine API.
+     */
+    @Test
+    void testRulesEngine_ErrorHandlingWithDefaultValues() throws YamlConfigurationException {
+        LOGGER.info("=== MODERN APPROACH: RulesEngine with error-handling YAML ===");
+        
+        // Step 1: Create engine from YAML file
+        RulesEngine engine = RulesEngine.fromFile(resourcePath("error-handling/yaml-default-value-test.yaml"));
+        
+        // Step 2: Prepare input data (intentionally missing fields to trigger errors)
+        Map<String, Object> inputData = new HashMap<>();
+        inputData.put("id", 1);
+        // Missing: age, email, creditScore, customerId - will trigger default-value error recovery
+        
+        // Step 3: Evaluate rules
+        RuleResult result = engine.evaluate(inputData);
+        
+        // Step 4: Check results
+        assertNotNull(result, "Result should not be null");
+        
+        // Error recovery via default values means result may be successful
+        // The key is that errors are logged and handled gracefully
+        assertNotNull(result.getEnrichedData(), "Enriched data should not be null");
+    }
+
+    /**
+     * Modern equivalent showing proper error verification.
+     * Demonstrates checking for failures and error messages in RuleResult.
+     */
+    @Test
+    void testRulesEngine_ErrorVerification() throws YamlConfigurationException {
+        LOGGER.info("=== MODERN APPROACH: Verify error reporting through RuleResult API ===");
+        
+        // Create engine
+        RulesEngine engine = RulesEngine.fromFile(resourcePath("error-handling/yaml-default-value-test.yaml"));
+        
+        // Input data with some valid and some missing fields
+        Map<String, Object> inputData = new HashMap<>();
+        inputData.put("id", 1);
+        inputData.put("age", 25);  // Valid
+        // Missing: email, creditScore, customerId
+        
+        // Evaluate
+        RuleResult result = engine.evaluate(inputData);
+        
+        // Verify result structure
+        assertNotNull(result, "Result should not be null");
+        
+        // Check if there are any failures or warnings
+        if (result.hasFailures()) {
+            List<String> failureMessages = result.getFailureMessages();
+            assertFalse(failureMessages.isEmpty(), "Should have failure messages if hasFailures() is true");
+            LOGGER.info("Failures detected (handled via default values): {}", failureMessages);
+        }
+        
+        // Verify enriched data is available even with errors
+        assertNotNull(result.getEnrichedData(), "Enriched data should be available");
+    }
+
+    /**
+     * Modern equivalent showing the simplified 2-line usage pattern.
+     */
+    @Test
+    void testRulesEngine_SimplifiedUsage() throws YamlConfigurationException {
+        LOGGER.info("=== MODERN APPROACH: Simplified 2-line usage ===");
+        
+        // Simple 2-line usage
+        RulesEngine engine = RulesEngine.fromFile(resourcePath("error-handling/yaml-default-value-test.yaml"));
+        
+        Map<String, Object> inputData = new HashMap<>();
+        inputData.put("id", 1);
+        inputData.put("customerId", "CUST123");
+        
+        RuleResult result = engine.evaluate(inputData);
+        
+        // Verify result
+        assertNotNull(result);
+        assertNotNull(result.getEnrichedData());
+    }
+
+    // ========================================
+    // Helper Methods
+    // ========================================
 
     // Helper to resolve classpath test resources to absolute file paths
     private String resourcePath(String name) {

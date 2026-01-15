@@ -88,9 +88,14 @@ class EnrichmentServiceRuleResultTest {
         assertEquals(1, result.getEnrichedData().get("idCopy"));
     }
 
+    /**
+     * Intentional error test: Verifies that when a required field mapping fails (source field
+     * does not exist in input data), the enrichment properly reports the failure through the
+     * RuleResult API with isSuccess() returning false and failure messages populated.
+     */
     @Test
     @DisplayName("Should return failure RuleResult for required field mapping failure")
-    void testEnrichObjectWithResult_RequiredFieldFailure() throws Exception {
+    void testEnrichObjectWithResult_RequiredFieldFailureIntentionalError() throws Exception {
         LOGGER.info("=== INTENTIONAL ERROR TEST: Required field mapping failure ===");
         String yamlConfig = """
             metadata:

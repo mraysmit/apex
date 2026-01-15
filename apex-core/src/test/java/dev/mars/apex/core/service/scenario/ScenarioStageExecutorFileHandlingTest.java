@@ -65,10 +65,16 @@ class ScenarioStageExecutorFileHandlingTest {
     // Level 1: Missing Stage Config Files
     // ========================================
 
+    /**
+     * Tests graceful handling of missing stage configuration files.
+     * ScenarioStageExecutor catches YamlConfigurationException and converts to stage failure.
+     * This is INTENTIONAL ERROR TEST - missing config files are caught, logged as ERROR with stack trace,
+     * and converted to ScenarioExecutionResult with failure status.
+     */
     @Test
-    @DisplayName("Should handle missing stage configuration file gracefully")
-    void testMissingStageConfigFile() {
-        logger.info("TEST: Triggering intentional error - Missing stage configuration file");
+    @DisplayName("Should handle missing stage configuration file gracefully (Intentional Error)")
+    void testMissingStageConfigFileIntentional() {
+        logger.info("=== INTENTIONAL ERROR TEST: Missing stage configuration file - tests graceful error handling ===");
 
         // Given: Scenario with stage having non-existent config file
         ScenarioStage stage = new ScenarioStage("test-stage",
@@ -90,10 +96,16 @@ class ScenarioStageExecutorFileHandlingTest {
         assertFalse(result.getStageResults().isEmpty(), "Should have stage results");
     }
 
+    /**
+     * Tests graceful handling of deeply nested missing file paths.
+     * ScenarioStageExecutor catches YamlConfigurationException and converts to stage failure.
+     * This is INTENTIONAL ERROR TEST - missing config files are caught, logged as ERROR with stack trace,
+     * and converted to ScenarioExecutionResult with failure status.
+     */
     @Test
-    @DisplayName("Should handle deeply nested missing file path")
-    void testDeeplyNestedMissingFilePath() {
-        logger.info("TEST: Triggering intentional error - Deeply nested missing file path");
+    @DisplayName("Should handle deeply nested missing file path (Intentional Error)")
+    void testDeeplyNestedMissingFilePathIntentional() {
+        logger.info("=== INTENTIONAL ERROR TEST: Deeply nested missing file path - tests graceful error handling ===");
 
         // Given: Scenario with stage having deeply nested non-existent path
         ScenarioStage stage = new ScenarioStage("test-stage",
@@ -108,9 +120,10 @@ class ScenarioStageExecutorFileHandlingTest {
 
         ScenarioExecutionResult result = stageExecutor.executeStages(scenario, testData);
 
-        // Then: Should return failure result
-        assertNotNull(result, "Should return ScenarioExecutionResult");
-        assertFalse(result.isSuccessful(), "Should indicate failure");
+        // Then: Should return failure result (exception caught and handled gracefully)
+        assertNotNull(result, "Should return ScenarioExecutionResult (exception caught)");
+        assertFalse(result.isSuccessful(), "Should indicate failure (config file not found)");
+        assertFalse(result.getStageResults().isEmpty(), "Should have stage results with failure details");
     }
 
     @Test
@@ -161,10 +174,15 @@ class ScenarioStageExecutorFileHandlingTest {
     // Level 2: Invalid File Paths
     // ========================================
 
+    /**
+     * Tests graceful handling of file paths with invalid characters (e.g., pipes, colons).
+     * ScenarioStageExecutor catches InvalidPathException or YamlConfigurationException and converts to stage failure.
+     * This is INTENTIONAL ERROR TEST.
+     */
     @Test
-    @DisplayName("Should handle file path with invalid characters")
-    void testInvalidFilePathCharacters() {
-        logger.info("TEST: Triggering intentional error - Invalid file path characters");
+    @DisplayName("Should handle file path with invalid characters (Intentional Error)")
+    void testInvalidFilePathCharactersIntentional() {
+        logger.info("=== INTENTIONAL ERROR TEST: File path with invalid characters - tests graceful error handling ===");
 
         // Given: Scenario with stage having invalid file path characters
         ScenarioStage stage = new ScenarioStage("test-stage",
@@ -184,10 +202,15 @@ class ScenarioStageExecutorFileHandlingTest {
         assertFalse(result.isSuccessful(), "Should indicate failure");
     }
 
+    /**
+     * Tests graceful handling of relative paths that reference files outside the project.
+     * ScenarioStageExecutor catches YamlConfigurationException and converts to stage failure.
+     * This is INTENTIONAL ERROR TEST.
+     */
     @Test
-    @DisplayName("Should handle relative path that goes outside project")
-    void testRelativePathOutsideProject() {
-        logger.info("TEST: Triggering intentional error - Relative path outside project");
+    @DisplayName("Should handle relative path that goes outside project (Intentional Error)")
+    void testRelativePathOutsideProjectIntentional() {
+        logger.info("=== INTENTIONAL ERROR TEST: Relative path outside project - tests graceful error handling ===");
 
         // Given: Scenario with stage having path that goes outside project
         ScenarioStage stage = new ScenarioStage("test-stage",
@@ -238,10 +261,15 @@ class ScenarioStageExecutorFileHandlingTest {
     // Level 4: Multiple Missing Files
     // ========================================
 
+    /**
+     * Tests graceful handling of scenarios with multiple stages where config files are missing.
+     * ScenarioStageExecutor catches YamlConfigurationException for each stage and converts to stage failures.
+     * This is INTENTIONAL ERROR TEST.
+     */
     @Test
-    @DisplayName("Should handle scenario with multiple stages having missing files")
-    void testMultipleStagesWithMissingFiles() {
-        logger.info("TEST: Triggering intentional error - Multiple stages with missing files");
+    @DisplayName("Should handle scenario with multiple stages having missing files (Intentional Error)")
+    void testMultipleStagesWithMissingFilesIntentional() {
+        logger.info("=== INTENTIONAL ERROR TEST: Multiple stages with missing files - tests graceful error handling ===");
 
         // Given: Scenario with multiple stages, all with missing files
         ScenarioStage stage1 = new ScenarioStage("stage-1", "missing-1.yaml", 1);
@@ -267,11 +295,15 @@ class ScenarioStageExecutorFileHandlingTest {
     // Level 5: Edge Cases
     // ========================================
 
+    /**
+     * Tests graceful handling of file paths with spaces when file doesn't exist.
+     * ScenarioStageExecutor catches YamlConfigurationException and converts to stage failure.
+     * This is INTENTIONAL ERROR TEST.
+     */
     @Test
-    @DisplayName("Should handle file path with spaces")
-    void testFilePathWithSpaces() {
-        logger.info("=== INTENTIONAL ERROR TEST: File path with spaces (file doesn't exist) ===");
-        logger.info("TEST: Triggering intentional error - File path with spaces");
+    @DisplayName("Should handle file path with spaces (Intentional Error)")
+    void testFilePathWithSpacesIntentional() {
+        logger.info("=== INTENTIONAL ERROR TEST: File path with spaces (file doesn't exist) - tests graceful error handling ===");
 
         // Given: Scenario with stage having file path containing spaces
         ScenarioStage stage = new ScenarioStage("test-stage",
@@ -291,10 +323,15 @@ class ScenarioStageExecutorFileHandlingTest {
         assertFalse(result.isSuccessful(), "Should indicate failure");
     }
 
+    /**
+     * Tests graceful handling of file paths with special characters when file doesn't exist.
+     * ScenarioStageExecutor catches YamlConfigurationException and converts to stage failure.
+     * This is INTENTIONAL ERROR TEST.
+     */
     @Test
-    @DisplayName("Should handle file path with special characters")
-    void testFilePathWithSpecialCharacters() {
-        logger.info("TEST: Triggering intentional error - File path with special characters");
+    @DisplayName("Should handle file path with special characters (Intentional Error)")
+    void testFilePathWithSpecialCharactersIntentional() {
+        logger.info("=== INTENTIONAL ERROR TEST: File path with special characters - tests graceful error handling ===");
 
         // Given: Scenario with stage having file path containing special characters
         ScenarioStage stage = new ScenarioStage("test-stage",

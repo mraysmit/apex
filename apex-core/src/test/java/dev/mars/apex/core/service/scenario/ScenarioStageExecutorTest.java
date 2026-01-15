@@ -137,8 +137,13 @@ class ScenarioStageExecutorTest {
 
     }
 
+    /**
+     * Tests graceful handling of stage failures with TERMINATE policy.
+     * ScenarioStageExecutor catches RuntimeException, converts to stage failure, terminates execution.
+     * This is INTENTIONAL ERROR TEST.
+     */
     @Test
-    void testExecuteStages_FailurePolicyTerminate() throws Exception {
+    void testExecuteStages_FailurePolicyTerminateIntentional() throws Exception {
         // Arrange
         ScenarioStage criticalStage = new ScenarioStage("critical-validation", "config/critical.yaml", 1);
         criticalStage.setFailurePolicy(ScenarioStage.FAILURE_POLICY_TERMINATE);
@@ -177,8 +182,13 @@ class ScenarioStageExecutorTest {
         assertTrue(result.getSkippedStages().containsKey("next-stage"));
     }
 
+    /**
+     * Tests graceful handling of stage failures with CONTINUE_WITH_WARNINGS policy.
+     * ScenarioStageExecutor catches RuntimeException, converts to stage failure with warnings, continues to next stage.
+     * This is INTENTIONAL ERROR TEST.
+     */
     @Test
-    void testExecuteStages_FailurePolicyContinueWithWarnings() throws Exception {
+    void testExecuteStages_FailurePolicyContinueWithWarningsIntentional() throws Exception {
         // Arrange
         ScenarioStage warningStage = new ScenarioStage("warning-stage", "config/warning.yaml", 1);
         warningStage.setFailurePolicy(ScenarioStage.FAILURE_POLICY_CONTINUE_WITH_WARNINGS);
@@ -218,8 +228,13 @@ class ScenarioStageExecutorTest {
 
     }
 
+    /**
+     * Tests graceful handling of stage failures with FLAG_FOR_REVIEW policy.
+     * ScenarioStageExecutor catches RuntimeException, converts to stage failure with review flag.
+     * This is INTENTIONAL ERROR TEST.
+     */
     @Test
-    void testExecuteStages_FailurePolicyFlagForReview() throws Exception {
+    void testExecuteStages_FailurePolicyFlagForReviewIntentional() throws Exception {
         // Arrange
         ScenarioStage reviewStage = new ScenarioStage("review-stage", "config/review.yaml", 1);
         reviewStage.setFailurePolicy(ScenarioStage.FAILURE_POLICY_FLAG_FOR_REVIEW);
@@ -248,8 +263,13 @@ class ScenarioStageExecutorTest {
 
     }
 
+    /**
+     * Tests graceful handling when stages are skipped due to failed dependencies.
+     * ScenarioStageExecutor catches RuntimeException in first stage, terminates, skips dependent stages.
+     * This is INTENTIONAL ERROR TEST.
+     */
     @Test
-    void testExecuteStages_SkippedDueToDependencies() throws Exception {
+    void testExecuteStages_SkippedDueToDependenciesIntentional() throws Exception {
         // Arrange
         ScenarioStage firstStage = new ScenarioStage("first", "config/first.yaml", 1);
         firstStage.setFailurePolicy(ScenarioStage.FAILURE_POLICY_TERMINATE);

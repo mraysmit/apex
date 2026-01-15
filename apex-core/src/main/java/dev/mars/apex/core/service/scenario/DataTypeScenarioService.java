@@ -135,12 +135,15 @@ public class DataTypeScenarioService {
                     String scenarioId = (String) registryEntry.get("scenario-id");
                     String configFile = (String) registryEntry.get("config-file");
 
-                    if (scenarioId != null && configFile != null) {
+                    // Validate scenario-id is not null or empty
+                    if (scenarioId != null && !scenarioId.trim().isEmpty() && configFile != null) {
                         logger.debug("Loading scenario '{}' from file: {}", scenarioId, configFile);
                         ScenarioConfiguration scenario = loadIndividualScenario(configFile);
                         if (scenario != null) {
                             registerScenario(scenario);
                         }
+                    } else if (scenarioId == null || scenarioId.trim().isEmpty()) {
+                        logger.warn("Skipping scenario registry entry with empty or missing scenario-id");
                     }
                 }
             }
@@ -195,7 +198,7 @@ public class DataTypeScenarioService {
             }
 
         } catch (Exception e) {
-            logger.error("Failed to load individual scenario from: {}", configFile, e);
+            logger.error("Failed to load individual scenario from: {} - Error: {}", configFile, e.getMessage());
             return null;
         }
     }

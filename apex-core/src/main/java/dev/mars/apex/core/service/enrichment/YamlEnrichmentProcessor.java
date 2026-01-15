@@ -333,13 +333,11 @@ public class YamlEnrichmentProcessor {
 
                 return result != null && result;
             } catch (Exception e) {
-                // CRITICAL: Enrichment condition evaluation failure is a serious configuration error
-                logger.error("CRITICAL: Enrichment condition evaluation failed for '" +
-                          enrichment.getId() + "' - condition: '" + enrichment.getCondition() +
-                          "' - Error: " + e.getMessage(), e);
+                // Enrichment condition evaluation failure - log error without stack trace
+                logger.error("Enrichment condition evaluation failed for '{}' - condition: '{}' - Error: {}",
+                          enrichment.getId(), enrichment.getCondition(), e.getMessage());
 
-                // For now, return false to maintain backward compatibility
-                // TODO: Consider throwing EnrichmentConfigurationException for critical enrichments
+                // Return false to skip this enrichment (error will be reported in RuleResult)
                 return false;
             }
         }

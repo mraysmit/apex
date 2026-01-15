@@ -491,6 +491,11 @@ class JsonDataLoaderTest {
         });
     }
 
+    /**
+     * Intentional error test: Verifies that attempting to load data from a non-existent JSON file
+     * throws an IOException with a descriptive error message. This ensures the loader properly
+     * handles missing file scenarios and reports errors gracefully.
+     */
     @Test
     @DisplayName("Should fail when JSON file missing (Intentional Error)")
     void testMissingFileIntentional() {
@@ -519,6 +524,11 @@ class JsonDataLoaderTest {
         });
     }
 
+    /**
+     * Intentional error test: Verifies that attempting to load a JSON file with an invalid
+     * encoding (e.g., "INVALID-ENCODING") throws an IOException with a descriptive error message.
+     * This ensures the loader properly validates encoding parameters and reports errors gracefully.
+     */
     @Test
     @DisplayName("Should fail with invalid encoding (Intentional Error)")
     void testInvalidEncodingIntentional() throws IOException {

@@ -211,6 +211,17 @@ class JdbcTemplateFactoryTest {
         }
     }
 
+    /**
+     * INTENTIONAL ERROR TEST: Verifies H2 TCP connection failure handling
+     * when TCP server is not running.
+     * 
+     * <p>Creates H2 TCP configuration without running server.
+     * Verifies that:
+     * - DataSourceException is thrown
+     * - Error type is CONNECTION_ERROR or CONFIGURATION_ERROR
+     * 
+     * <p>This tests H2 TCP connection failure detection.
+     */
     @Test
     @DisplayName("Should fail H2 TCP connection when server not running (Intentional Error)")
     void testH2TcpJdbcUrlIntentionalFailure() throws DataSourceException {
@@ -343,6 +354,17 @@ class JdbcTemplateFactoryTest {
     // Error Handling Tests
     // ========================================
 
+    /**
+     * INTENTIONAL ERROR TEST: Verifies connection failure handling with
+     * invalid PostgreSQL host configuration.
+     * 
+     * <p>Creates configuration with invalid host that doesn't exist.
+     * Verifies that:
+     * - DataSourceException is thrown
+     * - Error type is CONNECTION_ERROR or CONFIGURATION_ERROR
+     * 
+     * <p>This tests invalid configuration detection and error reporting.
+     */
     @Test
     @DisplayName("Should fail PostgreSQL connection with invalid host (Intentional Error)")
     void testInvalidDatabaseConfigurationIntentionalFailure() {
@@ -363,6 +385,17 @@ class JdbcTemplateFactoryTest {
                    exception.getErrorType() == DataSourceException.ErrorType.CONFIGURATION_ERROR);
     }
 
+    /**
+     * INTENTIONAL ERROR TEST: Verifies connection failure handling when
+     * connecting to non-existent PostgreSQL host.
+     * 
+     * <p>Creates configuration pointing to non-existent host.
+     * Verifies that:
+     * - DataSourceException is thrown
+     * - Error type is CONNECTION_ERROR or CONFIGURATION_ERROR
+     * 
+     * <p>This tests connection failure detection and error reporting.
+     */
     @Test
     @DisplayName("Should fail PostgreSQL connection to non-existent host (Intentional Error)")
     void testConnectionFailureIntentional() {

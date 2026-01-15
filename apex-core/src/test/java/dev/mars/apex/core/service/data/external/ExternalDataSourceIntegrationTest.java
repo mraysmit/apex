@@ -213,8 +213,21 @@ class ExternalDataSourceIntegrationTest {
         dataSource.shutdown();
     }
 
+    /**
+     * INTENTIONAL ERROR TEST: Verifies error handling and resilience when
+     * connecting to invalid REST API endpoint.
+     * 
+     * <p>Creates invalid REST API configuration.
+     * Verifies that:
+     * - Connection test fails
+     * - Data source is marked unhealthy
+     * - Query throws DataSourceException
+     * - Failed request metrics are tracked
+     * 
+     * <p>This tests error detection, health monitoring, and metrics tracking.
+     */
     @Test
-    void testErrorHandlingAndResilience() throws DataSourceException {
+    void testErrorHandlingAndResilienceIntentionalError() throws DataSourceException {
         LOGGER.info("=== INTENTIONAL ERROR TEST: External data source error handling ===");
 
         // Test error handling from External Data Sources Guide Section 9
