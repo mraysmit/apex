@@ -88,22 +88,19 @@ public class DatabaseDataSource implements ExternalDataSource {
                 this.connectionStatus = ConnectionStatus.connected("Database connection established");
                 LOGGER.info("Database data source '{}' initialized successfully", config.getName());
 
-                // Test database connectivity and log table existence
+                // Test database connectivity with a generic query
                 try (Connection testConn = dataSource.getConnection()) {
                     LOGGER.info("Testing database connectivity for '{}'", config.getName());
                     LOGGER.info("Database URL: {}", testConn.getMetaData().getURL());
 
-                    // Check if customers table exists and has data
+                    // Perform a simple connectivity check without assuming specific tables
                     try (Statement stmt = testConn.createStatement();
-                         ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM customers")) {
+                         ResultSet rs = stmt.executeQuery("SELECT 1")) {
                         if (rs.next()) {
-                            int count = rs.getInt(1);
-                            LOGGER.info("Found {} records in customers table", count);
-                        } else {
-                            LOGGER.warn("No records found in customers table");
+                            LOGGER.debug("Database connectivity check successful");
                         }
                     } catch (SQLException e) {
-                        LOGGER.warn("Customers table does not exist or query failed: {}", e.getMessage());
+                        LOGGER.warn("Database connectivity check failed: {}", e.getMessage());
                     }
                 } catch (SQLException e) {
                     LOGGER.error("Failed to test database connectivity: {}", e.getMessage());

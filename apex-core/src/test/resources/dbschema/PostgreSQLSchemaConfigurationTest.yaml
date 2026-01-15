@@ -1,0 +1,61 @@
+metadata:
+  type: "rule-config"
+  version: "2.1"
+  author: "APEX Test Suite"
+  id: "postgresql-schema-config-test"
+  name: "PostgreSQL Schema Configuration Test"
+  description: "Tests schema parameter application from YAML to PostgreSQL connection"
+
+# Inline data-source pattern
+data-sources:
+  - name: "trading-database"
+    type: "database"
+    source-type: "postgresql"
+    enabled: true
+    
+    connection:
+      database: "apex_test"
+      username: "test_user"
+      password: "test_pass"
+      host: "localhost"
+      port: 5432
+      schema: "trading"
+
+enrichments:
+  - id: "product-lookup"
+    type: "lookup-enrichment"
+    description: "Lookup product details from trading schema"
+    
+    lookup-config:
+      lookup-key: "#product_id"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "trading-database"
+        query: |
+          SELECT 
+            product_name,
+            product_type,
+            asset_class
+          FROM products 
+          WHERE product_id = :key
+    
+    field-mappings:
+      - source-field: "product_name"
+        target-field: "product_name"
+      - source-field: "product_type"
+        target-field: "product_type"
+      - source-field: "asset_class"
+        target-field: "asset_class"
+
+rules:
+  - id: "validate-product-enrichment"
+    name: "Validate Product Enrichment"
+    condition: "product_name != null"
+    message: "Product successfully enriched from trading schema"
+    severity: "INFO"
+  
+  - id: "product-enrichment-failed"
+    name: "Product Enrichment Failed"
+    condition: "product_name == null"
+    message: "Product enrichment failed - check schema configuration"
+    severity: "ERROR"

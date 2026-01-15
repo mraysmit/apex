@@ -91,7 +91,7 @@ public class UseCase3MixedProcessingTest {
         LOGGER.info("   Processing timestamp: {}", enrichedData.get("processingTimestamp"));
 
         // The key insight: This test demonstrates that UseCase3 can process enrichments
-        // in the order specified in the YAML document, which is the core fix for the design flaw
+        // in the order specified in the YAML document, demonstrating sequential processing
         assertTrue(enrichedData.containsKey("processedTransactionId"),
                   "Sequential processing should process enrichments in YAML document order");
     }

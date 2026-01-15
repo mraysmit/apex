@@ -18,9 +18,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * COMPREHENSIVE TEST: Tests ALL APEX processors with the SAME YAML file
- * to prove the design flaw that different processors produce different results.
+ * to demonstrate that different processors produce different results due to different processing strategies.
  */
-@DisplayName("🚨 ALL PROCESSORS: Same YAML → Different Results")
+@DisplayName("ALL PROCESSORS: Same YAML → Different Results")
 class AllProcessorsTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AllProcessorsTest.class);

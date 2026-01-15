@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * These tests validate that the sequential processing system integrates correctly
  * with existing APEX services and entry points, providing seamless backward
- * compatibility while enabling the fix for APEX's fundamental design flaw.
+ * compatibility while enabling document order processing.
  *
  * Test Coverage:
  * 1. OrderedYamlParser Integration

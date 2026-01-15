@@ -1,0 +1,29 @@
+metadata:
+  type: "external-data-config"
+  version: "2.1"
+  author: "APEX Test Suite"
+  id: "trading-database-config"
+  name: "Trading Database Configuration"
+  description: "PostgreSQL trading schema configuration"
+
+name: "trading-database"
+type: "database"
+source-type: "postgresql"
+
+connection:
+  host: "localhost"
+  port: 5432
+  database: "apex_test"
+  username: "test_user"
+  password: "test_pass"
+  schema: "trading"
+
+queries:
+  getProduct: |
+    SELECT 
+      product_id,
+      product_name,
+      product_type,
+      asset_class
+    FROM products 
+    WHERE product_id = :key

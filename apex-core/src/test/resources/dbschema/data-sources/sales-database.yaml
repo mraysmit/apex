@@ -1,0 +1,27 @@
+metadata:
+  type: "external-data-config"
+  version: "2.1"
+  author: "APEX Test Suite"
+  id: "sales-database-config"
+  name: "Sales Database Configuration"
+  description: "PostgreSQL sales schema configuration"
+
+name: "sales-database"
+type: "database"
+source-type: "postgresql"
+
+connection:
+  host: "localhost"
+  port: 5432
+  database: "apex_test"
+  username: "test_user"
+  password: "test_pass"
+  schema: "sales"  # Will be updated by test
+
+queries:
+  getCustomer: |
+    SELECT 
+      customer_id,
+      customer_name
+    FROM customers 
+    WHERE customer_id = :customer_id

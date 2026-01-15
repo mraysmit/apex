@@ -4,12 +4,15 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
+import dev.mars.apex.demo.util.TestContainerImages;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -70,23 +73,60 @@ class CustomSchemaEnrichmentTest extends DemoTestBase {
     private static final Logger logger = LoggerFactory.getLogger(CustomSchemaEnrichmentTest.class);
     private static final String CUSTOM_SCHEMA = "trading";
 
-    @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
-            .withDatabaseName("apex_trading_test")
-            .withUsername("apex_user")
-            .withPassword("apex_pass");
+    private static final DockerImageName POSTGRES_IMAGE = 
+        DockerImageName.parse(TestContainerImages.POSTGRES)
+                       .asCompatibleSubstituteFor("postgres");
 
-    @BeforeAll
-    static void setupSchema() throws Exception {
+
+    /*
+     * TESTCONTAINERS 2.0 PATTERN - DEMO/ENRICHMENT TESTING
+     * 
+     * Demonstrates APEX enrichment functionality with custom PostgreSQL schemas.
+     * Uses instance GenericContainer for vendor-agnostic database testing.
+     * 
+     * DEMO-SPECIFIC PATTERN:
+     * - Instance container (not static) for test isolation
+     * - Each @Test method gets fresh database with clean schema state
+     * - Manual JDBC URL via jdbcUrl() helper method
+     * - TestContainerImages.POSTGRES constant ensures version consistency
+     * - Hard-coded test credentials: apex_user/apex_pass
+     * - getMappedPort(5432) for Docker dynamic port mapping
+     * 
+     * ENRICHMENT VALIDATION:
+     * - Tests lookup enrichment against custom 'trading' schema
+     * - Validates schema isolation (no accidental public schema queries)
+     * - Demonstrates YAML-driven schema configuration
+     * - Proves queries work without hard-coded schema prefixes
+     * 
+     * See apex-core tests for additional pattern examples:
+     * - JdbcUrlSchemaParameterTest: Instance containers with retry logic
+     * - PostgreSQLSchemaConfigurationTest: Instance pattern for schema config
+     * - EnvironmentPromotionTest: Multi-environment simulation
+     */
+    @Container
+    @SuppressWarnings("resource") // Testcontainers manages lifecycle automatically
+    GenericContainer<?> postgres = new GenericContainer<>(POSTGRES_IMAGE)
+            .withEnv("POSTGRES_DB", "apex_trading_test")
+            .withEnv("POSTGRES_USER", "apex_user")
+            .withEnv("POSTGRES_PASSWORD", "apex_pass")
+            .withExposedPorts(5432)
+            .waitingFor(Wait.forListeningPort());
+
+    private String jdbcUrl() {
+        return "jdbc:postgresql://" + postgres.getHost() + ":"
+            + postgres.getMappedPort(5432) + "/apex_trading_test";
+    }
+
+    @BeforeEach
+    void setupSchema() throws Exception {
         if (!postgres.isRunning()) {
             return;
         }
 
-        String jdbcUrl = postgres.getJdbcUrl();
-        String username = postgres.getUsername();
-        String password = postgres.getPassword();
-
-        try (Connection conn = DriverManager.getConnection(jdbcUrl, username, password);
+        try (Connection conn = DriverManager.getConnection(
+                jdbcUrl(),
+                "apex_user",
+                "apex_pass");
              Statement stmt = conn.createStatement()) {
 
             // Create custom schema
@@ -358,10 +398,10 @@ class CustomSchemaEnrichmentTest extends DemoTestBase {
      */
     private void updateDataSourceConnection(YamlRuleConfiguration config, String dataSourceName) {
         String host = postgres.getHost();
-        Integer port = postgres.getFirstMappedPort();
-        String database = postgres.getDatabaseName();
-        String username = postgres.getUsername();
-        String password = postgres.getPassword();
+        Integer port = postgres.getMappedPort(5432);
+        String database = "apex_trading_test";
+        String username = "apex_user";
+        String password = "apex_pass";
 
         if (config.getDataSources() != null) {
             for (var dataSource : config.getDataSources()) {

@@ -1,0 +1,145 @@
+metadata:
+  created: "2025-02-03"
+  description: "Cache isolation test across multiple schemas with identical table structures"
+  author: "Mark Andrew Ray-Smith Cityline Ltd"
+  version: "2.1"
+  purpose: "Prove cache correctly isolates data from different schemas with same table names"
+  type: "rule-config"
+
+# Three data sources querying same table name (customers) from different schemas
+# Each has cache enabled with unique key-prefix to ensure isolation
+data-sources:
+  - name: "sales-db-cached"
+    type: "database"
+    source-type: "postgresql"
+    enabled: true
+    connection:
+      database: "apex_cache_test"
+      username: "test"
+      password: "test"
+      host: "localhost"
+      port: 5432
+      schema: "sales"  # Critical: schema parameter for PostgreSQL search_path
+    cache:
+      enabled: true
+      max-size: 100
+      ttl-seconds: 300
+      eviction-policy: "LRU"
+      key-prefix: "sales"  # Unique prefix to prevent cache key collisions
+
+  - name: "marketing-db-cached"
+    type: "database"
+    source-type: "postgresql"
+    enabled: true
+    connection:
+      database: "apex_cache_test"
+      username: "test"
+      password: "test"
+      host: "localhost"
+      port: 5432
+      schema: "marketing"  # Different schema, same table names
+    cache:
+      enabled: true
+      max-size: 100
+      ttl-seconds: 300
+      eviction-policy: "LRU"
+      key-prefix: "marketing"  # Different prefix ensures cache isolation
+
+  - name: "finance-db-cached"
+    type: "database"
+    source-type: "postgresql"
+    enabled: true
+    connection:
+      database: "apex_cache_test"
+      username: "test"
+      password: "test"
+      host: "localhost"
+      port: 5432
+      schema: "finance"  # Third schema with same table structure
+    cache:
+      enabled: true
+      max-size: 100
+      ttl-seconds: 300
+      eviction-policy: "LRU"
+      key-prefix: "finance"  # Unique prefix for finance schema
+
+# Enrichments that look up same customer ID from different schemas
+enrichments:
+  - id: "sales-customer-lookup"
+    type: "lookup-enrichment"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "sales-db-cached"
+        query: |
+          SELECT name, department, schema_name 
+          FROM customers 
+          WHERE id = :key
+    field-mappings:
+      - source-field: "name"
+        target-field: "sales_customer_name"
+      - source-field: "department"
+        target-field: "sales_department"
+      - source-field: "schema_name"
+        target-field: "sales_schema"
+
+  - id: "marketing-customer-lookup"
+    type: "lookup-enrichment"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "marketing-db-cached"
+        query: |
+          SELECT name, department, schema_name 
+          FROM customers 
+          WHERE id = :key
+    field-mappings:
+      - source-field: "name"
+        target-field: "marketing_customer_name"
+      - source-field: "department"
+        target-field: "marketing_department"
+      - source-field: "schema_name"
+        target-field: "marketing_schema"
+
+  - id: "finance-customer-lookup"
+    type: "lookup-enrichment"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "finance-db-cached"
+        query: |
+          SELECT name, department, schema_name 
+          FROM customers 
+          WHERE id = :key
+    field-mappings:
+      - source-field: "name"
+        target-field: "finance_customer_name"
+      - source-field: "department"
+        target-field: "finance_department"
+      - source-field: "schema_name"
+        target-field: "finance_schema"
+
+# Validation rules to ensure schema isolation
+rules:
+  - id: "validate-schema-isolation"
+    name: "Validate Schema Isolation"
+    description: "Ensure data from different schemas is correctly isolated"
+    condition: >
+      sales_schema == 'sales' &&
+      marketing_schema == 'marketing' &&
+      finance_schema == 'finance'
+    message: "Schema isolation validated - each lookup returned correct schema data"
+    severity: "INFO"
+
+  - id: "validate-no-cross-schema-contamination"
+    name: "Validate No Cross-Schema Contamination"
+    description: "Ensure sales customer name is different from marketing/finance"
+    condition: >
+      sales_customer_name != marketing_customer_name &&
+      sales_customer_name != finance_customer_name &&
+      marketing_customer_name != finance_customer_name
+    message: "Cache isolation verified - same ID from different schemas returned different customer names"
+    severity: "INFO"

@@ -1,0 +1,47 @@
+metadata:
+  type: "rule-config"
+  version: "2.1"
+  author: "APEX Test Suite"
+  id: "environment-promotion-test"
+  name: "Environment Promotion Test Configuration"
+  description: "Same YAML for DEV/UAT/PROD - only environment variables change"
+
+data-sources:
+  - name: "database"
+    type: "database"
+    source-type: "postgresql"
+    enabled: true
+    connection:
+      database: "apex_test"
+      username: "test_user"
+      password: "test_pass"
+      host: "localhost"
+      port: 5432
+      schema: "development"
+
+enrichments:
+  - id: "product-lookup"
+    type: "lookup-enrichment"
+    
+    lookup-config:
+      lookup-key: "#product_id"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "database"
+        query: |
+          SELECT product_name, environment
+          FROM products
+          WHERE product_id = :key
+    
+    field-mappings:
+      - source-field: "product_name"
+        target-field: "product_name"
+      - source-field: "environment"
+        target-field: "environment"
+
+rules:
+  - id: "environment-check"
+    name: "Environment Check"
+    condition: "environment != null"
+    message: "Environment detected: #{environment}"
+    severity: "INFO"

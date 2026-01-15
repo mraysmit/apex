@@ -75,7 +75,7 @@ public class YamlTransformationProcessor {
      * @deprecated since 1.1, for removal in 2.0. This method returns Object and cannot propagate errors properly.
      *             Use {@link #processTransformationsWithResult(List, Object)} instead, which returns RuleResult
      *             with proper error tracking and failure messages.
-     *             <p><strong>CRITICAL FLAW:</strong> This method catches and logs exceptions but continues processing,
+     *             <p><strong>Limitation:</strong> This method catches and logs exceptions but continues processing,
      *             making it impossible for callers to detect failures. Errors are lost and only appear in logs.</p>
      *             <p><strong>Migration:</strong> Replace {@code Object result = processor.processTransformations(transformations, data)}
      *             with {@code RuleResult result = processor.processTransformationsWithResult(transformations, data)}

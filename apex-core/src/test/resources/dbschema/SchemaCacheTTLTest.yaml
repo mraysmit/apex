@@ -1,0 +1,132 @@
+metadata:
+  created: "2025-02-03"
+  description: "Cache TTL independence test - different expiration times per schema"
+  author: "Mark Andrew Ray-Smith Cityline Ltd"
+  version: "2.1"
+  purpose: "Prove cache expiration in one schema doesn't affect other schemas"
+  type: "rule-config"
+
+# Data sources with DIFFERENT cache TTL values to test independent expiration
+data-sources:
+  - name: "sales-db-short-ttl"
+    type: "database"
+    source-type: "postgresql"
+    enabled: true
+    connection:
+      database: "apex_cache_test"
+      username: "test"
+      password: "test"
+      host: "localhost"
+      port: 5432
+      schema: "sales"
+    cache:
+      enabled: true
+      max-size: 100
+      ttl-seconds: 2  # SHORT TTL - expires quickly
+      eviction-policy: "LRU"
+      key-prefix: "sales-ttl"
+
+  - name: "marketing-db-medium-ttl"
+    type: "database"
+    source-type: "postgresql"
+    enabled: true
+    connection:
+      database: "apex_cache_test"
+      username: "test"
+      password: "test"
+      host: "localhost"
+      port: 5432
+      schema: "marketing"
+    cache:
+      enabled: true
+      max-size: 100
+      ttl-seconds: 5  # MEDIUM TTL
+      eviction-policy: "LRU"
+      key-prefix: "marketing-ttl"
+
+  - name: "finance-db-long-ttl"
+    type: "database"
+    source-type: "postgresql"
+    enabled: true
+    connection:
+      database: "apex_cache_test"
+      username: "test"
+      password: "test"
+      host: "localhost"
+      port: 5432
+      schema: "finance"
+    cache:
+      enabled: true
+      max-size: 100
+      ttl-seconds: 10  # LONG TTL - stays cached longest
+      eviction-policy: "LRU"
+      key-prefix: "finance-ttl"
+
+enrichments:
+  - id: "sales-lookup-ttl"
+    type: "lookup-enrichment"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "sales-db-short-ttl"
+        query: |
+          SELECT name, department, schema_name 
+          FROM customers 
+          WHERE id = :key
+    field-mappings:
+      - source-field: "name"
+        target-field: "sales_customer_name"
+      - source-field: "department"
+        target-field: "sales_department"
+      - source-field: "schema_name"
+        target-field: "sales_schema"
+
+  - id: "marketing-lookup-ttl"
+    type: "lookup-enrichment"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "marketing-db-medium-ttl"
+        query: |
+          SELECT name, department, schema_name 
+          FROM customers 
+          WHERE id = :key
+    field-mappings:
+      - source-field: "name"
+        target-field: "marketing_customer_name"
+      - source-field: "department"
+        target-field: "marketing_department"
+      - source-field: "schema_name"
+        target-field: "marketing_schema"
+
+  - id: "finance-lookup-ttl"
+    type: "lookup-enrichment"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "finance-db-long-ttl"
+        query: |
+          SELECT name, department, schema_name 
+          FROM customers 
+          WHERE id = :key
+    field-mappings:
+      - source-field: "name"
+        target-field: "finance_customer_name"
+      - source-field: "department"
+        target-field: "finance_department"
+      - source-field: "schema_name"
+        target-field: "finance_schema"
+
+rules:
+  - id: "validate-all-schemas-enriched"
+    name: "Validate All Schemas Enriched"
+    description: "All three schemas should return data even with different TTLs"
+    condition: >
+      sales_customer_name != null &&
+      marketing_customer_name != null &&
+      finance_customer_name != null
+    message: "All schemas successfully enriched data"
+    severity: "INFO"

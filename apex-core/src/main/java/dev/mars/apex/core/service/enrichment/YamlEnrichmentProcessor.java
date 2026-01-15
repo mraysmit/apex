@@ -109,7 +109,7 @@ public class YamlEnrichmentProcessor {
      * @deprecated since 1.1, for removal in 2.0. This method returns Object and cannot propagate errors properly.
      *             Use {@link #processEnrichmentsWithResult(List, Object)} instead, which returns RuleResult
      *             with proper error tracking and failure messages.
-     *             <p><strong>CRITICAL FLAW:</strong> This method catches and logs exceptions but continues processing,
+     *             <p><strong>Limitation:</strong> This method catches and logs exceptions but continues processing,
      *             making it impossible for callers to detect failures. Errors are lost and only appear in logs.</p>
      *             <p><strong>Migration:</strong> Replace {@code Object result = processor.processEnrichments(enrichments, data)}
      *             with {@code RuleResult result = processor.processEnrichmentsWithResult(enrichments, data)}
@@ -136,7 +136,7 @@ public class YamlEnrichmentProcessor {
      * @deprecated since 1.1, for removal in 2.0. This method returns Object and cannot propagate errors properly.
      *             Use {@link #processEnrichmentsWithResult(List, Object, YamlRuleConfiguration)} instead, which returns RuleResult
      *             with proper error tracking and failure messages.
-     *             <p><strong>CRITICAL FLAW:</strong> This method catches and logs exceptions but continues processing,
+     *             <p><strong>Limitation:</strong> This method catches and logs exceptions but continues processing,
      *             making it impossible for callers to detect failures. Errors are lost and only appear in logs.</p>
      *             <p><strong>Migration:</strong> Replace {@code Object result = processor.processEnrichments(enrichments, data, config)}
      *             with {@code RuleResult result = processor.processEnrichmentsWithResult(enrichments, data, config)}

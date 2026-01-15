@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Minimal test demonstrating sequential processing where a rule depends on enrichment results.
  *
  * This test follows the established pattern from other sequencing tests and demonstrates
- * the core fix for APEX's design flaw: respecting YAML document order when processing-mode
+ * sequential processing: respecting YAML document order when processing-mode
  * is set to "sequential".
  */
 class AMinimalSequentialProcessingTest {

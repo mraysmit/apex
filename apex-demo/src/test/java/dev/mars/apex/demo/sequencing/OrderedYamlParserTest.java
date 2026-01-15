@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Phase 1 Tests: OrderedYamlParser Validation
  * 
  * These tests validate that OrderedYamlParser correctly preserves YAML section order
- * and parses all content accurately, fixing APEX's fundamental design flaw.
+ * and parses all content accurately, enabling document order preservation.
  * 
  * Test Coverage:
  * - Section order preservation from YAML documents

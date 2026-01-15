@@ -1,0 +1,34 @@
+metadata:
+  type: "external-data-config"
+  version: "2.1"
+  author: "APEX Test Suite"
+  id: "environment-database-config"
+  name: "Environment-Aware Database Configuration"
+  description: "Schema changes based on environment variables"
+
+name: "database"
+type: "database"
+source-type: "postgresql"
+
+connection:
+  # Test configuration - will be updated by test
+  host: "localhost"
+  port: 5432
+  database: "apex_test"
+  username: "test_user"
+  password: "test_pass"
+  
+  # Schema differs per environment:
+  # DEV:  dev_trading
+  # UAT:  uat_trading  
+  # PROD: trading
+  schema: "trading"
+
+queries:
+  getProduct: |
+    SELECT 
+      product_id,
+      product_name,
+      environment
+    FROM products 
+    WHERE product_id = :product_id

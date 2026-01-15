@@ -1,0 +1,77 @@
+metadata:
+  type: "rule-config"
+  version: "2.1"
+  author: "APEX Test Suite"
+  id: "multi-schema-test"
+  name: "Multiple Schema Test"
+  description: "Tests multiple custom schemas via separate data-sources"
+
+# Two data-sources, two different schemas
+data-sources:
+  - name: "trading-database"
+    type: "database"
+    source-type: "postgresql"
+    enabled: true
+    connection:
+      database: "apex_test"
+      username: "test_user"
+      password: "test_pass"
+      host: "localhost"
+      port: 5432
+      schema: "trading"
+  
+  - name: "sales-database"
+    type: "database"
+    source-type: "postgresql"
+    enabled: true
+    connection:
+      database: "apex_test"
+      username: "test_user"
+      password: "test_pass"
+      host: "localhost"
+      port: 5432
+      schema: "sales"
+
+enrichments:
+  - id: "product-lookup"
+    type: "lookup-enrichment"
+    description: "Lookup from trading schema"
+    
+    lookup-config:
+      lookup-key: "#product_id"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "trading-database"
+        query: |
+          SELECT product_name
+          FROM products
+          WHERE product_id = :key
+    
+    field-mappings:
+      - source-field: "product_name"
+        target-field: "product_name"
+  
+  - id: "customer-lookup"
+    type: "lookup-enrichment"
+    description: "Lookup from sales schema"
+    
+    lookup-config:
+      lookup-key: "#customer_id"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "sales-database"
+        query: |
+          SELECT customer_name
+          FROM customers
+          WHERE customer_id = :key
+    
+    field-mappings:
+      - source-field: "customer_name"
+        target-field: "customer_name"
+
+rules:
+  - id: "validate-multi-schema"
+    name: "Validate Multi-Schema Access"
+    condition: "product_name != null && customer_name != null"
+    message: "Data retrieved from both trading and sales schemas"
+    severity: "INFO"

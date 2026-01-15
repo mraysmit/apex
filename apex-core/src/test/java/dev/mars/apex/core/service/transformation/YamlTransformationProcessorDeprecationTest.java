@@ -118,7 +118,7 @@ class YamlTransformationProcessorDeprecationTest {
         Map<String, Object> resultMap = (Map<String, Object>) result;
         assertEquals(100.0, resultMap.get("amount"), "Original data returned - error was lost!");
 
-        logger.info("⚠️ Deprecated method returned original object - error was lost (this is the fundamental flaw)");
+        logger.info("⚠️ Deprecated method returned original object - error was lost (this is the limitation)");
     }
 
     @Test

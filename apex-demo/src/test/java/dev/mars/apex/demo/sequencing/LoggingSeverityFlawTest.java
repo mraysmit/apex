@@ -18,13 +18,13 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Demonstrates APEX's critical logging severity flaw where business logic failures
- * are incorrectly logged as WARNING instead of ERROR/SEVERE.
+ * Demonstrates logging severity behavior where business logic failures
+ * are logged as WARNING instead of ERROR/SEVERE.
  *
- * This test focuses on demonstrating the problem through console output analysis
+ * This test focuses on demonstrating the behavior through console output analysis
  * rather than programmatic log capture (which requires additional dependencies).
  */
-@DisplayName("🚨 APEX Logging Severity Flaw Demonstration")
+@DisplayName("Logging Severity Behavior Demonstration")
 class LoggingSeverityFlawTest {
 
     private static final Logger logger = LoggerFactory.getLogger(LoggingSeverityFlawTest.class);
@@ -34,7 +34,7 @@ class LoggingSeverityFlawTest {
 
     @BeforeEach
     void setUp() {
-        logger.info("🔧 Initializing APEX services for logging severity flaw demonstration");
+        logger.info("Initializing APEX services for logging severity demonstration");
 
         // Initialize required services using correct constructors
         yamlLoader = new YamlConfigurationLoader();
@@ -42,13 +42,13 @@ class LoggingSeverityFlawTest {
         RulesEngineConfiguration config = new RulesEngineConfiguration();
         rulesEngine = new RulesEngine(config);
 
-        logger.info("✅ All services initialized for logging severity flaw demonstration");
+        logger.info("All services initialized for logging severity demonstration");
     }
 
     @Test
-    @DisplayName("🚨 CRITICAL FLAW: Business logic failure logged as WARNING instead of ERROR")
+    @DisplayName("Business logic failure logged as WARNING instead of ERROR")
     void testBusinessLogicFailureLoggedAsWarning() throws Exception {
-        System.out.println("=== DEMONSTRATING LOGGING SEVERITY FLAW ===");
+        System.out.println("=== DEMONSTRATING LOGGING SEVERITY BEHAVIOR ===");
 
         // Load YAML with invalid enrichment condition
         String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/LoggingSeverityFlawTest.yaml";
@@ -67,7 +67,7 @@ class LoggingSeverityFlawTest {
 
         System.out.println("🔍 Processing enrichment with invalid condition reference...");
         System.out.println("📋 Expected: You should see WARNING logs that say 'Error evaluating...'");
-        System.out.println("🚨 PROBLEM: These are business logic failures but logged as WARNING!");
+        System.out.println("� NOTE: These are business logic failures but logged as WARNING!");
 
         // Process enrichments - this will cause condition evaluation to fail
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
@@ -78,7 +78,7 @@ class LoggingSeverityFlawTest {
         System.out.println("   WARNING: Error evaluating enrichment condition...");
         System.out.println("");
 
-        System.out.println("🎯 FLAW ANALYSIS:");
+        System.out.println("🎯 BEHAVIOR ANALYSIS:");
         System.out.println("   ❌ Business logic failure (enrichment condition evaluation) logged as WARNING");
         System.out.println("   ❌ Message literally says 'Error' but uses WARNING level");
         System.out.println("   ❌ Developer sees 'warning' and assumes non-critical issue");

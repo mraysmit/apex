@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Sequential YAML Processing Tests - Using RulesEngine
  *
- * These tests demonstrate that APEX's fundamental design flaw has been FIXED.
+ * These tests demonstrate that sequential processing is working correctly.
  * Sequential processing now respects YAML document order instead of
  * using hardcoded processing sequences.
  *
@@ -98,7 +98,7 @@ public class SequentialYamlProcessorTest extends DemoTestBase {
         LOGGER.info("   1. Enrichment executed: customerData = {}", enrichedData.get("customerData"));
         LOGGER.info("   2. Rule validated enriched data successfully");
         LOGGER.info("   3. Sequential processing respects YAML document order");
-        LOGGER.info("✅ Enrich-then-validate pattern test PASSED - DESIGN FLAW FIXED!");
+        LOGGER.info("✅ Enrich-then-validate pattern test PASSED - Sequential processing working!");
     }
 
     /**
@@ -152,7 +152,7 @@ public class SequentialYamlProcessorTest extends DemoTestBase {
         LOGGER.info("   1. Rule validated input data first");
         LOGGER.info("   2. Enrichment executed after validation: customerData = {}", enrichedData.get("customerData"));
         LOGGER.info("   3. Sequential processing respects YAML document order");
-        LOGGER.info("✅ Validate-then-enrich pattern test PASSED - DESIGN FLAW FIXED!");
+        LOGGER.info("✅ Validate-then-enrich pattern test PASSED - Sequential processing working!");
     }
 
     /**

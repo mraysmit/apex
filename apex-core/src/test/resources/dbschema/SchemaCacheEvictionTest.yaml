@@ -1,0 +1,131 @@
+metadata:
+  created: "2025-02-03"
+  description: "Cache eviction boundary test - LRU eviction in one schema should not affect others"
+  author: "Mark Andrew Ray-Smith Cityline Ltd"
+  version: "2.1"
+  purpose: "Prove cache eviction in one schema doesn't evict entries from other schemas"
+  type: "rule-config"
+
+# Data sources with SMALL cache sizes to trigger eviction
+data-sources:
+  - name: "sales-db-small-cache"
+    type: "database"
+    source-type: "postgresql"
+    enabled: true
+    connection:
+      database: "apex_cache_test"
+      username: "test"
+      password: "test"
+      host: "localhost"
+      port: 5432
+      schema: "sales"
+    cache:
+      enabled: true
+      max-size: 2  # VERY SMALL - will trigger eviction quickly
+      ttl-seconds: 300
+      eviction-policy: "LRU"
+      key-prefix: "sales-evict"
+
+  - name: "marketing-db-normal-cache"
+    type: "database"
+    source-type: "postgresql"
+    enabled: true
+    connection:
+      database: "apex_cache_test"
+      username: "test"
+      password: "test"
+      host: "localhost"
+      port: 5432
+      schema: "marketing"
+    cache:
+      enabled: true
+      max-size: 100  # NORMAL SIZE - should not be affected by sales eviction
+      ttl-seconds: 300
+      eviction-policy: "LRU"
+      key-prefix: "marketing-evict"
+
+  - name: "finance-db-normal-cache"
+    type: "database"
+    source-type: "postgresql"
+    enabled: true
+    connection:
+      database: "apex_cache_test"
+      username: "test"
+      password: "test"
+      host: "localhost"
+      port: 5432
+      schema: "finance"
+    cache:
+      enabled: true
+      max-size: 100  # NORMAL SIZE - should not be affected by sales eviction
+      ttl-seconds: 300
+      eviction-policy: "LRU"
+      key-prefix: "finance-evict"
+
+enrichments:
+  - id: "sales-lookup-eviction"
+    type: "lookup-enrichment"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "sales-db-small-cache"
+        query: |
+          SELECT name, department, schema_name 
+          FROM customers 
+          WHERE id = :key
+    field-mappings:
+      - source-field: "name"
+        target-field: "sales_customer_name"
+      - source-field: "department"
+        target-field: "sales_department"
+      - source-field: "schema_name"
+        target-field: "sales_schema"
+
+  - id: "marketing-lookup-eviction"
+    type: "lookup-enrichment"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "marketing-db-normal-cache"
+        query: |
+          SELECT name, department, schema_name 
+          FROM customers 
+          WHERE id = :key
+    field-mappings:
+      - source-field: "name"
+        target-field: "marketing_customer_name"
+      - source-field: "department"
+        target-field: "marketing_department"
+      - source-field: "schema_name"
+        target-field: "marketing_schema"
+
+  - id: "finance-lookup-eviction"
+    type: "lookup-enrichment"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "finance-db-normal-cache"
+        query: |
+          SELECT name, department, schema_name 
+          FROM customers 
+          WHERE id = :key
+    field-mappings:
+      - source-field: "name"
+        target-field: "finance_customer_name"
+      - source-field: "department"
+        target-field: "finance_department"
+      - source-field: "schema_name"
+        target-field: "finance_schema"
+
+rules:
+  - id: "validate-eviction-isolation"
+    name: "Validate Eviction Isolation"
+    description: "Marketing and finance should be unaffected by sales cache eviction"
+    condition: >
+      marketing_customer_name != null &&
+      finance_customer_name != null
+    message: "Marketing and finance caches unaffected by sales eviction"
+    severity: "INFO"

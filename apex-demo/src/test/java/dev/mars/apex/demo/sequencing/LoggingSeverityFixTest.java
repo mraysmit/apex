@@ -60,7 +60,7 @@ public class LoggingSeverityFixTest {
             logger.info("🔍 Processing enrichment with invalid condition reference...");
             logger.info("🔍 Expected: You should see SEVERE logs (not WARNING)");
 
-            // Process enrichments with config parameter to create the same context as the original flaw test
+            // Process enrichments with config parameter to create the same context as the original test
             // This will trigger condition evaluation failures that should now be logged as SEVERE
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
 

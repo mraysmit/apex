@@ -16,7 +16,7 @@ import java.util.*;
 
 /**
  * Order-preserving YAML parser that maintains the natural sequence of YAML sections
- * as they appear in the document, fixing APEX's fundamental design flaw.
+ * as they appear in the document, enabling document order preservation.
  * 
  * This parser replaces Jackson's @JsonProperty approach which loses document order
  * by parsing sections into separate fields regardless of their position in the YAML file.

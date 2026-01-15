@@ -1,0 +1,106 @@
+metadata:
+  type: "rule-config"
+  version: "2.1"
+  author: "APEX Test Suite"
+  id: "jdbc-url-schema-test"
+  name: "JDBC URL Schema Parameter Test"
+  description: "Tests APEX's ability to configure PostgreSQL schema via YAML"
+
+data-sources:
+  - name: "trading-schema-db"
+    type: "database"
+    source-type: "postgresql"
+    enabled: true
+    connection:
+      database: "apex_jdbc_test"
+      username: "apex_user"
+      password: "apex_pass"
+      host: "localhost"
+      port: 5432
+      schema: "trading"
+
+  - name: "sales-schema-db"
+    type: "database"
+    source-type: "postgresql"
+    enabled: true
+    connection:
+      database: "apex_jdbc_test"
+      username: "apex_user"
+      password: "apex_pass"
+      host: "localhost"
+      port: 5432
+      schema: "sales"
+
+  - name: "inventory-schema-db"
+    type: "database"
+    source-type: "postgresql"
+    enabled: true
+    connection:
+      database: "apex_jdbc_test"
+      username: "apex_user"
+      password: "apex_pass"
+      host: "localhost"
+      port: 5432
+      schema: "inventory"
+
+enrichments:
+  - id: "trading-product-lookup"
+    type: "lookup-enrichment"
+    description: "Lookup from trading schema"
+    lookup-config:
+      lookup-key: "#product_id"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "trading-schema-db"
+        query: |
+          SELECT product_name, schema_name
+          FROM products
+          WHERE product_id = :key
+    field-mappings:
+      - source-field: "product_name"
+        target-field: "trading_product"
+      - source-field: "schema_name"
+        target-field: "trading_schema"
+
+  - id: "sales-product-lookup"
+    type: "lookup-enrichment"
+    description: "Lookup from sales schema"
+    lookup-config:
+      lookup-key: "#product_id"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "sales-schema-db"
+        query: |
+          SELECT product_name, schema_name
+          FROM products
+          WHERE product_id = :key
+    field-mappings:
+      - source-field: "product_name"
+        target-field: "sales_product"
+      - source-field: "schema_name"
+        target-field: "sales_schema"
+
+  - id: "inventory-product-lookup"
+    type: "lookup-enrichment"
+    description: "Lookup from inventory schema"
+    lookup-config:
+      lookup-key: "#product_id"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "inventory-schema-db"
+        query: |
+          SELECT product_name, schema_name
+          FROM products
+          WHERE product_id = :key
+    field-mappings:
+      - source-field: "product_name"
+        target-field: "inventory_product"
+      - source-field: "schema_name"
+        target-field: "inventory_schema"
+
+rules:
+  - id: "validate-schema-isolation"
+    name: "Validate Schema Isolation"
+    condition: "trading_schema == 'trading' && sales_schema == 'sales' && inventory_schema == 'inventory'"
+    message: "Schema isolation validated - each lookup accessed correct schema"
+    severity: "INFO"

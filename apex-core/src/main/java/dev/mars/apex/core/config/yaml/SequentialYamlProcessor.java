@@ -11,8 +11,8 @@ import java.util.List;
 /**
  * Sequential YAML processor that respects document order.
  * 
- * This processor fixes APEX's fundamental design flaw by processing YAML sections
- * in the order they appear in the document, rather than using hardcoded sequences.
+ * This processor enables YAML sections to be processed in the order they appear
+ * in the document, rather than using hardcoded sequences.
  * 
  * Key Features:
  * - Processes sections in document order (enrichments before rules, rules before enrichments, etc.)
@@ -42,7 +42,7 @@ public class SequentialYamlProcessor {
         this.orderedParser = new OrderedYamlParser();
         new DeferredDependencyResolver();
 
-        logger.info("SequentialYamlProcessor initialized - ready to fix APEX's fundamental design flaw");
+        logger.debug("SequentialYamlProcessor initialized");
     }
     
     /**
@@ -54,7 +54,7 @@ public class SequentialYamlProcessor {
      * @deprecated since 1.1, for removal in 2.0. This method returns SequentialProcessingResult and cannot propagate errors properly.
      *             Use {@link #processFileWithResult(String)} instead, which returns RuleResult
      *             with proper error tracking and failure messages.
-     *             <p><strong>CRITICAL FLAW:</strong> This method throws YamlConfigurationException but doesn't provide
+     *             <p><strong>Limitation:</strong> This method throws YamlConfigurationException but doesn't provide
      *             programmatic access to error details. Errors must be caught and inspected via exception messages.</p>
      *             <p><strong>Migration:</strong> Replace {@code SequentialProcessingResult result = processor.processFile(filePath)}
      *             with {@code RuleResult result = processor.processFileWithResult(filePath)}
@@ -85,7 +85,7 @@ public class SequentialYamlProcessor {
      * @deprecated since 1.1, for removal in 2.0. This method returns SequentialProcessingResult and cannot propagate errors properly.
      *             Use {@link #processYamlStringWithResult(String)} instead, which returns RuleResult
      *             with proper error tracking and failure messages.
-     *             <p><strong>CRITICAL FLAW:</strong> This method throws YamlConfigurationException but doesn't provide
+     *             <p><strong>Limitation:</strong> This method throws YamlConfigurationException but doesn't provide
      *             programmatic access to error details. Errors must be caught and inspected via exception messages.</p>
      *             <p><strong>Migration:</strong> Replace {@code SequentialProcessingResult result = processor.processYamlString(yamlContent)}
      *             with {@code RuleResult result = processor.processYamlStringWithResult(yamlContent)}
@@ -111,7 +111,7 @@ public class SequentialYamlProcessor {
      * @deprecated since 1.1, for removal in 2.0. This method returns SequentialProcessingResult and cannot propagate errors properly.
      *             Use {@link #processYamlStringWithResult(String, String)} instead, which returns RuleResult
      *             with proper error tracking and failure messages.
-     *             <p><strong>CRITICAL FLAW:</strong> This method throws YamlConfigurationException but doesn't provide
+     *             <p><strong>Limitation:</strong> This method throws YamlConfigurationException but doesn't provide
      *             programmatic access to error details. Errors must be caught and inspected via exception messages.</p>
      *             <p><strong>Migration:</strong> Replace {@code SequentialProcessingResult result = processor.processYamlString(yamlContent, source)}
      *             with {@code RuleResult result = processor.processYamlStringWithResult(yamlContent, source)}
@@ -143,7 +143,7 @@ public class SequentialYamlProcessor {
      * @deprecated since 1.1, for removal in 2.0. This method returns SequentialProcessingResult and cannot propagate errors properly.
      *             Use {@link #processOrderedConfigurationWithResult(OrderedYamlConfiguration, String)} instead, which returns RuleResult
      *             with proper error tracking and failure messages.
-     *             <p><strong>CRITICAL FLAW:</strong> This method throws YamlConfigurationException but doesn't provide
+     *             <p><strong>Limitation:</strong> This method throws YamlConfigurationException but doesn't provide
      *             programmatic access to error details. Errors must be caught and inspected via exception messages.</p>
      *             <p><strong>Migration:</strong> Replace {@code SequentialProcessingResult result = processor.processOrderedConfiguration(config, source)}
      *             with {@code RuleResult result = processor.processOrderedConfigurationWithResult(config, source)}
@@ -327,7 +327,7 @@ public class SequentialYamlProcessor {
     }
     
     /**
-     * Process using sequential mode - THE CORE FIX for APEX's fundamental design flaw.
+     * Process using sequential mode - processes sections in document order.
      * Processes sections in the order they appear in the YAML document.
      */
     private SequentialProcessingResult processSequentialMode(OrderedYamlConfiguration orderedConfig, String source) 
