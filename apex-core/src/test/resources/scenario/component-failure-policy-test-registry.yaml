@@ -15,13 +15,13 @@ metadata:
 scenarios:
   # Test 1: Successful component execution
   - scenario-id: "component-success-test"
-    config-file: "src/test/resources/dev/mars/apex/demo/scenario/component-success-test-scenario.yaml"
+    config-file: "src/test/resources/scenario/component-success-test-scenario.yaml"
 
   # Test 2: Component-ref with continue-with-warnings policy
   - scenario-id: "component-continue-test"
-    config-file: "src/test/resources/dev/mars/apex/demo/scenario/component-continue-test-scenario.yaml"
+    config-file: "src/test/resources/scenario/component-continue-test-scenario.yaml"
 
   # Test 3: Config-file with terminate policy
   - scenario-id: "component-terminate-test"
-    config-file: "src/test/resources/dev/mars/apex/demo/scenario/component-terminate-test-scenario.yaml"
+    config-file: "src/test/resources/scenario/component-terminate-test-scenario.yaml"
 

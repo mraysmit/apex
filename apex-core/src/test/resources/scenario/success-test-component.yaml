@@ -16,7 +16,7 @@ metadata:
 
 # Use enrichment rules that always pass (INFO severity)
 config-files:
-  - file: "src/test/resources/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-enrichment-rules.yaml"
+  - file: "src/test/resources/scenario/BasicStageConfigurationTest-enrichment-rules.yaml"
     execution-order: 1
     failure-policy: "terminate"
 

@@ -52,7 +52,7 @@ public class CategoryMetadataInheritanceIntegrationTest {
         logger.info("=== Testing Complete Metadata Inheritance Workflow ===");
 
         // Load YAML configuration with categories and rules
-        String yamlPath = "dev/mars/apex/core/config/yaml/CategoryMetadataInheritanceIntegrationTest.yaml";
+        String yamlPath = "config/CategoryMetadataInheritanceIntegrationTest.yaml";
         YamlRuleConfiguration config = yamlLoader.loadFromClasspath(yamlPath);
 
         // Verify categories are loaded
@@ -203,7 +203,7 @@ public class CategoryMetadataInheritanceIntegrationTest {
         logger.info("=== Testing Category Priority Ordering ===");
 
         // Load configuration
-        String yamlPath = "dev/mars/apex/core/config/yaml/CategoryMetadataInheritanceIntegrationTest.yaml";
+        String yamlPath = "config/CategoryMetadataInheritanceIntegrationTest.yaml";
         YamlRuleConfiguration config = yamlLoader.loadFromClasspath(yamlPath);
 
         // Create rules
@@ -228,7 +228,7 @@ public class CategoryMetadataInheritanceIntegrationTest {
         logger.info("=== Testing Category Lifecycle Management ===");
 
         // Load configuration
-        String yamlPath = "dev/mars/apex/core/config/yaml/CategoryMetadataInheritanceIntegrationTest.yaml";
+        String yamlPath = "config/CategoryMetadataInheritanceIntegrationTest.yaml";
         YamlRuleConfiguration config = yamlLoader.loadFromClasspath(yamlPath);
 
         // Create rules

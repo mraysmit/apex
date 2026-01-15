@@ -24,7 +24,7 @@ scenario:
     
     # Stage 1: Validation (must pass)
     - stage-name: "validation"
-      config-file: "src/test/java/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-validation-rules.yaml"
+      config-file: "src/test/resources/scenario/BasicStageConfigurationTest-validation-rules.yaml"
       execution-order: 1
       failure-policy: "terminate"
       required: true
@@ -38,7 +38,7 @@ scenario:
     # The config-file contains type: "rule-config" with rules: section (not actual enrichment).
     # This simplifies testing while demonstrating stage-based execution and failure policies.
     - stage-name: "enrichment"
-      config-file: "src/test/java/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-enrichment-rules.yaml"
+      config-file: "src/test/resources/scenario/BasicStageConfigurationTest-enrichment-rules.yaml"
       execution-order: 2
       failure-policy: "continue-with-warnings"
       required: false

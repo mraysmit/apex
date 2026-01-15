@@ -66,7 +66,7 @@ class ComponentLoaderTest {
     void testLoadBasicComponent() throws Exception {
         logger.info("=== Testing Basic Component Loading ===");
         
-        String componentPath = "dev/mars/apex/demo/scenario/basic-validation-component.yaml";
+        String componentPath = "scenario/basic-validation-component.yaml";
         ComponentConfiguration component = loader.loadComponent(componentPath);
         
         assertNotNull(component, "Component should be loaded");
@@ -97,7 +97,7 @@ class ComponentLoaderTest {
     void testLoadMultiStageComponent() throws Exception {
         logger.info("=== Testing Multi-Stage Component Loading ===");
         
-        String componentPath = "dev/mars/apex/demo/scenario/multi-stage-component.yaml";
+        String componentPath = "scenario/multi-stage-component.yaml";
         ComponentConfiguration component = loader.loadComponent(componentPath);
         
         assertNotNull(component, "Component should be loaded");
@@ -128,7 +128,7 @@ class ComponentLoaderTest {
     void testMixedExecutionOrder() throws Exception {
         logger.info("=== Testing Mixed Execution Order ===");
         
-        String componentPath = "dev/mars/apex/demo/scenario/mixed-order-component.yaml";
+        String componentPath = "scenario/mixed-order-component.yaml";
         ComponentConfiguration component = loader.loadComponent(componentPath);
         
         assertNotNull(component, "Component should be loaded");
@@ -160,7 +160,7 @@ class ComponentLoaderTest {
     void testValidationMissingId() {
         logger.info("=== Testing Validation: Missing ID ===");
 
-        String componentPath = "dev/mars/apex/demo/scenario/invalid-component-no-id.yaml";
+        String componentPath = "scenario/invalid-component-no-id.yaml";
 
         YamlConfigurationException exception = assertThrows(
             YamlConfigurationException.class,
@@ -178,7 +178,7 @@ class ComponentLoaderTest {
     void testValidationWrongType() {
         logger.info("=== Testing Validation: Wrong Type ===");
 
-        String componentPath = "dev/mars/apex/demo/scenario/invalid-component-wrong-type.yaml";
+        String componentPath = "scenario/invalid-component-wrong-type.yaml";
 
         YamlConfigurationException exception = assertThrows(
             YamlConfigurationException.class,
@@ -196,7 +196,7 @@ class ComponentLoaderTest {
     void testValidationNoFiles() {
         logger.info("=== Testing Validation: No File References ===");
 
-        String componentPath = "dev/mars/apex/demo/scenario/invalid-component-no-files.yaml";
+        String componentPath = "scenario/invalid-component-no-files.yaml";
 
         YamlConfigurationException exception = assertThrows(
             YamlConfigurationException.class,
@@ -224,7 +224,7 @@ class ComponentLoaderTest {
     void testNestedComponent() throws Exception {
         logger.info("=== Testing Nested Component (2 levels) ===");
 
-        String componentPath = "dev/mars/apex/demo/scenario/nested-component-level1.yaml";
+        String componentPath = "scenario/nested-component-level1.yaml";
         ComponentConfiguration component = loader.loadComponent(componentPath);
 
         assertNotNull(component, "Component should be loaded");
@@ -244,7 +244,7 @@ class ComponentLoaderTest {
     void testResolveNestedReferences() throws Exception {
         logger.info("=== Testing Nested Reference Resolution ===");
 
-        String componentPath = "dev/mars/apex/demo/scenario/nested-component-level1.yaml";
+        String componentPath = "scenario/nested-component-level1.yaml";
         ComponentConfiguration component = loader.loadComponent(componentPath);
 
         // Resolve all references (should expand nested component)
@@ -277,7 +277,7 @@ class ComponentLoaderTest {
     void testCircularReferenceDetection() {
         logger.info("=== Testing Circular Reference Detection ===");
 
-        String componentPath = "dev/mars/apex/demo/scenario/circular-component-a.yaml";
+        String componentPath = "scenario/circular-component-a.yaml";
 
         YamlConfigurationException exception = assertThrows(
             YamlConfigurationException.class,
@@ -295,7 +295,7 @@ class ComponentLoaderTest {
     void testNoCircularReferences() throws Exception {
         logger.info("=== Testing No Circular References ===");
 
-        String componentPath = "dev/mars/apex/demo/scenario/nested-component-level1.yaml";
+        String componentPath = "scenario/nested-component-level1.yaml";
         ComponentConfiguration component = loader.loadComponent(componentPath);
 
         // Should not throw exception - circular reference check passes
@@ -310,7 +310,7 @@ class ComponentLoaderTest {
     void testPartialSectionsComponent() throws Exception {
         logger.info("=== Testing Partial Sections Component (only component-refs and config-files) ===");
 
-        String componentPath = "dev/mars/apex/demo/scenario/partial-sections-component.yaml";
+        String componentPath = "scenario/partial-sections-component.yaml";
         ComponentConfiguration component = loader.loadComponent(componentPath);
 
         // Verify component loaded successfully

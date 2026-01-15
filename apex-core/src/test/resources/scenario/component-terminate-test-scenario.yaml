@@ -32,7 +32,7 @@ scenario:
   # Processing stages using component
   processing-stages:
     - stage-name: "component-processing"
-      config-file: "src/test/resources/dev/mars/apex/demo/scenario/partial-sections-component.yaml"
+      config-file: "src/test/resources/scenario/partial-sections-component.yaml"
       execution-order: 1
       failure-policy: "terminate"
       required: true

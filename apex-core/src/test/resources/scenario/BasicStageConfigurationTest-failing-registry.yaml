@@ -11,7 +11,7 @@ metadata:
 
 scenarios:
   - scenario-id: "basic-trade-processing-failing"
-    config-file: "src/test/java/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-failing-scenario.yaml"
+    config-file: "src/test/resources/scenario/BasicStageConfigurationTest-failing-scenario.yaml"
 
 routing:
   strategy: "type-based"

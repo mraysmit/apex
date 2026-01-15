@@ -24,7 +24,7 @@ scenario:
     
     # Stage 1: Strict Validation (will fail and terminate)
     - stage-name: "validation"
-      config-file: "src/test/java/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-failing-validation-rules.yaml"
+      config-file: "src/test/resources/scenario/BasicStageConfigurationTest-failing-validation-rules.yaml"
       execution-order: 1
       failure-policy: "terminate"
       required: true
@@ -36,7 +36,7 @@ scenario:
     # Stage 2: Enrichment (should be skipped due to validation failure)
     # NOTE: Uses validation rules to simulate enrichment (see enrichment-rules.yaml for details)
     - stage-name: "enrichment"
-      config-file: "src/test/java/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-enrichment-rules.yaml"
+      config-file: "src/test/resources/scenario/BasicStageConfigurationTest-enrichment-rules.yaml"
       execution-order: 2
       failure-policy: "continue-with-warnings"
       required: false

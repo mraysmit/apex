@@ -20,10 +20,10 @@ metadata:
 
 # Generic config files (only config-files section, no component-refs)
 config-files:
-  - file: "src/test/resources/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-validation-rules.yaml"
+  - file: "src/test/resources/scenario/BasicStageConfigurationTest-validation-rules.yaml"
     execution-order: 1
     failure-policy: "terminate"
-  - file: "src/test/resources/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-enrichment-rules.yaml"
+  - file: "src/test/resources/scenario/BasicStageConfigurationTest-enrichment-rules.yaml"
     execution-order: 2
     failure-policy: "continue-with-warnings"
 

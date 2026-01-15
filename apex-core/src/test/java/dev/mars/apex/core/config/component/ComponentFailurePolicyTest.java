@@ -67,7 +67,7 @@ class ComponentFailurePolicyTest {
 
         // Load scenario that uses partial-sections-component
         RulesEngine engine = RulesEngine.fromScenarioRegistry(
-            "src/test/resources/dev/mars/apex/demo/scenario/component-failure-policy-test-registry.yaml"
+            "src/test/resources/scenario/component-failure-policy-test-registry.yaml"
         );
 
         // Create valid test data that matches the validation rules
@@ -112,7 +112,7 @@ class ComponentFailurePolicyTest {
 
         // Load scenario
         RulesEngine engine = RulesEngine.fromScenarioRegistry(
-            "src/test/resources/dev/mars/apex/demo/scenario/component-failure-policy-test-registry.yaml"
+            "src/test/resources/scenario/component-failure-policy-test-registry.yaml"
         );
 
         // Create data that will fail validation in the nested component
@@ -138,7 +138,7 @@ class ComponentFailurePolicyTest {
 
         // Load scenario
         RulesEngine engine = RulesEngine.fromScenarioRegistry(
-            "src/test/resources/dev/mars/apex/demo/scenario/component-failure-policy-test-registry.yaml"
+            "src/test/resources/scenario/component-failure-policy-test-registry.yaml"
         );
 
         // Create data that will fail the config-file with terminate policy

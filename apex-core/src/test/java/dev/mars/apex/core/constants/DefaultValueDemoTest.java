@@ -1,4 +1,4 @@
-package dev.mars.apex.core.demo;
+package dev.mars.apex.core.constants;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;

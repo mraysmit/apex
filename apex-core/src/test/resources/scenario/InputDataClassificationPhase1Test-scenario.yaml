@@ -27,9 +27,9 @@ scenario:
       failure-policy: "continue-with-warnings"
       execution-order: 1
       dependencies: []
-      config-file: "src/test/java/dev/mars/apex/demo/scenario/InputDataClassificationPhase1Test-validation-rules.yaml"
+      config-file: "src/test/resources/scenario/InputDataClassificationPhase1Test-validation-rules.yaml"
       configuration:
-        rules-source: "src/test/java/dev/mars/apex/demo/scenario/InputDataClassificationPhase1Test-validation-rules.yaml"
+        rules-source: "src/test/resources/scenario/InputDataClassificationPhase1Test-validation-rules.yaml"
 
     - stage-id: "processing"
       stage-name: "Basic Processing"
@@ -38,9 +38,9 @@ scenario:
       failure-policy: "continue-with-warnings"
       execution-order: 2
       dependencies: ["validation"]
-      config-file: "src/test/java/dev/mars/apex/demo/scenario/InputDataClassificationPhase1Test-enrichment-rules.yaml"
+      config-file: "src/test/resources/scenario/InputDataClassificationPhase1Test-enrichment-rules.yaml"
       configuration:
-        rules-source: "src/test/java/dev/mars/apex/demo/scenario/InputDataClassificationPhase1Test-enrichment-rules.yaml"
+        rules-source: "src/test/resources/scenario/InputDataClassificationPhase1Test-enrichment-rules.yaml"
 
   # Processing configuration
   processing-config:
