@@ -1,0 +1,213 @@
+# Dual Format Demo - Shows both Map and Array formats side by side
+# This demonstrates the flexibility of APEX 2.2+ query configuration
+
+metadata:
+  name: "Dual Format Query Demo"
+  version: "2.2.0"
+  type: "rule-config"
+  description: "Demonstrates both traditional map format and new array format for queries"
+  author: "APEX Team"
+
+# Traditional Map Format (Recommended for simple cases)
+data-sources:
+  - name: "simple-database"
+    type: "database"
+    source-type: "h2"
+    description: "Simple queries using traditional map format"
+    enabled: true
+    
+    connection:
+      database: "./target/demo/dual-format-demo"
+      username: "sa"
+      password: ""
+    
+    # TRADITIONAL MAP FORMAT - Concise and clean
+    queries:
+      getCustomer: "SELECT * FROM customers WHERE id = :id"
+      getAllActive: "SELECT * FROM customers WHERE status = 'ACTIVE'"
+      getByEmail: "SELECT * FROM customers WHERE email = :email"
+
+# New Array Format (Recommended for complex, documented queries)
+  - name: "documented-database"
+    type: "database"
+    source-type: "h2"
+    description: "Complex queries with rich metadata using array format"
+    enabled: true
+    
+    connection:
+      database: "./target/demo/dual-format-demo"
+      username: "sa"
+      password: ""
+    
+    # NEW ARRAY FORMAT - Rich metadata for governance
+    queries:
+      - id: "Q-CUST-001"
+        name: "getCustomerProfile"
+        description: "Retrieve complete customer profile including credit info"
+        query: |
+          SELECT 
+            c.customer_id,
+            c.customer_name,
+            c.email,
+            c.status,
+            c.tier,
+            c.created_date,
+            cp.credit_score,
+            cp.credit_limit
+          FROM customers c
+          LEFT JOIN credit_profiles cp ON c.customer_id = cp.customer_id
+          WHERE c.customer_id = :customerId
+            AND c.deleted_at IS NULL
+        parameters:
+          - customerId
+        tags:
+          - customer
+          - credit
+          - profile
+          - pii-data
+        version: "2.0"
+        deprecated: false
+        author: "Customer Team"
+        compliance:
+          - GDPR
+          - PCI-DSS
+      
+      - id: "Q-CUST-002"
+        name: "searchCustomers"
+        description: "Full-text search across customer records"
+        query: |
+          SELECT customer_id, customer_name, email, tier
+          FROM customers
+          WHERE (customer_name LIKE :searchTerm 
+                 OR email LIKE :searchTerm)
+            AND status = 'ACTIVE'
+            AND deleted_at IS NULL
+          ORDER BY tier DESC, customer_name ASC
+          LIMIT 100
+        parameters:
+          - searchTerm
+        tags:
+          - customer
+          - search
+          - read-only
+        version: "1.5"
+
+# Mixed Format Example - Can use both in same configuration!
+  - name: "mixed-database"
+    type: "database"
+    source-type: "h2"
+    description: "Demonstrates mixing both formats in one data source"
+    enabled: true
+    
+    connection:
+      database: "./target/demo/dual-format-demo"
+      username: "sa"
+      password: ""
+    
+    # Simple queries use map format
+    queries:
+      quickLookup: "SELECT * FROM customers WHERE id = :id"
+      countAll: "SELECT COUNT(*) FROM customers"
+    
+    # Complex operations use array format  
+    operations:
+      - id: "OP-001"
+        name: "createCustomerWithAudit"
+        description: "Create customer and log to audit trail"
+        query: |
+          WITH inserted AS (
+            INSERT INTO customers (customer_name, email, status)
+            VALUES (:name, :email, 'PENDING')
+            RETURNING customer_id
+          )
+          INSERT INTO audit_log (entity_type, entity_id, action, user_id)
+          SELECT 'customer', customer_id, 'CREATE', :userId
+          FROM inserted
+        parameters: ["name", "email", "userId"]
+        tags: ["customer", "write", "audit"]
+        version: "1.0"
+
+# REST API Example with endpoints
+  - name: "currency-api"
+    type: "rest-api"
+    description: "Currency lookup service"
+    enabled: true
+    
+    connection:
+      base-url: "http://localhost:8080"
+    
+    # Map format for simple endpoints
+    endpoints:
+      getCurrency: "/api/currency/{code}"
+      getAllCurrencies: "/api/currencies"
+    
+    cache:
+      enabled: true
+      ttlSeconds: 300
+
+# REST API with documented endpoints
+  - name: "documented-api"
+    type: "rest-api"
+    description: "API with documented endpoints"
+    enabled: true
+    
+    connection:
+      base-url: "http://localhost:8080"
+    
+    # Array format for well-documented endpoints
+    endpoints:
+      - id: "EP-001"
+        name: "getCustomerById"
+        endpoint: "/api/customers/{id}"
+        method: "GET"
+        description: "Retrieve customer by unique identifier"
+        parameters: ["id"]
+        tags: ["customer", "rest-api", "read"]
+        version: "2.0"
+        
+      - id: "EP-002"
+        name: "createCustomer"
+        endpoint: "/api/customers"
+        method: "POST"
+        description: "Create new customer record"
+        tags: ["customer", "rest-api", "write"]
+        version: "2.0"
+        deprecated: false
+
+# Enrichments using the new query references
+enrichments:
+  - id: "customer-enrichment-simple"
+    type: "lookup-enrichment"
+    description: "Simple lookup using map-format query"
+    condition: "#customerId != null"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        data-source-ref: "simple-database"
+        query-ref: "getCustomer"  # References map-format query
+      output-field: "customerData"
+  
+  - id: "customer-enrichment-documented"
+    type: "lookup-enrichment"
+    description: "Complex lookup using array-format query"
+    condition: "#customerId != null"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        data-source-ref: "documented-database"
+        query-ref: "getCustomerProfile"  # References array-format query
+      output-field: "customerProfile"
+
+# Rules can use data from either format
+rules:
+  - id: "verify-customer"
+    description: "Verify customer exists"
+    condition: "#customerData != null"
+    message: "Customer found"
+    severity: "INFO"
+  
+  - id: "check-credit"
+    description: "Check credit score"
+    condition: "#customerProfile.creditScore >= 700"
+    message: "Customer has good credit"
+    severity: "INFO"
