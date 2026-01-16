@@ -1,4 +1,6 @@
 metadata:
+  id: "schema-cache-isolation-test"
+  name: "Schema Cache Isolation Test"
   created: "2025-02-03"
   description: "Cache isolation test across multiple schemas with identical table structures"
   author: "Mark Andrew Ray-Smith Cityline Ltd"

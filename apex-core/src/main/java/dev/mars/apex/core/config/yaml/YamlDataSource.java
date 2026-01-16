@@ -19,6 +19,7 @@ package dev.mars.apex.core.config.yaml;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import dev.mars.apex.core.config.datasource.*;
 
 import java.util.HashMap;
@@ -70,14 +71,17 @@ public class YamlDataSource {
     @JsonProperty("authentication")
     private Map<String, Object> authentication;
     
-    // Type-specific configurations
+    // Type-specific configurations - support both map and array formats
     @JsonProperty("queries")
+    @JsonDeserialize(using = FlexibleQueriesDeserializer.class)
     private Map<String, String> queries;
 
     @JsonProperty("operations")
+    @JsonDeserialize(using = FlexibleOperationsDeserializer.class)
     private Map<String, String> operations;
 
     @JsonProperty("endpoints")
+    @JsonDeserialize(using = FlexibleEndpointsDeserializer.class)
     private Map<String, String> endpoints;
     
     @JsonProperty("topics")

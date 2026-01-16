@@ -1,4 +1,6 @@
 metadata:
+  id: "schema-cache-ttl-test-old"
+  name: "Schema Cache TTL Test (Old)"
   created: "2025-02-03"
   description: "Cache TTL independence test - different expiration times per schema"
   author: "Mark Andrew Ray-Smith Cityline Ltd"

@@ -1,4 +1,6 @@
 metadata:
+  id: "schema-cache-eviction-test"
+  name: "Schema Cache Eviction Test"
   created: "2025-02-03"
   description: "Cache eviction boundary test - LRU eviction in one schema should not affect others"
   author: "Mark Andrew Ray-Smith Cityline Ltd"
