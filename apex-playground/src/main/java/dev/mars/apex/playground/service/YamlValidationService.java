@@ -184,57 +184,84 @@ public class YamlValidationService {
     private String extractFieldNameFromDeserializationError(String errorMessage) {
         // Provide specific examples based on the field
         if (errorMessage.contains("queries")) {
-            return "Field 'queries' expects a map of key-value pairs, not an array.\n\n" +
-                   "✗ INCORRECT:\n" +
-                   "queries:\n" +
-                   "  - SELECT * FROM customers\n\n" +
-                   "✓ CORRECT:\n" +
+            return "Field 'queries' has incorrect format.\n\n" +
+                   "✓ MAP FORMAT (simple queries):\n" +
                    "queries:\n" +
                    "  customerProfile: \"SELECT * FROM customers WHERE id = :id\"\n" +
-                   "  getAllActive: \"SELECT * FROM customers WHERE status = 'ACTIVE'\"";
+                   "  getAllActive: \"SELECT * FROM customers WHERE status = 'ACTIVE'\"\n\n" +
+                   "✓ ARRAY FORMAT (queries with metadata):\n" +
+                   "queries:\n" +
+                   "  - name: \"customerProfile\"\n" +
+                   "    query: \"SELECT * FROM customers WHERE id = :id\"\n" +
+                   "    description: \"Get customer by ID\"\n" +
+                   "    parameters: [\"id\"]\n\n" +
+                   "✗ INCORRECT (plain array of strings):\n" +
+                   "queries:\n" +
+                   "  - SELECT * FROM customers";
         }
         if (errorMessage.contains("operations")) {
-            return "Field 'operations' expects a map of key-value pairs, not an array.\n\n" +
-                   "✗ INCORRECT:\n" +
-                   "operations:\n" +
-                   "  - SELECT * FROM csv\n\n" +
-                   "✓ CORRECT:\n" +
+            return "Field 'operations' has incorrect format.\n\n" +
+                   "✓ MAP FORMAT (simple operations):\n" +
                    "operations:\n" +
                    "  getAllCustomers: \"SELECT * FROM csv\"\n" +
-                   "  getActiveCustomers: \"SELECT * FROM csv WHERE status = 'ACTIVE'\"";
+                   "  getActiveCustomers: \"SELECT * FROM csv WHERE status = 'ACTIVE'\"\n\n" +
+                   "✓ ARRAY FORMAT (operations with metadata):\n" +
+                   "operations:\n" +
+                   "  - name: \"getAllCustomers\"\n" +
+                   "    query: \"SELECT * FROM csv\"\n" +
+                   "    description: \"Retrieve all customers\"\n\n" +
+                   "✗ INCORRECT (plain array of strings):\n" +
+                   "operations:\n" +
+                   "  - SELECT * FROM csv";
         }
         if (errorMessage.contains("endpoints")) {
-            return "Field 'endpoints' expects a map of key-value pairs, not an array.\n\n" +
-                   "✗ INCORRECT:\n" +
-                   "endpoints:\n" +
-                   "  - /api/currency/{key}\n\n" +
-                   "✓ CORRECT:\n" +
+            return "Field 'endpoints' has incorrect format.\n\n" +
+                   "✓ MAP FORMAT (simple endpoints):\n" +
                    "endpoints:\n" +
                    "  currency-lookup: \"/api/currency/{key}\"\n" +
-                   "  country-lookup: \"/api/country/{code}\"";
+                   "  country-lookup: \"/api/country/{code}\"\n\n" +
+                   "✓ ARRAY FORMAT (endpoints with metadata):\n" +
+                   "endpoints:\n" +
+                   "  - name: \"currency-lookup\"\n" +
+                   "    endpoint: \"/api/currency/{key}\"\n" +
+                   "    description: \"Lookup currency by code\"\n" +
+                   "    method: \"GET\"\n\n" +
+                   "✗ INCORRECT (plain array of strings):\n" +
+                   "endpoints:\n" +
+                   "  - /api/currency/{key}";
         }
         if (errorMessage.contains("topics")) {
-            return "Field 'topics' expects a map of key-value pairs, not an array.\n\n" +
-                   "✗ INCORRECT:\n" +
-                   "topics:\n" +
-                   "  - customer-events\n\n" +
-                   "✓ CORRECT:\n" +
+            return "Field 'topics' has incorrect format.\n\n" +
+                   "✓ MAP FORMAT (simple topics):\n" +
                    "topics:\n" +
                    "  customerEvents: \"customer-events\"\n" +
-                   "  orderEvents: \"order-events\"";
+                   "  orderEvents: \"order-events\"\n\n" +
+                   "✓ ARRAY FORMAT (topics with metadata):\n" +
+                   "topics:\n" +
+                   "  - name: \"customerEvents\"\n" +
+                   "    topic: \"customer-events\"\n" +
+                   "    description: \"Customer lifecycle events\"\n\n" +
+                   "✗ INCORRECT (plain array of strings):\n" +
+                   "topics:\n" +
+                   "  - customer-events";
         }
         if (errorMessage.contains("key-patterns") || errorMessage.contains("keyPatterns")) {
-            return "Field 'key-patterns' expects a map of key-value pairs, not an array.\n\n" +
-                   "✗ INCORRECT:\n" +
-                   "key-patterns:\n" +
-                   "  - customer:*\n\n" +
-                   "✓ CORRECT:\n" +
+            return "Field 'key-patterns' has incorrect format.\n\n" +
+                   "✓ MAP FORMAT (simple patterns):\n" +
                    "key-patterns:\n" +
                    "  customerPattern: \"customer:*\"\n" +
-                   "  orderPattern: \"order:*\"";
+                   "  orderPattern: \"order:*\"\n\n" +
+                   "✓ ARRAY FORMAT (patterns with metadata):\n" +
+                   "key-patterns:\n" +
+                   "  - name: \"customerPattern\"\n" +
+                   "    pattern: \"customer:*\"\n" +
+                   "    description: \"Match all customer keys\"\n\n" +
+                   "✗ INCORRECT (plain array of strings):\n" +
+                   "key-patterns:\n" +
+                   "  - customer:*";
         }
-        return "YAML structure error: Expected a map (key-value pairs) but found an array. " +
-               "Fields like queries, operations, endpoints, topics, and key-patterns require map format.";
+        return "YAML structure error: Expected either a map (key-value pairs) or an array of objects with 'name' field. " +
+               "Plain arrays of strings are not supported for queries, operations, endpoints, topics, and key-patterns.";
     }
 
     /**
