@@ -203,16 +203,18 @@ public class D3TreeViewerListViewUITest {
         // Get all table headers - the text is in the first span child
         List<WebElement> headers = driver.findElements(By.cssSelector(".yaml-table thead th span:first-child"));
 
-        assertEquals(7, headers.size(), "Table should have 7 columns");
+        assertEquals(9, headers.size(), "Table should have 9 columns");
 
         // Check header text (case-insensitive since CSS may transform text to uppercase)
         assertEquals("file name", headers.get(0).getText().trim().toLowerCase());
         assertEquals("id", headers.get(1).getText().trim().toLowerCase());
         assertEquals("name", headers.get(2).getText().trim().toLowerCase());
         assertEquals("type", headers.get(3).getText().trim().toLowerCase());
-        assertEquals("author", headers.get(4).getText().trim().toLowerCase());
-        assertEquals("description", headers.get(5).getText().trim().toLowerCase());
-        assertEquals("version", headers.get(6).getText().trim().toLowerCase());
+        assertEquals("business domain", headers.get(4).getText().trim().toLowerCase());
+        assertEquals("owner", headers.get(5).getText().trim().toLowerCase());
+        assertEquals("author", headers.get(6).getText().trim().toLowerCase());
+        assertEquals("description", headers.get(7).getText().trim().toLowerCase());
+        assertEquals("version", headers.get(8).getText().trim().toLowerCase());
     }
 
     @Test

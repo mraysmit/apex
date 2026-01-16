@@ -8,7 +8,7 @@ const initialTreeTransform = d3.zoomIdentity.translate(200, 0);
 
 // Tooltip and selection state
 let tooltipTimer = null;
-let tooltipEnabled = true;
+let tooltipEnabled = false;  // Default to false to match unchecked checkbox
 let selectedNode = null;
 
 // Tooltip delay in milliseconds
@@ -141,6 +141,9 @@ function updateNodeLabels() {
 
 // Initialize the tree viewer
 function initializeTree() {
+    console.log('🌳 Initializing tree viewer...');
+    console.log('Tree container dimensions:', width, 'x', height);
+    
     // Show loading message initially
     document.getElementById('loading').style.display = 'block';
     document.getElementById('loading').textContent = 'Loading tree data...';
@@ -151,8 +154,11 @@ function initializeTree() {
         .attr("width", width)
         .attr("height", height);
     
+    console.log('SVG created, dimensions:', svg.attr('width'), 'x', svg.attr('height'));
+    
     // Create main group for zoom/pan
     g = svg.append("g");
+    console.log('Main group created');
 
     // Set up zoom behavior (store globally for toolbar access)
     zoom = d3.zoom()
@@ -161,8 +167,11 @@ function initializeTree() {
             g.attr("transform", event.transform);
         })
         .on("end", function(event) {
-            // Re-enable tooltips after zoom/drag ends
-            tooltipEnabled = true;
+            // Re-enable tooltips after zoom/drag ends only if checkbox is checked
+            const tooltipToggle = document.getElementById('tooltip-toggle');
+            if (tooltipToggle && tooltipToggle.checked) {
+                tooltipEnabled = true;
+            }
         });
 
     svg.call(zoom);
@@ -178,12 +187,13 @@ function initializeTree() {
     // Set initial zoom with left margin to account for root node label
     svg.call(zoom.transform, initialTreeTransform);
     
-    // Create tree layout
-    tree = d3.tree().size([height - 100, width - 200]);
+    // Create tree layout with nodeSize for dynamic spacing
+    // [vertical spacing, horizontal spacing]
+    tree = d3.tree().nodeSize([50, 280]);
 
-    // Load recent directories first, then load tree data if any exist
+    // Load recent directories first, but don't auto-load on page refresh
     setTimeout(() => {
-        loadRecentDirectories(true);  // Auto-load on initial page load
+        loadRecentDirectories(false);  // Don't auto-load to avoid unwanted tab switches
     }, 100);
 }
 
@@ -320,6 +330,9 @@ function loadSingleFileTree(filePath, baseUrl, skipSaveRecent = false) {
                     showAlert('warning', 'Tree Loaded with Warnings', data.warnings.join('\n'), 8000);
                 }
 
+                // Switch to Tree View tab to show the tree
+                switchToTreeViewTab();
+
                 processTreeData(data.tree);
 
                 // Save to recent - extract filename (unless skipSaveRecent is true)
@@ -394,6 +407,30 @@ function loadFolderFiles(folderPath, baseUrl) {
             showAlert('error', 'Failed to Scan Folder', error.message || 'Unknown error occurred');
             d3.select("#loading").style("display", "none");
         });
+}
+
+// Switch to Tree View tab programmatically
+function switchToTreeViewTab() {
+    const treeViewTab = document.getElementById('tree-view-tab');
+    const listViewTab = document.getElementById('list-view-tab');
+    const treeViewPanel = document.getElementById('tree-view-panel');
+    const listViewPanel = document.getElementById('list-view-panel');
+
+    if (treeViewTab && listViewTab && treeViewPanel && listViewPanel) {
+        // Update tab states
+        treeViewTab.classList.add('active');
+        listViewTab.classList.remove('active');
+
+        // Update panel visibility - use flex to match the CSS
+        treeViewPanel.classList.add('active');
+        treeViewPanel.style.display = 'flex';
+        listViewPanel.classList.remove('active');
+        listViewPanel.style.display = 'none';
+
+        console.log('Programmatically switched to Tree View');
+        console.log('Tree View Panel display:', treeViewPanel.style.display);
+        console.log('Tree View Panel classList:', treeViewPanel.classList.toString());
+    }
 }
 
 // Switch to List View tab programmatically
@@ -484,6 +521,7 @@ function populateListViewWithFolderFiles(yamlFiles) {
 
 // Process and render tree data
 function processTreeData(treeData) {
+    console.log('🎨 Processing tree data:', treeData);
     try {
         // Validate data
         if (!treeData) {
@@ -497,8 +535,8 @@ function processTreeData(treeData) {
 
         // Convert to D3 hierarchy
         root = d3.hierarchy(treeData);
-        console.log('D3 hierarchy created. Root:', root.data.name);
-        console.log('Root has children:', root.children ? root.children.length : 0);
+        console.log('✅ D3 hierarchy created. Root:', root.data.name);
+        console.log('✅ Root has children:', root.children ? root.children.length : 0);
 
         // Check for issues in the tree
         const issues = analyzeTreeIssues(root);
@@ -531,7 +569,9 @@ function processTreeData(treeData) {
         }
 
         // Render the tree
+        console.log('🎭 Calling update() to render tree...');
         update(root);
+        console.log('✅ Tree rendered successfully!');
 
         // Calculate and update statistics from actual tree data
         calculateAndUpdateStatistics(root);
@@ -663,13 +703,16 @@ function closeAlert() {
 
 // Update tree visualization
 function update(source) {
+    console.log('📍 update() called with source:', source.data ? source.data.name : source);
+    
     // Compute the new tree layout
     const treeData = tree(root);
     const nodes = treeData.descendants();
     const links = treeData.descendants().slice(1);
     
-    // Normalize for fixed-depth
-    nodes.forEach(d => d.y = d.depth * 180);
+    console.log('  📊 Tree has', nodes.length, 'nodes and', links.length, 'links');
+    
+    // No need to manually set d.y - nodeSize() handles spacing automatically
     
     // Update nodes
     const node = g.selectAll('g.node')
@@ -821,9 +864,12 @@ function handleMouseDown(event, d) {
     cancelTooltip();
 }
 
-// Handle mouseup - re-enable tooltip
+// Handle mouseup - re-enable tooltip only if checkbox is checked
 function handleMouseUp(event, d) {
-    tooltipEnabled = true;
+    const tooltipToggle = document.getElementById('tooltip-toggle');
+    if (tooltipToggle && tooltipToggle.checked) {
+        tooltipEnabled = true;
+    }
 }
 
 // Handle circle click (expand/collapse only)
@@ -1341,7 +1387,7 @@ function resizeTreeSVG() {
         const newHeight = window.innerHeight;
         console.log('resizeTreeSVG called - treePanel.offsetWidth:', treePanel.offsetWidth, 'newWidth:', newWidth);
         svg.attr("width", newWidth).attr("height", newHeight);
-        tree.size([newHeight - 100, newWidth - 200]);
+        // nodeSize is fixed, no need to update tree layout
         if (root) update(root);
     }
 }
@@ -1398,7 +1444,7 @@ function initializeResizer() {
                 const newWidth = treePanel.offsetWidth - 20;
                 const newHeight = window.innerHeight;
                 svg.attr("width", newWidth).attr("height", newHeight);
-                tree.size([newHeight - 100, newWidth - 200]);
+                // nodeSize is fixed, no need to update tree layout
                 if (root) update(root);
             }
         }
@@ -2428,11 +2474,6 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeTabSwitching();
     initializeListView();
     initializeFileBrowser();
-
-    // Global mouseup listener to re-enable tooltips
-    document.addEventListener('mouseup', function() {
-        tooltipEnabled = true;
-    });
 
     // Debug: Log actual header heights
     setTimeout(() => {

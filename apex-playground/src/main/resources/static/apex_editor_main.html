@@ -779,6 +779,7 @@
                     </ul>
                     <div class="d-flex gap-2">
                         <button class="btn btn-success btn-sm" onclick="openInPlayground()">Open in Playground</button>
+                        <button id="quickSaveBtn" class="btn btn-primary btn-sm" onclick="quickSaveTemplate()" disabled title="Load a template first">Save</button>
                         <button class="btn btn-outline-light btn-sm" onclick="openSaveTemplateModal()">Save Template</button>
                         <button class="btn btn-outline-light btn-sm" onclick="openYamlImportModal()">Import YAML</button>
                         <button class="btn btn-outline-light btn-sm" onclick="downloadYaml()">Download YAML</button>
@@ -6352,6 +6353,7 @@
             // Initialize Data Sources on page load
             document.addEventListener('DOMContentLoaded', function() {
                 refreshConnections();
+                updateSaveButtonState(); // Initialize the Save button state
             });
 
             function getEvalJsonFromEditor() {
@@ -6762,8 +6764,58 @@
                 // Refresh the toolbox to show the new template
                 workspace.updateToolbox(document.getElementById('toolbox'));
 
+                // Update current template name and UI if it's an update
+                if (existingTemplate) {
+                    currentTemplateName = name;
+                    updateSaveButtonState();
+                }
+
                 showToast('Template "' + name + '" saved successfully!', 'success');
             }
+
+            function quickSaveTemplate() {
+                if (!currentTemplateName) {
+                    showToast('No template loaded. Use "Save Template" to save as new template.', 'warning');
+                    return;
+                }
+
+                const templates = getTemplates();
+                const template = templates.find(t => t.name === currentTemplateName);
+
+                if (!template) {
+                    showToast('Current template not found. Use "Save Template" to save as new template.', 'error');
+                    currentTemplateName = null;
+                    updateSaveButtonState();
+                    return;
+                }
+
+                // Update the template with current workspace state
+                template.state = Blockly.serialization.workspaces.save(workspace);
+                template.updatedAt = new Date().toISOString();
+
+                saveTemplates(templates);
+
+                // Refresh the toolbox
+                workspace.updateToolbox(document.getElementById('toolbox'));
+
+                showToast('Template "' + currentTemplateName + '" saved successfully!', 'success');
+            }
+
+            function updateSaveButtonState() {
+                const saveBtn = document.getElementById('quickSaveBtn');
+                if (saveBtn) {
+                    if (currentTemplateName) {
+                        saveBtn.disabled = false;
+                        saveBtn.title = 'Save to "' + currentTemplateName + '"';
+                    } else {
+                        saveBtn.disabled = true;
+                        saveBtn.title = 'Load a template first';
+                    }
+                }
+            }
+
+            // Track the currently loaded template for quick save
+            let currentTemplateName = null;
 
             function loadTemplate(templateName) {
                 const templates = getTemplates();
@@ -6783,6 +6835,10 @@
                 workspace.clear();
                 Blockly.serialization.workspaces.load(template.state, workspace);
                 updateYaml();
+                
+                // Set the current template name and update UI
+                currentTemplateName = templateName;
+                updateSaveButtonState();
             }
 
             function deleteTemplate(templateName) {

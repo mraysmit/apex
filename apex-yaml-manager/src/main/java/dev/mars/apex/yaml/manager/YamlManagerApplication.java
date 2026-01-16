@@ -21,8 +21,13 @@ import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.info.License;
 import io.swagger.v3.oas.annotations.servers.Server;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 
 /**
  * Spring Boot application for the APEX YAML Manager.
@@ -88,8 +93,32 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 )
 public class YamlManagerApplication {
 
+    private static final Logger logger = LoggerFactory.getLogger(YamlManagerApplication.class);
+
     public static void main(String[] args) {
         SpringApplication.run(YamlManagerApplication.class, args);
+    }
+
+    @Bean
+    public CommandLineRunner logApplicationUrls(
+            @Value("${server.port:8080}") int port,
+            @Value("${server.servlet.context-path:}") String contextPath) {
+        return args -> {
+            String baseUrl = "http://localhost:" + port + contextPath;
+            
+            logger.info("");
+            logger.info("╔════════════════════════════════════════════════════════════════════════════╗");
+            logger.info("║                    APEX YAML Manager - Ready                               ║");
+            logger.info("╠════════════════════════════════════════════════════════════════════════════╣");
+            logger.info("║  Main UI:           {}                              ", baseUrl);
+            logger.info("║  D3 Visualization:  {}/d3-tree-viewer.html          ", baseUrl);
+            logger.info("║  API Endpoints:     {}/api                          ", baseUrl);
+            logger.info("║  Swagger UI:        {}/swagger-ui.html              ", baseUrl);
+            logger.info("║  API Docs:          {}/api-docs                     ", baseUrl);
+            logger.info("║  Health Check:      {}/actuator/health              ", baseUrl);
+            logger.info("╚════════════════════════════════════════════════════════════════════════════╝");
+            logger.info("");
+        };
     }
 }
 

@@ -166,9 +166,75 @@ public class YamlValidationService {
 
             // Try to extract line information from the error message
             String errorMessage = e.getMessage();
+            
+            // Provide user-friendly messages for common errors
+            if (errorMessage.contains("Cannot deserialize") && errorMessage.contains("LinkedHashMap") && errorMessage.contains("Array value")) {
+                String friendlyMessage = extractFieldNameFromDeserializationError(errorMessage);
+                errorMessage = friendlyMessage;
+            }
+            
             int line = extractLineNumber(errorMessage);
             response.addError("YAML syntax error: " + errorMessage, line, 0);
         }
+    }
+    
+    /**
+     * Extract field name from deserialization error message and provide helpful examples.
+     */
+    private String extractFieldNameFromDeserializationError(String errorMessage) {
+        // Provide specific examples based on the field
+        if (errorMessage.contains("queries")) {
+            return "Field 'queries' expects a map of key-value pairs, not an array.\n\n" +
+                   "✗ INCORRECT:\n" +
+                   "queries:\n" +
+                   "  - SELECT * FROM customers\n\n" +
+                   "✓ CORRECT:\n" +
+                   "queries:\n" +
+                   "  customerProfile: \"SELECT * FROM customers WHERE id = :id\"\n" +
+                   "  getAllActive: \"SELECT * FROM customers WHERE status = 'ACTIVE'\"";
+        }
+        if (errorMessage.contains("operations")) {
+            return "Field 'operations' expects a map of key-value pairs, not an array.\n\n" +
+                   "✗ INCORRECT:\n" +
+                   "operations:\n" +
+                   "  - SELECT * FROM csv\n\n" +
+                   "✓ CORRECT:\n" +
+                   "operations:\n" +
+                   "  getAllCustomers: \"SELECT * FROM csv\"\n" +
+                   "  getActiveCustomers: \"SELECT * FROM csv WHERE status = 'ACTIVE'\"";
+        }
+        if (errorMessage.contains("endpoints")) {
+            return "Field 'endpoints' expects a map of key-value pairs, not an array.\n\n" +
+                   "✗ INCORRECT:\n" +
+                   "endpoints:\n" +
+                   "  - /api/currency/{key}\n\n" +
+                   "✓ CORRECT:\n" +
+                   "endpoints:\n" +
+                   "  currency-lookup: \"/api/currency/{key}\"\n" +
+                   "  country-lookup: \"/api/country/{code}\"";
+        }
+        if (errorMessage.contains("topics")) {
+            return "Field 'topics' expects a map of key-value pairs, not an array.\n\n" +
+                   "✗ INCORRECT:\n" +
+                   "topics:\n" +
+                   "  - customer-events\n\n" +
+                   "✓ CORRECT:\n" +
+                   "topics:\n" +
+                   "  customerEvents: \"customer-events\"\n" +
+                   "  orderEvents: \"order-events\"";
+        }
+        if (errorMessage.contains("key-patterns") || errorMessage.contains("keyPatterns")) {
+            return "Field 'key-patterns' expects a map of key-value pairs, not an array.\n\n" +
+                   "✗ INCORRECT:\n" +
+                   "key-patterns:\n" +
+                   "  - customer:*\n\n" +
+                   "✓ CORRECT:\n" +
+                   "key-patterns:\n" +
+                   "  customerPattern: \"customer:*\"\n" +
+                   "  orderPattern: \"order:*\"";
+        }
+        return "YAML structure error: Expected a map (key-value pairs) but found an array. " +
+               "Fields like queries, operations, endpoints, topics, and key-patterns require map format.";
     }
 
     /**
