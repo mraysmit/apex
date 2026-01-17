@@ -103,6 +103,9 @@ public class PostgreSQLSchemaLookupNegativeTest extends DemoTestBase {
             // Create the WRONG schema (empty - no tables)
             stmt.execute("CREATE SCHEMA IF NOT EXISTS " + WRONG_SCHEMA);
             
+            // NOTE: Do NOT set ALTER DATABASE search_path for negative tests
+            // Each test dynamically sets its own schema to verify schema isolation
+            
             // Create customers table ONLY in the correct schema
             stmt.execute("""
                 CREATE TABLE myschema.customers (
@@ -342,7 +345,13 @@ public class PostgreSQLSchemaLookupNegativeTest extends DemoTestBase {
                     connection.put("password", password);
                     connection.put("schema", schema);
                     
-                    logger.info("✅ Updated data source '{}' with schema '{}'", dataSourceName, schema);
+                    // Also set explicit JDBC URL with currentSchema parameter to ensure it's used
+                    String jdbcUrl = String.format("jdbc:postgresql://%s:%d/%s?currentSchema=%s", 
+                        host, port, database, schema);
+                    connection.put("url", jdbcUrl);
+                    
+                    logger.info("✅ Updated data source '{}' with schema '{}' and JDBC URL: {}", 
+                        dataSourceName, schema, jdbcUrl);
                     break;
                 }
             }

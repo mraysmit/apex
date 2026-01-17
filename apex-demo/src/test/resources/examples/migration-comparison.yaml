@@ -1,0 +1,123 @@
+# APEX Format Migration Guide
+# Side-by-side comparison of Map Format (legacy) vs Array Format (APEX 2.2+)
+
+metadata:
+  type: "documentation"
+  purpose: "Format migration reference"
+  version: "2.2"
+
+# ============================================================================
+# LEGACY MAP FORMAT (Still Supported - 100% Backward Compatible)
+# ============================================================================
+# Pros: Concise, familiar to existing users
+# Cons: No metadata, no descriptions, no discoverability
+# ============================================================================
+
+legacy-queries:
+  getCustomer: "SELECT * FROM customers WHERE customer_id = :id"
+  listProducts: "SELECT product_id, name, price FROM products WHERE active = true"
+  validateOrder: "SELECT COUNT(*) FROM orders WHERE order_id = :orderId AND status != 'CANCELLED'"
+
+legacy-operations:
+  insertCustomer: "INSERT INTO customers (name, email) VALUES (:name, :email)"
+  updateBalance: "UPDATE accounts SET balance = balance + :amount WHERE account_id = :accountId"
+
+legacy-endpoints:
+  paymentGateway: "https://api.payments.example.com/v1/process"
+  inventoryService: "https://inventory.example.com/api/check-stock"
+
+# ============================================================================
+# NEW ARRAY FORMAT (APEX 2.2+)
+# ============================================================================
+# Pros: Self-documenting, rich metadata, better team collaboration
+# Cons: Slightly more verbose (but worth it for enterprise projects)
+# ============================================================================
+
+modern-queries:
+  - name: "getCustomer"
+    value: "SELECT * FROM customers WHERE customer_id = :id"
+    description: "Retrieve customer profile by unique ID"
+    tags: ["customer-management", "primary-lookup"]
+    owner: "customer-team"
+    
+  - name: "listProducts"
+    value: "SELECT product_id, name, price FROM products WHERE active = true"
+    description: "Fetch all active products in catalog"
+    tags: ["product-catalog", "read-only"]
+    cacheable: true
+    cache-ttl: "600s"
+    
+  - name: "validateOrder"
+    value: "SELECT COUNT(*) FROM orders WHERE order_id = :orderId AND status != 'CANCELLED'"
+    description: "Check if order exists and is valid (not cancelled)"
+    tags: ["order-validation", "business-rule"]
+    expected-result: "single-row"
+
+modern-operations:
+  - name: "insertCustomer"
+    value: "INSERT INTO customers (name, email) VALUES (:name, :email)"
+    description: "Create new customer record"
+    tags: ["customer-management", "write-operation"]
+    transaction: "required"
+    audit: true
+    
+  - name: "updateBalance"
+    value: "UPDATE accounts SET balance = balance + :amount WHERE account_id = :accountId"
+    description: "Adjust account balance (credit or debit)"
+    tags: ["financial", "critical-operation"]
+    idempotent: false
+    requires-approval: true
+
+modern-endpoints:
+  - name: "paymentGateway"
+    value: "https://api.payments.example.com/v1/process"
+    description: "Third-party payment processing endpoint (Stripe/PayPal)"
+    tags: ["payments", "external-api"]
+    method: "POST"
+    timeout: "5000ms"
+    retry: true
+    
+  - name: "inventoryService"
+    value: "https://inventory.example.com/api/check-stock"
+    description: "Real-time inventory availability check"
+    tags: ["inventory", "microservice"]
+    method: "GET"
+    circuit-breaker: true
+    sla: "99.5%"
+
+# ============================================================================
+# MIXED FORMAT (Both Supported in Same File!)
+# ============================================================================
+# APEX 2.2 seamlessly handles both formats - use what works best for each case
+# ============================================================================
+
+mixed-queries:
+  # Simple query - map format is fine
+  simpleCount: "SELECT COUNT(*) FROM users"
+  
+  # Complex query - array format adds value
+  - name: "complexAggregation"
+    value: >-
+      SELECT
+        department,
+        COUNT(*) as employee_count,
+        AVG(salary) as avg_salary,
+        MAX(hire_date) as latest_hire
+      FROM employees
+      WHERE status = 'ACTIVE'
+      GROUP BY department
+      HAVING COUNT(*) > 5
+      ORDER BY employee_count DESC
+    description: "Department staffing and compensation analysis"
+    tags: ["hr-analytics", "reporting"]
+    performance: "indexed-on-department"
+    output-format: "multi-row"
+
+# ============================================================================
+# MIGRATION STRATEGY
+# ============================================================================
+# 1. No action required - existing map format continues working
+# 2. For new queries: Use array format for complex/documented queries
+# 3. For migrations: Gradually convert high-value queries with metadata
+# 4. Mixed approach: Perfectly acceptable in same file
+# ============================================================================

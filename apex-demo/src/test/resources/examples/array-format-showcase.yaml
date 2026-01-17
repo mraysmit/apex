@@ -1,0 +1,119 @@
+# APEX Array Format Showcase
+# Demonstrates the new array-based syntax for queries, operations, and endpoints
+# APEX v2.2 Enhancement - Dual Format Support
+
+metadata:
+  type: "external-data-config"
+  description: "Array format demonstration for enterprise data sources"
+  version: "2.2"
+  created: "2026-01-17"
+  tags: ["array-format", "demo", "best-practices"]
+
+# Array format provides rich metadata while maintaining clean separation
+# Each entry includes name, value, description, and optional tags/metadata
+
+queries:
+  - name: "getTradeByID"
+    value: "SELECT * FROM trades WHERE trade_id = :tradeId"
+    description: "Retrieve single trade by unique identifier"
+    tags: ["trade-lookup", "primary-key"]
+    performance: "indexed"
+    
+  - name: "getActivePositions"
+    value: >-
+      SELECT account_id, symbol, quantity, market_value, unrealized_pnl
+      FROM positions
+      WHERE status = 'ACTIVE'
+      AND as_of_date = CURRENT_DATE
+      ORDER BY market_value DESC
+    description: "Fetch all active positions for current trading day"
+    tags: ["position-management", "portfolio"]
+    cacheable: true
+    cache-ttl: "300s"
+    
+  - name: "validateCounterparty"
+    value: "SELECT credit_rating, settlement_terms FROM counterparties WHERE party_id = :partyId"
+    description: "Validate counterparty creditworthiness and settlement preferences"
+    tags: ["risk-management", "pre-trade-check"]
+    required-params: ["partyId"]
+    
+  - name: "getCurrencyRates"
+    value: >-
+      SELECT base_currency, quote_currency, rate, effective_date
+      FROM fx_rates
+      WHERE effective_date = (SELECT MAX(effective_date) FROM fx_rates WHERE effective_date <= :asOfDate)
+    description: "Retrieve latest FX rates as of specified date"
+    tags: ["fx", "reference-data"]
+    performance: "materialized-view"
+
+operations:
+  - name: "recordTradeExecution"
+    value: >-
+      INSERT INTO trade_executions 
+      (trade_id, exec_time, exec_price, exec_quantity, broker, fees)
+      VALUES (:tradeId, :execTime, :execPrice, :execQuantity, :broker, :fees)
+    description: "Record trade execution details in audit trail"
+    tags: ["trade-lifecycle", "audit"]
+    transaction: "required"
+    
+  - name: "updatePositionMTM"
+    value: "UPDATE positions SET market_value = :mtmValue, unrealized_pnl = :pnl WHERE position_id = :positionId"
+    description: "Mark-to-market position valuation update"
+    tags: ["valuation", "eod-process"]
+    
+  - name: "settleTradePayment"
+    value: >-
+      UPDATE trades 
+      SET settlement_status = 'SETTLED', 
+          settlement_date = CURRENT_DATE,
+          settlement_amount = :amount
+      WHERE trade_id = :tradeId
+    description: "Mark trade as settled with final settlement amount"
+    tags: ["settlement", "post-trade"]
+    idempotent: true
+
+endpoints:
+  - name: "tradeValidationService"
+    value: "https://api.trading-platform.example.com/v2/validate-trade"
+    description: "Real-time trade validation API (pre-trade compliance)"
+    tags: ["rest-api", "compliance"]
+    method: "POST"
+    timeout: "2000ms"
+    retry-policy: "exponential-backoff"
+    
+  - name: "marketDataFeed"
+    value: "wss://marketdata.exchange.example.com/stream/prices"
+    description: "WebSocket market data streaming endpoint"
+    tags: ["websocket", "real-time", "market-data"]
+    protocol: "websocket"
+    
+  - name: "regulatoryReporting"
+    value: "https://reporting.regulator.gov/api/v1/submissions"
+    description: "Regulatory trade reporting endpoint (MiFID II/EMIR)"
+    tags: ["regulatory", "compliance", "reporting"]
+    auth: "mtls"
+    sla: "99.9%"
+
+# Connection configuration
+connection:
+  driver: "org.postgresql.Driver"
+  url: "jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:trading_platform}"
+  username: "${DB_USERNAME:apex_user}"
+  password: "${DB_PASSWORD:apex_pass}"
+  pool:
+    min-size: 5
+    max-size: 20
+    timeout: "30s"
+
+# Circuit breaker for resilience
+circuit-breaker:
+  failure-threshold: 5
+  timeout: "10s"
+  reset-timeout: "60s"
+
+# Caching configuration  
+cache:
+  enabled: true
+  default-ttl: "300s"
+  max-entries: 1000
+  eviction-policy: "LRU"

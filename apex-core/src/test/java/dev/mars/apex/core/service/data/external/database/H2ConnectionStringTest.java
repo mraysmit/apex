@@ -21,6 +21,7 @@ import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.service.data.external.DataSourceException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -56,6 +57,13 @@ class H2ConnectionStringTest {
     
     @TempDir
     Path tempDir;
+    
+    @AfterEach
+    void cleanup() {
+        // Clear the DataSource cache after each test to prevent H2 file lock issues
+        JdbcTemplateFactory.clearCache();
+        LOGGER.debug("Cleared DataSource cache after test");
+    }
     
     // ========================================
     // File-based H2 Database Tests

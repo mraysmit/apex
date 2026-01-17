@@ -17,6 +17,7 @@ package dev.mars.apex.core.config.yaml;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import dev.mars.apex.core.config.datasink.DataSinkConfiguration;
 import dev.mars.apex.core.config.datasink.OutputFormatConfig;
 import dev.mars.apex.core.config.datasink.ErrorHandlingConfig;
@@ -94,6 +95,7 @@ public class YamlDataSink {
     
     // Data sink specific configurations
     @JsonProperty("operations")
+    @JsonDeserialize(using = FlexibleOperationsDeserializer.class)
     private Map<String, String> operations;
     
     @JsonProperty("output-format")

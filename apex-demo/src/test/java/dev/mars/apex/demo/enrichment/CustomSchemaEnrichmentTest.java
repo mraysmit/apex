@@ -123,14 +123,38 @@ class CustomSchemaEnrichmentTest extends DemoTestBase {
             return;
         }
 
-        try (Connection conn = DriverManager.getConnection(
-                jdbcUrl(),
-                "apex_user",
-                "apex_pass");
-             Statement stmt = conn.createStatement()) {
+        logger.info("Setting up PostgreSQL test database with custom schema: {}", CUSTOM_SCHEMA);
+
+        // Add retry logic for connection attempts to handle PostgreSQL startup timing
+        int maxRetries = 3;
+        int retryDelayMs = 1000;
+        Connection conn = null;
+        
+        for (int i = 0; i < maxRetries; i++) {
+            try {
+                conn = DriverManager.getConnection(jdbcUrl(), "apex_user", "apex_pass");
+                logger.info("Successfully connected to PostgreSQL on attempt {}", i + 1);
+                break;
+            } catch (Exception e) {
+                if (i < maxRetries - 1) {
+                    logger.info("Connection attempt {} failed, retrying in {}ms... Error: {}", 
+                        i + 1, retryDelayMs, e.getMessage());
+                    Thread.sleep(retryDelayMs);
+                } else {
+                    logger.error("All connection attempts failed after {} retries", maxRetries);
+                    throw e;
+                }
+            }
+        }
+
+        try (Connection finalConn = conn;
+             Statement stmt = finalConn.createStatement()) {
 
             // Create custom schema
             stmt.execute("CREATE SCHEMA IF NOT EXISTS " + CUSTOM_SCHEMA);
+            
+            // Set search_path for the current user so all queries use the trading schema by default
+            stmt.execute("ALTER DATABASE apex_trading_test SET search_path TO " + CUSTOM_SCHEMA + ", public");
 
             // Create products table in custom schema
             stmt.execute("""

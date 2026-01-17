@@ -349,14 +349,22 @@ public class DataSourceFactory {
         try {
             // Create or get cached JDBC DataSource
             String cacheKey = generateJdbcCacheKey(configuration);
+            LOGGER.info("CACHE-KEY-DEBUG: Creating database data source with cache key: {}", cacheKey);
+            LOGGER.info("CACHE-KEY-DEBUG: Schema in configuration: {}", 
+                configuration.getConnection() != null ? configuration.getConnection().getSchema() : "null");
+            
             DataSource jdbcDataSource = jdbcDataSourceCache.computeIfAbsent(cacheKey, 
                 k -> {
                     try {
+                        LOGGER.info("CACHE-MISS-DEBUG: Cache miss - creating NEW JDBC DataSource for key: {}", k);
                         return JdbcTemplateFactory.createDataSource(configuration);
                     } catch (DataSourceException e) {
                         throw new RuntimeException(e);
                     }
                 });
+            
+            LOGGER.info("CACHE-RESULT-DEBUG: Using JDBC DataSource (cached: {})", 
+                !jdbcDataSourceCache.get(cacheKey).equals(jdbcDataSource));
             
             return new DatabaseDataSource(jdbcDataSource, configuration);
             
@@ -519,7 +527,10 @@ public class DataSourceFactory {
             key.append(configuration.getConnection().getDatabase()).append(":");
             key.append(configuration.getConnection().getUsername()).append(":");
             key.append(configuration.getConnection().getBaseUrl()).append(":");
-            key.append(configuration.getConnection().getBasePath());
+            key.append(configuration.getConnection().getBasePath()).append(":");
+            // Include schema to ensure different schemas get different data sources
+            String schema = configuration.getConnection().getSchema();
+            key.append(schema != null ? schema : "default");
         }
 
         if (configuration.getCache() != null) {

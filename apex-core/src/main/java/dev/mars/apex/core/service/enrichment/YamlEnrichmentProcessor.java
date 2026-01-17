@@ -82,6 +82,9 @@ public class YamlEnrichmentProcessor {
     // Unified cache manager for all caching needs
     private final ApexCacheManager cacheManager;
 
+    // Data source registry from RulesEngine - prevents duplicate data source creation
+    private final Map<String, dev.mars.apex.core.service.data.external.ExternalDataSource> dataSourceRegistry;
+
     // Current configuration context for database lookups
     private dev.mars.apex.core.config.yaml.YamlRuleConfiguration currentConfiguration;
 
@@ -92,12 +95,29 @@ public class YamlEnrichmentProcessor {
     @Deprecated(since = "3.0", forRemoval = true)
     public YamlEnrichmentProcessor(LookupServiceRegistry serviceRegistry,
                                    ExpressionEvaluatorService evaluatorService) {
+        this(serviceRegistry, evaluatorService, null);
+    }
+
+    /**
+     * Constructor with data source registry support.
+     * This constructor accepts a data source registry from RulesEngine to prevent duplicate
+     * data source creation during enrichment processing.
+     *
+     * @param serviceRegistry The lookup service registry
+     * @param evaluatorService The expression evaluator service
+     * @param dataSourceRegistry Optional data source registry from RulesEngine
+     */
+    public YamlEnrichmentProcessor(LookupServiceRegistry serviceRegistry,
+                                   ExpressionEvaluatorService evaluatorService,
+                                   Map<String, dev.mars.apex.core.service.data.external.ExternalDataSource> dataSourceRegistry) {
         this.serviceRegistry = serviceRegistry;
         this.evaluatorService = evaluatorService;
         this.parser = new SpelExpressionParser();
         this.cacheManager = ApexCacheManager.getInstance();
+        this.dataSourceRegistry = dataSourceRegistry != null ? dataSourceRegistry : new java.util.HashMap<>();
 
-        logger.info("YamlEnrichmentProcessor initialized with unified cache manager");
+        logger.info("YamlEnrichmentProcessor initialized with unified cache manager" + 
+                   (dataSourceRegistry != null ? " and data source registry (" + dataSourceRegistry.size() + " data sources)" : ""));
     }
     
     /**
@@ -1197,7 +1217,7 @@ public class YamlEnrichmentProcessor {
 
             try {
                 DatasetLookupService datasetService = DatasetLookupServiceFactory
-                    .createDatasetLookupService(datasetServiceName, dataset, this.currentConfiguration);
+                    .createDatasetLookupService(datasetServiceName, dataset, this.currentConfiguration, this.dataSourceRegistry);
 
                 // Cache the dataset service
                 cacheManager.put(ApexCacheManager.DATASET_CACHE, cacheKey, datasetService);

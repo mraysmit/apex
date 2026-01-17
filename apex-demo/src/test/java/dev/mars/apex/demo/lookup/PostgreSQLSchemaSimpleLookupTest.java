@@ -91,12 +91,16 @@ public class PostgreSQLSchemaSimpleLookupTest extends DemoTestBase {
         String jdbcUrl = postgres.getJdbcUrl();
         String username = postgres.getUsername();
         String password = postgres.getPassword();
+        String database = postgres.getDatabaseName();
         
         try (Connection conn = DriverManager.getConnection(jdbcUrl, username, password);
              Statement stmt = conn.createStatement()) {
             
             // Create custom schema
             stmt.execute("CREATE SCHEMA IF NOT EXISTS " + CUSTOM_SCHEMA);
+            
+            // Set search_path for the database so all queries use the custom schema by default
+            stmt.execute("ALTER DATABASE " + database + " SET search_path TO " + CUSTOM_SCHEMA + ", public");
             
             // Create customers table in custom schema with PostgreSQL-specific features
             stmt.execute("""

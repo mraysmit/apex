@@ -97,7 +97,7 @@ public class RulesEngine {
     private final RulesEngineConfiguration configuration;
     private final ErrorRecoveryService errorRecoveryService;
     private final RulePerformanceMonitor performanceMonitor;
-    private final YamlEnrichmentProcessor enrichmentProcessor;
+    private YamlEnrichmentProcessor enrichmentProcessor;  // Non-final to allow re-initialization with data sources
     private final UnifiedRuleEvaluator unifiedEvaluator;
     private final List<String> initializationErrors = new ArrayList<>();
 
@@ -165,6 +165,8 @@ public class RulesEngine {
         this.evaluatorService = new ExpressionEvaluatorService(this.parser);
         this.errorRecoveryService = new ErrorRecoveryService();
         this.performanceMonitor = new RulePerformanceMonitor();
+        // Note: enrichmentProcessor will be re-initialized after data sources are created
+        // to ensure it has access to the data source registry
         this.enrichmentProcessor = new YamlEnrichmentProcessor(new LookupServiceRegistry(), this.evaluatorService);
 
         // Load error recovery configuration from YAML if available, otherwise use defaults
@@ -219,6 +221,15 @@ public class RulesEngine {
                         initializationErrors.add("Failed to initialize data source '" + yamlDataSource.getName() + "': " + e.getMessage());
                     }
                 }
+                
+                // Re-initialize enrichment processor with data source registry
+                // This ensures enrichments can reuse existing data sources instead of creating duplicates
+                logger.debug("Re-initializing enrichment processor with {} data sources from registry", dataSources.size());
+                this.enrichmentProcessor = new YamlEnrichmentProcessor(
+                    new LookupServiceRegistry(), 
+                    this.evaluatorService,
+                    this.dataSources
+                );
             }
 
             // Initialize data sinks

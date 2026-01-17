@@ -388,7 +388,8 @@ public class YamlDataSource {
         config.setHost(getStringValue(map, "host"));
         config.setPort(getIntegerValue(map, "port"));
         config.setDatabase(getStringValue(map, "database"));
-        config.setSchema(getStringValue(map, "schema"));
+        String schemaValue = getStringValue(map, "schema");
+        config.setSchema(schemaValue);
         config.setUsername(getStringValue(map, "username"));
         config.setPassword(getStringValue(map, "password"));
         config.setSslEnabled(getBooleanValue(map, "ssl-enabled", false));

@@ -1,15 +1,17 @@
 ![APEX System Logo](APEX%20System%20logo.png)
 # APEX YAML Syntax Reference Guide
 
-**Version:** 2.4
-**Date:** 2025-11-16
+**Version:** 2.4 (Dual Format Support - APEX 2.2+)
+**Date:** 2026-01-17
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
-**Change Summary:** Added comprehensive `error-handling` keyword documentation for rule-groups and enrichment-groups (Sections 5.2.5 and 7.2); updated Quick Keyword Reference table
+**Change Summary:** Added dual format support for queries, operations, and endpoints (map format and array format); maintained 100% backward compatibility; enhanced metadata capabilities
 
 > **✅ SYNTAX VERIFIED**: This document has been updated and verified to use the correct APEX SpEL syntax. APEX processes HashMap data where fields are accessed using `#fieldName` syntax, NOT `#fieldName`. All examples in this document use the correct `#fieldName` syntax for field access in APEX YAML configurations.
 
 ## Table of Contents
 This section provides a definitive reference for APEX YAML keywords based on actual APEX core engine implementation. Approximately **155 keywords** are defined in apex-core, with **~140 functionally implemented** in execution logic. See Appendix C for planned/future keywords.
+
+> **🆕 DUAL FORMAT SUPPORT (APEX 2.2+)**: The `queries`, `operations`, and `endpoints` fields now support both **map format** (legacy, concise) and **array format** (new, metadata-rich). Both formats are fully supported and can be mixed in the same file. See Section 2.3 for complete details.
 
 ### 1.1 Complete Keyword Reference Table
 
@@ -225,6 +227,160 @@ APEX 2.0 introduces **external data-source references** that enable clean separa
 - **Configuration Caching**: External configurations cached for performance
 - **Enterprise Scalability**: Shared infrastructure across multiple rule configurations
 
+### 2.3 Dual Format Support (APEX 2.2+)
+
+#### Overview
+
+APEX 2.2 introduces **dual format support** for `queries`, `operations`, and `endpoints` fields in data source configurations. This enhancement provides flexibility to choose between concise map-based syntax or metadata-rich array-based syntax, depending on your project needs.
+
+**Key Benefits:**
+- ✅ **100% Backward Compatible**: All existing map format configurations work unchanged
+- ✅ **Rich Metadata**: Array format enables descriptions, tags, and custom properties
+- ✅ **Better Documentation**: Self-documenting configurations improve team collaboration
+- ✅ **Mixed Format**: Both formats can coexist in the same file
+- ✅ **Zero Performance Impact**: Transparent deserialization with minimal overhead
+
+#### Map Format (Legacy - Fully Supported)
+
+The traditional key-value format remains the recommended choice for simple, concise configurations:
+
+```yaml
+queries:
+  getCustomer: "SELECT * FROM customers WHERE id = :id"
+  listOrders: "SELECT * FROM orders WHERE customer_id = :customerId"
+
+operations:
+  insertOrder: "INSERT INTO orders (id, amount) VALUES (:id, :amount)"
+  
+endpoints:
+  paymentGateway: "https://api.payments.com/v1/process"
+```
+
+**When to Use Map Format:**
+- Small projects with few queries/operations
+- Internal tools with minimal documentation needs
+- Quick prototypes and demos
+- Simple, self-explanatory queries
+
+#### Array Format (New - Recommended for Enterprise)
+
+The new array format provides rich metadata for better documentation and discoverability:
+
+```yaml
+queries:
+  - name: "getCustomer"
+    value: "SELECT * FROM customers WHERE id = :id"
+    description: "Retrieve customer profile by unique ID"
+    tags: ["customer-management", "primary-lookup"]
+    performance: "indexed"
+    owner: "customer-team"
+    
+  - name: "listOrders"
+    value: "SELECT * FROM orders WHERE customer_id = :customerId"
+    description: "Fetch all orders for a specific customer"
+    tags: ["order-management", "batch-query"]
+    cacheable: true
+    cache-ttl: "300s"
+
+operations:
+  - name: "insertOrder"
+    value: "INSERT INTO orders (id, amount) VALUES (:id, :amount)"
+    description: "Create new order record in database"
+    tags: ["order-lifecycle", "write-operation"]
+    transaction: "required"
+    audit: true
+    
+endpoints:
+  - name: "paymentGateway"
+    value: "https://api.payments.com/v1/process"
+    description: "Third-party payment processing endpoint"
+    tags: ["payments", "external-api"]
+    method: "POST"
+    timeout: "5000ms"
+    retry-policy: "exponential-backoff"
+```
+
+**When to Use Array Format:**
+- Enterprise projects with multiple teams
+- Complex queries requiring documentation
+- APIs with versioning and SLA requirements
+- Configurations shared across departments
+- Compliance and audit requirements
+
+#### Mixed Format (Best of Both Worlds)
+
+Both formats can coexist in the same configuration file:
+
+```yaml
+queries:
+  # Simple query - map format is fine
+  simpleCount: "SELECT COUNT(*) FROM users"
+  
+  # Complex query - array format adds value
+  - name: "complexReport"
+    value: >-
+      SELECT dept, COUNT(*) as count, AVG(salary) as avg_sal
+      FROM employees
+      WHERE status = 'ACTIVE'
+      GROUP BY dept
+    description: "Department staffing and compensation analysis"
+    tags: ["hr-analytics", "reporting"]
+    performance: "indexed-on-dept"
+```
+
+#### Array Format Field Reference
+
+| Field | Required | Type | Description |
+|-------|----------|------|-------------|
+| **name** | Yes | String | Unique identifier for the query/operation/endpoint |
+| **value** | Yes | String | The actual query/operation/endpoint value |
+| **description** | No | String | Human-readable description of purpose |
+| **tags** | No | Array | Classification tags for discoverability |
+| **(custom)** | No | Any | Additional custom metadata as needed |
+
+**Common Custom Fields:**
+- `owner`: Team or individual responsible
+- `performance`: Performance characteristics (indexed, cached, slow)
+- `cacheable`: Whether results can be cached
+- `cache-ttl`: Cache time-to-live
+- `transaction`: Transaction requirements
+- `audit`: Audit logging enabled
+- `method`: HTTP method for endpoints
+- `timeout`: Timeout configuration
+- `retry-policy`: Retry behavior
+- `sla`: Service-level agreement
+
+#### Migration Strategy
+
+1. **No Action Required**: Existing map format configurations continue working
+2. **Gradual Adoption**: Convert high-value queries with complex logic
+3. **Mixed Approach**: Use array format where documentation adds value
+4. **Team Decision**: Choose format based on project needs and team preferences
+
+#### Error Handling
+
+The dual format deserializer provides clear error messages for common issues:
+
+```yaml
+# ERROR: Duplicate names
+queries:
+  - name: "getCustomer"
+    value: "SELECT * FROM customers WHERE id = :id"
+  - name: "getCustomer"  # ❌ Duplicate!
+    value: "SELECT * FROM customers WHERE email = :email"
+# Error: "Duplicate key 'getCustomer' found in array format"
+
+# ERROR: Missing required field
+queries:
+  - value: "SELECT * FROM customers"  # ❌ Missing 'name'!
+# Error: "Missing required field 'name' in array format entry"
+
+# ERROR: Invalid format
+queries:
+  - "just-a-string"  # ❌ Not an object!
+# Error: "Array format entries must be objects with 'name' and 'value' fields"
+```
+
 ---
 
 ## 3. Document Structure & Metadata
@@ -374,9 +530,24 @@ dataSources:
       username: "app_user"
       password: "${DB_PASSWORD}"
 
+    # DUAL FORMAT SUPPORT (APEX 2.2+)
+    # Map format (legacy - still fully supported)
     queries:
       getUserById: "SELECT * FROM users WHERE id = :id"
       getActiveUsers: "SELECT * FROM users WHERE status = 'ACTIVE'"
+    
+    # Array format (new - recommended for documentation-rich projects)
+    # queries:
+    #   - name: "getUserById"
+    #     value: "SELECT * FROM users WHERE id = :id"
+    #     description: "Fetch user profile by unique ID"
+    #     tags: ["user-management", "primary-lookup"]
+    #   
+    #   - name: "getActiveUsers"
+    #     value: "SELECT * FROM users WHERE status = 'ACTIVE'"
+    #     description: "List all users with active status"
+    #     tags: ["user-management", "batch-query"]
+    #     cacheable: true
 
     cache:
       enabled: true
@@ -408,15 +579,26 @@ dataSources:
     connection:
       base-url: "https://api.exchangerates.com/v1"
 
-    # Simple endpoints (recommended approach)
-    endpoints:
-      currency-lookup: "/rates/{key}"
-      exchange-rate: "/convert/{from}/{to}"
-      timeout: 5000
-
+    # DUAL FORMAT SUPPORT (APEX 2.2+)
+    # Map format (legacy - concise for simple cases)
     endpoints:
       getCurrentRate: "/rates/{currency}"
       getHistoricalRate: "/rates/{currency}/{date}"
+    
+    # Array format (new - recommended for enterprise APIs)
+    # endpoints:
+    #   - name: "getCurrentRate"
+    #     value: "/rates/{currency}"
+    #     description: "Get latest exchange rate for currency"
+    #     method: "GET"
+    #     timeout: "2000ms"
+    #     
+    #   - name: "getHistoricalRate"
+    #     value: "/rates/{currency}/{date}"
+    #     description: "Get historical rate for specific date"
+    #     method: "GET"
+    #     cacheable: true
+    #     cache-ttl: "3600s"
 
     authentication:
       type: "api-key"

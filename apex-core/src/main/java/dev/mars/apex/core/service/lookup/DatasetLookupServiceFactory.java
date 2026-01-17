@@ -55,7 +55,6 @@ public class DatasetLookupServiceFactory {
      */
     public static DatasetLookupService createDatasetLookupService(String serviceName,
                                                                   YamlEnrichment.LookupDataset dataset) {
-        System.out.println("DEBUG: 2-parameter createDatasetLookupService called with type: " + dataset.getType());
         return createDatasetLookupService(serviceName, dataset, null);
     }
 
@@ -72,6 +71,24 @@ public class DatasetLookupServiceFactory {
     public static DatasetLookupService createDatasetLookupService(String serviceName,
                                                                   YamlEnrichment.LookupDataset dataset,
                                                                   dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
+        return createDatasetLookupService(serviceName, dataset, configuration, null);
+    }
+
+    /**
+     * Create a DatasetLookupService from a LookupDataset configuration with full YAML configuration context
+     * and data source registry for reusing existing data sources.
+     *
+     * @param serviceName The name for the service
+     * @param dataset The dataset configuration
+     * @param configuration The full YAML configuration (required for database lookups)
+     * @param dataSourceRegistry Optional registry of existing data sources from RulesEngine
+     * @return A configured DatasetLookupService
+     * @throws EnrichmentException if the dataset type is unsupported or configuration is invalid
+     */
+    public static DatasetLookupService createDatasetLookupService(String serviceName,
+                                                                  YamlEnrichment.LookupDataset dataset,
+                                                                  dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration,
+                                                                  Map<String, dev.mars.apex.core.service.data.external.ExternalDataSource> dataSourceRegistry) {
         if (dataset == null) {
             throw new EnrichmentException("Dataset configuration cannot be null");
         }
@@ -86,7 +103,6 @@ public class DatasetLookupServiceFactory {
         }
         
         logger.info("Creating DatasetLookupService '" + serviceName + "' with type: " + datasetType);
-        System.out.println("DEBUG: 3-parameter createDatasetLookupService called with type: " + datasetType + ", configuration: " + (configuration != null ? "NOT NULL" : "NULL"));
         
         switch (datasetType.toLowerCase()) {
             case "inline":
@@ -105,7 +121,7 @@ public class DatasetLookupServiceFactory {
                 if (configuration == null) {
                     throw new EnrichmentException("Database lookups require configuration context. Use createDatasetLookupService(serviceName, dataset, configuration) method instead.");
                 }
-                return createDatabaseDatasetService(serviceName, dataset, configuration);
+                return createDatabaseDatasetService(serviceName, dataset, configuration, dataSourceRegistry);
 
             case "rest-api":
                 if (configuration == null) {
@@ -200,6 +216,22 @@ public class DatasetLookupServiceFactory {
     private static DatasetLookupService createDatabaseDatasetService(String serviceName,
                                                                      YamlEnrichment.LookupDataset dataset,
                                                                      dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
+        return createDatabaseDatasetService(serviceName, dataset, configuration, null);
+    }
+
+    /**
+     * Create a service for database datasets with optional data source registry.
+     *
+     * @param serviceName The service name
+     * @param dataset The dataset configuration
+     * @param configuration The full YAML configuration containing dataSources
+     * @param dataSourceRegistry Optional registry of existing data sources from RulesEngine
+     * @return A configured DatasetLookupService
+     */
+    private static DatasetLookupService createDatabaseDatasetService(String serviceName,
+                                                                     YamlEnrichment.LookupDataset dataset,
+                                                                     dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration,
+                                                                     Map<String, dev.mars.apex.core.service.data.external.ExternalDataSource> dataSourceRegistry) {
         logger.debug("Creating database dataset service: " + serviceName);
 
         // Validate database-specific configuration
@@ -249,12 +281,20 @@ public class DatasetLookupServiceFactory {
         }
 
         try {
-            // Create database data source using existing infrastructure
-            dev.mars.apex.core.service.data.external.factory.DataSourceFactory factory =
-                dev.mars.apex.core.service.data.external.factory.DataSourceFactory.getInstance();
+            // Check if data source already exists in registry (prevents duplicate creation)
+            dev.mars.apex.core.service.data.external.ExternalDataSource dataSource = null;
+            
+            if (dataSourceRegistry != null && dataSourceRegistry.containsKey(connectionName)) {
+                dataSource = dataSourceRegistry.get(connectionName);
+                logger.info("✅ REUSING existing data source '{}' from RulesEngine registry (prevents duplicate creation)", connectionName);
+            } else {
+                // Create new database data source using existing infrastructure
+                logger.info("❌ Creating NEW data source '{}' (not found in registry)", connectionName);
+                dev.mars.apex.core.service.data.external.factory.DataSourceFactory factory =
+                    dev.mars.apex.core.service.data.external.factory.DataSourceFactory.getInstance();
 
-            dev.mars.apex.core.service.data.external.ExternalDataSource dataSource =
-                factory.createDataSource(dataSourceConfig.toDataSourceConfiguration());
+                dataSource = factory.createDataSource(dataSourceConfig.toDataSourceConfiguration());
+            }
 
             // Extract parameter field names from dataset configuration
             java.util.List<String> parameterFields = new java.util.ArrayList<>();
