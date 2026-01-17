@@ -15,6 +15,9 @@ import dev.mars.apex.core.service.schema.diff.SchemaDiffService;
 import dev.mars.apex.core.service.schema.diff.SchemaComparisonResult;
 import dev.mars.apex.core.service.schema.diff.ComparisonOptions;
 import dev.mars.apex.core.service.schema.diff.SchemaDiffHtmlReportGenerator;
+import dev.mars.apex.core.service.schema.diff.json.SchemaDiffJsonSerializer;
+import dev.mars.apex.core.service.schema.diff.json.SchemaDiffReportBuilder;
+import dev.mars.apex.core.service.schema.diff.json.model.SchemaDiffReport;
 import dev.mars.apex.core.service.data.external.database.DatabaseDataSource;
 import dev.mars.apex.core.config.datasource.ConnectionConfig;
 import dev.mars.apex.core.util.TestAwareLogger;
@@ -1231,6 +1234,39 @@ public class PipelineExecutor {
             }
         } else {
             LOGGER.debug("[Pipeline.SchemaDiff] No report-output parameter specified, skipping HTML report generation");
+        }
+
+        // Generate JSON report if json-report-output parameter is specified
+        String jsonReportPath = (String) parameters.get("json-report-output");
+        LOGGER.debug("[Pipeline.SchemaDiff] json-report-output parameter: {}", jsonReportPath);
+        if (jsonReportPath != null && !jsonReportPath.trim().isEmpty()) {
+            LOGGER.info("[Pipeline.SchemaDiff] Generating JSON report to: {}", jsonReportPath);
+            try {
+                // Retrieve DataSourceContext from source and target steps
+                DataSourceContext sourceContext = (DataSourceContext) pipelineContext.get(sourceStepName + "_dataSourceContext");
+                DataSourceContext targetContext = (DataSourceContext) pipelineContext.get(targetStepName + "_dataSourceContext");
+                
+                LOGGER.debug("[Pipeline.SchemaDiff] Retrieved DataSourceContext for JSON: source={}, target={}", 
+                    sourceContext != null ? sourceContext.getDataSourceName() : "null",
+                    targetContext != null ? targetContext.getDataSourceName() : "null");
+                
+                // Build JSON report from comparison result
+                SchemaDiffReportBuilder builder = new SchemaDiffReportBuilder();
+                SchemaDiffReport jsonReport = builder.buildReport(result, sourceContext, targetContext);
+                
+                // Serialize to JSON file
+                SchemaDiffJsonSerializer serializer = new SchemaDiffJsonSerializer();
+                String generatedJsonPath = serializer.toJsonFile(jsonReport, jsonReportPath);
+                LOGGER.info("[Pipeline.SchemaDiff] JSON report generated: {}", generatedJsonPath);
+                
+                // Store JSON report path in context for reference
+                pipelineContext.put("schema-diff-json-report", generatedJsonPath);
+            } catch (Exception e) {
+                LOGGER.warn("[Pipeline.SchemaDiff] Failed to generate JSON report: {}", e.getMessage(), e);
+                // Don't fail the pipeline for report generation errors
+            }
+        } else {
+            LOGGER.debug("[Pipeline.SchemaDiff] No json-report-output parameter specified, skipping JSON report generation");
         }
 
         // Check fail-on-incompatibility flag

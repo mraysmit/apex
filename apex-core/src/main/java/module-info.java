@@ -38,6 +38,9 @@ module dev.mars.apex.core {
     requires com.fasterxml.jackson.databind;
     requires com.fasterxml.jackson.dataformat.yaml;
     requires com.fasterxml.jackson.dataformat.xml;
+    
+    // Handlebars template engine
+    requires handlebars;
     requires org.yaml.snakeyaml;
 
     // Enable automatic JDBC driver loading

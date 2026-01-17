@@ -1,0 +1,99 @@
+{
+  "$schema" : "https://apex.mars.dev/schemas/schema-diff/v1.0.json",
+  "metadata" : {
+    "generatedAt" : "2026-01-17T16:39:11.342782300Z",
+    "apexVersion" : "2.1.0",
+    "reportVersion" : "1.0"
+  },
+  "source" : {
+    "name" : "csv-source",
+    "type" : "file",
+    "connection" : {
+      "filePath" : "src/test/resources/test-data/customers.csv"
+    },
+    "tableMetadata" : {
+      "tableName" : "csv-source",
+      "columns" : 3
+    }
+  },
+  "target" : {
+    "name" : "csv-target",
+    "type" : "file",
+    "connection" : {
+      "filePath" : "src/test/resources/test-data/customers_with_phone.csv"
+    },
+    "tableMetadata" : {
+      "tableName" : "csv-target",
+      "columns" : 4
+    }
+  },
+  "summary" : {
+    "totalColumns" : {
+      "source" : 3,
+      "target" : 4
+    },
+    "compatible" : false
+  },
+  "columns" : {
+    "matching" : [ {
+      "columnName" : "id",
+      "status" : "MATCHED",
+      "source" : {
+        "dataType" : "INTEGER",
+        "nullable" : true,
+        "primaryKey" : false
+      },
+      "target" : {
+        "dataType" : "INTEGER",
+        "nullable" : true,
+        "primaryKey" : false
+      },
+      "differences" : [ ],
+      "breakingChange" : false
+    }, {
+      "columnName" : "name",
+      "status" : "MATCHED",
+      "source" : {
+        "dataType" : "VARCHAR",
+        "nullable" : true,
+        "primaryKey" : false
+      },
+      "target" : {
+        "dataType" : "VARCHAR",
+        "nullable" : true,
+        "primaryKey" : false
+      },
+      "differences" : [ ],
+      "breakingChange" : false
+    }, {
+      "columnName" : "email",
+      "status" : "MATCHED",
+      "source" : {
+        "dataType" : "VARCHAR",
+        "nullable" : true,
+        "primaryKey" : false
+      },
+      "target" : {
+        "dataType" : "VARCHAR",
+        "nullable" : true,
+        "primaryKey" : false
+      },
+      "differences" : [ ],
+      "breakingChange" : false
+    } ],
+    "added" : [ ],
+    "removed" : [ ],
+    "changed" : [ ]
+  },
+  "compatibility" : {
+    "compatible" : true,
+    "breakingChanges" : [ ],
+    "safeChanges" : [ ]
+  },
+  "recommendations" : [ {
+    "priority" : "LOW",
+    "description" : "Schema is fully compatible",
+    "automatable" : false,
+    "validationRequired" : false
+  } ]
+}

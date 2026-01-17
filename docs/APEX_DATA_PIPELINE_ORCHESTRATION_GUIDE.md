@@ -165,7 +165,7 @@ A **pipeline** is a complete data processing workflow consisting of multiple ste
 ### Steps
 
 **Steps** are individual processing units within a pipeline. APEX supports five step types:
-- **Read-Schema**: Introspect data sources to retrieve schema metadata
+- **Read-Schema**: Introspect data sources to retrieve schema metadata (columns, types, constraints) from databases and CSV files
 - **Extract**: Read data from external sources
 - **Load**: Write data to external destinations
 - **Transform**: Modify data between steps
@@ -655,11 +655,12 @@ The `retry` object supports the following keywords:
 
 ### Read-Schema Steps
 
-Read-schema steps introspect data sources to retrieve metadata about columns, data types, nullability, and constraints. This is essential for:
+Read-schema steps introspect data sources to retrieve metadata about columns, data types, nullability, and constraints. Introduced in APEX 2.1 as part of the database synchronization module, this step type is essential for:
 - **Pre-sync validation**: Verifying schema compatibility before data movement
 - **Dynamic mapping**: Generating transformation rules based on discovered schemas
 - **Change detection**: Identifying schema drift between environments
 - **Documentation**: Automatically cataloging data structures
+- **Type mapping**: Converting schemas between different database systems
 
 **Common Read-Schema Patterns:**
 - Database table introspection
@@ -667,68 +668,275 @@ Read-schema steps introspect data sources to retrieve metadata about columns, da
 - Multi-table schema discovery
 - Schema comparison between source and target
 
-**Database Schema Reading Example:**
+#### Database Schema Reading
+
+**Configuration Example:**
 
 ```yaml
 metadata:
-  type: "pipeline"
+  id: "read-db-schema"
+  name: "Database Schema Reader"
+  version: "1.0"
+  type: "pipeline-config"
 
-data-source-refs:
-  - name: "customer-database"
-    source: "data-sources/customer-database.yaml"
+data-sources:
+  - name: "my-database"
+    type: "database"
+    source-type: "h2"  # or postgresql, mysql, mssql, etc.
+    connection:
+      database: "mem:schema_test"
+      username: "sa"
+      password: ""
     enabled: true
 
 pipeline:
-  name: "read-customer-schema"
-  execution: "sequential"
+  name: "read-database-schema"
+  execution:
+    mode: "sequential"
+  
   steps:
-    - name: "read-customers-table-schema"    # Unique name for this read-schema step
-      type: "read-schema"                     # Step type: read-schema introspects sources
-      data-source-ref: "customer-database"    # References data source by name
-      description: "Introspect customer table schema"  # Step description
-      parameters:                             # Parameters specify what to introspect
-        table: "dbo.Customers"                # Table name (schema-qualified)
+    - name: "read-schema"
+      type: "read-schema"
+      source: "my-database"
+      description: "Read schema metadata from database table"
+      parameters:
+        table: "customers"  # Can be schema-qualified: "dbo.customers"
 ```
 
-**Schema Metadata Output** (stored in pipeline context):
-- `columnName`: Database column name
-- `dataType`: SQL data type (VARCHAR, INTEGER, DECIMAL, etc.)
-- `size`: Column size/precision
-- `nullable`: Whether NULL values are allowed
-- `primaryKey`: Whether column is part of primary key
-- `autoIncrement`: Whether column auto-increments
+#### CSV File Schema Reading
 
-**CSV File Schema Reading Example:**
+**Configuration Example:**
 
 ```yaml
 metadata:
-  type: "pipeline"
+  id: "read-csv-schema"
+  name: "CSV Schema Reader"
+  version: "1.0"
+  type: "pipeline-config"
 
-data-source-refs:
-  - name: "employee-csv"
-    source: "data-sources/employee-csv.yaml"
+data-sources:
+  - name: "csv-source"
+    type: "file-system"
+    source-type: "file"
     enabled: true
+    connection:
+      base-path: "."  # Base directory for file operations
 
 pipeline:
-  name: "read-employee-csv-schema"
-  execution: "sequential"
+  name: "read-csv-schema"
+  execution:
+    mode: "sequential"
+  
   steps:
-    - name: "read-csv-schema"                # Unique name for this read-schema step
-      type: "read-schema"                     # Step type: read-schema introspects sources
-      data-source-ref: "employee-csv"         # References CSV data source by name
-      description: "Analyze employee CSV structure"  # Step description
-      parameters:                             # Parameters specify what to introspect
-        file: "employees.csv"                 # CSV file name or path
+    - name: "read-schema"
+      type: "read-schema"
+      source: "csv-source"
+      description: "Read schema metadata from CSV file"
+      parameters:
+        file: "customers.csv"
 ```
 
-**Automatic Type Inference** (for CSV files):
-- `INTEGER`: Numeric values without decimals (e.g., "123", "-456")
-- `DECIMAL`: Numeric values with decimals (e.g., "123.45", "-0.99")
-- `BOOLEAN`: True/false values (e.g., "true", "false", "yes", "no")
-- `TIMESTAMP`: Date/time patterns (e.g., "2024-01-15", "2024-01-15 10:30:00")
-- `VARCHAR`: Default type for text values
+#### Schema Metadata Structure
 
-**Multi-Table Schema Reading Example:**
+The schema metadata is stored in the pipeline context with the following structure:
+
+```java
+SchemaMetadata {
+    String sourceName;           // Name of the source (table or file)
+    DataSourceType sourceType;   // DATABASE or FILE_SYSTEM
+    List<ColumnDefinition> columns;
+}
+
+ColumnDefinition {
+    String name;                 // Column name
+    String dataType;            // Data type (e.g., VARCHAR, INTEGER)
+    boolean nullable;           // Whether column can be null
+    boolean primaryKey;         // Whether column is primary key
+    Integer maxLength;          // Maximum length (for string types)
+    Integer precision;          // Precision (for numeric types)
+    Integer scale;              // Scale (for numeric types)
+}
+```
+
+**Accessing Schema Metadata:**
+
+Schema metadata is stored in the pipeline context as `"schemaMetadata"` and can be accessed by subsequent pipeline stages:
+
+```java
+// In your pipeline step execution
+SchemaMetadata schema = (SchemaMetadata) context.get("schemaMetadata");
+
+// Iterate over columns
+for (SchemaMetadata.ColumnDefinition column : schema.getColumns()) {
+    System.out.println("Column: " + column.getName());
+    System.out.println("  Type: " + column.getDataType());
+    System.out.println("  Nullable: " + column.isNullable());
+    System.out.println("  Primary Key: " + column.isPrimaryKey());
+}
+```
+
+#### CSV Type Inference
+
+When reading schema from CSV files, the stage analyzes the data to infer column types:
+
+| Inferred Type | Detection Pattern | Examples |
+|---------------|-------------------|----------|
+| `INTEGER` | Pure numeric values without decimals | "123", "-456", "0" |
+| `DECIMAL` | Numeric values with decimal points | "123.45", "-0.99", "3.14159" |
+| `BOOLEAN` | Boolean-like values | "true", "false", "yes", "no", "1", "0" |
+| `DATE` | ISO date patterns | "2024-01-15" (yyyy-MM-dd) |
+| `VARCHAR` | Default for all other values | Any text, mixed formats |
+
+**Maximum length** is calculated for VARCHAR fields based on the longest value in the sample data.
+
+#### Supported Databases
+
+The read-schema stage supports all database types that expose INFORMATION_SCHEMA:
+
+- ✅ **PostgreSQL** - via INFORMATION_SCHEMA.COLUMNS
+- ✅ **MySQL/MariaDB** - via INFORMATION_SCHEMA.COLUMNS
+- ✅ **Microsoft SQL Server** - via INFORMATION_SCHEMA.COLUMNS
+- ✅ **H2** - via INFORMATION_SCHEMA.COLUMNS
+- ✅ **Oracle** - via DBA_TAB_COLUMNS
+- ✅ **DB2** - via SYSCAT.COLUMNS
+
+#### Implementation Details
+
+**Key Classes:**
+
+- **`SchemaReaderService`**: Main service for reading schemas
+  - `readSchema()`: Dispatches to database or CSV reader
+  - `readDatabaseSchema()`: Queries INFORMATION_SCHEMA
+  - `readCsvSchema()`: Parses CSV and infers types
+
+- **`SchemaMetadata`**: Model class for schema information
+  - Contains source name, type, and column definitions
+  - Immutable after creation
+
+- **`PipelineExecutor`**: Orchestrates pipeline execution
+  - `executeReadSchemaStep()`: Executes read-schema steps
+  - Stores result in pipeline context
+
+**Database Schema Query Pattern:**
+
+The service uses the following SQL query pattern:
+
+```sql
+SELECT 
+    COLUMN_NAME,
+    DATA_TYPE,
+    IS_NULLABLE,
+    CHARACTER_MAXIMUM_LENGTH,
+    NUMERIC_PRECISION,
+    NUMERIC_SCALE
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME = ?
+ORDER BY ORDINAL_POSITION
+```
+
+Primary key detection is performed via:
+
+```sql
+SELECT COLUMN_NAME
+FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+WHERE TABLE_NAME = ?
+  AND CONSTRAINT_NAME IN (
+    SELECT CONSTRAINT_NAME
+    FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+    WHERE TABLE_NAME = ?
+      AND CONSTRAINT_TYPE = 'PRIMARY KEY'
+  )
+```
+
+#### Practical Use Cases
+
+##### 1. Schema Validation Before ETL
+
+```yaml
+steps:
+  - name: "validate-source-schema"
+    type: "read-schema"
+    source: "source-db"
+    parameters:
+      table: "source_table"
+  
+  - name: "validate-target-schema"
+    type: "read-schema"
+    source: "target-db"
+    parameters:
+      table: "target_table"
+  
+  - name: "compare-schemas"
+    type: "transform"
+    # Custom transformation to compare schemas
+  
+  - name: "extract-data"
+    type: "extract"
+    source: "source-db"
+    # Proceed with ETL if schemas match
+```
+
+##### 2. Dynamic Table Creation
+
+```yaml
+steps:
+  - name: "read-csv-structure"
+    type: "read-schema"
+    source: "csv-file"
+    parameters:
+      file: "import.csv"
+  
+  - name: "create-table"
+    type: "transform"
+    # Use schema metadata to generate CREATE TABLE statement
+  
+  - name: "load-data"
+    type: "load"
+    target: "database"
+```
+
+##### 3. Data Type Mapping Between Databases
+
+```yaml
+steps:
+  - name: "read-oracle-schema"
+    type: "read-schema"
+    source: "oracle-db"
+    parameters:
+      table: "customers"
+  
+  - name: "map-to-postgres-types"
+    type: "transform"
+    # Convert Oracle types to PostgreSQL equivalents
+  
+  - name: "create-postgres-table"
+    type: "load"
+    target: "postgres-db"
+```
+
+##### 4. Pre-Migration Schema Validation
+
+```yaml
+pipeline:
+  name: "validate-migration-schemas"
+  steps:
+    - name: "read-source-schema"
+      type: "read-schema"
+      data-source-ref: "legacy-sqlserver"
+      parameters:
+        table: "dbo.Customers"
+    
+    - name: "read-target-schema"
+      type: "read-schema"
+      data-source-ref: "modern-postgresql"
+      parameters:
+        table: "public.customers"
+      depends-on: ["read-source-schema"]
+    
+    # Compare schemas and identify differences before data migration
+```
+
+##### 5. Multi-Table Schema Discovery
 
 ```yaml
 pipeline:
@@ -756,46 +964,34 @@ pipeline:
       depends-on: ["read-orders-schema"]      # Chain schema reads
 ```
 
-**Use Cases:**
+#### Testing
 
-1. **Pre-Migration Schema Validation:**
-```yaml
-pipeline:
-  name: "validate-migration-schemas"
-  steps:
-    - name: "read-source-schema"
-      type: "read-schema"
-      data-source-ref: "legacy-sqlserver"
-      parameters:
-        table: "dbo.Customers"
-    
-    - name: "read-target-schema"
-      type: "read-schema"
-      data-source-ref: "modern-postgresql"
-      parameters:
-        table: "public.customers"
-      depends-on: ["read-source-schema"]
-    
-    # Compare schemas and identify differences before data migration
+Comprehensive integration tests are available in:
+- `apex-data-sync/src/test/java/dev/mars/apex/sync/ReadSchemaPipelineStageTest.java`
+
+Test coverage includes:
+- ✅ Reading schema from H2 database
+- ✅ Reading schema from CSV files
+- ✅ Column metadata extraction
+- ✅ Type inference for CSV
+- ✅ Pipeline context storage
+
+Run tests with:
+```bash
+cd apex-data-sync
+mvn test -Dtest=ReadSchemaPipelineStageTest
 ```
 
-2. **Dynamic ETL Pipeline Generation:**
-```yaml
-pipeline:
-  name: "discover-and-extract"
-  steps:
-    - name: "discover-schema"
-      type: "read-schema"
-      data-source-ref: "source-database"
-      parameters:
-        table: "dbo.Orders"
-    
-    - name: "extract-data"
-      type: "extract"
-      source: "source-database"
-      operation: "getAllOrders"
-      depends-on: ["discover-schema"]         # Use schema metadata to validate extraction
-```
+#### Best Practices for Read-Schema Steps
+
+1. **Always validate schemas** before performing ETL operations
+2. **Store schema metadata** in pipeline context for reuse
+3. **Handle type differences** between source and target databases
+4. **Use CSV schema reading** for data profiling and validation
+5. **Check nullable flags** before inserting data
+6. **Verify primary keys** to ensure data integrity
+7. **Use schema-qualified table names** for clarity (e.g., `dbo.Customers`)
+8. **Consider database-specific type mappings** when migrating between platforms
 
 ### Extract Steps
 
@@ -1571,6 +1767,17 @@ steps:
     optional: true  # Don't fail pipeline if email fails
     depends-on: ["process-customer-data"]
 ```
+
+### Read-Schema Step Best Practices
+
+1. **Validate Before ETL**: Always use read-schema steps to validate schema compatibility before data migration
+2. **Cache Schema Metadata**: Store schema metadata in pipeline context for reuse across multiple steps
+3. **Handle Type Differences**: Account for database-specific type mappings when migrating between platforms
+4. **CSV Profiling**: Use read-schema on CSV files for data profiling and validation before import
+5. **Check Constraints**: Verify nullable flags and primary keys before inserting data
+6. **Schema-Qualified Names**: Use schema-qualified table names for clarity (e.g., `dbo.Customers`, `public.orders`)
+7. **Type Inference Validation**: For CSV files, manually verify inferred types match expectations
+8. **Multi-Source Comparison**: Compare schemas across multiple sources to identify drift
 
 ### Performance Optimization
 

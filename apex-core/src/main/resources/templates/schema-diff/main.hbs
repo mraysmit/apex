@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APEX Schema Diff Report</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 8px 8px 0 0; }
+        .header h1 { font-size: 28px; margin-bottom: 10px; }
+        .metadata { font-size: 14px; opacity: 0.9; }
+        .section { padding: 30px; border-bottom: 1px solid #e0e0e0; }
+        .section:last-child { border-bottom: none; }
+        h2 { font-size: 20px; margin-bottom: 20px; color: #333; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }
+        .stat-card { background: #f9f9f9; padding: 20px; border-radius: 6px; text-align: center; }
+        .stat-value { font-size: 32px; font-weight: bold; margin-bottom: 5px; }
+        .stat-label { font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-matching .stat-value { color: #10b981; }
+        .stat-added .stat-value { color: #3b82f6; }
+        .stat-removed .stat-value { color: #ef4444; }
+        .stat-changed .stat-value { color: #f59e0b; }
+        .alert { padding: 15px; border-radius: 6px; margin: 15px 0; }
+        .alert-success { background: #d1fae5; border-left: 4px solid #10b981; color: #065f46; }
+        .alert-danger { background: #fee2e2; border-left: 4px solid #ef4444; color: #991b1b; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e0e0e0; }
+        th { background: #f9f9f9; font-weight: 600; font-size: 14px; }
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+        .badge-matching { background: #d1fae5; color: #065f46; }
+        .badge-added { background: #dbeafe; color: #1e40af; }
+        .badge-removed { background: #fee2e2; color: #991b1b; }
+        .badge-changed { background: #fef3c7; color: #92400e; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Schema Diff Report</h1>
+            <div class="metadata">
+                <div>Generated: {{metadata.generatedAt}}</div>
+                <div>APEX Version: {{metadata.apexVersion}} | Report Version: {{metadata.reportVersion}}</div>
+                <div>Source: {{source.name}} ({{source.type}}) → Target: {{target.name}} ({{target.type}})</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📈 Comparison Summary</h2>
+            <div class="stats-grid">
+                <div class="stat-card stat-matching">
+                    <div class="stat-value">{{summary.statistics.matching}}</div>
+                    <div class="stat-label">Matching</div>
+                </div>
+                <div class="stat-card stat-added">
+                    <div class="stat-value">{{summary.statistics.added}}</div>
+                    <div class="stat-label">Added</div>
+                </div>
+                <div class="stat-card stat-removed">
+                    <div class="stat-value">{{summary.statistics.removed}}</div>
+                    <div class="stat-label">Removed</div>
+                </div>
+                <div class="stat-card stat-changed">
+                    <div class="stat-value">{{summary.statistics.changed}}</div>
+                    <div class="stat-label">Changed</div>
+                </div>
+            </div>
+
+            {{#if compatibility.compatible}}
+            <div class="alert alert-success">
+                ✓ <strong>Compatible Migration:</strong> Target schema is backward compatible with source schema.
+            </div>
+            {{else}}
+            <div class="alert alert-danger">
+                ⚠️ <strong>Incompatible Migration:</strong> Breaking changes detected that may cause data loss or runtime errors.
+            </div>
+            {{/if}}
+        </div>
+
+        {{#if columns.matching}}
+        <div class="section">
+            <h2>✅ Matching Columns ({{summary.statistics.matching}})</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Column Name</th>
+                        <th>Data Type</th>
+                        <th>Nullable</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each columns.matching}}
+                    <tr>
+                        <td><strong>{{columnName}}</strong></td>
+                        <td>{{source.dataType}}</td>
+                        <td>{{#if source.nullable}}Yes{{else}}No{{/if}}</td>
+                        <td><span class="badge badge-matching">Matching</span></td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+        {{/if}}
+
+        {{#if columns.added}}
+        <div class="section">
+            <h2>➕ Added Columns ({{summary.statistics.added}})</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Column Name</th>
+                        <th>Data Type</th>
+                        <th>Nullable</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each columns.added}}
+                    <tr>
+                        <td><strong>{{columnName}}</strong></td>
+                        <td>{{target.dataType}}</td>
+                        <td>{{#if target.nullable}}Yes{{else}}No{{/if}}</td>
+                        <td><span class="badge badge-added">Added</span></td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+        {{/if}}
+
+        {{#if columns.removed}}
+        <div class="section">
+            <h2>➖ Removed Columns ({{summary.statistics.removed}})</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Column Name</th>
+                        <th>Data Type</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each columns.removed}}
+                    <tr>
+                        <td><strong>{{columnName}}</strong></td>
+                        <td>{{source.dataType}}</td>
+                        <td><span class="badge badge-removed">Removed</span></td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+        {{/if}}
+
+        {{#if columns.changed}}
+        <div class="section">
+            <h2>🔄 Changed Columns ({{summary.statistics.changed}})</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Column Name</th>
+                        <th>Source</th>
+                        <th>Target</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each columns.changed}}
+                    <tr>
+                        <td><strong>{{columnName}}</strong></td>
+                        <td>{{source.dataType}}</td>
+                        <td>{{target.dataType}}</td>
+                        <td><span class="badge badge-changed">Changed</span></td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+        {{/if}}
+    </div>
+</body>
+</html>

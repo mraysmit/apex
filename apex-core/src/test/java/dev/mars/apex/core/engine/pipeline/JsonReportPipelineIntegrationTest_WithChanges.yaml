@@ -1,0 +1,44 @@
+metadata:
+  name: "Schema Changes Detection Test"
+  version: "1.0"
+  description: "Test that schema changes are properly reflected in JSON report"
+
+data-sources:
+  - name: "csv-source"
+    type: "file-system"
+    connection:
+      base-path: "src/test/resources/test-data"
+    config:
+      file-pattern: "customers.csv"
+      
+  - name: "csv-target"
+    type: "file-system"
+    connection:
+      base-path: "src/test/resources/test-data"
+    config:
+      file-pattern: "customers_with_phone.csv"
+
+pipeline:
+  name: "changes-detection-test"
+  execution:
+    mode: "sequential"
+  
+  steps:
+    - name: "read-source-schema"
+      type: "read-schema"
+      source: "csv-source"
+      parameters:
+        file: "src/test/resources/test-data/customers.csv"
+      
+    - name: "read-target-schema"
+      type: "read-schema"
+      source: "csv-target"
+      parameters:
+        file: "src/test/resources/test-data/customers_with_phone.csv"
+      
+    - name: "compare-schemas"
+      type: "schema-diff"
+      parameters:
+        source-step: "read-source-schema"
+        target-step: "read-target-schema"
+        json-report-output: "apex-data-sync/reports/schema-diff-changes-test.json"

@@ -1,0 +1,260 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://apex.mars.dev/schemas/schema-diff/v1.0.json",
+  "title": "APEX Schema Diff Report",
+  "description": "Schema comparison report for database migrations",
+  "type": "object",
+  "required": ["metadata", "source", "target", "summary", "columns", "compatibility"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "format": "uri"
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["generatedAt", "apexVersion", "reportVersion"],
+      "properties": {
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the report was generated"
+        },
+        "apexVersion": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Version of APEX that generated this report"
+        },
+        "reportVersion": {
+          "type": "string",
+          "description": "Version of the report schema"
+        },
+        "comparisonType": {
+          "type": "string",
+          "enum": ["database-to-database", "csv-to-database", "csv-to-csv", "database-to-csv", "unknown"],
+          "description": "Type of comparison performed"
+        }
+      }
+    },
+    "source": {
+      "$ref": "#/definitions/DataSource"
+    },
+    "target": {
+      "$ref": "#/definitions/DataSource"
+    },
+    "summary": {
+      "type": "object",
+      "required": ["totalColumns", "statistics", "compatible", "migrationRisk"],
+      "properties": {
+        "totalColumns": {
+          "type": "object",
+          "properties": {
+            "source": {"type": "integer", "minimum": 0},
+            "target": {"type": "integer", "minimum": 0}
+          }
+        },
+        "statistics": {
+          "type": "object",
+          "properties": {
+            "matching": {"type": "integer", "minimum": 0},
+            "added": {"type": "integer", "minimum": 0},
+            "removed": {"type": "integer", "minimum": 0},
+            "changed": {"type": "integer", "minimum": 0},
+            "breaking": {"type": "integer", "minimum": 0}
+          }
+        },
+        "compatible": {
+          "type": "boolean",
+          "description": "Whether the migration is backward compatible"
+        },
+        "migrationRisk": {
+          "type": "string",
+          "enum": ["minimal", "low", "medium", "high"],
+          "description": "Overall risk assessment for migration"
+        }
+      }
+    },
+    "columns": {
+      "type": "object",
+      "properties": {
+        "matching": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/ColumnDiff"}
+        },
+        "added": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/ColumnDiff"}
+        },
+        "removed": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/ColumnDiff"}
+        },
+        "changed": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/ColumnDiff"}
+        }
+      }
+    },
+    "compatibility": {
+      "type": "object",
+      "required": ["compatible", "overallRisk"],
+      "properties": {
+        "compatible": {"type": "boolean"},
+        "overallRisk": {
+          "type": "string",
+          "enum": ["minimal", "low", "medium", "high"]
+        },
+        "breakingChanges": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/BreakingChange"}
+        },
+        "safeChanges": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/SafeChange"}
+        }
+      }
+    },
+    "recommendations": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/Recommendation"}
+    }
+  },
+  "definitions": {
+    "DataSource": {
+      "type": "object",
+      "required": ["name", "type"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Data source name"
+        },
+        "type": {
+          "type": "string",
+          "description": "Database type or file format (postgresql, mysql, csv, etc.)"
+        },
+        "connection": {
+          "type": "object",
+          "properties": {
+            "host": {"type": "string"},
+            "port": {"type": "integer"},
+            "database": {"type": "string"},
+            "schema": {"type": "string"},
+            "username": {"type": "string"},
+            "filePath": {"type": "string"}
+          }
+        },
+        "tableMetadata": {
+          "type": "object",
+          "properties": {
+            "tableName": {"type": "string"},
+            "columns": {"type": "integer", "minimum": 0},
+            "primaryKeys": {"type": "integer", "minimum": 0}
+          }
+        }
+      }
+    },
+    "ColumnDiff": {
+      "type": "object",
+      "required": ["columnName", "status"],
+      "properties": {
+        "columnName": {"type": "string"},
+        "status": {
+          "type": "string",
+          "enum": ["matching", "added", "removed", "changed"]
+        },
+        "source": {"$ref": "#/definitions/ColumnInfo"},
+        "target": {"$ref": "#/definitions/ColumnInfo"},
+        "differences": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/PropertyDifference"}
+        },
+        "breakingChange": {"type": "boolean"},
+        "migrationAction": {"type": "string"}
+      }
+    },
+    "ColumnInfo": {
+      "type": "object",
+      "properties": {
+        "dataType": {"type": "string"},
+        "size": {"type": "integer"},
+        "precision": {"type": "integer"},
+        "scale": {"type": "integer"},
+        "nullable": {"type": "boolean"},
+        "primaryKey": {"type": "boolean"},
+        "autoIncrement": {"type": "boolean"},
+        "defaultValue": {"type": "string"}
+      }
+    },
+    "PropertyDifference": {
+      "type": "object",
+      "required": ["property", "changeType", "breaking", "description"],
+      "properties": {
+        "property": {"type": "string"},
+        "sourceValue": {},
+        "targetValue": {},
+        "changeType": {
+          "type": "string",
+          "enum": ["narrowing", "widening", "type_change", "constraint_change"]
+        },
+        "breaking": {"type": "boolean"},
+        "description": {"type": "string"}
+      }
+    },
+    "BreakingChange": {
+      "type": "object",
+      "required": ["severity", "category", "description"],
+      "properties": {
+        "severity": {
+          "type": "string",
+          "enum": ["error", "warning"]
+        },
+        "category": {
+          "type": "string",
+          "enum": ["data_loss", "type_narrowing", "constraint_violation"]
+        },
+        "description": {"type": "string"},
+        "affectedColumn": {"type": "string"},
+        "recommendation": {"type": "string"}
+      }
+    },
+    "SafeChange": {
+      "type": "object",
+      "required": ["category", "description"],
+      "properties": {
+        "category": {
+          "type": "string",
+          "enum": ["additive", "type_widening", "constraint_relaxation"]
+        },
+        "description": {"type": "string"},
+        "affectedColumn": {"type": "string"},
+        "impact": {"type": "string"}
+      }
+    },
+    "Recommendation": {
+      "type": "object",
+      "required": ["priority", "category", "title", "description"],
+      "properties": {
+        "priority": {
+          "type": "string",
+          "enum": ["critical", "high", "medium", "low"]
+        },
+        "category": {
+          "type": "string",
+          "enum": ["schema_fix", "data_validation", "migration_strategy"]
+        },
+        "title": {"type": "string"},
+        "description": {"type": "string"},
+        "action": {
+          "type": "object",
+          "properties": {
+            "type": {"type": "string"},
+            "sql": {"type": "string"},
+            "estimatedImpact": {"type": "string"},
+            "rollbackPlan": {"type": "string"}
+          }
+        },
+        "automatable": {"type": "boolean"},
+        "validationRequired": {"type": "boolean"}
+      }
+    }
+  }
+}

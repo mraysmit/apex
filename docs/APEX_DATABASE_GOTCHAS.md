@@ -419,14 +419,6 @@ enrichments:
         query: "SELECT * FROM reporting.customer_summary_view WHERE customer_id = :customerId"
 ```
 
----
 
-## Related Documentation
-
-- [APEX H2 Database Usage Guide](APEX_H2_DATABASE_USAGE_GUIDE.md)
-- [APEX Lookup Configuration Guide](APEX_LOOKUP_CONFIGURATION_GUIDE.md)
-- [APEX Technical Reference](APEX_TECHNICAL_REFERENCE.md)
-
----
 
 *This document should be updated whenever new database compatibility issues are discovered.*

@@ -1,0 +1,61 @@
+metadata:
+  type: "pipeline-config"
+  name: "Schema Diff JSON Output Test"
+  description: "Test pipeline for JSON report generation in schema-diff"
+  version: "1.0"
+
+pipelines:
+  - name: "schema-diff-json-test"
+    description: "Compare CSV to in-memory schema and generate JSON report"
+    
+    steps:
+      # Step 1: Read schema from CSV file
+      - name: "read-csv-schema"
+        type: "read-schema"
+        source: "customers-csv"
+        parameters:
+          file-path: "demo-data/csv/customers.csv"
+          has-header: true
+      
+      # Step 2: Create target schema in memory
+      - name: "create-target-schema"
+        type: "read-schema"
+        source: "customers-target"
+        parameters:
+          # Use schema-definition to create an in-memory schema
+          schema-definition:
+            table-name: "customers"
+            columns:
+              - name: "customer_id"
+                type: "VARCHAR"
+                maxLength: 50
+                nullable: false
+              - name: "first_name"
+                type: "VARCHAR"
+                maxLength: 100
+                nullable: true
+              - name: "last_name"
+                type: "VARCHAR"
+                maxLength: 100
+                nullable: true
+              - name: "email"
+                type: "VARCHAR"
+                maxLength: 255
+                nullable: true
+      
+      # Step 3: Compare schemas and generate JSON report
+      - name: "compare-schemas"
+        type: "schema-diff"
+        parameters:
+          source-step: "read-csv-schema"
+          target-step: "create-target-schema"
+          json-report-output: "schema-diff-json-test.json"
+          fail-on-incompatibility: false
+
+data-source-refs:
+  - name: "customers-csv"
+    source: "data-sources/customers-csv.yaml"
+    enabled: true
+  - name: "customers-target"
+    source: "data-sources/customers-target.yaml"
+    enabled: true

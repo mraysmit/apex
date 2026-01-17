@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Schema Comparison: source-db → target-db</title>
+    <title>Schema Comparison: csv-source → csv-target</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -220,16 +220,16 @@
 </head>
 <body>
     <div class="container">
-        <h1>Schema Comparison: source-db → target-db</h1>
+        <h1>Schema Comparison: csv-source → csv-target</h1>
         <div class="metadata">
-            <strong>Generated:</strong>2026-01-17 21:04:39    <br/>
+            <strong>Generated:</strong>2026-01-18 00:39:11    <br/>
     <strong>Tool:</strong> APEX Rules Engine v2.1 - Schema Diff Service
 </div>
 <div class="comparison-header">
     <div class="schema-names">
-        <span class="schema-name">source-db</span>
+        <span class="schema-name">csv-source</span>
                 <span class="arrow">→</span>
-                <span class="schema-name">target-db</span>
+                <span class="schema-name">csv-target</span>
             </div>
         </div>
 <h2>Data Source Information</h2>
@@ -240,27 +240,7 @@
 <tbody>
 <tr>
 <th style="background-color: #3498db; color: white; padding: 8px; text-align: left; width: 140px;">Data Source</th>
-<td style="padding: 8px; border-bottom: 1px solid #ddd;">source-db</td>
-</tr>
-<tr>
-<th style="background-color: #3498db; color: white; padding: 8px; text-align: left; width: 140px;">Database Type</th>
-<td style="padding: 8px; border-bottom: 1px solid #ddd;">POSTGRESQL</td>
-</tr>
-<tr>
-<th style="background-color: #3498db; color: white; padding: 8px; text-align: left; width: 140px;">Host</th>
-<td style="padding: 8px; border-bottom: 1px solid #ddd;">localhost</td>
-</tr>
-<tr>
-<th style="background-color: #3498db; color: white; padding: 8px; text-align: left; width: 140px;">Port</th>
-<td style="padding: 8px; border-bottom: 1px solid #ddd;">59924</td>
-</tr>
-<tr>
-<th style="background-color: #3498db; color: white; padding: 8px; text-align: left; width: 140px;">Database</th>
-<td style="padding: 8px; border-bottom: 1px solid #ddd;">source_db</td>
-</tr>
-<tr>
-<th style="background-color: #3498db; color: white; padding: 8px; text-align: left; width: 140px;">Username</th>
-<td style="padding: 8px; border-bottom: 1px solid #ddd;">test</td>
+<td style="padding: 8px; border-bottom: 1px solid #ddd;">csv-source</td>
 </tr>
 </tbody>
 </table>
@@ -271,27 +251,7 @@
 <tbody>
 <tr>
 <th style="background-color: #3498db; color: white; padding: 8px; text-align: left; width: 140px;">Data Source</th>
-<td style="padding: 8px; border-bottom: 1px solid #ddd;">target-db</td>
-</tr>
-<tr>
-<th style="background-color: #3498db; color: white; padding: 8px; text-align: left; width: 140px;">Database Type</th>
-<td style="padding: 8px; border-bottom: 1px solid #ddd;">POSTGRESQL</td>
-</tr>
-<tr>
-<th style="background-color: #3498db; color: white; padding: 8px; text-align: left; width: 140px;">Host</th>
-<td style="padding: 8px; border-bottom: 1px solid #ddd;">localhost</td>
-</tr>
-<tr>
-<th style="background-color: #3498db; color: white; padding: 8px; text-align: left; width: 140px;">Port</th>
-<td style="padding: 8px; border-bottom: 1px solid #ddd;">59923</td>
-</tr>
-<tr>
-<th style="background-color: #3498db; color: white; padding: 8px; text-align: left; width: 140px;">Database</th>
-<td style="padding: 8px; border-bottom: 1px solid #ddd;">target_db</td>
-</tr>
-<tr>
-<th style="background-color: #3498db; color: white; padding: 8px; text-align: left; width: 140px;">Username</th>
-<td style="padding: 8px; border-bottom: 1px solid #ddd;">test</td>
+<td style="padding: 8px; border-bottom: 1px solid #ddd;">csv-target</td>
 </tr>
 </tbody>
 </table>
@@ -305,7 +265,7 @@
     <span class="stat-label">Matching</span>
 </div>
 <div class="stat-card stat-added">
-    <span class="stat-value">2</span>
+    <span class="stat-value">1</span>
     <span class="stat-label">Added</span>
 </div>
 <div class="stat-card stat-removed">
@@ -321,13 +281,13 @@
 <strong>✓ Compatible Migration:</strong> Target schema is backward compatible with source schema.
 </div>
 </div>
-<h2>Source Schema: source-db</h2>
+<h2>Source Schema: csv-source</h2>
 <div class="schema-section">
 <div style="background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
     <strong>Total Columns:</strong> 3 |
     <strong>Primary Keys:</strong> 0 |
-    <strong>Nullable:</strong> 1 |
-    <strong>Not Nullable:</strong> 2
+    <strong>Nullable:</strong> 3 |
+    <strong>Not Nullable:</strong> 0
 </div>
 <table>
 <thead>
@@ -344,41 +304,41 @@
 <tbody>
 <tr class="diff-matching">
 <td>id</td>
-<td>integer</td>
-<td><span class="not-nullable">No</span></td>
+<td>INTEGER</td>
+<td><span class="nullable">Yes</span></td>
 <td>-</td>
-<td>32</td>
-<td>0</td>
+<td>-</td>
+<td>-</td>
 <td>-</td>
 </tr>
 <tr class="diff-matching">
 <td>name</td>
-<td>character varying</td>
-<td><span class="not-nullable">No</span></td>
-<td>100</td>
+<td>VARCHAR</td>
+<td><span class="nullable">Yes</span></td>
+<td>-</td>
 <td>-</td>
 <td>-</td>
 <td>-</td>
 </tr>
 <tr class="diff-matching">
-<td>price</td>
-<td>numeric</td>
+<td>email</td>
+<td>VARCHAR</td>
 <td><span class="nullable">Yes</span></td>
 <td>-</td>
-<td>10</td>
-<td>2</td>
+<td>-</td>
+<td>-</td>
 <td>-</td>
 </tr>
 </tbody>
 </table>
 </div>
-<h2>Target Schema: target-db</h2>
+<h2>Target Schema: csv-target</h2>
 <div class="schema-section">
 <div style="background-color: white; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
-    <strong>Total Columns:</strong> 5 |
+    <strong>Total Columns:</strong> 4 |
     <strong>Primary Keys:</strong> 0 |
-    <strong>Nullable:</strong> 3 |
-    <strong>Not Nullable:</strong> 2
+    <strong>Nullable:</strong> 4 |
+    <strong>Not Nullable:</strong> 0
 </div>
 <table>
 <thead>
@@ -395,45 +355,36 @@
 <tbody>
 <tr class="diff-matching">
 <td>id</td>
-<td>integer</td>
-<td><span class="not-nullable">No</span></td>
+<td>INTEGER</td>
+<td><span class="nullable">Yes</span></td>
 <td>-</td>
-<td>32</td>
-<td>0</td>
-<td>-</td>
-</tr>
-<tr class="diff-matching">
-<td>name</td>
-<td>character varying</td>
-<td><span class="not-nullable">No</span></td>
-<td>100</td>
 <td>-</td>
 <td>-</td>
 <td>-</td>
 </tr>
 <tr class="diff-matching">
-<td>price</td>
-<td>numeric</td>
+<td>name</td>
+<td>VARCHAR</td>
 <td><span class="nullable">Yes</span></td>
 <td>-</td>
-<td>10</td>
-<td>2</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="diff-matching">
+<td>email</td>
+<td>VARCHAR</td>
+<td><span class="nullable">Yes</span></td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
 <td>-</td>
 </tr>
 <tr class="diff-added">
-<td>description</td>
-<td>text</td>
+<td>phone</td>
+<td>VARCHAR</td>
 <td><span class="nullable">Yes</span></td>
 <td>-</td>
-<td>-</td>
-<td>-</td>
-<td><span class="badge badge-added">ADDED</span></td>
-</tr>
-<tr class="diff-added">
-<td>category</td>
-<td>character varying</td>
-<td><span class="nullable">Yes</span></td>
-<td>50</td>
 <td>-</td>
 <td>-</td>
 <td><span class="badge badge-added">ADDED</span></td>
@@ -442,18 +393,13 @@
 </table>
 </div>
 <h2>Detailed Differences</h2>
-<h3 style="color: #27ae60;">✓ Added Columns (2)</h3>
+<h3 style="color: #27ae60;">✓ Added Columns (1)</h3>
 <table>
 <thead><tr><th>Column</th><th>Type</th><th>Impact</th></tr></thead>
 <tbody>
 <tr class="diff-added">
-<td><strong>description</strong></td>
-<td>text</td>
-<td>Non-breaking (new column)</td>
-</tr>
-<tr class="diff-added">
-<td><strong>category</strong></td>
-<td>character varying</td>
+<td><strong>phone</strong></td>
+<td>VARCHAR</td>
 <td>Non-breaking (new column)</td>
 </tr>
 </tbody></table>
