@@ -115,7 +115,7 @@ public class CompletePipelineWithSchemaTest extends SyncTestBase {
     @DisplayName("Should execute complete ETL pipeline with schema validation")
     public void shouldExecuteCompletePipelineWithSchema() throws Exception {
         // Load configuration from Java test directory (APEX naming convention)
-        RulesEngine rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/pipeline/CompletePipelineWithSchemaTest.yaml");
+        RulesEngine rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/pipeline/CompletePipelineWithSchemaTest.yaml");
         assertNotNull(rulesEngine, "RulesEngine should be initialized");
 
         // Execute the complete pipeline

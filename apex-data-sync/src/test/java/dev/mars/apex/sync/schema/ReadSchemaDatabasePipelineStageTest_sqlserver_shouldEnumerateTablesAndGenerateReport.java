@@ -62,7 +62,7 @@ class ReadSchemaDatabasePipelineStageTest_sqlserver_shouldEnumerateTablesAndGene
         
         // TODO: Uncomment when SQL Server is available
         /*
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/schema/ReadSchemaDatabasePipelineStageTest_sqlserver_shouldEnumerateTablesAndGenerateReport.yaml");
+        rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/schema/ReadSchemaDatabasePipelineStageTest_sqlserver_shouldEnumerateTablesAndGenerateReport.yaml");
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
         
         assertTrue(result.isSuccess(), "Pipeline should execute successfully");

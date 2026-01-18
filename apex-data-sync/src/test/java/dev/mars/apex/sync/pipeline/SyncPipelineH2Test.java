@@ -97,7 +97,7 @@ public class SyncPipelineH2Test extends SyncTestBase {
     @DisplayName("Should sync data using H2 compatibility modes")
     public void shouldSyncUsingH2Modes() throws Exception {
         // Load configuration from Java test directory (APEX naming convention)
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/pipeline/SyncPipelineH2Test.yaml");
+        rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/pipeline/SyncPipelineH2Test.yaml");
         assertNotNull(rulesEngine, "RulesEngine should be initialized");
 
         // Execute the pipeline

@@ -1,6 +1,7 @@
 package dev.mars.apex.core.engine.config;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.engine.model.ExecutionStep;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,7 @@ public class RulesEngineExecutionTraceTest {
     @Test
     public void testExecutionTraceLegacy() throws Exception {
         YamlConfigurationLoader loader = new YamlConfigurationLoader();
-        dev.mars.apex.core.config.yaml.YamlRuleConfiguration config = loader.loadFromFile("src/test/resources/tracing/trace-test-legacy.yaml");
+        YamlRuleConfiguration config = loader.loadFromFile("src/test/resources/tracing/trace-test-legacy.yaml");
         
         // Force legacy mode by clearing item order
         config.setItemOrder(null);

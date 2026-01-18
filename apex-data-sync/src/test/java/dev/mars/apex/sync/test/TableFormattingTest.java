@@ -78,7 +78,7 @@ public class TableFormattingTest {
 
         setupTestDatabase();
 
-                RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/sync/test/TableFormattingTest.yaml");
+                RulesEngine engine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/test/TableFormattingTest.yaml");
         RuleResult result = engine.evaluate(new java.util.HashMap<>());
 
         assertNotNull(result);
@@ -94,7 +94,7 @@ public class TableFormattingTest {
 
         setupTestDatabase();
 
-                RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/sync/test/TableFormattingTest.yaml");
+                RulesEngine engine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/test/TableFormattingTest.yaml");
         RuleResult result = engine.evaluate(new java.util.HashMap<>());
 
         assertNotNull(result);
@@ -110,7 +110,7 @@ public class TableFormattingTest {
 
         setupDatabaseWithSpecialChars();
 
-                RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/sync/test/TableFormattingTest.yaml");
+                RulesEngine engine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/test/TableFormattingTest.yaml");
         RuleResult result = engine.evaluate(new java.util.HashMap<>());
 
         assertNotNull(result);

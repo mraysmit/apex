@@ -83,7 +83,7 @@ public class MsSqlToPostgresSyncTest extends SyncTestBase {
 
         // 3. Initialize and Execute Pipeline (using classpath resource)
         logger.info("Initializing RulesEngine from classpath: dev/mars/apex/sync/pipeline/MsSqlToPostgresSyncTest.yaml");
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/pipeline/MsSqlToPostgresSyncTest.yaml");
+        rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/pipeline/MsSqlToPostgresSyncTest.yaml");
         assertNotNull(rulesEngine, "RulesEngine should be initialized");
 
         RuleResult result = rulesEngine.evaluate(new HashMap<>());

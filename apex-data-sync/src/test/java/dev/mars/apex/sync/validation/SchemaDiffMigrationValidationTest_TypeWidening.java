@@ -73,7 +73,7 @@ class SchemaDiffMigrationValidationTest_TypeWidening {
         logger.info("\n=== Test: Compatible Type Widening (VARCHAR 100→200, DATE→TIMESTAMP) ===\n");
         
         // Execute schema diff pipeline
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/validation/SchemaDiffDatabaseMigrationValidationTest_TypeWidening.yaml");
+        rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/validation/SchemaDiffDatabaseMigrationValidationTest_TypeWidening.yaml");
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
 
         // Verify pipeline execution

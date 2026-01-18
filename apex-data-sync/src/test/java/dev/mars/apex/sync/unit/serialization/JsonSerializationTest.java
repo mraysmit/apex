@@ -98,7 +98,7 @@ public class JsonSerializationTest extends SyncTestBase {
     @Test
     public void shouldSerializeSchemaMetadataToJson() throws Exception {
         // Execute YAML-configured pipeline
-        RulesEngine rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/unit/serialization/JsonSerializationTest.yaml");
+        RulesEngine rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/unit/serialization/JsonSerializationTest.yaml");
         assertNotNull(rulesEngine, "RulesEngine should be initialized");
 
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
@@ -156,7 +156,7 @@ public class JsonSerializationTest extends SyncTestBase {
 
     @Test
     public void shouldSerializeColumnsWithAllDataTypes() throws Exception {
-        RulesEngine rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/unit/serialization/JsonSerializationTest.yaml");
+        RulesEngine rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/unit/serialization/JsonSerializationTest.yaml");
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
         assertTrue(result.isSuccess());
 
@@ -182,7 +182,7 @@ public class JsonSerializationTest extends SyncTestBase {
 
     @Test
     public void shouldSerializeNullableFlags() throws Exception {
-        RulesEngine rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/unit/serialization/JsonSerializationTest.yaml");
+        RulesEngine rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/unit/serialization/JsonSerializationTest.yaml");
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
         assertTrue(result.isSuccess());
 
@@ -212,7 +212,7 @@ public class JsonSerializationTest extends SyncTestBase {
 
     @Test
     public void shouldSerializeSourceTypeInformation() throws Exception {
-        RulesEngine rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/unit/serialization/JsonSerializationTest.yaml");
+        RulesEngine rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/unit/serialization/JsonSerializationTest.yaml");
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
         assertTrue(result.isSuccess());
 
@@ -234,7 +234,7 @@ public class JsonSerializationTest extends SyncTestBase {
 
     @Test
     public void shouldPreserveColumnOrder() throws Exception {
-        RulesEngine rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/unit/serialization/JsonSerializationTest.yaml");
+        RulesEngine rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/unit/serialization/JsonSerializationTest.yaml");
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
         assertTrue(result.isSuccess());
 
@@ -258,7 +258,7 @@ public class JsonSerializationTest extends SyncTestBase {
 
     @Test
     public void shouldRoundTripSerialization() throws Exception {
-        RulesEngine rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/unit/serialization/JsonSerializationTest.yaml");
+        RulesEngine rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/unit/serialization/JsonSerializationTest.yaml");
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
         assertTrue(result.isSuccess());
 

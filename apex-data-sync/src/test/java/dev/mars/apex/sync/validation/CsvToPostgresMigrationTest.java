@@ -104,7 +104,7 @@ public class CsvToPostgresMigrationTest extends SyncTestBase {
     @DisplayName("Should validate CSV to PostgreSQL migration compatibility")
     public void shouldValidateCsvToPostgresMigration() throws Exception {
         // Load configuration from Java test directory (APEX naming convention)
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/validation/CsvToPostgresMigrationTest.yaml");
+        rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/validation/CsvToPostgresMigrationTest.yaml");
         assertNotNull(rulesEngine, "RulesEngine should be initialized");
 
         // Execute the pipeline

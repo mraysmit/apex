@@ -135,7 +135,7 @@ class SchemaDiffMigrationValidationTest_AddedColumns_Testcontainers extends Sync
         logger.info("\n=== Test: Safe Schema Evolution (Added Nullable Columns) ===\n");
 
         // Execute schema diff pipeline
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/validation/SchemaDiffDatabaseMigrationValidationTest_AddedColumns_Testcontainers.yaml");
+        rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/validation/SchemaDiffDatabaseMigrationValidationTest_AddedColumns_Testcontainers.yaml");
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
 
         // Verify pipeline execution

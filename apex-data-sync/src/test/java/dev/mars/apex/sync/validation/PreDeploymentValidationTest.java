@@ -91,7 +91,7 @@ public class PreDeploymentValidationTest extends SyncTestBase {
     @DisplayName("Should validate deployment safety before production")
     public void shouldValidatePreDeployment() throws Exception {
         // Load configuration from Java test directory (APEX naming convention)
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/validation/PreDeploymentValidationTest.yaml");
+        rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/validation/PreDeploymentValidationTest.yaml");
         assertNotNull(rulesEngine, "RulesEngine should be initialized");
 
         // Execute the pipeline

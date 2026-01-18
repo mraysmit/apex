@@ -138,7 +138,7 @@ public class ReadSchemaMultiTableTest extends SyncTestBase {
     @DisplayName("Should read schemas from 5 database tables using YAML configuration")
     public void shouldReadSchemaFromMultipleTables() throws Exception {
         // Load configuration from Java test directory (APEX naming convention)
-        RulesEngine rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/schema/ReadSchemaMultiTableTest.yaml");
+        RulesEngine rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/schema/ReadSchemaMultiTableTest.yaml");
         assertNotNull(rulesEngine, "RulesEngine should be initialized");
 
         // Execute the pipeline (5 schema read operations)

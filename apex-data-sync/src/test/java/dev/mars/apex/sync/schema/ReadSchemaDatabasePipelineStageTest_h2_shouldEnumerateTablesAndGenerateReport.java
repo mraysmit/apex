@@ -118,7 +118,7 @@ class ReadSchemaDatabasePipelineStageTest_h2_shouldEnumerateTablesAndGenerateRep
         logger.info("✓ H2 test database initialized with 3 tables: customers, orders, products");
 
         // Execute pipeline with table enumeration and report generation
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/schema/ReadSchemaDatabasePipelineStageTest_h2_shouldEnumerateTablesAndGenerateReport.yaml");
+        rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/schema/ReadSchemaDatabasePipelineStageTest_h2_shouldEnumerateTablesAndGenerateReport.yaml");
 
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
 

@@ -82,7 +82,7 @@ public class CustomTypeMappingTest {
 
         setupOracleStyleDatabase();
 
-        RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/sync/test/CustomTypeMappingTest.yaml");
+        RulesEngine engine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/test/CustomTypeMappingTest.yaml");
         RuleResult result = engine.evaluate(new java.util.HashMap<>());
 
         assertNotNull(result);
@@ -98,7 +98,7 @@ public class CustomTypeMappingTest {
 
         setupSqlServerStyleDatabase();
 
-        RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/sync/test/CustomTypeMappingTest.yaml");
+        RulesEngine engine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/test/CustomTypeMappingTest.yaml");
         RuleResult result = engine.evaluate(new java.util.HashMap<>());
 
         assertNotNull(result);

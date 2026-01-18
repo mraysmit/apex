@@ -85,7 +85,7 @@ public class JsonEdgeCasesTest {
 
         setupIdenticalSchemas();
 
-                RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/sync/test/JsonEdgeCasesTest.yaml");
+                RulesEngine engine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/test/JsonEdgeCasesTest.yaml");
         RuleResult result = engine.evaluate(new java.util.HashMap<>());
 
         assertNotNull(result);
@@ -102,7 +102,7 @@ public class JsonEdgeCasesTest {
         setupOnlyAdditions();
 
         System.setProperty("DB_URL", jdbcUrl);
-                RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/sync/test/JsonEdgeCasesTest.yaml");
+                RulesEngine engine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/test/JsonEdgeCasesTest.yaml");
         RuleResult result = engine.evaluate(new java.util.HashMap<>());
 
         assertNotNull(result);
@@ -119,7 +119,7 @@ public class JsonEdgeCasesTest {
         setupAllBreakingChanges();
 
         System.setProperty("DB_URL", jdbcUrl);
-                RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/sync/test/JsonEdgeCasesTest.yaml");
+                RulesEngine engine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/test/JsonEdgeCasesTest.yaml");
         RuleResult result = engine.evaluate(new java.util.HashMap<>());
 
         assertNotNull(result);

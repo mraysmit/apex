@@ -87,7 +87,7 @@ public class TypeCompatibilityTest extends SyncTestBase {
     @Test
     public void shouldDetectTypeCompatibilityChanges() throws Exception {
         // Execute YAML-configured pipeline
-        RulesEngine rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/unit/comparison/TypeCompatibilityTest.yaml");
+        RulesEngine rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/unit/comparison/TypeCompatibilityTest.yaml");
         assertNotNull(rulesEngine, "RulesEngine should be initialized");
 
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
@@ -136,7 +136,7 @@ public class TypeCompatibilityTest extends SyncTestBase {
 
     @Test
     public void shouldDetectVarcharNarrowing() throws Exception {
-        RulesEngine rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/unit/comparison/TypeCompatibilityTest.yaml");
+        RulesEngine rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/unit/comparison/TypeCompatibilityTest.yaml");
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
         assertTrue(result.isSuccess());
 
@@ -172,7 +172,7 @@ public class TypeCompatibilityTest extends SyncTestBase {
 
     @Test
     public void shouldValidateAllColumnTypesPresent() throws Exception {
-        RulesEngine rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/unit/comparison/TypeCompatibilityTest.yaml");
+        RulesEngine rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/unit/comparison/TypeCompatibilityTest.yaml");
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
         assertTrue(result.isSuccess());
 

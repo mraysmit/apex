@@ -86,7 +86,7 @@ public class JsonSerializationTest {
     public void testBasicJsonSerialization() throws Exception {
         logger.info("=== Testing basic JSON serialization ===");
 
-                RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/sync/test/JsonSerializationTest.yaml");
+                RulesEngine engine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/test/JsonSerializationTest.yaml");
         RuleResult result = engine.evaluate(new java.util.HashMap<>());
 
         assertNotNull(result);
@@ -100,7 +100,7 @@ public class JsonSerializationTest {
     public void testJsonFormattingAndIndentation() throws Exception {
         logger.info("=== Testing JSON formatting and indentation ===");
 
-        RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/sync/test/JsonSerializationTest.yaml");
+        RulesEngine engine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/test/JsonSerializationTest.yaml");
         RuleResult result = engine.evaluate(new java.util.HashMap<>());
 
         assertNotNull(result);
@@ -114,7 +114,7 @@ public class JsonSerializationTest {
     public void testDataTypeSerialization() throws Exception {
         logger.info("=== Testing data type serialization ===");
 
-        RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/sync/test/JsonSerializationTest.yaml");
+        RulesEngine engine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/test/JsonSerializationTest.yaml");
         RuleResult result = engine.evaluate(new java.util.HashMap<>());
 
         assertNotNull(result);

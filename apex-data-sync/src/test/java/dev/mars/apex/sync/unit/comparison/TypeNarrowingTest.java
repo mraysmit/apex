@@ -71,7 +71,7 @@ public class TypeNarrowingTest extends SyncTestBase {
     @Test
     public void shouldDetectIntegerTypeNarrowing() throws Exception {
         // Execute YAML-configured pipeline
-        RulesEngine rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/unit/comparison/TypeNarrowingTest.yaml");
+        RulesEngine rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/unit/comparison/TypeNarrowingTest.yaml");
         assertNotNull(rulesEngine, "RulesEngine should be initialized");
 
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
@@ -91,7 +91,7 @@ public class TypeNarrowingTest extends SyncTestBase {
     @Test
     public void shouldDetectDecimalPrecisionNarrowing() throws Exception {
         // Execute YAML-configured pipeline  
-        RulesEngine rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/unit/comparison/TypeNarrowingTest.yaml");
+        RulesEngine rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/unit/comparison/TypeNarrowingTest.yaml");
         assertNotNull(rulesEngine, "RulesEngine should be initialized: " + 
             (rulesEngine == null ? "null" : "Engine initialization failed"));
 
