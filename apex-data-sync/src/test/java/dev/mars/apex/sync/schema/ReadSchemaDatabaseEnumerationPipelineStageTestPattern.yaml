@@ -1,3 +1,30 @@
+# =====================================================================================
+# APEX Table Enumeration with Pattern Matching Test
+# =====================================================================================
+#
+# Purpose:
+#   Tests table enumeration with pattern matching, validating ability to filter
+#   tables by name pattern.
+#
+# Test Scenario:
+#   - Pattern: temp% (matches all tables starting with 'temp')
+#   - Only tables matching pattern are included
+#
+# Database: H2 ./target/h2-demo/schema_enum_test
+#
+# Pattern Matching Benefits:
+#   - Filter tables by naming convention
+#   - Target specific table groups
+#   - Flexible discovery
+#
+# Expected Results:
+#   - Only temp* tables enumerated
+#
+# Related Tests:
+#   - ReadSchemaDatabaseEnumerationPipelineStageTestExclusions: Exclusion-based filtering
+#
+# =====================================================================================
+
 metadata:
   type: "pipeline-config"
   version: "1.0"
@@ -6,9 +33,9 @@ metadata:
 data-sources:
   - name: "test-h2-db"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
-      database: "./target/h2-demo/schema_enum_test"
+      database: "./target/h2-demo/schema_enum_test"  # File-based H2 database
       username: "sa"
       password: ""
     enabled: true
@@ -20,9 +47,9 @@ pipeline:
     timeout-seconds: 30
   steps:
     - name: "read-temp-table-schemas"
-      type: "read-schema"
+      type: "read-schema"  # Read schema from database
       source: "test-h2-db"
       description: "Enumerate tables matching 'temp%' pattern"
       parameters:
-        schema: "PUBLIC"
-        table-pattern: "temp%"
+        schema: "PUBLIC"  # Schema to enumerate
+        table-pattern: "temp%"  # Pattern to match

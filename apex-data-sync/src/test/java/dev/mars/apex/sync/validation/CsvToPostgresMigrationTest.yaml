@@ -1,3 +1,46 @@
+# =====================================================================================
+# APEX CSV to PostgreSQL Migration Validation Pipeline
+# =====================================================================================
+#
+# Purpose:
+#   Real-world migration scenario: validates that legacy CSV file schema is compatible
+#   with target PostgreSQL database schema before data migration.
+#
+# Test Scenarios:
+#   1. Read schema from legacy CSV file (customer data export)
+#   2. Read schema from PostgreSQL target table (CUSTOMERS)
+#   3. Compare schemas to validate migration compatibility
+#   4. Detect any incompatibilities before actual data migration
+#
+# Database Setup:
+#   - Source: CSV file (file-system data source)
+#   - Target: H2 database (PostgreSQL compatibility mode)
+#   - Simulates CSV → PostgreSQL migration
+#
+# Migration Validation Features:
+#   - case-insensitive-names: true (handles naming differences)
+#   - inferred-type-tolerance: true (allows CSV type inference flexibility)
+#   - allow-added-columns: true (PostgreSQL can have additional columns)
+#   - fail-on-incompatibility: false (warning mode, not blocking)
+#
+# Real-World Use Case:
+#   - Migrating from legacy file-based systems to PostgreSQL
+#   - Validating data warehouse ETL processes
+#   - Pre-migration compatibility checks
+#   - Preventing data type mismatches
+#
+# Expected Results:
+#   - CSV schema successfully read and inferred
+#   - PostgreSQL schema read from CUSTOMERS table
+#   - Compatibility validated
+#   - Migration approved or issues identified
+#
+# Related Tests:
+#   - MultiTableMigrationTest: Multi-table CSV migrations
+#   - SqlServerPostgresMigrationTest: Cross-database migrations
+#
+# =====================================================================================
+
 # APEX Data Sync - CSV to PostgreSQL Migration Validation
 # Real-world use case: Validating legacy CSV data migration to PostgreSQL
 
@@ -10,18 +53,20 @@ metadata:
   description: "Validate CSV schema compatibility with PostgreSQL target"
 
 data-sources:
+  # Legacy CSV file source
   - name: "legacy-csv"
     type: "file-system"
-    source-type: "csv"
+    source-type: "csv"  # CSV files
     enabled: true
     connection:
-      base-path: "src/test/resources"
+      base-path: "src/test/resources"  # Base directory
 
+  # PostgreSQL target database (H2 in compatibility mode)
   - name: "postgres-target"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
-      database: "mem:postgres_target;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      database: "mem:postgres_target;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"  # PostgreSQL compatibility mode
       username: "sa"
       password: ""
     enabled: true
@@ -29,31 +74,34 @@ data-sources:
 pipeline:
   name: "csv-postgres-migration-validation"
   execution:
-    mode: "sequential"
-    error-handling: "stop-on-error"
+    mode: "sequential"  # Steps execute in order
+    error-handling: "stop-on-error"  # Halt on any failure
   
   steps:
+    # Read legacy CSV file schema
     - name: "read-legacy-csv-schema"
       type: "read-schema"
       source: "legacy-csv"
       description: "Read schema from legacy CSV file"
       parameters:
-        file: "src/test/resources/test-data/legacy-customers.csv"
+        file: "src/test/resources/test-data/legacy-customers.csv"  # CSV file path
 
+    # Read PostgreSQL target table schema
     - name: "read-postgres-target-schema"
       type: "read-schema"
       source: "postgres-target"
       description: "Read schema from PostgreSQL target table"
       parameters:
-        table: "CUSTOMERS"
+        table: "CUSTOMERS"  # Target table
 
+    # Validate CSV → PostgreSQL migration compatibility
     - name: "validate-migration-compatibility"
       type: "schema-diff"
       description: "Validate CSV schema is compatible with PostgreSQL target"
       parameters:
-        source-step: "read-legacy-csv-schema"
-        target-step: "read-postgres-target-schema"
-        case-insensitive-names: true
-        inferred-type-tolerance: true
-        allow-added-columns: true
-        fail-on-incompatibility: false
+        source-step: "read-legacy-csv-schema"  # CSV schema
+        target-step: "read-postgres-target-schema"  # PostgreSQL schema
+        case-insensitive-names: true  # Column name case handling
+        inferred-type-tolerance: true  # Allow CSV type inference flexibility
+        allow-added-columns: true  # PostgreSQL can have extra columns
+        fail-on-incompatibility: false  # Report only

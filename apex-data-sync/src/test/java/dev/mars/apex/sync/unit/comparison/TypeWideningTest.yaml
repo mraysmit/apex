@@ -1,0 +1,92 @@
+# =====================================================================================
+# APEX Type Widening Test Pipeline
+# =====================================================================================
+#
+# Purpose:
+#   Validates detection of safe type widening changes during schema comparison.
+#   Type widening allows existing data to fit into larger data types without loss.
+#
+# Test Scenarios:
+#   1. Integer Type Widening: INTEGER → BIGINT (safe, no data loss)
+#   2. Decimal Precision Widening: DECIMAL(10,2) → DECIMAL(15,4) (safe expansion)
+#
+# Database Setup:
+#   - Uses PostgreSQL via Testcontainers (postgres:15.13-alpine3.20)
+#   - Creates two schemas: source_schema (original types) and target_schema (widened types)
+#   - Environment variables: POSTGRES_HOST, POSTGRES_PORT (injected at runtime)
+#
+# Test Data:
+#   - Table: products (product_id, quantity, price)
+#   - Source: INTEGER, DECIMAL(10,2)
+#   - Target: BIGINT, DECIMAL(15,4)
+#
+# Expected Results:
+#   - Pipeline executes successfully
+#   - Schema read operations complete for both source and target
+#   - Type differences detected via read-schema pipeline steps
+#
+# Related Tests:
+#   - TypeNarrowingTest.java (opposite: type narrowing/unsafe changes)
+#   - PrecisionScaleTest.java (DECIMAL precision/scale specific tests)
+#
+# =====================================================================================
+
+metadata:
+  id: "type-widening-test"
+  name: "Type Widening Test"
+  version: "1.0"
+  type: "pipeline-config"
+  author: "APEX Team"
+  description: "Test pipeline for type widening validation (compatible changes)"
+
+data-sources:
+  # Source database with narrower data types (e.g., SMALLINT, VARCHAR(50))
+  - name: "source-database"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      host: "${POSTGRES_HOST}"  # Provided by Testcontainers
+      port: ${POSTGRES_PORT}     # Provided by Testcontainers
+      database: "apex_widening_test"
+      username: "apex_user"
+      password: "apex_pass"
+      schema: "source_schema"
+    enabled: true
+
+  # Target database with widened data types (e.g., INTEGER, VARCHAR(200))
+  - name: "target-database"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      host: "${POSTGRES_HOST}"  # Provided by Testcontainers
+      port: ${POSTGRES_PORT}     # Provided by Testcontainers
+      database: "apex_widening_test"
+      username: "apex_user"
+      password: "apex_pass"
+      schema: "target_schema"
+    enabled: true
+
+pipeline:
+  name: "type-widening-test-pipeline"
+  execution:
+    mode: "sequential"              # Steps execute in order
+    error-handling: "stop-on-error"  # Halt on any failure
+  
+  steps:
+    # Read source schema with narrower types
+    - name: "read-source-schema"
+      type: "read-schema"
+      source: "source-database"
+      description: "Read schema from source database with narrower types"
+      parameters:
+        table: "products"            # Table with original narrow types
+        schema: "source_schema"      # Source schema location
+        
+    # Read target schema with widened types
+    - name: "read-target-schema"
+      type: "read-schema"
+      source: "target-database"
+      description: "Read schema from target database with widened types"
+      parameters:
+        table: "products"            # Same table name, wider types
+        schema: "target_schema"      # Target schema location

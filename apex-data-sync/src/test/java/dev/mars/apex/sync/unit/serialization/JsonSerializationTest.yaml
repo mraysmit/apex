@@ -1,3 +1,51 @@
+# =====================================================================================
+# APEX JSON Serialization Test Pipeline
+# =====================================================================================
+#
+# Purpose:
+#   Tests JSON report generation from schema comparison, validating that schema
+#   differences are properly serialized as machine-readable JSON.
+#
+# Test Scenarios:
+#   1. Read schema from source database (CUSTOMERS table)
+#   2. Read schema from target database (CUSTOMERS table)
+#   3. Compare schemas (future enhancement - currently single schema read)
+#   4. Generate JSON report (future enhancement)
+#
+# Database Setup:
+#   - Source: H2 mem:json_test_source (PostgreSQL mode)
+#   - Target: H2 mem:json_test_target (PostgreSQL mode)
+#
+# JSON Serialization Benefits:
+#   - Machine-readable format for automation
+#   - API integration (CI/CD, monitoring tools)
+#   - Programmatic schema analysis
+#   - Version control friendly (text-based)
+#
+# JSON Report Structure:
+#   - Schema metadata (table name, columns)
+#   - Differences (added, removed, modified columns)
+#   - Data types and constraints
+#   - Compatibility flags
+#
+# Use Cases:
+#   - CI/CD pipeline integration
+#   - Automated migration validation
+#   - API-driven schema governance
+#   - Programmatic schema analysis tools
+#
+# Expected Results:
+#   - Schema read from CUSTOMERS table
+#   - JSON report generated (future)
+#   - Valid JSON format
+#   - Machine-parseable output
+#
+# Related Tests:
+#   - JsonEdgeCasesTest: Tests edge cases in JSON generation
+#   - schema-diff-json-test: JSON report from schema-diff
+#
+# =====================================================================================
+
 # APEX JSON Serialization Test Pipeline
 # Tests JSON report generation from schema comparison
 
@@ -10,20 +58,22 @@ metadata:
   description: "Test pipeline for JSON schema diff report generation"
 
 data-sources:
+  # Source H2 database (in-memory, PostgreSQL mode)
   - name: "source-h2-database"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
-      database: "mem:json_test_source;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      database: "mem:json_test_source;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"  # PostgreSQL compatibility mode
       username: "sa"
       password: ""
     enabled: true
 
+  # Target H2 database (in-memory, PostgreSQL mode)
   - name: "target-h2-database"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
-      database: "mem:json_test_target;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      database: "mem:json_test_target;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"  # PostgreSQL compatibility mode
       username: "sa"
       password: ""
     enabled: true
@@ -31,13 +81,15 @@ data-sources:
 pipeline:
   name: "json-serialization-test-pipeline"
   execution:
-    mode: "sequential"
-    error-handling: "stop-on-error"
+    mode: "sequential"  # Steps execute in order
+    error-handling: "stop-on-error"  # Halt on any failure
   
   steps:
+    # Read schema for JSON serialization testing
     - name: "read-schema-from-customers-table"
       type: "read-schema"
       source: "source-h2-database"
       description: "Read schema metadata from customers table"
       parameters:
-        table: "CUSTOMERS"
+        table: "CUSTOMERS"  # CUSTOMERS table
+        report-output: "json-serialization-test.json"  # JSON output (future)

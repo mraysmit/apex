@@ -1,3 +1,46 @@
+# =====================================================================================
+# APEX Cross-Platform Migration Validation (SQL Server → PostgreSQL)
+# =====================================================================================
+#
+# Purpose:
+#   Real-world cross-platform migration: validates schema compatibility when
+#   migrating from SQL Server to PostgreSQL with automatic type mapping.
+#
+# Test Scenarios:
+#   1. Read SQL Server schema (simulated via CSV with SQL Server types)
+#   2. Read PostgreSQL target schema (TARGET_CUSTOMERS table)
+#   3. Apply type mappings: NVARCHAR→VARCHAR, BIT→BOOLEAN, DATETIME2→TIMESTAMP
+#   4. Validate cross-platform compatibility
+#
+# Database Setup:
+#   - Source: CSV file (simulating SQL Server schema export)
+#   - Target: H2 database (PostgreSQL compatibility mode)
+#   - Type mappings configured in schema-diff step
+#
+# Cross-Platform Type Mappings:
+#   - NVARCHAR → VARCHAR (SQL Server Unicode to PostgreSQL text)
+#   - BIT → BOOLEAN (SQL Server bit to PostgreSQL boolean)
+#   - DATETIME2 → TIMESTAMP (SQL Server datetime to PostgreSQL timestamp)
+#   - INT → INTEGER (standard integer mapping)
+#
+# Migration Challenges Addressed:
+#   - Different type systems between platforms
+#   - Type name differences
+#   - Case sensitivity (SQL Server vs PostgreSQL)
+#   - Data type compatibility
+#
+# Expected Results:
+#   - Type mappings applied correctly
+#   - Cross-platform compatibility validated
+#   - Migration feasibility confirmed
+#   - fail-on-incompatibility: true ensures strict validation
+#
+# Related Tests:
+#   - CsvToPostgresMigrationTest: Same-platform CSV migration
+#   - MsSqlToPostgresSyncTest: Data sync pipeline
+#
+# =====================================================================================
+
 # APEX Data Sync - SQL Server to PostgreSQL Migration
 # Real-world use case: Cross-platform migration with type mappings
 
@@ -9,18 +52,20 @@ metadata:
   description: "Validate SQL Server to PostgreSQL migration with type mappings"
 
 data-sources:
+  # SQL Server source (simulated via CSV)
   - name: "sqlserver-source"
     type: "file-system"
-    source-type: "csv"
+    source-type: "csv"  # CSV file (simulating SQL Server export)
     enabled: true
     connection:
-      base-path: "src/test/resources"
+      base-path: "src/test/resources"  # Base directory
 
+  # PostgreSQL target database
   - name: "postgres-target"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
-      database: "mem:cross_platform;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      database: "mem:cross_platform;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"  # PostgreSQL compatibility mode
       username: "sa"
       password: ""
     enabled: true
@@ -28,33 +73,36 @@ data-sources:
 pipeline:
   name: "sqlserver-postgres-migration"
   execution:
-    mode: "sequential"
+    mode: "sequential"  # Steps execute in order
   
   steps:
+    # Read SQL Server schema (simulated from CSV export)
     - name: "read-sqlserver-schema"
       type: "read-schema"
       source: "sqlserver-source"
       description: "Read SQL Server schema (simulated via CSV)"
       parameters:
-        file: "src/test/resources/test-data/sqlserver-customers.csv"
+        file: "src/test/resources/test-data/sqlserver-customers.csv"  # SQL Server export
 
+    # Read PostgreSQL target schema
     - name: "read-postgres-schema"
       type: "read-schema"
       source: "postgres-target"
       description: "Read PostgreSQL target schema"
       parameters:
-        table: "TARGET_CUSTOMERS"
+        table: "TARGET_CUSTOMERS"  # PostgreSQL table
 
+    # Validate with cross-platform type mappings
     - name: "validate-cross-platform-migration"
       type: "schema-diff"
       description: "Validate with SQL Server to PostgreSQL type mappings"
       parameters:
-        source-step: "read-sqlserver-schema"
-        target-step: "read-postgres-schema"
-        type-mappings:
-          NVARCHAR: VARCHAR
-          BIT: BOOLEAN
-          DATETIME2: TIMESTAMP
+        source-step: "read-sqlserver-schema"  # SQL Server schema
+        target-step: "read-postgres-schema"  # PostgreSQL schema
+        type-mappings:  # Cross-platform type conversions
+          NVARCHAR: VARCHAR  # SQL Server → PostgreSQL
+          BIT: BOOLEAN  # SQL Server → PostgreSQL
+          DATETIME2: TIMESTAMP  # SQL Server → PostgreSQL
           INT: INTEGER
         case-insensitive-names: true
         fail-on-incompatibility: true

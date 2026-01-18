@@ -1,3 +1,31 @@
+# =====================================================================================
+# APEX Table Enumeration with Exclusion List Test
+# =====================================================================================
+#
+# Purpose:
+#   Tests table enumeration with exclusion filter, validating ability to skip
+#   specific tables during discovery.
+#
+# Test Scenario:
+#   - Enumerate all tables in PUBLIC schema
+#   - Exclude: temp_data, system_log tables
+#   - Results contain all tables EXCEPT excluded ones
+#
+# Database: H2 ./target/h2-demo/schema_enum_test
+#
+# Exclusion Use Cases:
+#   - Skip temporary tables
+#   - Ignore system/audit tables
+#   - Focus on application tables only
+#
+# Expected Results:
+#   - All tables enumerated except temp_data and system_log
+#
+# Related Tests:
+#   - ReadSchemaDatabaseEnumerationPipelineStageTestPattern: Pattern-based filtering
+#
+# =====================================================================================
+
 metadata:
   type: "pipeline-config"
   version: "1.0"
@@ -6,9 +34,9 @@ metadata:
 data-sources:
   - name: "test-h2-db"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
-      database: "./target/h2-demo/schema_enum_test"
+      database: "./target/h2-demo/schema_enum_test"  # File-based H2 database
       username: "sa"
       password: ""
     enabled: true
@@ -20,11 +48,11 @@ pipeline:
     timeout-seconds: 30
   steps:
     - name: "read-filtered-table-schemas"
-      type: "read-schema"
+      type: "read-schema"  # Read schema from database
       source: "test-h2-db"
       description: "Enumerate all tables except temp and system tables"
       parameters:
-        schema: "PUBLIC"
-        exclude-tables:
+        schema: "PUBLIC"  # Schema to enumerate
+        exclude-tables:  # Tables to skip
           - "temp_data"
           - "system_log"

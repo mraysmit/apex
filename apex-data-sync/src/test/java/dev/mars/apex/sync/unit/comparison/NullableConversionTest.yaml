@@ -1,4 +1,51 @@
-# Nullable Conversion Test
+# =====================================================================================
+# APEX Nullable Conversion Detection Test Pipeline
+# =====================================================================================
+#
+# Purpose:
+#   Tests the schema-diff engine's ability to detect nullable constraint changes
+#   between source and target schemas, identifying safe vs breaking changes.
+#
+# Test Scenarios:
+#   1. Safe change: NULL → NOT NULL with default value (no data loss)
+#   2. Breaking change: NOT NULL → NULL (relaxing constraint - safe)
+#   3. Breaking change: NULL → NOT NULL without default (potential data issues)
+#
+# Database Setup:
+#   - Platform: H2 in-memory database (PostgreSQL compatibility mode)
+#   - Database: mem:nullable_test (CONTACTS table)
+#   - Two schema versions for nullable constraint comparison
+#
+# Test Data:
+#   - CONTACTS table with various nullable constraint scenarios
+#   - Tests both directions: nullable → not null and not null → nullable
+#
+# Nullable Constraint Rules:
+#   1. NOT NULL → NULL: Always safe (relaxing constraint)
+#   2. NULL → NOT NULL: Potentially breaking (existing NULL values fail)
+#   3. NULL → NOT NULL with default: Safe if default provided
+#
+# Financial Services Context:
+#   - Customer email changing from NULL → NOT NULL requires data validation
+#   - Account status becoming nullable may indicate data quality issues
+#   - Regulatory fields (tax ID) must maintain NOT NULL constraints
+#
+# Migration Implications:
+#   - NULL → NOT NULL requires data backfill or default values
+#   - Existing NULL values must be handled before constraint addition
+#   - NOT NULL → NULL is safe but may indicate data model degradation
+#
+# Expected Results:
+#   - Schema diff detects nullable constraint changes
+#   - Test differentiates safe from breaking constraint changes
+#   - HTML report shows constraint modifications
+#   - Validates nullable conversion detection logic
+#
+# Related Tests:
+#   - BreakingChangeDetectionTest: Tests other breaking changes
+#   - PrimaryKeyChangeTest: Tests primary key constraint changes
+#
+# =====================================================================================
 
 metadata:
   id: "nullable-conversion-test"
@@ -7,20 +54,22 @@ metadata:
   type: "pipeline-config"
 
 data-sources:
+  # Source database with original nullable constraints
   - name: "nullable-source"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
-      database: "mem:nullable_source;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      database: "mem:nullable_source;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"  # PostgreSQL compatibility mode
       username: "sa"
       password: ""
     enabled: true
 
+  # Target database with modified nullable constraints
   - name: "nullable-target"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
-      database: "mem:nullable_target;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      database: "mem:nullable_target;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"  # PostgreSQL compatibility mode
       username: "sa"
       password: ""
     enabled: true
@@ -28,18 +77,29 @@ data-sources:
 pipeline:
   name: "nullable-conversion-pipeline"
   execution:
-    mode: "sequential"
-    error-handling: "stop-on-error"
+    mode: "sequential"  # Steps execute in order
+    error-handling: "stop-on-error"  # Halt on any failure
   
   steps:
+    # Read source schema with original nullable constraints
     - name: "read-source-nullable"
       type: "read-schema"
       source: "nullable-source"
       parameters:
-        table: "CONTACTS"
+        table: "CONTACTS"  # Original CONTACTS table
 
+    # Read target schema with modified nullable constraints
     - name: "read-target-nullable"
       type: "read-schema"
       source: "nullable-target"
       parameters:
-        table: "CONTACTS"
+        table: "CONTACTS"  # Modified CONTACTS table
+
+    # Compare schemas and detect nullable constraint changes
+    - name: "compare-nullable-constraints"
+      type: "schema-diff"
+      description: "Detect nullable constraint changes"
+      parameters:
+        source-step: "read-source-nullable"  # Original constraints
+        target-step: "read-target-nullable"  # Modified constraints
+        fail-on-incompatibility: false  # Report only

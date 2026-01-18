@@ -1,3 +1,31 @@
+# =====================================================================================
+# APEX Table Enumeration with HTML Report Generation Test
+# =====================================================================================
+#
+# Purpose:
+#   Tests table enumeration with HTML report generation, creating comprehensive
+#   database schema documentation.
+#
+# Test Scenario:
+#   - Enumerate all tables in PUBLIC schema
+#   - Generate HTML report: target/schema-report.html
+#
+# Database: H2 ./target/h2-demo/schema_enum_test
+#
+# Report Benefits:
+#   - Visual schema documentation
+#   - Shareable database overview
+#   - Audit trail
+#
+# Expected Results:
+#   - All tables enumerated
+#   - HTML report generated
+#
+# Related Tests:
+#   - ReadSchemaDatabaseEnumerationPipelineStageTest: Without report
+#
+# =====================================================================================
+
 metadata:
   type: "pipeline-config"
   version: "1.0"
@@ -6,9 +34,9 @@ metadata:
 data-sources:
   - name: "test-h2-db"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
-      database: "./target/h2-demo/schema_enum_test"
+      database: "./target/h2-demo/schema_enum_test"  # File-based H2 database
       username: "sa"
       password: ""
     enabled: true
@@ -20,12 +48,12 @@ pipeline:
     timeout-seconds: 30
   steps:
     - name: "read-all-table-schemas-with-report"
-      type: "read-schema"
+      type: "read-schema"  # Read schema from database
       source: "test-h2-db"
       description: "Enumerate all tables and generate HTML report"
       # No 'table' parameter - triggers enumeration
       # report-output parameter triggers HTML report generation
       # schema: "PUBLIC" filters to only user tables
       parameters:
-        schema: "PUBLIC"
-        report-output: "target/schema-report.html"
+        schema: "PUBLIC"  # Schema to enumerate
+        report-output: "target/schema-report.html"  # HTML report

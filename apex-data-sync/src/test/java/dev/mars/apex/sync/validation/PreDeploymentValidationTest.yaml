@@ -1,3 +1,44 @@
+# =====================================================================================
+# APEX Pre-Deployment Schema Validation Pipeline
+# =====================================================================================
+#
+# Purpose:
+#   Real-world CI/CD integration: validates new schema changes against production
+#   schema before deployment, preventing breaking changes in production.
+#
+# Test Scenarios:
+#   1. Read current production schema (PRODUCTION_SCHEMA table)
+#   2. Read proposed staging schema (NEW_SCHEMA table)
+#   3. Validate changes are safe for deployment
+#   4. Block deployment if breaking changes detected
+#
+# Database Setup:
+#   - Production DB: H2 (PostgreSQL mode) - current production state
+#   - Staging DB: H2 (standard mode) - proposed new schema
+#   - Both databases simulated for testing
+#
+# Pre-Deployment Validation Rules:
+#   - allow-added-columns: true (new columns OK if nullable)
+#   - allow-removed-columns: false (BLOCK column removals)
+#   - fail-on-incompatibility: false (report only, don't fail pipeline)
+#
+# CI/CD Integration:
+#   - Runs before production deployment
+#   - Automated schema validation gate
+#   - Prevents production outages
+#   - Documents schema changes
+#
+# Expected Results:
+#   - Production schema read successfully
+#   - Staging schema read successfully
+#   - Safe changes approved
+#   - Breaking changes flagged for review
+#
+# Related Tests:
+#   - SchemaEvolutionBreakingTest: Breaking change detection
+#   - SchemaDiffDatabaseMigrationValidationTest_*: Migration validation patterns
+#
+# =====================================================================================
 # APEX Data Sync - Pre-Deployment Schema Validation
 # Real-world use case: Validate new schema before production deployment
 
@@ -9,20 +50,22 @@ metadata:
   description: "Validate new schema changes before production deployment"
 
 data-sources:
+  # Production database (current schema)
   - name: "production-db"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
-      database: "mem:pre_deployment;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      database: "mem:pre_deployment;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"  # PostgreSQL compatibility mode
       username: "sa"
       password: ""
     enabled: true
 
+  # Staging database (new schema to validate)
   - name: "staging-db"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
-      database: "mem:pre_deployment;DB_CLOSE_DELAY=-1"
+      database: "mem:pre_deployment;DB_CLOSE_DELAY=-1"  # Standard H2 mode
       username: "sa"
       password: ""
     enabled: true
@@ -30,29 +73,32 @@ data-sources:
 pipeline:
   name: "pre-deployment-validation"
   execution:
-    mode: "sequential"
+    mode: "sequential"  # Steps execute in order
   
   steps:
+    # Read current production schema
     - name: "read-production-schema"
       type: "read-schema"
       source: "production-db"
       description: "Read current production schema"
       parameters:
-        table: "PRODUCTION_SCHEMA"
+        table: "PRODUCTION_SCHEMA"  # Current production table
 
+    # Read proposed new schema from staging
     - name: "read-staging-schema"
       type: "read-schema"
       source: "staging-db"
       description: "Read new staging schema"
       parameters:
-        table: "NEW_SCHEMA"
+        table: "NEW_SCHEMA"  # Proposed new table
 
+    # Validate changes are safe for production deployment
     - name: "validate-deployment-safety"
       type: "schema-diff"
       description: "Validate schema changes are safe for production deployment"
       parameters:
-        source-step: "read-production-schema"
-        target-step: "read-staging-schema"
-        allow-added-columns: true
-        allow-removed-columns: false
-        fail-on-incompatibility: false
+        source-step: "read-production-schema"  # Current production state
+        target-step: "read-staging-schema"  # Proposed new state
+        allow-added-columns: true  # New nullable columns are safe
+        allow-removed-columns: false  # BLOCK column removals
+        fail-on-incompatibility: false  # Report only, don't fail pipeline

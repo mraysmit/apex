@@ -1,3 +1,37 @@
+# =====================================================================================
+# APEX Database Table Enumeration Test
+# =====================================================================================
+#
+# Purpose:
+#   Tests enumerating all tables in a database schema without specifying table names,
+#   validating automatic table discovery.
+#
+# Test Scenario:
+#   - No 'table' parameter provided (triggers enumeration mode)
+#   - Reads all tables in PUBLIC schema
+#   - Excludes system tables (INFORMATION_SCHEMA)
+#
+# Database: H2 ./target/h2-demo/schema_enum_test
+#
+# Enumeration Features:
+#   - Automatic table discovery
+#   - Schema filtering (PUBLIC only)
+#   - System table exclusion
+#
+# Use Cases:
+#   - Database documentation
+#   - Schema auditing
+#   - Migration planning
+#
+# Expected Results:
+#   - All user tables enumerated
+#   - System tables excluded
+#
+# Related Tests:
+#   - ReadSchemaDatabaseEnumerationPipelineStageTestReport: With HTML report
+#
+# =====================================================================================
+
 metadata:
   id: "test-db-enumeration"
   name: "Database Table Enumeration Test"
@@ -8,9 +42,9 @@ metadata:
 data-sources:
   - name: "test-h2-db"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
-      database: "./target/h2-demo/schema_enum_test"
+      database: "./target/h2-demo/schema_enum_test"  # File-based H2 database
       username: "sa"
       password: ""
     enabled: true
@@ -22,10 +56,10 @@ pipeline:
     timeout-seconds: 30
   steps:
     - name: "read-all-table-schemas"
-      type: "read-schema"
+      type: "read-schema"  # Read schema from database
       source: "test-h2-db"
       description: "Enumerate all tables in the database"
       # No 'table' parameter - triggers enumeration
       # schema: "PUBLIC" filters to only user tables (excludes INFORMATION_SCHEMA)
       parameters:
-        schema: "PUBLIC"
+        schema: "PUBLIC"  # Schema to enumerate

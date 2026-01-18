@@ -1,3 +1,34 @@
+# =====================================================================================
+# APEX Multi-Table Schema Reading Test
+# =====================================================================================
+#
+# Purpose:
+#   Tests reading schemas from 5 different tables in single pipeline, validating
+#   batch schema documentation capability.
+#
+# Test Tables:
+#   1. CUSTOMERS (5 columns)
+#   2. ORDERS (6 columns)
+#   3. PRODUCTS (7 columns)
+#   4. INVENTORY (4 columns)
+#   5. TRANSACTIONS (8 columns)
+#
+# Database: H2 mem:multi_table_test (PostgreSQL mode)
+#
+# Multi-Table Benefits:
+#   - Document entire database schema
+#   - Batch processing efficiency
+#   - Comprehensive schema overview
+#
+# Expected Results:
+#   - All 5 table schemas read
+#   - Sequential execution with continue-on-error
+#
+# Related Tests:
+#   - ReadSchemaDatabasePipelineStageTestMultiTable: With HTML reports
+#
+# =====================================================================================
+
 metadata:
   name: "Multi-Table Schema Reader Test"
   description: "Test configuration for reading schemas from 5 H2 database tables"
@@ -6,9 +37,9 @@ metadata:
 data-sources:
   - name: "h2-multi-table-db"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
-      database: "mem:multi_table_test;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      database: "mem:multi_table_test;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"  # PostgreSQL compatibility mode
       username: "sa"
       password: ""
     enabled: true
@@ -16,46 +47,46 @@ data-sources:
 pipeline:
   name: "read-multi-table-schemas"
   execution:
-    mode: "sequential"
+    mode: "sequential"  # Steps execute in order
     error-handling: "continue-on-error"
   
   steps:
     # Table 1: customers (5 columns)
     - name: "read-schema-customers"
-      type: "read-schema"
+      type: "read-schema"  # Read schema from database table
       source: "h2-multi-table-db"
       description: "Read schema from customers table"
       parameters:
-        table: "CUSTOMERS"
+        table: "CUSTOMERS"  # Table to analyze
 
     # Table 2: orders (6 columns)
     - name: "read-schema-orders"
-      type: "read-schema"
+      type: "read-schema"  # Read schema from database table
       source: "h2-multi-table-db"
       description: "Read schema from orders table"
       parameters:
-        table: "ORDERS"
+        table: "ORDERS"  # Table to analyze
 
     # Table 3: products (7 columns)
     - name: "read-schema-products"
-      type: "read-schema"
+      type: "read-schema"  # Read schema from database table
       source: "h2-multi-table-db"
       description: "Read schema from products table"
       parameters:
-        table: "PRODUCTS"
+        table: "PRODUCTS"  # Table to analyze
 
     # Table 4: inventory (4 columns)
     - name: "read-schema-inventory"
-      type: "read-schema"
+      type: "read-schema"  # Read schema from database table
       source: "h2-multi-table-db"
       description: "Read schema from inventory table"
       parameters:
-        table: "INVENTORY"
+        table: "INVENTORY"  # Table to analyze
 
     # Table 5: transactions (8 columns)
     - name: "read-schema-transactions"
-      type: "read-schema"
+      type: "read-schema"  # Read schema from database table
       source: "h2-multi-table-db"
       description: "Read schema from transactions table"
       parameters:
-        table: "TRANSACTIONS"
+        table: "TRANSACTIONS"  # Table to analyze

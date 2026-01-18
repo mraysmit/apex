@@ -1,24 +1,69 @@
+# =====================================================================================
+# APEX Multi-Table Migration Validation Pipeline
+# =====================================================================================
+#
+# Purpose:
+#   Validates schema changes across multiple tables in a single pipeline,
+#   ensuring comprehensive migration validation for complex database changes.
+#
+# Test Scenarios:
+#   1. Validate customers table migration (source → target)
+#   2. Validate orders table migration (source → target)
+#   3. Both tables checked in single pipeline execution
+#   4. Consolidated validation results
+#
+# Database Setup:
+#   - Platform: H2 in-memory databases (PostgreSQL compatibility mode)
+#   - Source DB: mem:migration_source_multitable (customers, orders tables)
+#   - Target DB: mem:migration_target_multitable (customers, orders tables)
+#
+# Multi-Table Validation Benefits:
+#   - Comprehensive schema validation in one execution
+#   - Detects cross-table dependencies
+#   - Consolidated reporting
+#   - Efficient validation workflow
+#
+# Use Cases:
+#   - Production deployment validation
+#   - Multi-table schema evolution
+#   - Database migration planning
+#   - CI/CD pipeline integration
+#
+# Expected Results:
+#   - Both customers and orders tables validated
+#   - Separate HTML reports for each table comparison
+#   - All schema differences identified
+#   - Validates multi-table migration pipelines
+#
+# Related Tests:
+#   - MultiTableMigrationTest: Multi-table CSV to DB migration
+#   - ReadSchemaMultiTableTest: Multi-table schema reading
+#
+# =====================================================================================
+
 metadata:
   name: "Schema Diff - Multi-Table Migration"
   description: "Validate multiple tables in migration"
   version: "2.1"
 
 data-sources:
+  # Source database: Original schemas for multiple tables
   - name: "source-db"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     enabled: true
     connection:
-      url: "jdbc:h2:mem:migration_source_multitable;DB_CLOSE_DELAY=-1"
+      url: "jdbc:h2:mem:migration_source_multitable;DB_CLOSE_DELAY=-1"  # In-memory H2
       username: "sa"
       password: ""
 
+  # Target database: Modified schemas for multiple tables
   - name: "target-db"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     enabled: true
     connection:
-      url: "jdbc:h2:mem:migration_target_multitable;DB_CLOSE_DELAY=-1"
+      url: "jdbc:h2:mem:migration_target_multitable;DB_CLOSE_DELAY=-1"  # In-memory H2
       username: "sa"
       password: ""
 
@@ -26,48 +71,48 @@ pipeline:
   name: "multi-table-validation"
   description: "Validate schema diff for multiple tables"
   execution:
-    mode: "sequential"
+    mode: "sequential"  # Steps execute in order
   steps:
-    # Customers table comparison
+    # Customers table validation
     - name: "read-source-customers"
       type: "read-schema"
       source: "source-db"
       parameters:
-        table: "customers"
+        table: "customers"  # Source customers table
 
     - name: "read-target-customers"
       type: "read-schema"
       source: "target-db"
       parameters:
-        table: "customers"
+        table: "customers"  # Target customers table
 
     - name: "compare-customers"
       type: "schema-diff"
       description: "Compare customers table"
       parameters:
-        source-step: "read-source-customers"
-        target-step: "read-target-customers"
-        case-insensitive-names: true
-        report-output: "target/reports/customers-migration-diff.html"
+        source-step: "read-source-customers"  # Original customers
+        target-step: "read-target-customers"  # Modified customers
+        case-insensitive-names: true  # Column name case handling
+        report-output: "target/reports/customers-migration-diff.html"  # HTML report
 
-    # Orders table comparison
+    # Orders table validation
     - name: "read-source-orders"
       type: "read-schema"
       source: "source-db"
       parameters:
-        table: "orders"
+        table: "orders"  # Source orders table
 
     - name: "read-target-orders"
       type: "read-schema"
       source: "target-db"
       parameters:
-        table: "orders"
+        table: "orders"  # Target orders table
 
     - name: "compare-orders"
       type: "schema-diff"
       description: "Compare orders table"
       parameters:
-        source-step: "read-source-orders"
-        target-step: "read-target-orders"
-        case-insensitive-names: true
-        report-output: "target/reports/orders-migration-diff.html"
+        source-step: "read-source-orders"  # Original orders
+        target-step: "read-target-orders"  # Modified orders
+        case-insensitive-names: true  # Column name case handling
+        report-output: "target/reports/orders-migration-diff.html"  # HTML report

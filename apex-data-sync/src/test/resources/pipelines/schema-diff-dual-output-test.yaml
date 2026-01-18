@@ -1,3 +1,51 @@
+# =====================================================================================
+# APEX Schema-Diff Dual Output Test (HTML + JSON)
+# =====================================================================================
+#
+# Purpose:
+#   Tests simultaneous generation of both HTML and JSON reports from schema-diff,
+#   validating multi-format output capability for different consumers.
+#
+# Test Scenarios:
+#   1. Read source schema (CSV file)
+#   2. Read target schema (in-memory definition)
+#   3. Compare schemas
+#   4. Generate both HTML report AND JSON report
+#
+# Data Sources:
+#   - Source: CSV file (demo-data/csv/customers.csv)
+#   - Target: In-memory schema definition
+#   - External data-source references
+#
+# Dual Output Benefits:
+#   - HTML: Human-readable for developers/analysts
+#   - JSON: Machine-readable for automation
+#   - Single pipeline execution generates both
+#   - Consistent data in both formats
+#
+# Report Outputs:
+#   - HTML: schema-diff-dual-test.html (visual report)
+#   - JSON: schema-diff-dual-test.json (API integration)
+#
+# Use Cases:
+#   - Documentation + automation in one pipeline
+#   - Human review + CI/CD integration
+#   - Compliance reporting (human + machine audit)
+#
+# Expected Results:
+#   - CSV schema read successfully
+#   - In-memory schema created
+#   - Schema-diff executed
+#   - HTML report generated
+#   - JSON report generated
+#   - Both reports contain same comparison data
+#
+# Related Tests:
+#   - schema-diff-json-test: JSON only output
+#   - MarkdownGenerationTest: Markdown format output
+#
+# =====================================================================================
+
 metadata:
   type: "pipeline-config"
   name: "Schema Diff Dual Output Test"
@@ -9,21 +57,21 @@ pipelines:
     description: "Generate both HTML and JSON reports from schema comparison"
     
     steps:
-      # Step 1: Read source schema
+      # Step 1: Read source schema from CSV
       - name: "read-source"
         type: "read-schema"
-        source: "customers-csv"
+        source: "customers-csv"  # External data-source reference
         parameters:
-          file-path: "demo-data/csv/customers.csv"
-          has-header: true
+          file-path: "demo-data/csv/customers.csv"  # CSV file location
+          has-header: true  # First row is column names
       
-      # Step 2: Read target schema
+      # Step 2: Read target schema (in-memory definition)
       - name: "read-target"
         type: "read-schema"
-        source: "customers-target"
+        source: "customers-target"  # External data-source reference
         parameters:
-          schema-definition:
-            table-name: "customers"
+          schema-definition:  # Programmatic schema definition
+            table-name: "customers"  # Table name
             columns:
               - name: "customer_id"
                 type: "VARCHAR"
@@ -46,20 +94,22 @@ pipelines:
                 maxLength: 20
                 nullable: true
       
-      # Step 3: Compare and generate both reports
+      # Step 3: Compare and generate both HTML and JSON reports
       - name: "compare-with-reports"
         type: "schema-diff"
         parameters:
-          source-step: "read-source"
-          target-step: "read-target"
-          report-output: "schema-diff-dual-test.html"
-          json-report-output: "schema-diff-dual-test.json"
-          fail-on-incompatibility: false
+          source-step: "read-source"  # CSV schema
+          target-step: "read-target"  # In-memory schema
+          report-output: "schema-diff-dual-test.html"  # HTML format (human-readable)
+          json-report-output: "schema-diff-dual-test.json"  # JSON format (machine-readable)
+          fail-on-incompatibility: false  # Report only
 
 data-source-refs:
+  # External data-source reference for CSV
   - name: "customers-csv"
-    source: "data-sources/customers-csv.yaml"
+    source: "data-sources/customers-csv.yaml"  # External configuration file
     enabled: true
+  # External data-source reference for target schema
   - name: "customers-target"
-    source: "data-sources/customers-target.yaml"
+    source: "data-sources/customers-target.yaml"  # External configuration file
     enabled: true

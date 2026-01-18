@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Schema Report - edge-case-database</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 40px;
+            padding: 10px;
+            background-color: #ecf0f1;
+            border-left: 4px solid #3498db;
+        }
+        .metadata {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        .data-source-info {
+            margin-bottom: 30px;
+        }
+        .data-source-info h3 {
+            color: #34495e;
+            margin-top: 0;
+            margin-bottom: 0;
+            padding: 10px;
+            background-color: #ecf0f1;
+            border-left: 4px solid #3498db;
+        }
+        .ds-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: white;
+        }
+        .ds-table th {
+            background-color: #3498db;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            width: 200px;
+        }
+        .ds-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        .ds-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        .toc h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .toc ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .toc li {
+            padding: 8px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        .toc li:last-child {
+            border-bottom: none;
+        }
+        .toc a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: white;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        .primary-key {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .nullable {
+            color: #95a5a6;
+            font-style: italic;
+        }
+        .not-nullable {
+            color: #27ae60;
+            font-weight: 500;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+        .badge-pk {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .badge-nullable {
+            background-color: #95a5a6;
+            color: white;
+        }
+        .summary {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #3498db;
+        }
+        .summary strong {
+            color: #2c3e50;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            color: #95a5a6;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Database Schema Report - edge-case-database</h1>
+        <div class="metadata">
+            <strong>Generated:</strong>2026-01-18 22:47:07            <br/>
+            <strong>Tool:</strong> APEX Rules Engine v2.1 - Schema Reader
+        </div>
+<div class="data-source-info">
+<h3>Data Source Information</h3>
+<table class="ds-table">
+<tbody>
+<tr>
+<th>Data Source Name</th>
+<td>edge-case-database</td>
+</tr>
+<tr>
+<th>Source Type</th>
+<td>Database</td>
+</tr>
+<tr>
+<th>Database Type</th>
+<td>H2</td>
+</tr>
+<tr>
+<th>Database</th>
+<td>mem:edge_cases;DB_CLOSE_DELAY=-1;MODE=PostgreSQL</td>
+</tr>
+<tr>
+<th>Username</th>
+<td>sa</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h2 id="table-edge-case-database">edge-case-database</h2>
+<div class="summary">
+<strong>Total Columns:</strong> 2 | <strong>Primary Keys:</strong> 0 | <strong>Nullable:</strong> 2 | <strong>Not Nullable:</strong> 0
+</div>
+<table>
+<thead>
+<tr>
+<th>Column Name</th>
+<th>Data Type</th>
+<th>Nullable</th>
+<th>Max Length</th>
+<th>Precision</th>
+<th>Scale</th>
+<th>Attributes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ID</td>
+<td>INTEGER</td>
+<td><span class="nullable">Yes</span></td>
+<td>-</td>
+<td>32</td>
+<td>0</td>
+<td><span class="badge badge-nullable">NULLABLE</span></td>
+</tr>
+<tr>
+<td>NAME</td>
+<td>CHARACTER VARYING</td>
+<td><span class="nullable">Yes</span></td>
+<td>50</td>
+<td>-</td>
+<td>-</td>
+<td><span class="badge badge-nullable">NULLABLE</span></td>
+</tr>
+</tbody>
+</table>
+        <div class="footer">
+            Generated by APEX Rules Engine - Schema Reader Service
+        </div>
+    </div>
+</body>
+</html>

@@ -1,3 +1,32 @@
+# =====================================================================================
+# APEX Large CSV Schema Reading Test Pipeline
+# =====================================================================================
+#
+# Purpose:
+#   Tests schema inference from large CSV files with many columns (11+),
+#   validating performance and accuracy for complex CSV structures.
+#
+# Test Data:
+#   - File: test-employees-large.csv
+#   - 11 columns (complex employee data)
+#   - UTF-8 encoding, comma delimiter
+#
+# Large CSV Challenges:
+#   - More columns = more type inference
+#   - Performance with large files
+#   - Memory efficiency
+#
+# Expected Results:
+#   - All 11 columns detected
+#   - Types inferred correctly
+#   - Efficient processing
+#
+# Related Tests:
+#   - ReadSchemaCsvPipelineStageTest: Standard CSV
+#   - ReadSchemaLargeCsvTest: Duplicate test
+#
+# =====================================================================================
+
 metadata:
   name: "Large CSV Schema Reader Test"
   description: "Test configuration for reading schema from CSV with 11 columns"
@@ -6,26 +35,26 @@ metadata:
 data-sources:
   - name: "csv-large-test-source"
     type: "file-system"
-    source-type: "csv"
+    source-type: "csv"  # CSV file data source
     connection:
       base-path: "."
       formats: ["csv"]
     settings:
-      delimiter: ","
-      has-header: true
-      encoding: "UTF-8"
+      delimiter: ","  # Comma-separated values
+      has-header: true  # First row contains column names
+      encoding: "UTF-8"  # Character encoding
     enabled: true
 
 pipeline:
   name: "read-large-csv-schema"
   execution:
-    mode: "sequential"
+    mode: "sequential"  # Steps execute in order
     error-handling: "stop-on-error"
   
   steps:
     - name: "read-schema-from-large-csv"
-      type: "read-schema"
+      type: "read-schema"  # Read schema from CSV file
       source: "csv-large-test-source"
       description: "Read schema metadata from large CSV file with 11 columns"
       parameters:
-        file: "test-employees-large.csv"
+        file: "test-employees-large.csv"  # CSV file to analyze

@@ -1,0 +1,110 @@
+# =============================================================================
+# CustomTypeMappingTest.yaml
+# =============================================================================
+# 
+# Purpose:
+#   Demonstrates custom type mapping configuration for cross-database schema 
+#   comparison. Type mappings allow treating equivalent types from different
+#   database systems as compatible (e.g., Oracle NUMBER → PostgreSQL NUMERIC).
+#
+# Test Scenarios:
+#   1. Oracle-style type mappings: NUMBER → NUMERIC, VARCHAR2 → VARCHAR
+#   2. SQL Server-style type mappings: NVARCHAR → VARCHAR
+#
+# Database Setup:
+#   - Engine: H2 in-memory database
+#   - Schemas: source_schema (database-specific types), target_schema (standard SQL types)
+#   - Tables: products (Oracle test), customers (SQL Server test)
+#
+# Expected Results:
+#   - Type mappings prevent false-positive breaking changes
+#   - NUMBER → NUMERIC treated as compatible
+#   - VARCHAR2 → VARCHAR treated as compatible  
+#   - NVARCHAR → VARCHAR treated as compatible
+#   - Zero breaking changes detected when type mappings are configured
+#
+# Related Tests:
+#   - TypeCompatibilityTest.java - Basic type compatibility detection
+#   - BreakingChangeDetectionTest.java - Breaking change identification
+#   - TypeNarrowingTest.java - Unsafe type narrowing
+#
+# Configuration Pattern:
+#   Uses ComparisonOptions.typeMappings to define source→target type equivalences
+#
+# =============================================================================
+
+metadata:
+  name: "Custom Type Mapping Test"
+  description: "Test user-defined type mappings for cross-database schema comparison"
+  version: "1.0"
+  type: "pipeline-config"
+  tags: ["schema-comparison", "type-mapping", "cross-database"]
+
+pipeline:
+  name: "custom-type-mapping-pipeline"
+  execution:
+    mode: "sequential"
+  steps:
+    # Step 1: Read source schema
+    - name: "read-source"
+      type: "read-schema"
+      source: "test-source"
+      parameters:
+        table: "source_products"  # Specific table created by test
+        
+    # Step 2: Read target schema  
+    - name: "read-target"
+      type: "read-schema"
+      source: "test-target"
+      parameters:
+        table: "target_products"  # Specific table created by test
+        
+    # Step 3: Compare schemas with custom type mappings
+    - name: "compare"
+      type: "schema-diff"
+      parameters:
+        source-step: "read-source"  # Reference to read-source step
+        target-step: "read-target"  # Reference to read-target step
+        
+        # Custom type mappings: source type → target type
+        type-mappings:
+          # Oracle database type mappings
+          NUMBER: "NUMERIC"     # Oracle NUMBER maps to standard NUMERIC
+          VARCHAR2: "VARCHAR"   # Oracle VARCHAR2 maps to standard VARCHAR
+          
+          # SQL Server database type mappings  
+          NVARCHAR: "VARCHAR"   # SQL Server NVARCHAR maps to standard VARCHAR
+          
+        # Comparison options
+        case-insensitive-names: true    # Table/column names case-insensitive
+        inferred-type-tolerance: true   # Allow inferred type variations
+        allow-added-columns: true       # New columns are non-breaking
+        allow-removed-columns: false    # Removed columns are breaking
+        
+        # Report generation
+        report-format: "json"
+        report-output: "reports/custom-type-mapping-report.json"
+
+# Data source configurations
+data-sources:
+  # Source database
+  - name: "test-source"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      host: "${DB_HOST}"
+      port: ${DB_PORT}
+      database: "${DB_NAME}"
+      username: "${DB_USER}"
+      password: "${DB_PASS}"
+      
+  # Target database (same DB, different table prefix)
+  - name: "test-target"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      host: "${DB_HOST}"
+      port: ${DB_PORT}
+      database: "${DB_NAME}"
+      username: "${DB_USER}"
+      password: "${DB_PASS}"

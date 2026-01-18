@@ -1,3 +1,44 @@
+# =====================================================================================
+# APEX Data Sync Pipeline - H2 Compatibility Mode Test
+# =====================================================================================
+#
+# Purpose:
+#   Tests complete ETL pipeline (Extract-Transform-Load) using H2 database
+#   compatibility modes to simulate SQL Server → PostgreSQL data synchronization.
+#
+# Test Scenarios:
+#   1. Extract: Read data from SQL Server source (H2 in MSSQLServer mode)
+#   2. Load: Insert data into PostgreSQL target (H2 in PostgreSQL mode)
+#   3. Validate: End-to-end sync pipeline execution
+#
+# Database Setup:
+#   - Source: H2 mem:source_sqlserver;MODE=MSSQLServer (simulates SQL Server)
+#   - Target: H2 mem:target_postgres;MODE=PostgreSQL (simulates PostgreSQL)
+#   - Both in-memory for fast testing
+#
+# Pipeline Stages:
+#   - extract-from-sqlserver: Execute extractCustomers query
+#   - load-into-postgresql: Execute upsertCustomer operation
+#   - Sequential execution with dependency management
+#
+# H2 Compatibility Benefits:
+#   - Fast testing without real databases
+#   - Mode switching simulates different database engines
+#   - No Testcontainers overhead
+#   - Suitable for unit testing
+#
+# Expected Results:
+#   - Data extracted from source
+#   - Data loaded into target
+#   - Pipeline executes successfully
+#   - Validates sync logic without real databases
+#
+# Related Tests:
+#   - SyncPipelineContainersTest: Same test with real databases
+#   - MsSqlToPostgresSyncTest: Production-like sync configuration
+#
+# =====================================================================================
+
 # APEX Database Table Sync - H2 Test Pipeline
 # Simulated SQL Server to PostgreSQL sync using H2 Compatibility Modes.
 
@@ -12,10 +53,10 @@ metadata:
 data-sources:
   - name: "sqlserver-source"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
       # Using H2 MSSQLServer compatibility mode
-      database: "mem:source_sqlserver;MODE=MSSQLServer;DB_CLOSE_DELAY=-1"
+      database: "mem:source_sqlserver;MODE=MSSQLServer;DB_CLOSE_DELAY=-1"  # SQL Server compatibility mode
       username: "sa"
       password: ""
     enabled: true
@@ -25,10 +66,10 @@ data-sources:
 data-sinks:
   - name: "postgresql-target"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
       # Using H2 PostgreSQL compatibility mode
-      database: "mem:target_postgres;MODE=PostgreSQL;DB_CLOSE_DELAY=-1"
+      database: "mem:target_postgres;MODE=PostgreSQL;DB_CLOSE_DELAY=-1"  # PostgreSQL compatibility mode
       username: "sa"
       password: ""
     enabled: true
@@ -43,17 +84,17 @@ data-sinks:
 pipeline:
   name: "h2-simulated-sync"
   execution:
-    mode: "sequential"
+    mode: "sequential"  # Steps execute in order
     max-retries: 3
     error-handling: "continue-on-error"
   steps:
     - name: "extract-from-sqlserver"
-      type: "extract"
+      type: "extract"  # Extract from source
       source: "sqlserver-source"
-      operation: "extractCustomers"
+      operation: "extractCustomers"  # Query to execute
 
     - name: "load-into-postgresql"
-      type: "load"
+      type: "load"  # Load to target
       sink: "postgresql-target"
-      operation: "upsertCustomer"
-      depends-on: ["extract-from-sqlserver"]
+      operation: "upsertCustomer"  # Insert operation
+      depends-on: ["extract-from-sqlserver"]  # Wait for extraction

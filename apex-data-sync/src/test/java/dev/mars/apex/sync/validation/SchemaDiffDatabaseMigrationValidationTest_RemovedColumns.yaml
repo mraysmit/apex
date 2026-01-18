@@ -1,24 +1,68 @@
+# =====================================================================================
+# APEX Database Migration Validation - Removed Columns (Breaking Changes)
+# =====================================================================================
+#
+# Purpose:
+#   Validates that removing columns is correctly flagged as a breaking change
+#   during database migration validation, preventing accidental data loss.
+#
+# Test Scenarios:
+#   1. Source table has columns: id, name, email, phone
+#   2. Target table has columns: id, name (removed email, phone)
+#   3. Validation should fail with breaking changes detected
+#
+# Database Setup:
+#   - Platform: H2 in-memory databases (PostgreSQL compatibility mode)
+#   - Source DB: mem:migration_source_removed (customers table)
+#   - Target DB: mem:migration_target_removed (customers table)
+#
+# Breaking Change Detection:
+#   - Removed columns represent data loss
+#   - Existing applications may still reference removed columns
+#   - Requires careful migration planning
+#   - May need data archival before removal
+#
+# Migration Implications:
+#   - Application code must be updated first
+#   - Data migration strategy required
+#   - Potential rollback challenges
+#   - Not backward compatible
+#
+# Expected Results:
+#   - Removed columns detected (email, phone)
+#   - Validation fails (breaking change)
+#   - HTML report shows removed columns as breaking
+#   - allow-removed-columns: false enforces validation
+#
+# Related Tests:
+#   - SchemaDiffDatabaseMigrationValidationTest_AddedColumns: Safe additions
+#   - BreakingChangeDetectionTest: General breaking change detection
+#
+# =====================================================================================
+
 metadata:
   name: "Schema Diff - Breaking Changes (Removed Columns)"
   description: "Detect breaking changes when columns are removed"
   version: "2.1"
 
 data-sources:
+  # Source database: Original schema with all columns
   - name: "source-db"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     enabled: true
     connection:
-      url: "jdbc:h2:mem:migration_source_removed;DB_CLOSE_DELAY=-1"
+      url: "jdbc:h2:mem:migration_source_removed;DB_CLOSE_DELAY=-1"  # In-memory H2
       username: "sa"
       password: ""
 
+  # Target database: Modified schema with removed columns (BREAKING)
   - name: "target-db"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     enabled: true
     connection:
-      url: "jdbc:h2:mem:migration_target_removed;DB_CLOSE_DELAY=-1"
+      url: "jdbc:h2:mem:migration_target_removed;DB_CLOSE_DELAY=-1"  # In-memory H2
       username: "sa"
       password: ""
 
@@ -26,26 +70,29 @@ pipeline:
   name: "breaking-changes-validation"
   description: "Detect removed columns as breaking changes"
   execution:
-    mode: "sequential"
+    mode: "sequential"  # Steps execute in order
   steps:
+    # Read source schema with all columns
     - name: "read-source-schema"
       type: "read-schema"
       source: "source-db"
       parameters:
-        table: "customers"
+        table: "customers"  # Customers table with all columns
 
+    # Read target schema with removed columns
     - name: "read-target-schema"
       type: "read-schema"
       source: "target-db"
       parameters:
-        table: "customers"
+        table: "customers"  # Customers table with columns removed
 
+    # Detect removed columns as breaking change
     - name: "compare-schemas"
       type: "schema-diff"
       description: "Detect removed columns"
       parameters:
-        source-step: "read-source-schema"
-        target-step: "read-target-schema"
-        case-insensitive-names: true
-        allow-removed-columns: false
-        report-output: "target/reports/breaking-changes-migration-report.html"
+        source-step: "read-source-schema"  # Original schema
+        target-step: "read-target-schema"  # Schema with removed columns (breaking)
+        case-insensitive-names: true  # Column name case handling
+        allow-removed-columns: false  # Column removal is a breaking change
+        report-output: "target/reports/breaking-changes-migration-report.html"  # HTML report

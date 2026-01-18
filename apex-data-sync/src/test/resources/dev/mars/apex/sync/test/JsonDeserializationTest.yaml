@@ -1,0 +1,97 @@
+# =============================================================================
+# JsonDeserializationTest.yaml
+# =============================================================================
+# 
+# Purpose:
+#   Validates JSON deserialization (round-trip) of schema diff reports.
+#   Tests that serialized JSON can be deserialized back to objects and 
+#   re-serialized with data integrity preservation.
+#
+# Test Scenarios:
+#   1. Round-trip serialization - serialize → deserialize → verify
+#   2. Data integrity preservation - complex schema with multiple changes
+#
+# Database Setup:
+#   - Engine: H2 in-memory database
+#   - Schemas: source_schema (simple), target_schema (with changes)
+#   - Tables: products (column added, VARCHAR size changed)
+#
+# Expected Results:
+#   - JSON file can be deserialized to SchemaDiffReport object
+#   - All fields preserved (metadata, source, target, summary, columns)
+#   - Object can be re-serialized to equivalent JSON
+#   - No data loss during round-trip
+#
+# Related Tests:
+#   - JsonSerializationTest.java - Initial serialization
+#   - JsonSchemaValidationTest.java - Schema compliance
+#   - JsonEdgeCasesTest.java - Null/empty handling
+#
+# Configuration Pattern:
+#   Standard JSON report generation with round-trip testing
+#
+# =============================================================================
+
+metadata:
+  name: "JSON Deserialization Test"
+  description: "Test schema diff JSON deserialization and round-trip data integrity"
+  version: "1.0"
+  tags: ["json", "deserialization", "round-trip", "schema-comparison"]
+  type: "pipeline-config"
+
+pipeline:
+  name: "json-deserialization-pipeline"
+  execution:
+    mode: "sequential"
+  steps:
+    # Step 1: Read source schema
+    - name: "read-source"
+      type: "read-schema"
+      source: "h2-source"  # Source database
+      parameters:
+        table: "source_products"  # All tables
+        
+    # Step 2: Read target schema
+    - name: "read-target"
+      type: "read-schema"
+      source: "h2-target"  # Target database with changes
+      parameters:
+        table: "target_products"  # All tables
+        
+    # Step 3: Compare and generate JSON report
+    - name: "compare"
+      type: "compare-schemas"
+      parameters:
+        # Comparison options
+        case-insensitive-names: true    # Case-insensitive comparison
+        inferred-type-tolerance: false  # Strict type checking
+        allow-added-columns: true       # New columns non-breaking
+        allow-removed-columns: false    # Removed columns breaking
+        
+        # JSON report generation
+        report-format: "json"
+        report-output: "json-deserialization-test.json"  # Saved to reports/
+
+# Data source configurations
+data-sources:
+  # Source database
+  - name: "h2-source"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      host: "${DB_HOST}"
+      port: ${DB_PORT}
+      database: "${DB_NAME}"
+      username: "${DB_USER}"
+      password: "${DB_PASS}"
+      
+  # Target database
+  - name: "h2-target"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      host: "${DB_HOST}"
+      port: ${DB_PORT}
+      database: "${DB_NAME}"
+      username: "${DB_USER}"
+      password: "${DB_PASS}"

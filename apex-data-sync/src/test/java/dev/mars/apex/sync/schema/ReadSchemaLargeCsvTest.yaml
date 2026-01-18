@@ -1,3 +1,24 @@
+# =====================================================================================
+# APEX Large CSV Schema Reading Test
+# =====================================================================================
+#
+# Purpose:
+#   Tests schema inference from large CSV files (11 columns), validating
+#   handling of complex CSV structures.
+#
+# Test Data:
+#   - File: test-large-customers.csv
+#   - 11 columns with various data types
+#
+# Expected Results:
+#   - All columns detected
+#   - Types correctly inferred
+#
+# Related Tests:
+#   - ReadSchemaCsvPipelineStageTestLarge: Similar test
+#
+# =====================================================================================
+
 metadata:
   name: "Large CSV Schema Reader Test"
   description: "Test configuration for reading schema from CSV with 11 columns"
@@ -6,26 +27,26 @@ metadata:
 data-sources:
   - name: "csv-large-test-source"
     type: "file-system"
-    source-type: "csv"
+    source-type: "csv"  # CSV file data source
     connection:
       base-path: "."
       formats: ["csv"]
     settings:
-      delimiter: ","
-      has-header: true
-      encoding: "UTF-8"
+      delimiter: ","  # Comma-separated values
+      has-header: true  # First row contains column names
+      encoding: "UTF-8"  # Character encoding
     enabled: true
 
 pipeline:
   name: "read-large-csv-schema"
   execution:
-    mode: "sequential"
+    mode: "sequential"  # Steps execute in order
     error-handling: "stop-on-error"
   
   steps:
     - name: "read-schema-from-large-csv"
-      type: "read-schema"
+      type: "read-schema"  # Read schema from CSV file
       source: "csv-large-test-source"
       description: "Read schema metadata from large CSV file with 11 columns"
       parameters:
-        file: "test-large-customers.csv"
+        file: "test-large-customers.csv"  # CSV file to analyze

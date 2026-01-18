@@ -1,5 +1,42 @@
+# =====================================================================================
 # APEX Report Path Resolution Test Pipeline
-# Tests report output path resolution
+# =====================================================================================
+#
+# Purpose:
+#   Tests the report generation engine's path resolution logic, validating that
+#   report output paths are correctly interpreted (relative, absolute, filename-only).
+#
+# Test Scenarios:
+#   1. Filename only: "inventory-report.html" → saved to reports/ directory
+#   2. Relative path: "output/inventory-report.html" → creates output/ directory
+#   3. Absolute path: Full path specification
+#   4. Auto-creates missing directories in path
+#
+# Database Setup:
+#   - Platform: H2 in-memory database (PostgreSQL compatibility mode)
+#   - Database: mem:report_path (INVENTORY table)
+#
+# Test Data:
+#   - INVENTORY table used for schema reading and report generation
+#   - Tests report-output parameter handling in pipeline steps
+#
+# Path Resolution Rules:
+#   - Filename only → defaults to reports/ directory (auto-created)
+#   - Relative path → resolved from project root, creates directories
+#   - Absolute path → used as-is
+#   - Missing directories automatically created
+#
+# Expected Results:
+#   - Report generated at specified path
+#   - Directories auto-created as needed
+#   - Path resolution validated for all scenarios
+#   - HTML report contains INVENTORY table schema
+#
+# Related Tests:
+#   - MarkdownGenerationTest: Tests Markdown format output
+#   - ReadSchemaDatabaseEnumerationPipelineStageTestReport: Tests multi-table reports
+#
+# =====================================================================================
 
 metadata:
   id: "report-path-resolution-test"
@@ -10,11 +47,12 @@ metadata:
   description: "Test pipeline for report path resolution"
 
 data-sources:
+  # H2 in-memory database for report path testing
   - name: "test-h2-database"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
-      database: "mem:report_path_test;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      database: "mem:report_path_test;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"  # PostgreSQL compatibility mode
       username: "sa"
       password: ""
     enabled: true
@@ -22,13 +60,15 @@ data-sources:
 pipeline:
   name: "report-path-resolution-pipeline"
   execution:
-    mode: "sequential"
-    error-handling: "stop-on-error"
+    mode: "sequential"  # Steps execute in order
+    error-handling: "stop-on-error"  # Halt on any failure
   
   steps:
+    # Read schema and test report path resolution
     - name: "read-schema"
       type: "read-schema"
       source: "test-h2-database"
       description: "Read schema for report generation"
       parameters:
-        table: "INVENTORY"
+        table: "INVENTORY"  # Test table
+        report-output: "inventory-report.html"  # Filename only → saved to reports/ directory

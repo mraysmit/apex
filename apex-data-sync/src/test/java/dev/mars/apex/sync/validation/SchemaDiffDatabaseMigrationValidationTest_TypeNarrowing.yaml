@@ -1,24 +1,65 @@
+# =====================================================================================
+# APEX Database Migration Validation - Type Narrowing (Breaking Changes)
+# =====================================================================================
+#
+# Purpose:
+#   Validates that unsafe type narrowing changes (VARCHAR(100) → VARCHAR(50)) are
+#   correctly flagged as incompatible during database migration validation.
+#
+# Test Scenarios:
+#   1. Source table has VARCHAR(100) column
+#   2. Target table has VARCHAR(50) column (narrowed - UNSAFE)
+#   3. Validation should fail with incompatibility detected
+#
+# Database Setup:
+#   - Platform: H2 in-memory databases (PostgreSQL compatibility mode)
+#   - Source DB: mem:migration_source_narrowing (customers table)
+#   - Target DB: mem:migration_target_narrowing (customers table)
+#
+# Migration Validation Context:
+#   - Pre-deployment validation for database schema changes
+#   - Type narrowing is unsafe (potential data truncation)
+#   - Requires data validation before deployment
+#
+# Breaking Change Detection:
+#   - Existing data may exceed new size limit
+#   - Could cause data loss during migration
+#   - Requires application-level data transformation
+#
+# Expected Results:
+#   - Type narrowing detected and flagged as incompatible
+#   - Migration blocked pending data validation
+#   - HTML report shows unsafe type change
+#
+# Related Tests:
+#   - SchemaDiffDatabaseMigrationValidationTest_TypeWidening: Safe widening
+#   - TypeNarrowingTest: Unit test for type narrowing detection
+#
+# =====================================================================================
+
 metadata:
   name: "Schema Diff - Type Narrowing"
   description: "Detect incompatible type narrowing changes"
   version: "2.1"
 
 data-sources:
+  # Source database: Original type (VARCHAR 100)
   - name: "source-db"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     enabled: true
     connection:
-      url: "jdbc:h2:mem:migration_source_narrowing;DB_CLOSE_DELAY=-1"
+      url: "jdbc:h2:mem:migration_source_narrowing;DB_CLOSE_DELAY=-1"  # In-memory H2
       username: "sa"
       password: ""
 
+  # Target database: Narrowed type (VARCHAR 50) - UNSAFE
   - name: "target-db"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     enabled: true
     connection:
-      url: "jdbc:h2:mem:migration_target_narrowing;DB_CLOSE_DELAY=-1"
+      url: "jdbc:h2:mem:migration_target_narrowing;DB_CLOSE_DELAY=-1"  # In-memory H2
       username: "sa"
       password: ""
 
@@ -26,26 +67,29 @@ pipeline:
   name: "type-narrowing-validation"
   description: "Detect type narrowing as incompatible (VARCHAR 100→50)"
   execution:
-    mode: "sequential"
+    mode: "sequential"  # Steps execute in order
   steps:
+    # Read source schema with original type
     - name: "read-source-schema"
       type: "read-schema"
       source: "source-db"
       parameters:
-        table: "customers"
+        table: "customers"  # Customers table with VARCHAR(100)
 
+    # Read target schema with narrowed type
     - name: "read-target-schema"
       type: "read-schema"
       source: "target-db"
       parameters:
-        table: "customers"
+        table: "customers"  # Customers table with VARCHAR(50)
 
+    # Detect type narrowing as incompatible
     - name: "compare-schemas"
       type: "schema-diff"
       description: "Compare type changes - narrowing"
       parameters:
-        source-step: "read-source-schema"
-        target-step: "read-target-schema"
-        case-insensitive-names: true
-        inferred-type-tolerance: false
-        report-output: "target/reports/type-narrowing-migration-report.html"
+        source-step: "read-source-schema"  # Original types
+        target-step: "read-target-schema"  # Narrowed types (unsafe)
+        case-insensitive-names: true  # Column name case handling
+        inferred-type-tolerance: false  # Strict type checking
+        report-output: "target/reports/type-narrowing-migration-report.html"  # HTML report

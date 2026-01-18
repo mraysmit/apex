@@ -1,5 +1,46 @@
-# Custom Schema Test - Cross Schema Comparison (PostgreSQL)
-# Tests comparing schemas across different custom schemas
+# =====================================================================================
+# APEX Cross-Schema Comparison Test Pipeline (PostgreSQL)
+# =====================================================================================
+#
+# Purpose:
+#   Tests schema comparison (schema-diff) across different PostgreSQL schemas,
+#   validating that the engine can compare tables from different namespaces.
+#
+# Test Scenarios:
+#   1. Read schema from sales.orders (sales schema)
+#   2. Read schema from inventory.products (inventory schema)
+#   3. Compare schemas across different namespaces
+#   4. Validate schema-diff handles cross-schema comparisons
+#
+# Database Setup:
+#   - Platform: PostgreSQL (via Testcontainers)
+#   - Connection: Environment variables (POSTGRES_HOST, POSTGRES_PORT, etc.)
+#   - Source Schema: sales (orders table)
+#   - Target Schema: inventory (products table)
+#
+# Test Data:
+#   - sales.orders: Order management table
+#   - inventory.products: Product catalog table
+#   - Intentionally different tables to test cross-schema diff
+#
+# Cross-Schema Comparison Use Cases:
+#   - Migrating tables between schemas
+#   - Comparing production vs staging schemas
+#   - Validating schema consistency across namespaces
+#   - Multi-tenant database schema validation
+#
+# Expected Results:
+#   - Both schemas read successfully
+#   - Schema-diff compares sales.orders vs inventory.products
+#   - Differences detected across schema boundaries
+#   - Report shows schema-qualified table names
+#
+# Related Tests:
+#   - CustomSchemaPostgresTest_sales: Single schema read
+#   - CustomSchemaPostgresTest_inventory: Single schema read
+#   - CustomSchemaPostgresTest_hr: Single schema read
+#
+# =====================================================================================
 
 metadata:
   name: "Custom Schema Test - Cross Schema"
@@ -7,52 +48,57 @@ metadata:
   version: "1.0"
 
 data-sources:
+  # Sales schema connection
   - name: "sales-db"
     type: "database"
-    source-type: "postgresql"
+    source-type: "postgresql"  # PostgreSQL database
     connection:
-      host: "localhost"
-      port: 5432
-      database: "custom_schema_test"
+      host: "localhost"  # Testcontainers provides this
+      port: 5432  # Default PostgreSQL port
+      database: "custom_schema_test"  # Test database
       username: "test"
       password: "test"
-      schema: "sales"
+      schema: "sales"  # Sales schema
 
+  # Inventory schema connection
   - name: "inventory-db"
     type: "database"
-    source-type: "postgresql"
+    source-type: "postgresql"  # PostgreSQL database
     connection:
-      host: "localhost"
-      port: 5432
-      database: "custom_schema_test"
+      host: "localhost"  # Testcontainers provides this
+      port: 5432  # Default PostgreSQL port
+      database: "custom_schema_test"  # Same database, different schema
       username: "test"
       password: "test"
-      schema: "inventory"
+      schema: "inventory"  # Inventory schema
 
 pipeline:
   name: "cross-schema-comparison"
   execution:
-    mode: "sequential"
+    mode: "sequential"  # Steps execute in order
     max-retries: 1
-    error-handling: "fail-fast"
+    error-handling: "fail-fast"  # Stop on first error
   steps:
+    # Read schema from sales.orders
     - name: "read-sales-orders"
       type: "read-schema"
       source: "sales-db"
       parameters:
-        table: "orders"
-        schema: "sales"
+        table: "orders"  # Table in sales schema
+        schema: "sales"  # Schema-qualified
 
+    # Read schema from inventory.products
     - name: "read-inventory-products"
       type: "read-schema"
       source: "inventory-db"
       parameters:
-        table: "products"
-        schema: "inventory"
+        table: "products"  # Table in inventory schema
+        schema: "inventory"  # Schema-qualified
 
+    # Compare schemas across different namespaces
     - name: "compare-schemas"
       type: "schema-diff"
-      source-schema: "sales-db"
-      target-schema: "inventory-db"
+      source-schema: "sales-db"  # Sales schema
+      target-schema: "inventory-db"  # Inventory schema
       parameters:
-        fail-on-breaking-changes: false
+        fail-on-breaking-changes: false  # Report only

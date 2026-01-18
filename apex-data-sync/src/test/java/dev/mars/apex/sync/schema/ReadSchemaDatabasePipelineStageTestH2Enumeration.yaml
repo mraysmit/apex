@@ -1,3 +1,29 @@
+# =====================================================================================
+# APEX H2 Multi-Table Enumeration with HTML Report
+# =====================================================================================
+#
+# Purpose:
+#   Tests H2-specific table enumeration with HTML report generation.
+#
+# Test Scenario:
+#   - Enumerate all tables in TEST_SCHEMA (H2 uppercase)
+#   - Generate HTML report
+#
+# Database: H2 mem:enumeration_test (PostgreSQL mode)
+#
+# H2 Schema Considerations:
+#   - Schema names are uppercase (TEST_SCHEMA)
+#   - Must match case exactly
+#
+# Expected Results:
+#   - Tables enumerated from TEST_SCHEMA
+#   - HTML report: target/reports/h2-all-tables-schema-report.html
+#
+# Related Tests:
+#   - ReadSchemaDatabasePipelineStageTest_postgresql_*: PostgreSQL version
+#
+# =====================================================================================
+
 metadata:
   name: "Multi-Table Enumeration with HTML Report Test"
   description: "Test configuration for enumerating all tables and generating HTML report"
@@ -6,9 +32,9 @@ metadata:
 data-sources:
   - name: "h2-enumeration-db"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
-      database: "mem:enumeration_test;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      database: "mem:enumeration_test;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"  # PostgreSQL compatibility mode
       username: "sa"
       password: ""
     enabled: true
@@ -16,16 +42,16 @@ data-sources:
 pipeline:
   name: "enumerate-and-report"
   execution:
-    mode: "sequential"
+    mode: "sequential"  # Steps execute in order
     error-handling: "continue-on-error"
   
   steps:
     # Enumerate all tables without specifying individual table names
     - name: "enumerate-all-tables"
-      type: "read-schema"
+      type: "read-schema"  # Read schema from database
       source: "h2-enumeration-db"
       description: "Enumerate all tables in database and generate HTML report"
       parameters:
         # No table parameter - this triggers enumeration
         schema: "test_schema"  # Only enumerate tables in test_schema (not system tables)
-        report-output: "target/reports/all-tables-schema-report.html"
+        report-output: "target/reports/all-tables-schema-report.html"  # HTML report

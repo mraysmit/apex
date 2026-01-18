@@ -1,3 +1,46 @@
+# =====================================================================================
+# APEX JSON Edge Cases Test Pipeline
+# =====================================================================================
+#
+# Purpose:
+#   Tests JSON serialization edge cases for schema comparison, ensuring robust
+#   handling of special characters, null values, and unusual data types.
+#
+# Test Scenarios:
+#   1. Tables with special characters in names
+#   2. Columns with Unicode characters
+#   3. NULL values in schema metadata
+#   4. Complex data types (arrays, JSON columns)
+#
+# Database Setup:
+#   - Database: H2 mem:edge_cases (PostgreSQL mode)
+#   - Table: EDGE_TABLE (intentionally complex schema)
+#
+# Edge Cases Tested:
+#   - Special characters: quotes, newlines, backslashes
+#   - Unicode characters: emoji, CJK characters
+#   - NULL/missing metadata
+#   - Very long table/column names
+#   - Reserved keywords as column names
+#
+# JSON Serialization Challenges:
+#   - Proper escaping of special characters
+#   - UTF-8 encoding for Unicode
+#   - NULL value handling (null vs "null")
+#   - JSON structure validity
+#
+# Expected Results:
+#   - Schema read from EDGE_TABLE
+#   - JSON generated with proper escaping
+#   - Valid JSON structure
+#   - All edge cases handled correctly
+#
+# Related Tests:
+#   - JsonSerializationTest: Standard JSON serialization
+#   - schema-diff-json-test: JSON output from schema-diff
+#
+# =====================================================================================
+
 # Additional JSON Serialization Tests
 
 metadata:
@@ -7,11 +50,12 @@ metadata:
   type: "pipeline-config"
   
 data-sources:
+  # Database with edge-case schema for JSON testing
   - name: "edge-case-database"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
-      database: "mem:edge_cases;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      database: "mem:edge_cases;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"  # PostgreSQL compatibility mode
       username: "sa"
       password: ""
     enabled: true
@@ -19,12 +63,14 @@ data-sources:
 pipeline:
   name: "edge-case-pipeline"
   execution:
-    mode: "sequential"
-    error-handling: "continue-on-error"
+    mode: "sequential"  # Steps execute in order
+    error-handling: "continue-on-error"  # Continue even if errors occur
   
   steps:
+    # Read schema with edge cases (special chars, Unicode, NULL values)
     - name: "read-edge-case-schema"
       type: "read-schema"
       source: "edge-case-database"
       parameters:
-        table: "EDGE_TABLE"
+        table: "EDGE_TABLE"  # Table with complex/edge-case schema
+        report-output: "edge-cases-schema.json"  # JSON output (future)

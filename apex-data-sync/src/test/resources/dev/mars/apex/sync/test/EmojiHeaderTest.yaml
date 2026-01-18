@@ -1,0 +1,97 @@
+# =============================================================================
+# EmojiHeaderTest.yaml
+# =============================================================================
+# 
+# Purpose:
+#   Validates emoji rendering in Markdown schema diff report headers.
+#   Tests that visual categorization emojis (✅, ⚠️, 🔧, 📊) appear correctly
+#   in section headers.
+#
+# Test Scenarios:
+#   1. Emoji in headers - verify emojis or standard headers present
+#   2. Multiple emoji sections - verify multiple header sections
+#
+# Database Setup:
+#   - Engine: H2 in-memory database
+#   - Schemas: source_schema, target_schema
+#   - Tables: orders (with type changes triggering various sections)
+#
+# Expected Results:
+#   - Markdown report generated successfully
+#   - Headers present (with or without emojis)
+#   - Multiple header sections for different change categories
+#   - Emojis rendered correctly in UTF-8
+#
+# Related Tests:
+#   - MarkdownGenerationTest.java - Basic Markdown generation
+#   - TableFormattingTest.java - Table structure
+#   - MultiTableMarkdownTest.java - Multiple tables
+#
+# Configuration Pattern:
+#   Standard Markdown report generation
+#
+# =============================================================================
+
+metadata:
+  name: "Emoji Header Test"
+  description: "Test emoji rendering in Markdown schema diff report headers"
+  version: "1.0"
+  tags: ["markdown", "emoji", "headers", "schema-comparison"]
+  type: "pipeline-config"
+
+pipeline:
+  name: "emoji-header-pipeline"
+  execution:
+    mode: "sequential"
+  steps:
+    # Step 1: Read source schema
+    - name: "read-source"
+      type: "read-schema"
+      source: "h2-source"  # Source database
+      parameters:
+        table: "source_orders"  # All tables
+        
+    # Step 2: Read target schema
+    - name: "read-target"
+      type: "read-schema"
+      source: "h2-target"  # Target database
+      parameters:
+        table: "target_orders"  # All tables
+        
+    # Step 3: Compare and generate Markdown with emojis
+    - name: "compare"
+      type: "compare-schemas"
+      parameters:
+        # Comparison options
+        case-insensitive-names: true    # Case-insensitive comparison
+        inferred-type-tolerance: false  # Strict type checking
+        allow-added-columns: true       # New columns non-breaking
+        allow-removed-columns: false    # Removed columns breaking
+        
+        # Markdown report generation
+        report-format: "markdown"
+        report-output: "emoji-header-test.md"  # Saved to reports/
+
+# Data source configurations
+data-sources:
+  # Source database
+  - name: "h2-source"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      host: "${DB_HOST}"
+      port: ${DB_PORT}
+      database: "${DB_NAME}"
+      username: "${DB_USER}"
+      password: "${DB_PASS}"
+      
+  # Target database
+  - name: "h2-target"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      host: "${DB_HOST}"
+      port: ${DB_PORT}
+      database: "${DB_NAME}"
+      username: "${DB_USER}"
+      password: "${DB_PASS}"

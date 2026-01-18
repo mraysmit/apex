@@ -1,3 +1,50 @@
+# =====================================================================================
+# APEX Complete ETL Pipeline with Schema Validation
+# =====================================================================================
+#
+# Purpose:
+#   Demonstrates a full ETL pipeline that validates source schema before processing
+#   data, ensuring data quality and preventing migration failures.
+#
+# Test Scenarios:
+#   1. Read-Schema: Validate source table structure before extraction
+#   2. Extract: Pull data from validated source table
+#   3. Transform: Apply transformations (add processed_timestamp)
+#   4. Load: Insert transformed data into target
+#
+# Database Setup:
+#   - Source: H2 mem:source_db;MODE=MSSQLServer (simulates SQL Server)
+#   - Target: H2 mem:target_db;MODE=PostgreSQL (simulates PostgreSQL)
+#
+# Pipeline Workflow:
+#   Step 1: read-source-schema - Validate CUSTOMERS table exists
+#   Step 2: extract-from-source - Extract customer data (depends on step 1)
+#   Step 3: transform-data - Add processed_timestamp field
+#   Step 4: load-to-target - Load to target database
+#
+# Schema Validation Benefits:
+#   - Fail fast if source table structure is wrong
+#   - Prevent processing invalid data
+#   - Document expected schema
+#   - Enable schema drift detection
+#
+# Transformation Example:
+#   - field-addition: processed_timestamp = CURRENT_TIMESTAMP
+#   - Demonstrates data enrichment during ETL
+#
+# Expected Results:
+#   - Source schema validated before extraction
+#   - Data extracted from source
+#   - Data transformed with timestamp
+#   - Data loaded to target
+#   - Full ETL pipeline executes successfully
+#
+# Related Tests:
+#   - SyncPipelineH2Test: Sync without schema validation
+#   - ReadSchemaDatabasePipelineStageTest: Schema reading tests
+#
+# =====================================================================================
+
 # APEX Complete Pipeline with Schema Reading
 # Demonstrates a full ETL pipeline with schema validation
 
@@ -12,9 +59,9 @@ metadata:
 data-sources:
   - name: "source-database"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
-      database: "mem:source_db;MODE=MSSQLServer;DB_CLOSE_DELAY=-1"
+      database: "mem:source_db;MODE=MSSQLServer;DB_CLOSE_DELAY=-1"  # SQL Server compatibility mode
       username: "sa"
       password: ""
     enabled: true
@@ -24,9 +71,9 @@ data-sources:
 data-sinks:
   - name: "target-database"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
-      database: "mem:target_db;MODE=PostgreSQL;DB_CLOSE_DELAY=-1"
+      database: "mem:target_db;MODE=PostgreSQL;DB_CLOSE_DELAY=-1"  # PostgreSQL compatibility mode
       username: "sa"
       password: ""
     enabled: true
@@ -40,32 +87,32 @@ data-sinks:
 pipeline:
   name: "etl-with-schema-validation"
   execution:
-    mode: "sequential"
+    mode: "sequential"  # Steps execute in order
     max-retries: 2
     error-handling: "stop-on-error"
   
   steps:
     # Step 1: Read schema from source
     - name: "read-source-schema"
-      type: "read-schema"
+      type: "read-schema"  # Read schema from database table
       source: "source-database"
       description: "Validate source table schema before extraction"
       parameters:
-        table: "CUSTOMERS"
+        table: "CUSTOMERS"  # Table to analyze
     
     # Step 2: Extract data from source
     - name: "extract-from-source"
-      type: "extract"
+      type: "extract"  # Extract data from source
       source: "source-database"
-      operation: "extractCustomers"
+      operation: "extractCustomers"  # Query to execute
       description: "Extract customer data from source database"
-      depends-on: ["read-source-schema"]
+      depends-on: ["read-source-schema"]  # Wait for schema validation
     
     # Step 3: Transform data (optional)
     - name: "transform-data"
-      type: "transform"
+      type: "transform"  # Transform extracted data
       description: "Apply transformations to customer data"
-      depends-on: ["extract-from-source"]
+      depends-on: ["extract-from-source"]  # Wait for extraction
       transformations:
         - type: "field-addition"
           field: "processed_timestamp"
@@ -73,8 +120,8 @@ pipeline:
     
     # Step 4: Load data to target
     - name: "load-to-target"
-      type: "load"
+      type: "load"  # Load data to target
       sink: "target-database"
-      operation: "insertCustomer"
+      operation: "insertCustomer"  # Insert operation
       description: "Load transformed data to target database"
-      depends-on: ["transform-data"]
+      depends-on: ["transform-data"]  # Wait for transformation

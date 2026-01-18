@@ -1,3 +1,23 @@
+# =====================================================================================
+# APEX CSV Schema Reader Test
+# =====================================================================================
+#
+# Purpose:
+#   Basic CSV schema reading test, validates fundamental CSV schema inference.
+#
+# Test Data:
+#   - File: test-customers.csv
+#   - Simple customer data structure
+#
+# Expected Results:
+#   - CSV schema inferred
+#   - Column names and types extracted
+#
+# Related Tests:
+#   - ReadSchemaCsvPipelineStageTest: Similar test
+#
+# =====================================================================================
+
 # APEX Read Schema Pipeline - CSV Test
 # Demonstrates reading schema from a CSV file
 
@@ -12,21 +32,22 @@ metadata:
 data-sources:
   - name: "csv-test-source"
     type: "file-system"
-    source-type: "file"
+    source-type: "file"             # CSV file source
     enabled: true
     connection:
-      base-path: "."  # Current directory
+      base-path: "."                # Current directory
 
 pipeline:
   name: "read-csv-schema"
   execution:
-    mode: "sequential"
-    error-handling: "stop-on-error"
+    mode: "sequential"              # Steps execute in order
+    error-handling: "stop-on-error"  # Halt on any failure
   
   steps:
+    # Read schema metadata from CSV file
     - name: "read-schema-from-csv-file"
       type: "read-schema"
       source: "csv-test-source"
       description: "Read schema metadata from CSV file"
       parameters:
-        file: "test-customers.csv"
+        file: "test-customers.csv"   # CSV file to analyze

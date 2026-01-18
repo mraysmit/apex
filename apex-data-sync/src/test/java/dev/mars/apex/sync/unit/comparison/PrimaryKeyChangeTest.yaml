@@ -1,0 +1,103 @@
+# =====================================================================================
+# APEX Primary Key Change Test Pipeline
+# =====================================================================================
+#
+# Purpose:
+#   Validates detection of primary key column changes during schema comparison.
+#   PK changes are BREAKING changes requiring data migration and application updates.
+#
+# Test Scenarios:
+#   1. PK Column Change: id → order_number (breaking, requires migration)
+#   2. Schema Comparison Validation: End-to-end pipeline execution
+#
+# Database Setup:
+#   - Uses PostgreSQL via Testcontainers (postgres:15.13-alpine3.20)
+#   - Creates two schemas: source_schema (PK: id) and target_schema (PK: order_number)
+#   - Environment variables: POSTGRES_HOST, POSTGRES_PORT (injected at runtime)
+#
+# Test Data:
+#   - Table: orders (id, order_number, customer_id, total_amount)
+#   - Source PK: id (BIGINT)
+#   - Target PK: order_number (VARCHAR(50))
+#
+# Breaking Change Implications:
+#   - Foreign key relationships must be updated
+#   - Application queries using old PK will fail
+#   - Data migration required to preserve referential integrity
+#   - Index recreation needed for query performance
+#
+# Expected Results:
+#   - Pipeline executes successfully
+#   - Schema metadata correctly identifies PK columns
+#   - PK column difference detected (manual validation in test assertions)
+#
+# Migration Considerations:
+#   - Downtime may be required for large tables
+#   - Cascading updates to dependent tables
+#   - Application deployment coordination needed
+#
+# Related Tests:
+#   - TypeWideningTest.java (safe schema changes)
+#   - PrecisionScaleTest.java (safe numeric changes)
+#
+# =====================================================================================
+
+metadata:
+  id: "primary-key-change-test"
+  name: "Primary Key Change Test"
+  version: "1.0"
+  type: "pipeline-config"
+  author: "APEX Team"
+  description: "Test pipeline for primary key change validation (breaking changes)"
+
+data-sources:
+  # Source database with original primary key configuration
+  - name: "source-database"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      host: "${POSTGRES_HOST}"  # Provided by Testcontainers
+      port: ${POSTGRES_PORT}     # Provided by Testcontainers
+      database: "apex_pk_test"
+      username: "apex_user"
+      password: "apex_pass"
+      schema: "source_schema"
+    enabled: true
+
+  # Target database with modified primary key (breaking change)
+  - name: "target-database"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      host: "${POSTGRES_HOST}"  # Provided by Testcontainers
+      port: ${POSTGRES_PORT}     # Provided by Testcontainers
+      database: "apex_pk_test"
+      username: "apex_user"
+      password: "apex_pass"
+      schema: "target_schema"
+    enabled: true
+
+pipeline:
+  name: "primary-key-change-test-pipeline"
+  execution:
+    mode: "sequential"              # Steps execute in order
+    error-handling: "stop-on-error"  # Halt on any failure
+  
+  steps:
+    # Read source schema with original primary key
+    - name: "read-source-schema"
+      type: "read-schema"
+      source: "source-database"
+      description: "Read schema from source database with original PK"
+      parameters:
+        table: "orders"             # Table with original PK definition
+        schema: "source_schema"     # Source schema location
+
+    # Read target schema with modified primary key (breaking change)
+    - name: "read-target-schema"
+      type: "read-schema"
+      source: "target-database"
+      description: "Read schema from target database with modified PK"
+      parameters:
+        table: "orders"             # Same table, different PK
+        schema: "target_schema"     # Target schema location

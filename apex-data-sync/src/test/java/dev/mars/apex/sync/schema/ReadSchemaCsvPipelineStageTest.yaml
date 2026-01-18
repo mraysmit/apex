@@ -1,3 +1,35 @@
+# =====================================================================================
+# APEX Read Schema from CSV Test Pipeline
+# =====================================================================================
+#
+# Purpose:
+#   Tests reading and inferring schema from CSV files, validating that APEX can
+#   extract table structure from file-based data sources.
+#
+# Test Data:
+#   - File: test-customers.csv (CSV with header row)
+#   - Infers column names, data types, nullability from CSV content
+#
+# Schema Inference:
+#   - Column names from CSV header
+#   - Data types inferred from sample data
+#   - Nullable detection from empty values
+#
+# Use Cases:
+#   - Validating CSV structure before import
+#   - Documenting CSV file schemas
+#   - Pre-migration validation
+#
+# Expected Results:
+#   - CSV schema inferred successfully
+#   - Column metadata extracted (names, types)
+#
+# Related Tests:
+#   - ReadSchemaLargeCsvTest: Large CSV files
+#   - CsvToPostgresMigrationTest: CSV migration validation
+#
+# =====================================================================================
+
 # APEX Read Schema Pipeline - CSV Test
 # Demonstrates reading schema from a CSV file
 
@@ -10,23 +42,25 @@ metadata:
   description: "Test pipeline for reading CSV file schema"
 
 data-sources:
+  # File-system source for CSV files
   - name: "csv-test-source"
     type: "file-system"
-    source-type: "file"
+    source-type: "file"             # CSV file source
     enabled: true
     connection:
-      base-path: "."  # Current directory
+      base-path: "."                # Current directory
 
 pipeline:
   name: "read-csv-schema"
   execution:
-    mode: "sequential"
-    error-handling: "stop-on-error"
+    mode: "sequential"              # Steps execute in order
+    error-handling: "stop-on-error"  # Halt on any failure
   
   steps:
+    # Read schema metadata from CSV file
     - name: "read-schema-from-csv-file"
       type: "read-schema"
       source: "csv-test-source"
       description: "Read schema metadata from CSV file"
       parameters:
-        file: "test-customers.csv"
+        file: "test-customers.csv"   # CSV file to analyze

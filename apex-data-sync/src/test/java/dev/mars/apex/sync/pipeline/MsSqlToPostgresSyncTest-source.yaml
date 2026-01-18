@@ -1,3 +1,47 @@
+# =====================================================================================
+# APEX External Data-Source Configuration - Legacy SQL Server Source
+# =====================================================================================
+#
+# Purpose:
+#   External configuration file for legacy SQL Server data source, demonstrating
+#   APEX 2.1's clean architecture with infrastructure separation.
+#
+# Configuration Type:
+#   - Type: external-data-config (APEX 2.1 feature)
+#   - Referenced by: MsSqlToPostgresSyncTest.yaml
+#   - Separation of concerns: infrastructure vs business logic
+#
+# Data Source Definition:
+#   - Name: legacy-sqlserver
+#   - Platform: H2 database (MSSQLServer compatibility mode)
+#   - Connection: In-memory database (mem:mssql_test)
+#
+# Queries Defined:
+#   - extractCustomersBatch: Batch customer extraction query
+#   - Selects: customer_id AS id, name, status, email
+#   - Source table: dbo.Customers (SQL Server schema)
+#
+# External Reference Benefits:
+#   - Infrastructure changes don't affect business logic
+#   - Reusable across multiple pipelines
+#   - Environment-specific configuration isolation
+#   - Easier testing with different data sources
+#
+# APEX 2.1 Clean Architecture:
+#   - Business logic: Main pipeline YAML
+#   - Infrastructure: This external config file
+#   - Reference: data-source-ref in main pipeline
+#
+# Expected Usage:
+#   - Referenced via data-source-refs in pipeline configuration
+#   - Queries accessed by name (extractCustomersBatch)
+#   - Connection details can be overridden per environment
+#
+# Related Files:
+#   - MsSqlToPostgresSyncTest.yaml: Main pipeline using this source
+#
+# =====================================================================================
+
 metadata:
   id: "mssql-legacy-source"
   name: "mssql-legacy-source"
@@ -8,10 +52,10 @@ metadata:
 data-sources:
   - name: "legacy-sqlserver"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
       # Using H2 database parameter format (not full JDBC URL)
-      database: "mem:mssql_test;MODE=MSSQLServer;DB_CLOSE_DELAY=-1"
+      database: "mem:mssql_test;MODE=MSSQLServer;DB_CLOSE_DELAY=-1"  # SQL Server compatibility mode
       username: "sa"
       password: "pass"
     enabled: true

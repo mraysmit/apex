@@ -1,3 +1,49 @@
+# =====================================================================================
+# APEX Customer Data Sync Pipeline (SQL Server → PostgreSQL)
+# =====================================================================================
+#
+# Purpose:
+#   Production-style customer data synchronization pipeline from legacy SQL Server
+#   to modern PostgreSQL, demonstrating external data-source references.
+#
+# Test Scenarios:
+#   1. Fetch delta changes from legacy SQL Server
+#   2. Upsert customer records into PostgreSQL
+#   3. Track sync timestamp (synced_at column)
+#
+# Database Setup:
+#   - Source: External data-source reference (MsSqlToPostgresSyncTest-source.yaml)
+#   - Target: H2 database (PostgreSQL mode) - modern-postgres-sink
+#   - MERGE/UPSERT operation for idempotent syncs
+#
+# External Data-Source Reference:
+#   - Demonstrates APEX 2.1 clean architecture
+#   - Source configuration externalized to separate file
+#   - Business logic separated from infrastructure
+#
+# Pipeline Features:
+#   - Sequential execution mode
+#   - Max 3 retries for resilience
+#   - Continue-on-error for partial sync capability
+#   - Auto-create target schema
+#
+# Data Sync Pattern:
+#   - Extract: fetch-delta-changes (batch extraction)
+#   - Load: push-to-postgres (MERGE upsert)
+#   - Dependency: load depends on extract
+#
+# Expected Results:
+#   - Customer data extracted from SQL Server
+#   - Data upserted into PostgreSQL (no duplicates)
+#   - synced_at timestamp recorded
+#   - Pipeline executes with retry logic
+#
+# Related Tests:
+#   - MsSqlToPostgresSyncTest-source.yaml: External source configuration
+#   - SyncPipelineContainersTest: Testcontainers version
+#
+# =====================================================================================
+
 metadata:
   id: "customer-sync-pipeline"
   type: "pipeline-config"
@@ -11,10 +57,10 @@ data-source-refs:
 data-sinks:
   - name: "modern-postgres-sink"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
       # Using H2 database parameter format (not full JDBC URL)
-      database: "mem:postgres_test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1"
+      database: "mem:postgres_test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1"  # PostgreSQL compatibility mode
       username: "postgres"
       password: "pass"
     enabled: true
@@ -38,18 +84,18 @@ data-sinks:
 pipeline:
   name: "customer-sync-orchestration"
   execution:
-    mode: "sequential"
+    mode: "sequential"  # Steps execute in order
     max-retries: 3
     error-handling: "continue-on-error"
 
   steps:
     - name: "fetch-delta-changes"
-      type: "extract"
-      source: "legacy-sqlserver"
-      operation: "extractCustomersBatch"
+      type: "extract"  # Extract data from source
+      source: "legacy-sqlserver"  # External data-source reference
+      operation: "extractCustomersBatch"  # Query from external config
 
     - name: "push-to-postgres"
-      type: "load"
+      type: "load"  # Load data to target
       sink: "modern-postgres-sink"
-      operation: "upsertCustomer"
-      depends-on: ["fetch-delta-changes"]
+      operation: "upsertCustomer"  # MERGE operation
+      depends-on: ["fetch-delta-changes"]  # Wait for extraction

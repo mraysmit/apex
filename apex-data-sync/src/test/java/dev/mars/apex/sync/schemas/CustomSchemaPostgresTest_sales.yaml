@@ -1,5 +1,45 @@
-# Custom Schema Test - SALES Schema (PostgreSQL)
-# Tests reading schema from non-default sales schema
+# =====================================================================================
+# APEX Custom Schema Test - SALES Schema (PostgreSQL)
+# =====================================================================================
+#
+# Purpose:
+#   Tests reading schema from a non-default PostgreSQL schema (sales), validating
+#   that the schema-diff engine correctly handles schema-qualified table names.
+#
+# Test Scenarios:
+#   1. Connect to PostgreSQL database with multiple schemas
+#   2. Read schema from sales.orders table (non-default schema)
+#   3. Validate schema parameter is properly applied
+#   4. Confirm table metadata retrieved from correct schema
+#
+# Database Setup:
+#   - Platform: PostgreSQL (via Testcontainers)
+#   - Connection: Environment variables (POSTGRES_HOST, POSTGRES_PORT, etc.)
+#   - Schema: sales (non-default)
+#   - Table: orders
+#
+# Test Data:
+#   - sales.orders table in non-default schema
+#   - Tests schema-qualified table access
+#
+# PostgreSQL Schema Features:
+#   - Multiple schemas in single database (sales, inventory, hr)
+#   - Schema-qualified table names (schema.table)
+#   - Default schema (public) vs custom schemas
+#   - Schema search path considerations
+#
+# Expected Results:
+#   - Schema read successfully from sales.orders
+#   - Correct schema parameter applied in read-schema step
+#   - Table metadata retrieved from sales schema (not public)
+#   - Validates multi-schema database support
+#
+# Related Tests:
+#   - CustomSchemaPostgresTest_inventory: Tests inventory schema
+#   - CustomSchemaPostgresTest_hr: Tests hr schema
+#   - CustomSchemaPostgresTest_cross_schema: Tests cross-schema comparison
+#
+# =====================================================================================
 
 metadata:
   name: "Custom Schema Test - SALES"
@@ -7,27 +47,29 @@ metadata:
   version: "1.0"
 
 data-sources:
+  # PostgreSQL database with sales schema
   - name: "sales-db"
     type: "database"
-    source-type: "postgresql"
+    source-type: "postgresql"  # PostgreSQL database
     connection:
-      host: "localhost"
-      port: 5432
-      database: "custom_schema_test"
+      host: "localhost"  # Testcontainers provides this
+      port: 5432  # Default PostgreSQL port
+      database: "custom_schema_test"  # Test database
       username: "test"
       password: "test"
-      schema: "sales"
+      schema: "sales"  # Non-default schema
 
 pipeline:
   name: "read-sales-schema"
   execution:
-    mode: "sequential"
+    mode: "sequential"  # Steps execute in order
     max-retries: 1
-    error-handling: "fail-fast"
+    error-handling: "fail-fast"  # Stop on first error
   steps:
+    # Read schema from sales.orders table
     - name: "read-orders-schema"
       type: "read-schema"
       source: "sales-db"
       parameters:
-        table: "orders"
-        schema: "sales"
+        table: "orders"  # Table name in sales schema
+        schema: "sales"  # Schema-qualified access

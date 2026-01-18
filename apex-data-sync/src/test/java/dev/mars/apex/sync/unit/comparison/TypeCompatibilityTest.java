@@ -100,7 +100,7 @@ public class TypeCompatibilityTest extends SyncTestBase {
             .filter(step -> "PIPELINE_STEP".equals(step.getType()))
             .toList();
 
-        assertEquals(2, steps.size(), "Should have 2 pipeline steps");
+        assertEquals(3, steps.size(), "Should have 3 pipeline steps (read source, read target, compare)");
 
         // Validate source schema
         ExecutionStep sourceStep = steps.get(0);

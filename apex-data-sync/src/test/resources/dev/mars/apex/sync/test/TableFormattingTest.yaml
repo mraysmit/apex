@@ -1,0 +1,99 @@
+# =============================================================================
+# TableFormattingTest.yaml
+# =============================================================================
+# 
+# Purpose:
+#   Validates Markdown table formatting in schema diff reports. Tests proper
+#   table structure, column alignment, header separators, and special character
+#   handling in column names.
+#
+# Test Scenarios:
+#   1. Markdown table structure - headers, separators, data rows
+#   2. Column alignment - proper pipe separators
+#   3. Special character handling - quoted column names, special chars
+#
+# Database Setup:
+#   - Engine: H2 in-memory database
+#   - Schemas: source_schema, target_schema
+#   - Tables: products (with various column types and naming styles)
+#
+# Expected Results:
+#   - Markdown file contains properly formatted tables
+#   - Table headers with separator row (|---|---|)
+#   - Balanced pipe separators in all rows
+#   - Special characters in column names handled correctly
+#   - No malformed table structure
+#
+# Related Tests:
+#   - MarkdownGenerationTest.java - Basic Markdown generation
+#   - EmojiHeaderTest.java - Emoji in headers
+#   - MultiTableMarkdownTest.java - Multiple tables per report
+#
+# Configuration Pattern:
+#   Standard Markdown report with report-output path
+#
+# =============================================================================
+
+metadata:
+  name: "Table Formatting Test"
+  description: "Test Markdown table formatting in schema diff reports"
+  version: "1.0"
+  tags: ["markdown", "table-formatting", "schema-comparison"]
+  type: "pipeline-config"
+
+pipeline:
+  name: "table-formatting-pipeline"
+  execution:
+    mode: "sequential"
+  steps:
+    # Step 1: Read source schema
+    - name: "read-source"
+      type: "read-schema"
+      source: "h2-source"  # Source database
+      parameters:
+        table: "source_products"  # All tables
+        
+    # Step 2: Read target schema
+    - name: "read-target"
+      type: "read-schema"
+      source: "h2-target"  # Target database
+      parameters:
+        table: "target_products"  # All tables
+        
+    # Step 3: Compare and generate Markdown report
+    - name: "compare"
+      type: "compare-schemas"
+      parameters:
+        # Comparison options
+        case-insensitive-names: true    # Case-insensitive names
+        inferred-type-tolerance: false  # Strict type checking
+        allow-added-columns: true       # New columns non-breaking
+        allow-removed-columns: false    # Removed columns breaking
+        
+        # Markdown report generation
+        report-format: "markdown"
+        report-output: "table-formatting-test.md"  # Saved to reports/
+
+# Data source configurations
+data-sources:
+  # Source database
+  - name: "h2-source"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      host: "${DB_HOST}"
+      port: ${DB_PORT}
+      database: "${DB_NAME}"
+      username: "${DB_USER}"
+      password: "${DB_PASS}"
+      
+  # Target database
+  - name: "h2-target"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      host: "${DB_HOST}"
+      port: ${DB_PORT}
+      database: "${DB_NAME}"
+      username: "${DB_USER}"
+      password: "${DB_PASS}"

@@ -1,5 +1,52 @@
-# APEX Markdown Generation Test Pipeline
-# Tests Markdown report generation from schema comparison
+# =====================================================================================
+# APEX Markdown Report Generation Test Pipeline
+# =====================================================================================
+#
+# Purpose:
+#   Tests Markdown report generation from schema comparison results, validating
+#   that schema differences are properly formatted as human-readable Markdown.
+#
+# Test Scenarios:
+#   1. Source table (before) has columns: id, name, price
+#   2. Target table (after) has columns: id, name, price, description (added column)
+#   3. Markdown report should show:
+#      - Table comparison summary
+#      - Added columns section
+#      - Column details (name, type, nullable)
+#      - Formatted as valid Markdown with headers, tables, lists
+#
+# Database Setup:
+#   - Platform: H2 in-memory databases (PostgreSQL compatibility mode)
+#   - Source DB: mem:markdown_source (PRODUCTS table)
+#   - Target DB: mem:markdown_target (PRODUCTS table)
+#
+# Test Data:
+#   - PRODUCTS table with schema evolution (added description column)
+#   - Tests Markdown formatting for schema diff results
+#
+# Markdown Format Requirements:
+#   - Valid Markdown syntax (headers, lists, code blocks)
+#   - Table structure using Markdown tables
+#   - Column details in structured format
+#   - Clear differentiation of added/removed/modified columns
+#
+# Use Cases:
+#   - Documentation generation for schema changes
+#   - Migration planning documents
+#   - Code review artifacts
+#   - Integration with documentation systems (GitHub, Confluence)
+#
+# Expected Results:
+#   - Markdown report generated at specified path
+#   - Report contains valid Markdown syntax
+#   - Schema differences clearly presented
+#   - Human-readable format suitable for documentation
+#
+# Related Tests:
+#   - ReportPathResolutionTest: Tests HTML report path resolution
+#   - schema-diff-json-test: Tests JSON format output
+#
+# =====================================================================================
 
 metadata:
   id: "markdown-generation-test"
@@ -10,20 +57,22 @@ metadata:
   description: "Test pipeline for Markdown report generation from schema comparison"
 
 data-sources:
+  # Source database: Original PRODUCTS schema
   - name: "source-h2-database"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
-      database: "mem:markdown_test_source;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      database: "mem:markdown_test_source;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"  # PostgreSQL compatibility mode
       username: "sa"
       password: ""
     enabled: true
 
+  # Target database: Modified PRODUCTS schema (added column)
   - name: "target-h2-database"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
-      database: "mem:markdown_test_target;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      database: "mem:markdown_test_target;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"  # PostgreSQL compatibility mode
       username: "sa"
       password: ""
     enabled: true
@@ -31,20 +80,32 @@ data-sources:
 pipeline:
   name: "markdown-generation-test-pipeline"
   execution:
-    mode: "sequential"
-    error-handling: "stop-on-error"
+    mode: "sequential"  # Steps execute in order
+    error-handling: "stop-on-error"  # Halt on any failure
   
   steps:
+    # Read source schema (original version)
     - name: "read-source-schema"
       type: "read-schema"
       source: "source-h2-database"
       description: "Read schema from source database"
       parameters:
-        table: "PRODUCTS"
+        table: "PRODUCTS"  # Original PRODUCTS table
 
+    # Read target schema (modified version)
     - name: "read-target-schema"
       type: "read-schema"
       source: "target-h2-database"
       description: "Read schema from target database"
       parameters:
-        table: "PRODUCTS"
+        table: "PRODUCTS"  # Modified PRODUCTS table
+
+    # Compare and generate Markdown report
+    - name: "generate-markdown-report"
+      type: "schema-diff"
+      description: "Compare schemas and generate Markdown report"
+      parameters:
+        source-step: "read-source-schema"  # Original schema
+        target-step: "read-target-schema"  # Modified schema
+        markdown-report-output: "products-schema-diff.md"  # Markdown format
+        fail-on-incompatibility: false  # Report only

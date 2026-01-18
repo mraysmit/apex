@@ -1,4 +1,38 @@
-# Column Difference Detection Test
+# =====================================================================================
+# APEX Column Difference Detection Test Pipeline
+# =====================================================================================
+#
+# Purpose:
+#   Tests the schema-diff engine's ability to detect added and removed columns
+#   between source and target database schemas using H2 in-memory databases.
+#
+# Test Scenarios:
+#   1. Source table (before) has columns: id, name, email
+#   2. Target table (after) has columns: id, name, phone (removed email, added phone)
+#   3. Schema diff should detect:
+#      - Added column: phone
+#      - Removed column: email
+#      - Common columns: id, name (unchanged)
+#
+# Database Setup:
+#   - Platform: H2 in-memory databases (PostgreSQL compatibility mode)
+#   - Source DB: mem:column_diff_before (ACCOUNTS table)
+#   - Target DB: mem:column_diff_after (ACCOUNTS table)
+#
+# Test Data:
+#   - ACCOUNTS table structure changes from 3 to 3 columns (1 removed, 1 added)
+#
+# Expected Results:
+#   - Schema diff detects email column removal
+#   - Schema diff detects phone column addition
+#   - Column differences reported in HTML format
+#   - Test validates basic column-level schema evolution detection
+#
+# Related Tests:
+#   - BreakingChangeDetectionTest: Tests breaking vs safe changes
+#   - TypeCompatibilityTest: Tests data type compatibility
+#
+# =====================================================================================
 
 metadata:
   id: "column-difference-test"
@@ -7,20 +41,22 @@ metadata:
   type: "pipeline-config"
 
 data-sources:
+  # Before state: Original column set (id, name, email)
   - name: "before-database"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
-      database: "mem:col_diff_before;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      database: "mem:col_diff_before;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"  # PostgreSQL compatibility mode
       username: "sa"
       password: ""
     enabled: true
 
+  # After state: Modified column set (id, name, phone)
   - name: "after-database"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
-      database: "mem:col_diff_after;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      database: "mem:col_diff_after;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"  # PostgreSQL compatibility mode
       username: "sa"
       password: ""
     enabled: true
@@ -28,18 +64,29 @@ data-sources:
 pipeline:
   name: "column-difference-pipeline"
   execution:
-    mode: "sequential"
-    error-handling: "stop-on-error"
+    mode: "sequential"  # Steps execute in order
+    error-handling: "stop-on-error"  # Halt on any failure
   
   steps:
+    # Read original schema (before column changes)
     - name: "read-before-schema"
       type: "read-schema"
       source: "before-database"
       parameters:
-        table: "ACCOUNTS"
+        table: "ACCOUNTS"  # Original ACCOUNTS table
 
+    # Read evolved schema (after column changes)
     - name: "read-after-schema"
       type: "read-schema"
       source: "after-database"
       parameters:
-        table: "ACCOUNTS"
+        table: "ACCOUNTS"  # Modified ACCOUNTS table
+
+    # Compare and detect added/removed columns
+    - name: "detect-column-differences"
+      type: "schema-diff"
+      description: "Detect added and removed columns"
+      parameters:
+        source-step: "read-before-schema"  # Original columns
+        target-step: "read-after-schema"  # Modified columns
+        fail-on-incompatibility: false  # Report only

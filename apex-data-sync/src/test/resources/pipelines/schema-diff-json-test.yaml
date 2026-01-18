@@ -1,3 +1,50 @@
+# =====================================================================================
+# APEX Schema-Diff JSON Report Generation Test
+# =====================================================================================
+#
+# Purpose:
+#   Tests JSON report generation from schema-diff pipeline step, validating that
+#   CSV-to-in-memory schema comparison produces valid JSON output.
+#
+# Test Scenarios:
+#   1. Read schema from CSV file (customers.csv)
+#   2. Create in-memory target schema definition
+#   3. Compare schemas using schema-diff
+#   4. Generate JSON report (schema-diff-json-test.json)
+#
+# Data Sources:
+#   - Source: CSV file (demo-data/csv/customers.csv)
+#   - Target: In-memory schema definition (programmatic)
+#   - External data-source references
+#
+# Schema Comparison:
+#   - CSV inferred schema vs defined schema
+#   - Detects column differences
+#   - fail-on-incompatibility: false (report only)
+#
+# JSON Report Contents:
+#   - Source schema details
+#   - Target schema details
+#   - Column differences (added/removed/modified)
+#   - Compatibility assessment
+#
+# Use Cases:
+#   - Automated CSV validation before import
+#   - API-driven schema validation
+#   - CI/CD integration for data pipelines
+#
+# Expected Results:
+#   - CSV schema read successfully
+#   - In-memory schema created
+#   - Schema-diff comparison executed
+#   - JSON report generated at schema-diff-json-test.json
+#
+# Related Tests:
+#   - schema-diff-dual-output-test: Both HTML and JSON output
+#   - JsonSerializationTest: JSON serialization basics
+#
+# =====================================================================================
+
 metadata:
   type: "pipeline-config"
   name: "Schema Diff JSON Output Test"
@@ -12,19 +59,19 @@ pipelines:
       # Step 1: Read schema from CSV file
       - name: "read-csv-schema"
         type: "read-schema"
-        source: "customers-csv"
+        source: "customers-csv"  # External data-source reference
         parameters:
-          file-path: "demo-data/csv/customers.csv"
-          has-header: true
+          file-path: "demo-data/csv/customers.csv"  # CSV file location
+          has-header: true  # First row is column names
       
-      # Step 2: Create target schema in memory
+      # Step 2: Create target schema in memory (programmatic definition)
       - name: "create-target-schema"
         type: "read-schema"
-        source: "customers-target"
+        source: "customers-target"  # External data-source reference
         parameters:
           # Use schema-definition to create an in-memory schema
           schema-definition:
-            table-name: "customers"
+            table-name: "customers"  # Table name
             columns:
               - name: "customer_id"
                 type: "VARCHAR"
@@ -47,15 +94,17 @@ pipelines:
       - name: "compare-schemas"
         type: "schema-diff"
         parameters:
-          source-step: "read-csv-schema"
-          target-step: "create-target-schema"
-          json-report-output: "schema-diff-json-test.json"
-          fail-on-incompatibility: false
+          source-step: "read-csv-schema"  # CSV schema
+          target-step: "create-target-schema"  # In-memory schema
+          json-report-output: "schema-diff-json-test.json"  # JSON format output
+          fail-on-incompatibility: false  # Report only
 
 data-source-refs:
+  # External data-source reference for CSV
   - name: "customers-csv"
-    source: "data-sources/customers-csv.yaml"
+    source: "data-sources/customers-csv.yaml"  # External configuration file
     enabled: true
+  # External data-source reference for target schema
   - name: "customers-target"
-    source: "data-sources/customers-target.yaml"
+    source: "data-sources/customers-target.yaml"  # External configuration file
     enabled: true

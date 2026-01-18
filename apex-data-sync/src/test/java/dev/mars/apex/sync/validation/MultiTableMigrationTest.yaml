@@ -1,3 +1,46 @@
+# =====================================================================================
+# APEX Multi-Table CSV-to-Database Migration Validation Pipeline
+# =====================================================================================
+#
+# Purpose:
+#   Validates schema compatibility for multiple CSV files migrating to PostgreSQL
+#   tables, ensuring all tables in migration batch are compatible.
+#
+# Test Scenarios:
+#   1. customers: CSV → PostgreSQL CUSTOMERS table
+#   2. orders: CSV → PostgreSQL ORDERS table
+#   3. products: CSV → PostgreSQL PRODUCTS table
+#   4. All three migrations validated in single pipeline
+#
+# Database Setup:
+#   - Source: CSV files (file-system, src/test/resources/test-data/)
+#   - Target: H2 database (PostgreSQL compatibility mode)
+#   - Three table migration validation
+#
+# Multi-Table Migration Benefits:
+#   - Comprehensive validation in one execution
+#   - Detects cross-table compatibility issues
+#   - Batch migration planning
+#   - Consolidated validation results
+#
+# Use Cases:
+#   - Legacy system decommissioning
+#   - Data warehouse migrations
+#   - Multi-table ETL processes
+#   - Production cutover validation
+#
+# Expected Results:
+#   - All three table schemas validated
+#   - CSV schemas inferred correctly
+#   - PostgreSQL target schemas confirmed compatible
+#   - Migration readiness confirmed
+#
+# Related Tests:
+#   - CsvToPostgresMigrationTest: Single table CSV migration
+#   - SchemaDiffDatabaseMigrationValidationTest_MultiTable: Multi-table DB migration
+#
+# =====================================================================================
+
 # APEX Data Sync - Multi-Table Migration Validation
 # Real-world use case: Validate multiple table migrations in one pipeline
 
@@ -9,18 +52,20 @@ metadata:
   description: "Validate schemas for multiple table migrations"
 
 data-sources:
+  # CSV file-system source (legacy data files)
   - name: "source-db"
     type: "file-system"
-    source-type: "csv"
+    source-type: "csv"  # CSV files
     enabled: true
     connection:
-      base-path: "src/test/resources"
+      base-path: "src/test/resources"  # Base directory for CSV files
 
+  # Target H2 database (PostgreSQL compatibility mode)
   - name: "target-db"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
-      database: "mem:multi_table_migration;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      database: "mem:multi_table_migration;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"  # PostgreSQL compatibility mode
       username: "sa"
       password: ""
     enabled: true
@@ -28,62 +73,62 @@ data-sources:
 pipeline:
   name: "multi-table-validation"
   execution:
-    mode: "sequential"
+    mode: "sequential"  # Steps execute in order
   
   steps:
-    # Table 1: customers
+    # Table 1: customers CSV → DB validation
     - name: "read-source-customers"
       type: "read-schema"
       source: "source-db"
       parameters:
-        file: "src/test/resources/test-data/migration-customers.csv"
+        file: "src/test/resources/test-data/migration-customers.csv"  # CSV file
 
     - name: "read-target-customers"
       type: "read-schema"
       source: "target-db"
       parameters:
-        table: "CUSTOMERS"
+        table: "CUSTOMERS"  # Target database table
 
     - name: "compare-customers-schema"
       type: "schema-diff"
       parameters:
-        source-step: "read-source-customers"
-        target-step: "read-target-customers"
+        source-step: "read-source-customers"  # CSV schema
+        target-step: "read-target-customers"  # DB schema
 
-    # Table 2: orders
+    # Table 2: orders CSV → DB validation
     - name: "read-source-orders"
       type: "read-schema"
       source: "source-db"
       parameters:
-        file: "src/test/resources/test-data/migration-orders.csv"
+        file: "src/test/resources/test-data/migration-orders.csv"  # CSV file
 
     - name: "read-target-orders"
       type: "read-schema"
       source: "target-db"
       parameters:
-        table: "ORDERS"
+        table: "ORDERS"  # Target database table
 
     - name: "compare-orders-schema"
       type: "schema-diff"
       parameters:
-        source-step: "read-source-orders"
-        target-step: "read-target-orders"
+        source-step: "read-source-orders"  # CSV schema
+        target-step: "read-target-orders"  # DB schema
 
-    # Table 3: products
+    # Table 3: products CSV → DB validation
     - name: "read-source-products"
       type: "read-schema"
       source: "source-db"
       parameters:
-        file: "src/test/resources/test-data/migration-products.csv"
+        file: "src/test/resources/test-data/migration-products.csv"  # CSV file
 
     - name: "read-target-products"
       type: "read-schema"
       source: "target-db"
       parameters:
-        table: "PRODUCTS"
+        table: "PRODUCTS"  # Target database table
 
     - name: "compare-products-schema"
       type: "schema-diff"
       parameters:
-        source-step: "read-source-products"
-        target-step: "read-target-products"
+        source-step: "read-source-products"  # CSV schema
+        target-step: "read-target-products"  # DB schema

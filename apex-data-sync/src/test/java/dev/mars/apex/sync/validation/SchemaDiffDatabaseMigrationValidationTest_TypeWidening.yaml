@@ -1,24 +1,60 @@
+# =====================================================================================
+# APEX Database Migration Validation - Type Widening (Safe Changes)
+# =====================================================================================
+#
+# Purpose:
+#   Validates that safe type widening changes (VARCHAR(100) → VARCHAR(200)) are
+#   correctly identified as compatible during database migration validation.
+#
+# Test Scenarios:
+#   1. Source table has VARCHAR(100) column
+#   2. Target table has VARCHAR(200) column (widened - SAFE)
+#   3. Validation should pass with compatibility confirmed
+#
+# Database Setup:
+#   - Platform: H2 in-memory databases (PostgreSQL compatibility mode)
+#   - Source DB: mem:migration_source_widening (customers table)
+#   - Target DB: mem:migration_target_widening (customers table)
+#
+# Migration Validation Context:
+#   - Pre-deployment validation for database schema changes
+#   - Type widening is safe (no data loss risk)
+#   - Can be applied without data transformation
+#
+# Expected Results:
+#   - Type widening detected and validated as compatible
+#   - Migration approved for deployment
+#   - HTML report shows safe type change
+#
+# Related Tests:
+#   - SchemaDiffDatabaseMigrationValidationTest_TypeNarrowing: Unsafe narrowing
+#   - TypeWideningTest: Unit test for type widening detection
+#
+# =====================================================================================
+
 metadata:
   name: "Schema Diff - Type Widening"
   description: "Validate compatible type widening changes"
   version: "2.1"
 
 data-sources:
+  # Source database: Original type (VARCHAR 100)
   - name: "source-db"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     enabled: true
     connection:
-      url: "jdbc:h2:mem:migration_source_widening;DB_CLOSE_DELAY=-1"
+      url: "jdbc:h2:mem:migration_source_widening;DB_CLOSE_DELAY=-1"  # In-memory H2
       username: "sa"
       password: ""
 
+  # Target database: Widened type (VARCHAR 200)
   - name: "target-db"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     enabled: true
     connection:
-      url: "jdbc:h2:mem:migration_target_widening;DB_CLOSE_DELAY=-1"
+      url: "jdbc:h2:mem:migration_target_widening;DB_CLOSE_DELAY=-1"  # In-memory H2
       username: "sa"
       password: ""
 
@@ -26,26 +62,29 @@ pipeline:
   name: "type-widening-validation"
   description: "Validate safe type widening (VARCHAR 100→200)"
   execution:
-    mode: "sequential"
+    mode: "sequential"  # Steps execute in order
   steps:
+    # Read source schema with original type
     - name: "read-source-schema"
       type: "read-schema"
       source: "source-db"
       parameters:
-        table: "customers"
+        table: "customers"  # Customers table with VARCHAR(100)
 
+    # Read target schema with widened type
     - name: "read-target-schema"
       type: "read-schema"
       source: "target-db"
       parameters:
-        table: "customers"
+        table: "customers"  # Customers table with VARCHAR(200)
 
+    # Validate type widening is safe
     - name: "compare-schemas"
       type: "schema-diff"
       description: "Compare type changes - widening"
       parameters:
-        source-step: "read-source-schema"
-        target-step: "read-target-schema"
-        case-insensitive-names: true
-        inferred-type-tolerance: true
-        report-output: "target/reports/type-widening-migration-report.html"
+        source-step: "read-source-schema"  # Original types
+        target-step: "read-target-schema"  # Widened types
+        case-insensitive-names: true  # Column name case handling
+        inferred-type-tolerance: true  # Allow type variations
+        report-output: "target/reports/type-widening-migration-report.html"  # HTML report

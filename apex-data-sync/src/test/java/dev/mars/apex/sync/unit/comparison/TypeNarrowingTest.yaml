@@ -1,5 +1,49 @@
-# APEX Type Narrowing Test Pipeline
-# Tests type narrowing detection in schema comparison
+# =====================================================================================
+# APEX Type Narrowing Detection Test Pipeline
+# =====================================================================================
+#
+# Purpose:
+#   Tests the schema-diff engine's ability to detect unsafe type narrowing changes
+#   that could cause data loss or truncation (e.g., VARCHAR(100) → VARCHAR(50)).
+#
+# Test Scenarios:
+#   1. Source table has metric_value VARCHAR(100)
+#   2. Target table has metric_value VARCHAR(50) (narrowed - UNSAFE)
+#   3. Type narrowing detection:
+#      - Same base type (VARCHAR) but reduced size
+#      - Could truncate existing data exceeding 50 characters
+#      - Flagged as incompatible/unsafe migration
+#
+# Database Setup:
+#   - Platform: H2 in-memory database (PostgreSQL compatibility mode)
+#   - Database: mem:type_narrowing (METRICS table)
+#   - Two schema versions in same database
+#
+# Test Data:
+#   - METRICS table with VARCHAR field that undergoes type narrowing
+#   - Tests precision/scale reduction detection
+#
+# Financial Services Context:
+#   - Type narrowing is critical in financial data migrations
+#   - Example: Reducing decimal precision could cause rounding errors
+#   - Example: Narrowing VARCHAR could truncate account numbers or descriptions
+#
+# Breaking Change Implications:
+#   - Type narrowing is a breaking change requiring data validation
+#   - Existing data must be checked to ensure it fits new constraints
+#   - May require data transformation before migration
+#
+# Expected Results:
+#   - Schema diff detects VARCHAR(100) → VARCHAR(50) as incompatible
+#   - Test validates type narrowing detection logic
+#   - HTML report flags unsafe type changes
+#
+# Related Tests:
+#   - TypeWideningTest: Tests safe type widening (opposite case)
+#   - PrecisionScaleTest: Tests numeric precision/scale changes
+#   - TypeCompatibilityTest: Tests general type compatibility
+#
+# =====================================================================================
 
 metadata:
   id: "type-narrowing-test"
@@ -10,20 +54,22 @@ metadata:
   description: "Test pipeline for type narrowing validation"
 
 data-sources:
+  # Source H2 database with wider data types (e.g., INTEGER, VARCHAR(200))
   - name: "source-h2-database"
     type: "database"
     source-type: "h2"
     connection:
-      database: "mem:type_narrow_source;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      database: "mem:type_narrow_source;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"  # In-memory H2 database
       username: "sa"
       password: ""
     enabled: true
 
+  # Target H2 database with narrower data types (e.g., SMALLINT, VARCHAR(50))
   - name: "target-h2-database"
     type: "database"
     source-type: "h2"
     connection:
-      database: "mem:type_narrow_target;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      database: "mem:type_narrow_target;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"  # In-memory H2 database
       username: "sa"
       password: ""
     enabled: true
@@ -31,20 +77,22 @@ data-sources:
 pipeline:
   name: "type-narrowing-test-pipeline"
   execution:
-    mode: "sequential"
-    error-handling: "stop-on-error"
+    mode: "sequential"              # Steps execute in order
+    error-handling: "stop-on-error"  # Halt on any failure
   
   steps:
+    # Read source schema with wider types
     - name: "read-source-schema"
       type: "read-schema"
       source: "source-h2-database"
       description: "Read schema from source database with wider types"
       parameters:
-        table: "METRICS"
+        table: "METRICS"             # Table with original wider types
 
+    # Read target schema with narrowed types (breaking change)
     - name: "read-target-schema"
       type: "read-schema"
       source: "target-h2-database"
       description: "Read schema from target database with narrowed types"
       parameters:
-        table: "METRICS"
+        table: "METRICS"               # Same table, narrower types

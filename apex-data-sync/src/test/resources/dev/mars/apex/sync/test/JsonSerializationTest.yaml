@@ -1,0 +1,98 @@
+# =============================================================================
+# JsonSerializationTest.yaml
+# =============================================================================
+# 
+# Purpose:
+#   Validates JSON serialization of schema diff reports. Tests proper JSON
+#   structure, formatting, field presence, and data integrity.
+#
+# Test Scenarios:
+#   1. Basic JSON serialization - verify all required fields present
+#   2. JSON formatting - verify pretty-printing and indentation
+#   3. Data type serialization - verify type information preserved correctly
+#
+# Database Setup:
+#   - Engine: H2 in-memory database
+#   - Schemas: source_schema (INTEGER types), target_schema (BIGINT types)
+#   - Tables: customers (simple type widening scenario)
+#
+# Expected Results:
+#   - Valid JSON file generated at reports/json-serialization-test.json
+#   - JSON structure includes: $schema, metadata, source, target, summary, columns
+#   - JSON is pretty-printed with indentation
+#   - Type change (INTEGER → BIGINT) captured in changed columns
+#   - All field names follow camelCase convention
+#
+# Related Tests:
+#   - JsonDeserializationTest.java - Round-trip testing
+#   - JsonSchemaValidationTest.java - Schema compliance
+#   - JsonEdgeCasesTest.java - Null/empty handling
+#
+# Configuration Pattern:
+#   Uses report-format: "json" with report-output path
+#
+# =============================================================================
+
+metadata:
+  name: "JSON Serialization Test"
+  description: "Test schema diff JSON serialization with proper structure and formatting"
+  version: "1.0"
+  tags: ["json", "serialization", "schema-comparison"]
+  type: "pipeline-config"
+
+pipeline:
+  name: "json-serialization-pipeline"
+  execution:
+    mode: "sequential"
+  steps:
+    # Step 1: Read source schema
+    - name: "read-source"
+      type: "read-schema"
+      source: "h2-source"  # Database with INTEGER types
+      parameters:
+        table: "source_customers"  # All tables in schema
+        
+    # Step 2: Read target schema
+    - name: "read-target"
+      type: "read-schema"
+      source: "h2-target"  # Database with BIGINT types
+      parameters:
+        table: "target_customers"  # All tables in schema
+        
+    # Step 3: Compare and generate JSON report
+    - name: "compare"
+      type: "compare-schemas"
+      parameters:
+        # Comparison options
+        case-insensitive-names: true    # Table/column names case-insensitive
+        inferred-type-tolerance: false  # Strict type comparison
+        allow-added-columns: true       # New columns non-breaking
+        allow-removed-columns: false    # Removed columns breaking
+        
+        # JSON report generation
+        report-format: "json"
+        report-output: "json-serialization-test.json"  # Saved to reports/ directory
+
+# Data source configurations
+data-sources:
+  # Source database
+  - name: "h2-source"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      host: "${DB_HOST}"
+      port: ${DB_PORT}
+      database: "${DB_NAME}"
+      username: "${DB_USER}"
+      password: "${DB_PASS}"
+      
+  # Target database
+  - name: "h2-target"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      host: "${DB_HOST}"
+      port: ${DB_PORT}
+      database: "${DB_NAME}"
+      username: "${DB_USER}"
+      password: "${DB_PASS}"

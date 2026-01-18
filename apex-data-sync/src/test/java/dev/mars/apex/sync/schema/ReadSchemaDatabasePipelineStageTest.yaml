@@ -1,3 +1,23 @@
+# =====================================================================================
+# APEX Database Schema Reading Test
+# =====================================================================================
+#
+# Purpose:
+#   Tests basic database table schema reading from H2 database.
+#
+# Test Setup:
+#   - Database: H2 mem:schema_test (PostgreSQL mode)
+#   - Table: CUSTOMERS
+#
+# Expected Results:
+#   - Table metadata extracted
+#   - Schema read successfully
+#
+# Related Tests:
+#   - ReadSchemaDatabaseTest: Duplicate test
+#
+# =====================================================================================
+
 # APEX Read Schema Pipeline - Database Test
 # Demonstrates reading schema from a database table
 
@@ -12,9 +32,9 @@ metadata:
 data-sources:
   - name: "h2-test-database"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # In-memory H2 database
     connection:
-      database: "mem:schema_test;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      database: "mem:schema_test;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"  # PostgreSQL compatibility mode
       username: "sa"
       password: ""
     enabled: true
@@ -22,13 +42,13 @@ data-sources:
 pipeline:
   name: "read-database-schema"
   execution:
-    mode: "sequential"
+    mode: "sequential"  # Steps execute in order
     error-handling: "stop-on-error"
   
   steps:
     - name: "read-schema-from-customers-table"
-      type: "read-schema"
+      type: "read-schema"  # Read schema from database table
       source: "h2-test-database"
       description: "Read schema metadata from customers table"
       parameters:
-        table: "CUSTOMERS"
+        table: "CUSTOMERS"  # Table to analyze

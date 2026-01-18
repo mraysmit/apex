@@ -1,56 +1,98 @@
+# =====================================================================================
+# APEX Migration Validation - Added Columns (Testcontainers/Real PostgreSQL)
+# =====================================================================================
+#
+# Purpose:
+#   Validates added columns using real PostgreSQL databases via Testcontainers,
+#   ensuring migration validation works with actual database engines (not just H2).
+#
+# Test Scenarios:
+#   1. Source PostgreSQL has customers table (v1)
+#   2. Target PostgreSQL has customers table (v2 with added columns)
+#   3. Validation using real PostgreSQL type system
+#
+# Database Setup:
+#   - Platform: PostgreSQL (via Testcontainers)
+#   - Source DB: PostgreSQL container (${SOURCE_DB_HOST}, ${SOURCE_DB_PORT})
+#   - Target DB: PostgreSQL container (${TARGET_DB_HOST}, ${TARGET_DB_PORT})
+#   - Environment variables injected by test
+#
+# Testcontainers Benefits:
+#   - Tests against real PostgreSQL (not H2 compatibility mode)
+#   - Validates PostgreSQL-specific type handling
+#   - Ensures production-like behavior
+#   - Catches PostgreSQL-specific edge cases
+#
+# Expected Results:
+#   - Added columns validated using real PostgreSQL
+#   - Validation passes (safe evolution)
+#   - HTML report generated
+#   - PostgreSQL type system properly handled
+#
+# Related Tests:
+#   - SchemaDiffDatabaseMigrationValidationTest_AddedColumns: H2 version
+#   - SyncPipelineContainersTest: Other Testcontainers usage
+#
+# =====================================================================================
+
 metadata:
   name: "Schema Diff - Safe Evolution (Added Columns) - Testcontainers"
   description: "Validate migration with added nullable columns using real PostgreSQL"
   version: "2.1"
 
 data-sources:
+  # Source PostgreSQL database (version 1 schema)
   - name: "source-db"
     type: "database"
-    source-type: "postgresql"
+    source-type: "postgresql"  # Real PostgreSQL via Testcontainers
     enabled: true
     connection:
-      host: "${SOURCE_DB_HOST:localhost}"
-      port: ${SOURCE_DB_PORT:5432}
-      database: "${SOURCE_DB_NAME:source_db}"
-      username: "${SOURCE_DB_USER:test}"
-      password: "${SOURCE_DB_PASS:test}"
+      host: "${SOURCE_DB_HOST:localhost}"  # Provided by Testcontainers
+      port: ${SOURCE_DB_PORT:5432}  # Provided by Testcontainers
+      database: "${SOURCE_DB_NAME:source_db}"  # Provided by Testcontainers
+      username: "${SOURCE_DB_USER:test}"  # Provided by Testcontainers
+      password: "${SOURCE_DB_PASS:test}"  # Provided by Testcontainers
 
+  # Target PostgreSQL database (version 2 schema with added columns)
   - name: "target-db"
     type: "database"
-    source-type: "postgresql"
+    source-type: "postgresql"  # Real PostgreSQL via Testcontainers
     enabled: true
     connection:
-      host: "${TARGET_DB_HOST:localhost}"
-      port: ${TARGET_DB_PORT:5432}
-      database: "${TARGET_DB_NAME:target_db}"
-      username: "${TARGET_DB_USER:test}"
-      password: "${TARGET_DB_PASS:test}"
+      host: "${TARGET_DB_HOST:localhost}"  # Provided by Testcontainers
+      port: ${TARGET_DB_PORT:5432}  # Provided by Testcontainers
+      database: "${TARGET_DB_NAME:target_db}"  # Provided by Testcontainers
+      username: "${TARGET_DB_USER:test}"  # Provided by Testcontainers
+      password: "${TARGET_DB_PASS:test}"  # Provided by Testcontainers
 
 pipeline:
   name: "safe-evolution-validation"
   description: "Validate safe schema evolution with added columns"
   execution:
-    mode: "sequential"
+    mode: "sequential"  # Steps execute in order
   steps:
+    # Read source schema from real PostgreSQL
     - name: "read-source-schema"
       type: "read-schema"
       source: "source-db"
       parameters:
-        table: "customers"
+        table: "customers"  # Customers table v1
 
+    # Read target schema from real PostgreSQL
     - name: "read-target-schema"
       type: "read-schema"
       source: "target-db"
       parameters:
-        table: "customers"
+        table: "customers"  # Customers table v2
 
+    # Validate added columns using real PostgreSQL types
     - name: "compare-schemas"
       type: "schema-diff"
       description: "Compare v1 vs v2 (added columns)"
       parameters:
-        source-step: "read-source-schema"
-        target-step: "read-target-schema"
-        case-insensitive-names: true
-        allow-added-columns: true
-        allow-removed-columns: false
-        report-output: "target/reports/safe-evolution-migration-report-testcontainers.html"
+        source-step: "read-source-schema"  # Original schema
+        target-step: "read-target-schema"  # Schema with new columns
+        case-insensitive-names: true  # Column name case handling
+        allow-added-columns: true  # New columns are allowed
+        allow-removed-columns: false  # Column removal not allowed
+        report-output: "target/reports/safe-evolution-migration-report-testcontainers.html"  # HTML report

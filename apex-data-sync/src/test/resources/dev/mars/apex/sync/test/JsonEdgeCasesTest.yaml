@@ -1,0 +1,98 @@
+# =============================================================================
+# JsonEdgeCasesTest.yaml
+# =============================================================================
+# 
+# Purpose:
+#   Tests JSON serialization edge cases including empty diffs, schemas with
+#   only additions/removals, all breaking changes, and null value handling.
+#
+# Test Scenarios:
+#   1. Empty diff - identical schemas (no changes)
+#   2. Only additions - target has new columns
+#   3. All breaking changes - incompatible type/size changes
+#
+# Database Setup:
+#   - Engine: H2 in-memory database
+#   - Schemas: source_schema, target_schema (varies by test)
+#   - Tables: products (different configurations per test method)
+#
+# Expected Results:
+#   - Empty diffs produce valid JSON with zero changes
+#   - Only additions have non-zero added columns, zero changed/removed
+#   - All breaking changes have non-zero breaking change count
+#   - JSON structure preserved in all edge cases
+#   - No serialization errors for edge cases
+#
+# Related Tests:
+#   - JsonSerializationTest.java - Basic serialization
+#   - JsonDeserializationTest.java - Round-trip testing
+#   - BreakingChangeDetectionTest.java - Breaking change logic
+#
+# Configuration Pattern:
+#   Standard comparison with JSON output, multiple edge case scenarios
+#
+# =============================================================================
+
+metadata:
+  name: "JSON Edge Cases Test"
+  description: "Test schema diff JSON serialization for edge cases and boundary conditions"
+  version: "1.0"
+  tags: ["json", "edge-cases", "schema-comparison"]
+  type: "pipeline-config"
+
+pipeline:
+  name: "json-edge-cases-pipeline"
+  execution:
+    mode: "sequential"
+  steps:
+    # Step 1: Read source schema
+    - name: "read-source"
+      type: "read-schema"
+      source: "h2-source"  # Source schema (varies by test)
+      parameters:
+        table: "source_products"  # All tables
+        
+    # Step 2: Read target schema
+    - name: "read-target"
+      type: "read-schema"
+      source: "h2-target"  # Target schema (varies by test)
+      parameters:
+        table: "target_products"  # All tables
+        
+    # Step 3: Compare and generate JSON
+    - name: "compare"
+      type: "compare-schemas"
+      parameters:
+        # Comparison options
+        case-insensitive-names: true    # Case-insensitive names
+        inferred-type-tolerance: false  # Strict type checking
+        allow-added-columns: true       # New columns non-breaking
+        allow-removed-columns: false    # Removed columns breaking
+        
+        # JSON report generation
+        report-format: "json"
+        report-output: "json-edge-cases-test.json"  # Saved to reports/
+
+# Data source configurations
+data-sources:
+  # Source database
+  - name: "h2-source"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      host: "${DB_HOST}"
+      port: ${DB_PORT}
+      database: "${DB_NAME}"
+      username: "${DB_USER}"
+      password: "${DB_PASS}"
+      
+  # Target database
+  - name: "h2-target"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      host: "${DB_HOST}"
+      port: ${DB_PORT}
+      database: "${DB_NAME}"
+      username: "${DB_USER}"
+      password: "${DB_PASS}"

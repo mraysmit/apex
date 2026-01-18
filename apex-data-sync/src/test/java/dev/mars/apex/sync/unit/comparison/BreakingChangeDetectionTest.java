@@ -101,7 +101,7 @@ public class BreakingChangeDetectionTest extends SyncTestBase {
             .filter(step -> "PIPELINE_STEP".equals(step.getType()))
             .toList();
 
-        assertEquals(2, steps.size(), "Should have 2 pipeline steps");
+        assertEquals(3, steps.size(), "Should have 3 pipeline steps (read source, read target, compare)");
 
         // Validate original schema
         ExecutionStep originalStep = steps.get(0);

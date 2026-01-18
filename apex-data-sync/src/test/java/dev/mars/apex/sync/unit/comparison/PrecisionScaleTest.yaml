@@ -1,0 +1,97 @@
+# =====================================================================================
+# APEX Precision/Scale Change Test Pipeline
+# =====================================================================================
+#
+# Purpose:
+#   Validates detection of DECIMAL precision and scale modifications during schema
+#   comparison. Tests both safe increases that preserve data integrity.
+#
+# Test Scenarios:
+#   1. Precision Increase: DECIMAL(10,2) → DECIMAL(12,2) (safe, allows larger numbers)
+#   2. Scale Increase: DECIMAL(5,4) → DECIMAL(7,6) (safe, more decimal places)
+#
+# Database Setup:
+#   - Uses PostgreSQL via Testcontainers (postgres:15.13-alpine3.20)
+#   - Creates two schemas: source_schema (original) and target_schema (modified)
+#   - Environment variables: POSTGRES_HOST, POSTGRES_PORT (injected at runtime)
+#
+# Test Data:
+#   - Table: financial_data (transaction_id, amount, rate, total)
+#   - Source: DECIMAL(10,2), DECIMAL(5,4), DECIMAL(15,4)
+#   - Target: DECIMAL(12,2), DECIMAL(7,6), DECIMAL(15,4)
+#
+# Financial Services Context:
+#   - Critical for monetary calculations where precision matters
+#   - Common in migration scenarios (e.g., supporting larger transaction amounts)
+#   - Ensures backward compatibility with existing financial data
+#
+# Expected Results:
+#   - Pipeline executes successfully
+#   - Both schemas read without errors
+#   - Precision/scale differences captured in schema metadata
+#
+# Related Tests:
+#   - TypeWideningTest.java (general type widening)
+#   - TypeNarrowingTest.java (unsafe precision reduction)
+#
+# =====================================================================================
+
+metadata:
+  id: "precision-scale-test"
+  name: "Precision/Scale Change Test"
+  version: "1.0"
+  type: "pipeline-config"
+  author: "APEX Team"
+  description: "Test pipeline for DECIMAL precision and scale change validation"
+
+data-sources:
+  # Source database with original DECIMAL precision/scale (e.g., DECIMAL(10,2))
+  - name: "source-database"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      host: "${POSTGRES_HOST}"  # Provided by Testcontainers
+      port: ${POSTGRES_PORT}     # Provided by Testcontainers
+      database: "apex_precision_test"
+      username: "apex_user"
+      password: "apex_pass"
+      schema: "source_schema"
+    enabled: true
+
+  # Target database with modified DECIMAL precision/scale (e.g., DECIMAL(12,4))
+  - name: "target-database"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      host: "${POSTGRES_HOST}"  # Provided by Testcontainers
+      port: ${POSTGRES_PORT}     # Provided by Testcontainers
+      database: "apex_precision_test"
+      username: "apex_user"
+      password: "apex_pass"
+      schema: "target_schema"
+    enabled: true
+
+pipeline:
+  name: "precision-scale-test-pipeline"
+  execution:
+    mode: "sequential"              # Steps execute in order
+    error-handling: "stop-on-error"  # Halt on any failure
+  
+  steps:
+    # Read source schema with original precision/scale
+    - name: "read-source-schema"
+      type: "read-schema"
+      source: "source-database"
+      description: "Read schema from source database with original precision/scale"
+      parameters:
+        table: "financial_data"      # Table with DECIMAL(10,2)
+        schema: "source_schema"      # Source schema location
+
+    # Read target schema with modified precision/scale
+    - name: "read-target-schema"
+      type: "read-schema"
+      source: "target-database"
+      description: "Read schema from target database with modified precision/scale"
+      parameters:
+        table: "financial_data"      # Same table, DECIMAL(12,4)
+        schema: "target_schema"      # Target schema location

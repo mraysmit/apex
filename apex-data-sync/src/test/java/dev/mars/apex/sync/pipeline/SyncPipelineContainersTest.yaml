@@ -1,3 +1,45 @@
+# =====================================================================================
+# APEX Data Sync Pipeline - Testcontainers Integration Test
+# =====================================================================================
+#
+# Purpose:
+#   Tests complete ETL pipeline using real SQL Server and PostgreSQL databases
+#   via Testcontainers, validating production-like behavior.
+#
+# Test Scenarios:
+#   1. Extract: Read data from real SQL Server container
+#   2. Load: Insert data into real PostgreSQL container
+#   3. Validate: End-to-end sync with actual database engines
+#
+# Database Setup:
+#   - Source: SQL Server container (localhost:1433, connection details injected)
+#   - Target: PostgreSQL container (localhost:5432, connection details injected)
+#   - Containers started by test, connections configured programmatically
+#
+# Testcontainers Benefits:
+#   - Tests against real database engines (not H2 emulation)
+#   - Validates SQL Server and PostgreSQL specific behavior
+#   - Catches platform-specific issues
+#   - Production-like testing environment
+#
+# Pipeline Configuration:
+#   - Connection details overwritten by test at runtime
+#   - extract-from-sqlserver: Real SQL Server query
+#   - load-into-postgresql: Real PostgreSQL insert
+#   - Sequential execution with error handling
+#
+# Expected Results:
+#   - Data extracted from SQL Server container
+#   - Data loaded into PostgreSQL container
+#   - Pipeline executes with real database engines
+#   - Validates production-ready sync logic
+#
+# Related Tests:
+#   - SyncPipelineH2Test: H2 compatibility mode version
+#   - MsSqlToPostgresSyncTest: Production sync configuration
+#
+# =====================================================================================
+
 # APEX Database Table Sync - Containers Test Pipeline
 # Real SQL Server to PostgreSQL sync using TestContainers.
 # Connection details are populated programmatically by the test.
@@ -13,14 +55,14 @@ metadata:
 data-sources:
   - name: "sqlserver-source"
     type: "database"
-    source-type: "sqlserver"
+    source-type: "sqlserver"  # Real SQL Server via Testcontainers
     connection:
       # These values are overwritten programmatically by the test
-      host: "localhost"
+      host: "localhost"  # Provided by Testcontainers
       port: 1433
       database: "master"
       username: "sa"
-      password: "placeholder"
+      password: "placeholder"  # Provided by Testcontainers
     enabled: true
     queries:
       extractCustomers: "SELECT id, name FROM customers"
@@ -28,14 +70,14 @@ data-sources:
 data-sinks:
   - name: "postgresql-target"
     type: "database"
-    source-type: "postgresql"
+    source-type: "postgresql"  # Real PostgreSQL via Testcontainers
     connection:
       # These values are overwritten programmatically by the test
-      host: "localhost"
+      host: "localhost"  # Provided by Testcontainers
       port: 5432
       database: "test"
       username: "test"
-      password: "placeholder"
+      password: "placeholder"  # Provided by Testcontainers
     enabled: true
     operations:
       upsertCustomer: "INSERT INTO customers (id, name) VALUES (:id, :name)"
@@ -47,17 +89,17 @@ data-sinks:
 pipeline:
   name: "containers-sync"
   execution:
-    mode: "sequential"
+    mode: "sequential"  # Steps execute in order
     max-retries: 3
     error-handling: "continue-on-error"
   steps:
     - name: "extract-from-sqlserver"
-      type: "extract"
+      type: "extract"  # Extract from SQL Server
       source: "sqlserver-source"
-      operation: "extractCustomers"
+      operation: "extractCustomers"  # Query to execute
 
     - name: "load-into-postgresql"
-      type: "load"
+      type: "load"  # Load to PostgreSQL
       sink: "postgresql-target"
-      operation: "upsertCustomer"
-      depends-on: ["extract-from-sqlserver"]
+      operation: "upsertCustomer"  # Insert operation
+      depends-on: ["extract-from-sqlserver"]  # Wait for extraction

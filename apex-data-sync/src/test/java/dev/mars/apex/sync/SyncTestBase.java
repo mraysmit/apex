@@ -154,6 +154,12 @@ public abstract class SyncTestBase {
         // Clean up H2 database files to prevent persistence between tests
         cleanupH2DatabaseFiles();
 
+        // Reset the cache manager singleton to ensure complete isolation between tests
+        // This is more thorough than just clearing cache entries and statistics
+        // Note: resetInstance() internally calls shutdown() before nullifying the instance
+        ApexCacheManager.resetInstance();
+        logger.info("Cache manager singleton reset for test isolation");
+
         logger.info("✓ APEX services cleanup completed");
     }
 

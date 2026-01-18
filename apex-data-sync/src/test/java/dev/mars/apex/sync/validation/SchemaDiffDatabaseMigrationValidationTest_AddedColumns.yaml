@@ -1,24 +1,67 @@
+# =====================================================================================
+# APEX Database Migration Validation - Added Columns (Safe Evolution)
+# =====================================================================================
+#
+# Purpose:
+#   Validates that adding new nullable columns is correctly identified as a safe,
+#   non-breaking change during database migration validation using H2 databases.
+#
+# Test Scenarios:
+#   1. Source table (v1) has columns: id, name, email
+#   2. Target table (v2) has columns: id, name, email, phone, address (added nullable columns)
+#   3. Validation should pass with added columns flagged as safe
+#
+# Database Setup:
+#   - Platform: H2 file-based databases (./target/test/schema-diff/)
+#   - Source DB: migration_source_added (CUSTOMERS table v1)
+#   - Target DB: migration_target_added (CUSTOMERS table v2)
+#
+# Safe Evolution Criteria:
+#   - New columns are nullable (no data required)
+#   - Existing data remains compatible
+#   - No application changes required immediately
+#   - Backward compatible change
+#
+# Migration Validation Context:
+#   - Common scenario in agile development
+#   - Allows gradual feature rollout
+#   - Safe for zero-downtime deployments
+#
+# Expected Results:
+#   - Added columns detected (phone, address)
+#   - Validation passes (safe evolution)
+#   - HTML report shows added columns as non-breaking
+#   - allow-added-columns: true enables validation
+#
+# Related Tests:
+#   - SchemaDiffDatabaseMigrationValidationTest_RemovedColumns: Unsafe removal
+#   - ColumnDifferenceTest: Basic column difference detection
+#
+# =====================================================================================
+
 metadata:
   name: "Schema Diff - Safe Evolution (Added Columns)"
   description: "Validate migration with added nullable columns"
   version: "2.1"
 
 data-sources:
+  # Source database: Version 1 schema (original)
   - name: "source-db"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # H2 file-based database
     enabled: true
     connection:
-      url: "jdbc:h2:./target/test/schema-diff/migration_source_added;DB_CLOSE_DELAY=-1"
+      url: "jdbc:h2:./target/test/schema-diff/migration_source_added;DB_CLOSE_DELAY=-1"  # File-based H2
       username: "sa"
       password: ""
 
+  # Target database: Version 2 schema (with added columns)
   - name: "target-db"
     type: "database"
-    source-type: "h2"
+    source-type: "h2"  # H2 file-based database
     enabled: true
     connection:
-      url: "jdbc:h2:./target/test/schema-diff/migration_target_added;DB_CLOSE_DELAY=-1"
+      url: "jdbc:h2:./target/test/schema-diff/migration_target_added;DB_CLOSE_DELAY=-1"  # File-based H2
       username: "sa"
       password: ""
 
@@ -26,27 +69,30 @@ pipeline:
   name: "safe-evolution-validation"
   description: "Validate safe schema evolution with added columns"
   execution:
-    mode: "sequential"
+    mode: "sequential"  # Steps execute in order
   steps:
+    # Read original schema (v1)
     - name: "read-source-schema"
       type: "read-schema"
       source: "source-db"
       parameters:
-        table: "CUSTOMERS"
+        table: "CUSTOMERS"  # CUSTOMERS table v1
 
+    # Read evolved schema (v2 with new columns)
     - name: "read-target-schema"
       type: "read-schema"
       source: "target-db"
       parameters:
-        table: "CUSTOMERS"
+        table: "CUSTOMERS"  # CUSTOMERS table v2
 
+    # Validate added columns are safe
     - name: "compare-schemas"
       type: "schema-diff"
       description: "Compare v1 vs v2 (added columns)"
       parameters:
-        source-step: "read-source-schema"
-        target-step: "read-target-schema"
-        case-insensitive-names: true
-        allow-added-columns: true
-        allow-removed-columns: false
-        report-output: "target/reports/safe-evolution-migration-report.html"
+        source-step: "read-source-schema"  # Original schema
+        target-step: "read-target-schema"  # Schema with new columns
+        case-insensitive-names: true  # Column name case handling
+        allow-added-columns: true  # New columns are allowed
+        allow-removed-columns: false  # Column removal not allowed
+        report-output: "target/reports/safe-evolution-migration-report.html"  # HTML report

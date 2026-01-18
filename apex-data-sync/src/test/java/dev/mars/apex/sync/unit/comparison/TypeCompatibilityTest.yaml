@@ -1,5 +1,51 @@
-# APEX Type Compatibility Test Pipeline
-# Tests type compatibility detection in schema comparison
+# =====================================================================================
+# APEX Type Compatibility Detection Test Pipeline
+# =====================================================================================
+#
+# Purpose:
+#   Tests the schema-diff engine's ability to detect type compatibility issues
+#   between source and target schemas, validating safe vs unsafe type conversions.
+#
+# Test Scenarios:
+#   1. Compatible type changes:
+#      - INT → BIGINT (widening - safe)
+#      - VARCHAR(50) → VARCHAR(100) (widening - safe)
+#   2. Incompatible type changes:
+#      - VARCHAR → INTEGER (incompatible - data type mismatch)
+#      - TIMESTAMP → DATE (data loss - time component lost)
+#
+# Database Setup:
+#   - Platform: H2 in-memory database (PostgreSQL compatibility mode)
+#   - Database: mem:type_compat (ORDERS table)
+#   - Two schema versions for comparison
+#
+# Test Data:
+#   - ORDERS table with various data type compatibility scenarios
+#   - Mix of numeric, string, and temporal type changes
+#
+# Type Compatibility Rules Tested:
+#   1. Numeric widening: INT → BIGINT (safe)
+#   2. String widening: VARCHAR(50) → VARCHAR(100) (safe)
+#   3. Type mismatch: VARCHAR → INTEGER (unsafe)
+#   4. Temporal narrowing: TIMESTAMP → DATE (unsafe)
+#
+# Financial Services Context:
+#   - Order amounts may need widening (INT → BIGINT) for high-value transactions
+#   - Timestamps are critical for audit trails - cannot be narrowed
+#   - Type mismatches could corrupt financial data
+#
+# Expected Results:
+#   - Schema diff detects safe type widenings
+#   - Schema diff flags unsafe type conversions
+#   - HTML report shows compatibility analysis
+#   - Test validates type compatibility matrix
+#
+# Related Tests:
+#   - TypeNarrowingTest: Tests unsafe type narrowing
+#   - TypeWideningTest: Tests safe type widening
+#   - PrecisionScaleTest: Tests numeric precision changes
+#
+# =====================================================================================
 
 metadata:
   id: "type-compatibility-test"
@@ -10,20 +56,22 @@ metadata:
   description: "Test pipeline for type compatibility validation"
 
 data-sources:
+  # Source H2 database with original type definitions
   - name: "source-h2-database"
     type: "database"
     source-type: "h2"
     connection:
-      database: "mem:type_compat_source;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      database: "mem:type_compat_source;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"  # In-memory H2 database
       username: "sa"
       password: ""
     enabled: true
 
+  # Target H2 database with potentially incompatible type changes
   - name: "target-h2-database"
     type: "database"
     source-type: "h2"
     connection:
-      database: "mem:type_compat_target;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      database: "mem:type_compat_target;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"  # In-memory H2 database
       username: "sa"
       password: ""
     enabled: true
@@ -31,20 +79,31 @@ data-sources:
 pipeline:
   name: "type-compatibility-test-pipeline"
   execution:
-    mode: "sequential"
-    error-handling: "stop-on-error"
+    mode: "sequential"              # Steps execute in order
+    error-handling: "stop-on-error"  # Halt on any failure
   
   steps:
+    # Read source schema with original types
     - name: "read-source-schema"
       type: "read-schema"
       source: "source-h2-database"
       description: "Read schema from source database with original types"
       parameters:
-        table: "ORDERS"
+        table: "ORDERS"              # Table with original type definitions
 
+    # Read target schema with potentially incompatible type changes
     - name: "read-target-schema"
       type: "read-schema"
       source: "target-h2-database"
       description: "Read schema from target database with modified types"
       parameters:
-        table: "ORDERS"
+        table: "ORDERS"  # Same table name, different types
+
+    # Compare schemas and detect type compatibility issues
+    - name: "compare-schemas"
+      type: "schema-diff"
+      description: "Detect type compatibility issues"
+      parameters:
+        source-step: "read-source-schema"  # Original types
+        target-step: "read-target-schema"  # Modified types
+        fail-on-incompatibility: false  # Report only, don't fail pipeline

@@ -1,0 +1,101 @@
+# =============================================================================
+# MultiTableMarkdownTest.yaml
+# =============================================================================
+# 
+# Purpose:
+#   Validates multi-table Markdown report generation. Tests proper organization,
+#   table separators, individual table summaries, and aggregated statistics
+#   across multiple tables.
+#
+# Test Scenarios:
+#   1. Multiple tables in single report - proper organization
+#   2. Table organization - correct structure and separators
+#   3. Summary aggregation - cross-table statistics
+#
+# Database Setup:
+#   - Engine: H2 in-memory database
+#   - Schemas: source_schema, target_schema (each with 3 tables)
+#   - Tables: customers, orders, products (various changes)
+#
+# Expected Results:
+#   - Single Markdown report with all 3 tables
+#   - Proper table separators and headers
+#   - Multiple header sections (one per table or grouped)
+#   - Summary/overview section
+#   - Well-organized table structures
+#
+# Related Tests:
+#   - MarkdownGenerationTest.java - Basic Markdown generation
+#   - TableFormattingTest.java - Table formatting
+#   - EmojiHeaderTest.java - Header emojis
+#
+# Configuration Pattern:
+#   Standard Markdown report with wildcard table selection (*)
+#
+# =============================================================================
+
+metadata:
+  name: "Multi-Table Markdown Test"
+  description: "Test multi-table Markdown schema diff report generation and organization"
+  version: "1.0"
+  tags: ["markdown", "multi-table", "schema-comparison"]
+  type: "pipeline-config"
+
+pipeline:
+  name: "multi-table-markdown-pipeline"
+  execution:
+    mode: "sequential"
+  steps:
+    # Step 1: Read products table from source
+    - name: "read-source"
+      type: "read-schema"
+      source: "test-source"
+      parameters:
+        table: "source_products"  # Specific table
+        
+    # Step 2: Read products table from target
+    - name: "read-target"
+      type: "read-schema"
+      source: "test-target"
+      parameters:
+        table: "target_products"  # Specific table
+        
+    # Step 3: Compare and generate Markdown report
+    - name: "compare"
+      type: "schema-diff"
+      parameters:
+        source-step: "read-source"
+        target-step: "read-target"
+        # Comparison options
+        case-insensitive-names: true    # Case-insensitive comparison
+        inferred-type-tolerance: false  # Strict type checking
+        allow-added-columns: true       # New columns non-breaking
+        allow-removed-columns: false    # Removed columns breaking
+        
+        # Markdown report generation (single report for all tables)
+        report-format: "markdown"
+        report-output: "multi-table-markdown-test.md"  # Saved to reports/
+
+# Data source configurations
+data-sources:
+  # Source database
+  - name: "test-source"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      host: "${DB_HOST}"
+      port: ${DB_PORT}
+      database: "${DB_NAME}"
+      username: "${DB_USER}"
+      password: "${DB_PASS}"
+      
+  # Target database
+  - name: "test-target"
+    type: "database"
+    source-type: "postgresql"
+    connection:
+      host: "${DB_HOST}"
+      port: ${DB_PORT}
+      database: "${DB_NAME}"
+      username: "${DB_USER}"
+      password: "${DB_PASS}"
