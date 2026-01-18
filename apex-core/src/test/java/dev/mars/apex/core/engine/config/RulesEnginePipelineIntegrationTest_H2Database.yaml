@@ -1,0 +1,113 @@
+# ============================================================================
+# APEX RulesEngine Pipeline Integration Test - H2 Database Pipeline
+# ============================================================================
+#
+# PURPOSE:
+# Validates pipeline execution with real H2 database source and sink.
+# Tests extract and load operations with actual database connections.
+#
+# TEST COVERAGE:
+# - H2 database data source initialization
+# - H2 database data sink initialization
+# - Multi-step pipeline (extract + load)
+# - Actual data persistence verification
+# - Resource cleanup (database connections)
+#
+# USED BY: RulesEnginePipelineIntegrationTest.java
+# ============================================================================
+
+metadata:
+  id: "rules-engine-pipeline-h2-test"
+  name: "RulesEngine Pipeline Integration - H2 Database"
+  type: "pipeline-config"
+  version: "1.0"
+  author: "APEX Core Team"
+  tags: ["test", "pipeline", "integration", "h2", "database"]
+
+# H2 database source
+data-sources:
+  - name: "h2-test-source"
+    type: "database"
+    source-type: "jdbc"
+    enabled: true
+    description: "H2 in-memory database source for testing"
+    
+    connection:
+      database: "mem:pipeline_test_db"
+      username: "sa"
+      password: ""
+    
+    custom-properties:
+      schema:
+        auto-create: true
+        init-script: |
+          CREATE TABLE IF NOT EXISTS source_customers (
+            customer_id INTEGER PRIMARY KEY,
+            customer_name VARCHAR(255),
+            email VARCHAR(255),
+            status VARCHAR(50)
+          );
+          
+          INSERT INTO source_customers (customer_id, customer_name, email, status) VALUES
+            (1, 'John Doe', 'john@example.com', 'ACTIVE'),
+            (2, 'Jane Smith', 'jane@example.com', 'ACTIVE'),
+            (3, 'Bob Johnson', 'bob@example.com', 'INACTIVE');
+    
+    queries:
+      getAllCustomers: "SELECT customer_id, customer_name, email, status FROM source_customers"
+
+# H2 database sink
+data-sinks:
+  - name: "h2-test-sink"
+    type: "database"
+    source-type: "jdbc"
+    enabled: true
+    description: "H2 in-memory database sink for testing"
+    
+    connection:
+      database: "mem:pipeline_test_db"
+      username: "sa"
+      password: ""
+
+    custom-properties:
+      schema:
+        auto-create: true
+        init-script: |
+          CREATE TABLE IF NOT EXISTS target_customers (
+            customer_id INTEGER PRIMARY KEY,
+            customer_name VARCHAR(255),
+            email VARCHAR(255),
+            status VARCHAR(50),
+            processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+    
+    operations:
+      insertCustomer: |
+        INSERT INTO target_customers (customer_id, customer_name, email, status)
+        VALUES (:customer_id, :customer_name, :email, :status)
+
+# Multi-step pipeline: extract from source, load to sink
+pipeline:
+  name: "h2-extract-load-pipeline"
+  description: "Extract from H2 source and load to H2 sink"
+  
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+    max-retries: 0
+    retry-delay-ms: 0
+  
+  steps:
+    - name: "extract-customers"
+      type: "extract"
+      source: "h2-test-source"
+      operation: "getAllCustomers"
+      description: "Extract customer data from H2 source"
+    
+    - name: "load-customers"
+      type: "load"
+      sink: "h2-test-sink"
+      operation: "insertCustomer"
+      description: "Load customer data to H2 sink"
+      depends-on: ["extract-customers"]
+

@@ -212,7 +212,7 @@ public class RulesEnginePipelineStepDataIntegrationTest {
         logger.info("=== Test 1: Simple Extract Pipeline ===");
         
         // Given: A pipeline with a simple extract step
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/simple-extract-pipeline.yaml");
+        rulesEngine = RulesEngine.fromFile(TEST_YAML_BASE_PATH + "simple-extract-pipeline.yaml");
         Map<String, Object> inputData = new HashMap<>();
         
         // When: Execute the pipeline
@@ -269,7 +269,7 @@ public class RulesEnginePipelineStepDataIntegrationTest {
         logger.info("=== Test 2: Multi-Step Pipeline ===");
         
         // Given: A pipeline with Extract → Transform → Load steps
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/multi-step-pipeline.yaml");
+        rulesEngine = RulesEngine.fromFile(TEST_YAML_BASE_PATH + "multi-step-pipeline.yaml");
         Map<String, Object> inputData = new HashMap<>();
         
         // When: Execute the pipeline
@@ -316,7 +316,7 @@ public class RulesEnginePipelineStepDataIntegrationTest {
         logger.info("=== Test 3: Pipeline with Partial Failures ===");
 
         // Given: A pipeline that processes some records successfully and fails others
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/partial-failure-pipeline.yaml");
+        rulesEngine = RulesEngine.fromFile(TEST_YAML_BASE_PATH + "partial-failure-pipeline.yaml");
         Map<String, Object> inputData = new HashMap<>();
 
         // When: Execute the pipeline
@@ -363,7 +363,7 @@ public class RulesEnginePipelineStepDataIntegrationTest {
         logger.info("=== Test 4: Null Data Handling ===");
 
         // Given: A pipeline step that might return null data (e.g., load step)
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/null-data-pipeline.yaml");
+        rulesEngine = RulesEngine.fromFile(TEST_YAML_BASE_PATH + "null-data-pipeline.yaml");
         Map<String, Object> inputData = new HashMap<>();
 
         // When: Execute the pipeline
@@ -402,7 +402,7 @@ public class RulesEnginePipelineStepDataIntegrationTest {
         logger.info("=== Test 5: Database Extract ===");
 
         // Given: A pipeline with database extract step
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/database-extract-pipeline.yaml");
+        rulesEngine = RulesEngine.fromFile(TEST_YAML_BASE_PATH + "database-extract-pipeline.yaml");
         Map<String, Object> inputData = new HashMap<>();
 
         // When: Execute the pipeline
@@ -448,7 +448,7 @@ public class RulesEnginePipelineStepDataIntegrationTest {
         logger.info("=== Test 6: File Extract ===");
 
         // Given: A pipeline with CSV/JSON file extract step
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/file-extract-pipeline.yaml");
+        rulesEngine = RulesEngine.fromFile(TEST_YAML_BASE_PATH + "file-extract-pipeline.yaml");
         Map<String, Object> inputData = new HashMap<>();
 
         // When: Execute the pipeline
@@ -496,7 +496,7 @@ public class RulesEnginePipelineStepDataIntegrationTest {
         logger.info("=== Test 7: Serialization Preservation ===");
 
         // Given: A pipeline execution result with step data
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/simple-extract-pipeline.yaml");
+        rulesEngine = RulesEngine.fromFile(TEST_YAML_BASE_PATH + "simple-extract-pipeline.yaml");
         Map<String, Object> inputData = new HashMap<>();
 
         RuleResult originalResult = rulesEngine.evaluate(inputData);
@@ -565,7 +565,7 @@ public class RulesEnginePipelineStepDataIntegrationTest {
         logger.info("=== Test 8: Execution Path Access Patterns ===");
 
         // Given: A multi-step pipeline execution
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/multi-step-pipeline.yaml");
+        rulesEngine = RulesEngine.fromFile(TEST_YAML_BASE_PATH + "multi-step-pipeline.yaml");
         Map<String, Object> inputData = new HashMap<>();
 
         RuleResult result = rulesEngine.evaluate(inputData);

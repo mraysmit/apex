@@ -1,0 +1,26 @@
+metadata:
+  id: "rules-engine-classification-test-enrichment-rules"
+  name: "RulesEngine Classification Test Enrichment Rules"
+  version: "1.0.0"
+  description: "Enrichment rules for RulesEngine classification routing tests"
+  type: "rule-config"
+  author: "test@example.com"
+
+rules:
+  # Add processing timestamp
+  - id: "add-processing-timestamp"
+    name: "Add Processing Timestamp"
+    description: "Adds processing timestamp to the trade"
+    condition: "true"
+    severity: "INFO"
+    category: "ENRICHMENT"
+    enabled: true
+  
+  # Add processing status
+  - id: "add-processing-status"
+    name: "Add Processing Status"
+    description: "Adds processing status to the trade"
+    condition: "true"
+    severity: "INFO"
+    category: "ENRICHMENT"
+    enabled: true

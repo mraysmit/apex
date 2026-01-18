@@ -53,13 +53,13 @@ class RulesEngineErrorRecoveryConfigTest {
 
     @Test
     void testRulesEngineFromFileLoadsErrorRecoveryConfig() throws YamlConfigurationException {
-        // Test the fromClasspath() static factory method
-        String resourcePath = "error-handling/yaml-error-recovery-test.yaml";
-
-        // Create RulesEngine from classpath
-        RulesEngine engine = RulesEngine.fromClasspath(resourcePath);
-
-        assertNotNull(engine, "RulesEngine should be created from classpath successfully");
+        // Test the fromFile() static factory method
+        String filePath = "src/test/resources/error-handling/yaml-error-recovery-test.yaml";
+        
+        // Create RulesEngine from file
+        RulesEngine engine = RulesEngine.fromFile(filePath);
+        
+        assertNotNull(engine, "RulesEngine should be created from file successfully");
     }
 
     @Test

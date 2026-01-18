@@ -76,7 +76,8 @@ class SchemaDiffPipelineIntegrationTest {
         setupCustomersDatabase();
 
         // Load pipeline configuration
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/SchemaDiffPipelineIntegrationTest_CsvToDatabase.yaml");
+        rulesEngine = RulesEngine.fromFile(
+            TEST_YAML_BASE_PATH + "SchemaDiffPipelineIntegrationTest_CsvToDatabase.yaml");
 
         // Execute pipeline
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
@@ -114,7 +115,8 @@ class SchemaDiffPipelineIntegrationTest {
 
         setupCustomersDatabase();
 
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/SchemaDiffPipelineIntegrationTest_AddedColumns.yaml");
+        rulesEngine = RulesEngine.fromFile(
+            TEST_YAML_BASE_PATH + "SchemaDiffPipelineIntegrationTest_AddedColumns.yaml");
 
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
         assertTrue(result.isSuccess(), "Pipeline should execute successfully");
@@ -134,7 +136,8 @@ class SchemaDiffPipelineIntegrationTest {
 
         setupCustomersDatabase();
 
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/SchemaDiffPipelineIntegrationTest_RemovedColumns.yaml");
+        rulesEngine = RulesEngine.fromFile(
+            TEST_YAML_BASE_PATH + "SchemaDiffPipelineIntegrationTest_RemovedColumns.yaml");
 
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
         assertTrue(result.isSuccess(), "Pipeline should execute successfully");
@@ -154,7 +157,8 @@ class SchemaDiffPipelineIntegrationTest {
 
         setupCustomersDatabase();
 
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/SchemaDiffPipelineIntegrationTest_FailOnIncompatibility.yaml");
+        rulesEngine = RulesEngine.fromFile(
+            TEST_YAML_BASE_PATH + "SchemaDiffPipelineIntegrationTest_FailOnIncompatibility.yaml");
 
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
         
@@ -176,7 +180,8 @@ class SchemaDiffPipelineIntegrationTest {
 
         setupCustomersDatabase();
 
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/SchemaDiffPipelineIntegrationTest_CaseInsensitive.yaml");
+        rulesEngine = RulesEngine.fromFile(
+            TEST_YAML_BASE_PATH + "SchemaDiffPipelineIntegrationTest_CaseInsensitive.yaml");
 
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
         assertTrue(result.isSuccess(), "Pipeline should execute successfully");
@@ -197,7 +202,8 @@ class SchemaDiffPipelineIntegrationTest {
 
         setupCustomersDatabase();
 
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/SchemaDiffPipelineIntegrationTest_TypeMappings.yaml");
+        rulesEngine = RulesEngine.fromFile(
+            TEST_YAML_BASE_PATH + "SchemaDiffPipelineIntegrationTest_TypeMappings.yaml");
 
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
         assertTrue(result.isSuccess(), "Pipeline should execute successfully");
@@ -255,7 +261,8 @@ class SchemaDiffPipelineIntegrationTest {
         logger.info("\n=== Test: Generate HTML Report for Schema Diff ===\n");
 
         // Load configuration with report-output parameter
-        RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/pipeline/SchemaDiffPipelineIntegrationTest_HtmlReport.yaml");
+        RulesEngine engine = RulesEngine.fromFile(
+            "src/test/java/dev/mars/apex/core/engine/pipeline/SchemaDiffPipelineIntegrationTest_HtmlReport.yaml");
 
         // Execute the pipeline
         RuleResult result = engine.evaluate(new HashMap<>());

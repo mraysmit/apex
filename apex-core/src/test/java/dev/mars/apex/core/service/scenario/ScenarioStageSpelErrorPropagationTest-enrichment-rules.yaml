@@ -1,0 +1,18 @@
+metadata:
+  id: "spel-error-propagation-enrichment-rules"
+  name: "SpEL Error Propagation Enrichment Rules"
+  version: "1.0.0"
+  description: "Enrichment rules for SpEL error propagation testing (should be skipped)"
+  type: "rule-config"
+  author: "test@example.com"
+
+rules:
+  # Simple enrichment rule that should be skipped due to validation failure
+  - id: "processing-timestamp"
+    name: "Processing Timestamp"
+    description: "Adds processing timestamp (should be skipped due to validation failure)"
+    condition: "true"
+    message: "Processing timestamp added"
+    severity: "INFO"
+    category: "ENRICHMENT"
+    enabled: true

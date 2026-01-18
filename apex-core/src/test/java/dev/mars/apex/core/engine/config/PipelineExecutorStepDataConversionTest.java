@@ -62,7 +62,7 @@ public class PipelineExecutorStepDataConversionTest {
         logger.info("=== Test 9: Field Mapping Verification ===");
         
         // Given: A pipeline that will create PipelineStepResult objects
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/simple-extract-pipeline.yaml");
+        rulesEngine = RulesEngine.fromFile(TEST_YAML_BASE_PATH + "simple-extract-pipeline.yaml");
         Map<String, Object> inputData = new HashMap<>();
         
         // When: Execute the pipeline (triggers conversion)
@@ -116,7 +116,7 @@ public class PipelineExecutorStepDataConversionTest {
         logger.info("=== Test 10: Large Dataset Handling ===");
         
         // Given: A pipeline with a larger dataset
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/simple-extract-pipeline.yaml");
+        rulesEngine = RulesEngine.fromFile(TEST_YAML_BASE_PATH + "simple-extract-pipeline.yaml");
         Map<String, Object> inputData = new HashMap<>();
         
         long startTime = System.currentTimeMillis();
@@ -164,7 +164,7 @@ public class PipelineExecutorStepDataConversionTest {
         logger.info("=== Test 11: Different Data Types ===");
         
         // Given: A pipeline that produces different data types
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/multi-step-pipeline.yaml");
+        rulesEngine = RulesEngine.fromFile(TEST_YAML_BASE_PATH + "multi-step-pipeline.yaml");
         Map<String, Object> inputData = new HashMap<>();
         
         // When: Execute the pipeline
@@ -208,7 +208,7 @@ public class PipelineExecutorStepDataConversionTest {
         logger.info("=== Test 12: Skipped Steps ===");
 
         // Given: A pipeline with conditional/optional steps
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/partial-failure-pipeline.yaml");
+        rulesEngine = RulesEngine.fromFile(TEST_YAML_BASE_PATH + "partial-failure-pipeline.yaml");
         Map<String, Object> inputData = new HashMap<>();
 
         // When: Execute the pipeline
@@ -251,7 +251,7 @@ public class PipelineExecutorStepDataConversionTest {
         logger.info("=== Test 13: Failed Steps ===");
 
         // Given: A pipeline that may have failures
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/partial-failure-pipeline.yaml");
+        rulesEngine = RulesEngine.fromFile(TEST_YAML_BASE_PATH + "partial-failure-pipeline.yaml");
         Map<String, Object> inputData = new HashMap<>();
 
         // When: Execute the pipeline
@@ -298,7 +298,7 @@ public class PipelineExecutorStepDataConversionTest {
         logger.info("=== Test 14: Step Order Preservation ===");
 
         // Given: A multi-step pipeline with dependencies
-        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/multi-step-pipeline.yaml");
+        rulesEngine = RulesEngine.fromFile(TEST_YAML_BASE_PATH + "multi-step-pipeline.yaml");
         Map<String, Object> inputData = new HashMap<>();
 
         // When: Execute the pipeline

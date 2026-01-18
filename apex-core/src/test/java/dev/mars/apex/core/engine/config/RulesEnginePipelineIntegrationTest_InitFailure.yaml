@@ -1,0 +1,58 @@
+# ============================================================================
+# APEX RulesEngine Pipeline Integration Test - Initialization Failure
+# ============================================================================
+#
+# PURPOSE:
+# Validates graceful handling when data source initialization fails.
+# Tests that RulesEngine doesn't throw exceptions during construction.
+#
+# TEST COVERAGE:
+# - Data source with invalid configuration
+# - Graceful degradation (warning logged, no exception thrown)
+# - RulesEngine still initializes successfully
+#
+# USED BY: RulesEnginePipelineIntegrationTest.java
+# ============================================================================
+
+metadata:
+  id: "rules-engine-pipeline-init-failure-test"
+  name: "RulesEngine Pipeline Integration - Init Failure"
+  type: "pipeline-config"
+  version: "1.0"
+  author: "APEX Core Team"
+  tags: ["test", "pipeline", "error-handling", "initialization"]
+
+# Data source with invalid/unreachable database configuration
+data-sources:
+  - name: "unreachable-db-source"
+    type: "database"
+    source-type: "jdbc"
+    enabled: true
+    description: "Database source with invalid connection"
+    
+    connection:
+      host: "unreachable-host"
+      port: 9999
+      database: "nonexistent"
+      username: "sa"
+      password: ""
+    
+    queries:
+      getAllData: "SELECT * FROM test_table"
+
+# Pipeline that would use the unreachable source
+pipeline:
+  name: "init-failure-pipeline"
+  description: "Pipeline with data source that fails to initialize"
+  
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+  
+  steps:
+    - name: "test-extract"
+      type: "extract"
+      source: "unreachable-db-source"
+      operation: "getAllData"
+      description: "Extract from unreachable database"
+
