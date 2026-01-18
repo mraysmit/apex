@@ -72,8 +72,7 @@ class RulesEnginePipelineIntegrationTest {
         void shouldLoadPipelineConfiguration() throws Exception {
             logger.info("=== Test: Load Pipeline Configuration ===");
 
-            RulesEngine engine = RulesEngine.fromFile(
-                TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_Simple.yaml");
+            RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/RulesEnginePipelineIntegrationTest_Simple.yaml");
 
             assertNotNull(engine, "RulesEngine should be created successfully");
             logger.info("✓ Pipeline configuration loaded successfully");
@@ -87,8 +86,7 @@ class RulesEnginePipelineIntegrationTest {
         void shouldInitializeDataSources() throws Exception {
             logger.info("=== Test: Initialize Data Sources ===");
 
-            RulesEngine engine = RulesEngine.fromFile(
-                TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_H2Database.yaml");
+            RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/RulesEnginePipelineIntegrationTest_H2Database.yaml");
 
             assertNotNull(engine, "RulesEngine should be created successfully");
             logger.info("✓ Data sources initialized (check logs for initialization messages)");
@@ -102,8 +100,7 @@ class RulesEnginePipelineIntegrationTest {
         void shouldInitializeDataSinks() throws Exception {
             logger.info("=== Test: Initialize Data Sinks ===");
 
-            RulesEngine engine = RulesEngine.fromFile(
-                TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_H2Database.yaml");
+            RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/RulesEnginePipelineIntegrationTest_H2Database.yaml");
 
             assertNotNull(engine, "RulesEngine should be created successfully");
             logger.info("✓ Data sinks initialized (check logs for initialization messages)");
@@ -118,8 +115,7 @@ class RulesEnginePipelineIntegrationTest {
             logger.info("=== Test: Handle Missing Pipeline Section ===");
 
             // Use an existing enrichment-only YAML file
-            RulesEngine engine = RulesEngine.fromFile(
-                TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_WithEnrichments.yaml");
+            RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/RulesEnginePipelineIntegrationTest_WithEnrichments.yaml");
 
             assertNotNull(engine, "RulesEngine should be created even without pipeline section");
 
@@ -140,8 +136,7 @@ class RulesEnginePipelineIntegrationTest {
             logger.info("=== Test: Handle Data Source Initialization Failure ===");
 
             // YAML with unreachable database - should log warning but not throw exception
-            RulesEngine engine = RulesEngine.fromFile(
-                TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_InitFailure.yaml");
+            RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/RulesEnginePipelineIntegrationTest_InitFailure.yaml");
 
             assertNotNull(engine, "RulesEngine should be created even if data source init fails");
             logger.info("✓ Data source initialization failure handled gracefully (check logs for warnings)");
@@ -165,8 +160,7 @@ class RulesEnginePipelineIntegrationTest {
         void shouldExecuteSimpleExtractPipeline() throws Exception {
             logger.info("=== Test: Execute Simple Extract Pipeline ===");
 
-            RulesEngine engine = RulesEngine.fromFile(
-                TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_Simple.yaml");
+            RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/RulesEnginePipelineIntegrationTest_Simple.yaml");
 
             Map<String, Object> inputData = new HashMap<>();
             RuleResult result = engine.evaluate(inputData);
@@ -192,8 +186,7 @@ class RulesEnginePipelineIntegrationTest {
         void shouldExecuteMultiStepPipeline() throws Exception {
             logger.info("=== Test: Execute Multi-Step Pipeline ===");
 
-            RulesEngine engine = RulesEngine.fromFile(
-                TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_H2Database.yaml");
+            RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/RulesEnginePipelineIntegrationTest_H2Database.yaml");
 
             Map<String, Object> inputData = new HashMap<>();
             RuleResult result = engine.evaluate(inputData);
@@ -217,8 +210,7 @@ class RulesEnginePipelineIntegrationTest {
         void shouldExecutePipelineWithInlineData() throws Exception {
             logger.info("=== Test: Execute Pipeline with Inline Data ===");
 
-            RulesEngine engine = RulesEngine.fromFile(
-                TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_Simple.yaml");
+            RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/RulesEnginePipelineIntegrationTest_Simple.yaml");
 
             Map<String, Object> inputData = new HashMap<>();
             RuleResult result = engine.evaluate(inputData);
@@ -239,8 +231,7 @@ class RulesEnginePipelineIntegrationTest {
         void shouldExecutePipelineWithH2Database() throws Exception {
             logger.info("=== Test: Execute Pipeline with H2 Database ===");
 
-            RulesEngine engine = RulesEngine.fromFile(
-                TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_H2Database.yaml");
+            RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/RulesEnginePipelineIntegrationTest_H2Database.yaml");
 
             Map<String, Object> inputData = new HashMap<>();
             RuleResult result = engine.evaluate(inputData);
@@ -261,8 +252,7 @@ class RulesEnginePipelineIntegrationTest {
             logger.info("=== Test: Lazy Initialize PipelineExecutor ===");
 
             // Load config but don't execute pipeline yet
-            RulesEngine engine = RulesEngine.fromFile(
-                TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_Simple.yaml");
+            RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/RulesEnginePipelineIntegrationTest_Simple.yaml");
 
             assertNotNull(engine, "RulesEngine should be created");
             logger.info("✓ RulesEngine created (PipelineExecutor not yet initialized)");
@@ -283,8 +273,7 @@ class RulesEnginePipelineIntegrationTest {
         void shouldHandlePipelineExecutionFailure() throws Exception {
             logger.info("=== Test: Handle Pipeline Execution Failure ===");
 
-            RulesEngine engine = RulesEngine.fromFile(
-                TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_InvalidSource.yaml");
+            RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/RulesEnginePipelineIntegrationTest_InvalidSource.yaml");
 
             Map<String, Object> inputData = new HashMap<>();
             RuleResult result = engine.evaluate(inputData);
@@ -336,8 +325,7 @@ class RulesEnginePipelineIntegrationTest {
         void shouldExecutePipelineAndEnrichments() throws Exception {
             logger.info("=== Test: Execute Pipeline and Enrichments ===");
 
-            RulesEngine engine = RulesEngine.fromFile(
-                TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_WithEnrichments.yaml");
+            RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/RulesEnginePipelineIntegrationTest_WithEnrichments.yaml");
 
             Map<String, Object> inputData = Map.of("customerId", "CUST001");
             RuleResult result = engine.evaluate(inputData);
@@ -357,8 +345,7 @@ class RulesEnginePipelineIntegrationTest {
         void shouldExecutePipelineAndRules() throws Exception {
             logger.info("=== Test: Execute Pipeline and Rules ===");
 
-            RulesEngine engine = RulesEngine.fromFile(
-                TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_WithRules.yaml");
+            RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/RulesEnginePipelineIntegrationTest_WithRules.yaml");
 
             Map<String, Object> inputData = Map.of("customerId", "CUST001", "customerTier", "GOLD");
             RuleResult result = engine.evaluate(inputData);
@@ -377,8 +364,7 @@ class RulesEnginePipelineIntegrationTest {
         void shouldExecuteFullDocumentOrder() throws Exception {
             logger.info("=== Test: Execute Full Document Order ===");
 
-            RulesEngine engine = RulesEngine.fromFile(
-                TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_FullDocumentOrder.yaml");
+            RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/RulesEnginePipelineIntegrationTest_FullDocumentOrder.yaml");
 
             Map<String, Object> inputData = Map.of("customerId", "CUST001");
             RuleResult result = engine.evaluate(inputData);
@@ -408,8 +394,7 @@ class RulesEnginePipelineIntegrationTest {
         void shouldHandleInvalidDataSourceReference() throws Exception {
             logger.info("=== Test: Handle Invalid Data Source Reference ===");
 
-            RulesEngine engine = RulesEngine.fromFile(
-                TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_InvalidSource.yaml");
+            RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/RulesEnginePipelineIntegrationTest_InvalidSource.yaml");
 
             Map<String, Object> inputData = new HashMap<>();
             RuleResult result = engine.evaluate(inputData);
@@ -431,8 +416,7 @@ class RulesEnginePipelineIntegrationTest {
             logger.info("=== Test: Skip Missing Pipeline Configuration ===");
 
             // Load YAML with only enrichments, no pipeline
-            RulesEngine engine = RulesEngine.fromFile(
-                TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_WithEnrichments.yaml");
+            RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/RulesEnginePipelineIntegrationTest_WithEnrichments.yaml");
 
             Map<String, Object> inputData = Map.of("customerId", "CUST001");
             RuleResult result = engine.evaluate(inputData);
@@ -452,8 +436,7 @@ class RulesEnginePipelineIntegrationTest {
             logger.info("=== Test: Handle Data Source Connection Failure ===");
 
             // YAML with unreachable database
-            RulesEngine engine = RulesEngine.fromFile(
-                TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_InitFailure.yaml");
+            RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/RulesEnginePipelineIntegrationTest_InitFailure.yaml");
 
             assertNotNull(engine, "RulesEngine should initialize even with connection failure");
             logger.info("✓ Data source connection failure handled gracefully during initialization");
@@ -477,8 +460,7 @@ class RulesEnginePipelineIntegrationTest {
         void shouldNotThrowExceptionsDuringPipelineErrors() throws Exception {
             logger.info("=== Test: No Exceptions During Pipeline Errors ===");
 
-            RulesEngine engine = RulesEngine.fromFile(
-                TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_InvalidSource.yaml");
+            RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/RulesEnginePipelineIntegrationTest_InvalidSource.yaml");
 
             Map<String, Object> inputData = new HashMap<>();
 
@@ -511,8 +493,7 @@ class RulesEnginePipelineIntegrationTest {
         void shouldShutdownDataSources() throws Exception {
             logger.info("=== Test: Shutdown Data Sources ===");
 
-            RulesEngine engine = RulesEngine.fromFile(
-                TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_H2Database.yaml");
+            RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/RulesEnginePipelineIntegrationTest_H2Database.yaml");
 
             engine.evaluate(new HashMap<>());
 
@@ -528,8 +509,7 @@ class RulesEnginePipelineIntegrationTest {
         void shouldShutdownDataSinks() throws Exception {
             logger.info("=== Test: Shutdown Data Sinks ===");
 
-            RulesEngine engine = RulesEngine.fromFile(
-                TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_H2Database.yaml");
+            RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/RulesEnginePipelineIntegrationTest_H2Database.yaml");
 
             engine.evaluate(new HashMap<>());
 
@@ -545,8 +525,7 @@ class RulesEnginePipelineIntegrationTest {
         void shouldHandleMultipleShutdownCalls() throws Exception {
             logger.info("=== Test: Handle Multiple Shutdown Calls ===");
 
-            RulesEngine engine = RulesEngine.fromFile(
-                TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_Simple.yaml");
+            RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/RulesEnginePipelineIntegrationTest_Simple.yaml");
 
             assertDoesNotThrow(() -> engine.shutdown(), "First shutdown should succeed");
             assertDoesNotThrow(() -> engine.shutdown(), "Second shutdown should succeed");
@@ -563,8 +542,7 @@ class RulesEnginePipelineIntegrationTest {
 
             // Create and shutdown multiple engines to test for leaks
             for (int i = 0; i < 10; i++) {
-                RulesEngine engine = RulesEngine.fromFile(
-                    TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_H2Database.yaml");
+                RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/RulesEnginePipelineIntegrationTest_H2Database.yaml");
 
                 engine.evaluate(new HashMap<>());
                 engine.shutdown();

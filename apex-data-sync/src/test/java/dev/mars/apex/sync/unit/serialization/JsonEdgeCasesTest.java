@@ -67,8 +67,7 @@ public class JsonEdgeCasesTest extends SyncTestBase {
 
     @Test
     public void shouldHandleTableWithMinimalColumns() throws Exception {
-        RulesEngine rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/sync/unit/serialization/JsonEdgeCasesTest.yaml");
+        RulesEngine rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/unit/serialization/JsonEdgeCasesTest.yaml");
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
         assertTrue(result.isSuccess());
 
@@ -85,8 +84,7 @@ public class JsonEdgeCasesTest extends SyncTestBase {
 
     @Test
     public void shouldSerializeWithoutPrimaryKey() throws Exception {
-        RulesEngine rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/sync/unit/serialization/JsonEdgeCasesTest.yaml");
+        RulesEngine rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/unit/serialization/JsonEdgeCasesTest.yaml");
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
         assertTrue(result.isSuccess());
 

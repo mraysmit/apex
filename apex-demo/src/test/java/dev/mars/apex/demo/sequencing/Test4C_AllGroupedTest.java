@@ -49,7 +49,7 @@ public class Test4C_AllGroupedTest extends DemoTestBase {
         LOGGER.info("=== TEST 4C: All Grouped Enrichments ===");
 
         // Create RulesEngine from YAML
-        RulesEngine engine = RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/sequencing/Test4C_AllGroupedTest.yaml");
+        RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/demo/sequencing/Test4C_AllGroupedTest.yaml");
 
         // Create test data
         Map<String, Object> data = new HashMap<>();

@@ -52,7 +52,7 @@ public class Test4F_ComplexInterleavingTest extends DemoTestBase {
         LOGGER.info("=== TEST 4F: Complex Interleaving ===");
 
         // Create RulesEngine from YAML
-        RulesEngine engine = RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/sequencing/Test4F_ComplexInterleavingTest.yaml");
+        RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/demo/sequencing/Test4F_ComplexInterleavingTest.yaml");
 
         // Create test data
         Map<String, Object> data = new HashMap<>();

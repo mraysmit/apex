@@ -122,12 +122,10 @@ public class ReadSchemaDatabasePipelineStageTest_postgresql_shouldEnumerateTable
         logger.info("  Port: {}", postgres.getFirstMappedPort());
         logger.info("  Database: {}", postgres.getDatabaseName());
         logger.info("  Username: {}", postgres.getUsername());
-        
-        // Load the configuration
-        String yamlConfigPath = "src/test/java/dev/mars/apex/sync/" +
-            "ReadSchemaDatabasePipelineStageTest_postgresql_shouldEnumerateTablesAndGenerateReport.yaml";
-        
-        RulesEngine engine = RulesEngine.fromFile(yamlConfigPath);
+
+        // Load the configuration from classpath
+        RulesEngine engine = RulesEngine.fromClasspath(
+            "dev/mars/apex/sync/schema/ReadSchemaDatabasePipelineStageTest_postgresql_shouldEnumerateTablesAndGenerateReport.yaml");
         RuleResult result = engine.evaluate(new HashMap<>());
         
         // Verify execution

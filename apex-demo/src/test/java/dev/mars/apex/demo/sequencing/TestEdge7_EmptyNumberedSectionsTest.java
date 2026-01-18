@@ -37,9 +37,7 @@ public class TestEdge7_EmptyNumberedSectionsTest extends DemoTestBase {
 
         try {
             // Attempt to load YAML with empty numbered sections
-            RulesEngine engine = RulesEngine.fromFile(
-                "src/test/java/dev/mars/apex/demo/sequencing/TestEdge7_EmptyNumberedSectionsTest.yaml"
-            );
+            RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/demo/sequencing/TestEdge7_EmptyNumberedSectionsTest.yaml");
 
             LOGGER.info("✅ EDGE CASE TEST 7 PASSED: Empty numbered sections handled correctly");
             assertNotNull(engine, "RulesEngine should be created successfully");

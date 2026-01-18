@@ -81,8 +81,7 @@ public class PipelineStepDependencyTest extends DemoTestBase {
         logger.info("=== Testing Step Execution in Dependency Order ===");
 
         // Create RulesEngine and execute pipeline
-        rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/demo/etl/PipelineStepDependencyTest_DependencyOrder.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/etl/PipelineStepDependencyTest_DependencyOrder.yaml");
 
         java.util.Map<String, Object> inputData = new java.util.HashMap<>();
         RuleResult result = rulesEngine.evaluate(inputData);
@@ -104,8 +103,7 @@ public class PipelineStepDependencyTest extends DemoTestBase {
         // NOTE: This test is simplified during migration to RulesEngine.evaluate()
         // The new implementation may handle errors differently
         try {
-            rulesEngine = RulesEngine.fromFile(
-                "src/test/java/dev/mars/apex/demo/etl/PipelineStepDependencyTest_FailedDependency.yaml");
+            rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/etl/PipelineStepDependencyTest_FailedDependency.yaml");
 
             java.util.Map<String, Object> inputData = new java.util.HashMap<>();
             RuleResult result = rulesEngine.evaluate(inputData);
@@ -125,8 +123,7 @@ public class PipelineStepDependencyTest extends DemoTestBase {
         logger.info("=== Testing Optional Step Failure Handling ===");
 
         // Create RulesEngine and execute pipeline
-        rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/demo/etl/PipelineStepDependencyTest_OptionalStep.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/etl/PipelineStepDependencyTest_OptionalStep.yaml");
 
         java.util.Map<String, Object> inputData = new java.util.HashMap<>();
         RuleResult result = rulesEngine.evaluate(inputData);
@@ -157,8 +154,7 @@ public class PipelineStepDependencyTest extends DemoTestBase {
         // NOTE: This test is simplified during migration to RulesEngine.evaluate()
         // The new implementation may handle errors differently
         try {
-            rulesEngine = RulesEngine.fromFile(
-                "src/test/java/dev/mars/apex/demo/etl/PipelineStepDependencyTest_CircularDependency.yaml");
+            rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/etl/PipelineStepDependencyTest_CircularDependency.yaml");
 
             java.util.Map<String, Object> inputData = new java.util.HashMap<>();
             RuleResult result = rulesEngine.evaluate(inputData);

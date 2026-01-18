@@ -48,7 +48,7 @@ public class Test7A_RuleGroupsBasicTest extends DemoTestBase {
         LOGGER.info("=== TEST 7A: Rule Groups with Groups-Only Logic ===");
 
         // Create RulesEngine from YAML
-        RulesEngine engine = RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/sequencing/Test7A_RuleGroupsBasicTest.yaml");
+        RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/demo/sequencing/Test7A_RuleGroupsBasicTest.yaml");
 
         // Create test data
         Map<String, Object> data = new HashMap<>();

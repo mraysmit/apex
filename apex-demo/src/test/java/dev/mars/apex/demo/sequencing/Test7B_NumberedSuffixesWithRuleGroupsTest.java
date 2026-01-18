@@ -44,7 +44,7 @@ public class Test7B_NumberedSuffixesWithRuleGroupsTest extends DemoTestBase {
         LOGGER.info("=== TEST 7B: Numbered Suffixes with Rule Groups ===");
 
         // Create RulesEngine from YAML
-        RulesEngine engine = RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/sequencing/Test7B_NumberedSuffixesWithRuleGroupsTest.yaml");
+        RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/demo/sequencing/Test7B_NumberedSuffixesWithRuleGroupsTest.yaml");
 
         // Create test data
         Map<String, Object> data = new HashMap<>();

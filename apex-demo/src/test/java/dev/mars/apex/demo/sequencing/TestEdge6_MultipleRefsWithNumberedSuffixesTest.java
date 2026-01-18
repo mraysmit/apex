@@ -40,9 +40,7 @@ public class TestEdge6_MultipleRefsWithNumberedSuffixesTest extends DemoTestBase
         // 1. enrichment-refs is recognized and processed
         // 2. enrichment-refs-1 is recognized and processed (NOT treated as unknown section)
         // 3. Both external files are loaded and merged
-        RulesEngine engine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/demo/sequencing/TestEdge6_MultipleRefsWithNumberedSuffixesTest.yaml"
-        );
+        RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/demo/sequencing/TestEdge6_MultipleRefsWithNumberedSuffixesTest.yaml");
 
         assertNotNull(engine, "RulesEngine should be created successfully");
 

@@ -28,9 +28,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -84,18 +81,9 @@ public class MsSqlToPostgresSyncTest extends SyncTestBase {
         String targetUrl = "jdbc:h2:mem:postgres_test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1";
         setupTargetDatabase(targetUrl);
 
-        // 3. Resolve path to the co-located YAML file
-        Path configPath = Paths.get("src/test/java/dev/mars/apex/sync/pipeline/MsSqlToPostgresSyncTest.yaml");
-        File configFile = configPath.toFile();
-
-        if (!configFile.exists()) {
-            throw new RuntimeException("Test configuration not found at: " + configFile.getAbsolutePath());
-        }
-
-        logger.info("Initializing RulesEngine with config: {}", configFile.getAbsolutePath());
-
-        // 5. Initialize and Execute Pipeline
-        rulesEngine = RulesEngine.fromFile(configFile.getPath());
+        // 3. Initialize and Execute Pipeline (using classpath resource)
+        logger.info("Initializing RulesEngine from classpath: dev/mars/apex/sync/pipeline/MsSqlToPostgresSyncTest.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/pipeline/MsSqlToPostgresSyncTest.yaml");
         assertNotNull(rulesEngine, "RulesEngine should be initialized");
 
         RuleResult result = rulesEngine.evaluate(new HashMap<>());

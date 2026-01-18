@@ -62,7 +62,7 @@ class ReadSchemaDatabasePipelineStageTest_oracle_shouldEnumerateTablesAndGenerat
         
         // TODO: Uncomment when Oracle server is available
         /*
-        rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/schema/ReadSchemaDatabasePipelineStageTest_oracle_shouldEnumerateTablesAndGenerateReport.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/schema/ReadSchemaDatabasePipelineStageTest_oracle_shouldEnumerateTablesAndGenerateReport.yaml");
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
         
         assertTrue(result.isSuccess(), "Pipeline should execute successfully");

@@ -86,8 +86,7 @@ public class FocusedEtlTest extends DemoTestBase {
         logger.info("=== Testing CSV to JSON File Load ===");
 
         // Create RulesEngine and execute pipeline
-        rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/demo/etl/PipelineEtlExecutionTestLoadFilesystem.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/etl/PipelineEtlExecutionTestLoadFilesystem.yaml");
 
         java.util.Map<String, Object> inputData = new java.util.HashMap<>();
         RuleResult result = rulesEngine.evaluate(inputData);
@@ -113,8 +112,7 @@ public class FocusedEtlTest extends DemoTestBase {
         logger.info("=== Testing CSV to H2 Database Load ===");
 
         // Create RulesEngine and execute pipeline
-        rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/demo/etl/PipelineEtlExecutionTestLoadDatabase.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/etl/PipelineEtlExecutionTestLoadDatabase.yaml");
 
         java.util.Map<String, Object> inputData = new java.util.HashMap<>();
         RuleResult result = rulesEngine.evaluate(inputData);
@@ -137,8 +135,7 @@ public class FocusedEtlTest extends DemoTestBase {
         logger.info("=== Testing CSV Extract Only ===");
 
         // Create RulesEngine and execute pipeline
-        rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/demo/etl/PipelineEtlExecutionTestExtractCsv.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/etl/PipelineEtlExecutionTestExtractCsv.yaml");
 
         java.util.Map<String, Object> inputData = new java.util.HashMap<>();
         RuleResult result = rulesEngine.evaluate(inputData);
@@ -161,8 +158,7 @@ public class FocusedEtlTest extends DemoTestBase {
         createEmptyTestFile();
 
         // Create RulesEngine and execute pipeline
-        rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/demo/etl/PipelineEtlExecutionTestExtractEmptyCsv.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/etl/PipelineEtlExecutionTestExtractEmptyCsv.yaml");
 
         java.util.Map<String, Object> inputData = new java.util.HashMap<>();
         RuleResult result = rulesEngine.evaluate(inputData);

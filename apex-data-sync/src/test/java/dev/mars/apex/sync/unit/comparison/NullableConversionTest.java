@@ -82,8 +82,7 @@ public class NullableConversionTest extends SyncTestBase {
 
     @Test
     public void shouldDetectNullableToNotNullConversion() throws Exception {
-        RulesEngine rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/sync/unit/comparison/NullableConversionTest.yaml");
+        RulesEngine rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/unit/comparison/NullableConversionTest.yaml");
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
         assertTrue(result.isSuccess());
 
@@ -115,8 +114,7 @@ public class NullableConversionTest extends SyncTestBase {
 
     @Test
     public void shouldValidatePrimaryKeyNullability() throws Exception {
-        RulesEngine rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/sync/unit/comparison/NullableConversionTest.yaml");
+        RulesEngine rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/unit/comparison/NullableConversionTest.yaml");
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
         assertTrue(result.isSuccess());
 

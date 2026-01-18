@@ -43,8 +43,7 @@ class PipelineEtlExecutionTestExtractInvalidSource extends DemoTestBase {
         // NOTE: This test is simplified during migration to RulesEngine.evaluate()
         // The new implementation may handle errors differently (returning ERROR result vs throwing exception)
         try {
-            rulesEngine = RulesEngine.fromFile(
-                "src/test/java/dev/mars/apex/demo/etl/PipelineEtlExecutionTestExtractInvalidSource.yaml");
+            rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/etl/PipelineEtlExecutionTestExtractInvalidSource.yaml");
 
             java.util.Map<String, Object> inputData = new java.util.HashMap<>();
             RuleResult result = rulesEngine.evaluate(inputData);

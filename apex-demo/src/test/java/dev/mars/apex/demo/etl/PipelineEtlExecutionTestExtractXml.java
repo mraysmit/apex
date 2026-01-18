@@ -46,8 +46,7 @@ public class PipelineEtlExecutionTestExtractXml extends DemoTestBase {
         logger.info("=== Testing XML OTC Trades Extract Pipeline ===");
 
         // Create RulesEngine and execute pipeline
-        rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/demo/etl/PipelineEtlExecutionTestExtractXml.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/etl/PipelineEtlExecutionTestExtractXml.yaml");
 
         java.util.Map<String, Object> inputData = new java.util.HashMap<>();
         RuleResult result = rulesEngine.evaluate(inputData);
@@ -66,8 +65,7 @@ public class PipelineEtlExecutionTestExtractXml extends DemoTestBase {
         logger.info("=== Testing XML Deeply Nested Structures ===");
 
         // Create RulesEngine and execute pipeline
-        rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/demo/etl/PipelineEtlExecutionTestExtractXml.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/etl/PipelineEtlExecutionTestExtractXml.yaml");
 
         java.util.Map<String, Object> inputData = new java.util.HashMap<>();
         RuleResult result = rulesEngine.evaluate(inputData);

@@ -78,7 +78,7 @@ public class EmojiHeaderTest {
 
         setupTestDatabase();
 
-                RulesEngine engine = RulesEngine.fromFile("src/test/resources/dev/mars/apex/sync/test/EmojiHeaderTest.yaml");
+                RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/sync/test/EmojiHeaderTest.yaml");
         RuleResult result = engine.evaluate(new java.util.HashMap<>());
 
         assertNotNull(result);
@@ -94,7 +94,7 @@ public class EmojiHeaderTest {
 
         setupComplexDatabase();
 
-                RulesEngine engine = RulesEngine.fromFile("src/test/resources/dev/mars/apex/sync/test/EmojiHeaderTest.yaml");
+                RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/sync/test/EmojiHeaderTest.yaml");
         RuleResult result = engine.evaluate(new java.util.HashMap<>());
 
         assertNotNull(result);

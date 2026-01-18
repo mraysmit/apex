@@ -63,8 +63,7 @@ class PipelineEtlExecutionTestLoadBatch extends DemoTestBase {
         logger.info("=== Testing Batch Load Pipeline ===");
 
         // Create RulesEngine and execute pipeline
-        rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/demo/etl/PipelineEtlExecutionTestLoadBatch.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/etl/PipelineEtlExecutionTestLoadBatch.yaml");
 
         java.util.Map<String, Object> inputData = new java.util.HashMap<>();
         RuleResult result = rulesEngine.evaluate(inputData);

@@ -84,8 +84,7 @@ public class ColumnDifferenceTest extends SyncTestBase {
 
     @Test
     public void shouldDetectColumnSizeIncrease() throws Exception {
-        RulesEngine rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/sync/unit/comparison/ColumnDifferenceTest.yaml");
+        RulesEngine rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/unit/comparison/ColumnDifferenceTest.yaml");
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
         assertTrue(result.isSuccess());
 
@@ -119,8 +118,7 @@ public class ColumnDifferenceTest extends SyncTestBase {
 
     @Test
     public void shouldDetectNewColumn() throws Exception {
-        RulesEngine rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/sync/unit/comparison/ColumnDifferenceTest.yaml");
+        RulesEngine rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/unit/comparison/ColumnDifferenceTest.yaml");
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
         assertTrue(result.isSuccess());
 
@@ -144,8 +142,7 @@ public class ColumnDifferenceTest extends SyncTestBase {
 
     @Test
     public void shouldCompareColumnCounts() throws Exception {
-        RulesEngine rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/sync/unit/comparison/ColumnDifferenceTest.yaml");
+        RulesEngine rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/unit/comparison/ColumnDifferenceTest.yaml");
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
         assertTrue(result.isSuccess());
 

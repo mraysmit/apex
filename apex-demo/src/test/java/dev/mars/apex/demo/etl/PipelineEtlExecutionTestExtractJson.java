@@ -46,8 +46,7 @@ public class PipelineEtlExecutionTestExtractJson extends DemoTestBase {
         logger.info("=== Testing JSON OTC Options Extract Pipeline ===");
 
         // Create RulesEngine and execute pipeline
-        rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/demo/etl/PipelineEtlExecutionTestExtractJson.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/etl/PipelineEtlExecutionTestExtractJson.yaml");
 
         java.util.Map<String, Object> inputData = new java.util.HashMap<>();
         RuleResult result = rulesEngine.evaluate(inputData);
@@ -66,8 +65,7 @@ public class PipelineEtlExecutionTestExtractJson extends DemoTestBase {
         logger.info("=== Testing JSON Complex Nested Structures ===");
 
         // Create RulesEngine and execute pipeline
-        rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/demo/etl/PipelineEtlExecutionTestExtractJson.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/etl/PipelineEtlExecutionTestExtractJson.yaml");
 
         java.util.Map<String, Object> inputData = new java.util.HashMap<>();
         RuleResult result = rulesEngine.evaluate(inputData);

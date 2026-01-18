@@ -40,8 +40,7 @@ class PipelineEtlExecutionTestExtractEmptyCsv extends DemoTestBase {
         logger.info("=== Testing Empty CSV Extract Pipeline ===");
 
         // Create RulesEngine and execute pipeline
-        rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/demo/etl/PipelineEtlExecutionTestExtractEmptyCsv.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/etl/PipelineEtlExecutionTestExtractEmptyCsv.yaml");
 
         java.util.Map<String, Object> inputData = new java.util.HashMap<>();
         RuleResult result = rulesEngine.evaluate(inputData);

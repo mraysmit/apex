@@ -88,7 +88,7 @@ public class ReadSchemaLargeCsvTest extends SyncTestBase {
     @DisplayName("Should read schema from large CSV file (11 columns) using YAML configuration")
     public void shouldReadSchemaFromLargeCsv() throws Exception {
         // Load configuration from Java test directory (APEX naming convention)
-        RulesEngine rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/schema/ReadSchemaLargeCsvTest.yaml");
+        RulesEngine rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/schema/ReadSchemaLargeCsvTest.yaml");
         assertNotNull(rulesEngine, "RulesEngine should be initialized");
 
         // Execute the pipeline

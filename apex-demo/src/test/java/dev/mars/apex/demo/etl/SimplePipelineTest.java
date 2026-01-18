@@ -91,7 +91,7 @@ public class SimplePipelineTest extends DemoTestBase {
         logger.info("=== Testing CSV to H2 Pipeline Execution ===");
 
         // Initialize RulesEngine from YAML file
-        rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/etl/SimplePipelineTest.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/etl/SimplePipelineTest.yaml");
         assertNotNull(rulesEngine, "Rules engine should be created");
         logger.info("✓ RulesEngine initialized successfully");
 
@@ -120,7 +120,7 @@ public class SimplePipelineTest extends DemoTestBase {
         logger.info("=== Testing Data Transformation in Pipeline ===");
 
         // Initialize RulesEngine from YAML file
-        rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/etl/SimplePipelineTest.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/etl/SimplePipelineTest.yaml");
 
         // Execute the pipeline
         java.util.Map<String, Object> inputData = new java.util.HashMap<>();

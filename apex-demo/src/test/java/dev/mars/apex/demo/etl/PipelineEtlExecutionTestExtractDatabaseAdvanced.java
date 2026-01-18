@@ -170,8 +170,7 @@ public class PipelineEtlExecutionTestExtractDatabaseAdvanced extends DemoTestBas
         logger.info("=== Testing Advanced Database Extract - Customer Order Summary ===");
 
         // Create RulesEngine and execute pipeline
-        rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/demo/etl/PipelineEtlExecutionTestExtractDatabaseAdvanced.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/etl/PipelineEtlExecutionTestExtractDatabaseAdvanced.yaml");
 
         java.util.Map<String, Object> inputData = new java.util.HashMap<>();
         RuleResult result = rulesEngine.evaluate(inputData);

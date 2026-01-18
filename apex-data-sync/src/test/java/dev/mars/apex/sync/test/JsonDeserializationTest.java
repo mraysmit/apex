@@ -89,7 +89,7 @@ public class JsonDeserializationTest {
         logger.info("=== Testing JSON round-trip serialization ===");
 
         // Generate JSON report
-                RulesEngine engine = RulesEngine.fromFile("src/test/resources/dev/mars/apex/sync/test/JsonDeserializationTest.yaml");
+                RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/sync/test/JsonDeserializationTest.yaml");
         RuleResult result = engine.evaluate(new java.util.HashMap<>());
 
         assertNotNull(result);
@@ -105,7 +105,7 @@ public class JsonDeserializationTest {
 
         setupComplexDatabase();
 
-                RulesEngine engine = RulesEngine.fromFile("src/test/resources/dev/mars/apex/sync/test/JsonDeserializationTest.yaml");
+                RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/sync/test/JsonDeserializationTest.yaml");
         RuleResult result = engine.evaluate(new java.util.HashMap<>());
 
         assertNotNull(result);

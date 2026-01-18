@@ -24,8 +24,6 @@ import dev.mars.apex.core.engine.model.ExecutionStep;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -46,15 +44,10 @@ public class TableSyncIntegrationTestH2 {
 
     @Test
     public void testSimulatedMSSqlToPostgresSync() throws Exception {
-        // 1. Resolve Test YAML
-        URL resource = getClass().getClassLoader().getResource("test-sync-pipeline-h2.yaml");
-        assertNotNull(resource, "test-sync-pipeline-h2.yaml not found");
-        String configPath = new File(resource.toURI()).getAbsolutePath();
-
-        // 2. Setup Source Data (Simulating SQL Server via H2 MODE=MSSQLServer)
+        // 1. Setup Source Data (Simulating SQL Server via H2 MODE=MSSQLServer)
         // Note: The YAML file has hardcoded connection details, we just need to ensure the DB exists and has data.
         String sourceUrl = "jdbc:h2:mem:source_sqlserver;MODE=MSSQLServer;DB_CLOSE_DELAY=-1";
-        
+
         try (Connection conn = DriverManager.getConnection(sourceUrl, "sa", "")) {
             try (Statement stmt = conn.createStatement()) {
                 stmt.execute("CREATE TABLE IF NOT EXISTS customers (id INT PRIMARY KEY, name VARCHAR(255))");
@@ -63,8 +56,8 @@ public class TableSyncIntegrationTestH2 {
             }
         }
 
-        // 3. Run Sync via APEX Core
-        RulesEngine engine = RulesEngine.fromFile(configPath);
+        // 2. Run Sync via APEX Core (using classpath resource)
+        RulesEngine engine = RulesEngine.fromClasspath("test-sync-pipeline-h2.yaml");
         RuleResult result = engine.evaluate(new HashMap<>());
 
         // 4. Verify Result

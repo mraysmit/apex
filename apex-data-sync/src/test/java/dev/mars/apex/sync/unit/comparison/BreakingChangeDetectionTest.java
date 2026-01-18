@@ -88,8 +88,7 @@ public class BreakingChangeDetectionTest extends SyncTestBase {
     @Test
     public void shouldDetectBreakingChanges() throws Exception {
         // Execute YAML-configured pipeline
-        RulesEngine rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/sync/unit/comparison/BreakingChangeDetectionTest.yaml");
+        RulesEngine rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/unit/comparison/BreakingChangeDetectionTest.yaml");
         assertNotNull(rulesEngine, "RulesEngine should be initialized");
 
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
@@ -128,8 +127,7 @@ public class BreakingChangeDetectionTest extends SyncTestBase {
 
     @Test
     public void shouldQuantifyColumnsRemoved() throws Exception {
-        RulesEngine rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/sync/unit/comparison/BreakingChangeDetectionTest.yaml");
+        RulesEngine rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/unit/comparison/BreakingChangeDetectionTest.yaml");
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
         assertTrue(result.isSuccess());
 

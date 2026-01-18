@@ -80,8 +80,7 @@ public class PipelineTransformStepTest extends DemoTestBase {
         logger.info("=== Testing Transformation Rules Application ===");
 
         // Create RulesEngine and execute pipeline
-        rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/demo/etl/PipelineTransformStepTest_TransformRules.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/etl/PipelineTransformStepTest_TransformRules.yaml");
 
         java.util.Map<String, Object> inputData = new java.util.HashMap<>();
         RuleResult result = rulesEngine.evaluate(inputData);
@@ -101,8 +100,7 @@ public class PipelineTransformStepTest extends DemoTestBase {
         logger.info("=== Testing Record Filtering ===");
 
         // Create RulesEngine and execute pipeline
-        rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/demo/etl/PipelineTransformStepTest_FilterRecords.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/etl/PipelineTransformStepTest_FilterRecords.yaml");
 
         java.util.Map<String, Object> inputData = new java.util.HashMap<>();
         RuleResult result = rulesEngine.evaluate(inputData);
@@ -122,8 +120,7 @@ public class PipelineTransformStepTest extends DemoTestBase {
         logger.info("=== Testing Data Aggregation ===");
 
         // Create RulesEngine and execute pipeline
-        rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/demo/etl/PipelineTransformStepTest_AggregateData.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/etl/PipelineTransformStepTest_AggregateData.yaml");
 
         java.util.Map<String, Object> inputData = new java.util.HashMap<>();
         RuleResult result = rulesEngine.evaluate(inputData);
@@ -143,8 +140,7 @@ public class PipelineTransformStepTest extends DemoTestBase {
         logger.info("=== Testing Transformation Error Handling ===");
 
         // Create RulesEngine and execute pipeline
-        rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/demo/etl/PipelineTransformStepTest_ErrorHandling.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/etl/PipelineTransformStepTest_ErrorHandling.yaml");
 
         java.util.Map<String, Object> inputData = new java.util.HashMap<>();
         RuleResult result = rulesEngine.evaluate(inputData);

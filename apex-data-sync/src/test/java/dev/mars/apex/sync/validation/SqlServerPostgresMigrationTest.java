@@ -104,7 +104,7 @@ public class SqlServerPostgresMigrationTest extends SyncTestBase {
     @DisplayName("Should validate SQL Server to PostgreSQL cross-platform migration")
     public void shouldValidateSqlServerPostgresMigration() throws Exception {
         // Load configuration from Java test directory (APEX naming convention)
-        rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/validation/SqlServerPostgresMigrationTest.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/validation/SqlServerPostgresMigrationTest.yaml");
         assertNotNull(rulesEngine, "RulesEngine should be initialized");
 
         // Execute the pipeline

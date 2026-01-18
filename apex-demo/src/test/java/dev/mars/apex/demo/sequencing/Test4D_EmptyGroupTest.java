@@ -49,7 +49,7 @@ public class Test4D_EmptyGroupTest extends DemoTestBase {
         LOGGER.info("=== TEST 4D: Empty Group Edge Case ===");
 
         // Create RulesEngine from YAML
-        RulesEngine engine = RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/sequencing/Test4D_EmptyGroupTest.yaml");
+        RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/demo/sequencing/Test4D_EmptyGroupTest.yaml");
 
         // Create test data
         Map<String, Object> data = new HashMap<>();

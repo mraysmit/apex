@@ -387,6 +387,42 @@ public class RulesEngine {
     }
 
     /**
+     * Create a RulesEngine from a classpath resource.
+     * This is the recommended method for loading test configurations and bundled resources.
+     *
+     * <p><b>Example:</b></p>
+     * <pre>
+     * // Load from classpath (e.g., src/test/resources/config/test-config.yaml)
+     * RulesEngine engine = RulesEngine.fromClasspath("config/test-config.yaml");
+     * RuleResult result = engine.evaluate(inputData);
+     * </pre>
+     *
+     * <p><b>Benefits over fromFile():</b></p>
+     * <ul>
+     *   <li>Works consistently across different environments (dev, CI/CD, production)</li>
+     *   <li>No dependency on working directory or absolute paths</li>
+     *   <li>Follows Maven/Gradle conventions for test resources</li>
+     *   <li>Resources are packaged in JAR files automatically</li>
+     * </ul>
+     *
+     * @param resourcePath The classpath resource path (e.g., "config/test-config.yaml")
+     * @return A configured RulesEngine ready to evaluate rules
+     * @throws YamlConfigurationException if the resource cannot be found or loaded
+     * @since 2.1.0
+     */
+    public static RulesEngine fromClasspath(String resourcePath) throws YamlConfigurationException {
+        logger.info("Creating RulesEngine from classpath resource: {}", resourcePath);
+
+        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        YamlRuleConfiguration yamlConfig = loader.loadFromClasspath(resourcePath);
+
+        YamlRuleFactory ruleFactory = new YamlRuleFactory();
+        RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
+
+        return new RulesEngine(config, yamlConfig);
+    }
+
+    /**
      * Create a RulesEngine from a YamlRuleConfiguration object.
      * Use this when you need to inspect or modify the YAML configuration before creating the engine.
      *

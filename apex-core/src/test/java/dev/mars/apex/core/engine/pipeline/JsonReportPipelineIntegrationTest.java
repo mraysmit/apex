@@ -62,8 +62,7 @@ class JsonReportPipelineIntegrationTest {
         logger.info("\n=== Test: Generate JSON Report via Pipeline ===\n");
 
         // Load pipeline configuration with json-report-output parameter
-        rulesEngine = RulesEngine.fromFile(
-            TEST_YAML_BASE_PATH + "JsonReportPipelineIntegrationTest_JsonOutput.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/JsonReportPipelineIntegrationTest_JsonOutput.yaml");
 
         // Execute pipeline
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
@@ -103,8 +102,7 @@ class JsonReportPipelineIntegrationTest {
         logger.info("\n=== Test: Generate Both HTML and JSON Reports ===\n");
 
         // Load pipeline with both report-output and json-report-output
-        rulesEngine = RulesEngine.fromFile(
-            TEST_YAML_BASE_PATH + "JsonReportPipelineIntegrationTest_DualOutput.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/JsonReportPipelineIntegrationTest_DualOutput.yaml");
 
         // Execute pipeline
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
@@ -148,8 +146,7 @@ class JsonReportPipelineIntegrationTest {
         logger.info("\n=== Test: Schema Changes Reflected in JSON ===\n");
 
         // Load pipeline comparing schemas with differences
-        rulesEngine = RulesEngine.fromFile(
-            TEST_YAML_BASE_PATH + "JsonReportPipelineIntegrationTest_WithChanges.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/core/engine/config/JsonReportPipelineIntegrationTest_WithChanges.yaml");
 
         // Execute pipeline
         RuleResult result = rulesEngine.evaluate(new HashMap<>());

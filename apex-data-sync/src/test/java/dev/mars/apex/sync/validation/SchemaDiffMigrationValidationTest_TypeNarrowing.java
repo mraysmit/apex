@@ -73,7 +73,7 @@ class SchemaDiffMigrationValidationTest_TypeNarrowing {
         logger.info("\n=== Test: Incompatible Type Narrowing (VARCHAR 100→50) ===\n");
         
         // Execute schema diff pipeline
-        rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/validation/SchemaDiffDatabaseMigrationValidationTest_TypeNarrowing.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/validation/SchemaDiffDatabaseMigrationValidationTest_TypeNarrowing.yaml");
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
 
         // Verify pipeline execution

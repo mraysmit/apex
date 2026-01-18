@@ -100,7 +100,7 @@ public class PipelineEtlTest extends DemoTestBase {
 
         try {
             // Create RulesEngine and execute pipeline
-            rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/etl/PipelineEtlTest.yaml");
+            rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/etl/PipelineEtlTest.yaml");
 
             java.util.Map<String, Object> inputData = new java.util.HashMap<>();
             RuleResult result = rulesEngine.evaluate(inputData);
@@ -125,7 +125,7 @@ public class PipelineEtlTest extends DemoTestBase {
 
         try {
             // Create RulesEngine and execute pipeline
-            rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/etl/PipelineEtlTest.yaml");
+            rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/etl/PipelineEtlTest.yaml");
 
             java.util.Map<String, Object> inputData = new java.util.HashMap<>();
             RuleResult result = rulesEngine.evaluate(inputData);
@@ -149,7 +149,7 @@ public class PipelineEtlTest extends DemoTestBase {
 
         try {
             // Create RulesEngine and execute pipeline
-            rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/etl/PipelineEtlTest.yaml");
+            rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/etl/PipelineEtlTest.yaml");
 
             java.util.Map<String, Object> inputData = new java.util.HashMap<>();
             RuleResult result = rulesEngine.evaluate(inputData);

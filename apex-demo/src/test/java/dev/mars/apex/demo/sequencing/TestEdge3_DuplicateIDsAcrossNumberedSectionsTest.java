@@ -39,7 +39,7 @@ public class TestEdge3_DuplicateIDsAcrossNumberedSectionsTest extends DemoTestBa
         // Attempt to load YAML with duplicate IDs
         YamlConfigurationException exception = assertThrows(
             YamlConfigurationException.class,
-            () -> RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/sequencing/TestEdge3_DuplicateIDsAcrossNumberedSectionsTest.yaml"),
+            () -> RulesEngine.fromClasspath("dev/mars/apex/demo/sequencing/TestEdge3_DuplicateIDsAcrossNumberedSectionsTest.yaml"),
             "Should throw YamlConfigurationException for duplicate IDs"
         );
 

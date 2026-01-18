@@ -62,7 +62,7 @@ class ReadSchemaDatabasePipelineStageTest_mysql_shouldEnumerateTablesAndGenerate
         
         // TODO: Uncomment when MySQL server is available
         /*
-        rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/schema/ReadSchemaDatabasePipelineStageTest_mysql_shouldEnumerateTablesAndGenerateReport.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/schema/ReadSchemaDatabasePipelineStageTest_mysql_shouldEnumerateTablesAndGenerateReport.yaml");
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
         
         assertTrue(result.isSuccess(), "Pipeline should execute successfully");

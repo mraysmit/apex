@@ -73,8 +73,7 @@ public class ReportPathResolutionTest extends SyncTestBase {
     @Test
     public void shouldReadSchemaForReportGeneration() throws Exception {
         // Execute YAML-configured pipeline
-        RulesEngine rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/sync/unit/reporting/ReportPathResolutionTest.yaml");
+        RulesEngine rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/unit/reporting/ReportPathResolutionTest.yaml");
         assertNotNull(rulesEngine, "RulesEngine should be initialized");
 
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
@@ -108,8 +107,7 @@ public class ReportPathResolutionTest extends SyncTestBase {
 
     @Test
     public void shouldValidateAllInventoryColumns() throws Exception {
-        RulesEngine rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/sync/unit/reporting/ReportPathResolutionTest.yaml");
+        RulesEngine rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/unit/reporting/ReportPathResolutionTest.yaml");
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
         assertTrue(result.isSuccess());
 
@@ -132,8 +130,7 @@ public class ReportPathResolutionTest extends SyncTestBase {
 
     @Test
     public void shouldProvideSourceMetadata() throws Exception {
-        RulesEngine rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/sync/unit/reporting/ReportPathResolutionTest.yaml");
+        RulesEngine rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/unit/reporting/ReportPathResolutionTest.yaml");
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
         assertTrue(result.isSuccess());
 

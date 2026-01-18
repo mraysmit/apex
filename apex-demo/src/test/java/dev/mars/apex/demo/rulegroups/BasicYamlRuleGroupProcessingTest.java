@@ -70,7 +70,7 @@ public class BasicYamlRuleGroupProcessingTest {
 
             try {
                 // Load using file path following apex-demo pattern
-                RulesEngine engine = RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/rulegroups/BasicYamlRuleGroupProcessingTest-combined-config.yaml");
+                RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/demo/rulegroups/BasicYamlRuleGroupProcessingTest-combined-config.yaml");
 
                 RuleGroup ruleGroup = engine.getConfiguration().getRuleGroupById("separate-and-group");
                 assertNotNull(ruleGroup, "Rule group should be found");

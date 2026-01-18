@@ -117,7 +117,7 @@ public class MultiTableMigrationTest extends SyncTestBase {
     @DisplayName("Should validate multi-table migration schemas")
     public void shouldValidateMultiTableMigration() throws Exception {
         // Load configuration from Java test directory (APEX naming convention)
-        rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/validation/MultiTableMigrationTest.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/validation/MultiTableMigrationTest.yaml");
         assertNotNull(rulesEngine, "RulesEngine should be initialized");
 
         // Execute the pipeline

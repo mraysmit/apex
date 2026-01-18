@@ -40,7 +40,7 @@ public class TestEdge4_IDCollisionInlineVsExternalTest extends DemoTestBase {
         // Attempt to load YAML with ID collision
         YamlConfigurationException exception = assertThrows(
             YamlConfigurationException.class,
-            () -> RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/sequencing/TestEdge4_IDCollisionInlineVsExternalTest.yaml"),
+            () -> RulesEngine.fromClasspath("dev/mars/apex/demo/sequencing/TestEdge4_IDCollisionInlineVsExternalTest.yaml"),
             "Should throw YamlConfigurationException for duplicate IDs across inline and external files"
         );
 

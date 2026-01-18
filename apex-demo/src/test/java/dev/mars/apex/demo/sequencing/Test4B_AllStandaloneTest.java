@@ -49,7 +49,7 @@ public class Test4B_AllStandaloneTest extends DemoTestBase {
         LOGGER.info("=== TEST 4B: All Standalone Enrichments ===");
 
         // Create RulesEngine from YAML
-        RulesEngine engine = RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/sequencing/Test4B_AllStandaloneTest.yaml");
+        RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/demo/sequencing/Test4B_AllStandaloneTest.yaml");
 
         // Create test data
         Map<String, Object> data = new HashMap<>();

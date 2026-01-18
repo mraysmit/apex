@@ -44,7 +44,7 @@ public class Test5_NumberedSuffixesBasicTest extends DemoTestBase {
         LOGGER.info("=== TEST 5: Numbered Suffixes Basic ===");
 
         // Create RulesEngine from YAML
-        RulesEngine engine = RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/sequencing/Test5_NumberedSuffixesBasicTest.yaml");
+        RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/demo/sequencing/Test5_NumberedSuffixesBasicTest.yaml");
 
         // Create test data
         Map<String, Object> data = new HashMap<>();

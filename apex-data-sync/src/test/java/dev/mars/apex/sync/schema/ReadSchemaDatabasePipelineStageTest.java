@@ -55,7 +55,7 @@ class ReadSchemaDatabasePipelineStageTest extends SyncTestBase {
         setupTestDatabase();
 
         // Load pipeline configuration using RulesEngine.fromFile()
-        rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/schema/ReadSchemaDatabasePipelineStageTest.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/schema/ReadSchemaDatabasePipelineStageTest.yaml");
         assertNotNull(rulesEngine, "Rules engine should be created");
 
         // Execute pipeline
@@ -129,7 +129,7 @@ class ReadSchemaDatabasePipelineStageTest extends SyncTestBase {
         setupMultiTableDatabase();
 
         // Load pipeline configuration
-        rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/schema/ReadSchemaDatabasePipelineStageTestMultiTable.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/schema/ReadSchemaDatabasePipelineStageTestMultiTable.yaml");
         assertNotNull(rulesEngine, "Rules engine should be created");
 
         // Execute pipeline

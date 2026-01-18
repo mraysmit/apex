@@ -73,7 +73,7 @@ class SchemaDiffMigrationValidationTest_RemovedColumns {
         logger.info("\n=== Test: Breaking Changes (Removed Columns) ===\n");
         
         // Execute schema diff pipeline
-        rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/validation/SchemaDiffDatabaseMigrationValidationTest_RemovedColumns.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/validation/SchemaDiffDatabaseMigrationValidationTest_RemovedColumns.yaml");
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
 
         // Pipeline should execute successfully

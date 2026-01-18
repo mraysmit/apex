@@ -78,7 +78,7 @@ class ReadSchemaCsvPipelineStageTest extends SyncTestBase {
         setupTestDatabase();
 
         // Load pipeline configuration using RulesEngine.fromFile()
-        rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/schema/ReadSchemaCsvPipelineStageTest.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/schema/ReadSchemaCsvPipelineStageTest.yaml");
         assertNotNull(rulesEngine, "Rules engine should be created");
 
         // Execute pipeline
@@ -143,7 +143,7 @@ class ReadSchemaCsvPipelineStageTest extends SyncTestBase {
         setupTestDatabase();
 
         // Load pipeline configuration
-        rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/schema/ReadSchemaCsvPipelineStageTestLarge.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/sync/schema/ReadSchemaCsvPipelineStageTestLarge.yaml");
         assertNotNull(rulesEngine, "Rules engine should be created");
 
         // Execute pipeline

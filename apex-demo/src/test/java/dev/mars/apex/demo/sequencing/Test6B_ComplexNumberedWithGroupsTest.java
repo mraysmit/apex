@@ -48,7 +48,7 @@ public class Test6B_ComplexNumberedWithGroupsTest extends DemoTestBase {
         LOGGER.info("=== TEST 6B: Complex Numbered Suffixes with Multiple Groups ===");
 
         // Create RulesEngine from YAML
-        RulesEngine engine = RulesEngine.fromFile("src/test/java/dev/mars/apex/demo/sequencing/Test6B_ComplexNumberedWithGroupsTest.yaml");
+        RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/demo/sequencing/Test6B_ComplexNumberedWithGroupsTest.yaml");
 
         // Create test data
         Map<String, Object> data = new HashMap<>();

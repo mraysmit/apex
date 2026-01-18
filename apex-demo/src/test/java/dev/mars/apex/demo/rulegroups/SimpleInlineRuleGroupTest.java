@@ -58,9 +58,7 @@ public class SimpleInlineRuleGroupTest {
         LOGGER.info("Setting up Simple Inline Rule Group Test...");
 
         // Create the rules engine using static factory method
-        rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/demo/rulegroups/SimpleInlineRuleGroupTest-rules.yaml"
-        );
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/rulegroups/SimpleInlineRuleGroupTest-rules.yaml");
 
         // Create test context (empty for this simple test)
         testContext = new HashMap<>();

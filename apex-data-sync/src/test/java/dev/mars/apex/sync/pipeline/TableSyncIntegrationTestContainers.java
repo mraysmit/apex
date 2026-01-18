@@ -18,27 +18,20 @@
 
 package dev.mars.apex.sync.pipeline;
 
-import dev.mars.apex.core.config.yaml.RulesEngineService;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.MSSQLServerContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.io.File;
-import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.HashMap;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import dev.mars.apex.sync.TestContainerImages;
 
@@ -61,21 +54,16 @@ public class TableSyncIntegrationTestContainers {
 
     @Test
     public void testRealMSSqlToPostgresSync() throws Exception {
-        // 1. Resolve Test YAML
-        URL resource = getClass().getClassLoader().getResource("test-sync-pipeline-containers.yaml");
-        assertNotNull(resource, "test-sync-pipeline-containers.yaml not found");
-        String configPath = new File(resource.toURI()).getAbsolutePath();
-
-        // 2. Setup System Properties to override YAML defaults
+        // 1. Setup System Properties to override YAML defaults
         System.setProperty("SOURCE_DB_URL", sqlServer.getJdbcUrl());
         System.setProperty("SOURCE_DB_USER", sqlServer.getUsername());
         System.setProperty("SOURCE_DB_PASS", sqlServer.getPassword());
-        
+
         System.setProperty("TARGET_DB_URL", postgreSQL.getJdbcUrl());
         System.setProperty("TARGET_DB_USER", postgreSQL.getUsername());
         System.setProperty("TARGET_DB_PASS", postgreSQL.getPassword());
 
-        // 3. Setup Source Data in SQL Server Container
+        // 2. Setup Source Data in SQL Server Container
         try (Connection conn = DriverManager.getConnection(sqlServer.getJdbcUrl(), sqlServer.getUsername(), sqlServer.getPassword())) {
             try (Statement stmt = conn.createStatement()) {
                 stmt.execute("CREATE TABLE customers (id INT PRIMARY KEY, name VARCHAR(255))");
@@ -84,7 +72,7 @@ public class TableSyncIntegrationTestContainers {
             }
         }
 
-        // 4. Setup Target Table in PostgreSQL Container
+        // 3. Setup Target Table in PostgreSQL Container
         try (Connection conn = DriverManager.getConnection(postgreSQL.getJdbcUrl(), postgreSQL.getUsername(), postgreSQL.getPassword())) {
             try (Statement stmt = conn.createStatement()) {
                 // Initialize target table (sync might do this if auto-create is on, but ensuring for clarity)
@@ -92,8 +80,8 @@ public class TableSyncIntegrationTestContainers {
             }
         }
 
-        // 5. Run Sync via APEX Core
-        RulesEngine engine = RulesEngine.fromFile(configPath);
+        // 4. Run Sync via APEX Core (using classpath resource)
+        RulesEngine engine = RulesEngine.fromClasspath("test-sync-pipeline-containers.yaml");
         RuleResult result = engine.evaluate(new HashMap<>());
 
         // 6. Verify Result

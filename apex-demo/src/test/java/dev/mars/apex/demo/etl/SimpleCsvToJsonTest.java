@@ -72,8 +72,7 @@ class SimpleCsvToJsonTest extends DemoTestBase {
         logger.info("=== Testing Simple CSV to JSON Pipeline (1000 records) ===");
 
         // Create RulesEngine and execute pipeline
-        rulesEngine = RulesEngine.fromFile(
-            "src/test/java/dev/mars/apex/demo/etl/SimpleCsvToJsonTest.yaml");
+        rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/etl/SimpleCsvToJsonTest.yaml");
 
         long startTime = System.currentTimeMillis();
         java.util.Map<String, Object> inputData = new java.util.HashMap<>();
