@@ -1,0 +1,30 @@
+# Additional JSON Serialization Tests
+
+metadata:
+  id: "json-edge-cases-test"
+  name: "JSON Edge Cases Test"
+  version: "1.0"
+  type: "pipeline-config"
+  
+data-sources:
+  - name: "edge-case-database"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "mem:edge_cases;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      username: "sa"
+      password: ""
+    enabled: true
+
+pipeline:
+  name: "edge-case-pipeline"
+  execution:
+    mode: "sequential"
+    error-handling: "continue-on-error"
+  
+  steps:
+    - name: "read-edge-case-schema"
+      type: "read-schema"
+      source: "edge-case-database"
+      parameters:
+        table: "EDGE_TABLE"

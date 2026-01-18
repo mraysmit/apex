@@ -91,6 +91,72 @@ Get-Content target/surefire-reports/*.txt | Select-String -Pattern "\[SchemaRead
 
 ## Test Organization
 
+### Directory Structure
+
+The test suite is organized into 5 functional categories:
+
+```
+src/test/java/dev/mars/apex/sync/
+├── unit/                           # Unit tests for individual components
+│   ├── comparison/                 # Type compatibility, breaking change detection
+│   ├── serialization/              # JSON serialization/deserialization
+│   ├── reporting/                  # Report generation (Markdown, HTML, JSON)
+│   │   └── markdown/               # Markdown-specific tests
+│   └── util/                       # Utility classes and helpers
+├── integration/                    # Integration tests across components
+│   ├── schema/                     # Schema reading and discovery
+│   │   ├── database/               # Database schema reading
+│   │   └── csv/                    # CSV schema reading
+│   ├── comparison/                 # Schema comparison workflows
+│   │   ├── scenarios/              # Schema evolution scenarios
+│   │   └── platforms/              # Cross-platform comparisons
+│   └── sync/                       # Data synchronization workflows
+├── pipeline/                       # Complete pipeline orchestration
+│   ├── workflows/                  # End-to-end workflows
+│   ├── validation/                 # Pipeline validation
+│   └── error_handling/             # Error recovery and handling
+├── performance/                    # Performance and scalability tests
+│   ├── benchmarks/                 # Performance benchmarks
+│   └── scalability/                # Large dataset tests
+└── support/                        # Test infrastructure
+    ├── fixtures/                   # Test data and fixtures
+    ├── containers/                 # Testcontainers support
+    └── base/                       # Base test classes
+```
+
+**For detailed test planning**, see:
+- [TEST_ORGANIZATION_PROPOSAL.md](../docs-design/testing/TEST_ORGANIZATION_PROPOSAL.md) - 52 new tests across 3 phases
+- [FUNCTIONAL_TEST_MAPPING.md](../docs-design/testing/FUNCTIONAL_TEST_MAPPING.md) - 44 tests by function category
+
+### Test Naming Conventions
+
+All tests follow the pattern: `shouldXxxWhenYyy()` or `shouldXxx()`
+
+Examples:
+- `shouldSerializeSchemaMetadata()` - Basic positive test
+- `shouldHandleNullValues()` - Edge case handling
+- `shouldRejectIncompatibleTypes()` - Negative test
+- `shouldGenerateMarkdownWithEmoji()` - Feature-specific test
+
+### Running Tests by Category
+
+```bash
+# Run all unit tests
+mvn test -Dtest=unit/**
+
+# Run specific category
+mvn test -Dtest=unit/serialization/**
+mvn test -Dtest=integration/schema/**
+mvn test -Dtest=pipeline/**
+
+# Run specific test class
+mvn test -Dtest=JsonSerializationTest
+mvn test -Dtest=MarkdownGenerationTest
+
+# Run with console output (DEBUG logging)
+mvn test -Dtest=JsonSerializationTest -Dsurefire.useFile=false
+```
+
 ### Report Output Configuration
 
 Schema analysis reports can be generated automatically during test execution. The report output path can be configured with automatic directory handling:
@@ -113,18 +179,67 @@ parameters:
 - Parent directories are automatically created if they don't exist
 - No manual directory creation needed
 
-### Database Schema Tests
-**ReadSchemaDatabasePipelineStageTest**: Tests for reading schema from database tables
-- `shouldReadSchemaFromDatabase()` - Single H2 table (3 columns)
-- `shouldReadSchemaFromMultipleTables()` - 5 H2 tables (30 total columns: customers-5, orders-6, products-7, inventory-4, transactions-8)
+### Current Test Coverage
 
-### CSV Schema Tests
-**ReadSchemaCsvPipelineStageTest**: Tests for reading schema from CSV files with type inference
-- `shouldReadSchemaFromCsv()` - Small CSV file (4 columns)
-- `shouldReadSchemaFromLargeCsv()` - Large CSV with 11 columns (demonstrates INTEGER, VARCHAR, DECIMAL, BOOLEAN, TIMESTAMP inference)
+#### Unit Tests (17 tests)
+- **JsonSerializationTest** (8 tests) - Week 1 deliverable ✅
+  - Basic serialization/deserialization, round-trip validation
+  - Unicode handling (客户表, Straße), null values, empty schemas
+  - Numeric precision (DECIMAL 10,2), multiple column types
+  
+- **MarkdownGenerationTest** (9 tests) - Week 3 deliverable ✅
+  - Basic table generation, emoji headers (📊, 🔑, ✓)
+  - Table alignment, special character escaping (|, *)
+  - Unicode, summary sections, constraint indicators
 
-### Data Sync Tests
-**MsSqlToPostgresSyncTest**: MS SQL Server to PostgreSQL synchronization tests
+#### Integration Tests (11 tests)
+- **ReadSchemaDatabaseTest** (6 tests) - Database schema reading
+  - `shouldReadSchemaFromDatabase()` - Single H2 table (3 columns)
+  - `shouldReadSchemaFromMultipleTables()` - 5 H2 tables (30 total columns)
+  - PostgreSQL, H2, and multi-table scenarios
+  
+- **ReadSchemaCsvTest** (2 tests) - CSV schema reading with type inference
+  - `shouldReadSchemaFromCsv()` - Small CSV file (4 columns)
+  - `shouldReadSchemaFromLargeCsv()` - Large CSV with 11 columns (INTEGER, VARCHAR, DECIMAL, BOOLEAN, TIMESTAMP inference)
+  
+- **SchemaEvolutionBreakingTest** (3 tests) - Breaking change detection
+  - Schema evolution scenarios with breaking change validation
+
+#### Pipeline Tests (5 tests)
+- **CompletePipelineWithSchemaTest** - Full pipeline with schema analysis
+- **MsSqlToPostgresSyncTest** - MS SQL Server to PostgreSQL synchronization
+- **SchemaDiffJsonIntegrationTest** - JSON-based schema diff integration
+- **SyncPipelineH2Test** - H2 database synchronization
+- **SyncPipelineContainersTest** - Testcontainers-based sync tests
+
+#### Validation Tests (6 tests)
+- **CsvToPostgresMigrationValidationTest** - CSV to PostgreSQL migration
+- **MultiTableMigrationValidationTest** - Multi-table migration scenarios
+- **PreDeploymentValidationTest** - Pre-deployment validation checks
+- **SchemaDiffReportOutputOptionsTest** - Report output configuration
+- **SchemaEvolutionValidationTest** - Schema evolution validation
+- **SqlServerPostgresMigrationValidationTest** - SQL Server to PostgreSQL migration
+
+**Total: 39 tests (19 existing + 17 new + 3 moved)**
+
+### Test Implementation Status
+
+**Phase 1 (Week 1-2) - CRITICAL**: 17/22 tests completed
+- ✅ JsonSerializationTest (8 tests) - Week 1 deliverable
+- ✅ MarkdownGenerationTest (9 tests) - Week 3 deliverable
+- ⏳ TypeCompatibilityTest (8 tests) - HIGH priority, core logic
+- ⏳ BreakingChangeDetectionTest (2 tests) - HIGH priority
+- ⏳ ReportPathResolutionTest (5 tests) - MEDIUM priority
+
+**Phase 2 (Week 3-4)**: 11 tests planned
+- Cross-platform database tests (SQL Server, MySQL)
+- CSV edge cases (empty files, malformed data, encoding)
+
+**Phase 3 (Week 5-6)**: 19 tests planned
+- Error handling and recovery
+- Performance benchmarks and scalability
+
+**Target**: 71 total tests (39 current + 32 planned)
 
 ## Summary
 

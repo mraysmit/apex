@@ -1,0 +1,50 @@
+# APEX Type Narrowing Test Pipeline
+# Tests type narrowing detection in schema comparison
+
+metadata:
+  id: "type-narrowing-test"
+  name: "Type Narrowing Test"
+  version: "1.0"
+  type: "pipeline-config"
+  author: "APEX Team"
+  description: "Test pipeline for type narrowing validation"
+
+data-sources:
+  - name: "source-h2-database"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "mem:type_narrow_source;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      username: "sa"
+      password: ""
+    enabled: true
+
+  - name: "target-h2-database"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "mem:type_narrow_target;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      username: "sa"
+      password: ""
+    enabled: true
+
+pipeline:
+  name: "type-narrowing-test-pipeline"
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+  
+  steps:
+    - name: "read-source-schema"
+      type: "read-schema"
+      source: "source-h2-database"
+      description: "Read schema from source database with wider types"
+      parameters:
+        table: "METRICS"
+
+    - name: "read-target-schema"
+      type: "read-schema"
+      source: "target-h2-database"
+      description: "Read schema from target database with narrowed types"
+      parameters:
+        table: "METRICS"

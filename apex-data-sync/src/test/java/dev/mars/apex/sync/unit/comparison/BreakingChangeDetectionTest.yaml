@@ -1,0 +1,50 @@
+# APEX Breaking Change Detection Test Pipeline
+# Tests breaking change detection in schema evolution
+
+metadata:
+  id: "breaking-change-detection-test"
+  name: "Breaking Change Detection Test"
+  version: "1.0"
+  type: "pipeline-config"
+  author: "APEX Team"
+  description: "Test pipeline for breaking change detection"
+
+data-sources:
+  - name: "original-h2-database"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "mem:breaking_original;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      username: "sa"
+      password: ""
+    enabled: true
+
+  - name: "evolved-h2-database"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "mem:breaking_evolved;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      username: "sa"
+      password: ""
+    enabled: true
+
+pipeline:
+  name: "breaking-change-detection-pipeline"
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+  
+  steps:
+    - name: "read-original-schema"
+      type: "read-schema"
+      source: "original-h2-database"
+      description: "Read original schema"
+      parameters:
+        table: "USERS"
+
+    - name: "read-evolved-schema"
+      type: "read-schema"
+      source: "evolved-h2-database"
+      description: "Read evolved schema with breaking changes"
+      parameters:
+        table: "USERS"

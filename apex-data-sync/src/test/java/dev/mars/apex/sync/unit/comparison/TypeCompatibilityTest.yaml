@@ -1,0 +1,50 @@
+# APEX Type Compatibility Test Pipeline
+# Tests type compatibility detection in schema comparison
+
+metadata:
+  id: "type-compatibility-test"
+  name: "Type Compatibility Test"
+  version: "1.0"
+  type: "pipeline-config"
+  author: "APEX Team"
+  description: "Test pipeline for type compatibility validation"
+
+data-sources:
+  - name: "source-h2-database"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "mem:type_compat_source;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      username: "sa"
+      password: ""
+    enabled: true
+
+  - name: "target-h2-database"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "mem:type_compat_target;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      username: "sa"
+      password: ""
+    enabled: true
+
+pipeline:
+  name: "type-compatibility-test-pipeline"
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+  
+  steps:
+    - name: "read-source-schema"
+      type: "read-schema"
+      source: "source-h2-database"
+      description: "Read schema from source database with original types"
+      parameters:
+        table: "ORDERS"
+
+    - name: "read-target-schema"
+      type: "read-schema"
+      source: "target-h2-database"
+      description: "Read schema from target database with modified types"
+      parameters:
+        table: "ORDERS"

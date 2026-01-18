@@ -1,0 +1,50 @@
+# APEX Markdown Generation Test Pipeline
+# Tests Markdown report generation from schema comparison
+
+metadata:
+  id: "markdown-generation-test"
+  name: "Markdown Generation Test"
+  version: "1.0"
+  type: "pipeline-config"
+  author: "APEX Team"
+  description: "Test pipeline for Markdown report generation from schema comparison"
+
+data-sources:
+  - name: "source-h2-database"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "mem:markdown_test_source;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      username: "sa"
+      password: ""
+    enabled: true
+
+  - name: "target-h2-database"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "mem:markdown_test_target;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      username: "sa"
+      password: ""
+    enabled: true
+
+pipeline:
+  name: "markdown-generation-test-pipeline"
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+  
+  steps:
+    - name: "read-source-schema"
+      type: "read-schema"
+      source: "source-h2-database"
+      description: "Read schema from source database"
+      parameters:
+        table: "PRODUCTS"
+
+    - name: "read-target-schema"
+      type: "read-schema"
+      source: "target-h2-database"
+      description: "Read schema from target database"
+      parameters:
+        table: "PRODUCTS"

@@ -1,0 +1,45 @@
+# Nullable Conversion Test
+
+metadata:
+  id: "nullable-conversion-test"
+  name: "Nullable Conversion Test"
+  version: "1.0"
+  type: "pipeline-config"
+
+data-sources:
+  - name: "nullable-source"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "mem:nullable_source;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      username: "sa"
+      password: ""
+    enabled: true
+
+  - name: "nullable-target"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "mem:nullable_target;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      username: "sa"
+      password: ""
+    enabled: true
+
+pipeline:
+  name: "nullable-conversion-pipeline"
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+  
+  steps:
+    - name: "read-source-nullable"
+      type: "read-schema"
+      source: "nullable-source"
+      parameters:
+        table: "CONTACTS"
+
+    - name: "read-target-nullable"
+      type: "read-schema"
+      source: "nullable-target"
+      parameters:
+        table: "CONTACTS"

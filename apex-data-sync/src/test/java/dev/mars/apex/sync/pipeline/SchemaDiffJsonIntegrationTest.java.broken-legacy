@@ -17,9 +17,9 @@ package dev.mars.apex.sync.pipeline;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.mars.apex.core.loader.YamlConfigurationLoader;
-import dev.mars.apex.core.model.config.YamlConfiguration;
-import dev.mars.apex.core.service.YamlRulesEngineService;
+import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.config.yaml.YamlConfiguration;
+import dev.mars.apex.core.config.yaml.YamlRulesEngineService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;

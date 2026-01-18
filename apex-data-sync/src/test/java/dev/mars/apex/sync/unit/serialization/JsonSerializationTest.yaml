@@ -1,0 +1,43 @@
+# APEX JSON Serialization Test Pipeline
+# Tests JSON report generation from schema comparison
+
+metadata:
+  id: "test-json-serialization"
+  name: "JSON Serialization Test"
+  version: "1.0"
+  type: "pipeline-config"
+  author: "APEX Team"
+  description: "Test pipeline for JSON schema diff report generation"
+
+data-sources:
+  - name: "source-h2-database"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "mem:json_test_source;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      username: "sa"
+      password: ""
+    enabled: true
+
+  - name: "target-h2-database"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "mem:json_test_target;DB_CLOSE_DELAY=-1;MODE=PostgreSQL"
+      username: "sa"
+      password: ""
+    enabled: true
+
+pipeline:
+  name: "json-serialization-test-pipeline"
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+  
+  steps:
+    - name: "read-schema-from-customers-table"
+      type: "read-schema"
+      source: "source-h2-database"
+      description: "Read schema metadata from customers table"
+      parameters:
+        table: "CUSTOMERS"

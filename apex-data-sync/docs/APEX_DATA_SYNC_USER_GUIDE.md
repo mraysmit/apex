@@ -1,13 +1,70 @@
-# APEX Schema Diff - User Guide
+# APEX Data-Sync Module - User Guide
 
 ## Overview
 
-The **schema-diff** pipeline stage enables automatic comparison of schemas from heterogeneous data sources to validate migration compatibility, detect breaking changes, and generate comprehensive HTML reports. This feature is essential for:
+The **APEX Data-Sync** module is a synchronization runner built on the **APEX Core 2.0** platform that provides comprehensive schema management, data migration validation, and synchronization capabilities. It specializes in rule-based data movement between heterogeneous database environments (SQL Server, PostgreSQL, MySQL, Oracle, H2) and enables automated comparison of schemas to validate migration compatibility, detect breaking changes, and generate comprehensive reports in multiple formats (JSON, HTML, Markdown).
 
-- **Pre-migration validation**: Verify schema compatibility before data movement
-- **Breaking change detection**: Identify incompatible changes that could cause runtime failures
-- **Migration planning**: Generate actionable reports with migration recommendations
-- **Schema evolution tracking**: Monitor safe vs. unsafe schema changes over time
+By design, it facilitates synchronization of enterprise data from **Microsoft SQL Server (Legacy Source)** to **PostgreSQL (Modern Target)** without requiring custom Java development for connectivity, validation, or orchestration.
+
+### The "Thin Runner" Pattern
+
+Unlike traditional integration applications, this module contains no business logic in Java. Its components are:
+- **`TableSyncRunner.java`**: A minimalist entry point that delegates 100% of execution to the `RulesEngineService` in APEX Core
+- **`apex-core`**: The single primary engine used for connection pooling (via HikariCP), SQL execution, and pipeline orchestration
+- **Standardized YAMLs**: The entire synchronization behavior is defined in declarative configurations
+
+**Dependency Management**: The module maintains a minimal dependency policy. Its `pom.xml` contains exactly **one** primary dependency: `apex-core`. All other infrastructure (JDBC drivers, connection pooling, Spring frameworks) is provided transitively or managed by the platform at runtime.
+
+### Module Features
+
+#### Core Capabilities
+
+**1. Schema Reading & Analysis**
+- Read schema metadata from databases (PostgreSQL, SQL Server, H2, MySQL, Oracle, DB2)
+- Infer schema from CSV files with automatic type detection
+- Multi-table schema enumeration
+- Custom schema support (non-default PostgreSQL schemas)
+- Large file handling with performance optimization
+
+**2. Schema Comparison (Diff)**
+- Compare schemas between source and target systems
+- Detect: matching columns, added columns, removed columns, modified columns, breaking changes
+- Support cross-database comparisons (e.g., SQL Server → PostgreSQL)
+- Schema evolution tracking with compatibility analysis
+
+**3. Report Generation (JSON-First Architecture)**
+- **JSON Reports**: Machine-readable schema diff output for CI/CD integration
+- **HTML Reports**: Human-readable with visual formatting and color-coded changes
+- **Markdown Reports**: Documentation-friendly format for wikis and documentation
+- Flexible output paths (filename-only, relative, absolute)
+- Auto-creates report directories
+
+**4. Data Migration & Validation**
+- CSV → PostgreSQL migration validation
+- SQL Server → PostgreSQL cross-platform migration  
+- Multi-table batch migrations
+- Pre-deployment validation to catch breaking changes
+- Breaking change detection with actionable recommendations
+
+**5. Pipeline Orchestration**
+- Multi-stage pipeline execution (`read-schema` → `schema-diff` → reports)
+- Sequential step execution with data flow between stages
+- Error handling and recovery
+- Pipeline result tracking and metrics
+
+**6. Database Synchronization**
+- H2 to PostgreSQL schema sync
+- Cross-database schema synchronization
+- Real-time schema comparison
+- Testcontainers integration for realistic testing
+
+#### Key Use Cases
+
+1. **Pre-deployment schema validation** - Catch breaking changes before production deployment
+2. **Database migration planning** - Analyze schema differences between environments
+3. **Documentation generation** - Auto-generate schema comparison reports for compliance
+4. **CI/CD integration** - Automated schema validation in build pipelines
+5. **Data warehouse synchronization** - Keep schemas in sync across analytical systems
 
 ### Supported Data Sources
 
@@ -18,6 +75,13 @@ The **schema-diff** pipeline stage enables automatic comparison of schemas from 
 ---
 
 ## Quick Start
+
+### Running the Sync
+
+Sync operations are triggered via the CLI using a configuration path:
+```bash
+java -jar apex-data-sync.jar --config=configs/config-b/table-sync-pipeline.yaml
+```
 
 ### Basic Schema Comparison
 
@@ -579,6 +643,103 @@ ignore-columns:
 
 ---
 
+## Verification & Testing
+
+### Test Infrastructure
+
+The project includes comprehensive testing infrastructure with colored console output for enhanced readability:
+
+#### Integration Testing
+
+The project includes `TableSyncIntegrationTestH2` that simulates SQL Server → PostgreSQL sync using H2 compatibility modes:
+- **Source Simulation**: `jdbc:h2:mem:...;MODE=MSSQLServer`
+- **Target Simulation**: `jdbc:h2:mem:...;MODE=PostgreSQL`
+
+This ensures pipeline logic is verified against database-specific dialects without requiring full live infrastructure.
+
+**Run integration tests**:
+```bash
+mvn test -Dtest=TableSyncIntegrationTestH2
+```
+
+#### Schema Reading Tests
+
+The `ReadSchemaPipelineStageTest` provides comprehensive validation of schema reading capabilities with colored test output:
+
+**Single Table Schema Reading**:
+```java
+@Test
+void shouldReadSchemaFromDatabase() {
+    // Reads schema from H2 database table
+    // Verifies: ID (INTEGER), NAME (VARCHAR), EMAIL (VARCHAR)
+}
+```
+
+**CSV File Schema Reading**:
+```java
+@Test
+void shouldReadSchemaFromCsv() {
+    // Reads schema from CSV file with type inference
+    // Verifies: column_a (VARCHAR), column_b (INTEGER), 
+    //          column_c (DECIMAL), column_d (BOOLEAN)
+}
+```
+
+**Multi-Table Schema Reading**:
+```java
+@Test
+void shouldReadSchemaFromMultipleTables() {
+    // Reads schemas from 5 tables (30 total columns)
+    // Tables: customers(5), orders(6), products(7), 
+    //         inventory(4), transactions(8)
+}
+```
+
+**Large CSV Schema Reading**:
+```java
+@Test
+void shouldReadSchemaFromLargeCsv() {
+    // Reads schema from 11-column CSV file
+    // Demonstrates type inference: INTEGER, DECIMAL, 
+    //                              BOOLEAN, TIMESTAMP, VARCHAR
+}
+```
+
+### Debug Logging
+
+Comprehensive DEBUG-level logging is available for troubleshooting schema reading operations:
+
+```bash
+# Run tests with console debug output
+mvn test -Dtest=ReadSchemaPipelineStageTest -Dsurefire.useFile=false
+```
+
+**Log Prefixes**:
+- `[SchemaReader]`: Entry/exit points and routing decisions
+- `[SchemaReader.DB]`: Database-specific operations and column processing
+- `[SchemaReader.CSV]`: CSV file operations and type inference decisions
+- `[Pipeline.ReadSchema]`: Pipeline step validation and execution
+- `[Pipeline.Execute]`: Schema metadata storage and timing
+- `[Pipeline.Validation]`: Step validation status
+
+**Example Debug Output**:
+```
+[SchemaReader] readSchema() called with dataSource=h2-test-database, parameters={table=customers}
+[SchemaReader.DB] Executing metadata query for table: customers
+[SchemaReader.DB] Processing column: ID (INTEGER)
+[SchemaReader.DB] Processing column: NAME (VARCHAR)
+[Pipeline.Execute] Schema metadata stored: 2 columns from h2-test-database
+```
+
+**Run all tests**:
+```bash
+mvn test
+```
+
+See [README-TESTING.md](../README-TESTING.md) for complete testing and debugging documentation.
+
+---
+
 ## Troubleshooting
 
 ### Problem: "Table not found or no columns"
@@ -826,12 +987,89 @@ type-mappings:
   
   # JSON types
   "JSONB": ["JSON", "TEXT"]
-  "JSON": ["JSONB", "TEXT"]
+  "Project Structure
+
+- `configs/`: Standardized YAML configurations (Pipelines & Data Sources)
+- `docs/`: Architectural documentation and design specifications
+  - `APEX_DATA_SYNC_ARCHITECTURE.md`: Comprehensive architecture design
+  - `APEX_DATA_SYNC_USER_GUIDE.md`: This user guide
+  - `README-TESTING.md`: Testing guidelines and debug instructions
+- `src/main/java/.../TableSyncRunner.java`: Minimalist execution bridge
+- `pom.xml`: Lean configuration with exactly **one** primary dependency (`apex-core`)
+
+---
+
+## Configuration Standardization
+
+The module utilizes APEX 2.0 schema standards for all configuration artifacts.
+
+### Data Sources
+
+Connection profiles are defined as `external-data-config` documents, keeping database credentials and connection pool settings outside Java code:
+- `sqlserver-datasource.yaml`: Configures MSSQL connection and named extraction queries
+- `postgresql-datasource.yaml`: Configures PostgreSQL connection and upsert operations
+
+**Example Data Source Configuration**:
+```yaml
+# configs/data-sources/sqlserver-datasource.yaml
+metadata:
+  type: "external-data-config"
+data-sources:
+  - name: "sqlserver-source"
+    type: "database"
+    source-type: "sqlserver"
+    connection:
+      url: "${SQLSERVER_URL}"
+      username: "${SQLSERVER_USERNAME}"
+      password: "${SQLSERVER_PASSWORD}"
+    queries:
+      extractCustomers: "SELECT * FROM dbo.Customers"
+```
+
+### Pipelines
+
+Synchronization is orchestrated through standard `pipeline` document types using tiered steps:
+1. **Read-Schema**: Introspecting database tables or CSV files to retrieve column metadata
+2. **Extract**: Fetching records from the source using named queries
+3. **Transform**: Applying SpEL-based data mapping and inline validation rules
+4. **Load**: Writing validated records to the target sink using upsert operations
+
+**Example Pipeline Configuration**:
+```yaml
+# configs/config-b/table-sync-pipeline.yaml
+metadata:
+  type: "pipeline"
   
-  # Array types
-  "INTEGER[]": ["INT ARRAY"]
-  "TEXT[]": ["VARCHAR ARRAY"]
-  
+data-source-refs:
+  - name: "sqlserver-source"
+    source: "data-sources/sqlserver-datasource.yaml"
+  - name: "postgresql-target"
+    source: "data-sources/postgresql-datasource.yaml"
+
+pipeline:
+  name: "customer-sync"
+  execution: "sequential"
+  steps:
+    - name: "extract-customers"
+      type: "extract"
+      data-source-ref: "sqlserver-source"
+      query-ref: "extractCustomers"
+    
+    - name: "load-customers"
+      type: "load"
+      data-source-ref: "postgresql-target"
+      query-ref: "upsertCustomer"
+      depends-on: ["extract-customers"]
+```
+
+---
+
+## Next Steps
+
+1. **Review** the [APEX_DATA_SYNC_ARCHITECTURE.md](APEX_DATA_SYNC_ARCHITECTURE.md) for comprehensive architecture design
+2. **Check** the [README-TESTING.md](README-TESTING.md) for testing guidelines and debug instructions
+3. **Try** the example configurations in `configs/`
+4. **Run** integration tests: `mvn test
   # Custom types
   "UUID": ["CHAR(36)", "VARCHAR(36)"]
 ```
