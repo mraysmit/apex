@@ -1,0 +1,102 @@
+metadata:
+  name: "External OTC Enrichment Groups"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "External enrichment groups for OTC options trade processing - referenced by main config"
+
+# These enrichment groups will be loaded via enrichment-group-refs
+# They should appear in document order at the position of the enrichment-group-refs placeholder
+
+enrichment-groups:
+  - id: "market-data-enrichment-group"
+    name: "Market Data Enrichment Group"
+    description: "Group for enriching market data and calculating option metrics"
+    operator: "AND"
+    stop-on-first-failure: true
+    priority: 10
+    enrichment-ids:
+      - "enrich-market-data-group"
+      - "calculate-greeks-group"
+
+  - id: "risk-metrics-enrichment-group"
+    name: "Risk Metrics Enrichment Group"
+    description: "Group for calculating risk metrics and exposure"
+    operator: "AND"
+    stop-on-first-failure: false
+    priority: 20
+    enrichment-ids:
+      - "calculate-var-group"
+      - "calculate-exposure-group"
+
+# Enrichments used by the groups above
+enrichments:
+  - id: "enrich-market-data-group"
+    name: "Enrich Market Data (Group)"
+    type: "lookup-enrichment"
+    description: "Lookup current market data for the option (used in group)"
+    lookup-config:
+      lookup-key: "#underlying"
+      lookup-dataset:
+        type: "inline"
+        key-field: "underlying"
+        data:
+          - underlying: "SPX"
+            spotPrice: 4500.0
+            volatility: 18.5
+            riskFreeRate: 4.5
+          - underlying: "NDX"
+            spotPrice: 15000.0
+            volatility: 22.3
+            riskFreeRate: 4.5
+          - underlying: "RUT"
+            spotPrice: 2000.0
+            volatility: 25.1
+            riskFreeRate: 4.5
+    field-mappings:
+      - source-field: "spotPrice"
+        target-field: "currentSpotPrice"
+      - source-field: "volatility"
+        target-field: "impliedVolatility"
+      - source-field: "riskFreeRate"
+        target-field: "riskFreeRate"
+    enabled: true
+
+  - id: "calculate-greeks-group"
+    name: "Calculate Option Greeks (Group)"
+    type: "calculation-enrichment"
+    description: "Calculate delta, gamma, vega based on market data (used in group)"
+    condition: "#currentSpotPrice != null && #impliedVolatility != null"
+    calculation-config:
+      expression: "#currentSpotPrice * #impliedVolatility * 0.01"
+      result-field: "calculatedDelta"
+    field-mappings:
+      - source-field: "calculatedDelta"
+        target-field: "optionDelta"
+    enabled: true
+
+  - id: "calculate-var-group"
+    name: "Calculate Value at Risk (Group)"
+    type: "calculation-enrichment"
+    description: "Calculate VaR based on volatility and notional (used in group)"
+    condition: "#impliedVolatility != null && #notionalAmount != null"
+    calculation-config:
+      expression: "#notionalAmount * #impliedVolatility * 0.01 * 1.65"
+      result-field: "calculatedVaR"
+    field-mappings:
+      - source-field: "calculatedVaR"
+        target-field: "valueAtRisk"
+    enabled: true
+
+  - id: "calculate-exposure-group"
+    name: "Calculate Net Exposure (Group)"
+    type: "calculation-enrichment"
+    description: "Calculate net exposure based on delta and notional (used in group)"
+    condition: "#optionDelta != null && #notionalAmount != null"
+    calculation-config:
+      expression: "#optionDelta * #notionalAmount * 0.01"
+      result-field: "calculatedExposure"
+    field-mappings:
+      - source-field: "calculatedExposure"
+        target-field: "netExposure"
+    enabled: true
+

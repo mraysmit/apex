@@ -1,0 +1,47 @@
+# ============================================================================
+# APEX Simple Age Validation Rule
+# ============================================================================
+# This demonstrates the simplest possible YAML validation rule in APEX.
+# It validates that a person's age is at least 18 years old.
+# 
+# Following the exact YAML structure from YamlRuleConfiguration.java:
+# - metadata: ConfigurationMetadata (required)
+# - rules: List<YamlRule> (contains validation rules)
+# ============================================================================
+
+metadata:
+  id: "simple-age-validation"
+  name: "Simple Age Validation"
+  version: "1.0.0"
+  description: "The simplest possible YAML validation rule - validates age >= 18"
+  type: "rule-config"
+  author: "apex-demo-team@example.com"
+
+# Single validation rule using exact YamlRule structure
+rules:
+  - id: "age-check"
+    name: "Age Validation Rule"
+    description: "Validates that age is at least 18"
+    condition: "#age != null && #age >= 18"
+    message: "Age {{#age}} is valid (18 or older)"
+    severity: "INFO"
+    priority: 1
+    enabled: true
+
+  - id: "age-required"
+    name: "Age Required Rule"
+    description: "Validates that age field is present"
+    condition: "#age != null"
+    message: "Age field is present: {{#age}}"
+    severity: "ERROR"
+    priority: 1
+    enabled: true
+
+  - id: "age-too-young"
+    name: "Age Too Young Rule"
+    description: "Identifies when age is below minimum"
+    condition: "#age != null && #age < 18"
+    message: "Age {{#age}} is below minimum required age of 18"
+    severity: "WARNING"
+    priority: 2
+    enabled: true

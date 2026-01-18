@@ -1,0 +1,124 @@
+metadata:
+  name: "Mixed Rule Groups and Items Test"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "Test mixed individual rules and rule groups in document order"
+
+# Error recovery configuration
+# Rules detect INVALID data (condition = TRUE when data is invalid)
+# With valid data, conditions return FALSE, so we need recovery enabled
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+
+  severity-policies:
+    ERROR:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
+
+# YAML Section Order: enrichments → rule-refs → rules → rule-groups
+# Expected Processing Order: E1 → E2 → E3 → R1-ref → R2-ref → RG1-ref → RG2-ref → R3-inline → RG3-inline
+# Note: rule-refs loads BOTH individual rules AND rule groups from external files
+
+# First, enrich data for rules to validate
+enrichments:
+  - id: "enrich-market-data"
+    name: "Enrich Market Data"
+    type: "lookup-enrichment"
+    description: "Lookup current market data for the option"
+    lookup-config:
+      lookup-key: "#underlying"
+      lookup-dataset:
+        type: "inline"
+        key-field: "underlying"
+        data:
+          - underlying: "SPX"
+            spotPrice: 4500.0
+            volatility: 18.5
+          - underlying: "NDX"
+            spotPrice: 15000.0
+            volatility: 22.3
+          - underlying: "RUT"
+            spotPrice: 2000.0
+            volatility: 25.1
+    field-mappings:
+      - source-field: "spotPrice"
+        target-field: "currentSpotPrice"
+      - source-field: "volatility"
+        target-field: "impliedVolatility"
+    enabled: true
+
+  - id: "calculate-risk-metrics"
+    name: "Calculate Risk Metrics"
+    type: "calculation-enrichment"
+    description: "Calculate VaR and exposure for validation"
+    condition: "#impliedVolatility != null && #notionalAmount != null"
+    calculation-config:
+      expression: "#notionalAmount * #impliedVolatility * 0.01 * 1.65"
+      result-field: "calculatedVaR"
+    field-mappings:
+      - source-field: "calculatedVaR"
+        target-field: "valueAtRisk"
+    enabled: true
+
+  - id: "calculate-exposure"
+    name: "Calculate Net Exposure"
+    type: "calculation-enrichment"
+    description: "Calculate net exposure"
+    condition: "#notionalAmount != null && #currentSpotPrice != null"
+    calculation-config:
+      expression: "#notionalAmount * 0.5"
+      result-field: "calculatedExposure"
+    field-mappings:
+      - source-field: "calculatedExposure"
+        target-field: "netExposure"
+    enabled: true
+
+# Section 1: Rule-refs (placeholder - expands to R1, R2, RG1, RG2 from external files)
+rule-refs:
+  - name: "external-rules"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/external-rules-otc.yaml"
+    enabled: true
+    description: "Load individual rules from external file"
+  - name: "external-rule-groups"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/external-rule-groups-otc.yaml"
+    enabled: true
+    description: "Load rule groups from external file"
+
+# Section 2: Inline rules (execute after rule-refs)
+rules:
+  - id: "validate-market-data-present"
+    name: "Validate Market Data Present"
+    condition: "#optionType != null && #optionType == 'CALL' && #strike != null && #strike < 4600"
+    message: "Mid-strike CALL options require market data validation"
+    severity: "ERROR"
+    enabled: true
+
+  # Rules used by the inline rule group
+  - id: "validate-regulatory-approval"
+    name: "Validate Regulatory Approval"
+    condition: "#optionType == null"
+    message: "Option type must be specified for regulatory approval"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "validate-counterparty-approved"
+    name: "Validate Counterparty Approved"
+    condition: "#optionType != null && #optionType == 'PUT' && #strike != null && #strike <= 2000"
+    message: "Low-strike PUT options require counterparty approval"
+    severity: "ERROR"
+    enabled: true
+
+# Section 3: Inline rule group (executes after inline rules)
+rule-groups:
+  - id: "compliance-validation-group"
+    name: "Compliance Validation Group"
+    description: "Group for compliance-related validations"
+    operator: "AND"
+    stop-on-first-failure: false
+    priority: 30
+    rule-ids:
+      - "validate-regulatory-approval"
+      - "validate-counterparty-approved"
+

@@ -1,0 +1,50 @@
+# Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# ============================================================================
+# Pre-create nested structure before enrichment to avoid failure
+# ============================================================================
+# Tests: testWorkaroundPreCreateStructure
+#
+# PROBLEM:
+# SpEL expressions like "#result.nested.field" cannot auto-create intermediate
+# Map structures. If "result" exists but "result.nested" does not exist,
+# the enrichment will FAIL and report an error in the RuleResult
+# (see NestedTargetFieldEnrichmentTest-missing-structure.yaml).
+#
+# SOLUTION:
+# Pre-create the full nested structure in your input data BEFORE running
+# the enrichment. The test creates: input.put("result", Map.of("nested", new HashMap<>()))
+# Then the enrichment can successfully write to "#result.nested.field".
+#
+# USE CASE:
+# When you need to enrich deeply nested fields in complex structures like
+# OTC trades, portfolio positions, or multi-leg instruments, ensure the
+# parent structure exists before the enrichment runs.
+# ============================================================================
+
+metadata:
+  id: "workaround-demo"
+  name: "Workaround Demonstration"
+  version: "1.0.0"
+  description: "Demonstrates the workaround of pre-creating nested structure before enrichment"
+
+enrichments:
+  - id: "nested-enrichment"
+    type: "field-enrichment"
+    condition: "true"
+    field-mappings:
+      - source-field: "value"
+        target-field: "#result.nested.field"
+

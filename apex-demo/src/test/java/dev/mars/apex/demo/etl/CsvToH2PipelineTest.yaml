@@ -1,0 +1,148 @@
+
+# ============================================================================
+# APEX ETL Pipeline Configuration - CSV to H2 Database Demo
+# ============================================================================
+#
+# OVERVIEW:
+# This configuration demonstrates a complete ETL (Extract, Transform, Load)
+# pipeline using APEX's data processing capabilities. It showcases how to:
+# - Extract customer data from CSV files
+# - Process and validate the data through pipeline steps
+# - Load the processed data into an H2 in-memory database
+# - Perform audit logging of the entire process
+#
+# BUSINESS SCENARIO:
+# Customer data onboarding pipeline that reads customer information from
+# CSV files, validates and enriches the data, stores it in a database,
+# and maintains an audit trail for compliance and monitoring purposes.
+#
+# TECHNICAL FEATURES DEMONSTRATED:
+# ✓ File-system data sources with CSV processing
+# ✓ Database data sinks with automatic schema creation
+# ✓ Multi-step pipeline orchestration with dependencies
+# ✓ Error handling and retry mechanisms
+# ✓ Audit logging to JSON files
+# ✓ Sequential execution mode with proper cleanup
+#
+# PIPELINE FLOW:
+# 1. Extract: Read customer records from CSV file (./target/demo/etl/data/customers.csv)
+# 2. Load: Insert customer records into H2 database with auto-generated timestamps
+# 3. Audit: Write processing audit records to JSON file for compliance tracking
+#
+# DATA STRUCTURE:
+# Input CSV: customer_id, customer_name, email, status
+# Database: customers table with additional processed_at and created_at timestamps
+# Audit: JSON records with processing metadata and timestamps
+#
+# USED BY: CsvToH2PipelineTest.java
+# STATUS: Active production-ready test configuration
+# AUTHOR: APEX Demo Team
+# VERSION: 1.0.0
+# ============================================================================
+
+metadata:                                    # Configuration metadata and identification section
+  id: "csv-to-h2-pipeline-demo"         # Unique identifier for this pipeline configuration
+  name: "CSV to H2 ETL Pipeline Demo"   # Human-readable name displayed in logs and monitoring
+  version: "1.0.0"                      # Version number for tracking configuration changes
+  description: "Demonstration of CSV data processing with H2 database output using APEX data sinks"  # Detailed description of purpose
+  type: "pipeline-config"               # Configuration type: defines a data pipeline workflow
+  author: "APEX Demo Team"              # Who created/maintains this configuration
+  tags: ["demo", "etl", "csv", "h2", "pipeline"]  # Keywords for categorization and searching
+
+# Pipeline orchestration - defines the complete ETL workflow and execution steps
+pipeline:                                       # Main pipeline configuration section
+  name: "customer-etl-pipeline"                 # Unique identifier for this pipeline instance
+  description: "Extract customer data from CSV, transform, and load into H2 database"  # Human-readable description
+
+  # Pipeline steps executed in sequence - defines the workflow processing stages
+  steps:                                        # List of processing steps to execute in dependency order
+    - name: "extract-customers"                 # Unique name for this step (used in logs and dependencies)
+      type: "extract"                           # Step type: "extract" reads data from a source
+      source: "customer-csv-input"              # References the data-source named "customer-csv-input" below
+      operation: "getAllCustomers"              # Calls the "getAllCustomers" operation defined in the data source
+      description: "Read all customer records from CSV file"  # Human-readable description for this step
+
+    - name: "load-to-database"                  # Unique name for the database loading step
+      type: "load"                              # Step type: "load" writes data to a sink
+      sink: "customer-h2-database"              # References the data-sink named "customer-h2-database" below
+      operation: "insertCustomer"               # Calls the "insertCustomer" operation defined in the data sink
+      description: "Insert customer records into H2 database"  # Human-readable description for this step
+      depends-on: ["extract-customers"]         # This step waits for "extract-customers" to complete first
+
+    - name: "audit-logging"                     # Unique name for the audit logging step
+      type: "audit"                             # Step type: "audit" writes audit records for compliance
+      sink: "audit-log-file"                    # References the data-sink named "audit-log-file" below
+      operation: "writeAuditRecord"             # Calls the "writeAuditRecord" operation defined in the data sink
+      description: "Write audit records to JSON file"  # Human-readable description for this step
+      depends-on: ["load-to-database"]          # This step waits for "load-to-database" to complete first
+      # optional: true                          # REMOVED: Now respects pipeline-level error-handling: "stop-on-error"
+
+  # Pipeline execution configuration - controls how the pipeline runs and handles failures
+  execution:                              # Execution behavior settings for the entire pipeline
+    mode: "sequential"                    # Execute pipeline steps one after another in order (vs "parallel")
+    error-handling: "stop-on-error"      # Stop entire pipeline if any step fails (vs "continue-on-error")
+                                          # NOTE: Step-level "optional: true" overrides this setting!
+    max-retries: 3                        # Retry failed steps up to 3 times before giving up (0 = no retries)
+    retry-delay-ms: 1000                  # Wait 1000 milliseconds between retry attempts to avoid overwhelming resources
+
+# Input data source configuration - where the pipeline reads data from
+data-sources:                               # List of data sources available to pipeline steps
+  - name: "customer-csv-input"              # Unique identifier referenced by pipeline steps
+    type: "file-system"                     # Data source type: reads files from local filesystem
+    enabled: true                           # Whether this data source is active (false = skip)
+    description: "Customer CSV file input for ETL processing"  # Human-readable description
+
+    connection:                             # Connection parameters for the file system
+      base-path: "./target/demo/etl/data"   # Directory path where data files are located
+      file-pattern: "customers.csv"         # Filename pattern to match (supports wildcards like *.csv)
+      encoding: "UTF-8"                     # Character encoding for reading text files
+
+    operations:                             # Named queries/operations available on this data source
+      getAllCustomers: "SELECT * FROM csv"  # SQL-like query to read all columns from CSV file
+      getActiveCustomers: "SELECT * FROM csv WHERE status = 'ACTIVE'"  # Filtered query for active customers only
+
+# Output data sink configuration - where the pipeline writes processed data to
+data-sinks:                                 # List of data sinks available to pipeline steps
+  - name: "customer-h2-database"            # Unique identifier referenced by pipeline steps
+    type: "database"                        # Data sink type: writes to a database
+    source-type: "h2"                       # Database engine: H2 in-memory/file database
+    enabled: true                           # Whether this data sink is active (false = skip)
+    description: "H2 database for storing processed customer data"  # Human-readable description
+
+    connection:                             # Database connection parameters
+      database: "./target/demo/etl/output/customer_database"  # Database file path (H2 creates file automatically)
+      username: "sa"                        # Database username (H2 default admin user)
+      password: ""                          # Database password (empty = no password required)
+
+    schema:                                   # Database schema management settings
+      auto-create: true                       # Automatically create tables if they don't exist
+      init-script: |                          # SQL script to run when initializing the database
+        CREATE TABLE IF NOT EXISTS customers (
+          customer_id INTEGER PRIMARY KEY,
+          customer_name VARCHAR(255) NOT NULL,
+          email VARCHAR(255),
+          status VARCHAR(50) DEFAULT 'ACTIVE',
+          processed_at TIMESTAMP,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+    operations:                               # Named operations available on this data sink
+      insertCustomer: |                       # SQL insert operation with parameter binding
+        INSERT INTO customers (
+          customer_id, customer_name, email, status, processed_at, created_at
+        ) VALUES (
+          :column_1, :column_2, :column_3, :column_5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+        )
+
+  - name: "audit-log-file"                  # Second data sink for audit logging
+    type: "file-system"                     # Data sink type: writes files to local filesystem
+    enabled: true                           # Whether this data sink is active (false = skip)
+    description: "JSON file for audit logging of processed records"  # Human-readable description
+
+    connection:                             # Connection parameters for the file system
+      base-path: "./target/demo/etl/output/audit"  # Directory path where audit files will be written
+      file-pattern: "customer_audit_{timestamp}.json"  # Filename pattern with timestamp placeholder
+      encoding: "UTF-8"                     # Character encoding for writing text files
+
+    operations:                             # Named operations available on this data sink
+      writeAuditRecord: "write"             # Use standard "write" operation to append audit records to file

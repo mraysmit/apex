@@ -38,25 +38,25 @@ class ApexDemoScenarioYamlValidationTest {
         
         List<String> yamlFiles = List.of(
             // BasicStageConfigurationTest files
-            "apex-demo/src/test/java/dev/mars/apex/demo/scenario/BasicStageConfigurationTest.yaml",
-            "apex-demo/src/test/java/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-scenario.yaml",
-            "apex-demo/src/test/java/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-validation-rules.yaml",
-            "apex-demo/src/test/java/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-enrichment-rules.yaml",
-            "apex-demo/src/test/java/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-failing-registry.yaml",
-            "apex-demo/src/test/java/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-failing-scenario.yaml",
-            "apex-demo/src/test/java/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-failing-validation-rules.yaml",
+            "apex-demo/src/test/resources/dev/mars/apex/demo/scenario/BasicStageConfigurationTest.yaml",
+            "apex-demo/src/test/resources/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-scenario.yaml",
+            "apex-demo/src/test/resources/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-validation-rules.yaml",
+            "apex-demo/src/test/resources/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-enrichment-rules.yaml",
+            "apex-demo/src/test/resources/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-failing-registry.yaml",
+            "apex-demo/src/test/resources/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-failing-scenario.yaml",
+            "apex-demo/src/test/resources/dev/mars/apex/demo/scenario/BasicStageConfigurationTest-failing-validation-rules.yaml",
             
             // InputDataClassificationPhase1Test files
-            "apex-demo/src/test/java/dev/mars/apex/demo/scenario/InputDataClassificationPhase1Test.yaml",
-            "apex-demo/src/test/java/dev/mars/apex/demo/scenario/InputDataClassificationPhase1Test-scenario.yaml",
-            "apex-demo/src/test/java/dev/mars/apex/demo/scenario/InputDataClassificationPhase1Test-validation-rules.yaml",
-            "apex-demo/src/test/java/dev/mars/apex/demo/scenario/InputDataClassificationPhase1Test-enrichment-rules.yaml",
+            "apex-demo/src/test/resources/dev/mars/apex/demo/scenario/InputDataClassificationPhase1Test.yaml",
+            "apex-demo/src/test/resources/dev/mars/apex/demo/scenario/InputDataClassificationPhase1Test-scenario.yaml",
+            "apex-demo/src/test/resources/dev/mars/apex/demo/scenario/InputDataClassificationPhase1Test-validation-rules.yaml",
+            "apex-demo/src/test/resources/dev/mars/apex/demo/scenario/InputDataClassificationPhase1Test-enrichment-rules.yaml",
             
             // ValidationFailureScenarioTest files
-            "apex-demo/src/test/java/dev/mars/apex/demo/scenario/ValidationFailureScenarioTest.yaml",
-            "apex-demo/src/test/java/dev/mars/apex/demo/scenario/ValidationFailureScenarioTest-scenario.yaml",
-            "apex-demo/src/test/java/dev/mars/apex/demo/scenario/ValidationFailureScenarioTest-validation-rules.yaml",
-            "apex-demo/src/test/java/dev/mars/apex/demo/scenario/ValidationFailureScenarioTest-enrichment-rules.yaml"
+            "apex-demo/src/test/resources/dev/mars/apex/demo/scenario/ValidationFailureScenarioTest.yaml",
+            "apex-demo/src/test/resources/dev/mars/apex/demo/scenario/ValidationFailureScenarioTest-scenario.yaml",
+            "apex-demo/src/test/resources/dev/mars/apex/demo/scenario/ValidationFailureScenarioTest-validation-rules.yaml",
+            "apex-demo/src/test/resources/dev/mars/apex/demo/scenario/ValidationFailureScenarioTest-enrichment-rules.yaml"
         );
         
         int validCount = 0;

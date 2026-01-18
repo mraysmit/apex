@@ -1,0 +1,75 @@
+name: "Test 5: Numbered Suffixes Basic"
+description: "Tests that enrichments-1, enrichments-2, enrichments-3 are merged and executed in document order"
+
+# First batch of enrichments
+enrichments-1:
+  - id: "batch1-item1"
+    name: "Batch 1 Item 1"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('batch1-item1', 'value1')"
+      result-field: "value1"
+    field-mappings:
+      - source-field: "value1"
+        target-field: "value1"
+    enabled: true
+
+  - id: "batch1-item2"
+    name: "Batch 1 Item 2"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('batch1-item2', 'value2')"
+      result-field: "value2"
+    field-mappings:
+      - source-field: "value2"
+        target-field: "value2"
+    enabled: true
+
+# Second batch of enrichments
+enrichments-2:
+  - id: "batch2-item1"
+    name: "Batch 2 Item 1"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('batch2-item1', 'value3')"
+      result-field: "value3"
+    field-mappings:
+      - source-field: "value3"
+        target-field: "value3"
+    enabled: true
+
+  - id: "batch2-item2"
+    name: "Batch 2 Item 2"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('batch2-item2', 'value4')"
+      result-field: "value4"
+    field-mappings:
+      - source-field: "value4"
+        target-field: "value4"
+    enabled: true
+
+# Third batch of enrichments
+enrichments-3:
+  - id: "batch3-item1"
+    name: "Batch 3 Item 1"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('batch3-item1', 'value5')"
+      result-field: "value5"
+    field-mappings:
+      - source-field: "value5"
+        target-field: "value5"
+    enabled: true
+
+  - id: "batch3-item2"
+    name: "Batch 3 Item 2"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('batch3-item2', 'value6')"
+      result-field: "value6"
+    field-mappings:
+      - source-field: "value6"
+        target-field: "value6"
+    enabled: true
+

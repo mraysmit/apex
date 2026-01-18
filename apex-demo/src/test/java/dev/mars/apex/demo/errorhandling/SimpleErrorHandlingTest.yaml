@@ -1,0 +1,63 @@
+# ============================================================================
+# APEX ERROR HANDLING DEMONSTRATION: SIMPLE ERROR HANDLING TEST CONFIGURATION
+# ============================================================================
+#
+# PURPOSE:
+# This configuration is used by SimpleErrorHandlingTest.java to demonstrate
+# basic APEX error handling capabilities. It provides simple enrichment rules
+# that can handle both valid and invalid data scenarios.
+#
+# TEST SCENARIOS SUPPORTED:
+# 1. Valid data scenario - data contains valid 'amount' field
+# 2. Invalid data scenario - data contains invalid or missing 'amount' field
+# 3. Null data scenario - data is null or empty
+#
+# HOW IT WORKS:
+# The enrichment uses a conditional expression to check if the 'amount' field
+# is present and valid. Based on this check, it sets a status field that
+# indicates whether the data passed validation.
+#
+# ENRICHMENT LOGIC:
+# - If amount exists and > 0: status = "VALID"
+# - If amount is null or <= 0: status = "INVALID"
+# - The status field is then mapped to the output
+#
+# ERROR HANDLING APPROACH:
+# This configuration demonstrates graceful error handling by:
+# - Using conditional expressions that don't throw exceptions
+# - Providing meaningful status indicators for different data states
+# - Allowing processing to continue even with invalid data
+#
+# USED BY:
+# SimpleErrorHandlingTest.java - demonstrates basic error handling patterns
+#
+metadata:
+  id: "simple-error-handling"
+  name: "Simple Error Handling Demo"
+  version: "1.0.0"
+  description: "Simple demonstration of APEX error handling with conditional validation"
+  type: "enrichment-config"
+
+# ENRICHMENT RULES:
+# Simple validation enrichment that handles various data scenarios gracefully
+enrichments:
+
+  # ========================================================================
+  # ENRICHMENT 1: CONDITIONAL VALIDATION (HANDLES ERRORS GRACEFULLY)
+  # ========================================================================
+  # This enrichment demonstrates error-resistant processing by using
+  # conditional expressions that handle missing or invalid data gracefully
+  - id: "simple-validation"
+    name: "Simple Validation"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "true"  # Always execute this enrichment
+    description: "This enrichment demonstrates error-resistant processing using conditional expressions to avoid null pointer exceptions, handles missing 'amount' field gracefully, provides meaningful status indicators for different scenarios, and shows how to build resilient APEX processing rules."
+    calculation-config:
+      # Conditional expression that handles null/missing amount gracefully
+      # Uses ternary operator to avoid exceptions when amount is missing
+      expression: "(#amount != null && #amount > 0) ? 'VALID' : 'INVALID'"
+      result-field: "amount-validation-result"  # Creates a status field with validation result
+    field-mappings:
+      - source-field: "amount-validation-result"
+        target-field: "status"  # Maps status to output

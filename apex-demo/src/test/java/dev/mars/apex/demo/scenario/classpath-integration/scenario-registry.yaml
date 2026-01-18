@@ -1,0 +1,35 @@
+# Scenario Registry for Classpath Integration Tests
+# Demonstrates unified resource loading from classpath
+# Part of the Unified Resource Loading for APEX Configuration implementation
+
+metadata:
+  id: "classpath-integration-registry"
+  name: "Classpath Integration Test Registry"
+  description: "Registry for testing classpath-based scenario loading with components and rules"
+  type: "scenario-registry"
+  version: "1.0.0"
+  created-by: "APEX Test Team"
+
+scenarios:
+  - scenario-id: "otc-option-validation"
+    config-file: "scenarios/otc-option-scenario.yaml"
+    business-domain: "OTC Derivatives"
+    classification: "option-trade"
+    enabled: true
+    description: "OTC Option trade validation and enrichment scenario from classpath"
+
+  - scenario-id: "simple-trade-validation"
+    config-file: "scenarios/simple-trade-scenario.yaml"
+    business-domain: "Trading"
+    classification: "simple-trade"
+    enabled: true
+    description: "Simple trade validation scenario for basic classpath tests"
+
+routing:
+  strategy: "classification-based"
+  default-scenario: "simple-trade-validation"
+  classification-rules:
+    - pattern: ".*option.*"
+      scenario-id: "otc-option-validation"
+    - pattern: ".*trade.*"
+      scenario-id: "simple-trade-validation"

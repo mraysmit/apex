@@ -1,0 +1,70 @@
+# ============================================================================
+# APEX Trade Validation Rules for ComponentScenarioTest
+# ============================================================================
+# Validation rules for component scenario testing
+# Business rule conditions are fixed - they detect specific cases
+# ============================================================================
+
+metadata:
+  id: "component-test-validation-rules"
+  name: "Component Test Validation Rules"
+  version: "1.0.0"
+  description: "Validation rules for component scenario testing"
+  type: "rule-config"
+  author: "APEX Demo"
+
+# Error recovery configuration
+# These rules detect MISSING fields (condition = TRUE when field is missing)
+# With valid data, conditions return FALSE, so we need recovery enabled
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+
+  severity-policies:
+    ERROR:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
+
+# Trade validation rules
+rules:
+  - id: "trade-id-required"
+    name: "Trade ID Required"
+    description: "Detect when trade ID is missing or empty"
+    condition: "['tradeId'] == null || ['tradeId'].toString().isEmpty()"
+    message: "Trade ID is required and cannot be empty"
+    severity: "INFO"
+    enabled: true
+
+  - id: "amount-positive"
+    name: "Amount Positive"
+    description: "Detect when amount is missing or not positive"
+    condition: "['amount'] == null || T(java.lang.Double).parseDouble(['amount'].toString()) <= 0"
+    message: "Amount must be positive"
+    severity: "INFO"
+    enabled: true
+
+  - id: "currency-required"
+    name: "Currency Required"
+    description: "Detect when currency is missing or empty"
+    condition: "['currency'] == null || ['currency'].toString().isEmpty()"
+    message: "Currency is required"
+    severity: "INFO"
+    enabled: true
+
+  - id: "counterparty-required"
+    name: "Counterparty Required"
+    description: "Detect when counterparty is missing or empty"
+    condition: "['counterparty'] == null || ['counterparty'].toString().isEmpty()"
+    message: "Counterparty is required"
+    severity: "INFO"
+    enabled: true
+
+  - id: "trade-type-required"
+    name: "Trade Type Required"
+    description: "Detect when trade type is missing or empty"
+    condition: "['tradeType'] == null || ['tradeType'].toString().isEmpty()"
+    message: "Trade type is required"
+    severity: "INFO"
+    enabled: true
+

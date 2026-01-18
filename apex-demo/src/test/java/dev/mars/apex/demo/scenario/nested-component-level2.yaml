@@ -1,0 +1,25 @@
+# Nested Component - Level 2
+# Component referenced by level 1 component
+
+metadata:
+  id: "nested-component-level2"
+  name: "Nested Component Level 2"
+  version: "1.0.0"
+  description: "Second-level nested component"
+  type: "component"
+  business-domain: "testing"
+  owner: "APEX Demo Team"
+  criticality: "medium"
+  sla-ms: 200
+  tags:
+    - testing
+    - nesting
+    - level2
+  documentation-url: "https://apex-docs.example.com/components/nested-level2"
+
+# Configuration files
+config-files:
+  - file: "dev/mars/apex/demo/scenario/ComponentScenarioTest-enrichment-config.yaml"
+    execution-order: 1
+    failure-policy: "continue-with-warnings"
+

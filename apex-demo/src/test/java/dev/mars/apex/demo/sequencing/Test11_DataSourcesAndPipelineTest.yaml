@@ -1,0 +1,47 @@
+name: "Test 11: Data Sources and Pipeline Section Order"
+description: "Test that data-sources and pipeline sections appear in sectionOrder (section-level, not item-level)"
+
+# Test Case: Verify section-level sections (data-sources, pipeline) are tracked in sectionOrder
+# These sections don't have items in itemOrder, but should appear in sectionOrder
+
+# Section 1: data-sources (should be in sectionOrder)
+data-sources:
+  - id: "test-datasource"
+    name: "Test Data Source"
+    type: "inline"
+    connection-config:
+      type: "cache"
+    enabled: true
+
+# Section 2: enrichments (should be in both sectionOrder and itemOrder)
+enrichments:
+  - id: "enrich-1"
+    name: "First Enrichment"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('enrich-1', 'E1')"
+      target-field: "result1"
+    enabled: true
+
+# Section 3: pipeline (should be in sectionOrder, NOT in itemOrder - it's a single object)
+pipeline:
+  name: "Test Pipeline"
+  description: "Test pipeline configuration"
+  enabled: true
+
+# Section 4: rules (should be in both sectionOrder and itemOrder)
+rules:
+  - id: "rule-1"
+    name: "First Rule"
+    condition: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('rule-1', true)"
+    message: "Rule 1 executed"
+    severity: "INFO"
+    enabled: true
+
+# Section 5: data-sinks (should be in sectionOrder)
+data-sinks:
+  - id: "test-sink"
+    name: "Test Data Sink"
+    type: "console"
+    enabled: true
+

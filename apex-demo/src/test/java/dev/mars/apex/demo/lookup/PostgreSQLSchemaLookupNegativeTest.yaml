@@ -1,0 +1,92 @@
+# PostgreSQL Schema Lookup Negative Test Configuration
+# Tests error handling when schema is incorrect or missing
+#
+# This YAML is used to test:
+# 1. Wrong schema name (table doesn't exist in that schema)
+# 2. Nonexistent schema
+# 3. No schema specified (defaults to public)
+# 4. Correct schema (control test)
+#
+# NOTE: The schema is updated programmatically in the test class
+# The query does NOT include schema prefix - relies on connection schema config
+
+metadata:
+  id: "postgresql-schema-negative-test"
+  name: "PostgreSQL Schema Lookup Negative Test"
+  version: "1.0"
+  description: "Tests error handling for invalid/missing schema configurations"
+
+# Data source with placeholder schema (updated by test)
+data-sources:
+  - name: "test-database"
+    type: "database"
+    source-type: "postgresql"
+    enabled: true
+    description: "PostgreSQL database for negative schema testing"
+
+    connection:
+      host: "localhost"
+      port: 5432
+      database: "apex_schema_negative_test"
+      username: "apex_user"
+      password: "apex_pass"
+      schema: "myschema"  # Default - test will override this
+
+    # Query defined as key-value map (not array)
+    queries:
+      getCustomerById: |
+        SELECT
+          customer_name,
+          customer_type,
+          tier,
+          region,
+          status
+        FROM customers
+        WHERE customer_id = :customerId
+
+    parameterNames:
+      - "customerId"
+
+# Enrichment using dynamic schema lookup
+enrichments:
+  - id: "customer-lookup"
+    name: "Customer Lookup (Schema Test)"
+    type: "lookup-enrichment"
+    description: "Lookup customer details from database using dynamic schema"
+    enabled: true
+
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "test-database"
+        query: "SELECT customer_name, customer_type, tier, region, status FROM customers WHERE customer_id = :customerId"
+        parameters:
+          - field: "customerId"
+            type: "string"
+
+    field-mappings:
+      - source-field: "customer_name"
+        target-field: "customerName"
+        required: true
+      - source-field: "customer_type"
+        target-field: "customerType"
+        required: true
+      - source-field: "tier"
+        target-field: "customerTier"
+        required: true
+      - source-field: "region"
+        target-field: "customerRegion"
+        required: false
+      - source-field: "status"
+        target-field: "customerStatus"
+        required: false
+
+# Simple validation rule
+rules:
+  - id: "validate-customer"
+    name: "Customer Validation Rule"
+    description: "Validate customer was enriched"
+    condition: "#customerName != null"
+    message: "Customer lookup successful"
+    severity: "INFO"

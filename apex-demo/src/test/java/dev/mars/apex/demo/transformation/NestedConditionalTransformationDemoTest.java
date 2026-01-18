@@ -35,7 +35,7 @@ public class NestedConditionalTransformationDemoTest {
     @Test
     public void testDeeplyNestedTransformation() throws Exception {
         // Load the configuration
-        String filePath = "src/test/resources/dev/mars/apex/demo/transformation/NestedConditionalTransformationTest.yaml";
+        String filePath = "src/test/java/dev/mars/apex/demo/transformation/NestedConditionalTransformationTest.yaml";
         File configFile = new File(filePath);
         String absolutePath = configFile.getAbsolutePath();
         
@@ -83,7 +83,7 @@ public class NestedConditionalTransformationDemoTest {
     @Test
     public void testNestedTransformationPartialMatch() throws Exception {
         // Load the configuration
-        String filePath = "src/test/resources/dev/mars/apex/demo/transformation/NestedConditionalTransformationTest.yaml";
+        String filePath = "src/test/java/dev/mars/apex/demo/transformation/NestedConditionalTransformationTest.yaml";
         File configFile = new File(filePath);
         String absolutePath = configFile.getAbsolutePath();
         

@@ -17,6 +17,7 @@
 metadata:
   id: "rules-engine-pipeline-full-test"
   name: "RulesEngine Pipeline Integration - Full Document Order"
+  description: "Tests complete document order with pipeline, enrichments, and rules"
   type: "rule-config"
   version: "1.0"
   author: "APEX Core Team"

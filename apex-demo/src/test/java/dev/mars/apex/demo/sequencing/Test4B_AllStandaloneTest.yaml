@@ -1,0 +1,46 @@
+name: "Test 4B - All Standalone Enrichments"
+description: "Proves when NO groups exist, ALL enrichments execute at their definition positions"
+
+enrichments:
+  - id: "standalone-1"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('standalone-1', 'value1')"
+      result-field: "field1"
+    field-mappings:
+      - source-field: "field1"
+        target-field: "field1"
+    enabled: true
+
+  - id: "standalone-2"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('standalone-2', 'value2')"
+      result-field: "field2"
+    field-mappings:
+      - source-field: "field2"
+        target-field: "field2"
+    enabled: true
+
+  - id: "standalone-3"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('standalone-3', 'value3')"
+      result-field: "field3"
+    field-mappings:
+      - source-field: "field3"
+        target-field: "field3"
+    enabled: true
+
+  - id: "standalone-4"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('standalone-4', 'value4')"
+      result-field: "field4"
+    field-mappings:
+      - source-field: "field4"
+        target-field: "field4"
+    enabled: true
+
+# NO enrichment-groups section - all enrichments should execute at definition position
+

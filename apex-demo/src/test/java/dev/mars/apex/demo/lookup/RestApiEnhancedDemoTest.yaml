@@ -1,0 +1,265 @@
+# REST API Enhanced Demo Test Configuration
+# Demonstrates advanced REST API integration patterns using APEX enrichments
+
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: RestApiEnhancedDemoTest.java (Converted to YAML First approach)
+# Purpose: Simulated REST API lookup demonstration using APEX lookup
+#          enrichments with inline data that represents REST API responses
+# Status: ACTIVE - Converted from direct HTTP client to YAML First approach
+# ============================================================================
+
+metadata:
+  id: "rest-api-enhanced-demo"
+  name: "REST API Enhanced Demo"
+  version: "2.0.0"
+  description: "Advanced REST API integration using APEX enrichments"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+
+# Data source configuration for enhanced REST API integration
+data-sources:
+  - name: "enhanced-rest-api-server"
+    type: "rest-api"
+    enabled: true
+    description: "Enhanced HTTP server for advanced REST API testing"
+    
+    connection:
+      base-url: "http://localhost:${PORT}"  # Will be updated dynamically by test
+      timeout: 10000
+      max-retries: 3
+      retry-delay-ms: 1000
+    
+    endpoints:
+      currency-lookup: "/api/currency/{key}"
+      market-data-lookup: "/api/market/{key}"
+      metrics-lookup: "/api/metrics"
+      health-check: "/api/health"
+      batch-processing: "/api/batch"
+    
+    cache:
+      enabled: true
+      ttlSeconds: 600        # ✅ 10 minutes TTL
+      maxIdleSeconds: 300    # ✅ 5 minutes max idle time
+      maxSize: 1000          # ✅ Max 1000 entries (LRU eviction)
+      keyPrefix: "enhanced"  # ✅ Cache key prefix
+
+# Enhanced enrichment configurations
+enrichments:
+  - id: "enhanced-currency-rate-enrichment"
+    name: "Enhanced Currency Rate Lookup"
+    type: "lookup-enrichment"
+    description: "Advanced currency exchange rate lookup using REST API"
+    enabled: true
+    
+    # Condition: Only enrich if currency code is present
+    condition: "#currencyCode != null && #currencyCode != ''"
+    
+    # Lookup configuration
+    lookup-config:
+      lookup-key: "#currencyCode"
+      lookup-dataset:
+        type: "rest-api"
+        data-source-ref: "enhanced-rest-api-server"
+        operation-ref: "currency-lookup"
+    
+    # Field mappings from API response to enriched data
+    field-mappings:
+      - source-field: "name"
+        target-field: "currencyName"
+        required: true
+      - source-field: "symbol"
+        target-field: "currencySymbol"
+        required: false
+      - source-field: "rate"
+        target-field: "exchangeRate"
+        required: true
+      - source-field: "lastUpdated"
+        target-field: "rateTimestamp"
+        required: false
+
+  - id: "enhanced-market-data-enrichment"
+    name: "Enhanced Market Data Lookup"
+    type: "lookup-enrichment"
+    description: "Advanced market data lookup using REST API"
+    enabled: true
+    
+    # Condition: Only enrich if symbol is present
+    condition: "#symbol != null && #symbol != ''"
+    
+    # Lookup configuration
+    lookup-config:
+      lookup-key: "#symbol"
+      lookup-dataset:
+        type: "rest-api"
+        data-source-ref: "enhanced-rest-api-server"
+        operation-ref: "market-data-lookup"
+    
+    # Field mappings from API response to enriched data
+    field-mappings:
+      - source-field: "companyName"
+        target-field: "companyName"
+        required: true
+      - source-field: "currentPrice"
+        target-field: "currentPrice"
+        required: true
+      - source-field: "marketCap"
+        target-field: "marketCap"
+        required: false
+      - source-field: "volume"
+        target-field: "volume"
+        required: false
+      - source-field: "lastUpdated"
+        target-field: "marketDataTimestamp"
+        required: false
+
+  - id: "enhanced-metrics-enrichment"
+    name: "Enhanced Metrics Collection"
+    type: "lookup-enrichment"
+    description: "Advanced metrics collection using REST API"
+    enabled: true
+    
+    # Condition: Only enrich if metrics request is present
+    condition: "#metricsRequest != null && #metricsRequest == true"
+    
+    # Lookup configuration
+    lookup-config:
+      lookup-key: "'metrics'"  # Use literal string for static endpoints
+      lookup-dataset:
+        type: "rest-api"
+        data-source-ref: "enhanced-rest-api-server"
+        operation-ref: "metrics-lookup"
+    
+    # Field mappings from API response to enriched data
+    field-mappings:
+      - source-field: "totalRequests"
+        target-field: "totalRequests"
+        required: true
+      - source-field: "averageResponseTime"
+        target-field: "averageResponseTime"
+        required: true
+      - source-field: "uptime"
+        target-field: "uptime"
+        required: false
+      - source-field: "memoryUsage"
+        target-field: "memoryUsage"
+        required: false
+      - source-field: "cpuUsage"
+        target-field: "cpuUsage"
+        required: false
+
+  - id: "enhanced-health-check-enrichment"
+    name: "Enhanced Health Check"
+    type: "lookup-enrichment"
+    description: "Advanced health check using REST API"
+    enabled: true
+    
+    # Condition: Only enrich if health check is requested
+    condition: "#healthCheck != null && #healthCheck == true"
+    
+    # Lookup configuration
+    lookup-config:
+      lookup-key: "'health'"  # Use literal string for static endpoints
+      lookup-dataset:
+        type: "rest-api"
+        data-source-ref: "enhanced-rest-api-server"
+        operation-ref: "health-check"
+    
+    # Field mappings from API response to enriched data
+    field-mappings:
+      - source-field: "status"
+        target-field: "status"
+        required: true
+      - source-field: "timestamp"
+        target-field: "timestamp"
+        required: false
+      - source-field: "service"
+        target-field: "service"
+        required: false
+      - source-field: "version"
+        target-field: "version"
+        required: false
+
+  - id: "enhanced-batch-processing-enrichment"
+    name: "Enhanced Batch Processing"
+    type: "lookup-enrichment"
+    description: "Advanced batch processing using REST API"
+    enabled: true
+    
+    # Condition: Only enrich if batch request is present
+    condition: "#batchRequest != null && #batchRequest == true"
+    
+    # Lookup configuration
+    lookup-config:
+      lookup-key: "'batch'"  # Use literal string for static endpoints
+      lookup-dataset:
+        type: "rest-api"
+        data-source-ref: "enhanced-rest-api-server"
+        operation-ref: "batch-processing"
+    
+    # Field mappings from API response to enriched data
+    field-mappings:
+      - source-field: "processedCount"
+        target-field: "processedCount"
+        required: true
+      - source-field: "processingTime"
+        target-field: "processingTime"
+        required: true
+      - source-field: "batchStatus"
+        target-field: "batchStatus"
+        required: true
+      - source-field: "batchId"
+        target-field: "batchId"
+        required: false
+
+# Processing configuration
+processing:
+  parallel-execution: true
+  fail-fast: false
+  max-execution-time-ms: 30000
+  
+  # Error handling
+  error-handling:
+    strategy: "continue-on-error"
+    max-retries: 3
+    retry-delay-ms: 1000
+    
+  # Logging configuration
+  logging:
+    level: "INFO"
+    log-enrichment-results: true
+    log-performance-metrics: true
+
+# Validation rules
+validation:
+  required-fields:
+    - "requestId"
+  
+  field-constraints:
+    currencyCode:
+      type: "string"
+      min-length: 3
+      max-length: 3
+      pattern: "[A-Z]{3}"
+    
+    symbol:
+      type: "string"
+      min-length: 1
+      max-length: 10
+      pattern: "[A-Z]+"
+    
+    batchSize:
+      type: "number"
+      min-value: 1
+      max-value: 100
+
+# Performance benchmarks
+performance:
+  target-response-time-ms: 2000
+  max-response-time-ms: 10000
+  target-throughput-rps: 50
+  
+  # Memory constraints
+  max-memory-usage-mb: 100
+  max-cache-size-entries: 1000

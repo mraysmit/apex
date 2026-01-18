@@ -4,7 +4,9 @@
 metadata:
   id: "test-schema-diff-case-insensitive"
   name: "Schema Diff - Case-Insensitive Test"
+  description: "Tests case-insensitive column name matching"
   version: "1.0"
+  author: "APEX Test Team"
   type: "pipeline-config"
 
 data-sources:

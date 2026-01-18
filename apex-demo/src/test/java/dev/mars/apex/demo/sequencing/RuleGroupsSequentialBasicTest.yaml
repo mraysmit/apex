@@ -1,0 +1,42 @@
+metadata:
+  name: "Rule Groups Sequential Basic"
+  version: "1.0.0"
+  description: "Test rule-groups executing in document order"
+
+enrichments:
+  - id: "enrich-customer-tier"
+    name: "Enrich Customer Tier"
+    type: "lookup-enrichment"
+    condition: "#customerId != null"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "customerId"
+        data:
+          - customerId: "CUST001"
+            tier: "GOLD"
+          - customerId: "CUST002"
+            tier: "SILVER"
+          - customerId: "CUST003"
+            tier: "BRONZE"
+    field-mappings:
+      - source-field: "tier"
+        target-field: "customerTier"
+
+rules:
+  - id: "validate-tier-exists"
+    name: "Validate Tier Exists"
+    condition: "#customerTier == null"
+    message: "Customer tier must be enriched"
+    severity: "ERROR"
+    priority: 1
+
+rule-groups:
+  - id: "tier-validation-group"
+    name: "Tier Validation Group"
+    description: "Validates customer tier is enriched"
+    operator: "AND"
+    rule-ids:
+      - "validate-tier-exists"
+

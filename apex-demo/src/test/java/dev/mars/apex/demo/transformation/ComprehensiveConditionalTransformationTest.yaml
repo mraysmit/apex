@@ -1,0 +1,80 @@
+metadata:
+  type: "transformation-config"
+  description: "Comprehensive test configuration for conditional transformations"
+
+transformations:
+  - id: "priority-check"
+    type: "conditional-transformation"
+    transformation-rules:
+      - condition: "true"
+        actions:
+          - type: "set-field"
+            field: "priorityResult"
+            value: "legacy"
+        actions-true:
+          - type: "set-field"
+            field: "priorityResult"
+            value: "modern"
+
+  - id: "legacy-fallback"
+    type: "conditional-transformation"
+    transformation-rules:
+      - condition: "true"
+        actions:
+          - type: "set-field"
+            field: "fallbackResult"
+            value: "legacy"
+
+  - id: "false-path-check"
+    type: "conditional-transformation"
+    transformation-rules:
+      - condition: "false"
+        actions-true:
+          - type: "set-field"
+            field: "falsePathResult"
+            value: "wrong"
+        actions-false:
+          - type: "set-field"
+            field: "falsePathResult"
+            value: "correct-false-path"
+
+  - id: "sibling-rules"
+    type: "conditional-transformation"
+    transformation-rules:
+      - condition: "#root['type'] == 'A'"
+        actions-true:
+          - type: "set-field"
+            field: "mark"
+            value: "A"
+      - condition: "#root['value'] > 10"
+        actions-true:
+          - type: "set-field"
+            field: "size"
+            value: "big"
+
+  - id: "complex-nesting-paths"
+    type: "conditional-transformation"
+    transformation-rules:
+      - condition: "#root['l1'] == true"
+        actions-true:
+          - type: "set-field"
+            field: "l1_executed"
+            value: true
+          - type: "conditional-transformation"
+            transformation-rules:
+              - condition: "#root['l2'] == true"
+                actions-true:
+                  - type: "set-field"
+                    field: "l2_result"
+                    value: "true-path"
+                actions-false:
+                  - type: "set-field"
+                    field: "l2_result"
+                    value: "false-path"
+                  - type: "conditional-transformation"
+                    transformation-rules:
+                      - condition: "true"
+                        actions-true:
+                          - type: "set-field"
+                            field: "l2_false_nested"
+                            value: "executed"

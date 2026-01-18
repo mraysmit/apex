@@ -1,0 +1,119 @@
+# ULTIMATE COMPLEXITY TEST: All Section Types Sequential Processing
+#
+# This YAML file contains ALL 8 section types to test the most complex scenario:
+# 1. enrichment-refs (loads external enrichments)
+# 2. enrichments (inline enrichments)
+# 3. enrichment-refs (loads external enrichment groups)
+# 4. enrichment-groups (inline enrichment groups)
+# 5. rule-refs (loads external rules)
+# 6. rules (inline rules)
+# 7. rule-refs (loads external rule groups)
+# 8. rule-groups (inline rule groups)
+#
+# Expected Processing Order:
+# E1-ref → E2-ref → E3-inline → EG1-ref → EG2-ref → EG3-inline → R1-ref → R2-ref → R3-inline → RG1-ref → RG2-ref → RG3-inline
+
+metadata:
+  name: "All Section Types Sequential Test"
+  description: "Ultimate complexity test with all 8 section types"
+  version: "1.0"
+
+# Error recovery configuration
+# Rules detect INVALID data (condition = TRUE when data is invalid)
+# With valid data, conditions return FALSE, so we need recovery enabled
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+
+  severity-policies:
+    ERROR:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
+
+# PHASE 1: Load external enrichments (E1, E2) and enrichment groups (EG1, EG2)
+enrichment-refs:
+  - name: "external-enrichments"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/external-enrichments-otc.yaml"
+  - name: "external-enrichment-groups"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/external-enrichment-groups-otc.yaml"
+
+# PHASE 2: Inline enrichments (E3, E4)
+enrichments:
+  - id: "enrich-counterparty-data"
+    name: "Enrich Counterparty Data"
+    type: "lookup-enrichment"
+    condition: "#counterparty != null"
+    lookup-config:
+      lookup-key: "#counterparty"
+      lookup-dataset:
+        type: "inline"
+        key-field: "counterparty"
+        data:
+          - counterparty: "HEDGE_FUND_X"
+            counterpartyRating: "A+"
+            creditLimit: 500000000
+          - counterparty: "BANK_Y"
+            counterpartyRating: "AA"
+            creditLimit: 1000000000
+          - counterparty: "CORP_Z"
+            counterpartyRating: "BBB"
+            creditLimit: 200000000
+    field-mappings:
+      - source-field: "counterpartyRating"
+        target-field: "counterpartyRating"
+      - source-field: "creditLimit"
+        target-field: "creditLimit"
+    enabled: true
+
+  - id: "enrich-product-category"
+    name: "Enrich Product Category"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "optionType"
+        target-field: "productCategory"
+        expression: "#value == 'CALL' ? 'EQUITY_CALL_OPTION' : 'EQUITY_PUT_OPTION'"
+
+# PHASE 3: Inline enrichment group (EG3) - references enrichment defined above
+enrichment-groups:
+  - id: "product-enrichment-group"
+    name: "Product Enrichment Group"
+    description: "Enriches product-specific data"
+    operator: "AND"
+    stop-on-first-failure: false
+    enrichment-ids:
+      - "enrich-product-category"
+
+# PHASE 4: Load external rules (R1, R2) and rule groups (RG1, RG2)
+rule-refs:
+  - name: "external-rules"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/external-rules-otc.yaml"
+  - name: "external-rule-groups"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/external-rule-groups-otc.yaml"
+
+# PHASE 5: Inline rules (R3, R4)
+rules:
+  - id: "validate-product-type"
+    name: "Validate Product Type"
+    condition: "#optionType == null || (#optionType != 'CALL' && #optionType != 'PUT')"
+    message: "Product type must be CALL or PUT"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "validate-all-enrichments-complete"
+    name: "Validate All Enrichments Complete"
+    condition: "#currentSpotPrice != null && #optionDelta != null && #counterpartyRating != null && #impliedVolatility != null && #valueAtRisk != null && #productCategory != null"
+    message: "All enrichments completed successfully"
+    severity: "INFO"
+    enabled: true
+
+# PHASE 6: Inline rule group (RG3) - references rule defined above
+rule-groups:
+  - id: "final-validation-group"
+    name: "Final Validation Group"
+    description: "Final validation checks after all processing"
+    execution-mode: "sequential"
+    stop-on-first-failure: false
+    rule-ids:
+      - "validate-all-enrichments-complete"
+

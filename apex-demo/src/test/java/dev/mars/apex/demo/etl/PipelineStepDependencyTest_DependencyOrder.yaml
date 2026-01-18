@@ -1,0 +1,85 @@
+# ============================================================================
+# Pipeline Step Dependency Test - Dependency Order Validation
+# ============================================================================
+# Tests that steps execute in correct topological order based on dependencies
+# Dependency graph: step-a → step-b → step-c, step-a → step-d
+# Expected execution order: step-a, then step-b and step-d (in any order), then step-c
+# ============================================================================
+
+metadata:
+  id: "dependency-order-test"
+  name: "Dependency Order Test"
+  version: "1.0.0"
+  description: "Test pipeline for validating step execution order based on dependencies"
+  type: "pipeline-config"
+  author: "APEX Demo Team"
+  tags: ["test", "dependency", "order"]
+
+pipeline:
+  name: "dependency-order-pipeline"
+  description: "Pipeline with complex dependency chain for order validation"
+
+  steps:
+    # Step A: No dependencies - should execute first
+    - name: "step-a"
+      type: "extract"
+      source: "test-source"
+      operation: "getAllData"
+      description: "Extract step with no dependencies"
+
+    # Step B: Depends on step-a - should execute after step-a
+    - name: "step-b"
+      type: "extract"
+      source: "test-source"
+      operation: "getAllData"
+      description: "Extract step depending on step-a"
+      depends-on: ["step-a"]
+
+    # Step C: Depends on step-b - should execute after step-b
+    - name: "step-c"
+      type: "load"
+      sink: "test-sink"
+      operation: "write"
+      description: "Load step depending on step-b"
+      depends-on: ["step-b"]
+
+    # Step D: Depends on step-a - should execute after step-a (parallel with step-b)
+    - name: "step-d"
+      type: "load"
+      sink: "test-sink"
+      operation: "write"
+      description: "Load step depending on step-a"
+      depends-on: ["step-a"]
+
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+    max-retries: 0
+    retry-delay-ms: 0
+
+data-sources:
+  - name: "test-source"
+    type: "file-system"
+    enabled: true
+    description: "Test data source for dependency testing"
+    
+    connection:
+      base-path: "./demo-data/dependency-test/csv"
+      file-pattern: "test-data.csv"
+    
+    operations:
+      getAllData: "SELECT * FROM csv"
+
+data-sinks:
+  - name: "test-sink"
+    type: "file-system"
+    enabled: true
+    description: "Test data sink for dependency testing"
+    
+    connection:
+      base-path: "./demo-data/dependency-test/output"
+      file-pattern: "output.json"
+    
+    operations:
+      write: "write"
+

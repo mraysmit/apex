@@ -4,7 +4,9 @@
 metadata:
   id: "test-schema-diff-type-mappings"
   name: "Schema Diff - Type Mappings Test"
+  description: "Tests type mapping for SQL Server to PostgreSQL migration"
   version: "1.0"
+  author: "APEX Test Team"
   type: "pipeline-config"
 
 data-sources:

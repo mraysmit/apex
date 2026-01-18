@@ -1,0 +1,88 @@
+# ============================================================================
+# Pipeline Transform Step Test - Error Handling
+# ============================================================================
+# Tests that transformation errors are handled gracefully
+# Data contains invalid values that will cause transformation errors
+# Pipeline should handle errors without crashing
+# ============================================================================
+
+metadata:
+  id: "transform-error-handling-test"
+  name: "Transform Error Handling Test"
+  version: "1.0.0"
+  description: "Test pipeline for validating transformation error handling"
+  type: "pipeline-config"
+  author: "APEX Demo Team"
+  tags: ["test", "transform", "error-handling"]
+
+pipeline:
+  name: "error-handling-pipeline"
+  description: "Pipeline with transformation error handling"
+
+  steps:
+    # Step 1: Extract data (includes invalid data)
+    - name: "extract-data"
+      type: "extract"
+      source: "error-source"
+      operation: "getAllData"
+      description: "Extract data with potential errors"
+
+    # Step 2: Transform with error handling
+    - name: "transform-with-errors"
+      type: "transform"
+      description: "Transform data with graceful error handling"
+      depends-on: ["extract-data"]
+      optional: true
+      transformations:
+        - name: "calculate-numeric-value"
+          type: "calculation"
+          field: "calculated_value"
+          expression: "#value * 2"
+          error-handling: "skip-record"
+        
+        - name: "validate-status"
+          type: "validation"
+          field: "status"
+          rule: "required"
+          error-handling: "skip-record"
+
+    # Step 3: Load data (only valid records)
+    - name: "load-valid-data"
+      type: "load"
+      sink: "transform-sink"
+      operation: "write"
+      description: "Load successfully transformed data"
+      depends-on: ["extract-data"]
+
+  execution:
+    mode: "sequential"
+    error-handling: "continue-on-error"
+    max-retries: 0
+    retry-delay-ms: 0
+
+data-sources:
+  - name: "error-source"
+    type: "file-system"
+    enabled: true
+    description: "Source data with potential errors"
+    
+    connection:
+      base-path: "./demo-data/transform-test/csv"
+      file-pattern: "error-data.csv"
+    
+    operations:
+      getAllData: "SELECT * FROM csv"
+
+data-sinks:
+  - name: "transform-sink"
+    type: "file-system"
+    enabled: true
+    description: "Sink for valid transformed data"
+    
+    connection:
+      base-path: "./demo-data/transform-test/output"
+      file-pattern: "error-handled-output.json"
+    
+    operations:
+      write: "write"
+

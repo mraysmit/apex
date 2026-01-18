@@ -1,0 +1,50 @@
+name: "Condition Evaluation Logging Test"
+description: "Test configuration to verify that OR/AND/General condition evaluation failures are logged at SEVERE level"
+
+# These enrichments have intentionally invalid conditions to trigger different types of condition evaluation failures
+enrichments:
+  - id: "or-condition-test"
+    type: "calculation-enrichment"
+    # This will trigger OR condition evaluation failures
+    condition: "#invalidField.someMethod() || #anotherInvalidField.isValid()"
+    target-field: "orResult"
+    field-mappings:
+      - source-field: "customerId"
+        target-field: "orResult"
+        calculation: "'OR Test: ' + #customerId"
+    
+  - id: "and-condition-test"
+    type: "calculation-enrichment"
+    # This will trigger AND condition evaluation failures
+    condition: "#customerId != null && #customerId.invalidMethod() && #amount.isPositive()"
+    target-field: "andResult"
+    field-mappings:
+      - source-field: "amount"
+        target-field: "andResult"
+        calculation: "'AND Test: ' + #amount"
+        
+  - id: "general-condition-test"
+    type: "calculation-enrichment"
+    # This will trigger general condition evaluation failures
+    condition: "#nonExistentObject.performComplexOperation(#customerId, #amount)"
+    target-field: "generalResult"
+    field-mappings:
+      - source-field: "customerId"
+        target-field: "generalResult"
+        calculation: "'General Test: ' + #customerId"
+
+  - id: "complex-invalid-condition"
+    type: "calculation-enrichment"
+    # Complex invalid condition that should trigger SEVERE logging
+    condition: "#customerId.toUpperCase().contains('INVALID') && #amount.multiply(#rate).isGreaterThan(1000)"
+    target-field: "complexResult"
+    field-mappings:
+      - source-field: "customerId"
+        target-field: "complexResult"
+        calculation: "'Complex: ' + #customerId"
+
+# Add some valid rules for context
+rules:
+  - id: "basic-validation"
+    name: "basic-validation"
+    condition: "#customerId != null && #amount != null"

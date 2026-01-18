@@ -1,0 +1,44 @@
+﻿metadata:
+  id: "minimal-sequential-processing-test"
+  name: "Minimal Sequential Processing Test"
+  version: "1.0.0"
+  description: "Demonstrates sequential processing where rule depends on enrichment result"
+  type: "rule-config"
+  author: "APEX Demo Team"
+  created: "2025-10-30"
+  business-domain: "demo"
+  tags: ["sequential", "minimal", "demo"]
+  processing-mode: "sequential"
+
+# ENRICHMENT FIRST: Add customer tier data
+enrichments:
+  - id: "customer-tier-lookup"
+    name: "Customer Tier Lookup"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#customerId != null"
+    
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "customerId"
+        data:
+          - customerId: "CUST001"
+            tier: "GOLD"
+          - customerId: "CUST002"
+            tier: "SILVER"
+    
+    field-mappings:
+      - source-field: "tier"
+        target-field: "customerTier"
+        required: true
+
+# RULE SECOND: Check if enrichment result exists
+rules:
+  - id: "tier-validation-rule"
+    name: "Customer Tier Validation"
+    description: "Validates that customer tier was successfully enriched"
+    condition: "#customerTier != null"
+    message: "Customer tier successfully enriched: #{#customerTier}"
+    severity: "INFO"

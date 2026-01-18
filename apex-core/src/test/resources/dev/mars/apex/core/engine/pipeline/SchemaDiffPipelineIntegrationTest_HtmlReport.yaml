@@ -1,5 +1,8 @@
 metadata:
+  id: "test-schema-diff-html-report"
   name: "Schema Diff with HTML Report"
+  type: "pipeline-config"
+  author: "APEX Test Team"
   description: "Test schema-diff with HTML report generation"
   version: "2.1"
 

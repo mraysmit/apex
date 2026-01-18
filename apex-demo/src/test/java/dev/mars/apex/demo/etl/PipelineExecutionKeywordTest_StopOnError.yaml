@@ -1,0 +1,69 @@
+# APEX ETL Pipeline - Stop-On-Error Test
+# Tests that pipeline stops when a step fails with stop-on-error mode
+
+metadata:
+  id: "pipeline-execution-stop-on-error-test"
+  name: "Stop On Error Test"
+  version: "1.0.0"
+  description: "Test stop-on-error behavior when step fails"
+  type: "pipeline-config"
+
+pipeline:
+  name: "stop-on-error-pipeline"
+  description: "Pipeline that should stop on first error"
+
+  steps:
+    - name: "step-1-extract-valid"
+      type: "extract"
+      source: "valid-source"
+      operation: "getData"
+      description: "First step - should succeed"
+
+    - name: "step-2-load-invalid"
+      type: "load"
+      sink: "nonexistent-sink"
+      operation: "writeData"
+      description: "Second step - should fail (sink not found)"
+
+    - name: "step-3-load"
+      type: "load"
+      sink: "test-sink"
+      operation: "writeData"
+      description: "Third step - should not execute"
+
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+    max-retries: 0
+    retry-delay-ms: 0
+
+data-sources:
+  - name: "valid-source"
+    type: "file-system"
+    enabled: true
+    connection:
+      base-path: "./target/demo/etl/execution-tests"
+      file-pattern: "sample.csv"
+    operations:
+      getData: "SELECT * FROM csv"
+
+data-sinks:
+  - name: "test-sink"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+    connection:
+      database: "./target/demo/etl/execution-tests/output/stop_on_error_db"
+      username: "sa"
+      password: ""
+    schema:
+      auto-create: true
+      init-script: |
+        CREATE TABLE IF NOT EXISTS test_data (
+          id INTEGER PRIMARY KEY,
+          name VARCHAR(255),
+          val INTEGER
+        );
+    operations:
+      writeData: "INSERT INTO test_data (id, name, val) VALUES (:column_1, :column_2, :column_3)"
+

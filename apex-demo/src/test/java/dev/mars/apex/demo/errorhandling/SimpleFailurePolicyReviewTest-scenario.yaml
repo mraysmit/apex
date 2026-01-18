@@ -1,0 +1,52 @@
+# ============================================================================
+# APEX FAILURE POLICY DEMONSTRATION: FLAG-FOR-REVIEW SCENARIO CONFIGURATION
+# ============================================================================
+#
+# PURPOSE:
+# This scenario configuration demonstrates flag-for-review failure policy behavior.
+# It shows how processing continues when stages fail but the scenario gets flagged
+# for manual review instead of terminating or just continuing with warnings.
+#
+metadata:
+  id: "flag-for-review-test-scenario"
+  name: "Flag For Review Test Scenario"
+  version: "1.0.0"
+  description: "Scenario for testing flag-for-review failure policy behavior"
+  type: "scenario"
+
+# SCENARIO CONFIGURATION:
+# This scenario has multiple stages where failures trigger review flags
+scenario:
+  scenario-id: "flag-for-review-test"
+  name: "Flag For Review Failure Policy Test"
+  description: "Tests flag-for-review policy where failures flag scenario for manual review"
+
+  data-types:
+    - "HashMap"
+    - "java.util.Map"
+
+  # STAGE DEFINITIONS:
+  # Stage 1: Validation (will fail and flag for review)
+  # Stage 2: Enrichment (should execute despite validation failure)
+  processing-stages:
+    - stage-name: "validation"
+      config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyReviewTest-validation.yaml"
+      execution-order: 1
+      failure-policy: "flag-for-review"
+      required: true
+      stage-metadata:
+        description: "Validation stage that flags scenario for review when validation fails"
+        expected-behavior: "FAIL - missing required fields cause validation failure and review flag"
+      
+    - stage-name: "enrichment"
+      config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyReviewTest-enrichment.yaml"
+      execution-order: 2
+      failure-policy: "continue-with-warnings"
+      required: false
+      stage-metadata:
+        description: "Enrichment stage that should execute despite validation failures"
+        expected-behavior: "SUCCESS - enrichment continues despite review flags from validation"
+
+# ============================================================================
+# END OF FLAG-FOR-REVIEW SCENARIO CONFIGURATION
+# ============================================================================

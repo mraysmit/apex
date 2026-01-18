@@ -62,7 +62,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * <p>TEST RESOURCES:</p>
  * This test uses resources located at:
  * <pre>
- * src/test/resources/dev/mars/apex/demo/scenario/classpath-integration/
+ * src/test/java/dev/mars/apex/demo/scenario/classpath-integration/
  *   ├── scenario-registry.yaml
  *   └── scenarios/
  *       ├── otc-option-scenario.yaml

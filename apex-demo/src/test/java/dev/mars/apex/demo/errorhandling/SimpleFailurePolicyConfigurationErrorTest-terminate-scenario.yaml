@@ -1,0 +1,40 @@
+# ============================================================================
+# APEX CONFIGURATION ERROR HANDLING TEST SCENARIO - TERMINATE POLICY
+# ============================================================================
+
+metadata:
+  id: "config-error-terminate-scenario"
+  name: "Configuration Error Terminate Test Scenario"
+  version: "1.0.0"
+  description: "Test scenario with terminate policy for configuration error handling"
+  type: "scenario"
+
+scenario:
+  scenario-id: "config-error-terminate-test"
+  name: "Configuration Error Terminate Test Scenario"
+  description: "Tests that configuration errors with terminate policy are handled gracefully"
+
+  data-types:
+    - "HashMap"
+    - "java.util.Map"
+
+  processing-stages:
+    # Stage 1: Enrichment with configuration error and terminate policy
+    - stage-name: "enrichment"
+      config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyConfigurationErrorTest-enrichment.yaml"
+      execution-order: 1
+      failure-policy: "terminate"
+      required: true
+      stage-metadata:
+        description: "Enrichment stage with configuration error - should terminate gracefully"
+        expected-behavior: "FAIL and TERMINATE - but no exception should be thrown"
+
+    # Stage 2: This should be skipped due to termination
+    - stage-name: "validation"
+      config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyConfigurationErrorTest-validation.yaml"
+      execution-order: 2
+      failure-policy: "terminate"
+      required: false
+      stage-metadata:
+        description: "This stage should be skipped due to previous termination"
+        expected-behavior: "SKIPPED - due to previous stage termination"

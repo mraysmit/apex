@@ -1,0 +1,46 @@
+metadata:
+  name: "Validate Then Enrich Pattern"
+  type: "rule-config"
+  description: "Demonstrates validate-then-enrich business pattern"
+
+# STEP 1: Validate input data first
+rules:
+  - id: "validate-customer-id"
+    name: "Validate Customer ID"
+    condition: "#customerId != null"
+    message: "Customer ID is valid format"
+    severity: "INFO"
+    priority: 10
+
+  - id: "validate-request-type"
+    name: "Validate Request Type"
+    condition: "#requestType != null"
+    message: "Request type is valid"
+    severity: "INFO"
+    priority: 20
+
+# STEP 2: Enrich only after validation passes
+enrichments:
+  - id: "enrich-validated-customer"
+    name: "Enrich Validated Customer"
+    type: "lookup-enrichment"
+    condition: "#customerId != null"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "customerId"
+        data:
+          - customerId: "CUST001"
+            customerName: "John Doe"
+    field-mappings:
+      - source-field: "customerName"
+        target-field: "customerData"
+
+data-sources:
+  - name: "customer-db"
+    type: "cache"
+    data:
+      - customerId: "CUST001"
+        customerName: "John Doe"
+

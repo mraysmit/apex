@@ -1,0 +1,17 @@
+metadata:
+  name: "External Enrichments 1 for Edge Case Test 6"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "External enrichments for numbered suffixes test"
+
+enrichments:
+  - id: "external-1-item-1"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "'value-from-external-1'"
+      result-field: "result1"
+    field-mappings:
+      - source-field: "result1"
+        target-field: "result1"
+    enabled: true
+

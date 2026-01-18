@@ -4,12 +4,16 @@ metadata:
   version: "1.0.0"
   description: "Scenario for testing concurrent execution"
   type: "scenario"
-  author: "APEX Test Suite"
+  business-domain: "Testing"
+  owner: "APEX Test Suite"
 
 scenario:
   scenario-id: "concurrent-test-scenario"
   name: "Concurrent Test Scenario"
   description: "Tests concurrent scenario execution with multiple threads"
+  
+  data-types:
+    - "java.util.Map"
   
   classification-rule:
     condition: "#type == 'OTC'"

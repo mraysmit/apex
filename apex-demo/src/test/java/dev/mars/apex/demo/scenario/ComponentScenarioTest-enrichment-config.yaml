@@ -1,0 +1,41 @@
+# ============================================================================
+# APEX Trade Enrichment Rules for ComponentScenarioTest
+# ============================================================================
+# Enrichment rules for component scenario testing
+# Adds computed fields to trade data
+# ============================================================================
+
+metadata:
+  id: "component-test-enrichment-rules"
+  name: "Component Test Enrichment Rules"
+  version: "1.0.0"
+  description: "Enrichment rules for component scenario testing"
+  type: "rule-config"
+  author: "APEX Demo"
+
+# Trade enrichment rules
+enrichments:
+  - id: "calculate-trade-value"
+    name: "Calculate Trade Value"
+    description: "Calculate total trade value from amount"
+    type: "calculation-enrichment"
+    condition: "#amount != null"
+    calculation-config:
+      expression: "#amount"
+      result-field: "tradeValue"
+    field-mappings:
+      - source-field: "tradeValue"
+        target-field: "tradeValue"
+
+  - id: "determine-risk-category"
+    name: "Determine Risk Category"
+    description: "Categorize trade by amount (HIGH if > 500000, otherwise LOW)"
+    type: "calculation-enrichment"
+    condition: "#amount != null"
+    calculation-config:
+      expression: "T(java.lang.Double).parseDouble(#amount.toString()) > 500000 ? 'HIGH' : 'LOW'"
+      result-field: "riskCategory"
+    field-mappings:
+      - source-field: "riskCategory"
+        target-field: "riskCategory"
+

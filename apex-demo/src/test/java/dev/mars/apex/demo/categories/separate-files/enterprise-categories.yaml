@@ -1,0 +1,122 @@
+# Enterprise Category Definitions
+# Demonstrates comprehensive category definitions for enterprise scenarios
+
+metadata:
+  id: "enterprise-categories"
+  name: "Enterprise Categories"
+  version: "1.0.0"
+  description: "Enterprise-level category definitions"
+  type: "category-config"
+  author: "APEX Demo"
+
+categories:
+  - name: "credit-risk"
+    description: "Credit risk assessment and management"
+    priority: 5
+    enabled: true
+    business-domain: "Risk Management"
+    business-owner: "Chief Risk Officer"
+    created-by: "Risk Team"
+    stop-on-first-failure: true
+    parallel-execution: false
+
+  - name: "market-risk"
+    description: "Market risk evaluation"
+    priority: 10
+    enabled: true
+    business-domain: "Risk Management"
+    business-owner: "Chief Risk Officer"
+    created-by: "Risk Team"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+  - name: "operational-risk"
+    description: "Operational risk controls"
+    priority: 15
+    enabled: true
+    business-domain: "Risk Management"
+    business-owner: "Chief Risk Officer"
+    created-by: "Risk Team"
+    stop-on-first-failure: false
+    parallel-execution: false
+
+  - name: "compliance-validation"
+    description: "Regulatory compliance validation"
+    priority: 5
+    enabled: true
+    business-domain: "Compliance"
+    business-owner: "Compliance Officer"
+    created-by: "Compliance Team"
+    stop-on-first-failure: true
+    parallel-execution: false
+
+  - name: "data-quality"
+    description: "Data quality validation"
+    priority: 20
+    enabled: true
+    business-domain: "Data Management"
+    business-owner: "Data Governance Officer"
+    created-by: "Data Team"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+  - name: "trade-validation"
+    description: "Trade validation rules"
+    priority: 10
+    enabled: true
+    business-domain: "Trading"
+    business-owner: "Head of Trading"
+    created-by: "Trading Team"
+    stop-on-first-failure: true
+    parallel-execution: false
+
+  - name: "settlement-processing"
+    description: "Settlement processing rules"
+    priority: 15
+    enabled: true
+    business-domain: "Operations"
+    business-owner: "Operations Manager"
+    created-by: "Operations Team"
+    stop-on-first-failure: false
+    parallel-execution: true
+
+  - name: "client-onboarding"
+    description: "Client onboarding validation"
+    priority: 10
+    enabled: true
+    business-domain: "Client Services"
+    business-owner: "Client Services Manager"
+    created-by: "Client Services Team"
+    stop-on-first-failure: true
+    parallel-execution: false
+
+  - name: "reporting-controls"
+    description: "Reporting and disclosure controls"
+    priority: 20
+    enabled: true
+    business-domain: "Finance"
+    business-owner: "CFO"
+    created-by: "Finance Team"
+    stop-on-first-failure: false
+    parallel-execution: false
+
+  - name: "fraud-detection"
+    description: "Fraud detection and prevention"
+    priority: 5
+    enabled: true
+    business-domain: "Security"
+    business-owner: "Chief Security Officer"
+    created-by: "Security Team"
+    stop-on-first-failure: true
+    parallel-execution: true
+
+  - name: "audit-trail"
+    description: "Audit trail and logging"
+    priority: 25
+    enabled: true
+    business-domain: "Audit"
+    business-owner: "Chief Audit Executive"
+    created-by: "Audit Team"
+    stop-on-first-failure: false
+    parallel-execution: false
+

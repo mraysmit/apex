@@ -1,0 +1,247 @@
+# Custom Schema Enrichment Test Configuration
+# Demonstrates APEX's ability to use dynamic schema configuration
+#
+# KEY FEATURE: Schema is configured in the data-source connection settings,
+# NOT hardcoded in SQL queries. This enables clean separation between
+# business logic (queries) and infrastructure configuration (schema names).
+#
+# Usage:
+#   connection:
+#     schema: "trading"  <-- Schema set HERE
+#   
+#   query: "SELECT * FROM products ..."  <-- No schema prefix needed!
+
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: CustomSchemaEnrichmentTest.java
+# Purpose: Demonstrate database enrichment with dynamic schema configuration
+# Status: ACTIVE - Integrated with custom schema enrichment tests
+# ============================================================================
+
+metadata:
+  id: "custom-schema-enrichment-demo"
+  name: "Custom Schema Enrichment Demo"
+  version: "1.0.0"
+  description: "Demonstrates dynamic schema configuration for database enrichments"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+  created: "2025-01-14"
+  tags: ["apex-demo", "enrichment", "custom-schema", "postgresql", "database"]
+
+# ============================================================================
+# DATA SOURCE CONFIGURATION
+# ============================================================================
+# The schema is configured here in the connection settings.
+# Queries below do NOT need schema prefixes - they reference tables directly.
+# APEX uses PostgreSQL's currentSchema JDBC parameter to set the search_path.
+
+data-sources:
+  - name: "trading-database"
+    type: "database"
+    source-type: "postgresql"
+    enabled: true
+    description: "Trading database with custom schema configuration"
+
+    connection:
+      # Connection details (updated dynamically by test)
+      database: "apex_trading_test"
+      username: "apex_user"
+      password: "apex_pass"
+      host: "localhost"
+      port: 5432
+      # DYNAMIC SCHEMA CONFIGURATION
+      # This sets PostgreSQL search_path via JDBC currentSchema parameter
+      schema: "trading"
+
+    # Query definitions - NO SCHEMA PREFIX NEEDED!
+    # The schema is applied automatically from the connection configuration above
+    queries:
+      getProduct: |
+        SELECT 
+          product_name,
+          product_type,
+          asset_class,
+          currency,
+          min_trade_size,
+          max_trade_size
+        FROM products
+        WHERE product_id = :productId
+      
+      getCounterparty: |
+        SELECT 
+          counterparty_name,
+          lei_code,
+          credit_rating,
+          country_code,
+          is_active
+        FROM counterparties
+        WHERE counterparty_id = :counterpartyId
+      
+      getActiveProduct: |
+        SELECT 
+          product_name,
+          product_type,
+          asset_class,
+          min_trade_size,
+          max_trade_size
+        FROM active_products_view
+        WHERE product_id = :productId
+
+# ============================================================================
+# ENRICHMENT 1: Product Lookup
+# ============================================================================
+# Enriches trade data with product details from the products table.
+# Query references "products" table WITHOUT schema prefix.
+
+enrichments:
+  - id: "product-enrichment"
+    name: "Product Data Enrichment"
+    type: "lookup-enrichment"
+    description: "Enrich trade with product details from custom schema"
+    enabled: true
+    priority: 10
+
+    condition: "#productId != null && #productId != ''"
+
+    lookup-config:
+      lookup-key: "#productId"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "trading-database"
+        # Query WITHOUT schema prefix - schema comes from connection config!
+        query: |
+          SELECT 
+            product_name, 
+            product_type, 
+            asset_class, 
+            currency,
+            min_trade_size,
+            max_trade_size
+          FROM products
+          WHERE product_id = :productId
+        parameters:
+          - field: "productId"
+            type: "string"
+
+    field-mappings:
+      - source-field: "product_name"
+        target-field: "productName"
+        required: true
+      - source-field: "product_type"
+        target-field: "productType"
+        required: true
+      - source-field: "asset_class"
+        target-field: "assetClass"
+        required: true
+      - source-field: "currency"
+        target-field: "currency"
+        required: true
+      - source-field: "min_trade_size"
+        target-field: "minTradeSize"
+        required: false
+      - source-field: "max_trade_size"
+        target-field: "maxTradeSize"
+        required: false
+
+# ============================================================================
+# ENRICHMENT 2: Counterparty Lookup
+# ============================================================================
+# Enriches trade data with counterparty details.
+# Query references "counterparties" table WITHOUT schema prefix.
+
+  - id: "counterparty-enrichment"
+    name: "Counterparty Data Enrichment"
+    type: "lookup-enrichment"
+    description: "Enrich trade with counterparty details from custom schema"
+    enabled: true
+    priority: 20
+
+    condition: "#counterpartyId != null && #counterpartyId != ''"
+
+    lookup-config:
+      lookup-key: "#counterpartyId"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "trading-database"
+        # Query WITHOUT schema prefix
+        query: |
+          SELECT 
+            counterparty_name,
+            lei_code,
+            credit_rating,
+            country_code,
+            is_active
+          FROM counterparties
+          WHERE counterparty_id = :counterpartyId
+        parameters:
+          - field: "counterpartyId"
+            type: "string"
+
+    field-mappings:
+      - source-field: "counterparty_name"
+        target-field: "counterpartyName"
+        required: true
+      - source-field: "lei_code"
+        target-field: "leiCode"
+        required: false
+      - source-field: "credit_rating"
+        target-field: "creditRating"
+        required: false
+      - source-field: "country_code"
+        target-field: "countryCode"
+        required: true
+      - source-field: "is_active"
+        target-field: "counterpartyActive"
+        required: false
+
+# ============================================================================
+# ENRICHMENT 3: VIEW Lookup
+# ============================================================================
+# Demonstrates querying a VIEW in the custom schema.
+# Query references "active_products_view" WITHOUT schema prefix.
+
+  - id: "view-product-enrichment"
+    name: "Active Product VIEW Enrichment"
+    type: "lookup-enrichment"
+    description: "Enrich trade with product data from a VIEW in custom schema"
+    enabled: true
+    priority: 30
+
+    condition: "#productId != null && #productId != ''"
+
+    lookup-config:
+      lookup-key: "#productId"
+      lookup-dataset:
+        type: "database"
+        data-source-ref: "trading-database"
+        # Query the VIEW - no schema prefix needed!
+        query: |
+          SELECT 
+            product_name,
+            product_type,
+            asset_class,
+            min_trade_size,
+            max_trade_size
+          FROM active_products_view
+          WHERE product_id = :productId
+        parameters:
+          - field: "productId"
+            type: "string"
+
+    field-mappings:
+      - source-field: "product_name"
+        target-field: "viewProductName"
+        required: false
+      - source-field: "product_type"
+        target-field: "viewProductType"
+        required: false
+      - source-field: "asset_class"
+        target-field: "viewAssetClass"
+        required: false
+      - source-field: "min_trade_size"
+        target-field: "viewMinTradeSize"
+        required: false
+      - source-field: "max_trade_size"
+        target-field: "viewMaxTradeSize"
+        required: false

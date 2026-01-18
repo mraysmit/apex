@@ -1,0 +1,71 @@
+# ============================================================================
+# DESIGN FLAW DEMONSTRATION: Validate-Then-Enrich Pattern
+# ============================================================================
+# Developer Intent: Validate data FIRST, then enrich only valid records
+# Expected Flow: rules -> enrichments
+# APEX Reality: May process enrichments FIRST (depending on processor)
+# Result: Expensive enrichments run on invalid data
+# ============================================================================
+
+metadata:
+  id: "validate-then-enrich-demo"
+  name: "Validate Then Enrich Demo"
+  version: "1.0.0"
+  description: "Demonstrates broken validate-then-enrich pattern"
+  type: "rule-config"
+  author: "APEX Design Flaw Demo"
+
+# DEVELOPER INTENT: Process rules FIRST (validate data)
+rules:
+  - id: "validate-customer-id"
+    name: "Validate Customer ID"
+    description: "Ensure customer ID is present and valid"
+    condition: "#customerId != null && #customerId.length() > 0"
+    message: "Customer ID {{#customerId}} is valid"
+    severity: "INFO"
+    enabled: true
+
+  - id: "validate-amount"
+    name: "Validate Amount"
+    description: "Ensure amount is positive"
+    condition: "#amount != null && #amount > 0"
+    message: "Amount {{#amount}} is valid"
+    severity: "INFO"
+    enabled: true
+
+# DEVELOPER INTENT: Process enrichments SECOND (only for valid data)
+enrichments:
+  - id: "expensive-customer-lookup"
+    name: "Expensive Customer Lookup"
+    type: "lookup-enrichment"
+    description: "Expensive lookup - should only run for valid customers"
+    condition: "#ruleResults != null && #ruleResults.get('validate-customer-id').passed"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "customerId"
+        data:
+          - customerId: "CUST001"
+            customerName: "Valid Customer"
+            creditRating: "AAA"
+          - customerId: "CUST002"
+            customerName: "Another Customer"
+            creditRating: "BBB"
+    field-mappings:
+      - source-field: "customerName"
+        target-field: "customerName"
+      - source-field: "creditRating"
+        target-field: "creditRating"
+
+  - id: "calculate-fees"
+    name: "Calculate Transaction Fees"
+    type: "calculation-enrichment"
+    description: "Calculate fees - should only run for valid amounts"
+    condition: "#ruleResults != null && #ruleResults.get('validate-amount').passed"
+    calculation-config:
+      expression: "#amount * 0.025"
+      result-field: "transactionFee"
+    field-mappings:
+      - source-field: "transactionFee"
+        target-field: "transactionFee"

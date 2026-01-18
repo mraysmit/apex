@@ -1,0 +1,32 @@
+metadata:
+  name: "Test 3 External: Minimal Enrichment-Group"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "External file with ONE enrichment-group containing ONE lookup enrichment"
+
+# Enrichment-group that references the enrichment
+enrichment-groups:
+  - id: "minimal-group"
+    name: "Minimal Group"
+    operator: "AND"
+    enrichment-ids:
+      - "lookup-enrichment"
+
+# Enrichment definition (should be executed by the group)
+enrichments:
+  - id: "lookup-enrichment"
+    name: "Lookup Enrichment"
+    type: "lookup-enrichment"
+    lookup-config:
+      lookup-key: "#underlying"
+      lookup-dataset:
+        type: "inline"
+        key-field: "underlying"
+        data:
+          - underlying: "NDX"
+            spotPrice: 15000.0
+    field-mappings:
+      - source-field: "spotPrice"
+        target-field: "currentSpotPrice"
+    enabled: true
+

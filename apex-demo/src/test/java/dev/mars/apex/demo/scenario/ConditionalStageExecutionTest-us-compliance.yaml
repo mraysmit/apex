@@ -1,0 +1,39 @@
+# US Compliance Validation Rules
+# Used by ConditionalStageExecutionTest to demonstrate conditional stage execution
+# This stage only executes when condition: "#'region'] == 'US'" is true
+
+metadata:
+  id: "us-compliance-rules"
+  name: "US Compliance Validation"
+  description: "US-specific regulatory compliance checks for OTC options"
+  version: "1.0.0"
+  author: "Mark Andrew Ray-Smith Cityline Ltd"
+  created: "2024-11-13"
+
+type: "rule-config"
+
+rules:
+  - id: "us-dodd-frank-check"
+    name: "Dodd-Frank Compliance Check"
+    description: "Verify trade complies with Dodd-Frank regulations"
+    condition: "#'productType'] == 'OTC_OPTION'"
+    message: "Trade must comply with Dodd-Frank regulations for OTC derivatives"
+    enabled: true
+    priority: 1
+
+  - id: "us-cftc-reporting"
+    name: "CFTC Reporting Requirement"
+    description: "Ensure trade meets CFTC reporting requirements"
+    condition: "#'notionalAmount'] > 1000000"
+    message: "High-value OTC trades require CFTC reporting"
+    enabled: true
+    priority: 2
+
+  - id: "us-counterparty-check"
+    name: "US Counterparty Validation"
+    description: "Validate counterparty is authorized for US trades"
+    condition: "#'counterparty'] != null && #'counterparty'].length() > 0"
+    message: "Counterparty must be specified for US trades"
+    enabled: true
+    priority: 3
+

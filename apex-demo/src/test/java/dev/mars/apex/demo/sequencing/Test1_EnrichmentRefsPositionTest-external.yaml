@@ -1,0 +1,25 @@
+metadata:
+  name: "Test 1: External Enrichments"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "External enrichments referenced by test1-main.yaml"
+
+enrichments:
+  - id: "external-1"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('external-1', 'external-value-1')"
+      result-field: "externalValue1"
+    field-mappings:
+      - source-field: "externalValue1"
+        target-field: "externalValue1"
+
+  - id: "external-2"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('external-2', 'external-value-2')"
+      result-field: "externalValue2"
+    field-mappings:
+      - source-field: "externalValue2"
+        target-field: "externalValue2"
+

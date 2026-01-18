@@ -1,0 +1,89 @@
+# ============================================================================
+# Pipeline Transform Step Test - Transformation Rules Application
+# ============================================================================
+# Tests that transformation rules are applied correctly to data
+# Transformations: add timestamp, calculate derived field, validate format
+# ============================================================================
+
+metadata:
+  id: "transform-rules-test"
+  name: "Transform Rules Test"
+  version: "1.0.0"
+  description: "Test pipeline for validating transformation rules application"
+  type: "pipeline-config"
+  author: "APEX Demo Team"
+  tags: ["test", "transform", "rules"]
+
+pipeline:
+  name: "transform-rules-pipeline"
+  description: "Pipeline with transformation rules"
+
+  steps:
+    # Step 1: Extract data
+    - name: "extract-data"
+      type: "extract"
+      source: "transform-source"
+      operation: "getAllData"
+      description: "Extract data for transformation"
+
+    # Step 2: Apply transformation rules
+    - name: "transform-data"
+      type: "transform"
+      description: "Apply business transformations to data"
+      depends-on: ["extract-data"]
+      transformations:
+        - name: "add-processing-timestamp"
+          type: "field-addition"
+          field: "processed_at"
+          value: "CURRENT_TIMESTAMP"
+        
+        - name: "calculate-total-value"
+          type: "calculation"
+          field: "total_value"
+          expression: "#value * 1.1"
+        
+        - name: "validate-status"
+          type: "validation"
+          field: "status"
+          rule: "status-format"
+
+    # Step 3: Load transformed data
+    - name: "load-data"
+      type: "load"
+      sink: "transform-sink"
+      operation: "write"
+      description: "Load transformed data"
+      depends-on: ["transform-data"]
+
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+    max-retries: 0
+    retry-delay-ms: 0
+
+data-sources:
+  - name: "transform-source"
+    type: "file-system"
+    enabled: true
+    description: "Source data for transformation testing"
+    
+    connection:
+      base-path: "./demo-data/transform-test/csv"
+      file-pattern: "transform-data.csv"
+    
+    operations:
+      getAllData: "SELECT * FROM csv"
+
+data-sinks:
+  - name: "transform-sink"
+    type: "file-system"
+    enabled: true
+    description: "Sink for transformed data"
+    
+    connection:
+      base-path: "./demo-data/transform-test/output"
+      file-pattern: "transformed-output.json"
+    
+    operations:
+      write: "write"
+

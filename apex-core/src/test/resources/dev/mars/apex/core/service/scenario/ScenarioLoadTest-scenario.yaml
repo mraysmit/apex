@@ -4,12 +4,16 @@ metadata:
   version: "1.0.0"
   description: "Scenario for testing load processing"
   type: "scenario"
-  author: "APEX Test Suite"
+  business-domain: "Testing"
+  owner: "APEX Test Suite"
 
 scenario:
   scenario-id: "load-test-scenario"
   name: "Load Test Scenario"
   description: "Tests scenario execution under load"
+  
+  data-types:
+    - "java.util.Map"
   
   classification-rule:
     condition: "#type == 'OTC'"

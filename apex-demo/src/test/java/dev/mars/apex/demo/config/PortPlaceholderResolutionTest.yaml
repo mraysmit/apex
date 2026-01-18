@@ -1,0 +1,31 @@
+metadata:
+  name: "PORT Placeholder Resolution Test"
+  version: "1.0.0"
+  description: "Ultra simple test configuration for PORT placeholder resolution"
+
+# Simple REST API data source with PORT placeholder
+data-sources:
+  - name: "test-api"
+    type: "rest-api"
+    source-type: "rest-api"
+    enabled: true
+    description: "Test REST API with PORT placeholder"
+    
+    connection:
+      base-url: "http://localhost:${PORT}"
+      timeout: 5000
+    
+    endpoints:
+      health-check: "/api/health"
+
+# Simple enrichment that uses the data source
+enrichments:
+  - id: "test-enrichment"
+    name: "Test Enrichment"
+    type: "field-enrichment"
+    description: "Simple enrichment to test PORT resolution"
+    condition: "true"
+    
+    field-mappings:
+      - source-field: "testValue"
+        target-field: "enrichedValue"

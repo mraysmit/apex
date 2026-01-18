@@ -4,7 +4,9 @@
 metadata:
   id: "test-schema-diff-fail-on-incompatibility"
   name: "Schema Diff - Fail on Incompatibility Test"
+  description: "Tests fail-on-incompatibility parameter causes pipeline failure"
   version: "1.0"
+  author: "APEX Test Team"
   type: "pipeline-config"
 
 data-sources:

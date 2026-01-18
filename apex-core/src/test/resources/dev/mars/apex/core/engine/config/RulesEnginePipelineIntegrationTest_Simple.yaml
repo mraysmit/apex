@@ -19,6 +19,7 @@
 metadata:
   id: "rules-engine-pipeline-simple-test"
   name: "RulesEngine Pipeline Integration - Simple Extract"
+  description: "Validates basic pipeline execution through RulesEngine.evaluate() with inline data source"
   type: "pipeline-config"
   version: "1.0"
   author: "APEX Core Team"

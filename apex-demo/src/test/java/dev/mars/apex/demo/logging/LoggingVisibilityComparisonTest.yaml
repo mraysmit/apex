@@ -1,0 +1,69 @@
+name: "Logging Visibility Comparison Test"
+description: "Test configuration to demonstrate the dramatic improvement in logging visibility and user experience"
+
+# These enrichments demonstrate various types of configuration problems that now provide
+# clear visibility through SEVERE logging instead of being masked as warnings
+enrichments:
+  - id: "customer-lookup"
+    type: "calculation-enrichment"
+    # Configuration problem: References non-existent rule result structure
+    condition: "#ruleResults != null && #ruleResults.get('validate-customer').passed"
+    target-field: "customerDetails"
+    field-mappings:
+      - source-field: "customerId"
+        target-field: "customerDetails"
+        calculation: "'Customer: ' + #customerId"
+    
+  - id: "account-validation"
+    type: "calculation-enrichment"
+    # Configuration problem: References non-existent method
+    condition: "#accountId != null && #accountId.isValidFormat()"
+    target-field: "accountStatus"
+    field-mappings:
+      - source-field: "accountId"
+        target-field: "accountStatus"
+        calculation: "'Account: ' + #accountId"
+        
+  - id: "balance-check"
+    type: "calculation-enrichment"
+    # Configuration problem: References non-existent property
+    condition: "#balance != null && #balance.isPositive"
+    target-field: "balanceStatus"
+    field-mappings:
+      - source-field: "balance"
+        target-field: "balanceStatus"
+        calculation: "#balance > 0 ? 'POSITIVE' : 'NEGATIVE'"
+
+  - id: "transaction-enrichment"
+    type: "calculation-enrichment"
+    # Configuration problem: Complex invalid condition
+    condition: "#transactionId.toUpperCase().startsWith('TXN') && #amount.multiply(#rate).compareTo(1000) > 0"
+    target-field: "transactionCategory"
+    field-mappings:
+      - source-field: "transactionId"
+        target-field: "transactionCategory"
+        calculation: "'Transaction: ' + #transactionId"
+
+  - id: "risk-assessment"
+    type: "calculation-enrichment"
+    # Configuration problem: References non-existent service
+    condition: "#riskService.calculateRisk(#customerId, #amount) > 0.5"
+    target-field: "riskLevel"
+    field-mappings:
+      - source-field: "amount"
+        target-field: "riskLevel"
+        calculation: "#amount > 10000 ? 'HIGH' : 'LOW'"
+
+# Add some basic rules for context
+rules:
+  - id: "validate-customer"
+    name: "validate-customer"
+    condition: "#customerId != null && #customerId.length() > 0"
+    
+  - id: "validate-account"
+    name: "validate-account"
+    condition: "#accountId != null && #accountId.length() > 0"
+    
+  - id: "validate-balance"
+    name: "validate-balance"
+    condition: "#balance != null && #balance >= 0"

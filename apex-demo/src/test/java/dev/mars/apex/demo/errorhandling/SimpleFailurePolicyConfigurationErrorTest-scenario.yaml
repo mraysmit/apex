@@ -1,0 +1,40 @@
+# ============================================================================
+# APEX CONFIGURATION ERROR HANDLING TEST SCENARIO
+# ============================================================================
+
+metadata:
+  id: "config-error-test-scenario"
+  name: "Configuration Error Test Scenario"
+  version: "1.0.0"
+  description: "Multi-stage scenario testing configuration error handling with continue-with-warnings policy"
+  type: "scenario"
+
+scenario:
+  scenario-id: "config-error-continue-test"
+  name: "Configuration Error Test Scenario"
+  description: "Tests that configuration errors are handled gracefully without throwing exceptions"
+
+  data-types:
+    - "HashMap"
+    - "java.util.Map"
+
+  processing-stages:
+    # Stage 1: Validation (designed to fail due to missing fields)
+    - stage-name: "validation"
+      config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyConfigurationErrorTest-validation.yaml"
+      execution-order: 1
+      failure-policy: "continue-with-warnings"
+      required: true
+      stage-metadata:
+        description: "Validation stage - will fail due to missing required fields"
+        expected-behavior: "FAIL - but continue with warnings"
+
+    # Stage 2: Enrichment (designed to fail due to missing field-mappings in calculation-enrichment)
+    - stage-name: "enrichment"
+      config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyConfigurationErrorTest-enrichment.yaml"
+      execution-order: 2
+      failure-policy: "continue-with-warnings"
+      required: false
+      stage-metadata:
+        description: "Enrichment stage - will fail due to configuration error (missing field-mappings)"
+        expected-behavior: "FAIL - configuration error should be logged as warning, not thrown as exception"

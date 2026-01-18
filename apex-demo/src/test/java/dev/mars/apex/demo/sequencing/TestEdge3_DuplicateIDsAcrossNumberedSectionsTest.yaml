@@ -1,0 +1,47 @@
+name: "Edge Case Test 3 - Duplicate IDs Across Numbered Sections"
+description: "Tests that duplicate enrichment IDs across enrichments-1 and enrichments-2 are rejected"
+
+# This YAML should FAIL to load because "duplicate-id" appears in both enrichments-1 and enrichments-2
+
+enrichments-1:
+  - id: "duplicate-id"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "'value-from-section-1'"
+      result-field: "result1"
+    field-mappings:
+      - source-field: "result1"
+        target-field: "result1"
+    enabled: true
+
+  - id: "unique-id-1"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "'value-unique-1'"
+      result-field: "result2"
+    field-mappings:
+      - source-field: "result2"
+        target-field: "result2"
+    enabled: true
+
+enrichments-2:
+  - id: "duplicate-id"  # ❌ DUPLICATE! Same as in enrichments-1
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "'value-from-section-2'"
+      result-field: "result3"
+    field-mappings:
+      - source-field: "result3"
+        target-field: "result3"
+    enabled: true
+
+  - id: "unique-id-2"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "'value-unique-2'"
+      result-field: "result4"
+    field-mappings:
+      - source-field: "result4"
+        target-field: "result4"
+    enabled: true
+

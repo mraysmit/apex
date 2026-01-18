@@ -1,0 +1,85 @@
+metadata:
+  name: "Enrichment Group References Execution Order Test"
+  type: "rule-config"
+  version: "1.0.0"
+  processing-mode: "sequential"
+  description: |
+    Test to verify when enrichment-group-references should execute.
+    
+    YAML Structure:
+    - e1_eg: references enrichment e1
+    - e2_eg: references enrichment-group rbg1
+    - e3_eg: references enrichment e2
+    
+    QUESTION: When should rbg1 execute?
+    
+    Option A (Current Behavior - Flattening):
+    - rbg1's enrichments are COPIED into e2_eg during factory build
+    - Execution order: e1_eg(e1) → e2_eg(rbg1's enrichments) → e3_eg(e2)
+    - rbg1 never executes as a separate group
+    
+    Option B (Expected Behavior - Nested Execution):
+    - rbg1 should execute WHEN e2_eg references it
+    - Execution order: e1_eg(e1) → e2_eg → rbg1 → e3_eg(e2)
+    - rbg1 executes as a nested call from e2_eg
+
+enrichments:
+  - id: "e1"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('e1', 'value1')"
+      result-field: "result1"
+    field-mappings:
+      - source-field: "result1"
+        target-field: "result1"
+    enabled: true
+
+  - id: "e2"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('e2', 'value2')"
+      result-field: "result2"
+    field-mappings:
+      - source-field: "result2"
+        target-field: "result2"
+    enabled: true
+
+  - id: "rbg1_enrichment"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('rbg1_enrichment', 'rbg1_value')"
+      result-field: "rbg1Result"
+    field-mappings:
+      - source-field: "rbg1Result"
+        target-field: "rbg1Result"
+    enabled: true
+
+enrichment-groups:
+  - id: "rbg1"
+    name: "Referenced Group 1"
+    operator: "AND"
+    stop-on-first-failure: true
+    enrichment-ids:
+      - "rbg1_enrichment"
+
+  - id: "e1_eg"
+    name: "e1 enrichment group 1"
+    operator: "AND"
+    stop-on-first-failure: true
+    enrichment-ids:
+      - "e1"
+
+  - id: "e2_eg"
+    name: "e2 enrichment group 2"
+    operator: "AND"
+    stop-on-first-failure: true
+    enrichment-group-references:
+      - "rbg1"
+
+  - id: "e3_eg"
+    name: "e3 enrichment group 3"
+    operator: "AND"
+    stop-on-first-failure: true
+    enrichment-ids:
+      - "e2"
+

@@ -4,12 +4,16 @@ metadata:
   version: "1.0.0"
   description: "Scenario for testing memory usage"
   type: "scenario"
-  author: "APEX Test Suite"
+  business-domain: "Testing"
+  owner: "APEX Test Suite"
 
 scenario:
   scenario-id: "memory-profiling-test-scenario"
   name: "Memory Profiling Test Scenario"
   description: "Tests memory usage during repeated scenario execution"
+  
+  data-types:
+    - "java.util.Map"
   
   classification-rule:
     condition: "#type == 'OTC'"

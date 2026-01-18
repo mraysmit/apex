@@ -17,6 +17,7 @@
 metadata:
   id: "rules-engine-pipeline-init-failure-test"
   name: "RulesEngine Pipeline Integration - Init Failure"
+  description: "Validates graceful handling when data source initialization fails"
   type: "pipeline-config"
   version: "1.0"
   author: "APEX Core Team"

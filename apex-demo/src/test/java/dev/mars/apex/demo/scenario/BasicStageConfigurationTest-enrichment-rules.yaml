@@ -1,0 +1,59 @@
+# ============================================================================
+# APEX Enrichment Stage Configuration for BasicStageConfigurationTest
+# ============================================================================
+# PURPOSE:
+# This file provides the configuration for the "enrichment" STAGE in the
+# BasicStageConfigurationTest scenario. It uses validation rules (type: rule-config)
+# to SIMULATE enrichment processing for testing purposes.
+#
+# WHY VALIDATION RULES INSTEAD OF ACTUAL ENRICHMENT?
+# - Keeps the test simple and focused on stage-based execution
+# - Avoids complexity of real enrichment (external services, databases, calculations)
+# - Demonstrates stage dependency management and failure policies
+# - Real enrichment would use type: "enrichment" with enrichments: section
+#
+# WHAT THIS FILE DEMONSTRATES:
+# - Stage 2 of a multi-stage scenario (depends on validation stage)
+# - failure-policy: "continue-with-warnings" (processing continues even if this fails)
+# - Stage execution order and dependency management
+# ============================================================================
+
+metadata:
+  id: "trade-enrichment-stage-rules"
+  name: "Trade Enrichment Stage Rules"
+  version: "1.0.0"
+  description: "Validation rules that simulate enrichment stage for testing stage-based processing"
+  type: "rule-config"
+  author: "APEX Demo"
+
+# IMPORTANT: These are validation rules (not actual enrichment) used to simulate
+# the enrichment stage. They always pass (condition: "true") to demonstrate
+# successful stage execution. In production, this would be replaced with actual
+# enrichment configuration using type: "enrichment" and enrichments: section.
+rules:
+  - id: "processing-timestamp-check"
+    name: "Processing Timestamp Check"
+    description: "Verify trade has processing context (simulates enrichment)"
+    condition: "true"  # Always passes to simulate successful enrichment
+    severity: "INFO"
+    category: "enrichment"
+    message: "Trade processing timestamp verified"
+    enabled: true
+
+  - id: "trade-status-check"
+    name: "Trade Status Check"
+    description: "Verify trade status is processable (simulates enrichment)"
+    condition: "true"  # Always passes to simulate successful enrichment
+    severity: "INFO"
+    category: "enrichment"
+    message: "Trade status verified as processable"
+    enabled: true
+
+  - id: "market-determination-check"
+    name: "Market Determination Check"
+    description: "Verify market can be determined from currency (simulates enrichment)"
+    condition: "['currency'] != null"
+    severity: "INFO"
+    category: "enrichment"
+    message: "Market determination successful"
+    enabled: true

@@ -17,6 +17,7 @@
 metadata:
   id: "rules-engine-pipeline-enrichments-test"
   name: "RulesEngine Pipeline Integration - With Enrichments"
+  description: "Tests pipeline execution with enrichment processing"
   type: "rule-config"
   version: "1.0"
   author: "APEX Core Team"

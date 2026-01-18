@@ -1,0 +1,43 @@
+# ============================================================================
+# APEX FAILURE POLICY DEMONSTRATION: COMPLIANCE TEST VALIDATION RULES
+# ============================================================================
+#
+# PURPOSE:
+# These validation rules are designed to fail for test data that lacks
+# certain required fields. This demonstrates how compliance rules can
+# still execute even when validation fails.
+#
+metadata:
+  id: "compliance-validation-rules"
+  name: "Compliance Test Validation Rules"
+  version: "1.0.0"
+  description: "Validation rules that may fail to test compliance execution"
+  type: "validation-config"
+
+# VALIDATION RULES:
+# These rules check for required fields that may be missing in test data
+rules:
+  - id: "required-customer-id-check"
+    name: "Required Customer ID Check"
+    description: "Validates that customer ID is present and valid"
+    condition: "customerId != null && customerId.toString().length() > 0"
+    severity: "ERROR"
+    message: "Customer ID is required for all transactions"
+
+  - id: "required-account-number-check"
+    name: "Required Account Number Check"
+    description: "Validates that account number is present"
+    condition: "accountNumber != null && accountNumber.toString().length() > 0"
+    severity: "ERROR"
+    message: "Account number is required for transaction processing"
+
+  - id: "transaction-date-check"
+    name: "Transaction Date Check"
+    description: "Validates that transaction date is present and valid"
+    condition: "transactionDate != null"
+    severity: "WARNING"
+    message: "Transaction date must be specified"
+
+# ============================================================================
+# END OF COMPLIANCE VALIDATION RULES
+# ============================================================================

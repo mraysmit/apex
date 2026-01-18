@@ -1,0 +1,30 @@
+# ============================================================================
+# Cross-file base rule groups (defines base_validation)
+# ============================================================================
+metadata:
+  id: "cf-base-rule-groups"
+  name: "Cross-file Base Rule Groups"
+  version: "1.0.0"
+  type: "rule-config"
+
+rules:
+  - id: "age-validation"
+    name: "Age Validation"
+    description: "Validates customer age"
+    condition: "#age != null && #age >= 18"
+    message: "Customer must be at least 18 years old"
+    severity: "ERROR"
+    
+  - id: "email-validation"
+    name: "Email Validation"
+    description: "Validates email format"
+    condition: "#email != null && #email.contains('@')"
+    message: "Valid email address is required"
+    severity: "ERROR"
+
+rule-groups:
+  - id: base_validation
+    name: Base Validation (cross-file)
+    operator: AND
+    stop-on-first-failure: true
+    rule-ids: [ age-validation, email-validation ]

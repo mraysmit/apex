@@ -1,0 +1,28 @@
+metadata:
+  id: "simple-csv-datasource-demo"
+  name: "Simple CSV Data Source Demo"
+  version: "1.0.0"
+  type: "enrichment"
+
+# Simple CSV file data source example
+enrichments:
+  - id: "customer-lookup"
+    name: "Simple Customer Lookup"
+    type: "lookup-enrichment"
+    description: "Demonstrates the simplest possible CSV file data source"
+    condition: "#customerId != null"
+
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "csv-file"
+        key-field: "id"
+        file-path: "demo-data/csv/load-test-customers.csv"
+
+    field-mappings:
+      - source-field: "name"
+        target-field: "customerName"
+      - source-field: "email"
+        target-field: "customerEmail"
+      - source-field: "status"
+        target-field: "customerStatus"

@@ -1,0 +1,106 @@
+﻿# ==================================================================================
+# DECOUPLED ROUTING PATTERN TEST CONFIGURATION
+# ==================================================================================
+# This configuration demonstrates the "Decoupled Decision & Routing" pattern.
+#
+# Phase 1: The Decision (Enrichment)
+# Uses a conditional-mapping-enrichment to evaluate complex logic and determine
+# a "Route Code" (e.g., MANUAL_REVIEW, AUTO_APPROVE).
+#
+# Phase 2: The Execution (Router)
+# Uses a result-based-routing rule chain to simply read the "Route Code"
+# and execute the corresponding rules.
+# ==================================================================================
+metadata:
+  name: "Decoupled Routing Test"
+  description: "Verifies decoupled decision and routing pattern"
+  version: "1.0"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created: "2025-11-24"
+
+# Phase 1: The Decision
+enrichments:
+  - id: "determine-processing-path"
+    type: "conditional-mapping-enrichment"
+    target-field: "processingPath"
+    mapping-rules:
+      # Priority 1: High Risk Scenario
+      # If amount > 1M AND region is HighRisk AND not VIP -> MANUAL_REVIEW
+      - id: "high-risk-scenario"
+        priority: 1
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#amount > 1000000"
+            - condition: "#region == 'HighRisk'"
+            - condition: "#customerType != 'VIP'"
+        mapping:
+          type: "direct"
+          expression: "'MANUAL_REVIEW'"
+
+      # Priority 2: Auto Approve Scenario
+      # If (Score > 800 AND DTI < 0.3) OR (VIP AND Amount < 50k) -> AUTO_APPROVE
+      - id: "safe-auto-approve"
+        priority: 2
+        conditions:
+          operator: "OR"
+          rules:
+            - condition: "#score > 800 && #dti < 0.3"
+            - condition: "#customerType == 'VIP' && #amount < 50000"
+        mapping:
+          type: "direct"
+          expression: "'AUTO_APPROVE'"
+
+      # Default Path
+      - id: "default-path"
+        priority: 99
+        mapping:
+          type: "direct"
+          expression: "'STANDARD_PROCESS'"
+
+# Phase 2: The Execution
+rule-chains:
+  - id: "execute-processing-path"
+    name: "Execute Processing Path"
+    pattern: "result-based-routing"
+    configuration:
+      router-rule:
+        id: "route-dispatcher"
+        name: "Route Dispatcher"
+        condition: "#processingPath"
+        message: "Routing based on processing path"
+        severity: "INFO"
+      routes:
+        "MANUAL_REVIEW":
+          rules:
+            - id: "flag-for-review"
+              name: "Flag for Review"
+              condition: "true"
+              message: "Flagged for manual review"
+              severity: "WARNING"
+              result-field: "reviewRequired"
+            - id: "notify-supervisor"
+              name: "Notify Supervisor"
+              condition: "true"
+              message: "Supervisor notified"
+              severity: "INFO"
+              result-field: "supervisorNotified"
+
+        "AUTO_APPROVE":
+          rules:
+            - id: "approve-loan"
+              name: "Approve Loan"
+              condition: "true"
+              message: "Loan automatically approved"
+              severity: "INFO"
+              result-field: "loanApproved"
+
+        "STANDARD_PROCESS":
+          rules:
+            - id: "standard-validation"
+              name: "Standard Validation"
+              condition: "true"
+              message: "Standard validation applied"
+              severity: "INFO"
+              result-field: "standardValidationComplete"

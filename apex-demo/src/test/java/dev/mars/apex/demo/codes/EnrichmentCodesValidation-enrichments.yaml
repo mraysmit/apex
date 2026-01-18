@@ -1,0 +1,93 @@
+metadata:
+  id: "enrichment-codes-validation-enrichments"
+  name: "Enrichment Codes Validation"
+  version: "1.0.0"
+  description: "Enrichments demonstrating success-code and error-code features"
+  type: "rule-config"
+  author: "APEX Demo"
+
+enrichments:
+  # SUCCESS CASE: Enrichment with success code on match
+  - id: "enrich-success-code-on-match"
+    name: "Enrichment with Success Code on Match"
+    type: "field-enrichment"
+    condition: "#amount > 100"
+    description: "Enriches data when amount is valid, sets success code"
+    success-code: "ENRICHMENT_SUCCESS_AMOUNT_VALID"
+    field-mappings:
+      - source-field: "#amount"
+        target-field: "validated_amount"
+
+  # ERROR CASE: Enrichment with error code on no match
+  - id: "enrich-error-code-on-no-match"
+    name: "Enrichment with Error Code on No Match"
+    type: "field-enrichment"
+    condition: "#amount > 100"
+    description: "Sets error code when enrichment condition fails"
+    error-code: "ENRICHMENT_ERROR_AMOUNT_INVALID"
+    field-mappings:
+      - source-field: "#amount"
+        target-field: "validated_amount"
+
+  # MIXED CASE: Enrichment with both success and error codes
+  - id: "enrich-mixed-codes"
+    name: "Enrichment with Both Success and Error Codes"
+    type: "field-enrichment"
+    condition: "#amount > 100"
+    description: "Demonstrates both success and error codes in single enrichment"
+    success-code: "ENRICHMENT_SUCCESS_VALID"
+    error-code: "ENRICHMENT_ERROR_INVALID"
+    field-mappings:
+      - source-field: "#amount"
+        target-field: "validated_amount"
+
+  # SPEL SUCCESS CODE: Enrichment with SpEL expression success code
+  - id: "enrich-spel-success-code"
+    name: "Enrichment with SpEL Success Code"
+    type: "field-enrichment"
+    condition: "#amount > 100"
+    description: "Success code determined by SpEL expression"
+    success-code: "#amount > 1000 ? 'HIGH_VALUE_ENRICHED' : 'NORMAL_VALUE_ENRICHED'"
+    field-mappings:
+      - source-field: "#amount"
+        target-field: "validated_amount"
+
+  # SPEL ERROR CODE: Enrichment with SpEL expression error code
+  - id: "enrich-spel-error-code"
+    name: "Enrichment with SpEL Error Code"
+    type: "field-enrichment"
+    condition: "#amount > 100"
+    description: "Error code determined by SpEL expression"
+    error-code: "#amount < 50 ? 'CRITICAL_LOW_AMOUNT' : 'LOW_AMOUNT'"
+    field-mappings:
+      - source-field: "#amount"
+        target-field: "validated_amount"
+
+  # CALCULATION ENRICHMENT WITH SUCCESS CODE
+  - id: "enrich-calculation-success-code"
+    name: "Calculation Enrichment with Success Code"
+    type: "calculation-enrichment"
+    condition: "#amount > 0"
+    description: "Calculates fee and sets success code"
+    success-code: "CALCULATION_SUCCESS"
+    calculation-config:
+      expression: "#amount * 0.01"
+      result-field: "calculated_fee"
+    field-mappings:
+      - source-field: "calculated_fee"
+        target-field: "fee_amount"
+
+  # CALCULATION ENRICHMENT WITH ERROR CODE
+  - id: "enrich-calculation-error-code"
+    name: "Calculation Enrichment with Error Code"
+    type: "calculation-enrichment"
+    condition: "#amount > 0"
+    description: "Calculates fee and sets error code on failure"
+    error-code: "CALCULATION_ERROR"
+    calculation-config:
+      expression: "#amount * 0.01"
+      result-field: "calculated_fee"
+    field-mappings:
+      - source-field: "calculated_fee"
+        target-field: "fee_amount"
+

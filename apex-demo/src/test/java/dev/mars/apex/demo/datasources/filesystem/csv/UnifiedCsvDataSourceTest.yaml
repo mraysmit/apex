@@ -1,0 +1,33 @@
+metadata:
+  id: "unified-csv-datasource-demo"
+  name: "Unified CSV Data Source Demo"
+  version: "1.0.0"
+  type: "enrichment"
+
+# Unified CSV file data source example using file-system type
+enrichments:
+  - id: "customer-lookup"
+    name: "Unified Customer Lookup"
+    type: "lookup-enrichment"
+    description: "Demonstrates unified file-system approach for CSV files"
+    condition: "#customerId != null"
+
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "file-system"
+        key-field: "id"
+        file-path: "demo-data/csv/load-test-customers.csv"
+        format-config:
+          type: "csv"
+          hasHeaderRow: true
+          delimiter: ","
+          encoding: "UTF-8"
+
+    field-mappings:
+      - source-field: "name"
+        target-field: "customerName"
+      - source-field: "email"
+        target-field: "customerEmail"
+      - source-field: "status"
+        target-field: "customerStatus"

@@ -1,0 +1,67 @@
+metadata:
+  name: "Enrichment-Group-Refs Sequential Order Test"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "Test enrichment-group-refs placeholder expansion in document order"
+
+# Error recovery configuration
+# Rules detect INVALID data (condition = TRUE when data is invalid)
+# With valid data, conditions return FALSE, so we need recovery enabled
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+
+  severity-policies:
+    ERROR:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
+
+# YAML Section Order: enrichments → enrichment-refs → rules
+# Expected Processing Order: E1-inline → EG1-from-ref → EG2-from-ref → R1-inline
+
+# Section 1: Inline enrichment (executes first)
+enrichments:
+  - id: "enrich-counterparty-data"
+    name: "Enrich Counterparty Data"
+    type: "lookup-enrichment"
+    description: "Lookup counterparty credit rating and limits"
+    condition: "#counterparty != null"
+    lookup-config:
+      lookup-key: "#counterparty"
+      lookup-dataset:
+        type: "inline"
+        key-field: "counterparty"
+        data:
+          - counterparty: "HEDGE_FUND_X"
+            creditRating: "AA"
+            creditLimit: 100000000.0
+          - counterparty: "BANK_Y"
+            creditRating: "AAA"
+            creditLimit: 500000000.0
+          - counterparty: "CORP_Z"
+            creditRating: "BBB"
+            creditLimit: 25000000.0
+    field-mappings:
+      - source-field: "creditRating"
+        target-field: "counterpartyCreditRating"
+      - source-field: "creditLimit"
+        target-field: "counterpartyCreditLimit"
+    enabled: true
+
+# Section 2: Enrichment-refs (placeholder - expands to EG1 and EG2 from external file)
+enrichment-refs:
+  - name: "external-enrichment-groups"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/external-enrichment-groups-otc.yaml"
+    enabled: true
+    description: "Load enrichment groups from external file"
+
+# Section 3: Inline rule (executes after all enrichments and enrichment groups)
+rules:
+  - id: "validate-all-data-enriched"
+    name: "Validate All Data Enriched"
+    condition: "#counterpartyCreditRating != null && #currentSpotPrice != null && #optionDelta != null && #valueAtRisk != null && #netExposure != null"
+    message: "All required data should be enriched by inline enrichment and enrichment groups"
+    severity: "INFO"
+    enabled: true
+

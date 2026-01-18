@@ -1,0 +1,166 @@
+﻿# Nested Field Reference Lookup Example Configuration
+# Demonstrates REAL nested field navigation in APEX enrichments
+# Use Case: Financial trade processing with nested counterparty and settlement data
+
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: NestedFieldLookupDemoTest.java
+# Purpose: Demonstrate actual nested field navigation capabilities using APEX
+#          lookup enrichments with real nested data structures and field access
+# Status: ACTIVE - Tests real nested field navigation functionality
+# ============================================================================
+
+metadata:
+  id: "nested-field-reference-lookup-demo"
+  name: "Nested Field Reference Lookup Demo"
+  version: "1.0.0"
+  description: "Demonstrates real nested field navigation for trade settlement processing"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+  created: "2024-12-24"
+  tags: ["apex-demo", "lookup", "nested-fields", "real-navigation"]
+
+# Define the enrichment rules - REAL nested field navigation
+enrichments:
+  # Enrichment 1: Extract nested counterparty country code
+  - id: "nested-counterparty-country-extraction"
+    name: "Nested Counterparty Country Extraction"
+    description: "Extract country code from nested trade.counterparty.countryCode structure"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "#trade != null && #trade['counterparty'] != null && #trade['counterparty']['countryCode'] != null"
+
+    calculation-config:
+      expression: "#trade['counterparty']['countryCode']"
+      result-field: "extractedCountryCode"
+
+    field-mappings:
+      - source-field: "extractedCountryCode"
+        target-field: "extractedCountryCode"
+        required: true
+
+  # Enrichment 2: Country-specific settlement lookup using extracted country code
+  - id: "country-settlement-lookup"
+    name: "Country Settlement Information Lookup"
+    description: "Lookup settlement information based on extracted country code"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#extractedCountryCode != null"
+
+    lookup-config:
+      lookup-key: "#extractedCountryCode"
+      lookup-dataset:
+        type: "inline"
+        key-field: "countryCode"
+        data:
+          - countryCode: "US"
+            countryName: "United States"
+            settlementSystem: "DTC"
+            standardSettlementDays: 2
+            timeZone: "EST"
+            custodianBank: "Bank of New York Mellon"
+
+          - countryCode: "GB"
+            countryName: "United Kingdom"
+            settlementSystem: "CREST"
+            standardSettlementDays: 2
+            timeZone: "GMT"
+            custodianBank: "HSBC Custody Services"
+
+          - countryCode: "DE"
+            countryName: "Germany"
+            settlementSystem: "CBF"
+            standardSettlementDays: 2
+            timeZone: "CET"
+            custodianBank: "Deutsche Bank AG"
+
+          - countryCode: "JP"
+            countryName: "Japan"
+            settlementSystem: "JASDEC"
+            standardSettlementDays: 2
+            timeZone: "JST"
+            custodianBank: "Mizuho Trust & Banking"
+
+    field-mappings:
+      - source-field: "countryName"
+        target-field: "settlementCountryName"
+        required: true
+      - source-field: "settlementSystem"
+        target-field: "settlementSystem"
+        required: true
+      - source-field: "standardSettlementDays"
+        target-field: "standardSettlementDays"
+        required: true
+      - source-field: "custodianBank"
+        target-field: "custodianBank"
+        required: true
+
+  # Enrichment 3: Extract nested instrument pricing data
+  - id: "nested-instrument-pricing-extraction"
+    name: "Nested Instrument Pricing Extraction"
+    description: "Extract pricing data from nested trade.instrument.pricing structure"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "#trade != null && #trade['instrument'] != null && #trade['instrument']['pricing'] != null && #trade['instrument']['pricing']['price'] != null"
+
+    calculation-config:
+      expression: "T(java.lang.Double).parseDouble(#trade['instrument']['pricing']['price'].toString())"
+      result-field: "extractedPrice"
+
+    field-mappings:
+      - source-field: "extractedPrice"
+        target-field: "extractedPrice"
+        required: true
+
+  # Enrichment 4: Calculate trade value using nested fields
+  - id: "nested-trade-value-calculation"
+    name: "Nested Trade Value Calculation"
+    description: "Calculate trade value using nested quantity and extracted price"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "#trade != null && #trade['quantity'] != null && #extractedPrice != null"
+
+    calculation-config:
+      expression: "T(java.lang.Double).parseDouble(#trade['quantity'].toString()) * #extractedPrice"
+      result-field: "calculatedTradeValue"
+
+    field-mappings:
+      - source-field: "calculatedTradeValue"
+        target-field: "calculatedTradeValue"
+        required: true
+
+# Optional validation rules
+validations:
+  - id: "trade-object-validation"
+    name: "Trade Object Validation"
+    description: "Ensure trade object exists"
+    type: "field-validation"
+    enabled: true
+    condition: "true"
+
+    validation-config:
+      field: "trade"
+      rules:
+        - type: "not-null"
+          message: "Trade object must not be null"
+
+  - id: "counterparty-validation"
+    name: "Counterparty Validation"
+    description: "Ensure counterparty exists within trade"
+    type: "field-validation"
+    enabled: true
+    condition: "#trade != null"
+
+    validation-config:
+      field: "trade.counterparty"
+      rules:
+        - type: "not-null"
+          message: "Trade counterparty must not be null"
+
+# Processing configuration
+processing:
+  continue-on-error: true
+  max-errors: 10
+  error-handling: "log-and-continue"
+

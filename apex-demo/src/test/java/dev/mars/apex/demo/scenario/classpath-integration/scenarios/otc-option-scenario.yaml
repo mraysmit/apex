@@ -1,0 +1,99 @@
+# OTC Option Scenario for Classpath Integration Tests
+# Demonstrates multi-stage scenario processing loaded from classpath
+# Part of the Unified Resource Loading for APEX Configuration implementation
+
+metadata:
+  id: "otc-option-validation"
+  name: "OTC Option Trade Validation Scenario"
+  description: "Validates and enriches OTC option trade data loaded from classpath"
+  type: "scenario"
+  version: "1.0.0"
+  owner: "APEX Test Team"
+  business-domain: "OTC Derivatives"
+
+scenario:
+  scenario-id: "otc-option-validation"
+  business-domain: "OTC Derivatives"
+  classification: "option-trade"
+  
+  data-types:
+    - "java.util.Map"
+  
+  stages:
+    - stage-id: "validation"
+      name: "Trade Validation"
+      description: "Validates OTC option trade data"
+      order: 1
+      failure-policy: "terminate"
+      
+    - stage-id: "enrichment"
+      name: "Market Data Enrichment"
+      description: "Enriches trade with market data"
+      order: 2
+      failure-policy: "continue-with-warnings"
+      depends-on:
+        - "validation"
+
+  # Embedded rule configurations for validation stage
+  rule-configurations:
+    - id: "option-validation-rules"
+      stage: "validation"
+      rules:
+        - id: "option-notional-check"
+          name: "Notional Amount Validation"
+          description: "Validates that notional amount is positive"
+          condition: "#notionalAmount != null && #notionalAmount > 0"
+          message: "Notional amount must be positive"
+          severity: "ERROR"
+
+        - id: "option-type-check"
+          name: "Option Type Validation"
+          description: "Validates option type is CALL or PUT"
+          condition: "#optionType != null && (#optionType == 'CALL' || #optionType == 'PUT')"
+          message: "Option type must be CALL or PUT"
+          severity: "ERROR"
+
+        - id: "option-strike-check"
+          name: "Strike Price Validation"
+          description: "Validates that strike price is positive"
+          condition: "#strikePrice != null && #strikePrice > 0"
+          message: "Strike price must be positive"
+          severity: "ERROR"
+
+        - id: "option-expiry-check"
+          name: "Expiry Date Validation"
+          description: "Validates that expiry date is present"
+          condition: "#expiryDate != null && !#expiryDate.isEmpty()"
+          message: "Expiry date is required"
+          severity: "ERROR"
+
+        - id: "option-underlying-check"
+          name: "Underlying Asset Validation"
+          description: "Validates underlying asset is specified"
+          condition: "#underlyingAsset != null && !#underlyingAsset.isEmpty()"
+          message: "Underlying asset is required"
+          severity: "ERROR"
+
+        - id: "option-currency-check"
+          name: "Currency Validation"
+          description: "Validates currency code format"
+          condition: "#currency != null && #currency matches '^[A-Z]{3}$'"
+          message: "Currency must be a valid 3-letter ISO code"
+          severity: "WARNING"
+
+    - id: "option-enrichment-rules"
+      stage: "enrichment"
+      rules:
+        - id: "option-moneyness-info"
+          name: "Moneyness Information"
+          description: "Informational rule about option moneyness calculation"
+          condition: "true"
+          message: "Option moneyness calculation completed"
+          severity: "INFO"
+
+        - id: "option-greeks-info"
+          name: "Greeks Calculation"
+          description: "Informational rule about Greeks calculation"
+          condition: "true"
+          message: "Option Greeks (delta, gamma, theta, vega) calculated"
+          severity: "INFO"

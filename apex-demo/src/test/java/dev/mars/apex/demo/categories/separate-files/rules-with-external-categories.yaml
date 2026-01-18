@@ -1,0 +1,127 @@
+# Rules Configuration - Using External Categories
+# Demonstrates rules that reference categories defined in enterprise-categories.yaml
+
+metadata:
+  id: "rules-with-external-categories"
+  name: "Rules Using External Categories"
+  version: "1.0.0"
+  description: "Rules that reference categories from external files"
+  type: "rule-config"
+  author: "APEX Demo"
+
+rules:
+  # Credit Risk Rules
+  - id: "credit-limit-check"
+    name: "Credit Limit Validation"
+    category: "credit-risk"
+    condition: "#amount <= #creditLimit"
+    message: "Transaction within credit limit"
+    enabled: true
+
+  - id: "credit-score-threshold"
+    name: "Credit Score Threshold Check"
+    category: "credit-risk"
+    condition: "#creditScore >= 650"
+    message: "Credit score meets minimum threshold"
+    enabled: true
+
+  # Market Risk Rules
+  - id: "var-limit-check"
+    name: "Value at Risk Limit Check"
+    category: "market-risk"
+    condition: "#portfolioVaR <= #varLimit"
+    message: "Portfolio VaR within limits"
+    enabled: true
+
+  - id: "position-limit-check"
+    name: "Position Limit Validation"
+    category: "market-risk"
+    condition: "#positionSize <= #maxPositionSize"
+    message: "Position size within limits"
+    enabled: true
+
+  # Operational Risk Rules
+  - id: "operational-threshold"
+    name: "Operational Risk Threshold"
+    category: "operational-risk"
+    condition: "#operationalRiskScore <= 75"
+    message: "Operational risk within acceptable range"
+    enabled: true
+
+  # Compliance Rules
+  - id: "regulatory-compliance-check"
+    name: "Regulatory Compliance Validation"
+    category: "compliance-validation"
+    condition: "#complianceStatus == 'APPROVED'"
+    message: "Regulatory compliance verified"
+    enabled: true
+
+  - id: "kyc-verification"
+    name: "KYC Verification Check"
+    category: "compliance-validation"
+    condition: "#kycStatus == 'VERIFIED'"
+    message: "KYC verification complete"
+    enabled: true
+
+  # Data Quality Rules
+  - id: "data-completeness-check"
+    name: "Data Completeness Validation"
+    category: "data-quality"
+    condition: "#dataCompletenessScore >= 95"
+    message: "Data quality meets standards"
+    enabled: true
+
+  - id: "data-accuracy-check"
+    name: "Data Accuracy Validation"
+    category: "data-quality"
+    condition: "#dataAccuracyScore >= 98"
+    message: "Data accuracy acceptable"
+    enabled: true
+
+  # Trade Validation Rules
+  - id: "trade-amount-limit"
+    name: "Trade Amount Limit Check"
+    category: "trade-validation"
+    condition: "#tradeAmount <= #maxTradeAmount"
+    message: "Trade amount within limits"
+    enabled: true
+
+  - id: "trade-counterparty-check"
+    name: "Trade Counterparty Validation"
+    category: "trade-validation"
+    condition: "#counterpartyRating >= 'BBB'"
+    message: "Counterparty rating acceptable"
+    enabled: true
+
+  # Settlement Processing Rules
+  - id: "settlement-date-check"
+    name: "Settlement Date Validation"
+    category: "settlement-processing"
+    condition: "#settlementDate >= T(java.time.LocalDate).now()"
+    message: "Settlement date is valid"
+    enabled: true
+
+  # Client Onboarding Rules
+  - id: "client-documentation-check"
+    name: "Client Documentation Validation"
+    category: "client-onboarding"
+    condition: "#documentsComplete == true"
+    message: "Client documentation complete"
+    enabled: true
+
+  # Fraud Detection Rules
+  - id: "fraud-score-check"
+    name: "Fraud Score Threshold"
+    category: "fraud-detection"
+    condition: "#fraudScore <= 30"
+    message: "Fraud risk within acceptable range"
+    enabled: true
+
+  # Audit Trail Rules
+  - id: "audit-log-completeness"
+    name: "Audit Log Completeness Check"
+    category: "audit-trail"
+    condition: "#auditLogComplete == true"
+    message: "Audit trail is complete"
+    enabled: true
+

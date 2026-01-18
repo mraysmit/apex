@@ -1,0 +1,55 @@
+# ============================================================================
+# APEX FAILURE POLICY DEMONSTRATION: VALIDATION TEST ENRICHMENT RULES
+# ============================================================================
+#
+# PURPOSE:
+# These enrichment rules should execute even when validation stages fail.
+# They demonstrate how enrichment processing continues despite validation
+# failures and provides basic data enrichment for testing purposes.
+#
+metadata:
+  id: "validation-test-enrichment-rules"
+  name: "Validation Test Enrichment Rules"
+  version: "1.0.0"
+  description: "Enrichment rules that execute despite validation failures"
+  type: "enrichment-config"
+
+# ENRICHMENT RULES:
+# These rules perform basic enrichment operations for validation testing
+enrichments:
+  - id: "validation-status-enrichment"
+    name: "Validation Status Enrichment"
+    type: "calculation-enrichment"
+    description: "Sets validation processing status"
+    calculation-config:
+      expression: "'VALIDATION_PROCESSED'"
+      result-field: "validationStatus"
+    field-mappings:
+      - source-field: "validationStatus"
+        target-field: "processingStatus"
+    
+  - id: "audit-timestamp-enrichment"
+    name: "Audit Timestamp Enrichment"
+    type: "calculation-enrichment"
+    description: "Adds audit timestamp for validation processing"
+    calculation-config:
+      expression: "T(java.time.Instant).now().toString()"
+      result-field: "auditTimestamp"
+    field-mappings:
+      - source-field: "auditTimestamp"
+        target-field: "processedAt"
+        
+  - id: "data-quality-enrichment"
+    name: "Data Quality Enrichment"
+    type: "calculation-enrichment"
+    description: "Assesses data quality based on available fields"
+    calculation-config:
+      expression: "#root.size() >= 3 ? 'GOOD' : (#root.size() >= 2 ? 'FAIR' : 'POOR')"
+      result-field: "dataQuality"
+    field-mappings:
+      - source-field: "dataQuality"
+        target-field: "qualityScore"
+
+# ============================================================================
+# END OF VALIDATION TEST ENRICHMENT RULES
+# ============================================================================

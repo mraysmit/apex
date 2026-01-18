@@ -1,0 +1,51 @@
+name: "Test 10: Mixed Enrichments and Transformations"
+description: "Test interleaved enrichments and transformations - must execute in exact document order"
+
+# Test Case: Verify enrichments and transformations interleaved execute in document order
+# Expected execution order: enrich-1, transform-1, enrich-2, transform-2, enrich-3
+
+enrichments:
+  - id: "enrich-1"
+    name: "First Enrichment"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('enrich-1', 'E1')"
+      target-field: "enrichResult1"
+    enabled: true
+
+transformations:
+  - id: "transform-1"
+    name: "First Transformation"
+    type: "field-transformation"
+    source-field: "value"
+    target-field: "transformResult1"
+    expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('transform-1', #value + '-T1')"
+    enabled: true
+
+enrichments-2:
+  - id: "enrich-2"
+    name: "Second Enrichment"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('enrich-2', 'E2')"
+      target-field: "enrichResult2"
+    enabled: true
+
+transformations-2:
+  - id: "transform-2"
+    name: "Second Transformation"
+    type: "field-transformation"
+    source-field: "value"
+    target-field: "transformResult2"
+    expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('transform-2', #value + '-T2')"
+    enabled: true
+
+enrichments-3:
+  - id: "enrich-3"
+    name: "Third Enrichment"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('enrich-3', 'E3')"
+      target-field: "enrichResult3"
+    enabled: true
+

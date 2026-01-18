@@ -255,7 +255,7 @@ class ProjectYamlValidationTest {
         // List of files we manually fixed (first batch)
         List<String> fixedFiles = List.of(
             "apex-core/src/main/resources/examples/data-sources/database-example.yaml",
-            "apex-core/src/test/resources/test-config-with-properties.yaml",
+            "apex-core/src/test/resources/lookups/test-config-with-properties.yaml",
             // "apex-demo/src/test/resources/data-sources/products-json-datasource.yaml", // File doesn't exist
             "apex-core/src/main/resources/examples/data-sources/file-system-example.yaml",
             "apex-core/src/main/resources/examples/data-sources/mixed-example.yaml"

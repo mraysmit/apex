@@ -1,0 +1,103 @@
+# ========================================================================
+# COMPREHENSIVE SPEL ERROR HANDLING TEST - SCENARIO REGISTRY
+# ========================================================================
+# 
+# This registry defines scenarios for testing comprehensive SpEL error handling
+# across all APEX components. Each scenario tests different types of SpEL
+# exceptions to ensure they are handled gracefully through RuleResult.
+#
+# CRITICAL REQUIREMENT: All SpEL exceptions must be converted to RuleResult.error()
+# with appropriate severity levels, never thrown as stack dumps.
+#
+# Author: APEX Team
+# Since: 1.0.0
+# ========================================================================
+
+# Registry metadata
+metadata:
+  id: "comprehensive-spel-error-registry"
+  name: "Comprehensive SpEL Error Handling Test Registry"
+  description: "Registry for testing all possible SpEL exception scenarios in APEX"
+  version: "1.0.0"
+
+# Scenario definitions
+scenarios:
+  # ========================================================================
+  # PROPERTY ACCESS ERROR SCENARIOS
+  # ========================================================================
+  
+  - id: "property-not-found-test"
+    name: "Property Not Found Error Test"
+    description: "Tests handling of SpEL property not found exceptions"
+    config-file: "src/test/java/dev/mars/apex/demo/errorhandling/ComprehensiveSpelErrorHandlingTest-property-not-found-config.yaml"
+    data-types: ["HashMap"]
+    
+  - id: "nested-null-access-test"
+    name: "Nested Null Access Error Test"
+    description: "Tests handling of nested property access on null objects"
+    config-file: "src/test/java/dev/mars/apex/demo/errorhandling/ComprehensiveSpelErrorHandlingTest-nested-null-config.yaml"
+    data-types: ["HashMap"]
+    
+  # ========================================================================
+  # METHOD INVOCATION ERROR SCENARIOS
+  # ========================================================================
+  
+  - id: "method-not-found-test"
+    name: "Method Not Found Error Test"
+    description: "Tests handling of SpEL method not found exceptions"
+    config-file: "src/test/java/dev/mars/apex/demo/errorhandling/ComprehensiveSpelErrorHandlingTest-method-not-found-config.yaml"
+    data-types: ["HashMap"]
+    
+  - id: "wrong-method-params-test"
+    name: "Wrong Method Parameters Error Test"
+    description: "Tests handling of method invocation with incorrect parameters"
+    config-file: "src/test/java/dev/mars/apex/demo/errorhandling/ComprehensiveSpelErrorHandlingTest-wrong-params-config.yaml"
+    data-types: ["HashMap"]
+    
+  # ========================================================================
+  # TYPE CONVERSION ERROR SCENARIOS
+  # ========================================================================
+  
+  - id: "type-conversion-test"
+    name: "Type Conversion Error Test"
+    description: "Tests handling of SpEL type conversion exceptions"
+    config-file: "src/test/java/dev/mars/apex/demo/errorhandling/ComprehensiveSpelErrorHandlingTest-type-conversion-config.yaml"
+    data-types: ["HashMap"]
+    
+  - id: "arithmetic-error-test"
+    name: "Arithmetic Error Test"
+    description: "Tests handling of arithmetic exceptions (division by zero, etc.)"
+    config-file: "src/test/java/dev/mars/apex/demo/errorhandling/ComprehensiveSpelErrorHandlingTest-arithmetic-error-config.yaml"
+    data-types: ["HashMap"]
+    
+  # ========================================================================
+  # COLLECTION ACCESS ERROR SCENARIOS
+  # ========================================================================
+  
+  - id: "array-bounds-test"
+    name: "Array Index Out of Bounds Error Test"
+    description: "Tests handling of array/list index out of bounds exceptions"
+    config-file: "src/test/java/dev/mars/apex/demo/errorhandling/ComprehensiveSpelErrorHandlingTest-array-bounds-config.yaml"
+    data-types: ["HashMap"]
+    
+  - id: "map-key-not-found-test"
+    name: "Map Key Not Found Error Test"
+    description: "Tests handling of map key access on non-existent keys"
+    config-file: "src/test/java/dev/mars/apex/demo/errorhandling/ComprehensiveSpelErrorHandlingTest-map-key-config.yaml"
+    data-types: ["HashMap"]
+    
+  # ========================================================================
+  # COMPLEX ERROR SCENARIOS
+  # ========================================================================
+  
+  - id: "invalid-casting-test"
+    name: "Invalid Casting Error Test"
+    description: "Tests handling of invalid type casting exceptions"
+    config-file: "src/test/java/dev/mars/apex/demo/errorhandling/ComprehensiveSpelErrorHandlingTest-invalid-cast-config.yaml"
+    data-types: ["HashMap"]
+    
+  - id: "complex-expression-test"
+    name: "Complex Expression Error Test"
+    description: "Tests handling of complex nested expression errors"
+    config-file: "src/test/java/dev/mars/apex/demo/errorhandling/ComprehensiveSpelErrorHandlingTest-complex-expression-config.yaml"
+    data-types: ["HashMap"]

@@ -1,0 +1,37 @@
+metadata:
+  name: "Enrich-Then-Validate Test"
+  type: "rule-config"
+  processing-mode: "sequential"
+  description: "Demonstrates enrich-then-validate pattern with enrichments before rules"
+
+data-sources:
+  - name: "customer-db"
+    type: "cache"
+    data:
+      - customerId: "CUST001"
+        customerName: "John Doe"
+
+enrichments:
+  - id: "customer-lookup"
+    name: "Customer Data Enrichment"
+    type: "lookup-enrichment"
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "customerId"
+        data:
+          - customerId: "CUST001"
+            customerName: "John Doe"
+    field-mappings:
+      - source-field: "customerName"
+        target-field: "customerData"
+
+rules:
+  - id: "validate-customer"
+    name: "Validate Customer Data"
+    condition: "#customerData != null"
+    message: "Customer data is available"
+    priority: 100
+    severity: "INFO"
+

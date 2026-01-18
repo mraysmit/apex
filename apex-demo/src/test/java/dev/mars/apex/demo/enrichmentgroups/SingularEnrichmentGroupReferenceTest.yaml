@@ -1,0 +1,36 @@
+# ============================================================================
+# Singular Enrichment Group Reference Test
+# ============================================================================
+metadata:
+  id: "singular-enrichment-group-reference-test"
+  name: "Singular Enrichment Group Reference Test"
+  version: "1.0.0"
+  type: "rule-config"
+  description: "Tests singular enrichment-group field"
+
+enrichments:
+  - id: e1
+    name: Enrichment 1
+    type: field-enrichment
+    field-mappings:
+      - source-field: "a"
+        target-field: "a_copy"
+
+  - id: e2
+    name: Enrichment 2
+    type: field-enrichment
+    field-mappings:
+      - source-field: "b"
+        target-field: "b_copy"
+
+enrichment-groups:
+  - id: base_group
+    name: Base Group
+    operator: AND
+    enrichment-ids: [ e1 ]
+
+  - id: composite_group
+    name: Composite Group (Singular Reference)
+    operator: AND
+    enrichment-ids: [ e2 ]
+    enrichment-group: base_group  # Singular reference

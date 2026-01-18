@@ -1,0 +1,22 @@
+metadata:
+  id: "enrichment-codes-validation-simple-enrichments"
+  name: "Enrichment Codes Validation Simple"
+  version: "1.0.0"
+  description: "Simple enrichment demonstrating success-code with map-to-field"
+  type: "rule-config"
+  author: "APEX Demo"
+
+enrichments:
+  # SIMPLE CASE: Enrichment with success code and map-to-field
+  - id: "enrich-simple-with-map-to-field"
+    name: "Simple Enrichment with Map-to-Field"
+    type: "field-enrichment"
+    condition: "#amount > 100"
+    description: "Enriches data when amount is valid, sets success code and maps it to field"
+    success-code: "AMOUNT_VALID"
+    error-code: "AMOUNT_INVALID"
+    map-to-field: "validationStatus = #success_code"
+    field-mappings:
+      - source-field: "#amount"
+        target-field: "validated_amount"
+

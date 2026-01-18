@@ -1,0 +1,39 @@
+metadata:
+  name: "Zero Retries Test"
+  description: "Tests that zero retries causes immediate failure without retry attempts"
+  version: "1.0"
+  author: "APEX Demo"
+
+pipeline:
+  name: "zero-retries-pipeline"
+  description: "Pipeline that tests zero retries behavior"
+  
+  steps:
+    - name: "step-1-extract"
+      type: "extract"
+      source: "test-source"
+      operation: "getData"
+      description: "Extract data from CSV"
+    
+    - name: "step-2-load-to-fail"
+      type: "load"
+      sink: "nonexistent-sink"
+      operation: "writeData"
+      description: "Load to nonexistent sink - should fail immediately"
+  
+  execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+    max-retries: 0
+    retry-delay-ms: 0
+
+data-sources:
+  - name: "test-source"
+    type: "file-system"
+    enabled: true
+    connection:
+      base-path: "./target/demo/etl/execution-tests"
+      file-pattern: "sample.csv"
+    operations:
+      getData: "SELECT * FROM csv"
+

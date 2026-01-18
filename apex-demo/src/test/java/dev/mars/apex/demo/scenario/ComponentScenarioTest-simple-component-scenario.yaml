@@ -1,0 +1,32 @@
+# Simple Component Scenario
+# Scenario with a single component stage
+
+metadata:
+  id: "simple-component-test"
+  name: "Simple Component Test"
+  version: "1.0.0"
+  description: "Test scenario with a single component stage"
+  type: "scenario"
+  business-domain: "Testing"
+  owner: "test@example.com"
+
+scenario:
+  scenario-id: "simple-component-test"
+  name: "Simple Component Test"
+  description: "Test scenario with a single component stage"
+  
+  data-types:
+    - "Trade"
+    - "java.util.Map"
+  
+  processing-stages:
+    # Stage 1: Component stage with basic validation
+    - stage-name: "validation"
+      config-file: "dev/mars/apex/demo/scenario/basic-validation-component.yaml"
+      execution-order: 1
+      failure-policy: "terminate"
+      required: true
+      stage-metadata:
+        description: "Basic validation using component"
+        sla-ms: 1000
+

@@ -1,0 +1,59 @@
+# ============================================================================
+# Duplicate File Data Source Demo
+# ============================================================================
+# Purpose: Demonstrate dataset deduplication for CSV file-based lookups
+# 
+# This configuration shows two enrichments using the SAME CSV file.
+# With unified caching, both enrichments should share the same 
+# DatasetLookupService instance, eliminating memory duplication.
+#
+# Expected behavior:
+# - First enrichment: Cache MISS → Creates DatasetLookupService
+# - Second enrichment: Cache HIT → Reuses same DatasetLookupService
+# - Memory savings: 50% (1 service instead of 2)
+# ============================================================================
+
+metadata:
+  id: "duplicate-file-datasource-demo"
+  name: "Duplicate File Data Source Demo"
+  version: "1.0.0"
+  type: "enrichment"
+  description: "Demonstrates dataset deduplication for CSV file lookups"
+
+enrichments:
+  # First enrichment: Lookup currency name from CSV file
+  - id: "currency-name-lookup"
+    name: "Currency Name Lookup"
+    type: "lookup-enrichment"
+    condition: "#currencyCode != null"
+    
+    lookup-config:
+      lookup-key: "#currencyCode"
+      lookup-dataset:
+        type: "csv-file"
+        file-path: "src/test/java/dev/mars/apex/demo/datasources/file/currencies.csv"
+        key-field: "code"
+    
+    field-mappings:
+      - source-field: "name"
+        target-field: "currencyName"
+
+  # Second enrichment: Lookup currency symbol (SAME FILE!)
+  - id: "currency-symbol-lookup"
+    name: "Currency Symbol Lookup"
+    type: "lookup-enrichment"
+    condition: "#currencyCode != null"
+    
+    lookup-config:
+      lookup-key: "#currencyCode"
+      lookup-dataset:
+        type: "csv-file"
+        file-path: "src/test/java/dev/mars/apex/demo/datasources/file/currencies.csv"
+        key-field: "code"
+    
+    field-mappings:
+      - source-field: "symbol"
+        target-field: "currencySymbol"
+      - source-field: "region"
+        target-field: "currencyRegion"
+

@@ -1,0 +1,23 @@
+# Circular Component B
+# Component that references Component A (creates circular dependency)
+
+metadata:
+  id: "circular-component-b"
+  name: "Circular Component B"
+  version: "1.0.0"
+  description: "Component B that references Component A (circular dependency test)"
+  type: "component"
+  business-domain: "testing"
+  owner: "APEX Demo Team"
+  criticality: "low"
+  tags:
+    - testing
+    - circular
+    - error-case
+
+# Reference back to Component A (creates circular dependency)
+component-refs:
+  - file: "circular-component-a.yaml"
+    execution-order: 1
+    failure-policy: "terminate"
+

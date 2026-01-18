@@ -1,0 +1,16 @@
+# Scenario Registry for Conditional Stage Execution Tests
+# Used by ConditionalStageExecutionTest
+
+metadata:
+  id: "conditional-stage-test-registry"
+  name: "Conditional Stage Execution Test Registry"
+  description: "Registry for conditional processing-stage execution tests"
+  version: "1.0.0"
+  type: "scenario-registry"
+  created-by: "Mark Andrew Ray-Smith Cityline Ltd"
+  created: "2024-11-13"
+
+scenarios:
+  - scenario-id: "conditional-stage-execution-test"
+    config-file: "src/test/java/dev/mars/apex/demo/scenario/ConditionalStageExecutionTest-scenario.yaml"
+

@@ -1,0 +1,180 @@
+﻿# ============================================================================
+# USE CASE 2: Validation-First Processing
+# ============================================================================
+# Business Scenario: Performance-optimized transaction processing
+# 
+# Developer Intent: 
+#   1. FIRST: Validate input data quality (fast, cheap operations)
+#   2. SECOND: Only enrich valid records (expensive operations only when needed)
+#
+# YAML Structure: rules section BEFORE enrichments section
+# Processing Mode: sequential (respects YAML order)
+# Performance Benefit: Avoids expensive enrichment on invalid data
+# ============================================================================
+
+metadata:
+  id: "use-case-2-validation-first"
+  name: "Use Case 2: Validation-First Processing"
+  version: "1.0.0"
+  description: "Demonstrates validation-first pattern for performance optimization"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created: "2025-10-30"
+  business-domain: "Transaction Processing"
+  tags: ["use-case", "validation-first", "performance", "sequential-processing"]
+  processing-mode: "sequential"
+
+# STEP 1: No separate data-sources section needed for inline lookup data
+
+# STEP 2: RULES FIRST (validate input data quality)
+# This section appears BEFORE enrichments to express "validate then enrich" logic
+rules:
+  - id: "input-validation"
+    name: "Input Data Validation"
+    description: "Fast validation of required input fields"
+    condition: |
+      #customerId != null && 
+      #customerId != '' && 
+      #amount != null && 
+      #amount > 0 && 
+      #currency != null && 
+      #currency != ''
+    message: "Input validation passed: customerId={{#customerId}}, amount={{#amount}}, currency={{#currency}}"
+    severity: "INFO"
+    enabled: true
+    actions:
+      - type: "set-field"
+        field: "validationStatus"
+        value: "PASSED"
+      - type: "set-field"
+        field: "validationTimestamp"
+        value: "#{T(java.time.Instant).now()}"
+
+  - id: "business-rules-validation"
+    name: "Business Rules Validation"
+    description: "Additional business logic validation"
+    condition: |
+      #validationStatus == 'PASSED' && 
+      #amount <= 1000000 && 
+      (#currency == 'USD' || #currency == 'EUR' || #currency == 'GBP')
+    message: "Business rules validation passed for amount {{#amount}} {{#currency}}"
+    severity: "INFO"
+    enabled: true
+    actions:
+      - type: "set-field"
+        field: "businessValidationStatus"
+        value: "PASSED"
+
+  - id: "validation-failure"
+    name: "Validation Failure Handler"
+    description: "Handle validation failures"
+    condition: |
+      #customerId == null || #customerId == '' || 
+      #amount == null || #amount <= 0 || 
+      #currency == null || #currency == ''
+    message: "Validation failed: Invalid input data"
+    severity: "ERROR"
+    enabled: true
+    actions:
+      - type: "set-field"
+        field: "validationStatus"
+        value: "FAILED"
+      - type: "set-field"
+        field: "errorReason"
+        value: "INVALID_INPUT_DATA"
+
+# STEP 3: ENRICHMENTS SECOND (only for validated data)
+# This section appears AFTER rules to express conditional enrichment
+enrichments:
+  - id: "customer-enrichment"
+    name: "Customer Information Enrichment"
+    description: "Expensive customer lookup - only for valid data"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#customerId != null && #amount != null && #amount > 0"
+
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "customerId"
+        data:
+          - customerId: "CUST001"
+            customerName: "Alice Johnson"
+            accountStatus: "ACTIVE"
+            riskProfile: "LOW"
+            preferredCurrency: "USD"
+          - customerId: "CUST002"
+            customerName: "Bob Smith"
+            accountStatus: "ACTIVE"
+            riskProfile: "MEDIUM"
+            preferredCurrency: "EUR"
+          - customerId: "CUST003"
+            customerName: "Carol Davis"
+            accountStatus: "SUSPENDED"
+            riskProfile: "HIGH"
+            preferredCurrency: "GBP"
+
+    field-mappings:
+      - source-field: "customerName"
+        target-field: "customerName"
+        required: true
+      - source-field: "accountStatus"
+        target-field: "accountStatus"
+      - source-field: "riskProfile"
+        target-field: "riskProfile"
+      - source-field: "preferredCurrency"
+        target-field: "preferredCurrency"
+
+  - id: "risk-calculation"
+    name: "Risk Score Calculation"
+    description: "Complex risk calculation - only for valid, enriched data"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "#customerId != null && #amount != null && #riskProfile != null"
+
+    calculation-config:
+      expression: "#riskProfile == 'LOW' ? (#amount > 50000 ? 0.3 : 0.1) : (#riskProfile == 'MEDIUM' ? (#amount > 50000 ? 0.6 : 0.4) : (#riskProfile == 'HIGH' ? (#amount > 50000 ? 0.9 : 0.7) : 0.5))"
+      result-field: "riskScore"
+
+    field-mappings:
+      - source-field: "riskScore"
+        target-field: "riskScore"
+        required: true
+
+  - id: "currency-conversion"
+    name: "Currency Conversion"
+    description: "Convert to preferred currency - only for valid data"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "#customerId != null && #preferredCurrency != null && #currency != #preferredCurrency"
+
+    calculation-config:
+      expression: "#currency == 'USD' && #preferredCurrency == 'EUR' ? #amount * 0.85 : (#currency == 'USD' && #preferredCurrency == 'GBP' ? #amount * 0.75 : (#currency == 'EUR' && #preferredCurrency == 'USD' ? #amount * 1.18 : (#currency == 'EUR' && #preferredCurrency == 'GBP' ? #amount * 0.88 : (#currency == 'GBP' && #preferredCurrency == 'USD' ? #amount * 1.33 : (#currency == 'GBP' && #preferredCurrency == 'EUR' ? #amount * 1.14 : #amount)))))"
+      result-field: "convertedAmount"
+
+    field-mappings:
+      - source-field: "convertedAmount"
+        target-field: "convertedAmount"
+        required: true
+
+# EXPECTED PROCESSING ORDER (Sequential Mode):
+# 1. rules: Fast input validation and business rules
+# 2. enrichments: Expensive operations only on valid data
+#
+# PERFORMANCE OPTIMIZATION FLOW:
+# Valid Input: { customerId: "CUST001", amount: 50000.0, currency: "USD" }
+# Step 1: Input validation → PASSED (fast)
+# Step 2: Business validation → PASSED (fast)
+# Step 3: Customer enrichment → Execute (expensive, but only for valid data)
+# Step 4: Risk calculation → Execute (expensive, but only for valid data)
+# Step 5: Currency conversion → Execute if needed
+#
+# Invalid Input: { customerId: "", amount: -1000.0, currency: null }
+# Step 1: Input validation → FAILED (fast)
+# Step 2: Business validation → SKIPPED
+# Step 3: All enrichments → SKIPPED (saves expensive operations)
+#
+# PERFORMANCE BENEFIT: Invalid data is rejected quickly without expensive enrichment
+# This pattern is IMPOSSIBLE with enrichment-first processing because enrichments
+# would run on invalid data, wasting resources.

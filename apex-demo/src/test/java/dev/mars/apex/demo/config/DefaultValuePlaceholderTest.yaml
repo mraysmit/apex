@@ -1,0 +1,27 @@
+metadata:
+  name: "Default Value Placeholder Test"
+  version: "1.0.0"
+  description: "Test placeholder default values"
+
+data-sources:
+  - name: "default-test-api"
+    type: "rest-api"
+    source-type: "rest-api"
+    enabled: true
+    description: "Test default value resolution"
+    
+    connection:
+      base-url: "http://${HOST:localhost}:${PORT:8080}"
+      timeout: ${TIMEOUT:5000}
+      max-connections: ${MAX_CONN:100}
+      ssl-enabled: ${SSL_ENABLED:false}
+      
+    cache:
+      enabled: ${CACHE_ENABLED:true}
+      ttl-seconds: ${CACHE_TTL:300}
+      max-size: ${CACHE_SIZE:1000}
+      
+    authentication:
+      type: "${AUTH_TYPE:none}"
+      username: "${AUTH_USER:guest}"
+      password: "${AUTH_PASS:}"

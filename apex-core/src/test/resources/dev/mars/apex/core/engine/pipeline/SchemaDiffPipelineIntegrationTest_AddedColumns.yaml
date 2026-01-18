@@ -4,7 +4,9 @@
 metadata:
   id: "test-schema-diff-added-columns"
   name: "Schema Diff - Added Columns Test"
+  description: "Tests schema-diff detecting added columns in target"
   version: "1.0"
+  author: "APEX Test Team"
   type: "pipeline-config"
 
 data-sources:

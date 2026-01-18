@@ -1,0 +1,35 @@
+name: "Edge Case Test 4 - ID Collision Between Inline and External"
+description: "Tests that duplicate enrichment IDs between inline and external files are rejected"
+
+# This YAML should FAIL to load because "collision-id" appears in BOTH:
+# 1. Inline enrichments (below)
+# 2. External file (TestEdge4_IDCollisionInlineVsExternalTest_external.yaml)
+
+# Inline enrichment with ID "collision-id"
+enrichments:
+  - id: "collision-id"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "'value-from-inline'"
+      result-field: "inlineResult"
+    field-mappings:
+      - source-field: "inlineResult"
+        target-field: "inlineResult"
+    enabled: true
+
+  - id: "unique-inline-id"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "'value-unique-inline'"
+      result-field: "uniqueInline"
+    field-mappings:
+      - source-field: "uniqueInline"
+        target-field: "uniqueInline"
+    enabled: true
+
+# Reference external file that ALSO contains "collision-id"
+enrichment-refs:
+  - name: "External Enrichments"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/TestEdge4_IDCollisionInlineVsExternalTest_external.yaml"
+    enabled: true
+

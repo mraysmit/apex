@@ -1,0 +1,41 @@
+# REST API Caching Demo - Slow Endpoint Configuration
+# Demonstrates dramatic cache improvement with 10-second delay endpoint
+
+data-sources:
+  - name: "slow-cache-demo-api"
+    type: "rest-api"
+    enabled: true
+    description: "Slow REST API server for cache effectiveness demonstration"
+    
+    connection:
+      base-url: "http://localhost:8080"  # Will be updated dynamically by test
+      timeout: 15000                    # 15 seconds to accommodate 10s delay
+      max-retries: 1                    # Minimal retries for demo
+      retry-delay-ms: 1000
+    
+    endpoints:
+      currency-lookup: "/api/currency/{key}"
+    
+    cache:
+      enabled: true                     # ✅ Enable caching for demonstration
+      ttlSeconds: 300                   # ✅ 5 minutes TTL (long enough for demo)
+      maxIdleSeconds: 180               # ✅ 3 minutes max idle time
+      maxSize: 100                      # ✅ Max 100 entries (sufficient for demo)
+      keyPrefix: "slow-demo"            # ✅ Cache key prefix for identification
+
+enrichments:
+  - id: "slow-currency-lookup"
+    type: "lookup-enrichment"
+    description: "Currency lookup with slow endpoint to demonstrate cache effectiveness"
+    condition: "#currencyCode != null"
+    lookup-config:
+      lookup-key: "#currencyCode"
+      lookup-dataset:
+        type: "rest-api"
+        data-source-ref: "slow-cache-demo-api"
+        operation-ref: "currency-lookup"
+    field-mappings:
+      - source-field: "name"
+        target-field: "currencyName"
+        required: false
+        description: "Map currency name from API response"

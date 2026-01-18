@@ -1,0 +1,136 @@
+# ============================================================================
+# APEX YAML Configuration File - Trade Validation with Success/Error Codes
+# ============================================================================
+# Purpose: Demonstrates real-world OTC options trade validation using
+#          success-code, error-code, and map-to-field features for
+#          comprehensive trade lifecycle processing
+# 
+# Business Scenario: Middle Office Trade Processing
+# - Validate incoming OTC option trades
+# - Enrich with market data and pricing information
+# - Apply business rules with detailed status codes
+# - Map validation results to audit fields
+# ============================================================================
+
+metadata:
+  id: "trade-validation-codes-demo"
+  name: "OTC Options Trade Validation with Status Codes"
+  version: "1.0.0"
+  description: "Demonstrates success/error codes and field mapping in real-world trade validation"
+  type: "rule-config"
+  author: "APEX Demo"
+
+# ============================================================================
+# ENRICHMENTS: Data enrichment with success/error codes
+# ============================================================================
+enrichments:
+  # Enrich trade with option pricing parameters
+  - id: "enrich-option-pricing"
+    name: "Option Pricing Parameters Enrichment"
+    type: "lookup-enrichment"
+    description: "Enrich trade with option pricing parameters from market data"
+    condition: "#optionType != null && #underlyingSymbol != null"
+    lookup-config:
+      lookup-key: "#underlyingSymbol"
+      lookup-dataset:
+        type: "inline"
+        key-field: "symbol"
+        data:
+          - symbol: "SPX"
+            volatility: 18.5
+            riskFreeRate: 4.5
+            dividendYield: 1.8
+            marketPrice: 4500.00
+          - symbol: "AAPL"
+            volatility: 25.3
+            riskFreeRate: 4.5
+            dividendYield: 0.5
+            marketPrice: 175.50
+          - symbol: "TSLA"
+            volatility: 45.8
+            riskFreeRate: 4.5
+            dividendYield: 0.0
+            marketPrice: 245.30
+    field-mappings:
+      - source-field: "volatility"
+        target-field: "impliedVolatility"
+      - source-field: "riskFreeRate"
+        target-field: "riskFreeRate"
+      - source-field: "dividendYield"
+        target-field: "dividendYield"
+      - source-field: "marketPrice"
+        target-field: "underlyingPrice"
+    # SUCCESS CODE: Dynamic code based on volatility level
+    success-code: "#impliedVolatility > 30 ? 'PRICING_ENRICHED_HIGH_VOL' : 'PRICING_ENRICHED_NORMAL_VOL'"
+    # ERROR CODE: When pricing data not available
+    error-code: "PRICING_DATA_NOT_AVAILABLE"
+    # MAP TO FIELD: Record enrichment status
+    map-to-field:
+      - "pricingEnrichmentStatus = #success_code != null ? #success_code : #error_code"
+      - "pricingEnrichmentTimestamp = T(java.time.Instant).now().toString()"
+
+  # Calculate option Greeks
+  - id: "calculate-option-greeks"
+    name: "Option Greeks Calculation"
+    type: "calculation-enrichment"
+    description: "Calculate simplified option Greeks for risk assessment"
+    condition: "#strikePrice != null && #underlyingPrice != null && #impliedVolatility != null"
+    calculation-config:
+      # Simplified delta calculation (for demo purposes)
+      expression: |
+        #optionType != null && #optionType.equals('CALL') ?
+          (#underlyingPrice > #strikePrice ? 0.65 : 0.35) :
+          (#underlyingPrice < #strikePrice ? -0.65 : -0.35)
+      result-field: "delta"
+    field-mappings:
+      - source-field: "delta"
+        target-field: "optionDelta"
+    # SUCCESS CODE: Based on delta magnitude
+    success-code: "#delta != null && T(java.lang.Math).abs(#delta) > 0.5 ? 'GREEKS_CALCULATED_ITM' : 'GREEKS_CALCULATED_OTM'"
+    # ERROR CODE: When calculation fails
+    error-code: "GREEKS_CALCULATION_FAILED"
+    # MAP TO FIELD: Record calculation status and risk category
+    map-to-field:
+      - "greeksCalculationStatus = #success_code != null ? #success_code : #error_code"
+      - "riskCategory = #delta != null && T(java.lang.Math).abs(#delta) > 0.5 ? 'HIGH_DELTA' : 'LOW_DELTA'"
+
+  # Calculate notional value
+  - id: "calculate-notional"
+    name: "Notional Value Calculation"
+    type: "calculation-enrichment"
+    description: "Calculate trade notional value"
+    condition: "#quantity != null && #strikePrice != null"
+    calculation-config:
+      expression: "#quantity * #strikePrice"
+      result-field: "notionalValue"
+    field-mappings:
+      - source-field: "notionalValue"
+        target-field: "tradeNotional"
+    # SUCCESS CODE: Based on notional size
+    success-code: "#notionalValue > 1000000 ? 'NOTIONAL_CALCULATED_LARGE' : 'NOTIONAL_CALCULATED_NORMAL'"
+    # MAP TO FIELD: Record notional tier
+    map-to-field:
+      - "notionalCalculationStatus = #success_code"
+      - "notionalTier = #notionalValue > 1000000 ? 'TIER_1_LARGE' : 'TIER_2_STANDARD'"
+
+# ============================================================================
+# RULES: Trade validation rules with success/error codes
+# ============================================================================
+# NOTE: This demo focuses on enrichments with success/error codes.
+# Rules are included to show the feature works for rules too, but only
+# the first matching rule will execute (standard APEX behavior).
+rules:
+  # Validate required trade fields
+  - id: "validate-required-fields"
+    name: "Required Fields Validation"
+    condition: "#tradeId != null && #optionType != null && #underlyingSymbol != null && #strikePrice != null && #quantity != null && #expiryDate != null"
+    message: "All required trade fields are present"
+    severity: "ERROR"
+    enabled: true
+    # SUCCESS CODE: All required fields present
+    success-code: "REQUIRED_FIELDS_VALID"
+    # ERROR CODE: Missing required fields
+    error-code: "REQUIRED_FIELDS_MISSING"
+    # MAP TO FIELD: Record validation status
+    map-to-field: "requiredFieldsValidation = #success_code != null ? #success_code : #error_code"
+

@@ -17,6 +17,7 @@
 metadata:
   id: "rules-engine-pipeline-rules-test"
   name: "RulesEngine Pipeline Integration - With Rules"
+  description: "Tests pipeline execution with rule validation"
   type: "rule-config"
   version: "1.0"
   author: "APEX Core Team"

@@ -12,6 +12,9 @@ scenario:
   name: "OTC Option Processing"
   description: "Processes OTC option trades"
   
+  data-types:
+    - "java.util.Map"
+  
   # Embedded classification rule (Option B) - using direct field access
   classification-rule:
     condition: "#tradeType == 'OTCOption'"

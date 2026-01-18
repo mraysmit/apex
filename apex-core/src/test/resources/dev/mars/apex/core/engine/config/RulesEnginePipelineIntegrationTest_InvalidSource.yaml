@@ -17,6 +17,7 @@
 metadata:
   id: "rules-engine-pipeline-invalid-source-test"
   name: "RulesEngine Pipeline Integration - Invalid Source"
+  description: "Validates error handling when pipeline references non-existent data source"
   type: "pipeline-config"
   version: "1.0"
   author: "APEX Core Team"

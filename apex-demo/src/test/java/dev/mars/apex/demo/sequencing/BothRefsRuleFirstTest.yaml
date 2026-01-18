@@ -1,0 +1,36 @@
+metadata:
+  name: "Both Refs - Rule-Refs First Test"
+  type: "rule-config"
+  version: "1.0.0"
+  processing-mode: "sequential"
+  description: |
+    CRITICAL TEST: Verify BOTH rule-refs AND enrichment-refs in same file.
+    Rule-refs appears FIRST, enrichment-refs appears SECOND.
+    
+    Expected Processing Order:
+    1. R1-from-ref (validate-notional-limit) - from external rules file
+    2. R2-from-ref (validate-strike-price) - from external rules file
+    3. E1-from-ref (enrich-market-data) - from external enrichments file
+    4. E2-from-ref (calculate-greeks) - from external enrichments file
+    
+    This verifies that:
+    - Both rule-refs and enrichment-refs can coexist in same file
+    - Rule-refs expands BEFORE enrichment-refs
+    - Rules execute BEFORE enrichments (unusual but valid)
+    - No inline enrichments or rules - ONLY refs
+
+# CRITICAL: rule-refs appears FIRST
+rule-refs:
+  - name: "otc-validation-rules"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/external-rules-otc.yaml"
+    enabled: true
+    description: "Load OTC rules FIRST"
+
+# CRITICAL: enrichment-refs appears SECOND (after rule-refs)
+enrichment-refs:
+  - name: "otc-market-enrichments"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/external-enrichments-otc.yaml"
+    enabled: true
+    description: "Load OTC enrichments SECOND (after rules)"
+
+

@@ -1,0 +1,23 @@
+# Demonstrates SpEL field navigation with multiple levels of nesting (NEW in v2.3)
+# Shows how to access deeply nested fields using # prefix
+metadata:
+  name: "Deeply Nested Field Navigation Demo"
+  version: "1.0.0"
+
+enrichments:
+  - id: "extract-deeply-nested-fields"
+    type: "field-enrichment"
+    condition: "true"
+    field-mappings:
+      # Access fields 3 levels deep: transaction.trade.counterparty.name
+      - source-field: "#transaction.trade.counterparty.name"
+        target-field: "counterparty_name"
+      
+      # Access fields 3 levels deep: transaction.trade.counterparty.country
+      - source-field: "#transaction.trade.counterparty.country"
+        target-field: "counterparty_country"
+      
+      # Access fields 3 levels deep: transaction.trade.details.currency
+      - source-field: "#transaction.trade.details.currency"
+        target-field: "trade_currency"
+

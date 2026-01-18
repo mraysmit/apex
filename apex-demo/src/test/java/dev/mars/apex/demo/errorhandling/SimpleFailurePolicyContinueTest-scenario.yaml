@@ -1,0 +1,40 @@
+# ============================================================================
+# APEX FAILURE POLICY DEMONSTRATION: CONTINUE-WITH-WARNINGS POLICY SCENARIO
+# ============================================================================
+
+metadata:
+  id: "continue-test-scenario"
+  name: "Continue With Warnings Policy Test Scenario"
+  version: "1.0.0"
+  description: "Multi-stage scenario demonstrating continue-with-warnings failure policy"
+  type: "scenario"
+
+scenario:
+  scenario-id: "continue-with-warnings-test"
+  name: "Continue With Warnings Policy Test Scenario"
+  description: "Multi-stage scenario demonstrating continue-with-warnings failure policy"
+
+  data-types:
+    - "HashMap"
+    - "java.util.Map"
+
+  processing-stages:
+    # Stage 1: Validation (designed to fail but continue)
+    - stage-name: "validation"
+      config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyContinueTest-validation.yaml"
+      execution-order: 1
+      failure-policy: "continue-with-warnings"
+      required: true
+      stage-metadata:
+        description: "Validation stage - will fail but processing continues"
+        expected-behavior: "FAIL - but continue with warnings"
+
+    # Stage 2: Enrichment (should execute despite stage 1 failure)
+    - stage-name: "enrichment"
+      config-file: "src/test/java/dev/mars/apex/demo/errorhandling/SimpleFailurePolicyContinueTest-enrichment.yaml"
+      execution-order: 2
+      failure-policy: "continue-with-warnings"
+      required: false
+      stage-metadata:
+        description: "Enrichment stage - should execute despite validation failure"
+        expected-behavior: "EXECUTE - continues processing despite previous failure"

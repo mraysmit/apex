@@ -1,0 +1,37 @@
+metadata:
+  name: "Flag and React Pattern Test"
+  description: "Verifies that Rule Chains can trigger Enrichments via result-fields"
+  version: "1.0"
+  type: "rule-config"
+
+rule-chains:
+  - id: "vip-processing-chain"
+    name: "VIP Processing Chain"
+    description: "Determines if VIP processing is required"
+    pattern: "conditional-chaining"
+    configuration:
+      trigger-rule:
+        condition: "#customerType == 'VIP' && #amount > 10000"
+        message: "VIP High Value Transaction Detected"
+        result-field: "vipProcessingRequired"
+      
+      conditional-rules:
+        on-trigger:
+          - id: "log-vip-approval"
+            condition: "true"
+            message: "VIP processing approved"
+        on-no-trigger:
+          - id: "log-standard-processing"
+            condition: "true"
+            message: "Standard processing"
+
+enrichments:
+  - id: "apply-vip-bonus"
+    name: "Apply VIP Bonus"
+    description: "Apply bonus points for VIP processing"
+    type: "field-enrichment"
+    condition: "#vipProcessingRequired == true"
+    field-mappings:
+      - source-field: "amount"
+        target-field: "bonusPoints"
+        expression: "#amount * 0.1"

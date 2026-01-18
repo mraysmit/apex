@@ -1,0 +1,34 @@
+name: "Edge Case Test 7 - Empty Numbered Sections"
+description: "Tests that empty numbered sections mixed with populated ones are handled correctly"
+
+# Test: Empty numbered sections mixed with populated ones
+# Question: Does merge logic handle empty sections correctly?
+
+# Empty section
+enrichments-1:
+
+# Populated section
+enrichments-2:
+  - id: "item-1"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "'value-1'"
+      result-field: "result1"
+    field-mappings:
+      - source-field: "result1"
+        target-field: "result1"
+    enabled: true
+
+  - id: "item-2"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "'value-2'"
+      result-field: "result2"
+    field-mappings:
+      - source-field: "result2"
+        target-field: "result2"
+    enabled: true
+
+# Another empty section
+enrichments-3:
+

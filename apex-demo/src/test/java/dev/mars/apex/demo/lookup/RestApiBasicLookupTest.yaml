@@ -1,0 +1,185 @@
+# REST API Basic Lookup Configuration
+# Demonstrates JDK HTTP Server integration for REST API testing
+# Use Case: Currency exchange rate lookup using built-in JDK HTTP server (no external dependencies)
+
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: RestApiBasicLookupTest.java (Phase 2.1 implementation)
+# Purpose: Basic REST API demonstration using APEX lookup enrichments with
+#          JDK built-in HTTP server integration and simple REST API operations
+# Status: ACTIVE - Integrated with basic REST API tests
+# ============================================================================
+
+metadata:
+  id: "rest-api-basic-lookup-demo"
+  name: "REST API Basic Lookup Demo"
+  version: "1.0.0"
+  description: "Basic REST API integration using JDK built-in HTTP server for testing"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+
+# Data source configuration for REST API integration
+data-sources:
+  - name: "basic-rest-api-server"
+    type: "rest-api"
+    enabled: true
+    description: "JDK built-in HTTP server for basic REST API testing"
+    
+    connection:
+      base-url: "http://localhost:8080"  # Will be updated dynamically by test
+      timeout: 5000
+      max-retries: 3
+      retry-delay-ms: 1000
+    
+    endpoints:
+      currency-lookup: "/api/currency/{key}"
+      currency-conversion: "/api/convert?from={from}&to={to}&amount={amount}"
+      health-check: "/api/health"
+    
+    cache:
+      enabled: true
+      ttl-seconds: 300  # 5 minutes
+      max-size: 100
+
+# Enrichment configuration for currency rate lookup
+enrichments:
+  - id: "basic-currency-rate-enrichment"
+    name: "Basic Currency Rate Lookup"
+    type: "lookup-enrichment"
+    description: "Lookup currency exchange rates using REST API"
+    enabled: true
+    
+    # Condition: Only enrich if currency code is present
+    condition: "#currencyCode != null && #currencyCode != ''"
+    
+    # Lookup configuration
+    lookup-config:
+      lookup-key: "#currencyCode"
+      lookup-dataset:
+        type: "rest-api"
+        data-source-ref: "basic-rest-api-server"
+        operation-ref: "currency-lookup"
+    
+    # Field mappings from API response to enriched data
+    field-mappings:
+      - source-field: "name"
+        target-field: "currencyName"
+        required: true
+      - source-field: "symbol"
+        target-field: "currencySymbol"
+        required: false
+      - source-field: "rate"
+        target-field: "exchangeRate"
+        required: true
+      - source-field: "lastUpdated"
+        target-field: "rateTimestamp"
+        required: false
+
+  - id: "basic-currency-conversion-enrichment"
+    name: "Basic Currency Conversion"
+    type: "lookup-enrichment"
+    description: "Convert currency amounts using REST API"
+    enabled: true
+    
+    # Condition: Only convert if all required fields are present
+    condition: "#fromCurrency != null && #toCurrency != null && #amount != null"
+    
+    # Lookup configuration for conversion
+    lookup-config:
+      lookup-key: "#fromCurrency + '_' + #toCurrency + '_' + #amount"
+      lookup-dataset:
+        type: "rest-api"
+        data-source-ref: "basic-rest-api-server"
+        operation-ref: "currency-conversion"
+        parameters:
+          from: "#fromCurrency"
+          to: "#toCurrency"
+          amount: "#amount"
+    
+    # Field mappings from conversion API response
+    field-mappings:
+      - source-field: "convertedAmount"
+        target-field: "convertedAmount"
+        required: true
+      - source-field: "exchangeRate"
+        target-field: "conversionRate"
+        required: true
+      - source-field: "timestamp"
+        target-field: "conversionTimestamp"
+        required: false
+
+# Processing configuration
+processing:
+  parallel-execution: false
+  fail-fast: true
+  max-execution-time-ms: 10000
+  
+  # Error handling
+  error-handling:
+    strategy: "stop-on-error"
+    max-retries: 2
+    retry-delay-ms: 500
+    
+  # Logging configuration
+  logging:
+    level: "INFO"
+    log-enrichment-results: true
+    log-performance-metrics: true
+
+# Validation rules
+validation:
+  required-fields:
+    - "currencyCode"
+  
+  field-constraints:
+    currencyCode:
+      type: "string"
+      min-length: 3
+      max-length: 3
+      pattern: "[A-Z]{3}"
+    
+    amount:
+      type: "number"
+      min-value: 0.01
+      max-value: 1000000.00
+
+# Test scenarios for validation
+test-scenarios:
+  - name: "USD Currency Lookup"
+    description: "Test USD currency rate lookup"
+    input:
+      currencyCode: "USD"
+    expected-output:
+      currencyName: "US Dollar"
+      currencySymbol: "$"
+      exchangeRate: 1.0
+  
+  - name: "EUR Currency Lookup"
+    description: "Test EUR currency rate lookup"
+    input:
+      currencyCode: "EUR"
+    expected-output:
+      currencyName: "Euro"
+      currencySymbol: "€"
+      exchangeRate: 0.85
+  
+  - name: "Currency Conversion"
+    description: "Test USD to EUR conversion"
+    input:
+      fromCurrency: "USD"
+      toCurrency: "EUR"
+      amount: 100.0
+    expected-output:
+      convertedAmount: 85.0
+      conversionRate: 0.85
+
+# Performance benchmarks
+performance:
+  target-response-time-ms: 1000
+  max-response-time-ms: 5000
+  target-throughput-rps: 100
+  
+  # Memory constraints
+  max-memory-usage-mb: 50
+  max-cache-size-entries: 100

@@ -1,0 +1,61 @@
+name: "Test 6A: Numbered Suffixes with Groups-Only Logic"
+description: "Tests that groups-only logic works correctly when enrichments are defined in numbered sections"
+
+# First batch: standalone enrichments
+enrichments-1:
+  - id: "standalone-1"
+    name: "Standalone 1"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('standalone-1', 'value1')"
+      result-field: "value1"
+    field-mappings:
+      - source-field: "value1"
+        target-field: "value1"
+    enabled: true
+
+  - id: "grouped-1"
+    name: "Grouped 1"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('grouped-1', 'value2')"
+      result-field: "value2"
+    field-mappings:
+      - source-field: "value2"
+        target-field: "value2"
+    enabled: true
+
+# Second batch: more enrichments
+enrichments-2:
+  - id: "standalone-2"
+    name: "Standalone 2"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('standalone-2', 'value3')"
+      result-field: "value3"
+    field-mappings:
+      - source-field: "value3"
+        target-field: "value3"
+    enabled: true
+
+  - id: "grouped-2"
+    name: "Grouped 2"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('grouped-2', 'value4')"
+      result-field: "value4"
+    field-mappings:
+      - source-field: "value4"
+        target-field: "value4"
+    enabled: true
+
+# Enrichment group that references grouped enrichments
+enrichment-groups:
+  - id: "group-A"
+    name: "Group A"
+    description: "Group that references enrichments from numbered sections"
+    enrichment-ids:
+      - "grouped-1"
+      - "grouped-2"
+    enabled: true
+

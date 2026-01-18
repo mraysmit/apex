@@ -33,7 +33,7 @@ public class ComprehensiveConditionalTransformationTest {
         transformationProcessor = new YamlTransformationProcessor();
         
         // Load the configuration once
-        String filePath = "src/test/resources/dev/mars/apex/demo/transformation/ComprehensiveConditionalTransformationTest.yaml";
+        String filePath = "src/test/java/dev/mars/apex/demo/transformation/ComprehensiveConditionalTransformationTest.yaml";
         File configFile = new File(filePath);
         String absolutePath = configFile.getAbsolutePath();
         

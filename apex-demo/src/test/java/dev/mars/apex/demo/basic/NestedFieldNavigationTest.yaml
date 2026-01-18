@@ -1,0 +1,16 @@
+# Demonstrates SpEL field navigation (NEW in v2.3)
+# Shows how to access nested fields using # prefix
+metadata:
+  name: "Nested Field Navigation Demo"
+  version: "1.0.0"
+
+enrichments:
+  - id: "extract-nested-fields"
+    type: "field-enrichment"
+    condition: "true"
+    field-mappings:
+      - source-field: "#trade.currency"
+        target-field: "trade_currency"
+      - source-field: "#trade.amount"
+        target-field: "trade_amount"
+

@@ -1,0 +1,57 @@
+name: "Test 9: Transformations with Numbered Suffixes"
+description: "Test transformations-1, transformations-2, transformations-3 preserve document order"
+
+# Test Case: Verify numbered suffix transformations execute in document order
+# Expected execution order: batch1-t1, batch1-t2, batch2-t1, batch2-t2, batch3-t1, batch3-t2
+
+transformations-1:
+  - id: "batch1-t1"
+    name: "Batch 1 Transform 1"
+    type: "field-transformation"
+    source-field: "value"
+    target-field: "result1"
+    expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('batch1-t1', #value + '-B1T1')"
+    enabled: true
+
+  - id: "batch1-t2"
+    name: "Batch 1 Transform 2"
+    type: "field-transformation"
+    source-field: "value"
+    target-field: "result2"
+    expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('batch1-t2', #value + '-B1T2')"
+    enabled: true
+
+transformations-2:
+  - id: "batch2-t1"
+    name: "Batch 2 Transform 1"
+    type: "field-transformation"
+    source-field: "value"
+    target-field: "result3"
+    expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('batch2-t1', #value + '-B2T1')"
+    enabled: true
+
+  - id: "batch2-t2"
+    name: "Batch 2 Transform 2"
+    type: "field-transformation"
+    source-field: "value"
+    target-field: "result4"
+    expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('batch2-t2', #value + '-B2T2')"
+    enabled: true
+
+transformations-3:
+  - id: "batch3-t1"
+    name: "Batch 3 Transform 1"
+    type: "field-transformation"
+    source-field: "value"
+    target-field: "result5"
+    expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('batch3-t1', #value + '-B3T1')"
+    enabled: true
+
+  - id: "batch3-t2"
+    name: "Batch 3 Transform 2"
+    type: "field-transformation"
+    source-field: "value"
+    target-field: "result6"
+    expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('batch3-t2', #value + '-B3T2')"
+    enabled: true
+

@@ -1,0 +1,65 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: SimpleBasicYamlRuleGroupProcessingTest.java (testSimpleRuleGroupProcessing method)
+# Purpose: Test configuration demonstrating separate file concept with combined YAML
+#          for testing APEX rule group processing and rules engine functionality
+#          with multiple rules in a single configuration file
+# ============================================================================
+
+metadata:
+  id: "basic-rules-combined-config"
+  name: "Separate Rules Test - Combined Configuration"
+  version: "1.0.0"
+  description: "Test configuration demonstrating separate file concept with combined YAML"
+  type: "rule-config"
+  author: "apex-demo-team@example.com"
+
+rules:
+  - id: "separate-rule-1"
+    name: "Always True Rule 1"
+    condition: "true"
+    message: "Separate Rule 1 passed"
+    severity: "ERROR"
+    priority: 1
+
+  - id: "separate-rule-2"
+    name: "Always False Rule 2"
+    condition: "false"
+    message: "Separate Rule 2 failed"
+    severity: "WARNING"
+    priority: 2
+
+  - id: "separate-rule-3"
+    name: "Always True Rule 3"
+    condition: "true"
+    message: "Separate Rule 3 passed"
+    severity: "INFO"
+    priority: 3
+
+rule-groups:
+  - id: "separate-and-group"
+    name: "Separate AND Group"
+    description: "AND group using separate rules"
+    operator: "AND"
+    rule-ids:
+      - "separate-rule-1"
+      - "separate-rule-3"
+      
+  - id: "separate-or-group"
+    name: "Separate OR Group"
+    description: "OR group using separate rules"
+    operator: "OR"
+    rule-ids:
+      - "separate-rule-1"
+      - "separate-rule-2"
+      - "separate-rule-3"
+      
+  - id: "separate-and-mixed-group"
+    name: "Separate AND Mixed Group"
+    description: "AND group with mixed true/false rules"
+    operator: "AND"
+    rule-ids:
+      - "separate-rule-1"
+      - "separate-rule-2"
+      - "separate-rule-3"

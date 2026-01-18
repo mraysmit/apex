@@ -1,0 +1,90 @@
+metadata:
+  name: "Enrichment-Refs Sequential Order Test"
+  type: "rule-config"
+  version: "1.0.0"
+  processing-mode: "sequential"
+  description: |
+    Test that enrichment-refs placeholder is expanded at the correct position in document order.
+
+    Expected Processing Order:
+    1. E1-inline (enrich-counterparty-data) - inline enrichment
+    2. E2-from-ref (enrich-market-data) - from external file
+    3. E3-from-ref (calculate-greeks) - from external file
+    4. R1 (validate-greeks-calculated) - depends on E3
+
+    This verifies that:
+    - enrichment-refs placeholder is inserted at correct position during parsing
+    - Placeholder is expanded to actual enrichments after reference processing
+    - Referenced enrichments execute BEFORE subsequent rules
+
+# Error recovery configuration
+# Rules detect INVALID data (condition = TRUE when data is invalid)
+# With valid data, conditions return FALSE, so we need recovery enabled
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+
+  severity-policies:
+    ERROR:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 0
+
+# INLINE ENRICHMENT - should execute FIRST
+enrichments:
+  - id: "enrich-counterparty-data"
+    name: "Enrich Counterparty Data"
+    type: "lookup-enrichment"
+    description: "Lookup counterparty credit information"
+    lookup-config:
+      lookup-key: "#counterparty"
+      lookup-dataset:
+        type: "inline"
+        key-field: "counterparty"
+        data:
+          - counterparty: "HEDGE_FUND_X"
+            creditRating: "AA"
+            creditLimit: 100000000.0
+          - counterparty: "BANK_Y"
+            creditRating: "AAA"
+            creditLimit: 500000000.0
+          - counterparty: "CORP_Z"
+            creditRating: "BBB"
+            creditLimit: 50000000.0
+    field-mappings:
+      - source-field: "creditRating"
+        target-field: "counterpartyCreditRating"
+      - source-field: "creditLimit"
+        target-field: "counterpartyCreditLimit"
+    enabled: true
+
+# REFERENCE TO EXTERNAL FILE - should expand to E2, E3 at this position
+enrichment-refs:
+  - name: "otc-market-enrichments"
+    source: "src/test/java/dev/mars/apex/demo/sequencing/external-enrichments-otc.yaml"
+    enabled: true
+    description: "Load market data and greeks calculation enrichments"
+
+# RULES - should execute AFTER all enrichments (inline + referenced)
+rules:
+  - id: "validate-counterparty-enriched"
+    name: "Validate Counterparty Data Enriched"
+    condition: "#counterpartyCreditRating == null || #counterpartyCreditLimit == null"
+    message: "Counterparty data must be enriched before validation"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "validate-market-data-enriched"
+    name: "Validate Market Data Enriched"
+    condition: "#currentSpotPrice == null || #impliedVolatility == null"
+    message: "Market data must be enriched (from external file)"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "validate-greeks-calculated"
+    name: "Validate Greeks Calculated"
+    condition: "#optionDelta == null"
+    message: "Option greeks must be calculated (depends on market data from external file)"
+    severity: "ERROR"
+    enabled: true
+

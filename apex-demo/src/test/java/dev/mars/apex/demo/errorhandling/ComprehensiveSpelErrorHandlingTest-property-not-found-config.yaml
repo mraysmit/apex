@@ -1,0 +1,46 @@
+# ========================================================================
+# PROPERTY NOT FOUND ERROR TEST - SCENARIO CONFIGURATION
+# ========================================================================
+#
+# This scenario configuration tests SpEL property not found exceptions.
+# The most common SpEL error: "Property or field 'X' cannot be found"
+#
+# CRITICAL REQUIREMENT: These errors must be handled gracefully through
+# RuleResult.error() and never result in stack trace dumps.
+#
+# Test Strategy:
+# 1. Create rules that reference non-existent properties
+# 2. Execute with data that doesn't contain those properties
+# 3. Verify errors are converted to RuleResult.error() responses
+# 4. Ensure no stack traces are logged
+#
+# Author: APEX Team
+# Since: 1.0.0
+# ========================================================================
+
+# Scenario metadata
+metadata:
+  id: "property-not-found-config"
+  name: "Property Not Found Error Configuration"
+  description: "Configuration for testing SpEL property not found error handling"
+  version: "1.0.0"
+
+# Stage-based scenario configuration
+stages:
+  # ========================================================================
+  # VALIDATION STAGE - Property Not Found Errors
+  # ========================================================================
+  - id: "validation"
+    name: "Property Not Found Validation"
+    description: "Tests various property not found scenarios"
+    config: "src/test/java/dev/mars/apex/demo/errorhandling/ComprehensiveSpelErrorHandlingTest-property-not-found-rules.yaml"
+    failure-policy: "continue-with-warnings"  # Continue processing to test multiple errors
+    
+  # ========================================================================
+  # ENRICHMENT STAGE - More Property Errors
+  # ========================================================================
+  - id: "enrichment"
+    name: "Property Not Found Enrichment"
+    description: "Tests property errors in enrichment context"
+    config: "src/test/java/dev/mars/apex/demo/errorhandling/ComprehensiveSpelErrorHandlingTest-property-enrichment-rules.yaml"
+    failure-policy: "continue-with-warnings"

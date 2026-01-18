@@ -1,0 +1,132 @@
+# ============================================================================
+# APEX YAML Configuration File - Simplified Version for Testing
+# ============================================================================
+# Used by: UpdateStageFxTransactionSimpleTest.java
+# Purpose: Demonstrate FX transaction stage updates with conditional logic
+#          Simplified version focusing on conditional field mapping and calculations
+# Status: Ready for testing
+# ============================================================================
+
+metadata:
+  id: "update-stage-fx-transaction-simple"
+  name: "Update Stage FX Transaction - Simple"
+  version: "1.0.0"
+  description: "Simplified FX Transaction Processing with Conditional Logic"
+  type: "external-data-config"
+  author: "APEX Demo Team"
+  created: "2025-09-26"
+  tags: ["conditional", "fx-transaction", "field-mapping", "calculation"]
+
+enrichments:
+  # Simple currency rank assignment (hardcoded for testing)
+  - id: "assign-buy-currency-rank"
+    type: "calculation-enrichment"
+    condition: "#BUY_CURRENCY != null"
+    calculation-config:
+      expression: "#BUY_CURRENCY == 'USD' ? 1 : (#BUY_CURRENCY == 'EUR' ? 2 : (#BUY_CURRENCY == 'GBP' ? 3 : 5))"
+      result-field: "BUY_CURRENCY_RANK"
+    field-mappings:
+      - source-field: "BUY_CURRENCY_RANK"
+        target-field: "BUY_CURRENCY_RANK"
+
+  # Simple currency rank assignment for sell currency
+  - id: "assign-sell-currency-rank"
+    type: "calculation-enrichment"
+    condition: "#SELL_CURRENCY != null"
+    calculation-config:
+      expression: "#SELL_CURRENCY == 'USD' ? 1 : (#SELL_CURRENCY == 'EUR' ? 2 : (#SELL_CURRENCY == 'GBP' ? 3 : 5))"
+      result-field: "SELL_CURRENCY_RANK"
+    field-mappings:
+      - source-field: "SELL_CURRENCY_RANK"
+        target-field: "SELL_CURRENCY_RANK"
+
+  # IS_NDF rule1 IF branch
+  - id: "is-ndf-if-rule1"
+    name: "is-ndf-if-rule1"
+    description: "Check if IS_NDF is in {0,1} and SYSTEM_CODE is SWIFT"
+    type: "calculation-enrichment"
+    target-type: "LinkedHashMap"
+    enabled: true
+    condition: true
+    calculation-config:
+      expression: "({'0', '1'}.contains(#IS_NDF)) && (#SYSTEM_CODE == 'SWIFT')"
+      result-field: "is_ndf_if_result"
+    field-mappings:
+      - source-field: "is_ndf_if_result"
+        target-field: "is_ndf_if_result"
+        required: true
+
+  # IS_NDF rule1 THEN branch
+  - id: "is-ndf-then-rule1"
+    name: "is-ndf-then-rule1"
+    type: "field-enrichment"
+    description: "Apply direct NDF mapping when rule1 succeeds"
+    enabled: true
+    condition: "#is_ndf_if_result == true"
+    field-mappings:
+      - source-field: "IS_NDF"
+        target-field: "FINAL_IS_NDF"
+
+  # IS_NDF rule2 IF branch
+  - id: "is-ndf-if-rule2"
+    name: "is-ndf-if-rule2"
+    type: "calculation-enrichment"
+    description: "Check if we need rule builder function"
+    enabled: true
+    condition: "#is_ndf_if_result != true"
+    calculation-config:
+      expression: "#IS_NDF != null && #SYSTEM_CODE == 'SWIFT'"
+      result-field: "run_rule_builder_function_flag"
+    field-mappings:
+      - source-field: "run_rule_builder_function_flag"
+        target-field: "run_rule_builder_function_flag"
+
+  # Set translation parameters when rule2 applies
+  - id: "map-translation-type"
+    name: "map-translation-type"
+    type: "calculation-enrichment"
+    description: "Set translation type for rule builder function"
+    enabled: true
+    condition: "#run_rule_builder_function_flag == true"
+    calculation-config:
+      expression: "'IS_NDF'"
+      result-field: "TRANSLATION_TYPE"
+    field-mappings:
+      - source-field: "TRANSLATION_TYPE"
+        target-field: "TRANSLATION_TYPE"
+
+  # Set external code when rule2 applies
+  - id: "map-external-code"
+    name: "map-external-code"
+    type: "field-enrichment"
+    description: "Set external code for rule builder function"
+    enabled: true
+    condition: "#run_rule_builder_function_flag == true"
+    field-mappings:
+      - source-field: "IS_NDF"
+        target-field: "EXTERNAL_CODE"
+
+  # Simulate rule builder function result (simplified)
+  - id: "simulate-rule-builder-result"
+    name: "simulate-rule-builder-result"
+    type: "calculation-enrichment"
+    description: "Simulate external code to internal code mapping"
+    enabled: true
+    condition: "#run_rule_builder_function_flag == true"
+    calculation-config:
+      expression: "#EXTERNAL_CODE == 'Y' ? 'YES' : (#EXTERNAL_CODE == 'N' ? 'NO' : (#EXTERNAL_CODE == '1' ? 'YES' : (#EXTERNAL_CODE == '0' ? 'NO' : 'UNKNOWN')))"
+      result-field: "INTERNAL_CODE"
+    field-mappings:
+      - source-field: "INTERNAL_CODE"
+        target-field: "INTERNAL_CODE"
+
+  # Final mapping of internal code to IS_NDF
+  - id: "map-final-internal-code"
+    name: "map-final-internal-code"
+    type: "field-enrichment"
+    description: "Map internal code result to final IS_NDF"
+    enabled: true
+    condition: "#run_rule_builder_function_flag == true && #INTERNAL_CODE != null"
+    field-mappings:
+      - source-field: "INTERNAL_CODE"
+        target-field: "FINAL_IS_NDF"

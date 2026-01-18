@@ -2,15 +2,15 @@ COMPREHENSIVE APEX YAML VALIDATION REPORT
 =========================================
 
 OVERALL STATISTICS:
-  Total YAML files: 173
-  Fully valid files: 88
-  Structurally valid: 88
+  Total YAML files: 222
+  Fully valid files: 137
+  Structurally valid: 137
   Dependency issues only: 0
   Invalid files: 85
 
 SUCCESS RATES:
-  Overall success rate: 50.9%
-  Structural success rate: 50.9%
+  Overall success rate: 61.7%
+  Structural success rate: 61.7%
 
 ERROR BREAKDOWN:
   Missing Required Fields: 84 occurrences
@@ -43,5 +43,5 @@ SAMPLE INVALID FILES:
 
 BULK FIX IMPACT ASSESSMENT:
   Previous estimated rate: 21.3%
-  Current actual rate: 50.9%
-  Improvement: +29.6 percentage points
+  Current actual rate: 61.7%
+  Improvement: +40.4 percentage points

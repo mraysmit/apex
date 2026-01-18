@@ -19,6 +19,7 @@
 metadata:
   id: "rules-engine-pipeline-h2-test"
   name: "RulesEngine Pipeline Integration - H2 Database"
+  description: "Tests pipeline execution with H2 embedded database"
   type: "pipeline-config"
   version: "1.0"
   author: "APEX Core Team"

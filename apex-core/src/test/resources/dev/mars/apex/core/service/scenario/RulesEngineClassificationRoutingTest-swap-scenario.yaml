@@ -12,6 +12,9 @@ scenario:
   name: "Commodity Swap Processing"
   description: "Processes commodity swap trades"
   
+  data-types:
+    - "java.util.Map"
+  
   # Embedded classification rule - using direct field access
   classification-rule:
     condition: "#tradeType == 'CommoditySwap'"

@@ -1,0 +1,17 @@
+metadata:
+  name: "External Enrichments for Edge Case Test 5"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "External file with enrichment referenced by main file's group"
+
+enrichments:
+  - id: "external-1"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "'value-from-external'"
+      result-field: "externalResult"
+    field-mappings:
+      - source-field: "externalResult"
+        target-field: "externalResult"
+    enabled: true
+

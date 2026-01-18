@@ -1,0 +1,48 @@
+metadata:
+  id: "success-error-codes-validation-rules"
+  name: "Success and Error Codes Validation Rules"
+  version: "1.0.0"
+  description: "Rules for testing success-code and error-code features with constant and SpEL expressions"
+  type: "rule-config"
+  author: "APEX Demo"
+
+rules:
+  - id: "constant-success-code"
+    name: "Constant Success Code on Match"
+    condition: "#amount > 100"
+    message: "Amount is greater than 100"
+    severity: "INFO"
+    enabled: true
+    success-code: "SUCCESS_AMOUNT_VALID"
+
+  - id: "constant-error-code"
+    name: "Constant Error Code on No Match"
+    condition: "#amount > 100"
+    message: "Amount is greater than 100"
+    severity: "INFO"
+    enabled: true
+    error-code: "ERROR_AMOUNT_INVALID"
+
+  - id: "spel-expression-success-code"
+    name: "SpEL Expression Success Code"
+    condition: "#amount > 100"
+    message: "Amount is greater than 100"
+    severity: "INFO"
+    enabled: true
+    success-code: "#amount > 1000 ? 'HIGH_VALUE' : 'NORMAL_VALUE'"
+
+  - id: "backward-compatibility-no-codes"
+    name: "Backward Compatibility - No Codes Specified"
+    condition: "#amount > 100"
+    message: "Amount is greater than 100"
+    severity: "INFO"
+    enabled: true
+
+  - id: "invalid-spel-expression-code"
+    name: "Invalid SpEL Expression in Code"
+    condition: "#amount > 100"
+    message: "Amount is greater than 100"
+    severity: "INFO"
+    enabled: true
+    success-code: "#invalidVariable.method()"
+

@@ -1,0 +1,26 @@
+metadata:
+  id: "required-field-validation-test"
+  name: "Required Field Validation Test"
+
+enrichments:
+  - id: "test-lookup"
+    type: "lookup-enrichment"
+    enabled: true
+    
+    lookup-config:
+      lookup-key: "#id"
+      lookup-dataset:
+        type: "inline"
+        key-field: "id"
+        data:
+          - id: "1"
+            name: "Test1"
+          - id: "2"
+            name: "Test2"
+          - id: "3"
+            name: "Test3"
+    
+    field-mappings:
+      - source-field: "name"
+        target-field: "resultName"
+        required: true

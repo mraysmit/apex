@@ -12,6 +12,9 @@ scenario:
   name: "High-Notional OTC Option Processing"
   description: "Processes high-value OTC option trades (> $100M)"
   
+  data-types:
+    - "java.util.Map"
+  
   # Embedded classification rule with numeric comparison (Option B) - using direct field access
   classification-rule:
     condition: "#tradeType == 'OTCOption' && #notional > 100000000"

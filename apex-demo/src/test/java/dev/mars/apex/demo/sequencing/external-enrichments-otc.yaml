@@ -1,0 +1,49 @@
+metadata:
+  name: "External OTC Enrichments"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "External enrichments for OTC options trade processing - referenced by main config"
+
+# These enrichments will be loaded via enrichment-refs
+# They should appear in document order at the position of the enrichment-refs placeholder
+
+enrichments:
+  - id: "enrich-market-data"
+    name: "Enrich Market Data"
+    type: "lookup-enrichment"
+    description: "Lookup current market data for the option"
+    lookup-config:
+      lookup-key: "#underlying"
+      lookup-dataset:
+        type: "inline"
+        key-field: "underlying"
+        data:
+          - underlying: "SPX"
+            spotPrice: 4500.0
+            volatility: 18.5
+          - underlying: "NDX"
+            spotPrice: 15000.0
+            volatility: 22.3
+          - underlying: "RUT"
+            spotPrice: 2000.0
+            volatility: 25.1
+    field-mappings:
+      - source-field: "spotPrice"
+        target-field: "currentSpotPrice"
+      - source-field: "volatility"
+        target-field: "impliedVolatility"
+    enabled: true
+
+  - id: "calculate-greeks"
+    name: "Calculate Option Greeks"
+    type: "calculation-enrichment"
+    description: "Calculate delta, gamma, vega based on market data"
+    condition: "#currentSpotPrice != null && #impliedVolatility != null"
+    calculation-config:
+      expression: "#currentSpotPrice * #impliedVolatility * 0.01"
+      result-field: "calculatedValue"
+    field-mappings:
+      - source-field: "calculatedValue"
+        target-field: "optionDelta"
+    enabled: true
+

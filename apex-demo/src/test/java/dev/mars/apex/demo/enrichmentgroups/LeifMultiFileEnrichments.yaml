@@ -1,0 +1,35 @@
+# ============================================================================
+# Leif Multi-file Enrichments - Base enrichments and rule builder group
+# ============================================================================
+metadata:
+  id: "leif-multifile-enrichments"
+  name: "Leif Multi-file Enrichments"
+  version: "1.0.0"
+  type: "rule-config"
+
+enrichments:
+  - id: r1
+    name: Set Field X
+    type: field-enrichment
+    enabled: true
+    field-mappings:
+      - source-field: input_x
+        target-field: output_x
+        required: true
+
+  - id: r2
+    name: Set Field Y
+    type: field-enrichment
+    enabled: true
+    field-mappings:
+      - source-field: input_y
+        target-field: output_y
+        required: true
+
+enrichment-groups:
+  - id: rule_builder_group
+    name: Rule Builder Group
+    operator: AND
+    stop-on-first-failure: true
+    enrichment-ids: [ r1, r2 ]
+

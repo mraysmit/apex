@@ -1,0 +1,31 @@
+# ============================================================================
+# APEX FAILURE POLICY DEMONSTRATION: CONTINUE POLICY ENRICHMENT RULES
+# ============================================================================
+
+metadata:
+  id: "continue-enrichment-rules"
+  name: "Continue Test Enrichment Rules"
+  version: "1.0.0"
+  description: "Enrichment rules that should execute despite validation failure"
+  type: "enrichment-config"
+
+enrichments:
+  - id: "status-enrichment"
+    name: "Status Enrichment"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "'PROCESSED_WITH_WARNINGS'"
+      result-field: "processing-status"
+    field-mappings:
+      - source-field: "processing-status"
+        target-field: "status"
+
+  - id: "timestamp-enrichment"
+    name: "Timestamp Enrichment"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(java.time.Instant).now().toString()"
+      result-field: "processed-at"
+    field-mappings:
+      - source-field: "processed-at"
+        target-field: "timestamp"

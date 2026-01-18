@@ -1,0 +1,36 @@
+name: "Test 4D - Empty Group Edge Case"
+description: "Proves empty groups don't break the system"
+
+enrichments:
+  - id: "standalone-1"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('standalone-1', 'value1')"
+      result-field: "field1"
+    field-mappings:
+      - source-field: "field1"
+        target-field: "field1"
+    enabled: true
+
+  - id: "grouped-1"
+    type: "calculation-enrichment"
+    calculation-config:
+      expression: "T(dev.mars.apex.demo.sequencing.ExecutionTracker).recordAndReturn('grouped-1', 'value2')"
+      result-field: "field2"
+    field-mappings:
+      - source-field: "field2"
+        target-field: "field2"
+    enabled: true
+
+enrichment-groups:
+  - id: "group-A"
+    name: "Group A"
+    operator: "AND"
+    enrichment-ids:
+      - "grouped-1"
+
+  - id: "empty-group"
+    name: "Empty Group"
+    operator: "AND"
+    enrichment-ids: []
+

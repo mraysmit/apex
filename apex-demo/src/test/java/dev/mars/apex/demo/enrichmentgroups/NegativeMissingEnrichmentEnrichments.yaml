@@ -1,0 +1,31 @@
+﻿# ============================================================================
+# Enrichments (separate file) for negative validation test
+# ============================================================================
+metadata:
+  id: "neg-missing-enrichment-enrichments"
+  name: "Negative: Missing Enrichment (Enrichments file)"
+  version: "1.0.0"
+  type: "rule-config"
+  description: "Negative test case for missing enrichment validation"
+  author: "APEX Demo Team"
+  created: "2025-01-15"
+  tags: ["demo", "enrichments", "negative-test", "validation"]
+
+enrichments:
+  - id: e1
+    name: Copy A
+    type: field-enrichment
+    enabled: true
+    field-mappings:
+      - source-field: a
+        target-field: a_copy
+        required: true
+  - id: e2
+    name: Copy B
+    type: field-enrichment
+    enabled: true
+    field-mappings:
+      - source-field: b
+        target-field: b_copy
+        required: true
+

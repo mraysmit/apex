@@ -1,0 +1,49 @@
+metadata:
+  name: "Chained Dependencies Within Sections Test"
+  type: "rule-config"
+  processing-mode: "sequential"
+  description: "Tests E1->E2 chaining within enrichments section, then R1->R2 chaining within rules section"
+
+# ENRICHMENT CHAIN: E1 -> E2
+# E1 calculates riskScore
+# E2 uses riskScore to determine approvalLevel
+enrichments:
+  - id: "calculate-risk-score"
+    name: "Calculate Risk Score"
+    type: "calculation-enrichment"
+    condition: "#amount != null"
+    calculation-config:
+      expression: "#amount / 100000.0"
+      result-field: "riskScore"
+    field-mappings:
+      - source-field: "riskScore"
+        target-field: "riskScore"
+
+  - id: "determine-approval-level"
+    name: "Determine Approval Level"
+    type: "field-enrichment"
+    condition: "#riskScore != null"
+    field-mappings:
+      - source-field: "riskScore"
+        target-field: "approvalLevel"
+        expression: |
+          #riskScore < 0.3 ? 'AUTO_APPROVE' :
+          #riskScore >= 0.3 && #riskScore < 0.8 ? 'STANDARD' :
+          'MANUAL_REVIEW'
+
+# RULE CHAIN: R1 -> R2
+# R1 validates riskScore exists and is acceptable
+# R2 validates approvalLevel was determined
+rules:
+  - id: "validate-risk-score"
+    name: "Validate Risk Score"
+    condition: "#riskScore != null && #riskScore < 0.8"
+    message: "Risk score is acceptable"
+    severity: "INFO"
+
+  - id: "validate-approval-level"
+    name: "Validate Approval Level"
+    condition: "#approvalLevel != null && (#approvalLevel == 'AUTO_APPROVE' || #approvalLevel == 'STANDARD')"
+    message: "Approval level determined successfully"
+    severity: "INFO"
+

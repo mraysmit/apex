@@ -1,0 +1,70 @@
+# Conditional Stage Execution Scenario
+# Demonstrates conditional processing-stage execution based on data attributes
+# Used by ConditionalStageExecutionTest
+
+metadata:
+  id: "conditional-stage-scenario"
+  name: "Conditional Stage Execution Scenario"
+  description: "Multi-stage OTC options processing with conditional region-specific and value-based stages"
+  version: "1.0.0"
+  type: "scenario"
+  author: "Mark Andrew Ray-Smith Cityline Ltd"
+  created: "2024-11-13"
+
+scenario:
+  scenario-id: "otc-conditional-processing"
+  name: "OTC Options Conditional Processing"
+  description: "Demonstrates conditional stage execution for region-specific compliance and high-value checks"
+  business-domain: "OTC Options Trading"
+  owner: "Trading Operations"
+
+  data-types:
+    - "java.util.Map"
+
+  processing-stages:
+    # Stage 1: Base validation (always executes - no condition)
+    - stage-name: "base-validation"
+      config-file: "src/test/java/dev/mars/apex/demo/scenario/ConditionalStageExecutionTest-base-validation.yaml"
+      execution-order: 1
+      failure-policy: "terminate"
+      required: true
+      stage-metadata:
+        description: "Common validation for all trades"
+        critical: true
+
+    # Stage 2: US compliance (conditional - only for US region)
+    - stage-name: "us-compliance"
+      config-file: "src/test/java/dev/mars/apex/demo/scenario/ConditionalStageExecutionTest-us-compliance.yaml"
+      execution-order: 2
+      condition: "#region == 'US'"
+      failure-policy: "terminate"
+      depends-on: ["base-validation"]
+      stage-metadata:
+        description: "US-specific regulatory compliance"
+        critical: true
+        regulatory: true
+
+    # Stage 3: EMEA compliance (conditional - only for EMEA region)
+    - stage-name: "emea-compliance"
+      config-file: "src/test/java/dev/mars/apex/demo/scenario/ConditionalStageExecutionTest-emea-compliance.yaml"
+      execution-order: 3
+      condition: "#region == 'EMEA'"
+      failure-policy: "terminate"
+      depends-on: ["base-validation"]
+      stage-metadata:
+        description: "EMEA-specific regulatory compliance"
+        critical: true
+        regulatory: true
+
+    # Stage 4: High-value validation (conditional - only for trades > $10M)
+    - stage-name: "high-value-validation"
+      config-file: "src/test/java/dev/mars/apex/demo/scenario/ConditionalStageExecutionTest-high-value.yaml"
+      execution-order: 4
+      condition: "#notionalAmount > 10000000"
+      failure-policy: "flag-for-review"
+      depends-on: ["base-validation"]
+      stage-metadata:
+        description: "Additional validation for high-value trades"
+        critical: false
+        threshold: 10000000
+

@@ -1,0 +1,54 @@
+metadata:
+  id: "simple-restapi-datasource-demo"
+  name: "Simple REST API Data Source Demo"
+  version: "1.0.0"
+  type: "enrichment"
+
+# Simple REST API data source example using RestApiTestableServer
+data-sources:
+  - name: "test-api"
+    type: "rest-api"
+    enabled: true
+    description: "Test REST API server for demo purposes"
+
+    connection:
+      base-url: "http://localhost:8080"
+      timeout: 5000
+      retry-attempts: 2
+
+    endpoints:
+      customer-lookup: "/api/customers/{key}"
+    cache:
+      enabled: true          #  Enable caching
+      ttlSeconds: 600        #  10 minutes TTL
+      maxIdleSeconds: 300    #  5 minutes max idle time
+      maxSize: 1000          #  Max 1000 entries (LRU eviction)
+      keyPrefix: "test"      #  Cache key prefix
+
+enrichments:
+  - id: "customer-api-lookup"
+    name: "Simple Customer API Lookup"
+    type: "lookup-enrichment"
+    description: "Demonstrates the simplest possible REST API data source"
+    condition: "#customerId != null"
+
+    lookup-config:
+      lookup-key: "#customerId"
+      lookup-dataset:
+        type: "rest-api"
+        data-source-ref: "test-api"
+        operation-ref: "customer-lookup"
+
+    field-mappings:
+      - source-field: "customerName"
+        target-field: "customerName"
+        required: false
+      - source-field: "customerType"
+        target-field: "customerType"
+        required: false
+      - source-field: "creditRating"
+        target-field: "creditRating"
+        required: false
+      - source-field: "registrationDate"
+        target-field: "registrationDate"
+        required: false
