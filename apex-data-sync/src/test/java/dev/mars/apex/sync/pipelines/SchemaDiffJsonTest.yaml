@@ -99,12 +99,18 @@ pipelines:
           json-report-output: "schema-diff-json-test.json"  # JSON format output
           fail-on-incompatibility: false  # Report only
 
-data-source-refs:
-  # External data-source reference for CSV
+data-sources:
+  # Inline data-source definition for CSV
   - name: "customers-csv"
-    source: "data-sources/customers-csv.yaml"  # External configuration file
+    type: "file-system"
+    source-type: "file"
     enabled: true
-  # External data-source reference for target schema
+    connection:
+      base-path: "."
+  # Inline data-source definition for target schema
   - name: "customers-target"
-    source: "data-sources/customers-target.yaml"  # External configuration file
+    type: "file-system"
+    source-type: "file"
     enabled: true
+    connection:
+      base-path: "."

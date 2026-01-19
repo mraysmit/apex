@@ -1,0 +1,158 @@
+# =====================================================================================
+# APEX Data Transformation Pipeline - SQL Server to PostgreSQL (H2 Mode)
+# =====================================================================================
+#
+# Purpose:
+#   Demonstrates APEX transformation capabilities during ETL data migration.
+#   Uses H2 database compatibility modes for zero-infrastructure testing.
+#
+# Transformations Applied:
+#   1. String Concatenation: first_name + ' ' + last_name → full_name
+#   2. Case Transform: email → lowercase, department → uppercase
+#   3. Calculation: salary * 0.10 → annual_bonus
+#
+# Pipeline Flow:
+#   SQL Server (H2) → Extract → Transform → Load → PostgreSQL (H2)
+#
+# Database Setup:
+#   - Source: H2 mem:transform_source;MODE=MSSQLServer (employees table)
+#   - Target: H2 mem:transform_target;MODE=PostgreSQL (employees_transformed table)
+#
+# Source Schema (employees):
+#   - id: INT PRIMARY KEY
+#   - first_name: VARCHAR(100)
+#   - last_name: VARCHAR(100)
+#   - email: VARCHAR(255)
+#   - department: VARCHAR(50)
+#   - salary: DECIMAL(10,2)
+#
+# Target Schema (employees_transformed):
+#   - id: INT PRIMARY KEY
+#   - full_name: VARCHAR(200)        ← Concatenation of first_name + ' ' + last_name
+#   - email_lower: VARCHAR(255)      ← Lowercase email
+#   - department_upper: VARCHAR(50)  ← Uppercase department
+#   - annual_bonus: DECIMAL(10,2)    ← Calculated: salary * 0.10
+#
+# Expected Results:
+#   - All 4 employees extracted from source
+#   - Transformations applied correctly
+#   - Transformed data loaded to target
+#
+# =====================================================================================
+
+metadata:
+  id: "data-transformation-h2-test"
+  name: "Data Transformation Pipeline (H2)"
+  version: "1.0"
+  type: "pipeline-config"
+  author: "APEX Team"
+  description: "ETL pipeline with field transformations using H2 compatibility modes"
+
+# =============================================================================
+# Data Sources - SQL Server (simulated via H2)
+# =============================================================================
+data-sources:
+  - name: "sqlserver-source"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "mem:transform_source;MODE=MSSQLServer;DB_CLOSE_DELAY=-1"
+      username: "sa"
+      password: ""
+    enabled: true
+    queries:
+      # Extract all employee data for transformation
+      extractEmployees: "SELECT id, first_name, last_name, email, department, salary FROM employees"
+
+# =============================================================================
+# Data Sinks - PostgreSQL (simulated via H2)
+# =============================================================================
+data-sinks:
+  - name: "postgresql-target"
+    type: "database"
+    source-type: "h2"
+    connection:
+      database: "mem:transform_target;MODE=PostgreSQL;DB_CLOSE_DELAY=-1"
+      username: "sa"
+      password: ""
+    enabled: true
+    operations:
+      # Insert transformed employee data
+      # Parameters are bound from the transformed record fields (lowercase names)
+      insertTransformed: >
+        INSERT INTO employees_transformed 
+          (id, full_name, email_lower, department_upper, annual_bonus)
+        VALUES 
+          (:id, :full_name, :email_lower, :department_upper, :annual_bonus)
+
+# =============================================================================
+# Pipeline Definition - Extract → Transform → Load
+# =============================================================================
+pipeline:
+  name: "employee-data-transformation"
+  description: "Transform employee data during SQL Server to PostgreSQL migration"
+  execution:
+    mode: "sequential"
+    max-retries: 3
+    error-handling: "fail-fast"
+
+  steps:
+    # -------------------------------------------------------------------------
+    # Step 1: Extract from SQL Server (source)
+    # -------------------------------------------------------------------------
+    - name: "extract-employees"
+      type: "extract"
+      description: "Extract employee records from SQL Server source"
+      source: "sqlserver-source"
+      operation: "extractEmployees"
+
+    # -------------------------------------------------------------------------
+    # Step 2: Transform Data (apply business transformations)
+    # All transformations use 'calculation' type which supports SpEL expressions
+    # Note: PipelineExecutor stores results in lowercase field names
+    # -------------------------------------------------------------------------
+    - name: "transform-employee-data"
+      type: "transform"
+      description: "Apply field transformations for PostgreSQL target"
+      depends-on: ["extract-employees"]
+      transformations:
+        # Transformation 1: Concatenate first_name and last_name
+        - name: "create-full-name"
+          type: "calculation"
+          field: "full_name"
+          expression: "#FIRST_NAME + ' ' + #LAST_NAME"
+          description: "Concatenate first and last name with space separator"
+
+        # Transformation 2: Convert email to lowercase
+        - name: "lowercase-email"
+          type: "calculation"
+          field: "email_lower"
+          expression: "#EMAIL.toLowerCase()"
+          description: "Normalize email to lowercase for PostgreSQL"
+
+        # Transformation 3: Convert department to uppercase
+        - name: "uppercase-department"
+          type: "calculation"
+          field: "department_upper"
+          expression: "#DEPARTMENT.toUpperCase()"
+          description: "Standardize department codes to uppercase"
+
+        # Transformation 4: Calculate annual bonus (10% of salary)
+        - name: "calculate-annual-bonus"
+          type: "calculation"
+          field: "annual_bonus"
+          expression: "#SALARY * 0.10"
+          description: "Calculate 10% annual bonus from base salary"
+
+    # -------------------------------------------------------------------------
+    # Step 3: Load into PostgreSQL (target)
+    # -------------------------------------------------------------------------
+    - name: "load-transformed-employees"
+      type: "load"
+      description: "Load transformed employee data into PostgreSQL"
+      sink: "postgresql-target"
+      operation: "insertTransformed"
+      depends-on: ["transform-employee-data"]
+      parameters:
+        batch-size: 100
+        on-error: "continue"

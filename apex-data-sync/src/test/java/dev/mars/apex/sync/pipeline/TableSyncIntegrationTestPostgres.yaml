@@ -1,0 +1,103 @@
+# =====================================================================================
+# APEX Data Sync Pipeline - Real SQL Server to Real PostgreSQL Test
+# =====================================================================================
+#
+# Purpose:
+#   Tests complete ETL pipeline (Extract-Transform-Load) with REAL SQL Server and
+#   REAL PostgreSQL databases to validate actual cross-platform data synchronization.
+#
+# Test Scenarios:
+#   1. Extract: Read data from REAL SQL Server database (via Testcontainers)
+#   2. Load: Insert data into REAL PostgreSQL database (via Testcontainers)
+#   3. Validate: End-to-end sync pipeline execution with actual databases
+#
+# Database Setup:
+#   - Source: Real SQL Server 2022 via Testcontainers
+#   - Target: Real PostgreSQL 15 via Testcontainers
+#   - Dynamic connection details from test setup
+#
+# Pipeline Stages:
+#   - extract-from-sqlserver: Execute extractCustomers query
+#   - load-into-postgresql: Execute upsertCustomer operation
+#   - Sequential execution with dependency management
+#
+# Cross-Platform Benefits:
+#   - Tests actual SQL Server and PostgreSQL behavior
+#   - Validates real type mapping (NVARCHAR → VARCHAR)
+#   - Catches database-specific issues (collation, encoding, case sensitivity)
+#   - Production-like validation without manual database setup
+#   - Auto-cleanup via Testcontainers
+#
+# Expected Results:
+#   - Data extracted from real SQL Server database
+#   - Data loaded into real PostgreSQL database
+#   - Pipeline executes successfully with correct type conversion
+#   - All records synced accurately
+#
+# Related Tests:
+#   - TableSyncIntegrationTestH2: Same test with H2 emulation
+#   - SqlServerPostgresMigrationTest: Schema comparison validation
+#
+# =====================================================================================
+
+metadata:
+  id: "test-sync-pipeline-sqlserver-postgres"
+  name: "Real SQL Server to Real PostgreSQL Sync Pipeline"
+  version: "1.0"
+  type: "pipeline-config"
+  author: "Mark Andrew Ray-Smith Cityline Ltd"
+  description: "Cross-platform sync from SQL Server to PostgreSQL using real databases"
+
+data-sources:
+  - name: "sqlserver-source"
+    type: "database"
+    source-type: "sqlserver"  # Real SQL Server database
+    connection:
+      # Connection details provided by Testcontainers via system properties
+      host: "${SQLSERVER_SOURCE_HOST}"  # Dynamic host from container
+      port: "${SQLSERVER_SOURCE_PORT}"  # Dynamic port from container (1433)
+      database: "master"  # SQL Server database name
+      username: "${SQLSERVER_SOURCE_USER}"  # Username: sa
+      password: "${SQLSERVER_SOURCE_PASS}"  # Password: YourStrong!Passw0rd
+    enabled: true
+    queries:
+      extractCustomers: "SELECT id, name FROM customers"
+
+data-sinks:
+  - name: "postgresql-target"
+    type: "database"
+    source-type: "postgresql"  # Real PostgreSQL database
+    connection:
+      # Connection details provided by Testcontainers via system properties
+      host: "${POSTGRES_TARGET_HOST}"  # Dynamic host from container
+      port: "${POSTGRES_TARGET_PORT}"  # Dynamic port from container
+      database: "${POSTGRES_TARGET_DB}"  # Database name: target_postgres
+      username: "${POSTGRES_TARGET_USER}"  # Username: test
+      password: "${POSTGRES_TARGET_PASS}"  # Password: test
+    enabled: true
+    operations:
+      # PostgreSQL INSERT with ON CONFLICT for upsert capability
+      upsertCustomer: "INSERT INTO customers (id, name) VALUES (:ID, :NAME) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name"
+    schema:
+      auto-create: false  # Table created in test setup
+      table-name: "customers"
+
+pipeline:
+  name: "sqlserver-to-postgres-sync"
+  execution:
+    mode: "sequential"  # Steps execute in order
+    max-retries: 3
+    error-handling: "fail-on-error"  # Fail fast for integration testing
+  steps:
+    - name: "extract-from-sqlserver"
+      type: "extract"  # Extract from SQL Server source
+      source: "sqlserver-source"
+      operation: "extractCustomers"  # Query to execute
+      description: "Extract customer data from SQL Server (H2 MSSQLServer mode)"
+
+    - name: "load-into-postgresql"
+      type: "load"  # Load to PostgreSQL target
+      sink: "postgresql-target"
+      operation: "upsertCustomer"  # Insert with upsert capability
+      depends-on: ["extract-from-sqlserver"]  # Wait for extraction to complete
+      description: "Load customer data into real PostgreSQL database"

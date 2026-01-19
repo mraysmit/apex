@@ -1,4 +1,4 @@
-package pipelines;
+package dev.mars.apex.sync.pipelines;
 
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.sync.SyncTestBase;
@@ -27,7 +27,7 @@ class SchemaDiffDualOutputTest extends SyncTestBase {
         logger.info("\n=== Schema Diff Dual Output Test ===\n");
         
         // Load the dual-output test configuration
-        var config = yamlLoader.loadFromFile("src/test/java/pipelines/SchemaDiffDualOutputTest.yaml");
+        var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/sync/pipelines/SchemaDiffDualOutputTest.yaml");
         assertNotNull(config, "Configuration should load successfully");
         
         // Create the rules engine

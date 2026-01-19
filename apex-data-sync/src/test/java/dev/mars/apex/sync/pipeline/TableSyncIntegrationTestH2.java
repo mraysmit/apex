@@ -16,14 +16,16 @@
  * Created: 2026-01-14
  */
 
-package dev.mars.apex.sync;
+package dev.mars.apex.sync.pipeline;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.ExecutionStep;
 import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.sync.ColoredTestOutputExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -41,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2.1.0
  */
+@ExtendWith(ColoredTestOutputExtension.class)
 public class TableSyncIntegrationTestH2 {
 
     @Test
@@ -59,7 +62,7 @@ public class TableSyncIntegrationTestH2 {
 
         // 2. Run Sync via APEX Core (using YAML file)
         YamlConfigurationLoader loader = new YamlConfigurationLoader();
-        YamlRuleConfiguration yamlConfig = loader.loadFromFile("src/test/java/dev/mars/apex/sync/pipeline/SyncPipelineH2Test.yaml");
+        YamlRuleConfiguration yamlConfig = loader.loadFromFile("src/test/java/dev/mars/apex/sync/pipeline/TableSyncIntegrationTestH2.yaml");
         RulesEngine engine = RulesEngine.fromYamlConfig(yamlConfig);
         RuleResult result = engine.evaluate(new HashMap<>());
 
