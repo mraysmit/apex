@@ -222,7 +222,7 @@
     <div class="container">
         <h1>Schema Comparison: test-source → test-target</h1>
         <div class="metadata">
-            <strong>Generated:</strong>2026-01-19 16:43:53    <br/>
+            <strong>Generated:</strong>2026-01-19 17:15:50    <br/>
     <strong>Tool:</strong> APEX Rules Engine v2.1 - Schema Diff Service
 </div>
 <div class="comparison-header">
@@ -252,7 +252,7 @@
 </tr>
 <tr>
 <th style="background-color: #3498db; color: white; padding: 8px; text-align: left; width: 140px;">Port</th>
-<td style="padding: 8px; border-bottom: 1px solid #ddd;">61807</td>
+<td style="padding: 8px; border-bottom: 1px solid #ddd;">62149</td>
 </tr>
 <tr>
 <th style="background-color: #3498db; color: white; padding: 8px; text-align: left; width: 140px;">Database</th>
@@ -283,7 +283,7 @@
 </tr>
 <tr>
 <th style="background-color: #3498db; color: white; padding: 8px; text-align: left; width: 140px;">Port</th>
-<td style="padding: 8px; border-bottom: 1px solid #ddd;">61807</td>
+<td style="padding: 8px; border-bottom: 1px solid #ddd;">62149</td>
 </tr>
 <tr>
 <th style="background-color: #3498db; color: white; padding: 8px; text-align: left; width: 140px;">Database</th>
