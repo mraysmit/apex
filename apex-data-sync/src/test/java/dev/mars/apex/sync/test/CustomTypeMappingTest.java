@@ -24,9 +24,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -55,25 +57,33 @@ public class CustomTypeMappingTest {
 
     private static final Logger logger = LoggerFactory.getLogger(CustomTypeMappingTest.class);
     
+    private static final DockerImageName POSTGRES_IMAGE = 
+        DockerImageName.parse("postgres:15-alpine3.20")
+            .asCompatibleSubstituteFor("postgres");
+    
     @Container
-    private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine3.20")
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test");
+    @SuppressWarnings("resource")
+    private static final GenericContainer<?> postgres = new GenericContainer<>(POSTGRES_IMAGE)
+            .withEnv("POSTGRES_DB", "testdb")
+            .withEnv("POSTGRES_USER", "test")
+            .withEnv("POSTGRES_PASSWORD", "test")
+            .withExposedPorts(5432)
+            .waitingFor(Wait.forLogMessage(".*database system is ready to accept connections.*", 2));
     
     private static String jdbcUrl;
 
     @BeforeAll
     public static void setUp() {
-        jdbcUrl = postgres.getJdbcUrl();
+        jdbcUrl = "jdbc:postgresql://" + postgres.getHost() + ":" 
+            + postgres.getMappedPort(5432) + "/testdb";
         logger.info("PostgreSQL container started: {}", jdbcUrl);
         
         // Set system properties for YAML config
         System.setProperty("DB_HOST", postgres.getHost());
-        System.setProperty("DB_PORT", String.valueOf(postgres.getFirstMappedPort()));
-        System.setProperty("DB_NAME", postgres.getDatabaseName());
-        System.setProperty("DB_USER", postgres.getUsername());
-        System.setProperty("DB_PASS", postgres.getPassword());
+        System.setProperty("DB_PORT", String.valueOf(postgres.getMappedPort(5432)));
+        System.setProperty("DB_NAME", "testdb");
+        System.setProperty("DB_USER", "test");
+        System.setProperty("DB_PASS", "test");
     }
 
     @Test

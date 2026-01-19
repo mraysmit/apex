@@ -15,6 +15,8 @@
  */
 package dev.mars.apex.sync.schema;
 
+import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.*;
@@ -123,9 +125,11 @@ public class ReadSchemaDatabasePipelineStageTest_postgresql_shouldEnumerateTable
         logger.info("  Database: {}", postgres.getDatabaseName());
         logger.info("  Username: {}", postgres.getUsername());
 
-        // Load the configuration from classpath
-        RulesEngine engine = RulesEngine.fromClasspath(
-            "dev/mars/apex/sync/schema/ReadSchemaDatabasePipelineStageTest_postgresql_shouldEnumerateTablesAndGenerateReport.yaml");
+        // Load the configuration from YAML file
+        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        YamlRuleConfiguration yamlConfig = loader.loadFromFile(
+            "src/test/java/dev/mars/apex/sync/schema/ReadSchemaDatabasePipelineStageTest_postgresql_shouldEnumerateTablesAndGenerateReport.yaml");
+        RulesEngine engine = RulesEngine.fromYamlConfig(yamlConfig);
         RuleResult result = engine.evaluate(new HashMap<>());
         
         // Verify execution

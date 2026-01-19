@@ -28,14 +28,16 @@ import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.MSSQLServerContainer;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.DockerClientFactory;
+import org.testcontainers.utility.DockerImageName;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,8 +64,8 @@ public class SyncPipelineContainersTest {
 
     private static final Logger logger = LoggerFactory.getLogger(SyncPipelineContainersTest.class);
     
-    private static MSSQLServerContainer<?> sqlServer;
-    private static PostgreSQLContainer<?> postgres;
+    private static GenericContainer<?> sqlServer;
+    private static GenericContainer<?> postgres;
     private final YamlConfigurationLoader yamlLoader = new YamlConfigurationLoader();
 
     @BeforeAll
@@ -80,12 +82,35 @@ public class SyncPipelineContainersTest {
         
         // Start containers only if Docker is available
         try {
-            sqlServer = new MSSQLServerContainer<>(TestContainerImages.MSSQL_SERVER)
-                    .acceptLicense();
+            sqlServer = new GenericContainer<>(DockerImageName.parse(TestContainerImages.MSSQL_SERVER)
+                    .asCompatibleSubstituteFor("mcr.microsoft.com/mssql/server"))
+                    .withEnv("ACCEPT_EULA", "Y")
+                    .withEnv("SA_PASSWORD", "YourStrong@Passw0rd")
+                    .withExposedPorts(1433)
+                    .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofMinutes(2)));
             sqlServer.start();
             
-            postgres = new PostgreSQLContainer<>(TestContainerImages.POSTGRES);
+            postgres = new GenericContainer<>(DockerImageName.parse(TestContainerImages.POSTGRES)
+                    .asCompatibleSubstituteFor("postgres"))
+                    .withEnv("POSTGRES_DB", "test")
+                    .withEnv("POSTGRES_USER", "test")
+                    .withEnv("POSTGRES_PASSWORD", "test")
+                    .withExposedPorts(5432)
+                    .waitingFor(Wait.forLogMessage(".*database system is ready to accept connections.*", 2));
             postgres.start();
+            
+            // Set system properties for YAML placeholders
+            System.setProperty("SOURCE_DB_HOST", sqlServer.getHost());
+            System.setProperty("SOURCE_DB_PORT", String.valueOf(sqlServer.getMappedPort(1433)));
+            System.setProperty("SOURCE_DB_NAME", "master");
+            System.setProperty("SOURCE_DB_USER", "sa");
+            System.setProperty("SOURCE_DB_PASS", "YourStrong@Passw0rd");
+            
+            System.setProperty("TARGET_DB_HOST", postgres.getHost());
+            System.setProperty("TARGET_DB_PORT", String.valueOf(postgres.getMappedPort(5432)));
+            System.setProperty("TARGET_DB_NAME", "test");
+            System.setProperty("TARGET_DB_USER", "test");
+            System.setProperty("TARGET_DB_PASS", "test");
         } catch (Exception e) {
             Assumptions.assumeTrue(false,
                 "Failed to start containers. Skipping test. Error: " + e.getMessage());
@@ -109,7 +134,9 @@ public class SyncPipelineContainersTest {
         logger.info("=== Starting SQL Server to PostgreSQL Sync Test (TestContainers) ===");
 
         // Setup source data in SQL Server
-        try (Connection conn = DriverManager.getConnection(sqlServer.getJdbcUrl(), sqlServer.getUsername(), sqlServer.getPassword())) {
+        String sqlServerUrl = "jdbc:sqlserver://" + sqlServer.getHost() + ":" 
+            + sqlServer.getMappedPort(1433) + ";encrypt=false;trustServerCertificate=true";
+        try (Connection conn = DriverManager.getConnection(sqlServerUrl, "sa", "YourStrong@Passw0rd")) {
             try (Statement stmt = conn.createStatement()) {
                 stmt.execute("CREATE TABLE customers (id INT PRIMARY KEY, name VARCHAR(255))");
                 stmt.execute("INSERT INTO customers (id, name) VALUES (1, 'Alice from SQL Server')");
@@ -120,7 +147,9 @@ public class SyncPipelineContainersTest {
         logger.info("Created and populated SQL Server source table");
 
         // Setup target table in PostgreSQL
-        try (Connection conn = DriverManager.getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())) {
+        String postgresUrl = "jdbc:postgresql://" + postgres.getHost() + ":" 
+            + postgres.getMappedPort(5432) + "/test";
+        try (Connection conn = DriverManager.getConnection(postgresUrl, "test", "test")) {
             try (Statement stmt = conn.createStatement()) {
                 stmt.execute("CREATE TABLE IF NOT EXISTS customers (id INT PRIMARY KEY, name VARCHAR(255))");
             }
@@ -134,12 +163,12 @@ public class SyncPipelineContainersTest {
         // Programmatically update connection details with TestContainers values
         // This is the proven pattern from apex-demo PostgreSQLSimpleLookupTest
         updateDataSourceConnection(config, "sqlserver-source", 
-            sqlServer.getHost(), sqlServer.getFirstMappedPort(), "master",
-            sqlServer.getUsername(), sqlServer.getPassword());
+            sqlServer.getHost(), sqlServer.getMappedPort(1433), "master",
+            "sa", "YourStrong@Passw0rd");
         
         updateDataSinkConnection(config, "postgresql-target",
-            postgres.getHost(), postgres.getFirstMappedPort(), postgres.getDatabaseName(),
-            postgres.getUsername(), postgres.getPassword());
+            postgres.getHost(), postgres.getMappedPort(5432), "test",
+            "test", "test");
         
         // Create RulesEngine from updated config
         RulesEngine rulesEngine = RulesEngine.fromYamlConfig(config);
@@ -188,7 +217,7 @@ public class SyncPipelineContainersTest {
         assertNotNull(loadStep, "Should have load/transform step");
 
         // Verify target data in PostgreSQL
-        try (Connection conn = DriverManager.getConnection(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())) {
+        try (Connection conn = DriverManager.getConnection(postgresUrl, "test", "test")) {
             try (Statement stmt = conn.createStatement()) {
                 try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM customers")) {
                     assertTrue(rs.next(), "Should have result");

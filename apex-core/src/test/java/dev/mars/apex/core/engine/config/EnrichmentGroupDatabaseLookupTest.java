@@ -45,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-12-03
  */
-@DisplayName("CRITICAL: Enrichment Groups with Database Lookups")
+@DisplayName("Enrichment Groups with Database Lookups")
 public class EnrichmentGroupDatabaseLookupTest {
 
     private static final Logger logger = LoggerFactory.getLogger(EnrichmentGroupDatabaseLookupTest.class);
@@ -112,7 +112,7 @@ public class EnrichmentGroupDatabaseLookupTest {
     }
 
     @Test
-    @DisplayName("CRITICAL: Enrichment-group with database lookup should pass yamlConfig and execute successfully")
+    @DisplayName("Enrichment-group with database lookup should pass yamlConfig and execute successfully")
     void testEnrichmentGroupWithDatabaseLookup() throws Exception {
         logger.info("TEST START: Enrichment-group with database lookup");
         
@@ -176,7 +176,7 @@ public class EnrichmentGroupDatabaseLookupTest {
     }
 
     @Test
-    @DisplayName("CRITICAL: Multiple enrichment-groups with database lookups should all execute successfully")
+    @DisplayName("Multiple enrichment-groups with database lookups should all execute successfully")
     void testMultipleEnrichmentGroupsWithDatabaseLookups() throws Exception {
         logger.info("TEST START: Multiple enrichment-groups with database lookups");
         
@@ -214,12 +214,12 @@ public class EnrichmentGroupDatabaseLookupTest {
                        " (Rating: " + enrichedData.get("creditRating") + ")");
         }
         
-        logger.info("✓ TEST PASSED: All enrichment-groups with database lookups executed successfully");
+        logger.info("TEST PASSED: All enrichment-groups with database lookups executed successfully");
         engine.shutdown();
     }
 
     @Test
-    @DisplayName("EDGE CASE: Enrichment-group with database lookup should handle missing customer gracefully")
+    @DisplayName("Enrichment-group with database lookup should handle missing customer gracefully")
     void testEnrichmentGroupWithDatabaseLookupMissingCustomer() throws Exception {
         logger.info("=== INTENTIONAL ERROR TEST: Database lookup for non-existent customer ===");
         logger.info("TEST START: Enrichment-group with database lookup for non-existent customer");
@@ -261,7 +261,7 @@ public class EnrichmentGroupDatabaseLookupTest {
         Object customerName = enrichedData.get("customerName");
         logger.info("  customerName for non-existent customer: " + customerName);
         
-        logger.info("✓ TEST PASSED: Enrichment-group handled missing customer with proper error reporting");
+        logger.info("TEST PASSED: Enrichment-group handled missing customer with proper error reporting");
         engine.shutdown();
     }
 }

@@ -57,12 +57,12 @@ data-sources:
     type: "database"
     source-type: "sqlserver"  # Real SQL Server via Testcontainers
     connection:
-      # These values are overwritten programmatically by the test
-      host: "localhost"  # Provided by Testcontainers
-      port: 1433
-      database: "master"
-      username: "sa"
-      password: "placeholder"  # Provided by Testcontainers
+      # These values are overwritten programmatically by the test via system properties
+      host: "${SOURCE_DB_HOST}"
+      port: ${SOURCE_DB_PORT}
+      database: "${SOURCE_DB_NAME}"
+      username: "${SOURCE_DB_USER}"
+      password: "${SOURCE_DB_PASS}"
     enabled: true
     queries:
       extractCustomers: "SELECT id, name FROM customers"
@@ -72,12 +72,12 @@ data-sinks:
     type: "database"
     source-type: "postgresql"  # Real PostgreSQL via Testcontainers
     connection:
-      # These values are overwritten programmatically by the test
-      host: "localhost"  # Provided by Testcontainers
-      port: 5432
-      database: "test"
-      username: "test"
-      password: "placeholder"  # Provided by Testcontainers
+      # These values are overwritten programmatically by the test via system properties
+      host: "${TARGET_DB_HOST}"
+      port: ${TARGET_DB_PORT}
+      database: "${TARGET_DB_NAME}"
+      username: "${TARGET_DB_USER}"
+      password: "${TARGET_DB_PASS}"
     enabled: true
     operations:
       upsertCustomer: "INSERT INTO customers (id, name) VALUES (:id, :name)"

@@ -18,7 +18,8 @@
 
 package dev.mars.apex.sync;
 
-import dev.mars.apex.core.config.yaml.RulesEngineService;
+import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.ExecutionStep;
 import dev.mars.apex.core.engine.model.RuleResult;
@@ -56,8 +57,10 @@ public class TableSyncIntegrationTestH2 {
             }
         }
 
-        // 2. Run Sync via APEX Core (using classpath resource)
-        RulesEngine engine = RulesEngine.fromClasspath("test-sync-pipeline-h2.yaml");
+        // 2. Run Sync via APEX Core (using YAML file)
+        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        YamlRuleConfiguration yamlConfig = loader.loadFromFile("src/test/java/dev/mars/apex/sync/pipeline/SyncPipelineH2Test.yaml");
+        RulesEngine engine = RulesEngine.fromYamlConfig(yamlConfig);
         RuleResult result = engine.evaluate(new HashMap<>());
 
         // 4. Verify Result

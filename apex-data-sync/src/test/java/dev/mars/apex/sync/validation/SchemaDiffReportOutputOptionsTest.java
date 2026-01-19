@@ -23,7 +23,8 @@ import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -76,30 +77,42 @@ class SchemaDiffReportOutputOptionsTest extends SyncTestBase {
         }
     }
 
-    @Container
-    private static final PostgreSQLContainer<?> sourceDb = new PostgreSQLContainer<>(TestContainerImages.POSTGRES)
-            .withDatabaseName("source_db")
-            .withInitScript(null);
+    private static final DockerImageName POSTGRES_IMAGE = 
+        DockerImageName.parse(TestContainerImages.POSTGRES)
+            .asCompatibleSubstituteFor("postgres");
 
     @Container
-    private static final PostgreSQLContainer<?> targetDb = new PostgreSQLContainer<>(TestContainerImages.POSTGRES)
-            .withDatabaseName("target_db")
-            .withInitScript(null);
+    @SuppressWarnings("resource")
+    private static final GenericContainer<?> sourceDb = new GenericContainer<>(POSTGRES_IMAGE)
+            .withEnv("POSTGRES_DB", "source_db")
+            .withEnv("POSTGRES_USER", "test")
+            .withEnv("POSTGRES_PASSWORD", "test")
+            .withExposedPorts(5432)
+            .waitingFor(Wait.forLogMessage(".*database system is ready to accept connections.*", 2));
+
+    @Container
+    @SuppressWarnings("resource")
+    private static final GenericContainer<?> targetDb = new GenericContainer<>(POSTGRES_IMAGE)
+            .withEnv("POSTGRES_DB", "target_db")
+            .withEnv("POSTGRES_USER", "test")
+            .withEnv("POSTGRES_PASSWORD", "test")
+            .withExposedPorts(5432)
+            .waitingFor(Wait.forLogMessage(".*database system is ready to accept connections.*", 2));
 
     @BeforeAll
     static void setupDatabases() throws Exception {
         // Set system properties for both containers
         System.setProperty("SOURCE_DB_HOST", sourceDb.getHost());
-        System.setProperty("SOURCE_DB_PORT", String.valueOf(sourceDb.getFirstMappedPort()));
-        System.setProperty("SOURCE_DB_NAME", sourceDb.getDatabaseName());
-        System.setProperty("SOURCE_DB_USER", sourceDb.getUsername());
-        System.setProperty("SOURCE_DB_PASS", sourceDb.getPassword());
+        System.setProperty("SOURCE_DB_PORT", String.valueOf(sourceDb.getMappedPort(5432)));
+        System.setProperty("SOURCE_DB_NAME", "source_db");
+        System.setProperty("SOURCE_DB_USER", "test");
+        System.setProperty("SOURCE_DB_PASS", "test");
 
         System.setProperty("TARGET_DB_HOST", targetDb.getHost());
-        System.setProperty("TARGET_DB_PORT", String.valueOf(targetDb.getFirstMappedPort()));
-        System.setProperty("TARGET_DB_NAME", targetDb.getDatabaseName());
-        System.setProperty("TARGET_DB_USER", targetDb.getUsername());
-        System.setProperty("TARGET_DB_PASS", targetDb.getPassword());
+        System.setProperty("TARGET_DB_PORT", String.valueOf(targetDb.getMappedPort(5432)));
+        System.setProperty("TARGET_DB_NAME", "target_db");
+        System.setProperty("TARGET_DB_USER", "test");
+        System.setProperty("TARGET_DB_PASS", "test");
 
         // Create test schemas
         setupSourceSchema();
@@ -121,8 +134,9 @@ class SchemaDiffReportOutputOptionsTest extends SyncTestBase {
     }
 
     private static void setupSourceSchema() throws Exception {
-        try (Connection conn = DriverManager.getConnection(
-                sourceDb.getJdbcUrl(), sourceDb.getUsername(), sourceDb.getPassword());
+        String jdbcUrl = "jdbc:postgresql://" + sourceDb.getHost() + ":" 
+            + sourceDb.getMappedPort(5432) + "/source_db";
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, "test", "test");
              Statement stmt = conn.createStatement()) {
 
             stmt.execute("DROP TABLE IF EXISTS products");
@@ -137,8 +151,9 @@ class SchemaDiffReportOutputOptionsTest extends SyncTestBase {
     }
 
     private static void setupTargetSchema() throws Exception {
-        try (Connection conn = DriverManager.getConnection(
-                targetDb.getJdbcUrl(), targetDb.getUsername(), targetDb.getPassword());
+        String jdbcUrl = "jdbc:postgresql://" + targetDb.getHost() + ":" 
+            + targetDb.getMappedPort(5432) + "/target_db";
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, "test", "test");
              Statement stmt = conn.createStatement()) {
 
             stmt.execute("DROP TABLE IF EXISTS products");
