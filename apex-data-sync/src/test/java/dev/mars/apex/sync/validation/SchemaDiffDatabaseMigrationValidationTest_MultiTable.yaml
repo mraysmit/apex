@@ -53,7 +53,7 @@ data-sources:
     source-type: "h2"  # In-memory H2 database
     enabled: true
     connection:
-      url: "jdbc:h2:mem:migration_source_multitable;DB_CLOSE_DELAY=-1"  # In-memory H2
+      database: "mem:migration_source_multitable;DB_CLOSE_DELAY=-1"  # In-memory H2
       username: "sa"
       password: ""
 
@@ -63,7 +63,7 @@ data-sources:
     source-type: "h2"  # In-memory H2 database
     enabled: true
     connection:
-      url: "jdbc:h2:mem:migration_target_multitable;DB_CLOSE_DELAY=-1"  # In-memory H2
+      database: "mem:migration_target_multitable;DB_CLOSE_DELAY=-1"  # In-memory H2
       username: "sa"
       password: ""
 
@@ -73,18 +73,18 @@ pipeline:
   execution:
     mode: "sequential"  # Steps execute in order
   steps:
-    # Customers table validation
+    # Customers table validation (H2 stores table names as UPPERCASE)
     - name: "read-source-customers"
       type: "read-schema"
       source: "source-db"
       parameters:
-        table: "customers"  # Source customers table
+        table: "CUSTOMERS"  # Source customers table (UPPERCASE for H2)
 
     - name: "read-target-customers"
       type: "read-schema"
       source: "target-db"
       parameters:
-        table: "customers"  # Target customers table
+        table: "CUSTOMERS"  # Target customers table (UPPERCASE for H2)
 
     - name: "compare-customers"
       type: "schema-diff"
@@ -95,18 +95,18 @@ pipeline:
         case-insensitive-names: true  # Column name case handling
         report-output: "target/reports/customers-migration-diff.html"  # HTML report
 
-    # Orders table validation
+    # Orders table validation (H2 stores table names as UPPERCASE)
     - name: "read-source-orders"
       type: "read-schema"
       source: "source-db"
       parameters:
-        table: "orders"  # Source orders table
+        table: "ORDERS"  # Source orders table (UPPERCASE for H2)
 
     - name: "read-target-orders"
       type: "read-schema"
       source: "target-db"
       parameters:
-        table: "orders"  # Target orders table
+        table: "ORDERS"  # Target orders table (UPPERCASE for H2)
 
     - name: "compare-orders"
       type: "schema-diff"

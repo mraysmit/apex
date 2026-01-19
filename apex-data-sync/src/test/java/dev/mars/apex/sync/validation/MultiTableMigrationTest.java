@@ -62,6 +62,7 @@ public class MultiTableMigrationTest extends SyncTestBase {
     
     private File customersFile;
     private File ordersFile;
+    private File productsFile;
     private RulesEngine rulesEngine;
 
     @BeforeEach
@@ -80,6 +81,13 @@ public class MultiTableMigrationTest extends SyncTestBase {
             writer.println("order_id,customer_id,amount");
             writer.println("101,1,150.00");
             writer.println("102,2,200.00");
+        }
+
+        productsFile = new File("src/test/resources/test-data/migration-products.csv");
+        try (PrintWriter writer = new PrintWriter(productsFile)) {
+            writer.println("product_id,name,price");
+            writer.println("1001,Widget,29.99");
+            writer.println("1002,Gadget,49.99");
         }
         logger.info("Created test CSV files for multi-table migration");
 
@@ -107,6 +115,9 @@ public class MultiTableMigrationTest extends SyncTestBase {
         }
         if (ordersFile != null && ordersFile.exists()) {
             ordersFile.delete();
+        }
+        if (productsFile != null && productsFile.exists()) {
+            productsFile.delete();
         }
         if (rulesEngine != null) {
             rulesEngine.shutdown();
