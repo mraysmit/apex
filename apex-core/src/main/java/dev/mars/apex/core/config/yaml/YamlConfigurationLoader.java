@@ -8,6 +8,7 @@ import dev.mars.apex.core.config.component.ComponentLoader;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.service.data.external.DataSourceResolver;
 import dev.mars.apex.core.service.data.external.ExternalDataSourceConfig;
+import dev.mars.apex.core.util.PropertyResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -3119,87 +3120,19 @@ public class YamlConfigurationLoader {
 
     /**
      * Resolve environment variables and system properties in configuration values.
+     * Delegates to the centralized PropertyResolver utility.
      * Supports: ${VAR}, ${VAR:default}, $(VAR), $(VAR:default)
-     *
-     * NOTE: This method is added in Phase 1 but not used yet to ensure zero impact.
      *
      * @param value The configuration value that may contain property placeholders
      * @return The value with resolved properties
      * @throws YamlConfigurationException if a required property is not found
      */
     private String resolveProperties(String value) throws YamlConfigurationException {
-        if (value == null || (!value.contains("${") && !value.contains("$("))) {
-            return value;
+        try {
+            return PropertyResolver.resolve(value, true);
+        } catch (PropertyResolver.PropertyResolutionException e) {
+            throw new YamlConfigurationException(e.getMessage(), e);
         }
-
-        logger.debug("Resolving properties in value: " + maskSensitiveValue(value));
-
-        String result = value;
-
-        // First resolve ${VAR} and ${VAR:default} patterns
-        if (result.contains("${")) {
-            Pattern curlyPattern = Pattern.compile("\\$\\{([^}]+)\\}");
-            Matcher curlyMatcher = curlyPattern.matcher(result);
-            StringBuffer curlyResult = new StringBuffer();
-            while (curlyMatcher.find()) {
-                String placeholder = curlyMatcher.group(1);
-                String resolved = resolveSingleProperty(placeholder);
-                curlyMatcher.appendReplacement(curlyResult, Matcher.quoteReplacement(resolved));
-            }
-            curlyMatcher.appendTail(curlyResult);
-            result = curlyResult.toString();
-        }
-
-        // Then resolve $(VAR) and $(VAR:default) patterns
-        if (result.contains("$(")) {
-            Pattern parenPattern = Pattern.compile("\\$\\(([^)]+)\\)");
-            Matcher parenMatcher = parenPattern.matcher(result);
-            StringBuffer parenResult = new StringBuffer();
-            while (parenMatcher.find()) {
-                String placeholder = parenMatcher.group(1);
-                String resolved = resolveSingleProperty(placeholder);
-                parenMatcher.appendReplacement(parenResult, Matcher.quoteReplacement(resolved));
-            }
-            parenMatcher.appendTail(parenResult);
-            result = parenResult.toString();
-        }
-
-        logger.debug("Property resolution completed: " + maskSensitiveValue(result));
-
-        return result;
-    }
-
-    /**
-     * Resolve a single property placeholder.
-     *
-     * @param placeholder The placeholder (e.g., "VAR" or "VAR:default")
-     * @return The resolved value
-     * @throws YamlConfigurationException if the property is not found and no default is provided
-     */
-    private String resolveSingleProperty(String placeholder) throws YamlConfigurationException {
-        // Handle default values: VAR:default
-        String[] parts = placeholder.split(":", 2);
-        String key = parts[0].trim();
-        String defaultValue = parts.length > 1 ? parts[1].trim() : null;
-
-        // Resolution order: System Properties -> Environment Variables -> Default
-        String value = System.getProperty(key);
-        if (value == null) {
-            value = System.getenv(key);
-        }
-        if (value == null && defaultValue != null) {
-            value = defaultValue;
-        }
-        if (value == null) {
-            // Return the original placeholder if property not found
-            return "${" + placeholder + "}";
-        }
-
-        // Log resolution (mask sensitive values)
-        String logValue = isSensitiveProperty(key) ? "[MASKED]" : value;
-        logger.debug("Resolved property: ${" + placeholder + "} -> " + logValue);
-
-        return value;
     }
 
     /**
@@ -3223,69 +3156,38 @@ public class YamlConfigurationLoader {
 
     /**
      * Validate that no unresolved property placeholders remain in the value.
+     * Delegates to the centralized PropertyResolver utility.
      *
      * @param value The value to check for unresolved placeholders
      * @throws YamlConfigurationException if unresolved placeholders are found
      */
     private void validateNoUnresolvedPlaceholders(String value) throws YamlConfigurationException {
-        if (value == null) {
-            return;
-        }
-
-        // Check for unresolved ${...} placeholders
-        Pattern curlyPattern = Pattern.compile("\\$\\{([^}]+)\\}");
-        Matcher curlyMatcher = curlyPattern.matcher(value);
-        if (curlyMatcher.find()) {
-            String placeholder = curlyMatcher.group(1);
-            // Extract property name (before any colon for default values)
-            String propertyName = placeholder.split(":", 2)[0].trim();
-            throw new YamlConfigurationException("Property not found: " + propertyName);
-        }
-
-        // Check for unresolved $(...) placeholders
-        Pattern parenPattern = Pattern.compile("\\$\\(([^)]+)\\)");
-        Matcher parenMatcher = parenPattern.matcher(value);
-        if (parenMatcher.find()) {
-            String placeholder = parenMatcher.group(1);
-            // Extract property name (before any colon for default values)
-            String propertyName = placeholder.split(":", 2)[0].trim();
-            throw new YamlConfigurationException("Property not found: " + propertyName);
+        try {
+            PropertyResolver.validateNoUnresolvedPlaceholders(value);
+        } catch (PropertyResolver.PropertyResolutionException e) {
+            throw new YamlConfigurationException(e.getMessage(), e);
         }
     }
 
     /**
      * Check if a property key contains sensitive information.
+     * Delegates to the centralized PropertyResolver utility.
      *
      * @param key The property key
      * @return true if the property is considered sensitive
      */
     private boolean isSensitiveProperty(String key) {
-        String lowerKey = key.toLowerCase();
-        return lowerKey.contains("password") ||
-               lowerKey.contains("secret") ||
-               lowerKey.contains("token") ||
-               lowerKey.contains("key") ||
-               lowerKey.contains("pwd");
+        return PropertyResolver.isSensitiveProperty(key);
     }
 
     /**
      * Mask sensitive values for logging.
+     * Delegates to the centralized PropertyResolver utility.
      *
      * @param value The value to potentially mask
      * @return The masked value if it appears to contain sensitive data
      */
     private String maskSensitiveValue(String value) {
-        if (value == null) {
-            return null;
-        }
-
-        // If the value contains ${PASSWORD}, ${SECRET}, etc., mask the whole thing
-        String lowerValue = value.toLowerCase();
-        if (lowerValue.contains("password") || lowerValue.contains("secret") ||
-            lowerValue.contains("token") || lowerValue.contains("key")) {
-            return "[MASKED_VALUE_WITH_SENSITIVE_PLACEHOLDERS]";
-        }
-
-        return value;
+        return PropertyResolver.maskSensitiveValue(value);
     }
 }

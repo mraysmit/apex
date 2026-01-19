@@ -1,49 +1,29 @@
 package dev.mars.apex.core.config.yaml;
 
+import dev.mars.apex.core.util.PropertyResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.AfterEach;
 
-import java.lang.reflect.Method;
 import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test for property resolution methods in YamlConfigurationLoader.
+ * Test for property resolution methods in PropertyResolver.
  * 
- * This test verifies the property resolution functionality added in Phase 1
- * without affecting any existing APEX functionality.
+ * This test verifies the property resolution functionality that is now centralized
+ * in the PropertyResolver utility class, used by YamlConfigurationLoader, 
+ * DataSourceResolver, and YamlDataSource.
  */
 public class PropertyResolutionTest {
 
     private static final Logger LOGGER = Logger.getLogger(PropertyResolutionTest.class.getName());
-    
-    private YamlConfigurationLoader loader;
-    private Method resolvePropertiesMethod;
-    private Method resolveSinglePropertyMethod;
-    private Method isSensitivePropertyMethod;
-    private Method maskSensitiveValueMethod;
 
     @BeforeEach
     void setUp() throws Exception {
         LOGGER.info("Setting up PropertyResolutionTest");
-        
-        loader = new YamlConfigurationLoader();
-        
-        // Use reflection to access private methods for testing
-        resolvePropertiesMethod = YamlConfigurationLoader.class.getDeclaredMethod("resolveProperties", String.class);
-        resolvePropertiesMethod.setAccessible(true);
-        
-        resolveSinglePropertyMethod = YamlConfigurationLoader.class.getDeclaredMethod("resolveSingleProperty", String.class);
-        resolveSinglePropertyMethod.setAccessible(true);
-        
-        isSensitivePropertyMethod = YamlConfigurationLoader.class.getDeclaredMethod("isSensitiveProperty", String.class);
-        isSensitivePropertyMethod.setAccessible(true);
-        
-        maskSensitiveValueMethod = YamlConfigurationLoader.class.getDeclaredMethod("maskSensitiveValue", String.class);
-        maskSensitiveValueMethod.setAccessible(true);
         
         // Set up test environment variables and system properties
         System.setProperty("TEST_PROP", "test_value");
@@ -67,7 +47,7 @@ public class PropertyResolutionTest {
         LOGGER.info("TEST: Simple property resolution");
         
         String input = "${TEST_PROP}";
-        String result = (String) resolvePropertiesMethod.invoke(loader, input);
+        String result = PropertyResolver.resolve(input);
         
         assertEquals("test_value", result);
         LOGGER.info("✓ Simple property resolution works: " + input + " -> " + result);
@@ -79,7 +59,7 @@ public class PropertyResolutionTest {
         LOGGER.info("TEST: Property with default value");
         
         String input = "${NONEXISTENT_PROP:default_value}";
-        String result = (String) resolvePropertiesMethod.invoke(loader, input);
+        String result = PropertyResolver.resolve(input);
         
         assertEquals("default_value", result);
         LOGGER.info("✓ Property with default works: " + input + " -> " + result);
@@ -91,7 +71,7 @@ public class PropertyResolutionTest {
         LOGGER.info("TEST: Multiple properties in single string");
         
         String input = "jdbc:postgresql://${TEST_PROP}:5432/db?user=${TEST_DEFAULT:admin}";
-        String result = (String) resolvePropertiesMethod.invoke(loader, input);
+        String result = PropertyResolver.resolve(input);
         
         assertEquals("jdbc:postgresql://test_value:5432/db?user=default_used", result);
         LOGGER.info("✓ Multiple properties work: " + input + " -> " + result);
@@ -103,7 +83,7 @@ public class PropertyResolutionTest {
         LOGGER.info("TEST: String without placeholders");
         
         String input = "plain_string_no_placeholders";
-        String result = (String) resolvePropertiesMethod.invoke(loader, input);
+        String result = PropertyResolver.resolve(input);
         
         assertEquals(input, result);
         LOGGER.info("✓ No placeholders unchanged: " + input + " -> " + result);
@@ -114,7 +94,7 @@ public class PropertyResolutionTest {
     void testNullInput() throws Exception {
         LOGGER.info("TEST: Null input");
         
-        String result = (String) resolvePropertiesMethod.invoke(loader, (String) null);
+        String result = PropertyResolver.resolve(null);
         
         assertNull(result);
         LOGGER.info("✓ Null input handled correctly");
@@ -126,7 +106,7 @@ public class PropertyResolutionTest {
         LOGGER.info("TEST: Missing required property");
 
         String input = "${DEFINITELY_NONEXISTENT_PROPERTY}";
-        String result = (String) resolvePropertiesMethod.invoke(loader, input);
+        String result = PropertyResolver.resolve(input, false); // Don't throw on unresolved
 
         // Should return the original placeholder when property is not found
         assertEquals("${DEFINITELY_NONEXISTENT_PROPERTY}", result);
@@ -142,12 +122,12 @@ public class PropertyResolutionTest {
         String[] normalKeys = {"HOST", "PORT", "DATABASE", "USERNAME", "TIMEOUT"};
         
         for (String key : sensitiveKeys) {
-            boolean result = (Boolean) isSensitivePropertyMethod.invoke(loader, key);
+            boolean result = PropertyResolver.isSensitiveProperty(key);
             assertTrue(result, "Should detect " + key + " as sensitive");
         }
         
         for (String key : normalKeys) {
-            boolean result = (Boolean) isSensitivePropertyMethod.invoke(loader, key);
+            boolean result = PropertyResolver.isSensitiveProperty(key);
             assertFalse(result, "Should not detect " + key + " as sensitive");
         }
         
@@ -160,28 +140,28 @@ public class PropertyResolutionTest {
         LOGGER.info("TEST: Sensitive value masking");
         
         String sensitiveValue = "jdbc:postgresql://host:5432/db?password=${DB_PASSWORD}";
-        String result = (String) maskSensitiveValueMethod.invoke(loader, sensitiveValue);
+        String result = PropertyResolver.maskSensitiveValue(sensitiveValue);
         
         assertEquals("[MASKED_VALUE_WITH_SENSITIVE_PLACEHOLDERS]", result);
         LOGGER.info("✓ Sensitive value masking works");
         
         String normalValue = "jdbc:postgresql://host:5432/db?user=${DB_USER}";
-        String normalResult = (String) maskSensitiveValueMethod.invoke(loader, normalValue);
+        String normalResult = PropertyResolver.maskSensitiveValue(normalValue);
         
         assertEquals(normalValue, normalResult);
         LOGGER.info("✓ Normal value not masked");
     }
 
     @Test
-    @DisplayName("Should resolve system properties over environment variables")
+    @DisplayName("Should resolve system properties")
     void testResolutionPriority() throws Exception {
-        LOGGER.info("TEST: Resolution priority (System Properties > Environment Variables)");
+        LOGGER.info("TEST: System property resolution");
         
-        // This test assumes TEST_PROP is set as system property
-        String result = (String) resolveSinglePropertyMethod.invoke(loader, "TEST_PROP");
+        // This test verifies TEST_PROP is resolved from system property
+        String result = PropertyResolver.resolve("${TEST_PROP}");
         
         assertEquals("test_value", result);
-        LOGGER.info("✓ System property resolution priority works");
+        LOGGER.info("✓ System property resolution works");
     }
 
     @Test
@@ -190,7 +170,7 @@ public class PropertyResolutionTest {
         LOGGER.info("TEST: Complex placeholder patterns");
 
         String input = "host=${TEST_PROP},port=5432,password=${TEST_PASSWORD:fallback},timeout=${TIMEOUT:30}";
-        String result = (String) resolvePropertiesMethod.invoke(loader, input);
+        String result = PropertyResolver.resolve(input);
 
         assertEquals("host=test_value,port=5432,password=secret123,timeout=30", result);
         LOGGER.info("✓ Complex placeholders work: " + input + " -> [RESULT_MASKED_FOR_SECURITY]");
@@ -202,7 +182,7 @@ public class PropertyResolutionTest {
         LOGGER.info("TEST: Simple parentheses property resolution");
 
         String input = "$(TEST_PROP)";
-        String result = (String) resolvePropertiesMethod.invoke(loader, input);
+        String result = PropertyResolver.resolve(input);
 
         assertEquals("test_value", result);
         LOGGER.info("✓ Simple parentheses property resolution works: " + input + " -> " + result);
@@ -214,7 +194,7 @@ public class PropertyResolutionTest {
         LOGGER.info("TEST: Parentheses password property resolution");
 
         String input = "$(TEST_PASSWORD)";
-        String result = (String) resolvePropertiesMethod.invoke(loader, input);
+        String result = PropertyResolver.resolve(input);
 
         assertEquals("secret123", result);
         LOGGER.info("✓ Parentheses password property resolution works: " + input + " -> [MASKED]");
@@ -226,7 +206,7 @@ public class PropertyResolutionTest {
         LOGGER.info("TEST: Parentheses property with default value");
 
         String input = "$(NONEXISTENT_PROP:default_value)";
-        String result = (String) resolvePropertiesMethod.invoke(loader, input);
+        String result = PropertyResolver.resolve(input);
 
         assertEquals("default_value", result);
         LOGGER.info("✓ Parentheses property with default works: " + input + " -> " + result);
@@ -238,7 +218,7 @@ public class PropertyResolutionTest {
         LOGGER.info("TEST: Mixed placeholder syntax");
 
         String input = "host=${TEST_PROP},password=$(TEST_PASSWORD),timeout=$(TIMEOUT:30)";
-        String result = (String) resolvePropertiesMethod.invoke(loader, input);
+        String result = PropertyResolver.resolve(input);
 
         assertEquals("host=test_value,password=secret123,timeout=30", result);
         LOGGER.info("✓ Mixed placeholder syntax works: " + input + " -> [RESULT_MASKED_FOR_SECURITY]");

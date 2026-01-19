@@ -2,9 +2,11 @@ package dev.mars.apex.core.service.data.external;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import dev.mars.apex.core.util.PropertyResolver;
 import dev.mars.apex.core.util.RulesEngineLogger;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -93,13 +95,14 @@ public class DataSourceResolver {
             logger.debug("Successfully loaded data-source configuration from file system: {}", reference);
             return config;
         } catch (DataSourceResolutionException e) {
-            // Check if this is a validation error - if so, don't try classpath
+            // Check if this is a validation or property resolution error - if so, don't try classpath
             if (e.getMessage().contains("metadata is missing") ||
                 e.getMessage().contains("name is missing") ||
-                e.getMessage().contains("spec is missing")) {
-                logger.debug("Validation error from file system, not trying classpath: {}", e.getMessage());
+                e.getMessage().contains("spec is missing") ||
+                e.getMessage().contains("Property not found")) {
+                logger.debug("Validation/property error from file system, not trying classpath: {}", e.getMessage());
                 logger.debug("Full validation exception details:", e);
-                throw e; // Re-throw validation errors immediately
+                throw e; // Re-throw validation/property errors immediately
             }
             logger.debug("Failed to load from file system, trying classpath: {}", e.getMessage());
             logger.debug("Full exception details from file system attempt:", e);
@@ -136,7 +139,13 @@ public class DataSourceResolver {
         }
 
         try {
-            ExternalDataSourceConfig config = yamlMapper.readValue(path.toFile(), ExternalDataSourceConfig.class);
+            // Read file content as string for property resolution
+            String rawContent = Files.readString(path, StandardCharsets.UTF_8);
+            
+            // Resolve environment variables and system properties
+            String resolvedContent = resolveProperties(rawContent);
+            
+            ExternalDataSourceConfig config = yamlMapper.readValue(resolvedContent, ExternalDataSourceConfig.class);
 
             // Validate the loaded configuration
             validateConfiguration(config, reference);
@@ -164,13 +173,22 @@ public class DataSourceResolver {
                     "Data-source configuration not found on classpath: " + reference);
             }
 
-            ExternalDataSourceConfig config = yamlMapper.readValue(inputStream, ExternalDataSourceConfig.class);
+            // Read input stream content as string for property resolution
+            String rawContent = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+            
+            // Resolve environment variables and system properties
+            String resolvedContent = resolveProperties(rawContent);
+            
+            ExternalDataSourceConfig config = yamlMapper.readValue(resolvedContent, ExternalDataSourceConfig.class);
 
             // Validate the loaded configuration
             validateConfiguration(config, reference);
 
             return config;
 
+        } catch (DataSourceResolutionException e) {
+            // Re-throw resolution exceptions as-is
+            throw e;
         } catch (Exception e) {
             throw new DataSourceResolutionException(
                 "Failed to load data-source configuration from classpath: " + reference, e);
@@ -215,5 +233,21 @@ public class DataSourceResolver {
      */
     public int getCacheSize() {
         return configCache.size();
+    }
+    
+    /**
+     * Resolve environment variables and system properties in configuration values.
+     * Delegates to the centralized PropertyResolver utility.
+     *
+     * @param value The configuration value that may contain property placeholders
+     * @return The value with resolved properties
+     * @throws DataSourceResolutionException if a required property is not found
+     */
+    private String resolveProperties(String value) {
+        try {
+            return PropertyResolver.resolve(value, true);
+        } catch (PropertyResolver.PropertyResolutionException e) {
+            throw new DataSourceResolutionException(e.getMessage(), e);
+        }
     }
 }
