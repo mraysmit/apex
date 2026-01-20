@@ -73,4 +73,4 @@ pipeline:
       source: "edge-case-database"
       parameters:
         table: "EDGE_TABLE"  # Table with complex/edge-case schema
-        report-output: "edge-cases-schema.json"  # JSON output (future)
+        report-output: "edge-cases-schema.html"  # HTML format (JSON not yet supported for read-schema)

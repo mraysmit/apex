@@ -1,5 +1,11 @@
 # APEX Data-Sync - Functional Test Mapping
 
+**Version:** 2.1
+**Date:** 2026-01-20
+**Author:** Mark Andrew Ray-Smith Cityline Ltd
+
+> **Consolidated Document**: This document combines functional test mapping with test organization proposal and YAML co-location patterns for comprehensive test guidance.
+
 ## Module Functions & Test Coverage
 
 This document maps **apex-data-sync module functions** to their test coverage, identifying gaps and priorities.
@@ -1164,6 +1170,655 @@ As time permits: 7 low-priority tests
 
 ---
 
-**Document Version**: 1.0  
-**Created**: January 18, 2026  
-**Status**: Ready for Implementation
+## TEST ORGANIZATION & STRUCTURE
+
+> **Integrated from TEST_ORGANIZATION_PROPOSAL.md**
+
+### Current State Analysis
+
+#### Existing Test Structure (19 Test Classes)
+
+```
+apex-data-sync/src/test/java/dev/mars/apex/sync/
+├── pipeline/ (4 tests)
+│   ├── CompletePipelineWithSchemaTest.java
+│   ├── MsSqlToPostgresSyncTest.java
+│   ├── SchemaDiffJsonIntegrationTest.java
+│   └── SyncPipelineH2Test.java (legacy)
+│   └── SyncPipelineContainersTest.java
+├── schema/ (8 tests)
+│   ├── ReadSchemaCsvPipelineStageTest.java
+│   ├── ReadSchemaCsvTest.java
+│   ├── ReadSchemaDatabaseEnumerationPipelineStageTest.java
+│   ├── ReadSchemaDatabasePipelineStageTest.java
+│   ├── ReadSchemaDatabaseTest.java
+│   ├── ReadSchemaLargeCsvTest.java
+│   └── ReadSchemaMultiTableTest.java
+├── schemas/ (1 test)
+│   └── CustomSchemaPostgresTest.java
+├── validation/ (6 tests)
+│   ├── CsvToPostgresMigrationTest.java
+│   ├── MultiTableMigrationTest.java
+│   ├── PreDeploymentValidationTest.java
+│   ├── SchemaDiffReportOutputOptionsTest.java
+│   ├── SchemaEvolutionBreakingTest.java
+│   └── SqlServerPostgresMigrationTest.java
+├── ColoredTestOutputExtension.java
+├── SyncTestBase.java
+├── TableSyncIntegrationTestH2.java
+├── TestConstants.java
+└── TestContainerImages.java
+```
+
+### Proposed Test Organization
+
+#### New Directory Structure
+
+```
+apex-data-sync/src/test/java/dev/mars/apex/sync/
+│
+├── unit/                                    # Fast unit tests (no I/O)
+│   ├── comparison/                          # Schema comparison logic
+│   │   ├── TypeCompatibilityTest.java
+│   │   ├── BreakingChangeDetectionTest.java
+│   │   ├── ColumnDifferenceTest.java
+│   │   ├── NullableConversionTest.java
+│   │   ├── TypeNarrowingTest.java
+│   │   ├── TypeWideningTest.java
+│   │   ├── PrecisionScaleTest.java
+│   │   ├── PrimaryKeyChangeTest.java
+│   │   └── CustomTypeMappingTest.java
+│   │
+│   ├── serialization/                       # JSON serialization
+│   │   ├── JsonSerializationTest.java
+│   │   ├── JsonDeserializationTest.java
+│   │   ├── JsonSchemaValidationTest.java
+│   │   ├── JsonStructureTest.java
+│   │   ├── MetadataGenerationTest.java
+│   │   └── EdgeCaseHandlingTest.java
+│   │
+│   ├── reporting/                           # Report generation
+│   │   ├── markdown/
+│   │   │   ├── MarkdownGenerationTest.java
+│   │   │   ├── TableFormattingTest.java
+│   │   │   ├── EmojiHeaderTest.java
+│   │   │   └── MultiTableMarkdownTest.java
+│   │   ├── html/
+│   │   │   ├── HtmlGenerationTest.java     # (future)
+│   │   │   └── TemplateRenderingTest.java  # (future)
+│   │   └── ReportPathResolutionTest.java
+│   │
+│   └── util/                                # Utility classes
+│       ├── CsvTypeInferenceTest.java
+│       ├── SchemaMetadataBuilderTest.java
+│       └── DataSourceContextTest.java
+│
+├── integration/                             # Database integration tests
+│   ├── schema/                              # Schema reading (real DBs)
+│   │   ├── database/
+│   │   │   ├── PostgreSqlSchemaReadingTest.java
+│   │   │   ├── H2SchemaReadingTest.java
+│   │   │   ├── SqlServerSchemaReadingTest.java  # NEW
+│   │   │   ├── MySqlSchemaReadingTest.java      # NEW
+│   │   │   ├── OracleSchemaReadingTest.java     # NEW
+│   │   │   ├── CustomSchemaTest.java
+│   │   │   └── MultiTableEnumerationTest.java
+│   │   │
+│   │   └── csv/
+│   │       ├── CsvSchemaBasicTest.java
+│   │       ├── CsvSchemaLargeFileTest.java
+│   │       ├── CsvSchemaUnicodeTest.java        # NEW
+│   │       ├── CsvSchemaMalformedTest.java      # NEW
+│   │       └── CsvSchemaEdgeCasesTest.java      # NEW
+│   │
+│   ├── comparison/                          # Schema diff integration
+│   │   ├── platforms/
+│   │   │   ├── CsvToPostgresDiffTest.java
+│   │   │   ├── SqlServerToPostgresDiffTest.java
+│   │   │   ├── MySqlToPostgresDiffTest.java     # NEW
+│   │   │   ├── OracleToPostgresDiffTest.java    # NEW
+│   │   │   └── CrossPlatformTypeMappingTest.java # NEW
+│   │   │
+│   │   └── scenarios/
+│   │       ├── SchemaEvolutionTest.java
+│   │       ├── BreakingChangesTest.java
+│   │       ├── BackwardCompatibilityTest.java   # NEW
+│   │       ├── AdditiveChangesTest.java         # NEW
+│   │       └── DestructiveChangesTest.java      # NEW
+│   │
+│   ├── reporting/                           # End-to-end report generation
+│   │   ├── JsonReportIntegrationTest.java
+│   │   ├── MarkdownReportIntegrationTest.java
+│   │   ├── MultiFormatReportTest.java           # NEW
+│   │   └── ReportOutputOptionsTest.java
+│   │
+│   └── synchronization/                     # Data sync tests
+│       ├── H2SyncTest.java
+│       ├── PostgreSqlSyncTest.java
+│       ├── SqlServerToPostgresSyncTest.java
+│       ├── UpsertConflictResolutionTest.java    # NEW
+│       ├── BatchProcessingTest.java             # NEW
+│       ├── TransactionBoundaryTest.java         # NEW
+│       └── PartialSyncRecoveryTest.java         # NEW
+│
+├── pipeline/                                # End-to-end pipeline tests
+│   ├── workflows/
+│   │   ├── SimpleSchemaReadPipelineTest.java
+│   │   ├── SchemaDiffPipelineTest.java
+│   │   ├── MultiTableDiffPipelineTest.java
+│   │   ├── DataSyncPipelineTest.java
+│   │   └── CompleteE2EPipelineTest.java
+│   │
+│   ├── validation/
+│   │   ├── PreDeploymentValidationTest.java
+│   │   ├── CIIntegrationTest.java               # NEW
+│   │   └── MigrationCompatibilityTest.java      # NEW
+│   │
+│   └── error_handling/                          # NEW category
+│       ├── InvalidConfigurationTest.java
+│       ├── MissingDataSourceTest.java
+│       ├── NetworkFailureTest.java
+│       ├── TimeoutHandlingTest.java
+│       └── PartialExecutionRecoveryTest.java
+│
+├── performance/                             # Performance & stress tests
+│   ├── LargeSchemaComparisonTest.java           # NEW
+│   ├── MultiTablePerformanceTest.java           # NEW
+│   ├── ConcurrentPipelineTest.java              # NEW
+│   ├── MemoryLeakDetectionTest.java             # NEW
+│   ├── ReportGenerationBenchmarkTest.java       # NEW
+│   └── LargeDatasetSyncTest.java                # NEW
+│
+├── fixtures/                                # Test data & resources
+│   ├── schemas/
+│   │   ├── postgresql/
+│   │   ├── sqlserver/
+│   │   ├── mysql/
+│   │   └── oracle/
+│   ├── csv/
+│   │   ├── valid/
+│   │   ├── malformed/
+│   │   ├── unicode/
+│   │   └── large/
+│   ├── json/
+│   │   ├── valid-reports/
+│   │   └── invalid-reports/
+│   └── yaml/
+│       ├── pipelines/
+│       └── data-sources/
+│
+└── support/                                 # Test infrastructure
+    ├── ColoredTestOutputExtension.java
+    ├── SyncTestBase.java
+    ├── TestConstants.java
+    ├── TestContainerImages.java
+    ├── DatabaseTestContainerProvider.java       # NEW
+    ├── CsvTestDataGenerator.java                # NEW
+    ├── SchemaTestDataBuilder.java               # NEW
+    └── AssertionHelpers.java                    # NEW
+```
+
+### Test Categories & Guidelines
+
+#### 1. **Unit Tests** (`unit/`)
+**Purpose**: Fast, isolated tests with no external dependencies
+
+**Characteristics**:
+- No database connections
+- No file I/O (use in-memory data)
+- Mock external dependencies
+- Execution time: < 50ms per test
+- Coverage target: 95%+
+
+**Example**:
+```java
+@Test
+void shouldDetectTypeNarrowing() {
+    ColumnDefinition source = new ColumnDefinition("name", "VARCHAR", 200);
+    ColumnDefinition target = new ColumnDefinition("name", "VARCHAR", 100);
+    
+    ColumnDifference diff = comparator.compare(source, target);
+    
+    assertEquals(ChangeType.SIZE_CHANGED, diff.getChangeType());
+    assertEquals(Severity.BREAKING, diff.getSeverity());
+    assertTrue(diff.getMessage().contains("narrowing"));
+}
+```
+
+#### 2. **Integration Tests** (`integration/`)
+**Purpose**: Test interactions with real databases and file systems
+
+**Characteristics**:
+- Use Testcontainers for real databases
+- Actual file system operations
+- Real JDBC connections
+- Execution time: < 5 seconds per test
+- Coverage target: 90%+
+
+**Example**:
+```java
+@Testcontainers
+class PostgreSqlSchemaReadingTest extends SyncTestBase {
+    
+    @Container
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15");
+    
+    @Test
+    void shouldReadSchemaFromPostgres() {
+        // Create actual table in Testcontainer
+        // Read schema via SchemaReaderService
+        // Verify metadata accuracy
+    }
+}
+```
+
+#### 3. **Pipeline Tests** (`pipeline/`)
+**Purpose**: End-to-end workflow validation
+
+**Characteristics**:
+- Complete YAML pipeline execution
+- Multiple stages (read-schema → diff → report)
+- Real RulesEngine execution
+- Execution time: < 10 seconds per test
+- Coverage target: 85%+
+
+**Example**:
+```java
+@Test
+void shouldExecuteCompleteMigrationValidationPipeline() {
+    RulesEngine engine = RulesEngine.fromFile("test-migration-pipeline.yaml");
+    RuleResult result = engine.evaluate(Map.of());
+    
+    assertTrue(result.isSuccess());
+    assertReportGenerated("reports/migration-diff.json");
+    assertReportGenerated("reports/migration-diff.html");
+}
+```
+
+#### 4. **Performance Tests** (`performance/`)
+**Purpose**: Validate performance characteristics and resource usage
+
+**Characteristics**:
+- Large datasets (100+ columns, 50+ tables)
+- Concurrent execution scenarios
+- Memory profiling
+- Execution time tracking
+- Coverage target: Key scenarios only
+
+**Example**:
+```java
+@Test
+@Timeout(value = 30, unit = TimeUnit.SECONDS)
+void shouldCompare100TablesWithin30Seconds() {
+    List<SchemaMetadata> source = generate100Tables();
+    List<SchemaMetadata> target = generate100Tables();
+    
+    long start = System.currentTimeMillis();
+    SchemaDiff diff = service.compareSchemas(source, target, options);
+    long duration = System.currentTimeMillis() - start;
+    
+    assertTrue(duration < 30000, "Should complete in < 30 seconds");
+    assertEquals(100, diff.getTableDiffs().size());
+}
+```
+
+### Test Naming Conventions
+
+#### Pattern 1: **Unit Tests**
+```
+should[Action][UnderCondition]
+```
+Examples:
+- `shouldDetectTypeNarrowing()`
+- `shouldAllowTypeWidening()`
+- `shouldFailOnNullableToNotNullConversion()`
+
+#### Pattern 2: **Integration Tests**
+```
+should[Action]From[Source][OptionalCondition]
+```
+Examples:
+- `shouldReadSchemaFromPostgres()`
+- `shouldReadSchemaFromCsvWithUnicode()`
+- `shouldCompareSchemasCrossDatabase()`
+
+#### Pattern 3: **Pipeline Tests**
+```
+should[Action][WorkflowDescription]
+```
+Examples:
+- `shouldExecuteCompleteMigrationPipeline()`
+- `shouldFailOnIncompatibleSchemas()`
+- `shouldGenerateAllReportFormats()`
+
+#### Pattern 4: **Performance Tests**
+```
+should[Action][Resource][WithinBenchmark]
+```
+Examples:
+- `shouldCompare100TablesWithin30Seconds()`
+- `shouldGenerateReportWithin500Milliseconds()`
+- `shouldHandle1MillionRowsWithoutMemoryLeak()`
+
+---
+
+## YAML CO-LOCATION PATTERN
+
+> **Integrated from YAML_TEST_FILES_COLOCATION_PATTERN.md**
+
+### Overview
+
+The YAML Co-Location Pattern is a strict organizational principle that ensures every YAML configuration file has a corresponding Java test class in the **same directory**. This pattern provides executable documentation, enforces testability, and prevents orphaned configuration files.
+
+### The Pattern
+
+#### Core Principle
+```
+✅ CORRECT: Co-located in same directory
+src/test/java/dev/mars/apex/sync/schema/
+├── SchemaAnalysisExample.java
+└── SchemaAnalysisExample.yaml
+
+❌ WRONG: Orphaned YAML in separate configs folder
+configs/
+└── schema-analysis-example.yaml
+```
+
+#### Naming Convention
+- **Java test class**: `{BaseName}.java` (PascalCase)
+- **YAML configuration**: `{BaseName}.yaml` (PascalCase - **must exactly match** Java class name)
+- Both files **must** share the **identical base name** including case
+- Both files **must** reside in the same `src/test/java/` subdirectory
+
+**Examples:**
+- ✅ `SchemaAnalysisExample.java` + `SchemaAnalysisExample.yaml`
+- ✅ `ReadSchemaDatabaseTest.java` + `ReadSchemaDatabaseTest.yaml`
+- ❌ `SchemaDiffTest.java` + `schema-diff-test.yaml` (case mismatch)
+- ❌ `TestSchema.java` + `test-schema.yaml` (kebab-case not allowed)
+
+### Implementation Guidelines
+
+#### Directory Structure Example
+```
+apex-data-sync/
+└── src/test/java/dev/mars/apex/sync/
+    ├── schema/
+    │   ├── ReadSchemaDatabaseTest.java
+    │   ├── ReadSchemaDatabaseTest.yaml
+    │   ├── ReadSchemaCsvTest.java
+    │   ├── ReadSchemaCsvTest.yaml
+    │   ├── SchemaAnalysisExample.java
+    │   └── SchemaAnalysisExample.yaml
+    ├── validation/
+    │   ├── PreDeploymentValidationTest.java
+    │   └── PreDeploymentValidationTest.yaml
+    └── transform/
+        ├── CustomTypeMappingTest.java
+        └── CustomTypeMappingTest.yaml
+```
+
+#### Java Test Class Template
+```java
+package dev.mars.apex.sync.schema;
+
+import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.sync.SyncTestBase;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class SchemaAnalysisExample extends SyncTestBase {
+    
+    @Test
+    void shouldDemonstrateSchemaAnalysisCapabilities() throws Exception {
+        // Load co-located YAML configuration
+        var config = yamlLoader.loadFromFile(
+            "src/test/java/dev/mars/apex/sync/schema/SchemaAnalysisExample.yaml"
+        );
+        
+        assertNotNull(config, "Configuration should load successfully");
+        
+        var engine = RulesEngine.fromYamlConfig(config);
+        assertNotNull(engine, "Engine should be created from configuration");
+        
+        // Note: This example demonstrates configuration only
+        // Execution patterns vary based on use case
+    }
+}
+```
+
+### Pattern Benefits
+
+1. **Executable Documentation**
+   - YAML configurations are validated through actual test execution
+   - Examples are guaranteed to work, not just documented wishful thinking
+   - Changes to core engine immediately surface in test failures
+
+2. **Discoverability**
+   - Developers find related test code and configuration together
+   - No searching across multiple directories or modules
+   - Clear ownership: tests own their configurations
+
+3. **Prevents Configuration Drift**
+   - Orphaned YAML files are immediately visible as pattern violations
+   - Configuration changes require corresponding test updates
+   - Version control tracks changes to both files together
+
+4. **Test Isolation**
+   - Each test has its own configuration file
+   - No shared configuration leading to test interdependencies
+   - Easy to create variations by copying both files together
+
+### Anti-Patterns to Avoid
+
+#### ❌ Module-Root Configuration Folders
+```
+apex-data-sync/
+├── configs/                    # WRONG: Breaks co-location
+│   └── schema-example.yaml
+└── src/test/java/
+```
+
+**Problem**: Separates configuration from the code that uses it, creates orphaned files.
+
+#### ❌ Shared Configuration Files
+```java
+// WRONG: Multiple tests sharing one YAML file
+class Test1 { loadFromFile("shared-config.yaml"); }
+class Test2 { loadFromFile("shared-config.yaml"); }
+```
+
+**Problem**: Creates hidden dependencies between tests, makes changes risky.
+
+#### ❌ YAML Without Java Test
+```
+src/test/java/dev/mars/apex/sync/
+└── orphaned-config.yaml        # WRONG: No matching .java file
+```
+
+**Problem**: Untested configuration, unclear purpose, will eventually break.
+
+### Adoption Metrics
+
+- **Total co-located pairs**: 100+ in apex-data-sync module
+- **Adoption rate**: 100% of YAML configurations since v2.1
+- **Pattern violations**: 0 (enforced through code review)
+
+### Migration Path
+
+If you find a YAML file in the wrong location:
+
+1. **Identify the correct package**: Where should this configuration be tested?
+2. **Move the YAML**: To `src/test/java/{package}/`
+3. **Create matching test**: `{BaseName}.java` in same directory
+4. **Extend `SyncTestBase`**: Provides `yamlLoader`, `logger`, test setup
+5. **Load configuration**: Use relative path to co-located YAML file
+6. **Run test**: Verify configuration loads and executes correctly
+7. **Clean up**: Remove old location, update any references
+
+#### Creating New Test Classes
+
+**IMPORTANT**: When creating Java test classes for orphaned YAML files, always follow the patterns from existing working examples:
+
+1. **Find reference examples**: Look at existing test classes in the same package or similar scenarios
+   - Example: `SchemaAnalysisExample.java` for schema-related tests
+   - Example: `ReadSchemaDatabaseTest.java` for database schema tests
+
+2. **Copy the structure**:
+   - Package declaration matching directory structure
+   - Extends `SyncTestBase`
+   - Standard imports: `RulesEngine`, `Test`, assertions
+   - Descriptive JavaDoc explaining purpose and use cases
+
+3. **Follow the test pattern**:
+   ```java
+   @Test
+   void shouldDescribeWhatThisTests() throws Exception {
+       logger.info("\n=== Test Description ===\n");
+       var config = yamlLoader.loadFromFile("src/test/java/{package}/{FileName}.yaml");
+       assertNotNull(config, "Configuration should load successfully");
+       var engine = RulesEngine.fromYamlConfig(config);
+       // Additional assertions or execution as needed
+   }
+   ```
+
+4. **Use consistent naming**:
+   - Test method names: `should...` describing expected behavior
+   - Variable names: `config`, `engine`, following established conventions
+   - Log messages: Consistent formatting with existing tests
+
+5. **Match existing style**: Look at 5-10 working examples in the module to understand:
+   - How tests are structured
+   - What assertions are used
+   - How configurations are loaded
+   - When execution vs configuration-only is appropriate
+
+**Don't improvise** - the module has 100+ working examples. Use them as templates to maintain consistency and ensure your new tests integrate seamlessly with the existing test suite.
+
+### Enforcement
+
+This pattern is **mandatory** for all test configurations in apex-data-sync:
+
+- ✅ All YAML files in `src/test/java/` must have matching Java test classes
+- ✅ No standalone configuration folders at module root (e.g., `configs/`, `examples/`)
+- ✅ YAML and Java files must share the same base name
+- ✅ Both files must reside in the same directory
+
+**Code Review Checklist**:
+- [ ] Every new YAML file has a matching Java test class
+- [ ] Both files are in the same `src/test/java/` subdirectory
+- [ ] Test successfully loads and validates the configuration
+- [ ] No orphaned YAML files remain in the changeset
+
+---
+
+## PRIORITY IMPLEMENTATION PLAN
+
+### Phase 1: Critical Coverage (Week 1-2)
+**Goal**: Close most critical gaps for production readiness (🔴 CRITICAL + 🔴 HIGH)
+
+1. **JSON Serialization** (5 tests)
+   - `JsonSerializationTest` - basic serialization
+   - `JsonDeserializationTest` - round-trip testing
+   - `JsonSchemaValidationTest` - schema compliance
+   - `JsonStructureTest` - verify JSON structure
+   - `EdgeCaseHandlingTest` - nulls, empty diffs
+
+2. **Markdown Generation** (4 tests)
+   - `MarkdownGenerationTest` - basic markdown output
+   - `TableFormattingTest` - table structure validation
+   - `EmojiHeaderTest` - emoji rendering
+   - `MultiTableMarkdownTest` - multi-table reports
+
+3. **Type Compatibility** (8 tests)
+   - `TypeCompatibilityTest` - basic type matching
+   - `BreakingChangeDetectionTest` - breaking change rules
+   - `TypeNarrowingTest` - VARCHAR(200) → VARCHAR(100)
+   - `TypeWideningTest` - VARCHAR(100) → VARCHAR(200)
+   - `NullableConversionTest` - NULL ↔ NOT NULL
+   - `PrecisionScaleTest` - DECIMAL precision changes
+   - `PrimaryKeyChangeTest` - PK modifications
+   - `CustomTypeMappingTest` - user-defined type maps
+
+4. **Report Path Handling** (5 tests)
+   - `ReportPathResolutionTest` - all path types
+   - Directory creation, normalization, overwrites
+
+**Total Phase 1**: 22 new test classes
+
+### Phase 2: Enhanced Coverage (Week 3-4)
+**Goal**: Comprehensive platform and edge case coverage
+
+1. **Cross-Platform Tests** (4 tests)
+   - `SqlServerSchemaReadingTest` - SQL Server integration
+   - `MySqlSchemaReadingTest` - MySQL integration
+   - `OracleSchemaReadingTest` - Oracle integration (if available)
+   - `CrossPlatformTypeMappingTest` - platform-specific mappings
+
+2. **CSV Edge Cases** (4 tests)
+   - `CsvSchemaUnicodeTest` - UTF-8, UTF-16 handling
+   - `CsvSchemaMalformedTest` - missing headers, irregular rows
+   - `CsvSchemaEdgeCasesTest` - empty files, single column
+   - `CsvSchemaLargeFileTest` - 1M+ rows (performance)
+
+3. **Scenario-Based Tests** (3 tests)
+   - `BackwardCompatibilityTest` - additive-only changes
+   - `AdditiveChangesTest` - new nullable columns
+   - `DestructiveChangesTest` - column removals, type narrowing
+
+**Total Phase 2**: 11 new test classes
+
+### Phase 3: Robustness & Performance (Week 5-6)
+**Goal**: Production-grade reliability
+
+1. **Error Handling** (5 tests)
+   - `InvalidConfigurationTest` - malformed YAML
+   - `MissingDataSourceTest` - missing refs
+   - `NetworkFailureTest` - DB connection failures
+   - `TimeoutHandlingTest` - long-running queries
+   - `PartialExecutionRecoveryTest` - resume from failure
+
+2. **Performance Tests** (6 tests)
+   - `LargeSchemaComparisonTest` - 100+ columns
+   - `MultiTablePerformanceTest` - 50+ tables
+   - `ConcurrentPipelineTest` - parallel execution
+   - `MemoryLeakDetectionTest` - heap profiling
+   - `ReportGenerationBenchmarkTest` - report speed
+   - `LargeDatasetSyncTest` - 1M+ rows sync
+
+3. **Synchronization Tests** (4 tests)
+   - `UpsertConflictResolutionTest` - PK conflicts
+   - `BatchProcessingTest` - batch size variations
+   - `TransactionBoundaryTest` - rollback scenarios
+   - `PartialSyncRecoveryTest` - resume from failure
+
+**Total Phase 3**: 15 new test classes
+
+---
+
+## TEST COUNT SUMMARY
+
+| Category | Current | Phase 1 | Phase 2 | Phase 3 | **Total** |
+|----------|---------|---------|---------|---------|-----------|
+| **Unit Tests** | 0 | 22 | 0 | 0 | **22** |
+| **Integration Tests** | 15 | 0 | 11 | 0 | **26** |
+| **Pipeline Tests** | 4 | 0 | 0 | 5 | **9** |
+| **Performance Tests** | 0 | 0 | 0 | 6 | **6** |
+| **Sync Tests** | 0 | 0 | 0 | 4 | **4** |
+| **Support Classes** | 4 | 0 | 0 | 4 | **8** |
+| **TOTAL** | **19** | **22** | **11** | **19** | **71** |
+
+**Growth**: From 19 tests → 71 tests (274% increase)
+
+**Estimated Effort**:
+- Phase 1: 40 hours (2 weeks)
+- Phase 2: 24 hours (1.5 weeks)
+- Phase 3: 40 hours (2 weeks)
+- **Total**: ~104 hours (5.5 weeks for 1 developer)
+
+---
+
+**Document Version**: 2.1  
+**Last Updated**: January 20, 2026  
+**Author**: Mark Andrew Ray-Smith Cityline Ltd  
+**Status**: Consolidated - Ready for Implementation

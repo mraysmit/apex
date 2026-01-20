@@ -83,7 +83,7 @@ pipeline:
         
         # Report generation
         report-format: "json"
-        report-output: "reports/custom-type-mapping-report.json"
+        report-output: "reports/custom-type-mapping-report.html"
 
 # Data source configurations
 data-sources:

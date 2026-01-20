@@ -1,5 +1,9 @@
 # APEX Data-Sync Architecture Document
 
+**Version:** 2.1
+**Date:** 2026-01-20
+**Author:** Mark Andrew Ray-Smith Cityline Ltd
+
 ## Table of Contents
 
 1. [Executive Summary](#1-executive-summary)

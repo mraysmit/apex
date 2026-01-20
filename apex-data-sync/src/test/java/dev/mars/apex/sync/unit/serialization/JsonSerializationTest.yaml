@@ -92,4 +92,4 @@ pipeline:
       description: "Read schema metadata from customers table"
       parameters:
         table: "CUSTOMERS"  # CUSTOMERS table
-        report-output: "json-serialization-test.json"  # JSON output (future)
+        report-output: "json-serialization-test.html"  # HTML format (JSON not yet supported for read-schema)

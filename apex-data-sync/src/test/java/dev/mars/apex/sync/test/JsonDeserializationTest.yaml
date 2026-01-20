@@ -70,7 +70,7 @@ pipeline:
         
         # JSON report generation
         report-format: "json"
-        report-output: "json-deserialization-test.json"  # Saved to reports/
+        report-output: "json-deserialization-test.html"  # Saved to reports/ (HTML format)
 
 # Data source configurations
 data-sources:

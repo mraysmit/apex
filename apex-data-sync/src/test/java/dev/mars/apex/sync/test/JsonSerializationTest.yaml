@@ -71,7 +71,7 @@ pipeline:
         
         # JSON report generation
         report-format: "json"
-        report-output: "json-serialization-test.json"  # Saved to reports/ directory
+        report-output: "json-serialization-test.html"  # Saved to reports/ directory (HTML format)
 
 # Data source configurations
 data-sources:

@@ -14,10 +14,10 @@ import dev.mars.apex.core.service.schema.DataSourceContext;
 import dev.mars.apex.core.service.schema.diff.SchemaDiffService;
 import dev.mars.apex.core.service.schema.diff.SchemaComparisonResult;
 import dev.mars.apex.core.service.schema.diff.ComparisonOptions;
-import dev.mars.apex.core.service.schema.diff.SchemaDiffHtmlReportGenerator;
 import dev.mars.apex.core.service.schema.diff.json.SchemaDiffJsonSerializer;
 import dev.mars.apex.core.service.schema.diff.json.SchemaDiffReportBuilder;
 import dev.mars.apex.core.service.schema.diff.json.model.SchemaDiffReport;
+import dev.mars.apex.core.service.schema.diff.json.generators.JsonBasedHtmlReportGenerator;
 import dev.mars.apex.core.service.data.external.database.DatabaseDataSource;
 import dev.mars.apex.core.config.datasource.ConnectionConfig;
 import dev.mars.apex.core.util.TestAwareLogger;
@@ -944,7 +944,9 @@ public class PipelineExecutor {
     }
     
     /**
-     * Generate HTML report for schema if requested via parameters.
+     * Generate report for schema if requested via parameters.
+     * Supports HTML format (.html extension).
+     * Warns if unsupported format is requested (e.g., .json, .md).
      *
      * @param step the pipeline step
      * @param dataSource the data source being read
@@ -963,6 +965,21 @@ public class PipelineExecutor {
         String reportPath = (String) parameters.get("report-output");
         if (reportPath == null || reportPath.trim().isEmpty()) {
             return; // No report requested
+        }
+        
+        // Check file extension to determine report format
+        String lowerPath = reportPath.toLowerCase();
+        if (lowerPath.endsWith(".json")) {
+            LOGGER.warn("[Pipeline.ReadSchema] JSON format not yet supported for read-schema reports. " +
+                       "Please use .html extension. Skipping report generation for: {}", reportPath);
+            LOGGER.warn("[Pipeline.ReadSchema] Hint: Use 'report-output: \"schema-report.html\"' instead of .json");
+            return;
+        }
+        if (lowerPath.endsWith(".md") || lowerPath.endsWith(".markdown")) {
+            LOGGER.warn("[Pipeline.ReadSchema] Markdown format not yet supported for read-schema reports. " +
+                       "Please use .html extension. Skipping report generation for: {}", reportPath);
+            LOGGER.warn("[Pipeline.ReadSchema] Hint: Use 'report-output: \"schema-report.html\"' instead of .md");
+            return;
         }
         
         // Normalize and ensure report directory exists
@@ -1208,11 +1225,25 @@ public class PipelineExecutor {
                    result.getChangedColumns().size(),
                    result.getBreakingChanges().size());
 
-        // Generate HTML report if report-output parameter is specified
-        String reportPath = (String) parameters.get("report-output");
-        LOGGER.debug("[Pipeline.SchemaDiff] report-output parameter: {}", reportPath);
-        if (reportPath != null && !reportPath.trim().isEmpty()) {
-            LOGGER.info("[Pipeline.SchemaDiff] Generating HTML report to: {}", reportPath);
+        // ==================================================================================
+        // REPORT GENERATION ARCHITECTURE:
+        // JSON is the single source of truth. HTML reports are ALWAYS derived from the JSON
+        // model to ensure consistency and alignment between formats.
+        // 
+        // Flow: SchemaComparisonResult -> SchemaDiffReport (JSON model) -> HTML/JSON files
+        // ==================================================================================
+
+        // Get report output parameters
+        String htmlReportPath = (String) parameters.get("report-output");
+        String jsonReportPath = (String) parameters.get("json-report-output");
+        
+        LOGGER.debug("[Pipeline.SchemaDiff] report-output (HTML): {}", htmlReportPath);
+        LOGGER.debug("[Pipeline.SchemaDiff] json-report-output (JSON): {}", jsonReportPath);
+
+        // Only generate reports if at least one output is requested
+        if ((htmlReportPath != null && !htmlReportPath.trim().isEmpty()) ||
+            (jsonReportPath != null && !jsonReportPath.trim().isEmpty())) {
+            
             try {
                 // Retrieve DataSourceContext from source and target steps
                 DataSourceContext sourceContext = (DataSourceContext) pipelineContext.get(sourceStepName + "_dataSourceContext");
@@ -1222,51 +1253,38 @@ public class PipelineExecutor {
                     sourceContext != null ? sourceContext.getDataSourceName() : "null",
                     targetContext != null ? targetContext.getDataSourceName() : "null");
                 
-                SchemaDiffHtmlReportGenerator reportGenerator = new SchemaDiffHtmlReportGenerator();
-                String generatedReportPath = reportGenerator.generateReport(result, sourceContext, targetContext, reportPath);
-                LOGGER.info("[Pipeline.SchemaDiff] HTML report generated: {}", generatedReportPath);
-                
-                // Store report path in context for reference
-                pipelineContext.put("schema-diff-report", generatedReportPath);
-            } catch (Exception e) {
-                LOGGER.warn("[Pipeline.SchemaDiff] Failed to generate HTML report: {}", e.getMessage(), e);
-                // Don't fail the pipeline for report generation errors
-            }
-        } else {
-            LOGGER.debug("[Pipeline.SchemaDiff] No report-output parameter specified, skipping HTML report generation");
-        }
-
-        // Generate JSON report if json-report-output parameter is specified
-        String jsonReportPath = (String) parameters.get("json-report-output");
-        LOGGER.debug("[Pipeline.SchemaDiff] json-report-output parameter: {}", jsonReportPath);
-        if (jsonReportPath != null && !jsonReportPath.trim().isEmpty()) {
-            LOGGER.info("[Pipeline.SchemaDiff] Generating JSON report to: {}", jsonReportPath);
-            try {
-                // Retrieve DataSourceContext from source and target steps
-                DataSourceContext sourceContext = (DataSourceContext) pipelineContext.get(sourceStepName + "_dataSourceContext");
-                DataSourceContext targetContext = (DataSourceContext) pipelineContext.get(targetStepName + "_dataSourceContext");
-                
-                LOGGER.debug("[Pipeline.SchemaDiff] Retrieved DataSourceContext for JSON: source={}, target={}", 
-                    sourceContext != null ? sourceContext.getDataSourceName() : "null",
-                    targetContext != null ? targetContext.getDataSourceName() : "null");
-                
-                // Build JSON report from comparison result
+                // STEP 1: Build JSON report model (single source of truth)
+                LOGGER.info("[Pipeline.SchemaDiff] Building JSON report model (single source of truth)");
                 SchemaDiffReportBuilder builder = new SchemaDiffReportBuilder();
                 SchemaDiffReport jsonReport = builder.buildReport(result, sourceContext, targetContext);
                 
-                // Serialize to JSON file
-                SchemaDiffJsonSerializer serializer = new SchemaDiffJsonSerializer();
-                String generatedJsonPath = serializer.toJsonFile(jsonReport, jsonReportPath);
-                LOGGER.info("[Pipeline.SchemaDiff] JSON report generated: {}", generatedJsonPath);
+                // Store JSON report in context for potential downstream use
+                pipelineContext.put("schema-diff-json-model", jsonReport);
                 
-                // Store JSON report path in context for reference
-                pipelineContext.put("schema-diff-json-report", generatedJsonPath);
+                // STEP 2: Generate JSON file if requested
+                if (jsonReportPath != null && !jsonReportPath.trim().isEmpty()) {
+                    LOGGER.info("[Pipeline.SchemaDiff] Generating JSON report to: {}", jsonReportPath);
+                    SchemaDiffJsonSerializer serializer = new SchemaDiffJsonSerializer();
+                    String generatedJsonPath = serializer.toJsonFile(jsonReport, jsonReportPath);
+                    LOGGER.info("[Pipeline.SchemaDiff] JSON report generated: {}", generatedJsonPath);
+                    pipelineContext.put("schema-diff-json-report", generatedJsonPath);
+                }
+                
+                // STEP 3: Generate HTML from JSON model (ensures consistency)
+                if (htmlReportPath != null && !htmlReportPath.trim().isEmpty()) {
+                    LOGGER.info("[Pipeline.SchemaDiff] Generating HTML report from JSON model to: {}", htmlReportPath);
+                    JsonBasedHtmlReportGenerator htmlGenerator = new JsonBasedHtmlReportGenerator();
+                    String generatedHtmlPath = htmlGenerator.generateFromReport(jsonReport, htmlReportPath);
+                    LOGGER.info("[Pipeline.SchemaDiff] HTML report generated (from JSON model): {}", generatedHtmlPath);
+                    pipelineContext.put("schema-diff-report", generatedHtmlPath);
+                }
+                
             } catch (Exception e) {
-                LOGGER.warn("[Pipeline.SchemaDiff] Failed to generate JSON report: {}", e.getMessage(), e);
+                LOGGER.warn("[Pipeline.SchemaDiff] Failed to generate reports: {}", e.getMessage(), e);
                 // Don't fail the pipeline for report generation errors
             }
         } else {
-            LOGGER.debug("[Pipeline.SchemaDiff] No json-report-output parameter specified, skipping JSON report generation");
+            LOGGER.debug("[Pipeline.SchemaDiff] No report output parameters specified, skipping report generation");
         }
 
         // Check fail-on-incompatibility flag

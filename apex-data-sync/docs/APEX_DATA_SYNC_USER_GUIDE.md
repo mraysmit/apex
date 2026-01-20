@@ -1,5 +1,9 @@
 # APEX Data-Sync Module - User Guide
 
+**Version:** 2.1
+**Date:** 2026-01-20
+**Author:** Mark Andrew Ray-Smith Cityline Ltd
+
 ## Overview
 
 The **APEX Data-Sync** module is a synchronization runner built on the **APEX Core 2.0** platform that provides comprehensive schema management, data migration validation, and synchronization capabilities. It specializes in rule-based data movement between heterogeneous database environments (SQL Server, PostgreSQL, MySQL, Oracle, H2) and enables automated comparison of schemas to validate migration compatibility, detect breaking changes, and generate comprehensive reports in multiple formats (JSON, HTML, Markdown).
@@ -33,11 +37,21 @@ Unlike traditional integration applications, this module contains no business lo
 - Schema evolution tracking with compatibility analysis
 
 **3. Report Generation (JSON-First Architecture)**
+
+APEX uses a **JSON-as-single-source-of-truth** architecture for report generation:
+- **JSON Model**: All schema comparison data is first built into a `SchemaDiffReport` JSON model
+- **HTML Reports**: Always derived from the JSON model (not independently generated) to ensure consistency
+- **Report Flow**: `SchemaComparisonResult` → `SchemaDiffReport` (JSON model) → HTML/JSON files
+- **Consistency Guarantee**: HTML and JSON reports always contain identical data
+- **Template-Based**: HTML uses Handlebars templates for clean separation of presentation
+
+Features:
 - **JSON Reports**: Machine-readable schema diff output for CI/CD integration
-- **HTML Reports**: Human-readable with visual formatting and color-coded changes
+- **HTML Reports**: Human-readable with visual formatting, color-coded changes (generated from JSON model)
 - **Markdown Reports**: Documentation-friendly format for wikis and documentation
 - Flexible output paths (filename-only, relative, absolute)
 - Auto-creates report directories
+- Dual output support (both JSON and HTML from the same pipeline step)
 
 **4. Data Migration & Validation**
 - CSV → PostgreSQL migration validation
@@ -124,6 +138,7 @@ pipeline:
       parameters:
         source-step: "read-source-schema"
         target-step: "read-target-schema"
+        json-report-output: "migration-report.json"
         report-output: "migration-report.html"
 ```
 
@@ -134,7 +149,8 @@ java -jar apex-data-sync.jar --config=configs/migration-validation.yaml
 
 **Output**:
 - Console logs with comparison summary
-- HTML report at `reports/migration-report.html`
+- JSON report at `reports/migration-report.json` (machine-readable)
+- HTML report at `reports/migration-report.html` (human-readable, generated from JSON model)
 
 ---
 
@@ -179,6 +195,7 @@ pipeline:
         source-step: "read-csv-schema"
         target-step: "read-postgres-schema"
         fail-on-incompatibility: true
+        json-report-output: "csv-migration-validation.json"
         report-output: "csv-migration-validation.html"
 ```
 
@@ -187,6 +204,10 @@ pipeline:
 - Type compatibility (CSV inferred types → PostgreSQL types)
 - Missing columns in target (potential data loss)
 - Added columns in target (must be nullable for safety)
+
+**Report outputs**:
+- JSON for CI/CD pipeline integration and automated checks
+- HTML for developer review and stakeholder communication
 
 ---
 
@@ -233,11 +254,17 @@ pipeline:
           "DATETIME": ["TIMESTAMP", "TIMESTAMP WITHOUT TIME ZONE"]
           "BIT": ["BOOLEAN"]
           "INT": ["INTEGER"]
+        # Generate both JSON and HTML from same model
+        json-report-output: "sqlserver-postgres-diff.json"
         report-output: "sqlserver-postgres-diff.html"
 ```
 
 **Type mappings**:
 - Define acceptable type conversions between platforms
+
+**Report outputs**:
+- JSON for CI/CD pipeline integration
+- HTML for human review (generated from JSON model)
 - Multiple target types allowed per source type
 - Case-insensitive matching
 
@@ -282,6 +309,7 @@ pipeline:
       parameters:
         source-step: "read-legacy-customers"
         target-step: "read-modern-customers"
+        json-report-output: "customers-diff.json"
         report-output: "customers-diff.html"
     
     # Orders table
@@ -302,6 +330,7 @@ pipeline:
       parameters:
         source-step: "read-legacy-orders"
         target-step: "read-modern-orders"
+        json-report-output: "orders-diff.json"
         report-output: "orders-diff.html"
     
     # Products table
@@ -322,12 +351,13 @@ pipeline:
       parameters:
         source-step: "read-legacy-products"
         target-step: "read-modern-products"
+        json-report-output: "products-diff.json"
         report-output: "products-diff.html"
 ```
 
 **Benefits**:
 - Single pipeline run validates all tables
-- Individual reports per table for detailed analysis
+- Individual reports per table for detailed analysis (JSON for CI/CD, HTML for human review)
 - Parallel validation possible with `execution.mode: "parallel"`
 
 ---
@@ -372,6 +402,7 @@ pipeline:
         target-step: "read-production-schema"
         fail-on-incompatibility: true
         fail-on-breaking-changes: true
+        json-report-output: "pre-deploy-validation.json"
         report-output: "pre-deploy-validation.html"
 ```
 
@@ -382,6 +413,8 @@ pipeline:
 java -jar apex-data-sync.jar --config=configs/pre-deploy-validation.yaml
 if [ $? -ne 0 ]; then
   echo "❌ Schema validation failed - blocking deployment"
+  # Upload JSON report to CI/CD artifacts for machine processing
+  # Upload HTML report for developer review
   exit 1
 fi
 echo "✅ Schema validation passed - proceeding with deployment"
@@ -397,32 +430,128 @@ echo "✅ Schema validation passed - proceeding with deployment"
 |-----------|------|----------|---------|-------------|
 | `source-step` | String | Yes | - | Name of the read-schema step containing source schema |
 | `target-step` | String | Yes | - | Name of the read-schema step containing target schema |
-| `report-output` | String | No | - | Path to HTML report file (relative or absolute) |
+| `report-output` | String | No | - | Path to HTML report file (generated from JSON model) |
+| `json-report-output` | String | No | - | Path to JSON report file (machine-readable) |
 | `fail-on-incompatibility` | Boolean | No | `false` | Fail pipeline if schemas are incompatible |
 | `fail-on-breaking-changes` | Boolean | No | `false` | Fail pipeline if breaking changes detected |
 | `type-mappings` | Map | No | `{}` | Custom type equivalence mappings |
 | `ignore-columns` | List | No | `[]` | Column names to exclude from comparison |
 | `case-sensitive` | Boolean | No | `false` | Enable case-sensitive column name matching |
 
+**Report Generation Architecture:**
+- JSON model (`SchemaDiffReport`) is always built first as the single source of truth
+- HTML report is generated from the JSON model, ensuring consistency
+- You can request JSON only, HTML only, or both outputs
+- When both outputs are requested, they are guaranteed to contain identical data
+
 ### Report Output Paths
 
-The `report-output` parameter supports flexible path formats:
+Both `report-output` (HTML) and `json-report-output` (JSON) parameters support flexible path formats:
 
 ```yaml
-# Filename only → saved to reports/ directory (created automatically)
+# HTML only (generated from internal JSON model)
 report-output: "migration-report.html"
 # → Saved to: reports/migration-report.html
+# → HTML is generated from JSON model (JSON not saved to file)
+
+# JSON only
+json-report-output: "migration-report.json"
+# → Saved to: reports/migration-report.json
+# → JSON model is saved; no HTML generated
+
+# Both formats (recommended for CI/CD)
+report-output: "migration-report.html"
+json-report-output: "migration-report.json"
+# → Both files saved from the same JSON model (guaranteed identical data)
 
 # Relative path → creates directories as needed
 report-output: "output/migration/2026/january/report.html"
-# → Saved to: output/migration/2026/january/report.html
+json-report-output: "output/migration/2026/january/report.json"
+# → Saved to: output/migration/2026/january/
 
 # Absolute path (Windows)
 report-output: "C:/migration-reports/report.html"
+json-report-output: "C:/migration-reports/report.json"
 
 # Absolute path (Unix/Linux)
 report-output: "/var/reports/migration/report.html"
+json-report-output: "/var/reports/migration/report.json"
 ```
+
+**Architecture Notes:**
+- The JSON model is always built internally, even if only HTML output is requested
+- HTML reports are always generated from the JSON model via Handlebars templates
+- This ensures perfect consistency between HTML and JSON when both are generated
+- If neither output is specified, the comparison still runs but no reports are saved
+
+---
+
+## Report Generation Architecture
+
+### JSON-as-Single-Source-of-Truth
+
+APEX Data-Sync uses a revolutionary **JSON-first** architecture for report generation that guarantees consistency and alignment between all report formats.
+
+**Design Principles:**
+1. **Single Source of Truth**: All comparison data is first built into a `SchemaDiffReport` JSON model
+2. **Derived HTML**: HTML reports are always generated from the JSON model (never independently)
+3. **Guaranteed Consistency**: When both JSON and HTML are requested, they contain identical data
+4. **Template-Based**: HTML generation uses Handlebars templates for clean separation
+
+**Flow Diagram:**
+```
+SchemaComparisonResult (internal)
+    ↓
+SchemaDiffReportBuilder
+    ↓
+SchemaDiffReport (JSON model) ← Single Source of Truth
+    ↓
+    ├─→ SchemaDiffJsonSerializer → JSON file (if json-report-output specified)
+    └─→ JsonBasedHtmlReportGenerator → HTML file (if report-output specified)
+```
+
+**Benefits:**
+- ✅ **Consistency**: HTML and JSON are guaranteed to match
+- ✅ **Maintainability**: Changes to report structure happen in one place
+- ✅ **Testability**: Single data model to validate
+- ✅ **Extensibility**: Easy to add new formats (Markdown, PDF) from the same model
+
+### Dual Output Example
+
+Generate both JSON (for CI/CD) and HTML (for humans) from a single comparison:
+
+```yaml
+pipelines:
+  - name: "migration-validation"
+    steps:
+      - name: "read-source"
+        type: "read-schema"
+        source: "legacy-sqlserver"
+        parameters:
+          table: "Customers"
+      
+      - name: "read-target"
+        type: "read-schema"
+        source: "modern-postgres"
+        parameters:
+          table: "customers"
+      
+      - name: "compare"
+        type: "schema-diff"
+        parameters:
+          source-step: "read-source"
+          target-step: "read-target"
+          # Both outputs generated from the same JSON model
+          json-report-output: "reports/customers-diff.json"
+          report-output: "reports/customers-diff.html"
+          fail-on-incompatibility: true
+```
+
+**What Happens:**
+1. APEX builds the `SchemaDiffReport` JSON model internally
+2. JSON file is written to `reports/customers-diff.json`
+3. HTML is generated from the JSON model to `reports/customers-diff.html`
+4. Both files contain identical schema comparison data
 
 ### Type Mappings
 
@@ -616,8 +745,15 @@ parameters:
 Save reports with timestamps for audit trails:
 
 ```yaml
+# Generate both JSON and HTML for archival
+json-report-output: "reports/migrations/2026-01-17-migration-validation.json"
 report-output: "reports/migrations/2026-01-17-migration-validation.html"
 ```
+
+**Benefits**:
+- JSON reports can be parsed programmatically for trend analysis
+- HTML reports provide human-readable documentation
+- Both derived from same JSON model ensures consistency
 
 ### 5. **Test with Real Data Sources**
 

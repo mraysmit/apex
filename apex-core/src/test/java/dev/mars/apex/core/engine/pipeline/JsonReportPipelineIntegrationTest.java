@@ -132,11 +132,12 @@ class JsonReportPipelineIntegrationTest {
         logger.info("✓ JSON report version: {}, APEX version: {}", 
             report.getMetadata().getReportVersion(), report.getMetadata().getApexVersion());
 
-        // Validate HTML content
+        // Validate HTML content (generated from JSON model using Handlebars template)
         String htmlContent = Files.readString(htmlPath);
-        assertTrue(htmlContent.contains("Schema Comparison"), "HTML should contain schema comparison title");
+        assertTrue(htmlContent.contains("Schema Diff Report"), "HTML should contain schema diff title");
         assertTrue(htmlContent.contains("Matching"), "HTML should contain stats");
-        logger.info("✓ HTML report contains expected content");
+        assertTrue(htmlContent.contains("APEX Version"), "HTML should contain APEX version from JSON model");
+        logger.info("✓ HTML report contains expected content (generated from JSON model)");
     }
 
     @Test
