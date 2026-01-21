@@ -815,12 +815,15 @@ public class RulesEngine {
         List<RuleResult> results = new ArrayList<>();
         List<Callable<RuleResult>> tasks = new ArrayList<>();
 
+        // Convert to map once for deep copying
+        Map<String, Object> sourceMap = convertToMap(targetObject);
+
         for (YamlEnrichment enrichment : enrichments) {
             tasks.add(() -> {
-                // Create a thread-local copy of the data for each parallel task
-                // This prevents ConcurrentModificationException and data corruption
-                // as HashMap is not thread-safe for concurrent modifications
-                Object taskTargetObject = convertToMap(targetObject);
+                // Create a deep copy of the data for each parallel task
+                // This prevents race conditions when enrichments mutate nested structures
+                // (e.g., barrierTerms['knockoutConditions']['rebateTerms'])
+                Map<String, Object> taskTargetObject = deepCopyMap(sourceMap);
                 try {
                     return enrichmentProcessor.processEnrichmentWithResult(enrichment, taskTargetObject, yamlConfig);
                 } catch (Exception e) {
@@ -2037,8 +2040,11 @@ public class RulesEngine {
 
     /**
      * Convert an object to a Map.
-     * If the object is already a Map, return a copy.
+     * If the object is already a Map, return a shallow copy.
      * Otherwise, wrap it in a Map with key "data".
+     * 
+     * <p>Note: For parallel enrichment processing, use {@link #deepCopyMap(Map)} instead
+     * to ensure nested structures are fully isolated between threads.</p>
      *
      * @param object The object to convert
      * @return A Map representation of the object
@@ -2053,6 +2059,68 @@ public class RulesEngine {
             result.put("data", object);
             return result;
         }
+    }
+
+    /**
+     * Creates a deep copy of a Map, recursively copying all nested Maps and Lists.
+     * This ensures complete isolation for parallel processing where enrichments
+     * may mutate nested structures.
+     * 
+     * <p>Handles the following types:</p>
+     * <ul>
+     *   <li>Map - recursively deep copied</li>
+     *   <li>List - recursively deep copied (elements that are Maps/Lists are also copied)</li>
+     *   <li>Primitive wrappers, Strings, etc. - referenced directly (immutable)</li>
+     * </ul>
+     *
+     * @param original The original map to copy
+     * @return A deep copy of the map with all nested structures copied
+     */
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> deepCopyMap(Map<String, Object> original) {
+        if (original == null) {
+            return null;
+        }
+        
+        Map<String, Object> copy = new HashMap<>();
+        for (Map.Entry<String, Object> entry : original.entrySet()) {
+            copy.put(entry.getKey(), deepCopyValue(entry.getValue()));
+        }
+        return copy;
+    }
+
+    /**
+     * Deep copies a single value, handling Maps, Lists, and other types.
+     *
+     * @param value The value to copy
+     * @return A deep copy of the value if it's a Map or List, otherwise the original value
+     */
+    @SuppressWarnings("unchecked")
+    private Object deepCopyValue(Object value) {
+        if (value == null) {
+            return null;
+        }
+        
+        if (value instanceof Map) {
+            // Recursively copy nested maps
+            Map<String, Object> mapValue = (Map<String, Object>) value;
+            return deepCopyMap(mapValue);
+        }
+        
+        if (value instanceof List) {
+            // Recursively copy list elements
+            List<Object> listValue = (List<Object>) value;
+            List<Object> listCopy = new ArrayList<>(listValue.size());
+            for (Object item : listValue) {
+                listCopy.add(deepCopyValue(item));
+            }
+            return listCopy;
+        }
+        
+        // For immutable types (String, Number, Boolean, etc.), return as-is
+        // For other mutable types, we rely on the fact that enrichments typically
+        // don't modify arbitrary objects - they work with Maps and primitives
+        return value;
     }
 
     /**
