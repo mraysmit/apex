@@ -39,6 +39,10 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
+import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
+import dev.mars.apex.core.service.scenario.ScenarioStageExecutor;
+
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -113,7 +117,7 @@ public class RulesEngine {
      * Maps scenario IDs to their configurations.
      * Will be null if the engine was not created from a scenario registry.
      */
-    private final Map<String, dev.mars.apex.core.service.scenario.ScenarioConfiguration> scenarioRegistry;
+    private final Map<String, ScenarioConfiguration> scenarioRegistry;
 
     /**
      * Pipeline execution components (lazy-initialized when needed).
@@ -157,7 +161,7 @@ public class RulesEngine {
      * @param scenarioRegistry The scenario registry (can be null)
      */
     private RulesEngine(RulesEngineConfiguration configuration, YamlRuleConfiguration yamlConfig,
-                       Map<String, dev.mars.apex.core.service.scenario.ScenarioConfiguration> scenarioRegistry) {
+                       Map<String, ScenarioConfiguration> scenarioRegistry) {
         this.configuration = configuration;
         this.yamlConfig = yamlConfig;
         this.scenarioRegistry = scenarioRegistry;
@@ -193,8 +197,7 @@ public class RulesEngine {
         logger.configuration("RulesEngine", "Initialized with configuration: " + configuration.getClass().getSimpleName());
         logger.debug("Using parser: {}", parser.getClass().getSimpleName());
         logger.debug("Using error recovery service: {}", errorRecoveryService.getClass().getSimpleName());
-        logger.debug("Using error recovery config: enabled={}, default-strategy={}",
-                    errorRecoveryConfig.isEnabled(), errorRecoveryConfig.getDefaultStrategy());
+        logger.debug("Using error recovery config: enabled={}, default-strategy={}",errorRecoveryConfig.isEnabled(), errorRecoveryConfig.getDefaultStrategy());
         logger.debug("Using performance monitor: {}", performanceMonitor.getClass().getSimpleName());
         logger.debug("Using enrichment processor: {}", enrichmentProcessor != null ? enrichmentProcessor.getClass().getSimpleName() : "none");
     }
@@ -499,7 +502,7 @@ public class RulesEngine {
         logger.info("Creating RulesEngine from scenario registry: {}", registryPath);
 
         ScenarioRegistryLoader loader = new ScenarioRegistryLoader();
-        Map<String, dev.mars.apex.core.service.scenario.ScenarioConfiguration> scenarios;
+        Map<String, ScenarioConfiguration> scenarios;
         
         // Try classpath first (enables JAR-packaged resources and test resources)
         try (java.io.InputStream is = RulesEngine.class.getClassLoader().getResourceAsStream(registryPath)) {
@@ -570,7 +573,7 @@ public class RulesEngine {
      * @return The scenario registry map, or null if not a scenario-based engine
      * @since 3.0
      */
-    public Map<String, dev.mars.apex.core.service.scenario.ScenarioConfiguration> getScenarioRegistry() {
+    public Map<String, ScenarioConfiguration> getScenarioRegistry() {
         return scenarioRegistry;
     }
 
@@ -668,7 +671,7 @@ public class RulesEngine {
                     if (individualResult.getResultType() == RuleResult.ResultType.ERROR) {
                         // CRITICAL: Rule evaluation exception is a business logic failure
                         // This is NOT a "rule didn't match" scenario - it's a system failure
-                        logger.error("CRITICAL: Rule evaluation failed in group '{}': {}",
+                        logger.error("Rule evaluation failed in group '{}': {}",
                                    group.getName(), individualResult.getMessage());
                         return RuleResult.error(
                             group.getName(),
@@ -1517,7 +1520,7 @@ public class RulesEngine {
             case "rule-chains":
                 return processRuleChainItem(itemId, yamlConfig, data);
             default:
-                logger.warn("Unknown section type: {}", sectionType);
+                logger.error("Unknown section type: {}", sectionType);
                 return RuleResult.error(sectionType + ":" + itemId, "Unknown section type");
         }
     }
@@ -1831,7 +1834,7 @@ public class RulesEngine {
      * @throws NullPointerException if inputData is null
      * @since 3.0
      */
-    public dev.mars.apex.core.service.scenario.ScenarioExecutionResult evaluateScenario(Map<String, Object> inputData) {
+    public ScenarioExecutionResult evaluateScenario(Map<String, Object> inputData) {
         if (inputData == null) {
             throw new NullPointerException("Input data cannot be null");
         }
@@ -1855,13 +1858,15 @@ public class RulesEngine {
         logger.info("Evaluating scenario from YAML configuration");
 
         // Parse scenario configuration from YAML
-        dev.mars.apex.core.service.scenario.ScenarioConfiguration scenario = parseScenarioFromYaml(this.yamlConfig);
+        ScenarioConfiguration scenario = parseScenarioFromYaml(this.yamlConfig);
 
         // Create ScenarioStageExecutor and execute stages
-        dev.mars.apex.core.service.scenario.ScenarioStageExecutor executor =
-            new dev.mars.apex.core.service.scenario.ScenarioStageExecutor();
+        ScenarioStageExecutor executor = new ScenarioStageExecutor();
 
-        return executor.executeStages(scenario, inputData);
+        // Deep copy input data to protect against callers sharing the same map across concurrent calls
+        Map<String, Object> safeInputData = deepCopyMap(inputData);
+
+        return executor.executeStages(scenario, safeInputData);
     }
 
     /**
@@ -1891,7 +1896,7 @@ public class RulesEngine {
      * @throws NullPointerException if scenarioId or inputData is null
      * @since 3.0
      */
-    public dev.mars.apex.core.service.scenario.ScenarioExecutionResult evaluateScenario(String scenarioId, Map<String, Object> inputData) {
+    public ScenarioExecutionResult evaluateScenario(String scenarioId, Map<String, Object> inputData) {
         if (scenarioId == null) {
             throw new NullPointerException("Scenario ID cannot be null");
         }
@@ -1909,13 +1914,15 @@ public class RulesEngine {
         logger.info("Evaluating scenario by ID: {}", scenarioId);
 
         // Look up scenario from registry
-        dev.mars.apex.core.service.scenario.ScenarioConfiguration scenario = getScenario(scenarioId);
+        ScenarioConfiguration scenario = getScenario(scenarioId);
 
         // Create ScenarioStageExecutor and execute stages
-        dev.mars.apex.core.service.scenario.ScenarioStageExecutor executor =
-            new dev.mars.apex.core.service.scenario.ScenarioStageExecutor();
+        ScenarioStageExecutor executor = new ScenarioStageExecutor();
 
-        return executor.executeStages(scenario, inputData);
+        // Deep copy input data to protect against callers sharing the same map across concurrent calls
+        Map<String, Object> safeInputData = deepCopyMap(inputData);
+
+        return executor.executeStages(scenario, safeInputData);
     }
 
     /**
@@ -1949,7 +1956,7 @@ public class RulesEngine {
      * @throws NullPointerException if inputData is null
      * @since 3.0
      */
-    public dev.mars.apex.core.service.scenario.ScenarioExecutionResult evaluateWithClassification(Map<String, Object> inputData) {
+    public ScenarioExecutionResult evaluateWithClassification(Map<String, Object> inputData) {
         if (inputData == null) {
             throw new NullPointerException("Input data cannot be null");
         }
@@ -1964,7 +1971,7 @@ public class RulesEngine {
         logger.info("Evaluating scenario using classification-based routing");
 
         // Find matching scenario based on classification rules
-        dev.mars.apex.core.service.scenario.ScenarioConfiguration scenario = findMatchingScenario(inputData);
+        ScenarioConfiguration scenario = findMatchingScenario(inputData);
 
         if (scenario == null) {
             throw new IllegalStateException(
@@ -1976,10 +1983,12 @@ public class RulesEngine {
         logger.info("Matched scenario: {}", scenario.getScenarioId());
 
         // Create ScenarioStageExecutor and execute stages
-        dev.mars.apex.core.service.scenario.ScenarioStageExecutor executor =
-            new dev.mars.apex.core.service.scenario.ScenarioStageExecutor();
+        ScenarioStageExecutor executor = new ScenarioStageExecutor();
 
-        return executor.executeStages(scenario, inputData);
+        // Deep copy input data to protect against callers sharing the same map across concurrent calls
+        Map<String, Object> safeInputData = deepCopyMap(inputData);
+
+        return executor.executeStages(scenario, safeInputData);
     }
 
     // ========================================
@@ -2172,12 +2181,12 @@ public class RulesEngine {
      * @throws IllegalArgumentException if scenario not found or is disabled
      * @throws IllegalStateException if scenario registry is not initialized
      */
-    private dev.mars.apex.core.service.scenario.ScenarioConfiguration getScenario(String scenarioId) {
+    private ScenarioConfiguration getScenario(String scenarioId) {
         if (this.scenarioRegistry == null) {
             throw new IllegalStateException("Scenario registry is not initialized");
         }
 
-        dev.mars.apex.core.service.scenario.ScenarioConfiguration scenario = this.scenarioRegistry.get(scenarioId);
+        ScenarioConfiguration scenario = this.scenarioRegistry.get(scenarioId);
 
         if (scenario == null) {
             throw new IllegalArgumentException(
@@ -2208,7 +2217,7 @@ public class RulesEngine {
      * @param inputData The input data to match against classification rules
      * @return The first matching enabled scenario, or null if no match found
      */
-    private dev.mars.apex.core.service.scenario.ScenarioConfiguration findMatchingScenario(
+    private ScenarioConfiguration findMatchingScenario(
             Map<String, Object> inputData) {
 
         if (this.scenarioRegistry == null || this.scenarioRegistry.isEmpty()) {
@@ -2218,7 +2227,7 @@ public class RulesEngine {
 
         logger.debug("Evaluating {} scenarios for classification match", this.scenarioRegistry.size());
 
-        for (dev.mars.apex.core.service.scenario.ScenarioConfiguration scenario : this.scenarioRegistry.values()) {
+        for (ScenarioConfiguration scenario : this.scenarioRegistry.values()) {
             // Skip disabled scenarios
             if (!scenario.isEnabled()) {
                 logger.debug("Scenario {} is disabled - skipping", scenario.getScenarioId());
@@ -2250,7 +2259,7 @@ public class RulesEngine {
      * @throws IllegalStateException if scenario data is missing or invalid
      */
     @SuppressWarnings("unchecked")
-    private dev.mars.apex.core.service.scenario.ScenarioConfiguration parseScenarioFromYaml(
+    private ScenarioConfiguration parseScenarioFromYaml(
             dev.mars.apex.core.config.yaml.YamlRuleConfiguration yamlConfig) {
 
         if (!yamlConfig.hasScenario()) {
@@ -2258,11 +2267,11 @@ public class RulesEngine {
         }
 
         Object scenarioData = yamlConfig.getScenarioData();
-        if (!(scenarioData instanceof java.util.Map)) {
+        if (!(scenarioData instanceof Map)) {
             throw new IllegalStateException("Scenario data must be a Map");
         }
 
-        java.util.Map<String, Object> scenarioMap = (java.util.Map<String, Object>) scenarioData;
+        Map<String, Object> scenarioMap = (Map<String, Object>) scenarioData;
         return parseScenarioConfiguration(scenarioMap);
     }
 
@@ -2274,25 +2283,24 @@ public class RulesEngine {
      * @return Parsed ScenarioConfiguration
      */
     @SuppressWarnings("unchecked")
-    private dev.mars.apex.core.service.scenario.ScenarioConfiguration parseScenarioConfiguration(
-            java.util.Map<String, Object> scenarioData) {
+    private ScenarioConfiguration parseScenarioConfiguration(
+            Map<String, Object> scenarioData) {
 
-        dev.mars.apex.core.service.scenario.ScenarioConfiguration scenario =
-            new dev.mars.apex.core.service.scenario.ScenarioConfiguration();
+        ScenarioConfiguration scenario = new ScenarioConfiguration();
 
         scenario.setScenarioId((String) scenarioData.get("scenario-id"));
         scenario.setName((String) scenarioData.get("name"));
         scenario.setDescription((String) scenarioData.get("description"));
 
         // Parse data types (legacy)
-        java.util.List<String> dataTypes = (java.util.List<String>) scenarioData.get("data-types");
+        List<String> dataTypes = (List<String>) scenarioData.get("data-types");
         if (dataTypes != null) {
             scenario.setDataTypes(dataTypes);
         }
 
         // Parse classification rule (modern Map-based routing)
-        java.util.Map<String, Object> classificationRule =
-            (java.util.Map<String, Object>) scenarioData.get("classification-rule");
+        Map<String, Object> classificationRule =
+            (Map<String, Object>) scenarioData.get("classification-rule");
         if (classificationRule != null) {
             String condition = (String) classificationRule.get("condition");
             String description = (String) classificationRule.get("description");
@@ -2306,19 +2314,19 @@ public class RulesEngine {
         }
 
         // Parse rule configurations (legacy)
-        java.util.List<String> ruleConfigurations =
-            (java.util.List<String>) scenarioData.get("rule-configurations");
+        List<String> ruleConfigurations =
+            (List<String>) scenarioData.get("rule-configurations");
         if (ruleConfigurations != null) {
             scenario.setRuleConfigurations(ruleConfigurations);
         }
 
         // Parse processing stages (modern stage-based configuration)
-        java.util.List<java.util.Map<String, Object>> processingStages =
-            (java.util.List<java.util.Map<String, Object>>) scenarioData.get("processing-stages");
+        List<Map<String, Object>> processingStages =
+            (List<Map<String, Object>>) scenarioData.get("processing-stages");
         if (processingStages != null) {
-            java.util.List<dev.mars.apex.core.service.scenario.ScenarioStage> stages = new java.util.ArrayList<>();
-            for (java.util.Map<String, Object> stageData : processingStages) {
-                dev.mars.apex.core.service.scenario.ScenarioStage stage = parseScenarioStage(stageData);
+            List<ScenarioStage> stages = new ArrayList<>();
+            for (Map<String, Object> stageData : processingStages) {
+                ScenarioStage stage = parseScenarioStage(stageData);
                 if (stage != null) {
                     stages.add(stage);
                 }
@@ -2329,7 +2337,7 @@ public class RulesEngine {
             String classificationDescription = scenario.getClassificationRuleDescription();
             String description = scenario.getDescription();
 
-            scenario = dev.mars.apex.core.service.scenario.ScenarioConfiguration.withStages(
+            scenario = ScenarioConfiguration.withStages(
                 scenario.getScenarioId(), scenario.getName(), scenario.getDataTypes(), stages);
             scenario.setDescription(description);
             scenario.setClassificationRuleCondition(classificationCondition);
@@ -2347,8 +2355,8 @@ public class RulesEngine {
      * @return Parsed ScenarioStage or null if parsing fails
      */
     @SuppressWarnings("unchecked")
-    private dev.mars.apex.core.service.scenario.ScenarioStage parseScenarioStage(
-            java.util.Map<String, Object> stageData) {
+    private ScenarioStage parseScenarioStage(
+            Map<String, Object> stageData) {
 
         try {
             String stageName = (String) stageData.get("stage-name");
@@ -2363,8 +2371,8 @@ public class RulesEngine {
                 return null;
             }
 
-            dev.mars.apex.core.service.scenario.ScenarioStage stage =
-                new dev.mars.apex.core.service.scenario.ScenarioStage(stageName, configFile, executionOrder);
+            ScenarioStage stage =
+                new ScenarioStage(stageName, configFile, executionOrder);
 
             if (failurePolicy != null) {
                 stage.setFailurePolicy(failurePolicy);
@@ -2379,7 +2387,7 @@ public class RulesEngine {
             }
 
             // Parse dependencies
-            java.util.List<String> dependsOn = (java.util.List<String>) stageData.get("depends-on");
+            List<String> dependsOn = (List<String>) stageData.get("depends-on");
             if (dependsOn != null) {
                 for (String dependency : dependsOn) {
                     stage.addDependency(dependency);
@@ -2387,8 +2395,8 @@ public class RulesEngine {
             }
 
             // Parse stage metadata
-            java.util.Map<String, Object> stageMetadata =
-                (java.util.Map<String, Object>) stageData.get("stage-metadata");
+            Map<String, Object> stageMetadata =
+                (Map<String, Object>) stageData.get("stage-metadata");
             if (stageMetadata != null) {
                 stage.setStageMetadata(stageMetadata);
             }
@@ -2453,7 +2461,7 @@ public class RulesEngine {
          * {@inheritDoc}
          */
         @Override
-        public dev.mars.apex.core.service.scenario.ScenarioExecutionResult evaluate(Map<String, Object> inputData) {
+        public ScenarioExecutionResult evaluate(Map<String, Object> inputData) {
             return engine.evaluateScenario(inputData);
         }
 
@@ -2461,7 +2469,7 @@ public class RulesEngine {
          * {@inheritDoc}
          */
         @Override
-        public dev.mars.apex.core.service.scenario.ScenarioExecutionResult evaluate(String scenarioId, Map<String, Object> inputData) {
+        public ScenarioExecutionResult evaluate(String scenarioId, Map<String, Object> inputData) {
             return engine.evaluateScenario(scenarioId, inputData);
         }
 
@@ -2469,7 +2477,7 @@ public class RulesEngine {
          * {@inheritDoc}
          */
         @Override
-        public dev.mars.apex.core.service.scenario.ScenarioExecutionResult evaluateWithClassification(Map<String, Object> inputData) {
+        public ScenarioExecutionResult evaluateWithClassification(Map<String, Object> inputData) {
             return engine.evaluateWithClassification(inputData);
         }
     }
@@ -3054,7 +3062,7 @@ public class RulesEngine {
             loader.setSearchPaths(filesystemPaths);
             loader.setClasspathPrefixes(classpathPrefixes);
 
-            Map<String, dev.mars.apex.core.service.scenario.ScenarioConfiguration> scenarios;
+            Map<String, ScenarioConfiguration> scenarios;
 
             // Try classpath first
             try (java.io.InputStream is = RulesEngine.class.getClassLoader().getResourceAsStream(sourcePath)) {
