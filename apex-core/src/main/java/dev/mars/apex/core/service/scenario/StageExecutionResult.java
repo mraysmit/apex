@@ -160,7 +160,13 @@ public class StageExecutionResult {
         return executionTimeMs;
     }
     
-    public Map<String, Object> getStageOutputs() {
+    /**
+     * Gets a defensive copy of all stage outputs.
+     * Synchronized to ensure consistent snapshot during concurrent modifications.
+     *
+     * @return defensive copy of stage outputs
+     */
+    public synchronized Map<String, Object> getStageOutputs() {
         return new HashMap<>(stageOutputs);
     }
     
@@ -191,20 +197,25 @@ public class StageExecutionResult {
     
     /**
      * Adds a stage output. Thread-safe using ConcurrentHashMap.
+     * Synchronized to prevent interference with setStageOutputs().
      *
      * @param key the output key
      * @param value the output value
      */
-    public void addStageOutput(String key, Object value) {
+    public synchronized void addStageOutput(String key, Object value) {
         stageOutputs.put(key, value);
     }
 
     /**
-     * Sets all stage outputs. Thread-safe using ConcurrentHashMap.
+     * Sets all stage outputs atomically. Thread-safe using synchronized block
+     * to ensure clear() and putAll() execute as a single atomic operation.
+     * 
+     * <p>Note: Without synchronization, concurrent calls could observe an empty
+     * map between clear() and putAll(), or addStageOutput() calls could be lost.</p>
      *
      * @param outputs the outputs to set
      */
-    public void setStageOutputs(Map<String, Object> outputs) {
+    public synchronized void setStageOutputs(Map<String, Object> outputs) {
         this.stageOutputs.clear();
         if (outputs != null) {
             this.stageOutputs.putAll(outputs);
