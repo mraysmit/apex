@@ -6,16 +6,16 @@ The `read-schema` pipeline stage allows you to read schema metadata from various
 
 ## Features
 
-- ✅ Read schema from database tables using INFORMATION_SCHEMA
-- ✅ Read schema from CSV files by analyzing headers and data types  
-- ✅ Extract column metadata including:
+- Read schema from database tables using INFORMATION_SCHEMA
+- Read schema from CSV files by analyzing headers and data types  
+- Extract column metadata including:
   - Column names
   - Data types
   - Nullable flags
   - Maximum length
   - Precision and scale (for numeric types)
   - Primary key flags (database only)
-- ✅ Stores schema metadata in pipeline context for downstream stages
+- Stores schema metadata in pipeline context for downstream stages
 
 ## Pipeline Configuration
 
@@ -265,11 +265,11 @@ Comprehensive integration tests are available in:
 - `apex-data-sync/src/test/java/dev/mars/apex/sync/ReadSchemaPipelineStageTest.java`
 
 Test coverage includes:
-- ✅ Reading schema from H2 database
-- ✅ Reading schema from CSV files
-- ✅ Column metadata extraction
-- ✅ Type inference for CSV
-- ✅ Pipeline context storage
+- Reading schema from H2 database
+- Reading schema from CSV files
+- Column metadata extraction
+- Type inference for CSV
+- Pipeline context storage
 
 Run tests with:
 ```bash

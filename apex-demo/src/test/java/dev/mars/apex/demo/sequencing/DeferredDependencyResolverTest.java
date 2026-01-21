@@ -93,7 +93,7 @@ public class DeferredDependencyResolverTest {
             assertEquals("rules", readySections.get(0).getSectionName());
         }
 
-        LOGGER.info("✅ Forward reference resolution test PASSED - Dependencies resolved!");
+        LOGGER.info("Forward reference resolution test PASSED - Dependencies resolved!");
     }
     
     @Test
@@ -149,7 +149,7 @@ public class DeferredDependencyResolverTest {
             );
         }
 
-        LOGGER.info("✅ Complex dependency chain test PASSED - Chain resolved correctly!");
+        LOGGER.info("Complex dependency chain test PASSED - Chain resolved correctly!");
     }
     
     @Test
@@ -184,7 +184,7 @@ public class DeferredDependencyResolverTest {
         assertNotNull(result);
 
         LOGGER.info("Circular dependency detection result: " + result);
-        LOGGER.info("✅ Circular dependency detection test PASSED - Detection mechanism working!");
+        LOGGER.info("Circular dependency detection test PASSED - Detection mechanism working!");
     }
     
     @Test
@@ -217,7 +217,7 @@ public class DeferredDependencyResolverTest {
         assertTrue(status.getDeferredSections() >= 0);
 
         LOGGER.info("Resolution status: " + status);
-        LOGGER.info("✅ Unresolvable dependency handling test PASSED - Status correctly reported!");
+        LOGGER.info("Unresolvable dependency handling test PASSED - Status correctly reported!");
     }
     
     @Test
@@ -273,6 +273,6 @@ public class DeferredDependencyResolverTest {
         assertNotNull(finalStatus);
 
         LOGGER.info("Final status: " + finalStatus);
-        LOGGER.info("✅ Deferred processing queue management test PASSED - Queue managed correctly!");
+        LOGGER.info("Deferred processing queue management test PASSED - Queue managed correctly!");
     }
 }

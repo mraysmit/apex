@@ -39,11 +39,11 @@ public class TestEdge7_EmptyNumberedSectionsTest extends DemoTestBase {
             // Attempt to load YAML with empty numbered sections
             RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/demo/sequencing/TestEdge7_EmptyNumberedSectionsTest.yaml");
 
-            LOGGER.info("✅ EDGE CASE TEST 7 PASSED: Empty numbered sections handled correctly");
+            LOGGER.info("EDGE CASE TEST 7 PASSED: Empty numbered sections handled correctly");
             assertNotNull(engine, "RulesEngine should be created successfully");
 
         } catch (Exception e) {
-            LOGGER.error("❌ EDGE CASE TEST 7 FAILED: Empty numbered sections caused error", e);
+            LOGGER.error("EDGE CASE TEST 7 FAILED: Empty numbered sections caused error", e);
             fail("Empty numbered sections should be handled gracefully: " + e.getMessage());
         }
     }

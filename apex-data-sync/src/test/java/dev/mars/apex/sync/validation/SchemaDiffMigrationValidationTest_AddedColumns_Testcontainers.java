@@ -46,11 +46,11 @@ import dev.mars.apex.sync.TestContainerImages;
  * Tests backward-compatible schema changes using real PostgreSQL databases via Testcontainers.
  *
  * CRITICAL VALIDATION CHECKLIST:
- * ✅ Docker availability - Gracefully skip if Docker not available
- * ✅ Schema compatibility - Added nullable columns should be compatible
- * ✅ Migration safety - Backward-compatible changes should pass validation
- * ✅ Schema comparison - Source v1 vs Target v2 (with added columns)
- * ✅ Report generation - HTML report with migration analysis
+ * Docker availability - Gracefully skip if Docker not available
+ * Schema compatibility - Added nullable columns should be compatible
+ * Migration safety - Backward-compatible changes should pass validation
+ * Schema comparison - Source v1 vs Target v2 (with added columns)
+ * Report generation - HTML report with migration analysis
  *
  * This test uses REAL PostgreSQL via Testcontainers - NO MOCKING
  *

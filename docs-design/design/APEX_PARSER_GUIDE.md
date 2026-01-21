@@ -23,13 +23,13 @@ The **APEX Compiler** is a standalone lexical grammar checker and validation too
 
 ### Key Features
 
-- ✅ **Lexical Grammar Validation** - Validates YAML files against formal APEX grammar
-- ✅ **No Code Generation** - Pure validation without Java code generation
-- ✅ **SpEL Expression Validation** - Validates Spring Expression Language syntax
-- ✅ **Metadata Compliance** - Ensures APEX metadata standards compliance
-- ✅ **Type-Specific Validation** - Document type-specific rule enforcement
-- ✅ **Command-Line Interface** - Standalone CLI tool for build integration
-- ✅ **Programmatic API** - Java API for IDE and tool integration
+- **Lexical Grammar Validation** - Validates YAML files against formal APEX grammar
+- **No Code Generation** - Pure validation without Java code generation
+- **SpEL Expression Validation** - Validates Spring Expression Language syntax
+- **Metadata Compliance** - Ensures APEX metadata standards compliance
+- **Type-Specific Validation** - Document type-specific rule enforcement
+- **Command-Line Interface** - Standalone CLI tool for build integration
+- **Programmatic API** - Java API for IDE and tool integration
 
 ---
 
@@ -1277,9 +1277,9 @@ Expected output:
 ```
 APEX YAML Lexical Grammar Checker v1.0
 =======================================
-✅ Validates APEX YAML files against formal grammar
-✅ No Java code generation - pure validation
-✅ Catches syntax, structure, and semantic errors
+Validates APEX YAML files against formal grammar
+No Java code generation - pure validation
+Catches syntax, structure, and semantic errors
 
 Usage: java -cp apex-compiler.jar dev.mars.apex.compiler.ApexYamlCompiler <yaml-file>
 ```
@@ -1329,7 +1329,7 @@ ApexYamlLexicalValidator.ValidationResult result = validator.validateFile(yamlFi
 
 // Process results
 if (result.isValid()) {
-    System.out.println("✅ Configuration is valid!");
+    System.out.println("Configuration is valid!");
 } else {
     System.out.println("X Validation failed:");
     result.getErrors().forEach(error -> System.out.println("  • " + error));
@@ -1755,7 +1755,7 @@ java -cp "apex-compiler/target/classes:apex-core/target/classes:~/.m2/repository
 metadata:
   description: This has: special characters
 
-# ✅ Correct  
+# Correct  
 metadata:
   description: "This has: special characters"
 ```
@@ -1799,7 +1799,7 @@ condition: "#amount > (1000 + #fee"
 # X Invalid operators
 condition: "#amount > && #currency"
 
-# ✅ Correct
+# Correct
 condition: "#amount > 1000 && #currency == 'USD'"
 ```
 
@@ -2040,7 +2040,7 @@ public class ProjectYamlValidator {
             ValidationResult result = validator.validateFile(yamlFile);
 
             if (result.isValid()) {
-                System.out.println("✅ " + yamlFile);
+                System.out.println("" + yamlFile);
             } else {
                 System.out.println("X " + yamlFile);
                 result.getErrors().forEach(error ->
@@ -2085,7 +2085,7 @@ foreach ($file in $yamlFiles) {
         dev.mars.apex.compiler.ApexYamlCompiler $file.FullName 2>&1
 
     if ($LASTEXITCODE -eq 0) {
-        Write-Host "✅ $relativePath" -ForegroundColor Green
+        Write-Host "$relativePath" -ForegroundColor Green
     } else {
         Write-Host "X $relativePath" -ForegroundColor Red
         Write-Host "   $result" -ForegroundColor Red
@@ -2112,20 +2112,20 @@ class ApexYamlScanner:
         # Filter out target directories
         yaml_files = [f for f in yaml_files if "target" not in str(f)]
 
-        print(f"🔍 Scanning {len(yaml_files)} YAML files")
+        print(f"Scanning {len(yaml_files)} YAML files")
 
         valid_count = 0
         invalid_count = 0
 
         for yaml_file in yaml_files:
             if self._validate_file(yaml_file):
-                print(f"✅ {yaml_file.relative_to(self.project_root)}")
+                print(f"{yaml_file.relative_to(self.project_root)}")
                 valid_count += 1
             else:
                 print(f"X {yaml_file.relative_to(self.project_root)}")
                 invalid_count += 1
 
-        print(f"\n📊 Results: {valid_count} valid, {invalid_count} invalid")
+        print(f"\nResults: {valid_count} valid, {invalid_count} invalid")
         return invalid_count == 0
 
     def _validate_file(self, yaml_file):

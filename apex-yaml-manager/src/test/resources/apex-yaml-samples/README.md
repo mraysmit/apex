@@ -143,15 +143,15 @@ Additional scenarios:
 
 ## Key APEX Features Showcased
 
-- ✅ **Rule Reuse:** Rules referenced by multiple groups
-- ✅ **Enrichment Reuse:** Enrichments grouped and reused
-- ✅ **Inline Datasets:** Currency rates lookup table
-- ✅ **Database Lookups:** PostgreSQL connections with parameterized queries
-- ✅ **Nested Dependencies:** Multi-level configuration references
-- ✅ **Environment Variables:** Placeholder resolution for credentials
-- ✅ **Error Handling:** Failure policies and severity thresholds
-- ✅ **Classification Rules:** SpEL-based trade routing
-- ✅ **Processing Stages:** Ordered execution with dependencies
+- **Rule Reuse:** Rules referenced by multiple groups
+- **Enrichment Reuse:** Enrichments grouped and reused
+- **Inline Datasets:** Currency rates lookup table
+- **Database Lookups:** PostgreSQL connections with parameterized queries
+- **Nested Dependencies:** Multi-level configuration references
+- **Environment Variables:** Placeholder resolution for credentials
+- **Error Handling:** Failure policies and severity thresholds
+- **Classification Rules:** SpEL-based trade routing
+- **Processing Stages:** Ordered execution with dependencies
 
 ## Testing the Dependency Tree Viewer
 

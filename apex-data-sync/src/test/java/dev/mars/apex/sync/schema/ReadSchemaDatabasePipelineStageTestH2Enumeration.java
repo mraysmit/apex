@@ -47,10 +47,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * Validates H2 schema naming conventions (uppercase) and enumeration capabilities.
  *
  * CRITICAL VALIDATION CHECKLIST:
- * ✅ H2 in-memory database created with test schema
- * ✅ Tables enumerated from custom schema
- * ✅ H2 uppercase schema naming handled correctly
- * ✅ HTML report generated
+ * H2 in-memory database created with test schema
+ * Tables enumerated from custom schema
+ * H2 uppercase schema naming handled correctly
+ * HTML report generated
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2.1.0

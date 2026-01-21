@@ -35,14 +35,14 @@ class AllProcessorsTest {
         yamlLoader = new YamlConfigurationLoader();
         rulesEngineConfiguration = new RulesEngineConfiguration();
 
-        LOGGER.info("✅ All processors initialized");
+        LOGGER.info("All processors initialized");
     }
 
     @Test
-    @DisplayName("🚨 PROCESSOR 1: YamlEnrichmentProcessor (Rules → Enrichments)")
+    @DisplayName("PROCESSOR 1: YamlEnrichmentProcessor (Rules → Enrichments)")
     void testYamlEnrichmentProcessor() {
         LOGGER.info("=== TESTING: YamlEnrichmentProcessor ===");
-        LOGGER.info("📋 Processing Order: Rules FIRST → Enrichments SECOND (hardcoded)");
+        LOGGER.info("Processing Order: Rules FIRST → Enrichments SECOND (hardcoded)");
         
         String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/AllProcessorsTest.yaml";
         YamlRuleConfiguration config;
@@ -67,19 +67,19 @@ class AllProcessorsTest {
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
             
-            LOGGER.info("📊 YamlEnrichmentProcessor Result: {}", enrichedData);
+            LOGGER.info("YamlEnrichmentProcessor Result: {}", enrichedData);
             
             // Check what was actually calculated
             if (enrichedData.containsKey("riskScore")) {
-                LOGGER.info("✅ riskScore calculated: {}", enrichedData.get("riskScore"));
+                LOGGER.info("riskScore calculated: {}", enrichedData.get("riskScore"));
             } else {
-                LOGGER.error("❌ riskScore NOT calculated");
+                LOGGER.error("riskScore NOT calculated");
             }
             
             if (enrichedData.containsKey("riskCategory")) {
-                LOGGER.info("✅ riskCategory set: {}", enrichedData.get("riskCategory"));
+                LOGGER.info("riskCategory set: {}", enrichedData.get("riskCategory"));
             } else {
-                LOGGER.error("❌ riskCategory NOT set");
+                LOGGER.error("riskCategory NOT set");
             }
             
             assertNotNull(result, "YamlEnrichmentProcessor should return result");
@@ -91,10 +91,10 @@ class AllProcessorsTest {
     }
 
     @Test
-    @DisplayName("🚨 PROCESSOR 2: RulesEngine.evaluate() (Enrichments → Rules → Rule Groups)")
+    @DisplayName("PROCESSOR 2: RulesEngine.evaluate() (Enrichments → Rules → Rule Groups)")
     void testRulesEngineEvaluate() {
         LOGGER.info("=== TESTING: RulesEngine.evaluate() ===");
-        LOGGER.info("📋 Processing Order: Enrichments FIRST → Rules SECOND → Rule Groups THIRD (hardcoded)");
+        LOGGER.info("Processing Order: Enrichments FIRST → Rules SECOND → Rule Groups THIRD (hardcoded)");
         
         String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/AllProcessorsTest.yaml";
         YamlRuleConfiguration config;
@@ -117,20 +117,20 @@ class AllProcessorsTest {
             RuleResult result = engine.evaluate(config, testData);
             Map<String, Object> enrichedData = result.getEnrichedData();
             
-            LOGGER.info("📊 RulesEngine.evaluate() Result: {}", enrichedData);
+            LOGGER.info("RulesEngine.evaluate() Result: {}", enrichedData);
             LOGGER.info("🎯 Rule Evaluation Success: {}", result.isSuccess());
             
             // Check what was actually calculated
             if (enrichedData.containsKey("riskScore")) {
-                LOGGER.info("✅ riskScore calculated: {}", enrichedData.get("riskScore"));
+                LOGGER.info("riskScore calculated: {}", enrichedData.get("riskScore"));
             } else {
-                LOGGER.error("❌ riskScore NOT calculated");
+                LOGGER.error("riskScore NOT calculated");
             }
             
             if (enrichedData.containsKey("riskCategory")) {
-                LOGGER.info("✅ riskCategory set: {}", enrichedData.get("riskCategory"));
+                LOGGER.info("riskCategory set: {}", enrichedData.get("riskCategory"));
             } else {
-                LOGGER.error("❌ riskCategory NOT set");
+                LOGGER.error("riskCategory NOT set");
             }
             
             assertNotNull(result, "RulesEngine should return result");
@@ -142,10 +142,10 @@ class AllProcessorsTest {
     }
 
     @Test
-    @DisplayName("🚨 PROCESSOR 3: enrichmentProcessor.processEnrichments() (Delegates to YamlEnrichmentProcessor)")
+    @DisplayName("PROCESSOR 3: enrichmentProcessor.processEnrichments() (Delegates to YamlEnrichmentProcessor)")
     void testEnrichmentService() {
         LOGGER.info("=== TESTING: enrichmentProcessor.processEnrichments() ===");
-        LOGGER.info("📋 Processing Order: Delegates to YamlEnrichmentProcessor (Rules → Enrichments)");
+        LOGGER.info("Processing Order: Delegates to YamlEnrichmentProcessor (Rules → Enrichments)");
         
         String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/AllProcessorsTest.yaml";
         YamlRuleConfiguration config;
@@ -169,7 +169,7 @@ class AllProcessorsTest {
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
             
-            LOGGER.info("📊 EnrichmentService Result: {}", enrichedData);
+            LOGGER.info("EnrichmentService Result: {}", enrichedData);
             
             assertNotNull(result, "EnrichmentService should return result");
             
@@ -180,10 +180,10 @@ class AllProcessorsTest {
     }
 
     @Test
-    @DisplayName("🚨 PROCESSOR 4: RulesEngine with Individual Rules (Rules Only)")
+    @DisplayName("PROCESSOR 4: RulesEngine with Individual Rules (Rules Only)")
     void testSimpleRulesEngine() {
         LOGGER.info("=== TESTING: RulesEngine with Individual Rules ===");
-        LOGGER.info("📋 Processing Order: Rules ONLY (demonstrating rule-only execution)");
+        LOGGER.info("Processing Order: Rules ONLY (demonstrating rule-only execution)");
         
         Map<String, Object> testData = new HashMap<>();
         testData.put("amount", 50000.0);
@@ -219,7 +219,7 @@ class AllProcessorsTest {
             boolean riskScoreValid = riskScoreResult.isTriggered();
             boolean riskCategoryValid = riskCategoryResult.isTriggered();
             
-            LOGGER.info("📊 RulesEngine Results:");
+            LOGGER.info("RulesEngine Results:");
             LOGGER.info("   Risk Score Valid: {}", riskScoreValid);
             LOGGER.info("   Risk Category Valid: {}", riskCategoryValid);
             

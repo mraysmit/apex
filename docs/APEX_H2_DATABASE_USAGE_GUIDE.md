@@ -59,7 +59,7 @@ data-sources:
 
 ## Configuration Patterns
 
-### ✅ RECOMMENDED: File-based H2 Configuration
+### RECOMMENDED: File-based H2 Configuration
 
 ```yaml
 # File: customer-database.yaml
@@ -250,7 +250,7 @@ database: "./target/h2-demo/init;INIT=RUNSCRIPT FROM 'classpath:schema.sql'"
 
 ## Java Code Patterns
 
-### ✅ RECOMMENDED: File-based H2 in Java
+### RECOMMENDED: File-based H2 in Java
 
 ```java
 public class CustomerDatabaseDemo {
@@ -379,7 +379,7 @@ public class SharedDataSourceDemo {
              ResultSet rs = stmt.executeQuery()) {
             if (rs.next()) {
                 int count = rs.getInt(1);
-                logger.info("✅ Created customers table with {} records", count);
+                logger.info("Created customers table with {} records", count);
             }
         }
     }
@@ -393,8 +393,8 @@ public class SharedDataSourceDemo {
         YamlEnrichmentProcessor enrichmentProcessor = new YamlEnrichmentProcessor(serviceRegistry, expressionEvaluator);
         enrichmentService = new EnrichmentService(serviceRegistry, expressionEvaluator);
 
-        logger.info("✅ APEX services initialized");
-        logger.info("✅ Shared database connection available for integration");
+        logger.info("APEX services initialized");
+        logger.info("Shared database connection available for integration");
     }
 }
 ```
@@ -406,7 +406,7 @@ public class SharedDataSourceDemo {
 H2 database returns **uppercase column names** by default. Your field mappings must account for this:
 
 ```yaml
-# ✅ CORRECT: Use uppercase source fields
+# CORRECT: Use uppercase source fields
 field-mappings:
   - source-field: "CUSTOMER_NAME"    # H2 returns uppercase
     target-field: "customerName"     # Target can be any case
@@ -470,7 +470,7 @@ mkdir -p target/h2-demo
 
 ### H2 Database Usage Guidelines for APEX Demos
 
-#### ✅ DO:
+#### DO:
 - Use file-based H2: `database: "./target/h2-demo/apex_demo_shared"`
 - Use uppercase field mappings: `source-field: "CUSTOMER_NAME"`
 - Add proper cleanup in demo code: `DROP TABLE IF EXISTS customers`
@@ -547,7 +547,7 @@ Multiple H2 database demos in the APEX system were failing with consistent error
 java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" dev.mars.apex.demo.runners.ValidationRunner all
 ```
 
-**Result:** ✅ **APEX core services worked perfectly**
+**Result:** **APEX core services worked perfectly**
 - Validation demos: 100% successful
 - YAML configuration loading: Working
 - Enrichment processing: Working
@@ -560,7 +560,7 @@ java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" dev
 java -cp "apex-demo/target/apex-demo-1.0-SNAPSHOT-jar-with-dependencies.jar" dev.mars.apex.demo.lookup.DatabaseConnectivityTest
 ```
 
-**Result:** ✅ **H2 database operations worked perfectly**
+**Result:** **H2 database operations worked perfectly**
 - Database connection: Successful
 - Table creation: Successful
 - Data insertion: Successful

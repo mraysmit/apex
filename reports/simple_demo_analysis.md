@@ -3,7 +3,7 @@
 **Generated:** 2025-09-04T12:51:17.258863
 **Consistency Score:** 63.4%
 
-## 📊 Summary Statistics
+## Summary Statistics
 
 - **Total Demo Classes:** 101
 - **Total YAML Files:** 164
@@ -24,107 +24,107 @@
 
 | Class Name | Package | YAML Files | Error Handling |
 |------------|---------|------------|----------------|
-| AllDemosRunner | runners | X No YAML files | ✅ |
-| ApexAdvancedFeaturesDemo | evaluation | evaluation/apex-advanced-features-demo.yaml; evaluation/advanced-features/collection-operations-c... | ✅ |
-| ApexRulesEngineDemo | evaluation | apex-rules-engine-demo-config.yaml | ✅ |
-| BasicUsageExamples | validation | validation/basic-usage-examples-config.yaml | ✅ |
-| BatchProcessingDemo | enrichment | transformation/batch-processing-demo-config.yaml | ✅ |
+| AllDemosRunner | runners | X No YAML files | |
+| ApexAdvancedFeaturesDemo | evaluation | evaluation/apex-advanced-features-demo.yaml; evaluation/advanced-features/collection-operations-c... | |
+| ApexRulesEngineDemo | evaluation | apex-rules-engine-demo-config.yaml | |
+| BasicUsageExamples | validation | validation/basic-usage-examples-config.yaml | |
+| BatchProcessingDemo | enrichment | transformation/batch-processing-demo-config.yaml | |
 | BootstrapSIRepairResult | model | X No YAML files | X |
 | BootstrapSettlementInstruction | model | X No YAML files | X |
 | BootstrapStandingInstruction | model | X No YAML files | X |
-| CommoditySwapValidationBootstrap | validation | validation/commodity-swap-validation-bootstrap-demo.yaml; validation/commodity-bootstrap/validati... | ✅ |
-| CommoditySwapValidationQuickDemo | validation | X No YAML files | ✅ |
+| CommoditySwapValidationBootstrap | validation | validation/commodity-swap-validation-bootstrap-demo.yaml; validation/commodity-bootstrap/validati... | |
+| CommoditySwapValidationQuickDemo | validation | X No YAML files | |
 | CommodityTotalReturnSwap | model | X No YAML files | X |
-| ComplianceServiceDemo | evaluation | evaluation/compliance-service-demo.yaml; evaluation/compliance/regulatory-requirements.yaml; eval... | ✅ |
+| ComplianceServiceDemo | evaluation | evaluation/compliance-service-demo.yaml; evaluation/compliance/regulatory-requirements.yaml; eval... | |
 | CompoundKeyLookupDemo | lookup | X No YAML files | X |
-| ComprehensiveFinancialSettlementDemo | enrichment | comprehensive-financial-settlement-demo-config.yaml | ✅ |
+| ComprehensiveFinancialSettlementDemo | enrichment | comprehensive-financial-settlement-demo-config.yaml | |
 | Counterparty | model | X No YAML files | X |
 | CurrencyTransaction | model | X No YAML files | X |
-| CustodyAutoRepairBootstrap | enrichment | enrichment/custody-auto-repair-bootstrap-demo.yaml; enrichment/custody-bootstrap/standing-instruc... | ✅ |
-| CustodyAutoRepairDemo | enrichment | custody-auto-repair-demo-config.yaml | ✅ |
+| CustodyAutoRepairBootstrap | enrichment | enrichment/custody-auto-repair-bootstrap-demo.yaml; enrichment/custody-bootstrap/standing-instruc... | |
+| CustodyAutoRepairDemo | enrichment | custody-auto-repair-demo-config.yaml | |
 | Customer | model | X No YAML files | X |
 | CustomerOrder | model | X No YAML files | X |
 | CustomerProfile | model | X No YAML files | X |
-| CustomerTransformerDemo | enrichment | enrichment/customer-transformer-demo.yaml; enrichment/customer-transformer/transformer-rules-conf... | ✅ |
-| DataManagementDemo | enrichment | enrichment/data-management-demo-config.yaml | ✅ |
-| DataServiceManagerDemo | infrastructure | X No YAML files | ✅ |
-| DataSourceVerifier | infrastructure | X No YAML files | ✅ |
-| DatabaseSetup | infrastructure | X No YAML files | ✅ |
-| DemoDataBootstrap | infrastructure | infrastructure/bootstrap/datasets/customer-profiles.yaml; infrastructure/bootstrap/datasets/custo... | ✅ |
-| DemoDataLoader | infrastructure | X No YAML files | ✅ |
-| DemoDataProvider | infrastructure | infrastructure/demo-data-provider.yaml; infrastructure/datasets/customer-profiles.yaml; infrastru... | ✅ |
-| DynamicMethodExecutionDemo | evaluation | evaluation/dynamic-method-execution-demo.yaml; evaluation/dynamic-execution/settlement-processing... | ✅ |
+| CustomerTransformerDemo | enrichment | enrichment/customer-transformer-demo.yaml; enrichment/customer-transformer/transformer-rules-conf... | |
+| DataManagementDemo | enrichment | enrichment/data-management-demo-config.yaml | |
+| DataServiceManagerDemo | infrastructure | X No YAML files | |
+| DataSourceVerifier | infrastructure | X No YAML files | |
+| DatabaseSetup | infrastructure | X No YAML files | |
+| DemoDataBootstrap | infrastructure | infrastructure/bootstrap/datasets/customer-profiles.yaml; infrastructure/bootstrap/datasets/custo... | |
+| DemoDataLoader | infrastructure | X No YAML files | |
+| DemoDataProvider | infrastructure | infrastructure/demo-data-provider.yaml; infrastructure/datasets/customer-profiles.yaml; infrastru... | |
+| DynamicMethodExecutionDemo | evaluation | evaluation/dynamic-method-execution-demo.yaml; evaluation/dynamic-execution/settlement-processing... | |
 | EnhancedTrade | model | X No YAML files | X |
-| EnrichmentRunner | runners | X No YAML files | ✅ |
-| EvaluationRunner | runners | X No YAML files | ✅ |
-| ExternalDataSourceDemo | enrichment | enrichment/external-data-source-demo-config.yaml | ✅ |
-| ExternalDataSourceReferenceDemo | lookup | lookup/customer-profile-enrichment.yaml; lookup/settlement-instruction-enrichment.yaml | ✅ |
-| ExternalDataSourceWorkingDemo | lookup | lookup/customer-profile-enrichment.yaml | ✅ |
-| ExternalDatasetSetup | infrastructure | X No YAML files | ✅ |
-| FileProcessingDemo | infrastructure | X No YAML files | ✅ |
-| FinancialDemo | evaluation | X No YAML files | ✅ |
-| FinancialStaticDataProvider | infrastructure | infrastructure/financial-static-data-provider.yaml; infrastructure/datasets/financial-clients.yam... | ✅ |
+| EnrichmentRunner | runners | X No YAML files | |
+| EvaluationRunner | runners | X No YAML files | |
+| ExternalDataSourceDemo | enrichment | enrichment/external-data-source-demo-config.yaml | |
+| ExternalDataSourceReferenceDemo | lookup | lookup/customer-profile-enrichment.yaml; lookup/settlement-instruction-enrichment.yaml | |
+| ExternalDataSourceWorkingDemo | lookup | lookup/customer-profile-enrichment.yaml | |
+| ExternalDatasetSetup | infrastructure | X No YAML files | |
+| FileProcessingDemo | infrastructure | X No YAML files | |
+| FinancialDemo | evaluation | X No YAML files | |
+| FinancialStaticDataProvider | infrastructure | infrastructure/financial-static-data-provider.yaml; infrastructure/datasets/financial-clients.yam... | |
 | FinancialTrade | model | X No YAML files | X |
-| FluentRuleBuilderExample | evaluation | evaluation/fluent-rule-builder-demo.yaml; evaluation/fluent-rule-builder/customer-processing-cont... | ✅ |
-| H2CustomParametersDemo | lookup | X No YAML files | ✅ |
+| FluentRuleBuilderExample | evaluation | evaluation/fluent-rule-builder-demo.yaml; evaluation/fluent-rule-builder/customer-processing-cont... | |
+| H2CustomParametersDemo | lookup | X No YAML files | |
 | Header | model | X No YAML files | X |
-| InfrastructureRunner | runners | X No YAML files | ✅ |
-| IntegratedCustomerValidatorDemo | validation | validation/integrated-customer-validator-demo.yaml; validation/integrated-customer/validation-rul... | ✅ |
-| IntegratedProductValidatorDemo | validation | validation/integrated-product-validator-demo.yaml; validation/integrated-product/product-validati... | ✅ |
-| IntegratedTradeValidatorComplexDemo | validation | validation/integrated-trade-validator-complex-demo.yaml; validation/trade-validation/settlement-v... | ✅ |
-| IntegratedTradeValidatorDemo | validation | validation/integrated-trade-validator-demo.yaml; validation/trade-validation-simple/trade-validat... | ✅ |
-| LayeredAPIDemo | evaluation | layered-api-demo-config.yaml | ✅ |
+| InfrastructureRunner | runners | X No YAML files | |
+| IntegratedCustomerValidatorDemo | validation | validation/integrated-customer-validator-demo.yaml; validation/integrated-customer/validation-rul... | |
+| IntegratedProductValidatorDemo | validation | validation/integrated-product-validator-demo.yaml; validation/integrated-product/product-validati... | |
+| IntegratedTradeValidatorComplexDemo | validation | validation/integrated-trade-validator-complex-demo.yaml; validation/trade-validation/settlement-v... | |
+| IntegratedTradeValidatorDemo | validation | validation/integrated-trade-validator-demo.yaml; validation/trade-validation-simple/trade-validat... | |
+| LayeredAPIDemo | evaluation | layered-api-demo-config.yaml | |
 | LoanApplication | model | X No YAML files | X |
-| LookupRunner | runners | X No YAML files | ✅ |
+| LookupRunner | runners | X No YAML files | |
 | NestedFieldLookupDemo | lookup | X No YAML files | X |
 | OrderProcessing | model | X No YAML files | X |
 | OtcOption | model | X No YAML files | X |
-| OtcOptionsBootstrapDemo | enrichment | enrichment/otc-options-bootstrap-demo.yaml; enrichment/otc-bootstrap/sample-otc-options-config.ya... | ✅ |
+| OtcOptionsBootstrapDemo | enrichment | enrichment/otc-options-bootstrap-demo.yaml; enrichment/otc-bootstrap/sample-otc-options-config.ya... | |
 | PartyTradeIdentifier | model | X No YAML files | X |
-| PerformanceAndExceptionDemo | evaluation | evaluation/performance-and-exception-demo.yaml; evaluation/performance-and-exception/performance-... | ✅ |
-| PerformanceDemo | evaluation | X No YAML files | ✅ |
-| PostTradeProcessingServiceDemo | evaluation | evaluation/post-trade-processing-service-demo.yaml; evaluation/post-trade-processing/trade-proces... | ✅ |
-| PostgreSQLLookupDemo | lookup | X No YAML files | ✅ |
-| PricingServiceDemo | evaluation | evaluation/pricing-service-demo.yaml; evaluation/pricing-service/pricing-calculation-models-confi... | ✅ |
+| PerformanceAndExceptionDemo | evaluation | evaluation/performance-and-exception-demo.yaml; evaluation/performance-and-exception/performance-... | |
+| PerformanceDemo | evaluation | X No YAML files | |
+| PostTradeProcessingServiceDemo | evaluation | evaluation/post-trade-processing-service-demo.yaml; evaluation/post-trade-processing/trade-proces... | |
+| PostgreSQLLookupDemo | lookup | X No YAML files | |
+| PricingServiceDemo | evaluation | evaluation/pricing-service-demo.yaml; evaluation/pricing-service/pricing-calculation-models-confi... | |
 | Product | model | X No YAML files | X |
 | ProductionDemoDataServiceManager | infrastructure | X No YAML files | X |
-| QuickStartDemo | validation | X No YAML files | ✅ |
+| QuickStartDemo | validation | X No YAML files | |
 | RiskAssessment | model | X No YAML files | X |
-| RiskManagementService | evaluation | evaluation/risk-management-service-demo.yaml; evaluation/risk-management/risk-assessment-models-c... | ✅ |
-| RuleConfigDataSourceVerifier | infrastructure | X No YAML files | ✅ |
-| RuleConfigDatabaseSetup | infrastructure | X No YAML files | ✅ |
-| RuleConfigExternalDatasetSetup | infrastructure | X No YAML files | ✅ |
-| RuleConfigurationBootstrap | evaluation | evaluation/rule-configuration-bootstrap.yaml; evaluation/bootstrap-comprehensive/comprehensive-lo... | ✅ |
-| RuleConfigurationDemo | evaluation | evaluation/rule-configuration-demo.yaml | ✅ |
-| RuleConfigurationHardcodedBootstrap | evaluation | evaluation/rule-configuration-bootstrap-demo.yaml; evaluation/bootstrap/loan-approval-rules.yaml;... | ✅ |
-| RuleConfigurationHardcodedDemo | evaluation | evaluation/rule-configuration-demo.yaml; evaluation/rules/loan-approval-rules.yaml; evaluation/ru... | ✅ |
-| RuleDefinitionServiceDemo | evaluation | evaluation/rule-definition-service-demo.yaml; evaluation/rule-definition-service/rule-creation-en... | ✅ |
+| RiskManagementService | evaluation | evaluation/risk-management-service-demo.yaml; evaluation/risk-management/risk-assessment-models-c... | |
+| RuleConfigDataSourceVerifier | infrastructure | X No YAML files | |
+| RuleConfigDatabaseSetup | infrastructure | X No YAML files | |
+| RuleConfigExternalDatasetSetup | infrastructure | X No YAML files | |
+| RuleConfigurationBootstrap | evaluation | evaluation/rule-configuration-bootstrap.yaml; evaluation/bootstrap-comprehensive/comprehensive-lo... | |
+| RuleConfigurationDemo | evaluation | evaluation/rule-configuration-demo.yaml | |
+| RuleConfigurationHardcodedBootstrap | evaluation | evaluation/rule-configuration-bootstrap-demo.yaml; evaluation/bootstrap/loan-approval-rules.yaml;... | |
+| RuleConfigurationHardcodedDemo | evaluation | evaluation/rule-configuration-demo.yaml; evaluation/rules/loan-approval-rules.yaml; evaluation/ru... | |
+| RuleDefinitionServiceDemo | evaluation | evaluation/rule-definition-service-demo.yaml; evaluation/rule-definition-service/rule-creation-en... | |
 | SIRepairResult | model | X No YAML files | X |
-| ScenarioBasedProcessingDemo | evaluation | evaluation/scenario-based-processing-demo.yaml; evaluation/scenario-processing/sample-data-record... | ✅ |
+| ScenarioBasedProcessingDemo | evaluation | evaluation/scenario-based-processing-demo.yaml; evaluation/scenario-processing/sample-data-record... | |
 | Security | model | X No YAML files | X |
 | SettlementInstruction | model | X No YAML files | X |
-| SharedDataSourceDemo | lookup | X No YAML files | ✅ |
+| SharedDataSourceDemo | lookup | X No YAML files | |
 | SimpleFieldLookupDemo | lookup | X No YAML files | X |
-| SimplePostgreSQLLookupDemo | lookup | X No YAML files | ✅ |
-| SimplifiedAPIDemo | evaluation | simplified-api-demo-config.yaml | ✅ |
+| SimplePostgreSQLLookupDemo | lookup | X No YAML files | |
+| SimplifiedAPIDemo | evaluation | simplified-api-demo-config.yaml | |
 | StandingInstruction | model | X No YAML files | X |
 | StaticDataEntities | infrastructure | X No YAML files | X |
-| TestUtilities | util | util/test-utilities-demo.yaml; util/test-data/sample-data-config.yaml; util/test-data/test-data-g... | ✅ |
+| TestUtilities | util | util/test-utilities-demo.yaml; util/test-data/sample-data-config.yaml; util/test-data/test-data-g... | |
 | Trade | model | X No YAML files | X |
 | TradeB | model | X No YAML files | X |
 | TradeConfirmation | model | X No YAML files | X |
 | TradeHeader | model | X No YAML files | X |
-| TradeRecordMatcherDemo | evaluation | evaluation/trade-record-matcher-demo.yaml; evaluation/trade-record-matcher/trade-matching-algorit... | ✅ |
+| TradeRecordMatcherDemo | evaluation | evaluation/trade-record-matcher-demo.yaml; evaluation/trade-record-matcher/trade-matching-algorit... | |
 | TradeSettlement | model | X No YAML files | X |
-| TradeTransformerDemo | enrichment | enrichment/trade-transformer-demo.yaml; enrichment/trade-transformer/trade-transformer-rules-conf... | ✅ |
+| TradeTransformerDemo | enrichment | enrichment/trade-transformer-demo.yaml; enrichment/trade-transformer/trade-transformer-rules-conf... | |
 | UnderlyingAsset | model | X No YAML files | X |
-| UtilRunner | runners | X No YAML files | ✅ |
-| ValidationRunner | runners | X No YAML files | ✅ |
-| XmlDataGenerator | infrastructure | X No YAML files | ✅ |
-| YamlConfigurationDemo | evaluation | yaml-configuration-demo-config.yaml | ✅ |
-| YamlDatasetDemo | enrichment | yaml-dataset-demo-config.yaml | ✅ |
-| YamlDependencyAnalysisDemo | util | util/yaml-dependency-analysis-demo.yaml; util/dependency-analysis/scenario-files-config.yaml; uti... | ✅ |
-| YamlValidationDemo | util | X No YAML files | ✅ |
+| UtilRunner | runners | X No YAML files | |
+| ValidationRunner | runners | X No YAML files | |
+| XmlDataGenerator | infrastructure | X No YAML files | |
+| YamlConfigurationDemo | evaluation | yaml-configuration-demo-config.yaml | |
+| YamlDatasetDemo | enrichment | yaml-dataset-demo-config.yaml | |
+| YamlDependencyAnalysisDemo | util | util/yaml-dependency-analysis-demo.yaml; util/dependency-analysis/scenario-files-config.yaml; uti... | |
+| YamlValidationDemo | util | X No YAML files | |
 
 
 ## 🎯 Classes with YAML Files (42 classes)
@@ -327,7 +327,7 @@
 - `yaml-dataset-demo-config.yaml` (referenced by: YamlDatasetDemo)
 
 
-### 📋 Existing YAML Files
+### Existing YAML Files
 
 | File Path | Documentation Quality | Size (bytes) |
 |-----------|----------------------|--------------|
@@ -496,7 +496,7 @@
 | validation\trade-validation\trade-samples-config.yaml | excellent | 10291 |
 | validation\trade-validation\validation-rules-config.yaml | excellent | 11156 |
 
-## ✅ Conclusion
+## Conclusion
 
 The APEX demo module shows fair consistency in YAML file usage with a score of 63.4%.
 

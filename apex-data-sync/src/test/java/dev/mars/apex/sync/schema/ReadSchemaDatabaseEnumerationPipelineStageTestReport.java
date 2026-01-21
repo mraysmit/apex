@@ -47,10 +47,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * database schema documentation.
  *
  * CRITICAL VALIDATION CHECKLIST:
- * ✅ Database created with multiple tables
- * ✅ All tables enumerated successfully
- * ✅ HTML report generated at specified path
- * ✅ Report contains table and column information
+ * Database created with multiple tables
+ * All tables enumerated successfully
+ * HTML report generated at specified path
+ * Report contains table and column information
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2.1.0

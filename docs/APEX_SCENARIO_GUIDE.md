@@ -61,21 +61,21 @@ A **scenario** is a named configuration that automatically routes data through a
 
 ### Why Use Scenarios?
 
-✅ **Automatic Routing** - Data is automatically routed to the right scenario based on content  
-✅ **Multi-Stage Processing** - Break complex workflows into manageable stages  
-✅ **Dependency Management** - Ensure stages execute in the correct order  
-✅ **Error Handling** - Control how failures are handled at each stage  
-✅ **Monitoring** - Track performance and SLA compliance per stage
+**Automatic Routing** - Data is automatically routed to the right scenario based on content  
+**Multi-Stage Processing** - Break complex workflows into manageable stages  
+**Dependency Management** - Ensure stages execute in the correct order  
+**Error Handling** - Control how failures are handled at each stage  
+**Monitoring** - Track performance and SLA compliance per stage
 
 ### When to Use Scenarios
 
-✅ **Use scenarios when you have:**
+**Use scenarios when you have:**
 - Data that needs different processing based on its content
 - Complex workflows with multiple sequential stages
 - Stages that depend on results from previous stages
 - Different error handling requirements per stage
 
-❌ **Don't use scenarios when:**
+**Don't use scenarios when:**
 - You only have simple, single-step processing
 - All data follows the same processing path
 - You don't need automatic routing
@@ -298,7 +298,7 @@ condition: "#'counterparty'] != null && !#'counterparty'].isEmpty()"
 
 ### Best Practices for Classification Rules
 
-✅ **Be specific** - Make rules as specific as possible to avoid ambiguity
+**Be specific** - Make rules as specific as possible to avoid ambiguity
 ```yaml
 # Good
 condition: "#'tradeType'] == 'OTCOption' && #'region'] == 'US' && #'assetClass'] == 'Equity'"
@@ -307,7 +307,7 @@ condition: "#'tradeType'] == 'OTCOption' && #'region'] == 'US' && #'assetClass']
 condition: "#'tradeType'] == 'OTCOption'"
 ```
 
-✅ **Test null values** - Always check for null before accessing properties
+**Test null values** - Always check for null before accessing properties
 ```yaml
 # Good
 condition: "#'region'] != null && #'region'] == 'US'"
@@ -316,14 +316,14 @@ condition: "#'region'] != null && #'region'] == 'US'"
 condition: "#'region'] == 'US'"
 ```
 
-✅ **Document the logic** - Use clear descriptions
+**Document the logic** - Use clear descriptions
 ```yaml
 classification-rule:
   condition: "#'tradeType'] == 'OTCOption' && #'notional'] > 50000000"
   description: "Large OTC option trades (notional > 50M)"
 ```
 
-✅ **Order matters** - Scenarios are evaluated in registry order; first match wins
+**Order matters** - Scenarios are evaluated in registry order; first match wins
 ```yaml
 scenarios:
   # More specific scenario first
@@ -521,12 +521,12 @@ enabled: "false"
 
 When a stage is disabled (`enabled: false`):
 
-1. ✅ **Stage is skipped entirely** - No rules or enrichments execute
-2. ✅ **Condition is NOT evaluated** - Enabled check happens first
-3. ✅ **Dependencies are NOT checked** - Stage bypass is immediate
-4. ✅ **Skip reason is logged** - `"Stage is disabled (enabled: false)"`
-5. ✅ **Execution continues** - Next stage in sequence processes (unless failure policy says otherwise)
-6. ✅ **Tracked in results** - Disabled stages appear as "skipped" in execution results
+1. **Stage is skipped entirely** - No rules or enrichments execute
+2. **Condition is NOT evaluated** - Enabled check happens first
+3. **Dependencies are NOT checked** - Stage bypass is immediate
+4. **Skip reason is logged** - `"Stage is disabled (enabled: false)"`
+5. **Execution continues** - Next stage in sequence processes (unless failure policy says otherwise)
+6. **Tracked in results** - Disabled stages appear as "skipped" in execution results
 
 **Execution Flow:**
 
@@ -623,23 +623,23 @@ processing-stages:
 
 | Feature | Interaction |
 |---------|-------------|
-| **Condition** | ❌ NOT evaluated if stage is disabled (enabled check is first) |
-| **Dependencies** | ❌ NOT checked if stage is disabled |
-| **Failure Policy** | ❌ NOT applied (stage doesn't execute) |
-| **Required Flag** | ❌ Irrelevant (stage doesn't execute) |
-| **Stage Metadata** | ✅ Still accessible (for documentation/monitoring) |
+| **Condition** | NOT evaluated if stage is disabled (enabled check is first) |
+| **Dependencies** | NOT checked if stage is disabled |
+| **Failure Policy** | NOT applied (stage doesn't execute) |
+| **Required Flag** | Irrelevant (stage doesn't execute) |
+| **Stage Metadata** | Still accessible (for documentation/monitoring) |
 
 **Best Practices:**
 
-✅ **Use for temporary disabling** - Quick way to disable stages without deleting configuration  
-✅ **Document why disabled** - Add comments explaining why stage is disabled  
-✅ **Review regularly** - Check disabled stages periodically and remove if no longer needed  
-✅ **Use with feature flags** - Combine with external feature flag systems for dynamic control  
-✅ **Test before disabling** - Ensure disabling the stage doesn't break downstream dependencies  
+**Use for temporary disabling** - Quick way to disable stages without deleting configuration  
+**Document why disabled** - Add comments explaining why stage is disabled  
+**Review regularly** - Check disabled stages periodically and remove if no longer needed  
+**Use with feature flags** - Combine with external feature flag systems for dynamic control  
+**Test before disabling** - Ensure disabling the stage doesn't break downstream dependencies  
 
-❌ **Don't use for permanent removal** - Delete the stage configuration instead  
-❌ **Don't forget to re-enable** - Set reminders to review disabled stages  
-❌ **Don't disable critical stages** - Consider using `condition` instead for selective execution  
+**Don't use for permanent removal** - Delete the stage configuration instead  
+**Don't forget to re-enable** - Set reminders to review disabled stages  
+**Don't disable critical stages** - Consider using `condition` instead for selective execution  
 
 ---
 
@@ -716,7 +716,7 @@ boolean isCritical = stage.isCritical();  // true if required=true AND failure-p
 **Required Flag Behavior:**
 
 ```yaml
-# ✅ SCENARIO SUCCEEDS - Optional stage fails but doesn't fail scenario
+# SCENARIO SUCCEEDS - Optional stage fails but doesn't fail scenario
 processing-stages:
   - stage-name: "validation"
     required: true
@@ -734,7 +734,7 @@ processing-stages:
 ```
 
 ```yaml
-# ❌ SCENARIO FAILS - Required stage fails
+# SCENARIO FAILS - Required stage fails
 processing-stages:
   - stage-name: "validation"
     required: true
@@ -864,16 +864,16 @@ This default makes stages **optional by default**, which is the safest choice. Y
 
 **Best Practices:**
 
-✅ **Mark validation as required** - Data validation should typically be `required: true`  
-✅ **Mark enrichments as optional** - Enrichments are usually `required: false`  
-✅ **Mark settlement as required** - Final booking/settlement should be `required: true`  
-✅ **Use with failure-policy** - Combine both for precise control  
-✅ **Document critical stages** - Add comments explaining why stage is required  
-✅ **Review regularly** - Ensure requirements match business needs  
+**Mark validation as required** - Data validation should typically be `required: true`  
+**Mark enrichments as optional** - Enrichments are usually `required: false`  
+**Mark settlement as required** - Final booking/settlement should be `required: true`  
+**Use with failure-policy** - Combine both for precise control  
+**Document critical stages** - Add comments explaining why stage is required  
+**Review regularly** - Ensure requirements match business needs  
 
-❌ **Don't mark everything required** - Only truly mandatory stages should be `required: true`  
-❌ **Don't confuse with failure-policy** - They serve different purposes  
-❌ **Don't assume default is true** - Default is `false` (optional)  
+**Don't mark everything required** - Only truly mandatory stages should be `required: true`  
+**Don't confuse with failure-policy** - They serve different purposes  
+**Don't assume default is true** - Default is `false` (optional)  
 
 **Migration Note:**
 
@@ -1103,10 +1103,10 @@ Failure policies determine what happens when a stage encounters an error. Each s
 
 | Aspect | terminate | continue-with-warnings | flag-for-review |
 |--------|-----------|------------------------|-----------------|
-| **Stops processing?** | ✅ Yes | ❌ No | ❌ No |
-| **Logs error?** | ✅ Yes (ERROR) | ✅ Yes (WARN) | ✅ Yes (INFO) |
-| **Flags for review?** | ❌ No | ❌ No | ✅ Yes |
-| **Dependent stages execute?** | ❌ No (skipped) | ✅ Yes | ✅ Yes |
+| **Stops processing?** | Yes | No | No |
+| **Logs error?** | Yes (ERROR) | Yes (WARN) | Yes (INFO) |
+| **Flags for review?** | No | No | Yes |
+| **Dependent stages execute?** | No (skipped) | Yes | Yes |
 | **Final result status** | FAILED | SUCCESS (with warnings) | SUCCESS (flagged) |
 
 ### Mixed Policy Example
@@ -1219,24 +1219,24 @@ engine.shutdown();
 
 ### Naming Conventions
 
-✅ **Scenario IDs:**
+**Scenario IDs:**
 - Use lowercase with hyphens: `otc-option-us-processing`
 - Include domain and purpose: `derivatives-otc-validation`
 - Be descriptive: `large-trade-enhanced-compliance`
 
-✅ **Stage Names:**
+**Stage Names:**
 - Use action-oriented names: `validation`, `enrichment`, `calculation`
 - Be specific: `market-data-enrichment` not just `enrichment`
 - Use consistent naming across scenarios
 
-✅ **Configuration Files:**
+**Configuration Files:**
 - Group by type: `scenarios/`, `config/`, `rules/`
 - Use descriptive names: `otc-validation-rules.yaml`
 - Match scenario names: `otc-option-us-scenario.yaml` → `otc-option-validation.yaml`
 
 ### Organization
 
-✅ **Directory Structure:**
+**Directory Structure:**
 ```
 project/
 ├── config/
@@ -1253,13 +1253,13 @@ project/
 
 ### Metadata Best Practices
 
-✅ **Always include:**
+**Always include:**
 - `id`, `name`, `type`, `version` - Required
 - `description` - What the scenario does
 - `business-domain` - What business area
 - `owner` - Who maintains it
 
-✅ **Consider including:**
+**Consider including:**
 - `tags` - For categorization and search
 - `criticality` - For monitoring priorities
 - `sla-ms` - For performance tracking
@@ -1267,24 +1267,24 @@ project/
 
 ### Performance Optimization
 
-✅ **Execution order:**
+**Execution order:**
 - Put fast validations before slow ones (fail fast)
 - Group related operations together
 - Use parallel execution when possible (same dependencies)
 
-✅ **Stage design:**
+**Stage design:**
 - Keep stages focused (single responsibility)
 - Avoid unnecessary data loading
 - Use caching for reference data
 
-✅ **Classification rules:**
+**Classification rules:**
 - Make rules efficient (avoid complex computations)
 - Put most common scenarios first in registry
 - Use specific conditions to avoid unnecessary evaluations
 
 ### Testing Strategies
 
-✅ **Test scenarios:**
+**Test scenarios:**
 - Test each stage independently first
 - Test full scenario end-to-end
 - Test all failure paths and policies
@@ -1293,13 +1293,13 @@ project/
 - Test circular dependency detection
 - Test conditional execution with different data values
 
-✅ **Test classification rules:**
+**Test classification rules:**
 - Test rule matching with various data
 - Test null/missing field handling
 - Test boundary conditions
 - Test fallback behavior (no match found)
 
-✅ **Test conditional stages:**
+**Test conditional stages:**
 - Test stages execute when condition is true
 - Test stages skip when condition is false
 - Test condition evaluation errors (safe skip)
@@ -1685,7 +1685,7 @@ if (result.isSuccess()) {
 
 **Reusable usage (for multiple evaluations):**
 ```java
-// ✅ REUSABLE - Create once, use many times
+// REUSABLE - Create once, use many times
 RulesEngine engine = RulesEngine.fromScenarioRegistry("config/scenario-registry.yaml");
 
 // Process multiple data items
@@ -1705,7 +1705,7 @@ engine.shutdown();
 
 ### Migration Checklist
 
-✅ **Step 1: Update imports**
+**Step 1: Update imports**
 ```java
 // Remove old import
 // import dev.mars.apex.core.service.scenario.DataTypeScenarioService;
@@ -1716,7 +1716,7 @@ import dev.mars.apex.core.engine.RulesEngine;
 import dev.mars.apex.core.model.RuleResult;
 ```
 
-✅ **Step 2: Replace service initialization**
+**Step 2: Replace service initialization**
 ```java
 // OLD
 DataTypeScenarioService service = new DataTypeScenarioService();
@@ -1726,7 +1726,7 @@ service.loadScenarios("config/scenario-registry.yaml");
 RulesEngine engine = RulesEngine.fromScenarioRegistry("config/scenario-registry.yaml");
 ```
 
-✅ **Step 3: Update processing calls**
+**Step 3: Update processing calls**
 ```java
 // OLD
 ScenarioExecutionResult result = service.processMapData(data);
@@ -1735,7 +1735,7 @@ ScenarioExecutionResult result = service.processMapData(data);
 RuleResult result = engine.evaluateScenario(data);
 ```
 
-✅ **Step 4: Update result handling**
+**Step 4: Update result handling**
 ```java
 // OLD
 if (result.isSuccessful()) { ... }
@@ -1747,7 +1747,7 @@ if (result.isSuccess()) { ... }
 // RuleResult has unified success/failure handling
 ```
 
-✅ **Step 5: Add cleanup**
+**Step 5: Add cleanup**
 ```java
 // NEW - Add cleanup when done
 engine.shutdown();
@@ -1766,11 +1766,11 @@ engine.shutdown();
 
 APEX Scenarios provide a powerful, flexible way to route and process data through multi-stage pipelines. By following the patterns and best practices in this guide, you can:
 
-✅ Create robust scenario configurations  
-✅ Write effective classification rules  
-✅ Design dependency-aware processing stages  
-✅ Handle failures appropriately  
-✅ Build maintainable, testable workflows  
+Create robust scenario configurations  
+Write effective classification rules  
+Design dependency-aware processing stages  
+Handle failures appropriately  
+Build maintainable, testable workflows  
 
 For more information, see:
 - [APEX YAML Reference Guide](APEX_YAML_REFERENCE.md) - Complete YAML syntax reference

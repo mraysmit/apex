@@ -54,7 +54,7 @@ public class UltraSimpleTernaryTest extends DemoTestBase {
             Map<String, Object> result = ruleResult.getEnrichedData();
 
             assertEquals("FIRST", result.get("output"), "Should map A to FIRST");
-            logger.info("✅ Ternary A test passed: " + result);
+            logger.info("Ternary A test passed: " + result);
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
             fail("Test failed: " + e.getMessage());
@@ -76,7 +76,7 @@ public class UltraSimpleTernaryTest extends DemoTestBase {
             Map<String, Object> result = ruleResult.getEnrichedData();
 
             assertEquals("SECOND", result.get("output"), "Should map B to SECOND");
-            logger.info("✅ Ternary B test passed: " + result);
+            logger.info("Ternary B test passed: " + result);
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
             fail("Test failed: " + e.getMessage());
@@ -98,7 +98,7 @@ public class UltraSimpleTernaryTest extends DemoTestBase {
             Map<String, Object> result = ruleResult.getEnrichedData();
 
             assertEquals("THIRD", result.get("output"), "Should map C to THIRD");
-            logger.info("✅ Ternary C test passed: " + result);
+            logger.info("Ternary C test passed: " + result);
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
             fail("Test failed: " + e.getMessage());
@@ -120,7 +120,7 @@ public class UltraSimpleTernaryTest extends DemoTestBase {
             Map<String, Object> result = ruleResult.getEnrichedData();
 
             assertNull(result.get("output"), "Should be null for no match");
-            logger.info("✅ Ternary X test passed: " + result);
+            logger.info("Ternary X test passed: " + result);
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
             fail("Test failed: " + e.getMessage());
@@ -143,7 +143,7 @@ public class UltraSimpleTernaryTest extends DemoTestBase {
             assertTrue(config.getRuleGroups() == null || config.getRuleGroups().isEmpty(), "Should have NO rule groups");
             assertEquals(1, config.getEnrichments().size(), "Should have only 1 enrichment");
             
-            logger.info("✅ Configuration simplicity validated - NO rules, NO rule groups, just 1 enrichment!");
+            logger.info("Configuration simplicity validated - NO rules, NO rule groups, just 1 enrichment!");
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
             fail("Test failed: " + e.getMessage());

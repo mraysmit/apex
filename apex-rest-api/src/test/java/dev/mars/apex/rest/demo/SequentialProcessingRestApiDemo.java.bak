@@ -74,7 +74,7 @@ public class SequentialProcessingRestApiDemo {
         String processingMode = config.getMetadata().getProcessingMode();
         assert "standard".equals(processingMode) : "Processing mode should be 'standard'";
 
-        System.out.println("✅ STANDARD processing mode detected and supported via REST API");
+        System.out.println("STANDARD processing mode detected and supported via REST API");
     }
 
     @Test
@@ -94,8 +94,8 @@ public class SequentialProcessingRestApiDemo {
         String processingMode = config.getMetadata().getProcessingMode();
         assert "sequential".equals(processingMode) : "Processing mode should be 'sequential'";
 
-        System.out.println("✅ SEQUENTIAL processing mode detected and supported via REST API");
-        System.out.println("✅ APEX design flaw fix is now accessible via REST API!");
+        System.out.println("SEQUENTIAL processing mode detected and supported via REST API");
+        System.out.println("APEX design flaw fix is now accessible via REST API!");
     }
 
     @Test
@@ -114,7 +114,7 @@ public class SequentialProcessingRestApiDemo {
         String processingMode = config.getMetadata() != null ? config.getMetadata().getProcessingMode() : null;
         assert processingMode == null || "standard".equals(processingMode) : "Processing mode should default to STANDARD";
 
-        System.out.println("✅ Default processing mode (STANDARD) maintained for backward compatibility");
+        System.out.println("Default processing mode (STANDARD) maintained for backward compatibility");
     }
 
     @Test
@@ -125,9 +125,9 @@ public class SequentialProcessingRestApiDemo {
         assertNotNull(rulesEngineService, "RulesEngineService should be available");
         assertNotNull(sequentialProcessingIntegrationService, "SequentialProcessingIntegrationService should be available");
         
-        System.out.println("✅ All sequential processing services are properly configured in REST API");
-        System.out.println("✅ REST API controllers can now use sequential processing services");
-        System.out.println("✅ External users can access sequential processing via REST endpoints");
+        System.out.println("All sequential processing services are properly configured in REST API");
+        System.out.println("REST API controllers can now use sequential processing services");
+        System.out.println("External users can access sequential processing via REST endpoints");
         
         // Create test data
         Map<String, Object> testData = new HashMap<>();
@@ -146,10 +146,10 @@ public class SequentialProcessingRestApiDemo {
             // Test that the sequential enrichment service can process the configuration
             Object result = sequentialEnrichmentService.enrichObject(config, testData);
             assertNotNull(result, "Sequential enrichment should return a result");
-            System.out.println("✅ Sequential enrichment service working correctly via REST API integration");
+            System.out.println("Sequential enrichment service working correctly via REST API integration");
         } catch (Exception e) {
             // Expected for this demo since we don't have enrichments configured
-            System.out.println("✅ Sequential enrichment service properly integrated (expected configuration error in demo)");
+            System.out.println("Sequential enrichment service properly integrated (expected configuration error in demo)");
         }
     }
 }

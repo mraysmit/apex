@@ -69,9 +69,9 @@ public class ApexYamlCompiler {
     public static void main(String[] args) {
         System.out.println("APEX YAML Lexical Grammar Checker v1.0");
         System.out.println("=======================================");
-        System.out.println("✅ Validates APEX YAML files against formal grammar");
-        System.out.println("✅ No Java code generation - pure validation");
-        System.out.println("✅ Catches syntax, structure, and semantic errors");
+        System.out.println("Validates APEX YAML files against formal grammar");
+        System.out.println("No Java code generation - pure validation");
+        System.out.println("Catches syntax, structure, and semantic errors");
 
         if (args.length == 0) {
             System.out.println("\nUsage: java -cp apex-compiler.jar dev.mars.apex.compiler.ApexYamlCompiler <yaml-file>");
@@ -84,7 +84,7 @@ public class ApexYamlCompiler {
         ApexDependencyAnalyzer dependencyAnalyzer = new ApexDependencyAnalyzer();
         Path yamlFile = Paths.get(args[0]);
 
-        System.out.println("\n🔍 Validating with Dependency Analysis: " + yamlFile);
+        System.out.println("\nValidating with Dependency Analysis: " + yamlFile);
         System.out.println("-".repeat(60));
 
         // Perform dependency-aware validation
@@ -92,7 +92,7 @@ public class ApexYamlCompiler {
 
         // Display dependency graph
         if (!result.getDependencies().isEmpty()) {
-            System.out.println("\n📊 DEPENDENCY GRAPH:");
+            System.out.println("\nDEPENDENCY GRAPH:");
             result.getDependencies().forEach((file, deps) -> {
                 System.out.println("  " + file);
                 deps.forEach(dep -> System.out.println("    └─ " + dep));
@@ -110,7 +110,7 @@ public class ApexYamlCompiler {
         if (!result.getRootCauses().isEmpty()) {
             System.out.println("\n🎯 ROOT CAUSES:");
             result.getRootCauses().forEach(cause ->
-                System.out.println("  🔍 " + cause));
+                System.out.println("  " + cause));
         }
 
         // Display validation errors
@@ -121,7 +121,7 @@ public class ApexYamlCompiler {
         }
 
         // Display file-specific results
-        System.out.println("\n📋 FILE VALIDATION RESULTS:");
+        System.out.println("\nFILE VALIDATION RESULTS:");
         result.getFileResults().forEach((file, fileResult) -> {
             String status = fileResult.isValid() ? "✅" : "X";
             System.out.println("  " + status + " " + file);
@@ -132,7 +132,7 @@ public class ApexYamlCompiler {
         });
 
         if (result.isValid()) {
-            System.out.println("\n✅ DEPENDENCY-AWARE VALIDATION PASSED!");
+            System.out.println("\nDEPENDENCY-AWARE VALIDATION PASSED!");
             System.out.println("   All files in dependency chain are valid.");
             System.exit(0);
         } else {

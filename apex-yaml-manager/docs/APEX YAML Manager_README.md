@@ -6,7 +6,7 @@ Version: 1.0.0 | Port: 8082 | Context: `/yaml-manager`
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Overview](#overview)
 - [Quick Start](#quick-start)
@@ -26,11 +26,11 @@ Version: 1.0.0 | Port: 8082 | Context: `/yaml-manager`
 The APEX YAML Manager provides comprehensive tools for managing the complexity of APEX YAML configurations at enterprise scale. It enables developers, architects, and operations teams to understand, analyze, and optimize their configuration ecosystems.
 
 **Key Capabilities:**
-- 🔍 **Dependency Analysis** - Visualize and understand configuration relationships
+- **Dependency Analysis** - Visualize and understand configuration relationships
 - 📚 **Catalog Discovery** - Search and discover configurations across your system
-- ✅ **Health Checks** - Assess configuration quality and identify issues
+- **Health Checks** - Assess configuration quality and identify issues
 - 🔧 **Validation** - Comprehensive structural and reference validation
-- 📊 **Visualization** - Interactive D3.js dependency tree viewer
+- **Visualization** - Interactive D3.js dependency tree viewer
 - 🌐 **REST API** - Full programmatic access to all features
 
 ## Features
@@ -50,16 +50,16 @@ The APEX YAML Manager provides comprehensive tools for managing the complexity o
 - Unused configuration detection
 - Critical configuration identification
 
-### Layer 3: Validation and Health Checks ✅ COMPLETE
-- ✅ Structural validation (syntax, required fields)
-- ✅ Reference validation (all references exist)
-- ✅ Consistency checks (unique IDs, naming conventions)
-- ✅ Performance checks (detect overly deep chains)
-- ✅ Compliance checks (required metadata)
-- ✅ Health scoring (0-100 scale)
-- ✅ Automated issue detection with recommendations
-- ✅ REST API endpoints for all validation operations
-- ✅ 28 comprehensive test cases
+### Layer 3: Validation and Health Checks COMPLETE
+- Structural validation (syntax, required fields)
+- Reference validation (all references exist)
+- Consistency checks (unique IDs, naming conventions)
+- Performance checks (detect overly deep chains)
+- Compliance checks (required metadata)
+- Health scoring (0-100 scale)
+- Automated issue detection with recommendations
+- REST API endpoints for all validation operations
+- 28 comprehensive test cases
 
 ### Layer 4: Refactoring and Optimization Tools
 - Dependency simplification suggestions
@@ -69,15 +69,15 @@ The APEX YAML Manager provides comprehensive tools for managing the complexity o
 - Safe refactoring with validation
 - Performance optimization suggestions
 
-### Layer 5: UI and Visualization ✅ COMPLETE
-- ✅ Interactive D3.js dependency tree visualization
-- ✅ Node expansion/collapse with click interaction
-- ✅ Pan and zoom controls with toolbar
-- ✅ YAML content viewer with syntax highlighting
-- ✅ File metadata display panel
-- ✅ APEX keyword colorization
-- ✅ Resizable split-panel layout
-- ✅ REST API for programmatic access
+### Layer 5: UI and Visualization COMPLETE
+- Interactive D3.js dependency tree visualization
+- Node expansion/collapse with click interaction
+- Pan and zoom controls with toolbar
+- YAML content viewer with syntax highlighting
+- File metadata display panel
+- APEX keyword colorization
+- Resizable split-panel layout
+- REST API for programmatic access
 - Catalog browser with search (planned)
 - Health dashboard with real-time metrics (planned)
 - Impact analysis visualization (planned)
@@ -89,9 +89,9 @@ The APEX YAML Manager provides comprehensive tools for managing the complexity o
 ### Prerequisites
 
 Before starting, ensure you have:
-- ✅ **Java 21+** installed (`java -version`)
-- ✅ **Maven 3.8+** installed (`mvn -version`)
-- ✅ **APEX Core module** built successfully
+- **Java 21+** installed (`java -version`)
+- **Maven 3.8+** installed (`mvn -version`)
+- **APEX Core module** built successfully
 
 ### Step 1: Build the Module
 
@@ -221,11 +221,11 @@ Once the service is running, access these URLs:
 The interactive D3.js dependency tree viewer provides visual exploration of YAML configuration dependencies.
 
 **Features:**
-- 🔍 **Interactive Navigation** - Click nodes to expand/collapse
+- **Interactive Navigation** - Click nodes to expand/collapse
 - 🎨 **Visual Indicators** - Color-coded nodes by type and status
 - 📏 **Pan & Zoom** - Navigate large dependency trees
 - 📄 **Content Viewer** - View YAML content with syntax highlighting
-- 📊 **Metadata Panel** - Display file metadata and statistics
+- **Metadata Panel** - Display file metadata and statistics
 - 🎯 **APEX Keywords** - Highlighted domain-specific keywords
 
 **Default Configuration:**
@@ -266,12 +266,12 @@ The viewer loads a demo dataset on startup:
 
 All endpoints are prefixed with `/yaml-manager/api`
 
-### Health & Status ✅ COMPLETE
+### Health & Status COMPLETE
 
 | Method | Endpoint | Description | Status |
 |--------|----------|-------------|--------|
-| `GET` | `/health` | Service health check | ✅ |
-| `GET` | `/health/status` | Detailed system status | ✅ |
+| `GET` | `/health` | Service health check | |
+| `GET` | `/health/status` | Detailed system status | |
 
 **Example:**
 ```bash
@@ -288,13 +288,13 @@ curl http://localhost:8082/yaml-manager/api/health
 }
 ```
 
-### Dependency Analysis ✅ COMPLETE
+### Dependency Analysis COMPLETE
 
 | Method | Endpoint | Description | Status |
 |--------|----------|-------------|--------|
-| `POST` | `/dependencies/analyze` | Analyze file dependencies | ✅ |
-| `GET` | `/dependencies/tree` | Get dependency tree | ✅ |
-| `GET` | `/dependencies/content` | Get file content & metadata | ✅ |
+| `POST` | `/dependencies/analyze` | Analyze file dependencies | |
+| `GET` | `/dependencies/tree` | Get dependency tree | |
+| `GET` | `/dependencies/content` | Get file content & metadata | |
 
 **Example - Analyze Dependencies:**
 ```bash
@@ -312,13 +312,13 @@ curl -X POST http://localhost:8082/yaml-manager/api/dependencies/analyze \
 curl "http://localhost:8082/yaml-manager/api/dependencies/tree?rootFile=/path/to/root.yaml"
 ```
 
-### Catalog Management ✅ COMPLETE
+### Catalog Management COMPLETE
 
 | Method | Endpoint | Description | Status |
 |--------|----------|-------------|--------|
-| `GET` | `/catalog/scan` | Scan directory and build catalog | ✅ |
-| `GET` | `/catalog/metadata` | Get file metadata | ✅ |
-| `GET` | `/catalog/summary` | Get catalog statistics | ✅ |
+| `GET` | `/catalog/scan` | Scan directory and build catalog | |
+| `GET` | `/catalog/metadata` | Get file metadata | |
+| `GET` | `/catalog/summary` | Get catalog statistics | |
 
 **Example - Scan Directory:**
 ```bash
@@ -330,14 +330,14 @@ curl "http://localhost:8082/yaml-manager/api/catalog/scan?directory=/path/to/con
 curl "http://localhost:8082/yaml-manager/api/catalog/metadata?filePath=/path/to/config.yaml"
 ```
 
-### Health Checks ✅ COMPLETE
+### Health Checks COMPLETE
 
 | Method | Endpoint | Description | Status |
 |--------|----------|-------------|--------|
-| `POST` | `/health-checks/check` | Perform health check | ✅ |
-| `POST` | `/health-checks/report` | Generate health report | ✅ |
-| `GET` | `/health-checks/score` | Get health score | ✅ |
-| `GET` | `/health-checks/is-healthy` | Check if file is healthy | ✅ |
+| `POST` | `/health-checks/check` | Perform health check | |
+| `POST` | `/health-checks/report` | Generate health report | |
+| `GET` | `/health-checks/score` | Get health score | |
+| `GET` | `/health-checks/is-healthy` | Check if file is healthy | |
 
 **Example - Health Check:**
 ```bash
@@ -354,15 +354,15 @@ curl -X POST http://localhost:8082/yaml-manager/api/health-checks/check \
 curl "http://localhost:8082/yaml-manager/api/health-checks/score?filePath=/path/to/config.yaml"
 ```
 
-### Validation ✅ COMPLETE
+### Validation COMPLETE
 
 | Method | Endpoint | Description | Status |
 |--------|----------|-------------|--------|
-| `POST` | `/validation/structure` | Validate YAML structure | ✅ |
-| `POST` | `/validation/references` | Validate file references | ✅ |
-| `POST` | `/validation/consistency` | Validate consistency rules | ✅ |
-| `POST` | `/validation/all` | Perform all validations | ✅ |
-| `GET` | `/validation/is-valid` | Check if file is valid | ✅ |
+| `POST` | `/validation/structure` | Validate YAML structure | |
+| `POST` | `/validation/references` | Validate file references | |
+| `POST` | `/validation/consistency` | Validate consistency rules | |
+| `POST` | `/validation/all` | Perform all validations | |
+| `GET` | `/validation/is-valid` | Check if file is valid | |
 
 **Example - Validate Structure:**
 ```bash
@@ -500,15 +500,15 @@ mvn test
 
 ## Implementation Roadmap
 
-- ✅ Phase 1: Enhanced Dependency Analysis (COMPLETE)
-- ✅ Phase 2: Catalog and Discovery System (COMPLETE)
-- ✅ Phase 3: Validation and Health Checks (COMPLETE)
-- ✅ Phase 4: UI and Visualization - Core Features (COMPLETE)
-  - ✅ D3.js dependency tree viewer
-  - ✅ Interactive node expansion/collapse
-  - ✅ YAML content display with syntax highlighting
-  - ✅ File metadata panel
-  - ✅ Pan/zoom controls
+- Phase 1: Enhanced Dependency Analysis (COMPLETE)
+- Phase 2: Catalog and Discovery System (COMPLETE)
+- Phase 3: Validation and Health Checks (COMPLETE)
+- Phase 4: UI and Visualization - Core Features (COMPLETE)
+  - D3.js dependency tree viewer
+  - Interactive node expansion/collapse
+  - YAML content display with syntax highlighting
+  - File metadata panel
+  - Pan/zoom controls
   - Advanced catalog browser (planned)
   - Health dashboard (planned)
 - Phase 5: Refactoring and Optimization Tools (NEXT)

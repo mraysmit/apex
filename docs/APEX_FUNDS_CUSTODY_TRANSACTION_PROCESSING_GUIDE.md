@@ -2988,7 +2988,7 @@ java -cp "target/classes:target/dependency/*" dev.mars.apex.demo.enrichment.Cust
 ```
 === APEX Custody Auto-Repair Demo ===
 Loading YAML configuration from custody-auto-repair-bootstrap-demo.yaml
-✅ Configuration loaded successfully: Custody Auto-Repair Bootstrap Demo
+Configuration loaded successfully: Custody Auto-Repair Bootstrap Demo
 Creating APEX enrichment service with real services integration
 Processing sample custody data with real APEX enrichment
 Enrichment result: [Enriched Object with Auto-Repair Results]

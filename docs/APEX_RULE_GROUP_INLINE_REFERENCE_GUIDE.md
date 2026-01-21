@@ -11,7 +11,7 @@ This guide documents rule-group reference capabilities in APEX. **IMPORTANT:** C
 
 ### Current State (Updated 2025-11-09)
 
-#### ✅ What Works - Rule-Group Level References
+#### What Works - Rule-Group Level References
 
 **1. Within-File Rule-Group References:**
 ```yaml
@@ -28,7 +28,7 @@ rule-groups:
     name: "Complete Customer Onboarding"
     operator: "AND"
     rule-group-references:
-      - "customer-basic-validation"  # ✅ References another group in SAME file
+      - "customer-basic-validation"  # References another group in SAME file
 ```
 
 **2. Cross-File Rule-Group References (IMPLEMENTED):**
@@ -46,7 +46,7 @@ rule-groups:
     name: "Composite Validation"
     operator: "AND"
     rule-ids: ["income-validation"]
-    rule-group-references: ["base-validation"]  # ✅ Cross-file reference WORKS!
+    rule-group-references: ["base-validation"]  # Cross-file reference WORKS!
 ```
 
 **Implementation Details:**
@@ -55,7 +55,7 @@ rule-groups:
 - Phase 2: Resolve cross-file `rule-group-references` using global registry
 - Tested in `CrossFileRuleGroupReferenceTest.java`
 
-#### ❌ What Doesn't Work - Scenario Level References
+#### What Doesn't Work - Scenario Level References
 
 **Scenarios CANNOT reference rule-groups by ID:**
 
@@ -65,7 +65,7 @@ scenario:
   id: my-scenario
   processing-stages:
     - stage-name: validation
-      rule-group-id: "customer-basic-validation"  # ❌ NOT SUPPORTED
+      rule-group-id: "customer-basic-validation"  # NOT SUPPORTED
       # Must use: config-file: "groups/validation-groups.yaml"
 ```
 
@@ -100,7 +100,7 @@ Looks up referenced groups in global map
     ↓
 Adds rules from referenced groups to composite groups
     ↓
-✅ Cross-file rule-group references resolved
+Cross-file rule-group references resolved
 ```
 
 ### Scenario Level (NOT WORKING)
@@ -116,23 +116,23 @@ Reads config-file field only
     ↓
 Loads entire YAML file for each stage
     ↓
-❌ No rule-group-id field support
-❌ No direct rule-group lookup
+No rule-group-id field support
+No direct rule-group lookup
 ```
 
 ## Implementation Status
 
-### ✅ Implemented Features (Rule-Group Level)
+### Implemented Features (Rule-Group Level)
 
 #### 1. YAML Model Classes
 
 **File:** `apex-core/src/main/java/dev/mars/apex/core/config/yaml/YamlRuleGroup.java`
 - Lines 78-79: `rule-group-references` field
-- **Status:** ✅ Supports both within-file AND cross-file references
+- **Status:** Supports both within-file AND cross-file references
 
 **File:** `apex-core/src/main/java/dev/mars/apex/core/config/yaml/YamlRuleConfiguration.java`
 - Lines 60-61: `ruleGroups` field
-- **Status:** ✅ Loads rule-groups from YAML
+- **Status:** Loads rule-groups from YAML
 
 #### 2. Factory Classes (Cross-File Support)
 
@@ -157,28 +157,28 @@ private void addRuleGroupReferencesToGroupWithGlobalRegistry(
 }
 ```
 
-**Status:** ✅ Cross-file rule-group references fully working
+**Status:** Cross-file rule-group references fully working
 
 #### 3. Engine Configuration
 
 **File:** `apex-core/src/main/java/dev/mars/apex/core/engine/config/RulesEngineConfiguration.java`
 - Lines 56-59: `ruleGroupsById` map for local registry
-- **Status:** ✅ Works for within-configuration lookups
+- **Status:** Works for within-configuration lookups
 - **Note:** Global registry is managed in YamlRuleFactory, not here
 
-### ❌ Not Implemented Features (Scenario Level)
+### Not Implemented Features (Scenario Level)
 
 #### 4. Scenario Processing
 
 **File:** `apex-core/src/main/java/dev/mars/apex/core/service/scenario/ScenarioStage.java`
 - Lines 64-70: Only has `configFile` field
 - **Missing:** No `ruleGroupId` field
-- **Status:** ❌ Scenarios cannot reference rule-groups by ID
+- **Status:** Scenarios cannot reference rule-groups by ID
 
 **File:** `apex-core/src/main/java/dev/mars/apex/core/config/yaml/ScenarioRegistryLoader.java`
 - Lines 365-369: Only parses `config-file` field
 - **Missing:** No parsing of `rule-group-id` field
-- **Status:** ❌ No scenario-level rule-group-id support
+- **Status:** No scenario-level rule-group-id support
 
 ## Roadmap for Scenario-Level Rule-Group-ID Support
 
@@ -312,15 +312,15 @@ This requires the rule-group to be defined in any loaded configuration file.
 
 | File | Change | Priority | Status |
 |------|--------|----------|--------|
-| `ScenarioStage.java` | Add ruleGroupId field | HIGH | ❌ Not done |
-| `ScenarioRegistryLoader.java` | Parse rule-group-id | HIGH | ❌ Not done |
+| `ScenarioStage.java` | Add ruleGroupId field | HIGH | Not done |
+| `ScenarioRegistryLoader.java` | Parse rule-group-id | HIGH | Not done |
 | `RulesEngineConfiguration.java` | Add global registry | HIGH | ⚠️ Partial (exists in YamlRuleFactory) |
-| `ScenarioStageExecutor.java` | Resolve rule-group-id | HIGH | ❌ Not done |
-| `APEX_YAML_REFERENCE.md` | Document new syntax | MEDIUM | ❌ Not done |
+| `ScenarioStageExecutor.java` | Resolve rule-group-id | HIGH | Not done |
+| `APEX_YAML_REFERENCE.md` | Document new syntax | MEDIUM | Not done |
 
 ## YAML Configuration Examples
 
-### Example 1: Cross-File Rule-Group References (✅ WORKING)
+### Example 1: Cross-File Rule-Group References (WORKING)
 
 **File: CrossFileBaseRuleGroups.yaml**
 ```yaml
@@ -356,12 +356,12 @@ rule-groups:
     rule-ids:
       - "income-validation"
     rule-group-references:
-      - "base-validation"  # ✅ Cross-file reference WORKS!
+      - "base-validation"  # Cross-file reference WORKS!
 ```
 
-**Status:** ✅ This pattern is fully implemented and tested in `CrossFileRuleGroupReferenceTest.java`
+**Status:** This pattern is fully implemented and tested in `CrossFileRuleGroupReferenceTest.java`
 
-### Example 2: Scenario with config-file (✅ CURRENT APPROACH)
+### Example 2: Scenario with config-file (CURRENT APPROACH)
 
 **File: scenarios/trade-processing.yaml**
 ```yaml
@@ -378,7 +378,7 @@ scenario:
 
   processing-stages:
     - stage-name: validation
-      config-file: "groups/validation-groups.yaml"  # ✅ File reference works
+      config-file: "groups/validation-groups.yaml"  # File reference works
       failure-policy: terminate
       execution-order: 1
 
@@ -387,9 +387,9 @@ scenario:
       execution-order: 2
 ```
 
-**Status:** ✅ This is the current working approach for scenarios
+**Status:** This is the current working approach for scenarios
 
-### Example 3: Scenario with rule-group-id (❌ FUTURE - NOT YET SUPPORTED)
+### Example 3: Scenario with rule-group-id (FUTURE - NOT YET SUPPORTED)
 
 **File: scenarios/trade-processing-future.yaml**
 ```yaml
@@ -406,14 +406,14 @@ scenario:
 
   processing-stages:
     - stage-name: validation
-      rule-group-id: "mandatory-validation"  # ❌ NOT SUPPORTED YET
+      rule-group-id: "mandatory-validation"  # NOT SUPPORTED YET
       failure-policy: terminate
       execution-order: 1
 ```
 
-**Status:** ❌ This will be supported after implementing the roadmap steps
+**Status:** This will be supported after implementing the roadmap steps
 
-### Example 4: Composite Rule-Groups with Cross-File References (✅ WORKING)
+### Example 4: Composite Rule-Groups with Cross-File References (WORKING)
 
 **File: groups/base-validations.yaml**
 ```yaml
@@ -453,11 +453,11 @@ rule-groups:
     name: "Complete Validation"
     operator: "AND"
     rule-group-references:
-      - "basic-validation"      # ✅ Cross-file reference
-      - "business-validation"   # ✅ Cross-file reference
+      - "basic-validation"      # Cross-file reference
+      - "business-validation"   # Cross-file reference
 ```
 
-**Status:** ✅ This pattern is fully working - rule groups can reference other rule groups from different files
+**Status:** This pattern is fully working - rule groups can reference other rule groups from different files
 
 scenario:
   scenario-id: complete-processing
@@ -749,7 +749,7 @@ public void testScenarioWithRuleGroupId() throws Exception {
 
 ## Summary: What's Implemented vs What's Not
 
-### ✅ IMPLEMENTED: Cross-File Rule-Group References
+### IMPLEMENTED: Cross-File Rule-Group References
 
 **Status:** FULLY WORKING since implementation in YamlRuleFactory
 
@@ -769,7 +769,7 @@ rule-groups:
     name: Composite (income + base_validation from other file)
     operator: AND
     rule-ids: [ income-validation ]
-    rule-group-references: [ base_validation ]  # ✅ Cross-file reference works!
+    rule-group-references: [ base_validation ]  # Cross-file reference works!
 ```
 
 **Implementation Details:**
@@ -779,24 +779,24 @@ rule-groups:
   2. **Phase 2**: Resolve cross-file `rule-group-references` using the global registry
 - Test: `CrossFileRuleGroupReferenceTest.java`
 
-### ❌ NOT IMPLEMENTED: Scenario-Level Rule-Group-ID References
+### NOT IMPLEMENTED: Scenario-Level Rule-Group-ID References
 
 **Status:** NOT YET SUPPORTED
 
 Scenarios cannot yet reference rule groups by ID in processing stages. They must use `config-file` references:
 
 ```yaml
-# ❌ This DOESN'T work yet
+# This DOESN'T work yet
 scenario:
   processing-stages:
     - stage-name: validation
-      rule-group-id: "mandatory-validation"  # ❌ NOT SUPPORTED
+      rule-group-id: "mandatory-validation"  # NOT SUPPORTED
 
-# ✅ This DOES work (current approach)
+# This DOES work (current approach)
 scenario:
   processing-stages:
     - stage-name: validation
-      config-file: "groups/validation-groups.yaml"  # ✅ SUPPORTED
+      config-file: "groups/validation-groups.yaml"  # SUPPORTED
 ```
 
 **Why It Doesn't Work:**
@@ -815,17 +815,17 @@ scenario:
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| Within-file rule-group references | ✅ WORKING | Always worked |
-| Cross-file rule-group references | ✅ WORKING | Implemented in YamlRuleFactory |
-| Scenario rule-group-id references | ❌ NOT WORKING | Requires roadmap implementation |
+| Within-file rule-group references | WORKING | Always worked |
+| Cross-file rule-group references | WORKING | Implemented in YamlRuleFactory |
+| Scenario rule-group-id references | NOT WORKING | Requires roadmap implementation |
 
 **Key Takeaway:** Rule groups can reference other rule groups across files (✅), but scenarios cannot yet reference rule groups by ID (❌). Scenarios must continue using `config-file` references until the scenario-level roadmap is implemented.
 
 **Benefits of Cross-File Rule-Group References (Already Achieved):**
-- ✅ Enterprise-scale rule organization
-- ✅ Proper separation of concerns across multiple YAML files
-- ✅ Reusable rule groups across different configurations
-- ✅ Tested and production-ready
+- Enterprise-scale rule organization
+- Proper separation of concerns across multiple YAML files
+- Reusable rule groups across different configurations
+- Tested and production-ready
 
 **Benefits of Scenario-Level Rule-Group-ID (Future):**
 - 🔮 Cleaner scenario YAML (semantic ID instead of file path)

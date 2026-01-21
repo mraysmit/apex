@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Bridge JUL to SLF4J -->
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+
+    <!-- Set info level for APEX components -->
+    <logger name="dev.mars.apex" level="INFO"/>
+
+    <!-- 
+        Suppress HikariCP connection pool ERROR logging during tests.
+        Intentional error tests trigger expected connection failures which 
+        would otherwise dump verbose stack traces to test output.
+        Connection errors are properly handled by the application code.
+    -->
+    <logger name="com.zaxxer.hikari" level="OFF"/>
+
+    <!-- Enable database debug logging for development -->
+    <logger name="dev.mars.apex.core.service.data.external.database.DatabaseDataSource" level="DEBUG"/>
+    <logger name="dev.mars.apex.core.service.lookup.DatabaseLookupService" level="DEBUG"/>
+    <logger name="dev.mars.apex.core.service.data.external.database.JdbcParameterUtils" level="DEBUG"/>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>

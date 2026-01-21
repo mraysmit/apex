@@ -922,14 +922,14 @@ class DependencyAnalysisControllerTest {
         assertTrue(jsonBody.contains("\"maxDepth\""), "Response should contain maxDepth");
         assertTrue(jsonBody.contains("\"totalFiles\""), "Response should contain totalFiles");
 
-        System.out.println("✅ API returns correct JSON structure");
-        System.out.println("✅ Response contains status=success and tree data");
+        System.out.println("API returns correct JSON structure");
+        System.out.println("Response contains status=success and tree data");
 
         // 4. Validate specific tree structure (allow for spacing variations)
         assertTrue(jsonBody.contains("\"name\"") && jsonBody.contains("\"00-scenario-registry.yaml\""), "Should contain root node");
         assertTrue(jsonBody.contains("\"children\""), "Should contain children array");
 
-        System.out.println("✅ Tree structure validation passed");
+        System.out.println("Tree structure validation passed");
         System.out.println("=== INTEGRATION TEST COMPLETE ===");
     }
 

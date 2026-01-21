@@ -49,7 +49,7 @@ public class JsonBasedMarkdownReportGenerator {
         StringBuilder md = new StringBuilder();
         
         // Header
-        md.append("# 📊 Schema Diff Report\n\n");
+        md.append("# Schema Diff Report\n\n");
         md.append("**Generated:** ").append(report.getMetadata().getGeneratedAt()).append("\n\n");
         md.append("**APEX Version:** ").append(report.getMetadata().getApexVersion())
           .append(" | **Report Version:** ").append(report.getMetadata().getReportVersion()).append("\n\n");
@@ -63,7 +63,7 @@ public class JsonBasedMarkdownReportGenerator {
         ComparisonSummary.Statistics stats = report.getSummary().getStatistics();
         md.append("| Metric | Count |\n");
         md.append("|--------|-------|\n");
-        md.append("| ✅ Matching | ").append(stats.getMatching()).append(" |\n");
+        md.append("| Matching | ").append(stats.getMatching()).append(" |\n");
         md.append("| ➕ Added | ").append(stats.getAdded()).append(" |\n");
         md.append("| ➖ Removed | ").append(stats.getRemoved()).append(" |\n");
         md.append("| 🔄 Changed | ").append(stats.getChanged()).append(" |\n\n");
@@ -77,7 +77,7 @@ public class JsonBasedMarkdownReportGenerator {
         
         // Matching columns
         if (report.getColumns().getMatching() != null && !report.getColumns().getMatching().isEmpty()) {
-            md.append("## ✅ Matching Columns (").append(stats.getMatching()).append(")\n\n");
+            md.append("## Matching Columns (").append(stats.getMatching()).append(")\n\n");
             md.append("| Column Name | Data Type | Nullable |\n");
             md.append("|-------------|-----------|----------|\n");
             for (ColumnDiff col : report.getColumns().getMatching()) {

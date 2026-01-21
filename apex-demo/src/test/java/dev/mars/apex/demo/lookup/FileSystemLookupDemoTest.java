@@ -33,11 +33,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * File System Lookup Demo Test
  *
  * CRITICAL VALIDATION CHECKLIST APPLIED:
- * ✅ Count enrichments in YAML - 1 enrichment expected (Product Details Lookup)
- * ✅ Verify log shows "Processed: 1 out of 1" - Must be 100% execution rate
- * ✅ Check EVERY enrichment condition - Test data triggers the condition (#productId != null && #productId != '')
- * ✅ Validate EVERY business calculation - Test actual file system lookup logic
- * ✅ Assert ALL enrichment results - Every result-field has corresponding assertEquals
+ * Count enrichments in YAML - 1 enrichment expected (Product Details Lookup)
+ * Verify log shows "Processed: 1 out of 1" - Must be 100% execution rate
+ * Check EVERY enrichment condition - Test data triggers the condition (#productId != null && #productId != '')
+ * Validate EVERY business calculation - Test actual file system lookup logic
+ * Assert ALL enrichment results - Every result-field has corresponding assertEquals
  *
  * BUSINESS LOGIC VALIDATION:
  * - Real file system lookup operations using JSON and XML files

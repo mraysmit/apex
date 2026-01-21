@@ -47,10 +47,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * ensuring comprehensive migration validation for complex database changes.
  *
  * CRITICAL VALIDATION CHECKLIST:
- * ✅ Source and target databases created with customers and orders tables
- * ✅ Both tables validated in single pipeline execution
- * ✅ Separate HTML reports generated for each comparison
- * ✅ Schema differences correctly identified
+ * Source and target databases created with customers and orders tables
+ * Both tables validated in single pipeline execution
+ * Separate HTML reports generated for each comparison
+ * Schema differences correctly identified
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2.1.0

@@ -58,7 +58,7 @@ public void testRuleEvaluation() {
 }
 ```
 
-**✅ REUSABLE - Two-line pattern when testing multiple scenarios:**
+**REUSABLE - Two-line pattern when testing multiple scenarios:**
 ```java
 private RulesEngine engine;
 

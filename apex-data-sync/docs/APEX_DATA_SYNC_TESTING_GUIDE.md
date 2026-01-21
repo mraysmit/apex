@@ -1,29 +1,64 @@
-# APEX Data-Sync - Functional Test Mapping
+# APEX Data-Sync - Comprehensive Testing Guide
 
-**Version:** 2.1
-**Date:** 2026-01-20
+**Version:** 2.1  
+**Date:** 2026-01-21  
 **Author:** Mark Andrew Ray-Smith Cityline Ltd
 
-> **Consolidated Document**: This document combines functional test mapping with test organization proposal and YAML co-location patterns for comprehensive test guidance.
-
-## Module Functions & Test Coverage
-
-This document maps **apex-data-sync module functions** to their test coverage, identifying gaps and priorities.
+> **Consolidated Document**: This guide combines functional test mapping, test organization, YAML co-location patterns, and testing best practices into a single comprehensive reference.
 
 ---
 
 ## Table of Contents
 
-1. [Function Category Explanations](#function-category-explanations)
-2. [Detailed Function Testing](#detailed-function-testing)
+1. [Quick Reference](#quick-reference)
+2. [Function Category Explanations](#function-category-explanations)
+3. [Detailed Function Testing](#detailed-function-testing)
    - [1. Schema Reading & Discovery](#1-schema-reading--discovery)
    - [2. Schema Comparison & Diff](#2-schema-comparison--diff)
    - [3. Report Generation](#3-report-generation)
    - [4. Data Synchronization](#4-data-synchronization)
    - [5. Pipeline Orchestration](#5-pipeline-orchestration)
    - [6. Data Source Integration](#6-data-source-integration)
-3. [Summary by Priority](#summary-by-priority)
-4. [Execution Plan](#execution-plan)
+4. [Test Organization & Structure](#test-organization--structure)
+5. [YAML Co-Location Pattern](#yaml-co-location-pattern)
+6. [Console Logging for Tests](#console-logging-for-tests)
+7. [Summary by Priority](#summary-by-priority)
+8. [Priority Implementation Plan](#priority-implementation-plan)
+9. [Test Count Summary](#test-count-summary)
+
+---
+
+## Quick Reference
+
+### Running Tests
+
+```bash
+# Run all tests with console output
+mvn test -Dsurefire.useFile=false
+
+# Run specific test class
+mvn test -Dtest=ReadSchemaDatabasePipelineStageTest -Dsurefire.useFile=false
+
+# Run with DEBUG logging (edit logback.xml first to set level="DEBUG")
+mvn test -Dtest=YourTestClass -Dsurefire.useFile=false
+
+# Run tests by category
+mvn test -Dtest=unit/**
+mvn test -Dtest=integration/schema/**
+mvn test -Dtest=pipeline/**
+```
+
+### Current Test Status
+
+| Category | Count | Status |
+|----------|-------|--------|
+| Unit Tests | 17 | Phase 1 deliverable |
+| Integration Tests | 11 | Partial coverage |
+| Pipeline Tests | 5 | Basic flows covered |
+| Validation Tests | 6 | Core scenarios |
+| **Total Current** | **39** | |
+| **Planned New** | **32** | Phases 2-3 |
+| **Target Total** | **71** | 274% increase |
 
 ---
 
@@ -242,30 +277,30 @@ This modular design allows:
 
 **Current Test Coverage**:
 ```
-✅ ReadSchemaDatabaseTest.java
+ReadSchemaDatabaseTest.java
    - shouldReadSchemaFromH2Database()
    
-✅ ReadSchemaDatabasePipelineStageTest.java
+ReadSchemaDatabasePipelineStageTest.java
    - shouldReadSchemaFromDatabase()
    - shouldReadSchemaFromMultipleTables()
    
-✅ CustomSchemaPostgresTest.java
+CustomSchemaPostgresTest.java
    - shouldReadNonDefaultSchema()
 ```
 
 **Coverage Gaps**:
 ```
-❌ SQL Server-specific schema reading
-❌ MySQL-specific schema reading  
-❌ Oracle-specific schema reading
-❌ DB2-specific schema reading
-❌ Database connection failure handling
-❌ Timeout scenarios
-❌ Invalid table names
-❌ Empty tables
-❌ Tables with 100+ columns
-❌ View vs Table distinction
-❌ Temporary tables
+SQL Server-specific schema reading
+MySQL-specific schema reading  
+Oracle-specific schema reading
+DB2-specific schema reading
+Database connection failure handling
+Timeout scenarios
+Invalid table names
+Empty tables
+Tables with 100+ columns
+View vs Table distinction
+Temporary tables
 ```
 
 **Proposed Tests** (8 new):
@@ -304,31 +339,31 @@ This modular design allows:
 
 **Current Test Coverage**:
 ```
-✅ ReadSchemaCsvTest.java
+ReadSchemaCsvTest.java
    - shouldInferSchemaFromCsv()
    - shouldInferIntegerType()
    - shouldInferDecimalType()
    - shouldInferBooleanType()
    - shouldInferTimestampType()
    
-✅ ReadSchemaCsvPipelineStageTest.java
+ReadSchemaCsvPipelineStageTest.java
    - shouldReadSchemaFromCsv()
    
-✅ ReadSchemaLargeCsvTest.java
+ReadSchemaLargeCsvTest.java
    - shouldReadSchemaFromLargeCsv()
 ```
 
 **Coverage Gaps**:
 ```
-❌ Malformed CSV (missing headers, irregular row lengths)
-❌ Unicode/encoding issues (UTF-16, special characters)
-❌ Empty CSV files
-❌ Single-column CSV
-❌ CSV with quoted fields containing delimiters
-❌ CSV with escaped characters
-❌ Very large files (1M+ rows) - performance
-❌ Type inference edge cases ("123.00" → INTEGER or DECIMAL?)
-❌ Ambiguous timestamps (multiple formats)
+Malformed CSV (missing headers, irregular row lengths)
+Unicode/encoding issues (UTF-16, special characters)
+Empty CSV files
+Single-column CSV
+CSV with quoted fields containing delimiters
+CSV with escaped characters
+Very large files (1M+ rows) - performance
+Type inference edge cases ("123.00" → INTEGER or DECIMAL?)
+Ambiguous timestamps (multiple formats)
 ```
 
 **Proposed Tests** (5 new):
@@ -371,21 +406,21 @@ This modular design allows:
 
 **Current Test Coverage**:
 ```
-✅ ReadSchemaDatabaseEnumerationPipelineStageTest.java
+ReadSchemaDatabaseEnumerationPipelineStageTest.java
    - shouldEnumerateAllTablesInDatabase()
    - shouldEnumerateTablesInSpecificSchema()
    
-✅ ReadSchemaMultiTableTest.java
+ReadSchemaMultiTableTest.java
    - shouldReadMultipleTablesSequentially()
 ```
 
 **Coverage Gaps**:
 ```
-❌ Enumeration with table filtering patterns
-❌ Cross-schema enumeration
-❌ Enumeration with access restrictions
-❌ Large database (1000+ tables)
-❌ Empty schema
+Enumeration with table filtering patterns
+Cross-schema enumeration
+Enumeration with access restrictions
+Large database (1000+ tables)
+Empty schema
 ```
 
 **Proposed Tests** (2 new):
@@ -415,31 +450,31 @@ This modular design allows:
 
 **Current Test Coverage**:
 ```
-✅ CsvToPostgresMigrationTest.java
+CsvToPostgresMigrationTest.java
    - shouldValidateCsvToPostgresMigration()
    - shouldDetectIncompatibilities()
    
-✅ SqlServerPostgresMigrationTest.java
+SqlServerPostgresMigrationTest.java
    - shouldCompareSqlServerToPostgres()
    
-✅ SchemaEvolutionBreakingTest.java
+SchemaEvolutionBreakingTest.java
    - shouldDetectBreakingChanges()
 ```
 
 **Coverage Gaps**:
 ```
-❌ Type narrowing detection (VARCHAR(200) → VARCHAR(100))
-❌ Type widening detection (VARCHAR(100) → VARCHAR(200))
-❌ Precision/scale changes (DECIMAL(10,2) → DECIMAL(8,2))
-❌ Nullable → NOT NULL conversion
-❌ NOT NULL → Nullable conversion
-❌ Primary key additions
-❌ Primary key removals
-❌ Auto-increment changes
-❌ Default value changes
-❌ Case-insensitive column matching
-❌ Case-sensitive column matching
-❌ Column reordering (non-breaking)
+Type narrowing detection (VARCHAR(200) → VARCHAR(100))
+Type widening detection (VARCHAR(100) → VARCHAR(200))
+Precision/scale changes (DECIMAL(10,2) → DECIMAL(8,2))
+Nullable → NOT NULL conversion
+NOT NULL → Nullable conversion
+Primary key additions
+Primary key removals
+Auto-increment changes
+Default value changes
+Case-insensitive column matching
+Case-sensitive column matching
+Column reordering (non-breaking)
 ```
 
 **Proposed Tests** (9 new):
@@ -491,12 +526,12 @@ This modular design allows:
 
 **Coverage Gaps**:
 ```
-❌ Default type mapping rules
-❌ Custom type mapping configuration
-❌ Cross-platform type equivalences
-❌ Inferred type tolerance (CSV → Database)
-❌ Type hierarchy matching (INTEGER → BIGINT)
-❌ Type incompatibility detection
+Default type mapping rules
+Custom type mapping configuration
+Cross-platform type equivalences
+Inferred type tolerance (CSV → Database)
+Type hierarchy matching (INTEGER → BIGINT)
+Type incompatibility detection
 ```
 
 **Proposed Tests** (3 new):
@@ -530,19 +565,19 @@ This modular design allows:
 
 **Current Test Coverage**:
 ```
-✅ SchemaEvolutionBreakingTest.java
+SchemaEvolutionBreakingTest.java
    - shouldDetectBreakingChanges()
    
-✅ PreDeploymentValidationTest.java
+PreDeploymentValidationTest.java
    - shouldFailOnBreakingChanges()
 ```
 
 **Coverage Gaps**:
 ```
-❌ Comprehensive breaking change rule coverage
-❌ Edge cases in severity classification
-❌ Multi-column breaking changes
-❌ Cascading breaking changes
+Comprehensive breaking change rule coverage
+Edge cases in severity classification
+Multi-column breaking changes
+Cascading breaking changes
 ```
 
 **Proposed Tests** (2 new):
@@ -572,18 +607,18 @@ This modular design allows:
 
 **Current Test Coverage**:
 ```
-✅ MultiTableMigrationTest.java
+MultiTableMigrationTest.java
    - shouldCompareMultipleTables()
 ```
 
 **Coverage Gaps**:
 ```
-❌ Table name mapping validation
-❌ Partial table matching
-❌ Added table detection
-❌ Removed table detection
-❌ Mixed compatibility (some tables compatible, some not)
-❌ Schema name conflicts
+Table name mapping validation
+Partial table matching
+Added table detection
+Removed table detection
+Mixed compatibility (some tables compatible, some not)
+Schema name conflicts
 ```
 
 **Proposed Tests** (2 new):
@@ -615,49 +650,30 @@ This modular design allows:
 
 **Current Test Coverage**:
 ```
-❌ NO TESTS (major gap for Week 1-3 deliverable)
+JsonSerializationTest.java (8 tests) - Week 1 deliverable
+   - Basic serialization/deserialization, round-trip validation
+   - Unicode handling (客户表, Straße), null values, empty schemas
+   - Numeric precision (DECIMAL 10,2), multiple column types
 ```
 
 **Coverage Gaps**:
 ```
-❌ Basic serialization
-❌ Deserialization
-❌ Schema validation
-❌ JSON structure validation
-❌ Null handling
-❌ Empty diff handling
-❌ Large diff handling (100+ columns)
-❌ Unicode in JSON
+JSON schema validation (schema compliance)
+Large diff handling (100+ columns)
 ```
 
-**Proposed Tests** (5 new):
+**Proposed Tests** (2 new):
 ```
-✨ unit/serialization/JsonSerializationTest.java
-   - shouldSerializeComparisonResult()
-   - shouldIncludeAllRequiredFields()
-   - shouldHandleNullValues()
-   - shouldHandleUnicodeCharacters()
-   
-✨ unit/serialization/JsonDeserializationTest.java
-   - shouldDeserializeToReport()
-   - shouldPreserveAllData()
-   - shouldHandleRoundTrip()
-   
 ✨ unit/serialization/JsonSchemaValidationTest.java
    - shouldValidateAgainstSchema()
    - shouldRejectInvalidJson()
-   
-✨ unit/serialization/JsonStructureTest.java
-   - shouldHaveCorrectMetadata()
-   - shouldHaveCorrectSourceTarget()
-   - shouldHaveCorrectSummary()
    
 ✨ integration/reporting/JsonReportIntegrationTest.java
    - shouldGenerateJsonFromPipeline()
    - shouldWriteToCorrectPath()
 ```
 
-**Priority**: 🔴 CRITICAL (missing tests for delivered feature)
+**Priority**: MOSTLY COMPLETE (Week 1 deliverable done)
 
 ---
 
@@ -671,41 +687,26 @@ This modular design allows:
 
 **Current Test Coverage**:
 ```
-❌ NO TESTS (major gap for Week 3 deliverable)
+MarkdownGenerationTest.java (9 tests) - Week 3 deliverable
+   - Basic table generation, emoji headers (📊, 🔑, ✓)
+   - Table alignment, special character escaping (|, *)
+   - Unicode, summary sections, constraint indicators
 ```
 
 **Coverage Gaps**:
 ```
-❌ Basic markdown generation
-❌ Table formatting
-❌ Emoji rendering
-❌ Multi-table markdown
-❌ Large report handling
-❌ Special character escaping
+Multi-table markdown reports
+Large report handling
 ```
 
-**Proposed Tests** (4 new):
+**Proposed Tests** (1 new):
 ```
-✨ unit/reporting/markdown/MarkdownGenerationTest.java
-   - shouldGenerateValidMarkdown()
-   - shouldIncludeAllSections()
-   - shouldHandleSpecialCharacters()
-   
-✨ unit/reporting/markdown/TableFormattingTest.java
-   - shouldFormatTablesCorrectly()
-   - shouldAlignColumns()
-   - shouldHandleLongValues()
-   
-✨ unit/reporting/markdown/EmojiHeaderTest.java
-   - shouldRenderEmojiHeaders()
-   - shouldFallbackWithoutEmojiSupport()
-   
 ✨ integration/reporting/MarkdownReportIntegrationTest.java
    - shouldGenerateMarkdownFromPipeline()
    - shouldWriteToCorrectPath()
 ```
 
-**Priority**: 🔴 CRITICAL (missing tests for delivered feature)
+**Priority**: MOSTLY COMPLETE (Week 3 deliverable done)
 
 ---
 
@@ -724,11 +725,11 @@ This modular design allows:
 
 **Coverage Gaps**:
 ```
-❌ HTML structure validation
-❌ CSS rendering
-❌ Browser compatibility
-❌ Large report handling
-❌ XSS prevention
+HTML structure validation
+CSS rendering
+Browser compatibility
+Large report handling
+XSS prevention
 ```
 
 **Proposed Tests** (2 new):
@@ -756,7 +757,7 @@ This modular design allows:
 
 **Current Test Coverage**:
 ```
-✅ SchemaDiffReportOutputOptionsTest.java
+SchemaDiffReportOutputOptionsTest.java
    - shouldGenerateJsonReport()
    - shouldGenerateHtmlReport()
    - shouldGenerateMarkdownReport()
@@ -765,13 +766,13 @@ This modular design allows:
 
 **Coverage Gaps**:
 ```
-❌ Filename-only path validation
-❌ Relative path normalization
-❌ Absolute path handling
-❌ Directory creation verification
-❌ Path traversal prevention
-❌ Overwrite behavior
-❌ Concurrent writes
+Filename-only path validation
+Relative path normalization
+Absolute path handling
+Directory creation verification
+Path traversal prevention
+Overwrite behavior
+Concurrent writes
 ```
 
 **Proposed Tests** (1 new):
@@ -789,37 +790,6 @@ This modular design allows:
 
 ---
 
-### Function 3.5: Multi-Format Report Generation
-
-**Functionality**:
-- Generate JSON + HTML + Markdown in single pipeline
-- Consistent data across formats
-
-**Current Test Coverage**:
-```
-✅ SchemaDiffReportOutputOptionsTest.java
-   - shouldGenerateDualOutputReports()
-```
-
-**Coverage Gaps**:
-```
-❌ Triple format generation
-❌ Format consistency validation
-❌ Selective format generation
-```
-
-**Proposed Tests** (1 new):
-```
-✨ integration/reporting/MultiFormatReportTest.java
-   - shouldGenerateAllFormats()
-   - shouldMaintainConsistency()
-   - shouldAllowSelectiveGeneration()
-```
-
-**Priority**: 🟢 LOW (working, minimal gaps)
-
----
-
 ## 4. DATA SYNCHRONIZATION
 
 ### Function 4.1: Table Synchronization (Extract-Transform-Load)
@@ -832,26 +802,26 @@ This modular design allows:
 
 **Current Test Coverage**:
 ```
-✅ TableSyncIntegrationTestH2.java
+TableSyncIntegrationTestH2.java
    - shouldSyncDataFromSourceToTarget()
    
-✅ MsSqlToPostgresSyncTest.java
+MsSqlToPostgresSyncTest.java
    - shouldSyncMsSqlToPostgres()
    
-✅ SyncPipelineH2Test.java
+SyncPipelineH2Test.java
    - shouldExecuteSyncPipeline()
 ```
 
 **Coverage Gaps**:
 ```
-❌ Upsert conflict resolution strategies
-❌ Batch size variations
-❌ Transaction boundary testing
-❌ Failed row handling
-❌ Partial sync recovery
-❌ Large dataset sync (1M+ rows)
-❌ NULL value handling
-❌ Data type conversion during sync
+Upsert conflict resolution strategies
+Batch size variations
+Transaction boundary testing
+Failed row handling
+Partial sync recovery
+Large dataset sync (1M+ rows)
+NULL value handling
+Data type conversion during sync
 ```
 
 **Proposed Tests** (4 new):
@@ -891,22 +861,22 @@ This modular design allows:
 
 **Current Test Coverage**:
 ```
-✅ CompletePipelineWithSchemaTest.java
+CompletePipelineWithSchemaTest.java
    - shouldExecuteCompletePipeline()
    
-✅ SchemaDiffJsonIntegrationTest.java
+SchemaDiffJsonIntegrationTest.java
    - shouldExecuteSchemaDiffPipeline()
 ```
 
 **Coverage Gaps**:
 ```
-❌ Invalid pipeline configurations
-❌ Missing step dependencies
-❌ Circular dependencies
-❌ Step timeout handling
-❌ Parallel execution
-❌ Conditional step execution
-❌ Pipeline failure recovery
+Invalid pipeline configurations
+Missing step dependencies
+Circular dependencies
+Step timeout handling
+Parallel execution
+Conditional step execution
+Pipeline failure recovery
 ```
 
 **Proposed Tests** (3 new):
@@ -945,11 +915,11 @@ This modular design allows:
 
 **Coverage Gaps**:
 ```
-❌ Missing data source reference
-❌ Invalid data source YAML
-❌ Connection pool exhaustion
-❌ Credential validation
-❌ Environment variable substitution
+Missing data source reference
+Invalid data source YAML
+Connection pool exhaustion
+Credential validation
+Environment variable substitution
 ```
 
 **Proposed Tests** (1 new):
@@ -961,37 +931,6 @@ This modular design allows:
 ```
 
 **Priority**: 🟢 LOW (stable feature)
-
----
-
-### Function 5.3: Pipeline Context Management
-
-**Functionality**:
-- Store step results in pipeline context
-- Pass data between steps (schema metadata, comparison results)
-- Context keys: `schema_<stepName>`, `schema_diff_<stepName>`
-
-**Current Test Coverage**:
-```
-⚠️ Implicit in pipeline tests
-```
-
-**Coverage Gaps**:
-```
-❌ Context key collisions
-❌ Context data persistence
-❌ Context serialization
-```
-
-**Proposed Tests** (1 new):
-```
-✨ unit/util/PipelineContextTest.java
-   - shouldStoreAndRetrieveData()
-   - shouldHandleKeyCollisions()
-   - shouldClearContext()
-```
-
-**Priority**: 🟢 LOW (working well)
 
 ---
 
@@ -1007,16 +946,16 @@ This modular design allows:
 
 **Current Test Coverage**:
 ```
-✅ Via Testcontainers in integration tests
+Via Testcontainers in integration tests
 ```
 
 **Coverage Gaps**:
 ```
-❌ Connection timeout
-❌ Invalid credentials
-❌ Network failures
-❌ Driver not found
-❌ Connection pool exhaustion
+Connection timeout
+Invalid credentials
+Network failures
+Driver not found
+Connection pool exhaustion
 ```
 
 **Proposed Tests** (1 new):
@@ -1032,151 +971,9 @@ This modular design allows:
 
 ---
 
-### Function 6.2: Query Execution
+## Test Organization & Structure
 
-**Functionality**:
-- Execute named queries from data source config
-- Parameter binding
-- Result set mapping
-- Batch execution
-
-**Current Test Coverage**:
-```
-✅ Via sync tests (implicit)
-```
-
-**Coverage Gaps**:
-```
-❌ SQL injection prevention
-❌ Query timeout
-❌ Large result sets
-❌ NULL handling
-```
-
-**Proposed Tests** (1 new):
-```
-✨ integration/synchronization/QueryExecutionTest.java
-   - shouldPreventSqlInjection()
-   - shouldHandleQueryTimeout()
-   - shouldHandleLargeResultSet()
-```
-
-**Priority**: 🟢 LOW (working, secure via APEX Core)
-
----
-
-## SUMMARY BY PRIORITY
-
-### 🔴 CRITICAL (Immediate Action Required)
-
-**Missing Tests for Delivered Features**:
-1. JSON Serialization (5 tests) - **Week 1 deliverable**
-2. Markdown Generation (4 tests) - **Week 3 deliverable**
-
-**Total**: 9 tests
-
----
-
-### 🔴 HIGH (Within 2 Weeks)
-
-**Core Function Gaps**:
-1. Type Compatibility (3 tests)
-2. Breaking Change Detection (2 tests)
-3. Type Narrowing/Widening (2 tests)
-4. Nullable Conversion (1 test)
-5. Primary Key Changes (1 test)
-6. Cross-Platform DB Support (3 tests)
-
-**Total**: 12 tests
-
----
-
-### 🟡 MEDIUM (Within 4 Weeks)
-
-**Robustness & Edge Cases**:
-1. CSV Edge Cases (5 tests)
-2. Multi-Table Comparison (2 tests)
-3. Report Path Resolution (1 test)
-4. Data Sync Robustness (4 tests)
-5. Pipeline Error Handling (3 tests)
-6. Database Connection Errors (1 test)
-
-**Total**: 16 tests
-
----
-
-### 🟢 LOW (As Time Permits)
-
-**Nice-to-Have Coverage**:
-1. HTML Report Tests (2 tests)
-2. Multi-Format Reports (1 test)
-3. Multi-Table Enumeration (2 tests)
-4. Pipeline Context (1 test)
-5. Query Execution (1 test)
-
-**Total**: 7 tests
-
----
-
-## TOTAL NEW TESTS NEEDED
-
-| Priority | Count | Timeline |
-|----------|-------|----------|
-| 🔴 CRITICAL | 9 | This week |
-| 🔴 HIGH | 12 | Weeks 1-2 |
-| 🟡 MEDIUM | 16 | Weeks 3-4 |
-| 🟢 LOW | 7 | Weeks 5-6 |
-| **TOTAL** | **44** | **6 weeks** |
-
-**Current Tests**: 19  
-**Proposed New Tests**: 44  
-**Total After Implementation**: 63 tests (232% increase)
-
----
-
-## EXECUTION PLAN
-
-### Week 1: Critical Coverage
-```
-Day 1-2: JSON Serialization (5 tests)
-Day 3-4: Markdown Generation (4 tests)
-```
-
-### Week 2: Core Comparison Logic
-```
-Day 1-2: Type Compatibility (3 tests)
-Day 3: Breaking Change Detection (2 tests)
-Day 4-5: Type Narrowing/Widening/Nullable (4 tests)
-```
-
-### Week 3: Cross-Platform & Edge Cases
-```
-Day 1-2: SQL Server/MySQL Integration (3 tests)
-Day 3-4: CSV Edge Cases (5 tests)
-Day 5: Multi-Table Comparison (2 tests)
-```
-
-### Week 4: Robustness
-```
-Day 1-2: Data Sync Error Handling (4 tests)
-Day 3-4: Pipeline Error Handling (3 tests)
-Day 5: Report Path + DB Connection (2 tests)
-```
-
-### Weeks 5-6: Low Priority
-```
-As time permits: 7 low-priority tests
-```
-
----
-
-## TEST ORGANIZATION & STRUCTURE
-
-> **Integrated from TEST_ORGANIZATION_PROPOSAL.md**
-
-### Current State Analysis
-
-#### Existing Test Structure (19 Test Classes)
+### Current Test Structure (19 Test Classes)
 
 ```
 apex-data-sync/src/test/java/dev/mars/apex/sync/
@@ -1210,9 +1007,7 @@ apex-data-sync/src/test/java/dev/mars/apex/sync/
 └── TestContainerImages.java
 ```
 
-### Proposed Test Organization
-
-#### New Directory Structure
+### Proposed Directory Structure
 
 ```
 apex-data-sync/src/test/java/dev/mars/apex/sync/
@@ -1244,8 +1039,8 @@ apex-data-sync/src/test/java/dev/mars/apex/sync/
 │   │   │   ├── EmojiHeaderTest.java
 │   │   │   └── MultiTableMarkdownTest.java
 │   │   ├── html/
-│   │   │   ├── HtmlGenerationTest.java     # (future)
-│   │   │   └── TemplateRenderingTest.java  # (future)
+│   │   │   ├── HtmlGenerationTest.java
+│   │   │   └── TemplateRenderingTest.java
 │   │   └── ReportPathResolutionTest.java
 │   │
 │   └── util/                                # Utility classes
@@ -1258,48 +1053,48 @@ apex-data-sync/src/test/java/dev/mars/apex/sync/
 │   │   ├── database/
 │   │   │   ├── PostgreSqlSchemaReadingTest.java
 │   │   │   ├── H2SchemaReadingTest.java
-│   │   │   ├── SqlServerSchemaReadingTest.java  # NEW
-│   │   │   ├── MySqlSchemaReadingTest.java      # NEW
-│   │   │   ├── OracleSchemaReadingTest.java     # NEW
+│   │   │   ├── SqlServerSchemaReadingTest.java
+│   │   │   ├── MySqlSchemaReadingTest.java
+│   │   │   ├── OracleSchemaReadingTest.java
 │   │   │   ├── CustomSchemaTest.java
 │   │   │   └── MultiTableEnumerationTest.java
 │   │   │
 │   │   └── csv/
 │   │       ├── CsvSchemaBasicTest.java
 │   │       ├── CsvSchemaLargeFileTest.java
-│   │       ├── CsvSchemaUnicodeTest.java        # NEW
-│   │       ├── CsvSchemaMalformedTest.java      # NEW
-│   │       └── CsvSchemaEdgeCasesTest.java      # NEW
+│   │       ├── CsvSchemaUnicodeTest.java
+│   │       ├── CsvSchemaMalformedTest.java
+│   │       └── CsvSchemaEdgeCasesTest.java
 │   │
 │   ├── comparison/                          # Schema diff integration
 │   │   ├── platforms/
 │   │   │   ├── CsvToPostgresDiffTest.java
 │   │   │   ├── SqlServerToPostgresDiffTest.java
-│   │   │   ├── MySqlToPostgresDiffTest.java     # NEW
-│   │   │   ├── OracleToPostgresDiffTest.java    # NEW
-│   │   │   └── CrossPlatformTypeMappingTest.java # NEW
+│   │   │   ├── MySqlToPostgresDiffTest.java
+│   │   │   ├── OracleToPostgresDiffTest.java
+│   │   │   └── CrossPlatformTypeMappingTest.java
 │   │   │
 │   │   └── scenarios/
 │   │       ├── SchemaEvolutionTest.java
 │   │       ├── BreakingChangesTest.java
-│   │       ├── BackwardCompatibilityTest.java   # NEW
-│   │       ├── AdditiveChangesTest.java         # NEW
-│   │       └── DestructiveChangesTest.java      # NEW
+│   │       ├── BackwardCompatibilityTest.java
+│   │       ├── AdditiveChangesTest.java
+│   │       └── DestructiveChangesTest.java
 │   │
 │   ├── reporting/                           # End-to-end report generation
 │   │   ├── JsonReportIntegrationTest.java
 │   │   ├── MarkdownReportIntegrationTest.java
-│   │   ├── MultiFormatReportTest.java           # NEW
+│   │   ├── MultiFormatReportTest.java
 │   │   └── ReportOutputOptionsTest.java
 │   │
 │   └── synchronization/                     # Data sync tests
 │       ├── H2SyncTest.java
 │       ├── PostgreSqlSyncTest.java
 │       ├── SqlServerToPostgresSyncTest.java
-│       ├── UpsertConflictResolutionTest.java    # NEW
-│       ├── BatchProcessingTest.java             # NEW
-│       ├── TransactionBoundaryTest.java         # NEW
-│       └── PartialSyncRecoveryTest.java         # NEW
+│       ├── UpsertConflictResolutionTest.java
+│       ├── BatchProcessingTest.java
+│       ├── TransactionBoundaryTest.java
+│       └── PartialSyncRecoveryTest.java
 │
 ├── pipeline/                                # End-to-end pipeline tests
 │   ├── workflows/
@@ -1311,10 +1106,10 @@ apex-data-sync/src/test/java/dev/mars/apex/sync/
 │   │
 │   ├── validation/
 │   │   ├── PreDeploymentValidationTest.java
-│   │   ├── CIIntegrationTest.java               # NEW
-│   │   └── MigrationCompatibilityTest.java      # NEW
+│   │   ├── CIIntegrationTest.java
+│   │   └── MigrationCompatibilityTest.java
 │   │
-│   └── error_handling/                          # NEW category
+│   └── error_handling/
 │       ├── InvalidConfigurationTest.java
 │       ├── MissingDataSourceTest.java
 │       ├── NetworkFailureTest.java
@@ -1322,12 +1117,12 @@ apex-data-sync/src/test/java/dev/mars/apex/sync/
 │       └── PartialExecutionRecoveryTest.java
 │
 ├── performance/                             # Performance & stress tests
-│   ├── LargeSchemaComparisonTest.java           # NEW
-│   ├── MultiTablePerformanceTest.java           # NEW
-│   ├── ConcurrentPipelineTest.java              # NEW
-│   ├── MemoryLeakDetectionTest.java             # NEW
-│   ├── ReportGenerationBenchmarkTest.java       # NEW
-│   └── LargeDatasetSyncTest.java                # NEW
+│   ├── LargeSchemaComparisonTest.java
+│   ├── MultiTablePerformanceTest.java
+│   ├── ConcurrentPipelineTest.java
+│   ├── MemoryLeakDetectionTest.java
+│   ├── ReportGenerationBenchmarkTest.java
+│   └── LargeDatasetSyncTest.java
 │
 ├── fixtures/                                # Test data & resources
 │   ├── schemas/
@@ -1352,10 +1147,10 @@ apex-data-sync/src/test/java/dev/mars/apex/sync/
     ├── SyncTestBase.java
     ├── TestConstants.java
     ├── TestContainerImages.java
-    ├── DatabaseTestContainerProvider.java       # NEW
-    ├── CsvTestDataGenerator.java                # NEW
-    ├── SchemaTestDataBuilder.java               # NEW
-    └── AssertionHelpers.java                    # NEW
+    ├── DatabaseTestContainerProvider.java
+    ├── CsvTestDataGenerator.java
+    ├── SchemaTestDataBuilder.java
+    └── AssertionHelpers.java
 ```
 
 ### Test Categories & Guidelines
@@ -1464,62 +1259,31 @@ void shouldCompare100TablesWithin30Seconds() {
 
 ### Test Naming Conventions
 
-#### Pattern 1: **Unit Tests**
-```
-should[Action][UnderCondition]
-```
-Examples:
-- `shouldDetectTypeNarrowing()`
-- `shouldAllowTypeWidening()`
-- `shouldFailOnNullableToNotNullConversion()`
-
-#### Pattern 2: **Integration Tests**
-```
-should[Action]From[Source][OptionalCondition]
-```
-Examples:
-- `shouldReadSchemaFromPostgres()`
-- `shouldReadSchemaFromCsvWithUnicode()`
-- `shouldCompareSchemasCrossDatabase()`
-
-#### Pattern 3: **Pipeline Tests**
-```
-should[Action][WorkflowDescription]
-```
-Examples:
-- `shouldExecuteCompleteMigrationPipeline()`
-- `shouldFailOnIncompatibleSchemas()`
-- `shouldGenerateAllReportFormats()`
-
-#### Pattern 4: **Performance Tests**
-```
-should[Action][Resource][WithinBenchmark]
-```
-Examples:
-- `shouldCompare100TablesWithin30Seconds()`
-- `shouldGenerateReportWithin500Milliseconds()`
-- `shouldHandle1MillionRowsWithoutMemoryLeak()`
+| Pattern | Usage | Examples |
+|---------|-------|----------|
+| `should[Action][UnderCondition]` | Unit tests | `shouldDetectTypeNarrowing()`, `shouldAllowTypeWidening()` |
+| `should[Action]From[Source]` | Integration tests | `shouldReadSchemaFromPostgres()`, `shouldReadSchemaFromCsvWithUnicode()` |
+| `should[Action][Workflow]` | Pipeline tests | `shouldExecuteCompleteMigrationPipeline()`, `shouldFailOnIncompatibleSchemas()` |
+| `should[Action][Resource]Within[Benchmark]` | Performance tests | `shouldCompare100TablesWithin30Seconds()` |
 
 ---
 
-## YAML CO-LOCATION PATTERN
-
-> **Integrated from YAML_TEST_FILES_COLOCATION_PATTERN.md**
+## YAML Co-Location Pattern
 
 ### Overview
 
-The YAML Co-Location Pattern is a strict organizational principle that ensures every YAML configuration file has a corresponding Java test class in the **same directory**. This pattern provides executable documentation, enforces testability, and prevents orphaned configuration files.
+The YAML Co-Location Pattern is a **strict organizational principle** that ensures every YAML configuration file has a corresponding Java test class in the **same directory**. This pattern provides executable documentation, enforces testability, and prevents orphaned configuration files.
 
 ### The Pattern
 
 #### Core Principle
 ```
-✅ CORRECT: Co-located in same directory
+CORRECT: Co-located in same directory
 src/test/java/dev/mars/apex/sync/schema/
 ├── SchemaAnalysisExample.java
 └── SchemaAnalysisExample.yaml
 
-❌ WRONG: Orphaned YAML in separate configs folder
+WRONG: Orphaned YAML in separate configs folder
 configs/
 └── schema-analysis-example.yaml
 ```
@@ -1531,14 +1295,12 @@ configs/
 - Both files **must** reside in the same `src/test/java/` subdirectory
 
 **Examples:**
-- ✅ `SchemaAnalysisExample.java` + `SchemaAnalysisExample.yaml`
-- ✅ `ReadSchemaDatabaseTest.java` + `ReadSchemaDatabaseTest.yaml`
-- ❌ `SchemaDiffTest.java` + `schema-diff-test.yaml` (case mismatch)
-- ❌ `TestSchema.java` + `test-schema.yaml` (kebab-case not allowed)
+- `SchemaAnalysisExample.java` + `SchemaAnalysisExample.yaml`
+- `ReadSchemaDatabaseTest.java` + `ReadSchemaDatabaseTest.yaml`
+- `SchemaDiffTest.java` + `schema-diff-test.yaml` (case mismatch)
+- `TestSchema.java` + `test-schema.yaml` (kebab-case not allowed)
 
-### Implementation Guidelines
-
-#### Directory Structure Example
+### Directory Structure Example
 ```
 apex-data-sync/
 └── src/test/java/dev/mars/apex/sync/
@@ -1557,7 +1319,7 @@ apex-data-sync/
         └── CustomTypeMappingTest.yaml
 ```
 
-#### Java Test Class Template
+### Java Test Class Template
 ```java
 package dev.mars.apex.sync.schema;
 
@@ -1589,120 +1351,29 @@ class SchemaAnalysisExample extends SyncTestBase {
 
 ### Pattern Benefits
 
-1. **Executable Documentation**
-   - YAML configurations are validated through actual test execution
-   - Examples are guaranteed to work, not just documented wishful thinking
-   - Changes to core engine immediately surface in test failures
-
-2. **Discoverability**
-   - Developers find related test code and configuration together
-   - No searching across multiple directories or modules
-   - Clear ownership: tests own their configurations
-
-3. **Prevents Configuration Drift**
-   - Orphaned YAML files are immediately visible as pattern violations
-   - Configuration changes require corresponding test updates
-   - Version control tracks changes to both files together
-
-4. **Test Isolation**
-   - Each test has its own configuration file
-   - No shared configuration leading to test interdependencies
-   - Easy to create variations by copying both files together
+| Benefit | Description |
+|---------|-------------|
+| **Executable Documentation** | YAML configurations are validated through actual test execution |
+| **Discoverability** | Developers find related test code and configuration together |
+| **Prevents Configuration Drift** | Orphaned YAML files are immediately visible as pattern violations |
+| **Test Isolation** | Each test has its own configuration file |
 
 ### Anti-Patterns to Avoid
 
-#### ❌ Module-Root Configuration Folders
-```
-apex-data-sync/
-├── configs/                    # WRONG: Breaks co-location
-│   └── schema-example.yaml
-└── src/test/java/
-```
-
-**Problem**: Separates configuration from the code that uses it, creates orphaned files.
-
-#### ❌ Shared Configuration Files
-```java
-// WRONG: Multiple tests sharing one YAML file
-class Test1 { loadFromFile("shared-config.yaml"); }
-class Test2 { loadFromFile("shared-config.yaml"); }
-```
-
-**Problem**: Creates hidden dependencies between tests, makes changes risky.
-
-#### ❌ YAML Without Java Test
-```
-src/test/java/dev/mars/apex/sync/
-└── orphaned-config.yaml        # WRONG: No matching .java file
-```
-
-**Problem**: Untested configuration, unclear purpose, will eventually break.
-
-### Adoption Metrics
-
-- **Total co-located pairs**: 100+ in apex-data-sync module
-- **Adoption rate**: 100% of YAML configurations since v2.1
-- **Pattern violations**: 0 (enforced through code review)
-
-### Migration Path
-
-If you find a YAML file in the wrong location:
-
-1. **Identify the correct package**: Where should this configuration be tested?
-2. **Move the YAML**: To `src/test/java/{package}/`
-3. **Create matching test**: `{BaseName}.java` in same directory
-4. **Extend `SyncTestBase`**: Provides `yamlLoader`, `logger`, test setup
-5. **Load configuration**: Use relative path to co-located YAML file
-6. **Run test**: Verify configuration loads and executes correctly
-7. **Clean up**: Remove old location, update any references
-
-#### Creating New Test Classes
-
-**IMPORTANT**: When creating Java test classes for orphaned YAML files, always follow the patterns from existing working examples:
-
-1. **Find reference examples**: Look at existing test classes in the same package or similar scenarios
-   - Example: `SchemaAnalysisExample.java` for schema-related tests
-   - Example: `ReadSchemaDatabaseTest.java` for database schema tests
-
-2. **Copy the structure**:
-   - Package declaration matching directory structure
-   - Extends `SyncTestBase`
-   - Standard imports: `RulesEngine`, `Test`, assertions
-   - Descriptive JavaDoc explaining purpose and use cases
-
-3. **Follow the test pattern**:
-   ```java
-   @Test
-   void shouldDescribeWhatThisTests() throws Exception {
-       logger.info("\n=== Test Description ===\n");
-       var config = yamlLoader.loadFromFile("src/test/java/{package}/{FileName}.yaml");
-       assertNotNull(config, "Configuration should load successfully");
-       var engine = RulesEngine.fromYamlConfig(config);
-       // Additional assertions or execution as needed
-   }
-   ```
-
-4. **Use consistent naming**:
-   - Test method names: `should...` describing expected behavior
-   - Variable names: `config`, `engine`, following established conventions
-   - Log messages: Consistent formatting with existing tests
-
-5. **Match existing style**: Look at 5-10 working examples in the module to understand:
-   - How tests are structured
-   - What assertions are used
-   - How configurations are loaded
-   - When execution vs configuration-only is appropriate
-
-**Don't improvise** - the module has 100+ working examples. Use them as templates to maintain consistency and ensure your new tests integrate seamlessly with the existing test suite.
+| Anti-Pattern | Problem |
+|--------------|---------|
+| Module-root config folders (`configs/`) | Separates configuration from the code that uses it |
+| Shared configuration files | Creates hidden dependencies between tests |
+| YAML without Java test | Untested configuration, unclear purpose |
 
 ### Enforcement
 
 This pattern is **mandatory** for all test configurations in apex-data-sync:
 
-- ✅ All YAML files in `src/test/java/` must have matching Java test classes
-- ✅ No standalone configuration folders at module root (e.g., `configs/`, `examples/`)
-- ✅ YAML and Java files must share the same base name
-- ✅ Both files must reside in the same directory
+- All YAML files in `src/test/java/` must have matching Java test classes
+- No standalone configuration folders at module root
+- YAML and Java files must share the same base name
+- Both files must reside in the same directory
 
 **Code Review Checklist**:
 - [ ] Every new YAML file has a matching Java test class
@@ -1710,61 +1381,205 @@ This pattern is **mandatory** for all test configurations in apex-data-sync:
 - [ ] Test successfully loads and validates the configuration
 - [ ] No orphaned YAML files remain in the changeset
 
+### Adoption Metrics
+
+- **Total co-located pairs**: 100+ in apex-data-sync module
+- **Adoption rate**: 100% of YAML configurations since v2.1
+- **Pattern violations**: 0 (enforced through code review)
+
 ---
 
-## PRIORITY IMPLEMENTATION PLAN
+## Console Logging for Tests
 
-### Phase 1: Critical Coverage (Week 1-2)
-**Goal**: Close most critical gaps for production readiness (🔴 CRITICAL + 🔴 HIGH)
+### Quick Reference
 
-1. **JSON Serialization** (5 tests)
-   - `JsonSerializationTest` - basic serialization
-   - `JsonDeserializationTest` - round-trip testing
-   - `JsonSchemaValidationTest` - schema compliance
-   - `JsonStructureTest` - verify JSON structure
-   - `EdgeCaseHandlingTest` - nulls, empty diffs
+To run tests with DEBUG logging visible in the console:
 
-2. **Markdown Generation** (4 tests)
-   - `MarkdownGenerationTest` - basic markdown output
-   - `TableFormattingTest` - table structure validation
-   - `EmojiHeaderTest` - emoji rendering
-   - `MultiTableMarkdownTest` - multi-table reports
+```bash
+# Step 1: Set logging level to DEBUG in src/main/resources/logback.xml
+# Change: <logger name="dev.mars.apex" level="INFO"/>
+# To:     <logger name="dev.mars.apex" level="DEBUG"/>
 
-3. **Type Compatibility** (8 tests)
-   - `TypeCompatibilityTest` - basic type matching
-   - `BreakingChangeDetectionTest` - breaking change rules
-   - `TypeNarrowingTest` - VARCHAR(200) → VARCHAR(100)
-   - `TypeWideningTest` - VARCHAR(100) → VARCHAR(200)
-   - `NullableConversionTest` - NULL ↔ NOT NULL
-   - `PrecisionScaleTest` - DECIMAL precision changes
-   - `PrimaryKeyChangeTest` - PK modifications
-   - `CustomTypeMappingTest` - user-defined type maps
+# Step 2: Run tests with console output (overrides parent pom redirect setting)
+mvn test -Dtest=YourTestClass -Dsurefire.useFile=false
+```
 
-4. **Report Path Handling** (5 tests)
-   - `ReportPathResolutionTest` - all path types
-   - Directory creation, normalization, overwrites
+### Configuration Details
 
-**Total Phase 1**: 22 new test classes
+#### 1. Logback Configuration
+File: `src/main/resources/logback.xml`
+
+```xml
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Set to DEBUG for detailed schema reader logs -->
+    <logger name="dev.mars.apex" level="DEBUG"/>
+    
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>
+```
+
+#### 2. Maven Surefire Override
+The parent pom.xml has `redirectTestOutputToFile=true` by default. Override with:
+
+```bash
+-Dsurefire.useFile=false
+```
+
+### Examples
+
+```bash
+# Run all database schema tests with DEBUG logs to console
+mvn test -Dtest=ReadSchemaDatabasePipelineStageTest -Dsurefire.useFile=false
+
+# Run all CSV schema tests with DEBUG logs to console
+mvn test -Dtest=ReadSchemaCsvPipelineStageTest -Dsurefire.useFile=false
+
+# Run both test classes
+mvn test '-Dtest=ReadSchemaDatabasePipelineStageTest,ReadSchemaCsvPipelineStageTest' -Dsurefire.useFile=false
+
+# Run specific test method with DEBUG logs
+mvn test -Dtest=ReadSchemaDatabasePipelineStageTest#shouldReadSchemaFromMultipleTables -Dsurefire.useFile=false
+```
+
+### Debug Log Prefixes
+
+The schema reader uses structured logging prefixes:
+- `[SchemaReader]` - General schema reading operations
+- `[SchemaReader.DB]` - Database-specific schema operations
+- `[SchemaReader.CSV]` - CSV-specific schema operations  
+- `[Pipeline.ReadSchema]` - Pipeline execution for read-schema steps
+- `[Pipeline.Execute]` - General pipeline execution
+- `[Pipeline.Validation]` - Pipeline validation steps
+
+### Viewing Logs in Files (Alternative)
+
+If you prefer file-based logging (default):
+
+```bash
+# Run tests normally (output goes to file)
+mvn test -Dtest=ReadSchemaDatabasePipelineStageTest
+
+# View the output
+cat target/surefire-reports/dev.mars.apex.sync.ReadSchemaDatabasePipelineStageTest-output.txt
+
+# Filter for specific logs (PowerShell)
+Get-Content target/surefire-reports/*.txt | Select-String -Pattern "\[SchemaReader"
+```
+
+### Report Output Configuration
+
+Schema analysis reports can be generated automatically during test execution:
+
+```yaml
+parameters:
+  # Option 1: Filename only - saved to default 'reports/' directory
+  report-output: "schema-report.html"  # → reports/schema-report.html
+  
+  # Option 2: Relative path - creates directories as needed
+  report-output: "target/reports/analysis.html"  # → target/reports/analysis.html
+  
+  # Option 3: Full path with subdirectories
+  report-output: "output/database-analysis/schema.html"  # → output/database-analysis/schema.html
+```
+
+**Automatic Behavior**:
+- If only a filename is provided, the report is saved to the `reports/` directory
+- Parent directories are automatically created if they don't exist
+
+---
+
+## Summary by Priority
+
+### 🔴 CRITICAL (Immediate Action Required)
+
+**Missing Tests for Delivered Features**:
+1. JSON Schema Validation (2 tests)
+2. Markdown Pipeline Integration (1 test)
+
+**Total**: 3 tests remaining
+
+---
+
+### 🔴 HIGH (Within 2 Weeks)
+
+**Core Function Gaps**:
+1. Type Compatibility (3 tests)
+2. Breaking Change Detection (2 tests)
+3. Type Narrowing/Widening (2 tests)
+4. Nullable Conversion (1 test)
+5. Primary Key Changes (1 test)
+6. Cross-Platform DB Support (3 tests)
+
+**Total**: 12 tests
+
+---
+
+### 🟡 MEDIUM (Within 4 Weeks)
+
+**Robustness & Edge Cases**:
+1. CSV Edge Cases (5 tests)
+2. Multi-Table Comparison (2 tests)
+3. Report Path Resolution (1 test)
+4. Data Sync Robustness (4 tests)
+5. Pipeline Error Handling (3 tests)
+6. Database Connection Errors (1 test)
+
+**Total**: 16 tests
+
+---
+
+### 🟢 LOW (As Time Permits)
+
+**Nice-to-Have Coverage**:
+1. HTML Report Tests (2 tests)
+2. Multi-Format Reports (1 test)
+3. Multi-Table Enumeration (2 tests)
+4. Pipeline Context (1 test)
+5. Query Execution (1 test)
+
+**Total**: 7 tests
+
+---
+
+## Priority Implementation Plan
+
+### Phase 1: Critical Coverage (Week 1-2) MOSTLY COMPLETE
+**Goal**: Close most critical gaps for production readiness
+
+1. **JSON Serialization** (8 tests) COMPLETE
+2. **Markdown Generation** (9 tests) COMPLETE
+3. **Type Compatibility** (8 tests) - IN PROGRESS
+4. **Report Path Handling** (5 tests) - IN PROGRESS
+
+**Total Phase 1**: 22 tests (17 complete, 5 remaining)
 
 ### Phase 2: Enhanced Coverage (Week 3-4)
 **Goal**: Comprehensive platform and edge case coverage
 
 1. **Cross-Platform Tests** (4 tests)
-   - `SqlServerSchemaReadingTest` - SQL Server integration
-   - `MySqlSchemaReadingTest` - MySQL integration
-   - `OracleSchemaReadingTest` - Oracle integration (if available)
-   - `CrossPlatformTypeMappingTest` - platform-specific mappings
+   - `SqlServerSchemaReadingTest`
+   - `MySqlSchemaReadingTest`
+   - `OracleSchemaReadingTest`
+   - `CrossPlatformTypeMappingTest`
 
 2. **CSV Edge Cases** (4 tests)
-   - `CsvSchemaUnicodeTest` - UTF-8, UTF-16 handling
-   - `CsvSchemaMalformedTest` - missing headers, irregular rows
-   - `CsvSchemaEdgeCasesTest` - empty files, single column
-   - `CsvSchemaLargeFileTest` - 1M+ rows (performance)
+   - `CsvSchemaUnicodeTest`
+   - `CsvSchemaMalformedTest`
+   - `CsvSchemaEdgeCasesTest`
+   - `CsvSchemaLargeFileTest`
 
 3. **Scenario-Based Tests** (3 tests)
-   - `BackwardCompatibilityTest` - additive-only changes
-   - `AdditiveChangesTest` - new nullable columns
-   - `DestructiveChangesTest` - column removals, type narrowing
+   - `BackwardCompatibilityTest`
+   - `AdditiveChangesTest`
+   - `DestructiveChangesTest`
 
 **Total Phase 2**: 11 new test classes
 
@@ -1772,53 +1587,118 @@ This pattern is **mandatory** for all test configurations in apex-data-sync:
 **Goal**: Production-grade reliability
 
 1. **Error Handling** (5 tests)
-   - `InvalidConfigurationTest` - malformed YAML
-   - `MissingDataSourceTest` - missing refs
-   - `NetworkFailureTest` - DB connection failures
-   - `TimeoutHandlingTest` - long-running queries
-   - `PartialExecutionRecoveryTest` - resume from failure
+   - `InvalidConfigurationTest`
+   - `MissingDataSourceTest`
+   - `NetworkFailureTest`
+   - `TimeoutHandlingTest`
+   - `PartialExecutionRecoveryTest`
 
 2. **Performance Tests** (6 tests)
-   - `LargeSchemaComparisonTest` - 100+ columns
-   - `MultiTablePerformanceTest` - 50+ tables
-   - `ConcurrentPipelineTest` - parallel execution
-   - `MemoryLeakDetectionTest` - heap profiling
-   - `ReportGenerationBenchmarkTest` - report speed
-   - `LargeDatasetSyncTest` - 1M+ rows sync
+   - `LargeSchemaComparisonTest`
+   - `MultiTablePerformanceTest`
+   - `ConcurrentPipelineTest`
+   - `MemoryLeakDetectionTest`
+   - `ReportGenerationBenchmarkTest`
+   - `LargeDatasetSyncTest`
 
 3. **Synchronization Tests** (4 tests)
-   - `UpsertConflictResolutionTest` - PK conflicts
-   - `BatchProcessingTest` - batch size variations
-   - `TransactionBoundaryTest` - rollback scenarios
-   - `PartialSyncRecoveryTest` - resume from failure
+   - `UpsertConflictResolutionTest`
+   - `BatchProcessingTest`
+   - `TransactionBoundaryTest`
+   - `PartialSyncRecoveryTest`
 
 **Total Phase 3**: 15 new test classes
 
 ---
 
-## TEST COUNT SUMMARY
+## Test Count Summary
 
 | Category | Current | Phase 1 | Phase 2 | Phase 3 | **Total** |
 |----------|---------|---------|---------|---------|-----------|
-| **Unit Tests** | 0 | 22 | 0 | 0 | **22** |
-| **Integration Tests** | 15 | 0 | 11 | 0 | **26** |
-| **Pipeline Tests** | 4 | 0 | 0 | 5 | **9** |
+| **Unit Tests** | 17 | 5 | 0 | 0 | **22** |
+| **Integration Tests** | 11 | 0 | 11 | 0 | **22** |
+| **Pipeline Tests** | 5 | 0 | 0 | 5 | **10** |
 | **Performance Tests** | 0 | 0 | 0 | 6 | **6** |
 | **Sync Tests** | 0 | 0 | 0 | 4 | **4** |
+| **Validation Tests** | 6 | 0 | 0 | 0 | **6** |
 | **Support Classes** | 4 | 0 | 0 | 4 | **8** |
-| **TOTAL** | **19** | **22** | **11** | **19** | **71** |
+| **TOTAL** | **39** | **5** | **11** | **19** | **71** |
 
-**Growth**: From 19 tests → 71 tests (274% increase)
+**Growth**: From 39 tests → 71 tests (82% increase from current state)
 
 **Estimated Effort**:
-- Phase 1: 40 hours (2 weeks)
+- Phase 1 Remaining: 8 hours (0.5 weeks)
 - Phase 2: 24 hours (1.5 weeks)
 - Phase 3: 40 hours (2 weeks)
-- **Total**: ~104 hours (5.5 weeks for 1 developer)
+- **Total Remaining**: ~72 hours (4 weeks for 1 developer)
+
+---
+
+## Migration Strategy
+
+### Step 1: Create New Directory Structure
+```bash
+# Create new directories
+mkdir -p src/test/java/dev/mars/apex/sync/unit/{comparison,serialization,reporting/markdown,util}
+mkdir -p src/test/java/dev/mars/apex/sync/integration/{schema/database,schema/csv,comparison/platforms,comparison/scenarios,reporting,synchronization}
+mkdir -p src/test/java/dev/mars/apex/sync/pipeline/{workflows,validation,error_handling}
+mkdir -p src/test/java/dev/mars/apex/sync/performance
+mkdir -p src/test/java/dev/mars/apex/sync/fixtures/{schemas,csv,json,yaml}
+mkdir -p src/test/java/dev/mars/apex/sync/support
+```
+
+### Step 2: Move Existing Tests (Preserve Git History)
+```bash
+# Schema tests
+git mv src/test/java/dev/mars/apex/sync/schema/* src/test/java/dev/mars/apex/sync/integration/schema/database/
+
+# Validation tests
+git mv src/test/java/dev/mars/apex/sync/validation/* src/test/java/dev/mars/apex/sync/integration/comparison/scenarios/
+
+# Pipeline tests
+git mv src/test/java/dev/mars/apex/sync/pipeline/* src/test/java/dev/mars/apex/sync/pipeline/workflows/
+
+# Support classes
+git mv src/test/java/dev/mars/apex/sync/*.java src/test/java/dev/mars/apex/sync/support/
+```
+
+### Step 3: Update Package Declarations
+```java
+// Before
+package dev.mars.apex.sync.schema;
+
+// After
+package dev.mars.apex.sync.integration.schema.database;
+```
+
+---
+
+## Success Criteria
+
+### Phase 1 Completion (Week 2)
+- All JSON serialization tests passing
+- Markdown generation tests passing
+- ⏳ Type compatibility tests comprehensive (95%+ coverage)
+- ⏳ Report path handling robust
+- Zero regressions in existing tests
+
+### Phase 2 Completion (Week 4)
+- SQL Server, MySQL integration tests passing
+- CSV edge cases handled
+- Scenario-based tests comprehensive
+- All existing tests migrated to new structure
+- 90%+ integration test coverage
+
+### Phase 3 Completion (Week 6)
+- Error handling tests comprehensive
+- Performance benchmarks established
+- Synchronization tests robust
+- 95%+ overall test coverage
+- CI/CD pipeline executing all tests successfully
 
 ---
 
 **Document Version**: 2.1  
-**Last Updated**: January 20, 2026  
+**Last Updated**: January 21, 2026  
 **Author**: Mark Andrew Ray-Smith Cityline Ltd  
 **Status**: Consolidated - Ready for Implementation

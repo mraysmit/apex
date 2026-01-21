@@ -89,11 +89,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * </pre>
  *
  * CRITICAL VALIDATION CHECKLIST:
- * ✅ Database enumeration - Automatically discover all tables in schema
- * ✅ Multiple table schemas - Read schema for each discovered table
- * ✅ Map structure validation - stepData should be Map<String, SchemaMetadata>
- * ✅ Column count verification - Each table has expected number of columns
- * ✅ HTML report generation - Schema enumeration report with all tables
+ * Database enumeration - Automatically discover all tables in schema
+ * Multiple table schemas - Read schema for each discovered table
+ * Map structure validation - stepData should be Map<String, SchemaMetadata>
+ * Column count verification - Each table has expected number of columns
+ * HTML report generation - Schema enumeration report with all tables
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2.1.0

@@ -89,7 +89,7 @@ public class SimpleFailurePolicyReviewTest extends DemoTestBase {
         
         logger.info("✓ Flag-for-review policy flagged scenario for manual review");
         logger.info("✓ Review flags were set: {}", scenarioResult.getReviewFlags().size());
-        logger.info("✅ Flag-for-review failure policy test completed");
+        logger.info("Flag-for-review failure policy test completed");
     }
 
     @Test
@@ -114,6 +114,6 @@ public class SimpleFailurePolicyReviewTest extends DemoTestBase {
         
         logger.info("✓ Review flags set despite successful subsequent stages");
         logger.info("✓ All stages executed: {}", scenarioResult.getStageResults().size());
-        logger.info("✅ Mixed results review test completed");
+        logger.info("Mixed results review test completed");
     }
 }

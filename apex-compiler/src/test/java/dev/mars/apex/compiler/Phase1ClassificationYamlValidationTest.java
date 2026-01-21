@@ -61,10 +61,10 @@ class Phase1ClassificationYamlValidationTest {
                 
                 if (result.isValid()) {
                     validCount++;
-                    System.out.println("✅ VALID - " + yamlFile.getFileName());
+                    System.out.println("VALID - " + yamlFile.getFileName());
                 } else {
                     invalidFiles.add(filePath);
-                    System.out.println("❌ INVALID - " + yamlFile.getFileName());
+                    System.out.println("INVALID - " + yamlFile.getFileName());
                     System.out.println("   Errors:");
                     result.getErrors().forEach(error ->
                         System.out.println("     • " + error));
@@ -96,7 +96,7 @@ class Phase1ClassificationYamlValidationTest {
         System.out.println("=".repeat(60));
         
         if (!invalidFiles.isEmpty()) {
-            System.out.println("\n❌ INVALID FILES:");
+            System.out.println("\nINVALID FILES:");
             invalidFiles.forEach(file -> System.out.println("  • " + file));
         }
         

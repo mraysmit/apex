@@ -108,21 +108,75 @@ public class SchemaDiffReportBuilder {
         totalColumns.setTarget(targetTotal);
         summary.setTotalColumns(totalColumns);
         
+        // Build statistics from the comparison result
+        ComparisonSummary.Statistics statistics = new ComparisonSummary.Statistics();
+        statistics.setMatching(result.getMatchingColumns().size());
+        statistics.setAdded(result.getAddedColumns().size());
+        statistics.setRemoved(result.getRemovedColumns().size());
+        statistics.setChanged(result.getChangedColumns().size());
+        statistics.setBreaking(result.getBreakingChanges().size());
+        summary.setStatistics(statistics);
+        
+        summary.setCompatible(result.isCompatible());
+        summary.setMigrationRisk(result.isCompatible() ? "LOW" : "HIGH");
+        
         return summary;
     }
 
     private ColumnComparison buildColumnComparison(SchemaComparisonResult result) {
         ColumnComparison comparison = new ColumnComparison();
         
-        // For now, create diffs for all columns in source
-        List<ColumnDiff> allDiffs = buildColumnDiffs(result);
-        
-        // Categorize diffs
-        for (ColumnDiff diff : allDiffs) {
-            if ("MATCHED".equals(diff.getStatus())) {
+        // Process source columns to find matching and removed columns
+        for (SchemaMetadata.ColumnDefinition sourceCol : result.getSourceSchema().getColumns()) {
+            ColumnDiff.ColumnInfo sourceInfo = buildColumnInfo(sourceCol);
+            
+            // Try to find matching column in target
+            SchemaMetadata.ColumnDefinition targetCol = findColumnByName(
+                result.getTargetSchema(),
+                sourceCol.getName()
+            );
+            
+            ColumnDiff.ColumnInfo targetInfo = (targetCol != null) ? buildColumnInfo(targetCol) : null;
+            
+            String status = (targetCol != null) ? "MATCHED" : "MISSING_IN_TARGET";
+            List<ColumnDiff.PropertyDifference> differences = new ArrayList<>();
+            
+            ColumnDiff diff = new ColumnDiff(
+                sourceCol.getName(),
+                status,
+                sourceInfo,
+                targetInfo,
+                differences
+            );
+            
+            if ("MATCHED".equals(status)) {
                 comparison.getMatching().add(diff);
-            } else if ("MISSING_IN_TARGET".equals(diff.getStatus())) {
+            } else {
                 comparison.getRemoved().add(diff);
+            }
+        }
+        
+        // Process target columns to find added columns (exist in target but not in source)
+        for (SchemaMetadata.ColumnDefinition targetCol : result.getTargetSchema().getColumns()) {
+            // Check if this column exists in source
+            SchemaMetadata.ColumnDefinition sourceCol = findColumnByName(
+                result.getSourceSchema(),
+                targetCol.getName()
+            );
+            
+            // If not found in source, it's an added column
+            if (sourceCol == null) {
+                ColumnDiff.ColumnInfo targetInfo = buildColumnInfo(targetCol);
+                
+                ColumnDiff diff = new ColumnDiff(
+                    targetCol.getName(),
+                    "ADDED",
+                    null,  // no source info for added columns
+                    targetInfo,
+                    new ArrayList<>()
+                );
+                
+                comparison.getAdded().add(diff);
             }
         }
         

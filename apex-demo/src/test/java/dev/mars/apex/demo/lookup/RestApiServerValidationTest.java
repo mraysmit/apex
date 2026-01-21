@@ -57,7 +57,7 @@ class RestApiServerValidationTest {
         testServer.start();
         baseUrl = testServer.getBaseUrl();
 
-        logger.info("✅ REST API server validation test suite setup completed successfully");
+        logger.info("REST API server validation test suite setup completed successfully");
         logger.info("  Using RestApiTestableServer at: {}", baseUrl);
     }
 
@@ -79,7 +79,7 @@ class RestApiServerValidationTest {
         org.junit.jupiter.api.Assertions.assertNotNull(baseUrl, "Base URL should not be null");
         org.junit.jupiter.api.Assertions.assertTrue(baseUrl.startsWith("http://localhost:"), "Base URL should be localhost");
 
-        logger.info("✅ Server infrastructure validation completed successfully");
+        logger.info("Server infrastructure validation completed successfully");
     }
 
     @Test
@@ -107,8 +107,8 @@ class RestApiServerValidationTest {
         org.junit.jupiter.api.Assertions.assertTrue(response.body().contains("US Dollar"), "Response should contain currency name");
         org.junit.jupiter.api.Assertions.assertTrue(response.body().contains("rate"), "Response should contain rate");
 
-        logger.info("📊 USD Response: {}", response.body());
-        logger.info("✅ Currency endpoint validation completed successfully");
+        logger.info("USD Response: {}", response.body());
+        logger.info("Currency endpoint validation completed successfully");
     }
 
     @Test
@@ -137,8 +137,8 @@ class RestApiServerValidationTest {
         org.junit.jupiter.api.Assertions.assertTrue(response.body().contains("convertedAmount"), "Response should contain convertedAmount");
         org.junit.jupiter.api.Assertions.assertTrue(response.body().contains("exchangeRate"), "Response should contain exchangeRate");
 
-        logger.info("📊 Conversion Response: {}", response.body());
-        logger.info("✅ Currency conversion endpoint validation completed successfully");
+        logger.info("Conversion Response: {}", response.body());
+        logger.info("Currency conversion endpoint validation completed successfully");
     }
 
     @Test
@@ -167,7 +167,7 @@ class RestApiServerValidationTest {
         org.junit.jupiter.api.Assertions.assertTrue(response.body().contains("customerType"), "Response should contain customer type");
         org.junit.jupiter.api.Assertions.assertTrue(response.body().contains("creditRating"), "Response should contain credit rating");
 
-        logger.info("📊 Customer Response: {}", response.body());
+        logger.info("Customer Response: {}", response.body());
 
         // Test all customers endpoint
         String allCustomersUrl = baseUrl + "/api/customers";
@@ -185,8 +185,8 @@ class RestApiServerValidationTest {
         org.junit.jupiter.api.Assertions.assertTrue(allCustomersResponse.body().contains("customers"), "Response should contain customers array");
         org.junit.jupiter.api.Assertions.assertTrue(allCustomersResponse.body().contains("totalCount"), "Response should contain total count");
 
-        logger.info("📊 All Customers Response: {}", allCustomersResponse.body());
-        logger.info("✅ Customer endpoint validation completed successfully");
+        logger.info("All Customers Response: {}", allCustomersResponse.body());
+        logger.info("Customer endpoint validation completed successfully");
     }
 
     @Test
@@ -215,8 +215,8 @@ class RestApiServerValidationTest {
         org.junit.jupiter.api.Assertions.assertTrue(response.body().contains("timestamp"), "Response should contain timestamp");
         org.junit.jupiter.api.Assertions.assertTrue(response.body().contains("service"), "Response should contain service name");
 
-        logger.info("📊 Health Check Response: {}", response.body());
-        logger.info("✅ Health check endpoint validation completed successfully");
+        logger.info("Health Check Response: {}", response.body());
+        logger.info("Health check endpoint validation completed successfully");
     }
 
     @Test
@@ -243,7 +243,7 @@ class RestApiServerValidationTest {
         org.junit.jupiter.api.Assertions.assertTrue(response.body().contains("INVALID"), "Response should contain requested currency code");
         org.junit.jupiter.api.Assertions.assertTrue(response.body().contains("Unknown Currency"), "Response should contain unknown currency name");
 
-        logger.info("📊 Invalid Currency Response: {}", response.body());
+        logger.info("Invalid Currency Response: {}", response.body());
 
         // Test invalid customer endpoint
         String invalidCustomerUrl = baseUrl + "/api/customers/INVALID";
@@ -261,8 +261,8 @@ class RestApiServerValidationTest {
         org.junit.jupiter.api.Assertions.assertTrue(invalidCustomerResponse.body().contains("INVALID"), "Response should contain requested customer ID");
         org.junit.jupiter.api.Assertions.assertTrue(invalidCustomerResponse.body().contains("Unknown Customer"), "Response should contain unknown customer name");
 
-        logger.info("📊 Invalid Customer Response: {}", invalidCustomerResponse.body());
-        logger.info("✅ Error handling validation completed successfully");
+        logger.info("Invalid Customer Response: {}", invalidCustomerResponse.body());
+        logger.info("Error handling validation completed successfully");
     }
 
     @Test
@@ -295,7 +295,7 @@ class RestApiServerValidationTest {
         long totalTime = endTime - startTime;
         double averageTime = (double) totalTime / requestCount;
 
-        logger.info("📊 Performance Metrics:");
+        logger.info("Performance Metrics:");
         logger.info("  Total Requests: {}", requestCount);
         logger.info("  Total Time: {} ms", totalTime);
         logger.info("  Average Time per Request: {:.2f} ms", averageTime);
@@ -303,6 +303,6 @@ class RestApiServerValidationTest {
         // Validate performance (should be reasonable for test server)
         org.junit.jupiter.api.Assertions.assertTrue(averageTime < 1000, "Average response time should be less than 1 second");
 
-        logger.info("✅ Performance and load validation completed successfully");
+        logger.info("Performance and load validation completed successfully");
     }
 }

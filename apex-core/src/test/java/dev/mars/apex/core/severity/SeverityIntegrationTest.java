@@ -135,7 +135,7 @@ public class SeverityIntegrationTest {
         assertEquals(SeverityConstants.INFO, result.getSeverity(), "Result should have INFO severity");
         assertFalse(result.hasFailures(), "Should have no failures");
         
-        logger.info("✅ Complete workflow with INFO severity completed successfully");
+        logger.info("Complete workflow with INFO severity completed successfully");
     }
 
     @Test
@@ -233,7 +233,7 @@ public class SeverityIntegrationTest {
         // For now, just verify that processing succeeds
         assertFalse(result.hasFailures(), "Should have no failures");
         
-        logger.info("✅ Complete workflow with mixed severities completed successfully");
+        logger.info("Complete workflow with mixed severities completed successfully");
     }
 
     @Test
@@ -280,7 +280,7 @@ public class SeverityIntegrationTest {
         assertTrue(exception.getMessage().contains("INVALID_SEVERITY"),
                    "Exception message should mention the invalid severity value");
         
-        logger.info("✅ Invalid severity rejection test completed successfully");
+        logger.info("Invalid severity rejection test completed successfully");
     }
 
     @Test
@@ -340,6 +340,6 @@ public class SeverityIntegrationTest {
         assertEquals(SeverityConstants.INFO, result.getSeverity(), "Result should have default INFO severity");
         assertFalse(result.hasFailures(), "Should have no failures");
         
-        logger.info("✅ Default severity handling test completed successfully");
+        logger.info("Default severity handling test completed successfully");
     }
 }

@@ -185,7 +185,7 @@ This creates a **hierarchy of specificity** where:
 
 Understanding what categories are designed for is crucial for proper implementation:
 
-### ✅ Categories ARE Designed For (Implementation Layer)
+### Categories ARE Designed For (Implementation Layer)
 
 **Rules and Rule Groups**:
 - Individual business logic units that need governance
@@ -198,7 +198,7 @@ Understanding what categories are designed for is crucial for proper implementat
 - Collections of enrichments that execute together
 - Technical components that need organizational structure
 
-### ❌ Categories are NOT Designed For (Orchestration Layer)
+### Categories are NOT Designed For (Orchestration Layer)
 
 **Scenarios and Scenario Registry**:
 - Business process workflows (use business-domain metadata instead)
@@ -695,17 +695,17 @@ categories:
 **Anti-Pattern** (Technical Organisation):
 ```yaml
 categories:
-  - name: "database-rules"      # ❌ Technical focus
-  - name: "api-validation"      # ❌ Technical focus
-  - name: "batch-processing"    # ❌ Technical focus
+  - name: "database-rules"      # Technical focus
+  - name: "api-validation"      # Technical focus
+  - name: "batch-processing"    # Technical focus
 ```
 
 **Best Practice** (Business Organisation):
 ```yaml
 categories:
-  - name: "customer-onboarding"    # ✅ Business focus
-  - name: "trade-settlement"       # ✅ Business focus
-  - name: "regulatory-reporting"   # ✅ Business focus
+  - name: "customer-onboarding"    # Business focus
+  - name: "trade-settlement"       # Business focus
+  - name: "regulatory-reporting"   # Business focus
 ```
 
 ### Pattern 2: Hierarchical Governance
@@ -979,14 +979,14 @@ enrichment-groups:
 
 **Use Business Language, Not Technical Terms**:
 ```yaml
-# ✅ Good - Business-focused names
+# Good - Business-focused names
 categories:
   - name: "customer-onboarding"
   - name: "trade-settlement"
   - name: "regulatory-reporting"
   - name: "risk-assessment"
 
-# ❌ Avoid - Technical implementation details
+# Avoid - Technical implementation details
 categories:
   - name: "database-validation"
   - name: "api-rules"
@@ -1128,7 +1128,7 @@ categories:
 
 ## Complete Inheritance Reference
 
-### ✅ **Fully Inheritable Properties**
+### **Fully Inheritable Properties**
 
 These properties can be defined at the category level and will be inherited by all rules and rule groups in that category. Both rules and rule groups can override any of these by specifying their own values.
 
@@ -1156,7 +1156,7 @@ These properties control how rules within a category are executed. They are defi
 
 **Behavior**: These properties define the execution strategy for the entire category and cannot be overridden by individual rules.
 
-### ❌ **Non-Inheritable Properties** (Rule-Specific Only)
+### **Non-Inheritable Properties** (Rule-Specific Only)
 
 These properties are always rule-specific and cannot be inherited from categories. Each rule must define its own values.
 
@@ -1425,18 +1425,18 @@ rules:
 
 ## Implementation Status
 
-### ✅ **Fully Documented** - Business and Technical Guide Complete
+### **Fully Documented** - Business and Technical Guide Complete
 
 This comprehensive guide provides the business rationale, design philosophy, and implementation patterns for APEX Rule Categories.
 
 ### 🔄 **Partially Implemented** - Core Infrastructure Complete, Examples and Testing In Progress
 
 **What's Working**:
-- ✅ **YamlCategory Model** - Complete with all documented properties
-- ✅ **Category Parsing** - YAML loader supports categories section
-- ✅ **Metadata Inheritance Logic** - Implemented in YamlRuleFactory.createRuleWithMetadata()
-- ✅ **Category Assignment** - Rules can reference categories by name
-- ✅ **Priority Ordering** - Categories support priority-based execution
+- **YamlCategory Model** - Complete with all documented properties
+- **Category Parsing** - YAML loader supports categories section
+- **Metadata Inheritance Logic** - Implemented in YamlRuleFactory.createRuleWithMetadata()
+- **Category Assignment** - Rules can reference categories by name
+- **Priority Ordering** - Categories support priority-based execution
 
 **What's In Progress**:
 - 🔄 **Working YAML Examples** - Creating comprehensive demo configurations
@@ -1455,10 +1455,10 @@ This comprehensive guide provides the business rationale, design philosophy, and
 2. **Fix Metadata Inheritance** - Ensure YamlRuleFactory properly inherits category metadata
 3. **Add Integration Tests** - End-to-end testing of category functionality
 
-### 📋 **Implementation Roadmap**
+### **Implementation Roadmap**
 
 **Phase 1: Foundation** (Current)
-- ✅ Core data models and parsing
+- Core data models and parsing
 - 🔄 Basic metadata inheritance
 - 🔄 Working examples and tests
 
@@ -1522,14 +1522,14 @@ APEX supports multiple document types, but categories have different levels of s
 
 | Document Type | Categories Support | Category Usage | Inheritance Support |
 |---------------|-------------------|----------------|-------------------|
-| `rule-config` | ✅ **Full Support** | Rules and rule groups can reference categories | ✅ Full metadata inheritance |
-| `enrichment` | ❌ **Not Supported** | Enrichments cannot reference categories | ❌ No inheritance |
-| `rule-groups` | ✅ **Full Support** | Rule groups can reference categories (within rule-config) | ✅ Full metadata inheritance |
-| `enrichment-groups` | ❌ **Not Supported** | Enrichment groups cannot reference categories | ❌ No inheritance |
-| `dataset` | ❌ **Not Supported** | Datasets cannot reference categories | ❌ No inheritance |
-| `scenario` | ❌ **Not Supported** | Scenarios cannot reference categories | ❌ No inheritance |
-| `external-data-config` | ❌ **Not Supported** | External configs cannot reference categories | ❌ No inheritance |
-| `pipeline-config` | ❌ **Not Supported** | Pipelines cannot reference categories | ❌ No inheritance |
+| `rule-config` | **Full Support** | Rules and rule groups can reference categories | Full metadata inheritance |
+| `enrichment` | **Not Supported** | Enrichments cannot reference categories | No inheritance |
+| `rule-groups` | **Full Support** | Rule groups can reference categories (within rule-config) | Full metadata inheritance |
+| `enrichment-groups` | **Not Supported** | Enrichment groups cannot reference categories | No inheritance |
+| `dataset` | **Not Supported** | Datasets cannot reference categories | No inheritance |
+| `scenario` | **Not Supported** | Scenarios cannot reference categories | No inheritance |
+| `external-data-config` | **Not Supported** | External configs cannot reference categories | No inheritance |
+| `pipeline-config` | **Not Supported** | Pipelines cannot reference categories | No inheritance |
 
 ### Why Categories Are Rule-Config Specific
 
@@ -1564,15 +1564,15 @@ categories:
 
 rules:
   - id: "customer-age-check"
-    category: "customer-validation"  # ✅ Supported
+    category: "customer-validation"  # Supported
     condition: "#age >= 18"
     message: "Customer must be 18 or older"
 
 enrichments:
   - id: "customer-enrichment"
     type: "lookup-enrichment"
-    # ❌ Cannot use: category: "customer-validation"
-    # ❌ Cannot inherit metadata from categories
+    # Cannot use: category: "customer-validation"
+    # Cannot inherit metadata from categories
     condition: "#customerId != null"
     lookup-config:
       lookup-key: "#customerId"
@@ -1598,15 +1598,15 @@ categories:
 
 rules:
   - id: "required-field-check"
-    category: "validation-rules"  # ✅ Rules can reference categories
+    category: "validation-rules"  # Rules can reference categories
     condition: "#name != null"
     message: "Name is required"
 
 rule-groups:
   - id: "validation-group"
     name: "Data Validation Group"
-    # ❌ Cannot use: category: "validation-rules"
-    # ❌ Cannot inherit metadata from categories
+    # Cannot use: category: "validation-rules"
+    # Cannot inherit metadata from categories
     operator: "AND"
     rule-ids:
       - "required-field-check"  # References rule that has category
@@ -1642,13 +1642,13 @@ metadata:
   id: "trade-enrichments"
   type: "enrichment"  # Different document type
 
-# ❌ Cannot define categories in enrichment documents
+# Cannot define categories in enrichment documents
 # categories:  # This would be invalid
 
 enrichments:
   - id: "trade-value-calculation"
     type: "calculation-enrichment"
-    # ❌ Cannot reference categories from other files
+    # Cannot reference categories from other files
     condition: "#quantity != null && #price != null"
     calculation-config:
       expression: "#quantity * #price"

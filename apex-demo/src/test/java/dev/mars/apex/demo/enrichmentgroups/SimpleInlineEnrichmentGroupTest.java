@@ -98,7 +98,7 @@ public class SimpleInlineEnrichmentGroupTest extends DemoTestBase {
             Map<String, Object> enrichedData = result.getEnrichedData();
             assertEquals("test", enrichedData.get("output1"), "First enrichment should succeed");
 
-            LOGGER.info("✅ RulesEngine enrichment group test passed");
+            LOGGER.info("RulesEngine enrichment group test passed");
 
         } catch (YamlConfigurationException e) {
             logError("Failed to load YAML configuration: " + e.getMessage());
@@ -163,7 +163,7 @@ public class SimpleInlineEnrichmentGroupTest extends DemoTestBase {
             assertEquals("test", enrichedData.get("output1"));
             assertEquals("test2", enrichedData.get("output2"));
 
-            LOGGER.info("✅ Composite enrichment group test completed");
+            LOGGER.info("Composite enrichment group test completed");
 
         } catch (YamlConfigurationException e) {
             logError("Failed to load YAML configuration: " + e.getMessage());
@@ -228,7 +228,7 @@ public class SimpleInlineEnrichmentGroupTest extends DemoTestBase {
             assertEquals("test", enrichedData.get("output1"));
             assertEquals("test2", enrichedData.get("output2"));
 
-            LOGGER.info("✅ Enrichment group registry test passed");
+            LOGGER.info("Enrichment group registry test passed");
 
         } catch (YamlConfigurationException e) {
             logError("Failed to load YAML configuration: " + e.getMessage());
@@ -293,9 +293,9 @@ public class SimpleInlineEnrichmentGroupTest extends DemoTestBase {
             assertEquals("test", enrichedData.get("output1"));
             assertEquals("test2", enrichedData.get("output2"));
 
-            LOGGER.info("✅ Full workflow test passed");
-            LOGGER.info("✅ SUCCESS: Inline enrichment-group-id references working correctly!");
-            LOGGER.info("📋 SUMMARY: 2 enrichments, 2 enrichment groups, 1 inline reference - All working!");
+            LOGGER.info("Full workflow test passed");
+            LOGGER.info("SUCCESS: Inline enrichment-group-id references working correctly!");
+            LOGGER.info("SUMMARY: 2 enrichments, 2 enrichment groups, 1 inline reference - All working!");
 
         } catch (YamlConfigurationException e) {
             logError("Failed to load YAML configuration: " + e.getMessage());

@@ -70,7 +70,7 @@ public class UpdateStageFxTransactionSimplifiedTest {
         logger.info("Setting up APEX services for FX transaction processing tests...");
         this.yamlLoader = new YamlConfigurationLoader();
 
-        logger.info("✅ APEX services initialized successfully");
+        logger.info("APEX services initialized successfully");
     }
 
     /**
@@ -116,7 +116,7 @@ public class UpdateStageFxTransactionSimplifiedTest {
             // Log comprehensive result details
             logRuleResultDetails("SWIFT Valid NDF Processing", result);
 
-            logger.info("✅ SWIFT valid NDF test passed");
+            logger.info("SWIFT valid NDF test passed");
 
         } catch (YamlConfigurationException e) {
             logger.error("X Failed to load or process configuration: {}", e.getMessage());
@@ -162,7 +162,7 @@ public class UpdateStageFxTransactionSimplifiedTest {
             assertEquals("0", enrichedDataN.get("PROCESSED_NDF"), 
                 "Should convert N flag to 0");
             
-            logger.info("✅ SWIFT Y/N flag conversion test passed");
+            logger.info("SWIFT Y/N flag conversion test passed");
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
             fail("Test failed: " + e.getMessage());
@@ -207,7 +207,7 @@ public class UpdateStageFxTransactionSimplifiedTest {
             assertEquals("0", enrichedDataFalse.get("PROCESSED_NDF"), 
                 "Should convert FALSE to 0");
             
-            logger.info("✅ REUTERS system processing test passed");
+            logger.info("REUTERS system processing test passed");
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
             fail("Test failed: " + e.getMessage());
@@ -244,7 +244,7 @@ public class UpdateStageFxTransactionSimplifiedTest {
             assertEquals("NEEDS_TRANSLATION", enrichedData.get("VALIDATION_STATUS"), 
                 "Should indicate translation needed");
             
-            logger.info("✅ Complex NDF translation test passed: {}", enrichedData);
+            logger.info("Complex NDF translation test passed: {}", enrichedData);
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
             fail("Test failed: " + e.getMessage());
@@ -283,7 +283,7 @@ public class UpdateStageFxTransactionSimplifiedTest {
             assertEquals("SYSTEM_ERROR", enrichedData.get("VALIDATION_STATUS"), 
                 "Should indicate system error");
             
-            logger.info("✅ Unsupported system test passed: {}", enrichedData);
+            logger.info("Unsupported system test passed: {}", enrichedData);
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
             fail("Test failed: " + e.getMessage());
@@ -315,7 +315,7 @@ public class UpdateStageFxTransactionSimplifiedTest {
             assertEquals(true, enrichedData.get("CROSS_REGION"),
                 "Should identify cross-region transaction (Asia vs Europe)");
             
-            logger.info("✅ Risk assessment test passed: {}", enrichedData);
+            logger.info("Risk assessment test passed: {}", enrichedData);
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
             fail("Test failed: " + e.getMessage());
@@ -337,7 +337,7 @@ public class UpdateStageFxTransactionSimplifiedTest {
         assertNotNull(config, "Configuration should be loaded");
         assertEquals("Update Stage FX Transaction - Simplified", config.getMetadata().getName());
 
-        logger.info("✅ Configuration loaded: {} enrichments",
+        logger.info("Configuration loaded: {} enrichments",
             config.getEnrichments() != null ? config.getEnrichments().size() : 0);
 
         return config;
@@ -356,7 +356,7 @@ public class UpdateStageFxTransactionSimplifiedTest {
         RulesEngine engine = new RulesEngine(rulesConfig);
 
         assertNotNull(engine, "RulesEngine should be created");
-        logger.info("✅ RulesEngine created with EnrichmentService");
+        logger.info("RulesEngine created with EnrichmentService");
 
         return engine;
     }

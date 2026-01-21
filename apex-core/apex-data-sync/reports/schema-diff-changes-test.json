@@ -1,7 +1,7 @@
 {
   "$schema" : "https://apex.mars.dev/schemas/schema-diff/v1.0.json",
   "metadata" : {
-    "generatedAt" : "2026-01-20T03:15:44.166807200Z",
+    "generatedAt" : "2026-01-21T10:44:57.422064900Z",
     "apexVersion" : "2.1.0",
     "reportVersion" : "1.0"
   },
@@ -32,7 +32,15 @@
       "source" : 3,
       "target" : 4
     },
-    "compatible" : false
+    "statistics" : {
+      "matching" : 3,
+      "added" : 1,
+      "removed" : 0,
+      "changed" : 0,
+      "breaking" : 0
+    },
+    "compatible" : true,
+    "migrationRisk" : "LOW"
   },
   "columns" : {
     "matching" : [ {
@@ -81,7 +89,17 @@
       "differences" : [ ],
       "breakingChange" : false
     } ],
-    "added" : [ ],
+    "added" : [ {
+      "columnName" : "phone",
+      "status" : "ADDED",
+      "target" : {
+        "dataType" : "VARCHAR",
+        "nullable" : true,
+        "primaryKey" : false
+      },
+      "differences" : [ ],
+      "breakingChange" : false
+    } ],
     "removed" : [ ],
     "changed" : [ ]
   },

@@ -125,7 +125,7 @@ public class EnrichmentRefsSequentialOrderTest {
         // Verify all rules passed (they depend on enrichments)
         assertTrue(result.isTriggered(), "Rules should trigger");
 
-        LOGGER.info("✅ Enrichment-Refs Placeholder Expansion Test PASSED");
+        LOGGER.info("Enrichment-Refs Placeholder Expansion Test PASSED");
         LOGGER.info("   Processing Order Verified:");
         LOGGER.info("   1. E1 (inline): enrich-counterparty-data ✓");
         LOGGER.info("   2. E2 (from ref): enrich-market-data ✓");
@@ -164,7 +164,7 @@ public class EnrichmentRefsSequentialOrderTest {
             .anyMatch(e -> "calculate-greeks".equals(e.getId()));
         assertTrue(hasGreeks, "Should have external enrichment: calculate-greeks");
 
-        LOGGER.info("✅ All enrichments loaded correctly from inline and external sources");
+        LOGGER.info("All enrichments loaded correctly from inline and external sources");
     }
 
     @Test
@@ -208,7 +208,7 @@ public class EnrichmentRefsSequentialOrderTest {
 
         LOGGER.info("✓ Test Case 2: Missing underlying - dependency chain correctly handled");
 
-        LOGGER.info("✅ Enrichment-Refs Execution Order with Dependencies Test PASSED");
+        LOGGER.info("Enrichment-Refs Execution Order with Dependencies Test PASSED");
     }
 }
 

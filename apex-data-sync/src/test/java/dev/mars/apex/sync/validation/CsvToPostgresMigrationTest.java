@@ -46,12 +46,12 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * <p><b>CRITICAL VALIDATION CHECKLIST:</b></p>
  * <ul>
- *   <li>✅ Extends SyncTestBase (provides APEX service setup/teardown)</li>
- *   <li>✅ Uses ColoredTestOutputExtension (via SyncTestBase)</li>
- *   <li>✅ Validates pipeline steps - 3 steps expected (read CSV, read DB, validate)</li>
- *   <li>✅ Verifies schema metadata extraction from both sources</li>
- *   <li>✅ Validates migration compatibility</li>
- *   <li>✅ Proper cleanup of test resources</li>
+ *   <li>Extends SyncTestBase (provides APEX service setup/teardown)</li>
+ *   <li>Uses ColoredTestOutputExtension (via SyncTestBase)</li>
+ *   <li>Validates pipeline steps - 3 steps expected (read CSV, read DB, validate)</li>
+ *   <li>Verifies schema metadata extraction from both sources</li>
+ *   <li>Validates migration compatibility</li>
+ *   <li>Proper cleanup of test resources</li>
  * </ul>
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd

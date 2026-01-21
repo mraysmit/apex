@@ -63,7 +63,7 @@ public class ExternalDataConfigDatabaseTest {
         // Initialize APEX services following established patterns
         yamlLoader = new YamlConfigurationLoader();
         
-        logger.info("✅ APEX services initialized for external data config testing");
+        logger.info("APEX services initialized for external data config testing");
     }
 
     @Test

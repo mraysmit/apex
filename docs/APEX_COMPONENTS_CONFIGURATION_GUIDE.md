@@ -60,13 +60,13 @@ A **component** is a special YAML file (type: `"component"`) that groups multipl
 
 ### When to Use Components
 
-✅ **Use components when you have:**
+**Use components when you have:**
 - Multiple related configuration files that are always used together
 - Common validation or enrichment logic used across scenarios
 - Complex processing pipelines that need better organization
 - Configurations that are reused in multiple scenarios
 
-❌ **Don't use components when:**
+**Don't use components when:**
 - You only have a single configuration file
 - Files are never reused or grouped logically
 - Simplicity is more important than reusability
@@ -288,12 +288,12 @@ enrichment-refs:
 
 ### Best Practices for Execution Order
 
-✅ **Use document order when:**
+**Use document order when:**
 - Files have a natural sequential relationship
 - Order is obvious from the file names
 - You want to keep the configuration simple
 
-✅ **Use explicit order when:**
+**Use explicit order when:**
 - Files from different sections need to interleave
 - Order is not obvious from file position
 - You need gaps for future insertions
@@ -387,9 +387,9 @@ Components can reference other components, creating a hierarchical structure. Th
 
 | Depth Level | Status | Warning |
 |-------------|--------|---------|
-| 1-2 | ✅ Normal | No warnings |
+| 1-2 | Normal | No warnings |
 | 3-5 | ⚠️ Warning | Log WARNING message |
-| 6+ | ❌ Error | CRITICAL ERROR - fails to load |
+| 6+ | Error | CRITICAL ERROR - fails to load |
 
 ### Creating Nested Components
 
@@ -432,7 +432,7 @@ rule-configurations:
 APEX automatically detects and prevents circular references:
 
 ```yaml
-# ❌ This will fail:
+# This will fail:
 # Component A references Component B
 # Component B references Component A
 ```
@@ -445,12 +445,12 @@ ERROR: Circular component reference detected:
 
 ### Best Practices for Nesting
 
-✅ **Do:**
+**Do:**
 - Keep nesting shallow (1-2 levels preferred)
 - Use nesting for logical composition
 - Create reusable base components
 
-❌ **Don't:**
+**Don't:**
 - Create deep nesting hierarchies (>3 levels)
 - Create circular references
 - Nest components just for organization
@@ -536,19 +536,19 @@ When a scenario executes a component stage:
 
 ### Naming Conventions
 
-✅ **Component Files:**
+**Component Files:**
 - Use descriptive names: `validation-component.yaml`, `enrichment-component.yaml`
 - Include domain or purpose: `otc-validation-component.yaml`
 - Use hyphens, not underscores: `trade-validation.yaml` not `trade_validation.yaml`
 
-✅ **Component IDs:**
+**Component IDs:**
 - Use lowercase with hyphens: `common-trade-validation`
 - Be descriptive: `comprehensive-otc-validation`
 - Avoid abbreviations unless very common: `otc` is OK, `cmprhnsv` is not
 
 ### Organization
 
-✅ **Directory Structure:**
+**Directory Structure:**
 ```
 project/
 ├── components/
@@ -569,12 +569,12 @@ project/
 
 ### Metadata Best Practices
 
-✅ **Always Include:**
+**Always Include:**
 - `id`, `name`, `type`, `version`, `description` - Required or strongly recommended
 - `owner` - Who maintains this component
 - `business-domain` - What business area it serves
 
-✅ **Consider Including:**
+**Consider Including:**
 - `tags` - For categorization and search
 - `criticality` - For monitoring and alerting
 - `sla-ms` - For performance tracking
@@ -582,24 +582,24 @@ project/
 
 ### Reusability Guidelines
 
-✅ **Create reusable components for:**
+**Create reusable components for:**
 - Common validation patterns used across scenarios
 - Standard enrichment workflows
 - Shared business logic
 
-✅ **Create scenario-specific components for:**
+**Create scenario-specific components for:**
 - Complex multi-file workflows unique to one scenario
 - Tightly coupled rules and enrichments
 - Temporary or experimental configurations
 
 ### Performance Considerations
 
-✅ **Optimize execution order:**
+**Optimize execution order:**
 - Put fast validations before slow ones (fail fast)
 - Group related operations together
 - Avoid unnecessary file loading
 
-✅ **Manage component size:**
+**Manage component size:**
 - Keep components focused (5-10 files max)
 - Break large components into smaller, composable pieces
 - Use nesting for logical grouping, not just size reduction
@@ -919,7 +919,7 @@ processing-stages:
 
 ### Step 4: Test Thoroughly
 
-✅ **Testing checklist:**
+**Testing checklist:**
 - [ ] Component loads successfully
 - [ ] All files execute in correct order
 - [ ] Failure policies work as expected
@@ -1024,11 +1024,11 @@ If migration causes issues:
 
 APEX Components provide a powerful way to organize, reuse, and maintain your APEX configurations. By following the patterns and best practices in this guide, you can:
 
-✅ Create clean, maintainable component structures  
-✅ Leverage reusability across scenarios  
-✅ Control execution order and failure handling  
-✅ Build complex processing pipelines with composition  
-✅ Migrate existing scenarios smoothly  
+Create clean, maintainable component structures  
+Leverage reusability across scenarios  
+Control execution order and failure handling  
+Build complex processing pipelines with composition  
+Migrate existing scenarios smoothly  
 
 For more information, see:
 - [APEX YAML Reference Guide](APEX_YAML_REFERENCE.md) - Complete YAML syntax reference

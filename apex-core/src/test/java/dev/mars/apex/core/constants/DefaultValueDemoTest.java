@@ -69,8 +69,8 @@ class DefaultValueDemoTest {
         assertTrue(config.getErrorRecovery().getEnabled());
         assertEquals("CONTINUE_WITH_DEFAULT", config.getErrorRecovery().getDefaultStrategy());
         
-        System.out.println("✅ Default Value Enhancement Demo - All tests passed!");
-        System.out.println("📋 Configuration loaded successfully:");
+        System.out.println("Default Value Enhancement Demo - All tests passed!");
+        System.out.println("Configuration loaded successfully:");
         System.out.println("   - Rules with default values: " + config.getRules().size());
         System.out.println("   - Calculations with default values: " + config.getEnrichments().size());
         System.out.println("   - Error recovery enabled: " + config.getErrorRecovery().getEnabled());
@@ -103,7 +103,7 @@ class DefaultValueDemoTest {
         assertEquals("simple-rule", rule.getId());
         assertNull(rule.getDefaultValue()); // Should be null when not specified
         
-        System.out.println("✅ Backward Compatibility Test - Passed!");
+        System.out.println("Backward Compatibility Test - Passed!");
         System.out.println("   - Rules without default-value work correctly");
     }
 }

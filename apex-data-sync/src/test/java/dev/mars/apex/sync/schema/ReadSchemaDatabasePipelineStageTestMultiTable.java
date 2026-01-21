@@ -45,10 +45,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * comprehensive schema documentation.
  *
  * CRITICAL VALIDATION CHECKLIST:
- * ✅ H2 database created with 5 tables (CUSTOMERS, ORDERS, PRODUCTS, INVENTORY, TRANSACTIONS)
- * ✅ All 5 table schemas read successfully
- * ✅ HTML report generated for CUSTOMERS table
- * ✅ Each table has correct column count
+ * H2 database created with 5 tables (CUSTOMERS, ORDERS, PRODUCTS, INVENTORY, TRANSACTIONS)
+ * All 5 table schemas read successfully
+ * HTML report generated for CUSTOMERS table
+ * Each table has correct column count
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2.1.0

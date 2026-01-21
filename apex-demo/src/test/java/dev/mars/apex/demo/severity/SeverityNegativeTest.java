@@ -72,7 +72,7 @@ public class SeverityNegativeTest {
 
         yamlLoader = new YamlConfigurationLoader();
 
-        logger.info("✅ APEX services initialized successfully");
+        logger.info("APEX services initialized successfully");
     }
 
     @Test
@@ -90,7 +90,7 @@ public class SeverityNegativeTest {
         assertEquals(10, config.getRules().size(), "Should have exactly 10 rules");
         assertEquals(6, config.getRuleGroups().size(), "Should have exactly 6 rule groups");
         
-        logger.info("✅ Configuration loaded: {} rules, {} rule groups", 
+        logger.info("Configuration loaded: {} rules, {} rule groups", 
             config.getRules().size(), config.getRuleGroups().size());
         
         // Create RulesEngine using static factory method
@@ -106,7 +106,7 @@ public class SeverityNegativeTest {
         // Test never triggering rules
         testNeverTriggeringRules(engine);
         
-        logger.info("✅ All error handling tests passed");
+        logger.info("All error handling tests passed");
     }
 
     private void testMalformedConditionHandling(RulesEngine engine) {
@@ -125,7 +125,7 @@ public class SeverityNegativeTest {
         assertFalse(result.isTriggered(), "Malformed condition rule should not trigger");
         assertEquals("ERROR", result.getSeverity(), "Malformed condition rule should preserve severity");
         
-        logger.info("✅ Malformed condition handling test passed - rule did not trigger");
+        logger.info("Malformed condition handling test passed - rule did not trigger");
     }
 
     private void testExceptionThrowingRuleHandling(RulesEngine engine) {
@@ -145,7 +145,7 @@ public class SeverityNegativeTest {
         assertFalse(result.isTriggered(), "Exception throwing rule should not trigger");
         assertEquals("WARNING", result.getSeverity(), "Exception throwing rule uses WARNING severity after error recovery");
         
-        logger.info("✅ Exception throwing rule handling test passed - rule did not trigger");
+        logger.info("Exception throwing rule handling test passed - rule did not trigger");
     }
 
     private void testNeverTriggeringRules(RulesEngine engine) {
@@ -163,7 +163,7 @@ public class SeverityNegativeTest {
         assertFalse(result.isTriggered(), "Never triggers rule should not trigger");
         assertEquals("ERROR", result.getSeverity(), "Never triggers rule preserves its ERROR severity when not triggered");
         
-        logger.info("✅ Never triggering rule test passed - rule correctly did not trigger");
+        logger.info("Never triggering rule test passed - rule correctly did not trigger");
     }
 
     @Test
@@ -186,7 +186,7 @@ public class SeverityNegativeTest {
         // Test dangerous operations handling
         testDangerousOperationsHandling(engine);
 
-        logger.info("✅ All edge case tests passed");
+        logger.info("All edge case tests passed");
     }
 
     private void testUnusualSeverityHandling(RulesEngine engine) {
@@ -204,7 +204,7 @@ public class SeverityNegativeTest {
         assertTrue(result.isTriggered(), "Unusual severity rule should trigger (condition: true)");
         assertEquals("Info", result.getSeverity(), "Unusual severity case should be preserved as-is");
 
-        logger.info("✅ Unusual severity handling test passed with severity: '{}'", result.getSeverity());
+        logger.info("Unusual severity handling test passed with severity: '{}'", result.getSeverity());
     }
 
     private void testNullConditionHandling(RulesEngine engine) {
@@ -223,7 +223,7 @@ public class SeverityNegativeTest {
         assertTrue(result.isTriggered(), "Null condition rule should trigger when value is null");
         assertEquals("WARNING", result.getSeverity(), "Null condition rule should have WARNING severity");
 
-        logger.info("✅ Null condition handling test passed with severity: {}", result.getSeverity());
+        logger.info("Null condition handling test passed with severity: {}", result.getSeverity());
     }
 
     private void testDangerousOperationsHandling(RulesEngine engine) {
@@ -244,7 +244,7 @@ public class SeverityNegativeTest {
         assertFalse(result.isTriggered(), "Division by zero rule should not trigger");
         assertEquals("ERROR", result.getSeverity(), "Division by zero rule preserves original ERROR severity after error recovery");
 
-        logger.info("✅ Dangerous operations handling test passed - division by zero handled gracefully");
+        logger.info("Dangerous operations handling test passed - division by zero handled gracefully");
     }
 
     @Test
@@ -267,7 +267,7 @@ public class SeverityNegativeTest {
         // Test mixed success/failure group
         testMixedSuccessFailureGroup(engine);
 
-        logger.info("✅ All rule group negative scenario tests passed");
+        logger.info("All rule group negative scenario tests passed");
     }
 
     private void testAllFailingRulesGroup(RulesEngine engine) {
@@ -286,7 +286,7 @@ public class SeverityNegativeTest {
         // The severity might be from the first rule that was attempted
         assertNotNull(result.getSeverity(), "Rule group should have some severity");
 
-        logger.info("✅ All failing rules group test passed - group did not trigger");
+        logger.info("All failing rules group test passed - group did not trigger");
     }
 
     private void testEmptyRuleGroup(RulesEngine engine) {
@@ -305,7 +305,7 @@ public class SeverityNegativeTest {
         // It might trigger (vacuous truth for AND) or not trigger
         assertNotNull(result.getSeverity(), "Rule group should have some severity");
 
-        logger.info("✅ Empty rule group test passed - group handled gracefully");
+        logger.info("Empty rule group test passed - group handled gracefully");
     }
 
     private void testMixedSuccessFailureGroup(RulesEngine engine) {
@@ -324,42 +324,6 @@ public class SeverityNegativeTest {
         // AND group with mixed results - might not trigger if any rule fails
         assertNotNull(result.getSeverity(), "Rule group should have some severity");
 
-        logger.info("✅ Mixed success/failure group test passed with triggered: {}", result.isTriggered());
-    }
-
-    @Test
-    @DisplayName("Test APEX validation behavior")
-    void testApexValidationBehavior() throws Exception {
-        logger.info("=== Testing APEX Validation Behavior ===");
-
-        // Test that APEX properly validates severity values
-        testSeverityValidation();
-
-        logger.info("✅ All APEX validation behavior tests passed");
-    }
-
-    private void testSeverityValidation() {
-        logger.info("--- Testing Severity Validation ---");
-
-        // Document the APEX validation behaviors we discovered during testing:
-
-        logger.info("APEX Validation Behaviors Discovered:");
-        logger.info("1. APEX validates severity values and rejects empty strings");
-        logger.info("2. APEX validates rule references in rule groups");
-        logger.info("3. APEX preserves case sensitivity in severity values (e.g., 'Error' vs 'ERROR')");
-        logger.info("4. APEX handles malformed conditions gracefully (rules don't trigger)");
-        logger.info("5. APEX handles exception-throwing conditions gracefully (rules don't trigger)");
-        logger.info("6. APEX uses error recovery - failed rules get default INFO severity instead of original severity");
-        logger.info("7. APEX returns INFO severity for rules that don't trigger, regardless of their original severity");
-
-        // These are the validation errors we encountered:
-        logger.info("Expected validation errors:");
-        logger.info("- Empty severity: 'Rule has invalid severity'. Must be one of: ERROR, WARNING, INFO");
-        logger.info("- Invalid rule reference: 'Rule reference not found: Rule 'non-existent-rule-id' referenced in rule group 'group-name' does not exist'");
-
-        // This demonstrates that APEX has robust validation
-        assertTrue(true, "APEX validation is comprehensive and working correctly");
-
-        logger.info("✅ Severity validation test passed - APEX properly validates configurations");
+        logger.info("Mixed success/failure group test passed with triggered: {}", result.isTriggered());
     }
 }

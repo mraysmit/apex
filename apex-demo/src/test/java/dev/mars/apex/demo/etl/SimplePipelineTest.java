@@ -39,11 +39,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * Test for Simple ETL Pipeline functionality using APEX RulesEngine.
  *
  * FOLLOWS CODING PRINCIPLES FROM prompts.txt:
- * ✅ Never validate YAML syntax - test actual pipeline execution
- * ✅ Execute real APEX pipeline operations using RulesEngine.evaluate()
- * ✅ Set up real data sources (CSV files) and sinks (H2 database)
- * ✅ Validate functional results with specific assertions on processed data
- * ✅ Test end-to-end workflows from data setup through pipeline execution to result validation
+ * Never validate YAML syntax - test actual pipeline execution
+ * Execute real APEX pipeline operations using RulesEngine.evaluate()
+ * Set up real data sources (CSV files) and sinks (H2 database)
+ * Validate functional results with specific assertions on processed data
+ * Test end-to-end workflows from data setup through pipeline execution to result validation
  *
  * BUSINESS LOGIC VALIDATION:
  * - Extract step: Read test data from CSV file using file-system data source

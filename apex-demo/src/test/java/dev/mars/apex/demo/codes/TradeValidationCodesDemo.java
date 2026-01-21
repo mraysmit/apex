@@ -138,7 +138,7 @@ public class TradeValidationCodesDemo extends DemoTestBase {
         logger.info("  - 1 rule with success code and field mapping");
         logger.info("All status fields were successfully populated via map-to-field directives");
 
-        logger.info("\n✅ Test 1 PASSED: Valid SPX call option ready for auto-booking");
+        logger.info("\nTest 1 PASSED: Valid SPX call option ready for auto-booking");
         } catch (Exception e) {
             fail("Test failed with exception: " + e.getMessage());
         }
@@ -196,7 +196,7 @@ public class TradeValidationCodesDemo extends DemoTestBase {
         logger.info("  - Large notional ($12.5M) triggers NOTIONAL_CALCULATED_LARGE and TIER_1_LARGE");
         logger.info("Success codes adapt to business conditions automatically");
 
-        logger.info("\n✅ Test 2 PASSED: High volatility codes demonstrated");
+        logger.info("\nTest 2 PASSED: High volatility codes demonstrated");
         } catch (Exception e) {
             fail("Test failed with exception: " + e.getMessage());
         }
@@ -242,7 +242,7 @@ public class TradeValidationCodesDemo extends DemoTestBase {
         logger.info("  - map-to-field uses #error_code variable to populate validation status");
         logger.info("  - Result: requiredFieldsValidation = 'REQUIRED_FIELDS_MISSING'");
 
-        logger.info("\n✅ Test 3 PASSED: Error code correctly populated");
+        logger.info("\nTest 3 PASSED: Error code correctly populated");
         } catch (Exception e) {
             fail("Test failed with exception: " + e.getMessage());
         }

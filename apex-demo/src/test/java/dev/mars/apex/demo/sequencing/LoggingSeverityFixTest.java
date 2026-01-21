@@ -39,7 +39,7 @@ public class LoggingSeverityFixTest {
         RulesEngineConfiguration config = new RulesEngineConfiguration();
         rulesEngine = new RulesEngine(config);
 
-        logger.info("✅ All services initialized for logging severity fix verification");
+        logger.info("All services initialized for logging severity fix verification");
     }
     
     @Test
@@ -57,8 +57,8 @@ public class LoggingSeverityFixTest {
             testData.put("customerId", "");  // Invalid customer ID
             testData.put("amount", 1000.0);
 
-            logger.info("🔍 Processing enrichment with invalid condition reference...");
-            logger.info("🔍 Expected: You should see SEVERE logs (not WARNING)");
+            logger.info("Processing enrichment with invalid condition reference...");
+            logger.info("Expected: You should see SEVERE logs (not WARNING)");
 
             // Process enrichments with config parameter to create the same context as the original test
             // This will trigger condition evaluation failures that should now be logged as SEVERE
@@ -66,19 +66,19 @@ public class LoggingSeverityFixTest {
 
             engine.evaluate(config, testData);
 
-            logger.info("✅ Processing completed.");
-            logger.info("📊 Check the log output above - you should see:");
-            logger.info("   ✅ SEVERE: CRITICAL: Enrichment condition evaluation failed...");
-            logger.info("   ❌ NOT: WARNING: Error evaluating enrichment condition...");
+            logger.info("Processing completed.");
+            logger.info("Check the log output above - you should see:");
+            logger.info("   SEVERE: CRITICAL: Enrichment condition evaluation failed...");
+            logger.info("   NOT: WARNING: Error evaluating enrichment condition...");
 
             logger.info("🎯 LOGGING SEVERITY FIX VERIFICATION:");
-            logger.info("   ✅ Business logic failures now logged as SEVERE/ERROR");
-            logger.info("   ✅ Clear indication of critical configuration problems");
-            logger.info("   ✅ Developers will immediately recognize these as serious issues");
-            logger.info("   ✅ No longer masked as 'warnings' that can be ignored");
+            logger.info("   Business logic failures now logged as SEVERE/ERROR");
+            logger.info("   Clear indication of critical configuration problems");
+            logger.info("   Developers will immediately recognize these as serious issues");
+            logger.info("   No longer masked as 'warnings' that can be ignored");
 
         } catch (Exception e) {
-            logger.error("❌ Test failed with exception: " + e.getMessage(), e);
+            logger.error("Test failed with exception: " + e.getMessage(), e);
             throw e;
         }
     }
@@ -97,25 +97,25 @@ public class LoggingSeverityFixTest {
             testData.put("customerId", "");  // Invalid - will cause first enrichment to fail
             testData.put("amount", 0.0);     // Invalid - will cause second enrichment to fail
             
-            logger.info("🔍 Processing multiple enrichments with invalid conditions...");
-            logger.info("🔍 Expected: Multiple SEVERE logs (one for each enrichment failure)");
+            logger.info("Processing multiple enrichments with invalid conditions...");
+            logger.info("Expected: Multiple SEVERE logs (one for each enrichment failure)");
             
             // Process enrichments with config parameter - this should trigger multiple SEVERE logs
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
             engine.evaluate(config, testData);
 
-            logger.info("✅ Processing completed.");
-            logger.info("📊 Check the log output above - you should see:");
-            logger.info("   ✅ Multiple SEVERE: CRITICAL: Enrichment condition evaluation failed...");
-            logger.info("   ❌ NOT: Multiple WARNING: Error evaluating enrichment condition...");
+            logger.info("Processing completed.");
+            logger.info("Check the log output above - you should see:");
+            logger.info("   Multiple SEVERE: CRITICAL: Enrichment condition evaluation failed...");
+            logger.info("   NOT: Multiple WARNING: Error evaluating enrichment condition...");
             
             logger.info("🎯 MULTIPLE FAILURE LOGGING VERIFICATION:");
-            logger.info("   ✅ Each business logic failure logged separately at SEVERE level");
-            logger.info("   ✅ Clear visibility into all configuration problems");
-            logger.info("   ✅ No silent failures or masked warnings");
+            logger.info("   Each business logic failure logged separately at SEVERE level");
+            logger.info("   Clear visibility into all configuration problems");
+            logger.info("   No silent failures or masked warnings");
             
         } catch (Exception e) {
-            logger.error("❌ Test failed with exception: " + e.getMessage(), e);
+            logger.error("Test failed with exception: " + e.getMessage(), e);
             throw e;
         }
     }
@@ -124,28 +124,28 @@ public class LoggingSeverityFixTest {
     void testDocumentLoggingSeverityFix() {
         logger.info("=== LOGGING SEVERITY FIX DOCUMENTATION ===");
         logger.info("🎯 CRITICAL IMPROVEMENTS IMPLEMENTED:");
-        logger.info("   ✅ YamlEnrichmentProcessor:248 - Enrichment condition evaluation failure → SEVERE");
-        logger.info("   ✅ YamlEnrichmentProcessor:1095 - Rule evaluation failure → SEVERE");
-        logger.info("   ✅ YamlEnrichmentProcessor:1163 - Rule group evaluation failure → SEVERE");
-        logger.info("   ✅ YamlEnrichmentProcessor:1176 - Rules/rule groups processing failure → SEVERE");
-        logger.info("   ✅ YamlEnrichmentProcessor:149 - Enrichment processing failure → SEVERE");
-        logger.info("   ✅ YamlEnrichmentProcessor:555 - OR condition evaluation failure → SEVERE");
-        logger.info("   ✅ YamlEnrichmentProcessor:574 - AND condition evaluation failure → SEVERE");
-        logger.info("   ✅ YamlEnrichmentProcessor:605 - General condition evaluation failure → SEVERE");
+        logger.info("   YamlEnrichmentProcessor:248 - Enrichment condition evaluation failure → SEVERE");
+        logger.info("   YamlEnrichmentProcessor:1095 - Rule evaluation failure → SEVERE");
+        logger.info("   YamlEnrichmentProcessor:1163 - Rule group evaluation failure → SEVERE");
+        logger.info("   YamlEnrichmentProcessor:1176 - Rules/rule groups processing failure → SEVERE");
+        logger.info("   YamlEnrichmentProcessor:149 - Enrichment processing failure → SEVERE");
+        logger.info("   YamlEnrichmentProcessor:555 - OR condition evaluation failure → SEVERE");
+        logger.info("   YamlEnrichmentProcessor:574 - AND condition evaluation failure → SEVERE");
+        logger.info("   YamlEnrichmentProcessor:605 - General condition evaluation failure → SEVERE");
         
-        logger.info("🚨 IMPACT:");
-        logger.info("   ✅ Business logic failures no longer masked as warnings");
-        logger.info("   ✅ Clear indication of critical configuration problems");
-        logger.info("   ✅ Developers immediately recognize serious issues");
-        logger.info("   ✅ Debugging becomes much easier");
-        logger.info("   ✅ Production systems can be monitored for critical errors");
+        logger.info("IMPACT:");
+        logger.info("   Business logic failures no longer masked as warnings");
+        logger.info("   Clear indication of critical configuration problems");
+        logger.info("   Developers immediately recognize serious issues");
+        logger.info("   Debugging becomes much easier");
+        logger.info("   Production systems can be monitored for critical errors");
         
         logger.info("🔧 NEXT STEPS:");
-        logger.info("   📋 Sequential YAML processing can now be implemented with proper error visibility");
-        logger.info("   📋 Configuration errors will be immediately obvious during development");
-        logger.info("   📋 Production monitoring can alert on SEVERE logs");
+        logger.info("   Sequential YAML processing can now be implemented with proper error visibility");
+        logger.info("   Configuration errors will be immediately obvious during development");
+        logger.info("   Production monitoring can alert on SEVERE logs");
         
-        logger.info("✅ LOGGING SEVERITY FIX: COMPLETE");
+        logger.info("LOGGING SEVERITY FIX: COMPLETE");
     }
 }
 

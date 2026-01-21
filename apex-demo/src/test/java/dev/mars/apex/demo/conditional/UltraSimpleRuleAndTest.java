@@ -42,7 +42,7 @@ public class UltraSimpleRuleAndTest extends DemoTestBase {
             Map<String, Object> result = ruleResult.getEnrichedData();
 
             assertEquals("ALL_PASSED", result.get("output"), "Should output ALL_PASSED when all rules match");
-            logger.info("✅ Rule AND ABC test passed: " + result);
+            logger.info("Rule AND ABC test passed: " + result);
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
             fail("Test failed: " + e.getMessage());
@@ -64,7 +64,7 @@ public class UltraSimpleRuleAndTest extends DemoTestBase {
             Map<String, Object> result = ruleResult.getEnrichedData();
 
             assertEquals("FAILED", result.get("output"), "Should output FAILED when first rule fails");
-            logger.info("✅ Rule AND X test passed: " + result);
+            logger.info("Rule AND X test passed: " + result);
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
             fail("Test failed: " + e.getMessage());
@@ -86,7 +86,7 @@ public class UltraSimpleRuleAndTest extends DemoTestBase {
             Map<String, Object> result = ruleResult.getEnrichedData();
 
             assertEquals("FAILED", result.get("output"), "Should output FAILED when second rule fails");
-            logger.info("✅ Rule AND A test passed: " + result);
+            logger.info("Rule AND A test passed: " + result);
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
             fail("Test failed: " + e.getMessage());
@@ -108,7 +108,7 @@ public class UltraSimpleRuleAndTest extends DemoTestBase {
             Map<String, Object> result = ruleResult.getEnrichedData();
 
             assertEquals("FAILED", result.get("output"), "Should output FAILED when third rule fails");
-            logger.info("✅ Rule AND AB test passed: " + result);
+            logger.info("Rule AND AB test passed: " + result);
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
             fail("Test failed: " + e.getMessage());

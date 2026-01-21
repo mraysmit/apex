@@ -68,7 +68,7 @@ apex-demo/src/test/java/dev/mars/apex/demo/categories/
 - `stop-on-first-failure` - Whether to stop processing on first failure
 - `parallel-execution` - Whether rules can execute in parallel
 
-## 📊 Example Categories
+## Example Categories
 
 ### **Compliance Categories**
 - `kyc-compliance` - Know Your Customer compliance rules
@@ -91,7 +91,7 @@ apex-demo/src/test/java/dev/mars/apex/demo/categories/
 
 ## 🧪 Test Examples
 
-### **CategoryExamplesValidationTest.java** ✅ **5/5 PASSING**
+### **CategoryExamplesValidationTest.java** **5/5 PASSING**
 Comprehensive validation test suite demonstrating:
 
 **Test Methods:**
@@ -102,10 +102,10 @@ Comprehensive validation test suite demonstrating:
 - `testInheritancePatternExamples()` - Validates inheritance pattern examples
 
 **Validation Results:**
-- ✅ **30 total categories** across all examples
-- ✅ **20 rules** demonstrating category inheritance
-- ✅ **16 enrichments** with category governance
-- ✅ **All YAML configurations** successfully validated
+- **30 total categories** across all examples
+- **20 rules** demonstrating category inheritance
+- **16 enrichments** with category governance
+- **All YAML configurations** successfully validated
 
 ### **Legacy Test Files** (for reference)
 - `BasicCategoryTest.java` - Basic category definition and inheritance
@@ -166,7 +166,7 @@ The examples demonstrate real-world enterprise scenarios including:
 - Lifecycle management with governance
 - Cross-functional team collaboration patterns
 
-## 🔍 Validation
+## Validation
 
 All examples include comprehensive test validation that proves:
 - Categories load correctly from separate files

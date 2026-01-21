@@ -44,11 +44,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests reading schema metadata from CSV files with automatic type inference.
  *
  * CRITICAL VALIDATION CHECKLIST:
- * ✅ Count pipeline steps - 1 read-schema step expected per CSV file
- * ✅ Verify type inference - INTEGER, VARCHAR, DECIMAL, BOOLEAN, TIMESTAMP detection
- * ✅ Column count validation - Must match exact number of CSV columns
- * ✅ Small CSV test - 4 columns (id, name, column_c, column_d)
- * ✅ Large CSV test - 11 columns with diverse data types
+ * Count pipeline steps - 1 read-schema step expected per CSV file
+ * Verify type inference - INTEGER, VARCHAR, DECIMAL, BOOLEAN, TIMESTAMP detection
+ * Column count validation - Must match exact number of CSV columns
+ * Small CSV test - 4 columns (id, name, column_c, column_d)
+ * Large CSV test - 11 columns with diverse data types
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2.1.0

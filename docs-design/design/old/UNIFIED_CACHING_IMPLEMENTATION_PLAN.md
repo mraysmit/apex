@@ -6,7 +6,7 @@ This plan migrates APEX to a unified caching architecture using the existing `Ca
 
 ## Task Breakdown
 
-### Task 1: Create DatasetSignature Class ✅ (From previous design)
+### Task 1: Create DatasetSignature Class (From previous design)
 
 **File**: `apex-core/src/main/java/dev/mars/apex/core/service/lookup/DatasetSignature.java`
 
@@ -400,8 +400,8 @@ public void enrichObjects(List<Object> objects, List<YamlEnrichment> enrichments
 ### Task 10: Update Documentation
 
 **Files**:
-- `docs/design/UNIFIED_CACHING_DESIGN.md` ✅ (Already created)
-- `docs/design/UNIFIED_CACHING_IMPLEMENTATION_PLAN.md` ✅ (This file)
+- `docs/design/UNIFIED_CACHING_DESIGN.md` (Already created)
+- `docs/design/UNIFIED_CACHING_IMPLEMENTATION_PLAN.md` (This file)
 - `README.md` or user documentation (add caching section)
 
 **Content**:
@@ -450,16 +450,16 @@ Task 10 (Documentation)
 
 ## Success Criteria
 
-1. ✅ All caches use `CacheManager` infrastructure
-2. ✅ `DuplicateInlineDataSourceTest` shows only 1 dataset creation
-3. ✅ Cache statistics available via `ApexCacheManager.getAllStatistics()`
-4. ✅ All existing tests pass
-5. ✅ Memory usage reduced for duplicate datasets
-6. ✅ Cache hit rates visible in logs
-7. ✅ No breaking changes to public APIs
-8. ✅ Thread-safe concurrent access
-9. ✅ Configurable cache behavior
-10. ✅ Comprehensive test coverage
+1. All caches use `CacheManager` infrastructure
+2. `DuplicateInlineDataSourceTest` shows only 1 dataset creation
+3. Cache statistics available via `ApexCacheManager.getAllStatistics()`
+4. All existing tests pass
+5. Memory usage reduced for duplicate datasets
+6. Cache hit rates visible in logs
+7. No breaking changes to public APIs
+8. Thread-safe concurrent access
+9. Configurable cache behavior
+10. Comprehensive test coverage
 
 ## Next Steps
 
@@ -475,16 +475,16 @@ Ready to start implementation? Recommended order:
 
 # Implementation Review and Lessons Learned
 
-## 📋 **Code Review Against prompts.txt Principles**
+## **Code Review Against prompts.txt Principles**
 
 This section documents how the implementation followed the coding principles from `prompts.txt` and lessons learned during development.
 
-### ✅ **What We Did RIGHT:**
+### **What We Did RIGHT:**
 
 #### **1. Investigation Before Implementation** ✅
 **Principle**: "Understand Before You Change"
 
-✅ **EXCELLENT**: We investigated existing patterns before creating new code:
+**EXCELLENT**: We investigated existing patterns before creating new code:
 - Used `codebase-retrieval` to understand `InMemoryCacheManager` construction patterns
 - Examined `ClassificationCache` and `CacheDataSource` for existing cache usage
 - Checked `EnrichmentServiceTest.java` to understand existing test structure
@@ -502,7 +502,7 @@ enrichment.setType("lookup-enrichment");  // ← Added after seeing NPE and inve
 #### **2. Follow Established Conventions** ✅
 **Principle**: "Follow Established Conventions"
 
-✅ **EXCELLENT**: We followed existing APEX patterns:
+**EXCELLENT**: We followed existing APEX patterns:
 - Modeled `ApexCacheManager` after existing cache patterns in `ClassificationCache`
 - Used `DataSourceConfiguration` + `CacheConfig` pattern consistently
 - Followed singleton pattern used elsewhere in APEX
@@ -522,7 +522,7 @@ return new InMemoryCacheManager(config);
 #### **3. Verify Assumptions** ✅
 **Principle**: "Test Your Understanding"
 
-✅ **EXCELLENT**: We verified assumptions through testing:
+**EXCELLENT**: We verified assumptions through testing:
 - Ran tests after each change to verify they work
 - Fixed compilation errors by checking actual API signatures
 - Verified cache statistics structure matches expectations
@@ -538,7 +538,7 @@ return new InMemoryCacheManager(config);
 #### **4. Iterative Validation** ✅
 **Principle**: "Validate Each Step"
 
-✅ **EXCELLENT**: We validated incrementally:
+**EXCELLENT**: We validated incrementally:
 1. **Task 1**: Created DatasetSignature → Ran 17 tests → All passed ✅
 2. **Task 2**: Created ApexCacheManager → Ran 19 tests → All passed ✅
 3. **Task 3**: Migrated YamlEnrichmentProcessor → Ran 5 tests → All passed ✅
@@ -558,7 +558,7 @@ mvn test "-Dtest=DatasetSignature*,ApexCacheManager*,..." -pl apex-core  # 73 te
 #### **5. Read Logs Carefully** ✅
 **Principle**: "Read Logs Carefully"
 
-✅ **EXCELLENT**: We carefully analyzed error messages:
+**EXCELLENT**: We carefully analyzed error messages:
 - NPE at line 180: Investigated and found missing `type` field
 - `SpelEvaluationException`: Found wrong field name `currencyCode` vs `currency`
 - Compilation error: Found wrong method `setLookupField()` doesn't exist
@@ -582,7 +582,7 @@ ERROR: expected: <value> but was: <null> for expression cache
 #### **6. Test After Every Change** ✅
 **Principle**: "Test after every change"
 
-✅ **EXCELLENT**: We ran tests after EVERY fix:
+**EXCELLENT**: We ran tests after EVERY fix:
 - After creating DatasetSignature → Tests passed
 - After creating ApexCacheManager → Tests passed
 - After fixing TTL issue → Tests passed
@@ -595,7 +595,7 @@ ERROR: expected: <value> but was: <null> for expression cache
 #### **7. No Mocking** ✅
 **Principle**: "Do not use mockito without asking for permission"
 
-✅ **EXCELLENT**: We used real services, no mocks:
+**EXCELLENT**: We used real services, no mocks:
 - Real `ApexCacheManager` instance
 - Real `InMemoryCacheManager` instances
 - Real `EnrichmentService` instance
@@ -606,7 +606,7 @@ ERROR: expected: <value> but was: <null> for expression cache
 #### **8. Clear Documentation** ✅
 **Principle**: "Document Intent, Not Just Implementation"
 
-✅ **EXCELLENT**: We added comprehensive documentation:
+**EXCELLENT**: We added comprehensive documentation:
 - Added "WHY" documentation explaining TTL choices in `ApexCacheManager`
 - Added "WHY" documentation explaining content-based signatures in `DatasetSignature`
 - Explained the problem being solved (dataset deduplication)
@@ -626,7 +626,7 @@ ERROR: expected: <value> but was: <null> for expression cache
 #### **9. Honest Error Handling** ✅
 **Principle**: "Fail Fast, Fail Clearly"
 
-✅ **EXCELLENT**: We let tests fail when there were real problems:
+**EXCELLENT**: We let tests fail when there were real problems:
 - Didn't hide NPE with try-catch
 - Didn't mask compilation errors
 - Fixed root causes instead of working around them
@@ -635,7 +635,7 @@ ERROR: expected: <value> but was: <null> for expression cache
 #### **10. Test Classification** ✅
 **Principle**: "Clearly Distinguish Test Types"
 
-✅ **EXCELLENT**: Our tests are clearly integration tests:
+**EXCELLENT**: Our tests are clearly integration tests:
 - Test real cache manager behavior
 - Test real enrichment service operations
 - Test real dataset creation and caching
@@ -644,21 +644,21 @@ ERROR: expected: <value> but was: <null> for expression cache
 
 ---
 
-### 📊 **Overall Assessment:**
+### **Overall Assessment:**
 
 | Principle | Score | Evidence |
 |-----------|-------|----------|
-| Investigation Before Implementation | ✅ 10/10 | Used codebase-retrieval, checked existing patterns, APIs, field names |
-| Follow Established Conventions | ✅ 10/10 | Mirrored existing cache patterns, singleton pattern, test structure |
-| Verify Assumptions | ✅ 10/10 | Tested each assumption, fixed errors, caught TTL issue |
-| Iterative Validation | ✅ 10/10 | Tested after every change, incrementally validated all 4 tasks |
-| Read Logs Carefully | ✅ 10/10 | Analyzed NPE, SpEL errors, compilation errors, TTL failures |
-| Test After Every Change | ✅ 10/10 | Ran tests 10+ times during development |
-| No Mocking | ✅ 10/10 | Used real services throughout all tests |
-| Clear Documentation | ✅ 10/10 | Added "WHY" documentation explaining design decisions |
-| Honest Error Handling | ✅ 10/10 | Let tests fail, fixed root causes |
-| Test Classification | ✅ 10/10 | Clear integration tests with real components |
-| **TOTAL** | **✅ 100/100** | **Perfect adherence to principles** |
+| Investigation Before Implementation | 10/10 | Used codebase-retrieval, checked existing patterns, APIs, field names |
+| Follow Established Conventions | 10/10 | Mirrored existing cache patterns, singleton pattern, test structure |
+| Verify Assumptions | 10/10 | Tested each assumption, fixed errors, caught TTL issue |
+| Iterative Validation | 10/10 | Tested after every change, incrementally validated all 4 tasks |
+| Read Logs Carefully | 10/10 | Analyzed NPE, SpEL errors, compilation errors, TTL failures |
+| Test After Every Change | 10/10 | Ran tests 10+ times during development |
+| No Mocking | 10/10 | Used real services throughout all tests |
+| Clear Documentation | 10/10 | Added "WHY" documentation explaining design decisions |
+| Honest Error Handling | 10/10 | Let tests fail, fixed root causes |
+| Test Classification | 10/10 | Clear integration tests with real components |
+| **TOTAL** | **100/100** | **Perfect adherence to principles** |
 
 ---
 
@@ -734,19 +734,19 @@ ERROR: expected: <value> but was: <null> for expression cache
 
 ---
 
-### ✅ **Final Verdict:**
+### **Final Verdict:**
 
 **EXCELLENT WORK** - Perfect adherence to coding principles from `prompts.txt`:
-- ✅ Investigated before implementing
-- ✅ Followed existing patterns
-- ✅ Verified assumptions through testing
-- ✅ Validated incrementally
-- ✅ Read logs carefully
-- ✅ Tested after every change
-- ✅ No mocking
-- ✅ Clear documentation with "WHY"
-- ✅ Honest error handling
-- ✅ Clear test classification
+- Investigated before implementing
+- Followed existing patterns
+- Verified assumptions through testing
+- Validated incrementally
+- Read logs carefully
+- Tested after every change
+- No mocking
+- Clear documentation with "WHY"
+- Honest error handling
+- Clear test classification
 
 **Score: 100/100** 🎯
 

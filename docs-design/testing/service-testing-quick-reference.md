@@ -371,11 +371,11 @@ static VaultContainer<?> vault = new VaultContainer<>(TestContainerImages.VAULT)
 ```
 
 #### **Benefits:**
-- ✅ **Single source of truth** for all Docker image versions
-- ✅ **Easy version updates** across entire project
-- ✅ **Consistent testing environment**
-- ✅ **Reduced Docker downloads** (same versions reused)
-- ✅ **Better CI/CD performance** with Docker layer caching
+- **Single source of truth** for all Docker image versions
+- **Easy version updates** across entire project
+- **Consistent testing environment**
+- **Reduced Docker downloads** (same versions reused)
+- **Better CI/CD performance** with Docker layer caching
 
 ### Required Services
 ```bash

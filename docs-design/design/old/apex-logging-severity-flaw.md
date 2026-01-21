@@ -161,7 +161,7 @@ enrichments:
 ### 1. **Error Scenario Tests**
 ```java
 @Test
-@DisplayName("🚨 CRITICAL: Enrichment condition failure should be ERROR, not WARNING")
+@DisplayName("CRITICAL: Enrichment condition failure should be ERROR, not WARNING")
 void testEnrichmentConditionFailureLogging() {
     // Test that condition evaluation failures log as ERROR
     // Verify appropriate exception handling
@@ -289,7 +289,7 @@ void testEnrichmentConditionFailureLogging() {
 | **Rule Condition Evaluation Failure** | WARNING | **ERROR** | Business rules cannot be evaluated |
 | **Enrichment Condition Failure** | WARNING | **ERROR** | Data enrichment cannot proceed |
 | **Conditional Mapping Failure** | WARNING | **ERROR** | Data transformation cannot proceed |
-| **Optional Transformation Failure** | WARNING | **WARNING** | ✅ Acceptable - has fallback |
+| **Optional Transformation Failure** | WARNING | **WARNING** | Acceptable - has fallback |
 | **Performance Degradation** | INFO | **WARNING** | Should be elevated for visibility |
 
 ## Specific Implementation Changes

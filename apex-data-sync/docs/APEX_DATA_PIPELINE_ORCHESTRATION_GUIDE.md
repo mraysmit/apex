@@ -343,7 +343,7 @@ System.out.println("Pipeline success: " + (result.getResultType() == RuleResult.
 System.out.println("Message: " + result.getMessage());
 ```
 
-**✅ REUSABLE (Two Lines) - When you need cleanup or multiple executions:**
+**REUSABLE (Two Lines) - When you need cleanup or multiple executions:**
 ```java
 // Create RulesEngine from file
 RulesEngine rulesEngine = RulesEngine.fromFile("my-first-pipeline.yaml");
@@ -530,14 +530,14 @@ These keywords are available for **all** pipeline step types (extract, transform
 
 | Keyword | Type | Required | Default | Description |
 |---------|------|----------|---------|-------------|
-| `name` | String | ✅ Yes | - | Unique identifier for the step within the pipeline |
-| `type` | String | ✅ Yes | - | Step type: `read-schema`, `extract`, `transform`, `load`, or `audit` |
-| `description` | String | ❌ No | - | Human-readable description of what the step does |
-| `depends-on` | List<String> | ❌ No | `[]` | List of step names that must complete before this step runs |
-| `optional` | Boolean | ❌ No | `false` | If `true`, pipeline continues even if this step fails |
-| `condition` | String (SpEL) | ❌ No | - | SpEL expression; step only executes if condition evaluates to `true` |
-| `parameters` | Map<String, Object> | ❌ No | `{}` | Step-specific parameters passed to the operation |
-| `retry` | Object | ❌ No | - | Retry configuration for this step (see below) |
+| `name` | String | Yes | - | Unique identifier for the step within the pipeline |
+| `type` | String | Yes | - | Step type: `read-schema`, `extract`, `transform`, `load`, or `audit` |
+| `description` | String | No | - | Human-readable description of what the step does |
+| `depends-on` | List<String> | No | `[]` | List of step names that must complete before this step runs |
+| `optional` | Boolean | No | `false` | If `true`, pipeline continues even if this step fails |
+| `condition` | String (SpEL) | No | - | SpEL expression; step only executes if condition evaluates to `true` |
+| `parameters` | Map<String, Object> | No | `{}` | Step-specific parameters passed to the operation |
+| `retry` | Object | No | - | Retry configuration for this step (see below) |
 
 #### Read-Schema Step Specific Keywords
 
@@ -545,20 +545,20 @@ Additional keywords specific to `type: "read-schema"` steps:
 
 | Keyword | Type | Required | Default | Description |
 |---------|------|----------|---------|-------------|
-| `data-source-ref` | String | ✅ Yes | - | Name of the data source reference (from `data-source-refs` section) |
-| `parameters` | Map<String, Object> | ✅ Yes | - | Parameters specifying what to introspect (e.g., `table` name, `file` path) |
+| `data-source-ref` | String | Yes | - | Name of the data source reference (from `data-source-refs` section) |
+| `parameters` | Map<String, Object> | Yes | - | Parameters specifying what to introspect (e.g., `table` name, `file` path) |
 
 **Parameters Map (for database sources):**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `table` | String | ✅ Yes | Table name to introspect (can be schema-qualified: `schema.table`) |
+| `table` | String | Yes | Table name to introspect (can be schema-qualified: `schema.table`) |
 
 **Parameters Map (for CSV sources):**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `file` | String | ✅ Yes | CSV file name or path to introspect |
+| `file` | String | Yes | CSV file name or path to introspect |
 
 #### Extract Step Specific Keywords
 
@@ -566,8 +566,8 @@ Additional keywords specific to `type: "extract"` steps:
 
 | Keyword | Type | Required | Default | Description |
 |---------|------|----------|---------|-------------|
-| `source` | String | ✅ Yes | - | Name of the data source (references `data-sources` section) |
-| `operation` | String | ✅ Yes | - | Named query/operation to execute from the data source |
+| `source` | String | Yes | - | Name of the data source (references `data-sources` section) |
+| `operation` | String | Yes | - | Named query/operation to execute from the data source |
 
 #### Transform Step Specific Keywords
 
@@ -575,7 +575,7 @@ Additional keywords specific to `type: "transform"` steps:
 
 | Keyword | Type | Required | Default | Description |
 |---------|------|----------|---------|-------------|
-| `transformations` | List<Object> | ✅ Yes | - | List of transformation operations to apply |
+| `transformations` | List<Object> | Yes | - | List of transformation operations to apply |
 
 **Transformation Object Keywords:**
 
@@ -583,9 +583,9 @@ Each transformation in the `transformations` list supports:
 
 | Keyword | Type | Required | Description |
 |---------|------|----------|-------------|
-| `name` | String | ✅ Yes | Unique name for this transformation |
-| `type` | String | ✅ Yes | Transformation type (see below) |
-| `field` | String | ✅ Yes | Target field name to transform/create |
+| `name` | String | Yes | Unique name for this transformation |
+| `type` | String | Yes | Transformation type (see below) |
+| `field` | String | Yes | Target field name to transform/create |
 | `expression` | String (SpEL) | Conditional | SpEL expression for calculations/transformations |
 | `value` | Any | Conditional | Static value to assign |
 | `rule` | String | Conditional | Validation rule name |
@@ -605,8 +605,8 @@ Additional keywords specific to `type: "load"` steps:
 
 | Keyword | Type | Required | Default | Description |
 |---------|------|----------|---------|-------------|
-| `sink` | String | ✅ Yes | - | Name of the data sink (references `data-sinks` section) |
-| `operation` | String | ✅ Yes | - | Named operation to execute (e.g., SQL statement, API endpoint) |
+| `sink` | String | Yes | - | Name of the data sink (references `data-sinks` section) |
+| `operation` | String | Yes | - | Named operation to execute (e.g., SQL statement, API endpoint) |
 
 #### Audit Step Specific Keywords
 
@@ -614,8 +614,8 @@ Additional keywords specific to `type: "audit"` steps:
 
 | Keyword | Type | Required | Default | Description |
 |---------|------|----------|---------|-------------|
-| `sink` | String | ✅ Yes | - | Name of the audit sink (references `data-sinks` section) |
-| `operation` | String | ✅ Yes | - | Named audit operation to execute |
+| `sink` | String | Yes | - | Name of the audit sink (references `data-sinks` section) |
+| `operation` | String | Yes | - | Named audit operation to execute |
 
 #### Retry Configuration Keywords
 
@@ -623,33 +623,33 @@ The `retry` object supports the following keywords:
 
 | Keyword | Type | Required | Default | Description |
 |---------|------|----------|---------|-------------|
-| `max-attempts` | Integer | ❌ No | `3` | Maximum number of retry attempts |
-| `delay-ms` | Long | ❌ No | `1000` | Initial delay between retries (milliseconds) |
-| `backoff-multiplier` | Double | ❌ No | `2.0` | Multiplier for exponential backoff |
-| `max-delay-ms` | Long | ❌ No | `30000` | Maximum delay between retries (milliseconds) |
+| `max-attempts` | Integer | No | `3` | Maximum number of retry attempts |
+| `delay-ms` | Long | No | `1000` | Initial delay between retries (milliseconds) |
+| `backoff-multiplier` | Double | No | `2.0` | Multiplier for exponential backoff |
+| `max-delay-ms` | Long | No | `30000` | Maximum delay between retries (milliseconds) |
 
 #### Quick Reference Table
 
 | Keyword | Read-Schema | Extract | Transform | Load | Audit | Notes |
 |---------|-------------|---------|-----------|------|-------|-------|
-| `name` | ✅ | ✅ | ✅ | ✅ | ✅ | Required for all |
-| `type` | ✅ | ✅ | ✅ | ✅ | ✅ | Required for all |
+| `name` | | | | | | Required for all |
+| `type` | | | | | | Required for all |
 | `description` | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ | Optional for all |
-| `data-source-ref` | ✅ | ❌ | ❌ | ❌ | ❌ | Read-Schema only |
-| `source` | ❌ | ✅ | ❌ | ❌ | ❌ | Extract only |
-| `sink` | ❌ | ❌ | ❌ | ✅ | ✅ | Load & Audit only |
-| `operation` | ❌ | ✅ | ❌ | ✅ | ✅ | Extract, Load & Audit |
-| `transformations` | ❌ | ❌ | ✅ | ❌ | ❌ | Transform only |
+| `data-source-ref` | | | | | | Read-Schema only |
+| `source` | | | | | | Extract only |
+| `sink` | | | | | | Load & Audit only |
+| `operation` | | | | | | Extract, Load & Audit |
+| `transformations` | | | | | | Transform only |
 | `depends-on` | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ | Optional for all |
 | `optional` | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ | Optional for all |
 | `condition` | ⭐ | ⭐ | ⭐ | ⭐ | ⭐ | Optional for all |
-| `parameters` | ✅ | ⭐ | ❌ | ⭐ | ⭐ | Required for Read-Schema, optional for others |
-| `retry` | ⭐ | ⭐ | ❌ | ⭐ | ⭐ | Not for Transform |
+| `parameters` | | ⭐ | | ⭐ | ⭐ | Required for Read-Schema, optional for others |
+| `retry` | ⭐ | ⭐ | | ⭐ | ⭐ | Not for Transform |
 
 **Legend**:
-- ✅ = Required
+- = Required
 - ⭐ = Optional/Common
-- ❌ = Not applicable
+- = Not applicable
 
 ### 6.2 Step Type Examples
 
@@ -793,12 +793,12 @@ When reading schema from CSV files, the stage analyzes the data to infer column 
 
 The read-schema stage supports all database types that expose INFORMATION_SCHEMA:
 
-- ✅ **PostgreSQL** - via INFORMATION_SCHEMA.COLUMNS
-- ✅ **MySQL/MariaDB** - via INFORMATION_SCHEMA.COLUMNS
-- ✅ **Microsoft SQL Server** - via INFORMATION_SCHEMA.COLUMNS
-- ✅ **H2** - via INFORMATION_SCHEMA.COLUMNS
-- ✅ **Oracle** - via DBA_TAB_COLUMNS
-- ✅ **DB2** - via SYSCAT.COLUMNS
+- **PostgreSQL** - via INFORMATION_SCHEMA.COLUMNS
+- **MySQL/MariaDB** - via INFORMATION_SCHEMA.COLUMNS
+- **Microsoft SQL Server** - via INFORMATION_SCHEMA.COLUMNS
+- **H2** - via INFORMATION_SCHEMA.COLUMNS
+- **Oracle** - via DBA_TAB_COLUMNS
+- **DB2** - via SYSCAT.COLUMNS
 
 #### Implementation Details
 
@@ -970,11 +970,11 @@ Comprehensive integration tests are available in:
 - `apex-data-sync/src/test/java/dev/mars/apex/sync/ReadSchemaPipelineStageTest.java`
 
 Test coverage includes:
-- ✅ Reading schema from H2 database
-- ✅ Reading schema from CSV files
-- ✅ Column metadata extraction
-- ✅ Type inference for CSV
-- ✅ Pipeline context storage
+- Reading schema from H2 database
+- Reading schema from CSV files
+- Column metadata extraction
+- Type inference for CSV
+- Pipeline context storage
 
 Run tests with:
 ```bash
@@ -2337,7 +2337,7 @@ if (result.getResultType() == RuleResult.ResultType.MATCH) {
 }
 ```
 
-**✅ REUSABLE (Two Lines) - When you need cleanup or multiple executions:**
+**REUSABLE (Two Lines) - When you need cleanup or multiple executions:**
 ```java
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
@@ -2371,10 +2371,10 @@ rulesEngine.shutdown();
 | **Result Type** | `YamlPipelineExecutionResult` | `RuleResult` |
 | **Success Check** | `result.isSuccess()` | `result.getResultType() == MATCH` |
 | **Error Handling** | Throws `DataPipelineException` | Returns `RuleResult` with ERROR type |
-| **Step-Level Data** | `result.getStepResults().get(i).getData()` | `result.getExecutionPath().get(i).getStepData()` ✅ |
-| **Step Metrics** | `stepResult.getRecordsProcessed()` | `step.getRecordsProcessed()` ✅ |
-| **Success Rate** | `stepResult.getSuccessRate()` | `step.getSuccessRate()` ✅ |
-| **Execution Trace** | Not available | `result.getExecutionPath()` ✅ |
+| **Step-Level Data** | `result.getStepResults().get(i).getData()` | `result.getExecutionPath().get(i).getStepData()` |
+| **Step Metrics** | `stepResult.getRecordsProcessed()` | `step.getRecordsProcessed()` |
+| **Success Rate** | `stepResult.getSuccessRate()` | `step.getSuccessRate()` |
+| **Execution Trace** | Not available | `result.getExecutionPath()` |
 
 ### Migration Checklist
 
@@ -2469,9 +2469,9 @@ for (ExecutionStep step : result.getExecutionPath()) {
 ```
 
 **Key Points:**
-- ✅ Same data available in both APIs
-- ✅ Same metrics available in both APIs
-- ✅ New API adds execution trace for better debugging
+- Same data available in both APIs
+- Same metrics available in both APIs
+- New API adds execution trace for better debugging
 - ⚠️ New API uses `Integer` (nullable) instead of `int` for metrics
 
 ### Testing Your Migration
@@ -2623,16 +2623,16 @@ Some PostgreSQL integration tests use date-bounded test data. If tests fail with
 For consistency across the codebase, use the following patterns:
 
 ```java
-// ✅ RECOMMENDED: Modern pattern
+// RECOMMENDED: Modern pattern
 RulesEngine engine = RulesEngine.fromFile("path/to/config.yaml");
 RuleResult result = engine.evaluate(inputData);
 
-// ✅ ACCEPTABLE: When you need to inspect configuration
+// ACCEPTABLE: When you need to inspect configuration
 YamlConfigurationLoader loader = new YamlConfigurationLoader();
 YamlRuleConfiguration config = loader.loadFromFile("path/to/config.yaml");
 RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
-// ❌ DEPRECATED: Avoid in new code
+// DEPRECATED: Avoid in new code
 YamlRulesEngineService service = new YamlRulesEngineService();
 RulesEngine engine = service.createRulesEngineFromYamlConfig(config);
 ```

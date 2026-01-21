@@ -72,7 +72,7 @@ public class NewRuleResultApiDemonstrationTest {
         System.out.println("result.getRuleName() [DEPRECATED]: " + deprecatedRuleName);
         assertEquals("Success Group", deprecatedRuleName, "Backward compatibility preserved");
         
-        System.out.println("\n✅ SUCCESS CASE: New API provides clear semantics!");
+        System.out.println("\nSUCCESS CASE: New API provides clear semantics!");
     }
 
     @Test
@@ -111,7 +111,7 @@ public class NewRuleResultApiDemonstrationTest {
         System.out.println("result.getRuleName() [DEPRECATED]: " + deprecatedRuleName);
         assertEquals("Failure Group", deprecatedRuleName, "Backward compatibility preserved");
         
-        System.out.println("\n✅ FAILURE CASE: New API provides rich failure diagnostics!");
+        System.out.println("\nFAILURE CASE: New API provides rich failure diagnostics!");
     }
 
     @Test
@@ -132,7 +132,7 @@ public class NewRuleResultApiDemonstrationTest {
         System.out.println("result.getRuleName(): " + oldApi + " (confusing - is this a matched rule or failed group?)");
         
         System.out.println("\n--- NEW CLEAR API ---");
-        System.out.println("✅ SOLUTION: Separate methods with clear semantics");
+        System.out.println("SOLUTION: Separate methods with clear semantics");
         System.out.println("result.getRuleMatchedName(): " + result.getRuleMatchedName() + " (null = no rule matched)");
         System.out.println("result.getLastFailedGroupName(): " + result.getLastFailedGroupName() + " (diagnostic info)");
         System.out.println("result.getHighestFailedSeverity(): " + result.getHighestFailedSeverity() + " (failure severity)");

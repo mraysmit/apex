@@ -40,11 +40,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * - CurrencyMarketMappingTest-h2.yaml: H2 database for currency validation
  *
  * CRITICAL VALIDATION CHECKLIST APPLIED:
- * ✅ Count enrichments in YAML - 1 enrichment expected per configuration
- * ✅ Verify log shows "Processed: 1 out of 1" - Must be 100% execution rate
- * ✅ Check EVERY enrichment condition - Test data triggers lookup conditions
- * ✅ Validate EVERY business calculation - Test actual lookup validation logic
- * ✅ Assert ALL enrichment results - Every result-field has corresponding assertEquals
+ * Count enrichments in YAML - 1 enrichment expected per configuration
+ * Verify log shows "Processed: 1 out of 1" - Must be 100% execution rate
+ * Check EVERY enrichment condition - Test data triggers lookup conditions
+ * Validate EVERY business calculation - Test actual lookup validation logic
+ * Assert ALL enrichment results - Every result-field has corresponding assertEquals
  *
  * BUSINESS LOGIC VALIDATION:
  * - Currency code to market exchange mapping (inline dataset)
@@ -158,7 +158,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         logger.debug("✓ Trading hours validation passed: {}", tradingHours);
 
         logger.debug("All USD market mapping validations completed successfully");
-            logger.info("✅ Comprehensive currency market mapping functionality test completed successfully");
+            logger.info("Comprehensive currency market mapping functionality test completed successfully");
         } catch (Exception e) {
             fail("Failed to load YAML configuration: " + e.getMessage());
         }
@@ -226,7 +226,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         }
 
         logger.debug("Major currency mapping test completed for all {} currencies", currencies.length);
-            logger.info("✅ Major currency mapping processing test completed successfully");
+            logger.info("Major currency mapping processing test completed successfully");
         } catch (Exception e) {
             logger.error("Failed to load YAML configuration for major currency test: {}", e.getMessage(), e);
             fail("Failed to load YAML configuration: " + e.getMessage());
@@ -284,7 +284,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         }
 
         logger.debug("Invalid currency handling test completed for all {} invalid currencies", invalidCurrencies.length);
-            logger.info("✅ Invalid currency handling test completed successfully");
+            logger.info("Invalid currency handling test completed successfully");
         } catch (Exception e) {
             logger.error("Failed to load YAML configuration for invalid currency test: {}", e.getMessage(), e);
             fail("Failed to load YAML configuration: " + e.getMessage());
@@ -362,7 +362,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         logger.debug("✓ Validation passed: empty currency correctly skipped enrichment (condition: #currency != null && #currency.length() > 0)");
 
         logger.debug("Null and empty currency validation completed successfully");
-            logger.info("✅ Null and empty currency validation test completed successfully");
+            logger.info("Null and empty currency validation test completed successfully");
         } catch (Exception e) {
             fail("Failed to load YAML configuration: " + e.getMessage());
         }
@@ -423,7 +423,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         assertTrue((Boolean) enrichedDataValid.get("isActiveCurrency"), "Currency should be active");
         logger.debug("✓ All USD database validations passed");
 
-        logger.info("✅ Valid currency test: USD -> {}", enrichedDataValid.get("currencyName"));
+        logger.info("Valid currency test: USD -> {}", enrichedDataValid.get("currencyName"));
 
         // Test another valid currency
         logger.debug("--- Testing valid currency: EUR ---");
@@ -450,7 +450,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         assertEquals("Euro", enrichedDataEUR.get("currencyName"), "EUR name should be correct");
         logger.debug("✓ EUR database validations passed");
 
-        logger.info("✅ Valid currency test: EUR -> {}", enrichedDataEUR.get("currencyName"));
+        logger.info("Valid currency test: EUR -> {}", enrichedDataEUR.get("currencyName"));
 
         // Test invalid currency - should not find match in database
         logger.debug("--- Testing invalid currency: XYZ ---");
@@ -483,7 +483,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         assertNull(enrichedDataInvalid.get("currencyName"), "Currency name should be null for invalid currency");
         logger.debug("✓ XYZ correctly returned null (not found in database)");
 
-        logger.info("✅ Invalid currency test: XYZ -> not found (as expected)");
+        logger.info("Invalid currency test: XYZ -> not found (as expected)");
 
         // Test null currency - should skip lookup due to condition
         logger.debug("--- Testing null currency with H2 database ---");
@@ -513,10 +513,10 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         assertNull(enrichedDataNull.get("validatedCurrencyCode"), "Null currency should not trigger database lookup");
         logger.debug("✓ Null currency correctly skipped database lookup (condition: #currency != null && #currency.length() > 0)");
 
-        logger.info("✅ Null currency test: null -> no lookup (as expected)");
+        logger.info("Null currency test: null -> no lookup (as expected)");
 
         logger.debug("H2 database currency validation test completed successfully");
-            logger.info("✅ H2 database currency validation test completed successfully");
+            logger.info("H2 database currency validation test completed successfully");
         } catch (Exception e) {
             logger.error("CRITICAL ERROR: Failed to load H2 YAML configuration: {}", e.getMessage());
             logger.error("H2 database currency validation test cannot proceed");

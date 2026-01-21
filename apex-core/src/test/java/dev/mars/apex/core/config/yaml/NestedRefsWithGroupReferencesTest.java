@@ -108,13 +108,13 @@ class NestedRefsWithGroupReferencesTest {
                 "itemOrder should contain exactly 1 item: main_group");
 
         logger.info("=== TEST RESULTS ===");
-        logger.info("✅ main_group in itemOrder: {}", mainGroupInItemOrder);
-        logger.info("✅ level1_group filtered from itemOrder: {}", !level1GroupInItemOrder);
-        logger.info("✅ level2_group filtered from itemOrder: {}", !level2GroupInItemOrder);
-        logger.info("✅ level2_enrichment filtered from itemOrder: {}", !level2EnrichmentInItemOrder);
-        logger.info("✅ level1_enrichment filtered from itemOrder: {}", !level1EnrichmentInItemOrder);
-        logger.info("✅ main_enrichment filtered from itemOrder: {}", !mainEnrichmentInItemOrder);
-        logger.info("✅ Final itemOrder size: {}", itemOrder.size());
+        logger.info("main_group in itemOrder: {}", mainGroupInItemOrder);
+        logger.info("level1_group filtered from itemOrder: {}", !level1GroupInItemOrder);
+        logger.info("level2_group filtered from itemOrder: {}", !level2GroupInItemOrder);
+        logger.info("level2_enrichment filtered from itemOrder: {}", !level2EnrichmentInItemOrder);
+        logger.info("level1_enrichment filtered from itemOrder: {}", !level1EnrichmentInItemOrder);
+        logger.info("main_enrichment filtered from itemOrder: {}", !mainEnrichmentInItemOrder);
+        logger.info("Final itemOrder size: {}", itemOrder.size());
     }
 }
 

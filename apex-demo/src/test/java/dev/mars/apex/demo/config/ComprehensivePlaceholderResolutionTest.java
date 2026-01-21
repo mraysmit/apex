@@ -149,7 +149,7 @@ class ComprehensivePlaceholderResolutionTest {
             logger.info("🎉 Database placeholder resolution test PASSED");
 
         } catch (Exception e) {
-            logger.error("❌ Database placeholder resolution test FAILED: {}", e.getMessage(), e);
+            logger.error("Database placeholder resolution test FAILED: {}", e.getMessage(), e);
             fail("Database placeholder resolution failed: " + e.getMessage());
         }
     }
@@ -203,7 +203,7 @@ class ComprehensivePlaceholderResolutionTest {
             logger.info("🎉 Mixed placeholder syntax test PASSED");
 
         } catch (Exception e) {
-            logger.error("❌ Mixed placeholder syntax test FAILED: {}", e.getMessage(), e);
+            logger.error("Mixed placeholder syntax test FAILED: {}", e.getMessage(), e);
             fail("Mixed placeholder syntax failed: " + e.getMessage());
         }
     }
@@ -257,7 +257,7 @@ class ComprehensivePlaceholderResolutionTest {
             logger.info("🎉 Default value resolution test PASSED");
 
         } catch (Exception e) {
-            logger.error("❌ Default value resolution test FAILED: {}", e.getMessage(), e);
+            logger.error("Default value resolution test FAILED: {}", e.getMessage(), e);
             fail("Default value resolution failed: " + e.getMessage());
         }
     }
@@ -324,7 +324,7 @@ class ComprehensivePlaceholderResolutionTest {
             logger.info("🎉 Complex placeholder resolution test PASSED");
 
         } catch (Exception e) {
-            logger.error("❌ Complex placeholder resolution test FAILED: {}", e.getMessage(), e);
+            logger.error("Complex placeholder resolution test FAILED: {}", e.getMessage(), e);
             fail("Complex placeholder resolution failed: " + e.getMessage());
         }
     }
@@ -357,7 +357,7 @@ class ComprehensivePlaceholderResolutionTest {
             logger.info("🎉 Missing required properties test PASSED");
 
         } catch (AssertionError e) {
-            logger.error("❌ Missing required properties test FAILED: {}", e.getMessage());
+            logger.error("Missing required properties test FAILED: {}", e.getMessage());
             throw e;
         }
     }
@@ -395,7 +395,7 @@ class ComprehensivePlaceholderResolutionTest {
             logger.info("🎉 Property precedence test PASSED");
 
         } catch (Exception e) {
-            logger.error("❌ Property precedence test FAILED: {}", e.getMessage(), e);
+            logger.error("Property precedence test FAILED: {}", e.getMessage(), e);
             fail("Property precedence test failed: " + e.getMessage());
         }
     }

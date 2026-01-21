@@ -539,11 +539,11 @@ SpEL is now used consistently across ALL APEX features:
 
 | Feature | SpEL Support | Example |
 |---------|--------------|---------|
-| **Conditions** | ✅ Yes | `condition: '#currency != null'` |
-| **Transformations** | ✅ Yes | `expression: '#currency'` |
-| **Lookup Keys** | ✅ Yes | `lookup-key: '#symbol'` |
-| **Calculations** | ✅ Yes | `expression: '#amount * 0.01'` |
-| **Field Mappings** | ✅ **NEW!** | `source-field: '#currency'` |
+| **Conditions** | Yes | `condition: '#currency != null'` |
+| **Transformations** | Yes | `expression: '#currency'` |
+| **Lookup Keys** | Yes | `lookup-key: '#symbol'` |
+| **Calculations** | Yes | `expression: '#amount * 0.01'` |
+| **Field Mappings** | **NEW!** | `source-field: '#currency'` |
 
 ### Basic SpEL Field Mapping
 
@@ -553,7 +553,7 @@ enrichments:
     type: "field-enrichment"
     condition: "#field != null"
     field-mappings:
-      # ✅ Access nested fields with SpEL (use # prefix)
+      # Access nested fields with SpEL (use # prefix)
       - source-field: "#currency"
         target-field: "buy_currency"
 
@@ -1268,10 +1268,10 @@ enrichments:
 ### 1. Choose the Right Approach
 
 ```yaml
-# ✅ Good - Simple ternary for simple mapping
+# Good - Simple ternary for simple mapping
 expression: "#status == 'A' ? 'ACTIVE' : 'INACTIVE'"
 
-# ❌ Bad - Overkill for simple mapping
+# Bad - Overkill for simple mapping
 rules:
   - id: "status-active"
     condition: "#status == 'A'"
@@ -1285,12 +1285,12 @@ enrichments:
 ### 2. Use Meaningful IDs and Names
 
 ```yaml
-# ✅ Good - Clear, descriptive IDs
+# Good - Clear, descriptive IDs
 rules:
   - id: "high-value-transaction-over-100k"
     name: "High Value Transaction Exceeds $100,000"
 
-# ❌ Bad - Unclear IDs
+# Bad - Unclear IDs
 rules:
   - id: "rule1"
     name: "Check amount"
@@ -1299,7 +1299,7 @@ rules:
 ### 3. Document Complex Conditions
 
 ```yaml
-# ✅ Good - Documented logic
+# Good - Documented logic
 enrichments:
   - id: "priority-routing"
     name: "Priority-Based Transaction Routing"
@@ -1321,12 +1321,12 @@ enrichments:
 ### 4. Handle Null Values Safely
 
 ```yaml
-# ✅ Good - Null-safe conditions
+# Good - Null-safe conditions
 condition: "#amount != null && #amount > 0"
 condition: "#customer?.tier == 'PREMIUM'"  # Safe navigation
 condition: "#ruleResults.containsKey('rule-id') && #ruleResults['rule-id'] == true"
 
-# ❌ Bad - Can throw NullPointerException
+# Bad - Can throw NullPointerException
 condition: "#amount > 0"  # Fails if amount is null
 condition: "#ruleResults['rule-id'] == true"  # Fails if rule wasn't evaluated
 ```
@@ -1354,17 +1354,17 @@ expression: |
 ### 6. Keep Conditions Simple
 
 ```yaml
-# ✅ Good - Simple, readable condition
+# Good - Simple, readable condition
 condition: "#status == 'ACTIVE' && #balance > 0"
 
-# ❌ Bad - Overly complex condition
+# Bad - Overly complex condition
 condition: |
   (#status == 'ACTIVE' || #status == 'PENDING') &&
   (#balance > 0 || (#overdraftProtection == true && #balance > -1000)) &&
   (#lastActivity != null && #lastActivity.isAfter(T(java.time.LocalDateTime).now().minusDays(90))) &&
   (#riskScore < 500 || (#manualOverride == true && #approvedBy != null))
 
-# ✅ Better - Break into multiple rules
+# Better - Break into multiple rules
 rules:
   - id: "account-active"
     condition: "#status == 'ACTIVE' || #status == 'PENDING'"
@@ -1406,12 +1406,12 @@ Rule chains provide advanced orchestration capabilities for complex multi-stage 
 
 **When to Use Rule Chains:**
 
-- ✅ Multi-stage processing with dependencies between stages
-- ✅ Weighted scoring systems (accumulative decision making)
-- ✅ Eligibility checking with branching logic
-- ✅ Complex workflows with conditional routing
-- ✅ Sequential processing where each rule builds on previous results
-- ✅ Dynamic routing based on intermediate outcomes
+- Multi-stage processing with dependencies between stages
+- Weighted scoring systems (accumulative decision making)
+- Eligibility checking with branching logic
+- Complex workflows with conditional routing
+- Sequential processing where each rule builds on previous results
+- Dynamic routing based on intermediate outcomes
 
 **APEX supports 6 rule chain patterns:**
 
@@ -1507,11 +1507,11 @@ rule-chains:
 
 #### Key Features
 
-- ✅ Clear if-then-else semantics
-- ✅ Multiple rules in each branch
-- ✅ Context variable tracking
-- ✅ Stage result management
-- ✅ Outcome tracking (TRIGGERED_PATH_COMPLETED / NON_TRIGGERED_PATH_COMPLETED)
+- Clear if-then-else semantics
+- Multiple rules in each branch
+- Context variable tracking
+- Stage result management
+- Outcome tracking (TRIGGERED_PATH_COMPLETED / NON_TRIGGERED_PATH_COMPLETED)
 
 ---
 
@@ -1670,10 +1670,10 @@ rule-chains:
 
 #### Key Features
 
-- ✅ Explicit stage dependencies
-- ✅ Output variables passed between stages
-- ✅ Failure handling (terminate on stage failure)
-- ✅ Stage result tracking
+- Explicit stage dependencies
+- Output variables passed between stages
+- Failure handling (terminate on stage failure)
+- Stage result tracking
 
 ---
 
@@ -1792,10 +1792,10 @@ rule-chains:
 
 #### Key Features
 
-- ✅ Multiple stages with dependencies
-- ✅ Parallel execution support
-- ✅ Failure action configuration (terminate, escalate, continue)
-- ✅ Complex dependency graphs
+- Multiple stages with dependencies
+- Parallel execution support
+- Failure action configuration (terminate, escalate, continue)
+- Complex dependency graphs
 
 ---
 
@@ -1852,10 +1852,10 @@ rule-chains:
 
 #### Key Features
 
-- ✅ Nested rule composition
-- ✅ on-success / on-failure branching
-- ✅ Tree-like structure
-- ✅ Fluent configuration style
+- Nested rule composition
+- on-success / on-failure branching
+- Tree-like structure
+- Fluent configuration style
 
 ---
 
@@ -1893,12 +1893,12 @@ Do you need weighted scoring?
 
 | Scenario | Use Enrichment Condition | Use Rule Chain |
 |----------|-------------------------|----------------|
-| Apply single enrichment conditionally | ✅ | ❌ |
-| Multi-stage workflow | ❌ | ✅ |
-| Weighted scoring across rules | ❌ | ✅ |
-| Simple field-level condition | ✅ | ❌ |
-| Complex branching logic | ❌ | ✅ |
-| Progressive enrichment pipeline | ❌ | ✅ |
+| Apply single enrichment conditionally | | |
+| Multi-stage workflow | | |
+| Weighted scoring across rules | | |
+| Simple field-level condition | | |
+| Complex branching logic | | |
+| Progressive enrichment pipeline | | |
 
 ---
 
@@ -2214,14 +2214,14 @@ Let's trace how a transaction flows through this configuration:
 **Processing Steps:**
 
 1. **Rule Evaluation:**
-   - ✅ `high-value` → PASS (amount > 100,000)
-   - ✅ `very-high-value` → PASS (amount > 1,000,000)
-   - ✅ `premium-customer` → PASS (tier = PREMIUM)
-   - ✅ `new-customer` → PASS (accountAge < 90)
-   - ❌ `high-risk-country` → FAIL (US not in high-risk list)
-   - ✅ `unusual-pattern` → PASS (1.5M > 50K * 10)
-   - ❌ `requires-kyc` → FAIL (KYC verified and not expired)
-   - ✅ `requires-aml-check` → PASS (amount > 10,000)
+   - `high-value` → PASS (amount > 100,000)
+   - `very-high-value` → PASS (amount > 1,000,000)
+   - `premium-customer` → PASS (tier = PREMIUM)
+   - `new-customer` → PASS (accountAge < 90)
+   - `high-risk-country` → FAIL (US not in high-risk list)
+   - `unusual-pattern` → PASS (1.5M > 50K * 10)
+   - `requires-kyc` → FAIL (KYC verified and not expired)
+   - `requires-aml-check` → PASS (amount > 10,000)
 
 2. **Rule Group Evaluation:**
    - `risk-indicators` (OR) → **PASS** (new-customer OR unusual-pattern)

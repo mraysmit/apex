@@ -97,7 +97,7 @@ public class ItemLevelProcessingOtcOptionsTest {
         // R2 should trigger because VaR (7.5M) < 10M limit
         assertTrue(result.isSuccess(), "Overall result should be success - all validations passed");
 
-        LOGGER.info("✅ Item-level processing test PASSED");
+        LOGGER.info("Item-level processing test PASSED");
         LOGGER.info("   Processing Order:");
         LOGGER.info("   1. E1 (enrich-counterparty-credit-rating) -> Added credit rating & limit");
         LOGGER.info("   2. R1 (validate-credit-limit) -> Validated using E1 data");
@@ -150,7 +150,7 @@ public class ItemLevelProcessingOtcOptionsTest {
         // Since VaR is 12M, R2 will NOT trigger, but overall processing should still succeed
         assertTrue(result.isSuccess(), "Overall processing should succeed even if R2 doesn't trigger");
 
-        LOGGER.info("✅ High-risk trade test PASSED");
+        LOGGER.info("High-risk trade test PASSED");
         LOGGER.info("   VaR: " + enrichedData.get("valueAtRisk") + " (exceeds 10M limit)");
         LOGGER.info("   Trade NOT approved due to high VaR (R2 did not trigger)");
     }
@@ -198,7 +198,7 @@ public class ItemLevelProcessingOtcOptionsTest {
         // Both R1 and R2 should trigger, overall success
         assertTrue(result.isSuccess(), "Overall result should be success - all validations passed");
 
-        LOGGER.info("✅ Low-risk counterparty test PASSED");
+        LOGGER.info("Low-risk counterparty test PASSED");
         LOGGER.info("   Credit Rating: " + enrichedData.get("counterpartyCreditRating"));
         LOGGER.info("   VaR: " + enrichedData.get("valueAtRisk") + " (within 10M limit)");
         LOGGER.info("   Trade approved");

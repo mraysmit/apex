@@ -535,8 +535,8 @@ function processTreeData(treeData) {
 
         // Convert to D3 hierarchy
         root = d3.hierarchy(treeData);
-        console.log('✅ D3 hierarchy created. Root:', root.data.name);
-        console.log('✅ Root has children:', root.children ? root.children.length : 0);
+        console.log('D3 hierarchy created. Root:', root.data.name);
+        console.log('Root has children:', root.children ? root.children.length : 0);
 
         // Check for issues in the tree
         const issues = analyzeTreeIssues(root);
@@ -571,7 +571,7 @@ function processTreeData(treeData) {
         // Render the tree
         console.log('🎭 Calling update() to render tree...');
         update(root);
-        console.log('✅ Tree rendered successfully!');
+        console.log('Tree rendered successfully!');
 
         // Calculate and update statistics from actual tree data
         calculateAndUpdateStatistics(root);
@@ -710,7 +710,7 @@ function update(source) {
     const nodes = treeData.descendants();
     const links = treeData.descendants().slice(1);
     
-    console.log('  📊 Tree has', nodes.length, 'nodes and', links.length, 'links');
+    console.log('  Tree has', nodes.length, 'nodes and', links.length, 'links');
     
     // No need to manually set d.y - nodeSize() handles spacing automatically
     

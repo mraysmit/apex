@@ -113,7 +113,7 @@ public class RuleGroupRefsSequentialOrderTest {
         // Verify all rules passed (trade is within limits)
         assertTrue(result.isTriggered(), "Rules should trigger");
 
-        LOGGER.info("✅ Rule-Group-Refs Placeholder Expansion Test PASSED");
+        LOGGER.info("Rule-Group-Refs Placeholder Expansion Test PASSED");
         LOGGER.info("   Processing Order Verified:");
         LOGGER.info("   1. E1 (inline): enrich-market-data ✓");
         LOGGER.info("   2. E2 (inline): calculate-risk-metrics ✓");
@@ -147,7 +147,7 @@ public class RuleGroupRefsSequentialOrderTest {
             .anyMatch(rg -> "risk-validation-group".equals(rg.getId()));
         assertTrue(hasRiskValidationGroup, "Should have external rule group: risk-validation-group");
 
-        LOGGER.info("✅ All rule groups loaded correctly from external file");
+        LOGGER.info("All rule groups loaded correctly from external file");
     }
 
     @Test
@@ -199,7 +199,7 @@ public class RuleGroupRefsSequentialOrderTest {
 
         LOGGER.info("✓ Test Case 3: Invalid strike - validation rule triggered correctly (reported violation without blocking processing)");
 
-        LOGGER.info("✅ Rule-Group-Refs Execution Order with Validation Failures Test PASSED");
+        LOGGER.info("Rule-Group-Refs Execution Order with Validation Failures Test PASSED");
     }
 }
 

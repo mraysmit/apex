@@ -56,10 +56,10 @@ transformations:
 ### **Resolution: Standardize on `expression`**
 
 **Rationale:**
-1. ✅ **Technical accuracy** - It's literally a SpEL expression
-2. ✅ **Consistency with SpEL** - Spring Expression Language calls them "expressions"
-3. ✅ **Already used in 2 places** - `calculation-config` and `TransformationAction`
-4. ✅ **Shorter and clearer** - More concise than "transformation"
+1. **Technical accuracy** - It's literally a SpEL expression
+2. **Consistency with SpEL** - Spring Expression Language calls them "expressions"
+3. **Already used in 2 places** - `calculation-config` and `TransformationAction`
+4. **Shorter and clearer** - More concise than "transformation"
 
 **Strategy:**
 - **Phase 1:** Support both `expression` and `transformation` (backward compatibility)
@@ -70,7 +70,7 @@ transformations:
 
 ## Current State vs. Desired State
 
-### ✅ **What Works Today:**
+### **What Works Today:**
 
 ```yaml
 # 1. Expressions in field-mappings (WORKING - but uses old "transformation" name)
@@ -94,7 +94,7 @@ pipeline:
           value: "CURRENT_TIMESTAMP"
 ```
 
-### ❌ **What Doesn't Work (Yet):**
+### **What Doesn't Work (Yet):**
 
 ```yaml
 # 3. Top-level transformations section (NOT WORKING)
@@ -516,14 +516,14 @@ transformations:
 
 ## Success Criteria
 
-1. ✅ `Test8_TransformationsBasicTest` passes
-2. ✅ Transformations execute in exact document order
-3. ✅ Transformations work with enrichments and rules
-4. ✅ Conditional transformations work correctly
-5. ✅ Transformation-rules with actions work correctly
-6. ✅ Error handling integrates with error-recovery system
-7. ✅ Documentation is complete and accurate
-8. ✅ No breaking changes to existing functionality
+1. `Test8_TransformationsBasicTest` passes
+2. Transformations execute in exact document order
+3. Transformations work with enrichments and rules
+4. Conditional transformations work correctly
+5. Transformation-rules with actions work correctly
+6. Error handling integrates with error-recovery system
+7. Documentation is complete and accurate
+8. No breaking changes to existing functionality
 
 ---
 
@@ -555,10 +555,10 @@ transformations:
 ## Deprecation Timeline
 
 ### Version 3.1 (Current)
-- ✅ Add `expression` property to all relevant classes
-- ✅ Support both `expression` and `transformation` (backward compatible)
-- ✅ Log deprecation warnings when `transformation` is used
-- ✅ Update all documentation to use `expression`
+- Add `expression` property to all relevant classes
+- Support both `expression` and `transformation` (backward compatible)
+- Log deprecation warnings when `transformation` is used
+- Update all documentation to use `expression`
 
 ### Version 3.2 (Next Minor Release)
 - ⚠️ Continue supporting both properties
@@ -566,9 +566,9 @@ transformations:
 - ⚠️ Add migration guide to release notes
 
 ### Version 4.0 (Next Major Release)
-- ❌ Remove `transformation` property entirely
-- ✅ Only support `expression` property
-- ✅ Breaking change documented in migration guide
+- Remove `transformation` property entirely
+- Only support `expression` property
+- Breaking change documented in migration guide
 
 ---
 

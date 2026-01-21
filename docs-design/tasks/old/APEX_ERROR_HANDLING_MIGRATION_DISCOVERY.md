@@ -16,17 +16,17 @@
 - **Total Java test files**: ~200+ files
 
 ### Critical Findings - **UPDATED AFTER ANALYSIS**
-1. ✅ **EXCELLENT NEWS**: ALL 10 Java files with deprecated APIs are legitimate unit tests OF the deprecated processor itself
-2. ✅ **NO JAVA MIGRATION NEEDED**: All deprecated API usage is intentional (testing the deprecated class)
+1. **EXCELLENT NEWS**: ALL 10 Java files with deprecated APIs are legitimate unit tests OF the deprecated processor itself
+2. **NO JAVA MIGRATION NEEDED**: All deprecated API usage is intentional (testing the deprecated class)
 3. ⚠️ **YAML MIGRATION ONLY**: 362 YAML files need error-handling configuration added
-4. ✅ **Progress**: 96 YAML files already have error handling (21% complete)
-5. ✅ **apex-demo**: Already fully migrated to RulesEngine.evaluate() - no deprecated API usage!
+4. **Progress**: 96 YAML files already have error handling (21% complete)
+5. **apex-demo**: Already fully migrated to RulesEngine.evaluate() - no deprecated API usage!
 
 ---
 
 ## Detailed Inventory
 
-### 1. Java Files with Deprecated API Usage (10 files) - ✅ **NO MIGRATION NEEDED**
+### 1. Java Files with Deprecated API Usage (10 files) - **NO MIGRATION NEEDED**
 
 #### apex-core Unit Tests (10 files) - **LEGITIMATE TESTS OF DEPRECATED CLASS**
 These are legitimate unit tests of the YamlEnrichmentProcessor itself - they SHOULD use deprecated APIs:
@@ -42,17 +42,17 @@ These are legitimate unit tests of the YamlEnrichmentProcessor itself - they SHO
 9. `apex-core/src/test/java/dev/mars/apex/core/service/enrichment/SpelFieldMappingTest.java`
 10. `apex-core/src/test/java/dev/mars/apex/core/service/enrichment/YamlEnrichmentProcessorCachingTest.java`
 
-**Migration Strategy**: ✅ **NO MIGRATION** - Add `@SuppressWarnings("deprecation")` and documentation comments explaining these are legitimate tests OF the deprecated class
+**Migration Strategy**: **NO MIGRATION** - Add `@SuppressWarnings("deprecation")` and documentation comments explaining these are legitimate tests OF the deprecated class
 
-#### apex-demo Tests (0 files) - ✅ **ALREADY MIGRATED**
+#### apex-demo Tests (0 files) - **ALREADY MIGRATED**
 
-**Status**: ✅ **COMPLETE** - All apex-demo tests already use `RulesEngine.evaluate()` - no deprecated API usage found!
+**Status**: **COMPLETE** - All apex-demo tests already use `RulesEngine.evaluate()` - no deprecated API usage found!
 
 ---
 
 ### 2. YAML Files Status
 
-#### Files WITH Error Handling (96 files) - ✅ COMPLETE
+#### Files WITH Error Handling (96 files) - COMPLETE
 These files already have `error-handling:` or `error-recovery:` configuration
 
 #### Files NEEDING Migration (~362 files) - ⏳ TODO
@@ -145,7 +145,7 @@ These files need error-handling configuration added to rule-groups/enrichment-gr
 
 ## Next Steps
 
-1. ✅ **Discovery Complete** - This document
+1. **Discovery Complete** - This document
 2. ⏳ **Start Batch 1** - Critical integration tests
 3. ⏳ **Incremental validation** - Test after each batch
 4. ⏳ **Track progress** - Update task list after each batch
@@ -155,12 +155,12 @@ These files need error-handling configuration added to rule-groups/enrichment-gr
 
 ## Success Criteria
 
-✅ **ZERO deprecated API calls** in apex-core and apex-demo  
-✅ **ALL YAML files** have error-handling configuration  
-✅ **ALL tests** validate error handling behavior  
-✅ **ALL tests pass** green (3,000+ tests)  
-✅ **ZERO deprecation warnings** when compiling  
-✅ **Demos showcase** error handling features  
+**ZERO deprecated API calls** in apex-core and apex-demo  
+**ALL YAML files** have error-handling configuration  
+**ALL tests** validate error handling behavior  
+**ALL tests pass** green (3,000+ tests)  
+**ZERO deprecation warnings** when compiling  
+**Demos showcase** error handling features  
 
 ---
 

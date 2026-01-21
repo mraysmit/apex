@@ -70,7 +70,7 @@ class YamlTransformationProcessorErrorHandlingTest {
             "Result type should be ERROR when transformation fails");
         assertFalse(result.isSuccess(), "Result should indicate failure");
         
-        logger.info("✅ Test 1 PASSED: Catch block handled exception gracefully");
+        logger.info("Test 1 PASSED: Catch block handled exception gracefully");
         logger.info("   Result type: {}", result.getResultType());
         logger.info("   Result message: {}", result.getMessage());
     }
@@ -97,7 +97,7 @@ class YamlTransformationProcessorErrorHandlingTest {
         assertTrue(result.isSuccess(), "Result should indicate success");
         assertFalse(result.hasFailures(), "Should have no failures");
 
-        logger.info("✅ Test 2 PASSED: Transformation processing succeeds with valid configuration");
+        logger.info("Test 2 PASSED: Transformation processing succeeds with valid configuration");
     }
 
     @Test
@@ -115,7 +115,7 @@ class YamlTransformationProcessorErrorHandlingTest {
         assertNotNull(result, "Result should not be null");
         assertTrue(result.isSuccess(), "Result should indicate success for null transformations");
 
-        logger.info("✅ Test 3 PASSED: Null transformations handled gracefully");
+        logger.info("Test 3 PASSED: Null transformations handled gracefully");
     }
 
     @Test
@@ -160,7 +160,7 @@ class YamlTransformationProcessorErrorHandlingTest {
         assertTrue(ruleName.contains("error-tracking-transformation"),
             "Rule name should contain the transformation ID");
 
-        logger.info("✅ Test 4 PASSED: Error result contains proper error message and metadata");
+        logger.info("Test 4 PASSED: Error result contains proper error message and metadata");
         logger.info("   Rule name: {}", ruleName);
         logger.info("   Error message: {}", errorMessage);
     }

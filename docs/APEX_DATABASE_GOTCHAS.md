@@ -269,7 +269,7 @@ When using TestContainers, the container's host and port are **dynamically assig
 
 ### The Wrong Approach
 
-❌ **Don't use System properties in YAML:**
+**Don't use System properties in YAML:**
 ```yaml
 # This is fragile and hard to debug
 connection:
@@ -279,7 +279,7 @@ connection:
 
 ### The Correct Approach (Proven Pattern)
 
-✅ **Load YAML, then programmatically update connection details:**
+**Load YAML, then programmatically update connection details:**
 
 ```java
 @Test

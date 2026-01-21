@@ -54,10 +54,10 @@ import java.util.Map;
  * 
  * <p><b>Benefits:</b></p>
  * <ul>
- *   <li>✅ No casting required - returns {@link ScenarioExecutionResult} directly</li>
- *   <li>✅ Type-safe at compile time</li>
- *   <li>✅ Fluent, readable API with method chaining</li>
- *   <li>✅ Clear intent - developer knows they're working with scenarios</li>
+ *   <li>No casting required - returns {@link ScenarioExecutionResult} directly</li>
+ *   <li>Type-safe at compile time</li>
+ *   <li>Fluent, readable API with method chaining</li>
+ *   <li>Clear intent - developer knows they're working with scenarios</li>
  * </ul>
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd

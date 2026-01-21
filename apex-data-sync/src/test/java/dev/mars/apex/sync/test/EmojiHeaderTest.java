@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests emoji rendering in Markdown headers.
  * <p>
  * This test validates that Markdown reports correctly render emojis in section
- * headers for visual categorization (✅ Compatible, ⚠️ Breaking, etc.).
+ * headers for visual categorization (Compatible, ⚠️ Breaking, etc.).
  * </p>
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd

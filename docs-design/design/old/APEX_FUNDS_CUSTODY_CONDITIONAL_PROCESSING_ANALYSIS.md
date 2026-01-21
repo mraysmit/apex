@@ -19,8 +19,8 @@ This document analyzes the conditional processing requirements described in the 
 
 The Funds and Custody guide describes **two advanced rule-chain patterns** that are **NOT documented** in the APEX_CONDITIONAL_PROCESSING_GUIDE and have **LIMITED implementation** in apex-core:
 
-1. **Accumulative Chaining Pattern** - ✅ Implemented but ❌ Not documented in Conditional Processing Guide
-2. **Conditional Chaining Pattern** - ✅ Implemented but ❌ Not documented in Conditional Processing Guide
+1. **Accumulative Chaining Pattern** - Implemented but Not documented in Conditional Processing Guide
+2. **Conditional Chaining Pattern** - Implemented but Not documented in Conditional Processing Guide
 
 ---
 
@@ -65,7 +65,7 @@ rule-chains:
 
 #### Implementation Status in apex-core
 
-**Status:** ✅ **FULLY IMPLEMENTED**
+**Status:** **FULLY IMPLEMENTED**
 
 **Evidence:**
 - **Class:** `AccumulativeChainingExecutor.java`
@@ -95,15 +95,15 @@ for (Object ruleObj : accumulationRules) {
 ```
 
 **Advanced Features Implemented:**
-- ✅ Rule selection strategies (weight-threshold, top-weighted, priority-based, dynamic-threshold)
-- ✅ Weighted scoring with configurable weights
-- ✅ Final decision rule evaluation
-- ✅ Context variable management
-- ✅ Stage result tracking
+- Rule selection strategies (weight-threshold, top-weighted, priority-based, dynamic-threshold)
+- Weighted scoring with configurable weights
+- Final decision rule evaluation
+- Context variable management
+- Stage result tracking
 
 #### Documentation Status in APEX_CONDITIONAL_PROCESSING_GUIDE
 
-**Status:** ❌ **NOT DOCUMENTED**
+**Status:** **NOT DOCUMENTED**
 
 **Gap:** The APEX_CONDITIONAL_PROCESSING_GUIDE.md does NOT mention:
 - Accumulative chaining pattern
@@ -147,7 +147,7 @@ rule-chains:
 
 #### Implementation Status in apex-core
 
-**Status:** ✅ **FULLY IMPLEMENTED**
+**Status:** **FULLY IMPLEMENTED**
 
 **Evidence:**
 - **Class:** `ConditionalChainingExecutor.java`
@@ -177,15 +177,15 @@ if (triggerResult.isTriggered()) {
 ```
 
 **Features Implemented:**
-- ✅ Trigger rule evaluation
-- ✅ on-trigger rule execution
-- ✅ on-no-trigger rule execution
-- ✅ Context variable tracking
-- ✅ Stage result management
+- Trigger rule evaluation
+- on-trigger rule execution
+- on-no-trigger rule execution
+- Context variable tracking
+- Stage result management
 
 #### Documentation Status in APEX_CONDITIONAL_PROCESSING_GUIDE
 
-**Status:** ❌ **NOT DOCUMENTED**
+**Status:** **NOT DOCUMENTED**
 
 **Gap:** The APEX_CONDITIONAL_PROCESSING_GUIDE.md does NOT mention:
 - Conditional chaining pattern
@@ -204,14 +204,14 @@ if (triggerResult.isTriggered()) {
 
 | Approach | Funds & Custody Guide | Conditional Processing Guide | apex-core Implementation |
 |----------|----------------------|------------------------------|--------------------------|
-| **Ternary Operators** | ✅ Extensively used in SpEL | ✅ Section 3 (Lines 82-173) | ✅ Fully implemented |
-| **Rule-Based Conditions** | ✅ Used in rule chains | ✅ Section 4 (Lines 176-297) | ✅ Fully implemented |
-| **Rule Result References** | ❌ Not mentioned | ✅ Section 5 (Lines 299-413) | ✅ Fully implemented |
-| **Conditional Enrichments** | ✅ Extensively used | ✅ Section 6 (Lines 415-510) | ✅ Fully implemented |
-| **SpEL in Field Mappings** | ✅ Used throughout | ✅ Section 6.5 (Lines 513-674) | ✅ Fully implemented |
-| **Priority-Based Conditional Mapping** | ❌ Not mentioned | ✅ Section 7 (Lines 677-828) | ✅ Fully implemented |
-| **Accumulative Chaining** | ✅ **PRIMARY PATTERN** | ❌ **NOT DOCUMENTED** | ✅ Fully implemented |
-| **Conditional Chaining** | ✅ **PRIMARY PATTERN** | ❌ **NOT DOCUMENTED** | ✅ Fully implemented |
+| **Ternary Operators** | Extensively used in SpEL | Section 3 (Lines 82-173) | Fully implemented |
+| **Rule-Based Conditions** | Used in rule chains | Section 4 (Lines 176-297) | Fully implemented |
+| **Rule Result References** | Not mentioned | Section 5 (Lines 299-413) | Fully implemented |
+| **Conditional Enrichments** | Extensively used | Section 6 (Lines 415-510) | Fully implemented |
+| **SpEL in Field Mappings** | Used throughout | Section 6.5 (Lines 513-674) | Fully implemented |
+| **Priority-Based Conditional Mapping** | Not mentioned | Section 7 (Lines 677-828) | Fully implemented |
+| **Accumulative Chaining** | **PRIMARY PATTERN** | **NOT DOCUMENTED** | Fully implemented |
+| **Conditional Chaining** | **PRIMARY PATTERN** | **NOT DOCUMENTED** | Fully implemented |
 
 #### Key Differences
 
@@ -235,12 +235,12 @@ The apex-core implementation includes **6 rule chain patterns** total:
 
 | Pattern | Implemented | Documented in Funds & Custody | Documented in Conditional Processing |
 |---------|-------------|-------------------------------|-------------------------------------|
-| 1. conditional-chaining | ✅ Yes | ✅ Yes (Section 2) | ❌ No |
-| 2. sequential-dependency | ✅ Yes | ❌ No | ❌ No |
-| 3. result-based-routing | ✅ Yes | ❌ No | ❌ No |
-| 4. accumulative-chaining | ✅ Yes | ✅ Yes (Section 2) | ❌ No |
-| 5. complex-workflow | ✅ Yes | ❌ No | ❌ No |
-| 6. fluent-builder | ✅ Yes | ❌ No | ❌ No |
+| 1. conditional-chaining | Yes | Yes (Section 2) | No |
+| 2. sequential-dependency | Yes | No | No |
+| 3. result-based-routing | Yes | No | No |
+| 4. accumulative-chaining | Yes | Yes (Section 2) | No |
+| 5. complex-workflow | Yes | No | No |
+| 6. fluent-builder | Yes | No | No |
 
 **Evidence:**
 - `RuleChainExecutor.java` - Lines 32-45 list all 6 patterns
@@ -256,12 +256,12 @@ The apex-core implementation includes **6 rule chain patterns** total:
 **Location:** Section 2, Lines 565-614
 
 **Patterns Demonstrated:**
-1. ✅ Ternary operators: `#condition ? value_if_true : value_if_false`
-2. ✅ Object navigation: `#instruction.clientId`
-3. ✅ Method calls: `#availableClientSIs.containsKey(#instruction.clientId)`
-4. ✅ Boolean logic: `!#instruction.highValueTransaction && !#instruction.clientOptOut`
-5. ✅ Nested conditions: `#score >= 50 ? 'APPROVED' : (#score >= 20 ? 'PARTIAL' : 'MANUAL')`
-6. ✅ Numeric comparisons: `#repairScore >= 50`
+1. Ternary operators: `#condition ? value_if_true : value_if_false`
+2. Object navigation: `#instruction.clientId`
+3. Method calls: `#availableClientSIs.containsKey(#instruction.clientId)`
+4. Boolean logic: `!#instruction.highValueTransaction && !#instruction.clientOptOut`
+5. Nested conditions: `#score >= 50 ? 'APPROVED' : (#score >= 20 ? 'PARTIAL' : 'MANUAL')`
+6. Numeric comparisons: `#repairScore >= 50`
 
 **All patterns are documented in APEX_CONDITIONAL_PROCESSING_GUIDE** ✅
 
@@ -274,11 +274,11 @@ The apex-core implementation includes **6 rule chain patterns** total:
 **Location:** Section 2, Lines 512-564
 
 **Features:**
-- ✅ Inline YAML datasets
-- ✅ Key-based lookup with configurable key fields
-- ✅ Conditional enrichment application
-- ✅ Multiple enrichment types (client, market, instrument, counterparty, custodial)
-- ✅ Field mappings with source-field and target-field
+- Inline YAML datasets
+- Key-based lookup with configurable key fields
+- Conditional enrichment application
+- Multiple enrichment types (client, market, instrument, counterparty, custodial)
+- Field mappings with source-field and target-field
 
 **All features are documented in APEX_CONDITIONAL_PROCESSING_GUIDE** ✅
 
@@ -290,19 +290,19 @@ The apex-core implementation includes **6 rule chain patterns** total:
 
 #### APEX_CONDITIONAL_PROCESSING_GUIDE.md Missing Content
 
-1. **❌ Rule Chains Section** - No mention of rule-chains YAML section
-2. **❌ Accumulative Chaining Pattern** - Weighted scoring pattern not documented
-3. **❌ Conditional Chaining Pattern** - Trigger-based branching not documented
-4. **❌ Sequential Dependency Pattern** - Not documented
-5. **❌ Result-Based Routing Pattern** - Not documented
-6. **❌ Complex Workflow Pattern** - Not documented
-7. **❌ Fluent Builder Pattern** - Not documented
+1. **Rule Chains Section** - No mention of rule-chains YAML section
+2. **Accumulative Chaining Pattern** - Weighted scoring pattern not documented
+3. **Conditional Chaining Pattern** - Trigger-based branching not documented
+4. **Sequential Dependency Pattern** - Not documented
+5. **Result-Based Routing Pattern** - Not documented
+6. **Complex Workflow Pattern** - Not documented
+7. **Fluent Builder Pattern** - Not documented
 
 #### Funds & Custody Guide Missing Content
 
-1. **❌ Rule Result References** - No mention of #ruleResults or #ruleGroupResults
-2. **❌ Priority-Based Conditional Mapping** - conditional-mapping-enrichment type not mentioned
-3. **❌ Advanced Rule Chain Patterns** - Only 2 of 6 patterns documented
+1. **Rule Result References** - No mention of #ruleResults or #ruleGroupResults
+2. **Priority-Based Conditional Mapping** - conditional-mapping-enrichment type not mentioned
+3. **Advanced Rule Chain Patterns** - Only 2 of 6 patterns documented
 
 ### Implementation Status
 
@@ -369,11 +369,11 @@ Add sections covering:
 
 ### Key Findings
 
-1. ✅ **apex-core implementation is COMPLETE** - All features from both guides are fully implemented
+1. **apex-core implementation is COMPLETE** - All features from both guides are fully implemented
 2. ⚠️ **Documentation is FRAGMENTED** - Features are split across multiple guides with gaps
-3. ✅ **Funds & Custody guide demonstrates REAL-WORLD patterns** - Excellent practical examples
-4. ✅ **Conditional Processing guide covers ENRICHMENT-LEVEL logic** - Comprehensive enrichment patterns
-5. ❌ **Rule Chain Patterns are UNDOCUMENTED** - 6 powerful patterns exist but lack comprehensive documentation
+3. **Funds & Custody guide demonstrates REAL-WORLD patterns** - Excellent practical examples
+4. **Conditional Processing guide covers ENRICHMENT-LEVEL logic** - Comprehensive enrichment patterns
+5. **Rule Chain Patterns are UNDOCUMENTED** - 6 powerful patterns exist but lack comprehensive documentation
 
 ### Overall Assessment
 

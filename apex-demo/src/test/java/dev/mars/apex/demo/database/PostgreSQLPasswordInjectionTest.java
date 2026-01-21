@@ -179,7 +179,7 @@ class PostgreSQLPasswordInjectionTest {
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
         assertNotNull(config, "YAML configuration should load successfully");
 
-        logger.info("✅ YAML configuration loaded successfully");
+        logger.info("YAML configuration loaded successfully");
         logger.info("  Configuration name: {}", config.getMetadata() != null ? config.getMetadata().getName() : "unnamed");
         logger.info("  Number of enrichments: {}", config.getEnrichments() != null ? config.getEnrichments().size() : 0);
 
@@ -213,7 +213,7 @@ class PostgreSQLPasswordInjectionTest {
         assertTrue(connectionResult.contains("testuser"),
                    "Should contain resolved username");
         
-        logger.info("✅ PostgreSQL password injection test completed successfully");
+        logger.info("PostgreSQL password injection test completed successfully");
         logger.info("  ✓ PostgreSQL container started and accessible");
         logger.info("  ✓ System properties injected into YAML configuration");
         logger.info("  ✓ Database connection established using injected credentials");
@@ -249,7 +249,7 @@ class PostgreSQLPasswordInjectionTest {
                 ON CONFLICT DO NOTHING
                 """);
             
-            logger.info("✅ Test data setup completed:");
+            logger.info("Test data setup completed:");
             logger.info("  ✓ Created users table");
             logger.info("  ✓ Inserted test users: John Doe, Jane Smith");
         }

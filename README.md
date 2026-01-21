@@ -111,7 +111,7 @@ Choose the right pattern for your use case:
 | **Pattern** | **Lines** | **Use Case** | **When to Use** |
 |-------------|-----------|--------------|-----------------|
 | **One-Line** ⭐ | 1 line | Single evaluation | Default choice for most cases |
-| **Two-Line** ✅ | 2 lines | Multiple evaluations | When reusing engine or need cleanup |
+| **Two-Line** | 2 lines | Multiple evaluations | When reusing engine or need cleanup |
 | **Advanced** ⚙️ | 7+ lines | Config inspection | Only when you need to inspect/modify config |
 
 **Bottom Line:** Start with the one-line pattern. Only use the two-line pattern if you need engine reuse. Avoid the advanced pattern unless you have a specific need for config inspection or modification.
@@ -125,7 +125,7 @@ Map<String, Object> data = Map.of("amount", 1000, "currency", "USD");
 RuleResult result = RulesEngine.fromFile("config.yaml").evaluate(data);
 ```
 
-**✅ Two-Line Pattern (Reusable):**
+**Two-Line Pattern (Reusable):**
 ```java
 // Reuse engine for multiple evaluations
 RulesEngine engine = RulesEngine.fromFile("config.yaml");
@@ -416,12 +416,12 @@ Group multiple YAML configuration files into reusable components with dependency
 
 ### Features
 
-- ✅ **Reusable Components** - Group related configurations for better organization
-- ✅ **Dependency Management** - Automatic circular reference detection with DFS algorithm
-- ✅ **Execution Order Control** - Explicit execution-order or document-order execution
-- ✅ **Failure Policies** - Per-file failure handling (terminate, continue-with-warnings, flag-for-review)
-- ✅ **Nesting Depth Management** - Graduated warnings (levels 1-2: OK, 3-5: WARNING, 6+: ERROR)
-- ✅ **Scenario Integration** - Use components in processing stages seamlessly
+- **Reusable Components** - Group related configurations for better organization
+- **Dependency Management** - Automatic circular reference detection with DFS algorithm
+- **Execution Order Control** - Explicit execution-order or document-order execution
+- **Failure Policies** - Per-file failure handling (terminate, continue-with-warnings, flag-for-review)
+- **Nesting Depth Management** - Graduated warnings (levels 1-2: OK, 3-5: WARNING, 6+: ERROR)
+- **Scenario Integration** - Use components in processing stages seamlessly
 
 ### Component Configuration Example
 

@@ -334,9 +334,9 @@ class GroupReferencesGroupsOnlyLogicTest {
         assertEquals("e3_eg", itemOrder.get(2).getItemId(), "Third item should be e3_eg");
 
         logger.info("=== USER EXAMPLE TEST PASSED ===");
-        logger.info("✅ rbg1 correctly filtered from itemOrder");
-        logger.info("✅ e1_eg, e2_eg, e3_eg remain in itemOrder");
-        logger.info("✅ All enrichments (e1, e2, rbg1_enrichment) filtered from itemOrder");
+        logger.info("rbg1 correctly filtered from itemOrder");
+        logger.info("e1_eg, e2_eg, e3_eg remain in itemOrder");
+        logger.info("All enrichments (e1, e2, rbg1_enrichment) filtered from itemOrder");
     }
 }
 

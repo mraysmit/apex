@@ -110,7 +110,7 @@ class PropertyInjectionSyntaxTest {
         logger.info("Output: {}", result);
         
         assertEquals("user: admin, pass: secret", result);
-        logger.info("✅ ${PROPERTY:default} syntax works correctly");
+        logger.info("${PROPERTY:default} syntax works correctly");
     }
 
     @Test
@@ -125,14 +125,14 @@ class PropertyInjectionSyntaxTest {
         String result = (String) resolvePropertiesMethod.invoke(loader, input);
         
         assertEquals("value: system_value", result);
-        logger.info("✅ System property takes precedence: {}", result);
+        logger.info("System property takes precedence: {}", result);
         
         // Test fallback to default when property cleared
         System.clearProperty("PRIORITY_TEST");
         
         String result2 = (String) resolvePropertiesMethod.invoke(loader, input);
         assertEquals("value: default_value", result2);
-        logger.info("✅ Falls back to default when property missing: {}", result2);
+        logger.info("Falls back to default when property missing: {}", result2);
     }
 
     @Test
@@ -152,7 +152,7 @@ class PropertyInjectionSyntaxTest {
         assertTrue(result.contains("paren: test_value"));
         assertTrue(result.contains("default: fallback"));
         
-        logger.info("✅ Mixed syntax works correctly");
+        logger.info("Mixed syntax works correctly");
     }
 
     @Test
@@ -174,7 +174,7 @@ class PropertyInjectionSyntaxTest {
             assertNotNull(result, "Should handle edge case gracefully: " + testCase);
         }
         
-        logger.info("✅ Edge cases handled gracefully");
+        logger.info("Edge cases handled gracefully");
     }
 
     @Test
@@ -197,6 +197,6 @@ class PropertyInjectionSyntaxTest {
         assertTrue(result.contains("admin@example.com"));
         assertTrue(result.contains("/opt/app/config.yml"));
         
-        logger.info("✅ Complex defaults with special characters work correctly");
+        logger.info("Complex defaults with special characters work correctly");
     }
 }

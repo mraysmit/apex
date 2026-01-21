@@ -73,10 +73,10 @@ Adding clear "=== INTENTIONAL ERROR TEST: ... ===" markers to 39 test methods th
 16. **ScenarioStageExecutorFileHandlingTest.java** ✅
     - `testFilePathWithSpaces`
 
-17. **H2ConnectionStringTest.java** ✅ (fixed in earlier session)
+17. **H2ConnectionStringTest.java** (fixed in earlier session)
     - TCP connection test
 
-18. **ExternalDataSourceIntegrationTest.java** ✅ (fixed in earlier session)
+18. **ExternalDataSourceIntegrationTest.java** (fixed in earlier session)
     - Error handling test
 
 ## Remaining: 10/39 Tests (Lambda Expressions in assertThrows)
@@ -91,10 +91,10 @@ These are inline lambda expressions within `assertThrows()` calls - harder to ad
 - **DataSourceConfigurationServiceTest** - lambda$11 (onConfigurationEvent - test exception from listener)
 
 ### Status
-- ✅ **29 tests fixed** (74% complete)
-- ✅ **18 test classes** updated
+- **29 tests fixed** (74% complete)
+- **18 test classes** updated
 - ⏳ **10 lambda tests remaining** (26%)
-- ✅ All changes compile successfully
+- All changes compile successfully
 
 ### Impact
 With 29 tests fixed, **most intentional error stack traces** will now have clear markers in the test output. The remaining 10 lambda tests are lower priority since they're typically one-line assertThrows calls where the test name already indicates the intentional error.

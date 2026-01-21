@@ -256,10 +256,10 @@ This pattern is used in:
 
 ### Key Takeaways
 
-✅ **ResultType** = What happened (MATCH, NO_MATCH, ERROR)
-✅ **Severity** = How important it is (CRITICAL, ERROR, WARNING, INFO)
-✅ **ERROR ResultType** = System failure, always stops processing (unless explicitly handled)
-✅ **ERROR Severity** = Important business rule, may or may not stop processing (depends on recovery config)
+**ResultType** = What happened (MATCH, NO_MATCH, ERROR)
+**Severity** = How important it is (CRITICAL, ERROR, WARNING, INFO)
+**ERROR ResultType** = System failure, always stops processing (unless explicitly handled)
+**ERROR Severity** = Important business rule, may or may not stop processing (depends on recovery config)
 
 ---
 
@@ -288,7 +288,7 @@ String severity = SeverityConstants.CRITICAL;
 String severity = SeverityConstants.INFO;
 
 // Avoid hardcoded strings
-String severity = "ERROR";  // ❌ Don't do this
+String severity = "ERROR";  // Don't do this
 ```
 
 ---
@@ -958,8 +958,8 @@ Always enable logging and metrics in production for troubleshooting:
 ```yaml
 error-recovery:
   enabled: true
-  log-recovery-attempts: true  # ✅ Enable for debugging
-  metrics-enabled: true        # ✅ Enable for monitoring
+  log-recovery-attempts: true  # Enable for debugging
+  metrics-enabled: true        # Enable for monitoring
 ```
 
 ### 4. Use SeverityConstants in Code
@@ -967,11 +967,11 @@ error-recovery:
 Never use hardcoded severity strings:
 
 ```java
-// ✅ Correct
+// Correct
 import dev.mars.apex.core.constants.SeverityConstants;
 String severity = SeverityConstants.ERROR;
 
-// ❌ Incorrect
+// Incorrect
 String severity = "ERROR";
 ```
 
@@ -999,7 +999,7 @@ void testErrorRecoveryForWarnings() {
 **CRITICAL**: Always write validation rule conditions that return TRUE when data is **valid**, not when it's invalid.
 
 ```yaml
-# ✅ CORRECT: Returns TRUE for valid data
+# CORRECT: Returns TRUE for valid data
 rules:
   - id: "amount-validation"
     condition: "#amount != null && #amount > 0"
@@ -1008,7 +1008,7 @@ rules:
     # Valid data (amount > 0): condition TRUE → success
     # Invalid data (amount ≤ 0): condition FALSE + ERROR → fail-fast
 
-# ❌ INCORRECT: Returns TRUE for invalid data
+# INCORRECT: Returns TRUE for invalid data
 rules:
   - id: "amount-validation-wrong"
     condition: "#amount == null || #amount <= 0"
@@ -1615,10 +1615,10 @@ try {
 
 1. **Use Specific Exceptions**: Throw the most specific exception type for the error
    ```java
-   // ✅ Good
+   // Good
    throw new RuleEvaluationException(ruleName, expression, "Property not found");
 
-   // ❌ Bad
+   // Bad
    throw new RuntimeException("Error in rule");
    ```
 
@@ -1642,10 +1642,10 @@ try {
 
 4. **Use Factory Methods**: Leverage static factory methods for common cases
    ```java
-   // ✅ Good
+   // Good
    throw DataSourceException.connectionError("Connection failed", cause);
 
-   // ❌ Verbose
+   // Verbose
    throw new DataSourceException(ErrorType.CONNECTION_ERROR, "Connection failed", cause, null, null, true);
    ```
 
@@ -1760,11 +1760,11 @@ try {
 
 The APEX error handling system provides:
 
-✅ **Flexible Configuration**: Define policies in YAML or Java code  
-✅ **Severity-Based Control**: Different behaviors for different error types  
-✅ **Multiple Strategies**: Choose how to handle failures (fail fast, continue, retry, skip)  
-✅ **Backward Compatibility**: Sensible defaults ensure existing code works  
-✅ **Monitoring & Metrics**: Track recovery attempts and success rates
+**Flexible Configuration**: Define policies in YAML or Java code  
+**Severity-Based Control**: Different behaviors for different error types  
+**Multiple Strategies**: Choose how to handle failures (fail fast, continue, retry, skip)  
+**Backward Compatibility**: Sensible defaults ensure existing code works  
+**Monitoring & Metrics**: Track recovery attempts and success rates
 
 ### Critical Concepts to Remember
 
@@ -1794,6 +1794,6 @@ For more information, see:
 
 **Last Updated**: November 17, 2025
 **Version**: 2.2 (Enhanced with ResultType vs Severity, Enrichment/Transformation error handling, Parallel execution, Exception hierarchy, and expanded metrics documentation)
-✅ **Production-Ready**: Battle-tested with comprehensive logging and debugging support
+**Production-Ready**: Battle-tested with comprehensive logging and debugging support
 
 

@@ -81,7 +81,7 @@ public class ComprehensiveValidationTest extends DemoTestBase {
         LOGGER.info("   2. Enrichments executed: customerData = {}", enrichedData.get("customerData"));
         LOGGER.info("   3. Rules validated enriched data successfully");
         LOGGER.info("   4. All sections processed in sequential order");
-        LOGGER.info("✅ End-to-end sequential processing test PASSED");
+        LOGGER.info("End-to-end sequential processing test PASSED");
     }
 
     @Test
@@ -124,6 +124,6 @@ public class ComprehensiveValidationTest extends DemoTestBase {
         LOGGER.info("   2. Enrichment executed: enrichedData = {}", enrichedData.get("enrichedData"));
         LOGGER.info("   3. Rules validated enriched data successfully");
         LOGGER.info("   4. Dependencies processed in correct order");
-        LOGGER.info("✅ Complex dependency resolution test PASSED");
+        LOGGER.info("Complex dependency resolution test PASSED");
     }
 }

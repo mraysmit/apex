@@ -183,7 +183,7 @@ public class PostgreSQLSchemaSimpleLookupTest extends DemoTestBase {
                 WHERE status = 'ACTIVE'
                 """);
             
-            logger.info("✅ Created custom schema '{}' with customers table, customer_summary_view, and test data", CUSTOM_SCHEMA);
+            logger.info("Created custom schema '{}' with customers table, customer_summary_view, and test data", CUSTOM_SCHEMA);
         }
     }
 
@@ -203,7 +203,7 @@ public class PostgreSQLSchemaSimpleLookupTest extends DemoTestBase {
         String username = postgres.getUsername();
         String password = postgres.getPassword();
         
-        logger.info("✅ PostgreSQL Container Details:");
+        logger.info("PostgreSQL Container Details:");
         logger.info("  JDBC URL: {}", jdbcUrl);
         logger.info("  Username: {}", username);
         logger.info("  Database: {}", postgres.getDatabaseName());
@@ -218,14 +218,14 @@ public class PostgreSQLSchemaSimpleLookupTest extends DemoTestBase {
             ResultSet rs = statement.executeQuery(
                 "SELECT schema_name FROM information_schema.schemata WHERE schema_name = '" + CUSTOM_SCHEMA + "'");
             assertTrue(rs.next(), "Custom schema '" + CUSTOM_SCHEMA + "' should exist");
-            logger.info("✅ Custom schema '{}' verified", CUSTOM_SCHEMA);
+            logger.info("Custom schema '{}' verified", CUSTOM_SCHEMA);
             
             // Verify customers table exists in custom schema
             rs = statement.executeQuery("SELECT COUNT(*) FROM " + CUSTOM_SCHEMA + ".customers");
             rs.next();
             int customerCount = rs.getInt(1);
             
-            logger.info("✅ Database Validation:");
+            logger.info("Database Validation:");
             logger.info("  Schema: {}", CUSTOM_SCHEMA);
             logger.info("  Total customers in {}.customers: {}", CUSTOM_SCHEMA, customerCount);
             assertTrue(customerCount >= 10, "Should have at least 10 customers in custom schema");
@@ -237,7 +237,7 @@ public class PostgreSQLSchemaSimpleLookupTest extends DemoTestBase {
                 String metadata = rs.getString("metadata");
                 String[] tags = (String[]) rs.getArray("tags").getArray();
                 
-                logger.info("✅ PostgreSQL Features Validation in Custom Schema:");
+                logger.info("PostgreSQL Features Validation in Custom Schema:");
                 logger.info("  Customer ID: {}", customerId);
                 logger.info("  JSONB Metadata: {}", metadata);
                 logger.info("  Array Tags: {}", String.join(", ", tags));
@@ -251,7 +251,7 @@ public class PostgreSQLSchemaSimpleLookupTest extends DemoTestBase {
             fail("Direct database connection should work: " + e.getMessage());
         }
         
-        logger.info("✅ PostgreSQL custom schema setup validation completed successfully");
+        logger.info("PostgreSQL custom schema setup validation completed successfully");
     }
 
     @Test
@@ -306,7 +306,7 @@ public class PostgreSQLSchemaSimpleLookupTest extends DemoTestBase {
             assertNotNull(enrichedData.get("customerMetadata"), "JSONB metadata should be enriched");
             assertNotNull(enrichedData.get("customerTags"), "Array tags should be enriched");
             
-            logger.info("✅ Basic Enrichment Results from {}.customers:", CUSTOM_SCHEMA);
+            logger.info("Basic Enrichment Results from {}.customers:", CUSTOM_SCHEMA);
             logger.info("  Customer Name: {}", enrichedData.get("customerName"));
             logger.info("  Customer Type: {}", enrichedData.get("customerType"));
             logger.info("  Customer Tier: {}", enrichedData.get("customerTier"));
@@ -316,7 +316,7 @@ public class PostgreSQLSchemaSimpleLookupTest extends DemoTestBase {
             // Validate performance requirement (allow extra time for first run with container startup)
             assertTrue(responseTime < 1000, "Response time should be < 1000ms for first run, was: " + responseTime + "ms");
             
-            logger.info("✅ PostgreSQL simple lookup in custom schema completed successfully in {}ms", responseTime);
+            logger.info("PostgreSQL simple lookup in custom schema completed successfully in {}ms", responseTime);
             
         } catch (Exception e) {
             logger.error("X PostgreSQL simple lookup failed: {}", e.getMessage(), e);
@@ -363,13 +363,13 @@ public class PostgreSQLSchemaSimpleLookupTest extends DemoTestBase {
             assertNotNull(enrichedData.get("customerTagList"),
                 "Tag list should be extracted from array");
             
-            logger.info("✅ JSON Enrichment Results from {}.customers:", CUSTOM_SCHEMA);
+            logger.info("JSON Enrichment Results from {}.customers:", CUSTOM_SCHEMA);
             logger.info("  Industry: {}", enrichedData.get("customerIndustry"));
             logger.info("  Employee Count: {}", enrichedData.get("customerEmployeeCount"));
             logger.info("  Financial Value: {}", enrichedData.get("customerFinancialValue"));
             logger.info("  Tag List: {}", enrichedData.get("customerTagList"));
             
-            logger.info("✅ PostgreSQL JSON enrichment features validated successfully in custom schema '{}'", CUSTOM_SCHEMA);
+            logger.info("PostgreSQL JSON enrichment features validated successfully in custom schema '{}'", CUSTOM_SCHEMA);
             
         } catch (Exception e) {
             logger.error("X PostgreSQL JSON enrichment failed: {}", e.getMessage(), e);
@@ -432,7 +432,7 @@ public class PostgreSQLSchemaSimpleLookupTest extends DemoTestBase {
             assertEquals(3, enrichedData.get("viewTagCount"),
                 "Tag count should be calculated in VIEW (Acme has 3 tags: tech, large-cap, nasdaq)");
             
-            logger.info("✅ VIEW Enrichment Results from {}.customer_summary_view:", CUSTOM_SCHEMA);
+            logger.info("VIEW Enrichment Results from {}.customer_summary_view:", CUSTOM_SCHEMA);
             logger.info("  Customer Name: {}", enrichedData.get("viewCustomerName"));
             logger.info("  Customer Type: {}", enrichedData.get("viewCustomerType"));
             logger.info("  Tier: {}", enrichedData.get("viewTier"));
@@ -443,7 +443,7 @@ public class PostgreSQLSchemaSimpleLookupTest extends DemoTestBase {
             // Validate performance
             assertTrue(responseTime < 1000, "Response time should be < 1000ms, was: " + responseTime + "ms");
             
-            logger.info("✅ PostgreSQL VIEW lookup via YAML completed successfully in {}ms", responseTime);
+            logger.info("PostgreSQL VIEW lookup via YAML completed successfully in {}ms", responseTime);
             
         } catch (Exception e) {
             logger.error("X PostgreSQL VIEW lookup failed: {}", e.getMessage(), e);
@@ -485,7 +485,7 @@ public class PostgreSQLSchemaSimpleLookupTest extends DemoTestBase {
                     connection.put("password", password);
                     connection.put("schema", CUSTOM_SCHEMA);
 
-                    logger.info("✅ Updated PostgreSQL data source '{}' with Testcontainers connection details (schema: {})",
+                    logger.info("Updated PostgreSQL data source '{}' with Testcontainers connection details (schema: {})",
                                dataSource.getName(), CUSTOM_SCHEMA);
                     break;
                 }

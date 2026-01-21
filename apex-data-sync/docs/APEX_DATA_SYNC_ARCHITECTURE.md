@@ -35,12 +35,12 @@ The APEX Data-Sync module provides **automatic schema comparison and validation*
 
 ### 1.2 Core Benefits
 
-- ✅ **Validates schema compatibility** before data migration
-- ✅ **Auto-detects breaking changes** (type incompatibilities, size reductions)
-- ✅ **Generates comprehensive reports** in HTML, JSON, and Markdown formats
-- ✅ **Works with any combination**: CSV↔CSV, CSV↔Database, Database↔Database
-- ✅ **Extensible architecture**: Ready for Parquet, JSON, Excel, Avro, and more
-- ✅ **Zero custom code**: Pure YAML configuration for end users
+- **Validates schema compatibility** before data migration
+- **Auto-detects breaking changes** (type incompatibilities, size reductions)
+- **Generates comprehensive reports** in HTML, JSON, and Markdown formats
+- **Works with any combination**: CSV↔CSV, CSV↔Database, Database↔Database
+- **Extensible architecture**: Ready for Parquet, JSON, Excel, Avro, and more
+- **Zero custom code**: Pure YAML configuration for end users
 
 ---
 
@@ -392,9 +392,9 @@ pipeline:
 Multi-Table Schema Diff Report
 ==============================
 Matched Tables: 3
-  ✅ dbo.Customers → public.customers (compatible)
+  dbo.Customers → public.customers (compatible)
   ⚠️ dbo.Orders → public.orders (2 warnings)
-  ❌ dbo.Products → public.products (1 breaking change)
+  dbo.Products → public.products (1 breaking change)
 
 Added Tables: 1
   ➕ public.promotions (not in source)
@@ -647,7 +647,7 @@ public class JsonBasedMarkdownReportGenerator {
         
         // Build Markdown using StringBuilder
         StringBuilder md = new StringBuilder();
-        md.append("# 📊 Schema Comparison Report\n\n");
+        md.append("# Schema Comparison Report\n\n");
         
         // ... build sections
         
@@ -1026,17 +1026,17 @@ pipeline:
 
 ### Week 1-3: JSON-First Architecture (COMPLETED)
 
-- ✅ **Week 1**: JSON serialization layer
+- **Week 1**: JSON serialization layer
   - `SchemaDiffJsonSerializer.java`
   - `SchemaDiffReport.java` domain model
   - JSON schema validation
   
-- ✅ **Week 2**: Template-based HTML generation
+- **Week 2**: Template-based HTML generation
   - Handlebars template integration
   - HTML templates and partials
   - Visual parity with legacy reports
   
-- ✅ **Week 3**: Markdown report generation
+- **Week 3**: Markdown report generation
   - `JsonBasedMarkdownReportGenerator.java`
   - StringBuilder-based efficient rendering
   - Table-based output format
@@ -1153,14 +1153,14 @@ apex-data-sync/src/test/java/dev/mars/apex/datasync/
 
 ### Phase 1 (Schema-Diff) Metrics
 
-- ✅ Reduces manual schema comparison time by 95%
-- ✅ Catches breaking changes before migration starts
-- ✅ Works with CSV, SQL Server, PostgreSQL, MySQL, Oracle, H2
-- ✅ Zero custom code in apex-data-sync (pure YAML configuration)
-- ✅ JSON reports generated in < 50ms
-- ✅ HTML/Markdown reports generated in < 200ms
-- ✅ Multi-table support for full database migrations
-- ✅ 90%+ test coverage for core logic
+- Reduces manual schema comparison time by 95%
+- Catches breaking changes before migration starts
+- Works with CSV, SQL Server, PostgreSQL, MySQL, Oracle, H2
+- Zero custom code in apex-data-sync (pure YAML configuration)
+- JSON reports generated in < 50ms
+- HTML/Markdown reports generated in < 200ms
+- Multi-table support for full database migrations
+- 90%+ test coverage for core logic
 
 ### Phase 2 (Data-Diff) Target Metrics
 

@@ -101,7 +101,7 @@ class EnrichmentFailureDemosTest extends DemoTestBase {
             assertTrue(result.isSuccess(), "APEX evaluation should succeed (enrichments handle failures gracefully)");
             // Validation failures would be reported through the validation rules, not enrichments
 
-            logger.info("✅ Required field validation failure test completed");
+            logger.info("Required field validation failure test completed");
             logger.info("   - Missing required fields detected: customerId, currencyCode");
             logger.info("   - Enrichment summary: {}", enrichedData.get("enrichmentSummary"));
             logger.info("   - Data quality score: {}", enrichedData.get("dataQualityScore"));
@@ -153,7 +153,7 @@ class EnrichmentFailureDemosTest extends DemoTestBase {
             // Note: APEX enrichments detect and report failures without failing the overall evaluation
             assertTrue(result.isSuccess(), "APEX evaluation should succeed (enrichments handle failures gracefully)");
 
-            logger.info("✅ Data quality validation failure test completed");
+            logger.info("Data quality validation failure test completed");
             logger.info("   - Invalid formats detected: customerId, currencyCode, amount");
             logger.info("   - Data quality score: {}", enrichedData.get("dataQualityScore"));
             logger.info("   - Customer name result: {}", enrichedData.get("customerName"));
@@ -203,7 +203,7 @@ class EnrichmentFailureDemosTest extends DemoTestBase {
             // Note: APEX enrichments detect and report failures without failing the overall evaluation
             assertTrue(result.isSuccess(), "APEX evaluation should succeed (enrichments handle failures gracefully)");
 
-            logger.info("✅ Business rule validation failure test completed");
+            logger.info("Business rule validation failure test completed");
             logger.info("   - Invalid business values detected: negative amount");
             logger.info("   - Amount validation result: {}", enrichedData.get("amountValidationResult"));
             logger.info("   - Enrichment summary: {}", enrichedData.get("enrichmentSummary"));
@@ -252,7 +252,7 @@ class EnrichmentFailureDemosTest extends DemoTestBase {
             assertEquals("INVALID_AMOUNT", enrichedData.get("amountValidationResult"),
                 "Should detect invalid negative amount");
 
-            logger.info("✅ Comprehensive failure recovery strategy test completed");
+            logger.info("Comprehensive failure recovery strategy test completed");
             logger.info("Recovery Strategy Implementation:");
             logger.info("  Strategy: {}", enrichedData.get("recoveryStrategy"));
             logger.info("  Required Field Status: {}", enrichedData.get("requiredFieldValidationResult"));
@@ -300,7 +300,7 @@ class EnrichmentFailureDemosTest extends DemoTestBase {
             assertEquals("UNKNOWN_CUSTOMER", enrichedData.get("customerName"),
                 "Should handle unknown customer ID");
 
-            logger.info("✅ External customer lookup failure test completed");
+            logger.info("External customer lookup failure test completed");
             logger.info("   - External lookup result: {}", enrichedData.get("externalCustomerData"));
             logger.info("   - Customer name fallback: {}", enrichedData.get("customerName"));
 
@@ -372,7 +372,7 @@ class EnrichmentFailureDemosTest extends DemoTestBase {
             // Validate that evaluation succeeds with valid data
             assertTrue(result.isSuccess(), "APEX evaluation should succeed with valid data");
 
-            logger.info("✅ Successful enrichment scenario test completed");
+            logger.info("Successful enrichment scenario test completed");
             logger.info("   - All enrichments successful");
             logger.info("   - Customer name: {}", enrichedData.get("customerName"));
             logger.info("   - Currency name: {}", enrichedData.get("currencyName"));

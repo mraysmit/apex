@@ -9,6 +9,13 @@
     <!-- Set info level for APEX components -->
     <logger name="dev.mars.apex" level="INFO"/>
 
+    <!-- 
+        Suppress HikariCP connection pool ERROR logging during tests.
+        Intentional error tests trigger expected connection failures which 
+        would otherwise dump verbose stack traces to test output.
+    -->
+    <logger name="com.zaxxer.hikari" level="OFF"/>
+
     <!-- Enable database debug logging -->
     <logger name="dev.mars.apex.core.service.data.external.database.DatabaseDataSource" level="DEBUG"/>
     <logger name="dev.mars.apex.core.service.lookup.DatabaseLookupService" level="DEBUG"/>

@@ -70,7 +70,7 @@ public class SeverityEdgeCasesTest {
 
         yamlLoader = new YamlConfigurationLoader();
 
-        logger.info("✅ APEX services initialized successfully");
+        logger.info("APEX services initialized successfully");
     }
 
     @Test
@@ -88,7 +88,7 @@ public class SeverityEdgeCasesTest {
         assertEquals(12, config.getRules().size(), "Should have exactly 12 rules");
         assertEquals(6, config.getRuleGroups().size(), "Should have exactly 6 rule groups");
 
-        logger.info("✅ Configuration loaded: {} rules, {} rule groups",
+        logger.info("Configuration loaded: {} rules, {} rule groups",
             config.getRules().size(), config.getRuleGroups().size());
 
         // Create RulesEngine using static factory method
@@ -104,7 +104,7 @@ public class SeverityEdgeCasesTest {
         // Test case sensitivity rule group
         testCaseSensitivityRuleGroup(engine);
 
-        logger.info("✅ All severity handling tests passed");
+        logger.info("All severity handling tests passed");
     }
 
     private void testStandardSeverityHandling(RulesEngine engine) {
@@ -122,7 +122,7 @@ public class SeverityEdgeCasesTest {
         assertTrue(result.isTriggered(), "Rule with standard severity should be triggered");
         assertEquals("ERROR", result.getSeverity(), "Standard ERROR severity should be preserved");
 
-        logger.info("✅ Standard severity handling test passed with severity: {}", result.getSeverity());
+        logger.info("Standard severity handling test passed with severity: {}", result.getSeverity());
     }
 
     private void testCaseSensitivityPreservation(RulesEngine engine) {
@@ -149,7 +149,7 @@ public class SeverityEdgeCasesTest {
         assertTrue(lowercaseResult.isTriggered(), "Lowercase rule should be triggered");
         assertEquals("warning", lowercaseResult.getSeverity(), "Lowercase 'warning' should be preserved as-is");
 
-        logger.info("✅ Case sensitivity preservation tests passed");
+        logger.info("Case sensitivity preservation tests passed");
     }
 
     private void testCaseSensitivityRuleGroup(RulesEngine engine) {
@@ -168,7 +168,7 @@ public class SeverityEdgeCasesTest {
         // APEX uses the first rule's severity in AND groups when all pass, which is "ERROR" (standard case)
         assertEquals("ERROR", result.getSeverity(), "Case sensitivity group should use severity from first rule (ERROR)");
 
-        logger.info("✅ Case sensitivity rule group test passed with severity: {}", result.getSeverity());
+        logger.info("Case sensitivity rule group test passed with severity: {}", result.getSeverity());
     }
 
     @Test
@@ -194,7 +194,7 @@ public class SeverityEdgeCasesTest {
         // Test boundary conditions rule group
         testBoundaryConditionsRuleGroup(engine);
 
-        logger.info("✅ All boundary condition tests passed");
+        logger.info("All boundary condition tests passed");
     }
 
     private void testNumericBoundaryConditions(RulesEngine engine) {
@@ -222,7 +222,7 @@ public class SeverityEdgeCasesTest {
         result = engine.executeRule(rule, testData);
         assertTrue(result.isTriggered(), "Rule should be triggered for large boundary value");
 
-        logger.info("✅ Numeric boundary conditions test passed");
+        logger.info("Numeric boundary conditions test passed");
     }
 
     private void testNullEmptyStringConditions(RulesEngine engine) {
@@ -250,7 +250,7 @@ public class SeverityEdgeCasesTest {
         result = engine.executeRule(rule, testData);
         assertTrue(result.isTriggered(), "Rule should be triggered for whitespace-only string");
 
-        logger.info("✅ Null and empty string conditions test passed");
+        logger.info("Null and empty string conditions test passed");
     }
 
     private void testBooleanEdgeCases(RulesEngine engine) {
@@ -273,7 +273,7 @@ public class SeverityEdgeCasesTest {
         result = engine.executeRule(rule, testData);
         assertTrue(result.isTriggered(), "Rule should be triggered for boolean false");
 
-        logger.info("✅ Boolean edge cases test passed");
+        logger.info("Boolean edge cases test passed");
     }
 
     private void testBoundaryConditionsRuleGroup(RulesEngine engine) {
@@ -291,7 +291,7 @@ public class SeverityEdgeCasesTest {
         assertTrue(result.isTriggered(), "Boundary conditions OR group should be triggered");
         assertEquals("ERROR", result.getSeverity(), "Boundary conditions group should use severity from first matching rule (ERROR)");
 
-        logger.info("✅ Boundary conditions rule group test passed with severity: {}", result.getSeverity());
+        logger.info("Boundary conditions rule group test passed with severity: {}", result.getSeverity());
     }
 
     @Test
@@ -320,7 +320,7 @@ public class SeverityEdgeCasesTest {
         // Test comprehensive edge cases group
         testComprehensiveEdgeCasesGroup(engine);
 
-        logger.info("✅ All complex data structure tests passed");
+        logger.info("All complex data structure tests passed");
     }
 
     private void testCollectionEdgeCases(RulesEngine engine) {
@@ -347,7 +347,7 @@ public class SeverityEdgeCasesTest {
         result = engine.executeRule(rule, testData);
         assertTrue(result.isTriggered(), "Rule should be triggered for large collection");
 
-        logger.info("✅ Collection edge cases test passed");
+        logger.info("Collection edge cases test passed");
     }
 
     private void testDateTimeEdgeCases(RulesEngine engine) {
@@ -365,7 +365,7 @@ public class SeverityEdgeCasesTest {
         assertTrue(result.isTriggered(), "Rule should be triggered for positive timestamp");
         assertEquals("INFO", result.getSeverity(), "DateTime edge rule should have INFO severity");
 
-        logger.info("✅ DateTime edge cases test passed");
+        logger.info("DateTime edge cases test passed");
     }
 
     private void testNestedObjectAccess(RulesEngine engine) {
@@ -389,7 +389,7 @@ public class SeverityEdgeCasesTest {
         assertTrue(result.isTriggered(), "Rule should be triggered for high risk nested object");
         assertEquals("ERROR", result.getSeverity(), "Nested object rule should have ERROR severity");
 
-        logger.info("✅ Nested object access test passed");
+        logger.info("Nested object access test passed");
     }
 
     private void testSpecialContentHandling(RulesEngine engine) {
@@ -418,7 +418,7 @@ public class SeverityEdgeCasesTest {
         assertTrue(result.isTriggered(), "Special chars rule should be triggered");
         assertEquals("INFO", result.getSeverity(), "Special chars rule should have INFO severity");
 
-        logger.info("✅ Special content handling test passed");
+        logger.info("Special content handling test passed");
     }
 
     private void testComprehensiveEdgeCasesGroup(RulesEngine engine) {
@@ -436,6 +436,6 @@ public class SeverityEdgeCasesTest {
         assertTrue(result.isTriggered(), "Comprehensive edge cases OR group should be triggered");
         assertEquals("ERROR", result.getSeverity(), "Comprehensive group should use severity from first matching rule (ERROR)");
 
-        logger.info("✅ Comprehensive edge cases group test passed with severity: {}", result.getSeverity());
+        logger.info("Comprehensive edge cases group test passed with severity: {}", result.getSeverity());
     }
 }

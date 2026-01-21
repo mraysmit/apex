@@ -75,7 +75,7 @@ class EnrichmentFailureDemosTest extends DemoTestBase {
             // Load YAML configuration using real APEX services (following existing patterns)
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/EnrichmentFailureDemosTest.yaml");
             assertNotNull(config, "Configuration should be loaded successfully");
-            logger.info("✅ Configuration loaded: {}", config.getMetadata().getName());
+            logger.info("Configuration loaded: {}", config.getMetadata().getName());
 
             // Create test data missing required fields for enrichment
             Map<String, Object> incompleteData = new HashMap<>();
@@ -113,7 +113,7 @@ class EnrichmentFailureDemosTest extends DemoTestBase {
             assertEquals("ENRICHMENT_FAILED", enrichedData.get("enrichmentSummary"),
                 "Overall enrichment should be marked as failed");
 
-            logger.info("✅ Required field enrichment failure demonstration completed");
+            logger.info("Required field enrichment failure demonstration completed");
             
         } catch (Exception e) {
             logger.error("Test failed: {}", e.getMessage(), e);
@@ -169,7 +169,7 @@ class EnrichmentFailureDemosTest extends DemoTestBase {
             assertEquals("UNKNOWN_CUSTOMER", enrichedData.get("customerName"),
                 "Should handle unknown customer gracefully");
 
-            logger.info("✅ External data source failure demonstration completed");
+            logger.info("External data source failure demonstration completed");
             
         } catch (Exception e) {
             logger.error("Test failed: {}", e.getMessage(), e);
@@ -231,7 +231,7 @@ class EnrichmentFailureDemosTest extends DemoTestBase {
             assertEquals("INVALID_CURRENCY", enrichedData.get("currencyName"),
                 "Should detect invalid currency code");
 
-            logger.info("✅ Data quality failure demonstration completed");
+            logger.info("Data quality failure demonstration completed");
             
         } catch (Exception e) {
             logger.error("Test failed: {}", e.getMessage(), e);
@@ -296,12 +296,12 @@ class EnrichmentFailureDemosTest extends DemoTestBase {
             logger.info("  Strategy 3: Alternative Processing - Route to manual processing");
 
             logger.info("Recovery Pattern Demonstration:");
-            logger.info("  ✅ Failure detection and categorization");
-            logger.info("  ✅ Multiple recovery strategy options");
-            logger.info("  ✅ Business impact assessment");
-            logger.info("  ✅ Monitoring and alerting integration");
+            logger.info("  Failure detection and categorization");
+            logger.info("  Multiple recovery strategy options");
+            logger.info("  Business impact assessment");
+            logger.info("  Monitoring and alerting integration");
 
-            logger.info("✅ Enrichment failure recovery pattern demonstration completed");
+            logger.info("Enrichment failure recovery pattern demonstration completed");
             
         } catch (Exception e) {
             logger.error("Test failed: {}", e.getMessage(), e);

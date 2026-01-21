@@ -47,11 +47,11 @@ rules:
 APEX now supports **true sequential processing** that respects YAML document order, enabling developers to express business logic through file structure.
 
 **Key Benefits:**
-- ✅ **Developer Intent Respected**: YAML structure matches execution flow
-- ✅ **Business Logic Patterns Work**: "Enrich-then-validate" and "validate-then-enrich" patterns functional
-- ✅ **Predictable Behavior**: Processing order visible from YAML structure
-- ✅ **Industry Alignment**: Follows standard configuration system design principles
-- ✅ **Zero Breaking Changes**: Complete backward compatibility maintained
+- **Developer Intent Respected**: YAML structure matches execution flow
+- **Business Logic Patterns Work**: "Enrich-then-validate" and "validate-then-enrich" patterns functional
+- **Predictable Behavior**: Processing order visible from YAML structure
+- **Industry Alignment**: Follows standard configuration system design principles
+- **Zero Breaking Changes**: Complete backward compatibility maintained
 
 ---
 
@@ -83,10 +83,10 @@ rules:                 # ← These appear second in YAML
 ```
 
 **Characteristics:**
-- ✅ **Proven stable** - existing well-tested code
-- ✅ **Predictable** - same order every time regardless of YAML structure
-- ❌ **Inflexible** - cannot change processing sequence
-- ❌ **YAML structure ignored** - file organization is purely cosmetic
+- **Proven stable** - existing well-tested code
+- **Predictable** - same order every time regardless of YAML structure
+- **Inflexible** - cannot change processing sequence
+- **YAML structure ignored** - file organization is purely cosmetic
 
 ### 2.2 Sequential Mode (New - Respects Document Order)
 
@@ -113,10 +113,10 @@ rules:                 # ← Processed SECOND (because it appears second)
 ```
 
 **Characteristics:**
-- ✅ **Flexible** - change processing order by rearranging YAML sections
-- ✅ **Intuitive** - YAML structure matches execution flow
-- ✅ **Use-case driven** - different files can have different orders
-- ✅ **Production ready** - fully tested and validated
+- **Flexible** - change processing order by rearranging YAML sections
+- **Intuitive** - YAML structure matches execution flow
+- **Use-case driven** - different files can have different orders
+- **Production ready** - fully tested and validated
 
 ---
 
@@ -383,16 +383,16 @@ void testProcessingOrder() throws Exception {
 ### 6.1 When to Use Sequential Processing
 
 **Use sequential processing when**:
-- ✅ Rules reference enriched fields: `condition: "#customerTier == 'GOLD'"`
-- ✅ Enrichments reference rule results: `condition: "#ruleResults.get('validation').passed"`
-- ✅ Performance optimization needed: validate before expensive enrichment
-- ✅ Complex multi-phase business logic: multiple interdependent steps
+- Rules reference enriched fields: `condition: "#customerTier == 'GOLD'"`
+- Enrichments reference rule results: `condition: "#ruleResults.get('validation').passed"`
+- Performance optimization needed: validate before expensive enrichment
+- Complex multi-phase business logic: multiple interdependent steps
 
 **Stick with standard processing when**:
-- ✅ No cross-section dependencies
-- ✅ Simple, independent rules and enrichments
-- ✅ Existing files working correctly
-- ✅ Performance is not a concern
+- No cross-section dependencies
+- Simple, independent rules and enrichments
+- Existing files working correctly
+- Performance is not a concern
 
 ### 6.2 YAML Organization Best Practices
 

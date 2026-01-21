@@ -328,7 +328,7 @@ The visual editor has achieved **95% coverage** of all APEX keywords. The remain
 
 ---
 
-### Categories Section - ✅ **IMPLEMENTED 2025-12-17**
+### Categories Section - **IMPLEMENTED 2025-12-17**
 
 | Keyword | Supported | Block | Notes |
 |---------|-----------|-------|-------|
@@ -341,7 +341,7 @@ The visual editor has achieved **95% coverage** of all APEX keywords. The remain
 
 ---
 
-### Data Sinks Section - ✅ **IMPLEMENTED 2025-12-17**
+### Data Sinks Section - **IMPLEMENTED 2025-12-17**
 
 | Keyword | Supported | Block | Notes |
 |---------|-----------|-------|-------|
@@ -366,7 +366,7 @@ The visual editor has achieved **95% coverage** of all APEX keywords. The remain
 
 ---
 
-### File Source Enhancements - ✅ **IMPLEMENTED 2025-12-17**
+### File Source Enhancements - **IMPLEMENTED 2025-12-17**
 
 | Keyword | Supported | Block | Notes |
 |---------|-----------|-------|-------|
@@ -377,7 +377,7 @@ The visual editor has achieved **95% coverage** of all APEX keywords. The remain
 
 ---
 
-### Pipeline Configuration - ✅ **IMPLEMENTED 2025-12-17**
+### Pipeline Configuration - **IMPLEMENTED 2025-12-17**
 
 | Keyword | Supported | Block | Notes |
 |---------|-----------|-------|-------|
@@ -420,9 +420,9 @@ This table reflects the complete analysis including all Phase 5 implementations.
 | **Error Recovery** | **~8** | **7** | **0** | **7** | **88%** |
 | **Component Refs** | **~12** | **9** | **1** | **10** | **83%** |
 | **Rule Chains** | **~24** | **23** | **1** | **24** | **100%** |
-| **Categories** | **~4** | **4** | **0** | **4** | **100%** ✅ |
-| **Data Sinks** | **~16** | **16** | **0** | **16** | **100%** ✅ |
-| **File Source Enhanced** | **~2** | **2** | **0** | **2** | **100%** ✅ |
+| **Categories** | **~4** | **4** | **0** | **4** | **100%** |
+| **Data Sinks** | **~16** | **16** | **0** | **16** | **100%** |
+| **File Source Enhanced** | **~2** | **2** | **0** | **2** | **100%** |
 | Pipeline | ~6 | 0 | 0 | 0 | 0% |
 | **Total** | **~191** | **~151** | **~8** | **~159** | **~83%** |
 
@@ -436,31 +436,31 @@ This table reflects the complete analysis including all Phase 5 implementations.
 
 Add missing keywords to existing blocks:
 
-1. **Metadata Block** - ✅ **COMPLETED 2025-12-16**
+1. **Metadata Block** - **COMPLETED 2025-12-16**
    - ~~Add `owner` field (the only genuinely missing metadata field)~~
    - Added OWNER field to `apex_rule_config` and `apex_data_source_config` blocks
    - Selenium tests: Tests 67-70
 
-2. **Rule Groups / Enrichment Groups** - ✅ **COMPLETED 2025-12-16**
+2. **Rule Groups / Enrichment Groups** - **COMPLETED 2025-12-16**
    - ~~Add `stop-on-first-failure` checkbox~~
    - ~~Add `parallel-execution` checkbox~~
    - ~~Add `error-handling` dropdown (fail-fast, continue-on-error, skip-on-error)~~
    - Added all 3 fields to both `apex_rule_group` and `apex_enrichment_group` blocks
    - Selenium tests: Tests 71-78, 88
 
-3. **Field Mappings** - ✅ **COMPLETED 2025-12-16**
+3. **Field Mappings** - **COMPLETED 2025-12-16**
    - ~~Add `default-value` field~~
    - ~~Add `required` checkbox~~
    - Added both fields to `apex_field_mapping` block
    - Selenium tests: Tests 79-83
 
-4. **Data Sources** - ✅ **COMPLETED 2025-12-17**
+4. **Data Sources** - **COMPLETED 2025-12-17**
    - ~~Add `cache` configuration block~~ - Added `apex_cache_config` block
    - ~~Add `circuit-breaker` configuration~~ - Added `apex_circuit_breaker` block
    - ~~Add `authentication` block for REST API sources~~ - Added `apex_authentication` block
    - Selenium tests: Tests 96-106
 
-5. **Enrichment Calculation** - ✅ **COMPLETED 2025-12-17**
+5. **Enrichment Calculation** - **COMPLETED 2025-12-17**
    - ~~Add `priority` number field~~
    - ~~Add `error-code` text field~~
    - ~~Add `success-code` text field~~
@@ -470,7 +470,7 @@ Add missing keywords to existing blocks:
 
 Add new block types:
 
-1. **Scenario Blocks** - ✅ **COMPLETED 2025-11-30**
+1. **Scenario Blocks** - **COMPLETED 2025-11-30**
    - `apex_scenario_config` - Main scenario configuration
    - `apex_section_scenario` - Scenario definition
    - `apex_classification_rule` - Classification rule
@@ -480,11 +480,11 @@ Add new block types:
    - `apex_pipeline_config` - Pipeline settings
    - Mode, error handling, retries
 
-3. **Error Recovery Block** - ✅ **COMPLETED 2025-11-30**
+3. **Error Recovery Block** - **COMPLETED 2025-11-30**
    - `apex_error_recovery` - Recovery configuration with global settings
    - `apex_severity_policy` - Per-severity recovery policies
 
-4. **Component References** - ✅ **COMPLETED 2025-11-30**
+4. **Component References** - **COMPLETED 2025-11-30**
    - `apex_component_config` - Component configuration with metadata
    - `apex_file_reference` - File references with execution order and failure policy
    - `apex_data_source_ref` - External data source references
@@ -493,7 +493,7 @@ Add new block types:
 
 Add advanced features:
 
-1. **Rule Chains** - ✅ **COMPLETED 2025-12-17**
+1. **Rule Chains** - **COMPLETED 2025-12-17**
    - ~~Support for all 6 chaining patterns~~ - Implemented 5 patterns (conditional, sequential, routing, accumulative, fluent)
    - ~~Complex workflow visualization~~ - 10 new blocks with full generator and YAML import support
    - Selenium tests: Tests 113-127 (15 tests)
@@ -657,10 +657,10 @@ Many YAML keywords are generated automatically by the block structure, not as ex
 
 | Status | Description |
 |--------|-------------|
-| ✅ | Fully implemented (explicit field or implicit derivation) |
+| | Fully implemented (explicit field or implicit derivation) |
 | 🔄 | Implicitly derived from block selection/structure |
 | ⚠️ | Partially implemented |
-| ❌ | Not implemented |
+| | Not implemented |
 
 ---
 
@@ -672,22 +672,22 @@ These are genuine gaps in blocks that already exist.
 
 | Keyword | Status | Current Block | Implementation Notes |
 |---------|--------|---------------|---------------------|
-| `id` | ✅ | apex_rule_config | Implemented as `ID` field (line 1467) |
-| `name` | ✅ | apex_rule_config | Implemented as `NAME` field (line 1470) |
-| `version` | ✅ | apex_rule_config | Implemented as `VERSION` field (line 1474) |
+| `id` | | apex_rule_config | Implemented as `ID` field (line 1467) |
+| `name` | | apex_rule_config | Implemented as `NAME` field (line 1470) |
+| `version` | | apex_rule_config | Implemented as `VERSION` field (line 1474) |
 | `type` | 🔄 | apex_rule_config | **Implicitly derived** - `"rule-config"` or `"transformation-config"` based on content (line 2802) |
-| `description` | ✅ | apex_rule_config | Implemented in collapsible section (line 1487) |
-| `author` | ✅ | apex_rule_config | Implemented in collapsible section (line 1491) |
-| `created-by` | ✅ | apex_rule_config | Implemented as `CREATED_BY` field (line 1495) |
-| `created-date` | ✅ | apex_rule_config | Implemented as `CREATED_DATE` field (line 1499) |
-| `last-modified` | ✅ | apex_rule_config | Implemented as `LAST_MODIFIED` field (line 1503) |
-| `business-domain` | ✅ | apex_rule_config | Implemented as `BUSINESS_DOMAIN` field (line 1507) |
-| `effective-date` | ✅ | apex_rule_config | Implemented as `EFFECTIVE_DATE` field (line 1511) |
-| `expiration-date` | ✅ | apex_rule_config | Implemented as `EXPIRATION_DATE` field (line 1515) |
-| `tags` | ✅ | apex_rule_config | Implemented as comma-separated `TAGS` field (line 1519) |
-| `owner` | ✅ | apex_rule_config, apex_data_source_config | **IMPLEMENTED 2025-12-16** - Added OWNER field to both blocks |
+| `description` | | apex_rule_config | Implemented in collapsible section (line 1487) |
+| `author` | | apex_rule_config | Implemented in collapsible section (line 1491) |
+| `created-by` | | apex_rule_config | Implemented as `CREATED_BY` field (line 1495) |
+| `created-date` | | apex_rule_config | Implemented as `CREATED_DATE` field (line 1499) |
+| `last-modified` | | apex_rule_config | Implemented as `LAST_MODIFIED` field (line 1503) |
+| `business-domain` | | apex_rule_config | Implemented as `BUSINESS_DOMAIN` field (line 1507) |
+| `effective-date` | | apex_rule_config | Implemented as `EFFECTIVE_DATE` field (line 1511) |
+| `expiration-date` | | apex_rule_config | Implemented as `EXPIRATION_DATE` field (line 1515) |
+| `tags` | | apex_rule_config | Implemented as comma-separated `TAGS` field (line 1519) |
+| `owner` | | apex_rule_config, apex_data_source_config | **IMPLEMENTED 2025-12-16** - Added OWNER field to both blocks |
 
-**Implementation Task 1.1:** ✅ **COMPLETED 2025-12-16**
+**Implementation Task 1.1:** **COMPLETED 2025-12-16**
 
 - Added OWNER field to `apex_rule_config` and `apex_data_source_config` blocks
 - Updated generators to include owner in metadata output
@@ -700,22 +700,22 @@ These are genuine gaps in blocks that already exist.
 
 | Keyword | Status | Current Block | Implementation Notes |
 |---------|--------|---------------|---------------------|
-| `id` | ✅ | apex_rule | Implemented as `ID` field. |
-| `name` | ✅ | apex_rule | Implemented as `NAME` field. |
-| `condition` | ✅ | apex_rule | Implemented as value input. |
-| `message` | ✅ | apex_rule | Implemented in collapsible section. |
-| `severity` | ✅ | apex_rule | Implemented with ERROR/WARNING/INFO options. |
-| `enabled` | ✅ | apex_rule | Implemented as checkbox. |
-| `priority` | ✅ | apex_rule | Implemented as text field. |
-| `category` | ✅ | apex_rule | Implemented as text field. |
-| `result-field` | ✅ | apex_rule | Implemented as value input. |
-| `business-owner` | ✅ | apex_rule | **IMPLEMENTED 2025-12-17** - Text field in collapsible section. |
-| `custom-properties` | ❌ | apex_rule | Add statement input for key-value pairs. Complex - defer to P3. |
-| `validation` | ❌ | apex_rule | Add nested validation config. Complex - defer to P3. |
-| `error-code` | ✅ | apex_rule | **IMPLEMENTED 2025-12-17** - Text field for error code identifier. |
-| `success-code` | ✅ | apex_rule | **IMPLEMENTED 2025-12-17** - Text field for success code identifier. |
+| `id` | | apex_rule | Implemented as `ID` field. |
+| `name` | | apex_rule | Implemented as `NAME` field. |
+| `condition` | | apex_rule | Implemented as value input. |
+| `message` | | apex_rule | Implemented in collapsible section. |
+| `severity` | | apex_rule | Implemented with ERROR/WARNING/INFO options. |
+| `enabled` | | apex_rule | Implemented as checkbox. |
+| `priority` | | apex_rule | Implemented as text field. |
+| `category` | | apex_rule | Implemented as text field. |
+| `result-field` | | apex_rule | Implemented as value input. |
+| `business-owner` | | apex_rule | **IMPLEMENTED 2025-12-17** - Text field in collapsible section. |
+| `custom-properties` | | apex_rule | Add statement input for key-value pairs. Complex - defer to P3. |
+| `validation` | | apex_rule | Add nested validation config. Complex - defer to P3. |
+| `error-code` | | apex_rule | **IMPLEMENTED 2025-12-17** - Text field for error code identifier. |
+| `success-code` | | apex_rule | **IMPLEMENTED 2025-12-17** - Text field for success code identifier. |
 
-**Implementation Task 1.2: ✅ COMPLETED 2025-12-17**
+**Implementation Task 1.2: COMPLETED 2025-12-17**
 - Added BUSINESS_OWNER, ERROR_CODE, SUCCESS_CODE fields to apex_rule block
 - Updated generator to include business-owner, error-code, success-code in output
 - Updated YAML import to restore these fields
@@ -739,24 +739,24 @@ this.appendDummyInput('ROW_SUCCESS_CODE')
 
 ---
 
-#### 1.3 Rule Group Block (`apex_rule_group`) - ✅ **COMPLETED 2025-12-16**
+#### 1.3 Rule Group Block (`apex_rule_group`) - **COMPLETED 2025-12-16**
 
 | Keyword | Status | Current Block | Implementation Notes |
 |---------|--------|---------------|---------------------|
-| `id` | ✅ | apex_rule_group | Implemented. |
-| `name` | ✅ | apex_rule_group | Implemented. |
-| `enabled` | ✅ | apex_rule_group | Implemented. |
-| `operator` | ✅ | apex_rule_group | Implemented with AND/OR. |
-| `rule-ids` | ✅ | apex_rule_group | Implemented via statement input. |
-| `stop-on-first-failure` | ✅ | apex_rule_group | **IMPLEMENTED 2025-12-16** - Added STOP_ON_FIRST_FAILURE checkbox |
-| `parallel-execution` | ✅ | apex_rule_group | **IMPLEMENTED 2025-12-16** - Added PARALLEL_EXECUTION checkbox |
-| `debug-mode` | ❌ | apex_rule_group | Add checkbox field. |
-| `error-handling` | ✅ | apex_rule_group | **IMPLEMENTED 2025-12-16** - Added ERROR_HANDLING dropdown (fail-fast, continue-on-error, skip-on-error) |
-| `rule-references` | ❌ | apex_rule_group | Complex - requires new block type. Defer to P3. |
-| `rule-group-references` | ❌ | apex_rule_group | Complex - requires nested groups. Defer to P3. |
-| `depends-on` | ❌ | apex_rule_group | Add text field for comma-separated dependencies. |
+| `id` | | apex_rule_group | Implemented. |
+| `name` | | apex_rule_group | Implemented. |
+| `enabled` | | apex_rule_group | Implemented. |
+| `operator` | | apex_rule_group | Implemented with AND/OR. |
+| `rule-ids` | | apex_rule_group | Implemented via statement input. |
+| `stop-on-first-failure` | | apex_rule_group | **IMPLEMENTED 2025-12-16** - Added STOP_ON_FIRST_FAILURE checkbox |
+| `parallel-execution` | | apex_rule_group | **IMPLEMENTED 2025-12-16** - Added PARALLEL_EXECUTION checkbox |
+| `debug-mode` | | apex_rule_group | Add checkbox field. |
+| `error-handling` | | apex_rule_group | **IMPLEMENTED 2025-12-16** - Added ERROR_HANDLING dropdown (fail-fast, continue-on-error, skip-on-error) |
+| `rule-references` | | apex_rule_group | Complex - requires new block type. Defer to P3. |
+| `rule-group-references` | | apex_rule_group | Complex - requires nested groups. Defer to P3. |
+| `depends-on` | | apex_rule_group | Add text field for comma-separated dependencies. |
 
-**Implementation Task 1.3:** ✅ **COMPLETED 2025-12-16**
+**Implementation Task 1.3:** **COMPLETED 2025-12-16**
 
 - Added STOP_ON_FIRST_FAILURE checkbox to `apex_rule_group` block
 - Added PARALLEL_EXECUTION checkbox to `apex_rule_group` block
@@ -767,23 +767,23 @@ this.appendDummyInput('ROW_SUCCESS_CODE')
 
 ---
 
-#### 1.4 Enrichment Group Block (`apex_enrichment_group`) - ✅ **COMPLETED 2025-12-16**
+#### 1.4 Enrichment Group Block (`apex_enrichment_group`) - **COMPLETED 2025-12-16**
 
 | Keyword | Status | Current Block | Implementation Notes |
 |---------|--------|---------------|---------------------|
-| `id` | ✅ | apex_enrichment_group | Implemented. |
-| `name` | ✅ | apex_enrichment_group | Implemented. |
-| `enabled` | ✅ | apex_enrichment_group | Implemented. |
-| `operator` | ✅ | apex_enrichment_group | Implemented with AND/OR. |
-| `enrichment-ids` | ✅ | apex_enrichment_group | Implemented via statement input. |
-| `stop-on-first-failure` | ✅ | apex_enrichment_group | **IMPLEMENTED 2025-12-16** - Added STOP_ON_FIRST_FAILURE checkbox |
-| `parallel-execution` | ✅ | apex_enrichment_group | **IMPLEMENTED 2025-12-16** - Added PARALLEL_EXECUTION checkbox |
-| `debug-mode` | ❌ | apex_enrichment_group | Add checkbox field. |
-| `error-handling` | ✅ | apex_enrichment_group | **IMPLEMENTED 2025-12-16** - Added ERROR_HANDLING dropdown (fail-fast, continue-on-error, skip-on-error) |
-| `enrichment-references` | ❌ | apex_enrichment_group | Complex - defer to P3. |
-| `enrichment-group-references` | ❌ | apex_enrichment_group | Complex - defer to P3. |
+| `id` | | apex_enrichment_group | Implemented. |
+| `name` | | apex_enrichment_group | Implemented. |
+| `enabled` | | apex_enrichment_group | Implemented. |
+| `operator` | | apex_enrichment_group | Implemented with AND/OR. |
+| `enrichment-ids` | | apex_enrichment_group | Implemented via statement input. |
+| `stop-on-first-failure` | | apex_enrichment_group | **IMPLEMENTED 2025-12-16** - Added STOP_ON_FIRST_FAILURE checkbox |
+| `parallel-execution` | | apex_enrichment_group | **IMPLEMENTED 2025-12-16** - Added PARALLEL_EXECUTION checkbox |
+| `debug-mode` | | apex_enrichment_group | Add checkbox field. |
+| `error-handling` | | apex_enrichment_group | **IMPLEMENTED 2025-12-16** - Added ERROR_HANDLING dropdown (fail-fast, continue-on-error, skip-on-error) |
+| `enrichment-references` | | apex_enrichment_group | Complex - defer to P3. |
+| `enrichment-group-references` | | apex_enrichment_group | Complex - defer to P3. |
 
-**Implementation Task 1.4:** ✅ **COMPLETED 2025-12-16**
+**Implementation Task 1.4:** **COMPLETED 2025-12-16**
 
 - Added STOP_ON_FIRST_FAILURE checkbox to `apex_enrichment_group` block
 - Added PARALLEL_EXECUTION checkbox to `apex_enrichment_group` block
@@ -794,17 +794,17 @@ this.appendDummyInput('ROW_SUCCESS_CODE')
 
 ---
 
-#### 1.5 Field Mapping Block (`apex_field_mapping`) - ✅ **COMPLETED 2025-12-16**
+#### 1.5 Field Mapping Block (`apex_field_mapping`) - **COMPLETED 2025-12-16**
 
 | Keyword | Status | Current Block | Implementation Notes |
 |---------|--------|---------------|---------------------|
-| `source-field` | ✅ | apex_field_mapping | Implemented as `SOURCE`. |
-| `target-field` | ✅ | apex_field_mapping | Implemented as `TARGET`. |
-| `expression` | ✅ | apex_field_mapping | Implemented as value input. |
-| `default-value` | ✅ | apex_field_mapping | **IMPLEMENTED 2025-12-16** - Added DEFAULT_VALUE text field |
-| `required` | ✅ | apex_field_mapping | **IMPLEMENTED 2025-12-16** - Added REQUIRED checkbox |
+| `source-field` | | apex_field_mapping | Implemented as `SOURCE`. |
+| `target-field` | | apex_field_mapping | Implemented as `TARGET`. |
+| `expression` | | apex_field_mapping | Implemented as value input. |
+| `default-value` | | apex_field_mapping | **IMPLEMENTED 2025-12-16** - Added DEFAULT_VALUE text field |
+| `required` | | apex_field_mapping | **IMPLEMENTED 2025-12-16** - Added REQUIRED checkbox |
 
-**Implementation Task 1.5:** ✅ **COMPLETED 2025-12-16**
+**Implementation Task 1.5:** **COMPLETED 2025-12-16**
 
 - Added DEFAULT_VALUE text field to `apex_field_mapping` block
 - Added REQUIRED checkbox to `apex_field_mapping` block
@@ -820,21 +820,21 @@ this.appendDummyInput('ROW_SUCCESS_CODE')
 
 | Keyword | Status | Current Block | Implementation Notes |
 |---------|--------|---------------|---------------------|
-| `id` | ✅ | apex_data_source_database | Implemented as `ID` field. |
-| `name` | ✅ | apex_data_source_database | Implemented as `NAME` field. |
-| `enabled` | ✅ | apex_data_source_database | Implemented as `ENABLED` checkbox. |
-| `description` | ✅ | apex_data_source_database | Implemented as `DESCRIPTION` field. |
+| `id` | | apex_data_source_database | Implemented as `ID` field. |
+| `name` | | apex_data_source_database | Implemented as `NAME` field. |
+| `enabled` | | apex_data_source_database | Implemented as `ENABLED` checkbox. |
+| `description` | | apex_data_source_database | Implemented as `DESCRIPTION` field. |
 | `type` | 🔄 | apex_data_source_database | **Implicitly derived** - `"DATABASE"` (line 2920) |
 | `connection-config` | 🔄 | apex_data_source_database | **Structurally generated** - wrapper object created by generator (line 2921) |
-| `connection-config.host` | ✅ | apex_data_source_database | Implemented as `HOST` field. |
-| `connection-config.port` | ✅ | apex_data_source_database | Implemented as `PORT` field. |
-| `connection-config.database` | ✅ | apex_data_source_database | Implemented as `DATABASE` field. |
-| `connection-config.username` | ✅ | apex_data_source_database | Implemented as `USERNAME` field. |
-| `connection-config.password` | ✅ | apex_data_source_database | Implemented as `PASSWORD` field. |
-| `queries` | ✅ | apex_data_source_database | Implemented via statement input for `apex_data_source_query` blocks. |
-| `connection-pool` | ❌ | apex_data_source_database | Add nested config block. |
-| `cache` | ❌ | apex_data_source_database | Add nested config block. |
-| `health-check` | ❌ | apex_data_source_database | Add nested config block. |
+| `connection-config.host` | | apex_data_source_database | Implemented as `HOST` field. |
+| `connection-config.port` | | apex_data_source_database | Implemented as `PORT` field. |
+| `connection-config.database` | | apex_data_source_database | Implemented as `DATABASE` field. |
+| `connection-config.username` | | apex_data_source_database | Implemented as `USERNAME` field. |
+| `connection-config.password` | | apex_data_source_database | Implemented as `PASSWORD` field. |
+| `queries` | | apex_data_source_database | Implemented via statement input for `apex_data_source_query` blocks. |
+| `connection-pool` | | apex_data_source_database | Add nested config block. |
+| `cache` | | apex_data_source_database | Add nested config block. |
+| `health-check` | | apex_data_source_database | Add nested config block. |
 
 **Implementation Task 2.1:** Create new blocks for connection-pool, cache, and health-check configurations.
 
@@ -882,20 +882,20 @@ this.appendDummyInput('ROW_SUCCESS_CODE')
 
 | Keyword | Status | Current Block | Implementation Notes |
 |---------|--------|---------------|---------------------|
-| `id` | ✅ | apex_data_source_rest | Implemented as `ID` field. |
-| `name` | ✅ | apex_data_source_rest | Implemented as `NAME` field. |
-| `enabled` | ✅ | apex_data_source_rest | Implemented as `ENABLED` checkbox. |
-| `description` | ✅ | apex_data_source_rest | Implemented as `DESCRIPTION` field. |
+| `id` | | apex_data_source_rest | Implemented as `ID` field. |
+| `name` | | apex_data_source_rest | Implemented as `NAME` field. |
+| `enabled` | | apex_data_source_rest | Implemented as `ENABLED` checkbox. |
+| `description` | | apex_data_source_rest | Implemented as `DESCRIPTION` field. |
 | `type` | 🔄 | apex_data_source_rest | **Implicitly derived** - `"REST_API"` (line 2951) |
 | `connection-config` | 🔄 | apex_data_source_rest | **Structurally generated** - wrapper object created by generator (line 2952) |
-| `connection-config.base-url` | ✅ | apex_data_source_rest | Implemented as `BASE_URL` field. |
-| `connection-config.timeout` | ✅ | apex_data_source_rest | Implemented as `TIMEOUT` field. |
-| `endpoints` | ✅ | apex_data_source_rest | Implemented via statement input for `apex_data_source_endpoint` blocks. |
-| `authentication` | ❌ | apex_data_source_rest | Not implemented - needs new block. |
-| `operations` | ❌ | apex_data_source_rest | Add nested operations config. |
-| `response-mapping` | ❌ | apex_data_source_rest | Add nested response mapping. |
-| `circuit-breaker` | ❌ | apex_data_source_rest | Add nested circuit breaker config. |
-| `retry` | ❌ | apex_data_source_rest | Add retry configuration. |
+| `connection-config.base-url` | | apex_data_source_rest | Implemented as `BASE_URL` field. |
+| `connection-config.timeout` | | apex_data_source_rest | Implemented as `TIMEOUT` field. |
+| `endpoints` | | apex_data_source_rest | Implemented via statement input for `apex_data_source_endpoint` blocks. |
+| `authentication` | | apex_data_source_rest | Not implemented - needs new block. |
+| `operations` | | apex_data_source_rest | Add nested operations config. |
+| `response-mapping` | | apex_data_source_rest | Add nested response mapping. |
+| `circuit-breaker` | | apex_data_source_rest | Add nested circuit breaker config. |
+| `retry` | | apex_data_source_rest | Add retry configuration. |
 
 **Implementation Task 2.2:** Create authentication and circuit-breaker blocks.
 
@@ -950,17 +950,17 @@ this.appendDummyInput('ROW_SUCCESS_CODE')
 
 | Keyword | Status | Current Block | Implementation Notes |
 |---------|--------|---------------|---------------------|
-| `id` | ✅ | apex_data_source_file | Implemented as `ID` field. |
-| `name` | ✅ | apex_data_source_file | Implemented as `NAME` field. |
-| `enabled` | ✅ | apex_data_source_file | Implemented as `ENABLED` checkbox. |
-| `description` | ✅ | apex_data_source_file | Implemented as `DESCRIPTION` field. |
+| `id` | | apex_data_source_file | Implemented as `ID` field. |
+| `name` | | apex_data_source_file | Implemented as `NAME` field. |
+| `enabled` | | apex_data_source_file | Implemented as `ENABLED` checkbox. |
+| `description` | | apex_data_source_file | Implemented as `DESCRIPTION` field. |
 | `type` | 🔄 | apex_data_source_file | **Implicitly derived** - `"FILE_SYSTEM"` (line 2977) |
 | `connection-config` | 🔄 | apex_data_source_file | **Structurally generated** - wrapper object created by generator (line 2978) |
-| `connection-config.base-path` | ✅ | apex_data_source_file | Implemented as `BASE_PATH` field. |
-| `connection-config.file-pattern` | ✅ | apex_data_source_file | Implemented as `FILE_PATTERN` field. |
-| `connection-config.format` | ✅ | apex_data_source_file | Implemented as `FORMAT` dropdown (CSV/JSON/XML). |
-| `encoding` | ❌ | apex_data_source_file | Add dropdown (UTF-8, ISO-8859-1, etc.). |
-| `polling-interval` | ❌ | apex_data_source_file | Add number field for polling interval in ms. |
+| `connection-config.base-path` | | apex_data_source_file | Implemented as `BASE_PATH` field. |
+| `connection-config.file-pattern` | | apex_data_source_file | Implemented as `FILE_PATTERN` field. |
+| `connection-config.format` | | apex_data_source_file | Implemented as `FORMAT` dropdown (CSV/JSON/XML). |
+| `encoding` | | apex_data_source_file | Add dropdown (UTF-8, ISO-8859-1, etc.). |
+| `polling-interval` | | apex_data_source_file | Add number field for polling interval in ms. |
 
 **Implementation Task 2.3:**
 ```javascript
@@ -985,18 +985,18 @@ this.appendDummyInput('ROW_SUCCESS_CODE')
 
 | Keyword | Status | Current Block | Implementation Notes |
 |---------|--------|---------------|---------------------|
-| `id` | ✅ | apex_enrichment_calculation | Implemented as `ID` field. |
-| `enabled` | ✅ | apex_enrichment_calculation | Implemented as `ENABLED` checkbox. |
+| `id` | | apex_enrichment_calculation | Implemented as `ID` field. |
+| `enabled` | | apex_enrichment_calculation | Implemented as `ENABLED` checkbox. |
 | `type` | 🔄 | apex_enrichment_calculation | **Implicitly derived** - `"calculation-enrichment"` (line 3139) |
-| `condition` | ✅ | apex_enrichment_calculation | Implemented as value input. |
+| `condition` | | apex_enrichment_calculation | Implemented as value input. |
 | `calculation-config` | 🔄 | apex_enrichment_calculation | **Structurally generated** - wrapper object created by generator (line 3140) |
-| `calculation-config.expression` | ✅ | apex_enrichment_calculation | Implemented as `EXPRESSION` value input. |
-| `calculation-config.result-field` | ✅ | apex_enrichment_calculation | Implemented as `RESULT_FIELD` field. |
-| `priority` | ✅ | apex_enrichment_calculation | **IMPLEMENTED 2025-12-17** - Added PRIORITY number field. |
-| `error-code` | ✅ | apex_enrichment_calculation | **IMPLEMENTED 2025-12-17** - Added ERROR_CODE text field. |
-| `success-code` | ✅ | apex_enrichment_calculation | **IMPLEMENTED 2025-12-17** - Added SUCCESS_CODE text field. |
+| `calculation-config.expression` | | apex_enrichment_calculation | Implemented as `EXPRESSION` value input. |
+| `calculation-config.result-field` | | apex_enrichment_calculation | Implemented as `RESULT_FIELD` field. |
+| `priority` | | apex_enrichment_calculation | **IMPLEMENTED 2025-12-17** - Added PRIORITY number field. |
+| `error-code` | | apex_enrichment_calculation | **IMPLEMENTED 2025-12-17** - Added ERROR_CODE text field. |
+| `success-code` | | apex_enrichment_calculation | **IMPLEMENTED 2025-12-17** - Added SUCCESS_CODE text field. |
 
-**Effort:** ✅ COMPLETED 2025-12-17
+**Effort:** COMPLETED 2025-12-17
 
 ---
 
@@ -1004,11 +1004,11 @@ this.appendDummyInput('ROW_SUCCESS_CODE')
 
 | Keyword | Status | Current Block | Implementation Notes |
 |---------|--------|---------------|---------------------|
-| `id` | ✅ | apex_enrichment_field | Implemented as `ID` field. |
-| `enabled` | ✅ | apex_enrichment_field | Implemented as `ENABLED` checkbox. |
+| `id` | | apex_enrichment_field | Implemented as `ID` field. |
+| `enabled` | | apex_enrichment_field | Implemented as `ENABLED` checkbox. |
 | `type` | 🔄 | apex_enrichment_field | **Implicitly derived** - `"field-enrichment"` (line 3162) |
-| `condition` | ✅ | apex_enrichment_field | Implemented as value input. |
-| `field-mappings` | ✅ | apex_enrichment_field | Implemented via statement input for `apex_field_mapping` blocks. |
+| `condition` | | apex_enrichment_field | Implemented as value input. |
+| `field-mappings` | | apex_enrichment_field | Implemented via statement input for `apex_field_mapping` blocks. |
 
 **Effort:** Already complete - no changes needed.
 
@@ -1018,16 +1018,16 @@ this.appendDummyInput('ROW_SUCCESS_CODE')
 
 | Keyword | Status | Current Block | Implementation Notes |
 |---------|--------|---------------|---------------------|
-| `id` | ✅ | apex_enrichment_lookup | Implemented as `ID` field. |
-| `enabled` | ✅ | apex_enrichment_lookup | Implemented as `ENABLED` checkbox. |
+| `id` | | apex_enrichment_lookup | Implemented as `ID` field. |
+| `enabled` | | apex_enrichment_lookup | Implemented as `ENABLED` checkbox. |
 | `type` | 🔄 | apex_enrichment_lookup | **Implicitly derived** - `"lookup-enrichment"` (line 3193) |
-| `condition` | ✅ | apex_enrichment_lookup | Implemented as value input. |
+| `condition` | | apex_enrichment_lookup | Implemented as value input. |
 | `lookup-config` | 🔄 | apex_enrichment_lookup | **Structurally generated** - wrapper object created by generator (line 3194) |
-| `lookup-config.lookup-key` | ✅ | apex_enrichment_lookup | Implemented as `KEY` value input. |
-| `lookup-config.lookup-dataset` | ✅ | apex_enrichment_lookup | Implemented via value input for dataset blocks. |
-| `field-mappings` | ✅ | apex_enrichment_lookup | Implemented via statement input for `apex_field_mapping` blocks. |
-| `default-value` | ❌ | apex_enrichment_lookup | Add text field for fallback when lookup fails. |
-| `cache-enabled` | ❌ | apex_enrichment_lookup | Add checkbox for lookup caching. |
+| `lookup-config.lookup-key` | | apex_enrichment_lookup | Implemented as `KEY` value input. |
+| `lookup-config.lookup-dataset` | | apex_enrichment_lookup | Implemented via value input for dataset blocks. |
+| `field-mappings` | | apex_enrichment_lookup | Implemented via statement input for `apex_field_mapping` blocks. |
+| `default-value` | | apex_enrichment_lookup | Add text field for fallback when lookup fails. |
+| `cache-enabled` | | apex_enrichment_lookup | Add checkbox for lookup caching. |
 
 **Effort:** 1 hour
 
@@ -1038,12 +1038,12 @@ this.appendDummyInput('ROW_SUCCESS_CODE')
 | Keyword | Status | Current Block | Implementation Notes |
 |---------|--------|---------------|---------------------|
 | `type` (reference) | 🔄 | apex_lookup_dataset_reference | **Implicitly derived** - `"reference"` (line 3216) |
-| `id` | ✅ | apex_lookup_dataset_reference | Implemented as `ID` field. |
-| `key-field` | ✅ | apex_lookup_dataset_reference | Implemented as `KEY_FIELD` field. |
+| `id` | | apex_lookup_dataset_reference | Implemented as `ID` field. |
+| `key-field` | | apex_lookup_dataset_reference | Implemented as `KEY_FIELD` field. |
 | `type` (database) | 🔄 | apex_lookup_dataset_database | **Implicitly derived** - `"database"` (line 3232) |
-| `data-source-ref` | ✅ | apex_lookup_dataset_database | Implemented as `DS_REF` field. |
-| `query` | ✅ | apex_lookup_dataset_database | Implemented as `QUERY` field. |
-| `parameters` | ✅ | apex_lookup_dataset_database | Implemented via statement input for `apex_lookup_parameter` blocks. |
+| `data-source-ref` | | apex_lookup_dataset_database | Implemented as `DS_REF` field. |
+| `query` | | apex_lookup_dataset_database | Implemented as `QUERY` field. |
+| `parameters` | | apex_lookup_dataset_database | Implemented via statement input for `apex_lookup_parameter` blocks. |
 
 **Effort:** Already complete - no changes needed.
 
@@ -1055,12 +1055,12 @@ this.appendDummyInput('ROW_SUCCESS_CODE')
 
 | Keyword | Status | Implementation Notes |
 |---------|--------|---------------------|
-| `pipeline` | ❌ | New top-level block required. |
-| `mode` | ❌ | Dropdown: sequential, parallel. |
-| `error-handling` | ❌ | Dropdown: fail-fast, continue-on-error. |
-| `max-retries` | ❌ | Number field. |
-| `retry-delay-ms` | ❌ | Number field. |
-| `collect-metrics` | ❌ | Checkbox. |
+| `pipeline` | | New top-level block required. |
+| `mode` | | Dropdown: sequential, parallel. |
+| `error-handling` | | Dropdown: fail-fast, continue-on-error. |
+| `max-retries` | | Number field. |
+| `retry-delay-ms` | | Number field. |
+| `collect-metrics` | | Checkbox. |
 
 **Implementation Task 4.1:**
 ```javascript
@@ -1118,9 +1118,9 @@ Blockly.Blocks['apex_pipeline_config'] = {
 
 | Keyword | Status | Implementation Notes |
 |---------|--------|---------------------|
-| `rule-id` | ✅ | Implemented in apex_rule_ref. |
-| `sequence` | ❌ | Add number field for execution order. |
-| `override-priority` | ❌ | Add number field to override rule priority. |
+| `rule-id` | | Implemented in apex_rule_ref. |
+| `sequence` | | Add number field for execution order. |
+| `override-priority` | | Add number field to override rule priority. |
 
 **Implementation Task 4.2:**
 ```javascript
@@ -1152,10 +1152,10 @@ Blockly.Blocks['apex_rule_ref'] = {
 
 | Keyword | Status | Implementation Notes |
 |---------|--------|---------------------|
-| `validation` | ❌ | New nested block for rule validation config. |
-| `required-fields` | ❌ | Text field for comma-separated required fields. |
-| `field-types` | ❌ | Statement input for field type definitions. |
-| `custom-validators` | ❌ | Statement input for custom validator references. |
+| `validation` | | New nested block for rule validation config. |
+| `required-fields` | | Text field for comma-separated required fields. |
+| `field-types` | | Statement input for field type definitions. |
+| `custom-validators` | | Statement input for custom validator references. |
 
 **Implementation Task 4.3:**
 ```javascript
@@ -1207,8 +1207,8 @@ Blockly.Blocks['apex_rule_ref'] = {
 
 | Keyword | Status | Implementation Notes |
 |---------|--------|---------------------|
-| `categories` | ❌ | New section block for category definitions. |
-| `parent-category` | ❌ | Text field for hierarchical parent. |
+| `categories` | | New section block for category definitions. |
+| `parent-category` | | Text field for hierarchical parent. |
 
 **Implementation Task 4.4:**
 ```javascript
@@ -1251,7 +1251,7 @@ Blockly.Blocks['apex_rule_ref'] = {
 
 ---
 
-### Phase 5: Rule Chains (P4) - ✅ **COMPLETED 2025-12-17**
+### Phase 5: Rule Chains (P4) - **COMPLETED 2025-12-17**
 
 Rule chains implementation with 5 chaining patterns and 10 new blocks.
 
@@ -1259,53 +1259,53 @@ Rule chains implementation with 5 chaining patterns and 10 new blocks.
 
 | Keyword | Status | Implementation Notes |
 |---------|--------|---------------------|
-| `rule-chains` | ✅ | `apex_section_rule_chains` - Container section block. |
+| `rule-chains` | | `apex_section_rule_chains` - Container section block. |
 
 #### 5.2 Conditional Chaining Pattern
 
 | Keyword | Status | Implementation Notes |
 |---------|--------|---------------------|
-| `trigger-rule` | ✅ | `apex_conditional_chain` - TRIGGER_RULE field. |
-| `on-trigger` | ✅ | `apex_conditional_chain` - ON_TRIGGER statement input. |
-| `on-no-trigger` | ✅ | `apex_conditional_chain` - ON_NO_TRIGGER statement input. |
+| `trigger-rule` | | `apex_conditional_chain` - TRIGGER_RULE field. |
+| `on-trigger` | | `apex_conditional_chain` - ON_TRIGGER statement input. |
+| `on-no-trigger` | | `apex_conditional_chain` - ON_NO_TRIGGER statement input. |
 
 #### 5.3 Sequential Dependency Pattern
 
 | Keyword | Status | Implementation Notes |
 |---------|--------|---------------------|
-| `stages` | ✅ | `apex_sequential_dependency` - STAGES statement input. |
-| `stage-name` | ✅ | `apex_chain_stage` - STAGE_NAME field. |
-| `depends-on` | ✅ | `apex_chain_stage` - DEPENDS_ON field. |
-| `output-variable` | ✅ | `apex_chain_stage` - OUTPUT_VARIABLE field. |
+| `stages` | | `apex_sequential_dependency` - STAGES statement input. |
+| `stage-name` | | `apex_chain_stage` - STAGE_NAME field. |
+| `depends-on` | | `apex_chain_stage` - DEPENDS_ON field. |
+| `output-variable` | | `apex_chain_stage` - OUTPUT_VARIABLE field. |
 
 #### 5.4 Result-Based Routing Pattern
 
 | Keyword | Status | Implementation Notes |
 |---------|--------|---------------------|
-| `routes` | ✅ | `apex_result_routing` - ROUTES statement input. |
-| `router-condition` | ✅ | `apex_result_routing` - ROUTER_CONDITION field. |
-| `route-name` | ✅ | `apex_route` - ROUTE_NAME field. |
-| `route-condition` | ✅ | `apex_route` - ROUTE_CONDITION field. |
+| `routes` | | `apex_result_routing` - ROUTES statement input. |
+| `router-condition` | | `apex_result_routing` - ROUTER_CONDITION field. |
+| `route-name` | | `apex_route` - ROUTE_NAME field. |
+| `route-condition` | | `apex_route` - ROUTE_CONDITION field. |
 
 #### 5.5 Accumulative Chaining Pattern
 
 | Keyword | Status | Implementation Notes |
 |---------|--------|---------------------|
-| `accumulator-variable` | ✅ | `apex_accumulative_chain` - ACCUMULATOR_VARIABLE field. |
-| `initial-value` | ✅ | `apex_accumulative_chain` - INITIAL_VALUE field. |
-| `final-decision` | ✅ | `apex_accumulative_chain` - FINAL_DECISION field. |
-| `accumulation-rules` | ✅ | `apex_accumulative_chain` - ACCUMULATION_RULES statement input. |
-| `weight` | ✅ | `apex_accumulation_rule` - WEIGHT field. |
+| `accumulator-variable` | | `apex_accumulative_chain` - ACCUMULATOR_VARIABLE field. |
+| `initial-value` | | `apex_accumulative_chain` - INITIAL_VALUE field. |
+| `final-decision` | | `apex_accumulative_chain` - FINAL_DECISION field. |
+| `accumulation-rules` | | `apex_accumulative_chain` - ACCUMULATION_RULES statement input. |
+| `weight` | | `apex_accumulation_rule` - WEIGHT field. |
 
 #### 5.6 Fluent Builder Pattern
 
 | Keyword | Status | Implementation Notes |
 |---------|--------|---------------------|
-| `builder-target` | ✅ | `apex_fluent_builder` - BUILDER_TARGET field. |
-| `decision-steps` | ✅ | `apex_fluent_builder` - DECISION_STEPS statement input. |
-| `step-name` | ✅ | `apex_decision_step` - STEP_NAME field. |
-| `on-success` | ✅ | `apex_decision_step` - ON_SUCCESS field. |
-| `on-failure` | ✅ | `apex_decision_step` - ON_FAILURE field. |
+| `builder-target` | | `apex_fluent_builder` - BUILDER_TARGET field. |
+| `decision-steps` | | `apex_fluent_builder` - DECISION_STEPS statement input. |
+| `step-name` | | `apex_decision_step` - STEP_NAME field. |
+| `on-success` | | `apex_decision_step` - ON_SUCCESS field. |
+| `on-failure` | | `apex_decision_step` - ON_FAILURE field. |
 
 **Selenium Tests:** Tests 113-127 (15 tests - all passing)
 
@@ -1315,8 +1315,8 @@ Rule chains implementation with 5 chaining patterns and 10 new blocks.
 
 | Keyword | Status | Implementation Notes |
 |---------|--------|---------------------|
-| `data-sinks` | ❌ | New section block for output destinations. |
-| `sink` | ❌ | Individual sink configuration block. |
+| `data-sinks` | | New section block for output destinations. |
+| `sink` | | Individual sink configuration block. |
 
 **Effort:** 4 hours
 
@@ -1349,9 +1349,9 @@ When evaluating keyword coverage, it's important to distinguish between:
 | Error Recovery | 8 | 7 | 1 | 0 | 100% |
 | Component Refs | 12 | 10 | 1 | 1 | 92% |
 | **Rule Chains** | **24** | **23** | **1** | **0** | **100%** |
-| **Categories** | **4** | **4** | **0** | **0** | **100%** ✅ |
-| **Data Sinks** | **16** | **16** | **0** | **0** | **100%** ✅ |
-| **Pipeline** | **11** | **11** | **0** | **0** | **100%** ✅ |
+| **Categories** | **4** | **4** | **0** | **0** | **100%** |
+| **Data Sinks** | **16** | **16** | **0** | **0** | **100%** |
+| **Pipeline** | **11** | **11** | **0** | **0** | **100%** |
 | **TOTAL** | **~205** | **~167** | **~23** | **~15** | **~95%** |
 
 **Key Insight:** The actual coverage is now ~95% after implementing Categories, Data Sinks (Phase 5), and Pipeline Orchestration (Phase 6) on 2025-12-17.
@@ -1360,16 +1360,16 @@ When evaluating keyword coverage, it's important to distinguish between:
 
 | Phase | Priority | Effort | Keywords Added | New Coverage | Status |
 |-------|----------|--------|----------------|--------------|--------|
-| Phase 1 (Items 1-3) | P1 | 4 hours | 9 | 74% | ✅ **COMPLETED 2025-12-16** |
-| Phase 1 (Item 4 - Data Sources) | P1 | 3 hours | 3 | 76% | ✅ **COMPLETED 2025-12-17** |
-| Phase 1 (Item 5 - Enrichment Calc) | P1 | 1 hour | 3 | 79% | ✅ **COMPLETED 2025-12-17** |
-| Phase 2 (Scenario Blocks) | P2 | 4 hours | 12 | 84% | ✅ **COMPLETED 2025-11-30** |
-| Phase 2 (Error Recovery) | P2 | 2 hours | 8 | 89% | ✅ **COMPLETED 2025-11-30** |
-| Phase 2 (Component Refs) | P2 | 2 hours | 10 | 95% | ✅ **COMPLETED 2025-11-30** |
-| Phase 3 (Pipeline Config) | P2 | 2 hours | 11 | 95% | ✅ **COMPLETED 2025-12-17** |
-| Phase 4 (Rule Chains) | P3 | 16+ hours | 24 | 89% | ✅ **COMPLETED 2025-12-17** (Tests 113-127) |
-| **Phase 5 (Categories, Data Sinks, File Enhancements)** | **P4** | **4 hours** | **22** | **92%** | **✅ COMPLETED 2025-12-17** (Tests 176-189) |
-| **Phase 6 (Pipeline Orchestration)** | **P2** | **3 hours** | **11** | **95%** | **✅ COMPLETED 2025-12-17** (Tests 190-197) |
+| Phase 1 (Items 1-3) | P1 | 4 hours | 9 | 74% | **COMPLETED 2025-12-16** |
+| Phase 1 (Item 4 - Data Sources) | P1 | 3 hours | 3 | 76% | **COMPLETED 2025-12-17** |
+| Phase 1 (Item 5 - Enrichment Calc) | P1 | 1 hour | 3 | 79% | **COMPLETED 2025-12-17** |
+| Phase 2 (Scenario Blocks) | P2 | 4 hours | 12 | 84% | **COMPLETED 2025-11-30** |
+| Phase 2 (Error Recovery) | P2 | 2 hours | 8 | 89% | **COMPLETED 2025-11-30** |
+| Phase 2 (Component Refs) | P2 | 2 hours | 10 | 95% | **COMPLETED 2025-11-30** |
+| Phase 3 (Pipeline Config) | P2 | 2 hours | 11 | 95% | **COMPLETED 2025-12-17** |
+| Phase 4 (Rule Chains) | P3 | 16+ hours | 24 | 89% | **COMPLETED 2025-12-17** (Tests 113-127) |
+| **Phase 5 (Categories, Data Sinks, File Enhancements)** | **P4** | **4 hours** | **22** | **92%** | **COMPLETED 2025-12-17** (Tests 176-189) |
+| **Phase 6 (Pipeline Orchestration)** | **P2** | **3 hours** | **11** | **95%** | **COMPLETED 2025-12-17** (Tests 190-197) |
 
 **Phase 6 Deliverables (2025-12-17):**
 - 2 new blocks for Pipeline (apex_pipeline_config, apex_pipeline_stage)
@@ -1381,14 +1381,14 @@ When evaluating keyword coverage, it's important to distinguish between:
 
 ---
 
-1. ~~Add `owner` field to metadata block (30 min)~~ ✅ **COMPLETED 2025-12-16**
-2. ~~Add `stop-on-first-failure` and `error-handling` to rule groups (1 hour)~~ ✅ **COMPLETED 2025-12-16**
-3. ~~Add `default-value` and `required` to field mappings (1 hour)~~ ✅ **COMPLETED 2025-12-16**
-4. ~~Add `business-owner`, `error-code`, `success-code` to rules (1 hour)~~ ✅ **COMPLETED 2025-12-17** (Tests 89-95)
-5. ~~Add `cache`, `circuit-breaker`, `authentication` to data sources (3 hours)~~ ✅ **COMPLETED 2025-12-17** (Tests 96-106)
-6. ~~Add `priority`, `error-code`, `success-code` to enrichment calculation (1 hour)~~ ✅ **COMPLETED 2025-12-17** (Tests 107-112)
+1. ~~Add `owner` field to metadata block (30 min)~~ **COMPLETED 2025-12-16**
+2. ~~Add `stop-on-first-failure` and `error-handling` to rule groups (1 hour)~~ **COMPLETED 2025-12-16**
+3. ~~Add `default-value` and `required` to field mappings (1 hour)~~ **COMPLETED 2025-12-16**
+4. ~~Add `business-owner`, `error-code`, `success-code` to rules (1 hour)~~ **COMPLETED 2025-12-17** (Tests 89-95)
+5. ~~Add `cache`, `circuit-breaker`, `authentication` to data sources (3 hours)~~ **COMPLETED 2025-12-17** (Tests 96-106)
+6. ~~Add `priority`, `error-code`, `success-code` to enrichment calculation (1 hour)~~ **COMPLETED 2025-12-17** (Tests 107-112)
 7. Add `encoding` and `polling-interval` to file source (1 hour) - 🔲 **DEFERRED**
-8. ~~Add Rule Chains support (16+ hours)~~ ✅ **COMPLETED 2025-12-17** (Tests 113-127)
+8. ~~Add Rule Chains support (16+ hours)~~ **COMPLETED 2025-12-17** (Tests 113-127)
 
 ### Generator Updates Required
 
@@ -1505,4 +1505,4 @@ All new visual editor features require full Selenium test coverage. The followin
 
 **Run Command:** `mvn test -Dtest=VisualEditorUITest -DfailIfNoTests=false`
 
-**Status:** All 46 new tests pass ✅ (Tests 67-112)
+**Status:** All 46 new tests pass (Tests 67-112)

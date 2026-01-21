@@ -12,7 +12,7 @@ The PostgreSQL lookup demo showcases:
 - **Fallback Mechanisms** for resilience and error handling
 - **Real-time Data Enrichment** from PostgreSQL database
 
-## 📋 **Prerequisites**
+## **Prerequisites**
 
 - Docker and Docker Compose installed
 - Java 17+ for running the demo
@@ -62,7 +62,7 @@ java -cp target/classes dev.mars.apex.demo.examples.PostgreSQLLookupDemo
 - Email: admin@apex-demo.com
 - Password: admin123
 
-## 📊 **Database Schema**
+## **Database Schema**
 
 ### Customer Data Schema
 ```sql
@@ -160,7 +160,7 @@ monitoring:
     cache-miss-rate-threshold: 0.5
 ```
 
-## 🔍 **Sample Data**
+## **Sample Data**
 
 ### Customers (10 records)
 - CUST000001: Acme Corporation (PLATINUM, NA)

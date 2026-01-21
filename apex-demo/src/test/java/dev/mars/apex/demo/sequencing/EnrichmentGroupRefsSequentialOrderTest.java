@@ -125,7 +125,7 @@ public class EnrichmentGroupRefsSequentialOrderTest {
         // Verify all rules passed (they depend on enrichments)
         assertTrue(result.isTriggered(), "Rules should trigger");
 
-        LOGGER.info("✅ Enrichment-Group-Refs Placeholder Expansion Test PASSED");
+        LOGGER.info("Enrichment-Group-Refs Placeholder Expansion Test PASSED");
         LOGGER.info("   Processing Order Verified:");
         LOGGER.info("   1. E1 (inline): enrich-counterparty-data ✓");
         LOGGER.info("   2. EG1 (from ref): market-data-enrichment-group ✓");
@@ -157,7 +157,7 @@ public class EnrichmentGroupRefsSequentialOrderTest {
             .anyMatch(eg -> "risk-metrics-enrichment-group".equals(eg.getId()));
         assertTrue(hasRiskMetricsGroup, "Should have external enrichment group: risk-metrics-enrichment-group");
 
-        LOGGER.info("✅ All enrichment groups loaded correctly from external file");
+        LOGGER.info("All enrichment groups loaded correctly from external file");
     }
 
     @Test
@@ -206,7 +206,7 @@ public class EnrichmentGroupRefsSequentialOrderTest {
 
         LOGGER.info("✓ Test Case 2: Missing underlying - dependency chain correctly handled");
 
-        LOGGER.info("✅ Enrichment-Group-Refs Execution Order with Dependencies Test PASSED");
+        LOGGER.info("Enrichment-Group-Refs Execution Order with Dependencies Test PASSED");
     }
 }
 

@@ -141,7 +141,7 @@ public class UpdateStageFxTransactionTest extends DemoTestBase {
                 stmt3.executeUpdate();
             }
             
-            logger.info("✅ H2 database setup completed successfully");
+            logger.info("H2 database setup completed successfully");
             
         } catch (SQLException e) {
             logger.error("Failed to set up H2 database", e);
@@ -190,7 +190,7 @@ public class UpdateStageFxTransactionTest extends DemoTestBase {
             assertEquals(1, enrichedData.get("BUY_CURRENCY_RANK"), "USD should have rank 1");
             assertEquals(2, enrichedData.get("SELL_CURRENCY_RANK"), "EUR should have rank 2");
             
-            logger.info("✅ Currency rank enrichment completed successfully");
+            logger.info("Currency rank enrichment completed successfully");
             logger.info("  - Buy Currency (USD) Rank: {}", enrichedData.get("BUY_CURRENCY_RANK"));
             logger.info("  - Sell Currency (EUR) Rank: {}", enrichedData.get("SELL_CURRENCY_RANK"));
             
@@ -236,7 +236,7 @@ public class UpdateStageFxTransactionTest extends DemoTestBase {
             // Validate final result after rule builder processing
             assertEquals("YES", enrichedData.get("FINAL_IS_NDF"), "Final IS_NDF should be YES after processing '1'");
             
-            logger.info("✅ NDF Rule 1 conditional logic completed successfully");
+            logger.info("NDF Rule 1 conditional logic completed successfully");
             logger.info("  - Rule Builder Flag: {}", enrichedData.get("run_rule_builder_function_flag"));
             logger.info("  - Final IS_NDF: {}", enrichedData.get("FINAL_IS_NDF"));
             
@@ -288,7 +288,7 @@ public class UpdateStageFxTransactionTest extends DemoTestBase {
             // Validate internal code mapping result
             assertEquals("YES", enrichedData.get("INTERNAL_CODE"), "Internal code should be mapped to YES for Y");
 
-            logger.info("✅ NDF Rule 2 conditional logic completed successfully");
+            logger.info("NDF Rule 2 conditional logic completed successfully");
             logger.info("  - Rule Builder Flag: {}", enrichedData.get("run_rule_builder_function_flag"));
             logger.info("  - Translation Type: {}", enrichedData.get("TRANSLATION_TYPE"));
             logger.info("  - External Code: {}", enrichedData.get("EXTERNAL_CODE"));
@@ -357,7 +357,7 @@ public class UpdateStageFxTransactionTest extends DemoTestBase {
             assertEquals(5000000.00, enrichedData.get("TRADE_AMOUNT"), "Trade amount should be preserved");
             assertEquals("2025-10-15", enrichedData.get("SETTLEMENT_DATE"), "Settlement date should be preserved");
             
-            logger.info("✅ Complete FX transaction workflow completed successfully");
+            logger.info("Complete FX transaction workflow completed successfully");
             logger.info("  - Trade ID: {}", enrichedData.get("TRADE_ID"));
             logger.info("  - Buy Currency: {} (Rank: {})", enrichedData.get("BUY_CURRENCY"), enrichedData.get("BUY_CURRENCY_RANK"));
             logger.info("  - Sell Currency: {} (Rank: {})", enrichedData.get("SELL_CURRENCY"), enrichedData.get("SELL_CURRENCY_RANK"));
@@ -383,7 +383,7 @@ public class UpdateStageFxTransactionTest extends DemoTestBase {
         // Additional FX-specific validations
         assertNotNull(yamlLoader, "YAML configuration loader should be initialized for FX processing");
 
-        logger.info("✅ All APEX services properly initialized for FX transaction processing");
+        logger.info("All APEX services properly initialized for FX transaction processing");
     }
 }
 

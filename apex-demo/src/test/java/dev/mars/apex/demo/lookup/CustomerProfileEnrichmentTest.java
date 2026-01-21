@@ -53,11 +53,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Customer profile data retrieval and enrichment
  *
  * CRITICAL VALIDATION CHECKLIST APPLIED:
- * ✅ Count enrichments in YAML - 1 enrichment expected
- * ✅ Verify log shows "Processed: 1 out of 1" - Must be 100% execution rate
- * ✅ Check EVERY enrichment condition - Test data triggers customer profile enrichment
- * ✅ Validate EVERY database lookup - Test actual H2 database query functionality
- * ✅ Assert ALL enrichment results - Every result-field has corresponding assertEquals
+ * Count enrichments in YAML - 1 enrichment expected
+ * Verify log shows "Processed: 1 out of 1" - Must be 100% execution rate
+ * Check EVERY enrichment condition - Test data triggers customer profile enrichment
+ * Validate EVERY database lookup - Test actual H2 database query functionality
+ * Assert ALL enrichment results - Every result-field has corresponding assertEquals
  *
  * YAML FIRST PRINCIPLE:
  * - ALL enrichment logic is in YAML configuration
@@ -170,7 +170,7 @@ public class CustomerProfileEnrichmentTest extends DemoTestBase {
             assertEquals("North America", enrichedData.get("customerRegion"), "Should retrieve correct customer region");
             assertEquals("ACTIVE", enrichedData.get("customerStatus"), "Should retrieve correct customer status");
 
-            logger.info("✅ Customer profile enrichment from database completed successfully");
+            logger.info("Customer profile enrichment from database completed successfully");
             logger.info("  - Customer Name: {}", enrichedData.get("customerName"));
             logger.info("  - Customer Type: {}", enrichedData.get("customerType"));
             logger.info("  - Customer Tier: {}", enrichedData.get("customerTier"));
@@ -234,7 +234,7 @@ public class CustomerProfileEnrichmentTest extends DemoTestBase {
                     customerId, expectedName, expectedType, expectedTier);
             }
 
-            logger.info("✅ Multiple customer profile enrichments completed successfully");
+            logger.info("Multiple customer profile enrichments completed successfully");
 
         } catch (Exception e) {
             logger.error("Multiple customer profile enrichments test failed: {}", e.getMessage());
@@ -279,7 +279,7 @@ public class CustomerProfileEnrichmentTest extends DemoTestBase {
             assertEquals("TXN99999", enrichedData.get("transactionId"), "Original transaction ID should be preserved");
             assertEquals(1000.00, enrichedData.get("amount"), "Original amount should be preserved");
 
-            logger.info("✅ Skip enrichment when customer ID missing completed successfully");
+            logger.info("Skip enrichment when customer ID missing completed successfully");
 
         } catch (Exception e) {
             logger.error("Skip enrichment test failed: {}", e.getMessage());
@@ -320,7 +320,7 @@ public class CustomerProfileEnrichmentTest extends DemoTestBase {
             assertEquals("Europe", enrichedData.get("customerRegion"), "Should retrieve inactive customer region");
             assertEquals("INACTIVE", enrichedData.get("customerStatus"), "Should retrieve inactive customer status");
 
-            logger.info("✅ Inactive customer profile enrichment completed successfully");
+            logger.info("Inactive customer profile enrichment completed successfully");
             logger.info("  - Customer Name: {}", enrichedData.get("customerName"));
             logger.info("  - Customer Status: {}", enrichedData.get("customerStatus"));
 

@@ -98,11 +98,11 @@ class EnrichmentRefsWithGroupReferencesTest {
         assertFalse(rule2InItemOrder, "is-source-identifier-valid should be filtered from itemOrder (referenced by rule-group)");
 
         logger.info("=== TEST RESULTS ===");
-        logger.info("✅ e1_eg, e2_eg, e3_eg in itemOrder: {}, {}, {}", e1_egInItemOrder, e2_egInItemOrder, e3_egInItemOrder);
-        logger.info("✅ rbg1 filtered from itemOrder: {}", !rbg1InItemOrder);
-        logger.info("✅ e1, e2, e3 filtered from itemOrder: {}, {}, {}", !e1InItemOrder, !e2InItemOrder, !e3InItemOrder);
-        logger.info("✅ Rule group in itemOrder: {}", ruleGroupInItemOrder);
-        logger.info("✅ Rules filtered from itemOrder: {}, {}", !rule1InItemOrder, !rule2InItemOrder);
+        logger.info("e1_eg, e2_eg, e3_eg in itemOrder: {}, {}, {}", e1_egInItemOrder, e2_egInItemOrder, e3_egInItemOrder);
+        logger.info("rbg1 filtered from itemOrder: {}", !rbg1InItemOrder);
+        logger.info("e1, e2, e3 filtered from itemOrder: {}, {}, {}", !e1InItemOrder, !e2InItemOrder, !e3InItemOrder);
+        logger.info("Rule group in itemOrder: {}", ruleGroupInItemOrder);
+        logger.info("Rules filtered from itemOrder: {}, {}", !rule1InItemOrder, !rule2InItemOrder);
     }
 }
 

@@ -1208,7 +1208,7 @@ public class YamlEnrichmentProcessor {
             // Check cache first
             Object cached = cacheManager.get(ApexCacheManager.DATASET_CACHE, cacheKey);
             if (cached instanceof DatasetLookupService) {
-                logger.info("✅ Dataset cache HIT for signature: " + signature.toShortString());
+                logger.info("Dataset cache HIT for signature: " + signature.toShortString());
                 return (DatasetLookupService) cached;
             }
 
@@ -1222,7 +1222,7 @@ public class YamlEnrichmentProcessor {
                 // Cache the dataset service
                 cacheManager.put(ApexCacheManager.DATASET_CACHE, cacheKey, datasetService);
 
-                logger.info("❌ Dataset cache MISS - Created and cached dataset lookup service: " + datasetServiceName +
+                logger.info("Dataset cache MISS - Created and cached dataset lookup service: " + datasetServiceName +
                            " (type: " + dataset.getType() + ", records: " +
                            datasetService.getAllRecords().size() + ", signature: " + signature.toShortString() + ")");
 

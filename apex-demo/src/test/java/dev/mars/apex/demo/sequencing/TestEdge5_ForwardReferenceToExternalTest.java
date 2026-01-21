@@ -39,7 +39,7 @@ public class TestEdge5_ForwardReferenceToExternalTest extends DemoTestBase {
             // Attempt to load YAML with forward reference
             RulesEngine engine = RulesEngine.fromClasspath("dev/mars/apex/demo/sequencing/TestEdge5_ForwardReferenceToExternalTest.yaml");
 
-            LOGGER.info("✅ EDGE CASE TEST 5 PASSED: Forward references work correctly");
+            LOGGER.info("EDGE CASE TEST 5 PASSED: Forward references work correctly");
             LOGGER.info("   Reference resolution happens before group validation");
             
             assertNotNull(engine, "RulesEngine should be created successfully");

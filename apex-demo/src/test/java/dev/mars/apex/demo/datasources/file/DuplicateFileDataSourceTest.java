@@ -66,7 +66,7 @@ public class DuplicateFileDataSourceTest extends DemoTestBase {
             
             // Clear cache to start fresh
             cacheManager.clearAll();
-            logger.info("📊 Cache cleared - starting fresh");
+            logger.info("Cache cleared - starting fresh");
 
             // Load configuration with 2 enrichments using SAME CSV file
             var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/datasources/file/DuplicateFileDataSourceTest.yaml");
@@ -76,7 +76,7 @@ public class DuplicateFileDataSourceTest extends DemoTestBase {
             testData.put("currencyCode", "USD");
             testData.put("transactionId", "TXN123");
             
-            logger.info("📋 Processing enrichments with 2 identical CSV file references...");
+            logger.info("Processing enrichments with 2 identical CSV file references...");
 
             // Process enrichments - this should create 1 dataset service and reuse it
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
@@ -93,7 +93,7 @@ public class DuplicateFileDataSourceTest extends DemoTestBase {
             logger.info("=================================================================");
             logger.info("CACHE STATISTICS ANALYSIS");
             logger.info("=================================================================");
-            logger.info("📊 Dataset Cache Statistics:");
+            logger.info("Dataset Cache Statistics:");
             logger.info("   - Cache Hits: {}", stats.getHits());
             logger.info("   - Cache Misses: {}", stats.getMisses());
             logger.info("   - Hit Rate: {}%", String.format("%.2f%%", stats.getHitRate()));
@@ -110,7 +110,7 @@ public class DuplicateFileDataSourceTest extends DemoTestBase {
             assertTrue(stats.getHitRate() > 0,
                 "Hit rate should be greater than 0% (caching is working)");
 
-            logger.info("✅ VERIFICATION SUCCESSFUL:");
+            logger.info("VERIFICATION SUCCESSFUL:");
             logger.info("   ✓ Only 1 DatasetLookupService created for CSV file (not 2)");
             logger.info("   ✓ Second enrichment reused first enrichment's dataset");
             logger.info("   ✓ Memory duplication eliminated via caching");
@@ -127,7 +127,7 @@ public class DuplicateFileDataSourceTest extends DemoTestBase {
             assertEquals("North America", enrichedData.get("currencyRegion"));
 
         } catch (Exception e) {
-            logger.error("❌ CSV file dataset deduplication verification failed: {}", e.getMessage(), e);
+            logger.error("CSV file dataset deduplication verification failed: {}", e.getMessage(), e);
             fail("CSV file dataset deduplication verification failed: " + e.getMessage());
         }
     }
@@ -159,7 +159,7 @@ public class DuplicateFileDataSourceTest extends DemoTestBase {
             assertEquals("€", enrichedData.get("currencySymbol"));
             assertEquals("Europe", enrichedData.get("currencyRegion"));
 
-            logger.info("✅ EUR enrichment successful: {}", enrichedData);
+            logger.info("EUR enrichment successful: {}", enrichedData);
 
         } catch (Exception e) {
             fail("Different currency test failed: " + e.getMessage());
@@ -181,7 +181,7 @@ public class DuplicateFileDataSourceTest extends DemoTestBase {
             var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/datasources/file/DuplicateFileDataSourceTest.yaml");
             assertNotNull(config, "YAML configuration should not be null");
 
-            logger.info("📋 Loaded configuration with {} enrichments", config.getEnrichments().size());
+            logger.info("Loaded configuration with {} enrichments", config.getEnrichments().size());
             
             // Log enrichment details
             config.getEnrichments().forEach(enrichment -> {
@@ -199,7 +199,7 @@ public class DuplicateFileDataSourceTest extends DemoTestBase {
             testData.put("currencyCode", "USD");
             testData.put("transactionId", "TXN123");
             
-            logger.info("📊 Input data: {}", testData);
+            logger.info("Input data: {}", testData);
             logger.info("🔄 Processing enrichments...");
 
             // Process with APEX - this should trigger both enrichments
@@ -213,8 +213,8 @@ public class DuplicateFileDataSourceTest extends DemoTestBase {
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
 
-            logger.info("✅ Enrichment completed successfully");
-            logger.info("📊 Result data: {}", enrichedData);
+            logger.info("Enrichment completed successfully");
+            logger.info("Result data: {}", enrichedData);
 
             // Verify both enrichments worked (different fields from same CSV file)
             assertEquals("USD", enrichedData.get("currencyCode"));
@@ -226,13 +226,13 @@ public class DuplicateFileDataSourceTest extends DemoTestBase {
             logger.info("=================================================================");
             logger.info("SUCCESS: CSV FILE DATASET DEDUPLICATION VERIFIED");
             logger.info("=================================================================");
-            logger.info("✅ Both enrichments successfully processed the same CSV file");
-            logger.info("✅ Dataset deduplication works for CSV file lookups");
-            logger.info("✅ Same caching mechanism as inline and database datasets");
+            logger.info("Both enrichments successfully processed the same CSV file");
+            logger.info("Dataset deduplication works for CSV file lookups");
+            logger.info("Same caching mechanism as inline and database datasets");
             logger.info("=================================================================");
 
         } catch (Exception e) {
-            logger.error("❌ Test failed: {}", e.getMessage(), e);
+            logger.error("Test failed: {}", e.getMessage(), e);
             fail("Duplicate CSV file data source test failed: " + e.getMessage());
         }
     }

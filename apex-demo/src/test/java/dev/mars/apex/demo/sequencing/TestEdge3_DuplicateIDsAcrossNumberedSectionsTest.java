@@ -50,7 +50,7 @@ public class TestEdge3_DuplicateIDsAcrossNumberedSectionsTest extends DemoTestBa
         assertTrue(errorMessage.contains("enrichment") || errorMessage.contains("id"), 
             "Error message should mention 'enrichment' or 'id': " + exception.getMessage());
 
-        LOGGER.info("✅ EDGE CASE TEST 3 PASSED: Duplicate IDs correctly rejected");
+        LOGGER.info("EDGE CASE TEST 3 PASSED: Duplicate IDs correctly rejected");
         LOGGER.info("   Error message: {}", exception.getMessage());
     }
 }

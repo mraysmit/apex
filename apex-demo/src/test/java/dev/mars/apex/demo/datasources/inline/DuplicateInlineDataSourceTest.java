@@ -74,7 +74,7 @@ public class DuplicateInlineDataSourceTest extends DemoTestBase {
             var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/datasources/inline/DuplicateInlineDataSourceTest.yaml");
             assertNotNull(config, "YAML configuration should not be null");
 
-            logger.info("📋 Loaded configuration with {} enrichments", config.getEnrichments().size());
+            logger.info("Loaded configuration with {} enrichments", config.getEnrichments().size());
             
             // Log enrichment details
             config.getEnrichments().forEach(enrichment -> {
@@ -106,7 +106,7 @@ public class DuplicateInlineDataSourceTest extends DemoTestBase {
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
 
-            logger.info("✅ Enrichment completed successfully");
+            logger.info("Enrichment completed successfully");
             logger.info(" Result data: {}", enrichedData);
 
             // Verify both enrichments worked (different fields from same data)
@@ -119,14 +119,14 @@ public class DuplicateInlineDataSourceTest extends DemoTestBase {
             logger.info("=================================================================");
             logger.info("ANALYSIS: POTENTIAL MEMORY DUPLICATION ISSUE");
             logger.info("=================================================================");
-            logger.info("✅ Both enrichments successfully processed the same data");
+            logger.info("Both enrichments successfully processed the same data");
             logger.info(" Each enrichment likely created its own DatasetLookupService");
             logger.info(" Same inline data (4 currency records) loaded twice in memory");
             logger.info(" Optimization opportunity: Share datasets between enrichments");
             logger.info("=================================================================");
 
         } catch (Exception e) {
-            logger.error("❌ Test failed: {}", e.getMessage(), e);
+            logger.error("Test failed: {}", e.getMessage(), e);
             fail("Duplicate inline data source test failed: " + e.getMessage());
         }
     }
@@ -158,7 +158,7 @@ public class DuplicateInlineDataSourceTest extends DemoTestBase {
             assertEquals("€", enrichedData.get("currencySymbol"));
             assertEquals("Europe", enrichedData.get("currencyRegion"));
 
-            logger.info("✅ EUR enrichment successful: {}", enrichedData);
+            logger.info("EUR enrichment successful: {}", enrichedData);
 
         } catch (Exception e) {
             fail("Different currency test failed: " + e.getMessage());
@@ -179,7 +179,7 @@ public class DuplicateInlineDataSourceTest extends DemoTestBase {
             // Clear cache and reset statistics to start fresh
             cacheManager.clearAll();
             cacheManager.getAllStatistics().values().forEach(stats -> stats.reset());
-            logger.info("📊 Cache cleared and statistics reset - starting fresh");
+            logger.info("Cache cleared and statistics reset - starting fresh");
 
             // Load configuration with 2 enrichments using SAME inline data
             var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/datasources/inline/DuplicateInlineDataSourceTest.yaml");
@@ -189,7 +189,7 @@ public class DuplicateInlineDataSourceTest extends DemoTestBase {
             testData.put("currencyCode", "USD");
             testData.put("transactionId", "TXN123");
 
-            logger.info("📋 Processing enrichments with 2 identical datasets...");
+            logger.info("Processing enrichments with 2 identical datasets...");
 
             // Process enrichments - this should create 1 dataset service and reuse it
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
@@ -206,7 +206,7 @@ public class DuplicateInlineDataSourceTest extends DemoTestBase {
             logger.info("=================================================================");
             logger.info("CACHE STATISTICS ANALYSIS");
             logger.info("=================================================================");
-            logger.info("📊 Dataset Cache Statistics:");
+            logger.info("Dataset Cache Statistics:");
             logger.info("   - Cache Hits: {}", stats.getHits());
             logger.info("   - Cache Misses: {}", stats.getMisses());
             logger.info(String.format("   - Hit Rate: %.2f%%", stats.getHitRate()));
@@ -223,7 +223,7 @@ public class DuplicateInlineDataSourceTest extends DemoTestBase {
             assertEquals(50.0, stats.getHitRate(), 0.01,
                 "Hit rate should be 50% (1 hit out of 2 accesses)");
 
-            logger.info("✅ VERIFICATION SUCCESSFUL:");
+            logger.info("VERIFICATION SUCCESSFUL:");
             logger.info("   ✓ Only 1 DatasetLookupService created (not 2)");
             logger.info("   ✓ Second enrichment reused first enrichment's dataset");
             logger.info("   ✓ Memory duplication eliminated via caching");
@@ -239,7 +239,7 @@ public class DuplicateInlineDataSourceTest extends DemoTestBase {
             assertEquals("North America", enrichedData.get("currencyRegion"));
 
         } catch (Exception e) {
-            logger.error("❌ Cache statistics verification failed: {}", e.getMessage(), e);
+            logger.error("Cache statistics verification failed: {}", e.getMessage(), e);
             fail("Dataset deduplication verification failed: " + e.getMessage());
         }
     }

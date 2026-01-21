@@ -53,7 +53,7 @@ public class TestEdge4_IDCollisionInlineVsExternalTest extends DemoTestBase {
         assertTrue(errorMessage.contains("collision-id"), 
             "Error message should mention the duplicate ID 'collision-id': " + exception.getMessage());
 
-        LOGGER.info("✅ EDGE CASE TEST 4 PASSED: ID collision correctly rejected");
+        LOGGER.info("EDGE CASE TEST 4 PASSED: ID collision correctly rejected");
         LOGGER.info("   Error message: {}", exception.getMessage());
     }
 }

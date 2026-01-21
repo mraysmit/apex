@@ -86,7 +86,7 @@ public class BasicUsageExamplesTest {
             config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/BasicUsageExamplesTest-config.yaml");
             dataConfig = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/BasicUsageExamplesTest-data.yaml");
 
-            logger.info("✅ APEX services initialized for basic usage examples testing");
+            logger.info("APEX services initialized for basic usage examples testing");
             logger.info("  - Configuration loaded: {}", config.getMetadata().getName());
             logger.info("  - Data scenarios loaded: {}", dataConfig.getMetadata().getName());
 
@@ -109,7 +109,7 @@ public class BasicUsageExamplesTest {
         RulesEngine engine = new RulesEngine(rulesConfig);
 
         assertNotNull(engine, "RulesEngine should be created");
-        logger.info("✅ RulesEngine created with EnrichmentService");
+        logger.info("RulesEngine created with EnrichmentService");
 
         return engine;
     }

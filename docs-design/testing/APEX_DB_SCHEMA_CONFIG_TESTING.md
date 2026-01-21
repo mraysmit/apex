@@ -234,11 +234,11 @@ queries:
 ```
 
 **Benefits of External References**:
-- ✅ Business logic (enrichments, rules) separated from infrastructure (data sources)
-- ✅ Same business logic YAML works across all environments
-- ✅ Infrastructure team manages data-source configs independently
-- ✅ Credentials never committed to business logic files
-- ✅ Schema configuration centralized in data-source file
+- Business logic (enrichments, rules) separated from infrastructure (data sources)
+- Same business logic YAML works across all environments
+- Infrastructure team manages data-source configs independently
+- Credentials never committed to business logic files
+- Schema configuration centralized in data-source file
 
 ---
 
@@ -583,10 +583,10 @@ void testProductEnrichmentFromCustomSchema() {
 
 #### Key Validations
 
-✅ Queries execute without `trading.` schema prefix  
-✅ PostgreSQL `search_path` automatically includes `trading`  
-✅ Data enriched correctly from custom schema tables  
-✅ View queries work (`trading.active_products_view`)  
+Queries execute without `trading.` schema prefix  
+PostgreSQL `search_path` automatically includes `trading`  
+Data enriched correctly from custom schema tables  
+View queries work (`trading.active_products_view`)  
 
 ---
 
@@ -666,10 +666,10 @@ data-sources:
 
 #### Key Validations
 
-✅ PostgreSQL-specific types (JSONB, TEXT[]) work in custom schemas  
-✅ CHECK constraints enforced in custom schema tables  
-✅ Lookups retrieve correct data without hardcoded schema names  
-✅ 8 test customers with diverse data validated  
+PostgreSQL-specific types (JSONB, TEXT[]) work in custom schemas  
+CHECK constraints enforced in custom schema tables  
+Lookups retrieve correct data without hardcoded schema names  
+8 test customers with diverse data validated  
 
 ---
 
@@ -788,10 +788,10 @@ pipeline:
 
 #### Key Validations
 
-✅ Multiple data-sources target different schemas  
-✅ Cross-schema schema-diff operations work correctly  
-✅ Schema metadata reads from non-default schemas  
-✅ Pipeline steps correctly reference custom schemas  
+Multiple data-sources target different schemas  
+Cross-schema schema-diff operations work correctly  
+Schema metadata reads from non-default schemas  
+Pipeline steps correctly reference custom schemas  
 
 ---
 
@@ -881,7 +881,7 @@ data-sources:
 
 ## Anti-Patterns
 
-### ❌ Anti-Pattern 1: Hardcoded Schema Prefixes
+### Anti-Pattern 1: Hardcoded Schema Prefixes
 
 **Bad Example**:
 ```yaml
@@ -907,7 +907,7 @@ queries:
 
 ---
 
-### ❌ Anti-Pattern 2: Manual SET search_path
+### Anti-Pattern 2: Manual SET search_path
 
 **Bad Example**:
 ```yaml
@@ -932,7 +932,7 @@ connection:
 
 ---
 
-### ❌ Anti-Pattern 3: Schema Names in Every Query
+### Anti-Pattern 3: Schema Names in Every Query
 
 **Bad Example**:
 ```yaml
@@ -962,7 +962,7 @@ queries:
 
 ---
 
-### ❌ Anti-Pattern 4: Environment-Specific Query Files
+### Anti-Pattern 4: Environment-Specific Query Files
 
 **Bad Example**:
 ```
@@ -1047,9 +1047,9 @@ mvn test -Dtest=CustomSchemaPostgresTest
 ```
 [INFO] --- maven-surefire-plugin:3.0.0:test (default-test) @ apex-demo ---
 [INFO] Running dev.mars.apex.demo.enrichment.CustomSchemaEnrichmentTest
-[INFO] ✅ Created custom schema 'trading' with products, counterparties tables
+[INFO] Created custom schema 'trading' with products, counterparties tables
 [INFO] Input: productId=PROD001, tradeAmount=5000000.0
-[INFO] ✅ Product enrichment successful from schema 'trading':
+[INFO] Product enrichment successful from schema 'trading':
 [INFO]    productName: EUR/USD FX Forward
 [INFO]    productType: FX_FORWARD
 [INFO]    assetClass: FX
@@ -1265,13 +1265,13 @@ sequenceDiagram
 
 ### Benefits of Environment Variable Pattern
 
-✅ **Zero-Code Promotion**: Same YAML files work in all environments  
-✅ **No Configuration Drift**: Single source of truth for business logic  
-✅ **Secure Credentials**: Passwords never in version control  
-✅ **Schema Flexibility**: Different schemas per environment (dev_trading → uat_trading → trading)  
-✅ **Easy Rollback**: Revert environment variables, not code  
-✅ **Audit Trail**: Environment changes tracked separately from code changes  
-✅ **Vault Integration**: Production credentials from secure vault, not files
+**Zero-Code Promotion**: Same YAML files work in all environments  
+**No Configuration Drift**: Single source of truth for business logic  
+**Secure Credentials**: Passwords never in version control  
+**Schema Flexibility**: Different schemas per environment (dev_trading → uat_trading → trading)  
+**Easy Rollback**: Revert environment variables, not code  
+**Audit Trail**: Environment changes tracked separately from code changes  
+**Vault Integration**: Production credentials from secure vault, not files
 
 ### Configuration Hierarchy
 

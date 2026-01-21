@@ -29,12 +29,12 @@ APEX 2.2 introduces **dual format support** for `queries`, `operations`, and `en
 
 ### Key Features
 
-- ✅ **100% Backward Compatible** - All existing YAML files work unchanged
-- ✅ **Opt-In Enhancement** - Migration to array format is optional
-- ✅ **Mixed Format Support** - Use both formats in the same file
-- ✅ **Zero Performance Impact** - Runtime uses identical Map structure
-- ✅ **Self-Documenting** - Array format provides rich metadata
-- ✅ **Enterprise Ready** - Supports governance, versioning, and compliance
+- **100% Backward Compatible** - All existing YAML files work unchanged
+- **Opt-In Enhancement** - Migration to array format is optional
+- **Mixed Format Support** - Use both formats in the same file
+- **Zero Performance Impact** - Runtime uses identical Map structure
+- **Self-Documenting** - Array format provides rich metadata
+- **Enterprise Ready** - Supports governance, versioning, and compliance
 
 ### Quick Decision Matrix
 
@@ -61,12 +61,12 @@ queries:
 ```
 
 **Characteristics:**
-- ✅ Concise and readable
-- ✅ Fast Map.get() lookups
-- ✅ Simple YAML structure
-- ✅ Low memory footprint
-- ❌ No metadata
-- ❌ Limited documentation
+- Concise and readable
+- Fast Map.get() lookups
+- Simple YAML structure
+- Low memory footprint
+- No metadata
+- Limited documentation
 
 ### Array Format (Metadata-Rich)
 
@@ -81,11 +81,11 @@ queries:
 ```
 
 **Characteristics:**
-- ✅ Rich metadata
-- ✅ Self-documenting
-- ✅ Versioning support
-- ✅ Tagging and categorization
-- ✅ Compliance tracking
+- Rich metadata
+- Self-documenting
+- Versioning support
+- Tagging and categorization
+- Compliance tracking
 - ⚠️ More verbose
 - ⚠️ Slightly higher memory during deserialization
 
@@ -230,18 +230,18 @@ data-sources:
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `name` | String | ✅ Yes | Unique identifier (becomes Map key) |
-| `value` | String | ✅ Yes | The actual query/operation/endpoint |
-| `description` | String | ❌ No | Human-readable description |
-| `tags` | List<String> | ❌ No | Categorization tags |
-| `version` | String | ❌ No | Version number (e.g., "1.0", "2.1") |
-| `owner` | String | ❌ No | Team or person responsible |
-| `deprecated` | Boolean | ❌ No | Deprecation flag |
-| `deprecationMessage` | String | ❌ No | Why deprecated, what to use instead |
-| `parameters` | List<String> | ❌ No | List of parameter names |
-| `compliance` | List<String> | ❌ No | Compliance frameworks (GDPR, PCI-DSS) |
-| `performance` | String | ❌ No | Performance notes (e.g., "indexed") |
-| `sla` | String | ❌ No | Service level agreement (for endpoints) |
+| `name` | String | Yes | Unique identifier (becomes Map key) |
+| `value` | String | Yes | The actual query/operation/endpoint |
+| `description` | String | No | Human-readable description |
+| `tags` | List<String> | No | Categorization tags |
+| `version` | String | No | Version number (e.g., "1.0", "2.1") |
+| `owner` | String | No | Team or person responsible |
+| `deprecated` | Boolean | No | Deprecation flag |
+| `deprecationMessage` | String | No | Why deprecated, what to use instead |
+| `parameters` | List<String> | No | List of parameter names |
+| `compliance` | List<String> | No | Compliance frameworks (GDPR, PCI-DSS) |
+| `performance` | String | No | Performance notes (e.g., "indexed") |
+| `sla` | String | No | Service level agreement (for endpoints) |
 
 ### Example: Enterprise Query Configuration
 
@@ -389,7 +389,7 @@ String endpoint = endpoints.get("currencyLookup");
 String operation = operations.get("createCustomer");
 ```
 
-**Key Insight**: ✅ Format conversion happens during deserialization only. Runtime uses fast Map lookups.
+**Key Insight**: Format conversion happens during deserialization only. Runtime uses fast Map lookups.
 
 ---
 
@@ -486,11 +486,11 @@ data-sources:
 ### 1. Choose Format Based on Complexity
 
 ```yaml
-# ✅ GOOD: Simple query → map format
+# GOOD: Simple query → map format
 queries:
   getUser: "SELECT * FROM users WHERE id = :id"
 
-# ✅ GOOD: Complex query → array format
+# GOOD: Complex query → array format
 queries:
   - name: "getUserWithProfile"
     value: |
@@ -505,13 +505,13 @@ queries:
 ### 2. Use Consistent Naming Conventions
 
 ```yaml
-# ✅ GOOD: Consistent naming
+# GOOD: Consistent naming
 queries:
   getCustomer: "..."
   getCustomerById: "..."
   listActiveCustomers: "..."
 
-# ❌ BAD: Inconsistent naming
+# BAD: Inconsistent naming
 queries:
   customer: "..."
   fetchCustomerById: "..."
@@ -521,14 +521,14 @@ queries:
 ### 3. Document Parameters
 
 ```yaml
-# ✅ GOOD: Parameters documented
+# GOOD: Parameters documented
 queries:
   - name: "searchCustomers"
     value: "SELECT * FROM customers WHERE name LIKE :searchTerm AND status = :status"
     parameters: ["searchTerm", "status"]
     description: "Search customers by name and status"
 
-# ❌ MISSING: No parameter documentation
+# MISSING: No parameter documentation
 queries:
   - name: "searchCustomers"
     value: "SELECT * FROM customers WHERE name LIKE :searchTerm AND status = :status"
@@ -584,7 +584,7 @@ queries:
 queries:
   - name: "getCustomer"
     value: "SELECT * FROM customers WHERE id = :id"
-  - name: "getCustomer"  # ❌ Duplicate key
+  - name: "getCustomer"  # Duplicate key
     value: "SELECT * FROM customers WHERE email = :email"
 ```
 
@@ -600,7 +600,7 @@ Each query must have a unique name within the same data source.
 ```yaml
 queries:
   - name: "getCustomer"
-    # ❌ Missing 'value' field
+    # Missing 'value' field
     description: "Get customer by ID"
 ```
 
@@ -614,7 +614,7 @@ Each query must have both 'name' and 'value' fields.
 ```yaml
 queries:
   - value: "SELECT * FROM customers WHERE id = :id"
-    # ❌ Missing 'name' field
+    # Missing 'name' field
 ```
 
 **Error Message:**
@@ -627,7 +627,7 @@ Each query must have both 'name' and 'value' fields.
 
 **Error Scenario:**
 ```yaml
-queries: "SELECT * FROM customers"  # ❌ String instead of map or array
+queries: "SELECT * FROM customers"  # String instead of map or array
 ```
 
 **Error Message:**

@@ -10,9 +10,9 @@
 ### The Problem
 
 Many tests that appear to be "working" are actually **INCOMPLETE** because they only verify:
-1. ✅ Test passes (0 failures, 0 errors)
-2. ✅ Exception is caught and handled (no crash)
-3. ❌ **MISSING**: Error messages are properly reported through `RuleResult` API
+1. Test passes (0 failures, 0 errors)
+2. Exception is caught and handled (no crash)
+3. **MISSING**: Error messages are properly reported through `RuleResult` API
 
 ### The Pattern
 
@@ -21,14 +21,14 @@ Tests catch exceptions and handle them gracefully, but **fail to verify programm
 ```java
 // INCOMPLETE PATTERN (what many tests currently do):
 RuleResult result = engine.evaluate(config, inputData);
-assertNotNull(result, "Result should not be null");  // ❌ NOT ENOUGH!
+assertNotNull(result, "Result should not be null");  // NOT ENOUGH!
 
 // COMPLETE PATTERN (what tests SHOULD do):
 RuleResult result = engine.evaluate(config, inputData);
 assertNotNull(result, "Result should not be null");
-assertTrue(result.hasFailures(), "Result should indicate failure");  // ✅ VERIFY ERROR STATE
+assertTrue(result.hasFailures(), "Result should indicate failure");  // VERIFY ERROR STATE
 List<String> failureMessages = result.getFailureMessages();
-assertFalse(failureMessages.isEmpty(), "Should have failure messages");  // ✅ VERIFY ERROR DETAILS
+assertFalse(failureMessages.isEmpty(), "Should have failure messages");  // VERIFY ERROR DETAILS
 ```
 
 ### Why This Matters
@@ -65,11 +65,11 @@ Each test needs individual verification to determine proper classification.
 
 ### dev.mars.apex.core.config.yaml.EnrichmentCategoryInheritanceIntegrationTest
 
-- **TEST #1: testCustomerProfileEnrichmentInheritance** - java.nio.file.NoSuchFileException (2 occurrence(s)) - **✅ NOT A BUG: Test PASSES (0 failures, 0 errors). The NoSuchFileException is from java.util.logging.FileHandler trying to create log file at `target/test-logs/apex-tests-0.log.0.lck` but directory doesn't exist. This is a harmless logging configuration warning that doesn't affect test functionality. The test completes successfully.**
+- **TEST #1: testCustomerProfileEnrichmentInheritance** - java.nio.file.NoSuchFileException (2 occurrence(s)) - **NOT A BUG: Test PASSES (0 failures, 0 errors). The NoSuchFileException is from java.util.logging.FileHandler trying to create log file at `target/test-logs/apex-tests-0.log.0.lck` but directory doesn't exist. This is a harmless logging configuration warning that doesn't affect test functionality. The test completes successfully.**
 
 ### dev.mars.apex.core.engine.config.EnrichmentGroupDatabaseLookupTest
 
-- **TEST #2: testEnrichmentGroupWithDatabaseLookupMissingCustomer** - dev.mars.apex.core.service.enrichment.EnrichmentException (1 occurrence(s)) - **✅ WORKING AS DESIGNED BUT WAS INCOMPLETE: Test PASSES (0 failures, 0 errors) after enhancements. Already has INTENTIONAL ERROR TEST log marker. The EnrichmentException is logged at ERROR level when required field 'CUSTOMER_NAME' is missing from lookup result, but the exception is properly caught and handled by the enrichment processor. Test was enhanced to verify `result.hasFailures()` returns true and `result.getFailureMessages()` contains error details. This is proper error handling for failed lookups with programmatic error reporting through RuleResult API.**
+- **TEST #2: testEnrichmentGroupWithDatabaseLookupMissingCustomer** - dev.mars.apex.core.service.enrichment.EnrichmentException (1 occurrence(s)) - **WORKING AS DESIGNED BUT WAS INCOMPLETE: Test PASSES (0 failures, 0 errors) after enhancements. Already has INTENTIONAL ERROR TEST log marker. The EnrichmentException is logged at ERROR level when required field 'CUSTOMER_NAME' is missing from lookup result, but the exception is properly caught and handled by the enrichment processor. Test was enhanced to verify `result.hasFailures()` returns true and `result.getFailureMessages()` contains error details. This is proper error handling for failed lookups with programmatic error reporting through RuleResult API.**
 
 ### dev.mars.apex.core.engine.config.RulesEngineErrorPropagationTest
 
@@ -87,30 +87,30 @@ Each test needs individual verification to determine proper classification.
 
 ### dev.mars.apex.core.service.data.external.database.H2ConnectionStringTest
 
-- **TEST #8: testH2TcpServerConnectionIntentionalFailure** - org.h2.jdbc.JdbcSQLNonTransientConnectionException (1 occurrence(s)) - **✅ INTENTIONAL: Uses assertThrows(YamlConfigurationException.class), renamed from testH2TcpServerConnection, added INTENTIONAL ERROR TEST log marker**
+- **TEST #8: testH2TcpServerConnectionIntentionalFailure** - org.h2.jdbc.JdbcSQLNonTransientConnectionException (1 occurrence(s)) - **INTENTIONAL: Uses assertThrows(YamlConfigurationException.class), renamed from testH2TcpServerConnection, added INTENTIONAL ERROR TEST log marker**
 
 ### dev.mars.apex.core.service.data.external.database.JdbcTemplateFactoryTest
 
-- **TEST #9: testConnectionFailureIntentional** - org.postgresql.util.PSQLException (1 occurrence(s)) - **✅ INTENTIONAL: Uses assertThrows(DataSourceException.class), renamed from testConnectionFailure, added INTENTIONAL ERROR TEST log marker**
-- **TEST #10: testH2TcpJdbcUrlIntentionalFailure** - org.h2.jdbc.JdbcSQLNonTransientConnectionException (1 occurrence(s)) - **✅ INTENTIONAL: Uses assertThrows(DataSourceException.class), renamed from testH2TcpJdbcUrl, added INTENTIONAL ERROR TEST log marker**
-- **TEST #11: testInvalidDatabaseConfigurationIntentionalFailure** - org.postgresql.util.PSQLException (1 occurrence(s)) - **✅ INTENTIONAL: Uses assertThrows(DataSourceException.class), renamed from testInvalidDatabaseConfiguration, added INTENTIONAL ERROR TEST log marker**
+- **TEST #9: testConnectionFailureIntentional** - org.postgresql.util.PSQLException (1 occurrence(s)) - **INTENTIONAL: Uses assertThrows(DataSourceException.class), renamed from testConnectionFailure, added INTENTIONAL ERROR TEST log marker**
+- **TEST #10: testH2TcpJdbcUrlIntentionalFailure** - org.h2.jdbc.JdbcSQLNonTransientConnectionException (1 occurrence(s)) - **INTENTIONAL: Uses assertThrows(DataSourceException.class), renamed from testH2TcpJdbcUrl, added INTENTIONAL ERROR TEST log marker**
+- **TEST #11: testInvalidDatabaseConfigurationIntentionalFailure** - org.postgresql.util.PSQLException (1 occurrence(s)) - **INTENTIONAL: Uses assertThrows(DataSourceException.class), renamed from testInvalidDatabaseConfiguration, added INTENTIONAL ERROR TEST log marker**
 
 ### dev.mars.apex.core.service.data.external.ExternalDataSourceIntegrationTest
 
-- **TEST #12: testErrorHandlingAndResilience** - java.net.ConnectException (2 occurrence(s)) - **✅ INTENTIONAL: Uses assertThrows(DataSourceException.class), already has INTENTIONAL ERROR TEST log marker**
+- **TEST #12: testErrorHandlingAndResilience** - java.net.ConnectException (2 occurrence(s)) - **INTENTIONAL: Uses assertThrows(DataSourceException.class), already has INTENTIONAL ERROR TEST log marker**
 
 ### dev.mars.apex.core.service.data.external.file.CsvDataLoaderTest
 
-- **TEST #13: testMissingFileIntentional** - java.nio.file.NoSuchFileException (1 occurrence(s)) - **✅ INTENTIONAL: Uses assertThrows(IOException.class), renamed from testMissingFile, added INTENTIONAL ERROR TEST log marker**
+- **TEST #13: testMissingFileIntentional** - java.nio.file.NoSuchFileException (1 occurrence(s)) - **INTENTIONAL: Uses assertThrows(IOException.class), renamed from testMissingFile, added INTENTIONAL ERROR TEST log marker**
 
 ### dev.mars.apex.core.service.data.external.file.JsonDataLoaderTest
 
-- **TEST #14: testInvalidEncodingIntentional** - java.nio.charset.UnsupportedCharsetException (1 occurrence(s)) - **✅ INTENTIONAL: Uses assertThrows(IOException.class), renamed from testInvalidEncoding, added INTENTIONAL ERROR TEST log marker**
-- **TEST #15: testMissingFileIntentional** - java.nio.file.NoSuchFileException (1 occurrence(s)) - **✅ INTENTIONAL: Uses assertThrows(IOException.class), renamed from testMissingFile, added INTENTIONAL ERROR TEST log marker**
+- **TEST #14: testInvalidEncodingIntentional** - java.nio.charset.UnsupportedCharsetException (1 occurrence(s)) - **INTENTIONAL: Uses assertThrows(IOException.class), renamed from testInvalidEncoding, added INTENTIONAL ERROR TEST log marker**
+- **TEST #15: testMissingFileIntentional** - java.nio.file.NoSuchFileException (1 occurrence(s)) - **INTENTIONAL: Uses assertThrows(IOException.class), renamed from testMissingFile, added INTENTIONAL ERROR TEST log marker**
 
 ### dev.mars.apex.core.service.enrichment.EnrichmentServiceRuleResultTest
 
-- **TEST #16: testEnrichObjectWithResult_RequiredFieldFailure** - dev.mars.apex.core.service.enrichment.EnrichmentException (1 occurrence(s)) - **✅ INTENTIONAL: Already has INTENTIONAL ERROR TEST log marker, verifies RuleResult shows failure for required field**
+- **TEST #16: testEnrichObjectWithResult_RequiredFieldFailure** - dev.mars.apex.core.service.enrichment.EnrichmentException (1 occurrence(s)) - **INTENTIONAL: Already has INTENTIONAL ERROR TEST log marker, verifies RuleResult shows failure for required field**
 
 ### dev.mars.apex.core.service.scenario.DataTypeScenarioServiceMalformedRegistryTest
 
@@ -118,73 +118,73 @@ Each test needs individual verification to determine proper classification.
 
 ### dev.mars.apex.core.service.scenario.DataTypeScenarioServiceStageTest
 
-- **TEST #18: testProcessData_WithLegacyScenario** - org.springframework.expression.spel.SpelEvaluationException (3 occurrence(s)) - **✅ INTENTIONAL: Already has INTENTIONAL ERROR TEST log marker, tests legacy scenario with error-handling YAML**
-- **TEST #19: testProcessData_WithStageBasedScenario** - org.springframework.expression.spel.SpelEvaluationException (6 occurrence(s)) - **✅ INTENTIONAL: Already has INTENTIONAL ERROR TEST log marker, tests stage-based scenario with error-handling YAML**
-- **TEST #20: testProcessDataWithScenario_LegacyProcessing** - org.springframework.expression.spel.SpelEvaluationException (3 occurrence(s)) - **✅ INTENTIONAL: Tests legacy processing with error-handling YAML**
-- **TEST #21: testProcessDataWithScenario_StageBasedProcessing** - org.springframework.expression.spel.SpelEvaluationException (3 occurrence(s)) - **✅ INTENTIONAL: Tests stage-based processing with error-handling YAML**
-- **TEST #22: testProcessDataWithStages_Success** - org.springframework.expression.spel.SpelEvaluationException (3 occurrence(s)) - **✅ INTENTIONAL: Already has INTENTIONAL ERROR TEST log marker, tests processing with error-handling YAML**
+- **TEST #18: testProcessData_WithLegacyScenario** - org.springframework.expression.spel.SpelEvaluationException (3 occurrence(s)) - **INTENTIONAL: Already has INTENTIONAL ERROR TEST log marker, tests legacy scenario with error-handling YAML**
+- **TEST #19: testProcessData_WithStageBasedScenario** - org.springframework.expression.spel.SpelEvaluationException (6 occurrence(s)) - **INTENTIONAL: Already has INTENTIONAL ERROR TEST log marker, tests stage-based scenario with error-handling YAML**
+- **TEST #20: testProcessDataWithScenario_LegacyProcessing** - org.springframework.expression.spel.SpelEvaluationException (3 occurrence(s)) - **INTENTIONAL: Tests legacy processing with error-handling YAML**
+- **TEST #21: testProcessDataWithScenario_StageBasedProcessing** - org.springframework.expression.spel.SpelEvaluationException (3 occurrence(s)) - **INTENTIONAL: Tests stage-based processing with error-handling YAML**
+- **TEST #22: testProcessDataWithStages_Success** - org.springframework.expression.spel.SpelEvaluationException (3 occurrence(s)) - **INTENTIONAL: Already has INTENTIONAL ERROR TEST log marker, tests processing with error-handling YAML**
 
 ### dev.mars.apex.core.service.scenario.DataTypeScenarioServiceTest
 
 - **TEST #23: testLoadScenariosFromRegistry** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **🐛 TESTING BUG: Uses assertDoesNotThrow() expecting successful load, but YamlConfigurationException is thrown. Should be caught and handled gracefully**
-- **TEST #24: testLoadScenariosWithInvalidConfigIntentional** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **✅ INTENTIONAL: Uses assertThrows(RuntimeException.class), renamed from testLoadScenariosWithInvalidConfig, added INTENTIONAL ERROR TEST log marker**
-- **TEST #25: testLoadScenariosWithMissingFileIntentional** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **✅ INTENTIONAL: Uses assertThrows(RuntimeException.class), renamed from testLoadScenariosWithMissingFile, added INTENTIONAL ERROR TEST log marker**
+- **TEST #24: testLoadScenariosWithInvalidConfigIntentional** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **INTENTIONAL: Uses assertThrows(RuntimeException.class), renamed from testLoadScenariosWithInvalidConfig, added INTENTIONAL ERROR TEST log marker**
+- **TEST #25: testLoadScenariosWithMissingFileIntentional** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **INTENTIONAL: Uses assertThrows(RuntimeException.class), renamed from testLoadScenariosWithMissingFile, added INTENTIONAL ERROR TEST log marker**
 - **TEST #26: testScenarioLoadingErrors** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **🐛 TESTING BUG: Uses assertDoesNotThrow() expecting graceful handling, but YamlConfigurationException is thrown. Should be caught and handled gracefully**
 
 ### dev.mars.apex.core.service.scenario.RulesEngineScenarioRegistryTest
 
-- **TEST #27: testEvaluateScenarioById** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **✅ WORKING AS DESIGNED: Exception is caught and handled gracefully by ScenarioStageExecutor. Test PASSES. The exception appears in logs but scenario execution completes with TERMINATED status as expected. This is proper error handling - configuration file not found errors are logged and execution terminates gracefully without throwing to caller.**
+- **TEST #27: testEvaluateScenarioById** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **WORKING AS DESIGNED: Exception is caught and handled gracefully by ScenarioStageExecutor. Test PASSES. The exception appears in logs but scenario execution completes with TERMINATED status as expected. This is proper error handling - configuration file not found errors are logged and execution terminates gracefully without throwing to caller.**
 
 ### dev.mars.apex.core.service.scenario.ScenarioStageExecutorFileHandlingTest
 
-- **TEST #28: testDeeplyNestedMissingFilePathIntentional** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **✅ WORKING AS DESIGNED: Exception caught and handled gracefully. ScenarioStageExecutor catches YamlConfigurationException, logs as ERROR with stack trace, converts to ScenarioExecutionResult with failure status. Test PASSES (10/10 tests pass). Enhanced with IntentionalError suffix, JavaDoc, and INTENTIONAL ERROR TEST marker.**
-- **TEST #29: testFilePathWithSpacesIntentional** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **✅ WORKING AS DESIGNED: Exception caught and handled gracefully. Test PASSES. Enhanced with IntentionalError suffix, JavaDoc, and INTENTIONAL ERROR TEST marker.**
-- **TEST #30: testFilePathWithSpecialCharactersIntentional** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **✅ WORKING AS DESIGNED: Exception caught and handled gracefully. Test PASSES. Enhanced with IntentionalError suffix, JavaDoc, and INTENTIONAL ERROR TEST marker.**
-- **TEST #31: testInvalidFilePathCharactersIntentional** - java.nio.file.InvalidPathException (1 occurrence(s)) - **✅ WORKING AS DESIGNED: Exception caught and handled gracefully. Test PASSES. Enhanced with IntentionalError suffix, JavaDoc, and INTENTIONAL ERROR TEST marker.**
-- **TEST #32: testMissingStageConfigFileIntentional** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **✅ WORKING AS DESIGNED: Exception caught and handled gracefully. Test PASSES. Enhanced with IntentionalError suffix, JavaDoc, and INTENTIONAL ERROR TEST marker.**
-- **TEST #33: testMultipleStagesWithMissingFilesIntentional** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **✅ WORKING AS DESIGNED: Exception caught and handled gracefully. Test PASSES. Enhanced with IntentionalError suffix, JavaDoc, and INTENTIONAL ERROR TEST marker.**
-- **TEST #34: testRelativePathOutsideProjectIntentional** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **✅ WORKING AS DESIGNED: Exception caught and handled gracefully. Test PASSES. Enhanced with IntentionalError suffix, JavaDoc, and INTENTIONAL ERROR TEST marker.**
+- **TEST #28: testDeeplyNestedMissingFilePathIntentional** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **WORKING AS DESIGNED: Exception caught and handled gracefully. ScenarioStageExecutor catches YamlConfigurationException, logs as ERROR with stack trace, converts to ScenarioExecutionResult with failure status. Test PASSES (10/10 tests pass). Enhanced with IntentionalError suffix, JavaDoc, and INTENTIONAL ERROR TEST marker.**
+- **TEST #29: testFilePathWithSpacesIntentional** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **WORKING AS DESIGNED: Exception caught and handled gracefully. Test PASSES. Enhanced with IntentionalError suffix, JavaDoc, and INTENTIONAL ERROR TEST marker.**
+- **TEST #30: testFilePathWithSpecialCharactersIntentional** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **WORKING AS DESIGNED: Exception caught and handled gracefully. Test PASSES. Enhanced with IntentionalError suffix, JavaDoc, and INTENTIONAL ERROR TEST marker.**
+- **TEST #31: testInvalidFilePathCharactersIntentional** - java.nio.file.InvalidPathException (1 occurrence(s)) - **WORKING AS DESIGNED: Exception caught and handled gracefully. Test PASSES. Enhanced with IntentionalError suffix, JavaDoc, and INTENTIONAL ERROR TEST marker.**
+- **TEST #32: testMissingStageConfigFileIntentional** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **WORKING AS DESIGNED: Exception caught and handled gracefully. Test PASSES. Enhanced with IntentionalError suffix, JavaDoc, and INTENTIONAL ERROR TEST marker.**
+- **TEST #33: testMultipleStagesWithMissingFilesIntentional** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **WORKING AS DESIGNED: Exception caught and handled gracefully. Test PASSES. Enhanced with IntentionalError suffix, JavaDoc, and INTENTIONAL ERROR TEST marker.**
+- **TEST #34: testRelativePathOutsideProjectIntentional** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **WORKING AS DESIGNED: Exception caught and handled gracefully. Test PASSES. Enhanced with IntentionalError suffix, JavaDoc, and INTENTIONAL ERROR TEST marker.**
 
 ### dev.mars.apex.core.service.scenario.ScenarioStageExecutorTest
 
-- **TEST #35: testExecuteStages_FailurePolicyContinueWithWarningsIntentional** - java.lang.RuntimeException (1 occurrence(s)) - **✅ WORKING AS DESIGNED: RuntimeException caught and converted to stage failure with warnings. ScenarioStageExecutor handles gracefully, logs as ERROR with stack trace, continues to next stage. Test PASSES (8/8 tests pass). Enhanced with IntentionalError suffix and JavaDoc.**
-- **TEST #36: testExecuteStages_FailurePolicyFlagForReviewIntentional** - java.lang.RuntimeException (1 occurrence(s)) - **✅ WORKING AS DESIGNED: RuntimeException caught and converted to review flag. Test PASSES. Enhanced with IntentionalError suffix and JavaDoc.**
-- **TEST #37: testExecuteStages_FailurePolicyTerminateIntentional** - java.lang.RuntimeException (1 occurrence(s)) - **✅ WORKING AS DESIGNED: RuntimeException caught and converted to termination result. Test PASSES. Enhanced with IntentionalError suffix and JavaDoc.**
-- **TEST #38: testExecuteStages_SkippedDueToDependenciesIntentional** - java.lang.RuntimeException (1 occurrence(s)) - **✅ WORKING AS DESIGNED: RuntimeException caught in first stage, terminates execution, skips dependent stages. Test PASSES. Enhanced with IntentionalError suffix and JavaDoc.**
+- **TEST #35: testExecuteStages_FailurePolicyContinueWithWarningsIntentional** - java.lang.RuntimeException (1 occurrence(s)) - **WORKING AS DESIGNED: RuntimeException caught and converted to stage failure with warnings. ScenarioStageExecutor handles gracefully, logs as ERROR with stack trace, continues to next stage. Test PASSES (8/8 tests pass). Enhanced with IntentionalError suffix and JavaDoc.**
+- **TEST #36: testExecuteStages_FailurePolicyFlagForReviewIntentional** - java.lang.RuntimeException (1 occurrence(s)) - **WORKING AS DESIGNED: RuntimeException caught and converted to review flag. Test PASSES. Enhanced with IntentionalError suffix and JavaDoc.**
+- **TEST #37: testExecuteStages_FailurePolicyTerminateIntentional** - java.lang.RuntimeException (1 occurrence(s)) - **WORKING AS DESIGNED: RuntimeException caught and converted to termination result. Test PASSES. Enhanced with IntentionalError suffix and JavaDoc.**
+- **TEST #38: testExecuteStages_SkippedDueToDependenciesIntentional** - java.lang.RuntimeException (1 occurrence(s)) - **WORKING AS DESIGNED: RuntimeException caught in first stage, terminates execution, skips dependent stages. Test PASSES. Enhanced with IntentionalError suffix and JavaDoc.**
 
 ### dev.mars.apex.core.service.scenario.ScenarioStageMissingDependencyTest
 
-- **TEST #39: testCaseSensitiveStageDependencyIntentional** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **✅ WORKING AS DESIGNED: Exception caught and handled gracefully. ScenarioStageExecutor treats case-mismatched dependencies as missing, skips stages appropriately. Test PASSES (6/6 tests pass). Enhanced with IntentionalError suffix, JavaDoc, and INTENTIONAL ERROR TEST marker.**
-- **TEST #40: testDependencyChainWithMissingMiddleStageIntentional** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **✅ WORKING AS DESIGNED: Exception caught and handled gracefully. Missing chain elements cause dependent stages to be skipped. Test PASSES. Enhanced with IntentionalError suffix, JavaDoc, and INTENTIONAL ERROR TEST marker.**
-- **TEST #41: testStageDependsOnMissingStageIntentional** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **✅ WORKING AS DESIGNED: Exception caught and handled gracefully. Stages with missing dependencies are skipped. Test PASSES. Enhanced with IntentionalError suffix, JavaDoc, and INTENTIONAL ERROR TEST marker.**
-- **TEST #42: testStageMixedValidAndMissingDependenciesIntentional** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **✅ WORKING AS DESIGNED: Exception caught and handled gracefully. Mixed dependencies handled appropriately. Test PASSES. Enhanced with IntentionalError suffix, JavaDoc, and INTENTIONAL ERROR TEST marker.**
+- **TEST #39: testCaseSensitiveStageDependencyIntentional** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **WORKING AS DESIGNED: Exception caught and handled gracefully. ScenarioStageExecutor treats case-mismatched dependencies as missing, skips stages appropriately. Test PASSES (6/6 tests pass). Enhanced with IntentionalError suffix, JavaDoc, and INTENTIONAL ERROR TEST marker.**
+- **TEST #40: testDependencyChainWithMissingMiddleStageIntentional** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **WORKING AS DESIGNED: Exception caught and handled gracefully. Missing chain elements cause dependent stages to be skipped. Test PASSES. Enhanced with IntentionalError suffix, JavaDoc, and INTENTIONAL ERROR TEST marker.**
+- **TEST #41: testStageDependsOnMissingStageIntentional** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **WORKING AS DESIGNED: Exception caught and handled gracefully. Stages with missing dependencies are skipped. Test PASSES. Enhanced with IntentionalError suffix, JavaDoc, and INTENTIONAL ERROR TEST marker.**
+- **TEST #42: testStageMixedValidAndMissingDependenciesIntentional** - dev.mars.apex.core.config.yaml.YamlConfigurationException (1 occurrence(s)) - **WORKING AS DESIGNED: Exception caught and handled gracefully. Mixed dependencies handled appropriately. Test PASSES. Enhanced with IntentionalError suffix, JavaDoc, and INTENTIONAL ERROR TEST marker.**
 
 ### dev.mars.apex.core.service.transformation.YamlConditionalTransformationTest
 
-- **TEST #43: testErrorHandling** - java.lang.RuntimeException (1 occurrence(s)) - **✅ INTENTIONAL: Already has INTENTIONAL ERROR TEST log marker, tests division by zero error handling, verifies RuleResult shows ERROR**
+- **TEST #43: testErrorHandling** - java.lang.RuntimeException (1 occurrence(s)) - **INTENTIONAL: Already has INTENTIONAL ERROR TEST log marker, tests division by zero error handling, verifies RuleResult shows ERROR**
 
 ### dev.mars.apex.core.service.transformation.YamlTransformationProcessorDeprecationTest
 
-- **TEST #44: testDeprecatedMethodCannotPropagateErrors** - java.lang.IllegalArgumentException (1 occurrence(s)) - **✅ INTENTIONAL: Already has INTENTIONAL ERROR TEST log marker, tests deprecated method with invalid transformation type**
-- **TEST #45: testNewMethodPropagatesErrors** - java.lang.IllegalArgumentException (1 occurrence(s)) - **✅ INTENTIONAL: Already has INTENTIONAL ERROR TEST log marker, tests new method properly propagates errors via RuleResult**
+- **TEST #44: testDeprecatedMethodCannotPropagateErrors** - java.lang.IllegalArgumentException (1 occurrence(s)) - **INTENTIONAL: Already has INTENTIONAL ERROR TEST log marker, tests deprecated method with invalid transformation type**
+- **TEST #45: testNewMethodPropagatesErrors** - java.lang.IllegalArgumentException (1 occurrence(s)) - **INTENTIONAL: Already has INTENTIONAL ERROR TEST log marker, tests new method properly propagates errors via RuleResult**
 
 ### dev.mars.apex.core.service.transformation.YamlTransformationProcessorErrorHandlingTest
 
-- **TEST #46: testCatchBlockHandlesTransformationException** - org.springframework.expression.spel.SpelEvaluationException, java.lang.RuntimeException (2 occurrence(s)) - **✅ INTENTIONAL: Already has INTENTIONAL ERROR TEST log marker, tests invalid SpEL accessing null object, verifies exception caught and returned as ERROR RuleResult**
-- **TEST #47: testErrorResultContainsProperErrorMessage** - java.lang.ArithmeticException, java.lang.RuntimeException (2 occurrence(s)) - **✅ INTENTIONAL: Already has INTENTIONAL ERROR TEST log marker, tests division by zero, verifies error message and metadata in RuleResult**
+- **TEST #46: testCatchBlockHandlesTransformationException** - org.springframework.expression.spel.SpelEvaluationException, java.lang.RuntimeException (2 occurrence(s)) - **INTENTIONAL: Already has INTENTIONAL ERROR TEST log marker, tests invalid SpEL accessing null object, verifies exception caught and returned as ERROR RuleResult**
+- **TEST #47: testErrorResultContainsProperErrorMessage** - java.lang.ArithmeticException, java.lang.RuntimeException (2 occurrence(s)) - **INTENTIONAL: Already has INTENTIONAL ERROR TEST log marker, tests division by zero, verifies error message and metadata in RuleResult**
 
 ### dev.mars.apex.core.service.transformation.YamlTransformationProcessorRuleResultTest
 
-- **TEST #48: testErrorsTrackedInFailureMessages** - org.springframework.expression.spel.SpelEvaluationException, java.lang.RuntimeException (2 occurrence(s)) - **✅ INTENTIONAL: Already has INTENTIONAL ERROR TEST log marker, tests SpEL accessing missing property, verifies errors tracked in RuleResult.failureMessages**
-- **TEST #49: testResultTypeErrorOnTransformationErrors** - java.lang.IllegalArgumentException (1 occurrence(s)) - **✅ INTENTIONAL: Already has INTENTIONAL ERROR TEST log marker, tests null expression in transformation, verifies RuleResult.resultType = ERROR**
+- **TEST #48: testErrorsTrackedInFailureMessages** - org.springframework.expression.spel.SpelEvaluationException, java.lang.RuntimeException (2 occurrence(s)) - **INTENTIONAL: Already has INTENTIONAL ERROR TEST log marker, tests SpEL accessing missing property, verifies errors tracked in RuleResult.failureMessages**
+- **TEST #49: testResultTypeErrorOnTransformationErrors** - java.lang.IllegalArgumentException (1 occurrence(s)) - **INTENTIONAL: Already has INTENTIONAL ERROR TEST log marker, tests null expression in transformation, verifies RuleResult.resultType = ERROR**
 
 ---
 
 ## Summary Statistics
 
 ### By Category:
-- **✅ INTENTIONAL** (26 tests): Properly use `assertThrows()` or verify error handling with RuleResult - Tests #1-4, #7-19, #24-25, #43-49
-- **✅ WORKING AS DESIGNED** (20 tests): Exceptions caught and handled gracefully, converted to failure results - Tests #5-6, #20-23, #26-42
+- **INTENTIONAL** (26 tests): Properly use `assertThrows()` or verify error handling with RuleResult - Tests #1-4, #7-19, #24-25, #43-49
+- **WORKING AS DESIGNED** (20 tests): Exceptions caught and handled gracefully, converted to failure results - Tests #5-6, #20-23, #26-42
 - **🐛 REAL BUGS FIXED** (5 code bugs):
   1. **CacheDataSource.getData()** - Fixed null cacheManager handling (Tests #5-6)
   2. **DataTypeScenarioService.loadScenarios()** - Fixed empty scenario-id validation (Test #17)

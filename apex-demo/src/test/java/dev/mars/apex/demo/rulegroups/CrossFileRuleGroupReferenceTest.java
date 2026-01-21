@@ -73,7 +73,7 @@ public class CrossFileRuleGroupReferenceTest extends DemoTestBase {
         RuleResult failResult2 = engine.executeRuleGroupsList(List.of(compositeGroup), invalidEmailData);
         assertFalse(failResult2.isTriggered(), "Validation should fail with invalid email");
         
-        logger.info("✅ Cross-file rule-group reference test completed successfully!");
+        logger.info("Cross-file rule-group reference test completed successfully!");
         logger.info("   - Composite group successfully references base group from another file");
         logger.info("   - All 3 rules (1 local + 2 from referenced group) are working correctly");
     }
@@ -96,6 +96,6 @@ public class CrossFileRuleGroupReferenceTest extends DemoTestBase {
         RuleResult result = engine.executeRuleGroupsList(List.of(baseGroup), validData);
         assertTrue(result.isTriggered(), "Base validation should pass with valid data");
         
-        logger.info("✅ Base group works independently");
+        logger.info("Base group works independently");
     }
 }

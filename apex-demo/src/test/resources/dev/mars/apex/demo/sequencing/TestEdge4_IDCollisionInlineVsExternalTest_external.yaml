@@ -6,7 +6,7 @@ metadata:
 
 # External enrichment with ID "collision-id" (SAME as in main file!)
 enrichments:
-  - id: "collision-id"  # ❌ COLLISION! Same ID as in main file
+  - id: "collision-id"  # COLLISION! Same ID as in main file
     type: "calculation-enrichment"
     calculation-config:
       expression: "'value-from-external'"

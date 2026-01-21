@@ -11,51 +11,51 @@ This document analyzes the ETL test coverage against the capabilities documented
 
 ## Coverage Matrix
 
-### ✅ **WELL COVERED - Data Sources**
+### **WELL COVERED - Data Sources**
 
 | Capability | Test File | Status |
 |------------|-----------|--------|
-| **CSV Extraction** | `PipelineEtlExecutionTestExtractCsv.java` | ✅ Complete |
-| **JSON Extraction** | `PipelineEtlExecutionTestExtractJson.java` | ✅ Complete |
-| **XML Extraction** | `PipelineEtlExecutionTestExtractXml.java` | ✅ Complete |
-| **Database Extraction (Basic)** | `PipelineEtlExecutionTestExtractDatabase.java` | ✅ Complete |
-| **Database Extraction (Advanced)** | `PipelineEtlExecutionTestExtractDatabaseAdvanced.java` | ✅ Complete |
-| **Empty CSV Handling** | `PipelineEtlExecutionTestExtractEmptyCsv.java` | ✅ Complete |
-| **Invalid Source Handling** | `PipelineEtlExecutionTestExtractInvalidSource.java` | ✅ Complete |
+| **CSV Extraction** | `PipelineEtlExecutionTestExtractCsv.java` | Complete |
+| **JSON Extraction** | `PipelineEtlExecutionTestExtractJson.java` | Complete |
+| **XML Extraction** | `PipelineEtlExecutionTestExtractXml.java` | Complete |
+| **Database Extraction (Basic)** | `PipelineEtlExecutionTestExtractDatabase.java` | Complete |
+| **Database Extraction (Advanced)** | `PipelineEtlExecutionTestExtractDatabaseAdvanced.java` | Complete |
+| **Empty CSV Handling** | `PipelineEtlExecutionTestExtractEmptyCsv.java` | Complete |
+| **Invalid Source Handling** | `PipelineEtlExecutionTestExtractInvalidSource.java` | Complete |
 
-### ✅ **WELL COVERED - Data Sinks**
-
-| Capability | Test File | Status |
-|------------|-----------|--------|
-| **Database Load** | `PipelineEtlExecutionTestLoadDatabase.java` | ✅ Complete |
-| **File System Load** | `PipelineEtlExecutionTestLoadFilesystem.java` | ✅ Complete |
-| **Batch Load** | `PipelineEtlExecutionTestLoadBatch.java` | ✅ Complete |
-| **Invalid Records Handling** | `PipelineEtlExecutionTestLoadInvalidRecords.java` | ✅ Complete |
-| **CSV to H2 Pipeline** | `CsvToH2PipelineTest.java` | ✅ Complete |
-
-### ✅ **WELL COVERED - Transformations**
+### **WELL COVERED - Data Sinks**
 
 | Capability | Test File | Status |
 |------------|-----------|--------|
-| **Transform Rules** | `PipelineTransformStepTest.java` (TransformRules) | ✅ Complete |
-| **Filter Records** | `PipelineTransformStepTest.java` (FilterRecords) | ✅ Complete |
-| **Aggregate Data** | `PipelineTransformStepTest.java` (AggregateData) | ✅ Complete |
-| **Error Handling** | `PipelineTransformStepTest.java` (ErrorHandling) | ✅ Complete |
+| **Database Load** | `PipelineEtlExecutionTestLoadDatabase.java` | Complete |
+| **File System Load** | `PipelineEtlExecutionTestLoadFilesystem.java` | Complete |
+| **Batch Load** | `PipelineEtlExecutionTestLoadBatch.java` | Complete |
+| **Invalid Records Handling** | `PipelineEtlExecutionTestLoadInvalidRecords.java` | Complete |
+| **CSV to H2 Pipeline** | `CsvToH2PipelineTest.java` | Complete |
 
-### ✅ **WELL COVERED - Pipeline Features**
+### **WELL COVERED - Transformations**
 
 | Capability | Test File | Status |
 |------------|-----------|--------|
-| **Sequential Execution** | `PipelineExecutionKeywordTest.java` | ✅ Complete |
-| **Step Dependencies** | `PipelineStepDependencyTest.java` (DependencyOrder) | ✅ Complete |
-| **Failed Dependencies** | `PipelineStepDependencyTest.java` (FailedDependency) | ✅ Complete |
-| **Optional Steps** | `PipelineStepDependencyTest.java` (OptionalStep) | ✅ Complete |
-| **Circular Dependency Detection** | `PipelineStepDependencyTest.java` (CircularDependency) | ✅ Complete |
-| **Config Validation** | `PipelineConfigValidationTest.java` | ✅ Complete |
+| **Transform Rules** | `PipelineTransformStepTest.java` (TransformRules) | Complete |
+| **Filter Records** | `PipelineTransformStepTest.java` (FilterRecords) | Complete |
+| **Aggregate Data** | `PipelineTransformStepTest.java` (AggregateData) | Complete |
+| **Error Handling** | `PipelineTransformStepTest.java` (ErrorHandling) | Complete |
+
+### **WELL COVERED - Pipeline Features**
+
+| Capability | Test File | Status |
+|------------|-----------|--------|
+| **Sequential Execution** | `PipelineExecutionKeywordTest.java` | Complete |
+| **Step Dependencies** | `PipelineStepDependencyTest.java` (DependencyOrder) | Complete |
+| **Failed Dependencies** | `PipelineStepDependencyTest.java` (FailedDependency) | Complete |
+| **Optional Steps** | `PipelineStepDependencyTest.java` (OptionalStep) | Complete |
+| **Circular Dependency Detection** | `PipelineStepDependencyTest.java` (CircularDependency) | Complete |
+| **Config Validation** | `PipelineConfigValidationTest.java` | Complete |
 
 ---
 
-## ❌ **GAPS IDENTIFIED - Missing Test Coverage**
+## **GAPS IDENTIFIED - Missing Test Coverage**
 
 ### 1. **Data Source Gaps**
 
@@ -112,15 +112,15 @@ The guide documents these end-to-end scenarios (lines 809-836) but no tests exis
 
 | Use Case | Status | Priority |
 |----------|--------|----------|
-| **Trade Lifecycle Management** | ❌ Missing | 🟡 MEDIUM |
-| **Confirmation Matching** | ❌ Missing | 🟡 MEDIUM |
-| **Risk Aggregation** | ❌ Missing | 🟡 MEDIUM |
-| **Regulatory Reporting** | ❌ Missing | 🟢 LOW |
+| **Trade Lifecycle Management** | Missing | 🟡 MEDIUM |
+| **Confirmation Matching** | Missing | 🟡 MEDIUM |
+| **Risk Aggregation** | Missing | 🟡 MEDIUM |
+| **Regulatory Reporting** | Missing | 🟢 LOW |
 | **Counterparty Exposure** | ⚠️ Partial | 🟡 MEDIUM |
 
 ---
 
-## 📊 **Coverage Statistics**
+## **Coverage Statistics**
 
 ### Overall Coverage (REVISED AFTER INSPECTION)
 - **Total Capabilities Documented:** ~45
@@ -130,18 +130,18 @@ The guide documents these end-to-end scenarios (lines 809-836) but no tests exis
 ### By Category (REVISED)
 | Category | Documented | Actually Tested | Coverage | Notes |
 |----------|-----------|-----------------|----------|-------|
-| **Data Sources** | 7 | 7 | 100% ✅ | Good coverage |
+| **Data Sources** | 7 | 7 | 100% | Good coverage |
 | **Data Sinks** | 6 | 4 | 67% ⚠️ | Missing REST API, Message Queue |
-| **Transformations** | 5 | 0 | 0% ❌ | Tests exist but NO validation! |
-| **Pipeline Features** | 7 | 2 | 29% ❌ | Only dependencies tested, execution stubbed |
-| **Advanced Patterns** | 10 | 3 | 30% ❌ | Most advanced features missing |
-| **Use Cases** | 5 | 1 | 20% ❌ | Only basic CSV-to-H2 tested |
+| **Transformations** | 5 | 0 | 0% | Tests exist but NO validation! |
+| **Pipeline Features** | 7 | 2 | 29% | Only dependencies tested, execution stubbed |
+| **Advanced Patterns** | 10 | 3 | 30% | Most advanced features missing |
+| **Use Cases** | 5 | 1 | 20% | Only basic CSV-to-H2 tested |
 
 **CRITICAL:** The actual coverage is **44%**, not 62%. Many test files exist but don't actually test functionality.
 
 ---
 
-## 🚨 **CRITICAL FINDINGS**
+## **CRITICAL FINDINGS**
 
 ### **PipelineExecutionKeywordTest.java - ALL TESTS STUBBED OUT**
 This test file exists with 9 test methods but **EVERY SINGLE TEST** is stubbed with:
@@ -181,10 +181,10 @@ assertEquals(RuleResult.ResultType.MATCH, result.getResultType());
 3. 🔴 **Fix Test Coverage Claims** - Guide claims "52 Total Tests - All passing ✅" but many are fake
 
 ### Priority 1 (HIGH) - Critical Gaps
-1. ✅ **Add Audit Step Test** - Test `type: "audit"` step type
-2. ✅ **Add Upsert Operation Test** - Test MERGE INTO / UPSERT database operations
-3. ✅ **Add Dead Letter Queue Test** - Test failed record handling
-4. ✅ **Add REST API Source/Sink Tests** - Test HTTP-based data sources and sinks
+1. **Add Audit Step Test** - Test `type: "audit"` step type
+2. **Add Upsert Operation Test** - Test MERGE INTO / UPSERT database operations
+3. **Add Dead Letter Queue Test** - Test failed record handling
+4. **Add REST API Source/Sink Tests** - Test HTTP-based data sources and sinks
 
 ### Priority 2 (MEDIUM) - Important Gaps
 1. ⚠️ **Verify Transform Test Coverage** - Ensure field addition, calculation, validation are actually tested
@@ -209,7 +209,7 @@ assertEquals(RuleResult.ResultType.MATCH, result.getResultType());
 
 ---
 
-## 🔍 **Next Steps**
+## **Next Steps**
 
 1. **Verify Transform Tests:** Review `PipelineTransformStepTest.java` to confirm field addition, calculation, and validation are actually tested
 2. **Verify Advanced Database Test:** Review `PipelineEtlExecutionTestExtractDatabaseAdvanced.java` to confirm JOINs and aggregations are tested
@@ -219,7 +219,7 @@ assertEquals(RuleResult.ResultType.MATCH, result.getResultType());
 
 ---
 
-## ✅ **Conclusion**
+## **Conclusion**
 
 The APEX ETL test suite has **moderate coverage of core functionality** (44% actual coverage, down from claimed 62%). The main issues are:
 
@@ -229,15 +229,15 @@ The APEX ETL test suite has **moderate coverage of core functionality** (44% act
 3. 🔴 **Documentation Mismatch** - Guide claims "52 Total Tests - All passing ✅" but many are fake/incomplete
 
 ### **Strengths:**
-- ✅ Data source extraction tests are comprehensive and well-implemented
-- ✅ Data sink load tests follow good patterns with database validation
-- ✅ Step dependency tests are complete and functional
+- Data source extraction tests are comprehensive and well-implemented
+- Data sink load tests follow good patterns with database validation
+- Step dependency tests are complete and functional
 
 ### **Gaps:**
-- ❌ Transformation validation (0% - tests exist but don't validate)
-- ❌ Pipeline execution modes (0% - all tests stubbed)
-- ❌ Advanced features (audit steps, upsert, dead letter queue, circuit breaker)
-- ❌ Alternative data sources/sinks (REST API, message queues)
+- Transformation validation (0% - tests exist but don't validate)
+- Pipeline execution modes (0% - all tests stubbed)
+- Advanced features (audit steps, upsert, dead letter queue, circuit breaker)
+- Alternative data sources/sinks (REST API, message queues)
 
 **Recommendation:**
 1. **FIRST:** Implement the stubbed tests in `PipelineExecutionKeywordTest.java` (Priority 0)

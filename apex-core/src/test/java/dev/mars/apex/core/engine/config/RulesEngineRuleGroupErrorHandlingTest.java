@@ -85,7 +85,7 @@ class RulesEngineRuleGroupErrorHandlingTest {
             // Either way, it should NOT throw an exception
             assertNotNull(result.getResultType(), "Result type should not be null");
 
-            logger.info("✅ Test 1 PASSED: Catch block handled exception gracefully");
+            logger.info("Test 1 PASSED: Catch block handled exception gracefully");
             logger.info("   Result type: {}", result.getResultType());
             logger.info("   Result message: {}", result.getMessage());
 
@@ -136,7 +136,7 @@ class RulesEngineRuleGroupErrorHandlingTest {
                 "Rule group evaluation should return MATCH result type");
             assertTrue(result.isSuccess(), "Result should indicate success");
 
-            logger.info("✅ Test 2 PASSED: Rule group evaluation succeeds with valid rules");
+            logger.info("Test 2 PASSED: Rule group evaluation succeeds with valid rules");
 
         } catch (Exception e) {
             fail("Should not throw exception: " + e.getMessage());
@@ -183,7 +183,7 @@ class RulesEngineRuleGroupErrorHandlingTest {
             assertNotNull(result, "Result should not be null");
             assertTrue(result.isSuccess(), "Result should indicate success");
 
-            logger.info("✅ Test 3 PASSED: Safe navigation handled null gracefully");
+            logger.info("Test 3 PASSED: Safe navigation handled null gracefully");
 
         } catch (Exception e) {
             fail("Should not throw exception: " + e.getMessage());

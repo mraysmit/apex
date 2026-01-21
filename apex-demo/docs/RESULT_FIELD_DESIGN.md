@@ -63,9 +63,9 @@ Currently, when evaluating multiple rules or enrichments sequentially, there is 
 - Use enrichments to calculate and store intermediate values (verbose, not intuitive)
 
 **Limitations:**
-- ❌ No direct way to store "did this rule trigger?" as a boolean
-- ❌ Condition logic must be duplicated across rules
-- ❌ Cannot easily reference previous rule outcomes
+- No direct way to store "did this rule trigger?" as a boolean
+- Condition logic must be duplicated across rules
+- Cannot easily reference previous rule outcomes
 
 ### Desired Behavior
 
@@ -88,10 +88,10 @@ rules:
 ```
 
 **Benefits:**
-- ✅ Clear, explicit storage of intermediate results
-- ✅ Reusable condition outcomes
-- ✅ Simplified complex logic
-- ✅ Better maintainability
+- Clear, explicit storage of intermediate results
+- Reusable condition outcomes
+- Simplified complex logic
+- Better maintainability
 
 ---
 
@@ -130,7 +130,7 @@ if (calcConfig.getResultField() != null) {
 
 | Feature | calculation-enrichment | lookup-enrichment | field-enrichment | Rules |
 |---------|------------------------|-------------------|------------------|-------|
-| **Has `result-field`?** | ✅ YES | ❌ NO | ❌ NO | ❌ NO |
+| **Has `result-field`?** | YES | NO | NO | NO |
 | **What to store?** | Calculation result (any type) | N/A | N/A | N/A |
 | **Storage method** | `setFieldValue()` | N/A | N/A | N/A |
 | **Access pattern** | `#fieldName` | N/A | N/A | N/A |
@@ -361,12 +361,12 @@ public RuleResult executeRule(Rule rule, Map<String, Object> facts) {
 **Purpose:** Validate rule chaining with `result-field` configuration
 
 **Test Cases:**
-1. ✅ First rule stores result in configured field
-2. ✅ Second rule can access stored result
-3. ✅ Result is boolean (true/false)
-4. ✅ Works with sequential rule execution
-5. ✅ No overhead when `result-field` is not configured
-6. ✅ Supports nested field names (e.g., `validation.ageCheck`)
+1. First rule stores result in configured field
+2. Second rule can access stored result
+3. Result is boolean (true/false)
+4. Works with sequential rule execution
+5. No overhead when `result-field` is not configured
+6. Supports nested field names (e.g., `validation.ageCheck`)
 
 ---
 
@@ -642,15 +642,15 @@ public void setResultField(String resultField) {
 - `apex-demo/src/test/java/dev/mars/apex/demo/basic/EnrichmentResultFieldTest.java` - Comprehensive test covering all three enrichment types with 4 test methods
 
 **Test Results:**
-- ✅ All 4 tests passing (lookup-enrichment, field-enrichment, conditional-mapping-enrichment, and setup)
-- ✅ Verified result-field storage for successful operations (true)
-- ✅ Verified result-field storage for failed operations (false)
-- ✅ Verified enrichment chaining with conditional logic
+- All 4 tests passing (lookup-enrichment, field-enrichment, conditional-mapping-enrichment, and setup)
+- Verified result-field storage for successful operations (true)
+- Verified result-field storage for failed operations (false)
+- Verified enrichment chaining with conditional logic
 
 **Documentation Updated:**
-- ✅ `docs/APEX_YAML_REFERENCE.md` - Added `result-field` to all enrichment property tables and comprehensive examples
-- ✅ `docs/APEX_RULES_ENGINE_USER_GUIDE.md` - Added "Enrichment Chaining with Result Fields" section with examples
-- ✅ `README.md` - Added "Enrichment Chaining" to core capabilities
+- `docs/APEX_YAML_REFERENCE.md` - Added `result-field` to all enrichment property tables and comprehensive examples
+- `docs/APEX_RULES_ENGINE_USER_GUIDE.md` - Added "Enrichment Chaining with Result Fields" section with examples
+- `README.md` - Added "Enrichment Chaining" to core capabilities
 
 **Implementation Notes:**
 - **Critical Bug Fixed:** field-enrichment result-field was not being stored when condition didn't match because the enrichment was skipped entirely. Fixed by moving result-field storage logic to the main enrichment processing loop (lines 158-180 in YamlEnrichmentProcessor.java).
@@ -753,11 +753,11 @@ expression: "#ageCheckPassed ? 'ELIGIBLE' : 'NOT_ELIGIBLE'"
 3. `RulesEngineTest` - Verify result is persisted to facts map
 
 **Test Coverage:**
-- ✅ `result-field` is optional (null/empty handling)
-- ✅ Boolean result is correctly stored
-- ✅ Nested field names work (e.g., `validation.ageCheck`)
-- ✅ Result is accessible in subsequent rules
-- ✅ No overhead when not configured
+- `result-field` is optional (null/empty handling)
+- Boolean result is correctly stored
+- Nested field names work (e.g., `validation.ageCheck`)
+- Result is accessible in subsequent rules
+- No overhead when not configured
 
 ---
 
@@ -907,36 +907,36 @@ expression: "#ageCheckPassed ? 'ELIGIBLE' : 'NOT_ELIGIBLE'"
 
 ### Functional Requirements
 
-- ✅ `result-field` can be configured in YAML for rules
-- ✅ Boolean condition result is stored in specified field
-- ✅ Stored result is accessible in subsequent rules via SpEL
-- ✅ Nested field names are supported (e.g., `validation.ageCheck`)
-- ✅ Feature is optional (backward compatible)
+- `result-field` can be configured in YAML for rules
+- Boolean condition result is stored in specified field
+- Stored result is accessible in subsequent rules via SpEL
+- Nested field names are supported (e.g., `validation.ageCheck`)
+- Feature is optional (backward compatible)
 
 ### Non-Functional Requirements
 
-- ✅ All existing tests pass without modification
-- ✅ < 1% performance overhead when `result-field` is configured
-- ✅ 0% overhead when not configured
-- ✅ Code follows existing APEX patterns and conventions
-- ✅ Comprehensive test coverage (>90%)
+- All existing tests pass without modification
+- < 1% performance overhead when `result-field` is configured
+- 0% overhead when not configured
+- Code follows existing APEX patterns and conventions
+- Comprehensive test coverage (>90%)
 
 ### Documentation Requirements
 
-- ✅ YAML reference updated with `result-field` property
-- ✅ User guide includes rule chaining examples
-- ✅ At least 3 sample YAML files demonstrating usage
-- ✅ Inline code comments explain implementation
-- ✅ This design document is complete and approved
+- YAML reference updated with `result-field` property
+- User guide includes rule chaining examples
+- At least 3 sample YAML files demonstrating usage
+- Inline code comments explain implementation
+- This design document is complete and approved
 
 ### Quality Gates
 
-- ✅ Code review approved by 2+ developers
-- ✅ All unit tests pass
-- ✅ All integration tests pass
-- ✅ Performance tests show acceptable overhead
-- ✅ Documentation review approved
-- ✅ No critical or high-severity bugs
+- Code review approved by 2+ developers
+- All unit tests pass
+- All integration tests pass
+- Performance tests show acceptable overhead
+- Documentation review approved
+- No critical or high-severity bugs
 
 ---
 
@@ -1044,11 +1044,11 @@ rules:
 ### Compatibility with Future Features
 
 The `result-field` design is compatible with:
-- ✅ Async rule execution
-- ✅ Distributed rule evaluation
-- ✅ Rule versioning
-- ✅ A/B testing of rules
-- ✅ Rule performance monitoring
+- Async rule execution
+- Distributed rule evaluation
+- Rule versioning
+- A/B testing of rules
+- Rule performance monitoring
 
 ---
 

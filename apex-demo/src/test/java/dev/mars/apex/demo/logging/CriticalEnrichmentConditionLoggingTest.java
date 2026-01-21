@@ -65,16 +65,16 @@ class CriticalEnrichmentConditionLoggingTest {
         // Initialize YAML loader
         yamlLoader = new YamlConfigurationLoader();
 
-        logger.info("✅ All services initialized for critical enrichment condition logging test");
+        logger.info("All services initialized for critical enrichment condition logging test");
     }
 
     @Test
-    @DisplayName("🚨 CRITICAL: Enrichment condition evaluation failures must log as SEVERE")
+    @DisplayName("CRITICAL: Enrichment condition evaluation failures must log as SEVERE")
     void testCriticalEnrichmentConditionFailureLogging() throws Exception {
         logger.info("=== CRITICAL ENRICHMENT CONDITION LOGGING TEST ===");
         logger.info("🎯 PURPOSE: Verify that enrichment condition evaluation failures are logged as SEVERE");
-        logger.info("🔍 EXPECTED: You should see SEVERE logs with 'CRITICAL:' prefix");
-        logger.info("❌ OLD BEHAVIOR: Would have been WARNING logs");
+        logger.info("EXPECTED: You should see SEVERE logs with 'CRITICAL:' prefix");
+        logger.info("OLD BEHAVIOR: Would have been WARNING logs");
         
         try {
             // Load YAML with invalid enrichment condition
@@ -86,38 +86,38 @@ class CriticalEnrichmentConditionLoggingTest {
             testData.put("amount", 5000.0);
             testData.put("currency", "USD");
             
-            logger.info("🔍 Processing enrichment with invalid condition reference...");
-            logger.info("🔍 WATCH FOR: SEVERE logs with 'CRITICAL: Enrichment condition evaluation failed'");
+            logger.info("Processing enrichment with invalid condition reference...");
+            logger.info("WATCH FOR: SEVERE logs with 'CRITICAL: Enrichment condition evaluation failed'");
             
             // Process enrichments - this will trigger SEVERE logging for condition failures
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
             engine.evaluate(config, testData);
 
-            logger.info("✅ Processing completed.");
-            logger.info("📊 LOGGING BEHAVIOR VERIFICATION:");
-            logger.info("   ✅ Check the log output above for SEVERE level logs");
-            logger.info("   ✅ Look for 'CRITICAL: Enrichment condition evaluation failed' messages");
-            logger.info("   ✅ Verify full context is provided (enrichment ID, condition, error)");
-            logger.info("   ✅ Confirm stack traces are included for debugging");
+            logger.info("Processing completed.");
+            logger.info("LOGGING BEHAVIOR VERIFICATION:");
+            logger.info("   Check the log output above for SEVERE level logs");
+            logger.info("   Look for 'CRITICAL: Enrichment condition evaluation failed' messages");
+            logger.info("   Verify full context is provided (enrichment ID, condition, error)");
+            logger.info("   Confirm stack traces are included for debugging");
             
             logger.info("🎯 USER VISIBILITY BENEFITS:");
-            logger.info("   ✅ Production monitoring can now alert on SEVERE logs");
-            logger.info("   ✅ Developers immediately recognize these as serious configuration issues");
-            logger.info("   ✅ No more silent failures masked as 'warnings'");
-            logger.info("   ✅ Clear indication that business logic cannot execute properly");
+            logger.info("   Production monitoring can now alert on SEVERE logs");
+            logger.info("   Developers immediately recognize these as serious configuration issues");
+            logger.info("   No more silent failures masked as 'warnings'");
+            logger.info("   Clear indication that business logic cannot execute properly");
             
         } catch (Exception e) {
-            logger.error("❌ Test failed with exception: " + e.getMessage(), e);
+            logger.error("Test failed with exception: " + e.getMessage(), e);
             throw e;
         }
     }
 
     @Test
-    @DisplayName("🔍 Multiple enrichment condition failures should each log separately at SEVERE level")
+    @DisplayName("Multiple enrichment condition failures should each log separately at SEVERE level")
     void testMultipleCriticalEnrichmentFailures() throws Exception {
         logger.info("=== MULTIPLE CRITICAL ENRICHMENT FAILURES TEST ===");
         logger.info("🎯 PURPOSE: Verify that each enrichment failure is logged separately at SEVERE level");
-        logger.info("🔍 EXPECTED: Multiple SEVERE logs, one for each enrichment failure");
+        logger.info("EXPECTED: Multiple SEVERE logs, one for each enrichment failure");
         
         try {
             // Load YAML with multiple invalid enrichment conditions
@@ -128,51 +128,51 @@ class CriticalEnrichmentConditionLoggingTest {
             testData.put("customerId", "");  // Invalid - will trigger failures
             testData.put("amount", -100.0);  // Invalid - will trigger failures
             
-            logger.info("🔍 Processing multiple enrichments with invalid conditions...");
-            logger.info("🔍 WATCH FOR: Multiple SEVERE logs, one for each enrichment failure");
+            logger.info("Processing multiple enrichments with invalid conditions...");
+            logger.info("WATCH FOR: Multiple SEVERE logs, one for each enrichment failure");
             
             // Process enrichments - this will trigger multiple SEVERE logs
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
             engine.evaluate(config, testData);
 
-            logger.info("✅ Processing completed.");
-            logger.info("📊 MULTIPLE FAILURE LOGGING VERIFICATION:");
-            logger.info("   ✅ Each enrichment failure should be logged separately");
-            logger.info("   ✅ All failures should be at SEVERE level");
-            logger.info("   ✅ No failures should be masked or grouped together");
-            logger.info("   ✅ Full visibility into all configuration problems");
+            logger.info("Processing completed.");
+            logger.info("MULTIPLE FAILURE LOGGING VERIFICATION:");
+            logger.info("   Each enrichment failure should be logged separately");
+            logger.info("   All failures should be at SEVERE level");
+            logger.info("   No failures should be masked or grouped together");
+            logger.info("   Full visibility into all configuration problems");
             
         } catch (Exception e) {
-            logger.error("❌ Test failed with exception: " + e.getMessage(), e);
+            logger.error("Test failed with exception: " + e.getMessage(), e);
             throw e;
         }
     }
 
     @Test
-    @DisplayName("📋 Document the logging severity improvements implemented")
+    @DisplayName("Document the logging severity improvements implemented")
     void testDocumentLoggingSeverityImprovements() {
         logger.info("=== LOGGING SEVERITY IMPROVEMENTS DOCUMENTATION ===");
         logger.info("🎯 CRITICAL IMPROVEMENTS IMPLEMENTED:");
-        logger.info("   ✅ YamlEnrichmentProcessor:251 - Enrichment condition evaluation failure → SEVERE");
-        logger.info("   ✅ YamlEnrichmentProcessor:557 - OR condition evaluation failure → SEVERE");
-        logger.info("   ✅ YamlEnrichmentProcessor:576 - AND condition evaluation failure → SEVERE");
-        logger.info("   ✅ YamlEnrichmentProcessor:607 - General condition evaluation failure → SEVERE");
-        logger.info("   ✅ Enhanced error messages with 'CRITICAL:' and 'ERROR:' prefixes");
-        logger.info("   ✅ Full context provided (enrichment ID, condition, error details)");
-        logger.info("   ✅ Stack traces preserved for debugging");
+        logger.info("   YamlEnrichmentProcessor:251 - Enrichment condition evaluation failure → SEVERE");
+        logger.info("   YamlEnrichmentProcessor:557 - OR condition evaluation failure → SEVERE");
+        logger.info("   YamlEnrichmentProcessor:576 - AND condition evaluation failure → SEVERE");
+        logger.info("   YamlEnrichmentProcessor:607 - General condition evaluation failure → SEVERE");
+        logger.info("   Enhanced error messages with 'CRITICAL:' and 'ERROR:' prefixes");
+        logger.info("   Full context provided (enrichment ID, condition, error details)");
+        logger.info("   Stack traces preserved for debugging");
         
         logger.info("🎯 USER VISIBILITY BENEFITS:");
-        logger.info("   ✅ Business logic failures no longer masked as warnings");
-        logger.info("   ✅ Clear indication of critical configuration problems");
-        logger.info("   ✅ Developers immediately recognize serious issues");
-        logger.info("   ✅ Production monitoring can alert on SEVERE logs");
-        logger.info("   ✅ Debugging becomes much easier with enhanced context");
+        logger.info("   Business logic failures no longer masked as warnings");
+        logger.info("   Clear indication of critical configuration problems");
+        logger.info("   Developers immediately recognize serious issues");
+        logger.info("   Production monitoring can alert on SEVERE logs");
+        logger.info("   Debugging becomes much easier with enhanced context");
         
         logger.info("🎯 BEFORE vs AFTER COMPARISON:");
-        logger.info("   ❌ BEFORE: WARNING: Error evaluating enrichment condition...");
-        logger.info("   ✅ AFTER:  SEVERE: CRITICAL: Enrichment condition evaluation failed for 'enrichment-id' - condition: '...' - Error: ...");
+        logger.info("   BEFORE: WARNING: Error evaluating enrichment condition...");
+        logger.info("   AFTER:  SEVERE: CRITICAL: Enrichment condition evaluation failed for 'enrichment-id' - condition: '...' - Error: ...");
         
-        logger.info("✅ LOGGING SEVERITY IMPROVEMENTS: DOCUMENTED");
+        logger.info("LOGGING SEVERITY IMPROVEMENTS: DOCUMENTED");
     }
 }
 

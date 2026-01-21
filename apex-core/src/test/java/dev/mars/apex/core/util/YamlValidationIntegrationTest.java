@@ -28,6 +28,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Integration test for YAML validation with actual project files.
+ * 
+ * These tests MUST fail if the referenced files don't exist or are invalid.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-08-28
@@ -37,20 +39,17 @@ class YamlValidationIntegrationTest {
     
     @Test
     void testValidateActualProjectFiles() {
-        // Use the actual project structure
-        YamlMetadataValidator validator = new YamlMetadataValidator("../apex-demo/src/main/resources");
+        // Use actual existing test files
+        YamlMetadataValidator validator = new YamlMetadataValidator(
+            "../apex-demo/src/test/java/dev/mars/apex/demo/scenario");
         
-        // Test specific files that we know should exist and have type metadata
+        // Test files that actually exist in the project and are known to be valid
         List<String> filesToTest = List.of(
-            "scenarios/otc-options-scenario.yaml",
-            "scenarios/commodity-swaps-scenario.yaml", 
-            "scenarios/settlement-auto-repair-scenario.yaml",
-            "config/data-type-scenarios.yaml",
-            "bootstrap/otc-options-bootstrap.yaml",
-            "bootstrap/commodity-swap-validation-bootstrap.yaml",
-            "bootstrap/custody-auto-repair-bootstrap.yaml",
-            "config/financial-enrichment-rules.yaml",
-            "yaml-examples/datasets/countries.yaml"
+            "BasicStageConfigurationTest-scenario.yaml",
+            "BasicStageConfigurationTest-validation-rules.yaml",
+            "BasicStageConfigurationTest-enrichment-rules.yaml",
+            "ValidationFailureScenarioTest-scenario.yaml",
+            "ValidationFailureScenarioTest-validation-rules.yaml"
         );
         
         System.out.println("=== YAML Validation Integration Test ===");
@@ -98,27 +97,32 @@ class YamlValidationIntegrationTest {
             System.out.println("\n" + summary.getReport());
         }
         
-        // Assertions for the test
+        // Assertions for the test - MUST actually validate!
         assertTrue(summary.getTotalCount() > 0, "Should have found files to validate");
+        assertTrue(summary.isAllValid(), 
+            "All files should be valid. Errors found:\n" + summary.getReport());
         
-        // We expect some files might be missing or have issues, so let's be lenient
-        // The main goal is to verify the validation system works
         System.out.println("\n=== Test completed successfully ===");
         System.out.println("Validation system is working correctly!");
     }
     
     @Test
     void testValidateSpecificScenarioFiles() {
-        YamlMetadataValidator validator = new YamlMetadataValidator("../apex-demo/src/main/resources");
+        // Use actual existing test files, not non-existent production files
+        YamlMetadataValidator validator = new YamlMetadataValidator(
+            "../apex-demo/src/test/java/dev/mars/apex/demo/scenario");
         
-        // Test the scenario files specifically
+        // Test actual scenario files that exist and are valid
         List<String> scenarioFiles = List.of(
-            "scenarios/otc-options-scenario.yaml",
-            "scenarios/commodity-swaps-scenario.yaml", 
-            "scenarios/settlement-auto-repair-scenario.yaml"
+            "BasicStageConfigurationTest-scenario.yaml",
+            "ValidationFailureScenarioTest-scenario.yaml"
         );
         
         System.out.println("\n=== Scenario Files Validation ===");
+        
+        int validCount = 0;
+        int invalidCount = 0;
+        StringBuilder errors = new StringBuilder();
         
         for (String scenarioFile : scenarioFiles) {
             System.out.println("Validating: " + scenarioFile);
@@ -127,10 +131,14 @@ class YamlValidationIntegrationTest {
             
             if (result.isValid()) {
                 System.out.println("  ✓ VALID");
+                validCount++;
             } else {
                 System.out.println("  ✗ INVALID");
+                invalidCount++;
+                errors.append("\n").append(scenarioFile).append(":");
                 for (String error : result.getErrors()) {
                     System.out.println("    ERROR: " + error);
+                    errors.append("\n  - ").append(error);
                 }
             }
             
@@ -141,7 +149,9 @@ class YamlValidationIntegrationTest {
             }
         }
         
-        // The test passes regardless of validation results - we're just demonstrating the system
-        assertTrue(true, "Validation system demonstration completed");
+        // Actually assert validation passes!
+        assertEquals(0, invalidCount, 
+            "All scenario files should be valid. Invalid files:" + errors);
+        assertTrue(validCount > 0, "Should have validated at least one file");
     }
 }

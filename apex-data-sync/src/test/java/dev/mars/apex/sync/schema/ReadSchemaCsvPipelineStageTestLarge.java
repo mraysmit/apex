@@ -41,10 +41,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * validating performance and accuracy for complex CSV structures.
  *
  * CRITICAL VALIDATION CHECKLIST:
- * ✅ Large CSV file created (11 columns)
- * ✅ All columns detected correctly
- * ✅ Types inferred accurately
- * ✅ Efficient processing
+ * Large CSV file created (11 columns)
+ * All columns detected correctly
+ * Types inferred accurately
+ * Efficient processing
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2.1.0

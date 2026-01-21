@@ -3,7 +3,7 @@ name: "Constant Value Field Enrichment - NEGATIVE TEST"
 description: |
   Demonstrates INCORRECT pattern for assigning constant values.
   
-  ❌ INCORRECT PATTERN (DO NOT USE):
+  INCORRECT PATTERN (DO NOT USE):
   - source-field: '''e1''' (triple quotes - WRONG!)
   
   This is the exact example from the user's debug issue.
@@ -12,7 +12,7 @@ description: |
   2. The field lookup will fail or return null
   3. The constant string 'e1' will NOT be assigned to the target field
   
-  ✅ CORRECT PATTERN (USE THIS INSTEAD):
+  CORRECT PATTERN (USE THIS INSTEAD):
   - source-field: "constant"
   - expression: "'e1'"
 
@@ -27,7 +27,7 @@ enrichments:
     condition: true
     type: field-enrichment
     field-mappings:
-      # ❌ INCORRECT PATTERN - This is the user's original issue
+      # INCORRECT PATTERN - This is the user's original issue
       # This will try to lookup a field named '''e1''' instead of assigning constant 'e1'
       - source-field: '''e1'''
         target-field: 'a_field'

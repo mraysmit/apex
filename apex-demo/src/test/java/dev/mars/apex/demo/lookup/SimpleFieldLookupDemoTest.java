@@ -33,11 +33,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * JUnit 5 test for SimpleFieldLookupDemo functionality.
  *
  * CRITICAL VALIDATION CHECKLIST APPLIED:
- * ✅ Count enrichments in YAML - 1 enrichment expected (simple-field-lookup-demo)
- * ✅ Verify log shows "Processed: 1 out of 1" - Must be 100% execution rate
- * ✅ Check EVERY enrichment condition - Test data triggers currency code condition
- * ✅ Validate EVERY business calculation - Test actual currency lookup logic
- * ✅ Assert ALL enrichment results - Every field mapping has corresponding assertEquals
+ * Count enrichments in YAML - 1 enrichment expected (simple-field-lookup-demo)
+ * Verify log shows "Processed: 1 out of 1" - Must be 100% execution rate
+ * Check EVERY enrichment condition - Test data triggers currency code condition
+ * Validate EVERY business calculation - Test actual currency lookup logic
+ * Assert ALL enrichment results - Every field mapping has corresponding assertEquals
  *
  * BUSINESS LOGIC VALIDATION:
  * - Real currency lookup using inline dataset
@@ -350,7 +350,7 @@ public class SimpleFieldLookupDemoTest extends DemoTestBase {
         // Validate that all APEX services are properly initialized
         assertNotNull(yamlLoader, "YAML loader should be initialized");
 
-        logger.info("✅ All APEX services properly initialized");
+        logger.info("All APEX services properly initialized");
     }
 }
 

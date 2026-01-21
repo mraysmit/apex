@@ -66,16 +66,16 @@ class ConditionEvaluationLoggingTest {
         // Initialize YAML loader
         yamlLoader = new YamlConfigurationLoader();
 
-        logger.info("✅ All services initialized for condition evaluation logging test");
+        logger.info("All services initialized for condition evaluation logging test");
     }
 
     @Test
-    @DisplayName("🚨 OR condition evaluation failures must log as SEVERE")
+    @DisplayName("OR condition evaluation failures must log as SEVERE")
     void testOrConditionEvaluationFailureLogging() throws Exception {
         logger.info("=== OR CONDITION EVALUATION LOGGING TEST ===");
         logger.info("🎯 PURPOSE: Verify that OR condition evaluation failures are logged as SEVERE");
-        logger.info("🔍 EXPECTED: You should see SEVERE logs with 'ERROR: Failed to evaluate OR condition'");
-        logger.info("❌ OLD BEHAVIOR: Would have been WARNING logs");
+        logger.info("EXPECTED: You should see SEVERE logs with 'ERROR: Failed to evaluate OR condition'");
+        logger.info("OLD BEHAVIOR: Would have been WARNING logs");
         
         try {
             // Load YAML with invalid OR conditions
@@ -86,32 +86,32 @@ class ConditionEvaluationLoggingTest {
             testData.put("customerId", "CUST123");
             testData.put("amount", 1000.0);
             
-            logger.info("🔍 Processing enrichments with invalid OR conditions...");
-            logger.info("🔍 WATCH FOR: SEVERE logs with 'ERROR: Failed to evaluate OR condition'");
+            logger.info("Processing enrichments with invalid OR conditions...");
+            logger.info("WATCH FOR: SEVERE logs with 'ERROR: Failed to evaluate OR condition'");
             
             // Process enrichments - this will trigger SEVERE logging for OR condition failures
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
             engine.evaluate(config, testData);
 
-            logger.info("✅ Processing completed.");
-            logger.info("📊 OR CONDITION LOGGING VERIFICATION:");
-            logger.info("   ✅ Check for SEVERE level logs (not WARNING)");
-            logger.info("   ✅ Look for 'ERROR: Failed to evaluate OR condition' messages");
-            logger.info("   ✅ Verify condition text is included in error message");
-            logger.info("   ✅ Confirm detailed error information is provided");
+            logger.info("Processing completed.");
+            logger.info("OR CONDITION LOGGING VERIFICATION:");
+            logger.info("   Check for SEVERE level logs (not WARNING)");
+            logger.info("   Look for 'ERROR: Failed to evaluate OR condition' messages");
+            logger.info("   Verify condition text is included in error message");
+            logger.info("   Confirm detailed error information is provided");
             
         } catch (Exception e) {
-            logger.error("❌ Test failed with exception: " + e.getMessage(), e);
+            logger.error("Test failed with exception: " + e.getMessage(), e);
             throw e;
         }
     }
 
     @Test
-    @DisplayName("🚨 AND condition evaluation failures must log as SEVERE")
+    @DisplayName("AND condition evaluation failures must log as SEVERE")
     void testAndConditionEvaluationFailureLogging() throws Exception {
         logger.info("=== AND CONDITION EVALUATION LOGGING TEST ===");
         logger.info("🎯 PURPOSE: Verify that AND condition evaluation failures are logged as SEVERE");
-        logger.info("🔍 EXPECTED: You should see SEVERE logs with 'ERROR: Failed to evaluate AND condition'");
+        logger.info("EXPECTED: You should see SEVERE logs with 'ERROR: Failed to evaluate AND condition'");
         
         try {
             // Load YAML with invalid AND conditions
@@ -122,32 +122,32 @@ class ConditionEvaluationLoggingTest {
             testData.put("customerId", "CUST456");
             testData.put("amount", 2000.0);
             
-            logger.info("🔍 Processing enrichments with invalid AND conditions...");
-            logger.info("🔍 WATCH FOR: SEVERE logs with 'ERROR: Failed to evaluate AND condition'");
+            logger.info("Processing enrichments with invalid AND conditions...");
+            logger.info("WATCH FOR: SEVERE logs with 'ERROR: Failed to evaluate AND condition'");
             
             // Process enrichments - this will trigger SEVERE logging for AND condition failures
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
             engine.evaluate(config, testData);
 
-            logger.info("✅ Processing completed.");
-            logger.info("📊 AND CONDITION LOGGING VERIFICATION:");
-            logger.info("   ✅ Check for SEVERE level logs (not WARNING)");
-            logger.info("   ✅ Look for 'ERROR: Failed to evaluate AND condition' messages");
-            logger.info("   ✅ Verify condition text is included in error message");
-            logger.info("   ✅ Confirm detailed error information is provided");
+            logger.info("Processing completed.");
+            logger.info("AND CONDITION LOGGING VERIFICATION:");
+            logger.info("   Check for SEVERE level logs (not WARNING)");
+            logger.info("   Look for 'ERROR: Failed to evaluate AND condition' messages");
+            logger.info("   Verify condition text is included in error message");
+            logger.info("   Confirm detailed error information is provided");
             
         } catch (Exception e) {
-            logger.error("❌ Test failed with exception: " + e.getMessage(), e);
+            logger.error("Test failed with exception: " + e.getMessage(), e);
             throw e;
         }
     }
 
     @Test
-    @DisplayName("🚨 General condition evaluation failures must log as SEVERE")
+    @DisplayName("General condition evaluation failures must log as SEVERE")
     void testGeneralConditionEvaluationFailureLogging() throws Exception {
         logger.info("=== GENERAL CONDITION EVALUATION LOGGING TEST ===");
         logger.info("🎯 PURPOSE: Verify that general condition evaluation failures are logged as SEVERE");
-        logger.info("🔍 EXPECTED: You should see SEVERE logs with 'ERROR: Failed to evaluate condition'");
+        logger.info("EXPECTED: You should see SEVERE logs with 'ERROR: Failed to evaluate condition'");
         
         try {
             // Load YAML with invalid general conditions
@@ -158,45 +158,45 @@ class ConditionEvaluationLoggingTest {
             testData.put("customerId", "CUST789");
             testData.put("amount", 3000.0);
             
-            logger.info("🔍 Processing enrichments with invalid general conditions...");
-            logger.info("🔍 WATCH FOR: SEVERE logs with 'ERROR: Failed to evaluate condition'");
+            logger.info("Processing enrichments with invalid general conditions...");
+            logger.info("WATCH FOR: SEVERE logs with 'ERROR: Failed to evaluate condition'");
             
             // Process enrichments - this will trigger SEVERE logging for general condition failures
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
             engine.evaluate(config, testData);
 
-            logger.info("✅ Processing completed.");
-            logger.info("📊 GENERAL CONDITION LOGGING VERIFICATION:");
-            logger.info("   ✅ Check for SEVERE level logs (not WARNING)");
-            logger.info("   ✅ Look for 'ERROR: Failed to evaluate condition' messages");
-            logger.info("   ✅ Verify condition text is included in error message");
-            logger.info("   ✅ Confirm detailed error information is provided");
+            logger.info("Processing completed.");
+            logger.info("GENERAL CONDITION LOGGING VERIFICATION:");
+            logger.info("   Check for SEVERE level logs (not WARNING)");
+            logger.info("   Look for 'ERROR: Failed to evaluate condition' messages");
+            logger.info("   Verify condition text is included in error message");
+            logger.info("   Confirm detailed error information is provided");
             
         } catch (Exception e) {
-            logger.error("❌ Test failed with exception: " + e.getMessage(), e);
+            logger.error("Test failed with exception: " + e.getMessage(), e);
             throw e;
         }
     }
 
     @Test
-    @DisplayName("📋 Document condition evaluation logging improvements")
+    @DisplayName("Document condition evaluation logging improvements")
     void testDocumentConditionEvaluationImprovements() {
         logger.info("=== CONDITION EVALUATION LOGGING IMPROVEMENTS ===");
         logger.info("🎯 IMPROVEMENTS IMPLEMENTED:");
-        logger.info("   ✅ OR condition evaluation failures → SEVERE (was WARNING)");
-        logger.info("   ✅ AND condition evaluation failures → SEVERE (was WARNING)");
-        logger.info("   ✅ General condition evaluation failures → SEVERE (was WARNING)");
-        logger.info("   ✅ Clear 'ERROR:' prefix for all condition failures");
-        logger.info("   ✅ Full condition text included in error messages");
-        logger.info("   ✅ Detailed error context provided");
+        logger.info("   OR condition evaluation failures → SEVERE (was WARNING)");
+        logger.info("   AND condition evaluation failures → SEVERE (was WARNING)");
+        logger.info("   General condition evaluation failures → SEVERE (was WARNING)");
+        logger.info("   Clear 'ERROR:' prefix for all condition failures");
+        logger.info("   Full condition text included in error messages");
+        logger.info("   Detailed error context provided");
         
         logger.info("🎯 USER VISIBILITY BENEFITS:");
-        logger.info("   ✅ Configuration problems immediately obvious");
-        logger.info("   ✅ No more silent condition evaluation failures");
-        logger.info("   ✅ Clear indication of business logic problems");
-        logger.info("   ✅ Easier debugging with full condition context");
+        logger.info("   Configuration problems immediately obvious");
+        logger.info("   No more silent condition evaluation failures");
+        logger.info("   Clear indication of business logic problems");
+        logger.info("   Easier debugging with full condition context");
         
-        logger.info("✅ CONDITION EVALUATION LOGGING: DOCUMENTED");
+        logger.info("CONDITION EVALUATION LOGGING: DOCUMENTED");
     }
 }
 

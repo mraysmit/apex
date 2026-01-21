@@ -72,7 +72,7 @@ public class BarrierOptionNestedEnrichmentTest {
         // Initialize APEX services following established patterns
         yamlLoader = new YamlConfigurationLoader();
 
-        logger.info("✅ APEX services initialized for enrichment testing");
+        logger.info("APEX services initialized for enrichment testing");
     }
 
     @Test
@@ -343,7 +343,7 @@ public class BarrierOptionNestedEnrichmentTest {
         RulesEngine engine = new RulesEngine(rulesConfig);
 
         assertNotNull(engine, "RulesEngine should be created");
-        logger.info("✅ RulesEngine created with EnrichmentService");
+        logger.info("RulesEngine created with EnrichmentService");
 
         return engine;
     }

@@ -1,7 +1,7 @@
 # APEX Entry Points - Final State and Architecture
 
 **Document Date**: 2025-11-03  
-**Status**: ✅ **ARCHITECTURE COMPLETE**  
+**Status**: **ARCHITECTURE COMPLETE**  
 **Priority**: INFORMATIONAL - Documents current entry point architecture and usage patterns
 
 ---
@@ -26,7 +26,7 @@ This document describes the final state of APEX entry point architecture after c
 
 ## Current Entry Point Architecture
 
-### ✅ **RECOMMENDED ENTRY POINT** (Universal Pattern)
+### **RECOMMENDED ENTRY POINT** (Universal Pattern)
 
 **Simplest Pattern** - One line for maximum simplicity:
 
@@ -55,11 +55,11 @@ ScenarioExecutionResult result = engine.evaluateScenario("scenario-id", inputDat
 - **Two-line**: Multiple evaluations with the same engine (reuse the engine instance)
 
 **Key Benefits**:
-- ✅ Works for ANY YAML content type (enrichments, rules, pipelines, scenarios)
-- ✅ Simplest possible API (1-2 lines of code)
-- ✅ Content-agnostic (no inspection needed)
-- ✅ Industry-standard pattern (static factory methods + fluent API)
-- ✅ Backward compatible (existing code still works)
+- Works for ANY YAML content type (enrichments, rules, pipelines, scenarios)
+- Simplest possible API (1-2 lines of code)
+- Content-agnostic (no inspection needed)
+- Industry-standard pattern (static factory methods + fluent API)
+- Backward compatible (existing code still works)
 
 ---
 
@@ -91,8 +91,8 @@ RuleResult result = engine.evaluate(inputData);
 | **Pattern** | **Lines of Code** | **When to Use** |
 |-------------|-------------------|-----------------|
 | **One-Line (Simplest)** | 1 line 🏆 | Single evaluation, maximum simplicity |
-| **Two-Line (Primary)** | 2 lines ✅ | Multiple evaluations, engine reuse |
-| **Old Deprecated** | 3 lines ❌ | Never (deprecated) |
+| **Two-Line (Primary)** | 2 lines | Multiple evaluations, engine reuse |
+| **Old Deprecated** | 3 lines | Never (deprecated) |
 | **Advanced** | 7+ lines ⚠️ | Only when you need config inspection/modification |
 
 **Why the advanced pattern is verbose**: It exposes the internal loading mechanism, which is normally hidden by the static factory methods. This is intentional - the verbosity signals that you're doing something unusual that most developers don't need.
@@ -101,7 +101,7 @@ RuleResult result = engine.evaluate(inputData);
 
 ## Static Factory Methods
 
-**Implementation Status**: ✅ **COMPLETE**
+**Implementation Status**: **COMPLETE**
 
 RulesEngine provides static factory methods for simplified usage. These are the **recommended entry points** for all APEX processing.
 
@@ -148,35 +148,35 @@ RuleResult result = engine.evaluate(inputData);
 
 | **Aspect** | **Old Deprecated** | **New One-Line** | **New Two-Line** | **New Advanced** |
 |------------|-------------------|------------------|------------------|------------------|
-| **Lines of Code** | 3 lines | **1 line** 🏆 | **2 lines** ✅ | 7+ lines ⚠️ |
-| **Ease of Use** | ⭐⭐ | **⭐⭐⭐⭐⭐** 🏆 | **⭐⭐⭐⭐⭐** ✅ | ⭐⭐ |
-| **Engine Reuse** | ❌ | ❌ | **✅** | **✅** |
-| **Content-Agnostic** | ❌ | **✅** | **✅** | **✅** |
-| **Config Inspection** | ❌ | ❌ | ❌ | **✅** |
+| **Lines of Code** | 3 lines | **1 line** 🏆 | **2 lines** | 7+ lines ⚠️ |
+| **Ease of Use** | ⭐⭐ | **⭐⭐⭐⭐⭐** 🏆 | **⭐⭐⭐⭐⭐** | ⭐⭐ |
+| **Engine Reuse** | | | **✅** | **✅** |
+| **Content-Agnostic** | | **✅** | **✅** | **✅** |
+| **Config Inspection** | | | | **✅** |
 | **When to Use** | Never | **Single evaluation** | **Multiple evaluations** | Rare edge cases |
 
 ---
 
 ## Deprecated Entry Points
 
-### ❌ **DEPRECATED** - Content-Aware Services
+### **DEPRECATED** - Content-Aware Services
 
 These services assumed developers knew YAML content in advance:
 
 ```java
-// ❌ DEPRECATED - Assumes YAML contains only enrichments
+// DEPRECATED - Assumes YAML contains only enrichments
 @Deprecated(since = "3.0", forRemoval = true)
 YamlEnrichmentProcessor enrichmentProcessor = new YamlEnrichmentProcessor(...);
 
-// ❌ DEPRECATED - Assumes YAML contains only scenarios
+// DEPRECATED - Assumes YAML contains only scenarios
 @Deprecated(since = "3.0", forRemoval = true)
 DataTypeScenarioService scenarioService = new DataTypeScenarioService();
 
-// ❌ DEPRECATED - Assumes YAML contains only pipelines
+// DEPRECATED - Assumes YAML contains only pipelines
 @Deprecated(since = "3.0", forRemoval = true)
 DataPipelineEngine pipelineEngine = new DataPipelineEngine();
 
-// ❌ DEPRECATED - Factory methods replaced by static factory methods
+// DEPRECATED - Factory methods replaced by static factory methods
 @Deprecated(since = "3.0", forRemoval = true)
 YamlRulesEngineService service = new YamlRulesEngineService();
 RulesEngine engine = service.createRulesEngineFromFile("config.yaml");
@@ -184,10 +184,10 @@ RulesEngine engine = service.createRulesEngineFromFile("config.yaml");
 
 **Why Deprecated**: These services violated the Open/Closed Principle by requiring developers to inspect YAML content before choosing the correct service.
 
-### ✅ **REPLACEMENT** - Universal Pattern
+### **REPLACEMENT** - Universal Pattern
 
 ```java
-// ✅ NEW - Works for ANY YAML content
+// NEW - Works for ANY YAML content
 RulesEngine engine = RulesEngine.fromFile("config.yaml");
 RuleResult result = engine.evaluate(inputData);
 ```
@@ -262,19 +262,19 @@ RuleResult result = engine.evaluate(testData);
 
 | **Entry Point** | **Files Using** | **Status** |
 |----------------|-----------------|------------|
-| **RulesEngine.fromFile()** | 0 files | ✅ New pattern (migration in progress) |
-| **RulesEngine.fromScenarioRegistry()** | 11 files | ✅ Current (scenario tests) |
-| **YamlEnrichmentProcessor** | 0 files | ✅ Migrated away |
-| **DataTypeScenarioService** | 0 files | ✅ Migrated away |
+| **RulesEngine.fromFile()** | 0 files | New pattern (migration in progress) |
+| **RulesEngine.fromScenarioRegistry()** | 11 files | Current (scenario tests) |
+| **YamlEnrichmentProcessor** | 0 files | Migrated away |
+| **DataTypeScenarioService** | 0 files | Migrated away |
 | **YamlRulesEngineService factories** | 65 files | ⚠️ Deprecated (still functional) |
 | **Direct RulesEngine constructor** | 15 files | ⚠️ Advanced use cases only |
 
 ### Migration Progress
 
-- ✅ **apex-demo**: All deprecated service usage eliminated
-- ✅ **Scenario tests**: Migrated to RulesEngine.fromScenarioRegistry()
+- **apex-demo**: All deprecated service usage eliminated
+- **Scenario tests**: Migrated to RulesEngine.fromScenarioRegistry()
 - ⚠️ **Factory method tests**: Still using deprecated YamlRulesEngineService (functional but deprecated)
-- ✅ **apex-core**: Unit tests appropriately test deprecated classes
+- **apex-core**: Unit tests appropriately test deprecated classes
 
 ---
 
@@ -307,7 +307,7 @@ Choose Entry Point
     │       ↓
     │   ScenarioExecutionResult
     │
-    └─→ ❌ DEPRECATED: Content-specific services
+    └─→ DEPRECATED: Content-specific services
             (YamlEnrichmentProcessor, DataTypeScenarioService, etc.)
 ```
 
@@ -315,7 +315,7 @@ Choose Entry Point
 
 ## Public API Services
 
-### ✅ **CURRENT PUBLIC INTERFACES**
+### **CURRENT PUBLIC INTERFACES**
 
 **1. RulesEngine** - ⭐ **PRIMARY ENTRY POINT**
 - Static factory methods for simplified usage
@@ -332,7 +332,7 @@ Choose Entry Point
 - Used in REST controllers
 - Works with TransformerRule objects
 
-### ❌ **INTERNAL SERVICES** (Not exposed as public APIs)
+### **INTERNAL SERVICES** (Not exposed as public APIs)
 
 - RuleEngineService - Low-level rule evaluation
 - YamlEnrichmentProcessor - Internal enrichment processing
@@ -342,7 +342,7 @@ Choose Entry Point
 
 ## Best Practices
 
-### ✅ **DO THIS**
+### **DO THIS**
 
 1. **Use the one-line pattern for single evaluations** (simplest, 1 line):
    ```java
@@ -352,7 +352,7 @@ Choose Entry Point
 
 2. **Use the two-line pattern when reusing the engine** (2 lines):
    ```java
-   // ✅ EFFICIENT - Reuse the engine for multiple evaluations
+   // EFFICIENT - Reuse the engine for multiple evaluations
    RulesEngine engine = RulesEngine.fromFile("config.yaml");
    RuleResult result1 = engine.evaluate(inputData1);
    RuleResult result2 = engine.evaluate(inputData2);
@@ -370,21 +370,21 @@ Choose Entry Point
 
 4. **Trust the universal entry point** - don't inspect YAML content:
    ```java
-   // ✅ CORRECT - Works for ANY YAML content (enrichments, rules, scenarios, pipelines)
+   // CORRECT - Works for ANY YAML content (enrichments, rules, scenarios, pipelines)
    RuleResult result = RulesEngine.fromFile("config.yaml").evaluate(inputData);
    ```
 
-### ❌ **DON'T DO THIS**
+### **DON'T DO THIS**
 
 1. **Don't use content-specific services**:
    ```java
-   // ❌ WRONG - Assumes YAML contains only enrichments
+   // WRONG - Assumes YAML contains only enrichments
    YamlEnrichmentProcessor processor = new YamlEnrichmentProcessor(...);
    ```
 
 2. **Don't inspect YAML to choose service**:
    ```java
-   // ❌ WRONG - Developer shouldn't need to know YAML structure
+   // WRONG - Developer shouldn't need to know YAML structure
    if (yamlContainsEnrichments) {
        useEnrichmentService();
    } else {
@@ -394,19 +394,19 @@ Choose Entry Point
 
 3. **Don't use deprecated factory methods**:
    ```java
-   // ❌ DEPRECATED - Use static factory methods instead
+   // DEPRECATED - Use static factory methods instead
    YamlRulesEngineService service = new YamlRulesEngineService();
    RulesEngine engine = service.createRulesEngineFromFile("config.yaml");
    ```
 
 4. **Don't use the advanced pattern unless you really need it**:
    ```java
-   // ❌ UNNECESSARILY VERBOSE - Only use if you need config inspection/modification
+   // UNNECESSARILY VERBOSE - Only use if you need config inspection/modification
    YamlConfigurationLoader loader = new YamlConfigurationLoader();
    YamlRuleConfiguration yamlConfig = loader.loadFromFile("config.yaml");
    RulesEngine engine = RulesEngine.fromYamlConfig(yamlConfig);
 
-   // ✅ BETTER - Use the primary pattern instead
+   // BETTER - Use the primary pattern instead
    RulesEngine engine = RulesEngine.fromFile("config.yaml");
    ```
 
@@ -415,7 +415,7 @@ Choose Entry Point
 Only use the advanced pattern when you have a **specific need** to inspect or modify the configuration:
 
 ```java
-// ✅ VALID USE CASE: Need to inspect config metadata
+// VALID USE CASE: Need to inspect config metadata
 YamlConfigurationLoader loader = new YamlConfigurationLoader();
 YamlRuleConfiguration yamlConfig = loader.loadFromFile("config.yaml");
 
@@ -427,7 +427,7 @@ RulesEngine engine = RulesEngine.fromYamlConfig(yamlConfig);
 ```
 
 ```java
-// ✅ VALID USE CASE: Need to modify config programmatically
+// VALID USE CASE: Need to modify config programmatically
 YamlConfigurationLoader loader = new YamlConfigurationLoader();
 YamlRuleConfiguration yamlConfig = loader.loadFromFile("config.yaml");
 
@@ -443,7 +443,7 @@ RulesEngine engine = RulesEngine.fromYamlConfig(yamlConfig);
 
 ## Conclusion
 
-### Architecture Status: ✅ **COMPLETE**
+### Architecture Status: **COMPLETE**
 
 APEX now has a clean, content-agnostic architecture with:
 - **1 universal entry point** (RulesEngine) instead of 11 different services
@@ -477,7 +477,7 @@ The advanced pattern (7+ lines) is **more verbose** than even the old deprecated
 | **Use Case** | **Pattern** | **Lines** | **Frequency** |
 |--------------|-------------|-----------|---------------|
 | Single evaluation | One-line | 1 line 🏆 | Very common |
-| Multiple evaluations (engine reuse) | Two-line | 2 lines ✅ | Common |
+| Multiple evaluations (engine reuse) | Two-line | 2 lines | Common |
 | Scenario-based processing | Scenario registry | 1-2 lines | Common |
 | Config inspection/modification | Advanced | 7+ lines ⚠️ | <1% of cases |
 
@@ -488,7 +488,7 @@ The advanced pattern (7+ lines) is **more verbose** than even the old deprecated
 
 ### Recommended Next Steps
 
-1. ✅ **COMPLETE**: Core architecture rationalization
+1. **COMPLETE**: Core architecture rationalization
 2. 🔄 **ONGOING**: Migrate remaining tests from deprecated factory methods to static factory methods
 3. 📚 **DOCUMENTATION**: Update guides to reference RulesEngine as primary API
 4. 🔮 **FUTURE**: Remove deprecated services in version 4.0

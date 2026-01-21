@@ -211,7 +211,7 @@ read the document APEX_RULES_ENGINE_USER_GUIDE.md and the document  RULE_REFEREN
 - **Missed currency conversion validation** in multi-asset test due to missing test data fields
 - **Did not read logs carefully enough** - "Processed: 4 out of 5" should have been a red flag
 
-### **✅ MANDATORY VALIDATION CHECKLIST:**
+### **MANDATORY VALIDATION CHECKLIST:**
 
 **BEFORE claiming tests are complete:**
 1. **Count enrichments in YAML** - Know exactly how many business operations exist
@@ -221,9 +221,9 @@ read the document APEX_RULES_ENGINE_USER_GUIDE.md and the document  RULE_REFEREN
 5. **Assert ALL enrichment results** - Every `result-field` must have a corresponding `assertEquals`
 
 **BUSINESS LOGIC VALIDATION MEANS:**
-- ✅ **Mathematical calculations** (risk thresholds, currency rates)
-- ✅ **Conditional logic** (market-specific rules, asset class rules)  
-- ✅ **Data transformations** (field mappings, expressions)
+- **Mathematical calculations** (risk thresholds, currency rates)
+- **Conditional logic** (market-specific rules, asset class rules)  
+- **Data transformations** (field mappings, expressions)
 - X **NOT YAML syntax validation**
 - X **NOT just string concatenation**
 
@@ -263,7 +263,7 @@ we are coding on a windows  machine
 ## **🎯 Core Validation Philosophy**
 YAML operations in APEX are validated through **multi-layer comprehensive testing** that ensures every operation coded in YAML files is proven to work correctly in real-world scenarios.
 
-## **📋 Multi-Layer Validation Strategy**
+## **Multi-Layer Validation Strategy**
 
 ### **Layer 1: Syntax Validation**
 ```java
@@ -401,14 +401,14 @@ assertTrue(responseTime < maxTimeMs, "Response time should be acceptable");
 
 ## **🎯 Key Validation Principles**
 
-1. **🔍 Test Every Operation**: Every SpEL expression, database query, field mapping, and transformation in YAML has corresponding test validation
-2. **📊 Validate Actual Results**: Don't just test that operations execute - validate they produce correct business results
+1. **Test Every Operation**: Every SpEL expression, database query, field mapping, and transformation in YAML has corresponding test validation
+2. **Validate Actual Results**: Don't just test that operations execute - validate they produce correct business results
 3. **🚀 Real Service Integration**: Use actual databases, files, and services rather than mocks to validate YAML operations work in real environments
 4. **⚡ Performance Monitoring**: Ensure YAML operations meet performance requirements under realistic conditions
 5. **🛡️ Error Resilience**: Test how YAML operations handle edge cases, null values, and error conditions
 6. **📝 Clear Documentation**: Every validation includes descriptive messages explaining what business logic is being verified
 
-## **✅ Validation Categories**
+## **Validation Categories**
 
 ### **Correctness Validation**
 - Expected Value Testing: `assertEquals(expectedValue, actualValue)`
@@ -452,7 +452,7 @@ Write Tests First: Create comprehensive unit tests for new functionality
 Real Data Sources: Tests must use actual REST APIs, not inline data simulations
 Step-by-Step Validation: Test each component individually before integration
 
-# **🚨 CRITICAL ERROR HANDLING PRINCIPLES**
+# **CRITICAL ERROR HANDLING PRINCIPLES**
 
 ## **Distinguish Between Configuration Errors and Business Logic Failures**
 
@@ -476,7 +476,7 @@ Configuration errors are issues with YAML setup, missing optional fields, or use
 - Validation failures where user can correct input (e.g., invalid email format)
 - "No results found" scenarios (expected outcome)
 
-### **❌ WRONG APPROACH - Throwing Exceptions:**
+### **WRONG APPROACH - Throwing Exceptions:**
 ```java
 // BAD: Throwing exceptions for configuration issues
 if (optionalField == null) {
@@ -484,7 +484,7 @@ if (optionalField == null) {
 }
 ```
 
-### **✅ CORRECT APPROACH - Graceful Error Reporting:**
+### **CORRECT APPROACH - Graceful Error Reporting:**
 ```java
 // GOOD: Log warnings and continue processing
 if (optionalField == null) {
@@ -538,7 +538,7 @@ Business logic failures are fundamental errors in processing that represent actu
 - Set appropriate severity (`SeverityConstants.ERROR`)
 - Allow caller to check `resultType == ERROR` and handle appropriately
 
-### **❌ WRONG APPROACH - Swallowing Errors:**
+### **WRONG APPROACH - Swallowing Errors:**
 ```java
 // BAD: Catching and hiding business logic failures
 try {
@@ -549,7 +549,7 @@ try {
 }
 ```
 
-### **✅ CORRECT APPROACH - Return Structured Error Results:**
+### **CORRECT APPROACH - Return Structured Error Results:**
 ```java
 // GOOD: Return error result that caller can check
 public RuleResult processEnrichmentWithResult(Enrichment enrichment, Object data) {
@@ -673,13 +673,13 @@ we are coding on a windows  machine
 
 **Remember: The system should be resilient to configuration errors and provide helpful feedback to users without breaking the application flow.**
 
-# **🚨 CRITICAL APEX YAML SYNTAX VALIDATION RULES**
+# **CRITICAL APEX YAML SYNTAX VALIDATION RULES**
 
 ## **FUNDAMENTAL PROBLEM: LLMs HALLUCINATE INVALID YAML SYNTAX**
 
 **CORE ISSUE**: LLMs consistently add sections to APEX YAML files that seem logical but are NOT part of the official APEX specification. This creates files that appear correct but contain invalid syntax.
 
-### **❌ COMMON INVALID SECTIONS THAT LLMs ADD:**
+### **COMMON INVALID SECTIONS THAT LLMs ADD:**
 - `monitoring:` - Not a valid APEX top-level section
 - `test-scenarios:` - Not a valid APEX top-level section
 - `demo-info:` - Not a valid APEX top-level section
@@ -689,7 +689,7 @@ we are coding on a windows  machine
 - `test-notes:` - Not a valid field in enrichments or rules
 - `type: "demo"` - Not a valid APEX document type
 
-### **✅ ONLY VALID APEX YAML TOP-LEVEL SECTIONS:**
+### **ONLY VALID APEX YAML TOP-LEVEL SECTIONS:**
 Based on official APEX documentation, these are the ONLY valid top-level sections:
 
 **For `rule-config` documents:**
@@ -703,7 +703,7 @@ Based on official APEX documentation, these are the ONLY valid top-level section
 - `metadata:` (always required)
 - Document-specific sections as defined in APEX_YAML_REFERENCE.md
 
-### **✅ ONLY VALID APEX DOCUMENT TYPES:**
+### **ONLY VALID APEX DOCUMENT TYPES:**
 - `rule-config`
 - `enrichment`
 - `dataset`
@@ -734,7 +734,7 @@ Based on official APEX documentation, these are the ONLY valid top-level section
 3. Test the corrected YAML against the APEX compiler
 4. Only proceed when the YAML is confirmed valid
 
-### **📋 VALIDATION CHECKLIST:**
+### **VALIDATION CHECKLIST:**
 
 Before submitting any APEX YAML file:
 - [ ] All top-level sections are in the official APEX specification
@@ -756,7 +756,7 @@ If you find yourself thinking:
 
 **STOP** - You are about to add invalid YAML syntax. Stick to the official specification only.
 
-## **🚨 CRITICAL: APEX YAML KEYWORD HALLUCINATION PROBLEM**
+## **CRITICAL: APEX YAML KEYWORD HALLUCINATION PROBLEM**
 
 ### **THE PROBLEM:**
 I have a serious problem with hallucinating non-existent APEX YAML keywords like `compliance-reviewed` and `risk-approved` - these are NOT valid APEX DSL directives and I must never fabricate APEX syntax or functionality that doesn't exist in the actual codebase.
@@ -779,7 +779,7 @@ I have a serious problem with hallucinating non-existent APEX YAML keywords like
 
 ---
 
-## **📋 APEX YAML Configuration Requirements - Key Learnings**
+## **APEX YAML Configuration Requirements - Key Learnings**
 
 ### **Required Fields for APEX YAML Sections**
 
@@ -876,7 +876,7 @@ Required fields:
 
 ---
 
-## **🚨 CRITICAL: YAML Configuration File Location**
+## **CRITICAL: YAML Configuration File Location**
 
 **YAML configuration files are NEVER packaged in the JAR file.**
 

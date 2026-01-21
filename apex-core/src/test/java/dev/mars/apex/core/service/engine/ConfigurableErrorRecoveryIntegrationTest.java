@@ -92,7 +92,7 @@ class ConfigurableErrorRecoveryIntegrationTest {
         assertEquals(RuleResult.ResultType.NO_MATCH, infoResult.getResultType(),
                 "INFO severity should be recovered to NO_MATCH");
 
-        logger.info("✅ Default backward-compatible configuration working correctly");
+        logger.info("Default backward-compatible configuration working correctly");
     }
 
     @Test
@@ -113,7 +113,7 @@ class ConfigurableErrorRecoveryIntegrationTest {
         assertEquals(RuleResult.ResultType.NO_MATCH, result.getResultType(),
                 "ERROR severity should be recovered with custom configuration");
 
-        logger.info("✅ Custom error recovery configuration working correctly");
+        logger.info("Custom error recovery configuration working correctly");
     }
 
     @Test
@@ -144,7 +144,7 @@ class ConfigurableErrorRecoveryIntegrationTest {
         assertEquals(RuleResult.ResultType.NO_MATCH, recoveredResult.getResultType(),
                 "WARNING severity should be recovered when globally enabled");
 
-        logger.info("✅ Global error recovery enable/disable working correctly");
+        logger.info("Global error recovery enable/disable working correctly");
     }
 
     @Test
@@ -185,7 +185,7 @@ class ConfigurableErrorRecoveryIntegrationTest {
         assertEquals(RuleResult.ResultType.NO_MATCH, infoResult.getResultType(),
                 "INFO severity should be recovered with SKIP_RULE strategy");
 
-        logger.info("✅ Different recovery strategies per severity working correctly");
+        logger.info("Different recovery strategies per severity working correctly");
     }
 
     @Test
@@ -205,7 +205,7 @@ class ConfigurableErrorRecoveryIntegrationTest {
         assertEquals("UNKNOWN", result.getSeverity(),
                 "Unknown severity should be preserved");
 
-        logger.info("✅ Unknown severities handled gracefully");
+        logger.info("Unknown severities handled gracefully");
     }
 
     @Test
@@ -228,7 +228,7 @@ class ConfigurableErrorRecoveryIntegrationTest {
         assertTrue(retrievedConfig.isMetricsEnabled(),
                 "Metrics should be enabled by default");
 
-        logger.info("✅ Error recovery configuration access working correctly");
+        logger.info("Error recovery configuration access working correctly");
     }
 
     @Test
@@ -284,7 +284,7 @@ class ConfigurableErrorRecoveryIntegrationTest {
                     severity + " severity should return " + expectedResult + " result");
         }
 
-        logger.info("✅ Complete end-to-end configurable recovery working correctly");
+        logger.info("Complete end-to-end configurable recovery working correctly");
     }
 
     private Map<String, Object> createEmptyFacts() {

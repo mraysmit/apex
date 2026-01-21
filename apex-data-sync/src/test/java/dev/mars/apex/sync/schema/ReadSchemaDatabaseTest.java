@@ -43,10 +43,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * extraction from H2 database.
  *
  * CRITICAL VALIDATION CHECKLIST:
- * ✅ H2 database created with CUSTOMERS table
- * ✅ Schema read successfully via pipeline
- * ✅ Column metadata extracted correctly
- * ✅ Pipeline executes successfully
+ * H2 database created with CUSTOMERS table
+ * Schema read successfully via pipeline
+ * Column metadata extracted correctly
+ * Pipeline executes successfully
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2.1.0

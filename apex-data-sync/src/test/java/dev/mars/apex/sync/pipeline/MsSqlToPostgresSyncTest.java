@@ -47,11 +47,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * without requiring actual database infrastructure.</p>
  *
  * CRITICAL VALIDATION CHECKLIST:
- * ✅ Count pipeline steps - 2 steps expected (extract + load)
- * ✅ Verify extract step - Must process 3 records from source
- * ✅ Verify load step - Must load 3 records to target
- * ✅ Validate data transformations - Field mappings and type conversions
- * ✅ Target data verification - Confirm all records loaded correctly
+ * Count pipeline steps - 2 steps expected (extract + load)
+ * Verify extract step - Must process 3 records from source
+ * Verify load step - Must load 3 records to target
+ * Validate data transformations - Field mappings and type conversions
+ * Target data verification - Confirm all records loaded correctly
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2.1.0

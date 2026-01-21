@@ -1030,7 +1030,7 @@ if (result.isSuccess()) {
 #### Reusable Engine Pattern
 
 ```java
-// ✅ EFFICIENT - Reuse engine for multiple evaluations
+// EFFICIENT - Reuse engine for multiple evaluations
 RulesEngine engine = RulesEngine.fromFile("config/enrichment-rules.yaml");
 
 // Process multiple trades
@@ -1560,10 +1560,10 @@ enrichments:
 ```
 
 ### **Migration Benefits**
-- ✅ **Cleaner Syntax**: More readable SpEL expressions
-- ✅ **Better Performance**: Explicit caching and priority control
-- ✅ **Enhanced Validation**: Comprehensive metadata requirements
-- ✅ **Production Ready**: Enable/disable controls and field requirements
+- **Cleaner Syntax**: More readable SpEL expressions
+- **Better Performance**: Explicit caching and priority control
+- **Enhanced Validation**: Comprehensive metadata requirements
+- **Production Ready**: Enable/disable controls and field requirements
 
 ### **Automated Migration**
 ```bash

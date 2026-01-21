@@ -86,11 +86,11 @@ class DatasetSignatureIntegrationTest {
         assertFalse(shortString.contains(":"),
             "Short string should not contain colons");
 
-        System.out.println("✅ Dataset Signature Integration Test Results:");
+        System.out.println("Dataset Signature Integration Test Results:");
         System.out.println("   Signature 1:  " + signature1);
         System.out.println("   Signature 2:  " + signature2);
         System.out.println("   Short form:   " + shortString);
-        System.out.println("   ✅ Signatures are IDENTICAL - dataset deduplication will work!");
+        System.out.println("   Signatures are IDENTICAL - dataset deduplication will work!");
     }
 
     /**
@@ -139,10 +139,10 @@ class DatasetSignatureIntegrationTest {
         assertNotEquals(signature1.getContentHash(), signature2.getContentHash(),
             "Content hashes should be different for different datasets");
         
-        System.out.println("✅ Different Dataset Test Results:");
+        System.out.println("Different Dataset Test Results:");
         System.out.println("   Signature 1: " + signature1);
         System.out.println("   Signature 2: " + signature2);
-        System.out.println("   ✅ Signatures are DIFFERENT - correct!");
+        System.out.println("   Signatures are DIFFERENT - correct!");
     }
 }
 

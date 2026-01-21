@@ -93,7 +93,7 @@ public class ScenarioBasedRulesEngineTest {
         assertNotNull(result, "Result should not be null");
         assertTrue(result.isSuccess(), "Validation should pass for valid trade data");
         
-        logger.info("✅ OTC option scenario validation passed");
+        logger.info("OTC option scenario validation passed");
     }
 
     @Test
@@ -134,7 +134,7 @@ public class ScenarioBasedRulesEngineTest {
         assertFalse(result.isTriggered(), "Validation rule condition should be FALSE for missing required field");
         assertEquals(RuleResult.ResultType.ERROR, result.getResultType(), "Result type should be ERROR for failed validation");
         
-        logger.info("✅ OTC option scenario validation failure detected correctly");
+        logger.info("OTC option scenario validation failure detected correctly");
         logger.info("   Evaluation failed (isSuccess=false): {}", !result.isSuccess());
         logger.info("   Rule condition FALSE (field missing): {}", !result.isTriggered());
         logger.info("   ResultType=ERROR: {}", result.getResultType() == RuleResult.ResultType.ERROR);
@@ -168,7 +168,7 @@ public class ScenarioBasedRulesEngineTest {
         assertTrue(result.getFailureMessages().size() > 0 || !result.isSuccess(),
             "Should capture SpEL evaluation errors");
         
-        logger.info("✅ SpEL error propagation handled correctly");
+        logger.info("SpEL error propagation handled correctly");
         logger.info("   Result type: {}", result.getResultType());
         logger.info("   Success: {}", result.isSuccess());
     }
@@ -200,7 +200,7 @@ public class ScenarioBasedRulesEngineTest {
         assertNotNull(result, "Result should not be null");
         assertTrue(result.isSuccess(), "High-notional trade validation should pass");
         
-        logger.info("✅ High-notional trade classification processed correctly");
+        logger.info("High-notional trade classification processed correctly");
         logger.info("   Notional amount: ${}", highNotionalTrade.get("notional"));
     }
 
@@ -230,7 +230,7 @@ public class ScenarioBasedRulesEngineTest {
         assertNotNull(result, "Result should not be null");
         assertTrue(result.isSuccess(), "Commodity swap validation should pass");
         
-        logger.info("✅ Commodity swap scenario processed correctly");
+        logger.info("Commodity swap scenario processed correctly");
         logger.info("   Commodity: {}", swapTrade.get("commodity"));
     }
 
@@ -265,7 +265,7 @@ public class ScenarioBasedRulesEngineTest {
         // Data is now passed directly, no "data" wrapper
         assertTrue(enrichedData.containsKey("tradeId"), "Trade data should be accessible");
         
-        logger.info("✅ Trade enrichment rules processed successfully");
+        logger.info("Trade enrichment rules processed successfully");
         logger.info("   Enriched data fields: {}", enrichedData.keySet());
     }
 
@@ -292,12 +292,13 @@ public class ScenarioBasedRulesEngineTest {
         assertNotNull(validationResult, "Validation result should not be null");
         
         if (!validationResult.isSuccess()) {
+            // Validation failed - verify we got a proper failure result
             logger.info("✓ Validation stage failed as expected (missing required fields)");
             logger.info("   Failure policy: terminate - enrichment stage should be skipped");
             
-            // In real scenario processing, the failure policy would prevent
-            // the enrichment stage from executing
-            assertTrue(true, "Staged processing failure policy demonstration complete");
+            // Verify the failure result contains useful information
+            assertNotNull(validationResult.getSeverity(), "Failed result should have severity");
+            logger.info("   Failure severity: {}", validationResult.getSeverity());
         } else {
             logger.info("✓ Validation stage passed - proceeding to enrichment stage");
             
@@ -315,6 +316,6 @@ public class ScenarioBasedRulesEngineTest {
             logger.info("✓ Enrichment stage completed");
         }
         
-        logger.info("✅ Staged processing with failure policies demonstrated");
+        logger.info("Staged processing with failure policies demonstrated");
     }
 }

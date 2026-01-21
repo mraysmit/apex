@@ -89,10 +89,10 @@ class MixedRefsWithGroupReferencesTest {
                 "composite_mixed_group should be in itemOrder because it's not referenced by any other group");
 
         logger.info("=== TEST RESULTS ===");
-        logger.info("✅ filesystem_group filtered: {}", !filesystemGroupInItemOrder);
-        logger.info("✅ classpath_group filtered: {}", !classpathGroupInItemOrder);
-        logger.info("✅ composite_mixed_group in itemOrder: {}", compositeGroupInItemOrder);
-        logger.info("✅ Groups-only logic works correctly with mixed references (file system + classpath)");
+        logger.info("filesystem_group filtered: {}", !filesystemGroupInItemOrder);
+        logger.info("classpath_group filtered: {}", !classpathGroupInItemOrder);
+        logger.info("composite_mixed_group in itemOrder: {}", compositeGroupInItemOrder);
+        logger.info("Groups-only logic works correctly with mixed references (file system + classpath)");
     }
 }
 

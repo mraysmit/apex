@@ -36,11 +36,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Performance and timing validation
  *
  * FOLLOWS CODING PRINCIPLES FROM prompts.txt:
- * ✅ Never validate YAML syntax - test actual pipeline execution
- * ✅ Execute real APEX pipeline operations using RulesEngine.evaluate()
- * ✅ Set up real data sources and sinks (H2 database, CSV files)
- * ✅ Validate execution behavior with specific assertions on results
- * ✅ Test positive and negative scenarios for all execution keywords
+ * Never validate YAML syntax - test actual pipeline execution
+ * Execute real APEX pipeline operations using RulesEngine.evaluate()
+ * Set up real data sources and sinks (H2 database, CSV files)
+ * Validate execution behavior with specific assertions on results
+ * Test positive and negative scenarios for all execution keywords
  *
  * @author APEX Demo Team
  * @since 1.0.0

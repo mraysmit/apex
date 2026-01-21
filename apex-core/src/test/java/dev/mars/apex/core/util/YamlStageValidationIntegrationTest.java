@@ -87,31 +87,33 @@ class YamlStageValidationIntegrationTest {
             System.out.println("\n" + summary.getReport());
         }
         
-        // Assertions for the test
+        // Assertions for the test - MUST actually validate!
         assertTrue(summary.getTotalCount() > 0, "Should have found files to validate");
+        assertTrue(summary.isAllValid(), 
+            "All stage-based files should be valid. Errors found:\n" + summary.getReport());
         
-        // We expect the stage-based files to be valid
         System.out.println("\n=== Stage Validation Integration Test completed ===");
         System.out.println("Stage validation system is working correctly with actual scenario files!");
-        
-        // The main goal is to verify the validation system works with real files
-        // We'll be lenient about specific validation results since files might be missing
-        assertTrue(true, "Stage validation integration test completed successfully");
     }
     
     @Test
     void testValidateStageBasedVsLegacyScenarios() {
-        YamlMetadataValidator validator = new YamlMetadataValidator("../apex-demo/src/main/resources");
+        // Use actual existing test files
+        YamlMetadataValidator validator = new YamlMetadataValidator(
+            "../apex-demo/src/test/java/dev/mars/apex/demo/scenario");
         
-        // Test both stage-based and legacy scenario files
+        // Test actual scenario files that exist and are valid
         List<String> scenarioFiles = List.of(
-            "scenarios/otc-options-scenario.yaml",
-            "scenarios/commodity-swaps-scenario.yaml", 
-            "scenarios/settlement-auto-repair-scenario.yaml"
+            "BasicStageConfigurationTest-scenario.yaml",
+            "ValidationFailureScenarioTest-scenario.yaml"
         );
         
         System.out.println("\n=== Stage vs Legacy Scenario Validation ===");
-        System.out.println("Testing both stage-based and legacy scenario configurations...\n");
+        System.out.println("Testing stage-based scenario configurations...\n");
+        
+        int validCount = 0;
+        int invalidCount = 0;
+        StringBuilder errors = new StringBuilder();
         
         for (String scenarioFile : scenarioFiles) {
             System.out.println("Validating: " + scenarioFile);
@@ -120,10 +122,14 @@ class YamlStageValidationIntegrationTest {
             
             if (result.isValid()) {
                 System.out.println("  ✓ VALID");
+                validCount++;
             } else {
                 System.out.println("  ✗ INVALID");
+                invalidCount++;
+                errors.append("\n").append(scenarioFile).append(":");
                 for (String error : result.getErrors()) {
                     System.out.println("    ERROR: " + error);
+                    errors.append("\n  - ").append(error);
                 }
             }
             
@@ -134,31 +140,45 @@ class YamlStageValidationIntegrationTest {
             }
         }
         
-        System.out.println("\n=== Backward Compatibility Test completed ===");
-        System.out.println("Both stage-based and legacy scenarios are supported!");
+        // Actually assert validation passes!
+        assertEquals(0, invalidCount, 
+            "All scenario files should be valid. Invalid files:" + errors);
+        assertTrue(validCount > 0, "Should have validated at least one file");
         
-        // The test passes regardless of specific validation results
-        // We're demonstrating that the system handles both types
-        assertTrue(true, "Backward compatibility validation completed");
+        System.out.println("\n=== Backward Compatibility Test completed ===");
     }
     
     @Test
     void testStageValidationFeatures() {
-        System.out.println("\n=== Stage Validation Features Test ===");
-        System.out.println("Demonstrating new stage validation capabilities:\n");
+        // This test validates that the stage validation features work with real files
+        YamlMetadataValidator validator = new YamlMetadataValidator(
+            "../apex-demo/src/test/java/dev/mars/apex/demo/scenario");
         
+        System.out.println("\n=== Stage Validation Features Test ===");
+        System.out.println("Testing stage validation with actual scenario file...\n");
+        
+        // Test with an actual stage-based scenario file
+        YamlValidationResult result = validator.validateFile("BasicStageConfigurationTest-scenario.yaml");
+        
+        System.out.println("Validated: BasicStageConfigurationTest-scenario.yaml");
+        System.out.println("Status: " + result.getStatus());
+        
+        if (!result.isValid()) {
+            System.out.println("Errors:");
+            for (String error : result.getErrors()) {
+                System.out.println("  - " + error);
+            }
+        }
+        
+        System.out.println("\nStage validation features verified:");
         System.out.println("✓ Processing-stages validation");
         System.out.println("✓ Stage required fields validation (stage-name, config-file, execution-order)");
         System.out.println("✓ Failure policy validation (terminate, continue-with-warnings, flag-for-review)");
-        System.out.println("✓ Stage uniqueness validation (names and execution orders)");
-        System.out.println("✓ Circular dependency detection");
-        System.out.println("✓ Dependency reference validation");
-        System.out.println("✓ Backward compatibility with rule-configurations");
         System.out.println("✓ Enhanced error reporting with specific stage context");
         
-        System.out.println("\nAll stage validation features have been implemented and tested!");
-        
-        // This test always passes - it's demonstrating the features
-        assertTrue(true, "Stage validation features demonstration completed");
+        // Actually assert the validation passes!
+        assertTrue(result.isValid(), 
+            "Stage validation should pass for BasicStageConfigurationTest-scenario.yaml. Errors: " 
+            + result.getErrors());
     }
 }

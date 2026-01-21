@@ -80,7 +80,7 @@ class OrderedYamlParserComplexTest extends DemoTestBase {
         LOGGER.info("   2. Enrichments executed: customerData = {}", enrichedData.get("customerData"));
         LOGGER.info("   3. Rules validated enriched data successfully");
         LOGGER.info("   4. Rule-groups, enrichment-groups, transformations all processed");
-        LOGGER.info("✅ All section types in order test PASSED");
+        LOGGER.info("All section types in order test PASSED");
     }
 
     @Test
@@ -123,7 +123,7 @@ class OrderedYamlParserComplexTest extends DemoTestBase {
         LOGGER.info("   1. First enrichment: customerProfile = {}", enrichedData.get("customerProfile"));
         LOGGER.info("   2. Second enrichment: preferences = {}", enrichedData.get("preferences"));
         LOGGER.info("   3. Rules validated enriched data successfully");
-        LOGGER.info("✅ Enrich-then-validate pattern test PASSED");
+        LOGGER.info("Enrich-then-validate pattern test PASSED");
     }
 
     @Test
@@ -169,6 +169,6 @@ class OrderedYamlParserComplexTest extends DemoTestBase {
         LOGGER.info("   1. Rules validated input data first");
         LOGGER.info("   2. Enrichment executed after validation: customerData = {}", enrichedData.get("customerData"));
         LOGGER.info("   3. Sequential processing respects YAML document order");
-        LOGGER.info("✅ Validate-then-enrich pattern test PASSED");
+        LOGGER.info("Validate-then-enrich pattern test PASSED");
     }
 }

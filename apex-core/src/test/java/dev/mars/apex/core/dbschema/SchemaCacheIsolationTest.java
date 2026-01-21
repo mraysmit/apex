@@ -124,7 +124,7 @@ class SchemaCacheIsolationTest {
                         "('CUST-002', 'Finance Customer Beta', 'Finance', 'finance'), " +
                         "('CUST-003', 'Finance Customer Gamma', 'Finance', 'finance')");
 
-            LOGGER.info("✅ Created 3 schemas with identical table structure but different data");
+            LOGGER.info("Created 3 schemas with identical table structure but different data");
         }
     }
 
@@ -146,31 +146,31 @@ class SchemaCacheIsolationTest {
         testData.put("customerId", "CUST-001");
         
         // First query - hits sales schema (cache miss, reads from DB)
-        LOGGER.info("🔍 Query 1: Lookup CUST-001 from SALES schema (cache miss expected)");
+        LOGGER.info("Query 1: Lookup CUST-001 from SALES schema (cache miss expected)");
         RuleResult result1 = engine.evaluate(config, testData);
         Map<String, Object> salesData = result1.getEnrichedData();
         
         assertEquals("Sales Customer Alpha", salesData.get("sales_customer_name"));
         assertEquals("sales", salesData.get("sales_schema"));
-        LOGGER.info("✅ Sales schema returned correct customer: {}", salesData.get("sales_customer_name"));
+        LOGGER.info("Sales schema returned correct customer: {}", salesData.get("sales_customer_name"));
         
         // Second query - hits marketing schema (cache miss, reads from DB)
-        LOGGER.info("🔍 Query 2: Lookup CUST-001 from MARKETING schema (cache miss expected)");
+        LOGGER.info("Query 2: Lookup CUST-001 from MARKETING schema (cache miss expected)");
         RuleResult result2 = engine.evaluate(config, testData);
         Map<String, Object> marketingData = result2.getEnrichedData();
         
         assertEquals("Marketing Customer Alpha", marketingData.get("marketing_customer_name"));
         assertEquals("marketing", marketingData.get("marketing_schema"));
-        LOGGER.info("✅ Marketing schema returned correct customer: {}", marketingData.get("marketing_customer_name"));
+        LOGGER.info("Marketing schema returned correct customer: {}", marketingData.get("marketing_customer_name"));
         
         // Third query - hits finance schema (cache miss, reads from DB)
-        LOGGER.info("🔍 Query 3: Lookup CUST-001 from FINANCE schema (cache miss expected)");
+        LOGGER.info("Query 3: Lookup CUST-001 from FINANCE schema (cache miss expected)");
         RuleResult result3 = engine.evaluate(config, testData);
         Map<String, Object> financeData = result3.getEnrichedData();
         
         assertEquals("Finance Customer Alpha", financeData.get("finance_customer_name"));
         assertEquals("finance", financeData.get("finance_schema"));
-        LOGGER.info("✅ Finance schema returned correct customer: {}", financeData.get("finance_customer_name"));
+        LOGGER.info("Finance schema returned correct customer: {}", financeData.get("finance_customer_name"));
         
         // Critical validation: All three schemas returned DIFFERENT data for same ID
         assertNotEquals(salesData.get("sales_customer_name"), marketingData.get("marketing_customer_name"),
@@ -214,7 +214,7 @@ class SchemaCacheIsolationTest {
         assertEquals("marketing", cachedData.get("marketing_schema"));
         assertEquals("finance", cachedData.get("finance_schema"));
         
-        LOGGER.info("✅ Cache hits respected schema boundaries - no data leakage detected");
+        LOGGER.info("Cache hits respected schema boundaries - no data leakage detected");
     }
 
     @Test
@@ -248,7 +248,7 @@ class SchemaCacheIsolationTest {
         assertEquals("Marketing Customer Gamma", data.get("marketing_customer_name"));
         assertEquals("Finance Customer Gamma", data.get("finance_customer_name"));
         
-        LOGGER.info("✅ Per-schema TTL independence verified - sales expired, others still cached");
+        LOGGER.info("Per-schema TTL independence verified - sales expired, others still cached");
     }
 
     @Test
@@ -276,7 +276,7 @@ class SchemaCacheIsolationTest {
         assertNotNull(data.get("marketing_customer_name"), "Marketing cache should be unaffected");
         assertNotNull(data.get("finance_customer_name"), "Finance cache should be unaffected");
         
-        LOGGER.info("✅ Cache eviction in sales schema did not affect marketing/finance caches");
+        LOGGER.info("Cache eviction in sales schema did not affect marketing/finance caches");
     }
 
     /**

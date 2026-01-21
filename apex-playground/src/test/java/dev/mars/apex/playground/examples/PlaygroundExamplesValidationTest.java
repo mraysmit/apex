@@ -71,7 +71,7 @@ public class PlaygroundExamplesValidationTest {
     void setUp() {
         yamlLoader = new YamlConfigurationLoader();
         objectMapper = new ObjectMapper();
-        logger.info("✅ Test setup complete");
+        logger.info("Test setup complete");
     }
 
     /**

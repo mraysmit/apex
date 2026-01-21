@@ -58,7 +58,7 @@ public class SeverityValidationTest {
         configLoader = new YamlConfigurationLoader();
         ruleFactory = new YamlRuleFactory();
         
-        logger.info("✅ APEX services initialized successfully");
+        logger.info("APEX services initialized successfully");
     }
 
     @Test
@@ -69,7 +69,7 @@ public class SeverityValidationTest {
         // Load the value threshold rule which has severity: "INFO"
         YamlRuleConfiguration yamlConfig = configLoader.loadFromFile("src/test/java/dev/mars/apex/demo/severity/SeverityValidationTest.yaml");
         assertNotNull(yamlConfig, "YAML configuration should be loaded");
-        logger.info("✅ Configuration loaded: {} rules", yamlConfig.getRules().size());
+        logger.info("Configuration loaded: {} rules", yamlConfig.getRules().size());
 
         // Create rules engine configuration
         RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
@@ -80,7 +80,7 @@ public class SeverityValidationTest {
         assertNotNull(rule, "Rule should be found");
         assertNotNull(rule.getSeverity(), "Rule should have severity");
         assertEquals("INFO", rule.getSeverity(), "Rule severity should be INFO from YAML");
-        logger.info("✅ Rule loaded with severity: {}", rule.getSeverity());
+        logger.info("Rule loaded with severity: {}", rule.getSeverity());
 
         logger.info("🎉 Severity loading test PASSED - YAML severity properly loaded into Rule object");
     }
@@ -93,12 +93,12 @@ public class SeverityValidationTest {
         // Test 4-parameter constructor with severity
         Rule severityRule = new Rule("severity-rule", "#value > 0", "Test message", "ERROR");
         assertEquals("ERROR", severityRule.getSeverity(), "ERROR severity should be preserved");
-        logger.info("✅ 4-parameter constructor with ERROR severity works");
+        logger.info("4-parameter constructor with ERROR severity works");
 
         // Test default severity (backward compatibility)
         Rule defaultRule = new Rule("default-rule", "#value > 0", "Default message");
         assertEquals("INFO", defaultRule.getSeverity(), "Default severity should be INFO");
-        logger.info("✅ 3-parameter constructor defaults to INFO severity");
+        logger.info("3-parameter constructor defaults to INFO severity");
 
         logger.info("🎉 Rule constructor severity test PASSED");
     }
@@ -113,13 +113,13 @@ public class SeverityValidationTest {
         assertNotNull(matchResult, "Match result should not be null");
         assertEquals("ERROR", matchResult.getSeverity(), "Match result should have ERROR severity");
         assertTrue(matchResult.isTriggered(), "Match result should be triggered");
-        logger.info("✅ RuleResult.match() with severity works");
+        logger.info("RuleResult.match() with severity works");
 
         // Test backward compatibility - existing factory methods should still work
         RuleResult legacyResult = RuleResult.match("legacy-rule", "Legacy message");
         assertNotNull(legacyResult, "Legacy result should not be null");
         assertEquals("INFO", legacyResult.getSeverity(), "Legacy result should default to INFO severity");
-        logger.info("✅ Backward compatibility maintained");
+        logger.info("Backward compatibility maintained");
 
         logger.info("🎉 RuleResult factory methods test PASSED");
     }
@@ -135,12 +135,12 @@ public class SeverityValidationTest {
         // Verify the getSeverity() method works (this was the broken code in RuleEvaluationService)
         String severity = errorRule.getSeverity() != null ? errorRule.getSeverity() : "ERROR";
         assertEquals("ERROR", severity, "Severity should be accessible via getSeverity()");
-        logger.info("✅ REST API service can access rule severity: {}", severity);
+        logger.info("REST API service can access rule severity: {}", severity);
 
         // Test the exact pattern used in RuleEvaluationService.java line 117
         assertNotNull(errorRule.getSeverity(), "getSeverity() should not return null");
         assertEquals("ERROR", errorRule.getSeverity(), "getSeverity() should return ERROR");
-        logger.info("✅ RuleEvaluationService.java line 117 pattern works correctly");
+        logger.info("RuleEvaluationService.java line 117 pattern works correctly");
 
         logger.info("🎉 REST API service severity access test PASSED");
     }
@@ -158,7 +158,7 @@ public class SeverityValidationTest {
         // Get the rule and verify it has severity
         Rule rule = engine.getConfiguration().getRuleById("value-threshold-check");
         assertEquals("INFO", rule.getSeverity(), "Rule should have INFO severity from YAML");
-        logger.info("✅ Rule has severity: {}", rule.getSeverity());
+        logger.info("Rule has severity: {}", rule.getSeverity());
 
         // Test data that will trigger the rule
         Map<String, Object> testData = new HashMap<>();
@@ -175,7 +175,7 @@ public class SeverityValidationTest {
         assertNotNull(result.getSeverity(), "RuleResult should have severity");
         assertEquals("INFO", result.getSeverity(), "RuleResult severity should match rule severity");
         assertEquals(rule.getSeverity(), result.getSeverity(), "RuleResult severity should exactly match Rule severity");
-        logger.info("✅ End-to-end severity flow verified: YAML(INFO) → Rule(INFO) → RuleResult(INFO)");
+        logger.info("End-to-end severity flow verified: YAML(INFO) → Rule(INFO) → RuleResult(INFO)");
 
         logger.info("🎉 End-to-end severity flow test PASSED - Phase 2 implementation working correctly!");
     }
@@ -193,29 +193,29 @@ public class SeverityValidationTest {
         assertEquals("ERROR", errorResult.getSeverity(), "RuleResult.match should support ERROR severity");
         assertEquals("WARNING", warningResult.getSeverity(), "RuleResult.match should support WARNING severity");
         assertEquals("INFO", infoResult.getSeverity(), "RuleResult.match should support INFO severity");
-        logger.info("✅ RuleResult factory methods support all severity levels");
+        logger.info("RuleResult factory methods support all severity levels");
 
         // Test 2: Verify RuleResult constructors support severity
         RuleResult constructedResult = new RuleResult("test-rule", "test-message", "ERROR", true, RuleResult.ResultType.MATCH);
         assertEquals("ERROR", constructedResult.getSeverity(), "RuleResult constructor should support severity");
-        logger.info("✅ RuleResult constructors support severity");
+        logger.info("RuleResult constructors support severity");
 
         // Test 3: Verify Rule objects support severity (already tested in Phase 1)
         Rule errorRule = new Rule("critical-check", "#amount > 10000", "Critical amount detected", "ERROR");
         assertEquals("ERROR", errorRule.getSeverity(), "Rule objects should support severity");
-        logger.info("✅ Rule objects support severity");
+        logger.info("Rule objects support severity");
 
         // Test 4: Verify end-to-end YAML flow works (already tested in Phase 2)
-        logger.info("✅ End-to-end YAML severity flow verified in Phase 2");
+        logger.info("End-to-end YAML severity flow verified in Phase 2");
 
         // Test 5: Verify comprehensive severity support across all components
         // This demonstrates that all layers of the APEX system support severity
-        logger.info("✅ Phase 3 focuses on API layer - REST DTOs updated to support severity");
-        logger.info("✅ RuleEvaluationRequest and RuleEvaluationResponse DTOs now include severity fields");
-        logger.info("✅ RulesController endpoints updated to handle severity in requests and responses");
+        logger.info("Phase 3 focuses on API layer - REST DTOs updated to support severity");
+        logger.info("RuleEvaluationRequest and RuleEvaluationResponse DTOs now include severity fields");
+        logger.info("RulesController endpoints updated to handle severity in requests and responses");
 
         logger.info("🎉 Phase 3 API layer severity support COMPLETED!");
-        logger.info("📋 Summary: Core models, processing logic, and API layer all support severity attributes");
-        logger.info("📋 All phases complete: Phase 1 (Core Models) ✅, Phase 2 (Processing Logic) ✅, Phase 3 (API Layer) ✅");
+        logger.info("Summary: Core models, processing logic, and API layer all support severity attributes");
+        logger.info("All phases complete: Phase 1 (Core Models) ✅, Phase 2 (Processing Logic) ✅, Phase 3 (API Layer) ✅");
     }
 }

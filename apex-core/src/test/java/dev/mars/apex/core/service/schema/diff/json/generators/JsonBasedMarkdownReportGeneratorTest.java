@@ -65,7 +65,7 @@ class JsonBasedMarkdownReportGeneratorTest {
         String markdown = Files.readString(Path.of(path));
         logger.info("  → Markdown size: {} characters", markdown.length());
         
-        assertTrue(markdown.contains("# 📊 Schema Diff Report"));
+        assertTrue(markdown.contains("# Schema Diff Report"));
         assertTrue(markdown.contains("## 📈 Comparison Summary"));
         assertTrue(markdown.contains("test-source"));
         logger.info("  ✓ Markdown generation successful - contains expected sections");
@@ -84,7 +84,7 @@ class JsonBasedMarkdownReportGeneratorTest {
         logger.info("  → Generated Markdown: {}", path);
         
         String markdown = Files.readString(Path.of(path));
-        assertTrue(markdown.contains("| ✅ Matching | 10 |"));
+        assertTrue(markdown.contains("| Matching | 10 |"));
         assertTrue(markdown.contains("| ➕ Added | 5 |"));
         logger.info("  ✓ Statistics correctly formatted in Markdown table");
     }

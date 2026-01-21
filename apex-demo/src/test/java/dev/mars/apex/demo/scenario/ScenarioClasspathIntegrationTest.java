@@ -142,7 +142,7 @@ public class ScenarioClasspathIntegrationTest extends DemoTestBase {
             assertTrue(scenarios.containsKey("simple-trade-validation"),
                     "Registry should contain simple-trade-validation scenario");
 
-            logger.info("=== ✅ Registry Loading Test PASSED ===");
+            logger.info("=== Registry Loading Test PASSED ===");
         }
 
         @Test
@@ -167,7 +167,7 @@ public class ScenarioClasspathIntegrationTest extends DemoTestBase {
             logger.info("  - Business Domain: {}", otcScenario.getBusinessDomain());
             logger.info("  - Enabled: {}", otcScenario.isEnabled());
 
-            logger.info("=== ✅ Relative Path Resolution Test PASSED ===");
+            logger.info("=== Relative Path Resolution Test PASSED ===");
         }
 
         @Test
@@ -195,7 +195,7 @@ public class ScenarioClasspathIntegrationTest extends DemoTestBase {
                     "Exception message should indicate resource not found");
 
             logger.info("✓ Correctly threw exception: {}", exception.getMessage());
-            logger.info("=== ✅ Non-Existent Resource Test PASSED ===");
+            logger.info("=== Non-Existent Resource Test PASSED ===");
         }
     }
 
@@ -246,7 +246,7 @@ public class ScenarioClasspathIntegrationTest extends DemoTestBase {
                 logger.info("✓ Scenario data types: {}", dataTypes);
             }
 
-            logger.info("=== ✅ OTC Option Scenario Configuration Test PASSED ===");
+            logger.info("=== OTC Option Scenario Configuration Test PASSED ===");
         }
 
         @Test
@@ -270,7 +270,7 @@ public class ScenarioClasspathIntegrationTest extends DemoTestBase {
             logger.info("  - Business Domain: {}", simpleScenario.getBusinessDomain());
             logger.info("  - Enabled: {}", simpleScenario.isEnabled());
 
-            logger.info("=== ✅ Simple Trade Scenario Configuration Test PASSED ===");
+            logger.info("=== Simple Trade Scenario Configuration Test PASSED ===");
         }
 
         @Test
@@ -291,7 +291,7 @@ public class ScenarioClasspathIntegrationTest extends DemoTestBase {
                 logger.info("✓ Scenario '{}' has required metadata", id);
             });
 
-            logger.info("=== ✅ All Scenarios Required Metadata Test PASSED ===");
+            logger.info("=== All Scenarios Required Metadata Test PASSED ===");
         }
     }
 
@@ -319,7 +319,7 @@ public class ScenarioClasspathIntegrationTest extends DemoTestBase {
             // List all scenarios
             scenarios.keySet().forEach(id -> logger.info("  - {}", id));
 
-            logger.info("=== ✅ Load All Scenarios Test PASSED ===");
+            logger.info("=== Load All Scenarios Test PASSED ===");
         }
 
         @Test
@@ -336,7 +336,7 @@ public class ScenarioClasspathIntegrationTest extends DemoTestBase {
                 logger.info("✓ Scenario '{}' enabled status: {}", id, config.isEnabled());
             });
 
-            logger.info("=== ✅ Scenario Enabled Status Test PASSED ===");
+            logger.info("=== Scenario Enabled Status Test PASSED ===");
         }
     }
 }

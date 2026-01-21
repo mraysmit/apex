@@ -203,16 +203,16 @@ mvn test -Dtest=VaultPasswordInjectionTest -pl apex-demo
 ##  **Test Coverage Summary**
 
 **Complete coverage for**:
-- ✅ Two syntax types: `${}` and `$()`
-- ✅ Default value patterns: `:default` syntax
-- ✅ Resolution priority: System Properties > Environment Variables > Defaults
-- ✅ Pattern matching: Regex patterns for both syntax types
-- ✅ Security features: Automatic masking and secure logging
-- ✅ External sources: System properties and environment variables
-- ✅ Integration: APEX DataSource factory and enrichment pipeline
-- ✅ Edge cases: Malformed syntax and error handling
-- ✅ Real-world scenarios: Complete application configuration examples
-- ✅ **Production databases**: PostgreSQL with Testcontainers validation
-- ✅ **Secrets management**: HashiCorp Vault integration with Testcontainers 
+- Two syntax types: `${}` and `$()`
+- Default value patterns: `:default` syntax
+- Resolution priority: System Properties > Environment Variables > Defaults
+- Pattern matching: Regex patterns for both syntax types
+- Security features: Automatic masking and secure logging
+- External sources: System properties and environment variables
+- Integration: APEX DataSource factory and enrichment pipeline
+- Edge cases: Malformed syntax and error handling
+- Real-world scenarios: Complete application configuration examples
+- **Production databases**: PostgreSQL with Testcontainers validation
+- **Secrets management**: HashiCorp Vault integration with Testcontainers 
 
 **All 20 tests passing** - Comprehensive validation of password injection functionality across all deployment scenarios, technical requirements, production database environments, and enterprise secrets management systems.

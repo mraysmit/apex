@@ -41,4 +41,4 @@ foreach ($file in $files) {
     }
 }
 
-Write-Host "`n✅ Fixed $fixCount files" -ForegroundColor Cyan
+Write-Host "`nFixed $fixCount files" -ForegroundColor Cyan

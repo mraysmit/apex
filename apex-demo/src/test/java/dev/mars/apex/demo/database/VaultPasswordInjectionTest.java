@@ -219,7 +219,7 @@ class VaultPasswordInjectionTest {
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
         assertNotNull(config, "YAML configuration should load successfully");
         
-        logger.info("✅ YAML configuration loaded successfully");
+        logger.info("YAML configuration loaded successfully");
         logger.info("  Configuration name: {}", config.getMetadata() != null ? config.getMetadata().getName() : "unnamed");
         logger.info("  Number of enrichments: {}", config.getEnrichments() != null ? config.getEnrichments().size() : 0);
         
@@ -253,7 +253,7 @@ class VaultPasswordInjectionTest {
         assertTrue(connectionResult.contains("vaultuser"), 
                    "Should contain Vault-retrieved username");
         
-        logger.info("✅ Vault password injection test completed successfully");
+        logger.info("Vault password injection test completed successfully");
         logger.info("  ✓ Vault container started and accessible");
         logger.info("  ✓ Secrets retrieved from Vault KV store");
         logger.info("  ✓ Vault secrets injected into system properties");
@@ -313,9 +313,9 @@ class VaultPasswordInjectionTest {
 
         postgresSource.batchUpdate(ddlStatements);
 
-        logger.info("✅ Test data setup completed using APEX DataSource:");
-        logger.info("  ✅ Created vault_users table");
-        logger.info("  ✅ Inserted test users with Vault-managed credentials");
+        logger.info("Test data setup completed using APEX DataSource:");
+        logger.info("  Created vault_users table");
+        logger.info("  Inserted test users with Vault-managed credentials");
     }
 
     private Map<String, String> retrieveSecretsFromVault(String vaultUrl, String vaultToken) throws Exception {
@@ -349,7 +349,7 @@ class VaultPasswordInjectionTest {
             secrets.put("username", username);
             secrets.put("password", password);
             
-            logger.info("✅ Successfully retrieved secrets from Vault:");
+            logger.info("Successfully retrieved secrets from Vault:");
             logger.info("  ✓ Username: {}", username);
             logger.info("  ✓ Password: [MASKED]");
         } else {
@@ -390,7 +390,7 @@ class VaultPasswordInjectionTest {
             throw new RuntimeException("Failed to store secrets in Vault: " + response.body());
         }
 
-        logger.info("✅ Successfully stored secrets in Vault");
+        logger.info("Successfully stored secrets in Vault");
     }
 
     private String extractJsonValue(String json, String key) {

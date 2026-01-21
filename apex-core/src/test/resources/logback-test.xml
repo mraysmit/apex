@@ -16,6 +16,22 @@
     <logger name="dev.mars.apex.core.config.yaml.YamlConfigurationLoader" level="ERROR"/>
     <logger name="dev.mars.apex.core.util.YamlDependencyAnalyzer" level="INFO"/>
     <logger name="dev.mars.apex.core.util.YamlMetadataValidator" level="INFO"/>
+    
+    <!-- 
+        Suppress HikariCP connection pool ERROR logging during tests.
+        Intentional error tests trigger expected connection failures which 
+        would otherwise dump verbose stack traces to test output.
+        Connection errors are properly handled by the application code.
+    -->
+    <logger name="com.zaxxer.hikari" level="OFF"/>
+    
+    <!--
+        Suppress YamlEnrichmentProcessor ERROR logging during tests.
+        Intentional error tests (e.g., SetFieldValueNestedPathTest) trigger expected
+        enrichment failures which would otherwise dump verbose stack traces.
+        These errors are properly asserted in the test code.
+    -->
+    <logger name="dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor" level="OFF"/>
 
     <!-- Enhanced logging for scenario tests - enable console output -->
     <logger name="dev.mars.apex.core.service.scenario" level="INFO" additivity="false">

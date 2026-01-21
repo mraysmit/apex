@@ -47,10 +47,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Breaking changes should be detected and validation should fail
  *
  * CRITICAL VALIDATION CHECKLIST:
- * ✅ Legacy and new tables created in same database
- * ✅ Schema diff detects removed columns
- * ✅ Breaking change validation fails when columns removed
- * ✅ Prevents accidental data loss in production
+ * Legacy and new tables created in same database
+ * Schema diff detects removed columns
+ * Breaking change validation fails when columns removed
+ * Prevents accidental data loss in production
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2.1.0

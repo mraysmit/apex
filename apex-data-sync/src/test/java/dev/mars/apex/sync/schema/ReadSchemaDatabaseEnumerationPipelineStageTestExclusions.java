@@ -45,10 +45,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * specific tables during discovery.
  *
  * CRITICAL VALIDATION CHECKLIST:
- * ✅ Database created with multiple tables including temp and system tables
- * ✅ Enumeration excludes specified tables (temp_data, system_log)
- * ✅ Results contain only non-excluded tables
- * ✅ Pipeline executes successfully
+ * Database created with multiple tables including temp and system tables
+ * Enumeration excludes specified tables (temp_data, system_log)
+ * Results contain only non-excluded tables
+ * Pipeline executes successfully
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2.1.0

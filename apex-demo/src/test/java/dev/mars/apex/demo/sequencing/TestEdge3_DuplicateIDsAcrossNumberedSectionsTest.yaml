@@ -25,7 +25,7 @@ enrichments-1:
     enabled: true
 
 enrichments-2:
-  - id: "duplicate-id"  # ❌ DUPLICATE! Same as in enrichments-1
+  - id: "duplicate-id"  # DUPLICATE! Same as in enrichments-1
     type: "calculation-enrichment"
     calculation-config:
       expression: "'value-from-section-2'"

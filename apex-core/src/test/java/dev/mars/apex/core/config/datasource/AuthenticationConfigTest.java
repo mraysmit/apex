@@ -1188,7 +1188,7 @@ class AuthenticationConfigTest {
     }
 
     @Test
-    @DisplayName("Should not be equal when passwords differ")
+    @DisplayName("Should be equal when passwords differ (password not included in equals)")
     void testEqualsPasswordDifference() {
         config.setType("basic");
         config.setUsername("testuser");
@@ -1199,19 +1199,14 @@ class AuthenticationConfigTest {
         other.setUsername("testuser");
         other.setPassword("pass2");
 
-        // Note: Based on the actual implementation, password might not be included in equals
-        // This test documents the current behavior
-        if (config.equals(other)) {
-            // If they are equal, it means password is not included in equals comparison
-            assertTrue(true, "Password is not included in equals comparison");
-        } else {
-            // If they are not equal, password is included in equals comparison
-            assertNotEquals(config, other);
-        }
+        // Password is intentionally not included in equals comparison
+        // This is by design - equality is based on type and username only
+        assertEquals(config, other, "Configs should be equal - password is not included in equals");
+        assertEquals(config.hashCode(), other.hashCode(), "Hash codes should match when configs are equal");
     }
 
     @Test
-    @DisplayName("Should not be equal when tokens differ")
+    @DisplayName("Should be equal when tokens differ (token not included in equals)")
     void testEqualsTokenDifference() {
         config.setType("bearer-token");
         config.setToken("token1");
@@ -1220,15 +1215,10 @@ class AuthenticationConfigTest {
         other.setType("bearer-token");
         other.setToken("token2");
 
-        // Note: Based on the actual implementation, token might not be included in equals
-        // This test documents the current behavior
-        if (config.equals(other)) {
-            // If they are equal, it means token is not included in equals comparison
-            assertTrue(true, "Token is not included in equals comparison");
-        } else {
-            // If they are not equal, token is included in equals comparison
-            assertNotEquals(config, other);
-        }
+        // Token is intentionally not included in equals comparison
+        // This is by design - equality is based on type only
+        assertEquals(config, other, "Configs should be equal - token is not included in equals");
+        assertEquals(config.hashCode(), other.hashCode(), "Hash codes should match when configs are equal");
     }
 
     @Test

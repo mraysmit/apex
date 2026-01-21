@@ -125,8 +125,8 @@ public class PostgreSQLSchemaLookupNegativeTest extends DemoTestBase {
                 ('CUST001', 'Test Corporation', 'CORPORATE', 'GOLD', 'NA', 'ACTIVE')
                 """);
             
-            logger.info("✅ Created schema '{}' with customers table", CORRECT_SCHEMA);
-            logger.info("✅ Created empty schema '{}' (no tables)", WRONG_SCHEMA);
+            logger.info("Created schema '{}' with customers table", CORRECT_SCHEMA);
+            logger.info("Created empty schema '{}' (no tables)", WRONG_SCHEMA);
             logger.info("⚠️  Schema '{}' does NOT exist", NONEXISTENT_SCHEMA);
         }
     }
@@ -168,13 +168,13 @@ public class PostgreSQLSchemaLookupNegativeTest extends DemoTestBase {
             assertNull(enrichedData.get("customerType"), 
                 "Customer type should be NULL when schema is wrong");
             
-            logger.info("✅ NEGATIVE TEST PASSED: Enrichment correctly failed for wrong schema");
+            logger.info("NEGATIVE TEST PASSED: Enrichment correctly failed for wrong schema");
             logger.info("   customerName: {} (expected: null)", enrichedData.get("customerName"));
             logger.info("   customerType: {} (expected: null)", enrichedData.get("customerType"));
             
         } catch (Exception e) {
             // If we get here, the error handling is working - log it
-            logger.info("✅ NEGATIVE TEST PASSED: Exception thrown as expected");
+            logger.info("NEGATIVE TEST PASSED: Exception thrown as expected");
             logger.info("   Error: {}", e.getMessage());
             // Accept any exception - the test passes if schema lookup fails
             assertTrue(e.getMessage() != null && !e.getMessage().isEmpty(),
@@ -217,11 +217,11 @@ public class PostgreSQLSchemaLookupNegativeTest extends DemoTestBase {
             assertNull(enrichedData.get("customerName"), 
                 "Customer name should be NULL when schema doesn't exist");
             
-            logger.info("✅ NEGATIVE TEST PASSED: Enrichment correctly failed for nonexistent schema");
+            logger.info("NEGATIVE TEST PASSED: Enrichment correctly failed for nonexistent schema");
             logger.info("   customerName: {} (expected: null)", enrichedData.get("customerName"));
             
         } catch (Exception e) {
-            logger.info("✅ NEGATIVE TEST PASSED: Exception thrown as expected");
+            logger.info("NEGATIVE TEST PASSED: Exception thrown as expected");
             logger.info("   Error: {}", e.getMessage());
             // Accept any exception - the test passes if schema lookup fails
             assertTrue(e.getMessage() != null && !e.getMessage().isEmpty(),
@@ -268,13 +268,13 @@ public class PostgreSQLSchemaLookupNegativeTest extends DemoTestBase {
             assertEquals("GOLD", enrichedData.get("customerTier"),
                 "Customer tier should be enriched from correct schema");
             
-            logger.info("✅ POSITIVE TEST PASSED: Enrichment succeeded with correct schema");
+            logger.info("POSITIVE TEST PASSED: Enrichment succeeded with correct schema");
             logger.info("   customerName: {}", enrichedData.get("customerName"));
             logger.info("   customerType: {}", enrichedData.get("customerType"));
             logger.info("   customerTier: {}", enrichedData.get("customerTier"));
             
         } catch (Exception e) {
-            logger.error("❌ POSITIVE TEST FAILED: {}", e.getMessage(), e);
+            logger.error("POSITIVE TEST FAILED: {}", e.getMessage(), e);
             fail("Positive test with correct schema should not fail: " + e.getMessage());
         }
     }
@@ -315,11 +315,11 @@ public class PostgreSQLSchemaLookupNegativeTest extends DemoTestBase {
             assertNull(enrichedData.get("customerName"), 
                 "Customer name should be NULL when no schema specified (defaults to public)");
             
-            logger.info("✅ NEGATIVE TEST PASSED: Enrichment correctly failed without schema");
+            logger.info("NEGATIVE TEST PASSED: Enrichment correctly failed without schema");
             logger.info("   customerName: {} (expected: null)", enrichedData.get("customerName"));
             
         } catch (Exception e) {
-            logger.info("✅ NEGATIVE TEST PASSED: Exception thrown as expected");
+            logger.info("NEGATIVE TEST PASSED: Exception thrown as expected");
             logger.info("   Error: {}", e.getMessage());
         }
     }
@@ -350,7 +350,7 @@ public class PostgreSQLSchemaLookupNegativeTest extends DemoTestBase {
                         host, port, database, schema);
                     connection.put("url", jdbcUrl);
                     
-                    logger.info("✅ Updated data source '{}' with schema '{}' and JDBC URL: {}", 
+                    logger.info("Updated data source '{}' with schema '{}' and JDBC URL: {}", 
                         dataSourceName, schema, jdbcUrl);
                     break;
                 }
@@ -379,7 +379,7 @@ public class PostgreSQLSchemaLookupNegativeTest extends DemoTestBase {
                     connection.put("password", password);
                     connection.remove("schema");  // Remove schema to test default
                     
-                    logger.info("✅ Updated data source '{}' WITHOUT schema (defaults to public)", dataSourceName);
+                    logger.info("Updated data source '{}' WITHOUT schema (defaults to public)", dataSourceName);
                     break;
                 }
             }

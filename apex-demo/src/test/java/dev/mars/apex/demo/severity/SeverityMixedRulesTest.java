@@ -71,7 +71,7 @@ public class SeverityMixedRulesTest {
 
         yamlLoader = new YamlConfigurationLoader();
 
-        logger.info("✅ APEX services initialized successfully");
+        logger.info("APEX services initialized successfully");
     }
 
     @Test
@@ -89,7 +89,7 @@ public class SeverityMixedRulesTest {
         assertEquals(12, config.getRules().size(), "Should have exactly 12 rules");
         assertEquals(6, config.getRuleGroups().size(), "Should have exactly 6 rule groups");
         
-        logger.info("✅ Configuration loaded: {} rules, {} rule groups", 
+        logger.info("Configuration loaded: {} rules, {} rule groups", 
             config.getRules().size(), config.getRuleGroups().size());
         
         // Create RulesEngine using static factory method
@@ -105,7 +105,7 @@ public class SeverityMixedRulesTest {
         // Test INFO severity rules
         testInfoSeverityRules(engine);
         
-        logger.info("✅ All individual mixed severity tests passed");
+        logger.info("All individual mixed severity tests passed");
     }
 
     private void testErrorSeverityRules(RulesEngine engine) {
@@ -123,7 +123,7 @@ public class SeverityMixedRulesTest {
         assertTrue(result.isTriggered(), "Account balance critical rule should be triggered");
         assertEquals("ERROR", result.getSeverity(), "Account balance critical rule should have ERROR severity");
         
-        logger.info("✅ ERROR severity rule test passed: {}", result.getSeverity());
+        logger.info("ERROR severity rule test passed: {}", result.getSeverity());
     }
 
     private void testWarningSeverityRules(RulesEngine engine) {
@@ -141,7 +141,7 @@ public class SeverityMixedRulesTest {
         assertTrue(result.isTriggered(), "Account balance warning rule should be triggered");
         assertEquals("WARNING", result.getSeverity(), "Account balance warning rule should have WARNING severity");
         
-        logger.info("✅ WARNING severity rule test passed: {}", result.getSeverity());
+        logger.info("WARNING severity rule test passed: {}", result.getSeverity());
     }
 
     private void testInfoSeverityRules(RulesEngine engine) {
@@ -159,7 +159,7 @@ public class SeverityMixedRulesTest {
         assertTrue(result.isTriggered(), "Account balance info rule should be triggered");
         assertEquals("INFO", result.getSeverity(), "Account balance info rule should have INFO severity");
         
-        logger.info("✅ INFO severity rule test passed: {}", result.getSeverity());
+        logger.info("INFO severity rule test passed: {}", result.getSeverity());
     }
 
     @Test
@@ -182,7 +182,7 @@ public class SeverityMixedRulesTest {
         // Test INFO-only rule group
         testInfoOnlyGroup(engine);
 
-        logger.info("✅ All single severity rule group tests passed");
+        logger.info("All single severity rule group tests passed");
     }
 
     private void testErrorOnlyGroup(RulesEngine engine) {
@@ -204,7 +204,7 @@ public class SeverityMixedRulesTest {
         assertTrue(result.isTriggered(), "ERROR-only AND group should be triggered when all rules pass");
         assertEquals("ERROR", result.getSeverity(), "ERROR-only group should have ERROR severity");
 
-        logger.info("✅ ERROR-only rule group test passed with severity: {}", result.getSeverity());
+        logger.info("ERROR-only rule group test passed with severity: {}", result.getSeverity());
     }
 
     private void testWarningOnlyGroup(RulesEngine engine) {
@@ -223,7 +223,7 @@ public class SeverityMixedRulesTest {
         assertTrue(result.isTriggered(), "WARNING-only OR group should be triggered");
         assertEquals("WARNING", result.getSeverity(), "WARNING-only group should have WARNING severity");
 
-        logger.info("✅ WARNING-only rule group test passed with severity: {}", result.getSeverity());
+        logger.info("WARNING-only rule group test passed with severity: {}", result.getSeverity());
     }
 
     private void testInfoOnlyGroup(RulesEngine engine) {
@@ -245,7 +245,7 @@ public class SeverityMixedRulesTest {
         assertTrue(result.isTriggered(), "INFO-only AND group should be triggered when all rules pass");
         assertEquals("INFO", result.getSeverity(), "INFO-only group should have INFO severity");
 
-        logger.info("✅ INFO-only rule group test passed with severity: {}", result.getSeverity());
+        logger.info("INFO-only rule group test passed with severity: {}", result.getSeverity());
     }
 
     @Test
@@ -268,7 +268,7 @@ public class SeverityMixedRulesTest {
         // Test all severities mixed group
         testAllSeveritiesMixedGroup(engine);
 
-        logger.info("✅ All mixed severity rule group tests passed");
+        logger.info("All mixed severity rule group tests passed");
     }
 
     private void testErrorWarningMixedGroup(RulesEngine engine) {
@@ -287,7 +287,7 @@ public class SeverityMixedRulesTest {
         assertTrue(result.isTriggered(), "ERROR-WARNING mixed OR group should be triggered");
         assertEquals("ERROR", result.getSeverity(), "Mixed group should use severity from first matching rule (ERROR)");
 
-        logger.info("✅ ERROR-WARNING mixed rule group test passed with severity: {}", result.getSeverity());
+        logger.info("ERROR-WARNING mixed rule group test passed with severity: {}", result.getSeverity());
     }
 
     private void testWarningInfoMixedGroup(RulesEngine engine) {
@@ -309,7 +309,7 @@ public class SeverityMixedRulesTest {
         assertTrue(result.isTriggered(), "WARNING-INFO mixed AND group should be triggered when all rules pass");
         assertEquals("WARNING", result.getSeverity(), "Mixed AND group should use highest severity (WARNING)");
 
-        logger.info("✅ WARNING-INFO mixed rule group test passed with severity: {}", result.getSeverity());
+        logger.info("WARNING-INFO mixed rule group test passed with severity: {}", result.getSeverity());
     }
 
     private void testAllSeveritiesMixedGroup(RulesEngine engine) {
@@ -328,6 +328,6 @@ public class SeverityMixedRulesTest {
         assertTrue(result.isTriggered(), "All severities mixed OR group should be triggered");
         assertEquals("ERROR", result.getSeverity(), "Mixed group should use severity from first matching rule (ERROR)");
 
-        logger.info("✅ All severities mixed rule group test passed with severity: {}", result.getSeverity());
+        logger.info("All severities mixed rule group test passed with severity: {}", result.getSeverity());
     }
 }

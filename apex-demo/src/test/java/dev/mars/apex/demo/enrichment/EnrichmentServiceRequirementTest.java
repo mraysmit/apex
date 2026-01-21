@@ -59,11 +59,11 @@ class EnrichmentServiceRequirementTest extends DemoTestBase {
             YamlRuleConfiguration config = yamlLoader.loadFromFile(
                 "src/test/java/dev/mars/apex/demo/enrichment/EnrichmentServiceRequirementTest.yaml");
             assertNotNull(config, "Configuration should load");
-            logger.info("✅ Configuration loaded with enrichments");
+            logger.info("Configuration loaded with enrichments");
 
             // Create RulesEngine - enrichments handled automatically
             RulesEngine engine = new RulesEngine(rulesEngineConfiguration);
-            logger.info("✅ RulesEngine created - enrichments processed automatically");
+            logger.info("RulesEngine created - enrichments processed automatically");
 
             // Execute configuration
             Map<String, Object> testData = new HashMap<>();
@@ -73,11 +73,11 @@ class EnrichmentServiceRequirementTest extends DemoTestBase {
 
             RuleResult result = engine.evaluate(config, testData);
             assertNotNull(result, "Result should not be null");
-            logger.info("✅ Configuration executed successfully");
+            logger.info("Configuration executed successfully");
             logger.info("   Result: success={}, message={}", result.isSuccess(), result.getMessage());
 
         } catch (Exception e) {
-            logger.error("❌ Test failed: {}", e.getMessage(), e);
+            logger.error("Test failed: {}", e.getMessage(), e);
             fail("Test should not throw exception: " + e.getMessage());
         }
     }
@@ -93,7 +93,7 @@ class EnrichmentServiceRequirementTest extends DemoTestBase {
 
             // Create RulesEngine - no enrichments to process
             RulesEngine engine = new RulesEngine(rulesEngineConfiguration);
-            logger.info("✅ RulesEngine created - no enrichments defined");
+            logger.info("RulesEngine created - no enrichments defined");
 
             // Execute configuration
             Map<String, Object> testData = new HashMap<>();
@@ -102,11 +102,11 @@ class EnrichmentServiceRequirementTest extends DemoTestBase {
             RuleResult result = engine.evaluate(emptyConfig, testData);
             assertNotNull(result, "Result should not be null");
             assertTrue(result.isSuccess(), "Should succeed when no enrichments defined");
-            logger.info("✅ Configuration executed successfully without enrichments");
+            logger.info("Configuration executed successfully without enrichments");
             logger.info("   Result: success={}", result.isSuccess());
 
         } catch (Exception e) {
-            logger.error("❌ Test failed: {}", e.getMessage(), e);
+            logger.error("Test failed: {}", e.getMessage(), e);
             fail("Test should not throw exception: " + e.getMessage());
         }
     }

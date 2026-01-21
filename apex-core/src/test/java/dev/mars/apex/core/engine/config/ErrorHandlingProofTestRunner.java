@@ -62,7 +62,7 @@ class ErrorHandlingProofTestRunner {
     @Test
     @DisplayName("  PROOF: All execution paths handle errors gracefully")
     void proveAllExecutionPathsHandleErrorsGracefully() {
-        logger.info("📋 Testing all rule evaluation execution paths...");
+        logger.info("Testing all rule evaluation execution paths...");
         
         // Test all execution paths
         testPath1_ExecuteRule();
@@ -73,7 +73,7 @@ class ErrorHandlingProofTestRunner {
         testPath6_EdgeCases();
         
         // Report results
-        logger.info("📊 DEFINITIVE PROOF RESULTS:");
+        logger.info("DEFINITIVE PROOF RESULTS:");
         logger.info("   Total tests: {}", totalTests);
         logger.info("   Passed tests: {}", passedTests);
         logger.info("   Success rate: {}%", (passedTests * 100) / totalTests);
@@ -82,11 +82,11 @@ class ErrorHandlingProofTestRunner {
         assertEquals(totalTests, passedTests, 
             String.format("All tests should pass. %d/%d passed", passedTests, totalTests));
         
-        logger.info("✅ PROOF COMPLETE: All rule evaluation paths handle errors gracefully!");
+        logger.info("PROOF COMPLETE: All rule evaluation paths handle errors gracefully!");
     }
     
     private void testPath1_ExecuteRule() {
-        logger.info("🔍 Testing PATH 1: RulesEngine.executeRule()");
+        logger.info("Testing PATH 1: RulesEngine.executeRule()");
         
         // Test missing property error - use expression that will throw an exception
         // Note: "#missing != null" evaluates to false (not an error) when missing is undefined
@@ -105,7 +105,7 @@ class ErrorHandlingProofTestRunner {
     }
     
     private void testPath2_ExecuteRulesList() {
-        logger.info("🔍 Testing PATH 2: RulesEngine.executeRulesList()");
+        logger.info("Testing PATH 2: RulesEngine.executeRulesList()");
         
         assertStructuredError(() -> {
             List<Rule> rules = Arrays.asList(
@@ -116,7 +116,7 @@ class ErrorHandlingProofTestRunner {
     }
     
     private void testPath3_ExecuteRules() {
-        logger.info("🔍 Testing PATH 3: RulesEngine.executeRules()");
+        logger.info("Testing PATH 3: RulesEngine.executeRules()");
 
         // Use expression that will throw an exception (method call on null)
         assertStructuredError(() -> {
@@ -128,7 +128,7 @@ class ErrorHandlingProofTestRunner {
     }
     
     private void testPath4_RuleEngineService() {
-        logger.info("🔍 Testing PATH 4: RuleEngineService.evaluateRules()");
+        logger.info("Testing PATH 4: RuleEngineService.evaluateRules()");
         
         totalTests++;
         try {
@@ -155,14 +155,14 @@ class ErrorHandlingProofTestRunner {
             assertEquals("CRITICAL", errorResult.getSeverity(), "Should preserve severity");
             
             passedTests++;
-            logger.info("   ✅ PATH 4: RuleEngineService properly handles errors");
+            logger.info("   PATH 4: RuleEngineService properly handles errors");
         } catch (Exception e) {
-            logger.error("   ❌ PATH 4: RuleEngineService failed: {}", e.getMessage());
+            logger.error("   PATH 4: RuleEngineService failed: {}", e.getMessage());
         }
     }
     
     private void testPath5_SeverityHandling() {
-        logger.info("🔍 Testing PATH 5: Severity-based error handling");
+        logger.info("Testing PATH 5: Severity-based error handling");
         
         // Test CRITICAL severity - should return ERROR (recovery disabled)
         assertStructuredErrorWithSeverity(() -> {
@@ -178,7 +178,7 @@ class ErrorHandlingProofTestRunner {
     }
     
     private void testPath6_EdgeCases() {
-        logger.info("🔍 Testing PATH 6: Edge cases");
+        logger.info("Testing PATH 6: Edge cases");
         
         // Test null pointer access
         assertStructuredError(() -> {
@@ -219,9 +219,9 @@ class ErrorHandlingProofTestRunner {
                       "Should have descriptive error message");
             
             passedTests++;
-            logger.info("   ✅ {}", testName);
+            logger.info("   {}", testName);
         } catch (Exception e) {
-            logger.error("   ❌ {}: {}", testName, e.getMessage());
+            logger.error("   {}: {}", testName, e.getMessage());
         }
     }
     
@@ -245,9 +245,9 @@ class ErrorHandlingProofTestRunner {
                         "Should preserve " + expectedSeverity + " severity");
             
             passedTests++;
-            logger.info("   ✅ {}", testName);
+            logger.info("   {}", testName);
         } catch (Exception e) {
-            logger.error("   ❌ {}: {}", testName, e.getMessage());
+            logger.error("   {}: {}", testName, e.getMessage());
         }
     }
     

@@ -90,7 +90,7 @@ class PortPlaceholderResolutionTest {
             logger.info("🎉 PORT placeholder resolution test PASSED");
 
         } catch (Exception e) {
-            logger.error("❌ PORT placeholder resolution test FAILED: {}", e.getMessage(), e);
+            logger.error("PORT placeholder resolution test FAILED: {}", e.getMessage(), e);
             fail("PORT placeholder resolution failed: " + e.getMessage());
         }
     }
@@ -119,7 +119,7 @@ class PortPlaceholderResolutionTest {
             logger.info("🎉 PORT placeholder resolution failure test PASSED");
 
         } catch (AssertionError e) {
-            logger.error("❌ PORT placeholder resolution failure test FAILED: {}", e.getMessage());
+            logger.error("PORT placeholder resolution failure test FAILED: {}", e.getMessage());
             throw e;
         }
     }
@@ -152,7 +152,7 @@ class PortPlaceholderResolutionTest {
                 logger.info("✓ PORT {} resolved correctly to: {}", port, baseUrl);
 
             } catch (Exception e) {
-                logger.error("❌ Failed to resolve PORT {}: {}", port, e.getMessage());
+                logger.error("Failed to resolve PORT {}: {}", port, e.getMessage());
                 fail("Failed to resolve PORT " + port + ": " + e.getMessage());
             }
         }

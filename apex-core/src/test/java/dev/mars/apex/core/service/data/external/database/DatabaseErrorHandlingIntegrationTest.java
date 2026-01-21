@@ -97,7 +97,7 @@ class DatabaseErrorHandlingIntegrationTest {
             assertEquals(SqlErrorClassifier.SqlErrorType.CONFIGURATION_ERROR, errorType);
             assertTrue(SqlErrorClassifier.shouldFailPipeline(errorType));
 
-            LOGGER.info("✅ PASS: Real table not found error correctly classified as CONFIGURATION_ERROR");
+            LOGGER.info("PASS: Real table not found error correctly classified as CONFIGURATION_ERROR");
         }
     }
 
@@ -117,7 +117,7 @@ class DatabaseErrorHandlingIntegrationTest {
             assertEquals(SqlErrorClassifier.SqlErrorType.CONFIGURATION_ERROR, errorType);
             assertTrue(SqlErrorClassifier.shouldFailPipeline(errorType));
 
-            LOGGER.info("✅ PASS: Real column not found error correctly classified as CONFIGURATION_ERROR");
+            LOGGER.info("PASS: Real column not found error correctly classified as CONFIGURATION_ERROR");
         }
     }
 
@@ -137,7 +137,7 @@ class DatabaseErrorHandlingIntegrationTest {
             assertEquals(SqlErrorClassifier.SqlErrorType.CONFIGURATION_ERROR, errorType);
             assertTrue(SqlErrorClassifier.shouldFailPipeline(errorType));
 
-            LOGGER.info("✅ PASS: Real syntax error correctly classified as CONFIGURATION_ERROR");
+            LOGGER.info("PASS: Real syntax error correctly classified as CONFIGURATION_ERROR");
         }
     }
 
@@ -165,7 +165,7 @@ class DatabaseErrorHandlingIntegrationTest {
             assertEquals(SqlErrorClassifier.SqlErrorType.DATA_INTEGRITY_VIOLATION, errorType);
             assertFalse(SqlErrorClassifier.shouldFailPipeline(errorType));
 
-            LOGGER.info("✅ PASS: Real primary key violation correctly classified as DATA_INTEGRITY_VIOLATION");
+            LOGGER.info("PASS: Real primary key violation correctly classified as DATA_INTEGRITY_VIOLATION");
         }
     }
 
@@ -193,7 +193,7 @@ class DatabaseErrorHandlingIntegrationTest {
             assertEquals(SqlErrorClassifier.SqlErrorType.DATA_INTEGRITY_VIOLATION, errorType);
             assertFalse(SqlErrorClassifier.shouldFailPipeline(errorType));
 
-            LOGGER.info("✅ PASS: Real unique constraint violation correctly classified as DATA_INTEGRITY_VIOLATION");
+            LOGGER.info("PASS: Real unique constraint violation correctly classified as DATA_INTEGRITY_VIOLATION");
         }
     }
 
@@ -221,7 +221,7 @@ class DatabaseErrorHandlingIntegrationTest {
             assertEquals(SqlErrorClassifier.SqlErrorType.DATA_INTEGRITY_VIOLATION, errorType);
             assertFalse(SqlErrorClassifier.shouldFailPipeline(errorType));
 
-            LOGGER.info("✅ PASS: Real NOT NULL violation correctly classified as DATA_INTEGRITY_VIOLATION");
+            LOGGER.info("PASS: Real NOT NULL violation correctly classified as DATA_INTEGRITY_VIOLATION");
         }
     }
 
@@ -245,6 +245,6 @@ class DatabaseErrorHandlingIntegrationTest {
         // Fatal errors SHOULD fail pipeline
         assertTrue(SqlErrorClassifier.shouldFailPipeline(SqlErrorClassifier.SqlErrorType.FATAL_ERROR));
 
-        LOGGER.info("✅ PASS: Comprehensive error classification working correctly");
+        LOGGER.info("PASS: Comprehensive error classification working correctly");
     }
 }

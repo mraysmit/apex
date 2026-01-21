@@ -459,16 +459,16 @@ public class CatalogDiscoveryIntegrationTest {
         assertEquals(0, emptyAttr.size(), "Empty attribute should return empty set");
 
         logger.info("\n=== Distinct Values Summary ===");
-        logger.info("✅ Tags: {}", tags.size());
-        logger.info("✅ Business Domains: {}", businessDomains.size());
-        logger.info("✅ Owners: {}", owners.size());
-        logger.info("✅ Types: {}", types.size());
-        logger.info("✅ Authors: {}", authors.size());
-        logger.info("✅ Versions: {}", versions.size());
-        logger.info("✅ IDs: {}", ids.size());
-        logger.info("✅ Names: {}", names.size());
-        logger.info("✅ Descriptions: {}", descriptions.size());
-        logger.info("✅ Paths: {}", paths.size());
+        logger.info("Tags: {}", tags.size());
+        logger.info("Business Domains: {}", businessDomains.size());
+        logger.info("Owners: {}", owners.size());
+        logger.info("Types: {}", types.size());
+        logger.info("Authors: {}", authors.size());
+        logger.info("Versions: {}", versions.size());
+        logger.info("IDs: {}", ids.size());
+        logger.info("Names: {}", names.size());
+        logger.info("Descriptions: {}", descriptions.size());
+        logger.info("Paths: {}", paths.size());
 
         // Display actual distinct values for key attributes
         logger.info("\n=== Actual Distinct Values ===");

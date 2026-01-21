@@ -115,7 +115,7 @@ public class Test2_EnrichmentGroupsOnlyTest extends DemoTestBase {
         assertEquals(3, ExecutionTracker.getExecutionPosition("e2"), 
             "e2 must execute at position 3 (from group, not from enrichments section)");
         
-        LOGGER.info("✅ TEST 2 PASSED: ONLY enrichment-groups execute (no double execution)");
+        LOGGER.info("TEST 2 PASSED: ONLY enrichment-groups execute (no double execution)");
     }
 }
 

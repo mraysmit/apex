@@ -89,13 +89,13 @@ class ConstantValueFieldEnrichmentTest extends DemoTestBase {
             assertEquals("e1", enrichedData.get("enrichmentId"), "Enrichment ID should be 'e1'");
             assertEquals("OTC_OPTION", enrichedData.get("productType"), "Product type should be 'OTC_OPTION'");
 
-            logger.info("✅ Constant string assignment successful");
+            logger.info("Constant string assignment successful");
             logger.info("   status: {}", enrichedData.get("status"));
             logger.info("   enrichmentId: {}", enrichedData.get("enrichmentId"));
             logger.info("   productType: {}", enrichedData.get("productType"));
 
         } catch (Exception e) {
-            logger.error("❌ Test failed: {}", e.getMessage(), e);
+            logger.error("Test failed: {}", e.getMessage(), e);
             fail("Test should not throw exception: " + e.getMessage());
         }
     }
@@ -127,13 +127,13 @@ class ConstantValueFieldEnrichmentTest extends DemoTestBase {
             assertEquals(99.99, enrichedData.get("defaultPrice"), "Default price should be 99.99");
             assertEquals(true, enrichedData.get("requiresValidation"), "Requires validation should be true");
 
-            logger.info("✅ Constant numeric assignment successful");
+            logger.info("Constant numeric assignment successful");
             logger.info("   defaultQuantity: {}", enrichedData.get("defaultQuantity"));
             logger.info("   defaultPrice: {}", enrichedData.get("defaultPrice"));
             logger.info("   requiresValidation: {}", enrichedData.get("requiresValidation"));
 
         } catch (Exception e) {
-            logger.error("❌ Test failed: {}", e.getMessage(), e);
+            logger.error("Test failed: {}", e.getMessage(), e);
             fail("Test should not throw exception: " + e.getMessage());
         }
     }
@@ -167,13 +167,13 @@ class ConstantValueFieldEnrichmentTest extends DemoTestBase {
             assertEquals(true, enrichedData.get("requiresApproval"), "Requires approval should be true");
             assertEquals("SENIOR_TRADER", enrichedData.get("approvalLevel"), "Approval level should be 'SENIOR_TRADER'");
 
-            logger.info("✅ High value conditional assignment successful");
+            logger.info("High value conditional assignment successful");
             logger.info("   valueCategory: {}", enrichedData.get("valueCategory"));
             logger.info("   requiresApproval: {}", enrichedData.get("requiresApproval"));
             logger.info("   approvalLevel: {}", enrichedData.get("approvalLevel"));
 
         } catch (Exception e) {
-            logger.error("❌ Test failed: {}", e.getMessage(), e);
+            logger.error("Test failed: {}", e.getMessage(), e);
             fail("Test should not throw exception: " + e.getMessage());
         }
     }
@@ -207,13 +207,13 @@ class ConstantValueFieldEnrichmentTest extends DemoTestBase {
             assertEquals(false, enrichedData.get("requiresApproval"), "Requires approval should be false");
             assertEquals("AUTO_APPROVED", enrichedData.get("approvalLevel"), "Approval level should be 'AUTO_APPROVED'");
 
-            logger.info("✅ Standard value conditional assignment successful");
+            logger.info("Standard value conditional assignment successful");
             logger.info("   valueCategory: {}", enrichedData.get("valueCategory"));
             logger.info("   requiresApproval: {}", enrichedData.get("requiresApproval"));
             logger.info("   approvalLevel: {}", enrichedData.get("approvalLevel"));
 
         } catch (Exception e) {
-            logger.error("❌ Test failed: {}", e.getMessage(), e);
+            logger.error("Test failed: {}", e.getMessage(), e);
             fail("Test should not throw exception: " + e.getMessage());
         }
     }
@@ -251,13 +251,13 @@ class ConstantValueFieldEnrichmentTest extends DemoTestBase {
             assertEquals("SYSTEM", enrichedMetadata.get("source"), "Source should be 'SYSTEM'");
             assertEquals("v1.0", enrichedMetadata.get("version"), "Version should be 'v1.0'");
 
-            logger.info("✅ Nested field constant assignment successful");
+            logger.info("Nested field constant assignment successful");
             logger.info("   metadata.validationStatus: {}", enrichedMetadata.get("validationStatus"));
             logger.info("   metadata.source: {}", enrichedMetadata.get("source"));
             logger.info("   metadata.version: {}", enrichedMetadata.get("version"));
 
         } catch (Exception e) {
-            logger.error("❌ Test failed: {}", e.getMessage(), e);
+            logger.error("Test failed: {}", e.getMessage(), e);
             fail("Test should not throw exception: " + e.getMessage());
         }
     }
@@ -294,7 +294,7 @@ class ConstantValueFieldEnrichmentTest extends DemoTestBase {
 
             if (enrichedData.containsKey("a_field")) {
                 Object value = enrichedData.get("a_field");
-                logger.warn("❌ INCORRECT PATTERN RESULT: a_field = {}", value);
+                logger.warn("INCORRECT PATTERN RESULT: a_field = {}", value);
                 logger.warn("   Expected: 'e1' (constant string)");
                 logger.warn("   Actual: {} (field lookup or error)", value);
 
@@ -303,14 +303,14 @@ class ConstantValueFieldEnrichmentTest extends DemoTestBase {
                 assertNotEquals("e1", value,
                     "Triple quotes pattern should NOT assign constant 'e1' correctly");
             } else {
-                logger.warn("❌ INCORRECT PATTERN: Field 'a_field' was not set at all");
+                logger.warn("INCORRECT PATTERN: Field 'a_field' was not set at all");
             }
 
-            logger.info("✅ Negative test confirmed: Triple quotes pattern does NOT work");
+            logger.info("Negative test confirmed: Triple quotes pattern does NOT work");
             logger.info("   CORRECT PATTERN: source-field: \"constant\" + expression: \"'e1'\"");
 
         } catch (Exception e) {
-            logger.error("❌ Test failed: {}", e.getMessage(), e);
+            logger.error("Test failed: {}", e.getMessage(), e);
             fail("Test should not throw exception: " + e.getMessage());
         }
     }
@@ -348,14 +348,14 @@ class ConstantValueFieldEnrichmentTest extends DemoTestBase {
             assertEquals("ISDA", enrichedData.get("documentationType"), "Documentation type should be 'ISDA'");
             assertEquals("T+2", enrichedData.get("settlementCycle"), "Settlement cycle should be 'T+2'");
 
-            logger.info("✅ OTC Options trade processing successful");
+            logger.info("OTC Options trade processing successful");
             logger.info("   assetClass: {}", enrichedData.get("assetClass"));
             logger.info("   tradingDesk: {}", enrichedData.get("tradingDesk"));
             logger.info("   documentationType: {}", enrichedData.get("documentationType"));
             logger.info("   settlementCycle: {}", enrichedData.get("settlementCycle"));
 
         } catch (Exception e) {
-            logger.error("❌ Test failed: {}", e.getMessage(), e);
+            logger.error("Test failed: {}", e.getMessage(), e);
             fail("Test should not throw exception: " + e.getMessage());
         }
     }

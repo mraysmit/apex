@@ -82,7 +82,7 @@ public class SimpleErrorHandlingTest extends DemoTestBase {
         assertEquals("VALID", enrichedData.get("status"), "Valid amount should pass");
         
         logger.info("✓ Valid data processed successfully");
-        logger.info("✅ Valid data test completed");
+        logger.info("Valid data test completed");
     }
 
     @Test
@@ -113,7 +113,7 @@ public class SimpleErrorHandlingTest extends DemoTestBase {
         assertEquals("INVALID", enrichedData.get("status"), "Invalid amount should fail");
         
         logger.info("✓ Invalid data handled gracefully");
-        logger.info("✅ Invalid data test completed");
+        logger.info("Invalid data test completed");
     }
 
     @Test
@@ -144,7 +144,7 @@ public class SimpleErrorHandlingTest extends DemoTestBase {
         assertEquals("INVALID", enrichedData.get("status"), "Null amount should fail");
         
         logger.info("✓ Null data handled gracefully");
-        logger.info("✅ Null data test completed");
+        logger.info("Null data test completed");
     }
 }
 

@@ -69,7 +69,7 @@ class ComprehensiveFinancialSettlementDemoTest extends DemoTestBase {
             // Load YAML configuration using real APEX services
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/enrichment/comprehensivefinancialsettlementdemo.yaml");
             assertNotNull(config, "YAML configuration should be loaded successfully");
-            logger.info("✅ Configuration loaded successfully: " + config.getMetadata().getName());
+            logger.info("Configuration loaded successfully: " + config.getMetadata().getName());
             
             // Create test data for multi-asset settlement processing
             Map<String, Object> settlementData = new HashMap<>();
@@ -128,7 +128,7 @@ class ComprehensiveFinancialSettlementDemoTest extends DemoTestBase {
             assertEquals("Deutsche Bank AG", enrichedData.get("counterparty"));
             assertEquals("2025-08-30", enrichedData.get("settlementDate"));
             
-            logger.info("✅ Multi-asset settlement processing completed using real APEX services");
+            logger.info("Multi-asset settlement processing completed using real APEX services");
             logger.info("Settlement result: " + result);
             
         } catch (Exception e) {
@@ -206,7 +206,7 @@ class ComprehensiveFinancialSettlementDemoTest extends DemoTestBase {
             assertEquals("EUR", enrichedData.get("targetCurrency"));
             assertEquals("JPMorgan Chase", enrichedData.get("counterparty"));
             
-            logger.info("✅ Cross-border settlement processing completed using real APEX services");
+            logger.info("Cross-border settlement processing completed using real APEX services");
             logger.info("Cross-border result: " + result);
             
         } catch (Exception e) {
@@ -281,7 +281,7 @@ class ComprehensiveFinancialSettlementDemoTest extends DemoTestBase {
             assertEquals("HIGH", enrichedData.get("riskLevel"));
             assertEquals(true, enrichedData.get("requiresApproval"));
             
-            logger.info("✅ High-value transaction processing completed using real APEX services");
+            logger.info("High-value transaction processing completed using real APEX services");
             logger.info("High-value result: " + result);
             
         } catch (Exception e) {

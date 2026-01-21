@@ -413,39 +413,39 @@ APEX automatically masks sensitive values in logs to prevent credential leakage:
 
 1. **Never commit credentials to source control**
    ```yaml
-   # ✅ Good
+   # Good
    password: "$(DB_PASSWORD)"
    
-   # ❌ Bad
+   # Bad
    password: "my_actual_password"
    ```
 
 2. **Use specific property names**
    ```yaml
-   # ✅ Good - Clear purpose
+   # Good - Clear purpose
    customer-db-password: "$(CUSTOMER_DB_PASSWORD)"
    payment-api-key: "$(PAYMENT_API_KEY)"
    
-   # ❌ Bad - Ambiguous
+   # Bad - Ambiguous
    password1: "$(PASSWORD1)"
    key: "$(KEY)"
    ```
 
 3. **Provide safe defaults for development only**
    ```yaml
-   # ✅ Good - Obvious development default
+   # Good - Obvious development default
    password: "$(DB_PASSWORD:dev_password_change_in_prod)"
    
-   # ❌ Bad - No default for production secret
+   # Bad - No default for production secret
    password: "$(PROD_DB_PASSWORD)"
    ```
 
 4. **Use environment variables in production**
    ```bash
-   # ✅ Good - Externalized configuration
+   # Good - Externalized configuration
    export DATABASE_PASSWORD=$(vault read -field=password secret/database)
    
-   # ❌ Bad - Hardcoded in startup script
+   # Bad - Hardcoded in startup script
    java -DDATABASE_PASSWORD=hardcoded_secret -jar app.jar
    ```
 
@@ -524,10 +524,10 @@ java -jar apex-application.jar
 
 **Correct syntax:**
 ```yaml
-# ✅ Quotes required for placeholders
+# Quotes required for placeholders
 password: "$(DB_PASSWORD)"
 
-# ❌ Without quotes may cause YAML parsing issues
+# Without quotes may cause YAML parsing issues
 password: $(DB_PASSWORD)
 ```
 
@@ -539,10 +539,10 @@ password: $(DB_PASSWORD)
 
 **Check:**
 ```yaml
-# ✅ Correct - colon separator
+# Correct - colon separator
 password: "$(DB_PASSWORD:default_value)"
 
-# ❌ Wrong - equals sign
+# Wrong - equals sign
 password: "$(DB_PASSWORD=default_value)"
 ```
 
@@ -559,10 +559,10 @@ password: "$(DB_PASSWORD=default_value)"
 
 If your property doesn't contain these keywords, rename it:
 ```yaml
-# ✅ Will be masked
+# Will be masked
 api-secret-key: "$(API_SECRET_KEY)"
 
-# ❌ Might not be masked
+# Might not be masked
 api-value: "$(API_VALUE)"
 ```
 
@@ -643,12 +643,12 @@ java -jar apex-application.jar
 ```
 
 **Benefits of Vault Integration:**
-- ✅ Centralized secrets management
-- ✅ Audit trail and access control
-- ✅ Secret rotation without application restart
-- ✅ Dynamic secrets generation
-- ✅ Fine-grained access policies
-- ✅ Encryption at rest and in transit
+- Centralized secrets management
+- Audit trail and access control
+- Secret rotation without application restart
+- Dynamic secrets generation
+- Fine-grained access policies
+- Encryption at rest and in transit
 
 ---
 
@@ -851,14 +851,14 @@ external-services:
 
 ### Key Takeaways
 
-✅ **Use placeholders** in YAML: `$(PROPERTY)` or `${PROPERTY}`  
-✅ **Provide defaults** for development: `$(PROPERTY:default)`  
-✅ **Set via environment** in production: `export PROPERTY=value`  
-✅ **Automatic masking** keeps logs secure  
-✅ **Works everywhere**: Docker, Kubernetes, CI/CD, cloud platforms, HashiCorp Vault  
-✅ **REST API support**: Inject API keys, tokens, OAuth credentials  
-✅ **Zero code changes** across environments  
-✅ **Testcontainers support**: Real database and Vault testing  
+**Use placeholders** in YAML: `$(PROPERTY)` or `${PROPERTY}`  
+**Provide defaults** for development: `$(PROPERTY:default)`  
+**Set via environment** in production: `export PROPERTY=value`  
+**Automatic masking** keeps logs secure  
+**Works everywhere**: Docker, Kubernetes, CI/CD, cloud platforms, HashiCorp Vault  
+**REST API support**: Inject API keys, tokens, OAuth credentials  
+**Zero code changes** across environments  
+**Testcontainers support**: Real database and Vault testing  
 
 ### Resolution Priority
 
@@ -1137,12 +1137,12 @@ mvn test -Dtest=VaultPasswordInjectionTest
 ```
 
 **Benefits of Testcontainers approach:**
-- ✅ Tests against real databases (PostgreSQL, MySQL, etc.)
-- ✅ Real HashiCorp Vault instance for secrets management
-- ✅ No mocking - complete end-to-end validation
-- ✅ Isolated test environment
-- ✅ Reproducible tests across all environments
-- ✅ Automatic cleanup after tests
+- Tests against real databases (PostgreSQL, MySQL, etc.)
+- Real HashiCorp Vault instance for secrets management
+- No mocking - complete end-to-end validation
+- Isolated test environment
+- Reproducible tests across all environments
+- Automatic cleanup after tests
 
 ---
 

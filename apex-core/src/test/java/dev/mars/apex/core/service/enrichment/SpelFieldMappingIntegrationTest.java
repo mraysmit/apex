@@ -42,7 +42,7 @@ public class SpelFieldMappingIntegrationTest {
                 type: "field-enrichment"
                 condition: "#currency != null"
                 field-mappings:
-                  # ✅ NOW WORKS! Access nested field with SpEL
+                  # NOW WORKS! Access nested field with SpEL
                   - source-field: "#currency"
                     target-field: "buy_currency"
                   - source-field: "#amount"
@@ -70,7 +70,7 @@ public class SpelFieldMappingIntegrationTest {
         // Verify the issue is solved
         assertNotNull(enrichedMap, "Enriched data should not be null");
         
-        // ✅ ISSUE SOLVED: Nested fields are now accessible via SpEL in field mappings
+        // ISSUE SOLVED: Nested fields are now accessible via SpEL in field mappings
         assertEquals("USD", enrichedMap.get("buy_currency"), 
                     "Should extract nested currency field using SpEL");
         assertEquals(1000, enrichedMap.get("trade_amount"), 
@@ -112,7 +112,7 @@ public class SpelFieldMappingIntegrationTest {
                           bid: 150.25
                           ask: 150.30
                 field-mappings:
-                  # ✅ Access nested fields in lookup result with SpEL
+                  # Access nested fields in lookup result with SpEL
                   - source-field: "#instrument.name"
                     target-field: "instrument_name"
                   - source-field: "#instrument.type"
@@ -167,19 +167,19 @@ public class SpelFieldMappingIntegrationTest {
             enrichments:
               - id: "consistency-demo"
                 type: "field-enrichment"
-                # ✅ SpEL in condition
+                # SpEL in condition
                 condition: "#trade.status == 'ACTIVE'"
                 field-mappings:
-                  # ✅ SpEL in source-field (NEW!)
+                  # SpEL in source-field (NEW!)
                   - source-field: "#trade.counterparty"
                     target-field: "counterparty_name"
 
-                  # ✅ SpEL in source-field + expression
+                  # SpEL in source-field + expression
                   - source-field: "#trade.amount"
                     target-field: "adjusted_amount"
-                    expression: "#value * 1.1"  # ✅ SpEL in expression
+                    expression: "#value * 1.1"  # SpEL in expression
 
-                  # ✅ Complex SpEL expression in source-field
+                  # Complex SpEL expression in source-field
                   - source-field: "#trade.currency.toUpperCase()"
                     target-field: "currency_code"
             """;

@@ -1,11 +1,11 @@
 ﻿# ============================================================================
 # APEX YAML Configuration File
 # ============================================================================
-# Used by: ORPHANED - No Java test currently uses this file
+# Used by: ExternalDataConfigDatabaseTest.java
 # Purpose: Test configuration for external data source configuration with database
 #          connections, demonstrating APEX external data integration capabilities
 #          with H2 database setup and connection management
-# Status: Available for integration with external database configuration tests
+# Status: Active - used by ExternalDataConfigDatabaseTest
 # ============================================================================
 
 metadata:
@@ -30,7 +30,7 @@ dataSources:
       port: 5432
       database: "customer_db"
       username: "app_user"
-      password: "${DB_PASSWORD}"
+      password: "${DB_PASSWORD:test_password}"
       
     queries:
       getCustomerById: "SELECT * FROM customers WHERE customer_id = :customerId"

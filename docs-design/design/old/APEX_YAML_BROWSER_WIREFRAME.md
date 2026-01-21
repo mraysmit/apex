@@ -14,7 +14,7 @@ A standalone web application for browsing, searching, and analyzing APEX YAML co
 │                                                                               │
 │  ┌─────────────────────────────────────────────────────────────────────┐   │
 │  │  📁 Browse Directory: [C:\apex-configs\yaml-files    ] [Browse...]  │   │
-│  │  ☑ Include Subfolders    🔍 Search: [____________]  [Search]        │   │
+│  │  ☑ Include Subfolders    Search: [____________]  [Search]        │   │
 │  └─────────────────────────────────────────────────────────────────────┘   │
 │                                                                               │
 ├───────────────────────────┬───────────────────────────────────────────────────┤
@@ -33,7 +33,7 @@ A standalone web application for browsing, searching, and analyzing APEX YAML co
 │    📄 config.yaml         │  │ METADATA                                    │ │
 │                           │  │ ─────────────────────────────────────────── │ │
 │  ─────────────────────    │  │ ID: trade-validation-rules                  │ │
-│  📊 Statistics:           │  │ Name: Trade Validation Rules                │ │
+│  Statistics:           │  │ Name: Trade Validation Rules                │ │
 │    Total Files: 47        │  │ Type: rules                                 │ │
 │    Scenarios: 12          │  │ Version: 1.0.0                              │ │
 │    Rules: 23              │  │ Description: Validates trade data...        │ │
@@ -69,7 +69,7 @@ A standalone web application for browsing, searching, and analyzing APEX YAML co
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │  📁 Browse Directory: [C:\apex-configs\yaml-files          ] [Browse...]    │
-│  ☑ Include Subfolders    🔍 Search: [file name or content] [Search]        │
+│  ☑ Include Subfolders    Search: [file name or content] [Search]        │
 │  Filter: [All ▼] [Scenarios] [Rules] [Enrichments] [Other]                 │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -97,7 +97,7 @@ A standalone web application for browsing, searching, and analyzing APEX YAML co
 │    📄 config.yaml             │
 │                               │
 │  ─────────────────────────    │
-│  📊 STATISTICS                │
+│  STATISTICS                │
 │    Total Files: 47            │
 │    ✓ Valid: 45                │
 │    ⚠ Warnings: 2              │
@@ -317,26 +317,26 @@ A standalone web application for browsing, searching, and analyzing APEX YAML co
 ## 4. Key Features Summary
 
 ### Core Functionality
-- ✅ **Directory Browsing**: Browse local file system for YAML files
-- ✅ **Recursive Scanning**: Include/exclude subfolders
-- ✅ **File Tree View**: Hierarchical display with folder structure
-- ✅ **File Details**: Comprehensive metadata and content display
-- ✅ **Search**: Search by file name or content
-- ✅ **Filter**: Quick filter by file type (scenarios, rules, enrichments)
+- **Directory Browsing**: Browse local file system for YAML files
+- **Recursive Scanning**: Include/exclude subfolders
+- **File Tree View**: Hierarchical display with folder structure
+- **File Details**: Comprehensive metadata and content display
+- **Search**: Search by file name or content
+- **Filter**: Quick filter by file type (scenarios, rules, enrichments)
 
 ### Advanced Features
-- ✅ **Dependency Analysis**: Show file dependencies and dependents
-- ✅ **Validation**: Real-time YAML syntax and schema validation
-- ✅ **Statistics**: File counts, type distribution, validation status
-- ✅ **Export**: Export file lists and dependency graphs
-- ✅ **API Integration**: Connect to APEX YAML Manager REST API
+- **Dependency Analysis**: Show file dependencies and dependents
+- **Validation**: Real-time YAML syntax and schema validation
+- **Statistics**: File counts, type distribution, validation status
+- **Export**: Export file lists and dependency graphs
+- **API Integration**: Connect to APEX YAML Manager REST API
 
 ### User Experience
-- ✅ **Responsive Layout**: Resizable panels
-- ✅ **Dark/Light Theme**: User preference
-- ✅ **Keyboard Shortcuts**: Quick navigation
-- ✅ **Context Menus**: Right-click actions
-- ✅ **Drag & Drop**: Drop folders to browse
+- **Responsive Layout**: Resizable panels
+- **Dark/Light Theme**: User preference
+- **Keyboard Shortcuts**: Quick navigation
+- **Context Menus**: Right-click actions
+- **Drag & Drop**: Drop folders to browse
 
 ---
 

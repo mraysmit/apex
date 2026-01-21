@@ -68,18 +68,18 @@ class LoggingVisibilityComparisonTest {
         // Initialize YAML loader
         yamlLoader = new YamlConfigurationLoader();
 
-        logger.info("✅ All services initialized for logging visibility comparison test");
+        logger.info("All services initialized for logging visibility comparison test");
     }
 
     @Test
-    @DisplayName("📊 Demonstrate dramatic improvement in logging visibility and user experience")
+    @DisplayName("Demonstrate dramatic improvement in logging visibility and user experience")
     void testLoggingVisibilityImprovement() throws Exception {
         logger.info("=== LOGGING VISIBILITY IMPROVEMENT DEMONSTRATION ===");
         logger.info("🎯 PURPOSE: Show the dramatic improvement in user experience and visibility");
-        logger.info("📊 BEFORE vs AFTER comparison of logging behavior");
+        logger.info("BEFORE vs AFTER comparison of logging behavior");
         
         logger.info("");
-        logger.info("❌ OLD BEHAVIOR (Before Fix):");
+        logger.info("OLD BEHAVIOR (Before Fix):");
         logger.info("   WARNING: Error evaluating enrichment condition '#ruleResults.get('validate').passed'");
         logger.info("   - Logged as WARNING (easily ignored)");
         logger.info("   - Generic error message");
@@ -89,7 +89,7 @@ class LoggingVisibilityComparisonTest {
         logger.info("   - Production monitoring ignores warnings");
         
         logger.info("");
-        logger.info("✅ NEW BEHAVIOR (After Fix):");
+        logger.info("NEW BEHAVIOR (After Fix):");
         logger.info("   SEVERE: CRITICAL: Enrichment condition evaluation failed for 'customer-lookup'");
         logger.info("   - condition: '#ruleResults.get('validate').passed' - Error: Property 'passed' not found");
         logger.info("   - Logged as SEVERE (demands immediate attention)");
@@ -109,18 +109,18 @@ class LoggingVisibilityComparisonTest {
             testData.put("currency", "USD");
             
             logger.info("");
-            logger.info("🔍 PROCESSING ENRICHMENTS WITH CONFIGURATION PROBLEMS...");
-            logger.info("🔍 WATCH THE LOG OUTPUT BELOW - Notice the clear SEVERE logs:");
+            logger.info("PROCESSING ENRICHMENTS WITH CONFIGURATION PROBLEMS...");
+            logger.info("WATCH THE LOG OUTPUT BELOW - Notice the clear SEVERE logs:");
             
             // Process enrichments - this will demonstrate the improved logging
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
             engine.evaluate(config, testData);
 
             logger.info("");
-            logger.info("✅ Processing completed - Review the log output above");
+            logger.info("Processing completed - Review the log output above");
             
         } catch (Exception e) {
-            logger.error("❌ Test failed with exception: " + e.getMessage(), e);
+            logger.error("Test failed with exception: " + e.getMessage(), e);
             throw e;
         }
     }
@@ -132,16 +132,16 @@ class LoggingVisibilityComparisonTest {
         logger.info("🎯 PURPOSE: Show how the logging improvements benefit users in real scenarios");
         
         logger.info("");
-        logger.info("📊 PRODUCTION MONITORING SCENARIO:");
-        logger.info("   🔍 Monitoring System: Scans logs for SEVERE level entries");
-        logger.info("   🚨 Alert Trigger: SEVERE logs indicate critical configuration problems");
+        logger.info("PRODUCTION MONITORING SCENARIO:");
+        logger.info("   Monitoring System: Scans logs for SEVERE level entries");
+        logger.info("   Alert Trigger: SEVERE logs indicate critical configuration problems");
         logger.info("   📧 Notification: DevOps team receives immediate alert");
         logger.info("   🔧 Response: Team can quickly identify and fix configuration issues");
         
         logger.info("");
-        logger.info("📊 DEVELOPER DEBUGGING SCENARIO:");
-        logger.info("   🔍 Developer sees: SEVERE: CRITICAL: Enrichment condition evaluation failed");
-        logger.info("   📋 Context provided: Enrichment ID, condition text, specific error");
+        logger.info("DEVELOPER DEBUGGING SCENARIO:");
+        logger.info("   Developer sees: SEVERE: CRITICAL: Enrichment condition evaluation failed");
+        logger.info("   Context provided: Enrichment ID, condition text, specific error");
         logger.info("   🎯 Immediate understanding: Configuration problem, not code bug");
         logger.info("   ⚡ Quick resolution: Fix YAML condition reference");
         
@@ -156,68 +156,68 @@ class LoggingVisibilityComparisonTest {
             testData.put("balance", 5000.0);
             
             logger.info("");
-            logger.info("🔍 DEMONSTRATING TRACEABILITY IN ACTION...");
-            logger.info("🔍 Each SEVERE log provides full context for easy debugging:");
+            logger.info("DEMONSTRATING TRACEABILITY IN ACTION...");
+            logger.info("Each SEVERE log provides full context for easy debugging:");
             
             // Process enrichments - this will demonstrate traceability
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
             engine.evaluate(config, testData);
 
             logger.info("");
-            logger.info("✅ TRACEABILITY DEMONSTRATION COMPLETE");
-            logger.info("📊 BENEFITS ACHIEVED:");
-            logger.info("   ✅ Clear identification of configuration problems");
-            logger.info("   ✅ Full context for quick debugging");
-            logger.info("   ✅ Production monitoring can alert appropriately");
-            logger.info("   ✅ No more silent failures or masked warnings");
+            logger.info("TRACEABILITY DEMONSTRATION COMPLETE");
+            logger.info("BENEFITS ACHIEVED:");
+            logger.info("   Clear identification of configuration problems");
+            logger.info("   Full context for quick debugging");
+            logger.info("   Production monitoring can alert appropriately");
+            logger.info("   No more silent failures or masked warnings");
             
         } catch (Exception e) {
-            logger.error("❌ Test failed with exception: " + e.getMessage(), e);
+            logger.error("Test failed with exception: " + e.getMessage(), e);
             throw e;
         }
     }
 
     @Test
-    @DisplayName("📋 Document the complete logging transformation achieved")
+    @DisplayName("Document the complete logging transformation achieved")
     void testDocumentLoggingTransformation() {
         logger.info("=== COMPLETE LOGGING TRANSFORMATION DOCUMENTATION ===");
         
         logger.info("🎯 TRANSFORMATION SUMMARY:");
-        logger.info("   📊 SCOPE: 8+ critical logging locations updated in YamlEnrichmentProcessor");
+        logger.info("   SCOPE: 8+ critical logging locations updated in YamlEnrichmentProcessor");
         logger.info("   🔄 CHANGE: WARNING → SEVERE for business logic failures");
         logger.info("   📝 ENHANCEMENT: Generic messages → Detailed context with prefixes");
         logger.info("   🎯 IMPACT: Silent failures → Visible critical errors");
         
         logger.info("");
         logger.info("🎯 SPECIFIC IMPROVEMENTS:");
-        logger.info("   ✅ Enrichment condition evaluation failures → SEVERE with 'CRITICAL:' prefix");
-        logger.info("   ✅ OR condition evaluation failures → SEVERE with 'ERROR:' prefix");
-        logger.info("   ✅ AND condition evaluation failures → SEVERE with 'ERROR:' prefix");
-        logger.info("   ✅ General condition evaluation failures → SEVERE with 'ERROR:' prefix");
-        logger.info("   ✅ Rule evaluation failures → SEVERE with 'CRITICAL:' prefix");
-        logger.info("   ✅ Rule group evaluation failures → SEVERE with 'CRITICAL:' prefix");
-        logger.info("   ✅ Enhanced error context → Full enrichment/rule/condition details");
-        logger.info("   ✅ Stack traces preserved → Complete debugging information");
+        logger.info("   Enrichment condition evaluation failures → SEVERE with 'CRITICAL:' prefix");
+        logger.info("   OR condition evaluation failures → SEVERE with 'ERROR:' prefix");
+        logger.info("   AND condition evaluation failures → SEVERE with 'ERROR:' prefix");
+        logger.info("   General condition evaluation failures → SEVERE with 'ERROR:' prefix");
+        logger.info("   Rule evaluation failures → SEVERE with 'CRITICAL:' prefix");
+        logger.info("   Rule group evaluation failures → SEVERE with 'CRITICAL:' prefix");
+        logger.info("   Enhanced error context → Full enrichment/rule/condition details");
+        logger.info("   Stack traces preserved → Complete debugging information");
         
         logger.info("");
         logger.info("🎯 USER EXPERIENCE TRANSFORMATION:");
-        logger.info("   ❌ BEFORE: Silent failures, masked warnings, difficult debugging");
-        logger.info("   ✅ AFTER: Clear errors, immediate visibility, easy debugging");
-        logger.info("   ❌ BEFORE: Production issues go unnoticed");
-        logger.info("   ✅ AFTER: Production monitoring alerts on configuration problems");
-        logger.info("   ❌ BEFORE: Developers waste time hunting for problems");
-        logger.info("   ✅ AFTER: Developers immediately see configuration issues");
+        logger.info("   BEFORE: Silent failures, masked warnings, difficult debugging");
+        logger.info("   AFTER: Clear errors, immediate visibility, easy debugging");
+        logger.info("   BEFORE: Production issues go unnoticed");
+        logger.info("   AFTER: Production monitoring alerts on configuration problems");
+        logger.info("   BEFORE: Developers waste time hunting for problems");
+        logger.info("   AFTER: Developers immediately see configuration issues");
         
         logger.info("");
         logger.info("🎯 BUSINESS IMPACT:");
-        logger.info("   ✅ Faster problem resolution");
-        logger.info("   ✅ Reduced debugging time");
-        logger.info("   ✅ Improved system reliability");
-        logger.info("   ✅ Better production monitoring");
-        logger.info("   ✅ Enhanced developer productivity");
+        logger.info("   Faster problem resolution");
+        logger.info("   Reduced debugging time");
+        logger.info("   Improved system reliability");
+        logger.info("   Better production monitoring");
+        logger.info("   Enhanced developer productivity");
         
         logger.info("");
-        logger.info("✅ LOGGING TRANSFORMATION: COMPLETE AND DOCUMENTED");
+        logger.info("LOGGING TRANSFORMATION: COMPLETE AND DOCUMENTED");
     }
 }
 

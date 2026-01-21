@@ -40,11 +40,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * JUnit 5 test for SharedDatasourceDemo functionality.
  *
  * CRITICAL VALIDATION CHECKLIST APPLIED:
- * ✅ Count enrichments in YAML - 1 enrichment expected (shared-datasource-demo)
- * ✅ Verify log shows "Processed: 1 out of 1" - Must be 100% execution rate
- * ✅ Check EVERY enrichment condition - Test data triggers shared datasource lookup condition
- * ✅ Validate EVERY business calculation - Test actual shared datasource lookup logic
- * ✅ Assert ALL enrichment results - Every result-field has corresponding assertEquals
+ * Count enrichments in YAML - 1 enrichment expected (shared-datasource-demo)
+ * Verify log shows "Processed: 1 out of 1" - Must be 100% execution rate
+ * Check EVERY enrichment condition - Test data triggers shared datasource lookup condition
+ * Validate EVERY business calculation - Test actual shared datasource lookup logic
+ * Assert ALL enrichment results - Every result-field has corresponding assertEquals
  *
  * BUSINESS LOGIC VALIDATION:
  * - Shared H2 database data source demonstration using APEX lookup enrichments
@@ -144,7 +144,7 @@ public class SharedDatasourceDemoTest extends DemoTestBase {
         assertEquals("NA", enrichedData.get("customerRegion"), "CUST001 should be in NA region");
         assertEquals("ACTIVE", enrichedData.get("customerStatus"), "CUST001 should have ACTIVE status");
 
-            logger.info("✅ Shared datasource demo functionality test completed successfully");
+            logger.info("Shared datasource demo functionality test completed successfully");
         } catch (Exception e) {
             fail("Failed to load YAML configuration: " + e.getMessage());
         }

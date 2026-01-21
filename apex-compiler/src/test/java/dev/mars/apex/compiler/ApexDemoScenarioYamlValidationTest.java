@@ -75,10 +75,10 @@ class ApexDemoScenarioYamlValidationTest {
                 
                 if (result.isValid()) {
                     validCount++;
-                    System.out.println("✅ VALID - " + fileName);
+                    System.out.println("VALID - " + fileName);
                 } else {
                     invalidFiles.add(filePath);
-                    System.out.println("❌ INVALID - " + fileName);
+                    System.out.println("INVALID - " + fileName);
                     System.out.println("   Errors:");
                     result.getErrors().forEach(error ->
                         System.out.println("     • " + error));
@@ -110,7 +110,7 @@ class ApexDemoScenarioYamlValidationTest {
         System.out.println("=".repeat(60));
         
         if (!invalidFiles.isEmpty()) {
-            System.out.println("\n❌ INVALID FILES:");
+            System.out.println("\nINVALID FILES:");
             invalidFiles.forEach(file -> System.out.println("  • " + file));
             System.out.println("\nCommon issues to fix:");
             System.out.println("  1. Change 'type: enrichment-config' to 'type: rule-config'");

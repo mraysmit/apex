@@ -45,16 +45,16 @@ import static org.junit.jupiter.api.Assertions.*;
  * PostgreSQL Multi-Parameter Lookup Test - Phase 1.2 Implementation
  * 
  * PHASE 1.2 VALIDATION CHECKLIST:
- * ✅ PostgreSQL container starts successfully with trading data
- * ✅ Trading database schema created and populated via initialization script
- * ✅ APEX connects to real PostgreSQL database with trading tables
- * ✅ Multi-parameter settlement instruction lookup returns expected data
- * ✅ Multi-parameter risk assessment lookup returns expected data
- * ✅ Complex WHERE conditions with multiple parameters tested
- * ✅ JOIN operations across multiple tables validated
- * ✅ Optional parameter handling (NULL checks) working
- * ✅ Connection pooling and caching validated
- * ✅ Test passes consistently (3+ runs)
+ * PostgreSQL container starts successfully with trading data
+ * Trading database schema created and populated via initialization script
+ * APEX connects to real PostgreSQL database with trading tables
+ * Multi-parameter settlement instruction lookup returns expected data
+ * Multi-parameter risk assessment lookup returns expected data
+ * Complex WHERE conditions with multiple parameters tested
+ * JOIN operations across multiple tables validated
+ * Optional parameter handling (NULL checks) working
+ * Connection pooling and caching validated
+ * Test passes consistently (3+ runs)
  * 
  * SUCCESS METRICS:
  * - Response Time: < 200ms for multi-parameter lookup
@@ -105,7 +105,7 @@ public class PostgreSQLMultiParamLookupTest extends DemoTestBase {
         String username = postgres.getUsername();
         String password = postgres.getPassword();
         
-        logger.info("✅ PostgreSQL Container Details:");
+        logger.info("PostgreSQL Container Details:");
         logger.info("  JDBC URL: {}", jdbcUrl);
         logger.info("  Username: {}", username);
         logger.info("  Database: {}", postgres.getDatabaseName());
@@ -136,7 +136,7 @@ public class PostgreSQLMultiParamLookupTest extends DemoTestBase {
                 int settlementInstructionsCount = rs.getInt("settlement_instructions_count");
                 int riskAssessmentsCount = rs.getInt("risk_assessments_count");
                 
-                logger.info("✅ Trading Database Validation:");
+                logger.info("Trading Database Validation:");
                 logger.info("  Customers: {}", customersCount);
                 logger.info("  Counterparties: {}", counterpartiesCount);
                 logger.info("  Custodians: {}", custodiansCount);
@@ -178,7 +178,7 @@ public class PostgreSQLMultiParamLookupTest extends DemoTestBase {
                 String marketName = rs.getString("market_name");
                 String instrumentName = rs.getString("instrument_name");
                 
-                logger.info("✅ JOIN Query Validation:");
+                logger.info("JOIN Query Validation:");
                 logger.info("  Instruction ID: {}", instructionId);
                 logger.info("  Counterparty: {}", counterpartyName);
                 logger.info("  Custodian: {}", custodianName);
@@ -197,7 +197,7 @@ public class PostgreSQLMultiParamLookupTest extends DemoTestBase {
             fail("Trading database connection should work: " + e.getMessage());
         }
         
-        logger.info("✅ PostgreSQL trading database setup validation completed successfully");
+        logger.info("PostgreSQL trading database setup validation completed successfully");
     }
 
     @Test
@@ -277,7 +277,7 @@ public class PostgreSQLMultiParamLookupTest extends DemoTestBase {
             assertEquals("EQUITY", enrichedData.get("instrumentClass"));
             assertEquals("USD", enrichedData.get("settlementCurrency"));
             
-            logger.info("✅ Settlement Instruction Enrichment Results:");
+            logger.info("Settlement Instruction Enrichment Results:");
             logger.info("  Instruction ID: {}", enrichedData.get("settlementInstructionId"));
             logger.info("  Counterparty: {}", enrichedData.get("counterpartyName"));
             logger.info("  Settlement Method: {}", enrichedData.get("settlementMethod"));
@@ -289,7 +289,7 @@ public class PostgreSQLMultiParamLookupTest extends DemoTestBase {
             // Validate performance requirement
             assertTrue(responseTime < 2000, "Response time should be < 2000ms for first run, was: " + responseTime + "ms");
             
-            logger.info("✅ PostgreSQL multi-parameter settlement lookup completed successfully in {}ms", responseTime);
+            logger.info("PostgreSQL multi-parameter settlement lookup completed successfully in {}ms", responseTime);
             
         } catch (Exception e) {
             logger.error("X PostgreSQL multi-parameter settlement lookup failed: {}", e.getMessage(), e);
@@ -356,7 +356,7 @@ public class PostgreSQLMultiParamLookupTest extends DemoTestBase {
             assertEquals("MEDIUM", enrichedData.get("marketVolatilityRating"));
             assertEquals("HIGH", enrichedData.get("marketLiquidityRating"));
 
-            logger.info("✅ Risk Assessment Enrichment Results:");
+            logger.info("Risk Assessment Enrichment Results:");
             logger.info("  Risk Category: {}", enrichedData.get("riskCategory"));
             logger.info("  Risk Score: {}", enrichedData.get("riskScore"));
             logger.info("  Max Exposure: {}", enrichedData.get("maxExposure"));
@@ -366,7 +366,7 @@ public class PostgreSQLMultiParamLookupTest extends DemoTestBase {
             logger.info("  Market Volatility: {}", enrichedData.get("marketVolatilityRating"));
             logger.info("  Market Liquidity: {}", enrichedData.get("marketLiquidityRating"));
 
-            logger.info("✅ PostgreSQL multi-parameter risk assessment lookup completed successfully");
+            logger.info("PostgreSQL multi-parameter risk assessment lookup completed successfully");
 
         } catch (Exception e) {
             logger.error("X PostgreSQL multi-parameter risk assessment lookup failed: {}", e.getMessage(), e);
@@ -436,13 +436,13 @@ public class PostgreSQLMultiParamLookupTest extends DemoTestBase {
             assertEquals("LOW", enrichedData.get("riskCategory"));
             assertEquals(10, enrichedData.get("riskScore"));
 
-            logger.info("✅ Optional Parameters Test Results:");
+            logger.info("Optional Parameters Test Results:");
             logger.info("  Settlement Instruction ID: {}", enrichedData.get("settlementInstructionId"));
             logger.info("  Counterparty: {}", enrichedData.get("counterpartyName"));
             logger.info("  Risk Category: {}", enrichedData.get("riskCategory"));
             logger.info("  Risk Score: {}", enrichedData.get("riskScore"));
 
-            logger.info("✅ PostgreSQL multi-parameter optional parameters testing completed successfully");
+            logger.info("PostgreSQL multi-parameter optional parameters testing completed successfully");
 
         } catch (Exception e) {
             logger.error("X PostgreSQL multi-parameter optional parameters testing failed: {}", e.getMessage(), e);
@@ -482,7 +482,7 @@ public class PostgreSQLMultiParamLookupTest extends DemoTestBase {
                     connection.put("username", username);
                     connection.put("password", password);
                     
-                    logger.info("✅ Updated PostgreSQL trading data source '{}' with Testcontainers connection details", 
+                    logger.info("Updated PostgreSQL trading data source '{}' with Testcontainers connection details", 
                                dataSource.getName());
                     break;
                 }

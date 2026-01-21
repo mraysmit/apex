@@ -38,7 +38,7 @@ public class SimpleFailurePolicyConfigurationErrorTest extends DemoTestBase {
     public void setUp() {
         super.setUp(); // Call parent setup to initialize APEX services
         logger.info("Setting up configuration error handling test environment");
-        logger.info("✅ Test environment initialized for RulesEngine scenario testing");
+        logger.info("Test environment initialized for RulesEngine scenario testing");
     }
 
     @Test
@@ -69,7 +69,7 @@ public class SimpleFailurePolicyConfigurationErrorTest extends DemoTestBase {
 
         // Validate stage results: validation should fail, enrichment should succeed with warnings
         result.getStageResults().forEach(stageResult -> {
-            logger.info("✅ Stage result: {} - {}", stageResult.getStageName(), stageResult.getResultType());
+            logger.info("Stage result: {} - {}", stageResult.getStageName(), stageResult.getResultType());
             if ("validation".equals(stageResult.getStageName())) {
                 assertFalse(stageResult.isSuccessful(), "Validation stage should fail due to SpEL property not found");
             } else if ("enrichment".equals(stageResult.getStageName())) {
@@ -77,9 +77,9 @@ public class SimpleFailurePolicyConfigurationErrorTest extends DemoTestBase {
             }
         });
 
-        logger.info("✅ Configuration errors handled gracefully without exceptions");
-        logger.info("✅ Warnings collected: {}", result.getWarnings().size());
-        logger.info("✅ Continue-with-warnings policy working correctly");
+        logger.info("Configuration errors handled gracefully without exceptions");
+        logger.info("Warnings collected: {}", result.getWarnings().size());
+        logger.info("Continue-with-warnings policy working correctly");
     }
 
     @Test
@@ -106,7 +106,7 @@ public class SimpleFailurePolicyConfigurationErrorTest extends DemoTestBase {
 
         // Validate stage results: enrichment should succeed, validation should fail and cause termination
         result.getStageResults().forEach(stageResult -> {
-            logger.info("✅ Stage result: {} - {}", stageResult.getStageName(), stageResult.getResultType());
+            logger.info("Stage result: {} - {}", stageResult.getStageName(), stageResult.getResultType());
             if ("enrichment".equals(stageResult.getStageName())) {
                 assertTrue(stageResult.isSuccessful(), "Enrichment stage should succeed despite configuration warnings");
             } else if ("validation".equals(stageResult.getStageName())) {
@@ -114,8 +114,8 @@ public class SimpleFailurePolicyConfigurationErrorTest extends DemoTestBase {
             }
         });
 
-        logger.info("✅ Configuration error with terminate policy handled gracefully");
-        logger.info("✅ No exceptions thrown, proper termination behavior");
+        logger.info("Configuration error with terminate policy handled gracefully");
+        logger.info("No exceptions thrown, proper termination behavior");
     }
 
     @Test
@@ -141,7 +141,7 @@ public class SimpleFailurePolicyConfigurationErrorTest extends DemoTestBase {
         // Should attempt to execute all stages
         assertTrue(result.getStageResults().size() >= 2, "Should attempt multiple stages");
 
-        logger.info("✅ Multiple configuration errors handled gracefully");
-        logger.info("✅ All errors converted to warnings, no exceptions thrown");
+        logger.info("Multiple configuration errors handled gracefully");
+        logger.info("All errors converted to warnings, no exceptions thrown");
     }
 }

@@ -70,7 +70,7 @@ public class SeverityComprehensiveTest {
 
         yamlLoader = new YamlConfigurationLoader();
 
-        logger.info("✅ APEX services initialized successfully");
+        logger.info("APEX services initialized successfully");
     }
 
     @Test
@@ -88,7 +88,7 @@ public class SeverityComprehensiveTest {
         assertEquals(9, config.getRules().size(), "Should have exactly 9 rules (3 ERROR, 3 WARNING, 3 INFO)");
         assertEquals(4, config.getRuleGroups().size(), "Should have exactly 4 rule groups");
         
-        logger.info("✅ Configuration loaded: {} rules, {} rule groups", 
+        logger.info("Configuration loaded: {} rules, {} rule groups", 
             config.getRules().size(), config.getRuleGroups().size());
         
         // Create RulesEngine using static factory method
@@ -104,7 +104,7 @@ public class SeverityComprehensiveTest {
         // Test INFO severity rule
         testInfoSeverityRule(engine);
         
-        logger.info("✅ All individual severity level tests passed");
+        logger.info("All individual severity level tests passed");
     }
 
     private void testErrorSeverityRule(RulesEngine engine) {
@@ -132,7 +132,7 @@ public class SeverityComprehensiveTest {
         assertTrue(message.contains("CRITICAL") || message.contains("Amount"),
             "Message should indicate critical level or contain amount reference");
 
-        logger.info("✅ ERROR severity rule test passed: {}", result.getMessage());
+        logger.info("ERROR severity rule test passed: {}", result.getMessage());
     }
 
     private void testWarningSeverityRule(RulesEngine engine) {
@@ -161,7 +161,7 @@ public class SeverityComprehensiveTest {
         assertTrue(message.contains("WARNING") || message.contains("Amount") || message.contains("high"),
             "Message should indicate warning level or contain amount/high reference");
 
-        logger.info("✅ WARNING severity rule test passed: {}", result.getMessage());
+        logger.info("WARNING severity rule test passed: {}", result.getMessage());
     }
 
     private void testInfoSeverityRule(RulesEngine engine) {
@@ -189,7 +189,7 @@ public class SeverityComprehensiveTest {
         assertTrue(message.contains("INFO") || message.contains("Processing") || message.contains("transaction"),
             "Message should indicate info level or contain processing/transaction reference");
 
-        logger.info("✅ INFO severity rule test passed: {}", result.getMessage());
+        logger.info("INFO severity rule test passed: {}", result.getMessage());
     }
 
     @Test
@@ -212,7 +212,7 @@ public class SeverityComprehensiveTest {
         // Test INFO-only rule group
         testInfoOnlyRuleGroup(engine);
 
-        logger.info("✅ All single severity type rule group tests passed");
+        logger.info("All single severity type rule group tests passed");
     }
 
     private void testErrorOnlyRuleGroup(RulesEngine engine) {
@@ -236,7 +236,7 @@ public class SeverityComprehensiveTest {
         assertTrue(result.isTriggered(), "ERROR rule group should be triggered when all rules trigger");
         assertEquals("ERROR", result.getSeverity(), "Rule group should have ERROR severity");
 
-        logger.info("✅ ERROR-only rule group test passed with severity: {}", result.getSeverity());
+        logger.info("ERROR-only rule group test passed with severity: {}", result.getSeverity());
     }
 
     private void testWarningOnlyRuleGroup(RulesEngine engine) {
@@ -258,7 +258,7 @@ public class SeverityComprehensiveTest {
         assertTrue(result.isTriggered(), "WARNING rule group should be triggered");
         assertEquals("WARNING", result.getSeverity(), "Rule group should have WARNING severity");
 
-        logger.info("✅ WARNING-only rule group test passed with severity: {}", result.getSeverity());
+        logger.info("WARNING-only rule group test passed with severity: {}", result.getSeverity());
     }
 
     private void testInfoOnlyRuleGroup(RulesEngine engine) {
@@ -279,7 +279,7 @@ public class SeverityComprehensiveTest {
         assertTrue(result.isTriggered(), "INFO rule group should be triggered when all rules pass");
         assertEquals("INFO", result.getSeverity(), "Rule group should have INFO severity");
 
-        logger.info("✅ INFO-only rule group test passed with severity: {}", result.getSeverity());
+        logger.info("INFO-only rule group test passed with severity: {}", result.getSeverity());
     }
 
     @Test
@@ -321,7 +321,7 @@ public class SeverityComprehensiveTest {
         assertTrue(result.getSeverity().equals("ERROR") || result.getSeverity().equals("WARNING"),
             "Failed AND group should have ERROR or WARNING severity");
 
-        logger.info("✅ Mixed severity rule group aggregation test passed");
+        logger.info("Mixed severity rule group aggregation test passed");
         logger.info("   Group triggered: {}, Severity: {}", result.isTriggered(), result.getSeverity());
         logger.info("   This demonstrates proper severity aggregation in mixed rule groups");
     }

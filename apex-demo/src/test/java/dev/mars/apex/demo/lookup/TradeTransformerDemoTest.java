@@ -83,7 +83,7 @@ public class TradeTransformerDemoTest {
             // Load trade transformation configuration
             config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/TradeTransformerDemoTest.yaml");
             
-            logger.info("✅ APEX services initialized for trade transformation testing");
+            logger.info("APEX services initialized for trade transformation testing");
             logger.info("  - Configuration loaded: {}", config.getMetadata().getName());
             logger.info("  - Trade enrichments: {}", config.getEnrichments().size());
             
@@ -106,7 +106,7 @@ public class TradeTransformerDemoTest {
         RulesEngine engine = new RulesEngine(rulesConfig);
 
         assertNotNull(engine, "RulesEngine should be created");
-        logger.info("✅ RulesEngine created with EnrichmentService for trade transformation");
+        logger.info("RulesEngine created with EnrichmentService for trade transformation");
 
         return engine;
     }

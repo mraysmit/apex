@@ -85,7 +85,7 @@ public class SimpleFailurePolicyValidationTest extends DemoTestBase {
         
         logger.info("✓ Validation rules failed as expected for missing required fields");
         logger.info("✓ Validation failures handled gracefully without stack traces");
-        logger.info("✅ Validation rule failure test completed");
+        logger.info("Validation rule failure test completed");
     }
 
     @Test
@@ -112,7 +112,7 @@ public class SimpleFailurePolicyValidationTest extends DemoTestBase {
         
         logger.info("✓ Validation rules passed with valid data");
         logger.info("✓ All required fields validated successfully");
-        logger.info("✅ Valid data validation test completed");
+        logger.info("Valid data validation test completed");
     }
 
     @Test
@@ -137,6 +137,6 @@ public class SimpleFailurePolicyValidationTest extends DemoTestBase {
         
         logger.info("✓ SpEL exceptions handled gracefully");
         logger.info("✓ No stack traces thrown for missing properties");
-        logger.info("✅ SpEL exception handling test completed");
+        logger.info("SpEL exception handling test completed");
     }
 }

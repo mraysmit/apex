@@ -134,7 +134,7 @@ public class ValidationFailureScenarioTest extends DemoTestBase {
         logger.info("✓ STEP 4: Validating that validation rules triggered correctly");
         validateValidationRuleTriggering(result);
 
-        logger.info("=== ✅ Validation Rule Triggering Test COMPLETED SUCCESSFULLY ===");
+        logger.info("=== Validation Rule Triggering Test COMPLETED SUCCESSFULLY ===");
     }
 
     /**

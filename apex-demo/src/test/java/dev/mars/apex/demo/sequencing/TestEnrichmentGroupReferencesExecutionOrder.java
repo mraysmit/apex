@@ -94,7 +94,7 @@ public class TestEnrichmentGroupReferencesExecutionOrder {
         assertEquals(expectedFlattenedOrder, actualOrder,
             "Current behavior: rbg1's enrichments are flattened into e2_eg");
         
-        LOGGER.info("✅ Test PASSED - Current flattening behavior verified");
+        LOGGER.info("Test PASSED - Current flattening behavior verified");
         LOGGER.info("⚠️  NOTE: This may not match user expectation of nested execution");
     }
     
@@ -129,7 +129,7 @@ public class TestEnrichmentGroupReferencesExecutionOrder {
         assertFalse(actualOrder.contains("rbg1"), 
             "rbg1 should not appear as a separate group in execution order (it's flattened)");
         
-        LOGGER.info("✅ Test PASSED - rbg1 is flattened, not executed separately");
+        LOGGER.info("Test PASSED - rbg1 is flattened, not executed separately");
     }
 }
 

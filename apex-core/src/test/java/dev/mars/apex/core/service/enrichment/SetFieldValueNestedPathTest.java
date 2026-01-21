@@ -28,9 +28,14 @@ import static org.junit.jupiter.api.Assertions.*;
  * 1. Simple keys: Works (map.put(key, value))
  * 2. Dot-paths without SpEL: Treated as literal keys (LIMITATION)
  * 3. SpEL prefix with existing structure: Works
- * 4. SpEL prefix with missing structure: Fails silently (LIMITATION)
+ * 4. SpEL prefix with missing structure: Returns RuleResult with failure (ERROR)
  * 5. Array indices with existing list: Works
- * 6. Array indices with missing list: Fails silently (LIMITATION)
+ * 6. Array indices with missing list: Returns RuleResult with failure (ERROR)
+ * 
+ * Note: Tests in SpelWithMissingStructureTests are INTENTIONAL ERROR TESTS that
+ * verify the system properly propagates failures to RuleResult when structures are missing.
+ * Per APEX error handling patterns, errors are NOT thrown as exceptions but are
+ * captured in RuleResult.failureMessages and RuleResult.resultType.
  */
 @DisplayName("SetFieldValue Nested Path Tests")
 public class SetFieldValueNestedPathTest {
@@ -174,10 +179,19 @@ public class SetFieldValueNestedPathTest {
     @DisplayName("SpEL Prefix With Missing Structure - KNOWN LIMITATIONS")
     class SpelWithMissingStructureTests {
 
+        private void logIntentionalErrorBanner(String description) {
+            LOGGER.info("╔══════════════════════════════════════════════════════════════════════════════╗");
+            LOGGER.info("║ INTENTIONAL ERROR TEST: {}",
+                    String.format("%-54s║", description));
+            LOGGER.info("║ This test intentionally triggers an enrichment failure to verify that       ║");
+            LOGGER.info("║ errors are properly propagated to RuleResult (not thrown as exceptions).    ║");
+            LOGGER.info("╚══════════════════════════════════════════════════════════════════════════════╝");
+        }
+
         @Test
-        @DisplayName("SpEL fails silently when intermediate map is missing")
+        @DisplayName("SpEL propagates failure to RuleResult when intermediate map is missing")
         void testSpelMissingMap() throws Exception {
-            LOGGER.info("=== INTENTIONAL ERROR TEST: SpEL with missing intermediate map ===");
+            logIntentionalErrorBanner("SpEL with missing intermediate map");
             String yaml = createEnrichmentYaml("#missing.field");
             YamlRuleConfiguration config = loader.fromYamlString(yaml);
 
@@ -186,17 +200,24 @@ public class SetFieldValueNestedPathTest {
             // Note: "missing" map is NOT pre-created
 
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
-            Map<String, Object> result = engine.evaluate(input).getEnrichedData();
+            RuleResult result = engine.evaluate(input);
 
-            // LIMITATION: SpEL cannot auto-create missing intermediate structures
-            assertNull(result.get("missing"), "SpEL does not auto-create missing map");
-            assertFalse(result.containsKey("field"), "Field not set at root level either");
+            // VERIFY: Failure is propagated to RuleResult (not thrown as exception)
+            assertFalse(result.isSuccess(), "RuleResult should indicate failure");
+            assertFalse(result.getFailureMessages().isEmpty(), "RuleResult should contain failure messages");
+            assertEquals(RuleResult.ResultType.ERROR, result.getResultType(), "ResultType should be ERROR");
+            
+            // Verify the field was not set
+            Map<String, Object> enrichedData = result.getEnrichedData();
+            assertNull(enrichedData.get("missing"), "SpEL does not auto-create missing map");
+            
+            LOGGER.info("✓ Failure properly propagated to RuleResult: {}", result.getFailureMessages());
         }
 
         @Test
-        @DisplayName("SpEL fails silently when list is missing")
+        @DisplayName("SpEL propagates failure to RuleResult when list is missing")
         void testSpelMissingList() throws Exception {
-            LOGGER.info("=== INTENTIONAL ERROR TEST: SpEL with missing list ===");
+            logIntentionalErrorBanner("SpEL with missing list");
             String yaml = createEnrichmentYaml("#items[0].value");
             YamlRuleConfiguration config = loader.fromYamlString(yaml);
 
@@ -205,16 +226,24 @@ public class SetFieldValueNestedPathTest {
             // Note: "items" list is NOT pre-created
 
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
-            Map<String, Object> result = engine.evaluate(input).getEnrichedData();
+            RuleResult result = engine.evaluate(input);
 
-            // LIMITATION: SpEL cannot auto-create missing lists
-            assertNull(result.get("items"), "SpEL does not auto-create missing list");
+            // VERIFY: Failure is propagated to RuleResult (not thrown as exception)
+            assertFalse(result.isSuccess(), "RuleResult should indicate failure");
+            assertFalse(result.getFailureMessages().isEmpty(), "RuleResult should contain failure messages");
+            assertEquals(RuleResult.ResultType.ERROR, result.getResultType(), "ResultType should be ERROR");
+            
+            // Verify the list was not created
+            Map<String, Object> enrichedData = result.getEnrichedData();
+            assertNull(enrichedData.get("items"), "SpEL does not auto-create missing list");
+            
+            LOGGER.info("✓ Failure properly propagated to RuleResult: {}", result.getFailureMessages());
         }
 
         @Test
-        @DisplayName("SpEL fails silently when deep path has missing intermediate")
+        @DisplayName("SpEL propagates failure to RuleResult when deep path has missing intermediate")
         void testSpelDeepPathMissingIntermediate() throws Exception {
-            LOGGER.info("=== INTENTIONAL ERROR TEST: SpEL deep path with missing intermediate ===");
+            logIntentionalErrorBanner("SpEL deep path with missing intermediate");
             String yaml = createEnrichmentYaml("#a.b.c.d");
             YamlRuleConfiguration config = loader.fromYamlString(yaml);
 
@@ -227,12 +256,20 @@ public class SetFieldValueNestedPathTest {
             input.put("a", a);
 
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
-            Map<String, Object> result = engine.evaluate(input).getEnrichedData();
+            RuleResult result = engine.evaluate(input);
 
-            // LIMITATION: SpEL fails when "b" doesn't exist in "a"
+            // VERIFY: Failure is propagated to RuleResult (not thrown as exception)
+            assertFalse(result.isSuccess(), "RuleResult should indicate failure");
+            assertFalse(result.getFailureMessages().isEmpty(), "RuleResult should contain failure messages");
+            assertEquals(RuleResult.ResultType.ERROR, result.getResultType(), "ResultType should be ERROR");
+            
+            // Verify the intermediate structure was not created
+            Map<String, Object> enrichedData = result.getEnrichedData();
             @SuppressWarnings("unchecked")
-            Map<String, Object> resultA = (Map<String, Object>) result.get("a");
+            Map<String, Object> resultA = (Map<String, Object>) enrichedData.get("a");
             assertNull(resultA.get("b"), "SpEL does not auto-create missing intermediate 'b'");
+            
+            LOGGER.info("✓ Failure properly propagated to RuleResult: {}", result.getFailureMessages());
         }
     }
 

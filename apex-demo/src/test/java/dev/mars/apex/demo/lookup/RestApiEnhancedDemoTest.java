@@ -90,7 +90,7 @@ public class RestApiEnhancedDemoTest extends DemoTestBase {
         // Start the server
         httpServer.start();
 
-        logger.info("✅ Enhanced HTTP server started successfully:");
+        logger.info("Enhanced HTTP server started successfully:");
         logger.info("  Base URL: {}", baseUrl);
         logger.info("  Currency Rate Endpoint: /api/currency/{currencyCode}");
         logger.info("  Market Data Endpoint: /api/market/{symbol}");
@@ -98,7 +98,7 @@ public class RestApiEnhancedDemoTest extends DemoTestBase {
         logger.info("  Health Check Endpoint: /api/health");
         logger.info("  Batch Processing Endpoint: /api/batch");
 
-        logger.info("✅ Enhanced REST API test suite setup completed successfully");
+        logger.info("Enhanced REST API test suite setup completed successfully");
     }
 
     @AfterAll
@@ -106,7 +106,7 @@ public class RestApiEnhancedDemoTest extends DemoTestBase {
         if (httpServer != null) {
             logger.info("🛑 Stopping enhanced HTTP server...");
             httpServer.stop(0);
-            logger.info("✅ Enhanced HTTP server stopped successfully");
+            logger.info("Enhanced HTTP server stopped successfully");
         }
     }
 
@@ -143,7 +143,7 @@ public class RestApiEnhancedDemoTest extends DemoTestBase {
         assertEquals("$", enrichedData.get("currencySymbol"), "Currency symbol should be enriched");
         assertEquals(1.0, enrichedData.get("exchangeRate"), "Exchange rate should be enriched");
 
-        logger.info("✅ Enhanced currency rate lookup completed successfully");
+        logger.info("Enhanced currency rate lookup completed successfully");
 
         // Cleanup
         Files.deleteIfExists(Paths.get(tempYamlPath));
@@ -182,7 +182,7 @@ public class RestApiEnhancedDemoTest extends DemoTestBase {
         assertNotNull(enrichedData.get("currentPrice"), "Current price should be enriched");
         assertNotNull(enrichedData.get("marketCap"), "Market cap should be enriched");
 
-        logger.info("✅ Enhanced market data lookup completed successfully");
+        logger.info("Enhanced market data lookup completed successfully");
 
         // Cleanup
         Files.deleteIfExists(Paths.get(tempYamlPath));
@@ -221,7 +221,7 @@ public class RestApiEnhancedDemoTest extends DemoTestBase {
         assertNotNull(enrichedData.get("averageResponseTime"), "Average response time should be enriched");
         assertNotNull(enrichedData.get("uptime"), "Uptime should be enriched");
 
-        logger.info("✅ Enhanced metrics collection completed successfully");
+        logger.info("Enhanced metrics collection completed successfully");
 
         // Cleanup
         Files.deleteIfExists(Paths.get(tempYamlPath));
@@ -260,7 +260,7 @@ public class RestApiEnhancedDemoTest extends DemoTestBase {
         assertNotNull(enrichedData.get("timestamp"), "Timestamp should be enriched");
         assertEquals("Enhanced REST API Server", enrichedData.get("service"), "Service name should be enriched");
 
-        logger.info("✅ Enhanced health check completed successfully");
+        logger.info("Enhanced health check completed successfully");
 
         // Cleanup
         Files.deleteIfExists(Paths.get(tempYamlPath));
@@ -300,7 +300,7 @@ public class RestApiEnhancedDemoTest extends DemoTestBase {
         assertNotNull(enrichedData.get("processingTime"), "Processing time should be enriched");
         assertEquals("SUCCESS", enrichedData.get("batchStatus"), "Batch status should be SUCCESS");
 
-        logger.info("✅ Enhanced batch processing completed successfully");
+        logger.info("Enhanced batch processing completed successfully");
 
         // Cleanup
         Files.deleteIfExists(Paths.get(tempYamlPath));

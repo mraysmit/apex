@@ -106,7 +106,7 @@ public class MixedRuleGroupsAndItemsTest {
         // Verify all rules passed
         assertTrue(result.isTriggered(), "Rules should trigger");
 
-        LOGGER.info("✅ Mixed Rule Groups and Items Order Test PASSED");
+        LOGGER.info("Mixed Rule Groups and Items Order Test PASSED");
         LOGGER.info("   Processing Order Verified:");
         LOGGER.info("   1. Enrichments executed first ✓");
         LOGGER.info("   2. R1 (from ref): validate-notional-limit ✓");
@@ -142,7 +142,7 @@ public class MixedRuleGroupsAndItemsTest {
             .anyMatch(r -> "validate-market-data-present".equals(r.getId()));
         assertTrue(hasMarketData, "Should have inline rule: validate-market-data-present");
 
-        LOGGER.info("✅ Rule-refs expanded before inline rules");
+        LOGGER.info("Rule-refs expanded before inline rules");
     }
 
     @Test
@@ -168,7 +168,7 @@ public class MixedRuleGroupsAndItemsTest {
             .anyMatch(rg -> "compliance-validation-group".equals(rg.getId()));
         assertTrue(hasComplianceValidation, "Should have inline rule group: compliance-validation-group");
 
-        LOGGER.info("✅ Rule-group-refs expanded before inline rule groups");
+        LOGGER.info("Rule-group-refs expanded before inline rule groups");
     }
 
     @Test
@@ -231,7 +231,7 @@ public class MixedRuleGroupsAndItemsTest {
         assertTrue(result4.isSuccess(), "Result should succeed even when validation rules trigger (APEX design: rules are informational)");
         LOGGER.info("✓ Test Case 4: Missing counterparty - validation rule triggered correctly (reported violation without blocking processing)");
 
-        LOGGER.info("✅ Validation Failures in Order Test PASSED");
+        LOGGER.info("Validation Failures in Order Test PASSED");
     }
 }
 

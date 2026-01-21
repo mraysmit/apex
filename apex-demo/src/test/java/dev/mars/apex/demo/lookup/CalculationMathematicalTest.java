@@ -86,7 +86,7 @@ public class CalculationMathematicalTest {
             // Load mathematical operations configuration
             config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/CalculationMathematicalTest.yaml");
             
-            logger.info("✅ APEX services initialized for mathematical calculation testing");
+            logger.info("APEX services initialized for mathematical calculation testing");
             logger.info("  - Configuration loaded: {}", config.getMetadata().getName());
             logger.info("  - Mathematical enrichments: {}", config.getEnrichments().size());
             
@@ -109,7 +109,7 @@ public class CalculationMathematicalTest {
         RulesEngine engine = new RulesEngine(rulesConfig);
 
         assertNotNull(engine, "RulesEngine should be created");
-        logger.info("✅ RulesEngine created with EnrichmentService for mathematical operations");
+        logger.info("RulesEngine created with EnrichmentService for mathematical operations");
 
         return engine;
     }

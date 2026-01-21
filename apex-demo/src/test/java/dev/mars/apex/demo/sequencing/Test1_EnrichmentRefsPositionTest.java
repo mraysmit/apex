@@ -103,7 +103,7 @@ public class Test1_EnrichmentRefsPositionTest extends DemoTestBase {
         assertEquals(4, ExecutionTracker.getExecutionPosition("inline-after"), 
             "inline-after must execute at position 4");
         
-        LOGGER.info("✅ TEST 1 PASSED: enrichment-refs executes at EXACT reference position");
+        LOGGER.info("TEST 1 PASSED: enrichment-refs executes at EXACT reference position");
     }
 }
 

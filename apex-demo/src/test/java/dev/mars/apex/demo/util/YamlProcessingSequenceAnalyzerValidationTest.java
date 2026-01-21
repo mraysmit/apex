@@ -101,7 +101,7 @@ public class YamlProcessingSequenceAnalyzerValidationTest extends DemoTestBase {
         assertEquals(List.of("grouped-1", "grouped-2"), filteredIds,
             "Analyzer must identify grouped-1 and grouped-2 as filtered (execute via group only)");
         
-        System.out.println("✅ VALIDATION 1 PASSED: Analyzer correctly predicted execution sequence");
+        System.out.println("VALIDATION 1 PASSED: Analyzer correctly predicted execution sequence");
     }
     
     @Test
@@ -136,7 +136,7 @@ public class YamlProcessingSequenceAnalyzerValidationTest extends DemoTestBase {
         assertEquals(0, report.getFilteredItems().size(),
             "No items should be filtered when there are no groups");
         
-        System.out.println("✅ VALIDATION 2 PASSED: All standalone enrichments execute in order");
+        System.out.println("VALIDATION 2 PASSED: All standalone enrichments execute in order");
     }
     
     @Test
@@ -175,7 +175,7 @@ public class YamlProcessingSequenceAnalyzerValidationTest extends DemoTestBase {
         assertEquals(List.of("grouped-1", "grouped-2", "grouped-3", "grouped-4"), filteredIds,
             "All enrichments should be filtered (execute via group only)");
         
-        System.out.println("✅ VALIDATION 3 PASSED: All grouped enrichments execute via group");
+        System.out.println("VALIDATION 3 PASSED: All grouped enrichments execute via group");
     }
     
     @Test
@@ -210,7 +210,7 @@ public class YamlProcessingSequenceAnalyzerValidationTest extends DemoTestBase {
         assertEquals(List.of("standalone-rule-1", "standalone-rule-2", "rule-group-A"), predictedIds,
             "Analyzer must predict standalone rules + rule group");
         
-        System.out.println("✅ VALIDATION 4 PASSED: Rule groups work correctly");
+        System.out.println("VALIDATION 4 PASSED: Rule groups work correctly");
     }
     
     @Test
@@ -243,7 +243,7 @@ public class YamlProcessingSequenceAnalyzerValidationTest extends DemoTestBase {
         
         System.out.println("Predicted: " + predictedIds);
         System.out.println("Actual: " + actualExecutionOrder);
-        System.out.println("✅ VALIDATION 5 PASSED: Numbered suffixes handled correctly");
+        System.out.println("VALIDATION 5 PASSED: Numbered suffixes handled correctly");
     }
     
     @Test
@@ -265,7 +265,7 @@ public class YamlProcessingSequenceAnalyzerValidationTest extends DemoTestBase {
         assertTrue(formatted.contains("Filtered (groups-only):  2"), "Should show 2 filtered items");
         assertTrue(formatted.contains("Final execution order:   3"), "Should show 3 execution items");
         
-        System.out.println("✅ VALIDATION 6 PASSED: Report formatting is accurate");
+        System.out.println("VALIDATION 6 PASSED: Report formatting is accurate");
         System.out.println("\n" + formatted);
     }
 }

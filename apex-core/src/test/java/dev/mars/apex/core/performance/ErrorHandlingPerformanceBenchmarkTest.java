@@ -143,7 +143,7 @@ class ErrorHandlingPerformanceBenchmarkTest {
         assertTrue(overheadMs < MAX_OVERHEAD_MS, 
             String.format("Error handling overhead (%.4f ms) exceeds target (%.1f ms)", overheadMs, MAX_OVERHEAD_MS));
         
-        logger.info("\n✅ PASS: Error handling overhead is within acceptable limits");
+        logger.info("\nPASS: Error handling overhead is within acceptable limits");
     }
 }
 

@@ -63,7 +63,7 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
             // Verify the first rule matched and mapping was applied
             assertEquals("1", result.get("IS_NDF"), "IS_NDF should be directly mapped for valid SWIFT NDF");
 
-            logger.info("✅ SWIFT valid NDF rule test completed successfully");
+            logger.info("SWIFT valid NDF rule test completed successfully");
             logger.info("Result: " + result);
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
@@ -97,7 +97,7 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
             // Verify the second rule matched and Y flag was converted to 1
             assertEquals("1", result.get("IS_NDF"), "IS_NDF should be converted from Y to 1 for SWIFT Y flag");
 
-            logger.info("✅ SWIFT Y flag rule test completed successfully");
+            logger.info("SWIFT Y flag rule test completed successfully");
             logger.info("Result: " + result);
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
@@ -131,7 +131,7 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
             // Verify the third rule matched and default translation was applied
             assertEquals("DEFAULT_TRANSLATION", result.get("IS_NDF"), "IS_NDF should use default translation for complex codes");
 
-            logger.info("✅ Translation required rule test completed successfully");
+            logger.info("Translation required rule test completed successfully");
             logger.info("Result: " + result);
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
@@ -165,7 +165,7 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
             // Verify no mapping was applied (original value preserved)
             assertEquals("1", result.get("IS_NDF"), "IS_NDF should remain unchanged when no rules match");
 
-            logger.info("✅ No rule matches test completed successfully");
+            logger.info("No rule matches test completed successfully");
             logger.info("Result: " + result);
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
@@ -199,7 +199,7 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
             // Verify the first rule won (direct mapping, not Y->1 conversion)
             assertEquals("1", result.get("IS_NDF"), "IS_NDF should use first rule's direct mapping");
 
-            logger.info("✅ Rule group OR logic test completed successfully");
+            logger.info("Rule group OR logic test completed successfully");
             logger.info("Result: " + result);
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
@@ -232,8 +232,8 @@ public class ConditionalMappingDesignV2Test extends DemoTestBase {
             assertNotNull(config.getEnrichments(), "Enrichments should not be null");
             assertFalse(config.getEnrichments().isEmpty(), "Should have enrichments");
 
-            logger.info("✅ Configuration loaded successfully: " + config.getMetadata().getName());
-            logger.info("✅ Conditional mapping design V2 syntax validated successfully");
+            logger.info("Configuration loaded successfully: " + config.getMetadata().getName());
+            logger.info("Conditional mapping design V2 syntax validated successfully");
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
             fail("Test failed: " + e.getMessage());

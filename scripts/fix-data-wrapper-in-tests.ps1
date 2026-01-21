@@ -26,5 +26,5 @@ foreach ($file in $files) {
     }
 }
 
-Write-Host "`n✅ Fixed $fixCount files with Map.of pattern" -ForegroundColor Cyan
+Write-Host "`nFixed $fixCount files with Map.of pattern" -ForegroundColor Cyan
 Write-Host "⚠️  Manual review needed for files with separate data variable pattern" -ForegroundColor Yellow

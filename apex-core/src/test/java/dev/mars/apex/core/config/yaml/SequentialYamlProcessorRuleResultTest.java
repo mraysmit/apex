@@ -71,7 +71,7 @@ class SequentialYamlProcessorRuleResultTest {
         assertTrue(result.isSuccess(), "Result should indicate success");
         assertFalse(result.hasFailures(), "Result should have no failures");
 
-        logger.info("✅ Test 1 PASSED: processFileWithResult() returns RuleResult");
+        logger.info("Test 1 PASSED: processFileWithResult() returns RuleResult");
     }
 
     // ========================================
@@ -106,7 +106,7 @@ class SequentialYamlProcessorRuleResultTest {
 
         if (result.getResultType() == RuleResult.ResultType.ERROR) {
             assertFalse(result.isSuccess(), "ERROR result should indicate failure");
-            logger.info("✅ Test 2 PASSED: Errors tracked when parsing fails");
+            logger.info("Test 2 PASSED: Errors tracked when parsing fails");
         } else {
             // Parser accepted the YAML - this is also acceptable
             logger.info("⚠️ Test 2: Parser accepted the YAML (lenient parsing)");
@@ -148,7 +148,7 @@ class SequentialYamlProcessorRuleResultTest {
         if (result.getResultType() == RuleResult.ResultType.ERROR) {
             assertFalse(result.isSuccess(), "ERROR result should indicate failure");
             assertTrue(result.hasFailures(), "ERROR result should have failures");
-            logger.info("✅ Test 3 PASSED: Processing error returns ERROR result type");
+            logger.info("Test 3 PASSED: Processing error returns ERROR result type");
         } else {
             logger.info("⚠️ Test 3: Processor doesn't validate enrichment types (returns MATCH)");
             logger.info("   This is acceptable - validation happens at execution time");
@@ -189,7 +189,7 @@ class SequentialYamlProcessorRuleResultTest {
             "Failure messages should be empty on success");
 
         logger.info("Result message: {}", result.getMessage());
-        logger.info("✅ Test 4 PASSED: Successful processing returns match()");
+        logger.info("Test 4 PASSED: Successful processing returns match()");
     }
 }
 

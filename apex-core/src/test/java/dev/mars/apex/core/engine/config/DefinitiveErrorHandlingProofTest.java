@@ -46,7 +46,7 @@ class DefinitiveErrorHandlingProofTest {
     @Test
     @DisplayName("  PROOF 1: CRITICAL errors return ERROR RuleResult (no recovery)")
     void testCriticalErrorsReturnErrorResult() {
-        logger.info("📋 Testing CRITICAL error handling - should return ERROR result");
+        logger.info("Testing CRITICAL error handling - should return ERROR result");
         
         // Given: Rule with CRITICAL severity that will fail
         Rule rule = new Rule(
@@ -77,13 +77,13 @@ class DefinitiveErrorHandlingProofTest {
                   "Should mention the failing method");
         assertFalse(result.isTriggered(), "Rule should not be triggered");
         
-        logger.info("✅ PROOF 1 COMPLETE: CRITICAL errors return structured ERROR results");
+        logger.info("PROOF 1 COMPLETE: CRITICAL errors return structured ERROR results");
     }
     
     @Test
     @DisplayName("  PROOF 2: Non-critical errors are logged and recovered gracefully")
     void testNonCriticalErrorsAreLoggedAndRecovered() {
-        logger.info("📋 Testing non-critical error handling - should log error and recover");
+        logger.info("Testing non-critical error handling - should log error and recover");
 
         // Given: Rule with WARNING severity that will throw exception (non-critical)
         Rule rule = new Rule(
@@ -111,13 +111,13 @@ class DefinitiveErrorHandlingProofTest {
         assertFalse(result.isTriggered(), "Rule should not be triggered");
         assertTrue(result.isSuccess(), "Recovery should be successful");
         
-        logger.info("✅ PROOF 2 COMPLETE: Non-critical errors are logged and recovered gracefully");
+        logger.info("PROOF 2 COMPLETE: Non-critical errors are logged and recovered gracefully");
     }
     
     @Test
     @DisplayName("  PROOF 3: WARNING errors are logged at appropriate level")
     void testWarningErrorsAreLoggedAppropriately() {
-        logger.info("📋 Testing WARNING error handling - should log at INFO level and recover");
+        logger.info("Testing WARNING error handling - should log at INFO level and recover");
         
         // Given: Rule with WARNING severity that will fail
         Rule rule = new Rule(
@@ -142,13 +142,13 @@ class DefinitiveErrorHandlingProofTest {
         assertFalse(result.isTriggered(), "Rule should not be triggered");
         assertTrue(result.isSuccess(), "Recovery should be successful");
         
-        logger.info("✅ PROOF 3 COMPLETE: WARNING errors are logged appropriately and recovered");
+        logger.info("PROOF 3 COMPLETE: WARNING errors are logged appropriately and recovered");
     }
     
     @Test
     @DisplayName("  PROOF 4: Multiple CRITICAL errors in sequence return ERROR results")
     void testMultipleCriticalErrorsReturnErrorResults() {
-        logger.info("📋 Testing multiple CRITICAL errors - all should return ERROR results");
+        logger.info("Testing multiple CRITICAL errors - all should return ERROR results");
         
         // Test 1: Null pointer with CRITICAL severity
         Rule nullRule = new Rule(
@@ -187,13 +187,13 @@ class DefinitiveErrorHandlingProofTest {
         assertEquals("CRITICAL", propertyResult.getSeverity(), 
                     "Should preserve CRITICAL severity");
         
-        logger.info("✅ PROOF 4 COMPLETE: Multiple CRITICAL errors all return structured ERROR results");
+        logger.info("PROOF 4 COMPLETE: Multiple CRITICAL errors all return structured ERROR results");
     }
     
     @Test
     @DisplayName("  PROOF 5: Error handling preserves rule context and performance metrics")
     void testErrorHandlingPreservesContext() {
-        logger.info("📋 Testing error context preservation - should maintain rule information");
+        logger.info("Testing error context preservation - should maintain rule information");
         
         // Given: Rule that will fail with specific context
         Rule rule = new Rule(
@@ -225,13 +225,13 @@ class DefinitiveErrorHandlingProofTest {
         assertTrue(result.getPerformanceMetrics().getEvaluationTimeMillis() >= 0,
                   "Should have valid execution time");
         
-        logger.info("✅ PROOF 5 COMPLETE: Error handling preserves rule context and metrics");
+        logger.info("PROOF 5 COMPLETE: Error handling preserves rule context and metrics");
     }
     
     @Test
     @DisplayName("  SUMMARY: All error handling paths work correctly")
     void testSummaryAllErrorPathsWork() {
-        logger.info("📊 SUMMARY: Demonstrating all error handling paths work correctly");
+        logger.info("SUMMARY: Demonstrating all error handling paths work correctly");
         
         int totalTests = 0;
         int criticalErrorsReturned = 0;
@@ -280,10 +280,10 @@ class DefinitiveErrorHandlingProofTest {
         assertEquals(6, nonCriticalErrorsRecovered, 
                     "All non-critical errors should be recovered to NO_MATCH");
         
-        logger.info("📊 SUMMARY RESULTS:");
+        logger.info("SUMMARY RESULTS:");
         logger.info("   Total tests: {}", totalTests);
         logger.info("   CRITICAL errors returned as ERROR: {}", criticalErrorsReturned);
         logger.info("   Non-critical errors recovered: {}", nonCriticalErrorsRecovered);
-        logger.info("✅ ALL ERROR HANDLING PATHS WORK CORRECTLY!");
+        logger.info("ALL ERROR HANDLING PATHS WORK CORRECTLY!");
     }
 }

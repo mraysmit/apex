@@ -71,7 +71,7 @@ public class SeverityDefaultBehaviorTest {
 
         yamlLoader = new YamlConfigurationLoader();
 
-        logger.info("✅ APEX services initialized successfully");
+        logger.info("APEX services initialized successfully");
     }
 
     @Test
@@ -89,7 +89,7 @@ public class SeverityDefaultBehaviorTest {
         assertEquals(9, config.getRules().size(), "Should have exactly 9 rules");
         assertEquals(5, config.getRuleGroups().size(), "Should have exactly 5 rule groups");
         
-        logger.info("✅ Configuration loaded: {} rules, {} rule groups", 
+        logger.info("Configuration loaded: {} rules, {} rule groups", 
             config.getRules().size(), config.getRuleGroups().size());
         
         // Create RulesEngine using static factory method
@@ -105,7 +105,7 @@ public class SeverityDefaultBehaviorTest {
         // Test explicit INFO severity for comparison
         testExplicitInfoSeverity(engine);
         
-        logger.info("✅ All individual default severity tests passed");
+        logger.info("All individual default severity tests passed");
     }
 
     private void testNoSeverityField(RulesEngine engine) {
@@ -125,7 +125,7 @@ public class SeverityDefaultBehaviorTest {
         assertTrue(result.isTriggered(), "Rule should be triggered when amount > 100");
         assertEquals("INFO", result.getSeverity(), "Rule with no severity field should default to INFO");
         
-        logger.info("✅ No severity field test passed: {}", result.getSeverity());
+        logger.info("No severity field test passed: {}", result.getSeverity());
     }
 
     private void testNullSeverity(RulesEngine engine) {
@@ -154,7 +154,7 @@ public class SeverityDefaultBehaviorTest {
         assertTrue(anotherResult.isTriggered(), "Another no severity rule should be triggered");
         assertEquals("INFO", anotherResult.getSeverity(), "Rule with no severity field should default to INFO");
 
-        logger.info("✅ Null severity tests passed");
+        logger.info("Null severity tests passed");
     }
 
     private void testExplicitInfoSeverity(RulesEngine engine) {
@@ -173,7 +173,7 @@ public class SeverityDefaultBehaviorTest {
         assertTrue(result.isTriggered(), "Explicit INFO rule should be triggered");
         assertEquals("INFO", result.getSeverity(), "Rule with explicit INFO severity should have INFO");
         
-        logger.info("✅ Explicit INFO severity test passed");
+        logger.info("Explicit INFO severity test passed");
     }
 
     @Test
@@ -196,7 +196,7 @@ public class SeverityDefaultBehaviorTest {
         // Test complex default behavior group
         testComplexDefaultGroup(engine);
 
-        logger.info("✅ All default severity rule group tests passed");
+        logger.info("All default severity rule group tests passed");
     }
 
     private void testAllDefaultSeverityGroup(RulesEngine engine) {
@@ -218,7 +218,7 @@ public class SeverityDefaultBehaviorTest {
         assertTrue(result.isTriggered(), "All-default severity AND group should be triggered when all rules pass");
         assertEquals("INFO", result.getSeverity(), "Rule group with all default severity rules should have INFO severity");
 
-        logger.info("✅ All-default severity rule group test passed with severity: {}", result.getSeverity());
+        logger.info("All-default severity rule group test passed with severity: {}", result.getSeverity());
     }
 
     private void testMixedDefaultExplicitGroup(RulesEngine engine) {
@@ -251,7 +251,7 @@ public class SeverityDefaultBehaviorTest {
         // Since no-severity-field-1 is first and triggers, it will use INFO severity
         assertEquals("INFO", result.getSeverity(), "Mixed OR group uses severity from first matching rule (INFO from no-severity-field-1)");
 
-        logger.info("✅ Mixed default/explicit severity rule group test passed with severity: {}", result.getSeverity());
+        logger.info("Mixed default/explicit severity rule group test passed with severity: {}", result.getSeverity());
     }
 
     private void testComplexDefaultGroup(RulesEngine engine) {
@@ -272,7 +272,7 @@ public class SeverityDefaultBehaviorTest {
         assertTrue(result.isTriggered(), "Complex default AND group should be triggered when all rules pass");
         assertEquals("INFO", result.getSeverity(), "Complex default group should have INFO severity");
 
-        logger.info("✅ Complex default behavior rule group test passed with severity: {}", result.getSeverity());
+        logger.info("Complex default behavior rule group test passed with severity: {}", result.getSeverity());
     }
 
     @Test
@@ -305,7 +305,7 @@ public class SeverityDefaultBehaviorTest {
         assertEquals(defaultResult.getSeverity(), explicitResult.getSeverity(),
             "Default and explicit INFO severities should be identical");
 
-        logger.info("✅ Default vs explicit severity comparison test passed");
+        logger.info("Default vs explicit severity comparison test passed");
         logger.info("   Default severity: {}, Explicit INFO severity: {}",
             defaultResult.getSeverity(), explicitResult.getSeverity());
     }

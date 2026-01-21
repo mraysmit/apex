@@ -48,7 +48,7 @@ class YamlSectionOrderProofTest extends DemoTestBase {
         
         // Verify section order from YAML
         assertNotNull(config.getSectionOrder(), "Section order should be captured");
-        LOGGER.info("📋 Section order from YAML: {}", config.getSectionOrder());
+        LOGGER.info("Section order from YAML: {}", config.getSectionOrder());
         
         int enrichmentsIndex = config.getSectionOrder().indexOf("enrichments");
         int rulesIndex = config.getSectionOrder().indexOf("rules");
@@ -61,7 +61,7 @@ class YamlSectionOrderProofTest extends DemoTestBase {
         Map<String, Object> testData = new HashMap<>();
         testData.put("customerId", "CUST001");
         
-        LOGGER.info("📊 Input data: {}", testData);
+        LOGGER.info("Input data: {}", testData);
         LOGGER.info("🚀 Executing RulesEngine.evaluate()...");
         
         RuleResult result = engine.evaluate(config, testData);
@@ -80,7 +80,7 @@ class YamlSectionOrderProofTest extends DemoTestBase {
                   "Rule validation should succeed because it can access enriched riskScore");
         
         LOGGER.info("═══════════════════════════════════════════════════════════════");
-        LOGGER.info("✅ PROOF CONFIRMED: Enrichments executed FIRST (before rules)");
+        LOGGER.info("PROOF CONFIRMED: Enrichments executed FIRST (before rules)");
         LOGGER.info("   - Enrichment calculated riskScore = 0.5");
         LOGGER.info("   - Rule successfully validated riskScore < 0.8");
         LOGGER.info("   - This proves enrichments executed before rules");
@@ -100,7 +100,7 @@ class YamlSectionOrderProofTest extends DemoTestBase {
         
         // Verify section order from YAML
         assertNotNull(config.getSectionOrder(), "Section order should be captured");
-        LOGGER.info("📋 Section order from YAML: {}", config.getSectionOrder());
+        LOGGER.info("Section order from YAML: {}", config.getSectionOrder());
         
         int rulesIndex = config.getSectionOrder().indexOf("rules");
         int enrichmentsIndex = config.getSectionOrder().indexOf("enrichments");
@@ -114,7 +114,7 @@ class YamlSectionOrderProofTest extends DemoTestBase {
         testData.put("customerId", "CUST001");
         testData.put("amount", 50000.0);  // Provide amount for validation
         
-        LOGGER.info("📊 Input data: {}", testData);
+        LOGGER.info("Input data: {}", testData);
         LOGGER.info("🚀 Executing RulesEngine.evaluate()...");
         
         RuleResult result = engine.evaluate(config, testData);
@@ -133,7 +133,7 @@ class YamlSectionOrderProofTest extends DemoTestBase {
                     "Risk score should be calculated by enrichment");
         
         LOGGER.info("═══════════════════════════════════════════════════════════════");
-        LOGGER.info("✅ PROOF CONFIRMED: Rules executed FIRST (before enrichments)");
+        LOGGER.info("PROOF CONFIRMED: Rules executed FIRST (before enrichments)");
         LOGGER.info("   - Rule validated input amount > 0");
         LOGGER.info("   - Enrichment calculated riskScore = 0.5 AFTER validation");
         LOGGER.info("   - This proves rules executed before enrichments");
@@ -151,7 +151,7 @@ class YamlSectionOrderProofTest extends DemoTestBase {
         String yaml1Path = "src/test/java/dev/mars/apex/demo/sequencing/YamlSectionOrderProofTest_EnrichFirst.yaml";
         YamlRuleConfiguration config1 = yamlLoader.loadFromFile(yaml1Path);
         
-        LOGGER.info("📋 Test Case 1 - Section order: {}", config1.getSectionOrder());
+        LOGGER.info("Test Case 1 - Section order: {}", config1.getSectionOrder());
         assertEquals("enrichments", config1.getSectionOrder().get(2), 
                     "Third section should be enrichments");
         assertEquals("rules", config1.getSectionOrder().get(3), 
@@ -161,14 +161,14 @@ class YamlSectionOrderProofTest extends DemoTestBase {
         String yaml2Path = "src/test/java/dev/mars/apex/demo/sequencing/YamlSectionOrderProofTest_RulesFirst.yaml";
         YamlRuleConfiguration config2 = yamlLoader.loadFromFile(yaml2Path);
         
-        LOGGER.info("📋 Test Case 2 - Section order: {}", config2.getSectionOrder());
+        LOGGER.info("Test Case 2 - Section order: {}", config2.getSectionOrder());
         assertEquals("rules", config2.getSectionOrder().get(2), 
                     "Third section should be rules");
         assertEquals("enrichments", config2.getSectionOrder().get(3), 
                     "Fourth section should be enrichments");
         
         LOGGER.info("═══════════════════════════════════════════════════════════════");
-        LOGGER.info("✅ COMPREHENSIVE PROOF CONFIRMED:");
+        LOGGER.info("COMPREHENSIVE PROOF CONFIRMED:");
         LOGGER.info("   - Different YAML files have different section orders");
         LOGGER.info("   - Section order is preserved from YAML document");
         LOGGER.info("   - Execution follows the preserved section order");

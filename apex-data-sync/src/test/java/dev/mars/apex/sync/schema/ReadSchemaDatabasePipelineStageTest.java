@@ -24,11 +24,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests reading schema metadata from H2 database tables.
  *
  * CRITICAL VALIDATION CHECKLIST:
- * ✅ Count pipeline steps in YAML - 1 read-schema step expected (single table test)
- * ✅ Verify pipeline executes successfully - Must be 100% success rate
- * ✅ Validate schema metadata - All expected columns returned with correct types
- * ✅ Multi-table test - 5 read-schema steps (customers, orders, products, inventory, transactions)
- * ✅ Column count verification - Each table must have exact expected column count
+ * Count pipeline steps in YAML - 1 read-schema step expected (single table test)
+ * Verify pipeline executes successfully - Must be 100% success rate
+ * Validate schema metadata - All expected columns returned with correct types
+ * Multi-table test - 5 read-schema steps (customers, orders, products, inventory, transactions)
+ * Column count verification - Each table must have exact expected column count
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2.1.0

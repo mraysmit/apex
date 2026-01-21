@@ -45,7 +45,7 @@ public class Test8_TransformationsBasicTest extends DemoTestBase {
         assertEquals(List.of("transform-1", "transform-2", "transform-3"), executionOrder,
             "Transformations must execute in exact document order");
         
-        System.out.println("✅ TEST 8 PASSED: Transformations execute in document order");
+        System.out.println("TEST 8 PASSED: Transformations execute in document order");
         System.out.println("Execution order: " + executionOrder);
     }
 }

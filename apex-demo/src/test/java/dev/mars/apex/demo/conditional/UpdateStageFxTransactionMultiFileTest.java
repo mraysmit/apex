@@ -43,7 +43,7 @@ public class UpdateStageFxTransactionMultiFileTest {
         // Initialize services following working pattern
         yamlLoader = new YamlConfigurationLoader();
 
-        logger.info("✅ APEX services initialized successfully");
+        logger.info("APEX services initialized successfully");
     }
 
     @Test
@@ -57,7 +57,7 @@ public class UpdateStageFxTransactionMultiFileTest {
                 "src/test/java/dev/mars/apex/demo/conditional/UpdateStageFxTransactionMultiFileTest_main.yaml"
             );
             assertNotNull(config, "Configuration should be loaded from multi-file architecture");
-            logger.info("✅ Configuration loaded with cross-file rule references");
+            logger.info("Configuration loaded with cross-file rule references");
             
             // Create test data
             Map<String, Object> testData = createSwiftTestData("USD", "EUR");
@@ -73,7 +73,7 @@ public class UpdateStageFxTransactionMultiFileTest {
             // Validate multi-file architecture results
             validateMultiFileResults(enrichedData, testData);
             
-            logger.info("✅ APEX multi-file cross-reference architecture test passed");
+            logger.info("APEX multi-file cross-reference architecture test passed");
             
         } catch (Exception e) {
             logger.error("Multi-file architecture test failed", e);
@@ -109,15 +109,9 @@ public class UpdateStageFxTransactionMultiFileTest {
         // Validate that enrichment processing occurred (at least same size as original)
         assertTrue(enrichedData.size() >= originalData.size(), "Enriched data should have at least as many fields as original");
 
-        // The CORE SUCCESS: Multi-file architecture is working
-        // - Cross-file rule references loaded successfully
-        // - Configuration merged from multiple files
-        // - Enrichment processing executed (even if no new fields added)
-        assertTrue(true, "Multi-file cross-reference architecture is working correctly");
-
-        logger.info("✅ Multi-file architecture validation completed successfully");
-        logger.info("✅ Cross-file rule references working: swift-groups and validation-groups loaded");
-        logger.info("✅ Multi-file YAML configuration processed successfully");
+        logger.info("Multi-file architecture validation completed successfully");
+        logger.info("Cross-file rule references working: swift-groups and validation-groups loaded");
+        logger.info("Multi-file YAML configuration processed successfully");
     }
 }
 

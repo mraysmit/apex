@@ -341,7 +341,7 @@ class EnvironmentPromotionTest {
                     connection.put("password", password);
                     connection.put("schema", schema);
                     
-                    logger.info("✅ Updated data source '{}' with schema '{}'", 
+                    logger.info("Updated data source '{}' with schema '{}'", 
                         dataSourceName, schema);
                     break;
                 }

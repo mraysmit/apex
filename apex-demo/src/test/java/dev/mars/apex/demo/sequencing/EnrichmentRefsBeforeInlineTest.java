@@ -64,7 +64,7 @@ class EnrichmentRefsBeforeInlineTest extends DemoTestBase {
         assertTrue(config.getEnrichments().stream().anyMatch(e -> "enrich-counterparty-data".equals(e.getId())),
             "Should have enrich-counterparty-data inline");
         
-        LOGGER.info("✅ All enrichments loaded correctly (2 from ref + 1 inline)");
+        LOGGER.info("All enrichments loaded correctly (2 from ref + 1 inline)");
     }
 
     @Test
@@ -83,7 +83,7 @@ class EnrichmentRefsBeforeInlineTest extends DemoTestBase {
         testData.put("underlying", "SPX");  // For market data lookup (from ref)
         testData.put("counterparty", "HEDGE_FUND_X");  // For counterparty lookup (inline)
         
-        LOGGER.info("📊 Input data: {}", testData);
+        LOGGER.info("Input data: {}", testData);
         LOGGER.info("🚀 Executing with sequential processing...");
         
         // Execute
@@ -122,7 +122,7 @@ class EnrichmentRefsBeforeInlineTest extends DemoTestBase {
             "Processing should succeed - all enrichments executed before rules");
         
         LOGGER.info("═══════════════════════════════════════════════════════════════");
-        LOGGER.info("✅ CRITICAL FIX VERIFIED: enrichment-refs expanded at FIRST position!");
+        LOGGER.info("CRITICAL FIX VERIFIED: enrichment-refs expanded at FIRST position!");
         LOGGER.info("   - E1 (from ref): Market data enriched FIRST");
         LOGGER.info("   - E2 (from ref): Greeks calculated SECOND (depends on E1)");
         LOGGER.info("   - E3 (inline): Counterparty enriched THIRD");
@@ -142,7 +142,7 @@ class EnrichmentRefsBeforeInlineTest extends DemoTestBase {
         Map<String, Object> testData1 = new HashMap<>();
         testData1.put("counterparty", "BANK_Y");  // Only counterparty data
         
-        LOGGER.info("📊 Test Case 1 - Missing underlying: {}", testData1);
+        LOGGER.info("Test Case 1 - Missing underlying: {}", testData1);
         RuleResult result1 = engine.evaluate(testData1);
         Map<String, Object> enrichedData1 = result1.getEnrichedData();
         
@@ -158,13 +158,13 @@ class EnrichmentRefsBeforeInlineTest extends DemoTestBase {
         assertEquals("AAA", enrichedData1.get("counterpartyCreditRating"),
             "E3 should lookup BANK_Y credit rating = AAA");
         
-        LOGGER.info("✅ Test Case 1: E1, E2 skipped, E3 executed correctly");
+        LOGGER.info("Test Case 1: E1, E2 skipped, E3 executed correctly");
         
         // Test Case 2: Missing counterparty (E1, E2 execute, E3 won't enrich)
         Map<String, Object> testData2 = new HashMap<>();
         testData2.put("underlying", "NDX");  // Only underlying data
         
-        LOGGER.info("📊 Test Case 2 - Missing counterparty: {}", testData2);
+        LOGGER.info("Test Case 2 - Missing counterparty: {}", testData2);
         RuleResult result2 = engine.evaluate(testData2);
         Map<String, Object> enrichedData2 = result2.getEnrichedData();
         
@@ -180,8 +180,8 @@ class EnrichmentRefsBeforeInlineTest extends DemoTestBase {
         assertFalse(enrichedData2.containsKey("counterpartyCreditRating"),
             "E3 should not enrich without counterparty");
         
-        LOGGER.info("✅ Test Case 2: E1, E2 executed, E3 skipped correctly");
-        LOGGER.info("✅ Enrichment-Refs Execution Order Test PASSED");
+        LOGGER.info("Test Case 2: E1, E2 executed, E3 skipped correctly");
+        LOGGER.info("Enrichment-Refs Execution Order Test PASSED");
     }
 }
 

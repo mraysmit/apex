@@ -18,7 +18,7 @@ class ApexYamlValidatorDemoTest {
     @Test
     void demonstrateValidatorWithValidFile(@TempDir Path tempDir) throws Exception {
         System.out.println("\n" + "=".repeat(80));
-        System.out.println("🔍 APEX YAML LEXICAL VALIDATOR DEMONSTRATION");
+        System.out.println("APEX YAML LEXICAL VALIDATOR DEMONSTRATION");
         System.out.println("=".repeat(80));
         
         // Create a valid APEX YAML file
@@ -95,8 +95,8 @@ class ApexYamlValidatorDemoTest {
         System.out.println(result);
         
         if (result.isValid()) {
-            System.out.println("✅ SUCCESS: APEX YAML file passed all validation checks!");
-            System.out.println("\n📊 Validation Summary:");
+            System.out.println("SUCCESS: APEX YAML file passed all validation checks!");
+            System.out.println("\nValidation Summary:");
             System.out.println("  • Document Type: rule-config");
             System.out.println("  • Rules Found: 3");
             System.out.println("  • Enrichments Found: 3");

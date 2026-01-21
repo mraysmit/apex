@@ -276,7 +276,7 @@ public class RuleResultFieldTest extends DemoTestBase {
         // Additional validations
         assertNotNull(yamlLoader, "YAML configuration loader should be initialized");
 
-        logger.info("✅ All APEX services properly initialized for result-field testing");
+        logger.info("All APEX services properly initialized for result-field testing");
     }
 }
 

@@ -96,7 +96,7 @@ class RulesEngineErrorPropagationTest {
         }
         assertTrue(foundError, "Failure messages should contain details about the missing datasource. Messages: " + result.getFailureMessages());
 
-        logger.info("✅ Test 1 PASSED: Missing datasource handled gracefully");
+        logger.info("Test 1 PASSED: Missing datasource handled gracefully");
     }
 
     // ========================================
@@ -161,7 +161,7 @@ class RulesEngineErrorPropagationTest {
         }
         assertTrue(foundError, "Failure messages should contain details about the invalid expression. Messages: " + result.getFailureMessages());
 
-        logger.info("✅ Test 2 PASSED: Invalid transformation expression handled gracefully");
+        logger.info("Test 2 PASSED: Invalid transformation expression handled gracefully");
     }
 
     // ========================================
@@ -188,7 +188,7 @@ class RulesEngineErrorPropagationTest {
         assertTrue(result.isSuccess(), "Should succeed for valid enrichment");
         assertNotNull(result.getEnrichedData(), "Should have enriched data");
 
-        logger.info("✅ Test 3 PASSED: Valid enrichment processed successfully");
+        logger.info("Test 3 PASSED: Valid enrichment processed successfully");
     }
 
     // ========================================
@@ -224,7 +224,7 @@ class RulesEngineErrorPropagationTest {
         assertTrue(enrichedData.containsKey("doubledAmount") || enrichedData.containsKey("amount"),
                 "Should have either transformed field or original data");
 
-        logger.info("✅ Test 4 PASSED: Valid transformation processed successfully");
+        logger.info("Test 4 PASSED: Valid transformation processed successfully");
     }
 
     // ========================================

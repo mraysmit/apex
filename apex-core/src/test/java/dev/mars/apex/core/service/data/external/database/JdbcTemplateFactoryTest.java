@@ -221,11 +221,16 @@ class JdbcTemplateFactoryTest {
      * - Error type is CONNECTION_ERROR or CONFIGURATION_ERROR
      * 
      * <p>This tests H2 TCP connection failure detection.
+     * <p>HikariCP logging is suppressed via logback-test.xml to avoid stack trace pollution.
      */
     @Test
     @DisplayName("Should fail H2 TCP connection when server not running (Intentional Error)")
     void testH2TcpJdbcUrlIntentionalFailure() throws DataSourceException {
-        LOGGER.info("=== INTENTIONAL ERROR TEST: H2 TCP connection failure - no server running ===");
+        LOGGER.info("╔══════════════════════════════════════════════════════════════════════════════╗");
+        LOGGER.info("║ INTENTIONAL ERROR TEST: H2 TCP connection failure - no server running       ║");
+        LOGGER.info("║ This test intentionally triggers a connection failure to verify error       ║");
+        LOGGER.info("║ handling. The expected exception proves the system detects invalid configs. ║");
+        LOGGER.info("╚══════════════════════════════════════════════════════════════════════════════╝");
         
         DataSourceConfiguration config = createH2Configuration();
         config.getConnection().setHost("localhost");
@@ -240,6 +245,8 @@ class JdbcTemplateFactoryTest {
         // Could be either CONNECTION_ERROR or CONFIGURATION_ERROR depending on when the error occurs
         assertTrue(exception.getErrorType() == DataSourceException.ErrorType.CONNECTION_ERROR ||
                    exception.getErrorType() == DataSourceException.ErrorType.CONFIGURATION_ERROR);
+        
+        LOGGER.info("✓ Expected exception caught: {} - {}", exception.getErrorType(), exception.getMessage());
     }
 
     @Test
@@ -364,11 +371,16 @@ class JdbcTemplateFactoryTest {
      * - Error type is CONNECTION_ERROR or CONFIGURATION_ERROR
      * 
      * <p>This tests invalid configuration detection and error reporting.
+     * <p>HikariCP logging is suppressed via logback-test.xml to avoid stack trace pollution.
      */
     @Test
     @DisplayName("Should fail PostgreSQL connection with invalid host (Intentional Error)")
     void testInvalidDatabaseConfigurationIntentionalFailure() {
-        LOGGER.info("=== INTENTIONAL ERROR TEST: PostgreSQL connection failure - invalid host ===");
+        LOGGER.info("╔══════════════════════════════════════════════════════════════════════════════╗");
+        LOGGER.info("║ INTENTIONAL ERROR TEST: PostgreSQL connection failure - invalid host        ║");
+        LOGGER.info("║ This test intentionally triggers a connection failure to verify error       ║");
+        LOGGER.info("║ handling. The expected exception proves the system detects invalid configs. ║");
+        LOGGER.info("╚══════════════════════════════════════════════════════════════════════════════╝");
         
         DataSourceConfiguration config = createH2Configuration();
         config.setSourceType("postgresql"); // Use PostgreSQL but with invalid connection details
@@ -383,6 +395,8 @@ class JdbcTemplateFactoryTest {
         // Could be either CONNECTION_ERROR or CONFIGURATION_ERROR depending on when the error occurs
         assertTrue(exception.getErrorType() == DataSourceException.ErrorType.CONNECTION_ERROR ||
                    exception.getErrorType() == DataSourceException.ErrorType.CONFIGURATION_ERROR);
+        
+        LOGGER.info("✓ Expected exception caught: {} - {}", exception.getErrorType(), exception.getMessage());
     }
 
     /**
@@ -395,11 +409,16 @@ class JdbcTemplateFactoryTest {
      * - Error type is CONNECTION_ERROR or CONFIGURATION_ERROR
      * 
      * <p>This tests connection failure detection and error reporting.
+     * <p>HikariCP logging is suppressed via logback-test.xml to avoid stack trace pollution.
      */
     @Test
     @DisplayName("Should fail PostgreSQL connection to non-existent host (Intentional Error)")
     void testConnectionFailureIntentional() {
-        LOGGER.info("=== INTENTIONAL ERROR TEST: PostgreSQL connection failure - non-existent host ===");
+        LOGGER.info("╔══════════════════════════════════════════════════════════════════════════════╗");
+        LOGGER.info("║ INTENTIONAL ERROR TEST: PostgreSQL connection failure - non-existent host   ║");
+        LOGGER.info("║ This test intentionally triggers a connection failure to verify error       ║");
+        LOGGER.info("║ handling. The expected exception proves the system detects invalid configs. ║");
+        LOGGER.info("╚══════════════════════════════════════════════════════════════════════════════╝");
         
         DataSourceConfiguration config = createH2Configuration();
         config.setSourceType("postgresql"); // Will fail since PostgreSQL is not running
@@ -413,6 +432,8 @@ class JdbcTemplateFactoryTest {
         // Could be either CONNECTION_ERROR or CONFIGURATION_ERROR depending on when the error occurs
         assertTrue(exception.getErrorType() == DataSourceException.ErrorType.CONNECTION_ERROR ||
                    exception.getErrorType() == DataSourceException.ErrorType.CONFIGURATION_ERROR);
+        
+        LOGGER.info("✓ Expected exception caught: {} - {}", exception.getErrorType(), exception.getMessage());
     }
 
     // ========================================

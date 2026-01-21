@@ -75,11 +75,11 @@ Object result = calcExpr.getValue(context);
 ### Standardize on `expression`
 
 **Rationale:**
-1. ✅ **Technical accuracy** - It's literally a SpEL expression
-2. ✅ **Consistency with SpEL** - Spring Expression Language calls them "expressions"
-3. ✅ **Already used in 2 places** - `calculation-config` and `TransformationAction`
-4. ✅ **Shorter and clearer** - More concise than "transformation"
-5. ✅ **Industry standard** - Most expression languages use "expression" terminology
+1. **Technical accuracy** - It's literally a SpEL expression
+2. **Consistency with SpEL** - Spring Expression Language calls them "expressions"
+3. **Already used in 2 places** - `calculation-config` and `TransformationAction`
+4. **Shorter and clearer** - More concise than "transformation"
+5. **Industry standard** - Most expression languages use "expression" terminology
 
 ---
 
@@ -309,13 +309,13 @@ Ensure all YAML files use `expression` before upgrading to APEX 4.0.
 
 ## Success Criteria
 
-1. ✅ Both `expression` and `transformation` work in APEX 3.1
-2. ✅ Deprecation warnings logged when `transformation` is used
-3. ✅ All documentation updated to use `expression`
-4. ✅ Migration guide provided
-5. ✅ Backward compatibility tests pass
-6. ✅ No breaking changes in APEX 3.x
-7. ✅ Clean removal in APEX 4.0
+1. Both `expression` and `transformation` work in APEX 3.1
+2. Deprecation warnings logged when `transformation` is used
+3. All documentation updated to use `expression`
+4. Migration guide provided
+5. Backward compatibility tests pass
+6. No breaking changes in APEX 3.x
+7. Clean removal in APEX 4.0
 
 ---
 

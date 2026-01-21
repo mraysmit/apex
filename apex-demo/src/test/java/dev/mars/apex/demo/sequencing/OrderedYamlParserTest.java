@@ -97,7 +97,7 @@ class OrderedYamlParserTest {
         assertEquals(1, config.getRules().size());
         assertEquals("validate-enriched-data", config.getRules().get(0).getId());
         
-        LOGGER.info("✅ Section order preservation test PASSED");
+        LOGGER.info("Section order preservation test PASSED");
     }
     
     @Test
@@ -138,7 +138,7 @@ class OrderedYamlParserTest {
         assertTrue(orderedConfig.isSectionBefore("rules", "enrichments"),
                   "Rules should come before enrichments in document order");
         
-        LOGGER.info("✅ Rules before enrichments order test PASSED");
+        LOGGER.info("Rules before enrichments order test PASSED");
     }
     
     @Test
@@ -170,7 +170,7 @@ class OrderedYamlParserTest {
         assertFalse(populatedSections.contains("rules"), "Empty rules should not be populated");
         assertFalse(populatedSections.contains("enrichments"), "Empty enrichments should not be populated");
         
-        LOGGER.info("✅ Empty sections handling test PASSED");
+        LOGGER.info("Empty sections handling test PASSED");
     }
     
     @Test
@@ -191,7 +191,7 @@ class OrderedYamlParserTest {
             parser.parseYamlString(invalidYaml);
         }, "Invalid YAML should throw YamlConfigurationException");
         
-        LOGGER.info("✅ Invalid YAML handling test PASSED");
+        LOGGER.info("Invalid YAML handling test PASSED");
     }
     
     @Test
@@ -259,6 +259,6 @@ class OrderedYamlParserTest {
         assertEquals(1, config.getRuleGroups().size());
         assertEquals("test-group", config.getRuleGroups().get(0).getId());
         
-        LOGGER.info("✅ YamlRuleConfiguration compatibility test PASSED");
+        LOGGER.info("YamlRuleConfiguration compatibility test PASSED");
     }
 }

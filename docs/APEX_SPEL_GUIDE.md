@@ -41,11 +41,11 @@ SpEL is now supported consistently across ALL APEX features:
 
 | Feature | SpEL Support | Example |
 |---------|--------------|---------|
-| **Conditions** | ✅ Yes | `condition: '#currency != null'` |
-| **Transformations** | ✅ Yes | `expression: '#currency'` |
-| **Lookup Keys** | ✅ Yes | `lookup-key: '#symbol'` |
-| **Calculations** | ✅ Yes | `expression: '#amount * 0.01'` |
-| **Field Mappings** | ✅ **NEW (v2.3)** | `source-field: '#currency'` |
+| **Conditions** | Yes | `condition: '#currency != null'` |
+| **Transformations** | Yes | `expression: '#currency'` |
+| **Lookup Keys** | Yes | `lookup-key: '#symbol'` |
+| **Calculations** | Yes | `expression: '#amount * 0.01'` |
+| **Field Mappings** | **NEW (v2.3)** | `source-field: '#currency'` |
 
 ### The `#` Prefix Convention
 
@@ -72,9 +72,9 @@ source-field: "currency"
 ```yaml
 enrichments:
   - id: "field-enrichment-demo"
-    condition: "#currency != null"  # ✅ Works
+    condition: "#currency != null"  # Works
     field-mappings:
-      - source-field: "currency"          # ❌ Fails - can't access nested
+      - source-field: "currency"          # Fails - can't access nested
         target-field: "buy_currency"
 ```
 
@@ -82,9 +82,9 @@ enrichments:
 ```yaml
 enrichments:
   - id: "field-enrichment-demo"
-    condition: "#currency != null"  # ✅ Works
+    condition: "#currency != null"  # Works
     field-mappings:
-      - source-field: "#currency"   # ✅ NOW WORKS!
+      - source-field: "#currency"   # NOW WORKS!
         target-field: "buy_currency"
 ```
 
@@ -191,11 +191,11 @@ condition: "#trade.otcTrade.otcLeg[0].stbRuleName != null"
 
 | Aspect | Bracket `['prop']` | Mixed `.prop['dynamic']` | Dot `.prop` |
 |--------|-------------------|-------------------------|-------------|
-| **Readability** | ⚠️ Verbose | ✅ **Best balance** | ✅ Clean |
-| **Dynamic Properties** | ✅ Full support | ✅ Partial support | ❌ No support |
-| **Special Characters** | ✅ Handles all | ✅ In brackets only | ❌ Limited |
-| **Performance** | ⚠️ Slightly slower | ✅ **Optimal** | ✅ Fastest |
-| **Maintenance** | ⚠️ More typing | ✅ **Recommended** | ✅ Simple |
+| **Readability** | ⚠️ Verbose | **Best balance** | Clean |
+| **Dynamic Properties** | Full support | Partial support | No support |
+| **Special Characters** | Handles all | In brackets only | Limited |
+| **Performance** | ⚠️ Slightly slower | **Optimal** | Fastest |
+| **Maintenance** | ⚠️ More typing | **Recommended** | Simple |
 
 ---
 
@@ -217,10 +217,10 @@ condition: "#portfolio?.positions?.[0]?.trades?.size() > 0"
 ### Why Safe Navigation is Critical
 
 ```yaml
-# ❌ UNSAFE - can throw NullPointerException
+# UNSAFE - can throw NullPointerException
 condition: "#trade.otcTrade.otcLeg[0].stbRuleName != null"
 
-# ✅ SAFE - handles nulls gracefully
+# SAFE - handles nulls gracefully
 condition: "#trade?.otcTrade?.otcLeg?.[0]?.stbRuleName != null"
 ```
 
@@ -311,39 +311,39 @@ condition: "#trade?.otcTrade?.otcLeg?.size() > #legIndex && #trade.otcTrade.otcL
 ### 1. Prioritize Readability Over Cleverness
 
 ```yaml
-# ✅ PREFERRED - Clear, step-by-step logic
+# PREFERRED - Clear, step-by-step logic
 condition: "#trade?.structure == 'SIMPLE'"
 condition: "#trade?.otcTrade?.otcLeg?.size() > 0"
 condition: "#trade.otcTrade.otcLeg[0]?.stbRuleName != null"
 
-# ❌ AVOID - Clever but hard to debug
+# AVOID - Clever but hard to debug
 condition: "#trade?.structure == 'SIMPLE' && #trade?.otcTrade?.otcLeg?.[0]?.stbRuleName != null"
 ```
 
 ### 2. Always Use Safe Navigation
 
 ```yaml
-# ✅ Good - safe navigation prevents NPE
+# Good - safe navigation prevents NPE
 condition: "#trade?.otcTrade?.otcLeg?.size() > 0"
 
-# ❌ Bad - can throw NullPointerException
+# Bad - can throw NullPointerException
 condition: "#trade.otcTrade.otcLeg.size() > 0"
 ```
 
 ### 3. Check Array Bounds
 
 ```yaml
-# ✅ Good - bounds checking
+# Good - bounds checking
 condition: "#items?.size() > 2 && #items[2]?.status == 'ACTIVE'"
 
-# ❌ Bad - no bounds checking
+# Bad - no bounds checking
 condition: "#items[2].status == 'ACTIVE'"
 ```
 
 ### 4. Break Complex Logic Into Steps
 
 ```yaml
-# ✅ PREFERRED - Multiple simple rules
+# PREFERRED - Multiple simple rules
 # Rule 1: Check high value
 condition: "#trade?.notionalAmount > 1000000"
 # Rule 2: Check counterparty rating
@@ -351,46 +351,46 @@ condition: "#trade?.counterparty?.rating in {'AAA', 'AA+', 'AA'}"
 # Rule 3: Extract trade ID
 expression: "#trade.tradeId"
 
-# ❌ AVOID - One complex expression
+# AVOID - One complex expression
 expression: "#trades?.?[notionalAmount > 1000000 && counterparty?.rating in {'AAA', 'AA+', 'AA'}]?.![tradeId]"
 ```
 
 ### 5. Use Collection Operations for Filtering
 
 ```yaml
-# ✅ Good - use collection operations
+# Good - use collection operations
 condition: "#trades?.?[status == 'PENDING'].size() > 0"
 
-# ❌ Less efficient - would require manual iteration
+# Less efficient - would require manual iteration
 ```
 
 ### 6. Validate Data Types
 
 ```yaml
-# ✅ Good - type validation
+# Good - type validation
 condition: "#items instanceof T(java.util.List) && #items.size() > 0"
 
-# ❌ Risky - assumes type without checking
+# Risky - assumes type without checking
 condition: "#items.size() > 0"
 ```
 
 ### 7. Use Meaningful Variable Names
 
 ```yaml
-# ✅ Good - clear variable names
+# Good - clear variable names
 condition: "#currentLegIndex < #trade.otcTrade.otcLeg.size()"
 
-# ❌ Less clear - generic names
+# Less clear - generic names
 condition: "#i < #trade.otcTrade.otcLeg.size()"
 ```
 
 ### 8. Avoid Repeated Expensive Operations
 
 ```yaml
-# ❌ Inefficient - repeated expensive operations
+# Inefficient - repeated expensive operations
 condition: "#expensiveCalculation()[0] != null && #expensiveCalculation()[0].value > 100"
 
-# ✅ Efficient - calculate once, store in variable
+# Efficient - calculate once, store in variable
 condition: "#result = #expensiveCalculation(); #result?.size() > 0 && #result[0]?.value > 100"
 ```
 
@@ -401,52 +401,52 @@ condition: "#result = #expensiveCalculation(); #result?.size() > 0 && #result[0]
 ### 1. Syntax Errors
 
 ```yaml
-# ❌ Wrong - incorrect bracket syntax
+# Wrong - incorrect bracket syntax
 condition: "#trade.['otcTrade'].['otcLeg'][0].['stbRuleName'] != null"
 
-# ✅ Correct - proper bracket syntax
+# Correct - proper bracket syntax
 condition: "#trade['otcTrade']['otcLeg'][0]['stbRuleName'] != null"
 ```
 
 ### 2. Null Pointer Exceptions
 
 ```yaml
-# ❌ Wrong - can cause NullPointerException
+# Wrong - can cause NullPointerException
 condition: "#trade.otcTrade.otcLeg[0].stbRuleName != null"
 
-# ✅ Correct - safe navigation
+# Correct - safe navigation
 condition: "#trade?.otcTrade?.otcLeg?.[0]?.stbRuleName != null"
 ```
 
 ### 3. Array Bounds Errors
 
 ```yaml
-# ❌ Wrong - no bounds checking
+# Wrong - no bounds checking
 condition: "#trade.otcTrade.otcLeg[5].stbRuleName != null"
 
-# ✅ Correct - bounds checking
+# Correct - bounds checking
 condition: "#trade?.otcTrade?.otcLeg?.size() > 5 && #trade.otcTrade.otcLeg[5]?.stbRuleName != null"
 ```
 
 ### 4. Type Assumptions
 
 ```yaml
-# ❌ Wrong - assumes array type
+# Wrong - assumes array type
 condition: "#items[0].name != null"
 
-# ✅ Correct - validates type first
+# Correct - validates type first
 condition: "#items instanceof T(java.util.List) && #items.size() > 0 && #items[0]?.name != null"
 ```
 
 ### 5. Missing `#` Prefix in Field Mappings
 
 ```yaml
-# ❌ Wrong - trying to access nested field without SpEL
+# Wrong - trying to access nested field without SpEL
 field-mappings:
   - source-field: "data.currency"  # Looks for field literally named "data.currency"
     target-field: "currency_code"
 
-# ✅ Correct - use # prefix for SpEL
+# Correct - use # prefix for SpEL
 field-mappings:
   - source-field: "#currency"  # Evaluates as SpEL expression
     target-field: "currency_code"
@@ -587,13 +587,13 @@ rules:
 
 ### Complex vs Simple: When to Use Each
 
-#### ✅ Use Simple Patterns When:
+#### Use Simple Patterns When:
 - New team members need to understand the logic quickly
 - Debugging is required
 - Business logic changes frequently
 - Testing each logical step independently
 
-#### ✅ Use Complex Patterns When:
+#### Use Complex Patterns When:
 - Performance is critical
 - Atomic operations are required
 - Mathematical calculations must execute as one unit
@@ -602,10 +602,10 @@ rules:
 ### Example: Simple vs Complex
 
 ```yaml
-# ❌ COMPLEX: Everything in one expression
+# COMPLEX: Everything in one expression
 condition: "#trade?.legs?.size() > 1 && #trade.legs.?[notional > 0 && currency != null].size() == #trade.legs.size()"
 
-# ✅ SIMPLE: Break into logical steps
+# SIMPLE: Break into logical steps
 condition: "#trade?.legs?.size() > 1"
 condition: "#trade.legs.?[notional > 0].size() == #trade.legs.size()"
 condition: "#trade.legs.?[currency != null].size() == #trade.legs.size()"

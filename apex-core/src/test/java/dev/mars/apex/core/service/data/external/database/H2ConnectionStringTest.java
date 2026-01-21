@@ -301,10 +301,20 @@ class H2ConnectionStringTest {
     // H2 TCP Server Tests (Expected to Fail)
     // ========================================
 
+    /**
+     * INTENTIONAL ERROR TEST: Verifies H2 TCP connection failure handling
+     * when TCP server is not running.
+     * 
+     * <p>HikariCP logging is suppressed via logback-test.xml to avoid stack trace pollution.
+     */
     @Test
     @DisplayName("Should fail H2 TCP server connection when server not running (Intentional Error)")
     void testH2TcpServerConnectionIntentionalFailure() throws Exception {
-        LOGGER.info("=== INTENTIONAL ERROR TEST: H2 TCP server connection (no server running) ===");
+        LOGGER.info("╔══════════════════════════════════════════════════════════════════════════════╗");
+        LOGGER.info("║ INTENTIONAL ERROR TEST: H2 TCP server connection (no server running)        ║");
+        LOGGER.info("║ This test intentionally triggers a connection failure to verify error       ║");
+        LOGGER.info("║ handling. The expected exception proves the system detects invalid configs. ║");
+        LOGGER.info("╚══════════════════════════════════════════════════════════════════════════════╝");
 
         String yamlContent = """
             metadata:
@@ -343,7 +353,7 @@ class H2ConnectionStringTest {
             JdbcTemplateFactory.createDataSource(dataSourceConfig);
         });
 
-        LOGGER.info("✅ Expected exception for H2 TCP connection: {}", exception.getMessage());
+        LOGGER.info("✓ Expected exception caught: {} - {}", exception.getErrorType(), exception.getMessage());
         assertTrue(exception.getErrorType() == DataSourceException.ErrorType.CONNECTION_ERROR ||
                    exception.getErrorType() == DataSourceException.ErrorType.CONFIGURATION_ERROR,
                    "Should be connection or configuration error");
@@ -436,7 +446,7 @@ class H2ConnectionStringTest {
                 // Test connection to verify URL is valid
                 try (Connection connection = dataSource.getConnection()) {
                     String actualUrl = connection.getMetaData().getURL();
-                    LOGGER.info("  ✅ Database path '{}' -> JDBC URL: {}", databasePath, actualUrl);
+                    LOGGER.info("  Database path '{}' -> JDBC URL: {}", databasePath, actualUrl);
 
                     // Verify it's a valid H2 URL
                     assertTrue(actualUrl.startsWith("jdbc:h2:"), "Should be H2 JDBC URL");
@@ -523,7 +533,7 @@ class H2ConnectionStringTest {
             // Log connection details for verification
             String url = connection.getMetaData().getURL();
             String version = connection.getMetaData().getDatabaseProductVersion();
-            LOGGER.info("✅ Successfully connected to H2 database:");
+            LOGGER.info("Successfully connected to H2 database:");
             LOGGER.info("  Data Source: {}", dataSourceName);
             LOGGER.info("  JDBC URL: {}", url);
             LOGGER.info("  H2 Version: {}", version);

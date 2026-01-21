@@ -284,7 +284,7 @@ class SchemaDiffPipelineIntegrationTest {
 
         // Read and verify report content contains key elements
         String reportContent = java.nio.file.Files.readString(reportPath);
-        assertTrue(reportContent.contains("Schema Comparison"), 
+        assertTrue(reportContent.contains("Schema Diff Report"), 
                   "Report should contain title");
         assertTrue(reportContent.contains("Added"), 
                   "Report should contain added columns section");

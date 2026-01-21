@@ -218,7 +218,7 @@ class CustomSchemaEnrichmentTest extends DemoTestBase {
                 ('CP003', 'Asian Hedge Fund', 'LEI456789012345', 'BBB+', 'SGP')
                 """);
 
-            logger.info("✅ Created custom schema '{}' with products, counterparties tables, and active_products_view", CUSTOM_SCHEMA);
+            logger.info("Created custom schema '{}' with products, counterparties tables, and active_products_view", CUSTOM_SCHEMA);
         }
     }
 
@@ -260,14 +260,14 @@ class CustomSchemaEnrichmentTest extends DemoTestBase {
             assertEquals("USD", enrichedData.get("currency"),
                 "Currency should be enriched");
 
-            logger.info("✅ Product enrichment successful from schema '{}':", CUSTOM_SCHEMA);
+            logger.info("Product enrichment successful from schema '{}':", CUSTOM_SCHEMA);
             logger.info("   productName: {}", enrichedData.get("productName"));
             logger.info("   productType: {}", enrichedData.get("productType"));
             logger.info("   assetClass: {}", enrichedData.get("assetClass"));
             logger.info("   currency: {}", enrichedData.get("currency"));
 
         } catch (Exception e) {
-            logger.error("❌ Test failed: {}", e.getMessage(), e);
+            logger.error("Test failed: {}", e.getMessage(), e);
             fail("Test should not throw exception: " + e.getMessage());
         }
     }
@@ -307,14 +307,14 @@ class CustomSchemaEnrichmentTest extends DemoTestBase {
             assertEquals("USA", enrichedData.get("countryCode"),
                 "Country code should be enriched");
 
-            logger.info("✅ Counterparty enrichment successful from schema '{}':", CUSTOM_SCHEMA);
+            logger.info("Counterparty enrichment successful from schema '{}':", CUSTOM_SCHEMA);
             logger.info("   counterpartyName: {}", enrichedData.get("counterpartyName"));
             logger.info("   leiCode: {}", enrichedData.get("leiCode"));
             logger.info("   creditRating: {}", enrichedData.get("creditRating"));
             logger.info("   countryCode: {}", enrichedData.get("countryCode"));
 
         } catch (Exception e) {
-            logger.error("❌ Test failed: {}", e.getMessage(), e);
+            logger.error("Test failed: {}", e.getMessage(), e);
             fail("Test should not throw exception: " + e.getMessage());
         }
     }
@@ -354,7 +354,7 @@ class CustomSchemaEnrichmentTest extends DemoTestBase {
             assertNotNull(enrichedData.get("viewMaxTradeSize"),
                 "Max trade size should be enriched from VIEW");
 
-            logger.info("✅ VIEW enrichment successful from schema '{}':", CUSTOM_SCHEMA);
+            logger.info("VIEW enrichment successful from schema '{}':", CUSTOM_SCHEMA);
             logger.info("   viewProductName: {}", enrichedData.get("viewProductName"));
             logger.info("   viewProductType: {}", enrichedData.get("viewProductType"));
             logger.info("   viewAssetClass: {}", enrichedData.get("viewAssetClass"));
@@ -362,7 +362,7 @@ class CustomSchemaEnrichmentTest extends DemoTestBase {
             logger.info("   viewMaxTradeSize: {}", enrichedData.get("viewMaxTradeSize"));
 
         } catch (Exception e) {
-            logger.error("❌ Test failed: {}", e.getMessage(), e);
+            logger.error("Test failed: {}", e.getMessage(), e);
             fail("Test should not throw exception: " + e.getMessage());
         }
     }
@@ -407,12 +407,12 @@ class CustomSchemaEnrichmentTest extends DemoTestBase {
             assertTrue(tradeAmount <= maxSize.doubleValue(), 
                 "Trade amount should be <= max trade size");
 
-            logger.info("✅ Trade size validation successful:");
+            logger.info("Trade size validation successful:");
             logger.info("   tradeAmount: {} (within limits: {} - {})", 
                 tradeAmount, minSize, maxSize);
 
         } catch (Exception e) {
-            logger.error("❌ Test failed: {}", e.getMessage(), e);
+            logger.error("Test failed: {}", e.getMessage(), e);
             fail("Test should not throw exception: " + e.getMessage());
         }
     }
@@ -438,7 +438,7 @@ class CustomSchemaEnrichmentTest extends DemoTestBase {
                     connection.put("password", password);
                     connection.put("schema", CUSTOM_SCHEMA);  // Dynamic schema!
                     
-                    logger.info("✅ Updated data source '{}' with schema '{}'", 
+                    logger.info("Updated data source '{}' with schema '{}'", 
                         dataSourceName, CUSTOM_SCHEMA);
                     break;
                 }

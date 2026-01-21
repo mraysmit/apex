@@ -86,11 +86,11 @@ import java.util.concurrent.*;
  *
  * <p>Example:</p>
  * <pre>
- * // ✅ RECOMMENDED (production code):
+ * // RECOMMENDED (production code):
  * RulesEngineService service = new RulesEngineService();
  * RulesEngine engine = service.createRulesEngineFromFile(yamlFile);
  *
- * // ✅ ACCEPTABLE (tests and simple cases):
+ * // ACCEPTABLE (tests and simple cases):
  * RulesEngine engine = new RulesEngine(config, parser, errorService, monitor, enrichmentService);
  * </pre>
  */
@@ -455,6 +455,119 @@ public class RulesEngine {
         RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
 
         return new RulesEngine(config, yamlConfig);
+    }
+
+    /**
+     * Safely evaluate a YAML configuration string against input data.
+     * 
+     * <p>This method follows the APEX error handling contract: ALL errors are returned
+     * via RuleResult, never thrown as exceptions. This includes:</p>
+     * <ul>
+     *   <li>YAML parsing errors</li>
+     *   <li>YAML validation errors</li>
+     *   <li>Engine initialization errors</li>
+     *   <li>Runtime evaluation errors</li>
+     * </ul>
+     * 
+     * <p><b>Usage Example:</b></p>
+     * <pre>
+     * String yaml = """
+     *     metadata:
+     *       name: "My Rules"
+     *     rules:
+     *       - id: "rule-1"
+     *         condition: "#value > 100"
+     *         message: "Value exceeds threshold"
+     *     """;
+     * 
+     * Map&lt;String, Object&gt; data = Map.of("value", 150);
+     * RuleResult result = RulesEngine.evaluateYaml(yaml, data);
+     * 
+     * if (!result.isSuccess()) {
+     *     // Handle error - check result.getFailureMessages() for details
+     * }
+     * </pre>
+     *
+     * @param yamlString The YAML configuration as a string
+     * @param inputData The input data to evaluate against
+     * @return RuleResult containing either success with enriched data, or failure with error details
+     */
+    public static RuleResult evaluateYaml(String yamlString, Map<String, Object> inputData) {
+        logger.info("Starting safe YAML evaluation (no exceptions thrown)");
+        
+        try {
+            // Step 1: Parse and validate YAML
+            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            YamlRuleConfiguration yamlConfig = loader.fromYamlString(yamlString);
+            
+            // Step 2: Create engine
+            RulesEngine engine = fromYamlConfig(yamlConfig);
+            
+            // Step 3: Evaluate (this method already handles runtime errors)
+            return engine.evaluate(inputData);
+            
+        } catch (YamlConfigurationException e) {
+            // YAML parsing or validation error - return as RuleResult
+            logger.error("YAML configuration error: {}", e.getMessage());
+            List<String> failureMessages = new ArrayList<>();
+            failureMessages.add("YAML configuration error: " + e.getMessage());
+            if (e.getCause() != null) {
+                failureMessages.add("Caused by: " + e.getCause().getMessage());
+            }
+            Map<String, Object> data = inputData != null ? new HashMap<>(inputData) : new HashMap<>();
+            return RuleResult.evaluationFailure(failureMessages, data, "yaml-configuration", "YAML configuration error");
+            
+        } catch (Exception e) {
+            // Any other unexpected error - return as RuleResult
+            logger.error("Unexpected error during YAML evaluation: {}", e.getMessage(), e);
+            List<String> failureMessages = new ArrayList<>();
+            failureMessages.add("Unexpected error: " + e.getMessage());
+            Map<String, Object> data = inputData != null ? new HashMap<>(inputData) : new HashMap<>();
+            return RuleResult.evaluationFailure(failureMessages, data, "unexpected-error", "Unexpected error during evaluation");
+        }
+    }
+
+    /**
+     * Safely evaluate a YAML configuration file against input data.
+     * 
+     * <p>This method follows the APEX error handling contract: ALL errors are returned
+     * via RuleResult, never thrown as exceptions.</p>
+     *
+     * @param yamlFilePath The path to the YAML configuration file
+     * @param inputData The input data to evaluate against
+     * @return RuleResult containing either success with enriched data, or failure with error details
+     */
+    public static RuleResult evaluateYamlFile(String yamlFilePath, Map<String, Object> inputData) {
+        logger.info("Starting safe YAML file evaluation: {}", yamlFilePath);
+        
+        try {
+            // Step 1: Parse and validate YAML file
+            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            YamlRuleConfiguration yamlConfig = loader.loadFromFile(yamlFilePath);
+            
+            // Step 2: Create engine
+            RulesEngine engine = fromYamlConfig(yamlConfig);
+            
+            // Step 3: Evaluate
+            return engine.evaluate(inputData);
+            
+        } catch (YamlConfigurationException e) {
+            logger.error("YAML configuration error: {}", e.getMessage());
+            List<String> failureMessages = new ArrayList<>();
+            failureMessages.add("YAML configuration error: " + e.getMessage());
+            if (e.getCause() != null) {
+                failureMessages.add("Caused by: " + e.getCause().getMessage());
+            }
+            Map<String, Object> data = inputData != null ? new HashMap<>(inputData) : new HashMap<>();
+            return RuleResult.evaluationFailure(failureMessages, data, "yaml-configuration", "YAML configuration error");
+            
+        } catch (Exception e) {
+            logger.error("Unexpected error during YAML file evaluation: {}", e.getMessage(), e);
+            List<String> failureMessages = new ArrayList<>();
+            failureMessages.add("Unexpected error: " + e.getMessage());
+            Map<String, Object> data = inputData != null ? new HashMap<>(inputData) : new HashMap<>();
+            return RuleResult.evaluationFailure(failureMessages, data, "unexpected-error", "Unexpected error during evaluation");
+        }
     }
 
     /**

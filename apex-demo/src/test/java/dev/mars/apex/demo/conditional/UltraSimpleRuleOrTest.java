@@ -57,7 +57,7 @@ public class UltraSimpleRuleOrTest extends DemoTestBase {
             Map<String, Object> result = ruleResult.getEnrichedData();
 
             assertEquals("FIRST", result.get("output"), "Should map A to FIRST");
-            logger.info("✅ Rule OR A test passed: " + result);
+            logger.info("Rule OR A test passed: " + result);
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
             fail("Test failed: " + e.getMessage());
@@ -79,7 +79,7 @@ public class UltraSimpleRuleOrTest extends DemoTestBase {
             Map<String, Object> result = ruleResult.getEnrichedData();
 
             assertEquals("SECOND", result.get("output"), "Should map B to SECOND");
-            logger.info("✅ Rule OR B test passed: " + result);
+            logger.info("Rule OR B test passed: " + result);
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
             fail("Test failed: " + e.getMessage());
@@ -101,7 +101,7 @@ public class UltraSimpleRuleOrTest extends DemoTestBase {
             Map<String, Object> result = ruleResult.getEnrichedData();
 
             assertEquals("THIRD", result.get("output"), "Should map C to THIRD");
-            logger.info("✅ Rule OR C test passed: " + result);
+            logger.info("Rule OR C test passed: " + result);
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
             fail("Test failed: " + e.getMessage());
@@ -123,7 +123,7 @@ public class UltraSimpleRuleOrTest extends DemoTestBase {
             Map<String, Object> result = ruleResult.getEnrichedData();
 
             assertNull(result.get("output"), "Should have no output when no rules match");
-            logger.info("✅ Rule OR X test passed: " + result);
+            logger.info("Rule OR X test passed: " + result);
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
             fail("Test failed: " + e.getMessage());

@@ -140,7 +140,7 @@ public class BasicStageConfigurationTest extends DemoTestBase {
         logger.info("✓ STEP 5: Validating individual stage execution details");
         validateStageExecution(result);
 
-        logger.info("=== ✅ Stage-Based Scenario Execution Test COMPLETED SUCCESSFULLY ===");
+        logger.info("=== Stage-Based Scenario Execution Test COMPLETED SUCCESSFULLY ===");
     }
 
     @Test
@@ -178,7 +178,7 @@ public class BasicStageConfigurationTest extends DemoTestBase {
         logger.info("✓ STEP 4: Validating validation rule triggering behavior");
         validateValidationRuleTriggering(result);
 
-        logger.info("=== ✅ Validation Rule Triggering Test COMPLETED SUCCESSFULLY ===");
+        logger.info("=== Validation Rule Triggering Test COMPLETED SUCCESSFULLY ===");
     }
 
     @Test
@@ -216,7 +216,7 @@ public class BasicStageConfigurationTest extends DemoTestBase {
         logger.info("✓ STEP 4: Validating failure policy enforcement");
         validateFailurePolicyHandling(result);
 
-        logger.info("=== ✅ Stage Failure Policy Test COMPLETED SUCCESSFULLY ===");
+        logger.info("=== Stage Failure Policy Test COMPLETED SUCCESSFULLY ===");
     }
 
     /**

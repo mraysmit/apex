@@ -79,7 +79,7 @@ class SequentialProcessingIntegrationTest {
         assertNotNull(orderedConfig.getConfiguration());
         assertEquals(OrderedYamlConfiguration.ProcessingMode.SEQUENTIAL, orderedConfig.getProcessingMode());
 
-        LOGGER.info("✅ OrderedYamlParser integration test PASSED - Parsing successful!");
+        LOGGER.info("OrderedYamlParser integration test PASSED - Parsing successful!");
     }
     
     @Test
@@ -116,7 +116,7 @@ class SequentialProcessingIntegrationTest {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(), "Result type should be MATCH");
         assertFalse(result.hasFailures(), "Should have no failures");
 
-        LOGGER.info("✅ SequentialYamlProcessor integration test PASSED - Processing successful!");
+        LOGGER.info("SequentialYamlProcessor integration test PASSED - Processing successful!");
     }
     
     @Test
@@ -146,7 +146,7 @@ class SequentialProcessingIntegrationTest {
         OrderedYamlConfiguration standardConfig = orderedParser.parseYamlString(standardYaml, "test");
         assertEquals(OrderedYamlConfiguration.ProcessingMode.STANDARD, standardConfig.getProcessingMode());
 
-        LOGGER.info("✅ Processing mode detection test PASSED - Modes detected correctly!");
+        LOGGER.info("Processing mode detection test PASSED - Modes detected correctly!");
     }
     
     @Test
@@ -180,7 +180,7 @@ class SequentialProcessingIntegrationTest {
         YamlRuleConfiguration standardConfig = standardLoader.fromYamlString(legacyYaml);
         assertNotNull(standardConfig);
 
-        LOGGER.info("✅ Backward compatibility test PASSED - Legacy YAML works perfectly!");
+        LOGGER.info("Backward compatibility test PASSED - Legacy YAML works perfectly!");
     }
     
     @Test
@@ -224,7 +224,7 @@ class SequentialProcessingIntegrationTest {
             .orElse(null);
         assertEquals("enrichments", firstSection);
 
-        LOGGER.info("✅ Section order preservation test PASSED - Order maintained correctly!");
+        LOGGER.info("Section order preservation test PASSED - Order maintained correctly!");
     }
     
     // ========== TEST HELPER CLASSES ==========

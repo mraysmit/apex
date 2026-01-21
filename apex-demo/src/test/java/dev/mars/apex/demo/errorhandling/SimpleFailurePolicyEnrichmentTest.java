@@ -85,7 +85,7 @@ public class SimpleFailurePolicyEnrichmentTest extends DemoTestBase {
         
         logger.info("✓ Enrichment stage executed despite validation failure");
         logger.info("✓ Data enrichment completed successfully");
-        logger.info("✅ Enrichment after validation failure test completed");
+        logger.info("Enrichment after validation failure test completed");
     }
 
     @Test
@@ -111,7 +111,7 @@ public class SimpleFailurePolicyEnrichmentTest extends DemoTestBase {
         
         logger.info("✓ Enrichment calculations performed successfully");
         logger.info("✓ Field mappings applied correctly");
-        logger.info("✅ Enrichment field mappings test completed");
+        logger.info("Enrichment field mappings test completed");
     }
 
     @Test
@@ -136,6 +136,6 @@ public class SimpleFailurePolicyEnrichmentTest extends DemoTestBase {
         
         logger.info("✓ Enrichment handled missing data gracefully");
         logger.info("✓ No exceptions thrown for missing enrichment fields");
-        logger.info("✅ Enrichment missing data test completed");
+        logger.info("Enrichment missing data test completed");
     }
 }

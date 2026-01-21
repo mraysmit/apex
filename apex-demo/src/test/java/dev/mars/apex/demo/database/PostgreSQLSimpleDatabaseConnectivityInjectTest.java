@@ -130,7 +130,7 @@ public class PostgreSQLSimpleDatabaseConnectivityInjectTest extends DemoTestBase
                     connection.put("username", username);
                     connection.put("password", password);
 
-                    logger.info("✅ Updated PostgreSQL data source '{}' with Testcontainers connection details",
+                    logger.info("Updated PostgreSQL data source '{}' with Testcontainers connection details",
                                dataSource.getName());
                     break;
                 }

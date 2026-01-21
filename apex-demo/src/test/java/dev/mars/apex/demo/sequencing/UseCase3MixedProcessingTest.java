@@ -43,11 +43,11 @@ public class UseCase3MixedProcessingTest {
         // Initialize APEX services for sequential processing following established patterns
         yamlLoader = new YamlConfigurationLoader();
 
-        LOGGER.info("✅ Sequential processing services initialized");
+        LOGGER.info("Sequential processing services initialized");
     }
 
     @Test
-    @DisplayName("✅ SEQUENTIAL MODE: Complex Multi-Phase Processing")
+    @DisplayName("SEQUENTIAL MODE: Complex Multi-Phase Processing")
     void testMixedProcessingPattern() throws Exception {
         LOGGER.info("=== TESTING: Mixed Processing Pattern with Sequential Mode ===");
 
@@ -63,7 +63,7 @@ public class UseCase3MixedProcessingTest {
         testData.put("targetCurrency", "USD");
         testData.put("transactionType", "INTERNATIONAL_TRANSFER");
 
-        LOGGER.info("📊 Input Data: {}", testData);
+        LOGGER.info("Input Data: {}", testData);
 
         // Process with enrichment service (demonstrates sequential processing)
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
@@ -74,7 +74,7 @@ public class UseCase3MixedProcessingTest {
         @SuppressWarnings("unchecked")
         Map<String, Object> enrichedData = (Map<String, Object>) result;
 
-        LOGGER.info("🔍 Processing completed. Final data state: {}", enrichedData);
+        LOGGER.info("Processing completed. Final data state: {}", enrichedData);
 
         // Verify multi-phase processing worked correctly
         // At minimum, we should have the basic field enrichment working
@@ -84,7 +84,7 @@ public class UseCase3MixedProcessingTest {
                     "Processed transaction ID should match input");
 
         // Log what we actually got for debugging
-        LOGGER.info("✅ Mixed Processing pattern demonstrates sequential processing capability");
+        LOGGER.info("Mixed Processing pattern demonstrates sequential processing capability");
         LOGGER.info("   Input transaction: {}", testData.get("transactionId"));
         LOGGER.info("   Processed transaction: {}", enrichedData.get("processedTransactionId"));
         LOGGER.info("   Processing mode: {}", enrichedData.get("processingMode"));

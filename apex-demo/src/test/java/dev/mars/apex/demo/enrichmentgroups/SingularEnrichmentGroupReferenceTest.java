@@ -53,6 +53,6 @@ public class SingularEnrichmentGroupReferenceTest extends DemoTestBase {
         // Verify e2 (from composite_group) was applied
         assertEquals("B", enrichedData.get("b_copy"), "Enrichment e2 should have copied field 'b'");
 
-        logger.info("✅ Singular enrichment-group reference processed successfully");
+        logger.info("Singular enrichment-group reference processed successfully");
     }
 }

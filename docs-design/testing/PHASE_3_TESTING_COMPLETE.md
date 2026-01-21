@@ -51,7 +51,7 @@ if (isQuery) {
 
 ## Test Results
 
-### ✅ All 13 Tests Passing:
+### All 13 Tests Passing:
 
 #### H2 In-Memory Database Tests (7 tests)
 1. **Create H2 Connection** - Successfully creates in-memory H2 database connection
@@ -85,24 +85,24 @@ if (isQuery) {
 ## Test Coverage
 
 ### REST API Endpoints Tested (8/8)
-- ✅ `POST /playground/api/datasources/connections` - Create connection
-- ✅ `GET /playground/api/datasources/connections` - List all connections
-- ✅ `GET /playground/api/datasources/connections/{id}` - Get single connection
-- ✅ `PUT /playground/api/datasources/connections/{id}` - Update connection
-- ✅ `DELETE /playground/api/datasources/connections/{id}` - Delete connection
-- ✅ `POST /playground/api/datasources/test` - Test connection
-- ✅ `POST /playground/api/datasources/connections/{id}/query` - Execute query
-- ✅ `GET /playground/api/datasources/connections/{id}/schema` - Get schema
+- `POST /playground/api/datasources/connections` - Create connection
+- `GET /playground/api/datasources/connections` - List all connections
+- `GET /playground/api/datasources/connections/{id}` - Get single connection
+- `PUT /playground/api/datasources/connections/{id}` - Update connection
+- `DELETE /playground/api/datasources/connections/{id}` - Delete connection
+- `POST /playground/api/datasources/test` - Test connection
+- `POST /playground/api/datasources/connections/{id}/query` - Execute query
+- `GET /playground/api/datasources/connections/{id}/schema` - Get schema
 
 ### Database Types Tested
-- ✅ H2 (in-memory) - Full CRUD + Query execution
-- ✅ PostgreSQL - Connection and basic queries (optional)
+- H2 (in-memory) - Full CRUD + Query execution
+- PostgreSQL - Connection and basic queries (optional)
 
 ### Query Types Tested
-- ✅ SELECT queries (with filtering, ordering)
-- ✅ CREATE TABLE statements
-- ✅ INSERT statements
-- ✅ Schema introspection
+- SELECT queries (with filtering, ordering)
+- CREATE TABLE statements
+- INSERT statements
+- Schema introspection
 
 ## Execution Times
 - Individual test: < 1 second
@@ -111,11 +111,11 @@ if (isQuery) {
 
 ## Next Steps
 All integration tests passing! Ready to:
-1. ✅ Test via UI (apex_editor_main.html Data Sources accordion)
-2. ✅ Test via REST API directly
-3. ✅ Add more database types (MySQL, SQL Server, Oracle)
-4. ✅ Add query history/favorites features
-5. ✅ Add connection pooling metrics
+1. Test via UI (apex_editor_main.html Data Sources accordion)
+2. Test via REST API directly
+3. Add more database types (MySQL, SQL Server, Oracle)
+4. Add query history/favorites features
+5. Add connection pooling metrics
 
 ## Key Learnings
 1. **JDBC Gotcha**: `executeQuery()` is ONLY for SELECT, must use `executeUpdate()` for DDL/DML

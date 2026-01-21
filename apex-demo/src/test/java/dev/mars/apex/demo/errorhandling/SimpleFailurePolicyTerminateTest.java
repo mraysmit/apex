@@ -88,7 +88,7 @@ public class SimpleFailurePolicyTerminateTest extends DemoTestBase {
         
         logger.info("✓ Terminate policy correctly stopped processing after validation failure");
         logger.info("✓ Enrichment stage was skipped as expected");
-        logger.info("✅ Terminate failure policy test completed");
+        logger.info("Terminate failure policy test completed");
     }
 
     @Test
@@ -112,6 +112,6 @@ public class SimpleFailurePolicyTerminateTest extends DemoTestBase {
         
         logger.info("✓ Multiple stages correctly skipped after termination");
         logger.info("✓ Skipped stages: {}", scenarioResult.getSkippedStages().keySet());
-        logger.info("✅ Multi-stage terminate test completed");
+        logger.info("Multi-stage terminate test completed");
     }
 }

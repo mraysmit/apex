@@ -37,11 +37,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * JUnit 5 test for ConditionalExpressionLookup functionality.
  *
  * CRITICAL VALIDATION CHECKLIST APPLIED:
- * ✅ Count enrichments in YAML - 1 enrichment expected (conditional-expression-lookup-demo)
- * ✅ Verify log shows "Processed: 1 out of 1" - Must be 100% execution rate
- * ✅ Check EVERY enrichment condition - Test data triggers conditional expression lookup condition
- * ✅ Validate EVERY business calculation - Test actual conditional expression evaluation logic
- * ✅ Assert ALL enrichment results - Every result-field has corresponding assertEquals
+ * Count enrichments in YAML - 1 enrichment expected (conditional-expression-lookup-demo)
+ * Verify log shows "Processed: 1 out of 1" - Must be 100% execution rate
+ * Check EVERY enrichment condition - Test data triggers conditional expression lookup condition
+ * Validate EVERY business calculation - Test actual conditional expression evaluation logic
+ * Assert ALL enrichment results - Every result-field has corresponding assertEquals
  *
  * BUSINESS LOGIC VALIDATION:
  * - Conditional expression lookup using nested ternary operators with H2 database
@@ -145,7 +145,7 @@ public class ConditionalExpressionLookupTest extends DemoTestBase {
         assertEquals(1, ((Number) enrichedData.get("processingDays")).intValue(), "EXCELLENT category should have 1 day processing");
         assertEquals("JUNIOR", enrichedData.get("reviewerLevel"), "EXCELLENT category should require JUNIOR reviewer");
 
-            logger.info("✅ Conditional expression lookup functionality test completed successfully");
+            logger.info("Conditional expression lookup functionality test completed successfully");
         } catch (Exception e) {
             fail("Failed to load YAML configuration: " + e.getMessage());
         }

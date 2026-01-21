@@ -98,7 +98,7 @@ public class SimpleSeverityTest extends DemoTestBase {
         assertEquals("VALID", highEnrichedData.get("status"), "High amount should still be valid");
         
         logger.info("✓ High amount processed as valid");
-        logger.info("✅ Simple severity test completed");
+        logger.info("Simple severity test completed");
     }
 }
 

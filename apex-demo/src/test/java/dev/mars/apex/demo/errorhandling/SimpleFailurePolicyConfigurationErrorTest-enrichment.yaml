@@ -25,7 +25,7 @@ enrichments:
     calculation-config:
       expression: "'PROCESSED_WITH_ERRORS'"
       result-field: "processing-status"
-    # ❌ MISSING: field-mappings section (this should cause a configuration error)
+    # MISSING: field-mappings section (this should cause a configuration error)
     # This should be logged as a warning, NOT thrown as an exception
 
   # This enrichment is also missing field-mappings
@@ -35,4 +35,4 @@ enrichments:
     calculation-config:
       expression: "T(java.time.Instant).now().toString()"
       result-field: "processed-at"
-    # ❌ MISSING: field-mappings section (another configuration error)
+    # MISSING: field-mappings section (another configuration error)

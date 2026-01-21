@@ -230,13 +230,13 @@ queries:
 
 ## Critical Success Criteria
 
-✅ Schema parameter applied from YAML to JDBC URL  
-✅ Queries execute without schema prefix  
-✅ Multiple schemas supported simultaneously  
-✅ Schema isolation prevents public schema fallback  
-✅ JDBC URL includes `?currentSchema=<schema>`  
-✅ PostgreSQL `search_path` correctly configured  
-✅ Environment promotion works without code changes
+Schema parameter applied from YAML to JDBC URL  
+Queries execute without schema prefix  
+Multiple schemas supported simultaneously  
+Schema isolation prevents public schema fallback  
+JDBC URL includes `?currentSchema=<schema>`  
+PostgreSQL `search_path` correctly configured  
+Environment promotion works without code changes
 
 ## Design Documentation
 

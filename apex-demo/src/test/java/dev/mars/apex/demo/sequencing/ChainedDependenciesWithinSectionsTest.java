@@ -62,7 +62,7 @@ public class ChainedDependenciesWithinSectionsTest {
         // Verify R1 and R2 executed: both should trigger
         assertTrue(result.isTriggered(), "Rules should trigger");
 
-        LOGGER.info("✅ Chained dependencies test PASSED");
+        LOGGER.info("Chained dependencies test PASSED");
         LOGGER.info("   E1 (calculate-risk-score) -> E2 (determine-approval-level)");
         LOGGER.info("   R1 (validate-risk-score) -> R2 (validate-approval-level)");
         LOGGER.info("   riskScore: " + resultData.get("riskScore"));

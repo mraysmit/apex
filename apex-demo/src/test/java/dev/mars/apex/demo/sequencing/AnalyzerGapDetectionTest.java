@@ -63,7 +63,7 @@ public class AnalyzerGapDetectionTest extends DemoTestBase {
         assertEquals(List.of("transform-1", "transform-2", "transform-3"), plannedIds,
             "Analyzer MUST preserve transformation order in planned sequence");
 
-        System.out.println("✅ GAP 1 TEST PASSED: Analyzer correctly handles transformations");
+        System.out.println("GAP 1 TEST PASSED: Analyzer correctly handles transformations");
     }
 
     @Test
@@ -82,7 +82,7 @@ public class AnalyzerGapDetectionTest extends DemoTestBase {
             plannedIds,
             "Analyzer MUST preserve numbered suffix transformation order");
         
-        System.out.println("✅ GAP 2 TEST PASSED: Analyzer correctly handles numbered suffix transformations");
+        System.out.println("GAP 2 TEST PASSED: Analyzer correctly handles numbered suffix transformations");
     }
 
     @Test
@@ -104,7 +104,7 @@ public class AnalyzerGapDetectionTest extends DemoTestBase {
             plannedIds,
             "Analyzer MUST preserve interleaved enrichment/transformation order");
 
-        System.out.println("✅ GAP 3 TEST PASSED: Analyzer correctly handles mixed enrichments and transformations");
+        System.out.println("GAP 3 TEST PASSED: Analyzer correctly handles mixed enrichments and transformations");
     }
 
     @Test
@@ -128,7 +128,7 @@ public class AnalyzerGapDetectionTest extends DemoTestBase {
         // TODO: Add sectionOrder validation when analyzer supports it
         // Expected sectionOrder: [data-sources, enrichments, pipeline, rules, data-sinks]
         
-        System.out.println("✅ GAP 4 TEST PASSED: Analyzer correctly excludes section-level sections from itemOrder");
+        System.out.println("GAP 4 TEST PASSED: Analyzer correctly excludes section-level sections from itemOrder");
         System.out.println("NOTE: sectionOrder validation not yet implemented in analyzer");
     }
 
@@ -153,7 +153,7 @@ public class AnalyzerGapDetectionTest extends DemoTestBase {
         assertEquals("enrichments", plannedSequence.get(4).getSectionType(), 
             "Fifth item should be enrichments type");
         
-        System.out.println("✅ GAP 5 TEST PASSED: Analyzer correctly identifies section types");
+        System.out.println("GAP 5 TEST PASSED: Analyzer correctly identifies section types");
         System.out.println("\n" + report.getFormattedReport());
     }
 
@@ -177,7 +177,7 @@ public class AnalyzerGapDetectionTest extends DemoTestBase {
         assertEquals(List.of("standalone-1", "standalone-2", "standalone-3", "standalone-4"), plannedIds,
             "Analyzer MUST show all 4 enrichment items in document order");
 
-        System.out.println("✅ CRITICAL TEST PASSED: Analyzer shows all 4 items in their YAML file order");
+        System.out.println("CRITICAL TEST PASSED: Analyzer shows all 4 items in their YAML file order");
     }
 
     @Test
@@ -219,7 +219,7 @@ public class AnalyzerGapDetectionTest extends DemoTestBase {
         assertEquals(List.of("standalone-1", "standalone-2", "group-A"), plannedIds,
             "PLANNED sequence MUST be standalone-1, standalone-2, group-A (grouped items filtered out)");
 
-        System.out.println("✅ CRITICAL TEST PASSED: Complex YAML with groups-only logic correctly analyzed");
+        System.out.println("CRITICAL TEST PASSED: Complex YAML with groups-only logic correctly analyzed");
     }
 
     @Test
@@ -269,7 +269,7 @@ public class AnalyzerGapDetectionTest extends DemoTestBase {
         assertEquals(List.of("standalone-1", "group-A", "standalone-2", "group-B", "standalone-3"), plannedIds,
             "PLANNED sequence MUST preserve document order after filtering grouped items");
 
-        System.out.println("✅ MOST COMPLEX YAML TEST PASSED: Numbered suffixes + multiple groups + interleaving correctly analyzed");
+        System.out.println("MOST COMPLEX YAML TEST PASSED: Numbered suffixes + multiple groups + interleaving correctly analyzed");
     }
 }
 

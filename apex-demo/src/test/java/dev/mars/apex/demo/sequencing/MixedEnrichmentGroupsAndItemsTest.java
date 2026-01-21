@@ -118,7 +118,7 @@ public class MixedEnrichmentGroupsAndItemsTest {
         // Verify all rules passed
         assertTrue(result.isTriggered(), "Rules should trigger");
 
-        LOGGER.info("✅ Mixed Enrichment Groups and Items Order Test PASSED");
+        LOGGER.info("Mixed Enrichment Groups and Items Order Test PASSED");
         LOGGER.info("   Processing Order Verified:");
         LOGGER.info("   1. E1 (from ref): enrich-market-data ✓");
         LOGGER.info("   2. E2 (from ref): calculate-greeks ✓");
@@ -154,7 +154,7 @@ public class MixedEnrichmentGroupsAndItemsTest {
             .anyMatch(e -> "enrich-counterparty-data".equals(e.getId()));
         assertTrue(hasCounterparty, "Should have inline enrichment: enrich-counterparty-data");
 
-        LOGGER.info("✅ Enrichment-refs expanded before inline enrichments");
+        LOGGER.info("Enrichment-refs expanded before inline enrichments");
     }
 
     @Test
@@ -180,7 +180,7 @@ public class MixedEnrichmentGroupsAndItemsTest {
             .anyMatch(eg -> "compliance-enrichment-group".equals(eg.getId()));
         assertTrue(hasComplianceGroup, "Should have inline enrichment group: compliance-enrichment-group");
 
-        LOGGER.info("✅ Enrichment-group-refs expanded before inline enrichment groups");
+        LOGGER.info("Enrichment-group-refs expanded before inline enrichment groups");
     }
 
     @Test
@@ -213,7 +213,7 @@ public class MixedEnrichmentGroupsAndItemsTest {
         assertNotNull(enriched.get("netExposure"), "Exposure should be calculated");
         assertEquals(100, enriched.get("complianceScore"), "Compliance score should be calculated");
 
-        LOGGER.info("✅ Complex Dependency Chain Test PASSED");
+        LOGGER.info("Complex Dependency Chain Test PASSED");
     }
 }
 

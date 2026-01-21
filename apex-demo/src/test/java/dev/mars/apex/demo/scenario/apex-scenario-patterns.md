@@ -391,7 +391,7 @@ assertTrue(executedStages.contains("enrichment"));
 
 **Test Class:** `ScenarioEndToEndIntegrationTest.java`
 
-## 📊 Pattern Summary Table
+## Pattern Summary Table
 
 | Pattern | Purpose | Key Features | Usage Frequency | Files Demonstrated |
 |---------|---------|--------------|-----------------|-------------------|

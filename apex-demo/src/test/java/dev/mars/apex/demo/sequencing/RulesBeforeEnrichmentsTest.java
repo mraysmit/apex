@@ -76,7 +76,7 @@ class RulesBeforeEnrichmentsTest extends DemoTestBase {
         assertEquals(3, engine.getConfiguration().getAllEnrichmentGroups().size(),
             "Should have 3 enrichment groups: 2 from external file + 1 inline");
         
-        LOGGER.info("✅ All section types loaded correctly (rules first)");
+        LOGGER.info("All section types loaded correctly (rules first)");
         LOGGER.info("   - Rules: {}", engine.getConfiguration().getAllRules().size());
         LOGGER.info("   - Rule Groups: {}", engine.getConfiguration().getAllRuleGroups().size());
         LOGGER.info("   - Enrichments: {}", config.getEnrichments().size());
@@ -101,7 +101,7 @@ class RulesBeforeEnrichmentsTest extends DemoTestBase {
         testData.put("strike", 4600.0);  // Valid: > 0
         testData.put("optionType", "CALL");
         
-        LOGGER.info("📊 Input data: {}", testData);
+        LOGGER.info("Input data: {}", testData);
         LOGGER.info("🚀 Executing with sequential processing (rules first)...");
         
         // Execute
@@ -130,7 +130,7 @@ class RulesBeforeEnrichmentsTest extends DemoTestBase {
         assertTrue(enrichedData.containsKey("productCategory"),
             "EG3 (inline): productCategory should be enriched after rules");
         
-        LOGGER.info("✅ Rules Before Enrichments Test PASSED");
+        LOGGER.info("Rules Before Enrichments Test PASSED");
         LOGGER.info("   Processing Order Verified:");
         LOGGER.info("   1. R1 (from ref): validate-notional-limit ✅");
         LOGGER.info("   2. R2 (from ref): validate-strike-price ✅");
@@ -162,7 +162,7 @@ class RulesBeforeEnrichmentsTest extends DemoTestBase {
         testData.put("strike", 4600.0);
         testData.put("optionType", "CALL");
         
-        LOGGER.info("📊 Test Case: Invalid notional amount = 150M (limit is 100M)");
+        LOGGER.info("Test Case: Invalid notional amount = 150M (limit is 100M)");
         LOGGER.info("🚀 Expecting validation failure BEFORE enrichment...");
         
         // Execute
@@ -174,7 +174,7 @@ class RulesBeforeEnrichmentsTest extends DemoTestBase {
         assertTrue(result.isSuccess(),
             "Result should succeed even when validation rules trigger (APEX design: rules are informational)");
 
-        LOGGER.info("✅ Input validation before enrichment works correctly - validation rule triggered (reported violation without blocking processing)");
+        LOGGER.info("Input validation before enrichment works correctly - validation rule triggered (reported violation without blocking processing)");
     }
 
     @Test
@@ -209,7 +209,7 @@ class RulesBeforeEnrichmentsTest extends DemoTestBase {
         assertTrue(enrichedData.containsKey("productCategory"),
             "Enrichments should execute after rules pass");
         
-        LOGGER.info("✅ Enrichments executed after rules passed correctly");
+        LOGGER.info("Enrichments executed after rules passed correctly");
     }
 }
 

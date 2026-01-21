@@ -56,7 +56,7 @@ class CommonSpelErrorScenariosTest {
     // ========================================
 
     @Test
-    @DisplayName("❌ WRONG: #'variableName'] - Quote-Bracket Combination")
+    @DisplayName("WRONG: #'variableName'] - Quote-Bracket Combination")
     void testQuoteBracketSyntaxError() {
         logger.info("=== Common Error #1: Quote-Bracket Combination ===");
         logger.info("WRONG: #'region'] == 'US'");
@@ -65,7 +65,7 @@ class CommonSpelErrorScenariosTest {
         // This is what was breaking ConditionalStageExecutionTest
         Rule wrongRule = new Rule(
             "wrong-syntax",
-            "#'region'] == 'US'",  // ❌ WRONG: Mixing quotes and brackets
+            "#'region'] == 'US'",  // WRONG: Mixing quotes and brackets
             "Invalid syntax",
             "ERROR"
         );
@@ -86,13 +86,13 @@ class CommonSpelErrorScenariosTest {
     }
 
     @Test
-    @DisplayName("✅ CORRECT: #variableName - Proper Variable Reference")
+    @DisplayName("CORRECT: #variableName - Proper Variable Reference")
     void testCorrectVariableReferenceSyntax() {
         logger.info("=== Correct Syntax: Simple Variable Reference ===");
         
         Rule correctRule = new Rule(
             "correct-syntax",
-            "#region == 'US'",  // ✅ CORRECT: Simple hash prefix
+            "#region == 'US'",  // CORRECT: Simple hash prefix
             "Valid syntax",
             "INFO"
         );
@@ -113,7 +113,7 @@ class CommonSpelErrorScenariosTest {
     // ========================================
 
     @Test
-    @DisplayName("❌ WRONG: #obj.nonexistent.property - Nested Null Access")
+    @DisplayName("WRONG: #obj.nonexistent.property - Nested Null Access")
     void testNestedPropertyAccessError() {
         logger.info("=== Common Error #2: Nested Property Access on Null ===");
         logger.info("WRONG: #customer.address.city (when address is null)");
@@ -121,7 +121,7 @@ class CommonSpelErrorScenariosTest {
         
         Rule unsafeRule = new Rule(
             "nested-access",
-            "#customer.address.city == 'NYC'",  // ❌ WRONG: No null checks
+            "#customer.address.city == 'NYC'",  // WRONG: No null checks
             "City is NYC",
             "INFO"
         );
@@ -142,7 +142,7 @@ class CommonSpelErrorScenariosTest {
     }
 
     @Test
-    @DisplayName("✅ CORRECT: Safe Nested Property Access with Null Checks")
+    @DisplayName("CORRECT: Safe Nested Property Access with Null Checks")
     void testSafeNestedPropertyAccess() {
         logger.info("=== Correct Syntax: Safe Nested Property Access ===");
         
@@ -174,7 +174,7 @@ class CommonSpelErrorScenariosTest {
     // ========================================
 
     @Test
-    @DisplayName("❌ WRONG: #value.toString() - Method Call on Null")
+    @DisplayName("WRONG: #value.toString() - Method Call on Null")
     void testMethodCallOnNull() {
         logger.info("=== Common Error #3: Method Call on Null Value ===");
         logger.info("WRONG: #description.length() > 0 (when description is null)");
@@ -182,7 +182,7 @@ class CommonSpelErrorScenariosTest {
         
         Rule unsafeRule = new Rule(
             "null-method-call",
-            "#description.length() > 0",  // ❌ WRONG: No null check
+            "#description.length() > 0",  // WRONG: No null check
             "Has description",
             "INFO"
         );
@@ -200,13 +200,13 @@ class CommonSpelErrorScenariosTest {
     }
 
     @Test
-    @DisplayName("✅ CORRECT: Safe Method Calls with Null Guards")
+    @DisplayName("CORRECT: Safe Method Calls with Null Guards")
     void testSafeMethodCalls() {
         logger.info("=== Correct Syntax: Safe Method Calls ===");
         
         Rule safeRule = new Rule(
             "safe-method-call",
-            "#description != null && #description.length() > 0",  // ✅ CORRECT: Null check first
+            "#description != null && #description.length() > 0",  // CORRECT: Null check first
             "Has description",
             "INFO"
         );
@@ -227,7 +227,7 @@ class CommonSpelErrorScenariosTest {
     // ========================================
 
     @Test
-    @DisplayName("❌ WRONG: #amount > 1000 - Type Mismatch (String vs Number)")
+    @DisplayName("WRONG: #amount > 1000 - Type Mismatch (String vs Number)")
     void testTypeMismatchComparison() {
         logger.info("=== Common Error #4: Type Mismatch in Comparison ===");
         logger.info("WRONG: #amount > 1000 (when amount is a String)");
@@ -235,7 +235,7 @@ class CommonSpelErrorScenariosTest {
         
         Rule unsafeRule = new Rule(
             "type-mismatch",
-            "#amount > 1000",  // ❌ WRONG: Comparing String to Number
+            "#amount > 1000",  // WRONG: Comparing String to Number
             "High amount",
             "INFO"
         );
@@ -251,7 +251,7 @@ class CommonSpelErrorScenariosTest {
     }
 
     @Test
-    @DisplayName("✅ CORRECT: Explicit Type Conversion")
+    @DisplayName("CORRECT: Explicit Type Conversion")
     void testExplicitTypeConversion() {
         logger.info("=== Correct Syntax: Explicit Type Conversion ===");
         
@@ -278,7 +278,7 @@ class CommonSpelErrorScenariosTest {
     // ========================================
 
     @Test
-    @DisplayName("❌ WRONG: #items[5] - Array Index Out of Bounds")
+    @DisplayName("WRONG: #items[5] - Array Index Out of Bounds")
     void testArrayIndexOutOfBounds() {
         logger.info("=== Common Error #5: Array Index Out of Bounds ===");
         logger.info("WRONG: #items[5] (when list has only 2 elements)");
@@ -286,7 +286,7 @@ class CommonSpelErrorScenariosTest {
         
         Rule unsafeRule = new Rule(
             "array-access",
-            "#items[5] == 'target'",  // ❌ WRONG: No bounds check
+            "#items[5] == 'target'",  // WRONG: No bounds check
             "Target found",
             "INFO"
         );
@@ -304,13 +304,13 @@ class CommonSpelErrorScenariosTest {
     }
 
     @Test
-    @DisplayName("✅ CORRECT: Safe Array Access with Bounds Check")
+    @DisplayName("CORRECT: Safe Array Access with Bounds Check")
     void testSafeArrayAccess() {
         logger.info("=== Correct Syntax: Safe Array Access ===");
         
         Rule safeRule = new Rule(
             "safe-array-access",
-            "#items != null && #items.size() > 5 && #items[5] == 'target'",  // ✅ CORRECT: Size check
+            "#items != null && #items.size() > 5 && #items[5] == 'target'",  // CORRECT: Size check
             "Target found",
             "INFO"
         );
@@ -331,7 +331,7 @@ class CommonSpelErrorScenariosTest {
     // ========================================
 
     @Test
-    @DisplayName("❌ WRONG: #total / #count - Division by Zero")
+    @DisplayName("WRONG: #total / #count - Division by Zero")
     void testDivisionByZero() {
         logger.info("=== Common Error #6: Division by Zero ===");
         logger.info("WRONG: #total / #count (when count is 0)");
@@ -339,7 +339,7 @@ class CommonSpelErrorScenariosTest {
         
         Rule unsafeRule = new Rule(
             "division",
-            "#total / #count > 100",  // ❌ WRONG: No zero check
+            "#total / #count > 100",  // WRONG: No zero check
             "Average is high",
             "INFO"
         );
@@ -358,13 +358,13 @@ class CommonSpelErrorScenariosTest {
     }
 
     @Test
-    @DisplayName("✅ CORRECT: Safe Division with Zero Check")
+    @DisplayName("CORRECT: Safe Division with Zero Check")
     void testSafeDivision() {
         logger.info("=== Correct Syntax: Safe Division ===");
         
         Rule safeRule = new Rule(
             "safe-division",
-            "#count != null && #count != 0 && (#total / #count) > 100",  // ✅ CORRECT: Zero check
+            "#count != null && #count != 0 && (#total / #count) > 100",  // CORRECT: Zero check
             "Average is high",
             "INFO"
         );
@@ -416,7 +416,7 @@ class CommonSpelErrorScenariosTest {
     // ========================================
 
     @Test
-    @DisplayName("✅ BEST PRACTICE: Elvis Operator (?:) for Null Safety")
+    @DisplayName("BEST PRACTICE: Elvis Operator (?:) for Null Safety")
     void testElvisOperatorUsage() {
         logger.info("=== Best Practice: Elvis Operator for Default Values ===");
         logger.info("GOOD: #value ?: 0");
@@ -424,7 +424,7 @@ class CommonSpelErrorScenariosTest {
         
         Rule elvisRule = new Rule(
             "elvis-operator",
-            "(#quantity ?: 0) > 100",  // ✅ BEST: Elvis operator provides default
+            "(#quantity ?: 0) > 100",  // BEST: Elvis operator provides default
             "High quantity",
             "INFO"
         );
@@ -454,7 +454,7 @@ class CommonSpelErrorScenariosTest {
     // ========================================
 
     @Test
-    @DisplayName("✅ BEST PRACTICE: Safe Navigation (?.) for Null-Safe Property Access")
+    @DisplayName("BEST PRACTICE: Safe Navigation (?.) for Null-Safe Property Access")
     void testSafeNavigationOperator() {
         logger.info("=== Best Practice: Safe Navigation Operator ===");
         logger.info("GOOD: #customer?.address?.city");
@@ -462,7 +462,7 @@ class CommonSpelErrorScenariosTest {
         
         Rule safeNavRule = new Rule(
             "safe-navigation",
-            "#customer?.address?.city == 'NYC'",  // ✅ BEST: Safe navigation
+            "#customer?.address?.city == 'NYC'",  // BEST: Safe navigation
             "NYC customer",
             "INFO"
         );
@@ -482,44 +482,5 @@ class CommonSpelErrorScenariosTest {
         
         logger.info("✓ Safe navigation handles null gracefully");
         logger.info("💡 TIP: Use ?. for null-safe property chains");
-    }
-
-    // ========================================
-    // SUMMARY TEST
-    // ========================================
-
-    @Test
-    @DisplayName("📚 YAML Developer Guidelines Summary")
-    void printDeveloperGuidelines() {
-        logger.info("=======================================================");
-        logger.info("  APEX YAML SpEL Syntax - Quick Reference");
-        logger.info("=======================================================");
-        logger.info("");
-        logger.info("✅ DO:");
-        logger.info("  • Use #variableName for variable references");
-        logger.info("  • Check for null: #value != null");
-        logger.info("  • Use safe navigation: #obj?.property");
-        logger.info("  • Use Elvis operator: #value ?: defaultValue");
-        logger.info("  • Check array bounds: #list.size() > index");
-        logger.info("  • Guard divisions: #divisor != 0");
-        logger.info("  • Match types in comparisons");
-        logger.info("");
-        logger.info("❌ DON'T:");
-        logger.info("  • Don't use #'variableName'] (quote-bracket mix)");
-        logger.info("  • Don't call methods on null: #value.length()");
-        logger.info("  • Don't access nested nulls: #obj.sub.property");
-        logger.info("  • Don't compare incompatible types");
-        logger.info("  • Don't access arrays without bounds check");
-        logger.info("  • Don't divide without zero check");
-        logger.info("");
-        logger.info("📖 Common SpEL Error Codes:");
-        logger.info("  • EL1043E - Unexpected token (syntax error)");
-        logger.info("  • EL1007E - Property not found");
-        logger.info("  • EL1011E - Method call on null");
-        logger.info("  • EL1030E - Index out of bounds");
-        logger.info("");
-        logger.info("=======================================================");
-        
-        assertTrue(true, "Guidelines printed successfully");
     }
 }

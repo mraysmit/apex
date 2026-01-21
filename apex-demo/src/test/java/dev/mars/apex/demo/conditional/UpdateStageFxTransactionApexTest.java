@@ -45,7 +45,7 @@ public class UpdateStageFxTransactionApexTest {
         yamlLoader = new YamlConfigurationLoader();
         ruleFactory = new YamlRuleFactory();
 
-        logger.info("✅ APEX services initialized successfully");
+        logger.info("APEX services initialized successfully");
     }
 
     @Test
@@ -60,7 +60,7 @@ public class UpdateStageFxTransactionApexTest {
                 "src/test/java/dev/mars/apex/demo/conditional/UpdateStageFxTransactionApexTest.yaml"
             );
             
-            logger.info("✅ Configuration loaded with cross-file rule references");
+            logger.info("Configuration loaded with cross-file rule references");
             
             // Create test data
             Map<String, Object> testData = createSwiftTestData("1", "USD", "EUR");
@@ -78,7 +78,7 @@ public class UpdateStageFxTransactionApexTest {
             assertNotNull(enrichedData.get("SELL_CURRENCY_RANK"), "Sell currency ranking should be enriched");
             assertNotNull(enrichedData.get("PROCESSED_NDF"), "NDF processing should work");
 
-            logger.info("✅ APEX enrichment processing test passed");
+            logger.info("APEX enrichment processing test passed");
             logger.info("Enriched data: {}", enrichedData);
             
         } catch (Exception e) {
@@ -123,7 +123,7 @@ public class UpdateStageFxTransactionApexTest {
             logger.info("USD/EUR enriched data: {}", usdEurResult.getEnrichedData());
             logger.info("GBP/JPY enriched data: {}", gbpJpyResult.getEnrichedData());
             
-            logger.info("✅ Rule reusability demonstrated successfully");
+            logger.info("Rule reusability demonstrated successfully");
             
         } catch (Exception e) {
             logger.error("Rule reusability test failed", e);
@@ -162,7 +162,7 @@ public class UpdateStageFxTransactionApexTest {
             logger.info("Cross-file enriched data: {}", enrichedData);
             
             logger.info("Cross-file rule resolution successful - enriched data: {}", enrichedData);
-            logger.info("✅ Cross-file rule resolution test passed");
+            logger.info("Cross-file rule resolution test passed");
             
         } catch (Exception e) {
             logger.error("Cross-file rule resolution test failed", e);
@@ -210,7 +210,7 @@ public class UpdateStageFxTransactionApexTest {
         assertNotNull(enrichedData.get("SELL_CURRENCY_RANK"), "Sell currency ranking should be enriched");
         assertNotNull(enrichedData.get("PROCESSED_NDF"), "NDF processing should work");
         
-        logger.info("✅ {} validation passed", testName);
+        logger.info("{} validation passed", testName);
     }
 }
 

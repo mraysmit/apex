@@ -158,7 +158,7 @@ curl -X GET "http://localhost:8082/yaml-manager/api/health/status"
 
 ---
 
-## 🔍 Dependency Analysis Controller
+## Dependency Analysis Controller
 
 **Base Path**: `/api/dependencies`
 
@@ -1596,7 +1596,7 @@ curl -X GET "http://localhost:8082/yaml-manager/api/categories/customer-validati
 
 ---
 
-## ✅ Validation Controller
+## Validation Controller
 
 **Base Path**: `/api/validation`
 
@@ -1946,7 +1946,7 @@ validate_file() {
 
     is_valid=$(echo "$response" | jq -r '.isValid')
     if [ "$is_valid" != "true" ]; then
-        echo "❌ STRUCTURE VALIDATION FAILED: $file_name"
+        echo "STRUCTURE VALIDATION FAILED: $file_name"
         echo "$response" | jq '.issues'
         EXIT_CODE=1
         return
@@ -1962,7 +1962,7 @@ validate_file() {
         echo "⚠️  HEALTH SCORE BELOW THRESHOLD: $file_name (Score: $health_score)"
         EXIT_CODE=1
     else
-        echo "✅ PASSED: $file_name (Score: $health_score)"
+        echo "PASSED: $file_name (Score: $health_score)"
     fi
 }
 
@@ -1978,11 +1978,11 @@ circular_response=$(curl -s -X GET "${YAML_MANAGER_URL}/dependencies/circular-de
 circular_count=$(echo "$circular_response" | jq '.circularDependencies | length')
 
 if [ "$circular_count" -gt 0 ]; then
-    echo "❌ CIRCULAR DEPENDENCIES DETECTED:"
+    echo "CIRCULAR DEPENDENCIES DETECTED:"
     echo "$circular_response" | jq '.circularDependencies'
     EXIT_CODE=1
 else
-    echo "✅ No circular dependencies found"
+    echo "No circular dependencies found"
 fi
 
 echo -e "\n=== Validation Complete ==="
@@ -2105,7 +2105,7 @@ class YamlManagerDashboard {
         resultsDiv.innerHTML = `
             <h3>Validation Results</h3>
             <p>Overall Score: ${validation.overallScore}/100</p>
-            <p>Status: ${validation.isValid ? '✅ Valid' : '❌ Invalid'}</p>
+            <p>Status: ${validation.isValid ? 'Valid' : 'Invalid'}</p>
             <div class="issues">
                 ${validation.issues.map(issue => `
                     <div class="issue ${issue.type.toLowerCase()}">
@@ -2152,7 +2152,7 @@ dashboard.validateFile(`${dashboard.graphPath}/30-rules-a.yaml`);
 
 ---
 
-## 🚨 Troubleshooting Guide
+## Troubleshooting Guide
 
 ### Common Issues & Solutions
 
@@ -2169,10 +2169,10 @@ curl http://localhost:8082/yaml-manager/api/health
 
 #### File Path Issues (400 Error)
 ```bash
-# ❌ Incorrect (Windows paths need encoding)
+# Incorrect (Windows paths need encoding)
 curl "http://localhost:8082/yaml-manager/api/dependencies/tree?rootFile=C:\configs\file.yaml"
 
-# ✅ Correct (URL encoded)
+# Correct (URL encoded)
 curl "http://localhost:8082/yaml-manager/api/dependencies/tree?rootFile=C%3A%2FUsers%2Fmraysmit%2Fdev%2Fidea-projects%2Fapex-rules-engine%2Fapex-yaml-manager%2Fsrc%2Ftest%2Fresources%2Fapex-yaml-samples%2Fgraph-100%2F00-scenario-registry.yaml"
 ```
 
@@ -2202,28 +2202,28 @@ curl -X POST "http://localhost:8082/yaml-manager/api/catalog/scan" \
 
 #### Optimize Batch Operations
 ```bash
-# ✅ Good: Scan once, then query multiple times
+# Good: Scan once, then query multiple times
 curl -X POST "${API_BASE}/catalog/scan" -d "directory=${BASE_PATH}"
 curl -X GET "${API_BASE}/catalog/statistics"
 curl -X GET "${API_BASE}/catalog/discovery/health?minScore=0&maxScore=70"
 
-# ❌ Avoid: Multiple scans
+# Avoid: Multiple scans
 curl -X POST "${API_BASE}/catalog/scan" -d "directory=${BASE_PATH}"
 curl -X POST "${API_BASE}/catalog/scan" -d "directory=${BASE_PATH}"  # Redundant
 ```
 
 #### Use Appropriate Endpoints
 ```bash
-# ✅ For quick health check
+# For quick health check
 curl "${API_BASE}/health-checks/score?filePath=${FILE}"
 
-# ❌ Avoid for simple checks
+# Avoid for simple checks
 curl -X POST "${API_BASE}/health-checks/report" -d "filePath=${FILE}"  # Too heavy
 ```
 
 ---
 
-## 📋 Quick Reference
+## Quick Reference
 
 ### Essential Endpoints Summary
 

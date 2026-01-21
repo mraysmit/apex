@@ -60,7 +60,7 @@ class BothRefsEnrichmentFirstTest extends DemoTestBase {
         assertEquals(3, engine.getConfiguration().getAllRules().size(),
             "Should have 3 rules: 2 from external file + 1 inline");
         
-        LOGGER.info("✅ Both enrichments and rules loaded correctly");
+        LOGGER.info("Both enrichments and rules loaded correctly");
     }
 
     @Test
@@ -79,7 +79,7 @@ class BothRefsEnrichmentFirstTest extends DemoTestBase {
         testData.put("notionalAmount", 50000000.0);  // Valid: <= 100M (R1)
         testData.put("strike", 100.0);  // Valid: > 0 (R2)
         
-        LOGGER.info("📊 Input data: {}", testData);
+        LOGGER.info("Input data: {}", testData);
         LOGGER.info("🚀 Executing with sequential processing...");
         
         // Execute
@@ -114,7 +114,7 @@ class BothRefsEnrichmentFirstTest extends DemoTestBase {
             "Processing should succeed - all rules should pass with valid data");
 
         LOGGER.info("═══════════════════════════════════════════════════════════════");
-        LOGGER.info("✅ CRITICAL FIX VERIFIED: enrichment-refs expanded BEFORE rule-refs!");
+        LOGGER.info("CRITICAL FIX VERIFIED: enrichment-refs expanded BEFORE rule-refs!");
         LOGGER.info("   - E1 (from ref): Market data enriched FIRST");
         LOGGER.info("   - E2 (from ref): Greeks calculated SECOND");
         LOGGER.info("   - E3 (inline): Product type enriched THIRD");

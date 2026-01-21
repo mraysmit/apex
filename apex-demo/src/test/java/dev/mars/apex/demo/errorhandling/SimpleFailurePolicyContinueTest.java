@@ -88,7 +88,7 @@ public class SimpleFailurePolicyContinueTest extends DemoTestBase {
         
         logger.info("✓ Continue-with-warnings policy allowed processing to continue");
         logger.info("✓ Warnings were collected: {}", scenarioResult.getWarnings().size());
-        logger.info("✅ Continue-with-warnings failure policy test completed");
+        logger.info("Continue-with-warnings failure policy test completed");
     }
 
     @Test
@@ -113,6 +113,6 @@ public class SimpleFailurePolicyContinueTest extends DemoTestBase {
         
         logger.info("✓ All stages executed despite failures");
         logger.info("✓ Stage results count: {}", scenarioResult.getStageResults().size());
-        logger.info("✅ Multi-failure continue test completed");
+        logger.info("Multi-failure continue test completed");
     }
 }

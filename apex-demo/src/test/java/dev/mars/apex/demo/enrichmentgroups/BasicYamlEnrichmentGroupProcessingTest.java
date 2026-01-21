@@ -67,7 +67,7 @@ public class BasicYamlEnrichmentGroupProcessingTest extends DemoTestBase {
         assertEquals("B", enrichedData.get("b_copy"), "Enrichment e2 should have copied field 'b'");
         assertEquals("C", enrichedData.get("c_copy"), "Enrichment e3 should have copied field 'c'");
 
-        logger.info("✅ All enrichment groups processed successfully");
+        logger.info("All enrichment groups processed successfully");
     }
 
     @Test
@@ -115,7 +115,7 @@ public class BasicYamlEnrichmentGroupProcessingTest extends DemoTestBase {
         assertEquals("B", enrichedData.get("b_copy"), "Enrichment e2 should have copied field 'b'");
         assertNull(enrichedData.get("c_copy"), "Enrichment e3 should not have copied field 'c' (missing)");
 
-        logger.info("✅ Enrichment groups correctly failed with missing field");
+        logger.info("Enrichment groups correctly failed with missing field");
     }
 
     @Test
@@ -151,7 +151,7 @@ public class BasicYamlEnrichmentGroupProcessingTest extends DemoTestBase {
         // Note: b_copy might or might not be present depending on OR group short-circuit behavior
         assertNull(enrichedData.get("c_copy"), "Enrichment e3 should not have copied field 'c' (missing)");
 
-        logger.info("✅ Enrichment groups correctly processed with partial data");
+        logger.info("Enrichment groups correctly processed with partial data");
     }
 
     @Test
@@ -186,7 +186,7 @@ public class BasicYamlEnrichmentGroupProcessingTest extends DemoTestBase {
         assertNull(enrichedData.get("b_copy"), "No enrichments should be applied");
         assertNull(enrichedData.get("c_copy"), "No enrichments should be applied");
 
-        logger.info("✅ Enrichment groups correctly failed with no data");
+        logger.info("Enrichment groups correctly failed with no data");
     }
 
 }

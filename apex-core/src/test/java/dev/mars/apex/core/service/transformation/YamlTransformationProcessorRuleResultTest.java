@@ -62,7 +62,7 @@ class YamlTransformationProcessorRuleResultTest {
         assertNotNull(result.getResultType(), "Result type should not be null");
         assertTrue(result.isSuccess(), "Should succeed for valid transformation");
 
-        logger.info("✅ Test 1 PASSED: processTransformationsWithResult() returns RuleResult");
+        logger.info("Test 1 PASSED: processTransformationsWithResult() returns RuleResult");
     }
 
     // ========================================
@@ -109,7 +109,7 @@ class YamlTransformationProcessorRuleResultTest {
         assertTrue(result.getResultType() == RuleResult.ResultType.ERROR || result.isSuccess(),
                 "Should either return ERROR or handle gracefully");
 
-        logger.info("✅ Test 2 PASSED: Error handling verified");
+        logger.info("Test 2 PASSED: Error handling verified");
     }
 
     // ========================================
@@ -143,7 +143,7 @@ class YamlTransformationProcessorRuleResultTest {
         assertEquals(SeverityConstants.ERROR, result.getSeverity(),
                 "Should have ERROR severity");
 
-        logger.info("✅ Test 3 PASSED: RuleResult.resultType = ERROR on transformation errors");
+        logger.info("Test 3 PASSED: RuleResult.resultType = ERROR on transformation errors");
     }
 
     // ========================================
@@ -177,7 +177,7 @@ class YamlTransformationProcessorRuleResultTest {
         assertTrue(enrichedData.containsKey("doubledAmount") || enrichedData.containsKey("amount"),
                 "Should have transformed or original data");
 
-        logger.info("✅ Test 4 PASSED: Successful transformations return appropriate RuleResult");
+        logger.info("Test 4 PASSED: Successful transformations return appropriate RuleResult");
     }
 
     // ========================================

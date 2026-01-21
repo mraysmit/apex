@@ -49,11 +49,11 @@ import dev.mars.apex.sync.TestContainerImages;
  * 3. Absolute path → uses exact path specified
  *
  * CRITICAL VALIDATION CHECKLIST:
- * ✅ Docker availability - Gracefully skip if Docker not available
- * ✅ Report path patterns - Test filename-only, relative, and absolute paths
- * ✅ Directory auto-creation - Verify directories created automatically
- * ✅ HTML report generation - Confirm valid HTML output
- * ✅ Schema diff content - Verify report contains schema comparison results
+ * Docker availability - Gracefully skip if Docker not available
+ * Report path patterns - Test filename-only, relative, and absolute paths
+ * Directory auto-creation - Verify directories created automatically
+ * HTML report generation - Confirm valid HTML output
+ * Schema diff content - Verify report contains schema comparison results
  *
  * This test uses REAL PostgreSQL via Testcontainers - NO MOCKING
  *

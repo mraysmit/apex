@@ -2,7 +2,7 @@
 
 **Date:** 2025-10-17  
 **Issue:** 20 scenario loading failures in SimpleFailurePolicy tests  
-**Status:** ✅ **FIXED - 18 tests now passing**
+**Status:** **FIXED - 18 tests now passing**
 
 ---
 
@@ -48,17 +48,17 @@ scenarios:
 ### Files Fixed (9 total)
 
 **SimpleFailurePolicy Registry Files:**
-1. ✅ SimpleFailurePolicyComplianceTest.yaml
-2. ✅ SimpleFailurePolicyContinueTest.yaml
-3. ✅ SimpleFailurePolicyEnrichmentTest.yaml
-4. ✅ SimpleFailurePolicyReviewTest.yaml
-5. ✅ SimpleFailurePolicyTerminateTest.yaml
-6. ✅ SimpleFailurePolicyValidationTest.yaml
-7. ✅ SimpleFailurePolicyConfigurationErrorTest.yaml
+1. SimpleFailurePolicyComplianceTest.yaml
+2. SimpleFailurePolicyContinueTest.yaml
+3. SimpleFailurePolicyEnrichmentTest.yaml
+4. SimpleFailurePolicyReviewTest.yaml
+5. SimpleFailurePolicyTerminateTest.yaml
+6. SimpleFailurePolicyValidationTest.yaml
+7. SimpleFailurePolicyConfigurationErrorTest.yaml
 
 **Configuration Error Test Registry Files:**
-8. ✅ SimpleFailurePolicyConfigurationErrorTest-terminate.yaml
-9. ✅ SimpleFailurePolicyConfigurationErrorTest-multiple.yaml
+8. SimpleFailurePolicyConfigurationErrorTest-terminate.yaml
+9. SimpleFailurePolicyConfigurationErrorTest-multiple.yaml
 
 ---
 
@@ -151,7 +151,7 @@ After fixing scenario loading, the remaining failures are due to different root 
 
 ## Conclusion
 
-✅ **Scenario Loading Issue RESOLVED**
+**Scenario Loading Issue RESOLVED**
 
 The root cause was a simple but critical YAML key mismatch. By changing `scenario-registry:` to `scenarios:` in all registry files, we fixed 18 tests and improved overall test pass rate from 91.3% to 94.6%.
 

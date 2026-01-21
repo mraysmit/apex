@@ -54,7 +54,7 @@ class RestApiServerIntegrationTest {
         testServer.start();
         baseUrl = testServer.getBaseUrl();
         
-        logger.info("✅ RestApiTestableServer ready at: {}", baseUrl);
+        logger.info("RestApiTestableServer ready at: {}", baseUrl);
     }
 
     @AfterEach
@@ -92,8 +92,8 @@ class RestApiServerIntegrationTest {
         org.junit.jupiter.api.Assertions.assertTrue(response.body().contains("AAA"), "Response should contain AAA rating");
         org.junit.jupiter.api.Assertions.assertTrue(response.body().contains("CORPORATE"), "Response should contain CORPORATE type");
 
-        logger.info("📊 Customer Response: {}", response.body());
-        logger.info("✅ Business Rule: CUST1 approved for high-value transactions (AAA/CORPORATE)");
+        logger.info("Customer Response: {}", response.body());
+        logger.info("Business Rule: CUST1 approved for high-value transactions (AAA/CORPORATE)");
 
         // Test Case 2: Lower-rated customer (different approval criteria)
         logger.info("🔧 Testing A-rated hedge fund customer eligibility...");
@@ -114,10 +114,10 @@ class RestApiServerIntegrationTest {
         org.junit.jupiter.api.Assertions.assertTrue(hedgeFundResponse.body().contains("A"), "Response should contain A rating");
         org.junit.jupiter.api.Assertions.assertTrue(hedgeFundResponse.body().contains("HEDGE_FUND"), "Response should contain HEDGE_FUND type");
 
-        logger.info("📊 Hedge Fund Response: {}", hedgeFundResponse.body());
-        logger.info("✅ Business Rule: CUST3 requires additional approval (A/HEDGE_FUND)");
+        logger.info("Hedge Fund Response: {}", hedgeFundResponse.body());
+        logger.info("Business Rule: CUST3 requires additional approval (A/HEDGE_FUND)");
 
-        logger.info("✅ High-value transaction customer eligibility validation completed successfully");
+        logger.info("High-value transaction customer eligibility validation completed successfully");
     }
 
     @Test
@@ -143,7 +143,7 @@ class RestApiServerIntegrationTest {
             java.net.http.HttpResponse.BodyHandlers.ofString());
 
         org.junit.jupiter.api.Assertions.assertEquals(200, usdResponse.statusCode(), "USD rate lookup should succeed");
-        logger.info("📊 USD Rate: {}", usdResponse.body());
+        logger.info("USD Rate: {}", usdResponse.body());
 
         // Step 2: Get EUR conversion rate
         logger.info("🔧 Step 2: Getting EUR conversion rate...");
@@ -159,7 +159,7 @@ class RestApiServerIntegrationTest {
             java.net.http.HttpResponse.BodyHandlers.ofString());
 
         org.junit.jupiter.api.Assertions.assertEquals(200, eurResponse.statusCode(), "EUR rate lookup should succeed");
-        logger.info("📊 EUR Rate: {}", eurResponse.body());
+        logger.info("EUR Rate: {}", eurResponse.body());
 
         // Step 3: Perform currency conversion
         logger.info("🔧 Step 3: Performing USD to EUR conversion...");
@@ -178,10 +178,10 @@ class RestApiServerIntegrationTest {
         org.junit.jupiter.api.Assertions.assertTrue(conversionResponse.body().contains("convertedAmount"), "Response should contain converted amount");
         org.junit.jupiter.api.Assertions.assertTrue(conversionResponse.body().contains("exchangeRate"), "Response should contain exchange rate");
 
-        logger.info("📊 Conversion Result: {}", conversionResponse.body());
-        logger.info("✅ Business Rule: USD 1000 converted to EUR successfully");
+        logger.info("Conversion Result: {}", conversionResponse.body());
+        logger.info("Business Rule: USD 1000 converted to EUR successfully");
 
-        logger.info("✅ International trade currency conversion workflow completed successfully");
+        logger.info("International trade currency conversion workflow completed successfully");
     }
 
     @Test
@@ -208,7 +208,7 @@ class RestApiServerIntegrationTest {
 
         org.junit.jupiter.api.Assertions.assertEquals(200, healthResponse.statusCode(), "Health check should succeed");
         org.junit.jupiter.api.Assertions.assertTrue(healthResponse.body().contains("UP"), "System should be UP");
-        logger.info("📊 Health Status: {}", healthResponse.body());
+        logger.info("Health Status: {}", healthResponse.body());
 
         // Step 2: Validate new customer data
         logger.info("🔧 Step 2: Validating new customer data...");
@@ -226,7 +226,7 @@ class RestApiServerIntegrationTest {
         org.junit.jupiter.api.Assertions.assertEquals(200, customerResponse.statusCode(), "Customer validation should succeed");
         org.junit.jupiter.api.Assertions.assertTrue(customerResponse.body().contains("CUST5"), "Response should contain customer ID");
         org.junit.jupiter.api.Assertions.assertTrue(customerResponse.body().contains("PENSION_FUND"), "Response should contain customer type");
-        logger.info("📊 Customer Data: {}", customerResponse.body());
+        logger.info("Customer Data: {}", customerResponse.body());
 
         // Step 3: Get all customers for compliance check
         logger.info("🔧 Step 3: Compliance check - retrieving all customers...");
@@ -244,10 +244,10 @@ class RestApiServerIntegrationTest {
         org.junit.jupiter.api.Assertions.assertEquals(200, allCustomersResponse.statusCode(), "All customers lookup should succeed");
         org.junit.jupiter.api.Assertions.assertTrue(allCustomersResponse.body().contains("totalCount"), "Response should contain total count");
         org.junit.jupiter.api.Assertions.assertTrue(allCustomersResponse.body().contains("customers"), "Response should contain customers array");
-        logger.info("📊 All Customers: {}", allCustomersResponse.body());
+        logger.info("All Customers: {}", allCustomersResponse.body());
 
-        logger.info("✅ Business Rule: Customer onboarding process completed successfully");
-        logger.info("✅ Multi-step customer onboarding integration process completed successfully");
+        logger.info("Business Rule: Customer onboarding process completed successfully");
+        logger.info("Multi-step customer onboarding integration process completed successfully");
     }
 
     @Test
@@ -276,7 +276,7 @@ class RestApiServerIntegrationTest {
             java.net.http.HttpResponse.BodyHandlers.ofString());
 
         boolean cust1Eligible = cust1Response.body().contains("AAA");
-        logger.info("📊 CUST1 Credit Rating Check: {} (Eligible: {})", 
+        logger.info("CUST1 Credit Rating Check: {} (Eligible: {})", 
             cust1Response.body().contains("AAA") ? "AAA" : "Other", cust1Eligible);
 
         // Check CUST3 (A-rated)
@@ -291,14 +291,14 @@ class RestApiServerIntegrationTest {
             java.net.http.HttpResponse.BodyHandlers.ofString());
 
         boolean cust3Eligible = cust3Response.body().contains("AAA");
-        logger.info("📊 CUST3 Credit Rating Check: {} (Eligible: {})", 
+        logger.info("CUST3 Credit Rating Check: {} (Eligible: {})", 
             cust3Response.body().contains("A") ? "A" : "Other", cust3Eligible);
 
         // Business rule validation
         org.junit.jupiter.api.Assertions.assertTrue(cust1Eligible, "CUST1 (AAA) should be eligible for large transactions");
         org.junit.jupiter.api.Assertions.assertFalse(cust3Eligible, "CUST3 (A) should NOT be eligible for large transactions");
 
-        logger.info("✅ Business Rule Validation: Large transaction eligibility correctly enforced");
-        logger.info("✅ End-to-end business rule validation completed successfully");
+        logger.info("Business Rule Validation: Large transaction eligibility correctly enforced");
+        logger.info("End-to-end business rule validation completed successfully");
     }
 }

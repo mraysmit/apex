@@ -83,7 +83,7 @@ class AllSectionTypesSequentialTest extends DemoTestBase {
         assertEquals(3, engine.getConfiguration().getAllRuleGroups().size(),
             "Should have 3 rule groups: 2 from external file + 1 inline");
         
-        LOGGER.info("✅ All section types loaded correctly");
+        LOGGER.info("All section types loaded correctly");
         LOGGER.info("   - Enrichments: {}", config.getEnrichments().size());
         LOGGER.info("   - Enrichment Groups: {}", engine.getConfiguration().getAllEnrichmentGroups().size());
         LOGGER.info("   - Rules: {}", engine.getConfiguration().getAllRules().size());
@@ -108,7 +108,7 @@ class AllSectionTypesSequentialTest extends DemoTestBase {
         testData.put("strike", 4600.0);  // Valid: > 0
         testData.put("optionType", "CALL");  // For product type validation
         
-        LOGGER.info("📊 Input data: {}", testData);
+        LOGGER.info("Input data: {}", testData);
         LOGGER.info("🚀 Executing with sequential processing...");
         
         // Execute
@@ -143,7 +143,7 @@ class AllSectionTypesSequentialTest extends DemoTestBase {
         assertTrue(result.isSuccess(),
             "All validations should pass with complete data");
         
-        LOGGER.info("✅ All Section Types Sequential Processing Test PASSED");
+        LOGGER.info("All Section Types Sequential Processing Test PASSED");
         LOGGER.info("   Processing Order Verified:");
         LOGGER.info("   1. E1 (from ref): enrich-market-data ✅");
         LOGGER.info("   2. E2 (from ref): calculate-greeks ✅");
@@ -189,7 +189,7 @@ class AllSectionTypesSequentialTest extends DemoTestBase {
         assertTrue(result.isSuccess(),
             "Rules should execute successfully with enriched data");
         
-        LOGGER.info("✅ Enrichments executed before rules correctly");
+        LOGGER.info("Enrichments executed before rules correctly");
     }
 
     @Test
@@ -208,7 +208,7 @@ class AllSectionTypesSequentialTest extends DemoTestBase {
         testData.put("strike", 4600.0);
         testData.put("optionType", "CALL");
 
-        LOGGER.info("📊 Test Case: Excessive notional amount = 150M (limit is 100M)");
+        LOGGER.info("Test Case: Excessive notional amount = 150M (limit is 100M)");
 
         // Execute
         RuleResult result = engine.evaluate(testData);
@@ -223,7 +223,7 @@ class AllSectionTypesSequentialTest extends DemoTestBase {
         assertTrue(result.isSuccess(),
             "Result should succeed even when validation rules trigger (APEX design: rules are informational)");
 
-        LOGGER.info("✅ Validation rule triggered correctly (reported violation without blocking processing)");
+        LOGGER.info("Validation rule triggered correctly (reported violation without blocking processing)");
     }
 }
 

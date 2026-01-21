@@ -86,7 +86,7 @@ public class LookupBasicInlineTest {
             // Load inline lookup configuration
             config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/LookupBasicInlineTestB.yaml");
             
-            logger.info("✅ APEX services initialized for inline lookup testing");
+            logger.info("APEX services initialized for inline lookup testing");
             logger.info("  - Configuration loaded: {}", config.getMetadata().getName());
             logger.info("  - Lookup enrichments: {}", config.getEnrichments().size());
             
@@ -109,7 +109,7 @@ public class LookupBasicInlineTest {
         RulesEngine engine = new RulesEngine(rulesConfig);
 
         assertNotNull(engine, "RulesEngine should be created");
-        logger.info("✅ RulesEngine created with EnrichmentService for lookup operations");
+        logger.info("RulesEngine created with EnrichmentService for lookup operations");
 
         return engine;
     }

@@ -49,7 +49,7 @@ public class Test3_MinimalEnrichmentGroupTest extends DemoTestBase {
         assertNotNull(enrichedData.get("currentSpotPrice"), "currentSpotPrice should be enriched");
         assertEquals(15000.0, enrichedData.get("currentSpotPrice"), "NDX spot should be 15000.0");
         
-        LOGGER.info("✅ TEST 3 PASSED: Enrichment-group executed lookup enrichment successfully");
+        LOGGER.info("TEST 3 PASSED: Enrichment-group executed lookup enrichment successfully");
     }
 }
 

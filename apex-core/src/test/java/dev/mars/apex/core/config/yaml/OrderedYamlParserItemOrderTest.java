@@ -86,7 +86,7 @@ class OrderedYamlParserItemOrderTest {
         assertEquals("rules", itemOrder.get(3).getSectionType());
         assertEquals("rule-2", itemOrder.get(3).getItemId());
         
-        LOGGER.info("✅ Simple item order extraction test PASSED");
+        LOGGER.info("Simple item order extraction test PASSED");
     }
     
     @Test
@@ -146,7 +146,7 @@ class OrderedYamlParserItemOrderTest {
         assertEquals("enrichment-groups:group-1", itemOrder.get(4).toString());
         assertEquals("rule-groups:rule-group-1", itemOrder.get(5).toString());
         
-        LOGGER.info("✅ Interleaved item order extraction test PASSED");
+        LOGGER.info("Interleaved item order extraction test PASSED");
     }
     
     @Test
@@ -178,7 +178,7 @@ class OrderedYamlParserItemOrderTest {
         assertEquals(1, itemOrder.size(), "Should extract 1 item");
         assertEquals("rules:rule-1", itemOrder.get(0).toString());
         
-        LOGGER.info("✅ Empty sections handling test PASSED");
+        LOGGER.info("Empty sections handling test PASSED");
     }
     
     @Test
@@ -218,7 +218,7 @@ class OrderedYamlParserItemOrderTest {
         assertEquals("enrichments:enrich-2", itemOrder.get(1).toString());
         assertEquals("rules:rule-1", itemOrder.get(2).toString());
         
-        LOGGER.info("✅ Items without IDs handling test PASSED");
+        LOGGER.info("Items without IDs handling test PASSED");
     }
     
     @Test
@@ -277,7 +277,7 @@ class OrderedYamlParserItemOrderTest {
         assertTrue(itemOrder.stream().anyMatch(item -> item.isTransformation()), "Should have transformation");
         assertTrue(itemOrder.stream().anyMatch(item -> item.isRuleChain()), "Should have rule chain");
         
-        LOGGER.info("✅ All section types extraction test PASSED");
+        LOGGER.info("All section types extraction test PASSED");
     }
 }
 

@@ -17,15 +17,15 @@ This directory demonstrates APEX's basic rule group processing capabilities and 
 
 ### Test 1: Combined Configuration
 Tests loading a single YAML file containing both rules and rule groups:
-- ✅ AND group with true rules (passes)
-- ✅ OR group with mixed rules (passes)
-- ✅ AND group with mixed rules (fails as expected)
+- AND group with true rules (passes)
+- OR group with mixed rules (passes)
+- AND group with mixed rules (fails as expected)
 
 ### Test 2: Automatic Rule Reference Resolution
 Demonstrates APEX's `rule-refs` mechanism for cross-file references:
-- ✅ Loads only `rule-groups.yaml`
-- ✅ APEX automatically resolves and loads rules from `rules.yaml`
-- ✅ Tests the same rule group logic successfully
+- Loads only `rule-groups.yaml`
+- APEX automatically resolves and loads rules from `rules.yaml`
+- Tests the same rule group logic successfully
 
 ## Key APEX Features Demonstrated
 
@@ -98,8 +98,8 @@ Both tests should pass with logs showing:
 
 ## APEX Best Practices Demonstrated
 
-- ✅ Use `rule-refs` for cross-file rule references
-- ✅ Separate rules from rule groups for better organization
-- ✅ Test both combined and modular configuration approaches
-- ✅ Validate rule group logic with comprehensive test cases
-- ✅ Use proper APEX logging and error handling
+- Use `rule-refs` for cross-file rule references
+- Separate rules from rule groups for better organization
+- Test both combined and modular configuration approaches
+- Validate rule group logic with comprehensive test cases
+- Use proper APEX logging and error handling

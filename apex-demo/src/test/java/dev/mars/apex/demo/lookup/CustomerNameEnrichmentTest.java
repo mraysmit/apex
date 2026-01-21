@@ -47,11 +47,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Error handling and timeout configuration
  *
  * CRITICAL VALIDATION CHECKLIST APPLIED:
- * ✅ Count enrichments in YAML - 2 enrichments expected
- * ✅ Verify log shows "Processed: 2 out of 2" - Must be 100% execution rate
- * ✅ Check EVERY enrichment condition - Test data triggers customer name enrichment
- * ✅ Validate EVERY lookup result - Test actual REST API lookup functionality
- * ✅ Assert ALL enrichment results - Every result-field has corresponding assertEquals
+ * Count enrichments in YAML - 2 enrichments expected
+ * Verify log shows "Processed: 2 out of 2" - Must be 100% execution rate
+ * Check EVERY enrichment condition - Test data triggers customer name enrichment
+ * Validate EVERY lookup result - Test actual REST API lookup functionality
+ * Assert ALL enrichment results - Every result-field has corresponding assertEquals
  *
  * YAML FIRST PRINCIPLE:
  * - ALL enrichment logic is in YAML configuration
@@ -158,7 +158,7 @@ public class CustomerNameEnrichmentTest extends DemoTestBase {
             assertNotNull(enrichedData.get("customerType"), "Customer type should be enriched from REST API");
             assertNotNull(enrichedData.get("creditRating"), "Credit rating should be enriched from REST API");
 
-            logger.info("✅ Customer name enrichment from REST API completed successfully");
+            logger.info("Customer name enrichment from REST API completed successfully");
             logger.info("  - Customer Name: {}", enrichedData.get("customerName"));
             logger.info("  - Customer Type: {}", enrichedData.get("customerType"));
             logger.info("  - Credit Rating: {}", enrichedData.get("creditRating"));
@@ -211,7 +211,7 @@ public class CustomerNameEnrichmentTest extends DemoTestBase {
             assertTrue(orderSummary.contains(customerName), "Order summary should contain enriched customer name");
             assertTrue(orderSummary.contains("2750.5"), "Order summary should contain order amount");
 
-            logger.info("✅ Order summary calculation after enrichment completed successfully");
+            logger.info("Order summary calculation after enrichment completed successfully");
             logger.info("  - Enriched Customer Name: {}", customerName);
             logger.info("  - Order Summary: {}", orderSummary);
 
@@ -260,7 +260,7 @@ public class CustomerNameEnrichmentTest extends DemoTestBase {
             String orderSummary = (String) enrichedData.get("orderSummary");
             assertTrue(orderSummary.contains(originalCustomerName), "Order summary should use original customer name");
 
-            logger.info("✅ Skip enrichment when customer name exists completed successfully");
+            logger.info("Skip enrichment when customer name exists completed successfully");
             logger.info("  - Original Customer Name Preserved: {}", originalCustomerName);
             logger.info("  - Order Summary: {}", orderSummary);
 
@@ -314,7 +314,7 @@ public class CustomerNameEnrichmentTest extends DemoTestBase {
             assertTrue(orderSummary.contains("ORD99999"), "Order summary should contain order ID");
             assertTrue(orderSummary.contains("10000"), "Order summary should contain order amount");
 
-            logger.info("✅ Complete customer enrichment workflow completed successfully");
+            logger.info("Complete customer enrichment workflow completed successfully");
             logger.info("  - Customer Name: {}", enrichedData.get("customerName"));
             logger.info("  - Customer Type: {}", enrichedData.get("customerType"));
             logger.info("  - Credit Rating: {}", enrichedData.get("creditRating"));

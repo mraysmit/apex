@@ -65,7 +65,7 @@ class RuleRefsBeforeInlineTest extends DemoTestBase {
         assertTrue(engine.getConfiguration().getAllRules().stream().anyMatch(r -> "validate-counterparty-enriched".equals(r.getId())),
             "Should have validate-counterparty-enriched inline");
         
-        LOGGER.info("✅ All rules loaded correctly (2 from ref + 1 inline)");
+        LOGGER.info("All rules loaded correctly (2 from ref + 1 inline)");
     }
 
     @Test
@@ -85,7 +85,7 @@ class RuleRefsBeforeInlineTest extends DemoTestBase {
         testData.put("notionalAmount", 50000000.0);  // Valid: <= 100M (R1 from ref)
         testData.put("strike", 100.0);  // Valid: > 0 (R2 from ref)
         
-        LOGGER.info("📊 Input data: {}", testData);
+        LOGGER.info("Input data: {}", testData);
         LOGGER.info("🚀 Executing with sequential processing...");
         
         // Execute
@@ -112,7 +112,7 @@ class RuleRefsBeforeInlineTest extends DemoTestBase {
             "Processing should succeed - all rules should pass with valid data");
         
         LOGGER.info("═══════════════════════════════════════════════════════════════");
-        LOGGER.info("✅ CRITICAL FIX VERIFIED: rule-refs expanded at FIRST position!");
+        LOGGER.info("CRITICAL FIX VERIFIED: rule-refs expanded at FIRST position!");
         LOGGER.info("   - E1 (inline): Counterparty enriched FIRST");
         LOGGER.info("   - R1 (from ref): Notional limit validated SECOND");
         LOGGER.info("   - R2 (from ref): Strike price validated THIRD");
@@ -134,7 +134,7 @@ class RuleRefsBeforeInlineTest extends DemoTestBase {
         testData1.put("notionalAmount", 150000000.0);  // > 100M - triggers R1
         testData1.put("strike", 100.0);  // Valid
 
-        LOGGER.info("📊 Test Case 1 - High notional: {}", testData1);
+        LOGGER.info("Test Case 1 - High notional: {}", testData1);
         RuleResult result1 = engine.evaluate(testData1);
 
         // Verify enrichment executed BEFORE rules (correct order)
@@ -145,7 +145,7 @@ class RuleRefsBeforeInlineTest extends DemoTestBase {
         assertEquals("AAA", result1.getEnrichedData().get("counterpartyCreditRating"),
             "E1 (inline): Should lookup BANK_Y credit rating = AAA");
 
-        LOGGER.info("✅ Test Case 1: Enrichment executed BEFORE rules (correct order)");
+        LOGGER.info("Test Case 1: Enrichment executed BEFORE rules (correct order)");
 
         // Test Case 2: Invalid strike (R2 from ref should trigger)
         Map<String, Object> testData2 = new HashMap<>();
@@ -153,7 +153,7 @@ class RuleRefsBeforeInlineTest extends DemoTestBase {
         testData2.put("notionalAmount", 50000000.0);  // Valid
         testData2.put("strike", -10.0);  // <= 0 - triggers R2
 
-        LOGGER.info("📊 Test Case 2 - Invalid strike: {}", testData2);
+        LOGGER.info("Test Case 2 - Invalid strike: {}", testData2);
         RuleResult result2 = engine.evaluate(testData2);
 
         // Verify enrichment executed BEFORE rules (correct order)
@@ -164,7 +164,7 @@ class RuleRefsBeforeInlineTest extends DemoTestBase {
         assertEquals("BBB", result2.getEnrichedData().get("counterpartyCreditRating"),
             "E1 (inline): Should lookup CORP_Z credit rating = BBB");
 
-        LOGGER.info("✅ Test Case 2: Enrichment executed BEFORE rules (correct order)");
+        LOGGER.info("Test Case 2: Enrichment executed BEFORE rules (correct order)");
 
         // Test Case 3: Valid data (all rules should pass)
         Map<String, Object> testData3 = new HashMap<>();
@@ -172,7 +172,7 @@ class RuleRefsBeforeInlineTest extends DemoTestBase {
         testData3.put("notionalAmount", 50000000.0);  // Valid: <= 100M
         testData3.put("strike", 100.0);  // Valid: > 0
 
-        LOGGER.info("📊 Test Case 3 - Valid data: {}", testData3);
+        LOGGER.info("Test Case 3 - Valid data: {}", testData3);
         RuleResult result3 = engine.evaluate(testData3);
 
         // Verify enrichment executed BEFORE rules (correct order)
@@ -184,8 +184,8 @@ class RuleRefsBeforeInlineTest extends DemoTestBase {
         assertTrue(result3.getEnrichedData().containsKey("counterpartyCreditLimit"),
             "E1 (inline): Enrichment should execute BEFORE rules");
 
-        LOGGER.info("✅ Test Case 3: Valid data - all rules passed in correct order");
-        LOGGER.info("✅ All test cases passed - rule-refs execution order verified!");
+        LOGGER.info("Test Case 3: Valid data - all rules passed in correct order");
+        LOGGER.info("All test cases passed - rule-refs execution order verified!");
     }
 }
 

@@ -86,13 +86,13 @@ class DatabaseErrorHandlingProofTest {
     @Order(1)
     @DisplayName("PROOF: Table not found → CONFIGURATION_ERROR → FAIL FAST")
     void proofTableNotFoundFailsFast() throws SQLException {
-        LOGGER.info("🔍 TESTING: Table not found error classification");
+        LOGGER.info("TESTING: Table not found error classification");
         
         try (Statement stmt = testConnection.createStatement()) {
             stmt.executeQuery("SELECT * FROM nonexistent_table");
             fail("Expected SQLException for table not found");
         } catch (SQLException e) {
-            LOGGER.info("   📋 SQL Error: {}", e.getMessage());
+            LOGGER.info("   SQL Error: {}", e.getMessage());
             
             SqlErrorClassifier.SqlErrorType errorType = SqlErrorClassifier.classifyError(e);
             String description = SqlErrorClassifier.getErrorDescription(errorType);
@@ -105,7 +105,7 @@ class DatabaseErrorHandlingProofTest {
             assertEquals(SqlErrorClassifier.SqlErrorType.CONFIGURATION_ERROR, errorType);
             assertTrue(shouldFailPipeline, "Configuration errors should fail the pipeline");
             
-            LOGGER.info("   ✅ PROOF CONFIRMED: Table not found correctly fails fast");
+            LOGGER.info("   PROOF CONFIRMED: Table not found correctly fails fast");
         }
     }
 
@@ -113,13 +113,13 @@ class DatabaseErrorHandlingProofTest {
     @Order(2)
     @DisplayName("PROOF: Column not found → CONFIGURATION_ERROR → FAIL FAST")
     void proofColumnNotFoundFailsFast() throws SQLException {
-        LOGGER.info("🔍 TESTING: Column not found error classification");
+        LOGGER.info("TESTING: Column not found error classification");
         
         try (Statement stmt = testConnection.createStatement()) {
             stmt.executeQuery("SELECT nonexistent_column FROM proof_customers");
             fail("Expected SQLException for column not found");
         } catch (SQLException e) {
-            LOGGER.info("   📋 SQL Error: {}", e.getMessage());
+            LOGGER.info("   SQL Error: {}", e.getMessage());
             
             SqlErrorClassifier.SqlErrorType errorType = SqlErrorClassifier.classifyError(e);
             boolean shouldFailPipeline = SqlErrorClassifier.shouldFailPipeline(errorType);
@@ -130,7 +130,7 @@ class DatabaseErrorHandlingProofTest {
             assertEquals(SqlErrorClassifier.SqlErrorType.CONFIGURATION_ERROR, errorType);
             assertTrue(shouldFailPipeline, "Configuration errors should fail the pipeline");
             
-            LOGGER.info("   ✅ PROOF CONFIRMED: Column not found correctly fails fast");
+            LOGGER.info("   PROOF CONFIRMED: Column not found correctly fails fast");
         }
     }
 
@@ -138,13 +138,13 @@ class DatabaseErrorHandlingProofTest {
     @Order(3)
     @DisplayName("PROOF: SQL syntax error → CONFIGURATION_ERROR → FAIL FAST")
     void proofSyntaxErrorFailsFast() throws SQLException {
-        LOGGER.info("🔍 TESTING: SQL syntax error classification");
+        LOGGER.info("TESTING: SQL syntax error classification");
         
         try (Statement stmt = testConnection.createStatement()) {
             stmt.executeQuery("INVALID SQL SYNTAX SELECT WRONG");
             fail("Expected SQLException for syntax error");
         } catch (SQLException e) {
-            LOGGER.info("   📋 SQL Error: {}", e.getMessage());
+            LOGGER.info("   SQL Error: {}", e.getMessage());
             
             SqlErrorClassifier.SqlErrorType errorType = SqlErrorClassifier.classifyError(e);
             boolean shouldFailPipeline = SqlErrorClassifier.shouldFailPipeline(errorType);
@@ -155,7 +155,7 @@ class DatabaseErrorHandlingProofTest {
             assertEquals(SqlErrorClassifier.SqlErrorType.CONFIGURATION_ERROR, errorType);
             assertTrue(shouldFailPipeline, "Configuration errors should fail the pipeline");
             
-            LOGGER.info("   ✅ PROOF CONFIRMED: Syntax error correctly fails fast");
+            LOGGER.info("   PROOF CONFIRMED: Syntax error correctly fails fast");
         }
     }
 
@@ -167,7 +167,7 @@ class DatabaseErrorHandlingProofTest {
     @Order(4)
     @DisplayName("PROOF: Primary key violation → DATA_INTEGRITY_VIOLATION → GRACEFUL HANDLING")
     void proofPrimaryKeyViolationIsGraceful() throws SQLException {
-        LOGGER.info("🔍 TESTING: Primary key violation error classification");
+        LOGGER.info("TESTING: Primary key violation error classification");
         
         try (PreparedStatement stmt = testConnection.prepareStatement(
                 "INSERT INTO proof_customers (customer_id, customer_name, email, status) VALUES (?, ?, ?, ?)")) {
@@ -180,7 +180,7 @@ class DatabaseErrorHandlingProofTest {
             
             fail("Expected SQLException for primary key violation");
         } catch (SQLException e) {
-            LOGGER.info("   📋 SQL Error: {}", e.getMessage());
+            LOGGER.info("   SQL Error: {}", e.getMessage());
             
             SqlErrorClassifier.SqlErrorType errorType = SqlErrorClassifier.classifyError(e);
             String description = SqlErrorClassifier.getErrorDescription(errorType);
@@ -193,7 +193,7 @@ class DatabaseErrorHandlingProofTest {
             assertEquals(SqlErrorClassifier.SqlErrorType.DATA_INTEGRITY_VIOLATION, errorType);
             assertFalse(shouldFailPipeline, "Data integrity violations should NOT fail the pipeline");
             
-            LOGGER.info("   ✅ PROOF CONFIRMED: Primary key violation handled gracefully");
+            LOGGER.info("   PROOF CONFIRMED: Primary key violation handled gracefully");
         }
     }
 
@@ -201,7 +201,7 @@ class DatabaseErrorHandlingProofTest {
     @Order(5)
     @DisplayName("PROOF: Unique constraint violation → DATA_INTEGRITY_VIOLATION → GRACEFUL HANDLING")
     void proofUniqueConstraintViolationIsGraceful() throws SQLException {
-        LOGGER.info("🔍 TESTING: Unique constraint violation error classification");
+        LOGGER.info("TESTING: Unique constraint violation error classification");
         
         try (PreparedStatement stmt = testConnection.prepareStatement(
                 "INSERT INTO proof_customers (customer_id, customer_name, email, status) VALUES (?, ?, ?, ?)")) {
@@ -214,7 +214,7 @@ class DatabaseErrorHandlingProofTest {
             
             fail("Expected SQLException for unique constraint violation");
         } catch (SQLException e) {
-            LOGGER.info("   📋 SQL Error: {}", e.getMessage());
+            LOGGER.info("   SQL Error: {}", e.getMessage());
             
             SqlErrorClassifier.SqlErrorType errorType = SqlErrorClassifier.classifyError(e);
             boolean shouldFailPipeline = SqlErrorClassifier.shouldFailPipeline(errorType);
@@ -225,7 +225,7 @@ class DatabaseErrorHandlingProofTest {
             assertEquals(SqlErrorClassifier.SqlErrorType.DATA_INTEGRITY_VIOLATION, errorType);
             assertFalse(shouldFailPipeline, "Data integrity violations should NOT fail the pipeline");
             
-            LOGGER.info("   ✅ PROOF CONFIRMED: Unique constraint violation handled gracefully");
+            LOGGER.info("   PROOF CONFIRMED: Unique constraint violation handled gracefully");
         }
     }
 
@@ -233,7 +233,7 @@ class DatabaseErrorHandlingProofTest {
     @Order(6)
     @DisplayName("PROOF: NOT NULL violation → DATA_INTEGRITY_VIOLATION → GRACEFUL HANDLING")
     void proofNotNullViolationIsGraceful() throws SQLException {
-        LOGGER.info("🔍 TESTING: NOT NULL violation error classification");
+        LOGGER.info("TESTING: NOT NULL violation error classification");
         
         try (PreparedStatement stmt = testConnection.prepareStatement(
                 "INSERT INTO proof_customers (customer_id, customer_name, email, status) VALUES (?, ?, ?, ?)")) {
@@ -246,7 +246,7 @@ class DatabaseErrorHandlingProofTest {
             
             fail("Expected SQLException for NOT NULL violation");
         } catch (SQLException e) {
-            LOGGER.info("   📋 SQL Error: {}", e.getMessage());
+            LOGGER.info("   SQL Error: {}", e.getMessage());
             
             SqlErrorClassifier.SqlErrorType errorType = SqlErrorClassifier.classifyError(e);
             boolean shouldFailPipeline = SqlErrorClassifier.shouldFailPipeline(errorType);
@@ -257,7 +257,7 @@ class DatabaseErrorHandlingProofTest {
             assertEquals(SqlErrorClassifier.SqlErrorType.DATA_INTEGRITY_VIOLATION, errorType);
             assertFalse(shouldFailPipeline, "Data integrity violations should NOT fail the pipeline");
             
-            LOGGER.info("   ✅ PROOF CONFIRMED: NOT NULL violation handled gracefully");
+            LOGGER.info("   PROOF CONFIRMED: NOT NULL violation handled gracefully");
         }
     }
 
@@ -265,7 +265,7 @@ class DatabaseErrorHandlingProofTest {
     @Order(7)
     @DisplayName("PROOF: Check constraint violation → DATA_INTEGRITY_VIOLATION → GRACEFUL HANDLING")
     void proofCheckConstraintViolationIsGraceful() throws SQLException {
-        LOGGER.info("🔍 TESTING: Check constraint violation error classification");
+        LOGGER.info("TESTING: Check constraint violation error classification");
         
         try (PreparedStatement stmt = testConnection.prepareStatement(
                 "INSERT INTO proof_customers (customer_id, customer_name, email, status) VALUES (?, ?, ?, ?)")) {
@@ -278,7 +278,7 @@ class DatabaseErrorHandlingProofTest {
             
             fail("Expected SQLException for check constraint violation");
         } catch (SQLException e) {
-            LOGGER.info("   📋 SQL Error: {}", e.getMessage());
+            LOGGER.info("   SQL Error: {}", e.getMessage());
             
             SqlErrorClassifier.SqlErrorType errorType = SqlErrorClassifier.classifyError(e);
             boolean shouldFailPipeline = SqlErrorClassifier.shouldFailPipeline(errorType);
@@ -289,14 +289,14 @@ class DatabaseErrorHandlingProofTest {
             assertEquals(SqlErrorClassifier.SqlErrorType.DATA_INTEGRITY_VIOLATION, errorType);
             assertFalse(shouldFailPipeline, "Data integrity violations should NOT fail the pipeline");
             
-            LOGGER.info("   ✅ PROOF CONFIRMED: Check constraint violation handled gracefully");
+            LOGGER.info("   PROOF CONFIRMED: Check constraint violation handled gracefully");
         }
     }
 
     @AfterAll
     static void tearDownClass() {
         LOGGER.info("=".repeat(80));
-        LOGGER.info("✅ ALL PROOFS CONFIRMED: Database error handling works correctly!");
+        LOGGER.info("ALL PROOFS CONFIRMED: Database error handling works correctly!");
         LOGGER.info("   • Configuration errors (DDL/DML) → FAIL FAST ⚡");
         LOGGER.info("   • Data integrity violations → GRACEFUL HANDLING 🤝");
         LOGGER.info("   • System no longer crashes on data quality issues 🛡️");

@@ -30,10 +30,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * JUnit 5 test for Search-Based SpEL functionality.
  *
  * DEMONSTRATES SPEL SEARCH PATTERNS:
- * ✅ .^[condition] - Find first matching element
- * ✅ .$[condition] - Find last matching element  
- * ✅ .?[condition] - Find all matching elements
- * ✅ Business criteria searches (legType, payReceive, currency)
+ * .^[condition] - Find first matching element
+ * .$[condition] - Find last matching element  
+ * .?[condition] - Find all matching elements
+ * Business criteria searches (legType, payReceive, currency)
  *
  * BUSINESS LOGIC VALIDATION:
  * - Find floating leg in swap trade

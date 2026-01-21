@@ -102,7 +102,7 @@ public class ReadSchemaDatabasePipelineStageTest_postgresql_shouldEnumerateTable
                 )
             """);
             
-            logger.info("✅ PostgreSQL test database initialized with 3 tables: customers, orders, products");
+            logger.info("PostgreSQL test database initialized with 3 tables: customers, orders, products");
         }
     }
 
@@ -142,16 +142,16 @@ public class ReadSchemaDatabasePipelineStageTest_postgresql_shouldEnumerateTable
         
         File reportFile = reportPath.toFile();
         long reportSize = reportFile.length();
-        logger.info("✅ HTML report generated: {} ({} bytes)", reportPath, reportSize);
+        logger.info("HTML report generated: {} ({} bytes)", reportPath, reportSize);
         
         // Verify report content
         String reportContent = Files.readString(reportPath);
         assertTrue(reportContent.contains("customers"), "Report should contain 'customers' table");
         assertTrue(reportContent.contains("orders"), "Report should contain 'orders' table");
         assertTrue(reportContent.contains("products"), "Report should contain 'products' table");
-        logger.info("✅ HTML report contains all 3 enumerated tables");
+        logger.info("HTML report contains all 3 enumerated tables");
         
-        logger.info("✅ Successfully enumerated tables and generated comprehensive HTML report");
+        logger.info("Successfully enumerated tables and generated comprehensive HTML report");
         
         // Display metrics
         displayPipelineMetrics(result);

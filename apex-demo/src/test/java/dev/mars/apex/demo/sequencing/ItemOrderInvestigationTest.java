@@ -68,7 +68,7 @@ public class ItemOrderInvestigationTest extends DemoTestBase {
         LOGGER.info("  - Enrichment-groups in itemOrder: {}", enrichmentGroupCount);
         
         if (enrichmentCount > 1 && enrichmentGroupCount > 0) {
-            LOGGER.error("  ❌ BUG CONFIRMED: Both enrichments AND enrichment-groups are in itemOrder!");
+            LOGGER.error("  BUG CONFIRMED: Both enrichments AND enrichment-groups are in itemOrder!");
             LOGGER.error("     Enrichments will be executed TWICE:");
             LOGGER.error("     1. Once as individual enrichments");
             LOGGER.error("     2. Once as part of enrichment groups");
@@ -79,7 +79,7 @@ public class ItemOrderInvestigationTest extends DemoTestBase {
             .anyMatch(item -> "enrichment-refs".equals(item.getSectionType()));
         
         if (!hasEnrichmentRefsPlaceholder) {
-            LOGGER.error("  ❌ BUG CONFIRMED: enrichment-refs placeholder was removed!");
+            LOGGER.error("  BUG CONFIRMED: enrichment-refs placeholder was removed!");
             LOGGER.error("     The placeholder should remain and be executed at that position.");
         }
     }
@@ -125,10 +125,10 @@ public class ItemOrderInvestigationTest extends DemoTestBase {
             .anyMatch(item -> "enrichment-refs".equals(item.getSectionType()));
         
         if (!hasEnrichmentRefsPlaceholder) {
-            LOGGER.error("  ❌ BUG CONFIRMED: enrichment-refs placeholder was removed!");
+            LOGGER.error("  BUG CONFIRMED: enrichment-refs placeholder was removed!");
             LOGGER.error("     The placeholder should remain and be executed at that position.");
         } else {
-            LOGGER.info("  ✅ enrichment-refs placeholder is present");
+            LOGGER.info("  enrichment-refs placeholder is present");
         }
     }
 }

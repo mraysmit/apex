@@ -44,11 +44,11 @@ class UseCase2ValidationFirstTest {
         // Initialize APEX services for sequential processing
         yamlLoader = new YamlConfigurationLoader();
 
-        LOGGER.info("✅ Sequential processing services initialized");
+        LOGGER.info("Sequential processing services initialized");
     }
 
     @Test
-    @DisplayName("✅ SEQUENTIAL MODE: Validation-First Pattern Works")
+    @DisplayName("SEQUENTIAL MODE: Validation-First Pattern Works")
     void testValidationFirstPatternWithSequentialMode() throws Exception {
         LOGGER.info("=== TESTING: Validation-First Pattern with Sequential Mode ===");
 
@@ -62,7 +62,7 @@ class UseCase2ValidationFirstTest {
         validData.put("amount", 50000.0);
         validData.put("currency", "USD");
 
-        LOGGER.info("📊 Valid Input Data: {}", validData);
+        LOGGER.info("Valid Input Data: {}", validData);
 
         // Process with enrichment service (demonstrates sequential processing)
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
@@ -73,7 +73,7 @@ class UseCase2ValidationFirstTest {
         @SuppressWarnings("unchecked")
         Map<String, Object> enrichedData = (Map<String, Object>) result;
 
-        LOGGER.info("🔍 Processing completed. Final data state: {}", enrichedData);
+        LOGGER.info("Processing completed. Final data state: {}", enrichedData);
 
         // Verify validation-first pattern worked correctly
         // Note: In validation-first pattern, rules execute first, then enrichments
@@ -89,7 +89,7 @@ class UseCase2ValidationFirstTest {
         assertNotNull(enrichedData.get("riskScore"),
                      "Risk score should be calculated");
 
-        LOGGER.info("✅ Validation-First pattern WORKS with sequential processing");
+        LOGGER.info("Validation-First pattern WORKS with sequential processing");
         LOGGER.info("   1. Rules processed FIRST (validation)");
         LOGGER.info("   2. Enrichments processed SECOND (expensive operations)");
         LOGGER.info("   3. Customer enriched: {}", enrichedData.get("customerName"));

@@ -9,19 +9,19 @@
 
 ## 🎯 DEPRECATED ENTRY POINTS - MIGRATION REFERENCE
 
-**Deprecation Status**: ✅ **COMPLETE** - All 7 content-aware entry points deprecated in apex-core (Phase 1 & 2)
+**Deprecation Status**: **COMPLETE** - All 7 content-aware entry points deprecated in apex-core (Phase 1 & 2)
 **Deprecation Version**: Since 3.0, for removal in 4.0
 **Test Status**: 693/693 tests passing with 100+ deprecation warnings
 
 ---
 
-## ✅ RECOMMENDED PATTERN: Static Factory Methods (IMPLEMENTED)
+## RECOMMENDED PATTERN: Static Factory Methods (IMPLEMENTED)
 
-**Implementation Status**: ✅ **COMPLETE** - Static factory methods added to RulesEngine in apex-core
+**Implementation Status**: **COMPLETE** - Static factory methods added to RulesEngine in apex-core
 **Implementation Date**: 2025-11-01
 **Test Coverage**: 6 new tests in RulesEngineStaticFactoryMethodsTest, all passing
 
-### **📊 Pattern Comparison**
+### **Pattern Comparison**
 
 **Deprecated Pattern** (3 lines):
 ```java
@@ -42,7 +42,7 @@ RulesEngine engine = new RulesEngine(config);
 RuleResult result = engine.evaluate(yamlConfig, testData);
 ```
 
-**✅ NEW RECOMMENDED PATTERN** (2 lines):
+**NEW RECOMMENDED PATTERN** (2 lines):
 ```java
 RulesEngine engine = RulesEngine.fromFile("path/to/config.yaml");
 RuleResult result = engine.evaluate(testData);
@@ -52,7 +52,7 @@ RuleResult result = engine.evaluate(testData);
 
 ---
 
-### **✅ Benefits of Static Factory Method Pattern**
+### **Benefits of Static Factory Method Pattern**
 
 1. **Simple**: 2 lines for common cases (71% reduction in boilerplate)
 2. **Flexible**: Explicit API still available for advanced cases
@@ -67,7 +67,7 @@ RuleResult result = engine.evaluate(testData);
 The deprecated pattern had a **fundamental architectural flaw**:
 
 ```java
-// ❌ PROBLEM: Different services for different YAML content
+// PROBLEM: Different services for different YAML content
 YamlRulesEngineService      // For rules/rule-groups
 YamlEnrichmentProcessor     // For enrichments only
 DataPipelineEngine          // For pipelines only
@@ -84,9 +84,9 @@ This forced developers to:
 
 ---
 
-### **✅ IMPLEMENTED SOLUTION: Static Factory Methods**
+### **IMPLEMENTED SOLUTION: Static Factory Methods**
 
-**Implementation Status**: ✅ **COMPLETE**
+**Implementation Status**: **COMPLETE**
 
 We now have BOTH patterns: Simple API for common cases (90%), explicit API for advanced cases (10%).
 
@@ -95,7 +95,7 @@ We now have BOTH patterns: Simple API for common cases (90%), explicit API for a
 ```java
 public class RulesEngine {
 
-    // ✅ SIMPLE API - For 90% of use cases (IMPLEMENTED)
+    // SIMPLE API - For 90% of use cases (IMPLEMENTED)
     public static RulesEngine fromFile(String filePath) throws YamlConfigurationException {
         YamlConfigurationLoader loader = new YamlConfigurationLoader();
         YamlRuleConfiguration yamlConfig = loader.loadFromFile(filePath);
@@ -110,13 +110,13 @@ public class RulesEngine {
         return new RulesEngine(config, yamlConfig);  // Stores yamlConfig for simplified evaluate()
     }
 
-    // ✅ SIMPLIFIED EVALUATE - No need to pass yamlConfig again (IMPLEMENTED)
+    // SIMPLIFIED EVALUATE - No need to pass yamlConfig again (IMPLEMENTED)
     public RuleResult evaluate(Map<String, Object> inputData) {
         // Uses stored yamlConfig from static factory methods
         return evaluate(this.yamlConfig, inputData);
     }
 
-    // ✅ EXPLICIT API - For 10% of advanced use cases (EXISTING)
+    // EXPLICIT API - For 10% of advanced use cases (EXISTING)
     public RulesEngine(RulesEngineConfiguration config) {
         // Existing constructor
     }
@@ -129,13 +129,13 @@ public class RulesEngine {
 
 #### **Usage Examples**
 
-**✅ Simple Case** (90% of developers - 2 lines):
+**Simple Case** (90% of developers - 2 lines):
 ```java
 RulesEngine engine = RulesEngine.fromFile("config.yaml");
 RuleResult result = engine.evaluate(inputData);
 ```
 
-**✅ Advanced Case** (10% of developers - config inspection needed):
+**Advanced Case** (10% of developers - config inspection needed):
 ```java
 YamlConfigurationLoader loader = new YamlConfigurationLoader();
 YamlRuleConfiguration yamlConfig = loader.loadFromFile("config.yaml");
@@ -164,34 +164,34 @@ RuleResult result = engine.evaluate(yamlConfig, inputData);
 
 ---
 
-### **📊 Pattern Comparison**
+### **Pattern Comparison**
 
-| **Aspect** | **Deprecated** | **Verbose Universal** | **✅ Static Factory (IMPLEMENTED)** |
+| **Aspect** | **Deprecated** | **Verbose Universal** | **Static Factory (IMPLEMENTED)** |
 |------------|---------------|----------------|----------------------------------|
 | **Lines of Code** | 3 | 7 | **2** |
 | **Ease of Use** | ⭐⭐⭐⭐ | ⭐⭐ | **⭐⭐⭐⭐⭐** |
 | **Architectural Purity** | ⭐⭐ | ⭐⭐⭐⭐⭐ | **⭐⭐⭐⭐⭐** |
 | **Flexibility** | ⭐⭐ | ⭐⭐⭐⭐⭐ | **⭐⭐⭐⭐⭐** |
 | **Learning Curve** | ⭐⭐⭐⭐ | ⭐⭐ | **⭐⭐⭐⭐⭐** |
-| **Content-Agnostic** | ❌ | ✅ | **✅** |
+| **Content-Agnostic** | | | **✅** |
 | **Overall Score** | 3.0/5 | 3.8/5 | **4.8/5** |
 
 ---
 
 ### **🎯 IMPLEMENTATION COMPLETE**
 
-**Status**: ✅ **IMPLEMENTED** (2025-11-01)
+**Status**: **IMPLEMENTED** (2025-11-01)
 
 Static factory methods have been successfully added to `RulesEngine` in apex-core:
 
 **What Was Implemented**:
-- ✅ `RulesEngine.fromFile(String filePath)` - Simple 2-line usage
-- ✅ `RulesEngine.fromYamlConfig(YamlRuleConfiguration)` - Advanced usage with config inspection
-- ✅ Simplified `evaluate(Map<String, Object>)` - No need to pass yamlConfig again
-- ✅ Internal storage of YamlRuleConfiguration for simplified evaluate()
-- ✅ Comprehensive test coverage (6 new tests, all passing)
-- ✅ Updated existing test to expect exception instead of failure result
-- ✅ Full backward compatibility maintained
+- `RulesEngine.fromFile(String filePath)` - Simple 2-line usage
+- `RulesEngine.fromYamlConfig(YamlRuleConfiguration)` - Advanced usage with config inspection
+- Simplified `evaluate(Map<String, Object>)` - No need to pass yamlConfig again
+- Internal storage of YamlRuleConfiguration for simplified evaluate()
+- Comprehensive test coverage (6 new tests, all passing)
+- Updated existing test to expect exception instead of failure result
+- Full backward compatibility maintained
 
 **Test Results**:
 - 1980 tests run in apex-core
@@ -206,22 +206,22 @@ Static factory methods have been successfully added to `RulesEngine` in apex-cor
 
 ---
 
-### ✅ Recommended Entry Point (Static Factory Methods - IMPLEMENTED)
+### Recommended Entry Point (Static Factory Methods - IMPLEMENTED)
 
 **USE THIS PATTERN** for all new code:
 
 ```java
-// ✅ SIMPLE PATTERN - 2 lines (90% of use cases)
+// SIMPLE PATTERN - 2 lines (90% of use cases)
 RulesEngine engine = RulesEngine.fromFile("path/to/config.yaml");
 RuleResult result = engine.evaluate(inputData);
 ```
 
 **Key Benefits**:
-- ✅ Works for ANY YAML content type (enrichments, rules, pipelines, scenarios)
-- ✅ Simplest possible API (2 lines of code)
-- ✅ Content-agnostic (no inspection needed)
-- ✅ Industry-standard pattern (follows Java conventions)
-- ✅ Backward compatible (existing code still works)
+- Works for ANY YAML content type (enrichments, rules, pipelines, scenarios)
+- Simplest possible API (2 lines of code)
+- Content-agnostic (no inspection needed)
+- Industry-standard pattern (follows Java conventions)
+- Backward compatible (existing code still works)
 
 ---
 
@@ -249,10 +249,10 @@ RuleResult result = engine.evaluate(yamlConfig, inputData);
 
 ### Deprecated Entry Points - Migration Examples
 
-**✅ RECOMMENDED**: Use the static factory method pattern for all migrations:
+**RECOMMENDED**: Use the static factory method pattern for all migrations:
 
 ```java
-// ✅ SIMPLEST MIGRATION - Use this for all deprecated patterns
+// SIMPLEST MIGRATION - Use this for all deprecated patterns
 RulesEngine engine = RulesEngine.fromFile("path/to/config.yaml");
 RuleResult result = engine.evaluate(testData);
 ```
@@ -261,7 +261,7 @@ RuleResult result = engine.evaluate(testData);
 
 #### 1. Factory Method: createRulesEngineFromFile()
 
-**❌ DEPRECATED PATTERN** (18 files affected):
+**DEPRECATED PATTERN** (18 files affected):
 ```java
 // OLD: Content-aware factory method
 YamlRulesEngineService service = new YamlRulesEngineService();
@@ -271,7 +271,7 @@ RulesEngine engine = service.createRulesEngineFromFile(
 RuleResult result = engine.evaluate(config, testData);
 ```
 
-**✅ NEW RECOMMENDED PATTERN** (Static Factory Method):
+**NEW RECOMMENDED PATTERN** (Static Factory Method):
 ```java
 // NEW: Simple 2-line pattern using static factory method
 RulesEngine engine = RulesEngine.fromFile(
@@ -298,7 +298,7 @@ RuleResult result = engine.evaluate(yamlConfig, testData);
 
 #### 2. Factory Method: createRulesEngineFromYamlConfig()
 
-**❌ DEPRECATED PATTERN** (47 files affected - MOST COMMON):
+**DEPRECATED PATTERN** (47 files affected - MOST COMMON):
 ```java
 // OLD: Content-aware factory method
 YamlConfigurationLoader loader = new YamlConfigurationLoader();
@@ -310,7 +310,7 @@ RulesEngine engine = service.createRulesEngineFromYamlConfig(config);
 RuleResult result = engine.evaluate(config, testData);
 ```
 
-**✅ NEW RECOMMENDED PATTERN** (Static Factory Method):
+**NEW RECOMMENDED PATTERN** (Static Factory Method):
 ```java
 // NEW: Simple pattern using static factory method
 YamlConfigurationLoader loader = new YamlConfigurationLoader();
@@ -336,7 +336,7 @@ RuleResult result = engine.evaluate(yamlConfig, testData);
 
 #### 3. Factory Method: createRulesEngineFromMultipleFiles()
 
-**❌ DEPRECATED PATTERN** (3 files affected):
+**DEPRECATED PATTERN** (3 files affected):
 ```java
 // OLD: Content-aware factory method for multi-file configs
 YamlRulesEngineService service = new YamlRulesEngineService();
@@ -348,7 +348,7 @@ RulesEngine engine = service.createRulesEngineFromMultipleFiles(
 RuleResult result = engine.evaluate(config, testData);
 ```
 
-**✅ NEW UNIVERSAL PATTERN**:
+**NEW UNIVERSAL PATTERN**:
 ```java
 // NEW: Universal pattern with manual merging
 YamlConfigurationLoader loader = new YamlConfigurationLoader();
@@ -372,7 +372,7 @@ RuleResult result = engine.evaluate(mergedConfig, testData);
 
 #### 4. Enrichment Processor: new YamlEnrichmentProcessor()
 
-**❌ DEPRECATED PATTERN** (25 files affected):
+**DEPRECATED PATTERN** (25 files affected):
 ```java
 // OLD: Specialized processor for enrichment-only processing
 LookupServiceRegistry serviceRegistry = new LookupServiceRegistry();
@@ -388,7 +388,7 @@ Object result = enrichmentProcessor.processEnrichments(
 );
 ```
 
-**✅ NEW UNIVERSAL PATTERN**:
+**NEW UNIVERSAL PATTERN**:
 ```java
 // NEW: Universal pattern (RulesEngine handles enrichments automatically)
 YamlConfigurationLoader loader = new YamlConfigurationLoader();
@@ -408,7 +408,7 @@ Object enrichedData = result.getEnrichedData();
 
 #### 5. Specialized Engine: DataPipelineEngine
 
-**❌ DEPRECATED PATTERN** (17 files affected - all ETL tests):
+**DEPRECATED PATTERN** (17 files affected - all ETL tests):
 ```java
 // OLD: Specialized engine for pipeline/ETL processing
 DataPipelineEngine pipelineEngine = new DataPipelineEngine();
@@ -420,7 +420,7 @@ PipelineExecutionResult result = pipelineEngine.executePipeline(
 );
 ```
 
-**✅ NEW UNIVERSAL PATTERN**:
+**NEW UNIVERSAL PATTERN**:
 ```java
 // NEW: Universal pattern (RulesEngine handles pipelines automatically)
 YamlConfigurationLoader loader = new YamlConfigurationLoader();
@@ -440,7 +440,7 @@ RuleResult result = engine.evaluate(yamlConfig, inputData);
 
 #### 6. Specialized Engine: DataTypeScenarioService
 
-**❌ DEPRECATED PATTERN** (11 files affected - all scenario tests):
+**DEPRECATED PATTERN** (11 files affected - all scenario tests):
 ```java
 // OLD: Specialized service for scenario-based processing
 DataTypeScenarioService scenarioService = new DataTypeScenarioService();
@@ -451,7 +451,7 @@ ScenarioResult result = scenarioService.executeScenario(
 );
 ```
 
-**✅ NEW UNIVERSAL PATTERN**:
+**NEW UNIVERSAL PATTERN**:
 ```java
 // NEW: Universal pattern (RulesEngine handles scenarios automatically)
 YamlConfigurationLoader loader = new YamlConfigurationLoader();
@@ -471,7 +471,7 @@ RuleResult result = engine.evaluate(yamlConfig, testData);
 
 #### 7. Specialized Engine: SimpleRulesEngine
 
-**❌ DEPRECATED PATTERN** (1 file affected - rarely used):
+**DEPRECATED PATTERN** (1 file affected - rarely used):
 ```java
 // OLD: Simplified engine for rules-only processing
 SimpleRulesEngine simpleRulesEngine = new SimpleRulesEngine();
@@ -479,7 +479,7 @@ SimpleRulesEngine simpleRulesEngine = new SimpleRulesEngine();
 RuleResult result = simpleRulesEngine.evaluate(rules, testData);
 ```
 
-**✅ NEW UNIVERSAL PATTERN**:
+**NEW UNIVERSAL PATTERN**:
 ```java
 // NEW: Universal pattern (RulesEngine is already simple and universal)
 YamlConfigurationLoader loader = new YamlConfigurationLoader();
@@ -511,7 +511,7 @@ RuleResult result = engine.evaluate(yamlConfig, testData);
 
 ---
 
-## 🚨 CRITICAL: Entry Point Rationalization Plan
+## CRITICAL: Entry Point Rationalization Plan
 
 ### The Problem
 
@@ -602,7 +602,7 @@ The `RulesEngine` is the **primary entry point** for executing APEX configuratio
 
 **Description**: Load YAML file and create RulesEngine in one call  
 **Usage**: Most common pattern for simple test scenarios  
-**Recommendation**: ✅ **PREFERRED** for most tests
+**Recommendation**: **PREFERRED** for most tests
 
 ```java
 // Setup
@@ -635,7 +635,7 @@ RuleResult result = engine.evaluate(config, testData);
 
 **Description**: Load YAML separately, then create RulesEngine from config object  
 **Usage**: When you need to inspect/modify config before creating engine  
-**Recommendation**: ✅ **PREFERRED** when config inspection needed
+**Recommendation**: **PREFERRED** when config inspection needed
 
 ```java
 // Setup
@@ -688,7 +688,7 @@ RuleResult result = engine.evaluate(config, testData);
 
 **Description**: Load and merge multiple YAML files into single RulesEngine  
 **Usage**: Cross-file references, modular configurations  
-**Recommendation**: ✅ **PREFERRED** for multi-file scenarios
+**Recommendation**: **PREFERRED** for multi-file scenarios
 
 ```java
 // Setup
@@ -786,7 +786,7 @@ The `YamlEnrichmentProcessor` is used for **direct enrichment processing** witho
 
 **Description**: Direct instantiation for enrichment-only processing  
 **Usage**: Testing enrichments in isolation, enrichment-focused tests  
-**Recommendation**: ✅ **PREFERRED** for enrichment-only tests
+**Recommendation**: **PREFERRED** for enrichment-only tests
 
 ```java
 // Setup dependencies
@@ -841,7 +841,7 @@ Object result = enrichmentProcessor.processEnrichments(
 
 **Description**: Pipeline engine for ETL workflows  
 **Usage**: Extract-Transform-Load operations  
-**Recommendation**: ✅ **REQUIRED** for pipeline/ETL tests
+**Recommendation**: **REQUIRED** for pipeline/ETL tests
 
 ```java
 // Create and initialize pipeline engine
@@ -884,7 +884,7 @@ PipelineExecutionResult result = pipelineEngine.executePipeline(
 
 **Description**: Scenario-based processing with stages  
 **Usage**: Multi-stage workflows, scenario orchestration  
-**Recommendation**: ✅ **REQUIRED** for scenario tests
+**Recommendation**: **REQUIRED** for scenario tests
 
 ```java
 // Create scenario service
@@ -940,14 +940,14 @@ RuleResult result = simpleRulesEngine.evaluate(rules, testData);
 
 | **Pattern** | **Entry Point** | **Use Case** | **Recommendation** | **File Count** |
 |-------------|----------------|--------------|-------------------|----------------|
-| 1.1 | `YamlRulesEngineService.createRulesEngineFromFile()` | Simple single-file tests | ✅ PREFERRED | 18 |
-| 1.2 | `YamlRulesEngineService.createRulesEngineFromYamlConfig()` | Config inspection needed | ✅ PREFERRED | 47 |
-| 1.3 | `YamlRulesEngineService.createRulesEngineFromMultipleFiles()` | Multi-file scenarios | ✅ PREFERRED | 3 |
+| 1.1 | `YamlRulesEngineService.createRulesEngineFromFile()` | Simple single-file tests | PREFERRED | 18 |
+| 1.2 | `YamlRulesEngineService.createRulesEngineFromYamlConfig()` | Config inspection needed | PREFERRED | 47 |
+| 1.3 | `YamlRulesEngineService.createRulesEngineFromMultipleFiles()` | Multi-file scenarios | PREFERRED | 3 |
 | 1.4 | `new RulesEngine(RulesEngineConfiguration)` | Low-level control | ⚠️ USE SPARINGLY | 15 |
 | 1.5 | `RulesEngineService.createRulesEngineFromFile()` | Legacy pattern | ⚠️ DEPRECATED | 2 |
-| 2.1 | `new YamlEnrichmentProcessor(registry, evaluator)` | Enrichment-only tests | ✅ PREFERRED | 25 |
-| 3.1 | `new DataPipelineEngine()` | ETL/Pipeline tests | ✅ REQUIRED | 17 |
-| 3.2 | `new DataTypeScenarioService()` | Scenario tests | ✅ REQUIRED | 11 |
+| 2.1 | `new YamlEnrichmentProcessor(registry, evaluator)` | Enrichment-only tests | PREFERRED | 25 |
+| 3.1 | `new DataPipelineEngine()` | ETL/Pipeline tests | REQUIRED | 17 |
+| 3.2 | `new DataTypeScenarioService()` | Scenario tests | REQUIRED | 11 |
 | 3.3 | `new SimpleRulesEngine()` | Rules-only (no enrichment) | ⚠️ RARELY USED | 1 |
 | | | | **TOTAL UNIQUE ENTRY POINTS** | **11** |
 | | | | **TOTAL APEX TEST FILES** | **99** |
@@ -956,7 +956,7 @@ RuleResult result = simpleRulesEngine.evaluate(rules, testData);
 
 ## Recommendations for New Tests
 
-### ✅ RECOMMENDED PATTERNS (Use These)
+### RECOMMENDED PATTERNS (Use These)
 
 1. **For Standard Tests**: Extend `DemoTestBase` and use inherited services
 2. **For RulesEngine Tests**: Use `YamlRulesEngineService.createRulesEngineFromFile()`
@@ -1343,10 +1343,10 @@ RuleResult result = engine.evaluate(config, inputData);
 ```
 
 **Expected Outcome**:
-- ✅ 11 entry points → 1 entry point (91% reduction)
-- ✅ Zero developer confusion about which entry point to use
-- ✅ Content-agnostic design - no YAML inspection required
-- ✅ Simplified architecture and reduced maintenance burden
+- 11 entry points → 1 entry point (91% reduction)
+- Zero developer confusion about which entry point to use
+- Content-agnostic design - no YAML inspection required
+- Simplified architecture and reduced maintenance burden
 
 ---
 

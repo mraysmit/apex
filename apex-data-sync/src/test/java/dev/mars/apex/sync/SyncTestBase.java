@@ -201,7 +201,7 @@ public abstract class SyncTestBase {
      */
     protected void validateExecutionRate(int actualSteps, int expectedSteps, String context) {
         if (actualSteps != expectedSteps) {
-            logger.error("❌ EXECUTION RATE FAILURE: {} - Expected {} steps, but executed {} steps",
+            logger.error("EXECUTION RATE FAILURE: {} - Expected {} steps, but executed {} steps",
                 context, expectedSteps, actualSteps);
             throw new AssertionError(String.format(
                 "Execution rate failure for %s: Expected %d steps, executed %d steps (%.1f%%)",

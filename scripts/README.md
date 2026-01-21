@@ -2,7 +2,7 @@
 
 This directory contains Python scripts for analyzing YAML file usage patterns and documentation consistency in the APEX Rules Engine demo module.
 
-## 📋 Scripts Overview
+## Scripts Overview
 
 ### `analyze_demo_yaml_files.py`
 Comprehensive analysis script that examines:
@@ -43,7 +43,7 @@ python scripts/analyze_demo_yaml_files.py --output report.md --json report.json
 python scripts/analyze_demo_yaml_files.py --verbose
 ```
 
-## 📊 Report Contents
+## Report Contents
 
 ### Markdown Report Sections
 1. **Summary Statistics**
@@ -87,7 +87,7 @@ python scripts/analyze_demo_yaml_files.py --verbose
 }
 ```
 
-## 🔍 Analysis Features
+## Analysis Features
 
 ### Demo Class Analysis
 - **File Discovery**: Automatically finds all demo classes
@@ -119,7 +119,7 @@ The script calculates a consistency score based on:
 **Generated:** 2025-01-04T10:30:00
 **Consistency Score:** 95.5%
 
-## 📊 Summary Statistics
+## Summary Statistics
 - **Total Demo Classes:** 40
 - **Total YAML Files:** 60
 - **Missing YAML Files:** 0

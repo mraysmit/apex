@@ -3090,14 +3090,14 @@ CREATE INDEX idx_decisions_result_timestamp ON execution_decisions(condition_res
 
 | Property | Dependency Tree | Execution Trace | Alignment |
 |----------|----------------|-----------------|-----------|
-| `name` | File name | Same file name | ✅ Identical |
-| `path` | File path | Same file path | ✅ Identical - enables mapping |
-| `type` | `scenario`, `rule-config` | `scenario-execution`, `rule-group-execution` | ✅ Suffix pattern |
-| `depth` | Tree depth | Same depth | ✅ Identical structure |
-| `height` | Distance to leaf | Same calculation | ✅ Identical structure |
-| `children` | Nested dependencies | Nested execution steps | ✅ Same hierarchy |
-| `healthScore` | Static analysis | Runtime health | ✅ Same scale (0-100) |
-| `contentSummary` | Static counts | `executionSummary` with runtime data | ✅ Parallel structure |
+| `name` | File name | Same file name | Identical |
+| `path` | File path | Same file path | Identical - enables mapping |
+| `type` | `scenario`, `rule-config` | `scenario-execution`, `rule-group-execution` | Suffix pattern |
+| `depth` | Tree depth | Same depth | Identical structure |
+| `height` | Distance to leaf | Same calculation | Identical structure |
+| `children` | Nested dependencies | Nested execution steps | Same hierarchy |
+| `healthScore` | Static analysis | Runtime health | Same scale (0-100) |
+| `contentSummary` | Static counts | `executionSummary` with runtime data | Parallel structure |
 
 **Overlay Mapping Strategy:**
 - Match nodes by `path` property

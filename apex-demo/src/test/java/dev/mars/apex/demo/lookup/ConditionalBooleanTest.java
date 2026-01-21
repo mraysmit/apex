@@ -48,11 +48,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Conditional enrichment execution based on boolean conditions
  *
  * CRITICAL VALIDATION CHECKLIST APPLIED:
- * ✅ Count enrichments in YAML - 5 enrichments expected
- * ✅ Verify log shows "Processed: 5 out of 5" - Must be 100% execution rate
- * ✅ Check EVERY enrichment condition - Test data triggers all boolean conditions
- * ✅ Validate EVERY boolean calculation - Test actual boolean expression evaluation
- * ✅ Assert ALL enrichment results - Every result-field has corresponding assertEquals
+ * Count enrichments in YAML - 5 enrichments expected
+ * Verify log shows "Processed: 5 out of 5" - Must be 100% execution rate
+ * Check EVERY enrichment condition - Test data triggers all boolean conditions
+ * Validate EVERY boolean calculation - Test actual boolean expression evaluation
+ * Assert ALL enrichment results - Every result-field has corresponding assertEquals
  *
  * YAML FIRST PRINCIPLE:
  * - ALL boolean logic is in YAML enrichments
@@ -106,7 +106,7 @@ public class ConditionalBooleanTest extends DemoTestBase {
             assertNotNull(enrichedData.get("simpleBoolean"), "Simple boolean result should not be null");
             assertEquals(true, enrichedData.get("simpleBoolean"), "Simple boolean should return true for isActive=true");
 
-            logger.info("✅ Simple boolean field access test completed successfully");
+            logger.info("Simple boolean field access test completed successfully");
 
         } catch (Exception e) {
             logger.error("Simple boolean field access test failed: {}", e.getMessage());
@@ -143,7 +143,7 @@ public class ConditionalBooleanTest extends DemoTestBase {
             assertNotNull(enrichedData.get("negatedBoolean"), "Negated boolean result should not be null");
             assertEquals(true, enrichedData.get("negatedBoolean"), "Negated boolean should return true for !isDeleted when isDeleted=false");
 
-            logger.info("✅ Negated boolean expressions test completed successfully");
+            logger.info("Negated boolean expressions test completed successfully");
 
         } catch (Exception e) {
             logger.error("Negated boolean expressions test failed: {}", e.getMessage());
@@ -180,7 +180,7 @@ public class ConditionalBooleanTest extends DemoTestBase {
             assertNotNull(enrichedData.get("andExpression"), "AND expression result should not be null");
             assertEquals(true, enrichedData.get("andExpression"), "AND expression should return true for isActive=true && !isDeleted");
 
-            logger.info("✅ AND logical operator expressions test completed successfully");
+            logger.info("AND logical operator expressions test completed successfully");
 
         } catch (Exception e) {
             logger.error("AND logical operator expressions test failed: {}", e.getMessage());
@@ -217,7 +217,7 @@ public class ConditionalBooleanTest extends DemoTestBase {
             assertNotNull(enrichedData.get("orExpression"), "OR expression result should not be null");
             assertEquals(true, enrichedData.get("orExpression"), "OR expression should return true for isVisible=true || hasPermission=false");
 
-            logger.info("✅ OR logical operator expressions test completed successfully");
+            logger.info("OR logical operator expressions test completed successfully");
 
         } catch (Exception e) {
             logger.error("OR logical operator expressions test failed: {}", e.getMessage());
@@ -255,7 +255,7 @@ public class ConditionalBooleanTest extends DemoTestBase {
             assertNotNull(enrichedData.get("complexExpression"), "Complex expression result should not be null");
             assertEquals(true, enrichedData.get("complexExpression"), "Complex expression should return true for the given boolean combination");
 
-            logger.info("✅ Complex boolean expressions test completed successfully");
+            logger.info("Complex boolean expressions test completed successfully");
 
         } catch (Exception e) {
             logger.error("Complex boolean expressions test failed: {}", e.getMessage());
@@ -309,7 +309,7 @@ public class ConditionalBooleanTest extends DemoTestBase {
             assertEquals(true, enrichedData.get("orExpression"), "OR expression: isVisible || hasPermission should be true");
             assertEquals(true, enrichedData.get("complexExpression"), "Complex expression should evaluate to true");
 
-            logger.info("✅ Complete boolean enrichments workflow test completed successfully");
+            logger.info("Complete boolean enrichments workflow test completed successfully");
             logger.info("  - All 5 boolean enrichments processed successfully");
             logger.info("  - Simple boolean: {}", enrichedData.get("simpleBoolean"));
             logger.info("  - Negated boolean: {}", enrichedData.get("negatedBoolean"));

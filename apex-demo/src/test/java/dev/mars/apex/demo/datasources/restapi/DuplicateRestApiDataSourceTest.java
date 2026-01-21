@@ -65,7 +65,7 @@ public class DuplicateRestApiDataSourceTest extends DemoTestBase {
         testServer.start();
         baseUrl = testServer.getBaseUrl();
         
-        logger.info("✅ RestApiTestableServer started successfully:");
+        logger.info("RestApiTestableServer started successfully:");
         logger.info("  Base URL: {}", baseUrl);
         logger.info("  Server Port: {}", testServer.getPort());
         
@@ -78,7 +78,7 @@ public class DuplicateRestApiDataSourceTest extends DemoTestBase {
         if (testServer != null && testServer.isRunning()) {
             logger.info("🛑 Stopping RestApiTestableServer...");
             testServer.stop();
-            logger.info("✅ RestApiTestableServer stopped successfully");
+            logger.info("RestApiTestableServer stopped successfully");
         }
         System.clearProperty("REST_API_BASE_URL");
     }
@@ -96,7 +96,7 @@ public class DuplicateRestApiDataSourceTest extends DemoTestBase {
             
             // Clear cache to start fresh
             cacheManager.clearAll();
-            logger.info("📊 Cache cleared - starting fresh");
+            logger.info("Cache cleared - starting fresh");
 
             // Load configuration with 2 enrichments using SAME REST API endpoint
             var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/datasources/restapi/DuplicateRestApiDataSourceTest.yaml");
@@ -106,7 +106,7 @@ public class DuplicateRestApiDataSourceTest extends DemoTestBase {
             testData.put("currencyCode", "USD");
             testData.put("transactionId", "TXN123");
             
-            logger.info("📋 Processing enrichments with 2 identical REST API endpoints...");
+            logger.info("Processing enrichments with 2 identical REST API endpoints...");
 
             // Process enrichments - this should create 1 dataset service and reuse it
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
@@ -123,7 +123,7 @@ public class DuplicateRestApiDataSourceTest extends DemoTestBase {
             logger.info("=================================================================");
             logger.info("CACHE STATISTICS ANALYSIS");
             logger.info("=================================================================");
-            logger.info("📊 Dataset Cache Statistics:");
+            logger.info("Dataset Cache Statistics:");
             logger.info("   - Cache Hits: {}", stats.getHits());
             logger.info("   - Cache Misses: {}", stats.getMisses());
             logger.info("   - Hit Rate: {}%", String.format("%.2f%%", stats.getHitRate()));
@@ -140,7 +140,7 @@ public class DuplicateRestApiDataSourceTest extends DemoTestBase {
             assertTrue(stats.getHitRate() > 0, 
                 "Hit rate should be greater than 0% (caching is working)");
 
-            logger.info("✅ VERIFICATION SUCCESSFUL:");
+            logger.info("VERIFICATION SUCCESSFUL:");
             logger.info("   ✓ Only 1 DatasetLookupService created for REST API endpoint (not 2)");
             logger.info("   ✓ Second enrichment reused first enrichment's dataset");
             logger.info("   ✓ Memory duplication eliminated via caching");
@@ -156,7 +156,7 @@ public class DuplicateRestApiDataSourceTest extends DemoTestBase {
             assertEquals("$", enrichedData.get("currencySymbol"));
 
         } catch (Exception e) {
-            logger.error("❌ REST API dataset deduplication verification failed: {}", e.getMessage(), e);
+            logger.error("REST API dataset deduplication verification failed: {}", e.getMessage(), e);
             fail("REST API dataset deduplication verification failed: " + e.getMessage());
         }
     }
@@ -188,7 +188,7 @@ public class DuplicateRestApiDataSourceTest extends DemoTestBase {
             // Note: Symbol may vary by platform encoding, so we just check it's not null
             assertNotNull(enrichedData.get("currencySymbol"));
 
-            logger.info("✅ EUR enrichment successful: {}", enrichedData);
+            logger.info("EUR enrichment successful: {}", enrichedData);
 
         } catch (Exception e) {
             fail("Different currency test failed: " + e.getMessage());
@@ -210,7 +210,7 @@ public class DuplicateRestApiDataSourceTest extends DemoTestBase {
             var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/datasources/restapi/DuplicateRestApiDataSourceTest.yaml");
             assertNotNull(config, "YAML configuration should not be null");
 
-            logger.info("📋 Loaded configuration with {} enrichments", config.getEnrichments().size());
+            logger.info("Loaded configuration with {} enrichments", config.getEnrichments().size());
             
             // Log enrichment details
             config.getEnrichments().forEach(enrichment -> {
@@ -228,7 +228,7 @@ public class DuplicateRestApiDataSourceTest extends DemoTestBase {
             testData.put("currencyCode", "USD");
             testData.put("transactionId", "TXN123");
             
-            logger.info("📊 Input data: {}", testData);
+            logger.info("Input data: {}", testData);
             logger.info("🔄 Processing enrichments...");
 
             // Process with APEX - this should trigger both enrichments
@@ -242,8 +242,8 @@ public class DuplicateRestApiDataSourceTest extends DemoTestBase {
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
 
-            logger.info("✅ Enrichment completed successfully");
-            logger.info("📊 Result data: {}", enrichedData);
+            logger.info("Enrichment completed successfully");
+            logger.info("Result data: {}", enrichedData);
 
             // Verify both enrichments worked (different fields from same REST API endpoint)
             assertEquals("USD", enrichedData.get("currencyCode"));
@@ -254,14 +254,14 @@ public class DuplicateRestApiDataSourceTest extends DemoTestBase {
             logger.info("=================================================================");
             logger.info("SUCCESS: REST API DATASET DEDUPLICATION VERIFIED");
             logger.info("=================================================================");
-            logger.info("✅ Both enrichments successfully processed the same REST API endpoint");
-            logger.info("✅ Dataset deduplication works for REST API lookups");
-            logger.info("✅ Same caching mechanism as inline, database, and file datasets");
-            logger.info("✅ COMPLETE: All dataset types verified (inline, database, file, REST API)!");
+            logger.info("Both enrichments successfully processed the same REST API endpoint");
+            logger.info("Dataset deduplication works for REST API lookups");
+            logger.info("Same caching mechanism as inline, database, and file datasets");
+            logger.info("COMPLETE: All dataset types verified (inline, database, file, REST API)!");
             logger.info("=================================================================");
 
         } catch (Exception e) {
-            logger.error("❌ Test failed: {}", e.getMessage(), e);
+            logger.error("Test failed: {}", e.getMessage(), e);
             fail("Duplicate REST API data source test failed: " + e.getMessage());
         }
     }

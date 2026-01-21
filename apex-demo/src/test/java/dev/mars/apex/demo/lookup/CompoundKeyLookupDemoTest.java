@@ -37,11 +37,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * JUnit 5 test for CompoundKeyLookupDemo functionality.
  *
  * CRITICAL VALIDATION CHECKLIST APPLIED:
- * ✅ Count enrichments in YAML - 1 enrichment expected (compound-key-lookup-demo)
- * ✅ Verify log shows "Processed: 1 out of 1" - Must be 100% execution rate
- * ✅ Check enrichment condition - Test data triggers compound key condition
- * ✅ Validate business logic - Test actual compound key database lookup
- * ✅ Assert enrichment results - All database fields have corresponding assertions
+ * Count enrichments in YAML - 1 enrichment expected (compound-key-lookup-demo)
+ * Verify log shows "Processed: 1 out of 1" - Must be 100% execution rate
+ * Check enrichment condition - Test data triggers compound key condition
+ * Validate business logic - Test actual compound key database lookup
+ * Assert enrichment results - All database fields have corresponding assertions
  *
  * BUSINESS LOGIC VALIDATION:
  * - Compound key database lookup using H2 with customer-region composite keys
@@ -86,7 +86,7 @@ public class CompoundKeyLookupDemoTest extends DemoTestBase {
             String customerName = (String) enrichedData.get("customerName");
             assertEquals("TechCorp Solutions", customerName, "Customer name should match expected value for compound key CUST001-US-EAST");
 
-            logger.info("✅ Compound key lookup functionality test completed successfully");
+            logger.info("Compound key lookup functionality test completed successfully");
         } catch (Exception e) {
             fail("Failed to execute compound key lookup test: " + e.getMessage());
         }
@@ -135,7 +135,7 @@ public class CompoundKeyLookupDemoTest extends DemoTestBase {
                     enrichedData.get("customerName"));
             }
 
-            logger.info("✅ Multiple compound key lookups test completed successfully");
+            logger.info("Multiple compound key lookups test completed successfully");
         } catch (Exception e) {
             fail("Failed to execute multiple compound key lookups test: " + e.getMessage());
         }
@@ -171,7 +171,7 @@ public class CompoundKeyLookupDemoTest extends DemoTestBase {
             // For non-existent keys, database fields should be null
             assertNull(enrichedData.get("customerName"), "Customer name should be null for non-existent compound key");
 
-            logger.info("✅ Non-existent compound key lookup test completed successfully");
+            logger.info("Non-existent compound key lookup test completed successfully");
         } catch (Exception e) {
             fail("Failed to execute non-existent compound key lookup test: " + e.getMessage());
         }
@@ -216,7 +216,7 @@ public class CompoundKeyLookupDemoTest extends DemoTestBase {
                 ('CUST004-APAC', 'Asia Pacific Tech', 'Asia Pacific', 'PLATINUM', 0.18, 'APAC_PREMIUM', 'USD', 0.10)
                 """);
 
-            logger.info("✅ H2 database setup completed with {} customer-region records", 5);
+            logger.info("H2 database setup completed with {} customer-region records", 5);
 
         } catch (Exception e) {
             logger.error("Failed to setup customer-region database: " + e.getMessage(), e);

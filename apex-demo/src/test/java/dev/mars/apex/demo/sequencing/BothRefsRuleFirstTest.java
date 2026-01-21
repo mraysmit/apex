@@ -58,7 +58,7 @@ class BothRefsRuleFirstTest extends DemoTestBase {
         assertEquals(2, config.getEnrichments().size(),
             "Should have 2 enrichments from external file");
         
-        LOGGER.info("✅ Both rules and enrichments loaded correctly (refs-only)");
+        LOGGER.info("Both rules and enrichments loaded correctly (refs-only)");
     }
 
     @Test
@@ -77,7 +77,7 @@ class BothRefsRuleFirstTest extends DemoTestBase {
         testData.put("notionalAmount", 50000000.0);  // Valid: <= 100M (R1)
         testData.put("strike", 100.0);  // Valid: > 0 (R2)
         
-        LOGGER.info("📊 Input data: {}", testData);
+        LOGGER.info("Input data: {}", testData);
         LOGGER.info("🚀 Executing with sequential processing...");
         
         // Execute
@@ -111,7 +111,7 @@ class BothRefsRuleFirstTest extends DemoTestBase {
         assertEquals(100.0, enrichedData.get("strike"));
         
         LOGGER.info("═══════════════════════════════════════════════════════════════");
-        LOGGER.info("✅ CRITICAL FIX VERIFIED: rule-refs expanded BEFORE enrichment-refs!");
+        LOGGER.info("CRITICAL FIX VERIFIED: rule-refs expanded BEFORE enrichment-refs!");
         LOGGER.info("   - R1 (from ref): Notional limit validated FIRST");
         LOGGER.info("   - R2 (from ref): Strike price validated SECOND");
         LOGGER.info("   - E1 (from ref): Market data enriched THIRD");
@@ -134,7 +134,7 @@ class BothRefsRuleFirstTest extends DemoTestBase {
         testData.put("notionalAmount", 150000000.0);  // INVALID: > 100M (R1 should fail)
         testData.put("strike", 100.0);
         
-        LOGGER.info("📊 Test Case: Invalid notional (should fail R1 before enrichments)");
+        LOGGER.info("Test Case: Invalid notional (should fail R1 before enrichments)");
         
         // Execute
         RuleResult result = engine.evaluate(testData);
@@ -145,7 +145,7 @@ class BothRefsRuleFirstTest extends DemoTestBase {
         assertTrue(enrichedData.containsKey("currentSpotPrice"),
             "Enrichments should execute even after rule failure");
         
-        LOGGER.info("✅ Rules executed before enrichments (unusual but valid order)");
+        LOGGER.info("Rules executed before enrichments (unusual but valid order)");
     }
 }
 

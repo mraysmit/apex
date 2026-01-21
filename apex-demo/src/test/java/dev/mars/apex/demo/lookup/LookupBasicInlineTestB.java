@@ -48,11 +48,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Basic reference data enrichment workflows
  *
  * CRITICAL VALIDATION CHECKLIST APPLIED:
- * ✅ Count enrichments in YAML - 3 enrichments expected
- * ✅ Verify log shows "Processed: 3 out of 3" - Must be 100% execution rate
- * ✅ Check EVERY enrichment condition - Test data triggers all lookup conditions
- * ✅ Validate EVERY lookup result - Test actual inline dataset lookup functionality
- * ✅ Assert ALL enrichment results - Every result-field has corresponding assertEquals
+ * Count enrichments in YAML - 3 enrichments expected
+ * Verify log shows "Processed: 3 out of 3" - Must be 100% execution rate
+ * Check EVERY enrichment condition - Test data triggers all lookup conditions
+ * Validate EVERY lookup result - Test actual inline dataset lookup functionality
+ * Assert ALL enrichment results - Every result-field has corresponding assertEquals
  *
  * YAML FIRST PRINCIPLE:
  * - ALL lookup logic is in YAML enrichments
@@ -111,7 +111,7 @@ public class LookupBasicInlineTestB extends DemoTestBase {
             assertEquals("$", enrichedData.get("currencySymbol"), "Should retrieve correct currency symbol for USD");
             assertEquals("United States", enrichedData.get("currencyCountry"), "Should retrieve correct currency country for USD");
 
-            logger.info("✅ Currency lookup enrichment completed successfully");
+            logger.info("Currency lookup enrichment completed successfully");
             logger.info("  - Currency Name: {}", enrichedData.get("currencyName"));
             logger.info("  - Currency Symbol: {}", enrichedData.get("currencySymbol"));
             logger.info("  - Currency Country: {}", enrichedData.get("currencyCountry"));
@@ -157,7 +157,7 @@ public class LookupBasicInlineTestB extends DemoTestBase {
             assertEquals("10Y", enrichedData.get("instrumentMaturity"), "Should retrieve correct instrument maturity");
             assertEquals("US_TREASURY", enrichedData.get("instrumentIssuer"), "Should retrieve correct instrument issuer");
 
-            logger.info("✅ Instrument lookup enrichment completed successfully");
+            logger.info("Instrument lookup enrichment completed successfully");
             logger.info("  - Instrument Type: {}", enrichedData.get("instrumentType"));
             logger.info("  - Instrument Maturity: {}", enrichedData.get("instrumentMaturity"));
             logger.info("  - Instrument Issuer: {}", enrichedData.get("instrumentIssuer"));
@@ -203,7 +203,7 @@ public class LookupBasicInlineTestB extends DemoTestBase {
             assertEquals("DE", enrichedData.get("counterpartyJurisdiction"), "Should retrieve correct counterparty jurisdiction");
             assertEquals("BANK", enrichedData.get("counterpartyEntityType"), "Should retrieve correct counterparty entity type");
 
-            logger.info("✅ Counterparty lookup enrichment completed successfully");
+            logger.info("Counterparty lookup enrichment completed successfully");
             logger.info("  - Counterparty LEI: {}", enrichedData.get("counterpartyLEI"));
             logger.info("  - Counterparty Jurisdiction: {}", enrichedData.get("counterpartyJurisdiction"));
             logger.info("  - Counterparty Entity Type: {}", enrichedData.get("counterpartyEntityType"));
@@ -263,7 +263,7 @@ public class LookupBasicInlineTestB extends DemoTestBase {
                 logger.info("✓ Currency {} lookup: {} ({}, {})", currency, expectedName, expectedSymbol, expectedCountry);
             }
 
-            logger.info("✅ Multiple currency lookups completed successfully");
+            logger.info("Multiple currency lookups completed successfully");
 
         } catch (Exception e) {
             logger.error("Multiple currency lookups test failed: {}", e.getMessage());
@@ -324,7 +324,7 @@ public class LookupBasicInlineTestB extends DemoTestBase {
             assertEquals("TXN99999", enrichedData.get("transactionId"), "Original transaction ID should be preserved");
             assertEquals(50000.00, enrichedData.get("amount"), "Original amount should be preserved");
 
-            logger.info("✅ Complete basic inline lookup workflow completed successfully");
+            logger.info("Complete basic inline lookup workflow completed successfully");
             logger.info("  - All 3 enrichments processed successfully");
             logger.info("  - Currency: {} ({})", enrichedData.get("currencyName"), enrichedData.get("currencySymbol"));
             logger.info("  - Instrument: {} ({})", enrichedData.get("instrumentType"), enrichedData.get("instrumentMaturity"));

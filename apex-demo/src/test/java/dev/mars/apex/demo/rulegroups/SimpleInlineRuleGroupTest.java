@@ -83,7 +83,7 @@ public class SimpleInlineRuleGroupTest {
         // AND group with one false rule should fail
         assertFalse(result.isTriggered(), "Base group should fail (AND with one false rule)");
 
-        LOGGER.info("✅ Base rule group test passed - group failed as expected (AND logic)");
+        LOGGER.info("Base rule group test passed - group failed as expected (AND logic)");
     }
 
     @Test
@@ -103,7 +103,7 @@ public class SimpleInlineRuleGroupTest {
         // OR group with one true rule should pass
         assertTrue(result.isTriggered(), "Composite group should pass (OR with one true rule)");
 
-        LOGGER.info("✅ Composite rule group test passed - group passed as expected (OR logic)");
+        LOGGER.info("Composite rule group test passed - group passed as expected (OR logic)");
         LOGGER.info("Composite rule group successfully referenced base group by ID");
     }
 
@@ -125,7 +125,7 @@ public class SimpleInlineRuleGroupTest {
         assertEquals(2, baseGroup.getRules().size(), "Base group should have 2 rules");
         assertEquals(2, compositeGroup.getRules().size(), "Composite group should have 2 rules (from reference)");
 
-        LOGGER.info("✅ Rule group registry test passed");
+        LOGGER.info("Rule group registry test passed");
         LOGGER.info("Both rule groups properly registered: base={} rules, composite={} rules",
             baseGroup.getRules().size(), compositeGroup.getRules().size());
     }
@@ -151,7 +151,7 @@ public class SimpleInlineRuleGroupTest {
         assertTrue(hasRule1, "Composite group should contain simple-rule-1 from base group");
         assertTrue(hasRule2, "Composite group should contain simple-rule-2 from base group");
 
-        LOGGER.info("✅ Inline reference resolution test passed");
+        LOGGER.info("Inline reference resolution test passed");
         LOGGER.info("Inline rule-group-id reference successfully resolved: base-validation → composite-validation");
     }
 
@@ -182,8 +182,8 @@ public class SimpleInlineRuleGroupTest {
         assertEquals(baseGroup.getRules().size(), compositeGroup.getRules().size(),
             "Both groups should have same number of rules");
 
-        LOGGER.info("✅ Full workflow test passed");
-        LOGGER.info("✅ SUCCESS: Inline rule-group-id references working correctly!");
-        LOGGER.info("📋 SUMMARY: 2 rules, 2 rule groups, 1 inline reference - All working!");
+        LOGGER.info("Full workflow test passed");
+        LOGGER.info("SUCCESS: Inline rule-group-id references working correctly!");
+        LOGGER.info("SUMMARY: 2 rules, 2 rule groups, 1 inline reference - All working!");
     }
 }

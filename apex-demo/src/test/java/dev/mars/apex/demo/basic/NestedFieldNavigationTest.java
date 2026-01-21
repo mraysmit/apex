@@ -99,7 +99,7 @@ class NestedFieldNavigationTest {
         assertEquals(1000.0, enrichedMap.get("trade_amount"),
             "Should extract nested amount field");
 
-        System.out.println("\n✅ Successfully extracted nested fields:");
+        System.out.println("\nSuccessfully extracted nested fields:");
         System.out.println("   trade.currency → trade_currency: " + enrichedMap.get("trade_currency"));
         System.out.println("   trade.amount → trade_amount: " + enrichedMap.get("trade_amount"));
     }
@@ -170,7 +170,7 @@ class NestedFieldNavigationTest {
         assertEquals("EUR", enrichedMap.get("trade_currency"),
             "Should extract transaction.trade.details.currency");
 
-        System.out.println("\n✅ Successfully extracted deeply nested fields:");
+        System.out.println("\nSuccessfully extracted deeply nested fields:");
         System.out.println("   transaction.trade.counterparty.name → counterparty_name: " + enrichedMap.get("counterparty_name"));
         System.out.println("   transaction.trade.counterparty.country → counterparty_country: " + enrichedMap.get("counterparty_country"));
         System.out.println("   transaction.trade.details.currency → trade_currency: " + enrichedMap.get("trade_currency"));

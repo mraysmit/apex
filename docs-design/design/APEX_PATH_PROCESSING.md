@@ -8,13 +8,13 @@ Last Updated: 2026-01-08
 
 | Phase | Description | Status |
 |-------|-------------|--------|
-| **Phase 1** | Stream/classpath methods for `YamlConfigurationLoader` | ✅ COMPLETE |
-| **Phase 1** | Stream/classpath methods for `ScenarioRegistryLoader` | ✅ COMPLETE |
-| **Phase 1** | `RulesEngine.fromScenarioRegistry()` classpath support | ✅ COMPLETE |
-| **Phase 2** | Create `ResourceResolver` abstraction | ✅ COMPLETE |
-| **Phase 3** | Enhance component loading with classpath support | ✅ COMPLETE |
-| **Phase 4** | Create `ConfigurationContext` for name-based resolution | ✅ COMPLETE |
-| **Phase 5** | Add classpath scanning to `CatalogScanService` | ✅ COMPLETE |
+| **Phase 1** | Stream/classpath methods for `YamlConfigurationLoader` | COMPLETE |
+| **Phase 1** | Stream/classpath methods for `ScenarioRegistryLoader` | COMPLETE |
+| **Phase 1** | `RulesEngine.fromScenarioRegistry()` classpath support | COMPLETE |
+| **Phase 2** | Create `ResourceResolver` abstraction | COMPLETE |
+| **Phase 3** | Enhance component loading with classpath support | COMPLETE |
+| **Phase 4** | Create `ConfigurationContext` for name-based resolution | COMPLETE |
+| **Phase 5** | Add classpath scanning to `CatalogScanService` | COMPLETE |
 | **Phase 6** | Add builder pattern and environment configuration | ⏳ Planned |
 
 ### Summary of Completed Work
@@ -87,7 +87,7 @@ Support loading YAML configurations from multiple sources (filesystem, classpath
 ### Part 1: Core Infrastructure
 
 #### 1.1 Create `ResourceResolver` abstraction
-**Status:** ✅ COMPLETE
+**Status:** COMPLETE
 **New class:** `apex-core/src/main/java/dev/mars/apex/core/config/ResourceResolver.java`
 
 **Implemented API:**
@@ -135,7 +135,7 @@ public class ResourceResolver {
 **Test Coverage:** `ResourceResolverTest.java` (32 test methods, all passing)
 
 #### 1.2 Create `ConfigurationContext` for runtime name resolution
-**Status:** ✅ COMPLETE
+**Status:** COMPLETE
 **File:** `apex-core/src/main/java/dev/mars/apex/core/config/ConfigurationContext.java`
 
 Central registry for name-based resolution of APEX configurations with thread-safe access.
@@ -217,7 +217,7 @@ ConfigurationContext context = ConfigurationContext.builder()
 ### Part 2: Enhance Existing Loaders
 
 #### 2.1 Add `loadAsMap(InputStream)` to [YamlConfigurationLoader](apex-core/src/main/java/dev/mars/apex/core/config/yaml/YamlConfigurationLoader.java)
-**Status:** ✅ COMPLETE
+**Status:** COMPLETE
 
 Implemented methods:
 ```java
@@ -231,7 +231,7 @@ public Map<String, Object> loadAsMapFromClasspath(String resourcePath) throws Ya
 **Test Coverage:** `YamlConfigurationLoaderStreamTest.java` (345 lines, 12+ test cases)
 
 #### 2.2 Add stream/classpath support to [ScenarioRegistryLoader](apex-core/src/main/java/dev/mars/apex/core/config/yaml/ScenarioRegistryLoader.java)
-**Status:** ✅ COMPLETE
+**Status:** COMPLETE
 
 Implemented methods:
 ```java
@@ -250,7 +250,7 @@ public ScenarioConfiguration loadScenarioFromClasspath(String resourcePath)
 **Test Coverage:** `ScenarioRegistryLoaderStreamTest.java` (598 lines, 20+ test cases)
 
 #### 2.3 Add stream/classpath support to Component loading
-**Status:** ✅ COMPLETE
+**Status:** COMPLETE
 **File:** `apex-core/src/main/java/dev/mars/apex/core/config/component/ComponentLoader.java`
 
 Enhanced component file resolution to support classpath resources with full `ResourceResolver` integration:
@@ -295,7 +295,7 @@ public ResourceResolver getResourceResolver()
 - Maintain existing `configCache` for performance
 
 #### 2.5 Enhance `RulesEngine.fromScenarioRegistry()` for classpath support
-**Status:** ✅ COMPLETE
+**Status:** COMPLETE
 
 **File:** `apex-core/src/main/java/dev/mars/apex/core/engine/config/RulesEngine.java`
 
@@ -357,7 +357,7 @@ private static String deriveClasspathBase(String resourcePath) {
 ### Part 3: Classpath Scanning
 
 #### 3.1 Add classpath scanning to [CatalogScanService](apex-yaml-manager/src/main/java/dev/mars/apex/yaml/manager/service/CatalogScanService.java)
-**Status:** ✅ COMPLETE
+**Status:** COMPLETE
 
 **File:** `apex-yaml-manager/src/main/java/dev/mars/apex/yaml/manager/service/CatalogScanService.java`
 
@@ -588,108 +588,108 @@ Following APEX testing patterns (extending `DemoTestBase`, using `@DisplayName`,
 ---
 
 #### 7.1 `ResourceResolverTest.java`
-**Status:** ✅ COMPLETE
+**Status:** COMPLETE
 **Location:** `apex-core/src/test/java/dev/mars/apex/core/config/ResourceResolverTest.java`
 
 | Test Method | Purpose | Status |
 |-------------|---------|--------|
-| `testResolveFromClasspathRootResource()` | Resolve resource from classpath root | ✅ |
-| `testResolveFromClasspathWithPrefix()` | Load resource with classpath prefix | ✅ |
-| `testResolveNestedClasspathResource()` | Load nested classpath resource | ✅ |
-| `testResolveFromClasspathExplicit()` | Explicit classpath resolution | ✅ |
-| `testResolveFromClasspathNotFound()` | Handle missing classpath resource | ✅ |
-| `testResolveFromFilesystemAbsolutePath()` | Resolve absolute filesystem path | ✅ |
-| `testResolveFromFilesystemWithSearchPaths()` | Find file in configured search paths | ✅ |
-| `testResolveFromFilesystemExplicit()` | Explicit filesystem resolution | ✅ |
-| `testResolveFromFilesystemNotFound()` | Handle missing file | ✅ |
-| `testResolveRelativePathWithBasePath()` | Resolve relative path against base | ✅ |
-| `testResolveRelativePathWithDotSlash()` | Handle ./ prefix | ✅ |
-| `testResolveRelativePathUtility()` | Utility method tests | ✅ |
-| `testGetClasspathBaseFromResourcePath()` | Extract directory from classpath path | ✅ |
-| `testDefaultStrategyIsClasspathFirst()` | Default strategy verification | ✅ |
-| `testClasspathFirstStrategy()` | Classpath first resolution | ✅ |
-| `testFilesystemFirstStrategy()` | Filesystem first resolution | ✅ |
-| `testClasspathOnlyStrategy()` | Classpath-only mode | ✅ |
-| `testFilesystemOnlyStrategy()` | Filesystem-only mode | ✅ |
-| `testAddSearchPathDynamically()` | Add search path after construction | ✅ |
-| `testAddClasspathPrefixDynamically()` | Add classpath prefix dynamically | ✅ |
-| `testSetSearchPaths()` | Replace search paths | ✅ |
-| `testSetClasspathPrefixes()` | Replace classpath prefixes | ✅ |
-| `testMultipleSearchPathsOrder()` | Search paths checked in order | ✅ |
-| `testResolveNullPathThrowsException()` | Handle null input gracefully | ✅ |
-| `testResolveNotFoundThrowsException()` | Proper error when resource not found | ✅ |
-| `testAddNullSearchPathThrowsException()` | Handle null search path | ✅ |
-| `testAddNullClasspathPrefixThrowsException()` | Handle null prefix | ✅ |
-| `testExistsForClasspathResource()` | Exists check for classpath | ✅ |
-| `testExistsForFilesystemResource()` | Exists check for filesystem | ✅ |
-| `testExistsForNullOrEmpty()` | Exists for null/empty | ✅ |
-| `testBuilderCreatesResolver()` | Builder pattern creates resolver | ✅ |
-| `testBuilderAllOptions()` | Builder with all configuration options | ✅ |
+| `testResolveFromClasspathRootResource()` | Resolve resource from classpath root | |
+| `testResolveFromClasspathWithPrefix()` | Load resource with classpath prefix | |
+| `testResolveNestedClasspathResource()` | Load nested classpath resource | |
+| `testResolveFromClasspathExplicit()` | Explicit classpath resolution | |
+| `testResolveFromClasspathNotFound()` | Handle missing classpath resource | |
+| `testResolveFromFilesystemAbsolutePath()` | Resolve absolute filesystem path | |
+| `testResolveFromFilesystemWithSearchPaths()` | Find file in configured search paths | |
+| `testResolveFromFilesystemExplicit()` | Explicit filesystem resolution | |
+| `testResolveFromFilesystemNotFound()` | Handle missing file | |
+| `testResolveRelativePathWithBasePath()` | Resolve relative path against base | |
+| `testResolveRelativePathWithDotSlash()` | Handle ./ prefix | |
+| `testResolveRelativePathUtility()` | Utility method tests | |
+| `testGetClasspathBaseFromResourcePath()` | Extract directory from classpath path | |
+| `testDefaultStrategyIsClasspathFirst()` | Default strategy verification | |
+| `testClasspathFirstStrategy()` | Classpath first resolution | |
+| `testFilesystemFirstStrategy()` | Filesystem first resolution | |
+| `testClasspathOnlyStrategy()` | Classpath-only mode | |
+| `testFilesystemOnlyStrategy()` | Filesystem-only mode | |
+| `testAddSearchPathDynamically()` | Add search path after construction | |
+| `testAddClasspathPrefixDynamically()` | Add classpath prefix dynamically | |
+| `testSetSearchPaths()` | Replace search paths | |
+| `testSetClasspathPrefixes()` | Replace classpath prefixes | |
+| `testMultipleSearchPathsOrder()` | Search paths checked in order | |
+| `testResolveNullPathThrowsException()` | Handle null input gracefully | |
+| `testResolveNotFoundThrowsException()` | Proper error when resource not found | |
+| `testAddNullSearchPathThrowsException()` | Handle null search path | |
+| `testAddNullClasspathPrefixThrowsException()` | Handle null prefix | |
+| `testExistsForClasspathResource()` | Exists check for classpath | |
+| `testExistsForFilesystemResource()` | Exists check for filesystem | |
+| `testExistsForNullOrEmpty()` | Exists for null/empty | |
+| `testBuilderCreatesResolver()` | Builder pattern creates resolver | |
+| `testBuilderAllOptions()` | Builder with all configuration options | |
 
 **Implementation:** 500+ lines, 32 test methods, all passing
 
 ---
 
 #### 7.2 `ConfigurationContextTest.java`
-**Status:** ✅ COMPLETE
+**Status:** COMPLETE
 **Location:** `apex-core/src/test/java/dev/mars/apex/core/config/ConfigurationContextTest.java`
 
 | Test Method | Purpose | Status |
 |-------------|---------|--------|
-| `testRegisterAndRetrieveConfiguration()` | Basic registration and lookup | ✅ |
-| `testRegisterAndRetrieveDataSource()` | DataSource registration/lookup | ✅ |
-| `testRegisterAndRetrieveScenario()` | Scenario registration/lookup | ✅ |
-| `testRegisterAndRetrieveComponent()` | Component registration/lookup | ✅ |
-| `testRegisterConfigurationNullName()` | Handle null name | ✅ |
-| `testRegisterConfigurationNullValue()` | Handle null value | ✅ |
-| `testDuplicateRegistrationOverwrites()` | Later registration overwrites earlier | ✅ |
-| `testGetConfigurationNotFound()` | Return null for unknown name | ✅ |
-| `testGetWithNullName()` | Handle null lookup | ✅ |
-| `testContainsConfiguration()` | Check existence by name | ✅ |
-| `testContainsNullName()` | Contains check for null | ✅ |
-| `testGetConfigurationNames()` | Return set of registered names | ✅ |
-| `testSize()` | Total count across all types | ✅ |
-| `testIsEmpty()` | Empty state check | ✅ |
-| `testClear()` | Clear all registered items | ✅ |
-| `testRemoveConfiguration()` | Remove by name | ✅ |
-| `testRemoveNonExistent()` | Remove non-existent item | ✅ |
-| `testBuilderCreatesContext()` | Builder creates context | ✅ |
-| `testBuilderWithResourceResolver()` | Builder with custom resolver | ✅ |
-| `testBuilderWithSearchPaths()` | Builder with search paths | ✅ |
-| `testBuilderWithClasspathPrefixes()` | Builder with classpath prefixes | ✅ |
-| `testBuilderIgnoresInvalidPaths()` | Ignore null/empty paths | ✅ |
-| `testLoadAllFromSearchPaths()` | Bulk load from filesystem paths | ✅ |
-| `testLoadFromNonExistentSearchPath()` | Handle non-existent path | ✅ |
-| `testLoadAllFromClasspath()` | Bulk load from classpath prefix | ✅ |
-| `testThreadSafetyOfRegistration()` | Concurrent registration safety | ✅ |
-| `testThreadSafetyOfLookup()` | Concurrent lookup safety | ✅ |
-| `testMixedConcurrentAccess()` | Mixed read/write concurrency | ✅ |
-| `testDefaultResourceResolver()` | Default resolver creation | ✅ |
-| `testCustomResourceResolver()` | Custom resolver injection | ✅ |
-| `testNullResourceResolver()` | Reject null resolver | ✅ |
+| `testRegisterAndRetrieveConfiguration()` | Basic registration and lookup | |
+| `testRegisterAndRetrieveDataSource()` | DataSource registration/lookup | |
+| `testRegisterAndRetrieveScenario()` | Scenario registration/lookup | |
+| `testRegisterAndRetrieveComponent()` | Component registration/lookup | |
+| `testRegisterConfigurationNullName()` | Handle null name | |
+| `testRegisterConfigurationNullValue()` | Handle null value | |
+| `testDuplicateRegistrationOverwrites()` | Later registration overwrites earlier | |
+| `testGetConfigurationNotFound()` | Return null for unknown name | |
+| `testGetWithNullName()` | Handle null lookup | |
+| `testContainsConfiguration()` | Check existence by name | |
+| `testContainsNullName()` | Contains check for null | |
+| `testGetConfigurationNames()` | Return set of registered names | |
+| `testSize()` | Total count across all types | |
+| `testIsEmpty()` | Empty state check | |
+| `testClear()` | Clear all registered items | |
+| `testRemoveConfiguration()` | Remove by name | |
+| `testRemoveNonExistent()` | Remove non-existent item | |
+| `testBuilderCreatesContext()` | Builder creates context | |
+| `testBuilderWithResourceResolver()` | Builder with custom resolver | |
+| `testBuilderWithSearchPaths()` | Builder with search paths | |
+| `testBuilderWithClasspathPrefixes()` | Builder with classpath prefixes | |
+| `testBuilderIgnoresInvalidPaths()` | Ignore null/empty paths | |
+| `testLoadAllFromSearchPaths()` | Bulk load from filesystem paths | |
+| `testLoadFromNonExistentSearchPath()` | Handle non-existent path | |
+| `testLoadAllFromClasspath()` | Bulk load from classpath prefix | |
+| `testThreadSafetyOfRegistration()` | Concurrent registration safety | |
+| `testThreadSafetyOfLookup()` | Concurrent lookup safety | |
+| `testMixedConcurrentAccess()` | Mixed read/write concurrency | |
+| `testDefaultResourceResolver()` | Default resolver creation | |
+| `testCustomResourceResolver()` | Custom resolver injection | |
+| `testNullResourceResolver()` | Reject null resolver | |
 
 **Implementation:** 660+ lines, 38 test methods, all passing
 
 ---
 
 #### 7.3 `YamlConfigurationLoaderStreamTest.java`
-**Status:** ✅ COMPLETE
+**Status:** COMPLETE
 **Location:** `apex-core/src/test/java/dev/mars/apex/core/config/yaml/YamlConfigurationLoaderStreamTest.java`
 
 | Test Method | Purpose | Status |
 |-------------|---------|--------|
-| `testLoadAsMapFromInputStream()` | Parse YAML map from stream | ✅ |
-| `testThrowExceptionForNullInputStream()` | Handle null stream | ✅ |
-| `testThrowExceptionForEmptyYaml()` | Handle empty YAML | ✅ |
-| `testThrowExceptionForInvalidYamlSyntax()` | Handle malformed YAML | ✅ |
-| `testLoadComplexYamlWithNestedStructures()` | Complex nested structures | ✅ |
-| `testLoadYamlWithLists()` | YAML with list structures | ✅ |
-| `testLoadAsMapFromClasspath()` | Classpath resource loading | ✅ |
-| `testLoadAsMapFromClasspathNotFound()` | Handle missing resource | ✅ |
-| `testLoadAsMapFromClasspathNullPath()` | Handle null path | ✅ |
-| `testLoadAsMapFromClasspathEmptyPath()` | Handle empty path | ✅ |
-| `testLoadFromStreamProducesSameResultAsFile()` | Stream/file parity | ✅ |
-| `testLoadApexRuleConfiguration()` | Load full rule config | ✅ |
+| `testLoadAsMapFromInputStream()` | Parse YAML map from stream | |
+| `testThrowExceptionForNullInputStream()` | Handle null stream | |
+| `testThrowExceptionForEmptyYaml()` | Handle empty YAML | |
+| `testThrowExceptionForInvalidYamlSyntax()` | Handle malformed YAML | |
+| `testLoadComplexYamlWithNestedStructures()` | Complex nested structures | |
+| `testLoadYamlWithLists()` | YAML with list structures | |
+| `testLoadAsMapFromClasspath()` | Classpath resource loading | |
+| `testLoadAsMapFromClasspathNotFound()` | Handle missing resource | |
+| `testLoadAsMapFromClasspathNullPath()` | Handle null path | |
+| `testLoadAsMapFromClasspathEmptyPath()` | Handle empty path | |
+| `testLoadFromStreamProducesSameResultAsFile()` | Stream/file parity | |
+| `testLoadApexRuleConfiguration()` | Load full rule config | |
 
 **Implementation:** 345 lines, 12 test methods
 
@@ -698,31 +698,31 @@ Following APEX testing patterns (extending `DemoTestBase`, using `@DisplayName`,
 ---
 
 #### 7.4 `ScenarioRegistryLoaderStreamTest.java`
-**Status:** ✅ COMPLETE
+**Status:** COMPLETE
 **Location:** `apex-core/src/test/java/dev/mars/apex/core/config/yaml/ScenarioRegistryLoaderStreamTest.java`
 
 | Test Method | Purpose | Status |
 |-------------|---------|--------|
-| `testLoadRegistryFromInputStream()` | Load registry from stream | ✅ |
-| `testLoadRegistryWithMultipleScenarios()` | Multiple scenarios in registry | ✅ |
-| `testLoadRegistryThrowsExceptionForNullStream()` | Handle null stream | ✅ |
-| `testLoadRegistryThrowsExceptionForEmptyRegistry()` | Handle empty registry | ✅ |
-| `testLoadRegistryWithClasspathBase()` | Resolve with classpath base | ✅ |
-| `testLoadRegistryWithNullClasspathBase()` | Handle null classpath base | ✅ |
-| `testLoadRegistryFromClasspath()` | Convenience classpath method | ✅ |
-| `testLoadRegistryFromClasspathNotFound()` | Handle missing resource | ✅ |
-| `testLoadRegistryFromClasspathEmptyPath()` | Handle empty path | ✅ |
-| `testLoadRegistryFromClasspathNullPath()` | Handle null path | ✅ |
-| `testLoadScenarioFromStream()` | Load individual scenario | ✅ |
-| `testLoadScenarioFromStreamWithStages()` | Scenario with stages | ✅ |
-| `testLoadScenarioFromStreamThrowsExceptionForNull()` | Handle null stream | ✅ |
-| `testLoadScenarioFromClasspath()` | Load scenario from classpath | ✅ |
-| `testLoadScenarioFromClasspathNotFound()` | Handle missing scenario | ✅ |
-| `testLoadScenarioFromClasspathNullPath()` | Handle null path | ✅ |
-| `testRelativePathResolutionFromClasspath()` | Relative path resolution | ✅ |
-| `testBackwardCompatibilityWithFilePath()` | Filesystem API unchanged | ✅ |
-| `testRegistryWithDisabledScenarios()` | Disabled scenario handling | ✅ |
-| `testRegistryWithRoutingConfiguration()` | Routing config parsing | ✅ |
+| `testLoadRegistryFromInputStream()` | Load registry from stream | |
+| `testLoadRegistryWithMultipleScenarios()` | Multiple scenarios in registry | |
+| `testLoadRegistryThrowsExceptionForNullStream()` | Handle null stream | |
+| `testLoadRegistryThrowsExceptionForEmptyRegistry()` | Handle empty registry | |
+| `testLoadRegistryWithClasspathBase()` | Resolve with classpath base | |
+| `testLoadRegistryWithNullClasspathBase()` | Handle null classpath base | |
+| `testLoadRegistryFromClasspath()` | Convenience classpath method | |
+| `testLoadRegistryFromClasspathNotFound()` | Handle missing resource | |
+| `testLoadRegistryFromClasspathEmptyPath()` | Handle empty path | |
+| `testLoadRegistryFromClasspathNullPath()` | Handle null path | |
+| `testLoadScenarioFromStream()` | Load individual scenario | |
+| `testLoadScenarioFromStreamWithStages()` | Scenario with stages | |
+| `testLoadScenarioFromStreamThrowsExceptionForNull()` | Handle null stream | |
+| `testLoadScenarioFromClasspath()` | Load scenario from classpath | |
+| `testLoadScenarioFromClasspathNotFound()` | Handle missing scenario | |
+| `testLoadScenarioFromClasspathNullPath()` | Handle null path | |
+| `testRelativePathResolutionFromClasspath()` | Relative path resolution | |
+| `testBackwardCompatibilityWithFilePath()` | Filesystem API unchanged | |
+| `testRegistryWithDisabledScenarios()` | Disabled scenario handling | |
+| `testRegistryWithRoutingConfiguration()` | Routing config parsing | |
 
 **Implementation:** 598 lines, 20+ test methods
 
@@ -738,27 +738,27 @@ src/test/resources/
 ---
 
 #### 7.5 `ComponentLoaderClasspathTest.java`
-**Status:** ✅ COMPLETE
+**Status:** COMPLETE
 **Location:** `apex-core/src/test/java/dev/mars/apex/core/config/component/ComponentLoaderClasspathTest.java`
 
 | Test Method | Purpose | Status |
 |-------------|---------|--------|
-| `testDefaultConstructorCreatesResourceResolver()` | Default constructor creates resolver | ✅ |
-| `testCustomResourceResolverInjection()` | Custom resolver injection | ✅ |
-| `testLoadComponentFromClasspath()` | Load component from classpath | ✅ |
-| `testLoadNestedComponentFromClasspath()` | Nested component resolution | ✅ |
-| `testLoadComponentWithRuleReferencesFromClasspath()` | Rule refs from classpath | ✅ |
-| `testLoadComponentFromInputStream()` | Stream-based loading | ✅ |
-| `testLoadComponentFromInputStreamWithClasspathBase()` | Stream with classpath context | ✅ |
-| `testCircularReferenceDetectionFromClasspath()` | Circular ref detection | ✅ |
-| `testLoadComponentWithClasspathBase()` | Explicit classpath base | ✅ |
-| `testClasspathBaseTrackingThroughRecursion()` | Context tracking | ✅ |
-| `testGetResourceResolver()` | Accessor method | ✅ |
-| `testResourceResolverUsedForResolution()` | Resolver integration | ✅ |
-| `testLoadFromClasspathNotFound()` | Missing resource handling | ✅ |
-| `testLoadFromStreamNull()` | Null stream handling | ✅ |
-| `testLoadFromClasspathNull()` | Null path handling | ✅ |
-| `testLoadFromClasspathEmpty()` | Empty path handling | ✅ |
+| `testDefaultConstructorCreatesResourceResolver()` | Default constructor creates resolver | |
+| `testCustomResourceResolverInjection()` | Custom resolver injection | |
+| `testLoadComponentFromClasspath()` | Load component from classpath | |
+| `testLoadNestedComponentFromClasspath()` | Nested component resolution | |
+| `testLoadComponentWithRuleReferencesFromClasspath()` | Rule refs from classpath | |
+| `testLoadComponentFromInputStream()` | Stream-based loading | |
+| `testLoadComponentFromInputStreamWithClasspathBase()` | Stream with classpath context | |
+| `testCircularReferenceDetectionFromClasspath()` | Circular ref detection | |
+| `testLoadComponentWithClasspathBase()` | Explicit classpath base | |
+| `testClasspathBaseTrackingThroughRecursion()` | Context tracking | |
+| `testGetResourceResolver()` | Accessor method | |
+| `testResourceResolverUsedForResolution()` | Resolver integration | |
+| `testLoadFromClasspathNotFound()` | Missing resource handling | |
+| `testLoadFromStreamNull()` | Null stream handling | |
+| `testLoadFromClasspathNull()` | Null path handling | |
+| `testLoadFromClasspathEmpty()` | Empty path handling | |
 
 **Implementation:** 300+ lines, 16 test methods, all passing
 
@@ -779,23 +779,23 @@ src/test/resources/
 ---
 
 #### 7.6 `ScenarioClasspathIntegrationTest.java`
-**Status:** ✅ COMPLETE
+**Status:** COMPLETE
 **Location:** `apex-demo/src/test/java/dev/mars/apex/demo/scenario/ScenarioClasspathIntegrationTest.java`
 
 **Extends:** `DemoTestBase`
 
 | Test Method | Purpose | Status |
 |-------------|---------|--------|
-| `testLoadScenariosFromClasspath()` | Load full registry from classpath | ✅ |
-| `testScenarioWithProcessingStages()` | Multi-stage scenario parsing | ✅ |
-| `testOtcOptionScenarioConfiguration()` | OTC option scenario details | ✅ |
-| `testSimpleTradeScenarioConfiguration()` | Simple trade scenario details | ✅ |
-| `testScenarioWithRuleConfigurations()` | Inline rule configs | ✅ |
-| `testStageDependencyResolution()` | Stage dependency parsing | ✅ |
-| `testConditionalStageExecution()` | Conditional stage configs | ✅ |
-| `testFailurePolicyConfiguration()` | Failure policy parsing | ✅ |
-| `testMissingClasspathResourceError()` | Error handling for missing | ✅ |
-| `testInvalidScenarioConfiguration()` | Invalid config handling | ✅ |
+| `testLoadScenariosFromClasspath()` | Load full registry from classpath | |
+| `testScenarioWithProcessingStages()` | Multi-stage scenario parsing | |
+| `testOtcOptionScenarioConfiguration()` | OTC option scenario details | |
+| `testSimpleTradeScenarioConfiguration()` | Simple trade scenario details | |
+| `testScenarioWithRuleConfigurations()` | Inline rule configs | |
+| `testStageDependencyResolution()` | Stage dependency parsing | |
+| `testConditionalStageExecution()` | Conditional stage configs | |
+| `testFailurePolicyConfiguration()` | Failure policy parsing | |
+| `testMissingClasspathResourceError()` | Error handling for missing | |
+| `testInvalidScenarioConfiguration()` | Invalid config handling | |
 
 **Implementation:** 343 lines, 10 test methods
 
@@ -812,23 +812,23 @@ src/test/resources/
 ---
 
 #### 7.7 `RulesEngineFromScenarioRegistryTest.java`
-**Status:** ✅ COMPLETE (replaces planned JarResourceLoadingTest)
+**Status:** COMPLETE (replaces planned JarResourceLoadingTest)
 **Location:** `apex-core/src/test/java/dev/mars/apex/core/engine/config/RulesEngineFromScenarioRegistryTest.java`
 
 **Purpose:** Test `RulesEngine.fromScenarioRegistry()` classpath loading support
 
 | Test Method | Purpose | Status |
 |-------------|---------|--------|
-| `testLoadRegistryFromClasspath()` | Load registry from classpath resource | ✅ |
-| `testRelativePathResolutionInClasspath()` | Relative paths work in classpath | ✅ |
-| `testScenarioConfigurationsAvailable()` | Loaded scenarios are accessible | ✅ |
-| `testLoadRegistryFromFilesystem()` | Filesystem fallback works | ✅ |
-| `testFilesystemPathsStillWork()` | Backward compatibility | ✅ |
-| `testNonExistentResourceThrowsException()` | Error for missing resource | ✅ |
-| `testNonExistentFilesystemPathThrowsException()` | Error for missing file | ✅ |
-| `testEmptyRegistryThrowsException()` | Error for empty registry | ✅ |
-| `testNullRegistryPathThrowsException()` | Error for null path | ✅ |
-| `testClasspathTakesPrecedenceOverFilesystem()` | Classpath first resolution | ✅ |
+| `testLoadRegistryFromClasspath()` | Load registry from classpath resource | |
+| `testRelativePathResolutionInClasspath()` | Relative paths work in classpath | |
+| `testScenarioConfigurationsAvailable()` | Loaded scenarios are accessible | |
+| `testLoadRegistryFromFilesystem()` | Filesystem fallback works | |
+| `testFilesystemPathsStillWork()` | Backward compatibility | |
+| `testNonExistentResourceThrowsException()` | Error for missing resource | |
+| `testNonExistentFilesystemPathThrowsException()` | Error for missing file | |
+| `testEmptyRegistryThrowsException()` | Error for empty registry | |
+| `testNullRegistryPathThrowsException()` | Error for null path | |
+| `testClasspathTakesPrecedenceOverFilesystem()` | Classpath first resolution | |
 
 **Implementation:** 372 lines, 10 test methods
 
@@ -852,14 +852,14 @@ src/test/resources/
 **Implemented Structure:**
 ```
 apex-core/src/test/resources/
-├── scenario-stream-test/                    ✅ IMPLEMENTED
+├── scenario-stream-test/                    IMPLEMENTED
 │   ├── test-registry.yaml
 │   ├── basic-validation-scenario.yaml
 │   └── complex-rules-scenario.yaml
 ├── resolver-test/                           ⏳ PLANNED
 │   ├── test-config.yaml
 │   └── nested/nested-config.yaml
-├── component-classpath-test/                ✅ IMPLEMENTED
+├── component-classpath-test/                IMPLEMENTED
 │   ├── parent-component.yaml
 │   ├── nested/child-component.yaml
 │   ├── rules/validation-rules.yaml
@@ -869,7 +869,7 @@ apex-core/src/test/resources/
 
 apex-demo/src/test/resources/
 └── dev/mars/apex/demo/scenario/
-    └── classpath-integration/               ✅ IMPLEMENTED
+    └── classpath-integration/               IMPLEMENTED
         ├── scenario-registry.yaml
         └── scenarios/
             ├── otc-option-scenario.yaml
@@ -1068,10 +1068,10 @@ mvn test -pl apex-core -Dtest="*SearchPath*#test*Invalid*,*SearchPath*#test*Null
 
 #### 7.10 Test Implementation Order
 
-**Phase 1 - Core Infrastructure (✅ COMPLETE):**
-1. ✅ `YamlConfigurationLoaderStreamTest` - Foundation for stream-based loading
-2. ✅ `ScenarioRegistryLoaderStreamTest` - Immediate JAR URL fix validation
-3. ✅ `RulesEngineFromScenarioRegistryTest` - Classpath loading for RulesEngine factory
+**Phase 1 - Core Infrastructure (COMPLETE):**
+1. `YamlConfigurationLoaderStreamTest` - Foundation for stream-based loading
+2. `ScenarioRegistryLoaderStreamTest` - Immediate JAR URL fix validation
+3. `RulesEngineFromScenarioRegistryTest` - Classpath loading for RulesEngine factory
 
 **Phase 2 - Resource Resolution (⏳ PLANNED):**
 4. ⏳ `ResourceResolverTest` - Unified resolution abstraction
@@ -1080,11 +1080,11 @@ mvn test -pl apex-core -Dtest="*SearchPath*#test*Invalid*,*SearchPath*#test*Null
 **Phase 3 - Component Support (⏳ PLANNED):**
 6. ⏳ `ComponentClasspathLoadingTest` - Component classpath loading
 
-**Phase 4 - End-to-End (✅ COMPLETE):**
-7. ✅ `ScenarioClasspathIntegrationTest` - Full integration tests
+**Phase 4 - End-to-End (COMPLETE):**
+7. `ScenarioClasspathIntegrationTest` - Full integration tests
 
-**Phase 5 - Backward Compatibility (✅ COMPLETE - integrated into other tests):**
-8. ✅ Backward compatibility verified in existing test classes
+**Phase 5 - Backward Compatibility (COMPLETE - integrated into other tests):**
+8. Backward compatibility verified in existing test classes
 
 ---
 
@@ -1117,9 +1117,9 @@ mvn clean test -pl apex-core,apex-demo
 
 ### Migration Path
 
-1. **Phase 1** (✅ COMPLETE): Add stream/classpath methods to `YamlConfigurationLoader` and `ScenarioRegistryLoader`
-2. **Phase 1.5** (✅ COMPLETE): Enhance `RulesEngine.fromScenarioRegistry()` with classpath support
-3. **Phase 2** (✅ COMPLETE): Create `ResourceResolver` abstraction with unified resolution
+1. **Phase 1** (COMPLETE): Add stream/classpath methods to `YamlConfigurationLoader` and `ScenarioRegistryLoader`
+2. **Phase 1.5** (COMPLETE): Enhance `RulesEngine.fromScenarioRegistry()` with classpath support
+3. **Phase 2** (COMPLETE): Create `ResourceResolver` abstraction with unified resolution
 4. **Phase 3** (⏳ PLANNED): Enhance component loading with classpath support
 5. **Phase 4** (⏳ PLANNED): Create `ConfigurationContext` for name-based resolution
 6. **Phase 5** (⏳ PLANNED): Add classpath scanning to `CatalogScanService`

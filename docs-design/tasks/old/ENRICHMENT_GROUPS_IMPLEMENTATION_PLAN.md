@@ -20,14 +20,14 @@ RulesEngine.evaluate(yamlConfig, data)
 
 ### What This Means
 
-**❌ NO Type-Specific Public Methods**
+**NO Type-Specific Public Methods**
 - NO `processEnrichments()`
 - NO `processEnrichmentGroup()`
 - NO `processRuleGroup()`
 - NO `processScenario()`
 - NO `processLookup()`
 
-**✅ YES Universal Entry Point**
+**YES Universal Entry Point**
 - **ONLY** `RulesEngine.evaluate()`
 - Content-agnostic processing
 - Automatic detection of YAML type
@@ -112,17 +112,17 @@ YAML File → YamlRuleConfiguration → YamlRuleFactory → RulesEngineConfigura
 Enrichment-groups are **partially implemented** but NOT integrated into `RulesEngine`:
 
 **Existing Components**:
-1. **Model**: `EnrichmentGroup` ✅ (apex-core/src/main/java/dev/mars/apex/core/engine/model/EnrichmentGroup.java)
+1. **Model**: `EnrichmentGroup` (apex-core/src/main/java/dev/mars/apex/core/engine/model/EnrichmentGroup.java)
    - Similar structure to `RuleGroup`
    - Stores enrichments by sequence
    - Supports AND/OR logic, stop-on-first-failure, parallel execution
    - **MISSING**: No `evaluate()` method - execution logic is in `YamlEnrichmentProcessor`
 
-2. **YAML Mapping**: `YamlEnrichmentGroup` ✅ (apex-core/src/main/java/dev/mars/apex/core/config/yaml/YamlEnrichmentGroup.java)
+2. **YAML Mapping**: `YamlEnrichmentGroup` (apex-core/src/main/java/dev/mars/apex/core/config/yaml/YamlEnrichmentGroup.java)
    - Deserializes `enrichment-groups` section from YAML
    - Contains: id, name, operator, enrichment-ids, enrichment-group-references, etc.
 
-3. **Factory**: `EnrichmentGroupFactory.buildEnrichmentGroups()` ✅ (apex-core/src/main/java/dev/mars/apex/core/service/enrichment/EnrichmentGroupFactory.java)
+3. **Factory**: `EnrichmentGroupFactory.buildEnrichmentGroups()` (apex-core/src/main/java/dev/mars/apex/core/service/enrichment/EnrichmentGroupFactory.java)
    - Two-phase creation (same pattern as rule groups)
    - Applies category metadata inheritance
    - **PROBLEM**: Returns `List<EnrichmentGroup>` but doesn't register in `RulesEngineConfiguration`
@@ -137,7 +137,7 @@ Enrichment-groups are **partially implemented** but NOT integrated into `RulesEn
    - Returns `EnrichmentGroupResult`
    - **PROBLEM**: This is the deprecated API we're trying to replace
 
-6. **RulesEngine Integration**: ❌ NOT IMPLEMENTED
+6. **RulesEngine Integration**: NOT IMPLEMENTED
    - Line 705-708 in `RulesEngine.java`: TODO comment
    - No `executeEnrichmentGroupsList()` method
    - No call to enrichment-groups processing
@@ -146,12 +146,12 @@ Enrichment-groups are **partially implemented** but NOT integrated into `RulesEn
 
 | Component | Rule-Groups | Enrichment-Groups | Gap |
 |-----------|-------------|-------------------|-----|
-| Model with evaluate() | ✅ RuleGroup | ❌ EnrichmentGroup (no evaluate) | Need to add evaluate() |
-| YAML Mapping | ✅ YamlRuleGroup | ✅ YamlEnrichmentGroup | None |
-| Factory | ✅ YamlRuleFactory | ✅ EnrichmentGroupFactory | Need integration |
-| Storage in Config | ✅ ruleGroupsById | ❌ Missing | Need to add |
-| RulesEngine execution | ✅ executeRuleGroupsList() | ❌ Missing | Need to add |
-| Document order processing | ✅ case "rule-groups" | ❌ TODO | Need to implement |
+| Model with evaluate() | RuleGroup | EnrichmentGroup (no evaluate) | Need to add evaluate() |
+| YAML Mapping | YamlRuleGroup | YamlEnrichmentGroup | None |
+| Factory | YamlRuleFactory | EnrichmentGroupFactory | Need integration |
+| Storage in Config | ruleGroupsById | Missing | Need to add |
+| RulesEngine execution | executeRuleGroupsList() | Missing | Need to add |
+| Document order processing | case "rule-groups" | TODO | Need to implement |
 
 ---
 
@@ -253,11 +253,11 @@ LOGGER.info("Successfully created RulesEngineConfiguration with " +
 3. Use the existing `enrichmentProcessor` field to process individual enrichments
 
 **Why This Approach**:
-- ✅ Follows the universal entry point principle - NO public type-specific methods
-- ✅ Mirrors how individual enrichments are processed (lines 544-584)
-- ✅ `RulesEngine` already has `enrichmentProcessor` field (line 119)
-- ✅ `EnrichmentGroup` remains a simple data model (like `RuleGroup`)
-- ✅ No need to pass deprecated services around
+- Follows the universal entry point principle - NO public type-specific methods
+- Mirrors how individual enrichments are processed (lines 544-584)
+- `RulesEngine` already has `enrichmentProcessor` field (line 119)
+- `EnrichmentGroup` remains a simple data model (like `RuleGroup`)
+- No need to pass deprecated services around
 
 **Code Example**:
 ```java
@@ -591,12 +591,12 @@ RuleResult result = engine.evaluate(config, data);
 
 ## Success Criteria
 
-1. ✅ All 693 existing tests pass
-2. ✅ 7 enrichmentgroups tests migrated to use `RulesEngine.evaluate()`
-3. ✅ DemoTestBase cleaned up (remove deprecated enrichmentProcessor field)
-4. ✅ Zero deprecation warnings from enrichment-groups tests
-5. ✅ 93% compliance achieved (91 out of 99 files)
-6. ✅ No performance regression (< 5% overhead)
+1. All 693 existing tests pass
+2. 7 enrichmentgroups tests migrated to use `RulesEngine.evaluate()`
+3. DemoTestBase cleaned up (remove deprecated enrichmentProcessor field)
+4. Zero deprecation warnings from enrichment-groups tests
+5. 93% compliance achieved (91 out of 99 files)
+6. No performance regression (< 5% overhead)
 
 ---
 

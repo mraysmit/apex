@@ -20,14 +20,14 @@ This makes your datasets **self-contained** and ready for persistence, logging, 
 
 ## Key Features
 
-✅ **Attach codes to outcomes** - Map rule/enrichment results to external system codes (e.g., `ERR001-5300`)
-✅ **Constant or dynamic codes** - Use fixed strings or SpEL expressions
-✅ **Write back to dataset** - Validation results become part of the data being processed
-✅ **Multiple error codes** - Create arrays of codes for comprehensive error reporting
-✅ **Field mapping** - Write codes and computed values to dataset fields
-✅ **Chained processing** - Downstream rules can reference mapped fields
-✅ **Self-contained datasets** - Data includes validation status, codes, timestamps, and metadata
-✅ **Backward compatible** - All keywords are optional
+**Attach codes to outcomes** - Map rule/enrichment results to external system codes (e.g., `ERR001-5300`)
+**Constant or dynamic codes** - Use fixed strings or SpEL expressions
+**Write back to dataset** - Validation results become part of the data being processed
+**Multiple error codes** - Create arrays of codes for comprehensive error reporting
+**Field mapping** - Write codes and computed values to dataset fields
+**Chained processing** - Downstream rules can reference mapped fields
+**Self-contained datasets** - Data includes validation status, codes, timestamps, and metadata
+**Backward compatible** - All keywords are optional
 
 ---
 
@@ -171,11 +171,11 @@ enrichedData.get("requiresReview");        // true
 ```
 
 **Benefits:**
-- ✅ **Self-contained dataset:** All validation results are part of the dataset
-- ✅ **Downstream processing:** Subsequent rules can reference validation status
-- ✅ **Audit trail:** Validation timestamp and messages are preserved
-- ✅ **Operations integration:** Error codes are embedded in the data for external systems
-- ✅ **Conditional logic:** Downstream rules can check `#validationStatus == 'VALID'`
+- **Self-contained dataset:** All validation results are part of the dataset
+- **Downstream processing:** Subsequent rules can reference validation status
+- **Audit trail:** Validation timestamp and messages are preserved
+- **Operations integration:** Error codes are embedded in the data for external systems
+- **Conditional logic:** Downstream rules can check `#validationStatus == 'VALID'`
 
 ---
 
@@ -608,13 +608,13 @@ public void testSuccessCode() {
 
 ### 1. Use Meaningful Code Names
 
-✅ **Good:**
+**Good:**
 ```yaml
 success-code: "TRADE_VALIDATED"
 error-code: "TRADE_VALIDATION_FAILED"
 ```
 
-❌ **Bad:**
+**Bad:**
 ```yaml
 success-code: "OK"
 error-code: "ERR"
@@ -624,12 +624,12 @@ error-code: "ERR"
 
 ### 2. Use Constants for Simple Cases, SpEL for Dynamic Cases
 
-✅ **Constant (simple):**
+**Constant (simple):**
 ```yaml
 success-code: "VALID"
 ```
 
-✅ **SpEL (dynamic):**
+**SpEL (dynamic):**
 ```yaml
 success-code: "#amount > 100000 ? 'HIGH_VALUE' : 'NORMAL_VALUE'"
 ```
@@ -645,10 +645,10 @@ rules:
   - id: "step-1"
     condition: "#amount > 0"
     success-code: "STEP_1_PASSED"
-    map-to-field: "step1Status = #success_code"  # ✅ Write to dataset
+    map-to-field: "step1Status = #success_code"  # Write to dataset
 
   - id: "step-2"
-    condition: "#step1Status == 'STEP_1_PASSED'"  # ✅ Reference mapped field
+    condition: "#step1Status == 'STEP_1_PASSED'"  # Reference mapped field
     success-code: "STEP_2_PASSED"
 ```
 
@@ -656,7 +656,7 @@ rules:
 
 ### 4. Use Descriptive Field Names in Mappings
 
-✅ **Good:**
+**Good:**
 ```yaml
 map-to-field:
   - "validationStatus = #success_code"
@@ -664,7 +664,7 @@ map-to-field:
   - "validationSeverity = #severity"
 ```
 
-❌ **Bad:**
+**Bad:**
 ```yaml
 map-to-field:
   - "s = #success_code"
@@ -678,7 +678,7 @@ map-to-field:
 
 **Best Practice:** Use `map-to-field` to write validation/enrichment results directly back to the dataset being processed. This makes the dataset self-contained and ready for persistence or downstream processing.
 
-✅ **Good - Write results to dataset:**
+**Good - Write results to dataset:**
 ```yaml
 rules:
   - id: "trade-validation"
@@ -700,7 +700,7 @@ rules:
 
 ---
 
-❌ **Less Ideal - Results only in RuleResult:**
+**Less Ideal - Results only in RuleResult:**
 ```yaml
 rules:
   - id: "trade-validation"
@@ -777,11 +777,11 @@ enrichments:
 ```
 
 **Benefits:**
-- ✅ Standardized error codes across all systems
-- ✅ Single error code for primary routing (`opsStatusCode`)
-- ✅ Multiple error codes for comprehensive reporting (`opsErrorCodes`)
-- ✅ Automatic flagging for manual review (`requiresOpsReview`)
-- ✅ Audit trail with timestamps
+- Standardized error codes across all systems
+- Single error code for primary routing (`opsStatusCode`)
+- Multiple error codes for comprehensive reporting (`opsErrorCodes`)
+- Automatic flagging for manual review (`requiresOpsReview`)
+- Audit trail with timestamps
 
 ---
 
@@ -893,11 +893,11 @@ enrichedTrade.get("marketPrice");           // 175.50
 ```
 
 **Benefits:**
-- ✅ **Self-contained data:** All validation/enrichment results embedded in the dataset
-- ✅ **Persistence-ready:** Can be saved to database with full audit trail
-- ✅ **Downstream integration:** External systems receive complete validation context
-- ✅ **Audit compliance:** Timestamp, validator, and error codes are preserved
-- ✅ **Conditional routing:** Downstream systems can route based on `validationStatus`
+- **Self-contained data:** All validation/enrichment results embedded in the dataset
+- **Persistence-ready:** Can be saved to database with full audit trail
+- **Downstream integration:** External systems receive complete validation context
+- **Audit compliance:** Timestamp, validator, and error codes are preserved
+- **Conditional routing:** Downstream systems can route based on `validationStatus`
 
 ---
 
@@ -947,7 +947,7 @@ rules:
 rules:
   - id: "my-rule"
     condition: "#amount > 0"
-    success-code: "VALID"  # ✅ Add this
+    success-code: "VALID"  # Add this
 ```
 
 ---
@@ -958,8 +958,8 @@ rules:
 
 **Solution:** Verify the mapping syntax uses `=` and correct variable names:
 ```yaml
-map-to-field: "status = #success_code"  # ✅ Correct
-# NOT: "status: #success_code"          # ❌ Wrong syntax
+map-to-field: "status = #success_code"  # Correct
+# NOT: "status: #success_code"          # Wrong syntax
 ```
 
 ---
@@ -970,10 +970,10 @@ map-to-field: "status = #success_code"  # ✅ Correct
 
 **Solution:** Check expression syntax and available variables:
 ```yaml
-# ✅ Correct - uses available field
+# Correct - uses available field
 success-code: "#amount > 1000 ? 'HIGH' : 'LOW'"
 
-# ❌ Wrong - references non-existent field
+# Wrong - references non-existent field
 success-code: "#invalidField > 1000 ? 'HIGH' : 'LOW'"
 ```
 
@@ -987,7 +987,7 @@ success-code: "#invalidField > 1000 ? 'HIGH' : 'LOW'"
 
 ```yaml
 rules:
-  # ✅ Correct order
+  # Correct order
   - id: "step-1"
     map-to-field: "status = #success_code"
 
@@ -1010,11 +1010,11 @@ See the following test files for complete working examples:
 
 ## Implementation Status
 
-✅ **Phase 1: YAML Configuration Layer** - Complete
-✅ **Phase 2: Core Model Layer** - Complete
-✅ **Phase 3: Result Layer** - Complete
-✅ **Phase 4: Evaluation and Mapping Logic** - Complete
-✅ **Phase 5: Comprehensive Testing** - Complete
+**Phase 1: YAML Configuration Layer** - Complete
+**Phase 2: Core Model Layer** - Complete
+**Phase 3: Result Layer** - Complete
+**Phase 4: Evaluation and Mapping Logic** - Complete
+**Phase 5: Comprehensive Testing** - Complete
 
 All features are fully implemented and tested.
 
@@ -1022,12 +1022,12 @@ All features are fully implemented and tested.
 
 ## Summary
 
-✅ **success-code** and **error-code** attach business codes to rule/enrichment outcomes
-✅ **map-to-field** writes codes and computed values to dataset fields
-✅ Supports both **constant strings** and **SpEL expressions**
-✅ Enables **chained processing** where downstream rules reference mapped fields
-✅ **Fully backward compatible** - all keywords are optional
-✅ **Comprehensive test coverage** in apex-demo module
+**success-code** and **error-code** attach business codes to rule/enrichment outcomes
+**map-to-field** writes codes and computed values to dataset fields
+Supports both **constant strings** and **SpEL expressions**
+Enables **chained processing** where downstream rules reference mapped fields
+**Fully backward compatible** - all keywords are optional
+**Comprehensive test coverage** in apex-demo module
 
 ---
 

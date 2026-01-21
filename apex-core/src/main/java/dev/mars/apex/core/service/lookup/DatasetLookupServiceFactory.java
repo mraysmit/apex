@@ -286,10 +286,10 @@ public class DatasetLookupServiceFactory {
             
             if (dataSourceRegistry != null && dataSourceRegistry.containsKey(connectionName)) {
                 dataSource = dataSourceRegistry.get(connectionName);
-                logger.info("✅ REUSING existing data source '{}' from RulesEngine registry (prevents duplicate creation)", connectionName);
+                logger.info("REUSING existing data source '{}' from RulesEngine registry (prevents duplicate creation)", connectionName);
             } else {
                 // Create new database data source using existing infrastructure
-                logger.info("❌ Creating NEW data source '{}' (not found in registry)", connectionName);
+                logger.info("Creating NEW data source '{}' (not found in registry)", connectionName);
                 dev.mars.apex.core.service.data.external.factory.DataSourceFactory factory =
                     dev.mars.apex.core.service.data.external.factory.DataSourceFactory.getInstance();
 

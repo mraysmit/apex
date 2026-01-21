@@ -40,11 +40,11 @@ public class UseCase1EnrichmentFirstTest {
         // Initialize APEX services for sequential processing following established patterns
         yamlLoader = new YamlConfigurationLoader();
 
-        LOGGER.info("✅ Sequential processing services initialized");
+        LOGGER.info("Sequential processing services initialized");
     }
 
     @Test
-    @DisplayName("✅ SEQUENTIAL MODE: Enrichment-First Pattern Works")
+    @DisplayName("SEQUENTIAL MODE: Enrichment-First Pattern Works")
     void testEnrichmentFirstPatternWithSequentialMode() throws Exception {
         LOGGER.info("=== TESTING: Enrichment-First Pattern with Sequential Mode ===");
         
@@ -57,7 +57,7 @@ public class UseCase1EnrichmentFirstTest {
         testData.put("customerId", "CUST001");
         testData.put("amount", 150000.0);
         
-        LOGGER.info("📊 Input Data: customerId={}, amount={}", 
+        LOGGER.info("Input Data: customerId={}, amount={}", 
                    testData.get("customerId"), testData.get("amount"));
         
         // Process with enrichment service (demonstrates sequential processing)
@@ -69,7 +69,7 @@ public class UseCase1EnrichmentFirstTest {
         @SuppressWarnings("unchecked")
         Map<String, Object> enrichedData = (Map<String, Object>) result;
 
-        LOGGER.info("🔍 Processing completed. Final data state: {}", enrichedData);
+        LOGGER.info("Processing completed. Final data state: {}", enrichedData);
 
         // Verify customer tier was enriched FIRST
         assertNotNull(enrichedData.get("customerTier"), "Customer tier should be enriched first");
@@ -86,7 +86,7 @@ public class UseCase1EnrichmentFirstTest {
         assertEquals("HIGH_VALUE_GOLD", enrichedData.get("transactionClass"),
                     "High-value GOLD transaction should be classified correctly");
         
-        LOGGER.info("✅ Enrichment-First pattern WORKS with sequential processing");
+        LOGGER.info("Enrichment-First pattern WORKS with sequential processing");
         LOGGER.info("   1. Customer tier enriched: {}", enrichedData.get("customerTier"));
         LOGGER.info("   2. Tier-based validation: PASSED");
     }
@@ -118,7 +118,7 @@ public class UseCase1EnrichmentFirstTest {
         @SuppressWarnings("unchecked")
         Map<String, Object> enrichedData = (Map<String, Object>) result;
 
-        LOGGER.info("📊 Sequential processing result: {}", enrichedData);
+        LOGGER.info("Sequential processing result: {}", enrichedData);
 
         // The key insight: Sequential processing respects YAML order and enables
         // enrichment-first patterns that are impossible with standard processing
@@ -128,7 +128,7 @@ public class UseCase1EnrichmentFirstTest {
         assertEquals("GOLD", enrichedData.get("customerTier"), "Customer should be GOLD tier");
         assertNotNull(enrichedData.get("transactionClass"), "Transaction should be classified");
         
-        LOGGER.info("✅ USE CASE 1 VALIDATED: Sequential processing enables enrichment-first patterns");
+        LOGGER.info("USE CASE 1 VALIDATED: Sequential processing enables enrichment-first patterns");
     }
 }
 

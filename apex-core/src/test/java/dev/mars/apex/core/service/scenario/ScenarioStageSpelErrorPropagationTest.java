@@ -115,7 +115,7 @@ class ScenarioStageSpelErrorPropagationTest {
                   "Error information should be accessible to calling process");
         
         // 7. Demonstrate programmatic access for calling processes
-        logger.info("✅ PROOF: Error information is accessible to calling processes:");
+        logger.info("PROOF: Error information is accessible to calling processes:");
         logger.info("  - Scenario result available: {}", result != null);
         logger.info("  - Stage results available: {}", !stageResults.isEmpty());
         logger.info("  - Error details: {}", errorDetails);
@@ -168,7 +168,7 @@ class ScenarioStageSpelErrorPropagationTest {
         assertTrue(hasErrorInfo,
                   "Error information should be accessible to calling process: " + availableErrorInfo);
         
-        logger.info("✅ Multiple SpEL errors properly propagated: {}", availableErrorInfo);
+        logger.info("Multiple SpEL errors properly propagated: {}", availableErrorInfo);
         logger.info("=== Multiple SpEL Error Propagation Test PASSED ===");
     }
     
@@ -203,7 +203,7 @@ class ScenarioStageSpelErrorPropagationTest {
         assertEquals("validation", firstStage.getStageName(), "Stage name should be preserved");
         
         // 5. Demonstrate monitoring/debugging capabilities
-        logger.info("📊 ERROR CONTEXT AVAILABLE FOR MONITORING:");
+        logger.info("ERROR CONTEXT AVAILABLE FOR MONITORING:");
         logger.info("  - Scenario ID: {}", result.getScenarioId());
         logger.info("  - Stage Name: {}", firstStage.getStageName());
         logger.info("  - Error Message: {}", firstStage.getErrorMessage());

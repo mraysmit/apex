@@ -45,10 +45,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * tables by name pattern.
  *
  * CRITICAL VALIDATION CHECKLIST:
- * ✅ Database created with multiple tables including temp* tables
- * ✅ Pattern filter (temp%) applied correctly
- * ✅ Only matching tables included in results
- * ✅ Pipeline executes successfully
+ * Database created with multiple tables including temp* tables
+ * Pattern filter (temp%) applied correctly
+ * Only matching tables included in results
+ * Pipeline executes successfully
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2.1.0

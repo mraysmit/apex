@@ -48,11 +48,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Summary generation for transformation activities
  *
  * CRITICAL VALIDATION CHECKLIST APPLIED:
- * ✅ Count enrichments in YAML - 4 enrichments expected
- * ✅ Verify log shows "Processed: 2 out of 4" - Only 2 active enrichments (condition: "true")
- * ✅ Check EVERY enrichment condition - Test data triggers only active enrichments
- * ✅ Validate EVERY field enrichment - Test actual field mapping and default values
- * ✅ Assert ALL enrichment results - Every active result-field has corresponding assertEquals
+ * Count enrichments in YAML - 4 enrichments expected
+ * Verify log shows "Processed: 2 out of 4" - Only 2 active enrichments (condition: "true")
+ * Check EVERY enrichment condition - Test data triggers only active enrichments
+ * Validate EVERY field enrichment - Test actual field mapping and default values
+ * Assert ALL enrichment results - Every active result-field has corresponding assertEquals
  *
  * ENRICHMENT EXECUTION PATTERN:
  * - Enrichment 1: customer-segments-processing (condition: "true") - EXECUTES
@@ -118,7 +118,7 @@ public class CustomerTransformerDemoTest extends DemoTestBase {
             assertNull(enrichedData.get("customerFieldActionsResult"), "Customer field actions should not be processed (disabled)");
             assertNull(enrichedData.get("customerProfileEnrichmentResult"), "Customer profile enrichment should not be processed (disabled)");
 
-            logger.info("✅ Active customer segments processing completed successfully");
+            logger.info("Active customer segments processing completed successfully");
             logger.info("  - Customer Segments Result: {}", segmentsResult);
 
         } catch (Exception e) {
@@ -159,7 +159,7 @@ public class CustomerTransformerDemoTest extends DemoTestBase {
             assertTrue(transformerSummary.contains("Customer transformer completed"), "Should contain transformer completion message");
             assertTrue(transformerSummary.contains("real APEX services"), "Should contain APEX services reference");
 
-            logger.info("✅ Active customer transformer summary completed successfully");
+            logger.info("Active customer transformer summary completed successfully");
             logger.info("  - Customer Transformer Summary: {}", transformerSummary);
 
         } catch (Exception e) {
@@ -209,7 +209,7 @@ public class CustomerTransformerDemoTest extends DemoTestBase {
             assertEquals("CUST003", enrichedData.get("customerId"), "Original customer ID should be preserved");
             assertEquals("Small Business Inc", enrichedData.get("customerName"), "Original customer name should be preserved");
 
-            logger.info("✅ Disabled enrichments correctly skipped");
+            logger.info("Disabled enrichments correctly skipped");
             logger.info("  - Active enrichments: 2 processed");
             logger.info("  - Disabled enrichments: 2 skipped");
 
@@ -269,7 +269,7 @@ public class CustomerTransformerDemoTest extends DemoTestBase {
             assertEquals("Enterprise Customer Corp", enrichedData.get("customerName"), "Customer name should be preserved");
             assertEquals("PLATINUM", enrichedData.get("customerTier"), "Customer tier should be preserved");
 
-            logger.info("✅ Complete customer transformation workflow completed successfully");
+            logger.info("Complete customer transformation workflow completed successfully");
             logger.info("  - Total enrichments in YAML: 4");
             logger.info("  - Active enrichments processed: 2");
             logger.info("  - Disabled enrichments skipped: 2");
@@ -320,7 +320,7 @@ public class CustomerTransformerDemoTest extends DemoTestBase {
             assertEquals("Customer transformer completed using real APEX services", 
                 transformerSummary, "Should use exact default value for summary");
 
-            logger.info("✅ Field enrichment default values validated successfully");
+            logger.info("Field enrichment default values validated successfully");
             logger.info("  - Segments Default: {}", segmentsResult);
             logger.info("  - Summary Default: {}", transformerSummary);
 

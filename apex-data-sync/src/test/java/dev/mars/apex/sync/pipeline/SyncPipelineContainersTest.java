@@ -259,7 +259,7 @@ public class SyncPipelineContainersTest {
                     connection.put("database", database);
                     connection.put("username", username);
                     connection.put("password", password);
-                    logger.info("✅ Updated data source '{}' with TestContainers connection details", dataSourceName);
+                    logger.info("Updated data source '{}' with TestContainers connection details", dataSourceName);
                     return;
                 }
             }
@@ -289,7 +289,7 @@ public class SyncPipelineContainersTest {
                     connection.put("database", database);
                     connection.put("username", username);
                     connection.put("password", password);
-                    logger.info("✅ Updated data sink '{}' with TestContainers connection details", dataSinkName);
+                    logger.info("Updated data sink '{}' with TestContainers connection details", dataSinkName);
                     return;
                 }
             }

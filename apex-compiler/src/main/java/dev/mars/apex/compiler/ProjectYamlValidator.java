@@ -41,7 +41,7 @@ public class ProjectYamlValidator {
     public void validateAllYamlFiles() throws IOException {
         List<Path> yamlFiles = findAllYamlFiles();
         
-        System.out.println("🔍 APEX YAML Project Validation");
+        System.out.println("APEX YAML Project Validation");
         System.out.println("=" + "=".repeat(50));
         System.out.println("Found " + yamlFiles.size() + " YAML files to validate\n");
         
@@ -58,7 +58,7 @@ public class ProjectYamlValidator {
                 
                 if (result.isValid()) {
                     validFiles++;
-                    System.out.println("✅ " + relativePath);
+                    System.out.println("" + relativePath);
                 } else {
                     invalidFiles++;
                     System.out.println("X " + relativePath);
@@ -81,7 +81,7 @@ public class ProjectYamlValidator {
         
         // Summary
         System.out.println("\n" + "=".repeat(50));
-        System.out.println("📊 VALIDATION SUMMARY");
+        System.out.println("VALIDATION SUMMARY");
         System.out.println("=".repeat(50));
         System.out.println("Total files:   " + yamlFiles.size());
         System.out.println("Valid files:   " + validFiles);
@@ -96,7 +96,7 @@ public class ProjectYamlValidator {
     }
 
     private void printDetailedAnalysis() {
-        System.out.println("\n📋 DETAILED ANALYSIS");
+        System.out.println("\nDETAILED ANALYSIS");
         System.out.println("-".repeat(30));
         
         Map<String, Integer> errorCounts = new HashMap<>();

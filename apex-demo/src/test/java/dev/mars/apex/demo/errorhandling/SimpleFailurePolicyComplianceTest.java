@@ -86,7 +86,7 @@ public class SimpleFailurePolicyComplianceTest extends DemoTestBase {
         
         logger.info("✓ Compliance stage executed despite previous stage issues");
         logger.info("✓ Compliance rules processed successfully");
-        logger.info("✅ Compliance after failures test completed");
+        logger.info("Compliance after failures test completed");
     }
 
     @Test
@@ -112,7 +112,7 @@ public class SimpleFailurePolicyComplianceTest extends DemoTestBase {
         
         logger.info("✓ Compliance rules handled high-value transaction");
         logger.info("✓ Various data conditions processed correctly");
-        logger.info("✅ Compliance data conditions test completed");
+        logger.info("Compliance data conditions test completed");
     }
 
     @Test
@@ -137,6 +137,6 @@ public class SimpleFailurePolicyComplianceTest extends DemoTestBase {
         
         logger.info("✓ Compliance failure policy applied correctly");
         logger.info("✓ Problematic data handled according to policy");
-        logger.info("✅ Compliance failure policy test completed");
+        logger.info("Compliance failure policy test completed");
     }
 }

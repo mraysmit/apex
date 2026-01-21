@@ -66,7 +66,7 @@ queries:
   getCustomer: "SELECT * FROM customers WHERE id = :id"
 ```
 
-✅ **When:**
+**When:**
 - Small projects (< 10 queries)
 - Simple, self-explanatory queries
 - Internal tools with minimal documentation needs
@@ -82,7 +82,7 @@ queries:
     owner: "customer-team"
 ```
 
-✅ **When:**
+**When:**
 - Enterprise projects with multiple teams
 - Complex queries requiring documentation
 - Compliance/audit requirements
@@ -101,12 +101,12 @@ queries:
     description: "Department staffing analysis"
 ```
 
-✅ **When:**
+**When:**
 - Gradual migration from map to array format
 - Mix of simple and complex queries
 - Want flexibility to choose per query
 
-## 📊 Array Format Field Reference
+## Array Format Field Reference
 
 ### Required Fields
 | Field | Type | Description |
@@ -132,14 +132,14 @@ queries:
 
 **Custom Fields**: Add any metadata your team needs - the array format is extensible!
 
-## 🚨 Common Errors & Solutions
+## Common Errors & Solutions
 
 ### Error: Duplicate Key
 ```yaml
 queries:
   - name: "getCustomer"
     value: "SELECT * FROM customers WHERE id = :id"
-  - name: "getCustomer"  # ❌ DUPLICATE!
+  - name: "getCustomer"  # DUPLICATE!
     value: "SELECT * FROM customers WHERE email = :email"
 ```
 
@@ -155,7 +155,7 @@ queries:
 ### Error: Missing Required Field
 ```yaml
 queries:
-  - value: "SELECT * FROM customers"  # ❌ Missing 'name'!
+  - value: "SELECT * FROM customers"  # Missing 'name'!
 ```
 
 **Solution**: Always include both `name` and `value`
@@ -168,7 +168,7 @@ queries:
 ### Error: Invalid Format
 ```yaml
 queries:
-  - "just-a-string"  # ❌ Not an object!
+  - "just-a-string"  # Not an object!
 ```
 
 **Solution**: Use object format with `name` and `value`
@@ -183,9 +183,9 @@ queries:
 ### 1. Consistent Naming Conventions
 ```yaml
 queries:
-  - name: "getCustomerById"      # ✅ Verb + Noun + Qualifier
-  - name: "listActiveOrders"     # ✅ Clear action
-  - name: "validateCounterparty" # ✅ Descriptive
+  - name: "getCustomerById"      # Verb + Noun + Qualifier
+  - name: "listActiveOrders"     # Clear action
+  - name: "validateCounterparty" # Descriptive
 ```
 
 ### 2. Meaningful Descriptions
@@ -193,7 +193,7 @@ queries:
 queries:
   - name: "getTradeByID"
     value: "SELECT * FROM trades WHERE trade_id = :id"
-    description: "Retrieve single trade by unique identifier (primary key lookup)"  # ✅ Explains purpose and approach
+    description: "Retrieve single trade by unique identifier (primary key lookup)"  # Explains purpose and approach
 ```
 
 ### 3. Useful Tags
@@ -201,7 +201,7 @@ queries:
 queries:
   - name: "getActivePositions"
     value: "SELECT * FROM positions WHERE status = 'ACTIVE'"
-    tags: ["position-management", "portfolio", "read-only"]  # ✅ Enables filtering and discovery
+    tags: ["position-management", "portfolio", "read-only"]  # Enables filtering and discovery
 ```
 
 ### 4. Document Performance Characteristics
@@ -210,7 +210,7 @@ queries:
   - name: "complexAggregation"
     value: "SELECT dept, COUNT(*) FROM employees GROUP BY dept"
     description: "Department staffing report"
-    performance: "indexed-on-dept"  # ✅ Helps with troubleshooting
+    performance: "indexed-on-dept"  # Helps with troubleshooting
     cacheable: true
     cache-ttl: "600s"
 ```
@@ -252,5 +252,5 @@ A: Not yet. Future enhancement may include JSON Schema for IDE support.
 ---
 
 **APEX Version**: 2.2+  
-**Feature Status**: ✅ Production Ready  
+**Feature Status**: Production Ready  
 **Last Updated**: January 17, 2026

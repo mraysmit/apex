@@ -5,7 +5,7 @@ Replace string allocation and splitting logic in `mergeNumberedSections()` with 
 
 ---
 
-## 📊 Current Problem
+## Current Problem
 
 ### Location
 `OrderedYamlParser.mergeNumberedSections()`
@@ -34,7 +34,7 @@ At 1000 requests/sec with multiple numbered sections per request:
 
 ---
 
-## ✅ Solution: Explicit Section Registry
+## Solution: Explicit Section Registry
 
 ### Concept
 Replace dynamic string parsing with pre-computed lookup table:
@@ -351,7 +351,7 @@ At 1000 req/sec with 5 numbered sections each:
 
 ---
 
-## ✅ Testing Strategy
+## Testing Strategy
 
 1. **Unit Tests**: `SectionRegistryTest` validates caching and lookups
 2. **Integration Tests**: Run existing 2108 tests - should all pass
@@ -361,11 +361,11 @@ At 1000 req/sec with 5 numbered sections each:
 
 ## 🎯 Success Criteria
 
-- ✅ All 2108 tests pass
-- ✅ No new string allocations in hot path
-- ✅ Map lookup time < 20ns average
-- ✅ GC pause time reduced at 1000 req/sec load
-- ✅ Backward compatible (same API)
+- All 2108 tests pass
+- No new string allocations in hot path
+- Map lookup time < 20ns average
+- GC pause time reduced at 1000 req/sec load
+- Backward compatible (same API)
 
 ---
 

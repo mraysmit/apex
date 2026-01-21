@@ -63,7 +63,7 @@ public class DatasetInlineTest {
         // Initialize APEX services following established patterns
         yamlLoader = new YamlConfigurationLoader();
         
-        logger.info("✅ APEX services initialized for dataset testing");
+        logger.info("APEX services initialized for dataset testing");
     }
 
     @Test

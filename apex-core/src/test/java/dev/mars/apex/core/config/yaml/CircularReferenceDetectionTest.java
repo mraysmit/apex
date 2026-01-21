@@ -56,9 +56,9 @@ class CircularReferenceDetectionTest {
                 "Exception message should mention the duplicate enrichment ID");
 
         logger.info("=== TEST RESULTS ===");
-        logger.info("✅ No infinite loop - circular reference prevented");
-        logger.info("✅ Duplicate ID validation caught the circular reference");
-        logger.info("✅ Exception message: {}", message);
+        logger.info("No infinite loop - circular reference prevented");
+        logger.info("Duplicate ID validation caught the circular reference");
+        logger.info("Exception message: {}", message);
     }
 }
 

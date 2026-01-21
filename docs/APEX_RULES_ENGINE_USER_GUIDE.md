@@ -372,7 +372,7 @@ if (result.isSuccess()) {
 If you need to evaluate multiple datasets with the same rules, use the two-line pattern to reuse the engine:
 
 ```java
-// ✅ EFFICIENT (Two Lines) - Reuse the engine for multiple evaluations
+// EFFICIENT (Two Lines) - Reuse the engine for multiple evaluations
 RulesEngine engine = RulesEngine.fromFile("customer-rules.yaml");
 
 // Evaluate multiple customers with the same rules
@@ -1516,7 +1516,7 @@ enrichments:
 **Using the configuration:**
 
 ```java
-// ✅ EFFICIENT (Two Lines) - Reuse engine for multiple test cases
+// EFFICIENT (Two Lines) - Reuse engine for multiple test cases
 RulesEngine engine = RulesEngine.fromFile("transaction-processing.yaml");
 
 // Test case 1: High-value premium customer
@@ -3176,11 +3176,11 @@ data-sources:
     endpoints:
       quote-lookup: "/v1/quotes/{key}"
     cache:
-      enabled: true          # ✅ Enable caching
-      ttlSeconds: 600        # ✅ 10 minutes TTL
-      maxIdleSeconds: 300    # ✅ 5 minutes max idle time
-      maxSize: 1000          # ✅ Max 1000 entries (LRU eviction)
-      keyPrefix: "market"    # ✅ Cache key prefix
+      enabled: true          # Enable caching
+      ttlSeconds: 600        # 10 minutes TTL
+      maxIdleSeconds: 300    # 5 minutes max idle time
+      maxSize: 1000          # Max 1000 entries (LRU eviction)
+      keyPrefix: "market"    # Cache key prefix
 
 enrichments:
   - id: "market-data-enrichment"
@@ -3204,7 +3204,7 @@ enrichments:
 
 APEX provides **enterprise-grade caching** for all external data sources to improve performance and reduce external API calls. Here are the **actually implemented** cache features:
 
-**✅ Supported Cache Properties:**
+**Supported Cache Properties:**
 ```yaml
 data-sources:
   - name: "cached-source"
@@ -3521,11 +3521,11 @@ SpEL is now used consistently across ALL APEX features:
 
 | Feature | SpEL Support | Example |
 |---------|--------------|---------|
-| **Conditions** | ✅ Yes | `condition: '#currency != null'` |
-| **Transformations** | ✅ Yes | `expression: '#currency'` |
-| **Lookup Keys** | ✅ Yes | `lookup-key: '#symbol'` |
-| **Calculations** | ✅ Yes | `expression: '#amount * 0.01'` |
-| **Field Mappings** | ✅ **NEW!** | `source-field: '#currency'` |
+| **Conditions** | Yes | `condition: '#currency != null'` |
+| **Transformations** | Yes | `expression: '#currency'` |
+| **Lookup Keys** | Yes | `lookup-key: '#symbol'` |
+| **Calculations** | Yes | `expression: '#amount * 0.01'` |
+| **Field Mappings** | **NEW!** | `source-field: '#currency'` |
 
 #### Basic Nested Field Access
 
@@ -3537,7 +3537,7 @@ enrichments:
     type: "field-enrichment"
     condition: "#field != null"
     field-mappings:
-      # ✅ Access nested fields with SpEL (use # prefix)
+      # Access nested fields with SpEL (use # prefix)
       - source-field: "#currency"
         target-field: "buy_currency"
 
@@ -3630,7 +3630,7 @@ enrichments:
                 bid: 150.25
                 ask: 150.30
     field-mappings:
-      # ✅ Access nested fields in lookup result with SpEL
+      # Access nested fields in lookup result with SpEL
       - source-field: "#instrument.name"
         target-field: "instrument_name"
       - source-field: "#instrument.type"
@@ -4046,7 +4046,7 @@ lookup-config:
 
 H2 is an embedded Java database perfect for demos, testing, and development scenarios. APEX supports H2 in both file-based and in-memory modes, with file-based being recommended for scenarios requiring database sharing.
 
-#### ✅ RECOMMENDED: File-based H2 Configuration
+#### RECOMMENDED: File-based H2 Configuration
 
 File-based H2 creates persistent database files that enable true database sharing between multiple processes:
 
@@ -4521,7 +4521,7 @@ metadata:
   description: "Sample rules"
   # Missing: type field
 
-# ✅ CORRECT - Include required type field
+# CORRECT - Include required type field
 metadata:
   name: "My Rules"
   version: "1.0.0"
@@ -4539,7 +4539,7 @@ metadata:
 metadata:
   type: "rules"  # Invalid type
 
-# ✅ CORRECT - Use valid type
+# CORRECT - Use valid type
 metadata:
   type: "rule-config"  # Valid type
 ```
@@ -4557,7 +4557,7 @@ metadata:
   description: "Sample validation rules"
   # Missing: author field
 
-# ✅ CORRECT - Include type-specific required fields
+# CORRECT - Include type-specific required fields
 metadata:
   type: "rule-config"
   name: "Validation Rules"
@@ -4581,7 +4581,7 @@ metadata:
 metadata:
   version: "v1.0"  # Should be semantic versioning
 
-# ✅ CORRECT - Semantic versioning
+# CORRECT - Semantic versioning
 metadata:
   version: "1.0.0"  # Major.Minor.Patch format
 ```
@@ -5841,9 +5841,9 @@ Test with this sample data:
 ```
 
 **Expected Results**:
-- ✅ Payment method is supported (CREDIT_CARD found in dataset)
-- ✅ Amount $5000 is within limit of $10000
-- ✅ Verification requirement met (verified: true)
+- Payment method is supported (CREDIT_CARD found in dataset)
+- Amount $5000 is within limit of $10000
+- Verification requirement met (verified: true)
 
 ### Key Dataset Design Principles
 
@@ -8137,12 +8137,12 @@ divide(java.math.BigDecimal,int,int) in java.math.BigDecimal has been deprecated
 4. **Test incrementally**: Add one condition at a time and test each step
 
 **YAML Configuration Checklist:**
-- ✅ All enrichments have required `id`, `name`, and `type` fields
-- ✅ SpEL expressions use `#fieldName` syntax (not `#fieldName`)
-- ✅ Field names match actual data structure exactly
-- ✅ Enrichment types are valid (`field-enrichment`, `lookup-enrichment`, `calculation-enrichment`)
-- ✅ Required field mappings are present for field enrichments
-- ✅ Null safety is considered in complex expressions
+- All enrichments have required `id`, `name`, and `type` fields
+- SpEL expressions use `#fieldName` syntax (not `#fieldName`)
+- Field names match actual data structure exactly
+- Enrichment types are valid (`field-enrichment`, `lookup-enrichment`, `calculation-enrichment`)
+- Required field mappings are present for field enrichments
+- Null safety is considered in complex expressions
 
 **Testing Strategy:**
 1. **Unit test your data**: Verify data structure before writing rules

@@ -34,7 +34,7 @@ Design and implement a high-volume, concurrent transaction processing system usi
 
 ### Key Findings
 
-✅ **APEX is already designed for concurrent use:**
+**APEX is already designed for concurrent use:**
 - `RulesEngine` instances are lightweight and meant to be created per-request
 - Expensive resources (caches, connection pools, compiled expressions) are shared via thread-safe singletons
 - No global mutable state that would prevent concurrent execution
@@ -126,7 +126,7 @@ flowchart TD
 
 ### 3.1 Thread Safety Assessment
 
-#### ✅ Thread-Safe Components (Shared Across Threads)
+#### Thread-Safe Components (Shared Across Threads)
 
 | Component | Thread Safety Mechanism | Shared/Isolated |
 |-----------|------------------------|-----------------|
@@ -215,11 +215,11 @@ flowchart TD
 ```
 
 **Pros:**
-- ✅ Complete isolation between concurrent messages
-- ✅ No shared mutable state
-- ✅ Simple error handling (failure doesn't affect other messages)
-- ✅ Easy to implement and test
-- ✅ Leverages existing APEX design
+- Complete isolation between concurrent messages
+- No shared mutable state
+- Simple error handling (failure doesn't affect other messages)
+- Easy to implement and test
+- Leverages existing APEX design
 
 **Cons:**
 - ⚠️ Object allocation overhead (minimal with modern JVM)
@@ -270,9 +270,9 @@ flowchart LR
 ```
 
 **Pros:**
-- ✅ Eliminates object allocation overhead
-- ✅ Reduced GC pressure
-- ✅ Predictable resource usage
+- Eliminates object allocation overhead
+- Reduced GC pressure
+- Predictable resource usage
 
 **Cons:**
 - ⚠️ More complex lifecycle management
@@ -320,10 +320,10 @@ flowchart TD
 ```
 
 **Pros:**
-- ✅ Built-in backpressure handling
-- ✅ Excellent for very high volume (millions/sec)
-- ✅ Composable processing pipelines
-- ✅ Natural integration with reactive systems
+- Built-in backpressure handling
+- Excellent for very high volume (millions/sec)
+- Composable processing pipelines
+- Natural integration with reactive systems
 
 **Cons:**
 - ⚠️ Steeper learning curve

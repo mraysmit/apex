@@ -27,9 +27,9 @@ mvn test -Dtest="SimpleInlineDataSourceTest" -pl apex-demo
 ```
 
 **Example:** Currency lookup with 3 currencies embedded in YAML
-- ✅ No external dependencies
-- ✅ Perfect for prototyping
-- ✅ Data never changes
+- No external dependencies
+- Perfect for prototyping
+- Data never changes
 
 ### 2. Database Data Sources  
 **Best for:** Large, dynamic data (> 100 records)
@@ -40,9 +40,9 @@ mvn test -Dtest="SimpleDatabaseDataSourceTest" -pl apex-demo
 ```
 
 **Example:** Customer lookup from H2 database
-- ✅ Handles large datasets
-- ✅ Real-time data updates
-- ✅ Complex queries with joins
+- Handles large datasets
+- Real-time data updates
+- Complex queries with joins
 
 ### 3. CSV File Data Sources
 **Best for:** Spreadsheet exports, batch data
@@ -53,9 +53,9 @@ mvn test -Dtest="SimpleCsvDataSourceTest" -pl apex-demo
 ```
 
 **Example:** Product lookup from CSV file
-- ✅ Easy to create and edit
-- ✅ Works with Excel exports
-- ✅ Good for periodic data updates
+- Easy to create and edit
+- Works with Excel exports
+- Good for periodic data updates
 
 ### 4. JSON File Data Sources
 **Best for:** API data exports, configuration data
@@ -66,9 +66,9 @@ mvn test -Dtest="SimpleJsonDataSourceTest" -pl apex-demo
 ```
 
 **Example:** User lookup from JSON file
-- ✅ Structured data format
-- ✅ Nested object support
-- ✅ Web-friendly format
+- Structured data format
+- Nested object support
+- Web-friendly format
 
 ### 5. XML File Data Sources
 **Best for:** Legacy system exports, structured documents
@@ -79,9 +79,9 @@ mvn test -Dtest="SimpleXmlDataSourceTest" -pl apex-demo
 ```
 
 **Example:** Department lookup from XML file
-- ✅ Hierarchical data support
-- ✅ Legacy system compatibility
-- ✅ Schema validation support
+- Hierarchical data support
+- Legacy system compatibility
+- Schema validation support
 
 ### 6. REST API Data Sources
 **Best for:** Real-time external data, microservices
@@ -92,9 +92,9 @@ mvn test -Dtest="SimpleRestApiDataSourceTest" -pl apex-demo
 ```
 
 **Example:** User lookup from public API
-- ✅ Real-time data access
-- ✅ External service integration
-- ✅ Dynamic data updates
+- Real-time data access
+- External service integration
+- Dynamic data updates
 
 ## 🔄 When to Use Each Type
 
@@ -146,9 +146,9 @@ Every lookup enrichment has:
 
 ### Error Handling
 All examples demonstrate:
-- ✅ Missing lookup key (condition not met)
-- ✅ No match found (graceful degradation)
-- ✅ Data source errors (connection failures)
+- Missing lookup key (condition not met)
+- No match found (graceful degradation)
+- Data source errors (connection failures)
 
 ## 💡 Tips for Success
 

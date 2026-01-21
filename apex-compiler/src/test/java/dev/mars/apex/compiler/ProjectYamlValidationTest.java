@@ -1086,7 +1086,7 @@ class ProjectYamlValidationTest {
      */
     @Test
     void detailedAnalysisOfOurFixedFiles() {
-        System.out.println("\n🔍 DETAILED ANALYSIS OF OUR FIXED FILES");
+        System.out.println("\nDETAILED ANALYSIS OF OUR FIXED FILES");
         System.out.println("=".repeat(60));
 
         // Files we know we've been working on
@@ -1117,7 +1117,7 @@ class ProjectYamlValidationTest {
             try {
                 var result = analyzer.validateWithDependencies(yamlFile);
 
-                System.out.println("✅ Valid: " + result.isValid());
+                System.out.println("Valid: " + result.isValid());
 
                 // Show dependency graph
                 if (!result.getDependencies().isEmpty()) {
@@ -1144,7 +1144,7 @@ class ProjectYamlValidationTest {
 
                 // Show file-specific results
                 if (!result.getFileResults().isEmpty()) {
-                    System.out.println("\n📋 FILE VALIDATION RESULTS:");
+                    System.out.println("\nFILE VALIDATION RESULTS:");
                     result.getFileResults().forEach((file, fileResult) -> {
                         String status = fileResult.isValid() ? "✅" : "X";
                         System.out.println("  " + status + " " + file);
@@ -1169,12 +1169,12 @@ class ProjectYamlValidationTest {
      */
     @Test
     void identifyRemainingFilesToValidate() {
-        System.out.println("\n📋 IDENTIFYING REMAINING FILES TO VALIDATE");
+        System.out.println("\nIDENTIFYING REMAINING FILES TO VALIDATE");
         System.out.println("=".repeat(60));
 
         // Check the specific file the user has open
         String userFile = "apex-core/src/test/resources/test-config-with-properties.yaml";
-        System.out.println("🔍 Checking user's current file: " + userFile);
+        System.out.println("Checking user's current file: " + userFile);
 
         dev.mars.apex.compiler.dependency.ApexDependencyAnalyzer analyzer =
             new dev.mars.apex.compiler.dependency.ApexDependencyAnalyzer();
@@ -1183,7 +1183,7 @@ class ProjectYamlValidationTest {
         if (Files.exists(yamlFile)) {
             try {
                 var result = analyzer.validateWithDependencies(yamlFile);
-                System.out.println("✅ User's file valid: " + result.isValid());
+                System.out.println("User's file valid: " + result.isValid());
                 if (!result.isValid()) {
                     System.out.println("X Issues found:");
                     result.getErrors().forEach(error -> System.out.println("  • " + error));
@@ -1196,9 +1196,9 @@ class ProjectYamlValidationTest {
         }
 
         // Based on our comprehensive analysis, identify next batch priorities
-        System.out.println("\n📊 REMAINING VALIDATION WORK:");
+        System.out.println("\nREMAINING VALIDATION WORK:");
         System.out.println("From our comprehensive analysis of 178 files:");
-        System.out.println("  ✅ Valid files: 38 (21.3%)");
+        System.out.println("  Valid files: 38 (21.3%)");
         System.out.println("  X Invalid files: 140 (78.7%)");
         System.out.println("  🔧 Files we've systematically fixed: 47");
         System.out.println("  📝 Remaining files needing work: ~131");
@@ -1206,7 +1206,7 @@ class ProjectYamlValidationTest {
         System.out.println("\n🎯 TOP PRIORITY ACTIONS:");
         System.out.println("1. 📁 Create missing dependency files (67 missing file references)");
         System.out.println("2. 🔧 Fix ID format issues in remaining files");
-        System.out.println("3. 📋 Fix document type issues");
+        System.out.println("3. Fix document type issues");
         System.out.println("4. 🔗 Resolve remaining dependency chain issues");
 
         System.out.println("\n📁 NEXT BATCH CANDIDATES:");
@@ -1237,7 +1237,7 @@ class ProjectYamlValidationTest {
                 var result = analyzer.validateWithDependencies(file);
                 if (result.isValid()) {
                     validCount++;
-                    System.out.println("✅ " + filePath);
+                    System.out.println("" + filePath);
                 } else {
                     System.out.println("X " + filePath);
                     // Show first few errors
@@ -1252,7 +1252,7 @@ class ProjectYamlValidationTest {
             }
         }
 
-        System.out.println("\n📊 NEXT BATCH SUMMARY:");
+        System.out.println("\nNEXT BATCH SUMMARY:");
         System.out.println("  Candidates checked: " + totalCount);
         System.out.println("  Already valid: " + validCount);
         System.out.println("  Need fixing: " + (totalCount - validCount));
@@ -1279,7 +1279,7 @@ class ProjectYamlValidationTest {
      */
     @Test
     void validateUserCurrentFile() {
-        System.out.println("\n🔍 VALIDATING USER'S CURRENT FILE");
+        System.out.println("\nVALIDATING USER'S CURRENT FILE");
         System.out.println("=".repeat(50));
 
         String userFile = "apex-core/src/test/resources/test-config-with-properties.yaml";
@@ -1299,14 +1299,14 @@ class ProjectYamlValidationTest {
         try {
             var result = analyzer.validateWithDependencies(yamlFile);
 
-            System.out.println("\n📊 VALIDATION RESULTS:");
-            System.out.println("   ✅ Valid: " + result.isValid());
+            System.out.println("\nVALIDATION RESULTS:");
+            System.out.println("   Valid: " + result.isValid());
 
             if (result.isValid()) {
                 System.out.println("   🎉 This file validates successfully!");
-                System.out.println("   ✅ ID format is correct (kebab-case)");
-                System.out.println("   ✅ Document structure is valid");
-                System.out.println("   ✅ No dependency issues");
+                System.out.println("   ID format is correct (kebab-case)");
+                System.out.println("   Document structure is valid");
+                System.out.println("   No dependency issues");
             } else {
                 System.out.println("   X Validation issues found:");
                 result.getErrors().forEach(error ->
@@ -1334,7 +1334,7 @@ class ProjectYamlValidationTest {
 
             // File-specific validation results
             if (!result.getFileResults().isEmpty()) {
-                System.out.println("\n   📋 Detailed validation:");
+                System.out.println("\n   Detailed validation:");
                 result.getFileResults().forEach((file, fileResult) -> {
                     String status = fileResult.isValid() ? "✅" : "X";
                     System.out.println("      " + status + " " + file);
@@ -1347,9 +1347,9 @@ class ProjectYamlValidationTest {
 
             System.out.println("\n🎯 ASSESSMENT:");
             if (result.isValid()) {
-                System.out.println("   ✅ Your file is already properly validated!");
-                System.out.println("   ✅ ID format follows kebab-case convention");
-                System.out.println("   ✅ Ready for production use");
+                System.out.println("   Your file is already properly validated!");
+                System.out.println("   ID format follows kebab-case convention");
+                System.out.println("   Ready for production use");
             } else {
                 System.out.println("   🔧 This file needs some fixes");
                 System.out.println("   📝 Focus on the errors listed above");
@@ -1366,7 +1366,7 @@ class ProjectYamlValidationTest {
      */
     @Test
     void validateBatch6FixedFiles() {
-        System.out.println("\n✅ VALIDATING BATCH 6 FIXED FILES");
+        System.out.println("\nVALIDATING BATCH 6 FIXED FILES");
         System.out.println("=".repeat(50));
         System.out.println("Using template: test-config-with-property-resolution (kebab-case)");
 
@@ -1399,7 +1399,7 @@ class ProjectYamlValidationTest {
 
                 if (result.isValid()) {
                     validCount++;
-                    System.out.println("✅ " + filePath);
+                    System.out.println("" + filePath);
                 } else {
                     System.out.println("X " + filePath);
                     result.getErrors().stream().limit(3).forEach(error ->
@@ -1414,7 +1414,7 @@ class ProjectYamlValidationTest {
             }
         }
 
-        System.out.println("\n📊 Batch 6 Fixed Files Summary:");
+        System.out.println("\nBatch 6 Fixed Files Summary:");
         System.out.println("   Total files: " + totalCount);
         System.out.println("   Valid files: " + validCount);
         System.out.println("   Success rate: " + String.format("%.1f%%",
@@ -1423,9 +1423,9 @@ class ProjectYamlValidationTest {
         System.out.println("\n🎯 BATCH 6 RESULTS:");
         if (validCount == totalCount) {
             System.out.println("   🎉 Perfect! All batch 6 files now validate successfully!");
-            System.out.println("   ✅ ID format fixes using kebab-case template worked perfectly");
+            System.out.println("   ID format fixes using kebab-case template worked perfectly");
         } else if (validCount > 0) {
-            System.out.println("   ✅ " + validCount + " files now validate (improvement!)");
+            System.out.println("   " + validCount + " files now validate (improvement!)");
             System.out.println("   🔧 " + (totalCount - validCount) + " files still need additional work");
         } else {
             System.out.println("   ⚠️  Files still need additional fixes beyond ID format");
@@ -1470,7 +1470,7 @@ class ProjectYamlValidationTest {
         dev.mars.apex.compiler.dependency.ApexDependencyAnalyzer analyzer =
             new dev.mars.apex.compiler.dependency.ApexDependencyAnalyzer();
 
-        System.out.println("📋 SAMPLE VALIDATION RESULTS:");
+        System.out.println("SAMPLE VALIDATION RESULTS:");
 
         for (String filePath : sampleFiles) {
             totalCount++;
@@ -1486,7 +1486,7 @@ class ProjectYamlValidationTest {
 
                 if (result.isValid()) {
                     validCount++;
-                    System.out.println("✅ " + filePath.substring(filePath.lastIndexOf('/') + 1));
+                    System.out.println("" + filePath.substring(filePath.lastIndexOf('/') + 1));
                 } else {
                     System.out.println("X " + filePath.substring(filePath.lastIndexOf('/') + 1));
 
@@ -1514,7 +1514,7 @@ class ProjectYamlValidationTest {
             }
         }
 
-        System.out.println("\n📊 QUICK VALIDATION SUMMARY:");
+        System.out.println("\nQUICK VALIDATION SUMMARY:");
         System.out.println("   Sample files checked: " + totalCount);
         System.out.println("   Fully valid: " + validCount);
         System.out.println("   Structurally improved: " + improvedCount);
@@ -1525,10 +1525,10 @@ class ProjectYamlValidationTest {
         System.out.println("\n🎯 BULK FIX IMPACT ASSESSMENT:");
         if (validCount + improvedCount >= totalCount * 0.8) {
             System.out.println("   🎉 EXCELLENT! Bulk fixes dramatically improved validation success");
-            System.out.println("   ✅ Most files now have proper ID formats");
+            System.out.println("   Most files now have proper ID formats");
             System.out.println("   🔧 Remaining issues are mostly dependency-related");
         } else if (validCount + improvedCount >= totalCount * 0.5) {
-            System.out.println("   ✅ GOOD! Bulk fixes significantly improved validation");
+            System.out.println("   GOOD! Bulk fixes significantly improved validation");
             System.out.println("   🔧 Some files still need additional work");
         } else {
             System.out.println("   ⚠️  Bulk fixes helped, but more work needed");
@@ -1537,7 +1537,7 @@ class ProjectYamlValidationTest {
         System.out.println("\n🚀 NEXT PRIORITY ACTIONS:");
         System.out.println("   1. 📁 Address remaining dependency file issues");
         System.out.println("   2. 🔧 Fix document type issues in remaining files");
-        System.out.println("   3. 📋 Handle advanced validation rule compliance");
+        System.out.println("   3. Handle advanced validation rule compliance");
         System.out.println("   4. 🎯 Target: 90%+ validation success rate");
     }
 
@@ -1546,7 +1546,7 @@ class ProjectYamlValidationTest {
      */
     @Test
     void analyzeRemainingValidationFailures() {
-        System.out.println("\n🔍 ANALYZING REMAINING VALIDATION FAILURES");
+        System.out.println("\nANALYZING REMAINING VALIDATION FAILURES");
         System.out.println("=".repeat(60));
         System.out.println("Goal: Understand what's preventing 90%+ success rate");
 
@@ -1587,7 +1587,7 @@ class ProjectYamlValidationTest {
         Map<String, Integer> specificErrorCounts = new HashMap<>();
         List<String> sampleFailingFiles = new ArrayList<>();
 
-        System.out.println("📊 Analyzing " + totalFiles + " files...");
+        System.out.println("Analyzing " + totalFiles + " files...");
 
         for (Path yamlFile : allYamlFiles) {
             try {
@@ -1647,7 +1647,7 @@ class ProjectYamlValidationTest {
 
         double successRate = (validFiles * 100.0) / totalFiles;
 
-        System.out.println("\n📊 CURRENT VALIDATION STATUS:");
+        System.out.println("\nCURRENT VALIDATION STATUS:");
         System.out.println("   Total files: " + totalFiles);
         System.out.println("   Valid files: " + validFiles);
         System.out.println("   Invalid files: " + (totalFiles - validFiles));
@@ -1668,7 +1668,7 @@ class ProjectYamlValidationTest {
             .forEach(entry ->
                 System.out.println("   " + entry.getValue() + "x: " + entry.getKey()));
 
-        System.out.println("\n📋 SAMPLE FAILING FILES:");
+        System.out.println("\nSAMPLE FAILING FILES:");
         sampleFailingFiles.forEach(sample ->
             System.out.println("   • " + sample));
 
@@ -1681,7 +1681,7 @@ class ProjectYamlValidationTest {
             System.out.println("   2. 📁 Create " + missingFileIssues + " missing dependency files");
         }
         if (documentTypeIssues > 0) {
-            System.out.println("   3. 📋 Fix " + documentTypeIssues + " document type issues");
+            System.out.println("   3. Fix " + documentTypeIssues + " document type issues");
         }
         if (structuralIssues > 0) {
             System.out.println("   4. 🏗️  Fix " + structuralIssues + " structural issues");
@@ -1690,7 +1690,7 @@ class ProjectYamlValidationTest {
             System.out.println("   5. 🔗 Resolve " + dependencyIssues + " dependency chain issues");
         }
         if (otherIssues > 0) {
-            System.out.println("   6. 🔍 Investigate " + otherIssues + " other validation issues");
+            System.out.println("   6. Investigate " + otherIssues + " other validation issues");
         }
 
         double potentialSuccessRate = successRate +
@@ -1745,7 +1745,7 @@ class ProjectYamlValidationTest {
 
                 if (result.isValid()) {
                     validCount++;
-                    System.out.println("✅ " + fileName + " - VALIDATES SUCCESSFULLY");
+                    System.out.println("" + fileName + " - VALIDATES SUCCESSFULLY");
                 } else {
                     System.out.println("X " + fileName + " - VALIDATION FAILED");
                     System.out.println("   Errors:");
@@ -1762,7 +1762,7 @@ class ProjectYamlValidationTest {
             }
         }
 
-        System.out.println("\n📊 BULK FIX TEST RESULTS:");
+        System.out.println("\nBULK FIX TEST RESULTS:");
         System.out.println("   Files tested: " + totalCount);
         System.out.println("   Valid files: " + validCount);
         System.out.println("   Success rate: " + String.format("%.1f%%",
@@ -1771,20 +1771,20 @@ class ProjectYamlValidationTest {
         System.out.println("\n🎯 BULK FIX ASSESSMENT:");
         if (validCount == totalCount) {
             System.out.println("   🎉 EXCELLENT! Bulk fixes are working perfectly");
-            System.out.println("   ✅ All test files validate successfully");
+            System.out.println("   All test files validate successfully");
             System.out.println("   🚀 Ready to scale up bulk approach");
         } else if (validCount >= totalCount * 0.8) {
-            System.out.println("   ✅ GOOD! Bulk fixes are mostly working");
+            System.out.println("   GOOD! Bulk fixes are mostly working");
             System.out.println("   🔧 Minor issues remain but approach is sound");
         } else if (validCount > 0) {
             System.out.println("   ⚠️  MIXED! Bulk fixes partially working");
-            System.out.println("   🔍 Need to investigate remaining issues");
+            System.out.println("   Need to investigate remaining issues");
         } else {
             System.out.println("   X FAILED! Bulk fixes not working as expected");
             System.out.println("   🔧 Need to fix bulk approach or use manual method");
         }
 
-        System.out.println("\n📋 RECOMMENDATION:");
+        System.out.println("\nRECOMMENDATION:");
         if (validCount >= totalCount * 0.8) {
             System.out.println("   Bulk approach is working - can scale up safely");
         } else {
@@ -1797,7 +1797,7 @@ class ProjectYamlValidationTest {
      */
     @Test
     void testSingleFileValidation() {
-        System.out.println("\n🔍 TESTING SINGLE FILE VALIDATION");
+        System.out.println("\nTESTING SINGLE FILE VALIDATION");
         System.out.println("=".repeat(50));
 
         String testFile = "apex-demo/src/main/resources/data-sources/products-json-datasource.yaml";
@@ -1815,7 +1815,7 @@ class ProjectYamlValidationTest {
             ApexYamlLexicalValidator basicValidator = new ApexYamlLexicalValidator();
             ApexYamlLexicalValidator.ValidationResult basicResult = basicValidator.validateFile(yamlFile);
 
-            System.out.println("\n📊 BASIC VALIDATION:");
+            System.out.println("\nBASIC VALIDATION:");
             System.out.println("   Valid: " + basicResult.isValid());
             if (!basicResult.isValid()) {
                 System.out.println("   Errors:");
@@ -1828,7 +1828,7 @@ class ProjectYamlValidationTest {
                 new dev.mars.apex.compiler.dependency.ApexDependencyAnalyzer();
             var depResult = analyzer.validateWithDependencies(yamlFile);
 
-            System.out.println("\n📊 DEPENDENCY-AWARE VALIDATION:");
+            System.out.println("\nDEPENDENCY-AWARE VALIDATION:");
             System.out.println("   Valid: " + depResult.isValid());
             if (!depResult.isValid()) {
                 System.out.println("   Errors:");
@@ -1839,9 +1839,9 @@ class ProjectYamlValidationTest {
             System.out.println("\n🎯 ASSESSMENT:");
             if (basicResult.isValid() && depResult.isValid()) {
                 System.out.println("   🎉 FILE VALIDATES PERFECTLY!");
-                System.out.println("   ✅ Both basic and dependency validation pass");
+                System.out.println("   Both basic and dependency validation pass");
             } else if (basicResult.isValid()) {
-                System.out.println("   ✅ File structure is valid");
+                System.out.println("   File structure is valid");
                 System.out.println("   🔧 Has dependency issues only");
             } else {
                 System.out.println("   X File has structural validation issues");
@@ -1858,7 +1858,7 @@ class ProjectYamlValidationTest {
      */
     @Test
     void comprehensiveValidationAllFiles() {
-        System.out.println("\n🔍 COMPREHENSIVE VALIDATION - ALL YAML FILES");
+        System.out.println("\nCOMPREHENSIVE VALIDATION - ALL YAML FILES");
         System.out.println("=".repeat(70));
 
         // Get all YAML files from all modules
@@ -1990,7 +1990,7 @@ class ProjectYamlValidationTest {
         double structuralSuccessRate = ((validFiles + structurallyValid) * 100.0) / totalFiles;
 
         System.out.println("\n" + "=".repeat(70));
-        System.out.println("📊 COMPREHENSIVE VALIDATION RESULTS");
+        System.out.println("COMPREHENSIVE VALIDATION RESULTS");
         System.out.println("=".repeat(70));
 
         System.out.println("\n📈 OVERALL STATISTICS:");
@@ -2013,7 +2013,7 @@ class ProjectYamlValidationTest {
         }
 
         if (!sampleValidFiles.isEmpty()) {
-            System.out.println("\n✅ SAMPLE VALID FILES:");
+            System.out.println("\nSAMPLE VALID FILES:");
             sampleValidFiles.forEach(file ->
                 System.out.println("   • " + file));
         }
@@ -2028,7 +2028,7 @@ class ProjectYamlValidationTest {
         if (overallSuccessRate >= 90) {
             System.out.println("   🎉 EXCELLENT! 90%+ success rate achieved!");
         } else if (overallSuccessRate >= 70) {
-            System.out.println("   ✅ GOOD! Strong success rate, close to target");
+            System.out.println("   GOOD! Strong success rate, close to target");
         } else if (overallSuccessRate >= 50) {
             System.out.println("   📈 IMPROVED! Significant progress made");
         } else {

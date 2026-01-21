@@ -47,7 +47,7 @@ class ApexYamlLexicalValidatorTest {
         // Verify
         assertThat(result.isValid()).isTrue();
         assertThat(result.getErrors()).isEmpty();
-        System.out.println("✅ Valid document test passed");
+        System.out.println("Valid document test passed");
     }
     
     @Test
@@ -65,7 +65,7 @@ class ApexYamlLexicalValidatorTest {
         
         assertThat(result.isValid()).isFalse();
         assertThat(result.getErrors()).contains("Missing required 'metadata' section");
-        System.out.println("✅ Missing metadata test passed");
+        System.out.println("Missing metadata test passed");
     }
     
     @Test
@@ -86,7 +86,7 @@ class ApexYamlLexicalValidatorTest {
         
         assertThat(result.isValid()).isFalse();
         assertThat(result.getErrors()).anyMatch(error -> error.contains("Invalid document type: invalid-type"));
-        System.out.println("✅ Invalid document type test passed");
+        System.out.println("Invalid document type test passed");
     }
     
     @Test
@@ -107,7 +107,7 @@ class ApexYamlLexicalValidatorTest {
         assertThat(result.getErrors()).anyMatch(error -> error.contains("Missing required metadata field: version"));
         assertThat(result.getErrors()).anyMatch(error -> error.contains("Missing required metadata field: description"));
         assertThat(result.getErrors()).anyMatch(error -> error.contains("Missing required metadata field: type"));
-        System.out.println("✅ Missing required fields test passed");
+        System.out.println("Missing required fields test passed");
     }
     
     @Test
@@ -126,7 +126,7 @@ class ApexYamlLexicalValidatorTest {
         
         assertThat(result.isValid()).isFalse();
         assertThat(result.getErrors()).anyMatch(error -> error.contains("YAML syntax error"));
-        System.out.println("✅ Invalid YAML syntax test passed");
+        System.out.println("Invalid YAML syntax test passed");
     }
     
     @Test
@@ -154,7 +154,7 @@ class ApexYamlLexicalValidatorTest {
         assertThat(result.isValid()).isTrue();
         assertThat(result.hasWarnings()).isTrue();
         assertThat(result.getWarnings()).anyMatch(warning -> warning.contains("Version should follow semantic versioning"));
-        System.out.println("✅ Version format validation test passed");
+        System.out.println("Version format validation test passed");
     }
     
     @Test
@@ -180,7 +180,7 @@ class ApexYamlLexicalValidatorTest {
         
         assertThat(result.isValid()).isFalse();
         assertThat(result.getErrors()).anyMatch(error -> error.contains("Missing required field for type 'rule-config': author"));
-        System.out.println("✅ Type-specific required fields test passed");
+        System.out.println("Type-specific required fields test passed");
     }
     
     @Test
@@ -205,7 +205,7 @@ class ApexYamlLexicalValidatorTest {
         assertThat(result.getErrors()).anyMatch(error ->
             error.contains("Document type 'rule-config' requires at least one of") &&
             error.contains("rules") && error.contains("enrichments"));
-        System.out.println("✅ Missing required sections test passed");
+        System.out.println("Missing required sections test passed");
     }
 
     @Test
@@ -245,7 +245,7 @@ class ApexYamlLexicalValidatorTest {
         // Verify
         assertThat(result.isValid()).isTrue();
         assertThat(result.getErrors()).isEmpty();
-        System.out.println("✅ Valid pipeline-config document test passed");
+        System.out.println("Valid pipeline-config document test passed");
     }
 
     @Test
@@ -272,7 +272,7 @@ class ApexYamlLexicalValidatorTest {
         assertThat(result.isValid()).isFalse();
         assertThat(result.getErrors()).anyMatch(error ->
             error.contains("Missing required field for type 'pipeline-config': author"));
-        System.out.println("✅ Missing author for pipeline-config test passed");
+        System.out.println("Missing author for pipeline-config test passed");
     }
 
     @Test
@@ -328,7 +328,7 @@ class ApexYamlLexicalValidatorTest {
         // Verify
         assertThat(result.isValid()).isTrue();
         assertThat(result.getErrors()).isEmpty();
-        System.out.println("✅ Complete pipeline-config document validation test passed");
+        System.out.println("Complete pipeline-config document validation test passed");
         System.out.println("   Pipeline configuration matches orchestration guide format");
     }
 
@@ -395,7 +395,7 @@ class ApexYamlLexicalValidatorTest {
         // Verify
         assertThat(result.isValid()).isTrue();
         assertThat(result.getErrors()).isEmpty();
-        System.out.println("✅ Fixed orchestration guide example validation test passed");
+        System.out.println("Fixed orchestration guide example validation test passed");
         System.out.println("   All required metadata fields present and valid");
         System.out.println("   Document type 'pipeline-config' is now supported");
     }

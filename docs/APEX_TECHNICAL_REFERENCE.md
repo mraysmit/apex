@@ -12,9 +12,9 @@ Welcome to the APEX Technical Reference Guide! This comprehensive document provi
 
 Throughout this document, you'll see the following markers indicating implementation status:
 
-- **✅ IMPLEMENTED** - Feature is fully implemented and tested
+- **IMPLEMENTED** - Feature is fully implemented and tested
 - **⚠️ EXPERIMENTAL** - Feature is implemented but may change
-- **❌ NOT IMPLEMENTED** - Feature is planned but not yet available
+- **NOT IMPLEMENTED** - Feature is planned but not yet available
 - **🔄 DEPRECATED** - Feature is deprecated and should not be used
 
 ## Document Structure
@@ -162,7 +162,7 @@ enrichments:
 
 **Java Code:**
 ```java
-// ✅ EFFICIENT - Reuse engine for multiple evaluations
+// EFFICIENT - Reuse engine for multiple evaluations
 RulesEngine engine = RulesEngine.fromFile("config.yaml");
 
 // Process multiple items
@@ -230,7 +230,7 @@ RuleResult result = engine.evaluate(data);
 | **Pattern** | **Lines** | **Use Case** | **When to Use** |
 |-------------|-----------|--------------|-----------------|
 | **One-Line** ⭐ | 1 line | Single evaluation | Default choice for most cases |
-| **Two-Line** ✅ | 2 lines | Multiple evaluations | When reusing engine or need cleanup |
+| **Two-Line** | 2 lines | Multiple evaluations | When reusing engine or need cleanup |
 | **Advanced** ⚙️ | 7+ lines | Config inspection | Only when you need to inspect/modify config |
 
 **Bottom Line:** Start with the one-line pattern. Only use the two-line pattern if you need engine reuse. Avoid the advanced pattern unless you have a specific need for config inspection or modification.
@@ -299,7 +299,7 @@ graph TD
 
 #### 1. RulesEngine (Universal Entry Point)
 
-**✅ RECOMMENDED** - The universal entry point for all scenario-based processing:
+**RECOMMENDED** - The universal entry point for all scenario-based processing:
 
 ```java
 // ⭐ SIMPLEST - One-line scenario pattern
@@ -307,7 +307,7 @@ ScenarioExecutionResult result = RulesEngine
     .fromScenarioRegistry("path/to/scenario-registry.yaml")
     .evaluateScenario("scenario-id", inputData);
 
-// ✅ EFFICIENT - Two-line pattern when reusing engine
+// EFFICIENT - Two-line pattern when reusing engine
 RulesEngine engine = RulesEngine.fromScenarioRegistry("path/to/scenario-registry.yaml");
 ScenarioExecutionResult result = engine.evaluateScenario("scenario-id", inputData);
 
@@ -597,7 +597,7 @@ APEX supports the following standardized file types:
 
 #### 1. Scenario-Driven Processing
 
-**✅ RECOMMENDED PATTERN** - Using RulesEngine universal entry point:
+**RECOMMENDED PATTERN** - Using RulesEngine universal entry point:
 
 ```java
 @Service
@@ -614,7 +614,7 @@ public class ScenarioBasedProcessor {
     }
 
     public ProcessingResult processBatch(String scenarioId, List<Map<String, Object>> dataItems) {
-        // ✅ EFFICIENT - Reuse engine for multiple evaluations
+        // EFFICIENT - Reuse engine for multiple evaluations
         RulesEngine engine = RulesEngine.fromScenarioRegistry("config/scenario-registry.yaml");
 
         ProcessingResult batchResult = new ProcessingResult();
@@ -1602,7 +1602,7 @@ H2 is APEX's preferred embedded database for demos, testing, and development sce
 
 ### YAML Configuration Patterns
 
-#### ✅ RECOMMENDED: File-based H2 Configuration
+#### RECOMMENDED: File-based H2 Configuration
 
 ```yaml
 # File: customer-database.yaml
@@ -1718,7 +1718,7 @@ database: "mem:testdb;CACHE_SIZE=16384;MODE=Oracle"
 
 ### Java Code Patterns
 
-#### ✅ RECOMMENDED: File-based H2 in Java
+#### RECOMMENDED: File-based H2 in Java
 
 ```java
 public class CustomerDatabaseDemo {
@@ -1822,7 +1822,7 @@ public class CustomerDatabaseDemo {
 H2 database returns **uppercase column names** by default. Your field mappings must account for this:
 
 ```yaml
-# ✅ CORRECT: Use uppercase source fields
+# CORRECT: Use uppercase source fields
 field-mappings:
   - source-field: "CUSTOMER_NAME"    # H2 returns uppercase
     target-field: "customerName"     # Target can be any case
@@ -2258,7 +2258,7 @@ pipeline:
 
 ### Pipeline Execution with RulesEngine
 
-**✅ RECOMMENDED** - Use RulesEngine universal entry point for pipeline execution:
+**RECOMMENDED** - Use RulesEngine universal entry point for pipeline execution:
 
 ```java
 // ⭐ SIMPLEST - One-line pipeline execution
@@ -2266,7 +2266,7 @@ RuleResult result = RulesEngine
     .fromFile("config/pipeline.yaml")
     .evaluate(inputData);
 
-// ✅ EFFICIENT - Two-line pattern when reusing engine
+// EFFICIENT - Two-line pattern when reusing engine
 RulesEngine engine = RulesEngine.fromFile("config/pipeline.yaml");
 RuleResult result = engine.evaluate(inputData);
 
@@ -2290,7 +2290,7 @@ RuleResult result = RulesEngine
 System.out.println("Pipeline success: " + result.isSuccess());
 Map<String, Object> enrichedData = result.getEnrichedData();
 
-// ✅ EFFICIENT - Two-line pattern for multiple executions
+// EFFICIENT - Two-line pattern for multiple executions
 RulesEngine engine = RulesEngine.fromFile("classpath:config/customer-etl-pipeline.yaml");
 
 for (Map<String, Object> data : dataItems) {
@@ -4668,12 +4668,12 @@ private static List<RuleResult> executeRulesWithErrorHandling(List<Rule> rules,
 
 | Pattern | Use When | Complexity | Performance | Status |
 |---------|----------|------------|-------------|---------|
-| **Conditional Chaining** | Need to execute expensive rules only when conditions are met | Low | High | ✅ Implemented |
-| **Sequential Dependency** | Each step builds upon the previous result | Medium | Medium | ✅ Implemented |
-| **Result-Based Routing** | Different processing paths based on intermediate results | Medium | Medium | ✅ Implemented |
-| **Accumulative Chaining** | Building scores or cumulative results across multiple criteria | Medium | Medium | ✅ Implemented |
-| **Complex Financial Workflow** | Multi-stage business processes with dependencies | High | Medium | ✅ Implemented |
-| **Fluent Rule Builder** | Complex decision trees with multiple branches | High | Medium | ✅ Implemented |
+| **Conditional Chaining** | Need to execute expensive rules only when conditions are met | Low | High | Implemented |
+| **Sequential Dependency** | Each step builds upon the previous result | Medium | Medium | Implemented |
+| **Result-Based Routing** | Different processing paths based on intermediate results | Medium | Medium | Implemented |
+| **Accumulative Chaining** | Building scores or cumulative results across multiple criteria | Medium | Medium | Implemented |
+| **Complex Financial Workflow** | Multi-stage business processes with dependencies | High | Medium | Implemented |
+| **Fluent Rule Builder** | Complex decision trees with multiple branches | High | Medium | Implemented |
 
 ## Performance Monitoring
 
@@ -4858,7 +4858,7 @@ rules:
 
 ### Advanced Enrichment Configuration
 
-**✅ IMPLEMENTED** - All features shown below are verified as implemented.
+**IMPLEMENTED** - All features shown below are verified as implemented.
 
 ```yaml
 enrichments:
@@ -4871,8 +4871,8 @@ enrichments:
         type: "yaml-file"
         file-path: "datasets/currencies.yaml"
         key-field: "code"
-        cache-enabled: true          # ✅ Lookup-dataset level cache
-        cache-ttl-seconds: 3600      # ✅ Lookup-dataset level cache TTL
+        cache-enabled: true          # Lookup-dataset level cache
+        cache-ttl-seconds: 3600      # Lookup-dataset level cache TTL
         default-values:
           region: "Unknown"
           isActive: false
@@ -4956,7 +4956,7 @@ enrichments:
 
 ### Performance-Optimized Configuration
 
-**✅ IMPLEMENTED** - Lookup-dataset level caching
+**IMPLEMENTED** - Lookup-dataset level caching
 **⚠️ NOTE:** Advanced cache features (preload, max-size, monitoring) are configured at the **data-source** level, not lookup-dataset level.
 
 ```yaml
@@ -4969,7 +4969,7 @@ enrichments:
         type: "yaml-file"
         file-path: "datasets/large-dataset.yaml"
         key-field: "id"
-        # ✅ Lookup-dataset level cache properties
+        # Lookup-dataset level cache properties
         cache-enabled: true
         cache-ttl-seconds: 7200
 
@@ -4980,9 +4980,9 @@ data-sources:
     cache:
       enabled: true
       ttlSeconds: 7200
-      maxSize: 10000              # ✅ Data-source level
-      preload-enabled: true       # ✅ Data-source level
-      statistics-enabled: true    # ✅ Data-source level
+      maxSize: 10000              # Data-source level
+      preload-enabled: true       # Data-source level
+      statistics-enabled: true    # Data-source level
 ```
 
 ## Integration Patterns
@@ -5234,24 +5234,24 @@ public class RulesEngineIntegrationTest {
 ### Caching Strategies
 
 ```yaml
-# ✅ IMPLEMENTED - Lookup-dataset level caching
+# IMPLEMENTED - Lookup-dataset level caching
 enrichments:
   - id: "cached-lookup"
     lookup-config:
       lookup-dataset:
-        cache-enabled: true        # ✅ Lookup-dataset level
-        cache-ttl-seconds: 3600    # ✅ Lookup-dataset level
+        cache-enabled: true        # Lookup-dataset level
+        cache-ttl-seconds: 3600    # Lookup-dataset level
 
-# ✅ IMPLEMENTED - Data-source level advanced caching
+# IMPLEMENTED - Data-source level advanced caching
 data-sources:
   - name: "cached-source"
     type: "file-system"
     cache:
       enabled: true
       ttlSeconds: 3600
-      maxSize: 1000              # ✅ Data-source level only
-      preload-enabled: true      # ✅ Data-source level only
-      refresh-ahead: true        # ✅ Data-source level only (note: "refresh-ahead" not "cache-refresh-ahead")
+      maxSize: 1000              # Data-source level only
+      preload-enabled: true      # Data-source level only
+      refresh-ahead: true        # Data-source level only (note: "refresh-ahead" not "cache-refresh-ahead")
 ```
 
 **Cache Configuration Hierarchy:**
@@ -5518,8 +5518,8 @@ enrichments:
         type: "yaml-file"
         file-path: "datasets/production-instruments.yaml"
         key-field: "code"
-        cache-enabled: true        # ✅ Lookup-dataset level
-        cache-ttl-seconds: 3600    # ✅ Lookup-dataset level
+        cache-enabled: true        # Lookup-dataset level
+        cache-ttl-seconds: 3600    # Lookup-dataset level
         # Note: preload-enabled is a data-source level property, not lookup-dataset level
 ```
 
@@ -5555,7 +5555,7 @@ data:
 
 ### Time-Based Dataset Configuration
 
-**❌ NOT IMPLEMENTED** - This is a planned feature that does not currently exist in APEX.
+**NOT IMPLEMENTED** - This is a planned feature that does not currently exist in APEX.
 
 The properties `time-based` and `effective-date-field` are **not implemented**. For time-based lookups, you must implement the logic in your application code or use conditional enrichments with date comparisons.
 
@@ -5573,7 +5573,7 @@ enrichments:
 
 ### Conditional Dataset Loading
 
-**✅ IMPLEMENTED** - Conditional enrichments are fully supported.
+**IMPLEMENTED** - Conditional enrichments are fully supported.
 
 ```yaml
 enrichments:
@@ -5703,11 +5703,11 @@ data-sources:
       currency-lookup: "/api/currency/{key}"
       exchange-rates: "/api/rates/{from}/{to}"
     cache:
-      enabled: true          # ✅ Enable caching
-      ttlSeconds: 600        # ✅ 10 minutes TTL
-      maxIdleSeconds: 300    # ✅ 5 minutes max idle time
-      maxSize: 1000          # ✅ Max 1000 entries (LRU eviction)
-      keyPrefix: "currency"  # ✅ Cache key prefix
+      enabled: true          # Enable caching
+      ttlSeconds: 600        # 10 minutes TTL
+      maxIdleSeconds: 300    # 5 minutes max idle time
+      maxSize: 1000          # Max 1000 entries (LRU eviction)
+      keyPrefix: "currency"  # Cache key prefix
 
 # Using REST API in Enrichments
 enrichments:
@@ -5731,7 +5731,7 @@ enrichments:
 
 APEX provides **enterprise-grade caching** across all data source types with the following **actually implemented** features:
 
-**✅ Universally Supported Cache Features**
+**Universally Supported Cache Features**
 ```yaml
 data-sources:
   - name: "cached-data-source"
@@ -5755,10 +5755,10 @@ data-sources:
 
 | Data Source Type | Basic Caching | Advanced Features | Status |
 |------------------|---------------|-------------------|---------|
-| **RestApiDataSource** | ✅ TTL, maxIdleSeconds | ✅ maxSize, LRU, keyPrefix | **Fully Implemented** |
-| **DatabaseDataSource** | ✅ TTL, maxIdleSeconds | ✅ maxSize, LRU, keyPrefix | **Fully Implemented** |
-| **FileSystemDataSource** | ✅ TTL, maxIdleSeconds | ✅ maxSize, LRU, keyPrefix | **Fully Implemented** |
-| **CacheDataSource** | ✅ TTL, maxIdleSeconds | ✅ maxSize, LRU, keyPrefix | **Fully Implemented** |
+| **RestApiDataSource** | TTL, maxIdleSeconds | maxSize, LRU, keyPrefix | **Fully Implemented** |
+| **DatabaseDataSource** | TTL, maxIdleSeconds | maxSize, LRU, keyPrefix | **Fully Implemented** |
+| **FileSystemDataSource** | TTL, maxIdleSeconds | maxSize, LRU, keyPrefix | **Fully Implemented** |
+| **CacheDataSource** | TTL, maxIdleSeconds | maxSize, LRU, keyPrefix | **Fully Implemented** |
 | **MessageQueueDataSource** | X No caching | X No caching | **Not Applicable** |
 
 **Advanced REST API Configuration (Enterprise)**
@@ -7920,35 +7920,35 @@ for (Object record : dataList) {
 #### Comprehensive Test Coverage (31 Tests Total)
 
 **SqlErrorClassifierTest (17 tests)**
-- ✅ Primary key violation classification
-- ✅ Unique constraint violation classification
-- ✅ Foreign key violation classification
-- ✅ NOT NULL violation classification
-- ✅ Connection error classification
-- ✅ Deadlock error classification
-- ✅ Table not found classification
-- ✅ Column not found classification
-- ✅ Syntax error classification
-- ✅ Unknown error classification
-- ✅ Null exception handling
-- ✅ Error description verification
-- ✅ Message pattern classification
+- Primary key violation classification
+- Unique constraint violation classification
+- Foreign key violation classification
+- NOT NULL violation classification
+- Connection error classification
+- Deadlock error classification
+- Table not found classification
+- Column not found classification
+- Syntax error classification
+- Unknown error classification
+- Null exception handling
+- Error description verification
+- Message pattern classification
 
 **DatabaseErrorHandlingIntegrationTest (7 tests)**
-- ✅ Real table not found error classification
-- ✅ Real column not found error classification
-- ✅ Real SQL syntax error classification
-- ✅ Real primary key violation classification
-- ✅ Real unique constraint violation classification
-- ✅ Real NOT NULL violation classification
+- Real table not found error classification
+- Real column not found error classification
+- Real SQL syntax error classification
+- Real primary key violation classification
+- Real unique constraint violation classification
+- Real NOT NULL violation classification
 
 **DatabaseErrorHandlingProofTest (7 tests)**
-- ✅ **PROOF**: Table not found → CONFIGURATION_ERROR → FAIL FAST
-- ✅ **PROOF**: Column not found → CONFIGURATION_ERROR → FAIL FAST
-- ✅ **PROOF**: SQL syntax error → CONFIGURATION_ERROR → FAIL FAST
-- ✅ **PROOF**: Primary key violation → DATA_INTEGRITY_VIOLATION → GRACEFUL HANDLING
-- ✅ **PROOF**: Unique constraint violation → DATA_INTEGRITY_VIOLATION → GRACEFUL HANDLING
-- ✅ **PROOF**: NOT NULL violation → DATA_INTEGRITY_VIOLATION → GRACEFUL HANDLING
+- **PROOF**: Table not found → CONFIGURATION_ERROR → FAIL FAST
+- **PROOF**: Column not found → CONFIGURATION_ERROR → FAIL FAST
+- **PROOF**: SQL syntax error → CONFIGURATION_ERROR → FAIL FAST
+- **PROOF**: Primary key violation → DATA_INTEGRITY_VIOLATION → GRACEFUL HANDLING
+- **PROOF**: Unique constraint violation → DATA_INTEGRITY_VIOLATION → GRACEFUL HANDLING
+- **PROOF**: NOT NULL violation → DATA_INTEGRITY_VIOLATION → GRACEFUL HANDLING
 
 ### Benefits
 

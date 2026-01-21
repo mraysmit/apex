@@ -13,7 +13,7 @@ APEX provides multiple approaches for conditional logic, each suited for differe
 
 ## Test Classes & Results
 
-All tests are **✅ PASSING** (24 tests total):
+All tests are **PASSING** (24 tests total):
 
 ### 1. UltraSimpleTernaryTest (6 tests)
 **Simplest approach** - No rules, no rule groups, just pure SpEL ternary logic
@@ -125,25 +125,25 @@ enrichments:
 
 ## When to Use Each Pattern
 
-### ✅ Use Ternary When:
+### Use Ternary When:
 - Simple value mappings (A→X, B→Y, C→Z)
 - No complex business logic needed
 - Performance is critical
 - Configuration should be minimal
 
-### ✅ Use Rule OR Logic When:
+### Use Rule OR Logic When:
 - Need rule documentation and traceability
 - Conditions might become more complex
 - Want separation between conditions and actions
 - Need rule result logging
 
-### ✅ Use Rule Result References When:
+### Use Rule Result References When:
 - Multiple enrichments depend on same rules
 - Complex conditional processing chains
 - Need rule group results
 - Advanced business logic scenarios
 
-### ✅ Use Complex Business Logic When:
+### Use Complex Business Logic When:
 - Real-world financial/business scenarios
 - Multiple systems with different behaviors
 - Fallback and default handling required
@@ -174,7 +174,7 @@ mvn test -Dtest=ConditionalMappingDesignV2Test -pl apex-demo
 - `stop-on-first-failure: true` - First success wins
 - Sequential rule evaluation
 
-### 📊 Rule Result Integration
+### Rule Result Integration
 - `#ruleResults['rule-id']` - Access individual rule results
 - `#ruleGroupResults['group-id']` - Access rule group results
 - Conditional enrichments based on rule outcomes

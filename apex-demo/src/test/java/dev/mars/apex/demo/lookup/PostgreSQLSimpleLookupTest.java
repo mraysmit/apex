@@ -43,13 +43,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * PostgreSQL Simple Lookup Test - Phase 1.1 Implementation
  * 
  * PHASE 1.1 VALIDATION CHECKLIST:
- * ✅ PostgreSQL container starts successfully
- * ✅ Database schema created and populated via initialization script
- * ✅ APEX connects to real PostgreSQL database
- * ✅ Simple customer lookup returns expected data
- * ✅ PostgreSQL-specific features (JSONB, arrays) tested
- * ✅ Connection pooling validated
- * ✅ Test passes consistently (3+ runs)
+ * PostgreSQL container starts successfully
+ * Database schema created and populated via initialization script
+ * APEX connects to real PostgreSQL database
+ * Simple customer lookup returns expected data
+ * PostgreSQL-specific features (JSONB, arrays) tested
+ * Connection pooling validated
+ * Test passes consistently (3+ runs)
  * 
  * SUCCESS METRICS:
  * - Response Time: < 100ms for simple lookup
@@ -99,7 +99,7 @@ public class PostgreSQLSimpleLookupTest extends DemoTestBase {
         String username = postgres.getUsername();
         String password = postgres.getPassword();
         
-        logger.info("✅ PostgreSQL Container Details:");
+        logger.info("PostgreSQL Container Details:");
         logger.info("  JDBC URL: {}", jdbcUrl);
         logger.info("  Username: {}", username);
         logger.info("  Database: {}", postgres.getDatabaseName());
@@ -114,7 +114,7 @@ public class PostgreSQLSimpleLookupTest extends DemoTestBase {
             rs.next();
             int customerCount = rs.getInt(1);
             
-            logger.info("✅ Database Validation:");
+            logger.info("Database Validation:");
             logger.info("  Total customers: {}", customerCount);
             assertTrue(customerCount >= 10, "Should have at least 10 customers from initialization script");
             
@@ -125,7 +125,7 @@ public class PostgreSQLSimpleLookupTest extends DemoTestBase {
                 String metadata = rs.getString("metadata");
                 String[] tags = (String[]) rs.getArray("tags").getArray();
                 
-                logger.info("✅ PostgreSQL Features Validation:");
+                logger.info("PostgreSQL Features Validation:");
                 logger.info("  Customer ID: {}", customerId);
                 logger.info("  JSONB Metadata: {}", metadata);
                 logger.info("  Array Tags: {}", String.join(", ", tags));
@@ -139,7 +139,7 @@ public class PostgreSQLSimpleLookupTest extends DemoTestBase {
             fail("Direct database connection should work: " + e.getMessage());
         }
         
-        logger.info("✅ PostgreSQL container setup validation completed successfully");
+        logger.info("PostgreSQL container setup validation completed successfully");
     }
 
     @Test
@@ -193,7 +193,7 @@ public class PostgreSQLSimpleLookupTest extends DemoTestBase {
             assertNotNull(enrichedData.get("customerMetadata"), "JSONB metadata should be enriched");
             assertNotNull(enrichedData.get("customerTags"), "Array tags should be enriched");
             
-            logger.info("✅ Basic Enrichment Results:");
+            logger.info("Basic Enrichment Results:");
             logger.info("  Customer Name: {}", enrichedData.get("customerName"));
             logger.info("  Customer Type: {}", enrichedData.get("customerType"));
             logger.info("  Customer Tier: {}", enrichedData.get("customerTier"));
@@ -203,7 +203,7 @@ public class PostgreSQLSimpleLookupTest extends DemoTestBase {
             // Validate performance requirement (allow extra time for first run with container startup)
             assertTrue(responseTime < 1000, "Response time should be < 1000ms for first run, was: " + responseTime + "ms");
             
-            logger.info("✅ PostgreSQL simple lookup completed successfully in {}ms", responseTime);
+            logger.info("PostgreSQL simple lookup completed successfully in {}ms", responseTime);
             
         } catch (Exception e) {
             logger.error("X PostgreSQL simple lookup failed: {}", e.getMessage(), e);
@@ -243,20 +243,20 @@ public class PostgreSQLSimpleLookupTest extends DemoTestBase {
             // Second enrichment should extract JSON fields
             if (enrichedData.get("customerIndustry") != null) {
                 assertEquals("Technology", enrichedData.get("customerIndustry"));
-                logger.info("✅ JSON Industry: {}", enrichedData.get("customerIndustry"));
+                logger.info("JSON Industry: {}", enrichedData.get("customerIndustry"));
             }
             
             if (enrichedData.get("customerEmployeeCount") != null) {
                 assertEquals(5000, enrichedData.get("customerEmployeeCount"));
-                logger.info("✅ JSON Employee Count: {}", enrichedData.get("customerEmployeeCount"));
+                logger.info("JSON Employee Count: {}", enrichedData.get("customerEmployeeCount"));
             }
             
             if (enrichedData.get("customerFinancialValue") != null) {
                 assertEquals(1000000000L, enrichedData.get("customerFinancialValue"));
-                logger.info("✅ JSON Financial Value: {}", enrichedData.get("customerFinancialValue"));
+                logger.info("JSON Financial Value: {}", enrichedData.get("customerFinancialValue"));
             }
             
-            logger.info("✅ PostgreSQL JSON enrichment features validated successfully");
+            logger.info("PostgreSQL JSON enrichment features validated successfully");
             
         } catch (Exception e) {
             logger.error("X PostgreSQL JSON enrichment failed: {}", e.getMessage(), e);
@@ -296,7 +296,7 @@ public class PostgreSQLSimpleLookupTest extends DemoTestBase {
                     connection.put("username", username);
                     connection.put("password", password);
 
-                    logger.info("✅ Updated PostgreSQL data source '{}' with Testcontainers connection details",
+                    logger.info("Updated PostgreSQL data source '{}' with Testcontainers connection details",
                                dataSource.getName());
                     break;
                 }

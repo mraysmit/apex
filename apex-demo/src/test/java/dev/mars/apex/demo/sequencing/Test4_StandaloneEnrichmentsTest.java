@@ -94,7 +94,7 @@ public class Test4_StandaloneEnrichmentsTest extends DemoTestBase {
         assertEquals("grouped-1", executionLog.get(2), "Position 2 MUST be grouped-1 (from group-A)");
         assertEquals("grouped-2", executionLog.get(3), "Position 3 MUST be grouped-2 (from group-A)");
 
-        LOGGER.info("✅ TEST 4A PASSED: All 5 definitive assertion types verified");
+        LOGGER.info("TEST 4A PASSED: All 5 definitive assertion types verified");
         LOGGER.info("  ✓ Exact count: 4 items");
         LOGGER.info("  ✓ Exact order: standalone-1, standalone-2, grouped-1, grouped-2");
         LOGGER.info("  ✓ What executed: All 4 items present");

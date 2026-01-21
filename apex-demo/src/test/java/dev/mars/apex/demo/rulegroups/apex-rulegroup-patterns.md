@@ -177,7 +177,7 @@ RulesEngine engine = rulesEngineService.createRulesEngineFromMultipleFiles(
 - **Modularity**: Easy to add/remove rule files
 - **Automatic Merging**: APEX handles file merging transparently
 
-## 📊 Pattern Summary Table
+## Pattern Summary Table
 
 | Pattern | Use Case | Key Features | Files Demonstrated |
 |---------|----------|--------------|-------------------|
@@ -210,7 +210,7 @@ Let APEX aggregate severities automatically rather than manually specifying grou
 ### 6. Testing Strategy
 Test both individual groups and composite workflows to ensure proper behavior.
 
-## 🔍 Key APEX Features Demonstrated
+## Key APEX Features Demonstrated
 
 ### Rule Group Operators
 - `AND`: All rules must pass

@@ -89,11 +89,11 @@ class ClasspathRefsWithGroupReferencesTest {
                 "itemOrder should contain exactly 1 item: composite_group");
 
         logger.info("=== TEST RESULTS ===");
-        logger.info("✅ composite_group in itemOrder: {}", compositeGroupInItemOrder);
-        logger.info("✅ external_group_1 filtered from itemOrder: {}", !externalGroup1InItemOrder);
-        logger.info("✅ external_enrichment_1 filtered from itemOrder: {}", !externalEnrichment1InItemOrder);
-        logger.info("✅ local_enrichment_1 filtered from itemOrder: {}", !localEnrichment1InItemOrder);
-        logger.info("✅ Final itemOrder size: {}", itemOrder.size());
+        logger.info("composite_group in itemOrder: {}", compositeGroupInItemOrder);
+        logger.info("external_group_1 filtered from itemOrder: {}", !externalGroup1InItemOrder);
+        logger.info("external_enrichment_1 filtered from itemOrder: {}", !externalEnrichment1InItemOrder);
+        logger.info("local_enrichment_1 filtered from itemOrder: {}", !localEnrichment1InItemOrder);
+        logger.info("Final itemOrder size: {}", itemOrder.size());
     }
 }
 

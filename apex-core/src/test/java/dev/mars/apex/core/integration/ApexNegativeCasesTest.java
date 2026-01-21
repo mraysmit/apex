@@ -98,7 +98,7 @@ class ApexNegativeCasesTest {
         RuleResult exactAgeResult = rulesEngine.executeRule(ageRule, exactAgeData);
         assertTrue(exactAgeResult.isTriggered(), "Age rule should be triggered for exactly 18 years old");
         
-        System.out.println("✅ Age validation failure testing completed");
+        System.out.println("Age validation failure testing completed");
     }
 
     @Test
@@ -135,7 +135,7 @@ class ApexNegativeCasesTest {
         RuleResult withinLimitResult = rulesEngine.executeRule(creditRule, withinLimitData);
         assertTrue(withinLimitResult.isTriggered(), "Credit rule should be triggered when amount is within limit");
         
-        System.out.println("✅ Credit limit failure testing completed");
+        System.out.println("Credit limit failure testing completed");
     }
 
     @Test
@@ -164,7 +164,7 @@ class ApexNegativeCasesTest {
         System.out.println("  - Required income: $30,000");
         System.out.println("  - Shortfall: $" + (30000 - 25000));
         
-        System.out.println("✅ Income requirement failure testing completed");
+        System.out.println("Income requirement failure testing completed");
     }
 
     // ========================================
@@ -228,7 +228,7 @@ class ApexNegativeCasesTest {
         System.out.println("  - Failure rate: " + String.format("%.1f%%", failureRate * 100));
         System.out.println("  - Application status: REJECTED");
         
-        System.out.println("✅ Multiple rule failure testing completed");
+        System.out.println("Multiple rule failure testing completed");
     }
 
     // ========================================
@@ -289,7 +289,7 @@ class ApexNegativeCasesTest {
         System.out.println("  - Success: " + successResult.isSuccess());
         System.out.println("  - Has failures: " + successResult.hasFailures());
 
-        System.out.println("✅ Enrichment failure management testing completed");
+        System.out.println("Enrichment failure management testing completed");
     }
 
     @Test
@@ -333,10 +333,10 @@ class ApexNegativeCasesTest {
         if (enrichedData != null && !enrichedData.isEmpty()) {
             System.out.println("  - Enriched fields: " + enrichedData.size());
             enrichedData.forEach((key, value) ->
-                System.out.println("    ✅ " + key + ": " + value));
+                System.out.println("    " + key + ": " + value));
         }
 
-        System.out.println("✅ Partial enrichment scenario testing completed");
+        System.out.println("Partial enrichment scenario testing completed");
     }
 
     // ========================================
@@ -415,7 +415,7 @@ class ApexNegativeCasesTest {
         System.out.println("  - Risk assessment: INCOMPLETE");
         System.out.println("  - Required actions: Fix primary data issues before re-assessment");
 
-        System.out.println("✅ Cascading failure scenario testing completed");
+        System.out.println("Cascading failure scenario testing completed");
     }
 
     @Test
@@ -465,12 +465,12 @@ class ApexNegativeCasesTest {
         }
 
         System.out.println("Recovery pattern demonstration:");
-        System.out.println("  ✅ Critical failure detection");
-        System.out.println("  ✅ Data correction strategy");
-        System.out.println("  ✅ Graceful degradation option");
-        System.out.println("  ✅ Alternative validation approach");
+        System.out.println("  Critical failure detection");
+        System.out.println("  Data correction strategy");
+        System.out.println("  Graceful degradation option");
+        System.out.println("  Alternative validation approach");
 
-        System.out.println("✅ Failure recovery pattern testing completed");
+        System.out.println("Failure recovery pattern testing completed");
     }
 
     // ========================================

@@ -41,10 +41,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests reading schema metadata from a simple CSV file.
  *
  * CRITICAL VALIDATION CHECKLIST:
- * ✅ CSV file created and accessible
- * ✅ Schema inferred from CSV headers
- * ✅ Column types detected correctly
- * ✅ Pipeline executes successfully
+ * CSV file created and accessible
+ * Schema inferred from CSV headers
+ * Column types detected correctly
+ * Pipeline executes successfully
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2.1.0

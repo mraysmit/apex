@@ -64,7 +64,7 @@ class YamlTransformationProcessorDeprecationTest {
         Map<String, Object> resultMap = (Map<String, Object>) result;
         assertEquals(100.0, resultMap.get("amount"), "Original data should be preserved");
 
-        logger.info("✅ Deprecated method still works correctly");
+        logger.info("Deprecated method still works correctly");
     }
 
     @Test
@@ -88,7 +88,7 @@ class YamlTransformationProcessorDeprecationTest {
         assertTrue(result.isSuccess(), "Result should indicate success");
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(), "Result type should be MATCH");
 
-        logger.info("✅ New method works correctly and returns RuleResult");
+        logger.info("New method works correctly and returns RuleResult");
     }
 
     @Test
@@ -146,7 +146,7 @@ class YamlTransformationProcessorDeprecationTest {
 
         // Note: The current implementation may not populate failureMessages for all error types
         // The key point is that the error is propagated via RuleResult.resultType = ERROR
-        logger.info("✅ New method properly propagated error via RuleResult");
+        logger.info("New method properly propagated error via RuleResult");
         logger.info("   Result type: {}", result.getResultType());
         logger.info("   Success: {}", result.isSuccess());
     }

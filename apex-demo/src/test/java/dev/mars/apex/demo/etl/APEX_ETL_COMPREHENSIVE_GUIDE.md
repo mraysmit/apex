@@ -377,17 +377,17 @@ data-sources:
 ```
 
 **Supported SQL Features:**
-- ✅ SELECT with multiple columns
-- ✅ WHERE clauses with complex conditions
-- ✅ INNER JOIN, LEFT JOIN, RIGHT JOIN, FULL OUTER JOIN
-- ✅ GROUP BY with aggregation functions (COUNT, SUM, AVG, MIN, MAX)
-- ✅ HAVING clauses for filtered aggregations
-- ✅ ORDER BY with multiple columns and ASC/DESC
-- ✅ LIMIT and OFFSET for pagination
-- ✅ COALESCE and other SQL functions
-- ✅ Subqueries in SELECT, FROM, and WHERE clauses
-- ✅ UNION and UNION ALL
-- ✅ Common Table Expressions (CTEs) with WITH clause
+- SELECT with multiple columns
+- WHERE clauses with complex conditions
+- INNER JOIN, LEFT JOIN, RIGHT JOIN, FULL OUTER JOIN
+- GROUP BY with aggregation functions (COUNT, SUM, AVG, MIN, MAX)
+- HAVING clauses for filtered aggregations
+- ORDER BY with multiple columns and ASC/DESC
+- LIMIT and OFFSET for pagination
+- COALESCE and other SQL functions
+- Subqueries in SELECT, FROM, and WHERE clauses
+- UNION and UNION ALL
+- Common Table Expressions (CTEs) with WITH clause
 
 data-sinks:                               # Output data sink definitions
   - name: "sink-name"                     # Unique identifier for this data sink
@@ -421,7 +421,7 @@ pipeline:
   steps:
     - name: "critical-step"
       type: "load"
-      # optional: true                    # ❌ OVERRIDES pipeline-level error-handling!
+      # optional: true                    # OVERRIDES pipeline-level error-handling!
       # If uncommented, this step's failure will NOT stop the pipeline
 ```
 
@@ -597,12 +597,12 @@ The ETL demo includes comprehensive test data files demonstrating various data f
 - Wheat (ZW) - Agriculture
 
 **Data Structure Features**:
-- ✅ Nested objects (`underlyingAsset`)
-- ✅ Arrays (`tags` for categorization)
-- ✅ Multiple data types (strings, numbers, dates)
-- ✅ Various trade statuses (ACTIVE, EXPIRED)
-- ✅ Both Call and Put options
-- ✅ Cash and Physical settlement types
+- Nested objects (`underlyingAsset`)
+- Arrays (`tags` for categorization)
+- Multiple data types (strings, numbers, dates)
+- Various trade statuses (ACTIVE, EXPIRED)
+- Both Call and Put options
+- Cash and Physical settlement types
 
 **Sample Record**:
 ```json
@@ -635,12 +635,12 @@ The ETL demo includes comprehensive test data files demonstrating various data f
 **Format**: XML with attributes and nested elements (FpML-style)
 
 **Data Structure Features**:
-- ✅ XML attributes (`id`, `status`, `currency`)
-- ✅ Multi-level nesting (counterparties → buyer/seller → lei)
-- ✅ Complex hierarchies (optionDetails → underlyingAsset)
-- ✅ Risk metrics (delta, gamma, vega, theta)
-- ✅ LEI codes for regulatory compliance
-- ✅ Various trade statuses (CONFIRMED, PENDING_CONFIRMATION, SETTLED)
+- XML attributes (`id`, `status`, `currency`)
+- Multi-level nesting (counterparties → buyer/seller → lei)
+- Complex hierarchies (optionDetails → underlyingAsset)
+- Risk metrics (delta, gamma, vega, theta)
+- LEI codes for regulatory compliance
+- Various trade statuses (CONFIRMED, PENDING_CONFIRMATION, SETTLED)
 
 **Sample Record**:
 ```xml
@@ -1007,12 +1007,12 @@ Total steps: 1, Successful: 1, Failed: 0
 
 #### Key Features Demonstrated
 
-✅ **JSONPath Queries**: Flexible data extraction with predicates for filtering trades
-✅ **Nested Objects**: UnderlyingAsset object preserved in structure
-✅ **Arrays**: Tags array maintained as list for categorization
-✅ **Type Preservation**: Numbers (notionalAmount, strikePrice), strings, correctly typed
-✅ **Multiple Operations**: Different queries on same data source (by status, optionType, notionalAmount)
-✅ **Financial Data**: Realistic OTC options trade data for middle office processing
+**JSONPath Queries**: Flexible data extraction with predicates for filtering trades
+**Nested Objects**: UnderlyingAsset object preserved in structure
+**Arrays**: Tags array maintained as list for categorization
+**Type Preservation**: Numbers (notionalAmount, strikePrice), strings, correctly typed
+**Multiple Operations**: Different queries on same data source (by status, optionType, notionalAmount)
+**Financial Data**: Realistic OTC options trade data for middle office processing
 
 ### XML Data Extraction
 
@@ -1185,12 +1185,12 @@ Total steps: 1, Successful: 1, Failed: 0
 
 #### Key Features Demonstrated
 
-✅ **XML Attributes**: Attributes prefixed with `@` in data structure (trade id, status)
-✅ **Nested Elements**: Multi-level nesting (trade → counterparties → buyer → lei)
-✅ **Record Element**: Specify which XML element represents a record (trade)
-✅ **Complex Structures**: Counterparties, option details, underlying asset, and risk metrics
-✅ **Filtering**: Query operations for different trade statuses (CONFIRMED, PENDING, SETTLED)
-✅ **Financial Data**: LEI codes, risk Greeks, and OTC trade confirmation data
+**XML Attributes**: Attributes prefixed with `@` in data structure (trade id, status)
+**Nested Elements**: Multi-level nesting (trade → counterparties → buyer → lei)
+**Record Element**: Specify which XML element represents a record (trade)
+**Complex Structures**: Counterparties, option details, underlying asset, and risk metrics
+**Filtering**: Query operations for different trade statuses (CONFIRMED, PENDING, SETTLED)
+**Financial Data**: LEI codes, risk Greeks, and OTC trade confirmation data
 
 ### Advanced Database Extraction
 
@@ -1460,15 +1460,15 @@ Sample extracted data:
 
 #### Key Features Demonstrated
 
-✅ **Complex JOINs**: LEFT JOIN to include counterparties without trades, INNER JOIN for trade details
-✅ **Aggregation Functions**: COUNT, SUM, AVG, MAX for exposure calculations
-✅ **GROUP BY**: Grouping by multiple columns (counterparty, commodity)
-✅ **COALESCE**: Handle NULL values in aggregations for zero-trade counterparties
-✅ **CASE Statements**: Conditional aggregation for buy-side vs sell-side notional
-✅ **Multiple Queries**: Different analytical queries (exposure, trade details, commodity risk)
-✅ **ORDER BY**: Sort results by calculated columns (total_notional DESC)
-✅ **Calculated Columns**: Derive new columns from aggregations (net_delta, total_vega)
-✅ **Financial Analytics**: Counterparty exposure, commodity risk, and trade volume analysis
+**Complex JOINs**: LEFT JOIN to include counterparties without trades, INNER JOIN for trade details
+**Aggregation Functions**: COUNT, SUM, AVG, MAX for exposure calculations
+**GROUP BY**: Grouping by multiple columns (counterparty, commodity)
+**COALESCE**: Handle NULL values in aggregations for zero-trade counterparties
+**CASE Statements**: Conditional aggregation for buy-side vs sell-side notional
+**Multiple Queries**: Different analytical queries (exposure, trade details, commodity risk)
+**ORDER BY**: Sort results by calculated columns (total_notional DESC)
+**Calculated Columns**: Derive new columns from aggregations (net_delta, total_vega)
+**Financial Analytics**: Counterparty exposure, commodity risk, and trade volume analysis
 
 ## Practical Demo: CSV to H2 Database Pipeline
 

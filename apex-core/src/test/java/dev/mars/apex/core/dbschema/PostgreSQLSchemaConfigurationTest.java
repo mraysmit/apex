@@ -358,7 +358,7 @@ class PostgreSQLSchemaConfigurationTest {
                     connection.put("password", password);
                     connection.put("schema", CUSTOM_SCHEMA);
                     
-                    logger.info("✅ Updated data source '{}' with schema '{}'", 
+                    logger.info("Updated data source '{}' with schema '{}'", 
                         dataSourceName, CUSTOM_SCHEMA);
                     break;
                 }
@@ -384,7 +384,7 @@ class PostgreSQLSchemaConfigurationTest {
                     connection.put("password", password);
                     connection.put("schema", schema);
                     
-                    logger.info("✅ Updated data source '{}' with schema '{}'", 
+                    logger.info("Updated data source '{}' with schema '{}'", 
                         dataSourceName, schema);
                     break;
                 }

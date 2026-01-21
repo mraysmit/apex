@@ -98,7 +98,7 @@ public class SequentialYamlProcessorTest extends DemoTestBase {
         LOGGER.info("   1. Enrichment executed: customerData = {}", enrichedData.get("customerData"));
         LOGGER.info("   2. Rule validated enriched data successfully");
         LOGGER.info("   3. Sequential processing respects YAML document order");
-        LOGGER.info("✅ Enrich-then-validate pattern test PASSED - Sequential processing working!");
+        LOGGER.info("Enrich-then-validate pattern test PASSED - Sequential processing working!");
     }
 
     /**
@@ -152,7 +152,7 @@ public class SequentialYamlProcessorTest extends DemoTestBase {
         LOGGER.info("   1. Rule validated input data first");
         LOGGER.info("   2. Enrichment executed after validation: customerData = {}", enrichedData.get("customerData"));
         LOGGER.info("   3. Sequential processing respects YAML document order");
-        LOGGER.info("✅ Validate-then-enrich pattern test PASSED - Sequential processing working!");
+        LOGGER.info("Validate-then-enrich pattern test PASSED - Sequential processing working!");
     }
 
     /**
@@ -206,6 +206,6 @@ public class SequentialYamlProcessorTest extends DemoTestBase {
         LOGGER.info("   2. Enrichments executed: customerData = {}", enrichedData.get("customerData"));
         LOGGER.info("   3. Rules validated enriched data successfully");
         LOGGER.info("   4. Sequential processing handles complex configurations");
-        LOGGER.info("✅ Complex section ordering test PASSED");
+        LOGGER.info("Complex section ordering test PASSED");
     }
 }

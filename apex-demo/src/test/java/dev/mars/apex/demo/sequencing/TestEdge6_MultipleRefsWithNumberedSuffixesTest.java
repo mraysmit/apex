@@ -48,7 +48,7 @@ public class TestEdge6_MultipleRefsWithNumberedSuffixesTest extends DemoTestBase
         // The key validation is that enrichment-refs-1 is NOT logged as "Unknown YAML section"
         // and both external files are loaded successfully.
 
-        LOGGER.info("✅ EDGE CASE TEST 6 PASSED: Multiple refs sections work correctly");
+        LOGGER.info("EDGE CASE TEST 6 PASSED: Multiple refs sections work correctly");
         LOGGER.info("   - enrichment-refs section processed successfully");
         LOGGER.info("   - enrichment-refs-1 section processed successfully (NOT treated as unknown)");
         LOGGER.info("   - Both external files loaded and merged");

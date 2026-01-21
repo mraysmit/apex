@@ -98,10 +98,10 @@ curl "http://localhost:8082/yaml-manager/api/dependencies/tree?rootFile=src/test
 ## APEX Compliance
 
 All files follow the APEX YAML Reference specification:
-- ✅ Required `metadata` section with `id`, `type`, `version`
-- ✅ Valid APEX document types: `scenario-registry`, `scenario`, `rule-config`, `enrichment`, `external-data-config`, `pipeline-config`
-- ✅ Proper dependency references using relative file paths
-- ✅ Kebab-case naming for APEX keywords
+- Required `metadata` section with `id`, `type`, `version`
+- Valid APEX document types: `scenario-registry`, `scenario`, `rule-config`, `enrichment`, `external-data-config`, `pipeline-config`
+- Proper dependency references using relative file paths
+- Kebab-case naming for APEX keywords
 
 ## Generation
 
