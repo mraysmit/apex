@@ -18,6 +18,7 @@ package dev.mars.apex.core.service.scenario;
 
 import dev.mars.apex.core.engine.model.RuleResult;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,7 +64,7 @@ public class StageExecutionResult {
         this.stageName = stageName;
         this.resultType = resultType;
         this.successful = successful;
-        this.stageOutputs = new java.util.concurrent.ConcurrentHashMap<>();
+        this.stageOutputs = Collections.synchronizedMap(new HashMap<>());
         this.startTime = System.currentTimeMillis();
     }
     
@@ -196,11 +197,11 @@ public class StageExecutionResult {
     }
     
     /**
-     * Adds a stage output. Thread-safe using ConcurrentHashMap.
-     * Synchronized to prevent interference with setStageOutputs().
+     * Adds a stage output. Thread-safe using synchronized map.
+     * Supports null values from YAML configurations.
      *
      * @param key the output key
-     * @param value the output value
+     * @param value the output value (may be null)
      */
     public synchronized void addStageOutput(String key, Object value) {
         stageOutputs.put(key, value);

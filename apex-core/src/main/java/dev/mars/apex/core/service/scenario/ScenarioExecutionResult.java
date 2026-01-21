@@ -17,6 +17,7 @@ package dev.mars.apex.core.service.scenario;
  */
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -63,9 +64,9 @@ public class ScenarioExecutionResult {
         this.stageResults = new CopyOnWriteArrayList<>();
         this.warnings = new CopyOnWriteArrayList<>();
         this.reviewFlags = new CopyOnWriteArrayList<>();
-        this.skippedStages = new java.util.concurrent.ConcurrentHashMap<>();
+        this.skippedStages = new ConcurrentHashMap<>();
         this.totalExecutionTimeMs = new AtomicLong(0);
-        this.scenarioOutputs = new java.util.concurrent.ConcurrentHashMap<>();
+        this.scenarioOutputs = Collections.synchronizedMap(new HashMap<>());
         this.executionPath = new CopyOnWriteArrayList<>();
     }
     
