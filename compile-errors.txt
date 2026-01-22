@@ -1,0 +1,256 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] apex-parent                                                        [pom]
+[INFO] apex-core                                                          [jar]
+[INFO] APEX YAML Compiler                                                 [jar]
+[INFO] apex-demo                                                          [jar]
+[INFO] APEX REST API                                                      [jar]
+[INFO] APEX Playground                                                    [jar]
+[INFO] APEX YAML Manager                                                  [jar]
+[INFO] APEX Data Sync                                                     [jar]
+[INFO] 
+[INFO] ------------------------< com.apex:apex-parent >------------------------
+[INFO] Building apex-parent 1.0-SNAPSHOT                                  [1/8]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ apex-parent ---
+[INFO] 
+[INFO] -------------------------< com.apex:apex-core >-------------------------
+[INFO] Building apex-core 1.0-SNAPSHOT                                    [2/8]
+[INFO]   from apex-core\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ apex-core ---
+[INFO] Deleting C:\Users\mraysmit\dev\idea-projects\apex-rules-engine\apex-core\target
+[INFO] 
+[INFO] --- jacoco:0.8.13:prepare-agent (prepare-agent) @ apex-core ---
+[INFO] argLine set to -javaagent:C:\\Users\\mraysmit\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.13\\org.jacoco.agent-0.8.13-runtime.jar=destfile=C:\\Users\\mraysmit\\dev\\idea-projects\\apex-rules-engine\\apex-core\\target\\jacoco.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ apex-core ---
+[INFO] Copying 9 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ apex-core ---
+[WARNING] ********************************************************************************************************************************************
+[WARNING] * Required filename-based automodules detected: [handlebars-4.3.1.jar]. Please don't publish this project to a public artifact repository! *
+[WARNING] ********************************************************************************************************************************************
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 264 source files with javac [debug deprecation release 21 module-path] to target\classes
+[INFO] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/SequentialProcessor.java: Some input files additionally use or override a deprecated API that is marked for removal.
+[INFO] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/util/YamlDependencyAnalyzer.java: C:\Users\mraysmit\dev\idea-projects\apex-rules-engine\apex-core\src\main\java\dev\mars\apex\core\util\YamlDependencyAnalyzer.java uses unchecked or unsafe operations.
+[INFO] -------------------------------------------------------------
+[WARNING] COMPILATION WARNING : 
+[INFO] -------------------------------------------------------------
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/module-info.java:[28,31] requires transitive directive for an automatic module
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/config/yaml/ScenarioRegistryLoader.java:[725,21] setRuleConfigurations(java.util.List<java.lang.String>) in dev.mars.apex.core.service.scenario.ScenarioConfiguration has been deprecated
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/EnrichmentGroupExecutor.java:[55,19] dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor in dev.mars.apex.core.service.enrichment has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/EnrichmentGroupExecutor.java:[62,36] dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor in dev.mars.apex.core.service.enrichment has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/EnrichmentGroupExecutor.java:[185,47] processEnrichmentWithResult(dev.mars.apex.core.config.yaml.YamlEnrichment,java.lang.Object,dev.mars.apex.core.config.yaml.YamlRuleConfiguration) in dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/EnrichmentGroupExecutor.java:[239,47] processEnrichmentWithResult(dev.mars.apex.core.config.yaml.YamlEnrichment,java.lang.Object,dev.mars.apex.core.config.yaml.YamlRuleConfiguration) in dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/config/yaml/SequentialYamlProcessor.java:[510,47] processTransformations(java.util.List<dev.mars.apex.core.config.yaml.YamlTransformation>,java.lang.Object) in dev.mars.apex.core.service.transformation.YamlTransformationProcessor has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/RulesEngine.java:[111,13] dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor in dev.mars.apex.core.service.enrichment has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/RulesEngine.java:[187,40] dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor in dev.mars.apex.core.service.enrichment has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/RulesEngine.java:[187,36] YamlEnrichmentProcessor(dev.mars.apex.core.service.lookup.LookupServiceRegistry,dev.mars.apex.core.service.engine.ExpressionEvaluatorService) in dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/RulesEngine.java:[258,48] dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor in dev.mars.apex.core.service.enrichment has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/RulesEngine.java:[313,13] dev.mars.apex.core.engine.pipeline.YamlPipelineExecutionResult in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/RulesEngine.java:[318,56] dev.mars.apex.core.engine.pipeline.PipelineStepResult in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/RulesEngine.java:[354,18] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/RulesEngine.java:[1472,21] setRuleConfigurations(java.util.List<java.lang.String>) in dev.mars.apex.core.service.scenario.ScenarioConfiguration has been deprecated
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/scenario/ScenarioParser.java:[121,21] setRuleConfigurations(java.util.List<java.lang.String>) in dev.mars.apex.core.service.scenario.ScenarioConfiguration has been deprecated
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[49,31] dev.mars.apex.core.engine.pipeline.PipelineStepResult in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[77,12] dev.mars.apex.core.engine.pipeline.YamlPipelineExecutionResult in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[77,87] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[79,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[88,9] dev.mars.apex.core.engine.pipeline.YamlPipelineExecutionResult in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[88,50] dev.mars.apex.core.engine.pipeline.YamlPipelineExecutionResult in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[137,74] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[139,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[154,57] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[156,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[160,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[165,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[169,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[174,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[183,76] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[198,27] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[235,77] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[243,31] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[253,20] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[252,69] dev.mars.apex.core.engine.pipeline.YamlPipelineExecutionResult in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[267,20] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[266,67] dev.mars.apex.core.engine.pipeline.YamlPipelineExecutionResult in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[276,92] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[276,49] dev.mars.apex.core.engine.pipeline.YamlPipelineExecutionResult in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[280,9] dev.mars.apex.core.engine.pipeline.PipelineStepResult in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[280,45] dev.mars.apex.core.engine.pipeline.PipelineStepResult in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[311,25] dev.mars.apex.core.engine.pipeline.PipelineStepResult in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[313,39] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[428,27] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[445,35] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[490,65] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[493,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[501,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[509,80] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[548,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[701,72] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[705,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[710,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[776,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[785,74] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[788,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[833,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[846,68] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[855,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[862,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[942,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[1177,84] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[1182,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[1190,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[1202,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[1207,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[1293,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[1304,75] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[1305,9] dev.mars.apex.core.engine.pipeline.PipelineStepResult in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[1307,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[1314,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/PipelineExecutor.java:[1318,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/service/schema/SchemaReaderService.java:[35,20] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/service/schema/SchemaReaderService.java:[42,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/service/schema/SchemaReaderService.java:[60,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/service/schema/SchemaReaderService.java:[73,20] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/service/schema/SchemaReaderService.java:[80,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/service/schema/SchemaReaderService.java:[147,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/service/schema/SchemaReaderService.java:[242,20] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/service/schema/SchemaReaderService.java:[248,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/service/schema/SchemaReaderService.java:[257,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/service/schema/SchemaReaderService.java:[263,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/service/schema/SchemaReaderService.java:[289,27] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/service/schema/SchemaReaderService.java:[339,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/service/schema/SchemaReaderService.java:[377,20] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/service/schema/SchemaReaderService.java:[389,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/service/schema/SchemaReaderService.java:[400,27] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/service/schema/SchemaReaderService.java:[452,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/service/schema/SchemaReaderService.java:[534,20] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/service/schema/SchemaReaderService.java:[540,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/service/schema/SchemaReaderService.java:[546,23] dev.mars.apex.core.engine.pipeline.DataPipelineException in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/YamlPipelineExecutionResult.java:[23,24] dev.mars.apex.core.engine.pipeline.PipelineStepResult in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/YamlPipelineExecutionResult.java:[38,31] dev.mars.apex.core.engine.pipeline.PipelineStepResult in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/pipeline/YamlPipelineExecutionResult.java:[80,17] dev.mars.apex.core.engine.pipeline.PipelineStepResult in dev.mars.apex.core.engine.pipeline has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/SequentialProcessor.java:[69,19] dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor in dev.mars.apex.core.service.enrichment has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/SequentialProcessor.java:[90,13] dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor in dev.mars.apex.core.service.enrichment has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/SequentialProcessor.java:[374,35] processEnrichmentWithResult(dev.mars.apex.core.config.yaml.YamlEnrichment,java.lang.Object,dev.mars.apex.core.config.yaml.YamlRuleConfiguration) in dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/SequentialProcessor.java:[412,32] storeIndividualRuleResult(java.lang.String,boolean) in dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor has been deprecated and marked for removal
+[WARNING] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/SequentialProcessor.java:[497,32] storeRuleGroupResult(java.lang.String,boolean,java.util.Map<java.lang.String,java.lang.Boolean>) in dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor has been deprecated and marked for removal
+[INFO] 100 warnings 
+[INFO] -------------------------------------------------------------
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/RulesEngine.java:[118,19] cannot find symbol
+  symbol:   class SequentialProcessor
+  location: class dev.mars.apex.core.engine.config.RulesEngine
+[ERROR] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/SequentialProcessor.java:[29,41] cannot find symbol
+  symbol:   class EvaluatorService
+  location: package dev.mars.apex.core.service.engine
+[ERROR] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/SequentialProcessor.java:[32,36] cannot find symbol
+  symbol:   class YamlConfigurationException
+  location: package dev.mars.apex.core.exception
+[ERROR] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/SequentialProcessor.java:[71,19] cannot find symbol
+  symbol:   class EvaluatorService
+  location: class dev.mars.apex.core.engine.config.execution.SequentialProcessor
+[ERROR] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/SequentialProcessor.java:[92,13] cannot find symbol
+  symbol:   class EvaluatorService
+  location: class dev.mars.apex.core.engine.config.execution.SequentialProcessor
+[ERROR] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/SequentialProcessor.java:[830,23] cannot find symbol
+  symbol:   class YamlPipeline
+  location: class dev.mars.apex.core.engine.config.execution.SequentialProcessor.PipelineExecutionContext
+[ERROR] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/SequentialProcessor.java:[833,41] cannot find symbol
+  symbol:   class YamlPipeline
+  location: class dev.mars.apex.core.engine.config.execution.SequentialProcessor.PipelineExecutionContext
+[ERROR] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/SequentialProcessor.java:[838,16] cannot find symbol
+  symbol:   class YamlPipeline
+  location: class dev.mars.apex.core.engine.config.execution.SequentialProcessor.PipelineExecutionContext
+[ERROR] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/RulesEngine.java:[199,40] cannot find symbol
+  symbol:   class SequentialProcessor
+  location: class dev.mars.apex.core.engine.config.RulesEngine
+[ERROR] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/SequentialProcessor.java:[353,71] cannot find symbol
+  symbol:   variable contextFactory
+  location: class dev.mars.apex.core.engine.config.execution.SequentialProcessor
+[ERROR] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/SequentialProcessor.java:[491,46] method executeRuleGroupsList in class dev.mars.apex.core.engine.config.execution.RuleGroupExecutor cannot be applied to given types;
+  required: java.util.List<dev.mars.apex.core.engine.model.RuleGroup>,java.util.Map<java.lang.String,java.lang.Object>,org.springframework.expression.spel.support.StandardEvaluationContext
+  found:    java.util.List<dev.mars.apex.core.engine.model.RuleGroup>,java.util.Map<java.lang.String,java.lang.Object>
+  reason: actual and formal argument lists differ in length
+[ERROR] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/SequentialProcessor.java:[644,59] method executeRuleGroupsList in class dev.mars.apex.core.engine.config.execution.RuleGroupExecutor cannot be applied to given types;
+  required: java.util.List<dev.mars.apex.core.engine.model.RuleGroup>,java.util.Map<java.lang.String,java.lang.Object>,org.springframework.expression.spel.support.StandardEvaluationContext
+  found:    java.util.List<dev.mars.apex.core.engine.model.RuleGroup>,java.util.Map<java.lang.String,java.lang.Object>
+  reason: actual and formal argument lists differ in length
+[INFO] 12 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for apex-parent 1.0-SNAPSHOT:
+[INFO] 
+[INFO] apex-parent ........................................ SUCCESS [  0.129 s]
+[INFO] apex-core .......................................... FAILURE [  3.550 s]
+[INFO] APEX YAML Compiler ................................. SKIPPED
+[INFO] apex-demo .......................................... SKIPPED
+[INFO] APEX REST API ...................................... SKIPPED
+[INFO] APEX Playground .................................... SKIPPED
+[INFO] APEX YAML Manager .................................. SKIPPED
+[INFO] APEX Data Sync ..................................... SKIPPED
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  3.961 s
+[INFO] Finished at: 2026-01-22T18:21:56+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project apex-core: Compilation failure: Compilation failure: 
+[ERROR] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/RulesEngine.java:[118,19] cannot find symbol
+[ERROR]   symbol:   class SequentialProcessor
+[ERROR]   location: class dev.mars.apex.core.engine.config.RulesEngine
+[ERROR] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/SequentialProcessor.java:[29,41] cannot find symbol
+[ERROR]   symbol:   class EvaluatorService
+[ERROR]   location: package dev.mars.apex.core.service.engine
+[ERROR] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/SequentialProcessor.java:[32,36] cannot find symbol
+[ERROR]   symbol:   class YamlConfigurationException
+[ERROR]   location: package dev.mars.apex.core.exception
+[ERROR] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/SequentialProcessor.java:[71,19] cannot find symbol
+[ERROR]   symbol:   class EvaluatorService
+[ERROR]   location: class dev.mars.apex.core.engine.config.execution.SequentialProcessor
+[ERROR] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/SequentialProcessor.java:[92,13] cannot find symbol
+[ERROR]   symbol:   class EvaluatorService
+[ERROR]   location: class dev.mars.apex.core.engine.config.execution.SequentialProcessor
+[ERROR] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/SequentialProcessor.java:[830,23] cannot find symbol
+[ERROR]   symbol:   class YamlPipeline
+[ERROR]   location: class dev.mars.apex.core.engine.config.execution.SequentialProcessor.PipelineExecutionContext
+[ERROR] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/SequentialProcessor.java:[833,41] cannot find symbol
+[ERROR]   symbol:   class YamlPipeline
+[ERROR]   location: class dev.mars.apex.core.engine.config.execution.SequentialProcessor.PipelineExecutionContext
+[ERROR] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/SequentialProcessor.java:[838,16] cannot find symbol
+[ERROR]   symbol:   class YamlPipeline
+[ERROR]   location: class dev.mars.apex.core.engine.config.execution.SequentialProcessor.PipelineExecutionContext
+[ERROR] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/RulesEngine.java:[199,40] cannot find symbol
+[ERROR]   symbol:   class SequentialProcessor
+[ERROR]   location: class dev.mars.apex.core.engine.config.RulesEngine
+[ERROR] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/SequentialProcessor.java:[353,71] cannot find symbol
+[ERROR]   symbol:   variable contextFactory
+[ERROR]   location: class dev.mars.apex.core.engine.config.execution.SequentialProcessor
+[ERROR] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/SequentialProcessor.java:[491,46] method executeRuleGroupsList in class dev.mars.apex.core.engine.config.execution.RuleGroupExecutor cannot be applied to given types;
+[ERROR]   required: java.util.List<dev.mars.apex.core.engine.model.RuleGroup>,java.util.Map<java.lang.String,java.lang.Object>,org.springframework.expression.spel.support.StandardEvaluationContext
+[ERROR]   found:    java.util.List<dev.mars.apex.core.engine.model.RuleGroup>,java.util.Map<java.lang.String,java.lang.Object>
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /C:/Users/mraysmit/dev/idea-projects/apex-rules-engine/apex-core/src/main/java/dev/mars/apex/core/engine/config/execution/SequentialProcessor.java:[644,59] method executeRuleGroupsList in class dev.mars.apex.core.engine.config.execution.RuleGroupExecutor cannot be applied to given types;
+[ERROR]   required: java.util.List<dev.mars.apex.core.engine.model.RuleGroup>,java.util.Map<java.lang.String,java.lang.Object>,org.springframework.expression.spel.support.StandardEvaluationContext
+[ERROR]   found:    java.util.List<dev.mars.apex.core.engine.model.RuleGroup>,java.util.Map<java.lang.String,java.lang.Object>
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :apex-core
