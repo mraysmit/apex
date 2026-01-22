@@ -44,6 +44,7 @@ import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
 import dev.mars.apex.core.service.scenario.ScenarioStage;
 import dev.mars.apex.core.service.scenario.ScenarioStageExecutor;
 import dev.mars.apex.core.engine.config.util.DataCopyUtility;
+import dev.mars.apex.core.engine.config.scenario.ScenarioParser;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -106,6 +107,7 @@ public class RulesEngine {
     private YamlEnrichmentProcessor enrichmentProcessor;  // Non-final to allow re-initialization with data sources
     private final UnifiedRuleEvaluator unifiedEvaluator;
     private final List<String> initializationErrors = new ArrayList<>();
+    private final ScenarioParser scenarioParser;  // For parsing scenario configurations
 
     /**
      * The YAML configuration used to create this engine (if created via static factory methods).
@@ -171,6 +173,7 @@ public class RulesEngine {
         this.evaluatorService = new ExpressionEvaluatorService(this.parser);
         this.errorRecoveryService = new ErrorRecoveryService();
         this.performanceMonitor = new RulePerformanceMonitor();
+        this.scenarioParser = new ScenarioParser();  // Initialize scenario parser
         // Note: enrichmentProcessor will be re-initialized after data sources are created
         // to ensure it has access to the data source registry
         this.enrichmentProcessor = new YamlEnrichmentProcessor(new LookupServiceRegistry(), this.evaluatorService);
@@ -1972,8 +1975,8 @@ public class RulesEngine {
 
         logger.info("Evaluating scenario from YAML configuration");
 
-        // Parse scenario configuration from YAML
-        ScenarioConfiguration scenario = parseScenarioFromYaml(this.yamlConfig);
+        // Parse scenario configuration from YAML using ScenarioParser
+        ScenarioConfiguration scenario = scenarioParser.parseFromYaml(this.yamlConfig);
 
         // Create ScenarioStageExecutor and execute stages
         ScenarioStageExecutor executor = new ScenarioStageExecutor();
