@@ -1,61 +1,40 @@
 package dev.mars.apex.core.engine.config;
 
-import dev.mars.apex.core.config.datasink.DataSinkConfiguration;
-import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
 import dev.mars.apex.core.config.error.ErrorRecoveryConfig;
 import dev.mars.apex.core.config.pipeline.PipelineConfiguration;
 import dev.mars.apex.core.config.yaml.*;
-import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.config.execution.EnrichmentGroupExecutor;
 import dev.mars.apex.core.engine.config.execution.PipelineExecutionManager;
 import dev.mars.apex.core.engine.config.execution.RuleChainExecutor;
 import dev.mars.apex.core.engine.config.execution.RuleGroupExecutor;
 import dev.mars.apex.core.engine.config.execution.SequentialProcessor;
-import dev.mars.apex.core.engine.config.scenario.ScenarioParser;
 import dev.mars.apex.core.engine.config.scenario.ScenarioEvaluationManager;
+import dev.mars.apex.core.engine.config.scenario.ScenarioParser;
 import dev.mars.apex.core.engine.config.scenario.ScenarioRegistryManager;
-import dev.mars.apex.core.engine.model.EnrichmentGroup;
-import dev.mars.apex.core.engine.model.EnrichmentGroupResult;
-import dev.mars.apex.core.engine.model.ExecutionStep;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleBase;
 import dev.mars.apex.core.engine.model.RuleGroup;
-import dev.mars.apex.core.engine.model.RuleGroupEvaluationResult;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.engine.pipeline.DataPipelineException;
-import dev.mars.apex.core.engine.pipeline.PipelineExecutor;
-import dev.mars.apex.core.engine.pipeline.YamlPipelineExecutionResult;
 import dev.mars.apex.core.service.data.external.DataSink;
-import dev.mars.apex.core.service.data.external.DataSinkException;
-import dev.mars.apex.core.service.data.external.DataSourceException;
 import dev.mars.apex.core.service.data.external.ExternalDataSource;
 import dev.mars.apex.core.service.data.external.factory.DataSinkFactory;
 import dev.mars.apex.core.service.data.external.factory.DataSourceFactory;
-import dev.mars.apex.core.service.data.external.manager.ExternalDataSourceManager;
-import dev.mars.apex.core.service.enrichment.EnrichmentGroupFactory;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import dev.mars.apex.core.service.engine.UnifiedRuleEvaluator;
-import dev.mars.apex.core.service.transformation.YamlTransformationProcessor;
 import dev.mars.apex.core.util.LoggingContext;
 import dev.mars.apex.core.util.RulesEngineLogger;
-import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
 import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
-import dev.mars.apex.core.service.scenario.ScenarioStage;
-import dev.mars.apex.core.service.scenario.ScenarioStageExecutor;
-import dev.mars.apex.core.engine.config.util.DataCopyUtility;
-import dev.mars.apex.core.engine.config.scenario.ScenarioParser;
 
 import java.util.*;
-import java.util.concurrent.*;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -651,18 +630,7 @@ public class RulesEngine {
         return ruleGroupExecutor.executeRuleGroupsList(ruleGroups, facts, context);
     }
 
-    /**
-     * Execute a list of enrichment groups with proper result aggregation.
-     * Delegates to EnrichmentGroupExecutor for actual execution.
-     *
-     * @param enrichmentGroups The list of enrichment groups to execute
-     * @param targetObject The target object to enrich
-     * @param yamlConfig The YAML configuration (required for database lookups)
-     * @return The result of enrichment group execution
-     */
-    private RuleResult executeEnrichmentGroupsList(List<EnrichmentGroup> enrichmentGroups, Object targetObject, YamlRuleConfiguration yamlConfig) {
-        return enrichmentGroupExecutor.executeEnrichmentGroupsList(enrichmentGroups, targetObject, yamlConfig);
-    }
+
 
     /**
      * Execute a list of rules against the provided facts.
@@ -1032,45 +1000,11 @@ public class RulesEngine {
         return scenarioRegistryManager.findMatchingScenario(inputData);
     }
 
-    /**
-     * Parse scenario configuration from YamlRuleConfiguration.
-     * Delegates to ScenarioRegistryManager.
-     *
-     * @param yamlConfig The YAML configuration containing scenario data
-     * @return Parsed ScenarioConfiguration
-     * @throws IllegalStateException if scenario data is missing or invalid
-     */
-    @SuppressWarnings("unchecked")
-    private ScenarioConfiguration parseScenarioFromYaml(
-            dev.mars.apex.core.config.yaml.YamlRuleConfiguration yamlConfig) {
-        return scenarioRegistryManager.parseScenarioFromYaml(yamlConfig);
-    }
 
-    /**
-     * Parse scenario configuration from YAML data map.
-     * Delegates to ScenarioRegistryManager.
-     *
-     * @param scenarioData The scenario data map from YAML
-     * @return Parsed ScenarioConfiguration
-     */
-    @SuppressWarnings("unchecked")
-    private ScenarioConfiguration parseScenarioConfiguration(
-            Map<String, Object> scenarioData) {
-        return scenarioRegistryManager.parseScenarioConfiguration(scenarioData);
-    }
 
-    /**
-     * Parse a scenario stage from YAML data.
-     * Delegates to ScenarioRegistryManager.
-     *
-     * @param stageData The stage data map from YAML
-     * @return Parsed ScenarioStage or null if parsing fails
-     */
-    @SuppressWarnings("unchecked")
-    private ScenarioStage parseScenarioStage(
-            Map<String, Object> stageData) {
-        return scenarioRegistryManager.parseScenarioStage(stageData);
-    }
+
+
+
 
     /**
      * Load error recovery configuration from YAML if available, otherwise return defaults.
@@ -1129,9 +1063,6 @@ public class RulesEngine {
      * @param data The data to evaluate
      * @return RuleResult from processing the rule chain
      */
-    private RuleResult processRuleChainItem(String chainId, YamlRuleConfiguration yamlConfig, Map<String, Object> data) {
-        return ruleChainExecutor.processRuleChain(chainId, yamlConfig, data, this::createContext);
-    }
 
     // ========================================================================
     // Builder Pattern for Fluent API Configuration

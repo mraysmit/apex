@@ -35,7 +35,7 @@ module dev.mars.apex.core {
 
     // YAML and XML processing dependencies
     requires com.fasterxml.jackson.core;
-    requires com.fasterxml.jackson.databind;
+    requires transitive com.fasterxml.jackson.databind;
     requires com.fasterxml.jackson.dataformat.yaml;
     requires com.fasterxml.jackson.dataformat.xml;
     

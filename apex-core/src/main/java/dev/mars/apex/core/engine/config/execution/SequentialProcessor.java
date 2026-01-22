@@ -68,7 +68,6 @@ public class SequentialProcessor {
 
     private final RulesEngineConfiguration configuration;
     private final YamlEnrichmentProcessor enrichmentProcessor;
-    private final UnifiedRuleEvaluator unifiedEvaluator;
     private final ExpressionEvaluatorService evaluatorService;
     private final EnrichmentGroupExecutor enrichmentGroupExecutor;
     private final RuleGroupExecutor ruleGroupExecutor;
@@ -96,7 +95,6 @@ public class SequentialProcessor {
             RuleChainExecutor ruleChainExecutor) {
         this.configuration = configuration;
         this.enrichmentProcessor = enrichmentProcessor;
-        this.unifiedEvaluator = unifiedEvaluator;
         this.evaluatorService = evaluatorService;
         this.enrichmentGroupExecutor = enrichmentGroupExecutor;
         this.ruleGroupExecutor = ruleGroupExecutor;

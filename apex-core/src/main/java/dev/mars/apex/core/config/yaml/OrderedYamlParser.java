@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import org.yaml.snakeyaml.Yaml;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -257,41 +256,6 @@ public class OrderedYamlParser {
                     logger.warn("Unknown base section for merging: " + baseSectionName);
             }
         }
-    }
-
-    /**
-     * Check if a section name is a known section (with or without numeric suffix).
-     *
-     * @param sectionName Section name to check
-     * @return true if known section, false otherwise
-     */
-    private boolean isKnownSection(String sectionName) {
-        String normalized = normalizeSectionName(sectionName);
-        return KNOWN_SECTIONS.contains(normalized);
-    }
-
-    /**
-     * Extract the order of sections as they appear in the YAML document.
-     *
-     * @param yamlMap Ordered map from SnakeYAML parsing
-     * @return List of section names in document order
-     */
-    private List<String> extractSectionOrder(Map<String, Object> yamlMap) {
-        List<String> sectionOrder = new ArrayList<>();
-
-        // LinkedHashMap from SnakeYAML preserves insertion order
-        for (String key : yamlMap.keySet()) {
-            if (isKnownSection(key)) {
-                sectionOrder.add(key);
-                logger.debug("Found section in order: " + key);
-            } else {
-                logger.warn("Unknown YAML section encountered: " + key);
-                // Still include unknown sections to preserve complete order
-                sectionOrder.add(key);
-            }
-        }
-
-        return sectionOrder;
     }
 
     /**
