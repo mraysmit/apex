@@ -7,10 +7,13 @@ import dev.mars.apex.core.config.pipeline.PipelineConfiguration;
 import dev.mars.apex.core.config.yaml.*;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.config.execution.EnrichmentGroupExecutor;
+import dev.mars.apex.core.engine.config.execution.PipelineExecutionManager;
 import dev.mars.apex.core.engine.config.execution.RuleChainExecutor;
 import dev.mars.apex.core.engine.config.execution.RuleGroupExecutor;
 import dev.mars.apex.core.engine.config.execution.SequentialProcessor;
 import dev.mars.apex.core.engine.config.scenario.ScenarioParser;
+import dev.mars.apex.core.engine.config.scenario.ScenarioEvaluationManager;
+import dev.mars.apex.core.engine.config.scenario.ScenarioRegistryManager;
 import dev.mars.apex.core.engine.model.EnrichmentGroup;
 import dev.mars.apex.core.engine.model.EnrichmentGroupResult;
 import dev.mars.apex.core.engine.model.ExecutionStep;
@@ -113,6 +116,8 @@ public class RulesEngine {
     private final UnifiedRuleEvaluator unifiedEvaluator;
     private final List<String> initializationErrors = new ArrayList<>();
     private final ScenarioParser scenarioParser;  // For parsing scenario configurations
+    private final ScenarioEvaluationManager scenarioEvaluationManager;  // For scenario evaluation
+    private final ScenarioRegistryManager scenarioRegistryManager;  // For scenario registry operations
     private final EnrichmentGroupExecutor enrichmentGroupExecutor;  // For executing enrichment groups
     private final RuleGroupExecutor ruleGroupExecutor;  // For executing rule groups
     private final RuleChainExecutor ruleChainExecutor;  // For executing rule chains
@@ -133,13 +138,11 @@ public class RulesEngine {
     private final Map<String, ScenarioConfiguration> scenarioRegistry;
 
     /**
-     * Pipeline execution components (lazy-initialized when needed).
+     * Pipeline execution manager (handles pipeline initialization and execution).
      */
-    private final DataSourceFactory dataSourceFactory;
-    private final DataSinkFactory dataSinkFactory;
+    private final PipelineExecutionManager pipelineExecutionManager;
     private final Map<String, ExternalDataSource> dataSources;
     private final Map<String, DataSink> dataSinks;
-    private PipelineExecutor pipelineExecutor; // Lazy-initialized
 
     /**
      * Create a new RulesEngine with the specified configuration.
@@ -173,7 +176,7 @@ public class RulesEngine {
      * @param yamlConfig The YAML configuration (can be null)
      * @param scenarioRegistry The scenario registry (can be null)
      */
-    private RulesEngine(RulesEngineConfiguration configuration, YamlRuleConfiguration yamlConfig,
+    RulesEngine(RulesEngineConfiguration configuration, YamlRuleConfiguration yamlConfig,
                        Map<String, ScenarioConfiguration> scenarioRegistry) {
         this.configuration = configuration;
         this.yamlConfig = yamlConfig;
@@ -183,6 +186,16 @@ public class RulesEngine {
         this.errorRecoveryService = new ErrorRecoveryService();
         this.performanceMonitor = new RulePerformanceMonitor();
         this.scenarioParser = new ScenarioParser();  // Initialize scenario parser
+        this.scenarioRegistryManager = new ScenarioRegistryManager(
+            scenarioRegistry,
+            this.evaluatorService
+        );
+        this.scenarioEvaluationManager = new ScenarioEvaluationManager(
+            yamlConfig,
+            scenarioRegistry,
+            this.scenarioParser,
+            new ScenarioLookupStrategyImpl()
+        );
         // Note: enrichmentProcessor will be re-initialized after data sources are created
         // to ensure it has access to the data source registry
         this.enrichmentProcessor = new YamlEnrichmentProcessor(new LookupServiceRegistry(), this.evaluatorService);
@@ -208,15 +221,23 @@ public class RulesEngine {
         );
 
         // Initialize pipeline components
-        this.dataSourceFactory = DataSourceFactory.getInstance();
-        this.dataSinkFactory = DataSinkFactory.getInstance();
         this.dataSources = new HashMap<>();
         this.dataSinks = new HashMap<>();
-        this.pipelineExecutor = null; // Lazy-initialized when needed
+        this.pipelineExecutionManager = new PipelineExecutionManager(
+            DataSourceFactory.getInstance(),
+            DataSinkFactory.getInstance(),
+            this.dataSources,
+            this.dataSinks,
+            this.initializationErrors,
+            this.evaluatorService
+        );
 
         // Initialize data sources and sinks if yamlConfig is provided
         if (yamlConfig != null) {
-            initializePipelineComponents(yamlConfig);
+            YamlEnrichmentProcessor updatedProcessor = pipelineExecutionManager.initializePipelineComponents(yamlConfig);
+            if (updatedProcessor != null) {
+                this.enrichmentProcessor = updatedProcessor;
+            }
         }
 
         // Initialize logging context
@@ -231,161 +252,15 @@ public class RulesEngine {
     }
 
     /**
-     * Initialize pipeline components (data sources and sinks) from YAML configuration.
-     * This method is called during construction if yamlConfig is provided.
-     *
-     * @param yamlConfig The YAML configuration containing data sources and sinks
-     */
-    private void initializePipelineComponents(YamlRuleConfiguration yamlConfig) {
-        try {
-            // Initialize data sources
-            if (yamlConfig.getDataSources() != null && !yamlConfig.getDataSources().isEmpty()) {
-                logger.info("Initializing {} data sources", yamlConfig.getDataSources().size());
-                for (YamlDataSource yamlDataSource : yamlConfig.getDataSources()) {
-                    try {
-                        DataSourceConfiguration config = yamlDataSource.toDataSourceConfiguration();
-                        ExternalDataSource dataSource = dataSourceFactory.createDataSource(config);
-                        dataSources.put(config.getName(), dataSource);
-                        logger.debug("Initialized data source: {}", config.getName());
-                    } catch (DataSourceException e) {
-                        logger.warn("Failed to initialize data source '{}': {}", yamlDataSource.getName(), e.getMessage());
-                        initializationErrors.add("Failed to initialize data source '" + yamlDataSource.getName() + "': " + e.getMessage());
-                    }
-                }
-                
-                // Re-initialize enrichment processor with data source registry
-                // This ensures enrichments can reuse existing data sources instead of creating duplicates
-                logger.debug("Re-initializing enrichment processor with {} data sources from registry", dataSources.size());
-                this.enrichmentProcessor = new YamlEnrichmentProcessor(
-                    new LookupServiceRegistry(), 
-                    this.evaluatorService,
-                    this.dataSources
-                );
-            }
-
-            // Initialize data sinks
-            if (yamlConfig.getDataSinks() != null && !yamlConfig.getDataSinks().isEmpty()) {
-                logger.info("Initializing {} data sinks", yamlConfig.getDataSinks().size());
-                for (YamlDataSink yamlDataSink : yamlConfig.getDataSinks()) {
-                    try {
-                        DataSinkConfiguration config = yamlDataSink.toDataSinkConfiguration();
-                        DataSink dataSink = dataSinkFactory.createDataSink(config);
-                        dataSinks.put(config.getName(), dataSink);
-                        logger.debug("Initialized data sink: {}", config.getName());
-                    } catch (DataSinkException e) {
-                        logger.warn("Failed to initialize data sink '{}': {}", yamlDataSink.getName(), e.getMessage());
-                        initializationErrors.add("Failed to initialize data sink '" + yamlDataSink.getName() + "': " + e.getMessage());
-                    }
-                }
-            }
-
-            logger.info("Pipeline components initialized: {} data sources, {} data sinks",
-                    dataSources.size(), dataSinks.size());
-
-        } catch (Exception e) {
-            logger.warn("Failed to initialize pipeline components: {}", e.getMessage());
-            logger.debug("Pipeline initialization exception details:", e);
-            initializationErrors.add("Failed to initialize pipeline components: " + e.getMessage());
-        }
-    }
-
-    /**
      * Execute a pipeline configuration.
+     * Delegates to PipelineExecutionManager.
      *
      * @param pipeline The pipeline configuration to execute
      * @param inputData The input data for the pipeline
      * @return RuleResult indicating success or failure
      */
     private RuleResult executePipeline(PipelineConfiguration pipeline, Map<String, Object> inputData) {
-        try {
-            logger.info("Executing pipeline: {}", pipeline.getName());
-
-            // Lazy-initialize pipeline executor
-            if (pipelineExecutor == null) {
-                pipelineExecutor = new PipelineExecutor(new DataSourceManagerAdapter());
-
-                // Add all data sinks to executor
-                for (Map.Entry<String, DataSink> entry : dataSinks.entrySet()) {
-                    pipelineExecutor.addDataSink(entry.getKey(), entry.getValue());
-                }
-            }
-
-            // Execute pipeline
-            YamlPipelineExecutionResult result = pipelineExecutor.execute(pipeline);
-
-            // Convert pipeline steps to ExecutionSteps for tracing
-            List<ExecutionStep> pipelineSteps = new ArrayList<>();
-            if (result.getStepResults() != null) {
-                for (dev.mars.apex.core.engine.pipeline.PipelineStepResult stepResult : result.getStepResults()) {
-                    String status = stepResult.isSuccess() ? "SUCCESS" : (stepResult.isSkipped() ? "SKIPPED" : "FAILURE");
-                    String message = stepResult.getError() != null ? stepResult.getError() :
-                                   (stepResult.isSkipped() ? "Step skipped" : "Step completed successfully");
-
-                    // Use new constructor that captures step data and metrics
-                    pipelineSteps.add(new ExecutionStep(
-                        stepResult.getStepName(),
-                        "PIPELINE_STEP",
-                        status,
-                        message,
-                        stepResult.getDurationMs(),
-                        stepResult.getData(),              // Capture step data
-                        stepResult.getRecordsProcessed(),  // Capture metrics
-                        stepResult.getRecordsFailed()      // Capture metrics
-                    ));
-                }
-            }
-
-            // Convert to RuleResult
-            RuleResult ruleResult;
-            if (result.isSuccess()) {
-                logger.info("Pipeline '{}' executed successfully in {}ms",
-                        pipeline.getName(), result.getDurationMs());
-                ruleResult = RuleResult.match("pipeline:" + pipeline.getName(),
-                        "Pipeline executed successfully", SeverityConstants.INFO);
-            } else {
-                logger.error("Pipeline '{}' execution failed: {}", pipeline.getName(), result.getError());
-                ruleResult = RuleResult.error("pipeline:" + pipeline.getName(),
-                        "Pipeline execution failed: " + result.getError());
-            }
-            
-            // Attach the execution path
-            ruleResult.setExecutionPath(pipelineSteps);
-            return ruleResult;
-            
-        } catch (DataPipelineException e) {
-            logger.error("Pipeline execution failed with exception", e);
-            return RuleResult.error("pipeline:" + pipeline.getName(),
-                    "Pipeline execution failed: " + e.getMessage());
-        } catch (Exception e) {
-            logger.error("Unexpected error during pipeline execution", e);
-            return RuleResult.error("pipeline:unknown",
-                    "Pipeline execution failed: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Adapter to provide ExternalDataSourceManager interface to PipelineExecutor.
-     */
-    private class DataSourceManagerAdapter implements ExternalDataSourceManager {
-        @Override
-        public ExternalDataSource getDataSource(String name) {
-            return dataSources.get(name);
-        }
-
-        @Override
-        public void addDataSource(String name, ExternalDataSource dataSource) {
-            dataSources.put(name, dataSource);
-        }
-
-        @Override
-        public void removeDataSource(String name) {
-            dataSources.remove(name);
-        }
-
-        @Override
-        public boolean hasDataSource(String name) {
-            return dataSources.containsKey(name);
-        }
+        return pipelineExecutionManager.executePipeline(pipeline, inputData);
     }
 
     // Static Factory Methods
@@ -988,38 +863,7 @@ public class RulesEngine {
      * @since 3.0
      */
     public ScenarioExecutionResult evaluateScenario(Map<String, Object> inputData) {
-        if (inputData == null) {
-            throw new NullPointerException("Input data cannot be null");
-        }
-
-        if (this.yamlConfig == null) {
-            throw new IllegalStateException(
-                "Cannot use evaluateScenario(Map) method - this RulesEngine was not created with a YAML configuration. " +
-                "Use RulesEngine.fromFile() or RulesEngine.fromYamlConfig() to create the engine."
-            );
-        }
-
-        // Check if YAML configuration contains a scenario
-        if (!this.yamlConfig.hasScenario()) {
-            throw new IllegalStateException(
-                "YAML configuration does not contain a scenario section. " +
-                "Use a scenario configuration file or RulesEngine.fromScenarioRegistry() for scenario evaluation."
-           
-            );
-        }
-
-        logger.info("Evaluating scenario from YAML configuration");
-
-        // Parse scenario configuration from YAML using ScenarioParser
-        ScenarioConfiguration scenario = scenarioParser.parseFromYaml(this.yamlConfig);
-
-        // Create ScenarioStageExecutor and execute stages
-        ScenarioStageExecutor executor = new ScenarioStageExecutor();
-
-        // Deep copy input data to protect against callers sharing the same map across concurrent calls
-        Map<String, Object> safeInputData = DataCopyUtility.deepCopyMap(inputData);
-
-        return executor.executeStages(scenario, safeInputData);
+        return scenarioEvaluationManager.evaluateScenario(inputData);
     }
 
     /**
@@ -1050,32 +894,7 @@ public class RulesEngine {
      * @since 3.0
      */
     public ScenarioExecutionResult evaluateScenario(String scenarioId, Map<String, Object> inputData) {
-        if (scenarioId == null) {
-            throw new NullPointerException("Scenario ID cannot be null");
-        }
-        if (inputData == null) {
-            throw new NullPointerException("Input data cannot be null");
-        }
-
-        if (this.scenarioRegistry == null) {
-            throw new IllegalStateException(
-                "Cannot use evaluateScenario(String, Map) method - this RulesEngine was not created with a scenario registry. " +
-                "Use RulesEngine.fromScenarioRegistry() to create the engine."
-            );
-        }
-
-        logger.info("Evaluating scenario by ID: {}", scenarioId);
-
-        // Look up scenario from registry
-        ScenarioConfiguration scenario = getScenario(scenarioId);
-
-        // Create ScenarioStageExecutor and execute stages
-        ScenarioStageExecutor executor = new ScenarioStageExecutor();
-
-        // Deep copy input data to protect against callers sharing the same map across concurrent calls
-        Map<String, Object> safeInputData = DataCopyUtility.deepCopyMap(inputData);
-
-        return executor.executeStages(scenario, safeInputData);
+        return scenarioEvaluationManager.evaluateScenario(scenarioId, inputData);
     }
 
     /**
@@ -1110,38 +929,7 @@ public class RulesEngine {
      * @since 3.0
      */
     public ScenarioExecutionResult evaluateWithClassification(Map<String, Object> inputData) {
-        if (inputData == null) {
-            throw new NullPointerException("Input data cannot be null");
-        }
-
-        if (this.scenarioRegistry == null) {
-            throw new IllegalStateException(
-                "Cannot use evaluateWithClassification(Map) method - this RulesEngine was not created with a scenario registry. " +
-                "Use RulesEngine.fromScenarioRegistry() to create the engine."
-            );
-        }
-
-        logger.info("Evaluating scenario using classification-based routing");
-
-        // Find matching scenario based on classification rules
-        ScenarioConfiguration scenario = findMatchingScenario(inputData);
-
-        if (scenario == null) {
-            throw new IllegalStateException(
-                "No matching scenario found for the provided input data. " +
-                "Ensure that at least one scenario's classification rule matches the data."
-            );
-        }
-
-        logger.info("Matched scenario: {}", scenario.getScenarioId());
-
-        // Create ScenarioStageExecutor and execute stages
-        ScenarioStageExecutor executor = new ScenarioStageExecutor();
-
-        // Deep copy input data to protect against callers sharing the same map across concurrent calls
-        Map<String, Object> safeInputData = DataCopyUtility.deepCopyMap(inputData);
-
-        return executor.executeStages(scenario, safeInputData);
+        return scenarioEvaluationManager.evaluateWithClassification(inputData);
     }
 
     // ========================================
@@ -1177,112 +965,8 @@ public class RulesEngine {
      * @since 3.0
      * @see ScenarioEvaluator
      */
-    public ScenarioEvaluator asScenario() {
-        if (this.yamlConfig == null && this.scenarioRegistry == null) {
-            throw new IllegalStateException(
-                "Cannot use asScenario() method - this RulesEngine was not created with a scenario configuration or registry. " +
-                "Use RulesEngine.fromFile() or RulesEngine.fromScenarioRegistry() to create the engine."
-            );
-        }
-
-        return new ScenarioEvaluatorImpl(this);
-    }
-
-    /**
-     * Get the priority value for a severity level.
-     * Higher values indicate higher severity.
-     *
-     * @param severity The severity level (ERROR, WARNING, INFO)
-
-     * @return The priority value (3 for ERROR, 2 for WARNING, 1 for INFO)
-     */
-    private int getSeverityPriority(String severity) {
-        return SeverityConstants.getSeverityPriority(severity);
-    }
-
-    /**
-     * Convert an object to a Map.
-     * If the object is already a Map, return a shallow copy.
-     * Otherwise, wrap it in a Map with key "data".
-     * 
-     * <p>Note: For parallel enrichment processing, use {@link #deepCopyMap(Map)} instead
-     * to ensure nested structures are fully isolated between threads.</p>
-     *
-     * @param object The object to convert
-     * @return A Map representation of the object
-     */
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> convertToMap(Object object) {
-        if (object instanceof Map) {
-            return new HashMap<>((Map<String, Object>) object);
-        } else {
-            // For non-Map objects, create a simple wrapper
-            Map<String, Object> result = new HashMap<>();
-            result.put("data", object);
-            return result;
-        }
-    }
-
-    /**
-     * Creates a deep copy of a Map, recursively copying all nested Maps and Lists.
-     * This ensures complete isolation for parallel processing where enrichments
-     * may mutate nested structures.
-     * 
-     * <p>Handles the following types:</p>
-     * <ul>
-     *   <li>Map - recursively deep copied</li>
-     *   <li>List - recursively deep copied (elements that are Maps/Lists are also copied)</li>
-     *   <li>Primitive wrappers, Strings, etc. - referenced directly (immutable)</li>
-     * </ul>
-     *
-     * @param original The original map to copy
-     * @return A deep copy of the map with all nested structures copied
-     */
-    @SuppressWarnings("unchecked")
-    private Map<String, Object> deepCopyMap(Map<String, Object> original) {
-        if (original == null) {
-            return null;
-        }
-        
-        Map<String, Object> copy = new HashMap<>();
-        for (Map.Entry<String, Object> entry : original.entrySet()) {
-            copy.put(entry.getKey(), deepCopyValue(entry.getValue()));
-        }
-        return copy;
-    }
-
-    /**
-     * Deep copies a single value, handling Maps, Lists, and other types.
-     *
-     * @param value The value to copy
-     * @return A deep copy of the value if it's a Map or List, otherwise the original value
-     */
-    @SuppressWarnings("unchecked")
-    private Object deepCopyValue(Object value) {
-        if (value == null) {
-            return null;
-        }
-        
-        if (value instanceof Map) {
-            // Recursively copy nested maps
-            Map<String, Object> mapValue = (Map<String, Object>) value;
-            return deepCopyMap(mapValue);
-        }
-        
-        if (value instanceof List) {
-            // Recursively copy list elements
-            List<Object> listValue = (List<Object>) value;
-            List<Object> listCopy = new ArrayList<>(listValue.size());
-            for (Object item : listValue) {
-                listCopy.add(deepCopyValue(item));
-            }
-            return listCopy;
-        }
-        
-        // For immutable types (String, Number, Boolean, etc.), return as-is
-        // For other mutable types, we rely on the fact that enrichments typically
-        // don't modify arbitrary objects - they work with Maps and primitives
-        return value;
+    public ScenarioEvaluationManager.ScenarioEvaluator asScenario() {
+        return scenarioEvaluationManager.asScenario();
     }
 
     /**
@@ -1325,9 +1009,7 @@ public class RulesEngine {
 
     /**
      * Get a scenario by ID from the scenario registry.
-     *
-     * <p>This method retrieves a scenario by its ID and validates that it is enabled.
-     * Disabled scenarios cannot be executed directly by ID.</p>
+     * Delegates to ScenarioRegistryManager.
      *
      * @param scenarioId The scenario ID to look up
      * @return The scenario configuration
@@ -1335,77 +1017,24 @@ public class RulesEngine {
      * @throws IllegalStateException if scenario registry is not initialized
      */
     private ScenarioConfiguration getScenario(String scenarioId) {
-        if (this.scenarioRegistry == null) {
-            throw new IllegalStateException("Scenario registry is not initialized");
-        }
-
-        ScenarioConfiguration scenario = this.scenarioRegistry.get(scenarioId);
-
-        if (scenario == null) {
-            throw new IllegalArgumentException(
-                "Scenario not found: " + scenarioId + ". " +
-                "Available scenarios: " + this.scenarioRegistry.keySet()
-            );
-        }
-
-        // Check if scenario is enabled
-        if (!scenario.isEnabled()) {
-            throw new IllegalArgumentException(
-                "Scenario '" + scenarioId + "' is disabled and cannot be executed. " +
-                "Enable the scenario in the registry or use a different scenario."
-            );
-        }
-
-        return scenario;
+        return scenarioRegistryManager.getScenario(scenarioId);
     }
 
     /**
      * Find the first matching scenario based on classification rules.
-     * Iterates through all scenarios in the registry and evaluates their classification rules
-     * against the provided input data using SpEL expressions.
-     *
-     * <p>Only enabled scenarios are considered for matching. Disabled scenarios are skipped
-     * during classification-based routing.</p>
+     * Delegates to ScenarioRegistryManager.
      *
      * @param inputData The input data to match against classification rules
      * @return The first matching enabled scenario, or null if no match found
      */
     private ScenarioConfiguration findMatchingScenario(
             Map<String, Object> inputData) {
-
-        if (this.scenarioRegistry == null || this.scenarioRegistry.isEmpty()) {
-            logger.warn("Scenario registry is empty - no scenarios to match");
-            return null;
-        }
-
-        logger.debug("Evaluating {} scenarios for classification match", this.scenarioRegistry.size());
-
-        for (ScenarioConfiguration scenario : this.scenarioRegistry.values()) {
-            // Skip disabled scenarios
-            if (!scenario.isEnabled()) {
-                logger.debug("Scenario {} is disabled - skipping", scenario.getScenarioId());
-                continue;
-            }
-
-            if (scenario.hasClassificationRule()) {
-                logger.debug("Evaluating classification rule for scenario: {}", scenario.getScenarioId());
-
-                if (scenario.matchesClassificationRule(inputData, this.evaluatorService)) {
-                    logger.info("Found matching scenario: {} ({})",
-                        scenario.getScenarioId(), scenario.getClassificationRuleDescription());
-                    return scenario;
-                }
-            } else {
-                logger.debug("Scenario {} has no classification rule - skipping", scenario.getScenarioId());
-            }
-        }
-
-        logger.warn("No matching scenario found for input data");
-        return null;
+        return scenarioRegistryManager.findMatchingScenario(inputData);
     }
 
     /**
      * Parse scenario configuration from YamlRuleConfiguration.
+     * Delegates to ScenarioRegistryManager.
      *
      * @param yamlConfig The YAML configuration containing scenario data
      * @return Parsed ScenarioConfiguration
@@ -1414,23 +1043,12 @@ public class RulesEngine {
     @SuppressWarnings("unchecked")
     private ScenarioConfiguration parseScenarioFromYaml(
             dev.mars.apex.core.config.yaml.YamlRuleConfiguration yamlConfig) {
-
-        if (!yamlConfig.hasScenario()) {
-            throw new IllegalStateException("YAML configuration does not contain a scenario section");
-        }
-
-        Object scenarioData = yamlConfig.getScenarioData();
-        if (!(scenarioData instanceof Map)) {
-            throw new IllegalStateException("Scenario data must be a Map");
-        }
-
-        Map<String, Object> scenarioMap = (Map<String, Object>) scenarioData;
-        return parseScenarioConfiguration(scenarioMap);
+        return scenarioRegistryManager.parseScenarioFromYaml(yamlConfig);
     }
 
     /**
      * Parse scenario configuration from YAML data map.
-     * Follows the same pattern as DataTypeScenarioService.parseScenarioConfiguration.
+     * Delegates to ScenarioRegistryManager.
      *
      * @param scenarioData The scenario data map from YAML
      * @return Parsed ScenarioConfiguration
@@ -1438,71 +1056,12 @@ public class RulesEngine {
     @SuppressWarnings("unchecked")
     private ScenarioConfiguration parseScenarioConfiguration(
             Map<String, Object> scenarioData) {
-
-        ScenarioConfiguration scenario = new ScenarioConfiguration();
-
-        scenario.setScenarioId((String) scenarioData.get("scenario-id"));
-        scenario.setName((String) scenarioData.get("name"));
-        scenario.setDescription((String) scenarioData.get("description"));
-
-        // Parse data types (legacy)
-        List<String> dataTypes = (List<String>) scenarioData.get("data-types");
-        if (dataTypes != null) {
-            scenario.setDataTypes(dataTypes);
-        }
-
-        // Parse classification rule (modern Map-based routing)
-        Map<String, Object> classificationRule =
-            (Map<String, Object>) scenarioData.get("classification-rule");
-        if (classificationRule != null) {
-            String condition = (String) classificationRule.get("condition");
-            String description = (String) classificationRule.get("description");
-
-            if (condition != null) {
-                scenario.setClassificationRuleCondition(condition);
-            }
-            if (description != null) {
-                scenario.setClassificationRuleDescription(description);
-            }
-        }
-
-        // Parse rule configurations (legacy)
-        List<String> ruleConfigurations =
-            (List<String>) scenarioData.get("rule-configurations");
-        if (ruleConfigurations != null) {
-            scenario.setRuleConfigurations(ruleConfigurations);
-        }
-
-        // Parse processing stages (modern stage-based configuration)
-        List<Map<String, Object>> processingStages =
-            (List<Map<String, Object>>) scenarioData.get("processing-stages");
-        if (processingStages != null) {
-            List<ScenarioStage> stages = new ArrayList<>();
-            for (Map<String, Object> stageData : processingStages) {
-                ScenarioStage stage = parseScenarioStage(stageData);
-                if (stage != null) {
-                    stages.add(stage);
-                }
-            }
-
-            // Preserve classification rule fields when creating stage-based scenario
-            String classificationCondition = scenario.getClassificationRuleCondition();
-            String classificationDescription = scenario.getClassificationRuleDescription();
-            String description = scenario.getDescription();
-
-            scenario = ScenarioConfiguration.withStages(
-                scenario.getScenarioId(), scenario.getName(), scenario.getDataTypes(), stages);
-            scenario.setDescription(description);
-            scenario.setClassificationRuleCondition(classificationCondition);
-            scenario.setClassificationRuleDescription(classificationDescription);
-        }
-
-        return scenario;
+        return scenarioRegistryManager.parseScenarioConfiguration(scenarioData);
     }
 
     /**
      * Parse a scenario stage from YAML data.
-     * Follows the same pattern as DataTypeScenarioService.parseScenarioStage.
+     * Delegates to ScenarioRegistryManager.
      *
      * @param stageData The stage data map from YAML
      * @return Parsed ScenarioStage or null if parsing fails
@@ -1510,56 +1069,7 @@ public class RulesEngine {
     @SuppressWarnings("unchecked")
     private ScenarioStage parseScenarioStage(
             Map<String, Object> stageData) {
-
-        try {
-            String stageName = (String) stageData.get("stage-name");
-            String configFile = (String) stageData.get("config-file");
-            Integer executionOrder = (Integer) stageData.get("execution-order");
-            String failurePolicy = (String) stageData.get("failure-policy");
-            String condition = (String) stageData.get("condition");
-            Boolean required = (Boolean) stageData.get("required");
-
-            if (stageName == null || configFile == null || executionOrder == null) {
-                logger.warn("Missing required stage fields: stage-name, config-file, or execution-order");
-                return null;
-            }
-
-            ScenarioStage stage =
-                new ScenarioStage(stageName, configFile, executionOrder);
-
-            if (failurePolicy != null) {
-                stage.setFailurePolicy(failurePolicy);
-            }
-
-            if (condition != null) {
-                stage.setCondition(condition);
-            }
-
-            if (required != null) {
-                stage.setRequired(required);
-            }
-
-            // Parse dependencies
-            List<String> dependsOn = (List<String>) stageData.get("depends-on");
-            if (dependsOn != null) {
-                for (String dependency : dependsOn) {
-                    stage.addDependency(dependency);
-                }
-            }
-
-            // Parse stage metadata
-            Map<String, Object> stageMetadata =
-                (Map<String, Object>) stageData.get("stage-metadata");
-            if (stageMetadata != null) {
-                stage.setStageMetadata(stageMetadata);
-            }
-
-            return stage;
-
-        } catch (Exception e) {
-            logger.error("Error parsing scenario stage: {}", e.getMessage());
-            return null;
-        }
+        return scenarioRegistryManager.parseScenarioStage(stageData);
     }
 
     /**
@@ -1598,40 +1108,15 @@ public class RulesEngine {
      *
      * @since 3.0
      */
-    private static class ScenarioEvaluatorImpl implements ScenarioEvaluator {
-        private final RulesEngine engine;
-
-        /**
-         * Create a new ScenarioEvaluatorImpl wrapping the given RulesEngine.
-         *
-         * @param engine The RulesEngine instance to delegate to
-         */
-        ScenarioEvaluatorImpl(RulesEngine engine) {
-            this.engine = engine;
+    private class ScenarioLookupStrategyImpl implements ScenarioEvaluationManager.ScenarioLookupStrategy {
+        @Override
+        public ScenarioConfiguration getScenario(String scenarioId) {
+            return RulesEngine.this.getScenario(scenarioId);
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
-        public ScenarioExecutionResult evaluate(Map<String, Object> inputData) {
-            return engine.evaluateScenario(inputData);
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public ScenarioExecutionResult evaluate(String scenarioId, Map<String, Object> inputData) {
-            return engine.evaluateScenario(scenarioId, inputData);
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public ScenarioExecutionResult evaluateWithClassification(Map<String, Object> inputData) {
-            return engine.evaluateWithClassification(inputData);
+        public ScenarioConfiguration findMatchingScenario(Map<String, Object> inputData) {
+            return RulesEngine.this.findMatchingScenario(inputData);
         }
     }
 
@@ -1677,385 +1162,10 @@ public class RulesEngine {
      *     .build();
      * }</pre>
      *
-     * @return A new Builder instance
+     * @return A new RulesEngineBuilder instance
      * @since 3.0
      */
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    /**
-     * Fluent builder for RulesEngine configuration.
-     * 
-     * <p>Provides a clean API for configuring search paths, classpath prefixes,
-     * context variables, and building a RulesEngine from various sources.</p>
-     * 
-     * <p><b>Search Path Precedence:</b></p>
-     * <ol>
-     *   <li>Registry-level paths (from registry YAML {@code search-paths} section)</li>
-     *   <li>Programmatic paths (via {@code addSearchPath()}, {@code addClasspathPrefix()})</li>
-     *   <li>System property paths ({@code apex.config.searchPaths})</li>
-     *   <li>Environment variable paths ({@code APEX_CONFIG_SEARCH_PATHS})</li>
-     *   <li>Default resolution (relative to source file)</li>
-     * </ol>
-     *
-     * @since 3.0
-     */
-    public static class Builder {
-        private static final RulesEngineLogger builderLogger = new RulesEngineLogger(Builder.class);
-        
-        private final List<String> filesystemPaths = new ArrayList<>();
-        private final List<String> classpathPrefixes = new ArrayList<>();
-        private final Map<String, Object> contextVariables = new HashMap<>();
-        private String sourcePath;
-        private SourceType sourceType;
-
-        private enum SourceType {
-            FILE, SCENARIO_REGISTRY, YAML_CONFIG
-        }
-
-        /**
-         * Create a new Builder instance.
-         * Typically accessed via {@link RulesEngine#builder()}.
-         */
-        public Builder() {
-            builderLogger.debug("Created new RulesEngine.Builder");
-        }
-
-        /**
-         * Add a filesystem search path for config file resolution.
-         * 
-         * <p>Paths are searched in the order they are added. Supports environment
-         * variable expansion using {@code ${VAR_NAME}} syntax.</p>
-         *
-         * @param path The filesystem path (absolute or relative)
-         * @return this builder for method chaining
-         */
-        public Builder addSearchPath(String path) {
-            if (path != null && !path.trim().isEmpty()) {
-                String expanded = expandEnvironmentVariables(path.trim());
-                filesystemPaths.add(expanded);
-                builderLogger.debug("Added filesystem search path: {}", expanded);
-            }
-            return this;
-        }
-
-        /**
-         * Add multiple filesystem search paths.
-         *
-         * @param paths The filesystem paths to add
-         * @return this builder for method chaining
-         */
-        public Builder addSearchPaths(String... paths) {
-            if (paths != null) {
-                for (String path : paths) {
-                    addSearchPath(path);
-                }
-            }
-            return this;
-        }
-
-        /**
-         * Add multiple filesystem search paths from a collection.
-         *
-         * @param paths The filesystem paths to add
-         * @return this builder for method chaining
-         */
-        public Builder addSearchPaths(Collection<String> paths) {
-            if (paths != null) {
-                for (String path : paths) {
-                    addSearchPath(path);
-                }
-            }
-            return this;
-        }
-
-        /**
-         * Add a classpath prefix for config file resolution.
-         * 
-         * <p>Prefixes are searched in the order they are added.</p>
-         *
-         * @param prefix The classpath prefix (e.g., "apex/", "META-INF/apex/")
-         * @return this builder for method chaining
-         */
-        public Builder addClasspathPrefix(String prefix) {
-            if (prefix != null && !prefix.trim().isEmpty()) {
-                String normalized = prefix.trim();
-                // Ensure prefix ends with /
-                if (!normalized.endsWith("/")) {
-                    normalized = normalized + "/";
-                }
-                classpathPrefixes.add(normalized);
-                builderLogger.debug("Added classpath prefix: {}", normalized);
-            }
-            return this;
-        }
-
-        /**
-         * Add multiple classpath prefixes.
-         *
-         * @param prefixes The classpath prefixes to add
-         * @return this builder for method chaining
-         */
-        public Builder addClasspathPrefixes(String... prefixes) {
-            if (prefixes != null) {
-                for (String prefix : prefixes) {
-                    addClasspathPrefix(prefix);
-                }
-            }
-            return this;
-        }
-
-        /**
-         * Add a context variable for environment variable substitution.
-         * 
-         * <p>Context variables can be used in YAML files with {@code ${name}} syntax.</p>
-         *
-         * @param name The variable name
-         * @param value The variable value
-         * @return this builder for method chaining
-         */
-        public Builder withContext(String name, Object value) {
-            if (name != null && !name.trim().isEmpty()) {
-                contextVariables.put(name.trim(), value);
-                builderLogger.debug("Added context variable: {} = {}", name, value);
-            }
-            return this;
-        }
-
-        /**
-         * Add multiple context variables from a map.
-         *
-         * @param context The context variables map
-         * @return this builder for method chaining
-         */
-        public Builder withContext(Map<String, Object> context) {
-            if (context != null) {
-                contextVariables.putAll(context);
-                builderLogger.debug("Added {} context variables", context.size());
-            }
-            return this;
-        }
-
-        /**
-         * Configure the builder to load from a scenario registry.
-         *
-         * @param registryPath The path to the scenario registry YAML file
-         * @return this builder for method chaining
-         */
-        public Builder fromScenarioRegistry(String registryPath) {
-            this.sourcePath = registryPath;
-            this.sourceType = SourceType.SCENARIO_REGISTRY;
-            builderLogger.debug("Set source: scenario registry at {}", registryPath);
-            return this;
-        }
-
-        /**
-         * Configure the builder to load from a YAML configuration file.
-         *
-         * @param filePath The path to the YAML configuration file
-         * @return this builder for method chaining
-         */
-        public Builder fromFile(String filePath) {
-            this.sourcePath = filePath;
-            this.sourceType = SourceType.FILE;
-            builderLogger.debug("Set source: file at {}", filePath);
-            return this;
-        }
-
-        /**
-         * Get the configured filesystem search paths.
-         *
-         * @return An unmodifiable list of search paths
-         */
-        public List<String> getSearchPaths() {
-            return Collections.unmodifiableList(filesystemPaths);
-        }
-
-        /**
-         * Get the configured classpath prefixes.
-         *
-         * @return An unmodifiable list of classpath prefixes
-         */
-        public List<String> getClasspathPrefixes() {
-            return Collections.unmodifiableList(classpathPrefixes);
-        }
-
-        /**
-         * Get the configured context variables.
-         *
-         * @return An unmodifiable map of context variables
-         */
-        public Map<String, Object> getContextVariables() {
-            return Collections.unmodifiableMap(contextVariables);
-        }
-
-        /**
-         * Build the RulesEngine with the configured options.
-         *
-         * @return A configured RulesEngine instance
-         * @throws YamlConfigurationException if configuration fails
-         * @throws IllegalStateException if no source is configured
-         */
-        public RulesEngine build() throws YamlConfigurationException {
-            if (sourceType == null || sourcePath == null) {
-                throw new IllegalStateException(
-                    "No source configured. Call fromFile(), fromScenarioRegistry(), or fromYamlConfig() before build()."
-                );
-            }
-
-            builderLogger.info("Building RulesEngine from {} at {}", sourceType, sourcePath);
-
-            switch (sourceType) {
-                case SCENARIO_REGISTRY:
-                    return buildFromScenarioRegistry();
-                case FILE:
-                    return buildFromFile();
-                default:
-                    throw new IllegalStateException("Unknown source type: " + sourceType);
-            }
-        }
-
-        /**
-         * Build RulesEngine from scenario registry with configured search paths.
-         */
-        private RulesEngine buildFromScenarioRegistry() throws YamlConfigurationException {
-            builderLogger.debug("Creating ScenarioRegistryLoader with {} filesystem paths, {} classpath prefixes",
-                              filesystemPaths.size(), classpathPrefixes.size());
-
-            ScenarioRegistryLoader loader = new ScenarioRegistryLoader();
-            
-            // Apply configured search paths to the loader
-            loader.setSearchPaths(filesystemPaths);
-            loader.setClasspathPrefixes(classpathPrefixes);
-
-            Map<String, ScenarioConfiguration> scenarios;
-
-            // Try classpath first
-            try (java.io.InputStream is = RulesEngine.class.getClassLoader().getResourceAsStream(sourcePath)) {
-                if (is != null) {
-                    String classpathBase = deriveClasspathBase(sourcePath);
-                    scenarios = loader.loadRegistry(is, classpathBase);
-                    builderLogger.info("Loaded {} scenarios from classpath registry: {}", scenarios.size(), sourcePath);
-                } else {
-                    // Fallback to filesystem
-                    scenarios = loader.loadRegistry(sourcePath);
-                    builderLogger.info("Loaded {} scenarios from filesystem registry: {}", scenarios.size(), sourcePath);
-                }
-            } catch (java.io.IOException e) {
-                throw new YamlConfigurationException("Failed to load scenario registry: " + sourcePath, e);
-            }
-
-            if (scenarios == null || scenarios.isEmpty()) {
-                throw new YamlConfigurationException(
-                    "Scenario registry is empty or failed to load: " + sourcePath
-                );
-            }
-
-            RulesEngineConfiguration config = new RulesEngineConfiguration();
-            return new RulesEngine(config, null, scenarios);
-        }
-
-        /**
-         * Build RulesEngine from YAML file with configured search paths.
-         */
-        private RulesEngine buildFromFile() throws YamlConfigurationException {
-            builderLogger.debug("Loading YAML configuration from: {}", sourcePath);
-
-            // Resolve the file using search paths
-            String resolvedPath = resolveFilePath(sourcePath);
-            if (resolvedPath == null) {
-                throw new YamlConfigurationException("Config file not found: " + sourcePath);
-            }
-
-            return RulesEngine.fromFile(resolvedPath);
-        }
-
-        /**
-         * Resolve a file path using configured search paths.
-         */
-        private String resolveFilePath(String filePath) {
-            // Check if path is absolute
-            if (isAbsolutePath(filePath)) {
-                return java.nio.file.Files.exists(java.nio.file.Paths.get(filePath)) ? filePath : null;
-            }
-
-            // Try each search path
-            for (String searchPath : filesystemPaths) {
-                String candidate = combinePath(searchPath, filePath);
-                if (java.nio.file.Files.exists(java.nio.file.Paths.get(candidate))) {
-                    builderLogger.debug("Resolved {} to {}", filePath, candidate);
-                    return candidate;
-                }
-            }
-
-            // Try classpath prefixes
-            for (String prefix : classpathPrefixes) {
-                String candidate = combineClasspath(prefix, filePath);
-                if (getClass().getClassLoader().getResource(candidate) != null) {
-                    builderLogger.debug("Resolved {} to classpath:{}", filePath, candidate);
-                    return "classpath:" + candidate;
-                }
-            }
-
-            // Fallback: check if file exists as-is
-            if (java.nio.file.Files.exists(java.nio.file.Paths.get(filePath))) {
-                return filePath;
-            }
-
-            // Check classpath as-is
-            if (getClass().getClassLoader().getResource(filePath) != null) {
-                return "classpath:" + filePath;
-            }
-
-            return null;
-        }
-
-        private boolean isAbsolutePath(String path) {
-            if (path == null || path.isEmpty()) return false;
-            if (path.startsWith("/")) return true;
-            if (path.length() >= 3 && path.charAt(1) == ':' && (path.charAt(2) == '\\' || path.charAt(2) == '/')) {
-                return true;
-            }
-            return false;
-        }
-
-        private String combinePath(String basePath, String relativePath) {
-            if (basePath == null || basePath.isEmpty()) return relativePath;
-            String base = basePath.endsWith("/") || basePath.endsWith("\\") 
-                         ? basePath : basePath + "/";
-            return base + relativePath;
-        }
-
-        private String combineClasspath(String prefix, String resourcePath) {
-            if (prefix == null || prefix.isEmpty()) return resourcePath;
-            String base = prefix.endsWith("/") ? prefix : prefix + "/";
-            String resource = resourcePath.startsWith("/") ? resourcePath.substring(1) : resourcePath;
-            return base + resource;
-        }
-
-        private String expandEnvironmentVariables(String value) {
-            if (value == null || !value.contains("${")) {
-                return value;
-            }
-            
-            String result = value;
-            int start;
-            while ((start = result.indexOf("${")) != -1) {
-                int end = result.indexOf("}", start);
-                if (end == -1) break;
-                
-                String varName = result.substring(start + 2, end);
-                String varValue = contextVariables.containsKey(varName) 
-                                 ? String.valueOf(contextVariables.get(varName))
-                                 : System.getenv(varName);
-                if (varValue == null) {
-                    varValue = System.getProperty(varName, "");
-                }
-                result = result.substring(0, start) + varValue + result.substring(end + 1);
-            }
-            
-            return result;
-        }
+    public static RulesEngineBuilder builder() {
+        return new RulesEngineBuilder();
     }
 }
