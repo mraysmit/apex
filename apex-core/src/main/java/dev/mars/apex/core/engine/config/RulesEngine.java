@@ -41,7 +41,9 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
 import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
+import dev.mars.apex.core.service.scenario.ScenarioStage;
 import dev.mars.apex.core.service.scenario.ScenarioStageExecutor;
+import dev.mars.apex.core.engine.config.util.DataCopyUtility;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -1977,7 +1979,7 @@ public class RulesEngine {
         ScenarioStageExecutor executor = new ScenarioStageExecutor();
 
         // Deep copy input data to protect against callers sharing the same map across concurrent calls
-        Map<String, Object> safeInputData = deepCopyMap(inputData);
+        Map<String, Object> safeInputData = DataCopyUtility.deepCopyMap(inputData);
 
         return executor.executeStages(scenario, safeInputData);
     }
@@ -2033,7 +2035,7 @@ public class RulesEngine {
         ScenarioStageExecutor executor = new ScenarioStageExecutor();
 
         // Deep copy input data to protect against callers sharing the same map across concurrent calls
-        Map<String, Object> safeInputData = deepCopyMap(inputData);
+        Map<String, Object> safeInputData = DataCopyUtility.deepCopyMap(inputData);
 
         return executor.executeStages(scenario, safeInputData);
     }
@@ -2099,7 +2101,7 @@ public class RulesEngine {
         ScenarioStageExecutor executor = new ScenarioStageExecutor();
 
         // Deep copy input data to protect against callers sharing the same map across concurrent calls
-        Map<String, Object> safeInputData = deepCopyMap(inputData);
+        Map<String, Object> safeInputData = DataCopyUtility.deepCopyMap(inputData);
 
         return executor.executeStages(scenario, safeInputData);
     }
