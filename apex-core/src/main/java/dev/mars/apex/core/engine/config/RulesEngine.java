@@ -6,6 +6,8 @@ import dev.mars.apex.core.config.error.ErrorRecoveryConfig;
 import dev.mars.apex.core.config.pipeline.PipelineConfiguration;
 import dev.mars.apex.core.config.yaml.*;
 import dev.mars.apex.core.constants.SeverityConstants;
+import dev.mars.apex.core.engine.config.execution.EnrichmentGroupExecutor;
+import dev.mars.apex.core.engine.config.scenario.ScenarioParser;
 import dev.mars.apex.core.engine.model.EnrichmentGroup;
 import dev.mars.apex.core.engine.model.EnrichmentGroupResult;
 import dev.mars.apex.core.engine.model.ExecutionStep;
@@ -108,6 +110,7 @@ public class RulesEngine {
     private final UnifiedRuleEvaluator unifiedEvaluator;
     private final List<String> initializationErrors = new ArrayList<>();
     private final ScenarioParser scenarioParser;  // For parsing scenario configurations
+    private final EnrichmentGroupExecutor enrichmentGroupExecutor;  // For executing enrichment groups
 
     /**
      * The YAML configuration used to create this engine (if created via static factory methods).
@@ -177,6 +180,8 @@ public class RulesEngine {
         // Note: enrichmentProcessor will be re-initialized after data sources are created
         // to ensure it has access to the data source registry
         this.enrichmentProcessor = new YamlEnrichmentProcessor(new LookupServiceRegistry(), this.evaluatorService);
+        // Initialize enrichment group executor
+        this.enrichmentGroupExecutor = new EnrichmentGroupExecutor(this.enrichmentProcessor);
 
         // Load error recovery configuration from YAML if available, otherwise use defaults
         ErrorRecoveryConfig errorRecoveryConfig = loadErrorRecoveryConfig(yamlConfig);
@@ -834,6 +839,7 @@ public class RulesEngine {
 
     /**
      * Execute a list of enrichment groups with proper result aggregation.
+     * Delegates to EnrichmentGroupExecutor for actual execution.
      *
      * @param enrichmentGroups The list of enrichment groups to execute
      * @param targetObject The target object to enrich
@@ -841,209 +847,7 @@ public class RulesEngine {
      * @return The result of enrichment group execution
      */
     private RuleResult executeEnrichmentGroupsList(List<EnrichmentGroup> enrichmentGroups, Object targetObject, YamlRuleConfiguration yamlConfig) {
-        if (enrichmentGroups == null || enrichmentGroups.isEmpty()) {
-            logger.info("No enrichment groups provided for execution");
-            return RuleResult.noRules();
-        }
-
-        logger.info("Executing {} enrichment groups", enrichmentGroups.size());
-
-        List<String> failureMessages = new ArrayList<>();
-        boolean overallSuccess = true;
-        Map<String, Object> enrichedData = convertToMap(targetObject);
-
-        for (EnrichmentGroup group : enrichmentGroups) {
-            logger.debug("Evaluating enrichment group: {}", group.getName());
-            logger.debug("Enriched data keys before group '{}': {}", group.getName(), enrichedData.keySet());
-            try {
-                EnrichmentGroupResult result = processEnrichmentGroup(group, enrichedData, yamlConfig);
-                logger.debug("Enriched data keys after group '{}': {}", group.getName(), enrichedData.keySet());
-
-                if (!result.isSuccess()) {
-                    overallSuccess = false;
-                    failureMessages.add("Enrichment group '" + group.getId() + "' failed: " + result.getMessage());
-                }
-
-                // Collect enriched data from all enrichment results in the group
-                if (result.getEnrichmentResults() != null) {
-                    for (RuleResult enrichmentResult : result.getEnrichmentResults()) {
-                        if (enrichmentResult.getEnrichedData() != null) {
-                            enrichedData.putAll(enrichmentResult.getEnrichedData());
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                logger.error("Enrichment group '{}' failed with exception: {}", group.getName(), e.getMessage());
-                overallSuccess = false;
-                failureMessages.add("Enrichment group '" + group.getId() + "' exception: " + e.getMessage());
-            }
-        }
-
-        if (overallSuccess) {
-            return RuleResult.enrichmentSuccess(enrichedData, SeverityConstants.INFO);
-        } else {
-            logger.debug("Returning enrichment failure with data keys: {}", enrichedData.keySet());
-            return RuleResult.enrichmentFailure(failureMessages, enrichedData, SeverityConstants.ERROR);
-        }
-    }
-
-    /**
-     * Process a single enrichment group.
-     * This is a PRIVATE helper method that migrates logic from YamlEnrichmentProcessor.
-     *
-     * @param group The enrichment group to process
-     * @param targetObject The target object to enrich
-     * @param yamlConfig The YAML configuration (required for database lookups)
-     * @return The result of enrichment group processing
-     */
-    private EnrichmentGroupResult processEnrichmentGroup(EnrichmentGroup group, Object targetObject, YamlRuleConfiguration yamlConfig) {
-        if (group == null) {
-            return EnrichmentGroupResult.of("<null>", true, "No group", List.of(), 0L);
-        }
-
-        long start = System.currentTimeMillis();
-        boolean andOp = group.isAndOperator();
-        boolean shortCircuit = group.isStopOnFirstFailure() && !group.isDebugMode();
-
-        List<YamlEnrichment> ordered = group.getEnrichmentsInOrder();
-        List<RuleResult> results = new ArrayList<>();
-
-        if (group.isParallelExecution() && ordered.size() > 1) {
-            // Parallel execution - no short-circuit
-            results = processEnrichmentGroupParallel(ordered, targetObject, yamlConfig);
-        } else {
-            // Sequential execution with possible short-circuit
-            results = processEnrichmentGroupSequential(ordered, targetObject, andOp, shortCircuit, yamlConfig);
-        }
-
-        // Aggregate overall based on AND/OR semantics
-        boolean overall = aggregateEnrichmentResults(results, andOp);
-
-        long elapsed = System.currentTimeMillis() - start;
-        String message = overall ? "Enrichment group succeeded" : "Enrichment group failed";
-        return EnrichmentGroupResult.of(group.getId(), overall, message, results, elapsed);
-    }
-
-    /**
-     * Process enrichments in parallel.
-     *
-     * @param enrichments The list of enrichments to process
-     * @param targetObject The target object to enrich
-     * @param yamlConfig The YAML configuration (required for database lookups)
-     * @return List of enrichment results
-     */
-    private List<RuleResult> processEnrichmentGroupParallel(List<YamlEnrichment> enrichments, Object targetObject, YamlRuleConfiguration yamlConfig) {
-        List<RuleResult> results = new ArrayList<>();
-        List<Callable<RuleResult>> tasks = new ArrayList<>();
-
-        // Convert to map once for deep copying
-        Map<String, Object> sourceMap = convertToMap(targetObject);
-
-        for (YamlEnrichment enrichment : enrichments) {
-            tasks.add(() -> {
-                // Create a deep copy of the data for each parallel task
-                // This prevents race conditions when enrichments mutate nested structures
-                // (e.g., barrierTerms['knockoutConditions']['rebateTerms'])
-                Map<String, Object> taskTargetObject = deepCopyMap(sourceMap);
-                try {
-                    return enrichmentProcessor.processEnrichmentWithResult(enrichment, taskTargetObject, yamlConfig);
-                } catch (Exception e) {
-                    List<String> msgs = new ArrayList<>();
-                    msgs.add("Parallel enrichment exception: " + e.getMessage());
-                    Map<String, Object> data = convertToMap(taskTargetObject);
-                    return RuleResult.enrichmentFailure(msgs, data, SeverityConstants.ERROR);
-                }
-            });
-        }
-
-        ExecutorService executor = Executors.newFixedThreadPool(
-            Math.min(tasks.size(), Runtime.getRuntime().availableProcessors())
-        );
-        try {
-            List<Future<RuleResult>> futures = executor.invokeAll(tasks);
-            for (Future<RuleResult> f : futures) {
-                try {
-                    results.add(f.get());
-                } catch (Exception e) {
-                    List<String> msgs = new ArrayList<>();
-                    msgs.add("Error getting parallel enrichment result: " + e.getMessage());
-                    Map<String, Object> data = convertToMap(targetObject);
-                    results.add(RuleResult.enrichmentFailure(msgs, data, SeverityConstants.ERROR));
-                }
-            }
-        } catch (InterruptedException ie) {
-            Thread.currentThread().interrupt();
-            List<String> msgs = new ArrayList<>();
-            msgs.add("Parallel execution interrupted: " + ie.getMessage());
-            Map<String, Object> data = convertToMap(targetObject);
-            results.add(RuleResult.enrichmentFailure(msgs, data, SeverityConstants.ERROR));
-        } finally {
-            executor.shutdownNow();
-        }
-
-        return results;
-    }
-
-    /**
-     * Process enrichments sequentially.
-     *
-     * @param enrichments The list of enrichments to process
-     * @param targetObject The target object to enrich
-     * @param andOp Whether to use AND operator (true) or OR operator (false)
-     * @param shortCircuit Whether to stop on first failure/success
-     * @param yamlConfig The YAML configuration (required for database lookups)
-     * @return List of enrichment results
-     */
-    private List<RuleResult> processEnrichmentGroupSequential(List<YamlEnrichment> enrichments, Object targetObject,
-                                                               boolean andOp, boolean shortCircuit, YamlRuleConfiguration yamlConfig) {
-        List<RuleResult> results = new ArrayList<>();
-
-        for (YamlEnrichment enrichment : enrichments) {
-            RuleResult r = enrichmentProcessor.processEnrichmentWithResult(enrichment, targetObject, yamlConfig);
-            results.add(r);
-            boolean ok = r.isSuccess();
-
-            if (andOp) {
-                // AND: stop if failure and short-circuit enabled
-                if (!ok && shortCircuit) {
-                    break;
-                }
-            } else {
-                // OR: stop if success and short-circuit enabled
-                if (ok && shortCircuit) {
-                    break;
-                }
-            }
-        }
-
-        return results;
-    }
-
-    /**
-     * Aggregate enrichment results based on AND/OR operator.
-     *
-     * @param results The list of enrichment results
-     * @param andOp Whether to use AND operator (true) or OR operator (false)
-     * @return true if overall success, false otherwise
-     */
-    private boolean aggregateEnrichmentResults(List<RuleResult> results, boolean andOp) {
-        boolean overall = andOp; // AND starts true, OR starts false
-        if (!andOp) overall = false;
-
-        for (RuleResult r : results) {
-            boolean ok = r != null && r.isSuccess();
-            if (andOp) {
-                if (!ok) {
-                    overall = false;
-                }
-            } else { // OR
-                if (ok) {
-                    overall = true;
-                }
-            }
-        }
-
-        return overall;
+        return enrichmentGroupExecutor.executeEnrichmentGroupsList(enrichmentGroups, targetObject, yamlConfig);
     }
 
     /**
