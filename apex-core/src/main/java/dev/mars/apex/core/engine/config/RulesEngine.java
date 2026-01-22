@@ -7,6 +7,7 @@ import dev.mars.apex.core.config.pipeline.PipelineConfiguration;
 import dev.mars.apex.core.config.yaml.*;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.config.execution.EnrichmentGroupExecutor;
+import dev.mars.apex.core.engine.config.execution.RuleChainExecutor;
 import dev.mars.apex.core.engine.config.execution.RuleGroupExecutor;
 import dev.mars.apex.core.engine.config.scenario.ScenarioParser;
 import dev.mars.apex.core.engine.model.EnrichmentGroup;
@@ -113,6 +114,7 @@ public class RulesEngine {
     private final ScenarioParser scenarioParser;  // For parsing scenario configurations
     private final EnrichmentGroupExecutor enrichmentGroupExecutor;  // For executing enrichment groups
     private final RuleGroupExecutor ruleGroupExecutor;  // For executing rule groups
+    private final RuleChainExecutor ruleChainExecutor;  // For executing rule chains
 
     /**
      * The YAML configuration used to create this engine (if created via static factory methods).
@@ -192,6 +194,7 @@ public class RulesEngine {
         // Initialize executors (after dependencies are initialized)
         this.enrichmentGroupExecutor = new EnrichmentGroupExecutor(this.enrichmentProcessor);
         this.ruleGroupExecutor = new RuleGroupExecutor(this.unifiedEvaluator);
+        this.ruleChainExecutor = new RuleChainExecutor(this.parser, this.unifiedEvaluator, this.enrichmentGroupExecutor);
 
         // Initialize pipeline components
         this.dataSourceFactory = DataSourceFactory.getInstance();
@@ -2242,6 +2245,7 @@ public class RulesEngine {
 
     /**
      * Process a single rule chain by ID.
+     * Delegates to RuleChainExecutor for actual execution.
      *
      * @param chainId The rule chain ID to process
      * @param yamlConfig The YAML configuration
@@ -2249,294 +2253,7 @@ public class RulesEngine {
      * @return RuleResult from processing the rule chain
      */
     private RuleResult processRuleChainItem(String chainId, YamlRuleConfiguration yamlConfig, Map<String, Object> data) {
-        // Find rule chain in yamlConfig
-        YamlRuleChain chain = findRuleChainById(yamlConfig, chainId);
-        if (chain == null) {
-            logger.warn("Rule chain not found: {}", chainId);
-            return RuleResult.error("rule-chain:" + chainId, "Rule chain not found");
-        }
-
-        if (!chain.isEnabled()) {
-            logger.info("Rule chain '{}' is disabled, skipping", chainId);
-            return RuleResult.noMatch(chainId, "Rule chain disabled", SeverityConstants.INFO);
-        }
-
-        logger.info("Processing rule chain: {} (Pattern: {})", chain.getName(), chain.getPattern());
-
-        // Handle different patterns
-        if ("conditional-chaining".equals(chain.getPattern())) {
-            return executeConditionalChainingPattern(chain, data);
-        } else if ("result-based-routing".equals(chain.getPattern())) {
-            return executeResultBasedRoutingPattern(chain, yamlConfig, data);
-        } else {
-            logger.warn("Rule chain pattern '{}' not yet supported", chain.getPattern());
-            return RuleResult.noMatch(chainId, "Pattern not supported: " + chain.getPattern(), SeverityConstants.INFO);
-        }
-    }
-
-    /**
-     * Find a rule chain by ID in the configuration.
-     *
-     * @param config The YAML configuration
-     * @param chainId The rule chain ID to find
-     * @return The YamlRuleChain if found, null otherwise
-     */
-    private YamlRuleChain findRuleChainById(YamlRuleConfiguration config, String chainId) {
-        if (config.getRuleChains() != null) {
-            for (YamlRuleChain chain : config.getRuleChains()) {
-                if (chainId.equals(chain.getId())) {
-                    return chain;
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Execute a rule chain with the 'result-based-routing' pattern.
-     *
-     * @param chain The rule chain to execute
-     * @param yamlConfig The YAML configuration
-     * @param data The data to evaluate
-     * @return RuleResult from execution
-     */
-    @SuppressWarnings("unchecked")
-    private RuleResult executeResultBasedRoutingPattern(YamlRuleChain chain, YamlRuleConfiguration yamlConfig, Map<String, Object> data) {
-        Map<String, Object> config = chain.getConfiguration();
-        if (config == null) {
-            return RuleResult.error(chain.getId(), "Missing configuration for rule chain");
-        }
-
-        // 1. Evaluate Router Rule
-        Map<String, Object> routerRuleConfig = (Map<String, Object>) config.get("router-rule");
-        if (routerRuleConfig == null) {
-            return RuleResult.error(chain.getId(), "Missing router-rule configuration");
-        }
-
-        String condition = (String) routerRuleConfig.get("condition");
-        String resultField = (String) routerRuleConfig.get("result-field");
-
-        StandardEvaluationContext context = createContext(data);
-        String routeKey = null;
-        try {
-            Expression exp = parser.parseExpression(condition);
-            Object result = exp.getValue(context);
-            routeKey = result != null ? result.toString() : "null";
-        } catch (Exception e) {
-            logger.error("Error evaluating router rule for chain '{}': {}", chain.getId(), e.getMessage());
-            return RuleResult.error(chain.getId(), "Router evaluation failed: " + e.getMessage());
-        }
-
-        // Set result field if specified
-        if (resultField != null && !resultField.isEmpty()) {
-            data.put(resultField, routeKey);
-            logger.debug("Set result field '{}' to {}", resultField, routeKey);
-        }
-
-        logger.info("Router evaluated to route: '{}'", routeKey);
-
-        // 2. Execute Route Rules
-        Map<String, Object> routes = (Map<String, Object>) config.get("routes");
-        if (routes != null) {
-            Object routeObj = routes.get(routeKey);
-            List<Map<String, Object>> rulesConfig = null;
-            
-            if (routeObj instanceof Map) {
-                Map<String, Object> routeConfig = (Map<String, Object>) routeObj;
-                rulesConfig = (List<Map<String, Object>>) routeConfig.get("rules");
-
-                // Handle enrichment groups
-                List<String> enrichmentGroupRefs = null;
-                if (routeConfig.containsKey("enrichment-group-references")) {
-                    enrichmentGroupRefs = (List<String>) routeConfig.get("enrichment-group-references");
-                } else if (routeConfig.containsKey("enrichment-groups")) {
-                    enrichmentGroupRefs = (List<String>) routeConfig.get("enrichment-groups");
-                }
-
-                if (enrichmentGroupRefs != null && !enrichmentGroupRefs.isEmpty()) {
-                    logger.info("Executing {} enrichment groups for route '{}'", enrichmentGroupRefs.size(), routeKey);
-                    List<EnrichmentGroup> groupsToExecute = new ArrayList<>();
-                    
-                    for (String groupId : enrichmentGroupRefs) {
-                        EnrichmentGroup group = null;
-                        
-                        // Try to find in YAML config first
-                        if (yamlConfig != null && yamlConfig.getEnrichmentGroups() != null) {
-                            for (YamlEnrichmentGroup yamlGroup : yamlConfig.getEnrichmentGroups()) {
-                                if (groupId.equals(yamlGroup.getId())) {
-                                    // Found in YAML, build it
-                                    List<EnrichmentGroup> groups = EnrichmentGroupFactory.buildEnrichmentGroups(yamlConfig);
-                                    for (EnrichmentGroup g : groups) {
-                                        if (groupId.equals(g.getId())) {
-                                            group = g;
-                                            break;
-                                        }
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                        
-                        // Fallback to engine configuration
-                        if (group == null) {
-                            group = configuration.getEnrichmentGroupById(groupId);
-                        }
-
-                        if (group != null) {
-                            groupsToExecute.add(group);
-                        } else {
-                            logger.warn("Enrichment group '{}' not found for route '{}'", groupId, routeKey);
-                        }
-                    }
-                    
-                    if (!groupsToExecute.isEmpty()) {
-                        RuleResult enrichmentResult = executeEnrichmentGroupsList(groupsToExecute, data, yamlConfig);
-                        if (enrichmentResult.getEnrichedData() != null) {
-                            data.putAll(enrichmentResult.getEnrichedData());
-                            logger.debug("Merged enriched data from route '{}' into context", routeKey);
-                        }
-                    }
-                }
-            } else if (routeObj instanceof List) {
-                // Support direct list for backward compatibility or simpler syntax
-                rulesConfig = (List<Map<String, Object>>) routeObj;
-            }
-            
-            if (rulesConfig != null) {
-                logger.info("Executing route '{}' for chain '{}'", routeKey, chain.getName());
-                // Convert simple map configs to Rule objects and execute
-                List<Rule> rules = new ArrayList<>();
-                for (Map<String, Object> rc : rulesConfig) {
-                    String ruleId = (String) rc.get("id");
-                    String ruleCondition = (String) rc.get("condition");
-                    String ruleMessage = (String) rc.get("message");
-                    String ruleResultField = (String) rc.get("result-field");
-                    logger.debug("Creating rule '{}' with result-field: '{}'", ruleId, ruleResultField);
-                    
-                    // Use full constructor to include resultField and severity
-                    Rule r = new Rule(
-                        ruleId, 
-                        Collections.singleton(new dev.mars.apex.core.engine.model.Category("default", 100)), 
-                        "Rule-" + ruleId, 
-                        ruleCondition, 
-                        ruleMessage, 
-                        ruleMessage, 
-                        100, 
-                        SeverityConstants.INFO, 
-                        null, // metadata
-                        null, // defaultValue
-                        null, // successCode
-                        null, // errorCode
-                        null, // mapToField
-                        ruleResultField // resultField
-                    );
-                    rules.add(r);
-                }
-                executeRulesList(rules, data);
-                return RuleResult.match(chain.getId(), "Executed route: " + routeKey);
-            } else {
-                // If we executed enrichment groups but no rules, consider it a match
-                if (routeObj instanceof Map) {
-                    Map<String, Object> routeConfig = (Map<String, Object>) routeObj;
-                    if (routeConfig.containsKey("enrichment-group-references") || routeConfig.containsKey("enrichment-groups")) {
-                        return RuleResult.match(chain.getId(), "Executed route (enrichment only): " + routeKey);
-                    }
-                }
-                
-                logger.info("No rules defined for route '{}' in chain '{}'", routeKey, chain.getName());
-                return RuleResult.noMatch(chain.getId(), "No rules for route: " + routeKey, SeverityConstants.INFO);
-            }
-        }
-
-        return RuleResult.noMatch(chain.getId(), "No routes configuration found", SeverityConstants.WARNING);
-    }
-
-    /**
-     * Execute a rule chain with the 'conditional-chaining' pattern.
-     *
-     * @param chain The rule chain to execute
-     * @param data The data to evaluate
-     * @return RuleResult from execution
-     */
-    @SuppressWarnings("unchecked")
-    private RuleResult executeConditionalChainingPattern(YamlRuleChain chain, Map<String, Object> data) {
-        Map<String, Object> config = chain.getConfiguration();
-        if (config == null) {
-            return RuleResult.error(chain.getId(), "Missing configuration for rule chain");
-        }
-
-        // 1. Evaluate Trigger Rule
-        Map<String, Object> triggerRuleConfig = (Map<String, Object>) config.get("trigger-rule");
-        if (triggerRuleConfig == null) {
-            return RuleResult.error(chain.getId(), "Missing trigger-rule configuration");
-        }
-
-        String condition = (String) triggerRuleConfig.get("condition");
-        String message = (String) triggerRuleConfig.get("message");
-        String resultField = (String) triggerRuleConfig.get("result-field");
-
-        StandardEvaluationContext context = createContext(data);
-        boolean triggered = false;
-        try {
-            Expression exp = parser.parseExpression(condition);
-            Boolean result = exp.getValue(context, Boolean.class);
-            triggered = result != null && result;
-        } catch (Exception e) {
-            logger.error("Error evaluating trigger rule for chain '{}': {}", chain.getId(), e.getMessage());
-            return RuleResult.error(chain.getId(), "Trigger evaluation failed: " + e.getMessage());
-        }
-
-        // Set result field if specified
-        if (resultField != null && !resultField.trim().isEmpty()) {
-            data.put(resultField, triggered);
-            logger.debug("Set result field '{}' to {}", resultField, triggered);
-        }
-
-        // 2. Execute Conditional Rules
-        Map<String, Object> conditionalRules = (Map<String, Object>) config.get("conditional-rules");
-        if (conditionalRules != null) {
-            String sectionToExecute = triggered ? "on-trigger" : "on-no-trigger";
-            List<Map<String, Object>> rulesConfig = (List<Map<String, Object>>) conditionalRules.get(sectionToExecute);
-            
-            if (rulesConfig != null) {
-                logger.info("Executing '{}' path for chain '{}'", sectionToExecute, chain.getName());
-                // Convert simple map configs to Rule objects and execute
-                List<Rule> rules = new ArrayList<>();
-                for (Map<String, Object> rc : rulesConfig) {
-                    String ruleId = (String) rc.get("id");
-                    String ruleCondition = (String) rc.get("condition");
-                    String ruleMessage = (String) rc.get("message");
-                    String ruleResultField = (String) rc.get("result-field");
-                    String ruleSeverity = (String) rc.get("severity");
-                    
-                    // Use full constructor to include resultField and severity
-                    Rule r = new Rule(
-                        ruleId, 
-                        Collections.singleton(new dev.mars.apex.core.engine.model.Category("default", 100)), 
-                        "Rule-" + ruleId, 
-                        ruleCondition, 
-                        ruleMessage, 
-                        ruleMessage, 
-                        100, 
-                        ruleSeverity != null ? ruleSeverity : SeverityConstants.INFO, 
-                        null, // metadata
-                        null, // defaultValue
-                        null, // successCode
-                        null, // errorCode
-                        null, // mapToField
-                        ruleResultField // resultField
-                    );
-                    rules.add(r);
-                }
-                executeRulesList(rules, data);
-            }
-        }
-
-        if (triggered) {
-            return RuleResult.match(chain.getId(), message != null ? message : "Rule chain triggered");
-        } else {
-            return RuleResult.noMatch(chain.getId(), "Rule chain not triggered", SeverityConstants.INFO);
-        }
+        return ruleChainExecutor.processRuleChain(chainId, yamlConfig, data, this::createContext);
     }
 
     // ========================================================================
