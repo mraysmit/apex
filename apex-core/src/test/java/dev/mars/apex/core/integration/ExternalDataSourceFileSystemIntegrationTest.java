@@ -1,6 +1,7 @@
 package dev.mars.apex.core.integration;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.config.yaml.YamlConfigurationMerger;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlRuleFactory;
 import dev.mars.apex.core.engine.config.RulesEngine;
@@ -8,6 +9,7 @@ import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -200,15 +202,15 @@ public class ExternalDataSourceFileSystemIntegrationTest {
         YamlRuleConfiguration rulesConfig = configLoader.loadFromFileWithoutValidation(rulesConfigFile.toString());
         YamlRuleConfiguration groupsConfig = configLoader.loadFromFileWithoutValidation(ruleGroupsConfigFile.toString());
         
-        // Merge configurations
+        // Merge YAML configurations using YamlConfigurationMerger
         YamlRuleConfiguration merged = new YamlRuleConfiguration();
-        configLoader.mergeConfigurations(merged, rulesConfig);
-        configLoader.mergeConfigurations(merged, groupsConfig);
+        YamlConfigurationMerger.merge(merged, rulesConfig);
+        YamlConfigurationMerger.merge(merged, groupsConfig);
         
-        // Process references and validate
+        // Process references and validate the merged configuration
         configLoader.processReferencesAndValidate(merged);
         
-        // Create engine
+        // Create engine from merged configuration
         RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(merged);
         RulesEngine engine = new RulesEngine(config);
 
