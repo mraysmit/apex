@@ -113,7 +113,7 @@ class StageDataPersistenceTest {
             assertEquals(true, outputs.get("enrichedField3"));
             assertEquals(3, outputs.size());
             
-            logger.info("✓ Stage outputs correctly stored and retrieved");
+            logger.info("[OK] Stage outputs correctly stored and retrieved");
         }
         
         @Test
@@ -136,7 +136,7 @@ class StageDataPersistenceTest {
             assertEquals("value2", retrieved.get("key2"));
             assertEquals(999, retrieved.get("key3"));
             
-            logger.info("✓ setStageOutputs works correctly");
+            logger.info("[OK] setStageOutputs works correctly");
         }
         
         @Test
@@ -154,7 +154,7 @@ class StageDataPersistenceTest {
             assertEquals("partialValue", result.getStageOutputs().get("partialData"));
             assertEquals(42, result.getStageOutputs().get("processedCount"));
             
-            logger.info("✓ Failure result can store outputs for partial data capture");
+            logger.info("[OK] Failure result can store outputs for partial data capture");
         }
         
         @Test
@@ -176,7 +176,7 @@ class StageDataPersistenceTest {
             assertFalse(outputs2.containsKey("modified"), "Original map should not be modified");
             assertEquals("value", outputs2.get("original"));
             
-            logger.info("✓ getStageOutputs returns defensive copy");
+            logger.info("[OK] getStageOutputs returns defensive copy");
         }
     }
 
@@ -210,7 +210,7 @@ class StageDataPersistenceTest {
             assertTrue(summary.contains("1 failed"),
                 "Summary should show 1 failed stage, got: " + summary);
             
-            logger.info("✓ getExecutionSummary reports correct success count: {}", summary);
+            logger.info("[OK] getExecutionSummary reports correct success count: {}", summary);
         }
         
         @Test
@@ -232,7 +232,7 @@ class StageDataPersistenceTest {
             assertEquals(2, scenarioResult.getFailedStages().size(),
                 "Should have exactly 2 failed stages");
             
-            logger.info("✓ getSuccessfulStages returns correct count");
+            logger.info("[OK] getSuccessfulStages returns correct count");
         }
         
         @Test
@@ -251,7 +251,7 @@ class StageDataPersistenceTest {
             assertFalse(scenarioResult.isStageSuccessful("enrichment"), "enrichment should not be successful");
             assertFalse(scenarioResult.isStageSuccessful("nonexistent"), "nonexistent should return false");
             
-            logger.info("✓ isStageSuccessful identifies correct stages");
+            logger.info("[OK] isStageSuccessful identifies correct stages");
         }
     }
 
@@ -303,7 +303,7 @@ class StageDataPersistenceTest {
             assertEquals(3, result.getStageResults().size(), "All stages should execute");
             assertEquals(3, result.getSuccessfulStages().size(), "All stages should be successful");
             
-            logger.info("✓ Multiple stages execute in sequence");
+            logger.info("[OK] Multiple stages execute in sequence");
         }
         
         @Test
@@ -338,7 +338,7 @@ class StageDataPersistenceTest {
             assertEquals(true, inputData.get("field3"));
             assertNotNull(inputData.get("nestedData"));
             
-            logger.info("✓ Original data preserved across stages");
+            logger.info("[OK] Original data preserved across stages");
         }
         
         @Test
@@ -367,7 +367,7 @@ class StageDataPersistenceTest {
             assertTrue(stageResult.isSuccessful());
             assertNotNull(stageResult.getRuleResult());
             
-            logger.info("✓ Stage result correctly added");
+            logger.info("[OK] Stage result correctly added");
         }
         
         @Test
@@ -399,7 +399,7 @@ class StageDataPersistenceTest {
             assertEquals("second", result.getStageResults().get(1).getStageName());
             assertEquals("third", result.getStageResults().get(2).getStageName());
             
-            logger.info("✓ Stage results correctly ordered");
+            logger.info("[OK] Stage results correctly ordered");
         }
         
         @Test
@@ -427,7 +427,7 @@ class StageDataPersistenceTest {
             // Both stages should execute
             assertEquals(2, result.getStageResults().size(), "Both stages should execute");
             
-            logger.info("✓ Continued execution after non-critical failure policy");
+            logger.info("[OK] Continued execution after non-critical failure policy");
         }
     }
 
@@ -491,7 +491,7 @@ class StageDataPersistenceTest {
             assertNull(inputData.get("scenarioContext"),
                 "scenarioContext should be null in input data");
             
-            logger.info("✓ scenarioContext not present in input data");
+            logger.info("[OK] scenarioContext not present in input data");
         }
         
         @Test
@@ -533,7 +533,7 @@ class StageDataPersistenceTest {
             assertNull(inputData.get("previousStageResults"),
                 "previousStageResults should be null in input data");
             
-            logger.info("✓ previousStageResults not present in input data");
+            logger.info("[OK] previousStageResults not present in input data");
         }
         
         @Test
@@ -567,7 +567,7 @@ class StageDataPersistenceTest {
             assertNull(inputData.get("scenarioId"),
                 "scenarioId should be null in input data");
             
-            logger.info("✓ scenarioId not present in input data");
+            logger.info("[OK] scenarioId not present in input data");
         }
         
         @Test
@@ -601,7 +601,7 @@ class StageDataPersistenceTest {
             assertNull(inputData.get("executionStartTime"),
                 "executionStartTime should be null in input data");
             
-            logger.info("✓ executionStartTime not present in input data");
+            logger.info("[OK] executionStartTime not present in input data");
         }
         
         @Test
@@ -658,8 +658,8 @@ class StageDataPersistenceTest {
                     "New key '" + newKey + "' should not be scenario metadata");
             }
             
-            logger.info("✓ Input data contains {} fields, none are scenario metadata", inputData.size());
-            logger.info("✓ All scenario metadata fields successfully filtered");
+            logger.info("[OK] Input data contains {} fields, none are scenario metadata", inputData.size());
+            logger.info("[OK] All scenario metadata fields successfully filtered");
         }
         
         @Test
@@ -700,7 +700,7 @@ class StageDataPersistenceTest {
             assertFalse(inputData.containsKey("scenarioId"));
             assertFalse(inputData.containsKey("executionStartTime"));
             
-            logger.info("✓ Legitimate data preserved while metadata filtered");
+            logger.info("[OK] Legitimate data preserved while metadata filtered");
         }
         
         @Test
@@ -754,7 +754,7 @@ class StageDataPersistenceTest {
             assertFalse(inputData.containsKey("executionStartTime"),
                 "executionStartTime should not appear after any stage");
             
-            logger.info("✓ Metadata successfully filtered across all {} stages", 3);
+            logger.info("[OK] Metadata successfully filtered across all {} stages", 3);
         }
         
         @Test
@@ -794,7 +794,7 @@ class StageDataPersistenceTest {
             assertFalse(inputData.containsKey("executionStartTime"),
                 "executionStartTime should not appear even on failure");
             
-            logger.info("✓ Metadata successfully filtered even on stage failure");
+            logger.info("[OK] Metadata successfully filtered even on stage failure");
         }
         
         @Test
@@ -858,7 +858,7 @@ class StageDataPersistenceTest {
                     "ScenarioConfiguration leaked into input data as key: " + key);
             }
             
-            logger.info("✓ No infrastructure objects found in input data (type-based check passed)");
+            logger.info("[OK] No infrastructure objects found in input data (type-based check passed)");
         }
     }
 }

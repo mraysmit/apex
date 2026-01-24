@@ -58,7 +58,7 @@ public class PipelineExecutionKeywordTest extends DemoTestBase {
                 Files.writeString(sampleCsv, "id,name,value\n1,test,100\n2,demo,200\n");
             }
 
-            LOGGER.info("✓ Pipeline execution test setup complete: {}", testDataDir);
+            LOGGER.info("[OK] Pipeline execution test setup complete: {}", testDataDir);
 
         } catch (Exception e) {
             throw new RuntimeException("Failed to setup pipeline execution tests", e);
@@ -98,7 +98,7 @@ public class PipelineExecutionKeywordTest extends DemoTestBase {
         // Validate data was loaded to database (proving all steps executed)
         validateSequentialExecution();
 
-        LOGGER.info("✓ Sequential execution test completed successfully");
+        LOGGER.info("[OK] Sequential execution test completed successfully");
     }
 
     @Test
@@ -126,11 +126,11 @@ public class PipelineExecutionKeywordTest extends DemoTestBase {
                 assertTrue(rs.next(), "Should have count result");
                 int recordCount = rs.getInt("count");
                 assertEquals(2, recordCount, "Should have 2 records (header row skipped)");
-                LOGGER.info("✓ Verified {} records loaded successfully in parallel mode", recordCount);
+                LOGGER.info("[OK] Verified {} records loaded successfully in parallel mode", recordCount);
             }
         }
 
-        LOGGER.info("✓ Parallel execution test completed - pipeline executed successfully");
+        LOGGER.info("[OK] Parallel execution test completed - pipeline executed successfully");
         LOGGER.info("Note: Current implementation executes parallel mode as sequential (PipelineExecutor.java:235)");
     }
 
@@ -159,11 +159,11 @@ public class PipelineExecutionKeywordTest extends DemoTestBase {
                 assertTrue(rs.next(), "Should have count result");
                 int recordCount = rs.getInt("count");
                 assertEquals(2, recordCount, "Should have 2 records (header row skipped)");
-                LOGGER.info("✓ Verified {} records loaded successfully with invalid mode defaulting to sequential", recordCount);
+                LOGGER.info("[OK] Verified {} records loaded successfully with invalid mode defaulting to sequential", recordCount);
             }
         }
 
-        LOGGER.info("✓ Invalid execution mode test completed - system defaulted to sequential mode");
+        LOGGER.info("[OK] Invalid execution mode test completed - system defaulted to sequential mode");
     }
 
     @Test
@@ -184,7 +184,7 @@ public class PipelineExecutionKeywordTest extends DemoTestBase {
         assertEquals(RuleResult.ResultType.ERROR, result.getResultType(),
             "Pipeline should stop and return ERROR when error occurs with stop-on-error mode");
 
-        LOGGER.info("✓ Stop-on-error test completed - pipeline correctly stopped on error");
+        LOGGER.info("[OK] Stop-on-error test completed - pipeline correctly stopped on error");
     }
 
     @Test
@@ -206,7 +206,7 @@ public class PipelineExecutionKeywordTest extends DemoTestBase {
         // Verify step 3 executed successfully by checking database
         validateContinueOnErrorExecution();
 
-        LOGGER.info("✓ Continue-on-error test completed - pipeline correctly continued after error");
+        LOGGER.info("[OK] Continue-on-error test completed - pipeline correctly continued after error");
     }
 
     private void validateContinueOnErrorExecution() throws Exception {
@@ -221,7 +221,7 @@ public class PipelineExecutionKeywordTest extends DemoTestBase {
             assertTrue(recordCount > 0,
                 "Should have loaded records from step 3 despite step 2 failure - found " + recordCount + " records");
 
-            LOGGER.info("✓ Verified step 3 executed successfully with {} records despite step 2 failure", recordCount);
+            LOGGER.info("[OK] Verified step 3 executed successfully with {} records despite step 2 failure", recordCount);
         }
     }
 
@@ -244,7 +244,7 @@ public class PipelineExecutionKeywordTest extends DemoTestBase {
         // Verify data was loaded successfully
         validateRetryExecution();
 
-        LOGGER.info("✓ Retry test completed - pipeline executed with retry configuration");
+        LOGGER.info("[OK] Retry test completed - pipeline executed with retry configuration");
     }
 
     private void validateRetryExecution() throws Exception {
@@ -259,7 +259,7 @@ public class PipelineExecutionKeywordTest extends DemoTestBase {
             assertTrue(recordCount > 0,
                 "Should have loaded records - found " + recordCount + " records");
 
-            LOGGER.info("✓ Verified retry pipeline executed successfully with {} records", recordCount);
+            LOGGER.info("[OK] Verified retry pipeline executed successfully with {} records", recordCount);
         }
     }
 
@@ -299,7 +299,7 @@ public class PipelineExecutionKeywordTest extends DemoTestBase {
         assertTrue(totalTime < 3000,
             String.format("Total time (%dms) should be less than 3000ms (2000ms + reasonable overhead)", totalTime));
 
-        LOGGER.info("✓ Retry delay test completed - verified ~1000ms delay between retry attempts");
+        LOGGER.info("[OK] Retry delay test completed - verified ~1000ms delay between retry attempts");
     }
 
     @Test
@@ -318,7 +318,7 @@ public class PipelineExecutionKeywordTest extends DemoTestBase {
         assertEquals(RuleResult.ResultType.ERROR, result.getResultType(),
             "Pipeline should fail immediately with zero retries when step fails");
 
-        LOGGER.info("✓ Zero retries test completed - pipeline failed immediately without retry attempts");
+        LOGGER.info("[OK] Zero retries test completed - pipeline failed immediately without retry attempts");
     }
 
     @Test
@@ -346,11 +346,11 @@ public class PipelineExecutionKeywordTest extends DemoTestBase {
                 assertTrue(rs.next(), "Should have count result");
                 int recordCount = rs.getInt("count");
                 assertEquals(2, recordCount, "Should have 2 records (header row skipped)");
-                LOGGER.info("✓ Verified {} records loaded successfully despite invalid retry parameters", recordCount);
+                LOGGER.info("[OK] Verified {} records loaded successfully despite invalid retry parameters", recordCount);
             }
         }
 
-        LOGGER.info("✓ Invalid retry parameters test completed - system handled invalid values gracefully");
+        LOGGER.info("[OK] Invalid retry parameters test completed - system handled invalid values gracefully");
     }
 
     // ========================================================================
@@ -367,14 +367,14 @@ public class PipelineExecutionKeywordTest extends DemoTestBase {
             // Verify table exists
             ResultSet tables = conn.getMetaData().getTables(null, null, "TEST_DATA", null);
             assertTrue(tables.next(), "Table 'test_data' should exist");
-            LOGGER.info("✓ Table 'test_data' exists");
+            LOGGER.info("[OK] Table 'test_data' exists");
 
             // Verify records were loaded (proving both extract and load steps executed)
             ResultSet countRs = stmt.executeQuery("SELECT COUNT(*) as cnt FROM test_data");
             assertTrue(countRs.next(), "Should have count result");
             int recordCount = countRs.getInt("cnt");
             assertTrue(recordCount > 0, "Should have loaded records from CSV");
-            LOGGER.info("✓ Database contains {} records (steps executed sequentially)", recordCount);
+            LOGGER.info("[OK] Database contains {} records (steps executed sequentially)", recordCount);
         }
     }
 }

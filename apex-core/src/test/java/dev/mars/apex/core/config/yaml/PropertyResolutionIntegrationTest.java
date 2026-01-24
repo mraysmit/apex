@@ -109,7 +109,7 @@ public class PropertyResolutionIntegrationTest {
         assertEquals("test_user", dsConfig.getConnection().getUsername());
         assertEquals("secret123", dsConfig.getConnection().getPassword());
         
-        LOGGER.info("✓ Property resolution from file works correctly");
+        LOGGER.info("[OK] Property resolution from file works correctly");
     }
 
     @Test
@@ -146,7 +146,7 @@ public class PropertyResolutionIntegrationTest {
         assertEquals("test_database", dsConfig.getConnection().getDatabase());
         assertEquals("test_user", dsConfig.getConnection().getUsername());
         
-        LOGGER.info("✓ Property resolution from stream works correctly");
+        LOGGER.info("[OK] Property resolution from stream works correctly");
     }
 
     @Test
@@ -181,7 +181,7 @@ public class PropertyResolutionIntegrationTest {
         assertEquals("test_user", dsConfig.getConnection().getUsername());
         assertEquals("default_password", dsConfig.getConnection().getPassword()); // Default value used
         
-        LOGGER.info("✓ Property resolution from YAML string works correctly");
+        LOGGER.info("[OK] Property resolution from YAML string works correctly");
     }
 
     @Test
@@ -216,7 +216,7 @@ public class PropertyResolutionIntegrationTest {
         assertEquals("static_user", dsConfig.getConnection().getUsername());
         assertEquals("static_password", dsConfig.getConnection().getPassword());
         
-        LOGGER.info("✓ YAML without placeholders works correctly");
+        LOGGER.info("[OK] YAML without placeholders works correctly");
     }
 
     @Test
@@ -242,7 +242,7 @@ public class PropertyResolutionIntegrationTest {
         
         assertTrue(exception.getMessage().contains("Property not found: DEFINITELY_MISSING_PROPERTY"));
         
-        LOGGER.info("✓ Missing required properties throw correct exception: " + exception.getMessage());
+        LOGGER.info("[OK] Missing required properties throw correct exception: " + exception.getMessage());
     }
 
     @Test
@@ -276,6 +276,6 @@ public class PropertyResolutionIntegrationTest {
         assertEquals("fallback_database", dsConfig.getConnection().getDatabase());
         assertEquals("user_test_user_suffix", dsConfig.getConnection().getUsername());
         
-        LOGGER.info("✓ Complex property patterns work correctly");
+        LOGGER.info("[OK] Complex property patterns work correctly");
     }
 }

@@ -95,7 +95,7 @@ class ResultThreadSafetyTest {
             assertEquals(expectedTime, result.getTotalExecutionTimeMs(),
                 "Total execution time should be accumulated correctly");
             
-            logger.info("✓ Successfully handled {} concurrent addStageResult calls", expectedStages);
+            logger.info("[OK] Successfully handled {} concurrent addStageResult calls", expectedStages);
             
         } finally {
             executor.shutdown();
@@ -141,7 +141,7 @@ class ResultThreadSafetyTest {
             assertEquals(expectedWarnings, result.getWarnings().size(),
                 "All warnings should be added without loss");
             
-            logger.info("✓ Successfully handled {} concurrent addWarning calls", expectedWarnings);
+            logger.info("[OK] Successfully handled {} concurrent addWarning calls", expectedWarnings);
             
         } finally {
             executor.shutdown();
@@ -219,7 +219,7 @@ class ResultThreadSafetyTest {
             assertEquals(reviewFlagCount.get(), result.getReviewFlags().size(),
                 "All review flags should be recorded");
             
-            logger.info("✓ Successfully handled {} mixed concurrent operations", 
+            logger.info("[OK] Successfully handled {} mixed concurrent operations", 
                 threadCount * operationsPerThread);
             
         } finally {
@@ -269,7 +269,7 @@ class ResultThreadSafetyTest {
             assertEquals(expectedOutputs, result.getStageOutputs().size(),
                 "All stage outputs should be added without loss");
             
-            logger.info("✓ Successfully handled {} concurrent addStageOutput calls", expectedOutputs);
+            logger.info("[OK] Successfully handled {} concurrent addStageOutput calls", expectedOutputs);
             
         } finally {
             executor.shutdown();
@@ -317,7 +317,7 @@ class ResultThreadSafetyTest {
             assertEquals(expectedTime, result.getTotalExecutionTimeMs(),
                 "Total execution time should be correct under high load");
             
-            logger.info("✓ Stress test passed: {} operations completed successfully", expectedStages);
+            logger.info("[OK] Stress test passed: {} operations completed successfully", expectedStages);
             
         } finally {
             executor.shutdown();

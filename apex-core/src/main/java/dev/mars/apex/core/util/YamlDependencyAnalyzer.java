@@ -370,7 +370,7 @@ public class YamlDependencyAnalyzer {
         visited.add(filePath);
         
         YamlNode node = graph.getNode(filePath);
-        String status = node != null && node.exists() ? "✓" : "✗";
+        String status = node != null && node.exists() ? "[OK]" : "✗";
         
         report.append(prefix).append("└── ").append(filePath).append(" ").append(status).append("\n");
         
@@ -398,7 +398,7 @@ public class YamlDependencyAnalyzer {
     private void checkComponentNestingDepth(String filePath, int depth) {
         if (depth >= 6) {
             String errorMsg = String.format(
-                "CRITICAL: Component nesting depth exceeded maximum allowed (6+). " +
+                "Component nesting depth exceeded maximum allowed (6+). " +
                 "Component '%s' is at depth %d. This indicates excessive nesting and may cause " +
                 "performance issues or circular dependencies. Please refactor to reduce nesting depth.",
                 filePath, depth

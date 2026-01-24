@@ -144,8 +144,8 @@ class ReadSchemaDatabasePipelineStageTestMultiTable extends SyncTestBase {
         assertTrue(reportContent.contains("CUSTOMERS") || reportContent.contains("customers"), 
             "Report should contain CUSTOMERS table");
 
-        logger.info("✓ HTML report generated: {}", reportPath);
-        logger.info("✓ Successfully read 5 table schemas with report generation");
+        logger.info("[OK] HTML report generated: {}", reportPath);
+        logger.info("[OK] Successfully read 5 table schemas with report generation");
     }
 
     private void setupTestDatabase() throws Exception {

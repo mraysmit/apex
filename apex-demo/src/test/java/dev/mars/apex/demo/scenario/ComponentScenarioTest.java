@@ -62,23 +62,23 @@ public class ComponentScenarioTest {
 
         // 1. Create test data
         Map<String, Object> tradeData = createValidTradeData();
-        logger.info("✓ STEP 1: Created test trade data");
+        logger.info("[OK] STEP 1: Created test trade data");
         logTradeData(tradeData);
 
         // 2. Load scenario registry with component stage
         String registryPath = "src/test/java/dev/mars/apex/demo/scenario/ComponentScenarioTest-registry.yaml";
-        logger.info("✓ STEP 2: Loading scenario registry from: {}", registryPath);
+        logger.info("[OK] STEP 2: Loading scenario registry from: {}", registryPath);
         RulesEngine engine = RulesEngine.fromScenarioRegistry(registryPath);
         logger.info("  - Scenario registry loaded successfully");
 
         // 3. Execute scenario with component stage
-        logger.info("✓ STEP 3: Executing scenario 'simple-component-test'");
+        logger.info("[OK] STEP 3: Executing scenario 'simple-component-test'");
         logger.info("  - Component should expand to validation rules");
         logger.info("  - Expected: 5 validation rules (trade-id, amount, currency, counterparty, trade-type)");
         ScenarioExecutionResult result = engine.evaluateScenario("simple-component-test", tradeData);
 
         // 4. Validate execution results
-        logger.info("✓ STEP 4: Validating execution results");
+        logger.info("[OK] STEP 4: Validating execution results");
         assertNotNull(result, "Execution result should not be null");
         assertTrue(result.isSuccessful(), "Scenario execution should be successful - all validations should pass");
         assertFalse(result.isTerminated(), "Scenario should not be terminated");
@@ -89,7 +89,7 @@ public class ComponentScenarioTest {
         logger.info("  - Executed {} stages", result.getStageResults().size());
 
         // 6. Verify validation rules executed (all should pass with valid data)
-        logger.info("✓ STEP 5: Verifying validation rules executed");
+        logger.info("[OK] STEP 5: Verifying validation rules executed");
         logger.info("  - All 5 validation rules should have been evaluated");
         logger.info("  - All validations should PASS (conditions return FALSE for valid data)");
         logger.info("  - Trade ID: {} (should be present)", tradeData.get("tradeId"));
@@ -114,16 +114,16 @@ public class ComponentScenarioTest {
         highRiskTrade.put("amount", 750000);  // HIGH risk (> 500000)
         highRiskTrade.put("currency", "USD");
         highRiskTrade.put("counterparty", "BANK-B");
-        logger.info("✓ STEP 1: Created HIGH risk trade data (amount: 750000)");
+        logger.info("[OK] STEP 1: Created HIGH risk trade data (amount: 750000)");
         logTradeData(highRiskTrade);
 
         // 2. Load scenario registry
         String registryPath = "src/test/java/dev/mars/apex/demo/scenario/ComponentScenarioTest-registry.yaml";
-        logger.info("✓ STEP 2: Loading scenario registry");
+        logger.info("[OK] STEP 2: Loading scenario registry");
         RulesEngine engine = RulesEngine.fromScenarioRegistry(registryPath);
 
         // 3. Execute scenario with multi-stage component
-        logger.info("✓ STEP 3: Executing scenario 'multi-stage-component-test'");
+        logger.info("[OK] STEP 3: Executing scenario 'multi-stage-component-test'");
         logger.info("  - Component should expand to validation + enrichment rules");
         logger.info("  - Expected: 5 validation rules + 2 enrichment rules");
         logger.info("  - Enrichment 1: Calculate trade value (should = amount)");
@@ -131,12 +131,12 @@ public class ComponentScenarioTest {
         ScenarioExecutionResult result = engine.evaluateScenario("multi-stage-component-test", highRiskTrade);
 
         // 4. Validate execution results
-        logger.info("✓ STEP 4: Validating execution results");
+        logger.info("[OK] STEP 4: Validating execution results");
         assertNotNull(result);
         assertTrue(result.isSuccessful(), "Multi-stage component execution should be successful");
 
         // 5. Validate enrichment business logic
-        logger.info("✓ STEP 5: Validating enrichment business logic");
+        logger.info("[OK] STEP 5: Validating enrichment business logic");
         logger.info("  - APEX enriches data in-place, checking input Map for enriched fields");
 
         // Verify trade value enrichment
@@ -162,7 +162,7 @@ public class ComponentScenarioTest {
         logger.info("\n[SUCCESS] Multi-stage component test passed - enrichments calculated correctly");
 
         // 6. Test with LOW risk amount to verify enrichment logic works both ways
-        logger.info("\n✓ STEP 6: Testing with LOW risk amount (< 500000)");
+        logger.info("\n[OK] STEP 6: Testing with LOW risk amount (< 500000)");
         Map<String, Object> lowRiskTrade = new HashMap<>();
         lowRiskTrade.put("tradeId", "TRADE-LOW-002");
         lowRiskTrade.put("tradeType", "Spot");
@@ -192,19 +192,19 @@ public class ComponentScenarioTest {
 
         // 1. Create test data
         Map<String, Object> tradeData = createValidTradeData();
-        logger.info("✓ STEP 1: Created test trade data");
+        logger.info("[OK] STEP 1: Created test trade data");
 
         // 2. Load scenario registry
         String registryPath = "src/test/java/dev/mars/apex/demo/scenario/ComponentScenarioTest-registry.yaml";
-        logger.info("✓ STEP 2: Loading scenario registry");
+        logger.info("[OK] STEP 2: Loading scenario registry");
         RulesEngine engine = RulesEngine.fromScenarioRegistry(registryPath);
 
         // 3. Execute scenario with nested component
-        logger.info("✓ STEP 3: Executing scenario 'nested-component-test'");
+        logger.info("[OK] STEP 3: Executing scenario 'nested-component-test'");
         ScenarioExecutionResult result = engine.evaluateScenario("nested-component-test", tradeData);
 
         // 4. Validate results
-        logger.info("✓ STEP 4: Validating execution results");
+        logger.info("[OK] STEP 4: Validating execution results");
         assertNotNull(result);
         assertTrue(result.isSuccessful(), "Nested component execution should be successful");
 
@@ -218,19 +218,19 @@ public class ComponentScenarioTest {
 
         // 1. Create test data
         Map<String, Object> tradeData = createValidTradeData();
-        logger.info("✓ STEP 1: Created test trade data");
+        logger.info("[OK] STEP 1: Created test trade data");
 
         // 2. Load scenario registry
         String registryPath = "src/test/java/dev/mars/apex/demo/scenario/ComponentScenarioTest-registry.yaml";
-        logger.info("✓ STEP 2: Loading scenario registry");
+        logger.info("[OK] STEP 2: Loading scenario registry");
         RulesEngine engine = RulesEngine.fromScenarioRegistry(registryPath);
 
         // 3. Execute scenario with regular (non-component) config files
-        logger.info("✓ STEP 3: Executing scenario 'backward-compatibility-test'");
+        logger.info("[OK] STEP 3: Executing scenario 'backward-compatibility-test'");
         ScenarioExecutionResult result = engine.evaluateScenario("backward-compatibility-test", tradeData);
 
         // 4. Validate results
-        logger.info("✓ STEP 4: Validating execution results");
+        logger.info("[OK] STEP 4: Validating execution results");
         assertNotNull(result);
         assertTrue(result.isSuccessful(), "Backward compatibility scenario should be successful");
 
@@ -250,19 +250,19 @@ public class ComponentScenarioTest {
         Map<String, Object> invalidData = new HashMap<>();
         invalidData.put("tradeId", "TRADE-INVALID");
         // Missing required fields: tradeType, amount, currency, counterparty
-        logger.info("✓ STEP 1: Created invalid test data (missing required fields)");
+        logger.info("[OK] STEP 1: Created invalid test data (missing required fields)");
 
         // 2. Load scenario registry
         String registryPath = "src/test/java/dev/mars/apex/demo/scenario/ComponentScenarioTest-registry.yaml";
-        logger.info("✓ STEP 2: Loading scenario registry");
+        logger.info("[OK] STEP 2: Loading scenario registry");
         RulesEngine engine = RulesEngine.fromScenarioRegistry(registryPath);
 
         // 3. Execute scenario with component (should fail validation)
-        logger.info("✓ STEP 3: Executing scenario 'simple-component-test' with invalid data");
+        logger.info("[OK] STEP 3: Executing scenario 'simple-component-test' with invalid data");
         ScenarioExecutionResult result = engine.evaluateScenario("simple-component-test", invalidData);
 
         // 4. Validate failure behavior
-        logger.info("✓ STEP 4: Validating failure policy behavior");
+        logger.info("[OK] STEP 4: Validating failure policy behavior");
         assertNotNull(result);
         // The scenario should complete but may have validation failures
         logger.info("  - Scenario completed with status: {}", result.isSuccessful() ? "SUCCESS" : "FAILURE");

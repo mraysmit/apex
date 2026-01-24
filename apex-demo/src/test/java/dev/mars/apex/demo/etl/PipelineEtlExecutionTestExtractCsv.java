@@ -50,6 +50,6 @@ class PipelineEtlExecutionTestExtractCsv extends DemoTestBase {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Pipeline should execute successfully");
 
-        logger.info("✓ CSV extract pipeline test completed successfully");
+        logger.info("[OK] CSV extract pipeline test completed successfully");
     }
 }

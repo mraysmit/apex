@@ -127,10 +127,10 @@ public class EnrichmentGroupRefsSequentialOrderTest {
 
         LOGGER.info("Enrichment-Group-Refs Placeholder Expansion Test PASSED");
         LOGGER.info("   Processing Order Verified:");
-        LOGGER.info("   1. E1 (inline): enrich-counterparty-data ✓");
-        LOGGER.info("   2. EG1 (from ref): market-data-enrichment-group ✓");
-        LOGGER.info("   3. EG2 (from ref): risk-metrics-enrichment-group ✓");
-        LOGGER.info("   4. R1: validate-all-data-enriched ✓");
+        LOGGER.info("   1. E1 (inline): enrich-counterparty-data [OK]");
+        LOGGER.info("   2. EG1 (from ref): market-data-enrichment-group [OK]");
+        LOGGER.info("   3. EG2 (from ref): risk-metrics-enrichment-group [OK]");
+        LOGGER.info("   4. R1: validate-all-data-enriched [OK]");
         LOGGER.info("");
         LOGGER.info("   🎯 CRITICAL FIX VERIFIED: enrichment-group-refs expanded at correct position!");
     }
@@ -187,7 +187,7 @@ public class EnrichmentGroupRefsSequentialOrderTest {
         assertNotNull(enriched1.get("valueAtRisk"), "VaR should be calculated");
         assertNotNull(enriched1.get("netExposure"), "Net exposure should be calculated");
 
-        LOGGER.info("✓ Test Case 1: Complete data - all enrichment groups executed in order");
+        LOGGER.info("[OK] Test Case 1: Complete data - all enrichment groups executed in order");
 
         // Test Case 2: Missing underlying - market data group should fail, risk metrics should not calculate
         Map<String, Object> missingUnderlyingData = new HashMap<>();
@@ -204,7 +204,7 @@ public class EnrichmentGroupRefsSequentialOrderTest {
         assertNull(enriched2.get("optionDelta"), "Delta should be null (depends on market data)");
         assertNull(enriched2.get("netExposure"), "Net exposure should be null (depends on delta)");
 
-        LOGGER.info("✓ Test Case 2: Missing underlying - dependency chain correctly handled");
+        LOGGER.info("[OK] Test Case 2: Missing underlying - dependency chain correctly handled");
 
         LOGGER.info("Enrichment-Group-Refs Execution Order with Dependencies Test PASSED");
     }

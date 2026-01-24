@@ -31,7 +31,7 @@ rules:
   - id: "critical-value-error"
     name: "Critical Value Error Check"
     condition: "#amount != null && #amount > 10000"
-    message: "CRITICAL: Amount {{#amount}} exceeds maximum allowed limit"
+    message: Amount {{#amount}} exceeds maximum allowed limit"
     severity: "ERROR"
     priority: 1
 

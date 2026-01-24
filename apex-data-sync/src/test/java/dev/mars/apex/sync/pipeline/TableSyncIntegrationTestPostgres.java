@@ -133,7 +133,7 @@ class TableSyncIntegrationTestPostgres {
             stmt.execute("CREATE TABLE customers (id INT PRIMARY KEY, name NVARCHAR(255))");
             stmt.execute("INSERT INTO customers (id, name) VALUES (1, 'Alice from SQL Server')");
             stmt.execute("INSERT INTO customers (id, name) VALUES (2, 'Bob from SQL Server')");
-            System.out.println("✓ Created and populated customers table in SQL Server");
+            System.out.println("[OK] Created and populated customers table in SQL Server");
         }
 
         // Create target table in PostgreSQL
@@ -148,7 +148,7 @@ class TableSyncIntegrationTestPostgres {
              Statement stmt = conn.createStatement()) {
             stmt.execute("DROP TABLE IF EXISTS customers");
             stmt.execute("CREATE TABLE customers (id INT PRIMARY KEY, name VARCHAR(255))");
-            System.out.println("✓ Created customers table in PostgreSQL");
+            System.out.println("[OK] Created customers table in PostgreSQL");
         }
     }
 
@@ -167,7 +167,7 @@ class TableSyncIntegrationTestPostgres {
              ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM customers")) {
             assertTrue(rs.next());
             assertEquals(2, rs.getInt(1), "SQL Server should have 2 source records");
-            System.out.println("✓ Verified SQL Server source data");
+            System.out.println("[OK] Verified SQL Server source data");
         }
 
         // 2. Run Sync via APEX Core (using co-located YAML file)
@@ -233,7 +233,7 @@ class TableSyncIntegrationTestPostgres {
                 String name = rs.getString(1);
                 assertTrue(name.contains("SQL Server"), 
                     "Data should have been copied from SQL Server source, got: " + name);
-                System.out.println("✓ Verified record 1: " + name);
+                System.out.println("[OK] Verified record 1: " + name);
             }
 
             // Verify total count
@@ -241,7 +241,7 @@ class TableSyncIntegrationTestPostgres {
                 assertTrue(rs.next());
                 int count = rs.getInt(1);
                 assertEquals(2, count, "PostgreSQL table should have 2 synced records");
-                System.out.println("✓ Verified record count: " + count);
+                System.out.println("[OK] Verified record count: " + count);
             }
 
             // Verify all records
@@ -255,12 +255,12 @@ class TableSyncIntegrationTestPostgres {
                 assertEquals("Bob from SQL Server", rs.getString("name"));
                 
                 assertFalse(rs.next(), "Should only have 2 records");
-                System.out.println("✓ All records verified successfully");
+                System.out.println("[OK] All records verified successfully");
             }
         }
 
         // 6. Cleanup
         engine.shutdown();
-        System.out.println("✓ Pipeline completed successfully");
+        System.out.println("[OK] Pipeline completed successfully");
     }
 }

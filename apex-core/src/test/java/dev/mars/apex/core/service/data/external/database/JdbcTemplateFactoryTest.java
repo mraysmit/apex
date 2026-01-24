@@ -246,7 +246,7 @@ class JdbcTemplateFactoryTest {
         assertTrue(exception.getErrorType() == DataSourceException.ErrorType.CONNECTION_ERROR ||
                    exception.getErrorType() == DataSourceException.ErrorType.CONFIGURATION_ERROR);
         
-        LOGGER.info("✓ Expected exception caught: {} - {}", exception.getErrorType(), exception.getMessage());
+        LOGGER.info("[OK] Expected exception caught: {} - {}", exception.getErrorType(), exception.getMessage());
     }
 
     @Test
@@ -396,7 +396,7 @@ class JdbcTemplateFactoryTest {
         assertTrue(exception.getErrorType() == DataSourceException.ErrorType.CONNECTION_ERROR ||
                    exception.getErrorType() == DataSourceException.ErrorType.CONFIGURATION_ERROR);
         
-        LOGGER.info("✓ Expected exception caught: {} - {}", exception.getErrorType(), exception.getMessage());
+        LOGGER.info("[OK] Expected exception caught: {} - {}", exception.getErrorType(), exception.getMessage());
     }
 
     /**
@@ -433,7 +433,7 @@ class JdbcTemplateFactoryTest {
         assertTrue(exception.getErrorType() == DataSourceException.ErrorType.CONNECTION_ERROR ||
                    exception.getErrorType() == DataSourceException.ErrorType.CONFIGURATION_ERROR);
         
-        LOGGER.info("✓ Expected exception caught: {} - {}", exception.getErrorType(), exception.getMessage());
+        LOGGER.info("[OK] Expected exception caught: {} - {}", exception.getErrorType(), exception.getMessage());
     }
 
     // ========================================

@@ -145,7 +145,7 @@ class ReadSchemaDatabasePipelineStageTestH2Enumeration extends SyncTestBase {
             }
         }
 
-        logger.info("✓ Successfully enumerated H2 tables");
+        logger.info("[OK] Successfully enumerated H2 tables");
     }
 
     private void setupTestDatabase() throws Exception {

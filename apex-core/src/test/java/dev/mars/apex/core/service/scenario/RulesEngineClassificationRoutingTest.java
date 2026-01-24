@@ -85,7 +85,7 @@ class RulesEngineClassificationRoutingTest {
         // 1. Verify engine is loaded with scenarios
         assertNotNull(engine.getScenarioRegistry(), "Scenario registry should be loaded");
         assertFalse(engine.getScenarioRegistry().isEmpty(), "Scenario registry should not be empty");
-        logger.info("✓ STEP 1: Loaded {} scenarios from registry", engine.getScenarioRegistry().size());
+        logger.info("[OK] STEP 1: Loaded {} scenarios from registry", engine.getScenarioRegistry().size());
 
         // 2. Create simple OTC Option trade data
         Map<String, Object> otcOptionData = new HashMap<>();
@@ -93,12 +93,12 @@ class RulesEngineClassificationRoutingTest {
         otcOptionData.put("tradeId", "OTC-001");
         otcOptionData.put("notional", 1000000.0);
 
-        logger.info("✓ STEP 2: Created OTC Option trade data");
+        logger.info("[OK] STEP 2: Created OTC Option trade data");
         logger.info("  - Trade Type: OTCOption");
         logger.info("  - Trade ID: OTC-001");
         
         // 3. Process data using classification-based routing
-        logger.info("✓ STEP 3: Processing data through classification-based routing");
+        logger.info("[OK] STEP 3: Processing data through classification-based routing");
         long startTime = System.currentTimeMillis();
         ScenarioExecutionResult result = engine.evaluateWithClassification(otcOptionData);
         long executionTime = System.currentTimeMillis() - startTime;
@@ -117,7 +117,7 @@ class RulesEngineClassificationRoutingTest {
         List<StageExecutionResult> stageResults = result.getStageResults();
         assertFalse(stageResults.isEmpty(), "Should have executed at least one stage");
         
-        logger.info("✓ VERIFICATION: OTC Option correctly routed to otc-option-scenario");
+        logger.info("[OK] VERIFICATION: OTC Option correctly routed to otc-option-scenario");
         logger.info("  - Stages executed: {}", stageResults.size());
     }
     
@@ -132,7 +132,7 @@ class RulesEngineClassificationRoutingTest {
         commoditySwapData.put("tradeId", "SWAP-001");
         commoditySwapData.put("commodity", "GOLD");
         
-        logger.info("✓ Created Commodity Swap trade data");
+        logger.info("[OK] Created Commodity Swap trade data");
         logger.info("  - Trade Type: CommoditySwap");
         
         // Process data using classification-based routing
@@ -144,7 +144,7 @@ class RulesEngineClassificationRoutingTest {
             "Should match commodity-swap-scenario via classification rule");
         assertFalse(result.isTerminated(), "Scenario should complete successfully");
         
-        logger.info("✓ VERIFICATION: Commodity Swap correctly routed to commodity-swap-scenario");
+        logger.info("[OK] VERIFICATION: Commodity Swap correctly routed to commodity-swap-scenario");
     }
     
     // ========================================
@@ -163,7 +163,7 @@ class RulesEngineClassificationRoutingTest {
         usOtcOptionData.put("tradeId", "US-OTC-001");
         usOtcOptionData.put("notional", 5000000.0);
         
-        logger.info("✓ Created US OTC Option trade data");
+        logger.info("[OK] Created US OTC Option trade data");
         logger.info("  - Trade Type: OTCOption");
         logger.info("  - Region: US");
         
@@ -176,7 +176,7 @@ class RulesEngineClassificationRoutingTest {
             "Should match otc-option-us-scenario via AND condition (tradeType && region)");
         assertFalse(result.isTerminated(), "Scenario should complete successfully");
         
-        logger.info("✓ VERIFICATION: US OTC Option correctly routed to region-specific scenario");
+        logger.info("[OK] VERIFICATION: US OTC Option correctly routed to region-specific scenario");
     }
     
     @Test
@@ -190,7 +190,7 @@ class RulesEngineClassificationRoutingTest {
         emeaOtcOptionData.put("region", "EMEA");
         emeaOtcOptionData.put("tradeId", "EMEA-OTC-001");
         
-        logger.info("✓ Created EMEA OTC Option trade data");
+        logger.info("[OK] Created EMEA OTC Option trade data");
         logger.info("  - Trade Type: OTCOption");
         logger.info("  - Region: EMEA (should NOT match US-specific scenario)");
         
@@ -203,7 +203,7 @@ class RulesEngineClassificationRoutingTest {
             "Should match generic otc-option-scenario when region is not US");
         assertFalse(result.isTerminated(), "Scenario should complete successfully");
         
-        logger.info("✓ VERIFICATION: EMEA OTC Option correctly routed to generic scenario");
+        logger.info("[OK] VERIFICATION: EMEA OTC Option correctly routed to generic scenario");
     }
     
     // ========================================
@@ -221,7 +221,7 @@ class RulesEngineClassificationRoutingTest {
         highNotionalData.put("notional", 150000000.0);  // $150M
         highNotionalData.put("tradeId", "HIGH-OTC-001");
         
-        logger.info("✓ Created high-notional OTC Option trade data");
+        logger.info("[OK] Created high-notional OTC Option trade data");
         logger.info("  - Trade Type: OTCOption");
         logger.info("  - Notional: $150M (> $100M threshold)");
         
@@ -234,7 +234,7 @@ class RulesEngineClassificationRoutingTest {
             "Should match high-notional-otc-scenario via numeric comparison (notional > 100000000)");
         assertFalse(result.isTerminated(), "Scenario should complete successfully");
         
-        logger.info("✓ VERIFICATION: High-notional OTC Option correctly routed to special scenario");
+        logger.info("[OK] VERIFICATION: High-notional OTC Option correctly routed to special scenario");
     }
     
     @Test
@@ -248,7 +248,7 @@ class RulesEngineClassificationRoutingTest {
         lowNotionalData.put("notional", 50000000.0);  // $50M
         lowNotionalData.put("tradeId", "LOW-OTC-001");
         
-        logger.info("✓ Created low-notional OTC Option trade data");
+        logger.info("[OK] Created low-notional OTC Option trade data");
         logger.info("  - Trade Type: OTCOption");
         logger.info("  - Notional: $50M (< $100M threshold)");
         
@@ -261,7 +261,7 @@ class RulesEngineClassificationRoutingTest {
             "Should match generic otc-option-scenario when notional < 100000000");
         assertFalse(result.isTerminated(), "Scenario should complete successfully");
         
-        logger.info("✓ VERIFICATION: Low-notional OTC Option correctly routed to generic scenario");
+        logger.info("[OK] VERIFICATION: Low-notional OTC Option correctly routed to generic scenario");
     }
     
     // ========================================
@@ -278,7 +278,7 @@ class RulesEngineClassificationRoutingTest {
         unknownTradeData.put("tradeType", "UnknownInstrument");
         unknownTradeData.put("tradeId", "UNKNOWN-001");
         
-        logger.info("✓ Created unknown trade data");
+        logger.info("[OK] Created unknown trade data");
         logger.info("  - Trade Type: UnknownInstrument (no matching scenario)");
         
         // RulesEngine.evaluateWithClassification() throws IllegalStateException when no scenario matches
@@ -286,7 +286,7 @@ class RulesEngineClassificationRoutingTest {
             engine.evaluateWithClassification(unknownTradeData);
         }, "Should throw IllegalStateException when no scenario matches");
         
-        logger.info("✓ VERIFICATION: No matching scenario throws IllegalStateException as expected");
+        logger.info("[OK] VERIFICATION: No matching scenario throws IllegalStateException as expected");
     }
     
     @Test
@@ -299,7 +299,7 @@ class RulesEngineClassificationRoutingTest {
             engine.evaluateWithClassification(null);
         }, "Should throw NullPointerException for null data");
         
-        logger.info("✓ VERIFICATION: Null data throws NullPointerException as expected");
+        logger.info("[OK] VERIFICATION: Null data throws NullPointerException as expected");
     }
     
     // ========================================
@@ -322,7 +322,7 @@ class RulesEngineClassificationRoutingTest {
         assertTrue(registry.containsKey("otc-option-us-scenario"), "Should contain otc-option-us-scenario");
         assertTrue(registry.containsKey("high-notional-otc-scenario"), "Should contain high-notional-otc-scenario");
         
-        logger.info("✓ Scenario registry contains {} scenarios", registry.size());
+        logger.info("[OK] Scenario registry contains {} scenarios", registry.size());
         registry.keySet().forEach(id -> logger.info("  - {}", id));
     }
     
@@ -342,7 +342,7 @@ class RulesEngineClassificationRoutingTest {
         assertNotNull(result, "Result should not be null");
         assertEquals("otc-option-scenario", result.getScenarioId(), "Should execute the specified scenario");
         
-        logger.info("✓ Successfully evaluated scenario by ID: {}", result.getScenarioId());
+        logger.info("[OK] Successfully evaluated scenario by ID: {}", result.getScenarioId());
     }
     
     @Test
@@ -358,6 +358,6 @@ class RulesEngineClassificationRoutingTest {
             engine.evaluateScenario("non-existent-scenario", tradeData);
         }, "Should throw IllegalArgumentException for non-existent scenario ID");
         
-        logger.info("✓ Non-existent scenario ID throws IllegalArgumentException as expected");
+        logger.info("[OK] Non-existent scenario ID throws IllegalArgumentException as expected");
     }
 }

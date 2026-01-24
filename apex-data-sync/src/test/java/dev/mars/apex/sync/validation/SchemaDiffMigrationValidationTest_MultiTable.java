@@ -133,10 +133,10 @@ class SchemaDiffMigrationValidationTest_MultiTable extends SyncTestBase {
         assertTrue(Files.exists(customersReport), "Customers migration report should be generated");
         assertTrue(Files.exists(ordersReport), "Orders migration report should be generated");
 
-        logger.info("✓ Generated reports:");
+        logger.info("[OK] Generated reports:");
         logger.info("  - {}", customersReport);
         logger.info("  - {}", ordersReport);
-        logger.info("✓ Successfully validated multiple tables in single pipeline");
+        logger.info("[OK] Successfully validated multiple tables in single pipeline");
     }
 
     private void setupSourceDatabase() throws Exception {

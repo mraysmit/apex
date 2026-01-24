@@ -387,7 +387,7 @@ class ReadSchemaDatabaseEnumerationPipelineStageTest extends SyncTestBase {
         assertEquals(3, usersSchema.getColumns().size(), "USERS should have 3 columns");
         assertEquals("test-h2-db", usersSchema.getSourceName(), "Source name should be the data source name");
         
-        logger.info("✓ All table enumeration assertions passed");
+        logger.info("[OK] All table enumeration assertions passed");
     }
 
     @Test
@@ -430,7 +430,7 @@ class ReadSchemaDatabaseEnumerationPipelineStageTest extends SyncTestBase {
         assertEquals(1, tableSchemas.size(), "Should enumerate only tables matching pattern");
         assertTrue(tableSchemas.containsKey("TEMP_DATA"), "Should include TEMP_DATA table");
         
-        logger.info("✓ Pattern filter assertions passed");
+        logger.info("[OK] Pattern filter assertions passed");
     }
     
     @Test
@@ -482,7 +482,7 @@ class ReadSchemaDatabaseEnumerationPipelineStageTest extends SyncTestBase {
         assertTrue(tableSchemas.containsKey("ORDERS"), "Should include ORDERS table");
         assertTrue(tableSchemas.containsKey("PRODUCTS"), "Should include PRODUCTS table");
         
-        logger.info("✓ Exclusion filter assertions passed");
+        logger.info("[OK] Exclusion filter assertions passed");
     }
     
     @Test
@@ -532,7 +532,7 @@ class ReadSchemaDatabaseEnumerationPipelineStageTest extends SyncTestBase {
         assertTrue(reportContent.contains("USERS"), "Report should contain USERS table");
         assertTrue(reportContent.contains("ORDERS"), "Report should contain ORDERS table");
         
-        logger.info("✓ HTML report generated successfully: {}", reportPath.toAbsolutePath());
-        logger.info("✓ Report size: {} bytes", Files.size(reportPath));
+        logger.info("[OK] HTML report generated successfully: {}", reportPath.toAbsolutePath());
+        logger.info("[OK] Report size: {} bytes", Files.size(reportPath));
     }
 }

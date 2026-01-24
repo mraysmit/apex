@@ -143,7 +143,7 @@ public class ExpressionController {
 
             // Check for business logic failures (ResultType.ERROR)
             if (result.getResultType() == RuleResult.ResultType.ERROR) {
-                logger.error("CRITICAL: Expression evaluation failed with ERROR result type");
+                logger.error(Expression evaluation failed with ERROR result type");
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("success", false);
                 errorResponse.put("error", "Expression evaluation failed");

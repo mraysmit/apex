@@ -165,7 +165,7 @@ public class ReadSchemaMultiTableTest extends SyncTestBase {
         verifyTableSchema(readSchemaSteps, "inventory", 4);
         verifyTableSchema(readSchemaSteps, "transactions", 8);
 
-        logger.info("✓ Successfully validated schemas from 5 database tables");
+        logger.info("[OK] Successfully validated schemas from 5 database tables");
         
         // Validate execution rate (5 steps, all should succeed)
         validateExecutionRate(5, 5, "Multi-table schema reading");

@@ -81,7 +81,7 @@ class CommonSpelErrorScenariosTest {
                    result.getMessage().contains("evaluation failed"),
             "Error should mention syntax problem");
         
-        logger.info("✓ Error detected: Malformed quote-bracket syntax");
+        logger.info("[OK] Error detected: Malformed quote-bracket syntax");
         logger.info("💡 TIP: Use #variableName without quotes or brackets");
     }
 
@@ -105,7 +105,7 @@ class CommonSpelErrorScenariosTest {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Should match with correct syntax");
         
-        logger.info("✓ Rule matched successfully with correct syntax");
+        logger.info("[OK] Rule matched successfully with correct syntax");
     }
 
     // ========================================
@@ -137,7 +137,7 @@ class CommonSpelErrorScenariosTest {
         assertEquals(RuleResult.ResultType.NO_MATCH, result.getResultType(),
             "Error recovery returns NO_MATCH for null property access");
         
-        logger.info("✓ Error detected: Null pointer in nested property access");
+        logger.info("[OK] Error detected: Null pointer in nested property access");
         logger.info("💡 TIP: Always check for null before accessing nested properties");
     }
 
@@ -166,7 +166,7 @@ class CommonSpelErrorScenariosTest {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Should match with safe null checks");
         
-        logger.info("✓ Safe nested access works correctly");
+        logger.info("[OK] Safe nested access works correctly");
     }
 
     // ========================================
@@ -195,7 +195,7 @@ class CommonSpelErrorScenariosTest {
         assertEquals(RuleResult.ResultType.NO_MATCH, result.getResultType(),
             "Error recovery returns NO_MATCH when calling method on null");
         
-        logger.info("✓ Error detected: Method call on null object");
+        logger.info("[OK] Error detected: Method call on null object");
         logger.info("💡 TIP: Check for null before calling methods");
     }
 
@@ -219,7 +219,7 @@ class CommonSpelErrorScenariosTest {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Should match with safe null check");
         
-        logger.info("✓ Safe method call works correctly");
+        logger.info("[OK] Safe method call works correctly");
     }
 
     // ========================================
@@ -270,7 +270,7 @@ class CommonSpelErrorScenariosTest {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Should match with proper type conversion");
         
-        logger.info("✓ Type-safe comparison works correctly");
+        logger.info("[OK] Type-safe comparison works correctly");
     }
 
     // ========================================
@@ -299,7 +299,7 @@ class CommonSpelErrorScenariosTest {
         assertEquals(RuleResult.ResultType.NO_MATCH, result.getResultType(),
             "Error recovery returns NO_MATCH for index out of bounds");
         
-        logger.info("✓ Error detected: Array index out of bounds");
+        logger.info("[OK] Error detected: Array index out of bounds");
         logger.info("💡 TIP: Check array/list size before accessing by index");
     }
 
@@ -323,7 +323,7 @@ class CommonSpelErrorScenariosTest {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Should match with safe bounds check");
         
-        logger.info("✓ Safe array access works correctly");
+        logger.info("[OK] Safe array access works correctly");
     }
 
     // ========================================
@@ -353,7 +353,7 @@ class CommonSpelErrorScenariosTest {
         assertEquals(RuleResult.ResultType.NO_MATCH, result.getResultType(),
             "Error recovery returns NO_MATCH for division by zero");
         
-        logger.info("✓ Error detected: Division by zero");
+        logger.info("[OK] Error detected: Division by zero");
         logger.info("💡 TIP: Always check divisor is not zero");
     }
 
@@ -378,7 +378,7 @@ class CommonSpelErrorScenariosTest {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Should match with safe division");
         
-        logger.info("✓ Safe division works correctly");
+        logger.info("[OK] Safe division works correctly");
     }
 
     // ========================================
@@ -445,7 +445,7 @@ class CommonSpelErrorScenariosTest {
         assertEquals(RuleResult.ResultType.MATCH, valueResult.getResultType(),
             "Should match when value > 100");
         
-        logger.info("✓ Elvis operator provides safe default values");
+        logger.info("[OK] Elvis operator provides safe default values");
         logger.info("💡 TIP: Use ?: for concise null handling");
     }
 
@@ -480,7 +480,7 @@ class CommonSpelErrorScenariosTest {
         assertEquals(RuleResult.ResultType.NO_MATCH, result.getResultType(),
             "Should not match but also not error");
         
-        logger.info("✓ Safe navigation handles null gracefully");
+        logger.info("[OK] Safe navigation handles null gracefully");
         logger.info("💡 TIP: Use ?. for null-safe property chains");
     }
 }

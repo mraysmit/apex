@@ -54,7 +54,7 @@ public class PipelineEtlExecutionTestExtractDatabaseAdvanced extends DemoTestBas
             throw new RuntimeException("Failed to create database directory", e);
         }
 
-        logger.info("✓ Advanced Database Extract Pipeline Test setup completed");
+        logger.info("[OK] Advanced Database Extract Pipeline Test setup completed");
     }
 
     @AfterEach
@@ -153,7 +153,7 @@ public class PipelineEtlExecutionTestExtractDatabaseAdvanced extends DemoTestBas
                 (8, 4, 'PROD-006', 'Webcam HD Pro', 1, 89.99, 89.99)
                 """);
 
-            logger.info("✓ H2 database setup completed successfully");
+            logger.info("[OK] H2 database setup completed successfully");
             logger.info("  - 4 customers");
             logger.info("  - 4 orders");
             logger.info("  - 8 order items");
@@ -180,7 +180,7 @@ public class PipelineEtlExecutionTestExtractDatabaseAdvanced extends DemoTestBas
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Pipeline should execute successfully");
 
-        logger.info("✓ Customer order summary extracted successfully");
+        logger.info("[OK] Customer order summary extracted successfully");
     }
 }
 

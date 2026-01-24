@@ -95,9 +95,9 @@ class RulesEngineErrorHandlingTest {
         // Step 7: Verify enriched data is still available (error recovery allows partial processing)
         assertNotNull(result.getEnrichedData(), "Enriched data should be available even with errors");
         
-        LOGGER.info("✓ Captured {} error message(s) in RuleResult without throwing exceptions", failureMessages.size());
-        LOGGER.info("✓ Error messages: {}", failureMessages);
-        LOGGER.info("✓ Error messages contain rule context for debugging");
+        LOGGER.info("[OK] Captured {} error message(s) in RuleResult without throwing exceptions", failureMessages.size());
+        LOGGER.info("[OK] Error messages: {}", failureMessages);
+        LOGGER.info("[OK] Error messages contain rule context for debugging");
     }
 
     /**
@@ -133,7 +133,7 @@ class RulesEngineErrorHandlingTest {
         // Verify enriched data is available (default values allow processing to continue)
         assertNotNull(result.getEnrichedData(), "Enriched data should be available");
         
-        LOGGER.info("✓ Error recovery with default values working correctly");
+        LOGGER.info("[OK] Error recovery with default values working correctly");
     }
 
     /**
@@ -176,7 +176,7 @@ class RulesEngineErrorHandlingTest {
         // Verify partial processing succeeded
         assertNotNull(result.getEnrichedData(), "Enriched data should be available");
         
-        LOGGER.info("✓ Partial data processing with selective error reporting working correctly");
+        LOGGER.info("[OK] Partial data processing with selective error reporting working correctly");
     }
 
     /**
@@ -205,7 +205,7 @@ class RulesEngineErrorHandlingTest {
         // Enrichments failed but should not crash the evaluation
         assertNotNull(result.getEnrichedData(), "Enriched data should exist (may be empty)");
         
-        LOGGER.info("✓ Enrichment condition failures handled gracefully without stack traces");
+        LOGGER.info("[OK] Enrichment condition failures handled gracefully without stack traces");
     }
 
     /**
@@ -224,7 +224,7 @@ class RulesEngineErrorHandlingTest {
         assertNotNull(result, "Result should not be null");
         assertNotNull(result.getEnrichedData(), "Enriched data should be available");
         
-        LOGGER.info("✓ Simplified usage pattern works cleanly");
+        LOGGER.info("[OK] Simplified usage pattern works cleanly");
     }
 
     /**
@@ -258,7 +258,7 @@ class RulesEngineErrorHandlingTest {
         Map<String, Object> enrichedData = result.getEnrichedData();
         assertNotNull(enrichedData, "Enriched data should be accessible");
         
-        LOGGER.info("✓ Proper error checking pattern demonstrated");
+        LOGGER.info("[OK] Proper error checking pattern demonstrated");
     }
 
     /**
@@ -294,7 +294,7 @@ class RulesEngineErrorHandlingTest {
         
         // Verify consistency
         assertNotNull(goodResult, "Result should not be null");
-        LOGGER.info("✓ hasFailures() consistency verified");
+        LOGGER.info("[OK] hasFailures() consistency verified");
     }
 
     // ========================================

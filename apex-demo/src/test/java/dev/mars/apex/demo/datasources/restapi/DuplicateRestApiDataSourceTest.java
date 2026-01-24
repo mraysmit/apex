@@ -141,11 +141,11 @@ public class DuplicateRestApiDataSourceTest extends DemoTestBase {
                 "Hit rate should be greater than 0% (caching is working)");
 
             logger.info("VERIFICATION SUCCESSFUL:");
-            logger.info("   ✓ Only 1 DatasetLookupService created for REST API endpoint (not 2)");
-            logger.info("   ✓ Second enrichment reused first enrichment's dataset");
-            logger.info("   ✓ Memory duplication eliminated via caching");
-            logger.info("   ✓ 50% memory savings achieved");
-            logger.info("   ✓ REST API dataset deduplication works same as inline, database, and file!");
+            logger.info("   [OK] Only 1 DatasetLookupService created for REST API endpoint (not 2)");
+            logger.info("   [OK] Second enrichment reused first enrichment's dataset");
+            logger.info("   [OK] Memory duplication eliminated via caching");
+            logger.info("   [OK] 50% memory savings achieved");
+            logger.info("   [OK] REST API dataset deduplication works same as inline, database, and file!");
             logger.info("=================================================================");
 
             // Verify enrichment results are still correct

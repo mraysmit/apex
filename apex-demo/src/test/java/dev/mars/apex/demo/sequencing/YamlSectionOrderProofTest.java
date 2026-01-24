@@ -54,7 +54,7 @@ class YamlSectionOrderProofTest extends DemoTestBase {
         int rulesIndex = config.getSectionOrder().indexOf("rules");
         assertTrue(enrichmentsIndex < rulesIndex, 
                   "Enrichments should appear BEFORE rules in section order");
-        LOGGER.info("✓ Verified: enrichments at index {}, rules at index {}", enrichmentsIndex, rulesIndex);
+        LOGGER.info("[OK] Verified: enrichments at index {}, rules at index {}", enrichmentsIndex, rulesIndex);
         
         // Execute with test data
         RulesEngine engine = RulesEngine.fromFile(yamlPath);
@@ -106,7 +106,7 @@ class YamlSectionOrderProofTest extends DemoTestBase {
         int enrichmentsIndex = config.getSectionOrder().indexOf("enrichments");
         assertTrue(rulesIndex < enrichmentsIndex, 
                   "Rules should appear BEFORE enrichments in section order");
-        LOGGER.info("✓ Verified: rules at index {}, enrichments at index {}", rulesIndex, enrichmentsIndex);
+        LOGGER.info("[OK] Verified: rules at index {}, enrichments at index {}", rulesIndex, enrichmentsIndex);
         
         // Execute with test data
         RulesEngine engine = RulesEngine.fromFile(yamlPath);

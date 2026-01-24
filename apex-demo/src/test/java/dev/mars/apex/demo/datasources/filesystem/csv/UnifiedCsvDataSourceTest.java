@@ -72,7 +72,7 @@ public class UnifiedCsvDataSourceTest extends DemoTestBase {
         assertEquals("ACTIVE", enrichedData.get("customerStatus"));
         assertEquals("E123", enrichedData.get("employeeId"));
 
-        logger.info("✓ Unified CSV data source enrichment successful");
+        logger.info("[OK] Unified CSV data source enrichment successful");
     }
 
     @Test
@@ -109,7 +109,7 @@ public class UnifiedCsvDataSourceTest extends DemoTestBase {
         assertNull(enrichedData.get("customerEmail"));
         assertNull(enrichedData.get("customerStatus"));
 
-        logger.info("✓ Unknown customer ID handled correctly with unified approach");
+        logger.info("[OK] Unknown customer ID handled correctly with unified approach");
     }
 
     @Test
@@ -144,7 +144,7 @@ public class UnifiedCsvDataSourceTest extends DemoTestBase {
         assertNull(enrichedData.get("customerEmail"));
         assertNull(enrichedData.get("customerStatus"));
 
-        logger.info("✓ Missing customer ID handled correctly with unified approach");
+        logger.info("[OK] Missing customer ID handled correctly with unified approach");
     }
 }
 

@@ -78,7 +78,7 @@ public class SimpleSeverityTest extends DemoTestBase {
         Map<String, Object> enrichedData = (Map<String, Object>) result;
         assertEquals("VALID", enrichedData.get("status"), "Low amount should be valid");
         
-        logger.info("✓ Low amount processed as valid");
+        logger.info("[OK] Low amount processed as valid");
 
         // Test high amount
         Map<String, Object> highAmount = new HashMap<>();
@@ -97,7 +97,7 @@ public class SimpleSeverityTest extends DemoTestBase {
         Map<String, Object> highEnrichedData = (Map<String, Object>) highResult;
         assertEquals("VALID", highEnrichedData.get("status"), "High amount should still be valid");
         
-        logger.info("✓ High amount processed as valid");
+        logger.info("[OK] High amount processed as valid");
         logger.info("Simple severity test completed");
     }
 }

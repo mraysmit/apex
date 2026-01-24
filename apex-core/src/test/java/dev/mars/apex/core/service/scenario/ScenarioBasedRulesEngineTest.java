@@ -59,7 +59,7 @@ public class ScenarioBasedRulesEngineTest {
     void setUp() {
         ApexCacheManager.resetInstance();
         yamlLoader = new YamlConfigurationLoader();
-        logger.info("✓ Initialized test environment with RulesEngine API");
+        logger.info("[OK] Initialized test environment with RulesEngine API");
     }
 
     @Test
@@ -293,14 +293,14 @@ public class ScenarioBasedRulesEngineTest {
         
         if (!validationResult.isSuccess()) {
             // Validation failed - verify we got a proper failure result
-            logger.info("✓ Validation stage failed as expected (missing required fields)");
+            logger.info("[OK] Validation stage failed as expected (missing required fields)");
             logger.info("   Failure policy: terminate - enrichment stage should be skipped");
             
             // Verify the failure result contains useful information
             assertNotNull(validationResult.getSeverity(), "Failed result should have severity");
             logger.info("   Failure severity: {}", validationResult.getSeverity());
         } else {
-            logger.info("✓ Validation stage passed - proceeding to enrichment stage");
+            logger.info("[OK] Validation stage passed - proceeding to enrichment stage");
             
             // Load enrichment stage configuration
             YamlRuleConfiguration enrichmentConfig = yamlLoader.loadFromFile(
@@ -313,7 +313,7 @@ public class ScenarioBasedRulesEngineTest {
             RuleResult enrichmentResult = enrichmentEngine.evaluate(validationResult.getEnrichedData());
             
             assertNotNull(enrichmentResult, "Enrichment result should not be null");
-            logger.info("✓ Enrichment stage completed");
+            logger.info("[OK] Enrichment stage completed");
         }
         
         logger.info("Staged processing with failure policies demonstrated");

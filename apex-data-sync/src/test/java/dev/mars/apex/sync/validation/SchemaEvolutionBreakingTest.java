@@ -138,7 +138,7 @@ class SchemaEvolutionBreakingTest extends SyncTestBase {
                 comparison.getRemovedColumns().forEach(col -> 
                     logger.warn("  ⚠ Removed column detected: {}", col.getColumnName()));
                 
-                logger.info("✓ Breaking changes correctly detected - migration would cause data loss");
+                logger.info("[OK] Breaking changes correctly detected - migration would cause data loss");
             }
         } else {
             // If we can't get comparison result, at least verify pipeline ran
@@ -162,7 +162,7 @@ class SchemaEvolutionBreakingTest extends SyncTestBase {
         // With fail-on-incompatibility: true, the pipeline should fail when breaking changes detected
         // This protects against accidental deployments that would cause data loss
         if (!result.isSuccess()) {
-            logger.info("✓ Pipeline correctly blocked deployment due to breaking schema changes");
+            logger.info("[OK] Pipeline correctly blocked deployment due to breaking schema changes");
             // The pipeline fails with a general failure message - the important thing is it failed
             assertTrue(result.getMessage().toLowerCase().contains("failure") || 
                        result.getMessage().toLowerCase().contains("failed") ||

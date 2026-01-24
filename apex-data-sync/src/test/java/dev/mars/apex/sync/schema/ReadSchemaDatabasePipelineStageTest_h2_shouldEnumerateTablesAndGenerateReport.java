@@ -115,7 +115,7 @@ class ReadSchemaDatabasePipelineStageTest_h2_shouldEnumerateTablesAndGenerateRep
             stmt.execute("INSERT INTO test_schema.products VALUES (1, 'Test Product', 'Electronics', 99.99, 50, '2024-01-01 00:00:00')");
         }
 
-        logger.info("✓ H2 test database initialized with 3 tables: customers, orders, products");
+        logger.info("[OK] H2 test database initialized with 3 tables: customers, orders, products");
 
         // Execute pipeline with table enumeration and report generation
         rulesEngine = RulesEngine.fromFile("src/test/java/dev/mars/apex/sync/schema/ReadSchemaDatabasePipelineStageTest_h2_shouldEnumerateTablesAndGenerateReport.yaml");
@@ -135,7 +135,7 @@ class ReadSchemaDatabasePipelineStageTest_h2_shouldEnumerateTablesAndGenerateRep
         assertTrue(reportFile.exists(), "HTML report file should exist");
         assertTrue(reportFile.length() > 0, "HTML report file should not be empty");
 
-        logger.info("✓ HTML report generated: {} ({} bytes)", reportFile.getPath(), reportFile.length());
+        logger.info("[OK] HTML report generated: {} ({} bytes)", reportFile.getPath(), reportFile.length());
 
         // Read and verify report content
         String reportContent = java.nio.file.Files.readString(reportFile.toPath());
@@ -145,8 +145,8 @@ class ReadSchemaDatabasePipelineStageTest_h2_shouldEnumerateTablesAndGenerateRep
         assertTrue(reportContent.contains("orders"), "Report should include orders table");
         assertTrue(reportContent.contains("products"), "Report should include products table");
 
-        logger.info("✓ HTML report contains all 3 enumerated tables");
-        logger.info("✓ Successfully enumerated tables and generated comprehensive HTML report");
+        logger.info("[OK] HTML report contains all 3 enumerated tables");
+        logger.info("[OK] Successfully enumerated tables and generated comprehensive HTML report");
 
         displayPipelineMetrics(result);
     }

@@ -221,7 +221,7 @@ public class MetricsCollectionDemo extends DemoTestBase {
             logger.info("  • Consider optimizing rule conditions for faster evaluation");
             logger.info("  • Review complex expressions that may be causing delays");
         } else {
-            logger.info("✓ Execution time is within acceptable range ({}ms)", String.format("%.2f%%", avgTime));
+            logger.info("[OK] Execution time is within acceptable range ({}ms)", String.format("%.2f%%", avgTime));
         }
         
         if (successRate < 80.0) {
@@ -229,7 +229,7 @@ public class MetricsCollectionDemo extends DemoTestBase {
             logger.info("  • Review error recovery strategies");
             logger.info("  • Consider improving input data validation");
         } else {
-            logger.info("✓ Success rate is acceptable ({}%)", String.format("%.1f", successRate));
+            logger.info("[OK] Success rate is acceptable ({}%)", String.format("%.1f", successRate));
         }
         
         // Data quality impact analysis

@@ -52,7 +52,7 @@ public class RuleRefsSequentialOrderTest {
         assertTrue(config.getRules().stream().anyMatch(r -> "validate-enrichment-completed".equals(r.getId())),
             "Should have validate-enrichment-completed inline rule");
 
-        LOGGER.info("✓ All rules loaded correctly from inline and external sources");
+        LOGGER.info("[OK] All rules loaded correctly from inline and external sources");
     }
 
     @Test
@@ -104,14 +104,14 @@ public class RuleRefsSequentialOrderTest {
         assertNotNull(enrichedData.get("enrichedNotional"),
             "R3 (inline): enrichment should be completed before this rule");
 
-        LOGGER.info("✓ Rule-Refs Placeholder Expansion Test PASSED");
+        LOGGER.info("[OK] Rule-Refs Placeholder Expansion Test PASSED");
         LOGGER.info("   Processing Order Verified:");
-        LOGGER.info("   1. E1 (inline): enrich-trade-data ✓");
-        LOGGER.info("   2. R1 (from ref): validate-notional-limit ✓");
-        LOGGER.info("   3. R2 (from ref): validate-strike-price ✓");
-        LOGGER.info("   4. R3 (inline): validate-enrichment-completed ✓");
+        LOGGER.info("   1. E1 (inline): enrich-trade-data [OK]");
+        LOGGER.info("   2. R1 (from ref): validate-notional-limit [OK]");
+        LOGGER.info("   3. R2 (from ref): validate-strike-price [OK]");
+        LOGGER.info("   4. R3 (inline): validate-enrichment-completed [OK]");
         LOGGER.info("");
-        LOGGER.info("   ✓ CRITICAL FIX VERIFIED: rule-refs expanded at correct position!");
+        LOGGER.info("   [OK] CRITICAL FIX VERIFIED: rule-refs expanded at correct position!");
     }
 
     @Test
@@ -136,7 +136,7 @@ public class RuleRefsSequentialOrderTest {
         assertTrue(result1.getEnrichedData().containsKey("enrichedNotional"),
             "Enrichment should execute before rules");
 
-        LOGGER.info("✓ Test Case 1: Invalid notional - rule executed in correct order");
+        LOGGER.info("[OK] Test Case 1: Invalid notional - rule executed in correct order");
 
         // Test Case 2: Invalid strike price
         Map<String, Object> invalidStrike = new HashMap<>();
@@ -151,7 +151,7 @@ public class RuleRefsSequentialOrderTest {
         assertTrue(result2.getEnrichedData().containsKey("enrichedStrike"),
             "Enrichment should execute before rules");
 
-        LOGGER.info("✓ Test Case 2: Invalid strike - rule executed in correct order");
+        LOGGER.info("[OK] Test Case 2: Invalid strike - rule executed in correct order");
 
         // Test Case 3: Valid data (all rules should pass)
         Map<String, Object> validData = new HashMap<>();
@@ -169,8 +169,8 @@ public class RuleRefsSequentialOrderTest {
         assertTrue(result3.getEnrichedData().containsKey("enrichedStrike"),
             "Enrichment should execute before rules");
 
-        LOGGER.info("✓ Test Case 3: Valid data - all rules passed in correct order");
-        LOGGER.info("✓ All test cases passed - rule-refs execution order verified!");
+        LOGGER.info("[OK] Test Case 3: Valid data - all rules passed in correct order");
+        LOGGER.info("[OK] All test cases passed - rule-refs execution order verified!");
     }
 }
 

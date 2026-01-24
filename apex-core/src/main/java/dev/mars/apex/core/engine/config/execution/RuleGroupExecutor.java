@@ -120,7 +120,7 @@ public class RuleGroupExecutor {
             } catch (Exception e) {
                 // CRITICAL: Rule group evaluation exception is a business logic failure
                 // This is NOT a "rule didn't match" scenario - it's a system failure
-                logger.error("CRITICAL: Rule group evaluation failed for '{}': {}", group.getName(), e.getMessage(), e);
+                logger.error("Rule group evaluation failed for '{}': {}", group.getName(), e.getMessage(), e);
                 return RuleResult.error(
                     group.getName(),
                     "Rule group evaluation failed: " + e.getMessage(),

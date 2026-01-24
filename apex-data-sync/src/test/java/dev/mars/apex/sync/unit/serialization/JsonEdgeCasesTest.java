@@ -78,7 +78,7 @@ public class JsonEdgeCasesTest extends SyncTestBase {
         SchemaMetadata schema = (SchemaMetadata) steps.get(0).getStepData();
         assertEquals(2, schema.getColumns().size(), "Should have minimal 2 columns");
         
-        logger.info("✓ Minimal column table handled");
+        logger.info("[OK] Minimal column table handled");
         validateExecutionRate(1, 1, "Minimal columns handling");
     }
 
@@ -99,7 +99,7 @@ public class JsonEdgeCasesTest extends SyncTestBase {
         assertNotNull(json);
         assertTrue(json.contains("columns"));
         
-        logger.info("✓ Table without PK serialized successfully");
+        logger.info("[OK] Table without PK serialized successfully");
         validateExecutionRate(1, 1, "No PK serialization");
     }
 }

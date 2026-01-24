@@ -212,7 +212,7 @@ public class MsSqlToPostgresSyncTest extends SyncTestBase {
                     assertTrue(rs.next(), "Should have count result");
                     int count = rs.getInt(1);
                     assertEquals(3, count, "Target should have 3 synced records");
-                    logger.info("✓ Verified record count: {}", count);
+                    logger.info("[OK] Verified record count: {}", count);
                 }
 
                 // Verify CUST001
@@ -222,7 +222,7 @@ public class MsSqlToPostgresSyncTest extends SyncTestBase {
                     assertEquals("Alice Johnson", rs.getString("name"));
                     assertEquals("alice@example.com", rs.getString("email"));
                     assertEquals("ACTIVE", rs.getString("status"));
-                    logger.info("✓ Verified CUST001");
+                    logger.info("[OK] Verified CUST001");
                 }
 
                 // Verify CUST002
@@ -231,7 +231,7 @@ public class MsSqlToPostgresSyncTest extends SyncTestBase {
                     assertTrue(rs.next(), "CUST002 should exist");
                     assertEquals("Bob Smith", rs.getString("name"));
                     assertEquals("bob@example.com", rs.getString("email"));
-                    logger.info("✓ Verified CUST002");
+                    logger.info("[OK] Verified CUST002");
                 }
 
                 // Verify CUST003
@@ -240,7 +240,7 @@ public class MsSqlToPostgresSyncTest extends SyncTestBase {
                     assertTrue(rs.next(), "CUST003 should exist");
                     assertEquals("Charlie Brown", rs.getString("name"));
                     assertEquals("charlie@example.com", rs.getString("email"));
-                    logger.info("✓ Verified CUST003");
+                    logger.info("[OK] Verified CUST003");
                 }
 
                 // Verify synced_at timestamp is populated
@@ -249,7 +249,7 @@ public class MsSqlToPostgresSyncTest extends SyncTestBase {
                     assertTrue(rs.next(), "Should have count result");
                     int count = rs.getInt(1);
                     assertEquals(3, count, "All records should have synced_at timestamp");
-                    logger.info("✓ Verified all records have synced_at timestamp");
+                    logger.info("[OK] Verified all records have synced_at timestamp");
                 }
 
                 logger.info("All target data verifications passed!");

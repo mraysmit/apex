@@ -145,7 +145,7 @@ class ReadSchemaDatabaseEnumerationPipelineStageTestExclusions extends SyncTestB
                 logger.info("  Included table: {}", table));
         }
 
-        logger.info("✓ Successfully enumerated tables with exclusion filter");
+        logger.info("[OK] Successfully enumerated tables with exclusion filter");
     }
 
     private void setupTestDatabase() throws Exception {

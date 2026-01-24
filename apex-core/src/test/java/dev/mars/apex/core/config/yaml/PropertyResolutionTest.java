@@ -50,7 +50,7 @@ public class PropertyResolutionTest {
         String result = PropertyResolver.resolve(input);
         
         assertEquals("test_value", result);
-        LOGGER.info("✓ Simple property resolution works: " + input + " -> " + result);
+        LOGGER.info("[OK] Simple property resolution works: " + input + " -> " + result);
     }
 
     @Test
@@ -62,7 +62,7 @@ public class PropertyResolutionTest {
         String result = PropertyResolver.resolve(input);
         
         assertEquals("default_value", result);
-        LOGGER.info("✓ Property with default works: " + input + " -> " + result);
+        LOGGER.info("[OK] Property with default works: " + input + " -> " + result);
     }
 
     @Test
@@ -74,7 +74,7 @@ public class PropertyResolutionTest {
         String result = PropertyResolver.resolve(input);
         
         assertEquals("jdbc:postgresql://test_value:5432/db?user=default_used", result);
-        LOGGER.info("✓ Multiple properties work: " + input + " -> " + result);
+        LOGGER.info("[OK] Multiple properties work: " + input + " -> " + result);
     }
 
     @Test
@@ -86,7 +86,7 @@ public class PropertyResolutionTest {
         String result = PropertyResolver.resolve(input);
         
         assertEquals(input, result);
-        LOGGER.info("✓ No placeholders unchanged: " + input + " -> " + result);
+        LOGGER.info("[OK] No placeholders unchanged: " + input + " -> " + result);
     }
 
     @Test
@@ -97,7 +97,7 @@ public class PropertyResolutionTest {
         String result = PropertyResolver.resolve(null);
         
         assertNull(result);
-        LOGGER.info("✓ Null input handled correctly");
+        LOGGER.info("[OK] Null input handled correctly");
     }
 
     @Test
@@ -110,7 +110,7 @@ public class PropertyResolutionTest {
 
         // Should return the original placeholder when property is not found
         assertEquals("${DEFINITELY_NONEXISTENT_PROPERTY}", result);
-        LOGGER.info("✓ Missing required property returns original placeholder: " + result);
+        LOGGER.info("[OK] Missing required property returns original placeholder: " + result);
     }
 
     @Test
@@ -131,7 +131,7 @@ public class PropertyResolutionTest {
             assertFalse(result, "Should not detect " + key + " as sensitive");
         }
         
-        LOGGER.info("✓ Sensitive property detection works correctly");
+        LOGGER.info("[OK] Sensitive property detection works correctly");
     }
 
     @Test
@@ -143,13 +143,13 @@ public class PropertyResolutionTest {
         String result = PropertyResolver.maskSensitiveValue(sensitiveValue);
         
         assertEquals("[MASKED_VALUE_WITH_SENSITIVE_PLACEHOLDERS]", result);
-        LOGGER.info("✓ Sensitive value masking works");
+        LOGGER.info("[OK] Sensitive value masking works");
         
         String normalValue = "jdbc:postgresql://host:5432/db?user=${DB_USER}";
         String normalResult = PropertyResolver.maskSensitiveValue(normalValue);
         
         assertEquals(normalValue, normalResult);
-        LOGGER.info("✓ Normal value not masked");
+        LOGGER.info("[OK] Normal value not masked");
     }
 
     @Test
@@ -161,7 +161,7 @@ public class PropertyResolutionTest {
         String result = PropertyResolver.resolve("${TEST_PROP}");
         
         assertEquals("test_value", result);
-        LOGGER.info("✓ System property resolution works");
+        LOGGER.info("[OK] System property resolution works");
     }
 
     @Test
@@ -173,7 +173,7 @@ public class PropertyResolutionTest {
         String result = PropertyResolver.resolve(input);
 
         assertEquals("host=test_value,port=5432,password=secret123,timeout=30", result);
-        LOGGER.info("✓ Complex placeholders work: " + input + " -> [RESULT_MASKED_FOR_SECURITY]");
+        LOGGER.info("[OK] Complex placeholders work: " + input + " -> [RESULT_MASKED_FOR_SECURITY]");
     }
 
     @Test
@@ -185,7 +185,7 @@ public class PropertyResolutionTest {
         String result = PropertyResolver.resolve(input);
 
         assertEquals("test_value", result);
-        LOGGER.info("✓ Simple parentheses property resolution works: " + input + " -> " + result);
+        LOGGER.info("[OK] Simple parentheses property resolution works: " + input + " -> " + result);
     }
 
     @Test
@@ -197,7 +197,7 @@ public class PropertyResolutionTest {
         String result = PropertyResolver.resolve(input);
 
         assertEquals("secret123", result);
-        LOGGER.info("✓ Parentheses password property resolution works: " + input + " -> [MASKED]");
+        LOGGER.info("[OK] Parentheses password property resolution works: " + input + " -> [MASKED]");
     }
 
     @Test
@@ -209,7 +209,7 @@ public class PropertyResolutionTest {
         String result = PropertyResolver.resolve(input);
 
         assertEquals("default_value", result);
-        LOGGER.info("✓ Parentheses property with default works: " + input + " -> " + result);
+        LOGGER.info("[OK] Parentheses property with default works: " + input + " -> " + result);
     }
 
     @Test
@@ -221,6 +221,6 @@ public class PropertyResolutionTest {
         String result = PropertyResolver.resolve(input);
 
         assertEquals("host=test_value,password=secret123,timeout=30", result);
-        LOGGER.info("✓ Mixed placeholder syntax works: " + input + " -> [RESULT_MASKED_FOR_SECURITY]");
+        LOGGER.info("[OK] Mixed placeholder syntax works: " + input + " -> [RESULT_MASKED_FOR_SECURITY]");
     }
 }

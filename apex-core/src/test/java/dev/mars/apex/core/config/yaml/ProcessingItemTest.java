@@ -39,7 +39,7 @@ class ProcessingItemTest {
         assertEquals("enrichments", item.getSectionType(), "Section type should match");
         assertEquals("enrich-1", item.getItemId(), "Item ID should match");
         
-        logger.info("✓ ProcessingItem created successfully: {}", item);
+        logger.info("[OK] ProcessingItem created successfully: {}", item);
     }
 
     @Test
@@ -54,7 +54,7 @@ class ProcessingItemTest {
         );
         
         assertEquals("Section type cannot be null or empty", exception.getMessage());
-        logger.info("✓ Null section type rejected: {}", exception.getMessage());
+        logger.info("[OK] Null section type rejected: {}", exception.getMessage());
     }
 
     @Test
@@ -69,7 +69,7 @@ class ProcessingItemTest {
         );
         
         assertEquals("Section type cannot be null or empty", exception.getMessage());
-        logger.info("✓ Empty section type rejected: {}", exception.getMessage());
+        logger.info("[OK] Empty section type rejected: {}", exception.getMessage());
     }
 
     @Test
@@ -84,7 +84,7 @@ class ProcessingItemTest {
         );
         
         assertEquals("Section type cannot be null or empty", exception.getMessage());
-        logger.info("✓ Whitespace section type rejected: {}", exception.getMessage());
+        logger.info("[OK] Whitespace section type rejected: {}", exception.getMessage());
     }
 
     @Test
@@ -99,7 +99,7 @@ class ProcessingItemTest {
         );
         
         assertEquals("Item ID cannot be null or empty", exception.getMessage());
-        logger.info("✓ Null item ID rejected: {}", exception.getMessage());
+        logger.info("[OK] Null item ID rejected: {}", exception.getMessage());
     }
 
     @Test
@@ -114,7 +114,7 @@ class ProcessingItemTest {
         );
         
         assertEquals("Item ID cannot be null or empty", exception.getMessage());
-        logger.info("✓ Empty item ID rejected: {}", exception.getMessage());
+        logger.info("[OK] Empty item ID rejected: {}", exception.getMessage());
     }
 
     @Test
@@ -129,7 +129,7 @@ class ProcessingItemTest {
         );
         
         assertEquals("Item ID cannot be null or empty", exception.getMessage());
-        logger.info("✓ Whitespace item ID rejected: {}", exception.getMessage());
+        logger.info("[OK] Whitespace item ID rejected: {}", exception.getMessage());
     }
 
     // ========================================
@@ -147,7 +147,7 @@ class ProcessingItemTest {
         assertTrue(enrichmentItem.isEnrichment(), "Should identify enrichment item");
         assertFalse(ruleItem.isEnrichment(), "Should not identify rule as enrichment");
         
-        logger.info("✓ Enrichment identification works correctly");
+        logger.info("[OK] Enrichment identification works correctly");
     }
 
     @Test
@@ -161,7 +161,7 @@ class ProcessingItemTest {
         assertTrue(ruleItem.isRule(), "Should identify rule item");
         assertFalse(enrichmentItem.isRule(), "Should not identify enrichment as rule");
         
-        logger.info("✓ Rule identification works correctly");
+        logger.info("[OK] Rule identification works correctly");
     }
 
     @Test
@@ -175,7 +175,7 @@ class ProcessingItemTest {
         assertTrue(groupItem.isEnrichmentGroup(), "Should identify enrichment group item");
         assertFalse(enrichmentItem.isEnrichmentGroup(), "Should not identify enrichment as group");
         
-        logger.info("✓ Enrichment group identification works correctly");
+        logger.info("[OK] Enrichment group identification works correctly");
     }
 
     @Test
@@ -189,7 +189,7 @@ class ProcessingItemTest {
         assertTrue(groupItem.isRuleGroup(), "Should identify rule group item");
         assertFalse(ruleItem.isRuleGroup(), "Should not identify rule as group");
         
-        logger.info("✓ Rule group identification works correctly");
+        logger.info("[OK] Rule group identification works correctly");
     }
 
     @Test
@@ -203,7 +203,7 @@ class ProcessingItemTest {
         assertTrue(transformItem.isTransformation(), "Should identify transformation item");
         assertFalse(ruleItem.isTransformation(), "Should not identify rule as transformation");
         
-        logger.info("✓ Transformation identification works correctly");
+        logger.info("[OK] Transformation identification works correctly");
     }
 
     @Test
@@ -217,7 +217,7 @@ class ProcessingItemTest {
         assertTrue(chainItem.isRuleChain(), "Should identify rule chain item");
         assertFalse(ruleItem.isRuleChain(), "Should not identify rule as chain");
         
-        logger.info("✓ Rule chain identification works correctly");
+        logger.info("[OK] Rule chain identification works correctly");
     }
 
     // ========================================
@@ -233,7 +233,7 @@ class ProcessingItemTest {
         
         assertEquals(item, item, "Item should be equal to itself");
         
-        logger.info("✓ Reflexive property satisfied");
+        logger.info("[OK] Reflexive property satisfied");
     }
 
     @Test
@@ -248,7 +248,7 @@ class ProcessingItemTest {
         assertEquals(item2, item1, "Equality should be symmetric");
         assertEquals(item1.hashCode(), item2.hashCode(), "Hash codes should match");
         
-        logger.info("✓ Symmetric property satisfied");
+        logger.info("[OK] Symmetric property satisfied");
     }
 
     @Test
@@ -260,7 +260,7 @@ class ProcessingItemTest {
         
         assertNotEquals(item, null, "Item should not be equal to null");
         
-        logger.info("✓ Null comparison works correctly");
+        logger.info("[OK] Null comparison works correctly");
     }
 
     @Test
@@ -273,7 +273,7 @@ class ProcessingItemTest {
         
         assertNotEquals(item, notAnItem, "Item should not be equal to different type");
         
-        logger.info("✓ Different type comparison works correctly");
+        logger.info("[OK] Different type comparison works correctly");
     }
 
     @Test
@@ -287,7 +287,7 @@ class ProcessingItemTest {
         assertNotEquals(item1, item2, "Items with different section types should not be equal");
         assertNotEquals(item1.hashCode(), item2.hashCode(), "Hash codes should differ");
         
-        logger.info("✓ Different section type comparison works correctly");
+        logger.info("[OK] Different section type comparison works correctly");
     }
 
     @Test
@@ -301,7 +301,7 @@ class ProcessingItemTest {
         assertNotEquals(item1, item2, "Items with different IDs should not be equal");
         assertNotEquals(item1.hashCode(), item2.hashCode(), "Hash codes should differ");
         
-        logger.info("✓ Different item ID comparison works correctly");
+        logger.info("[OK] Different item ID comparison works correctly");
     }
 
     // ========================================
@@ -318,7 +318,7 @@ class ProcessingItemTest {
         
         assertEquals("enrichments:enrich-counterparty", result, "toString should use sectionType:itemId format");
         
-        logger.info("✓ toString() format correct: {}", result);
+        logger.info("[OK] toString() format correct: {}", result);
     }
 
     @Test
@@ -333,7 +333,7 @@ class ProcessingItemTest {
         assertTrue(description.contains("rules"), "Description should contain section type");
         assertTrue(description.contains("validate-credit-limit"), "Description should contain item ID");
         
-        logger.info("✓ Description generated: {}", description);
+        logger.info("[OK] Description generated: {}", description);
     }
 }
 

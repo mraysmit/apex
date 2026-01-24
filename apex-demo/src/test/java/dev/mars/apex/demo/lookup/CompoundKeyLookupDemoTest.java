@@ -230,7 +230,7 @@ public class CompoundKeyLookupDemoTest extends DemoTestBase {
         try (Connection connection = DriverManager.getConnection(
                 "jdbc:h2:./target/h2-demo/" + DB_NAME, "sa", "")) {
             connection.createStatement().execute("SHUTDOWN");
-            logger.info("✓ Database shutdown completed");
+            logger.info("[OK] Database shutdown completed");
         } catch (Exception e) {
             logger.warn("Failed to shutdown database: " + e.getMessage());
         }

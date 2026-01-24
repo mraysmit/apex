@@ -218,7 +218,7 @@ public class YamlEnrichmentProcessor {
                 }
             } catch (Exception e) {
                 // CRITICAL: Enrichment processing failure is a serious configuration error
-                logger.error("CRITICAL: Enrichment failure in deprecated method cannot be propagated to caller: " + enrichment.getId() +
+                logger.error("Enrichment failure in deprecated method cannot be propagated to caller: " + enrichment.getId() +
                           " - Error: " + e.getMessage(), e);
                 // Continue processing other enrichments for now (backward compatibility)
                 // TODO: Consider fail-fast behavior for critical enrichments
@@ -430,7 +430,7 @@ public class YamlEnrichmentProcessor {
             // CRITICAL: Field mapping failed - throw exception to propagate failure to RuleResult
             String errorMsg = "Lookup enrichment '" + enrichment.getId() + "' failed: one or more field mappings could not be applied. " +
                              "Check: (1) target paths exist, (2) intermediate structures are pre-created, (3) SpEL expressions are valid.";
-            logger.error("CRITICAL: " + errorMsg);
+            logger.error(errorMsg);
             throw new EnrichmentException(errorMsg);
         }
 
@@ -468,7 +468,7 @@ public class YamlEnrichmentProcessor {
                     // CRITICAL: Field mapping failed - throw exception to propagate failure to RuleResult
                     String errorMsg = "Calculation enrichment '" + enrichment.getId() + "' failed: one or more field mappings could not be applied. " +
                                      "Check: (1) target paths exist, (2) intermediate structures are pre-created, (3) SpEL expressions are valid.";
-                    logger.error("CRITICAL: " + errorMsg);
+                    logger.error(errorMsg);
                     throw new EnrichmentException(errorMsg);
                 }
                 targetObject = mappedResult;
@@ -525,7 +525,7 @@ public class YamlEnrichmentProcessor {
                 // CRITICAL: Field mapping failed - throw exception to propagate failure to RuleResult
                 String errorMsg = "Field enrichment '" + enrichment.getId() + "' failed: one or more field mappings could not be applied. " +
                                  "Check: (1) target paths exist, (2) intermediate structures are pre-created, (3) SpEL expressions are valid.";
-                logger.error("CRITICAL: " + errorMsg);
+                logger.error(errorMsg);
                 throw new EnrichmentException(errorMsg);
             }
         }
@@ -1343,7 +1343,7 @@ public class YamlEnrichmentProcessor {
 
                     } catch (Exception e) {
                         // CRITICAL: Rule evaluation failure is a serious configuration error
-                        logger.error("CRITICAL: Rule evaluation failed for '" + yamlRule.getId() +
+                        logger.error("Rule evaluation failed for '" + yamlRule.getId() +
                                   "' - condition: '" + yamlRule.getCondition() + "' - Error: " + e.getMessage(), e);
                         individualRuleResults.put(yamlRule.getId(), false);
                     }
@@ -1411,7 +1411,7 @@ public class YamlEnrichmentProcessor {
 
                     } catch (Exception e) {
                         // CRITICAL: Rule group evaluation failure is a serious configuration error
-                        logger.error("CRITICAL: Rule group evaluation failed for '" + yamlRuleGroup.getId() +
+                        logger.error("Rule group evaluation failed for '" + yamlRuleGroup.getId() +
                                   "' - Error: " + e.getMessage(), e);
                         Map<String, Object> failedResult = new HashMap<>();
                         failedResult.put("passed", false);
@@ -1424,7 +1424,8 @@ public class YamlEnrichmentProcessor {
 
         } catch (Exception e) {
             // CRITICAL: General rules/rule groups processing failure is a serious system error
-            logger.error("CRITICAL: Error processing rules and rule groups - System Error: " + e.getMessage(), e);
+            logger.error("CRITICAL: Error processing rules and rule groups - System Error: {}", e.getMessage());
+            logger.debug("Full stack trace for rules/rule groups processing error:", e);
         }
     }
 
@@ -1619,7 +1620,8 @@ public class YamlEnrichmentProcessor {
                     }
                 }
             } catch (Exception e) {
-                logger.error("Enrichment processing failed: " + enrichment.getId() + " - " + e.getMessage(), e);
+                logger.error("CRITICAL: Enrichment processing failed: {} - {}", enrichment.getId(), e.getMessage());
+                logger.debug("Full stack trace for enrichment processing failure:", e);
                 overallSuccess = false;
                 failureMessages.add("Enrichment '" + enrichment.getId() + "' failed: " + e.getMessage());
             }
@@ -1637,7 +1639,7 @@ public class YamlEnrichmentProcessor {
                 if (enrichmentFailed) {
                     overallSuccess = false;
                     failureMessages.add("Required field enrichment failed - check logs for CRITICAL ERROR details");
-                    logger.error("CRITICAL: Enrichment failed due to required field mapping failures");
+                    logger.error("Enrichment failed due to required field mapping failures");
                 }
             }
 
@@ -1649,12 +1651,13 @@ public class YamlEnrichmentProcessor {
                 logger.debug("Enrichment processing completed successfully with severity: " + aggregatedSeverity);
                 return RuleResult.enrichmentSuccess(enrichedData, aggregatedSeverity);
             } else {
-                logger.error("CRITICAL: Enrichment processing completed with failures, severity: " + aggregatedSeverity);
+                logger.error("Enrichment processing completed with failures, severity: " + aggregatedSeverity);
                 return RuleResult.enrichmentFailure(failureMessages, enrichedData, aggregatedSeverity);
             }
 
         } catch (Exception e) {
-            logger.error("CRITICAL: Exception during enrichment processing: " + e.getMessage(), e);
+            logger.error("CRITICAL: Exception during enrichment processing: {}", e.getMessage());
+            logger.debug("Full stack trace for enrichment exception:", e);
             // Business logic failure - return error result
             return RuleResult.error(
                 "enrichments",

@@ -127,12 +127,12 @@ public class EnrichmentRefsSequentialOrderTest {
 
         LOGGER.info("Enrichment-Refs Placeholder Expansion Test PASSED");
         LOGGER.info("   Processing Order Verified:");
-        LOGGER.info("   1. E1 (inline): enrich-counterparty-data ✓");
-        LOGGER.info("   2. E2 (from ref): enrich-market-data ✓");
-        LOGGER.info("   3. E3 (from ref): calculate-greeks ✓");
-        LOGGER.info("   4. R1: validate-counterparty-enriched ✓");
-        LOGGER.info("   5. R2: validate-market-data-enriched ✓");
-        LOGGER.info("   6. R3: validate-greeks-calculated ✓");
+        LOGGER.info("   1. E1 (inline): enrich-counterparty-data [OK]");
+        LOGGER.info("   2. E2 (from ref): enrich-market-data [OK]");
+        LOGGER.info("   3. E3 (from ref): calculate-greeks [OK]");
+        LOGGER.info("   4. R1: validate-counterparty-enriched [OK]");
+        LOGGER.info("   5. R2: validate-market-data-enriched [OK]");
+        LOGGER.info("   6. R3: validate-greeks-calculated [OK]");
         LOGGER.info("");
         LOGGER.info("   🎯 CRITICAL FIX VERIFIED: enrichment-refs expanded at correct position!");
     }
@@ -191,7 +191,7 @@ public class EnrichmentRefsSequentialOrderTest {
         assertEquals(15000.0, enriched1.get("currentSpotPrice"), "NDX spot should be 15000.0");
         assertNotNull(enriched1.get("optionDelta"), "Delta should be calculated");
 
-        LOGGER.info("✓ Test Case 1: Complete data - all enrichments executed in order");
+        LOGGER.info("[OK] Test Case 1: Complete data - all enrichments executed in order");
 
         // Test Case 2: Missing underlying - market data enrichment should fail, greeks should not calculate
         Map<String, Object> missingUnderlyingData = new HashMap<>();
@@ -206,7 +206,7 @@ public class EnrichmentRefsSequentialOrderTest {
         assertNull(enriched2.get("currentSpotPrice"), "Spot price should be null (no underlying)");
         assertNull(enriched2.get("optionDelta"), "Delta should be null (depends on market data)");
 
-        LOGGER.info("✓ Test Case 2: Missing underlying - dependency chain correctly handled");
+        LOGGER.info("[OK] Test Case 2: Missing underlying - dependency chain correctly handled");
 
         LOGGER.info("Enrichment-Refs Execution Order with Dependencies Test PASSED");
     }

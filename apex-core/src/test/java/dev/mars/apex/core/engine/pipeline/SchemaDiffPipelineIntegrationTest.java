@@ -232,7 +232,7 @@ class SchemaDiffPipelineIntegrationTest {
         stmt.close();
         // Do NOT close connection - keep it open for pipeline to use
         
-        logger.info("✓ Test database setup complete");
+        logger.info("[OK] Test database setup complete");
     }
 
     private ExecutionStep findPipelineStep(RuleResult result, String stepName) {
@@ -293,8 +293,8 @@ class SchemaDiffPipelineIntegrationTest {
         assertTrue(reportContent.contains("Matching"), 
                   "Report should contain matching columns section");
 
-        logger.info("✓ HTML report generated successfully: {}", reportPath.toAbsolutePath());
-        logger.info("✓ Report contains expected schema diff information");
+        logger.info("[OK] HTML report generated successfully: {}", reportPath.toAbsolutePath());
+        logger.info("[OK] Report contains expected schema diff information");
         
         engine.shutdown();
     }

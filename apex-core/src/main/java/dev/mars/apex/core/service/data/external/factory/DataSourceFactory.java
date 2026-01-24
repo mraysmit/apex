@@ -162,7 +162,7 @@ public class DataSourceFactory {
         DataSourceType type = configuration.getDataSourceType();
         String name = configuration.getName();
 
-        LOGGER.info("Creating data source '{}' of type {}", name, type);
+        LOGGER.debug("Creating data source '{}' of type {}", name, type);
 
         try {
             ExternalDataSource dataSource = createDataSourceByType(type, configuration);
@@ -170,7 +170,7 @@ public class DataSourceFactory {
             // Initialize the data source
             dataSource.initialize(configuration);
 
-            LOGGER.info("Successfully created and initialized data source '{}'", name);
+            LOGGER.debug("Successfully created and initialized data source '{}'", name);
             return dataSource;
 
         } catch (DataSourceException e) {
@@ -293,11 +293,11 @@ public class DataSourceFactory {
             try {
                 future.get();
             } catch (Exception e) {
-                LOGGER.warn("Error waiting for pending data source creation during cache clear", e);
+                LOGGER.debug("Error waiting for pending data source creation during cache clear: {}", e.getMessage());
             }
         });
         pendingCreations.clear();
-        LOGGER.info("Cleared data source factory cache");
+        LOGGER.debug("Cleared data source factory cache");
     }
 
     /**

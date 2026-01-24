@@ -122,7 +122,7 @@ public class PrecisionScaleTest extends SyncTestBase {
                 )
                 """);
 
-            logger.info("✓ Created schemas with precision/scale variations");
+            logger.info("[OK] Created schemas with precision/scale variations");
         }
     }
 
@@ -153,7 +153,7 @@ public class PrecisionScaleTest extends SyncTestBase {
             assertTrue(steps.stream().anyMatch(s -> "read-target-schema".equals(s.getName())),
                 "Target schema read step should be present");
             
-            logger.info("✓ Precision increase detection test passed");
+            logger.info("[OK] Precision increase detection test passed");
         } finally {
             System.clearProperty("POSTGRES_HOST");
             System.clearProperty("POSTGRES_PORT");
@@ -184,7 +184,7 @@ public class PrecisionScaleTest extends SyncTestBase {
             List<ExecutionStep> steps = result.getExecutionPath();
             assertFalse(steps.isEmpty(), "Execution path should contain steps");
             
-            logger.info("✓ Scale increase detection test passed");
+            logger.info("[OK] Scale increase detection test passed");
         } finally {
             System.clearProperty("POSTGRES_HOST");
             System.clearProperty("POSTGRES_PORT");

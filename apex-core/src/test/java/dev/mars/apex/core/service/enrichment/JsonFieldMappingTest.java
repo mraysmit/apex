@@ -96,7 +96,7 @@ public class JsonFieldMappingTest {
         assertEquals(1250000, enrichedMap.get("tradingVolume"));
         assertEquals(0.14, enrichedMap.get("changePercent"));
         
-        System.out.println("✓ JSON field mapping test passed!");
+        System.out.println("[OK] JSON field mapping test passed!");
     }
 
     @Test
@@ -163,6 +163,6 @@ public class JsonFieldMappingTest {
         assertEquals(0.0, enrichedMap.get("bidPrice")); // Default value (no "bid" field in target)
         assertEquals(0.0, enrichedMap.get("askPrice")); // Default value (no "ask" field in target)
         
-        System.out.println("✓ Direct map field mapping test passed!");
+        System.out.println("[OK] Direct map field mapping test passed!");
     }
 }

@@ -147,7 +147,7 @@ public class CompletePipelineWithSchemaTest extends SyncTestBase {
         assertInstanceOf(SchemaMetadata.class, schemaData, "Step data should be SchemaMetadata");
         SchemaMetadata schema = (SchemaMetadata) schemaData;
         assertEquals(3, schema.getColumns().size(), "Source schema should have 3 columns (id, name, email)");
-        logger.info("✓ Schema validated: {} columns", schema.getColumns().size());
+        logger.info("[OK] Schema validated: {} columns", schema.getColumns().size());
 
         // Verify extract step
         ExecutionStep extractStep = steps.stream()
@@ -155,7 +155,7 @@ public class CompletePipelineWithSchemaTest extends SyncTestBase {
             .findFirst()
             .orElse(null);
         assertNotNull(extractStep, "Should have extract-from-source step");
-        logger.info("✓ Extract step completed");
+        logger.info("[OK] Extract step completed");
 
         // Verify transform step
         ExecutionStep transformStep = steps.stream()
@@ -163,7 +163,7 @@ public class CompletePipelineWithSchemaTest extends SyncTestBase {
             .findFirst()
             .orElse(null);
         assertNotNull(transformStep, "Should have transform-data step");
-        logger.info("✓ Transform step completed");
+        logger.info("[OK] Transform step completed");
 
         // Verify load step
         ExecutionStep loadStep = steps.stream()
@@ -171,7 +171,7 @@ public class CompletePipelineWithSchemaTest extends SyncTestBase {
             .findFirst()
             .orElse(null);
         assertNotNull(loadStep, "Should have load-to-target step");
-        logger.info("✓ Load step completed");
+        logger.info("[OK] Load step completed");
         
         // Validate execution rate (4 steps: read-schema, extract, transform, load)
         validateExecutionRate(4, 4, "Complete ETL pipeline");

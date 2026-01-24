@@ -56,7 +56,7 @@ public class PipelineEtlExecutionTestExtractJson extends DemoTestBase {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Pipeline should execute successfully");
 
-        logger.info("✓ JSON OTC options extraction executed successfully");
+        logger.info("[OK] JSON OTC options extraction executed successfully");
     }
 
     @Test
@@ -75,7 +75,7 @@ public class PipelineEtlExecutionTestExtractJson extends DemoTestBase {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Pipeline should execute successfully");
 
-        logger.info("✓ Complex nested structures validated successfully");
+        logger.info("[OK] Complex nested structures validated successfully");
     }
 }
 

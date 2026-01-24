@@ -91,8 +91,8 @@ public class InMemoryCacheManager implements CacheManager {
         }
         
         this.running = true;
-        LOGGER.info("In-memory cache manager initialized with maxSize={}, defaultTTL={}s", 
-            maxSize, defaultTtlSeconds);
+        LOGGER.debug("Cache '{}' initialized: maxSize={}, ttl={}s", 
+            configuration.getName(), maxSize, defaultTtlSeconds);
     }
     
     @Override
@@ -300,10 +300,10 @@ public class InMemoryCacheManager implements CacheManager {
         try {
             cache.clear();
             currentSize.set(0);
-            LOGGER.info("Cache cleared for '{}'", configuration.getName());
+            LOGGER.debug("Cache '{}' cleared", configuration.getName());
 
         } catch (Exception e) {
-            LOGGER.error("Failed to clear cache", e);
+            LOGGER.error("Failed to clear cache '{}'", configuration.getName(), e);
         }
     }
     
@@ -365,7 +365,7 @@ public class InMemoryCacheManager implements CacheManager {
         
         cache.clear();
         currentSize.set(0);
-        LOGGER.info("In-memory cache manager shut down for '{}'", configuration.getName());
+        LOGGER.debug("Cache '{}' shut down", configuration.getName());
     }
 
     /**

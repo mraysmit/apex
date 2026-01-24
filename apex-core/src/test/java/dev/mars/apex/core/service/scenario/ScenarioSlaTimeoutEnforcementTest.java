@@ -95,7 +95,7 @@ class ScenarioSlaTimeoutEnforcementTest {
             assertTrue(result.getTotalExecutionTimeMs() >= 0,
                 "Result should track execution time");
 
-            logger.info("✓ Scenario completed within SLA: {}ms (limit: {}ms)",
+            logger.info("[OK] Scenario completed within SLA: {}ms (limit: {}ms)",
                 executionTime, slaMs);
         }
         
@@ -130,7 +130,7 @@ class ScenarioSlaTimeoutEnforcementTest {
                     "Stage '" + stageResult.getStageName() + "' should have execution time tracked");
             }
             
-            logger.info("✓ Stage execution times tracked: {} stages",
+            logger.info("[OK] Stage execution times tracked: {} stages",
                 result.getStageResults().size());
         }
         
@@ -166,7 +166,7 @@ class ScenarioSlaTimeoutEnforcementTest {
                 logger.warn("TEST: SLA exceeded - execution: {}ms, limit: {}ms",
                     executionTime, slaMs);
             } else {
-                logger.info("✓ Tight SLA met: {}ms (limit: {}ms)",
+                logger.info("[OK] Tight SLA met: {}ms (limit: {}ms)",
                     executionTime, slaMs);
             }
         }
@@ -201,7 +201,7 @@ class ScenarioSlaTimeoutEnforcementTest {
             assertTrue(result.getTotalExecutionTimeMs() >= totalStageTime,
                 "Total execution time should be >= sum of stage times");
 
-            logger.info("✓ Total execution time: {}ms (stages: {}ms)",
+            logger.info("[OK] Total execution time: {}ms (stages: {}ms)",
                 result.getTotalExecutionTimeMs(), totalStageTime);
         }
     }

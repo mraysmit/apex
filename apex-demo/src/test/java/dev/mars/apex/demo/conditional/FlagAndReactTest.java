@@ -51,7 +51,7 @@ public class FlagAndReactTest extends DemoTestBase {
             // Load YAML configuration
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/FlagAndReactTest.yaml");
             assertNotNull(config, "Configuration should not be null");
-            logger.info("✓ Configuration loaded successfully");
+            logger.info("[OK] Configuration loaded successfully");
 
             // Scenario 1: Chain Passes (VIP + High Value)
             // -------------------------------------------
@@ -78,7 +78,7 @@ public class FlagAndReactTest extends DemoTestBase {
             assertEquals(1500.0, passEnriched.get("bonusPoints"), 
                 "Bonus points should be 10% of amount (1500.0)");
             
-            logger.info("✓ Scenario 1 passed: Chain set flag, Enrichment reacted to flag");
+            logger.info("[OK] Scenario 1 passed: Chain set flag, Enrichment reacted to flag");
 
 
             // Scenario 2: Chain Fails (VIP but Low Value)
@@ -108,7 +108,7 @@ public class FlagAndReactTest extends DemoTestBase {
             assertFalse(failEnriched.containsKey("bonusPoints"), 
                 "Enrichment should NOT have triggered for failed chain");
 
-            logger.info("✓ Scenario 2 passed: Chain failed, Enrichment did not run");
+            logger.info("[OK] Scenario 2 passed: Chain failed, Enrichment did not run");
 
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);

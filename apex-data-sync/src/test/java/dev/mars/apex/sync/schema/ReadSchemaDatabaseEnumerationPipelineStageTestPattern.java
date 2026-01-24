@@ -147,7 +147,7 @@ class ReadSchemaDatabaseEnumerationPipelineStageTestPattern extends SyncTestBase
             assertTrue(tableSchemas.size() >= 2, "Should have at least 2 TEMP tables");
         }
 
-        logger.info("✓ Successfully enumerated tables with pattern filter");
+        logger.info("[OK] Successfully enumerated tables with pattern filter");
     }
 
     private void setupTestDatabase() throws Exception {

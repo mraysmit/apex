@@ -175,15 +175,15 @@ class SchemaDiffMigrationValidationTest_AddedColumns_Testcontainers extends Sync
         // Verify HTML report was generated
         Path reportPath = Path.of("target/reports/safe-evolution-migration-report-testcontainers.html");
         assertTrue(Files.exists(reportPath), "HTML report should be generated");
-        logger.info("✓ HTML report generated: {}", reportPath);
+        logger.info("[OK] HTML report generated: {}", reportPath);
         
         String reportContent = Files.readString(reportPath);
         assertTrue(reportContent.contains("phone") || reportContent.contains("status"), 
             "Report should mention added columns");
         assertTrue(reportContent.contains("Added Columns"), "Report should have added columns section");
         
-        logger.info("✓ Safe schema evolution validated: 2 columns added, no breaking changes");
-        logger.info("✓ Migration is backward compatible - existing applications will continue to work");
+        logger.info("[OK] Safe schema evolution validated: 2 columns added, no breaking changes");
+        logger.info("[OK] Migration is backward compatible - existing applications will continue to work");
     }
 
     private SchemaComparisonResult extractComparisonResult(RuleResult result) {

@@ -95,7 +95,7 @@ public class SimpleAgeValidationTest {
             assertTrue(result.isSuccess(), "Age validation should succeed for age 25");
             assertNotNull(result.getMessage(), "Result should have a message");
             
-            logger.info("✓ Valid age scenario test passed");
+            logger.info("[OK] Valid age scenario test passed");
             
         } catch (YamlConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
@@ -139,7 +139,7 @@ public class SimpleAgeValidationTest {
             assertTrue(result.isSuccess(), "Rule execution should succeed");
             assertNotNull(result.getMessage(), "Result should have a message");
             
-            logger.info("✓ Invalid age scenario test passed");
+            logger.info("[OK] Invalid age scenario test passed");
             
         } catch (YamlConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
@@ -187,7 +187,7 @@ public class SimpleAgeValidationTest {
             assertTrue(result.getMessage().contains("Age field") || result.getMessage().contains("#age"), 
                       "Message should reference age field");
             
-            logger.info("✓ Missing age scenario test passed");
+            logger.info("[OK] Missing age scenario test passed");
             
         } catch (YamlConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());

@@ -101,7 +101,7 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
                 ('CUST005', 'Manufacturing Co', 'INDUSTRIAL', 'GOLD', 'EU', 'SUSPENDED', '2023-05-12')
                 """);
 
-            logger.info("✓ H2 database setup completed for simple database enrichment testing");
+            logger.info("[OK] H2 database setup completed for simple database enrichment testing");
 
         } catch (Exception e) {
             logger.error("Failed to setup H2 database: " + e.getMessage(), e);
@@ -384,7 +384,7 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
         try (Connection connection = DriverManager.getConnection(
                 "jdbc:h2:./target/h2-demo/" + DB_NAME, "sa", "")) {
             connection.createStatement().execute("SHUTDOWN");
-            logger.info("✓ Database shutdown completed");
+            logger.info("[OK] Database shutdown completed");
         } catch (Exception e) {
             logger.warn("Failed to shutdown database: " + e.getMessage());
         }

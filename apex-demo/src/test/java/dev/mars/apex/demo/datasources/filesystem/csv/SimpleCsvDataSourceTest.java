@@ -91,7 +91,7 @@ public class SimpleCsvDataSourceTest extends DemoTestBase {
             assertEquals("ACTIVE", enrichedData.get("customerStatus"));
             assertEquals("ORD123", enrichedData.get("orderId"));
 
-            logger.info("✓ CSV data source enrichment successful");
+            logger.info("[OK] CSV data source enrichment successful");
         } catch (Exception e) {
             fail("CSV data source test failed: " + e.getMessage());
         }
@@ -128,7 +128,7 @@ public class SimpleCsvDataSourceTest extends DemoTestBase {
             assertNull(enrichedData.get("productPrice"));
             assertNull(enrichedData.get("productCategory"));
 
-            logger.info("✓ Missing product ID handled correctly");
+            logger.info("[OK] Missing product ID handled correctly");
         } catch (Exception e) {
             fail("Missing product ID test failed: " + e.getMessage());
         }
@@ -167,7 +167,7 @@ public class SimpleCsvDataSourceTest extends DemoTestBase {
             assertNull(enrichedData.get("productPrice"));
             assertNull(enrichedData.get("productCategory"));
 
-            logger.info("✓ Unknown product ID handled correctly");
+            logger.info("[OK] Unknown product ID handled correctly");
         } catch (Exception e) {
             fail("Unknown product ID test failed: " + e.getMessage());
         }

@@ -214,11 +214,11 @@ class PostgreSQLPasswordInjectionTest {
                    "Should contain resolved username");
         
         logger.info("PostgreSQL password injection test completed successfully");
-        logger.info("  ✓ PostgreSQL container started and accessible");
-        logger.info("  ✓ System properties injected into YAML configuration");
-        logger.info("  ✓ Database connection established using injected credentials");
-        logger.info("  ✓ SQL query executed successfully");
-        logger.info("  ✓ Expected data retrieved and mapped correctly");
+        logger.info("  [OK] PostgreSQL container started and accessible");
+        logger.info("  [OK] System properties injected into YAML configuration");
+        logger.info("  [OK] Database connection established using injected credentials");
+        logger.info("  [OK] SQL query executed successfully");
+        logger.info("  [OK] Expected data retrieved and mapped correctly");
         logger.info("=================================================================");
     }
 
@@ -250,8 +250,8 @@ class PostgreSQLPasswordInjectionTest {
                 """);
             
             logger.info("Test data setup completed:");
-            logger.info("  ✓ Created users table");
-            logger.info("  ✓ Inserted test users: John Doe, Jane Smith");
+            logger.info("  [OK] Created users table");
+            logger.info("  [OK] Inserted test users: John Doe, Jane Smith");
         }
     }
 }

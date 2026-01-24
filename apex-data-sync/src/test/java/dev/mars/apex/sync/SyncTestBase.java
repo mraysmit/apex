@@ -109,7 +109,7 @@ public abstract class SyncTestBase {
         this.expressionEvaluator = new ExpressionEvaluatorService();
         this.rulesEngineConfiguration = new RulesEngineConfiguration();
 
-        logger.info("✓ APEX services initialized successfully");
+        logger.info("[OK] APEX services initialized successfully");
     }
 
     /**
@@ -160,7 +160,7 @@ public abstract class SyncTestBase {
         ApexCacheManager.resetInstance();
         logger.info("Cache manager singleton reset for test isolation");
 
-        logger.info("✓ APEX services cleanup completed");
+        logger.info("[OK] APEX services cleanup completed");
     }
 
     /**
@@ -207,7 +207,7 @@ public abstract class SyncTestBase {
                 "Execution rate failure for %s: Expected %d steps, executed %d steps (%.1f%%)",
                 context, expectedSteps, actualSteps, (actualSteps * 100.0 / expectedSteps)));
         }
-        logger.info("✓ 100%% execution rate verified: {} - Processed {} out of {} steps",
+        logger.info("[OK] 100%% execution rate verified: {} - Processed {} out of {} steps",
             context, actualSteps, expectedSteps);
     }
 }

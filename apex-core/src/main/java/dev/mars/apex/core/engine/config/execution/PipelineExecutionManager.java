@@ -148,7 +148,7 @@ public class PipelineExecutionManager {
                 }
             }
 
-            logger.info("Pipeline components initialized: {} data sources, {} data sinks",
+            logger.debug("Pipeline components initialized: {} data sources, {} data sinks",
                     dataSources.size(), dataSinks.size());
 
         } catch (Exception e) {

@@ -63,7 +63,7 @@ class DataSourceServiceTest {
         assertEquals("Test H2 Database", created.getName());
         assertNotNull(created.getCreatedAt());
         
-        System.out.println("✓ Created connection: " + created.getId());
+        System.out.println("[OK] Created connection: " + created.getId());
     }
     
     @Test
@@ -79,7 +79,7 @@ class DataSourceServiceTest {
         // Then
         assertTrue(isValid);
         
-        System.out.println("✓ Connection test passed");
+        System.out.println("[OK] Connection test passed");
     }
     
     @Test
@@ -93,7 +93,7 @@ class DataSourceServiceTest {
         assertNotNull(connections);
         assertFalse(connections.isEmpty());
         
-        System.out.println("✓ Retrieved " + connections.size() + " connection(s)");
+        System.out.println("[OK] Retrieved " + connections.size() + " connection(s)");
     }
     
     @Test
@@ -101,7 +101,7 @@ class DataSourceServiceTest {
     @DisplayName("Should create test table using executeUpdate")
     void shouldCreateTestTable() {
         // Use a simplified approach - just verify service can handle queries
-        System.out.println("✓ Service ready for query execution");
+        System.out.println("[OK] Service ready for query execution");
     }
     
     @Test
@@ -117,7 +117,7 @@ class DataSourceServiceTest {
             dataSourceService.executeQuery("non-existent-id", request)
         );
         
-        System.out.println("✓ Non-existent connection threw exception as expected");
+        System.out.println("[OK] Non-existent connection threw exception as expected");
     }
     
     @Test
@@ -131,7 +131,7 @@ class DataSourceServiceTest {
         DataSourceConnection connection = dataSourceService.getConnection(testConnectionId);
         assertNull(connection);
         
-        System.out.println("✓ Connection deleted successfully");
+        System.out.println("[OK] Connection deleted successfully");
     }
     
     @Test
@@ -163,6 +163,6 @@ class DataSourceServiceTest {
         dataSourceService.deleteConnection(created1.getId());
         dataSourceService.deleteConnection(created2.getId());
         
-        System.out.println("✓ Multiple connections created and deleted");
+        System.out.println("[OK] Multiple connections created and deleted");
     }
 }

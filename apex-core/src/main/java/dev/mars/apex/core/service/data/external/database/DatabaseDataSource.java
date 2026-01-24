@@ -68,7 +68,7 @@ public class DatabaseDataSource implements ExternalDataSource {
      * @param configuration The data source configuration
      */
     public DatabaseDataSource(DataSource dataSource, DataSourceConfiguration configuration) {
-        LOGGER.info("APEX-CORE: Creating DatabaseDataSource instance for '{}'", configuration.getName());
+        LOGGER.debug("Creating DatabaseDataSource instance for '{}'", configuration.getName());
         this.dataSource = dataSource;
         this.configuration = configuration;
         this.connectionStatus = ConnectionStatus.notInitialized();
@@ -86,12 +86,12 @@ public class DatabaseDataSource implements ExternalDataSource {
             // Test the connection
             if (testConnection()) {
                 this.connectionStatus = ConnectionStatus.connected("Database connection established");
-                LOGGER.info("Database data source '{}' initialized successfully", config.getName());
+                LOGGER.debug("Database data source '{}' initialized successfully", config.getName());
 
                 // Test database connectivity with a generic query
                 try (Connection testConn = dataSource.getConnection()) {
-                    LOGGER.info("Testing database connectivity for '{}'", config.getName());
-                    LOGGER.info("Database URL: {}", testConn.getMetaData().getURL());
+                    LOGGER.debug("Testing database connectivity for '{}', URL: {}", 
+                        config.getName(), testConn.getMetaData().getURL());
 
                     // Perform a simple connectivity check without assuming specific tables
                     try (Statement stmt = testConn.createStatement();
@@ -141,7 +141,7 @@ public class DatabaseDataSource implements ExternalDataSource {
         try (Connection connection = dataSource.getConnection()) {
             return connection != null && !connection.isClosed();
         } catch (SQLException e) {
-            LOGGER.warn("Database connection test failed", e);
+            LOGGER.warn("Database connection test failed: {}", e.getMessage());
             return false;
         }
     }

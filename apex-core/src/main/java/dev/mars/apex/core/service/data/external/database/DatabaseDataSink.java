@@ -687,7 +687,7 @@ public class DatabaseDataSink implements DataSink {
 
                         try (PreparedStatement preparedStatement = connection.prepareStatement(actualSql)) {
                             preparedStatement.execute();
-                            LOGGER.info("✓ Statement {}/{} executed successfully", i + 1, statements.length);
+                            LOGGER.info("[OK] Statement {}/{} executed successfully", i + 1, statements.length);
                         } catch (Exception e) {
                             LOGGER.error("X Statement {}/{} failed: {}", i + 1, statements.length, e.getMessage());
                             throw e;
@@ -726,7 +726,7 @@ public class DatabaseDataSink implements DataSink {
                 // Perform a basic connectivity test by querying system tables
                 verifyDatabaseConnectivity(connection);
 
-                LOGGER.info("✓ Schema verification completed successfully for database sink: {}", getName());
+                LOGGER.info("[OK] Schema verification completed successfully for database sink: {}", getName());
             }
 
         } catch (Exception e) {
@@ -743,7 +743,7 @@ public class DatabaseDataSink implements DataSink {
 
         try (PreparedStatement statement = connection.prepareStatement(testQuery)) {
             statement.executeQuery();
-            LOGGER.info("✓ Table '{}' exists and is accessible", tableName);
+            LOGGER.info("[OK] Table '{}' exists and is accessible", tableName);
         } catch (Exception e) {
             LOGGER.error("X Table '{}' verification failed: {}", tableName, e.getMessage());
             throw new Exception("Table '" + tableName + "' does not exist or is not accessible", e);
@@ -760,12 +760,12 @@ public class DatabaseDataSink implements DataSink {
             String databaseName = metadata.getDatabaseProductName();
             String databaseVersion = metadata.getDatabaseProductVersion();
 
-            LOGGER.info("✓ Database connectivity verified: {} {}", databaseName, databaseVersion);
+            LOGGER.info("[OK] Database connectivity verified: {} {}", databaseName, databaseVersion);
 
             // Test a simple query that should work on all databases
             try (PreparedStatement statement = connection.prepareStatement("SELECT 1")) {
                 statement.executeQuery();
-                LOGGER.info("✓ Basic query execution verified");
+                LOGGER.info("[OK] Basic query execution verified");
             }
 
         } catch (Exception e) {

@@ -68,7 +68,7 @@ public class RuleResultFieldPerformanceTest extends DemoTestBase {
             for (int i = 0; i < WARMUP_ITERATIONS; i++) {
                 engine.evaluate(config, testData);
             }
-            logger.info("✓ Warmup completed");
+            logger.info("[OK] Warmup completed");
             
             // Benchmark Phase 1: Rules WITHOUT result-field
             logger.info("\n--- Benchmark Phase 1: Rules WITHOUT result-field ---");
@@ -133,10 +133,10 @@ public class RuleResultFieldPerformanceTest extends DemoTestBase {
 
             // Validate overhead is within acceptable range
             if (overheadPercent < 0) {
-                logger.info("✓ Result-field is FASTER than baseline ({}% improvement)",
+                logger.info("[OK] Result-field is FASTER than baseline ({}% improvement)",
                     String.format("%.3f", Math.abs(overheadPercent)));
             } else if (overheadPercent <= MAX_OVERHEAD_PERCENT) {
-                logger.info("✓ Overhead is within acceptable range: {}% <= {}%",
+                logger.info("[OK] Overhead is within acceptable range: {}% <= {}%",
                     String.format("%.3f", overheadPercent), MAX_OVERHEAD_PERCENT);
             } else {
                 logger.warn("⚠ Overhead exceeds threshold: {}% > {}%",
@@ -148,7 +148,7 @@ public class RuleResultFieldPerformanceTest extends DemoTestBase {
                 String.format("result-field overhead (%.3f%%) should be <= %.1f%%",
                     overheadPercent, MAX_OVERHEAD_PERCENT));
 
-            logger.info("\n✓ Performance validation PASSED: result-field overhead is minimal");
+            logger.info("\n[OK] Performance validation PASSED: result-field overhead is minimal");
             
         } catch (Exception e) {
             logger.error("Performance test failed: " + e.getMessage(), e);
@@ -200,7 +200,7 @@ public class RuleResultFieldPerformanceTest extends DemoTestBase {
             logger.info("  Median:  {}", formatTime(stats.median));
             logger.info("  StdDev:  {}", formatTime(stats.stdDev));
             
-            logger.info("\n✓ Zero overhead validation PASSED");
+            logger.info("\n[OK] Zero overhead validation PASSED");
             
         } catch (Exception e) {
             logger.error("Zero overhead test failed: " + e.getMessage(), e);

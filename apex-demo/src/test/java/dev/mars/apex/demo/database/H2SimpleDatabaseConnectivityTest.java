@@ -41,7 +41,7 @@ public class H2SimpleDatabaseConnectivityTest extends DemoTestBase {
             statement.execute("CREATE TABLE test_table (id VARCHAR(10), name VARCHAR(50))");
             statement.execute("INSERT INTO test_table VALUES ('1', 'Test Name')");
 
-            logger.info("✓ Database setup completed");
+            logger.info("[OK] Database setup completed");
 
         } catch (Exception e) {
             throw new RuntimeException("Database setup failed", e);
@@ -54,7 +54,7 @@ public class H2SimpleDatabaseConnectivityTest extends DemoTestBase {
         try (Connection connection = DriverManager.getConnection(
                 "jdbc:h2:./target/h2-demo/" + DB_NAME, "sa", "")) {
             connection.createStatement().execute("SHUTDOWN");
-            logger.info("✓ Database shutdown completed");
+            logger.info("[OK] Database shutdown completed");
         } catch (Exception e) {
             logger.warn("Failed to shutdown database: " + e.getMessage());
         }
@@ -84,7 +84,7 @@ public class H2SimpleDatabaseConnectivityTest extends DemoTestBase {
             Map<String, Object> enrichedData = (Map<String, Object>) result;
 
             assertEquals("Test Name", enrichedData.get("name"));
-            logger.info("✓ Database connectivity test passed");
+            logger.info("[OK] Database connectivity test passed");
 
         } catch (Exception e) {
             fail("Database connectivity test failed: " + e.getMessage());

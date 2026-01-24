@@ -108,7 +108,7 @@ public class NullableConversionTest extends SyncTestBase {
         assertTrue(sourceEmail.isNullable(), "Source email should be nullable");
         assertFalse(targetEmail.isNullable(), "Target email should NOT be nullable");
         
-        logger.info("✓ Nullable to NOT NULL conversion detected");
+        logger.info("[OK] Nullable to NOT NULL conversion detected");
         validateExecutionRate(2, 2, "Nullable conversion");
     }
 
@@ -132,7 +132,7 @@ public class NullableConversionTest extends SyncTestBase {
         assertNotNull(idColumn);
         assertFalse(idColumn.isNullable(), "Primary key should not be nullable");
         
-        logger.info("✓ Primary key nullability validated");
+        logger.info("[OK] Primary key nullability validated");
         validateExecutionRate(2, 2, "PK nullability");
     }
 }

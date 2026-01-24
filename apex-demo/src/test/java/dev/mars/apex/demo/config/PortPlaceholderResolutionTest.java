@@ -62,7 +62,7 @@ class PortPlaceholderResolutionTest {
             
             // Verify configuration loaded successfully
             assertEquals("PORT Placeholder Resolution Test", config.getMetadata().getName());
-            logger.info("✓ YAML configuration loaded successfully");
+            logger.info("[OK] YAML configuration loaded successfully");
 
             // Verify data source was loaded
             assertNotNull(config.getDataSources(), "Data sources should not be null");
@@ -70,7 +70,7 @@ class PortPlaceholderResolutionTest {
             
             YamlDataSource dataSource = config.getDataSources().get(0);
             assertEquals("test-api", dataSource.getName());
-            logger.info("✓ Data source loaded: {}", dataSource.getName());
+            logger.info("[OK] Data source loaded: {}", dataSource.getName());
 
             // Verify PORT placeholder was resolved in base-url
             assertNotNull(dataSource.getConnection(), "Connection configuration should not be null");
@@ -79,13 +79,13 @@ class PortPlaceholderResolutionTest {
             
             String expectedUrl = "http://localhost:" + TEST_PORT;
             assertEquals(expectedUrl, baseUrl, "PORT placeholder should be resolved to actual port");
-            logger.info("✓ PORT placeholder resolved correctly: {} -> {}", "${PORT}", TEST_PORT);
-            logger.info("✓ Final base URL: {}", baseUrl);
+            logger.info("[OK] PORT placeholder resolved correctly: {} -> {}", "${PORT}", TEST_PORT);
+            logger.info("[OK] Final base URL: {}", baseUrl);
 
             // Verify enrichment was loaded
             assertNotNull(config.getEnrichments(), "Enrichments should not be null");
             assertEquals(1, config.getEnrichments().size(), "Should have exactly 1 enrichment");
-            logger.info("✓ Enrichment loaded successfully");
+            logger.info("[OK] Enrichment loaded successfully");
 
             logger.info("🎉 PORT placeholder resolution test PASSED");
 
@@ -115,7 +115,7 @@ class PortPlaceholderResolutionTest {
             assertTrue(errorMessage.contains("Property not found: PORT"), 
                       "Exception should indicate PORT property not found, but was: " + errorMessage);
             
-            logger.info("✓ Expected failure occurred: {}", errorMessage);
+            logger.info("[OK] Expected failure occurred: {}", errorMessage);
             logger.info("🎉 PORT placeholder resolution failure test PASSED");
 
         } catch (AssertionError e) {
@@ -149,7 +149,7 @@ class PortPlaceholderResolutionTest {
                 String expectedUrl = "http://localhost:" + port;
                 
                 assertEquals(expectedUrl, baseUrl, "PORT should resolve to " + port);
-                logger.info("✓ PORT {} resolved correctly to: {}", port, baseUrl);
+                logger.info("[OK] PORT {} resolved correctly to: {}", port, baseUrl);
 
             } catch (Exception e) {
                 logger.error("Failed to resolve PORT {}: {}", port, e.getMessage());

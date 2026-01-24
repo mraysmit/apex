@@ -45,16 +45,16 @@ public class ConsoleVisualizationDemo {
         // Analyze each file
         System.out.println("Analyzing: trade-validation-rules.yaml");
         YamlContentSummary validationSummary = analyzer.analyzYamlContent(tradeValidation.getName());
-        System.out.println("  ✓ Found: " + validationSummary.getRuleGroupCount() + " rule groups, " + 
+        System.out.println("  [OK] Found: " + validationSummary.getRuleGroupCount() + " rule groups, " + 
                           validationSummary.getRuleCount() + " rules");
 
         System.out.println("Analyzing: trade-enrichment.yaml");
         YamlContentSummary enrichmentSummary = analyzer.analyzYamlContent(tradeEnrichment.getName());
-        System.out.println("  ✓ Found: " + enrichmentSummary.getEnrichmentCount() + " enrichments");
+        System.out.println("  [OK] Found: " + enrichmentSummary.getEnrichmentCount() + " enrichments");
 
         System.out.println("Analyzing: compliance-rules.yaml");
         YamlContentSummary complianceSummary = analyzer.analyzYamlContent(complianceRules.getName());
-        System.out.println("  ✓ Found: " + complianceSummary.getRuleGroupCount() + " rule groups, " + 
+        System.out.println("  [OK] Found: " + complianceSummary.getRuleGroupCount() + " rule groups, " + 
                           complianceSummary.getRuleCount() + " rules");
 
         // Attach summaries to nodes

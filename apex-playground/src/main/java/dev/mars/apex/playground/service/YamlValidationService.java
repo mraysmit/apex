@@ -185,11 +185,11 @@ public class YamlValidationService {
         // Provide specific examples based on the field
         if (errorMessage.contains("queries")) {
             return "Field 'queries' has incorrect format.\n\n" +
-                   "✓ MAP FORMAT (simple queries):\n" +
+                   "[OK] MAP FORMAT (simple queries):\n" +
                    "queries:\n" +
                    "  customerProfile: \"SELECT * FROM customers WHERE id = :id\"\n" +
                    "  getAllActive: \"SELECT * FROM customers WHERE status = 'ACTIVE'\"\n\n" +
-                   "✓ ARRAY FORMAT (queries with metadata):\n" +
+                   "[OK] ARRAY FORMAT (queries with metadata):\n" +
                    "queries:\n" +
                    "  - name: \"customerProfile\"\n" +
                    "    query: \"SELECT * FROM customers WHERE id = :id\"\n" +
@@ -201,11 +201,11 @@ public class YamlValidationService {
         }
         if (errorMessage.contains("operations")) {
             return "Field 'operations' has incorrect format.\n\n" +
-                   "✓ MAP FORMAT (simple operations):\n" +
+                   "[OK] MAP FORMAT (simple operations):\n" +
                    "operations:\n" +
                    "  getAllCustomers: \"SELECT * FROM csv\"\n" +
                    "  getActiveCustomers: \"SELECT * FROM csv WHERE status = 'ACTIVE'\"\n\n" +
-                   "✓ ARRAY FORMAT (operations with metadata):\n" +
+                   "[OK] ARRAY FORMAT (operations with metadata):\n" +
                    "operations:\n" +
                    "  - name: \"getAllCustomers\"\n" +
                    "    query: \"SELECT * FROM csv\"\n" +
@@ -216,11 +216,11 @@ public class YamlValidationService {
         }
         if (errorMessage.contains("endpoints")) {
             return "Field 'endpoints' has incorrect format.\n\n" +
-                   "✓ MAP FORMAT (simple endpoints):\n" +
+                   "[OK] MAP FORMAT (simple endpoints):\n" +
                    "endpoints:\n" +
                    "  currency-lookup: \"/api/currency/{key}\"\n" +
                    "  country-lookup: \"/api/country/{code}\"\n\n" +
-                   "✓ ARRAY FORMAT (endpoints with metadata):\n" +
+                   "[OK] ARRAY FORMAT (endpoints with metadata):\n" +
                    "endpoints:\n" +
                    "  - name: \"currency-lookup\"\n" +
                    "    endpoint: \"/api/currency/{key}\"\n" +
@@ -232,11 +232,11 @@ public class YamlValidationService {
         }
         if (errorMessage.contains("topics")) {
             return "Field 'topics' has incorrect format.\n\n" +
-                   "✓ MAP FORMAT (simple topics):\n" +
+                   "[OK] MAP FORMAT (simple topics):\n" +
                    "topics:\n" +
                    "  customerEvents: \"customer-events\"\n" +
                    "  orderEvents: \"order-events\"\n\n" +
-                   "✓ ARRAY FORMAT (topics with metadata):\n" +
+                   "[OK] ARRAY FORMAT (topics with metadata):\n" +
                    "topics:\n" +
                    "  - name: \"customerEvents\"\n" +
                    "    topic: \"customer-events\"\n" +
@@ -247,11 +247,11 @@ public class YamlValidationService {
         }
         if (errorMessage.contains("key-patterns") || errorMessage.contains("keyPatterns")) {
             return "Field 'key-patterns' has incorrect format.\n\n" +
-                   "✓ MAP FORMAT (simple patterns):\n" +
+                   "[OK] MAP FORMAT (simple patterns):\n" +
                    "key-patterns:\n" +
                    "  customerPattern: \"customer:*\"\n" +
                    "  orderPattern: \"order:*\"\n\n" +
-                   "✓ ARRAY FORMAT (patterns with metadata):\n" +
+                   "[OK] ARRAY FORMAT (patterns with metadata):\n" +
                    "key-patterns:\n" +
                    "  - name: \"customerPattern\"\n" +
                    "    pattern: \"customer:*\"\n" +

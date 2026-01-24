@@ -195,7 +195,7 @@ public abstract class DemoTestBase {
             failureMessages.add("Error details: " + e.getMessage());
 
             return RuleResult.evaluationFailure(failureMessages, new HashMap<String, Object>(),
-                "configuration-loading", "CRITICAL: Configuration file loading failed: " + e.getMessage());
+                "configuration-loading", Configuration file loading failed: " + e.getMessage());
 
         } catch (Exception e) {
             logger.error("Unexpected error loading YAML configuration: {}", e.getMessage(), e);

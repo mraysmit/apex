@@ -88,7 +88,7 @@ public class EnhancedCacheManager {
             this.keyPrefix = "";
         }
         
-        LOGGER.info("Enhanced cache manager initialized: enabled={}, maxSize={}, defaultTTL={}s, maxIdle={}s, keyPrefix='{}'", 
+        LOGGER.debug("Enhanced cache manager initialized: enabled={}, maxSize={}, defaultTTL={}s, maxIdle={}s, keyPrefix='{}'", 
             enabled, maxSize, defaultTtlSeconds, maxIdleSeconds, keyPrefix);
     }
     

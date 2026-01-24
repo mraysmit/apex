@@ -70,6 +70,6 @@ class SchemaDiffReportBuilderTest {
         assertNotNull(report.getSummary());
         assertNotNull(report.getColumns());
         assertNotNull(report.getCompatibility());
-        logger.info("  ✓ Report built successfully - all sections present");
+        logger.info("  [OK] Report built successfully - all sections present");
     }
 }

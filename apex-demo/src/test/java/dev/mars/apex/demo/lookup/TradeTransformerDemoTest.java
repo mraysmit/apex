@@ -131,7 +131,7 @@ public class TradeTransformerDemoTest {
             assertNotNull(result, "Equity trade result should not be null");
             
             Map<String, Object> enrichedData = result.getEnrichedData();
-            logger.info("✓ Equity trade transformation successful:");
+            logger.info("[OK] Equity trade transformation successful:");
             logger.info("  - Instrument Category: {}", enrichedData.get("instrumentCategory"));
             logger.info("  - Priority Category: {}", enrichedData.get("priorityCategory"));
             logger.info("  - Value Category: {}", enrichedData.get("valueCategory"));
@@ -170,7 +170,7 @@ public class TradeTransformerDemoTest {
             assertNotNull(result, "Bond trade result should not be null");
             
             Map<String, Object> enrichedData = result.getEnrichedData();
-            logger.info("✓ Bond trade transformation successful:");
+            logger.info("[OK] Bond trade transformation successful:");
             logger.info("  - Instrument Category: {}", enrichedData.get("instrumentCategory"));
             logger.info("  - Priority Category: {}", enrichedData.get("priorityCategory"));
             logger.info("  - Value Category: {}", enrichedData.get("valueCategory"));
@@ -209,7 +209,7 @@ public class TradeTransformerDemoTest {
             assertNotNull(result, "Small trade result should not be null");
             
             Map<String, Object> enrichedData = result.getEnrichedData();
-            logger.info("✓ Small trade transformation successful:");
+            logger.info("[OK] Small trade transformation successful:");
             logger.info("  - Instrument Category: {}", enrichedData.get("instrumentCategory"));
             logger.info("  - Priority Category: {}", enrichedData.get("priorityCategory"));
             logger.info("  - Value Category: {}", enrichedData.get("valueCategory"));
@@ -249,7 +249,7 @@ public class TradeTransformerDemoTest {
             
             Map<String, Object> enrichedData = result.getEnrichedData();
             
-            logger.info("✓ Complete trade portfolio transformation processed successfully");
+            logger.info("[OK] Complete trade portfolio transformation processed successfully");
             logger.info("  - Trade Details: {} {} trade valued at ${}", 
                 enrichedData.get("priorityCategory"), 
                 enrichedData.get("instrumentCategory"), 
@@ -291,7 +291,7 @@ public class TradeTransformerDemoTest {
             assertNotNull(result, "Partial trade result should not be null");
             
             Map<String, Object> enrichedData = result.getEnrichedData();
-            logger.info("✓ Partial trade data transformation handled gracefully");
+            logger.info("[OK] Partial trade data transformation handled gracefully");
             logger.info("  - Enriched data size: {}", enrichedData.size());
             logger.info("  - Available data: {}", enrichedData.keySet());
 

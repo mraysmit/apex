@@ -49,7 +49,7 @@ class SimpleBasicYamlRuleGroupProcessingTest {
 
         this.yamlLoader = new YamlConfigurationLoader();
 
-        logger.info("✓ APEX services initialized successfully");
+        logger.info("[OK] APEX services initialized successfully");
     }
 
     /**
@@ -68,7 +68,7 @@ class SimpleBasicYamlRuleGroupProcessingTest {
             );
             
             assertNotNull(config, "Configuration should be loaded");
-            logger.info("✓ Configuration loaded: {} rules, {} rule groups", 
+            logger.info("[OK] Configuration loaded: {} rules, {} rule groups", 
                 config.getRules().size(), config.getRuleGroups().size());
             
             // Create RulesEngine using static factory method
@@ -86,7 +86,7 @@ class SimpleBasicYamlRuleGroupProcessingTest {
             RuleResult andResult = engine.executeRuleGroupsList(java.util.List.of(andGroup), testData);
             assertNotNull(andResult, "Result should not be null");
             assertTrue(andResult.isTriggered(), "AND group with all true rules should pass");
-            logger.info("✓ AND group passed");
+            logger.info("[OK] AND group passed");
             
             // Test 2: OR group with mixed rules (should pass)
             logger.info("Testing OR group with mixed rules...");
@@ -96,7 +96,7 @@ class SimpleBasicYamlRuleGroupProcessingTest {
             RuleResult orResult = engine.executeRuleGroupsList(java.util.List.of(orGroup), testData);
             assertNotNull(orResult, "Result should not be null");
             assertTrue(orResult.isTriggered(), "OR group with at least one true rule should pass");
-            logger.info("✓ OR group passed");
+            logger.info("[OK] OR group passed");
             
             // Test 3: AND group with mixed rules (should fail)
             logger.info("Testing AND group with mixed rules...");
@@ -106,9 +106,9 @@ class SimpleBasicYamlRuleGroupProcessingTest {
             RuleResult andMixedResult = engine.executeRuleGroupsList(java.util.List.of(andMixedGroup), testData);
             assertNotNull(andMixedResult, "Result should not be null");
             assertFalse(andMixedResult.isTriggered(), "AND group with mixed rules should fail");
-            logger.info("✓ AND group failed as expected");
+            logger.info("[OK] AND group failed as expected");
             
-            logger.info("✓ All simple rule group tests passed");
+            logger.info("[OK] All simple rule group tests passed");
             
         } catch (YamlConfigurationException e) {
             logger.error("X Failed to load or process configuration: {}", e.getMessage());
@@ -132,13 +132,13 @@ class SimpleBasicYamlRuleGroupProcessingTest {
             );
             
             assertNotNull(config, "Configuration should be loaded");
-            logger.info("✓ Configuration with automatic rule references loaded: {} rules, {} rule groups",
+            logger.info("[OK] Configuration with automatic rule references loaded: {} rules, {} rule groups",
                 config.getRules().size(), config.getRuleGroups().size());
             
             // Create RulesEngine using static factory method
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
             assertNotNull(engine, "RulesEngine should be created");
-            logger.info("✓ Automatic rule reference resolution successful");
+            logger.info("[OK] Automatic rule reference resolution successful");
             
             // Test data (empty for hardcoded rule conditions)
             Map<String, Object> testData = Map.of();
@@ -151,7 +151,7 @@ class SimpleBasicYamlRuleGroupProcessingTest {
             assertNotNull(result, "Result should not be null");
             assertTrue(result.isTriggered(), "AND group should pass");
             
-            logger.info("✓ Separate files test passed");
+            logger.info("[OK] Separate files test passed");
             
         } catch (YamlConfigurationException e) {
             logger.error("X Failed to load or process configuration: {}", e.getMessage());

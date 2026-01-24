@@ -137,7 +137,7 @@ public class ReadSchemaLargeCsvTest extends SyncTestBase {
             .findFirst()
             .orElse(null);
         assertNotNull(emailColumn, "Should have email column");
-        logger.info("✓ Large CSV schema validated: {} columns", schema.getColumns().size());
+        logger.info("[OK] Large CSV schema validated: {} columns", schema.getColumns().size());
         
         // Validate execution rate
         validateExecutionRate(1, 1, "Large CSV schema reading");

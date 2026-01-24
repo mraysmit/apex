@@ -116,7 +116,7 @@ class ScenarioConcurrentAccessTest {
                 assertEquals(expectedTotal, totalSuccess,
                     "All concurrent executions should succeed");
                 
-                logger.info("✓ Multi-threaded execution passed: {} threads, {} executions each, {} total success",
+                logger.info("[OK] Multi-threaded execution passed: {} threads, {} executions each, {} total success",
                     threadCount, executionsPerThread, totalSuccess);
                 
             } catch (Exception e) {
@@ -171,7 +171,7 @@ class ScenarioConcurrentAccessTest {
                     }
                 }
                 
-                logger.info("✓ Race condition prevention verified: {} concurrent executions",
+                logger.info("[OK] Race condition prevention verified: {} concurrent executions",
                     concurrentExecutions);
                 
             } catch (Exception e) {
@@ -227,7 +227,7 @@ class ScenarioConcurrentAccessTest {
                         "Thread " + i + " execution should succeed");
                 }
                 
-                logger.info("✓ Result isolation verified: {} threads with isolated results",
+                logger.info("[OK] Result isolation verified: {} threads with isolated results",
                     threadCount);
                 
             } catch (Exception e) {
@@ -303,7 +303,7 @@ class ScenarioConcurrentAccessTest {
                 assertEquals(expectedTotal, successCount.get(),
                     "All concurrent cache accesses should succeed");
                 
-                logger.info("✓ Concurrent cache access verified: {} threads, {} executions each",
+                logger.info("[OK] Concurrent cache access verified: {} threads, {} executions each",
                     threadCount, executionsPerThread);
                 
             } catch (Exception e) {

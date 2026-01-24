@@ -96,7 +96,7 @@ class ResourceResolverTest {
                 assertTrue(content.contains("scenario-registry"), 
                           "Content should contain 'scenario-registry'");
                 
-                logger.info("✓ Successfully resolved classpath resource: {}", CLASSPATH_RESOURCE);
+                logger.info("[OK] Successfully resolved classpath resource: {}", CLASSPATH_RESOURCE);
             }
         }
 
@@ -114,7 +114,7 @@ class ResourceResolverTest {
                 assertTrue(content.contains("scenario-registry"), 
                           "Content should contain 'scenario-registry'");
                 
-                logger.info("✓ Successfully resolved with classpath prefix");
+                logger.info("[OK] Successfully resolved with classpath prefix");
             }
         }
 
@@ -129,7 +129,7 @@ class ResourceResolverTest {
                 String content = readStream(is);
                 assertNotNull(content, "Content should not be null");
                 
-                logger.info("✓ Successfully resolved nested classpath resource");
+                logger.info("[OK] Successfully resolved nested classpath resource");
             }
         }
 
@@ -140,7 +140,7 @@ class ResourceResolverTest {
 
             try (InputStream is = resolver.resolveFromClasspath(CLASSPATH_RESOURCE)) {
                 assertNotNull(is, "InputStream should not be null");
-                logger.info("✓ Successfully used explicit classpath resolution");
+                logger.info("[OK] Successfully used explicit classpath resolution");
             }
         }
 
@@ -156,7 +156,7 @@ class ResourceResolverTest {
 
             assertTrue(exception.getMessage().contains("not found"),
                       "Exception message should indicate resource not found");
-            logger.info("✓ Correctly threw ResourceNotFoundException");
+            logger.info("[OK] Correctly threw ResourceNotFoundException");
         }
     }
 
@@ -190,7 +190,7 @@ class ResourceResolverTest {
                 assertTrue(content.contains("test-file"), 
                           "Content should contain 'test-file'");
                 
-                logger.info("✓ Successfully resolved from absolute path: {}", testFile);
+                logger.info("[OK] Successfully resolved from absolute path: {}", testFile);
             }
         }
 
@@ -216,7 +216,7 @@ class ResourceResolverTest {
                 assertTrue(content.contains("search-path-test"), 
                           "Content should contain 'search-path-test'");
                 
-                logger.info("✓ Successfully resolved from search path");
+                logger.info("[OK] Successfully resolved from search path");
             }
         }
 
@@ -231,7 +231,7 @@ class ResourceResolverTest {
 
             try (InputStream is = resolver.resolveFromFilesystem(testFile.toString())) {
                 assertNotNull(is, "InputStream should not be null");
-                logger.info("✓ Successfully used explicit filesystem resolution");
+                logger.info("[OK] Successfully used explicit filesystem resolution");
             }
         }
 
@@ -247,7 +247,7 @@ class ResourceResolverTest {
 
             assertTrue(exception.getMessage().contains("not found"),
                       "Exception message should indicate file not found");
-            logger.info("✓ Correctly threw ResourceNotFoundException");
+            logger.info("[OK] Correctly threw ResourceNotFoundException");
         }
     }
 
@@ -268,7 +268,7 @@ class ResourceResolverTest {
             // basic-validation-scenario.yaml is also in scenario/
             try (InputStream is = resolver.resolve("basic-validation-scenario.yaml", "scenario/")) {
                 assertNotNull(is, "InputStream should not be null");
-                logger.info("✓ Successfully resolved relative path with base");
+                logger.info("[OK] Successfully resolved relative path with base");
             }
         }
 
@@ -279,7 +279,7 @@ class ResourceResolverTest {
 
             try (InputStream is = resolver.resolve("./basic-validation-scenario.yaml", "scenario/")) {
                 assertNotNull(is, "InputStream should not be null");
-                logger.info("✓ Successfully handled ./ prefix");
+                logger.info("[OK] Successfully handled ./ prefix");
             }
         }
 
@@ -297,7 +297,7 @@ class ResourceResolverTest {
             String nullBase = resolver.resolveRelativePath("rules.yaml", null);
             assertEquals("rules.yaml", nullBase);
 
-            logger.info("✓ resolveRelativePath utility works correctly");
+            logger.info("[OK] resolveRelativePath utility works correctly");
         }
 
         @Test
@@ -310,7 +310,7 @@ class ResourceResolverTest {
             assertEquals("", resolver.getClasspathBase(""));
             assertEquals("", resolver.getClasspathBase(null));
 
-            logger.info("✓ getClasspathBase works correctly");
+            logger.info("[OK] getClasspathBase works correctly");
         }
     }
 
@@ -332,7 +332,7 @@ class ResourceResolverTest {
 
             assertEquals(ResourceResolver.ResolutionStrategy.CLASSPATH_FIRST, 
                         resolver.getResolutionStrategy());
-            logger.info("✓ Default strategy is CLASSPATH_FIRST");
+            logger.info("[OK] Default strategy is CLASSPATH_FIRST");
         }
 
         @Test
@@ -351,7 +351,7 @@ class ResourceResolverTest {
                 // Should be the classpath version which contains "scenario-registry"
                 assertTrue(content.contains("scenario-registry"), 
                           "Should resolve from classpath first");
-                logger.info("✓ CLASSPATH_FIRST resolved from classpath");
+                logger.info("[OK] CLASSPATH_FIRST resolved from classpath");
             }
         }
 
@@ -374,7 +374,7 @@ class ResourceResolverTest {
                 String content = readStream(is);
                 assertTrue(content.contains("filesystem-version"), 
                           "Should resolve from filesystem first");
-                logger.info("✓ FILESYSTEM_FIRST resolved from filesystem");
+                logger.info("[OK] FILESYSTEM_FIRST resolved from filesystem");
             }
         }
 
@@ -388,7 +388,7 @@ class ResourceResolverTest {
             // Should find classpath resource
             try (InputStream is = resolver.resolve(CLASSPATH_RESOURCE)) {
                 assertNotNull(is);
-                logger.info("✓ CLASSPATH_ONLY found classpath resource");
+                logger.info("[OK] CLASSPATH_ONLY found classpath resource");
             }
 
             // Should NOT find filesystem-only resource
@@ -397,7 +397,7 @@ class ResourceResolverTest {
 
             assertThrows(ResourceNotFoundException.class,
                 () -> resolver.resolve(testFile.toString()));
-            logger.info("✓ CLASSPATH_ONLY correctly ignores filesystem");
+            logger.info("[OK] CLASSPATH_ONLY correctly ignores filesystem");
         }
 
         @Test
@@ -413,13 +413,13 @@ class ResourceResolverTest {
 
             try (InputStream is = resolver.resolve(testFile.toString())) {
                 assertNotNull(is);
-                logger.info("✓ FILESYSTEM_ONLY found filesystem resource");
+                logger.info("[OK] FILESYSTEM_ONLY found filesystem resource");
             }
 
             // Should NOT find classpath-only resource (that doesn't exist on filesystem)
             assertThrows(ResourceNotFoundException.class,
                 () -> resolver.resolve(CLASSPATH_RESOURCE));
-            logger.info("✓ FILESYSTEM_ONLY correctly ignores classpath");
+            logger.info("[OK] FILESYSTEM_ONLY correctly ignores classpath");
         }
     }
 
@@ -446,7 +446,7 @@ class ResourceResolverTest {
             assertTrue(paths.contains("/etc/apex/configs"));
             assertTrue(paths.contains("/opt/apex"));
 
-            logger.info("✓ Search paths added correctly");
+            logger.info("[OK] Search paths added correctly");
         }
 
         @Test
@@ -464,7 +464,7 @@ class ResourceResolverTest {
             assertTrue(prefixes.contains("apex/"));
             assertTrue(prefixes.contains("META-INF/apex/"));  // Should add trailing slash
 
-            logger.info("✓ Classpath prefixes added correctly");
+            logger.info("[OK] Classpath prefixes added correctly");
         }
 
         @Test
@@ -480,7 +480,7 @@ class ResourceResolverTest {
             assertFalse(paths.contains("/old/path"));
             assertTrue(paths.contains("/new/path1"));
 
-            logger.info("✓ setSearchPaths replaced existing paths");
+            logger.info("[OK] setSearchPaths replaced existing paths");
         }
 
         @Test
@@ -496,7 +496,7 @@ class ResourceResolverTest {
             assertFalse(prefixes.contains("old/"));
             assertTrue(prefixes.contains("new1/"));
 
-            logger.info("✓ setClasspathPrefixes replaced existing prefixes");
+            logger.info("[OK] setClasspathPrefixes replaced existing prefixes");
         }
 
         @Test
@@ -523,7 +523,7 @@ class ResourceResolverTest {
                 assertTrue(content.contains("dir1"), "Should find file from first search path");
             }
 
-            logger.info("✓ Search paths checked in order");
+            logger.info("[OK] Search paths checked in order");
         }
     }
 
@@ -544,7 +544,7 @@ class ResourceResolverTest {
             assertThrows(IllegalArgumentException.class, () -> resolver.resolve(""));
             assertThrows(IllegalArgumentException.class, () -> resolver.resolve("  "));
 
-            logger.info("✓ Correctly throws IllegalArgumentException for null/empty path");
+            logger.info("[OK] Correctly throws IllegalArgumentException for null/empty path");
         }
 
         @Test
@@ -560,7 +560,7 @@ class ResourceResolverTest {
             assertNotNull(exception.getMessage());
             assertTrue(exception.getMessage().contains("not found"));
 
-            logger.info("✓ Correctly throws ResourceNotFoundException");
+            logger.info("[OK] Correctly throws ResourceNotFoundException");
         }
 
         @Test
@@ -594,7 +594,7 @@ class ResourceResolverTest {
             assertTrue(resolver.exists(CLASSPATH_RESOURCE));
             assertFalse(resolver.exists("non/existent/resource.yaml"));
 
-            logger.info("✓ exists() works correctly for classpath");
+            logger.info("[OK] exists() works correctly for classpath");
         }
 
         @Test
@@ -608,7 +608,7 @@ class ResourceResolverTest {
             assertTrue(resolver.exists(testFile.toString()));
             assertFalse(resolver.exists(tempDir.resolve("not-exists.yaml").toString()));
 
-            logger.info("✓ exists() works correctly for filesystem");
+            logger.info("[OK] exists() works correctly for filesystem");
         }
 
         @Test
@@ -648,7 +648,7 @@ class ResourceResolverTest {
                 assertNotNull(is);
             }
 
-            logger.info("✓ Builder pattern works correctly");
+            logger.info("[OK] Builder pattern works correctly");
         }
 
         @Test
@@ -670,7 +670,7 @@ class ResourceResolverTest {
             assertEquals(2, builtResolver.getSearchPaths().size());
             assertEquals(2, builtResolver.getClasspathPrefixes().size());
 
-            logger.info("✓ Builder configured all options correctly");
+            logger.info("[OK] Builder configured all options correctly");
         }
     }
 

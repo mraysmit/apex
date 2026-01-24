@@ -36,7 +36,7 @@ public class FieldMappingValidation {
         ruleFactory = new YamlRuleFactory();
         config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/codes/FieldMappingValidation-rules.yaml");
         assertNotNull(config, "Configuration should be loaded");
-        logger.info("✓ Configuration loaded: {} rules", config.getRules().size());
+        logger.info("[OK] Configuration loaded: {} rules", config.getRules().size());
     }
 
     /**
@@ -81,9 +81,9 @@ public class FieldMappingValidation {
         logger.info("Rule evaluation completed");
 
         assertTrue(result.isTriggered(), "Rule should match");
-        logger.info("✓ Rule triggered: true");
+        logger.info("[OK] Rule triggered: true");
         assertEquals("AMOUNT_VALID", result.getSuccessCode(), "Success code should be set");
-        logger.info("✓ Success code: {}", result.getSuccessCode());
+        logger.info("[OK] Success code: {}", result.getSuccessCode());
 
         // Check enriched data contains the mapped field
         Map<String, Object> enrichedData = result.getEnrichedData();
@@ -93,7 +93,7 @@ public class FieldMappingValidation {
         logger.info("AFTER RULE EVALUATION (with map-to-field applied):");
         logger.info("  Dataset: {}", enrichedData);
         logger.info("");
-        logger.info("✓ Field mapping applied: validationStatus={}", enrichedData.get("validationStatus"));
+        logger.info("[OK] Field mapping applied: validationStatus={}", enrichedData.get("validationStatus"));
     }
 
     /**
@@ -124,9 +124,9 @@ public class FieldMappingValidation {
         logger.info("Rule evaluation completed");
 
         assertFalse(result.isTriggered(), "Rule should not match");
-        logger.info("✓ Rule triggered: false");
+        logger.info("[OK] Rule triggered: false");
         assertEquals("AMOUNT_INVALID", result.getErrorCode(), "Error code should be set");
-        logger.info("✓ Error code: {}", result.getErrorCode());
+        logger.info("[OK] Error code: {}", result.getErrorCode());
 
         // Check enriched data contains the mapped field
         Map<String, Object> enrichedData = result.getEnrichedData();
@@ -136,7 +136,7 @@ public class FieldMappingValidation {
         logger.info("AFTER RULE EVALUATION (with map-to-field applied):");
         logger.info("  Dataset: {}", enrichedData);
         logger.info("");
-        logger.info("✓ Field mapping applied: validationStatus={}", enrichedData.get("validationStatus"));
+        logger.info("[OK] Field mapping applied: validationStatus={}", enrichedData.get("validationStatus"));
     }
 
     /**
@@ -169,7 +169,7 @@ public class FieldMappingValidation {
         logger.info("Rule evaluation completed");
 
         assertTrue(result.isTriggered(), "Rule should match");
-        logger.info("✓ Rule triggered: true");
+        logger.info("[OK] Rule triggered: true");
 
         // Check enriched data contains all mapped fields
         Map<String, Object> enrichedData = result.getEnrichedData();
@@ -180,8 +180,8 @@ public class FieldMappingValidation {
         logger.info("AFTER RULE EVALUATION (with map-to-field applied):");
         logger.info("  Dataset: {}", enrichedData);
         logger.info("");
-        logger.info("✓ Field mapping 1: validationStatus={}", enrichedData.get("validationStatus"));
-        logger.info("✓ Field mapping 2: severity={}", enrichedData.get("severity"));
+        logger.info("[OK] Field mapping 1: validationStatus={}", enrichedData.get("validationStatus"));
+        logger.info("[OK] Field mapping 2: severity={}", enrichedData.get("severity"));
     }
 
     /**
@@ -208,13 +208,13 @@ public class FieldMappingValidation {
         logger.info("Rule evaluation completed");
 
         assertTrue(result.isTriggered(), "Rule should match");
-        logger.info("✓ Rule triggered: true");
+        logger.info("[OK] Rule triggered: true");
 
         // Check enriched data contains the mapped field with correct value
         Map<String, Object> enrichedData = result.getEnrichedData();
         assertNotNull(enrichedData, "Enriched data should not be null");
         assertEquals("HIGH", enrichedData.get("riskLevel"), "riskLevel should be HIGH");
-        logger.info("✓ Field mapping applied with SpEL: riskLevel={} (1500 > 1000)", enrichedData.get("riskLevel"));
+        logger.info("[OK] Field mapping applied with SpEL: riskLevel={} (1500 > 1000)", enrichedData.get("riskLevel"));
     }
 
     /**
@@ -241,15 +241,15 @@ public class FieldMappingValidation {
         logger.info("Rule evaluation completed");
 
         assertTrue(result.isTriggered(), "Rule should match");
-        logger.info("✓ Rule triggered: true");
+        logger.info("[OK] Rule triggered: true");
         assertEquals("AMOUNT_VALID", result.getSuccessCode(), "Success code should be set");
-        logger.info("✓ Success code: {}", result.getSuccessCode());
+        logger.info("[OK] Success code: {}", result.getSuccessCode());
 
         // Enriched data should be empty (no mappings)
         Map<String, Object> enrichedData = result.getEnrichedData();
         assertNotNull(enrichedData, "Enriched data should not be null");
         assertTrue(enrichedData.isEmpty(), "Enriched data should be empty");
-        logger.info("✓ Enriched data is empty (no field mappings defined)");
+        logger.info("[OK] Enriched data is empty (no field mappings defined)");
     }
 }
 

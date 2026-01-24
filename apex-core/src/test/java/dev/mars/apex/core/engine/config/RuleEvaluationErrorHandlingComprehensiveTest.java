@@ -86,7 +86,7 @@ class RuleEvaluationErrorHandlingComprehensiveTest {
         assertTrue(result.getMessage().contains("Rule evaluation failed") || result.getMessage().contains("evaluation"),
                   "Should have descriptive error message");
 
-        logger.info("✓ PATH 1: executeRule() properly handles missing property with ERROR severity");
+        logger.info("[OK] PATH 1: executeRule() properly handles missing property with ERROR severity");
     }
     
     @Test
@@ -116,7 +116,7 @@ class RuleEvaluationErrorHandlingComprehensiveTest {
         assertTrue(result.getMessage().contains("Rule evaluation failed"),
                   "Should have descriptive error message");
 
-        logger.info("✓ PATH 1: executeRule() properly handles missing property with CRITICAL severity");
+        logger.info("[OK] PATH 1: executeRule() properly handles missing property with CRITICAL severity");
     }
     
     @Test
@@ -145,7 +145,7 @@ class RuleEvaluationErrorHandlingComprehensiveTest {
         assertFalse(result.isTriggered(),
                    "Should not be triggered after error recovery");
 
-        logger.info("✓ PATH 1: executeRule() properly handles type mismatch with WARNING severity");
+        logger.info("[OK] PATH 1: executeRule() properly handles type mismatch with WARNING severity");
     }
     
     // ========================================
@@ -177,7 +177,7 @@ class RuleEvaluationErrorHandlingComprehensiveTest {
         assertTrue(result.getMessage().contains("Rule evaluation failed") || result.getMessage().contains("evaluation"), 
                   "Should have descriptive error message");
         
-        logger.info("✓ PATH 2: executeRulesList() properly handles first rule failure");
+        logger.info("[OK] PATH 2: executeRulesList() properly handles first rule failure");
     }
     
     // ========================================
@@ -208,7 +208,7 @@ class RuleEvaluationErrorHandlingComprehensiveTest {
         assertTrue(result.getMessage().contains("Rule evaluation failed"),
                   "Should have descriptive error message");
 
-        logger.info("✓ PATH 3: executeRules() properly handles mixed rule failure");
+        logger.info("[OK] PATH 3: executeRules() properly handles mixed rule failure");
     }
 
     // ========================================
@@ -240,7 +240,7 @@ class RuleEvaluationErrorHandlingComprehensiveTest {
 
         // With parameter validation removed, may get NO_MATCH results instead of ERROR
         // The important thing is that evaluation completes without throwing exceptions
-        logger.info("✓ PATH 4: RuleEngineService properly handles rule failures in results list");
+        logger.info("[OK] PATH 4: RuleEngineService properly handles rule failures in results list");
     }
 
     // ========================================
@@ -273,7 +273,7 @@ class RuleEvaluationErrorHandlingComprehensiveTest {
         assertTrue(result.getMessage().contains("Rule evaluation failed"),
                   "Should have descriptive error message");
 
-        logger.info("✓ EDGE CASE: Null pointer access properly handled with structured error");
+        logger.info("[OK] EDGE CASE: Null pointer access properly handled with structured error");
     }
 
     @Test
@@ -303,7 +303,7 @@ class RuleEvaluationErrorHandlingComprehensiveTest {
         assertTrue(result.getMessage().contains("Rule evaluation failed"),
                   "Should have descriptive error message");
 
-        logger.info("✓ EDGE CASE: Method not found properly handled with structured error");
+        logger.info("[OK] EDGE CASE: Method not found properly handled with structured error");
     }
 
     // ========================================

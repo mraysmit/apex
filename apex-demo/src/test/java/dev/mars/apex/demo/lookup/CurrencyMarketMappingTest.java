@@ -97,7 +97,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
             logger.debug("Loading YAML configuration: CurrencyMarketMappingTest.yaml");
             var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/CurrencyMarketMappingTest.yaml");
             assertNotNull(config, "YAML configuration should not be null");
-            logger.debug("✓ YAML configuration loaded successfully: {}", config.getMetadata().getName());
+            logger.debug("[OK] YAML configuration loaded successfully: {}", config.getMetadata().getName());
 
         // Create comprehensive test data that triggers the currency mapping enrichment
         Map<String, Object> testData = new HashMap<>();
@@ -116,7 +116,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
             RuleResult ruleResult = engine.evaluate(config, testData);
             Object result = ruleResult.getEnrichedData();
-        logger.debug("✓ APEX enrichment processing completed");
+        logger.debug("[OK] APEX enrichment processing completed");
 
         // Validate enrichment results
         assertNotNull(result, "Currency market mapping result should not be null");
@@ -133,29 +133,29 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         assertNotNull(enrichedData.get("marketRegion"), "Region should be provided");
         assertNotNull(enrichedData.get("marketTimezone"), "Timezone should be provided");
         assertNotNull(enrichedData.get("tradingHours"), "Trading hours should be provided");
-        logger.debug("✓ All required fields are present in enrichment results");
+        logger.debug("[OK] All required fields are present in enrichment results");
 
         // Validate specific business calculations for USD
         logger.debug("Validating specific USD market mapping...");
         String market = (String) enrichedData.get("market");
         assertEquals("NYSE", market, "USD should map to NYSE");
-        logger.debug("✓ Market validation passed: USD -> {}", market);
+        logger.debug("[OK] Market validation passed: USD -> {}", market);
 
         String marketName = (String) enrichedData.get("marketName");
         assertEquals("New York Stock Exchange", marketName, "Market name should be complete");
-        logger.debug("✓ Market name validation passed: {}", marketName);
+        logger.debug("[OK] Market name validation passed: {}", marketName);
 
         String region = (String) enrichedData.get("marketRegion");
         assertEquals("North America", region, "USD should map to North America region");
-        logger.debug("✓ Region validation passed: {}", region);
+        logger.debug("[OK] Region validation passed: {}", region);
 
         String timezone = (String) enrichedData.get("marketTimezone");
         assertEquals("America/New_York", timezone, "USD should map to New York timezone");
-        logger.debug("✓ Timezone validation passed: {}", timezone);
+        logger.debug("[OK] Timezone validation passed: {}", timezone);
 
         String tradingHours = (String) enrichedData.get("tradingHours");
         assertEquals("09:30-16:00", tradingHours, "USD should have correct trading hours");
-        logger.debug("✓ Trading hours validation passed: {}", tradingHours);
+        logger.debug("[OK] Trading hours validation passed: {}", tradingHours);
 
         logger.debug("All USD market mapping validations completed successfully");
             logger.info("Comprehensive currency market mapping functionality test completed successfully");
@@ -174,7 +174,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
             logger.debug("Loading YAML configuration for major currency testing...");
             var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/CurrencyMarketMappingTest.yaml");
             assertNotNull(config, "YAML configuration should not be null");
-            logger.debug("✓ YAML configuration loaded for major currency testing");
+            logger.debug("[OK] YAML configuration loaded for major currency testing");
 
         // Test different major currencies
         String[] currencies = {"USD", "EUR", "GBP", "CHF", "JPY", "HKD"};
@@ -201,7 +201,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
             RuleResult ruleResult = engine.evaluate(config, testData);
             Object result = ruleResult.getEnrichedData();
-            logger.debug("✓ APEX enrichment completed for {}", currency);
+            logger.debug("[OK] APEX enrichment completed for {}", currency);
 
             // Validate enrichment results
             assertNotNull(result, "Currency market mapping result should not be null for " + currency);
@@ -216,13 +216,13 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
             assertNotNull(enrichedData.get("market"), "Market should be mapped for " + currency);
             assertEquals(expectedMarket, enrichedData.get("market"), currency + " should map to " + expectedMarket);
             assertEquals(expectedRegion, enrichedData.get("marketRegion"), currency + " should map to " + expectedRegion);
-            logger.debug("✓ Market and region validation passed for {}: {} -> {}, {}", currency, currency, expectedMarket, expectedRegion);
+            logger.debug("[OK] Market and region validation passed for {}: {} -> {}, {}", currency, currency, expectedMarket, expectedRegion);
 
             // Validate all required fields are present
             assertNotNull(enrichedData.get("marketName"), "Market name should be provided for " + currency);
             assertNotNull(enrichedData.get("marketTimezone"), "Timezone should be provided for " + currency);
             assertNotNull(enrichedData.get("tradingHours"), "Trading hours should be provided for " + currency);
-            logger.debug("✓ All required fields validated for {}", currency);
+            logger.debug("[OK] All required fields validated for {}", currency);
         }
 
         logger.debug("Major currency mapping test completed for all {} currencies", currencies.length);
@@ -243,7 +243,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
             logger.debug("Loading YAML configuration for invalid currency testing...");
             var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/CurrencyMarketMappingTest.yaml");
             assertNotNull(config, "YAML configuration should not be null");
-            logger.debug("✓ YAML configuration loaded for invalid currency testing");
+            logger.debug("[OK] YAML configuration loaded for invalid currency testing");
 
         // Test invalid currencies
         String[] invalidCurrencies = {"XYZ", "INVALID", "123", "ABC"};
@@ -264,7 +264,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
             RuleResult ruleResult = engine.evaluate(config, testData);
             Object result = ruleResult.getEnrichedData();
-            logger.debug("✓ APEX enrichment completed for invalid currency {}", invalidCurrency);
+            logger.debug("[OK] APEX enrichment completed for invalid currency {}", invalidCurrency);
 
             // Validate enrichment results - should not enrich with invalid currency
             assertNotNull(result, "Result should not be null even for invalid currency " + invalidCurrency);
@@ -280,7 +280,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
 
             // Invalid currency should not produce market mapping
             assertNull(enrichedData.get("market"), "Invalid currency " + invalidCurrency + " should not map to any market");
-            logger.debug("✓ Validation passed: {} correctly returned null market (not found in lookup)", invalidCurrency);
+            logger.debug("[OK] Validation passed: {} correctly returned null market (not found in lookup)", invalidCurrency);
         }
 
         logger.debug("Invalid currency handling test completed for all {} invalid currencies", invalidCurrencies.length);
@@ -301,7 +301,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
             logger.debug("Loading YAML configuration for null/empty currency testing...");
             var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/CurrencyMarketMappingTest.yaml");
             assertNotNull(config, "YAML configuration should not be null");
-            logger.debug("✓ YAML configuration loaded for null/empty currency testing");
+            logger.debug("[OK] YAML configuration loaded for null/empty currency testing");
 
         // Test null currency
         logger.debug("--- Testing null currency ---");
@@ -316,7 +316,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
         RuleResult ruleResult = engine.evaluate(config, testDataNull);
         Object resultNull = ruleResult.getEnrichedData();
-        logger.debug("✓ APEX enrichment completed with null currency");
+        logger.debug("[OK] APEX enrichment completed with null currency");
 
         assertNotNull(resultNull, "Result should not be null even with null currency");
         @SuppressWarnings("unchecked")
@@ -330,7 +330,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         }
 
         assertNull(enrichedDataNull.get("market"), "Null currency should not trigger enrichment");
-        logger.debug("✓ Validation passed: null currency correctly skipped enrichment (condition: #currency != null && #currency.length() > 0)");
+        logger.debug("[OK] Validation passed: null currency correctly skipped enrichment (condition: #currency != null && #currency.length() > 0)");
 
         // Test empty currency
         logger.debug("--- Testing empty currency ---");
@@ -345,7 +345,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         RulesEngine engine2 = RulesEngine.fromYamlConfig(config);
         RuleResult ruleResult2 = engine2.evaluate(config, testDataEmpty);
         Object resultEmpty = ruleResult2.getEnrichedData();
-        logger.debug("✓ APEX enrichment completed with empty currency");
+        logger.debug("[OK] APEX enrichment completed with empty currency");
 
         assertNotNull(resultEmpty, "Result should not be null even with empty currency");
         @SuppressWarnings("unchecked")
@@ -359,7 +359,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         }
 
         assertNull(enrichedDataEmpty.get("market"), "Empty currency should not trigger enrichment");
-        logger.debug("✓ Validation passed: empty currency correctly skipped enrichment (condition: #currency != null && #currency.length() > 0)");
+        logger.debug("[OK] Validation passed: empty currency correctly skipped enrichment (condition: #currency != null && #currency.length() > 0)");
 
         logger.debug("Null and empty currency validation completed successfully");
             logger.info("Null and empty currency validation test completed successfully");
@@ -376,7 +376,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         // Setup H2 database with currency data
         logger.debug("Setting up H2 database with currency validation data...");
         setupH2CurrencyDatabase();
-        logger.debug("✓ H2 database setup completed");
+        logger.debug("[OK] H2 database setup completed");
 
         // Load H2-specific YAML configuration for currency validation
         try {
@@ -390,7 +390,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
             }
             var config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/CurrencyMarketMappingTest-h2.yaml");
             assertNotNull(config, "H2 YAML configuration should not be null");
-            logger.debug("✓ H2 YAML configuration loaded successfully: {}", config.getMetadata().getName());
+            logger.debug("[OK] H2 YAML configuration loaded successfully: {}", config.getMetadata().getName());
 
         // Test valid currency - should find match in database
         logger.debug("--- Testing valid currency: USD ---");
@@ -405,7 +405,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         RulesEngine engine3 = RulesEngine.fromYamlConfig(config);
         RuleResult ruleResult3 = engine3.evaluate(config, testDataValid);
         Object resultValid = ruleResult3.getEnrichedData();
-        logger.debug("✓ APEX enrichment completed for USD database lookup");
+        logger.debug("[OK] APEX enrichment completed for USD database lookup");
 
         assertNotNull(resultValid, "Result should not be null for valid currency");
         @SuppressWarnings("unchecked")
@@ -421,7 +421,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         assertNotNull(enrichedDataValid.get("currencyName"), "Currency name should be retrieved from database");
         assertEquals("US Dollar", enrichedDataValid.get("currencyName"), "Currency name should be correct");
         assertTrue((Boolean) enrichedDataValid.get("isActiveCurrency"), "Currency should be active");
-        logger.debug("✓ All USD database validations passed");
+        logger.debug("[OK] All USD database validations passed");
 
         logger.info("Valid currency test: USD -> {}", enrichedDataValid.get("currencyName"));
 
@@ -438,7 +438,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         RulesEngine engine4 = RulesEngine.fromYamlConfig(config);
         RuleResult ruleResult4 = engine4.evaluate(config, testDataEUR);
         Object resultEUR = ruleResult4.getEnrichedData();
-        logger.debug("✓ APEX enrichment completed for EUR database lookup");
+        logger.debug("[OK] APEX enrichment completed for EUR database lookup");
 
         @SuppressWarnings("unchecked")
         Map<String, Object> enrichedDataEUR = (Map<String, Object>) resultEUR;
@@ -448,7 +448,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
 
         assertEquals("EUR", enrichedDataEUR.get("validatedCurrencyCode"), "EUR should be validated");
         assertEquals("Euro", enrichedDataEUR.get("currencyName"), "EUR name should be correct");
-        logger.debug("✓ EUR database validations passed");
+        logger.debug("[OK] EUR database validations passed");
 
         logger.info("Valid currency test: EUR -> {}", enrichedDataEUR.get("currencyName"));
 
@@ -465,7 +465,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         RulesEngine engine5 = RulesEngine.fromYamlConfig(config);
         RuleResult ruleResult5 = engine5.evaluate(config, testDataInvalid);
         Object resultInvalid = ruleResult5.getEnrichedData();
-        logger.debug("✓ APEX enrichment completed for XYZ database lookup");
+        logger.debug("[OK] APEX enrichment completed for XYZ database lookup");
 
         assertNotNull(resultInvalid, "Result should not be null even for invalid currency");
         @SuppressWarnings("unchecked")
@@ -481,7 +481,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         // Invalid currency should not be found in database
         assertNull(enrichedDataInvalid.get("validatedCurrencyCode"), "Invalid currency should not be found in database");
         assertNull(enrichedDataInvalid.get("currencyName"), "Currency name should be null for invalid currency");
-        logger.debug("✓ XYZ correctly returned null (not found in database)");
+        logger.debug("[OK] XYZ correctly returned null (not found in database)");
 
         logger.info("Invalid currency test: XYZ -> not found (as expected)");
 
@@ -498,7 +498,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         RulesEngine engine6 = RulesEngine.fromYamlConfig(config);
         RuleResult ruleResult6 = engine6.evaluate(config, testDataNull);
         Object resultNull = ruleResult6.getEnrichedData();
-        logger.debug("✓ APEX enrichment completed with null currency (H2 database)");
+        logger.debug("[OK] APEX enrichment completed with null currency (H2 database)");
 
         @SuppressWarnings("unchecked")
         Map<String, Object> enrichedDataNull = (Map<String, Object>) resultNull;
@@ -511,7 +511,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
         }
 
         assertNull(enrichedDataNull.get("validatedCurrencyCode"), "Null currency should not trigger database lookup");
-        logger.debug("✓ Null currency correctly skipped database lookup (condition: #currency != null && #currency.length() > 0)");
+        logger.debug("[OK] Null currency correctly skipped database lookup (condition: #currency != null && #currency.length() > 0)");
 
         logger.info("Null currency test: null -> no lookup (as expected)");
 
@@ -537,12 +537,12 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
 
         try (Connection connection = DriverManager.getConnection(jdbcUrl, "sa", "")) {
             Statement statement = connection.createStatement();
-            logger.debug("✓ H2 database connection established");
+            logger.debug("[OK] H2 database connection established");
 
             // Drop and create table
             logger.debug("Dropping existing valid_currencies table if it exists...");
             statement.execute("DROP TABLE IF EXISTS valid_currencies");
-            logger.debug("✓ Existing table dropped (if existed)");
+            logger.debug("[OK] Existing table dropped (if existed)");
 
             logger.debug("Creating valid_currencies table with schema...");
             statement.execute("""
@@ -552,7 +552,7 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
                     is_active BOOLEAN DEFAULT true
                 )
                 """);
-            logger.debug("✓ valid_currencies table created with columns: currency_code (PK), currency_name, is_active");
+            logger.debug("[OK] valid_currencies table created with columns: currency_code (PK), currency_name, is_active");
 
             // Insert sample currency data
             logger.debug("Inserting sample currency data (15 currencies)...");
@@ -574,18 +574,18 @@ public class CurrencyMarketMappingTest extends DemoTestBase {
                 ('ZAR', 'South African Rand', true),
                 ('BRL', 'Brazilian Real', true)
                 """);
-            logger.debug("✓ All 15 currencies inserted successfully");
+            logger.debug("[OK] All 15 currencies inserted successfully");
 
             // Verify data insertion
             logger.debug("Verifying currency data insertion...");
             var rs = statement.executeQuery("SELECT COUNT(*) as count FROM valid_currencies WHERE is_active = true");
             if (rs.next()) {
                 int count = rs.getInt("count");
-                logger.debug("✓ Database verification: {} active currencies found", count);
+                logger.debug("[OK] Database verification: {} active currencies found", count);
             }
             rs.close();
 
-            logger.info("✓ H2 currency validation database setup completed with 15 currencies");
+            logger.info("[OK] H2 currency validation database setup completed with 15 currencies");
 
         } catch (Exception e) {
             logger.error("Failed to setup H2 currency database: {}", e.getMessage(), e);

@@ -91,7 +91,7 @@ public class H2CustomParametersDemoTest extends DemoTestBase {
                 ('CUST001', 'Test Customer Corp', 'CORPORATE', 'GOLD', 'NA', 'ACTIVE')
                 """);
 
-            logger.info("✓ H2 database setup completed successfully");
+            logger.info("[OK] H2 database setup completed successfully");
 
         } catch (Exception e) {
             logger.error("Failed to setup H2 database: " + e.getMessage(), e);
@@ -308,7 +308,7 @@ public class H2CustomParametersDemoTest extends DemoTestBase {
         try (Connection connection = DriverManager.getConnection(
                 "jdbc:h2:./target/h2-demo/" + DB_NAME, "sa", "")) {
             connection.createStatement().execute("SHUTDOWN");
-            logger.info("✓ Database shutdown completed");
+            logger.info("[OK] Database shutdown completed");
         } catch (Exception e) {
             logger.warn("Failed to shutdown database: " + e.getMessage());
         }

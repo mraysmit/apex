@@ -409,7 +409,7 @@ class ScenarioAdvancedFeaturesTest {
             assertNotNull(result.getStageResults(), "Should have stage results");
             assertFalse(result.getStageResults().isEmpty(), "Should have at least one stage result");
 
-            logger.info("✓ Flag-for-review policy validated: status={}, requiresReview={}",
+            logger.info("[OK] Flag-for-review policy validated: status={}, requiresReview={}",
                 result.getExecutionStatus(), result.requiresReview());
         }
     }
@@ -471,7 +471,7 @@ class ScenarioAdvancedFeaturesTest {
             assertTrue(status.contains("PARTIAL") || status.contains("FAILURE"),
                 "Scenario should show partial success or failure status, got: " + status);
 
-            logger.info("✓ Dependency handling validated: stage-1 failed, stage-2 skipped. Status: {}",
+            logger.info("[OK] Dependency handling validated: stage-1 failed, stage-2 skipped. Status: {}",
                 result.getExecutionStatus());
         }
     }

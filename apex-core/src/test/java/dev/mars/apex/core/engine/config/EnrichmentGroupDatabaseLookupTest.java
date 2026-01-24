@@ -98,13 +98,13 @@ public class EnrichmentGroupDatabaseLookupTest {
             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM customers");
             rs.next();
             int count = rs.getInt(1);
-            logger.info("✓ H2 database setup complete with {} test customers", count);
+            logger.info("[OK] H2 database setup complete with {} test customers", count);
             
             // DEBUG: Verify we can query the first customer
             rs = stmt.executeQuery("SELECT customer_name FROM customers WHERE customer_id = 'CUST001'");
             if (rs.next()) {
                 String name = rs.getString(1);
-                logger.info("✓ Verified CUST001 exists with name: {}", name);
+                logger.info("[OK] Verified CUST001 exists with name: {}", name);
             } else {
                 logger.error("ERROR: CUST001 not found after insert!");
             }
@@ -167,7 +167,7 @@ public class EnrichmentGroupDatabaseLookupTest {
         assertEquals("USA", enrichedData.get("country"),
             "Country should match database value");
         
-        logger.info("✓ TEST PASSED: Enrichment-group successfully executed database lookup");
+        logger.info("[OK] TEST PASSED: Enrichment-group successfully executed database lookup");
         logger.info("  - customerName: " + enrichedData.get("customerName"));
         logger.info("  - creditRating: " + enrichedData.get("creditRating"));
         logger.info("  - country: " + enrichedData.get("country"));
@@ -210,7 +210,7 @@ public class EnrichmentGroupDatabaseLookupTest {
             assertEquals(expectedRatings[i], enrichedData.get("creditRating"),
                 "Credit rating should match for " + customerIds[i]);
             
-            logger.info("  ✓ " + customerIds[i] + ": " + enrichedData.get("customerName") + 
+            logger.info("  [OK] " + customerIds[i] + ": " + enrichedData.get("customerName") + 
                        " (Rating: " + enrichedData.get("creditRating") + ")");
         }
         

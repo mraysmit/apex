@@ -517,7 +517,7 @@ public class SequentialProcessor {
         RuleResult transformationResult = processor.processTransformationsWithResult(List.of(transformation), data);
 
         if (transformationResult.getResultType() == RuleResult.ResultType.ERROR) {
-            logger.error("CRITICAL: Transformation processing failed: {}", transformationResult.getMessage());
+            logger.error("Transformation processing failed: {}", transformationResult.getMessage());
         }
 
         return transformationResult;
@@ -560,7 +560,7 @@ public class SequentialProcessor {
                     if (enrichmentResult.hasFailures()) {
                         failureMessages.addAll(enrichmentResult.getFailureMessages());
                     }
-                    logger.error("CRITICAL: Enrichment processing failed: {}", enrichmentResult.getMessage());
+                    logger.error("Enrichment processing failed: {}", enrichmentResult.getMessage());
                 }
 
                 if (enrichmentResult.getEnrichedData() != null && !enrichmentResult.getEnrichedData().isEmpty()) {
@@ -568,7 +568,8 @@ public class SequentialProcessor {
                     logger.debug("Enrichment completed, enriched data size: {}", enrichedData.size());
                 }
             } catch (Exception e) {
-                logger.error("CRITICAL: Enrichment processing exception: {}", e.getMessage(), e);
+                logger.error("CRITICAL: Enrichment processing exception: {}", e.getMessage());
+                logger.debug("Full stack trace for enrichment processing exception:", e);
                 sectionStatus = "FAILURE";
                 sectionMessage = e.getMessage();
                 failureMessages.add("Enrichment processing failed: " + e.getMessage());
@@ -763,7 +764,7 @@ public class SequentialProcessor {
                 if (transformationResult.hasFailures()) {
                     failureMessages.addAll(transformationResult.getFailureMessages());
                 }
-                logger.error("CRITICAL: Transformation processing failed: {}", transformationResult.getMessage());
+                logger.error("Transformation processing failed: {}", transformationResult.getMessage());
             }
 
             if (transformationResult.getEnrichedData() != null && !transformationResult.getEnrichedData().isEmpty()) {

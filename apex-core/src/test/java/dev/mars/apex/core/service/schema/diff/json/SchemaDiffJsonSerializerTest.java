@@ -59,7 +59,7 @@ class SchemaDiffJsonSerializerTest {
         assertNotNull(json);
         assertTrue(json.contains("\"$schema\""));
         assertTrue(json.contains("\"metadata\""));
-        logger.info("  ✓ JSON string serialization successful");
+        logger.info("  [OK] JSON string serialization successful");
     }
 
     @Test
@@ -76,7 +76,7 @@ class SchemaDiffJsonSerializerTest {
         
         assertNotNull(deserialized);
         assertEquals(original.getMetadata().getReportVersion(), deserialized.getMetadata().getReportVersion());
-        logger.info("  ✓ Round-trip successful - data integrity verified");
+        logger.info("  [OK] Round-trip successful - data integrity verified");
     }
 
     @Test
@@ -92,7 +92,7 @@ class SchemaDiffJsonSerializerTest {
         
         assertTrue(outputFile.exists());
         assertTrue(outputFile.length() > 0);
-        logger.info("  ✓ JSON file generation successful");
+        logger.info("  [OK] JSON file generation successful");
     }
 
     private SchemaDiffReport createMinimalReport() {

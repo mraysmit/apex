@@ -30,7 +30,7 @@ public class EnrichmentCodesValidation extends DemoTestBase {
         super.setUp();  // Call parent setUp to initialize APEX services
         config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/codes/EnrichmentCodesValidation-enrichments.yaml");
         assertNotNull(config, "Configuration should be loaded");
-        logger.info("✓ Configuration loaded: {} enrichments", config.getEnrichments().size());
+        logger.info("[OK] Configuration loaded: {} enrichments", config.getEnrichments().size());
     }
 
     /**
@@ -63,7 +63,7 @@ public class EnrichmentCodesValidation extends DemoTestBase {
         logger.info("AFTER ENRICHMENT:");
         logger.info("  Dataset: {}", enrichedData);
         logger.info("");
-        logger.info("✓ Enrichment succeeded with success code");
+        logger.info("[OK] Enrichment succeeded with success code");
         logger.info("  - validated_amount: {}", enrichedData.get("validated_amount"));
         logger.info("  - success-code: ENRICHMENT_SUCCESS_AMOUNT_VALID");
     }
@@ -98,7 +98,7 @@ public class EnrichmentCodesValidation extends DemoTestBase {
         logger.info("AFTER ENRICHMENT:");
         logger.info("  Dataset: {}", enrichedData);
         logger.info("");
-        logger.info("✓ Enrichment failed as expected with error code");
+        logger.info("[OK] Enrichment failed as expected with error code");
         logger.info("  - validated_amount: null (enrichment not applied)");
         logger.info("  - error-code: ENRICHMENT_ERROR_AMOUNT_INVALID");
     }
@@ -126,7 +126,7 @@ public class EnrichmentCodesValidation extends DemoTestBase {
 
         // Verify enrichment was applied
         assertEquals(200, enrichedData.get("validated_amount"), "Amount should be enriched");
-        logger.info("✓ Enrichment succeeded with mixed codes");
+        logger.info("[OK] Enrichment succeeded with mixed codes");
         logger.info("  - validated_amount: {}", enrichedData.get("validated_amount"));
         logger.info("  - success-code: ENRICHMENT_SUCCESS_VALID (condition matched)");
         logger.info("  - error-code: ENRICHMENT_ERROR_INVALID (not used, condition matched)");
@@ -155,7 +155,7 @@ public class EnrichmentCodesValidation extends DemoTestBase {
 
         // Verify enrichment was applied
         assertEquals(1500, enrichedData.get("validated_amount"), "Amount should be enriched");
-        logger.info("✓ Enrichment succeeded with SpEL success code");
+        logger.info("[OK] Enrichment succeeded with SpEL success code");
         logger.info("  - validated_amount: {}", enrichedData.get("validated_amount"));
         logger.info("  - success-code: HIGH_VALUE_ENRICHED (1500 > 1000)");
     }
@@ -183,7 +183,7 @@ public class EnrichmentCodesValidation extends DemoTestBase {
 
         // Verify enrichment was not applied
         assertNull(enrichedData.get("validated_amount"), "Amount should not be enriched when condition fails");
-        logger.info("✓ Enrichment failed as expected with SpEL error code");
+        logger.info("[OK] Enrichment failed as expected with SpEL error code");
         logger.info("  - validated_amount: null (enrichment not applied)");
         logger.info("  - error-code: CRITICAL_LOW_AMOUNT (30 < 50)");
     }
@@ -211,7 +211,7 @@ public class EnrichmentCodesValidation extends DemoTestBase {
 
         // Verify calculation was applied
         assertEquals(10.0, enrichedData.get("fee_amount"), "Fee should be calculated (1% of 1000)");
-        logger.info("✓ Calculation enrichment succeeded with success code");
+        logger.info("[OK] Calculation enrichment succeeded with success code");
         logger.info("  - calculated_fee: 10.0");
         logger.info("  - fee_amount: {}", enrichedData.get("fee_amount"));
         logger.info("  - success-code: CALCULATION_SUCCESS");
@@ -240,7 +240,7 @@ public class EnrichmentCodesValidation extends DemoTestBase {
 
         // Verify calculation was not applied (condition failed)
         assertNull(enrichedData.get("fee_amount"), "Fee should not be calculated when condition fails");
-        logger.info("✓ Calculation enrichment failed as expected with error code");
+        logger.info("[OK] Calculation enrichment failed as expected with error code");
         logger.info("  - fee_amount: null (enrichment not applied)");
         logger.info("  - error-code: CALCULATION_ERROR");
     }

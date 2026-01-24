@@ -200,7 +200,7 @@ class PostgreSQLSchemaConfigurationTest {
         assertEquals(CUSTOM_SCHEMA, configuredSchema, 
                 "Schema should be 'trading' from YAML configuration");
 
-        logger.info("✓ Schema parameter correctly configured: {}", configuredSchema);
+        logger.info("[OK] Schema parameter correctly configured: {}", configuredSchema);
     }
 
     @Test
@@ -229,7 +229,7 @@ class PostgreSQLSchemaConfigurationTest {
         assertEquals("Apple Inc.", enrichedData.get("product_name"),
                 "Should retrieve product from trading schema");
 
-        logger.info("✓ Query executed successfully against custom schema");
+        logger.info("[OK] Query executed successfully against custom schema");
         logger.info("  Enriched data: product_name={}", enrichedData.get("product_name"));
     }
 
@@ -283,7 +283,7 @@ class PostgreSQLSchemaConfigurationTest {
         assertEquals("Microsoft Corporation", enrichedData.get("product_name"));
         assertEquals("Acme Corporation", enrichedData.get("customer_name"));
 
-        logger.info("✓ Multiple schemas accessed successfully");
+        logger.info("[OK] Multiple schemas accessed successfully");
         logger.info("  Trading schema: product_name={}", enrichedData.get("product_name"));
         logger.info("  Sales schema: customer_name={}", enrichedData.get("customer_name"));
     }
@@ -333,7 +333,7 @@ class PostgreSQLSchemaConfigurationTest {
         assertNotEquals("WRONG_DATA_FROM_PUBLIC_SCHEMA", enrichedData.get("product_name"),
                 "Should NOT retrieve from public schema");
 
-        logger.info("✓ Schema parameter correctly overrides default 'public' schema");
+        logger.info("[OK] Schema parameter correctly overrides default 'public' schema");
     }
 
     /**

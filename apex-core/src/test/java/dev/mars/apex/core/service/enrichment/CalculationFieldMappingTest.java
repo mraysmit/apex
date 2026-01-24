@@ -72,7 +72,7 @@ public class CalculationFieldMappingTest {
         // This assertion will FAIL because field mappings don't work for calculation-enrichment
         if (enrichedMap.containsKey("status")) {
             assertEquals("VALID", enrichedMap.get("status"), "Field mapping should create 'status' field");
-            System.out.println("✓ Field mapping works for calculation enrichment!");
+            System.out.println("[OK] Field mapping works for calculation enrichment!");
         } else {
             System.out.println("✗ BUG CONFIRMED: Field mapping does NOT work for calculation enrichment");
             System.out.println("  - Expected field 'status' with value 'VALID'");

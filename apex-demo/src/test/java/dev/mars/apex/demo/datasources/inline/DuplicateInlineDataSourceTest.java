@@ -224,10 +224,10 @@ public class DuplicateInlineDataSourceTest extends DemoTestBase {
                 "Hit rate should be 50% (1 hit out of 2 accesses)");
 
             logger.info("VERIFICATION SUCCESSFUL:");
-            logger.info("   ✓ Only 1 DatasetLookupService created (not 2)");
-            logger.info("   ✓ Second enrichment reused first enrichment's dataset");
-            logger.info("   ✓ Memory duplication eliminated via caching");
-            logger.info("   ✓ 50% memory savings achieved");
+            logger.info("   [OK] Only 1 DatasetLookupService created (not 2)");
+            logger.info("   [OK] Second enrichment reused first enrichment's dataset");
+            logger.info("   [OK] Memory duplication eliminated via caching");
+            logger.info("   [OK] 50% memory savings achieved");
             logger.info("=================================================================");
 
             // Verify enrichment results are still correct

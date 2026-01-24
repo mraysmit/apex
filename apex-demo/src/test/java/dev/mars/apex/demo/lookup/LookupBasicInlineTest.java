@@ -132,7 +132,7 @@ public class LookupBasicInlineTest {
             assertNotNull(usdResult, "USD lookup result should not be null");
             
             Map<String, Object> usdEnriched = usdResult.getEnrichedData();
-            logger.info("✓ USD Currency lookup successful:");
+            logger.info("[OK] USD Currency lookup successful:");
             logger.info("  - Currency Name: {}", usdEnriched.get("currencyName"));
             logger.info("  - Currency Symbol: {}", usdEnriched.get("currencySymbol"));
             logger.info("  - Currency Country: {}", usdEnriched.get("currencyCountry"));
@@ -150,7 +150,7 @@ public class LookupBasicInlineTest {
             assertNotNull(eurResult, "EUR lookup result should not be null");
             
             Map<String, Object> eurEnriched = eurResult.getEnrichedData();
-            logger.info("✓ EUR Currency lookup successful:");
+            logger.info("[OK] EUR Currency lookup successful:");
             logger.info("  - Currency Name: {}", eurEnriched.get("currencyName"));
             logger.info("  - Currency Symbol: {}", eurEnriched.get("currencySymbol"));
             logger.info("  - Currency Country: {}", eurEnriched.get("currencyCountry"));
@@ -183,7 +183,7 @@ public class LookupBasicInlineTest {
             assertNotNull(treasuryResult, "Treasury lookup result should not be null");
             
             Map<String, Object> treasuryEnriched = treasuryResult.getEnrichedData();
-            logger.info("✓ US Treasury Note lookup successful:");
+            logger.info("[OK] US Treasury Note lookup successful:");
             logger.info("  - Instrument Type: {}", treasuryEnriched.get("instrumentType"));
             logger.info("  - Instrument Maturity: {}", treasuryEnriched.get("instrumentMaturity"));
             logger.info("  - Instrument Issuer: {}", treasuryEnriched.get("instrumentIssuer"));
@@ -201,7 +201,7 @@ public class LookupBasicInlineTest {
             assertNotNull(bondResult, "Bond lookup result should not be null");
             
             Map<String, Object> bondEnriched = bondResult.getEnrichedData();
-            logger.info("✓ German Government Bond lookup successful:");
+            logger.info("[OK] German Government Bond lookup successful:");
             logger.info("  - Instrument Type: {}", bondEnriched.get("instrumentType"));
             logger.info("  - Instrument Maturity: {}", bondEnriched.get("instrumentMaturity"));
             logger.info("  - Instrument Issuer: {}", bondEnriched.get("instrumentIssuer"));
@@ -234,7 +234,7 @@ public class LookupBasicInlineTest {
             assertNotNull(dbResult, "Deutsche Bank lookup result should not be null");
             
             Map<String, Object> dbEnriched = dbResult.getEnrichedData();
-            logger.info("✓ Deutsche Bank counterparty lookup successful:");
+            logger.info("[OK] Deutsche Bank counterparty lookup successful:");
             logger.info("  - Counterparty LEI: {}", dbEnriched.get("counterpartyLEI"));
             logger.info("  - Counterparty Jurisdiction: {}", dbEnriched.get("counterpartyJurisdiction"));
             logger.info("  - Counterparty Entity Type: {}", dbEnriched.get("counterpartyEntityType"));
@@ -252,7 +252,7 @@ public class LookupBasicInlineTest {
             assertNotNull(jpResult, "JPMorgan lookup result should not be null");
             
             Map<String, Object> jpEnriched = jpResult.getEnrichedData();
-            logger.info("✓ JPMorgan Chase counterparty lookup successful:");
+            logger.info("[OK] JPMorgan Chase counterparty lookup successful:");
             logger.info("  - Counterparty LEI: {}", jpEnriched.get("counterpartyLEI"));
             logger.info("  - Counterparty Jurisdiction: {}", jpEnriched.get("counterpartyJurisdiction"));
             logger.info("  - Counterparty Entity Type: {}", jpEnriched.get("counterpartyEntityType"));
@@ -288,7 +288,7 @@ public class LookupBasicInlineTest {
             
             Map<String, Object> enrichedData = completeResult.getEnrichedData();
             
-            logger.info("✓ Complete multi-lookup workflow processed successfully");
+            logger.info("[OK] Complete multi-lookup workflow processed successfully");
             logger.info("  - Currency: {} ({}) from {}", 
                 enrichedData.get("currencyName"), 
                 enrichedData.get("currencySymbol"), 
@@ -339,7 +339,7 @@ public class LookupBasicInlineTest {
             assertNotNull(missingResult, "Missing data result should not be null");
             
             Map<String, Object> enrichedData = missingResult.getEnrichedData();
-            logger.info("✓ Lookup with missing data handled gracefully");
+            logger.info("[OK] Lookup with missing data handled gracefully");
             logger.info("  - Enriched data size: {}", enrichedData.size());
 
             // Should still have original data but no enriched lookup fields

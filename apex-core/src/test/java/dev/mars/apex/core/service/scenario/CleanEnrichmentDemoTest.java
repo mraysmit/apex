@@ -143,20 +143,20 @@ class CleanEnrichmentDemoTest {
             // Check if enrichment was applied
             if (outputs.containsKey("riskCategory")) {
                 assertEquals("HIGH_VALUE", outputs.get("riskCategory"), "Enrichment should set riskCategory");
-                logger.info("   ✓ Enrichment applied: riskCategory = {}", outputs.get("riskCategory"));
+                logger.info("   [OK] Enrichment applied: riskCategory = {}", outputs.get("riskCategory"));
             }
             if (outputs.containsKey("status")) {
                 assertEquals("APPROVED", outputs.get("status"), "Enrichment should set status");
-                logger.info("   ✓ Enrichment applied: status = {}", outputs.get("status"));
+                logger.info("   [OK] Enrichment applied: status = {}", outputs.get("status"));
             }
         }
         
         // Also check inputData for enriched fields (they get merged back)
         if (inputData.containsKey("riskCategory")) {
-            logger.info("   ✓ Enrichment merged to inputData: riskCategory = {}", inputData.get("riskCategory"));
+            logger.info("   [OK] Enrichment merged to inputData: riskCategory = {}", inputData.get("riskCategory"));
         }
         if (inputData.containsKey("status")) {
-            logger.info("   ✓ Enrichment merged to inputData: status = {}", inputData.get("status"));
+            logger.info("   [OK] Enrichment merged to inputData: status = {}", inputData.get("status"));
         }
 
         logger.info("4. SUCCESS: Data is clean - contains only business fields + enrichments, no metadata pollution!");

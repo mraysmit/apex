@@ -130,7 +130,7 @@ class ReadSchemaDatabaseTest extends SyncTestBase {
         assertNotNull(schema.getColumns(), "Schema should have columns");
         assertTrue(schema.getColumns().size() >= 3, "Should have at least 3 columns");
 
-        logger.info("✓ Successfully read database schema with {} columns", schema.getColumns().size());
+        logger.info("[OK] Successfully read database schema with {} columns", schema.getColumns().size());
     }
 
     /**

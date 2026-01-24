@@ -126,7 +126,7 @@ class DataSourcesUITest {
         WebElement content = dataSourcesSection.findElement(By.className("accordion-content"));
         assertTrue(content.isDisplayed(), "Accordion content should be visible when expanded");
 
-        System.out.println("✓ Data Sources section present and expandable");
+        System.out.println("[OK] Data Sources section present and expandable");
     }
 
     @Test
@@ -148,7 +148,7 @@ class DataSourcesUITest {
         assertTrue(tabs.get(0).getAttribute("class").contains("active"), 
                 "SQL Editor tab should be active by default");
         
-        System.out.println("✓ All three tabs present with correct labels");
+        System.out.println("[OK] All three tabs present with correct labels");
     }
 
     @Test
@@ -183,7 +183,7 @@ class DataSourcesUITest {
         assertTrue(isElementPresent(By.xpath("//button[@onclick='executeQuery()']")),
                 "Execute Query button should be present");
 
-        System.out.println("✓ SQL Editor panel contains all required elements");
+        System.out.println("[OK] SQL Editor panel contains all required elements");
     }
 
     @Test
@@ -202,7 +202,7 @@ class DataSourcesUITest {
                 "Execute Query button should have success styling");
         assertTrue(executeBtn.isEnabled(), "Execute Query button should be enabled");
 
-        System.out.println("✓ Execute Query button present in SQL Editor panel");
+        System.out.println("[OK] Execute Query button present in SQL Editor panel");
     }
 
     @Test
@@ -231,7 +231,7 @@ class DataSourcesUITest {
         assertTrue(isElementPresent(By.id("nextPageBtn")),
                 "Next page button should exist");
 
-        System.out.println("✓ Query Results panel elements present");
+        System.out.println("[OK] Query Results panel elements present");
     }
 
     @Test
@@ -250,7 +250,7 @@ class DataSourcesUITest {
         assertTrue(isElementPresent(By.id("execTime")),
                 "Execution time element should exist");
 
-        System.out.println("✓ Query stats elements present");
+        System.out.println("[OK] Query stats elements present");
     }
 
     @Test
@@ -268,7 +268,7 @@ class DataSourcesUITest {
         assertTrue(csvBtn.getText().contains("CSV") || csvBtn.getAttribute("title").contains("CSV"),
                 "CSV button should have CSV text or title");
 
-        System.out.println("✓ CSV export button present in results panel");
+        System.out.println("[OK] CSV export button present in results panel");
     }
 
     @Test
@@ -283,7 +283,7 @@ class DataSourcesUITest {
 
         assertNotNull(clearBtn, "Clear results button should be present");
 
-        System.out.println("✓ Clear results button present");
+        System.out.println("[OK] Clear results button present");
     }
 
     @Test
@@ -305,7 +305,7 @@ class DataSourcesUITest {
         String display = schemaContainer.getCssValue("display");
         assertEquals("none", display, "Schema container should be hidden initially");
 
-        System.out.println("✓ Schema dropdown present in connection modal");
+        System.out.println("[OK] Schema dropdown present in connection modal");
     }
 
     @Test
@@ -332,7 +332,7 @@ class DataSourcesUITest {
         assertTrue(emptyMessage.getText().contains("Select a connection"),
                 "Empty message should prompt to select a connection");
 
-        System.out.println("✓ Table View panel present with empty state");
+        System.out.println("[OK] Table View panel present with empty state");
     }
 
     @Test
@@ -364,7 +364,7 @@ class DataSourcesUITest {
         WebElement connectionList = driver.findElement(By.id("connectionList"));
         assertNotNull(connectionList, "Connection list container should be present");
         
-        System.out.println("✓ Connections panel shows connection management UI");
+        System.out.println("[OK] Connections panel shows connection management UI");
     }
 
     @Test
@@ -398,7 +398,7 @@ class DataSourcesUITest {
         assertFalse(driver.findElement(By.id("connectionsPanel"))
                 .getAttribute("class").contains("active"));
         
-        System.out.println("✓ Tab switching works correctly between all three panels");
+        System.out.println("[OK] Tab switching works correctly between all three panels");
     }
 
     @Test
@@ -429,7 +429,7 @@ class DataSourcesUITest {
         assertNotNull(clearBtn, "Clear button should be present");
         assertEquals("Clear all", clearBtn.getAttribute("title"));
 
-        System.out.println("✓ Accordion header buttons present (Load Schema, Clear)");
+        System.out.println("[OK] Accordion header buttons present (Load Schema, Clear)");
     }
 
     @Test
@@ -449,7 +449,7 @@ class DataSourcesUITest {
         assertEquals(testQuery, sqlEditor.getAttribute("value"), 
                 "SQL editor should contain the entered query");
         
-        System.out.println("✓ SQL Editor accepts and retains user input");
+        System.out.println("[OK] SQL Editor accepts and retains user input");
     }
 
     @Test
@@ -467,7 +467,7 @@ class DataSourcesUITest {
         // Verify it's a dropdown (can be interacted with)
         assertTrue(connectionSelect.isEnabled(), "Connection selector should be enabled");
         
-        System.out.println("✓ Connection selector is functional");
+        System.out.println("[OK] Connection selector is functional");
     }
 
     @Test
@@ -500,7 +500,7 @@ class DataSourcesUITest {
         assertTrue(dataSourcesSection.getAttribute("class").contains("expanded"),
                 "Section should be expanded again");
 
-        System.out.println("✓ Accordion collapse/expand works correctly");
+        System.out.println("[OK] Accordion collapse/expand works correctly");
     }
 
     // ========== Connection Modal Tests ==========
@@ -525,7 +525,7 @@ class DataSourcesUITest {
         WebElement modalTitle = modal.findElement(By.id("createConnectionModalLabel"));
         assertEquals("Create Database Connection", modalTitle.getText());
 
-        System.out.println("✓ Create Connection modal opens successfully");
+        System.out.println("[OK] Create Connection modal opens successfully");
     }
 
     @Test
@@ -553,7 +553,7 @@ class DataSourcesUITest {
         assertNotNull(modal.findElement(By.xpath(".//button[@onclick='saveConnection()']")), 
                 "Create Connection button should be present");
         
-        System.out.println("✓ Modal contains all required form fields");
+        System.out.println("[OK] Modal contains all required form fields");
     }
 
     @Test
@@ -581,7 +581,7 @@ class DataSourcesUITest {
         assertTrue(optionValues.contains("SQLSERVER"), "SQL Server should be available");
         assertTrue(optionValues.contains("ORACLE"), "Oracle should be available");
         
-        System.out.println("✓ Database type dropdown has all required options");
+        System.out.println("[OK] Database type dropdown has all required options");
     }
 
     @Test
@@ -618,7 +618,7 @@ class DataSourcesUITest {
         assertEquals("9092", 
                 driver.findElement(By.id("connectionPort")).getAttribute("value"));
         
-        System.out.println("✓ Modal form accepts user input correctly");
+        System.out.println("[OK] Modal form accepts user input correctly");
     }
 
     @Test
@@ -641,7 +641,7 @@ class DataSourcesUITest {
         // Wait for modal to be hidden (check class or visibility)
         wait.until(ExpectedConditions.invisibilityOf(modal));
         
-        System.out.println("✓ Modal closes when Cancel is clicked");
+        System.out.println("[OK] Modal closes when Cancel is clicked");
     }
 
     // ========== SQL Execution and Results Tests ==========
@@ -663,7 +663,7 @@ class DataSourcesUITest {
                 By.xpath("//button[@onclick='loadSampleQuery()']"));
         assertTrue(sampleBtn.isEnabled(), "Sample button should be enabled");
         
-        System.out.println("✓ SQL Editor toolbar buttons are functional");
+        System.out.println("[OK] SQL Editor toolbar buttons are functional");
     }
 
     @Test
@@ -691,7 +691,7 @@ class DataSourcesUITest {
         WebElement sqlEditor = driver.findElement(By.id("sqlEditor"));
         assertNotNull(sqlEditor, "SQL editor should still be present after clicking");
         
-        System.out.println("✓ Load Sample Query button is functional");
+        System.out.println("[OK] Load Sample Query button is functional");
     }
 
     @Test
@@ -710,7 +710,7 @@ class DataSourcesUITest {
         assertTrue(executeBtn.getAttribute("class").contains("btn-success"),
                 "Execute Query button should have success styling");
 
-        System.out.println("✓ Execute Query button present in SQL Editor panel");
+        System.out.println("[OK] Execute Query button present in SQL Editor panel");
     }
 
     @Test
@@ -728,7 +728,7 @@ class DataSourcesUITest {
         assertNotNull(rowCount, "Row count element should exist");
         assertNotNull(execTime, "Execution time element should exist");
         
-        System.out.println("✓ Query stats section structure verified");
+        System.out.println("[OK] Query stats section structure verified");
     }
 
     @Test
@@ -745,7 +745,7 @@ class DataSourcesUITest {
         assertTrue(displayStyle.equals("none") || !sqlError.isDisplayed(), 
                 "Error section should be hidden initially");
         
-        System.out.println("✓ SQL error section structure verified");
+        System.out.println("[OK] SQL error section structure verified");
     }
 
     @Test
@@ -771,7 +771,7 @@ class DataSourcesUITest {
         WebElement tablesList = driver.findElement(By.id("schemaTablesList"));
         assertNotNull(tablesList, "Schema tables list should exist");
 
-        System.out.println("✓ Table View schema tables container present");
+        System.out.println("[OK] Table View schema tables container present");
     }
 
     @Test
@@ -796,7 +796,7 @@ class DataSourcesUITest {
         WebElement resultsTable = driver.findElement(By.id("queryResultsTable"));
         assertNotNull(resultsTable, "Query results table should exist");
 
-        System.out.println("✓ Query results table structure verified");
+        System.out.println("[OK] Query results table structure verified");
     }
 
     // ========== Connection Management (CRUD) Tests ==========
@@ -815,7 +815,7 @@ class DataSourcesUITest {
                    listContent.contains("Click \"Create Connection\""),
                 "Empty state message should be visible when no connections exist");
         
-        System.out.println("✓ Connection list shows proper empty state");
+        System.out.println("[OK] Connection list shows proper empty state");
     }
 
     @Test
@@ -843,7 +843,7 @@ class DataSourcesUITest {
         WebElement connectionList = driver.findElement(By.id("connectionList"));
         assertNotNull(connectionList, "Connection list should still be present after refresh");
         
-        System.out.println("✓ Refresh connections button works");
+        System.out.println("[OK] Refresh connections button works");
     }
 
     @Test
@@ -862,7 +862,7 @@ class DataSourcesUITest {
         assertTrue(testBtn.isEnabled(), "Test Connection button should be enabled");
         assertTrue(testBtn.getText().contains("Test Connection"));
         
-        System.out.println("✓ Test Connection button present in modal");
+        System.out.println("[OK] Test Connection button present in modal");
     }
 
     @Test
@@ -881,7 +881,7 @@ class DataSourcesUITest {
         assertTrue(content == null || content.isEmpty(), 
                 "Result area should be empty initially");
         
-        System.out.println("✓ Test connection result area verified");
+        System.out.println("[OK] Test connection result area verified");
     }
 
     @Test
@@ -902,7 +902,7 @@ class DataSourcesUITest {
         assertEquals("Select connection...", options.get(0).getText(),
                 "First option should be placeholder");
         
-        System.out.println("✓ Connection selector initial state verified");
+        System.out.println("[OK] Connection selector initial state verified");
     }
 
     @Test
@@ -917,7 +917,7 @@ class DataSourcesUITest {
         assertEquals("Load database schema into Field blocks", 
                 loadSchemaBtn.getAttribute("title"));
         
-        System.out.println("✓ Load Schema button verified");
+        System.out.println("[OK] Load Schema button verified");
     }
 
     @Test
@@ -931,7 +931,7 @@ class DataSourcesUITest {
         assertNotNull(clearBtn, "Clear button should be present");
         assertEquals("Clear all", clearBtn.getAttribute("title"));
         
-        System.out.println("✓ Clear button verified");
+        System.out.println("[OK] Clear button verified");
     }
 
     @Test
@@ -955,7 +955,7 @@ class DataSourcesUITest {
         assertTrue(sqlPanel.getAttribute("class").contains("active"),
                 "SQL Editor panel should be active by default");
         
-        System.out.println("✓ All panels have correct CSS classes");
+        System.out.println("[OK] All panels have correct CSS classes");
     }
 
     // ========== Advanced SQL Editor Feature Tests ==========
@@ -973,7 +973,7 @@ class DataSourcesUITest {
         assertTrue(placeholder.contains("SELECT"), 
                 "Placeholder should contain example SQL");
         
-        System.out.println("✓ SQL Editor placeholder verified");
+        System.out.println("[OK] SQL Editor placeholder verified");
     }
 
     @Test
@@ -991,7 +991,7 @@ class DataSourcesUITest {
         assertTrue(Integer.parseInt(rows) >= 5, 
                 "Should have at least 5 rows for comfortable editing");
         
-        System.out.println("✓ SQL Editor multiline capability verified");
+        System.out.println("[OK] SQL Editor multiline capability verified");
     }
 
     @Test
@@ -1013,7 +1013,7 @@ class DataSourcesUITest {
         assertTrue(requiredLabels >= 5, 
                 "At least 5 fields should be marked as required");
         
-        System.out.println("✓ Required field indicators present");
+        System.out.println("[OK] Required field indicators present");
     }
 
     @Test
@@ -1034,7 +1034,7 @@ class DataSourcesUITest {
         assertTrue(modalDialog.getAttribute("class").contains("modal-dialog-centered"),
                 "Should be centered");
         
-        System.out.println("✓ Connection modal Bootstrap styling verified");
+        System.out.println("[OK] Connection modal Bootstrap styling verified");
     }
 
     @Test
@@ -1057,7 +1057,7 @@ class DataSourcesUITest {
         assertEquals("password", passwordInput.getAttribute("type"),
                 "Password should be password input");
         
-        System.out.println("✓ Form input types verified");
+        System.out.println("[OK] Form input types verified");
     }
 
     // ========== End-to-End Functional Tests ==========
@@ -1130,7 +1130,7 @@ class DataSourcesUITest {
                                   driver.findElements(By.xpath("//div[contains(text(), 'E2E Test H2')]")).size() > 0;
         
         if (connectionFound) {
-            System.out.println("✓ E2E: Connection created and appears in list");
+            System.out.println("[OK] E2E: Connection created and appears in list");
         } else {
             // Connection creation might have failed - check for error or empty state
             boolean hasEmptyState = listContent.contains("No connections");
@@ -1187,7 +1187,7 @@ class DataSourcesUITest {
         WebElement resultDiv = driver.findElement(By.id("testConnectionResult"));
         assertNotNull(resultDiv, "Test connection result div should exist");
 
-        System.out.println("✓ E2E: Connection form can be filled correctly");
+        System.out.println("[OK] E2E: Connection form can be filled correctly");
     }
 
     @Test
@@ -1216,7 +1216,7 @@ class DataSourcesUITest {
         boolean hasConnections = options.size() > 1;
         
         if (hasConnections) {
-            System.out.println("✓ E2E: Connection appears in SQL Editor dropdown (" + 
+            System.out.println("[OK] E2E: Connection appears in SQL Editor dropdown (" + 
                              (options.size() - 1) + " connections found)");
         } else {
             System.out.println("⚠ E2E: No connections found in dropdown (may need to run test #36 first)");
@@ -1260,7 +1260,7 @@ class DataSourcesUITest {
         assertTrue(errorShown || statsShown || true, // Always pass - just checking mechanism
                 "Query execution should show some feedback");
         
-        System.out.println("✓ E2E: SQL query execution attempted (error shown: " + 
+        System.out.println("[OK] E2E: SQL query execution attempted (error shown: " + 
                          errorShown + ", stats shown: " + statsShown + ")");
     }
 
@@ -1284,7 +1284,7 @@ class DataSourcesUITest {
         WebElement tablesList = driver.findElement(By.id("schemaTablesList"));
         boolean hasTables = tablesList.isDisplayed();
 
-        System.out.println("✓ E2E: Table View accessible (has tables: " + hasTables + ")");
+        System.out.println("[OK] E2E: Table View accessible (has tables: " + hasTables + ")");
     }
 
     @Test
@@ -1323,7 +1323,7 @@ class DataSourcesUITest {
         // Error div should either be visible or page should still be functional
         assertNotNull(sqlError, "SQL error element should exist");
         
-        System.out.println("✓ E2E: Invalid SQL handled (error display attempted)");
+        System.out.println("[OK] E2E: Invalid SQL handled (error display attempted)");
     }
 
     @Test
@@ -1371,7 +1371,7 @@ class DataSourcesUITest {
             List<WebElement> afterDelete = driver.findElements(
                     By.xpath("//button[contains(@class, 'btn-outline-danger')][@onclick]"));
             
-            System.out.println("✓ E2E: Delete connection executed (before: " + 
+            System.out.println("[OK] E2E: Delete connection executed (before: " + 
                              initialCount + ", after: " + afterDelete.size() + ")");
         } else {
             System.out.println("⚠ E2E: No connections available to delete");
@@ -1410,7 +1410,7 @@ class DataSourcesUITest {
         
         assertNotNull(afterFormat, "SQL should still be present after format attempt");
         
-        System.out.println("✓ E2E: Format SQL button executed (changed: " + 
+        System.out.println("[OK] E2E: Format SQL button executed (changed: " + 
                          !beforeFormat.equals(afterFormat) + ")");
     }
 
@@ -1449,7 +1449,7 @@ class DataSourcesUITest {
         // Check if cleared
         String afterClear = sqlEditor.getAttribute("value");
         
-        System.out.println("✓ E2E: Clear button executed (content after: '" + 
+        System.out.println("[OK] E2E: Clear button executed (content after: '" + 
                          (afterClear == null || afterClear.isEmpty() ? "empty" : "has content") + "')");
     }
 
@@ -1525,7 +1525,7 @@ class DataSourcesUITest {
         // 4. Back to connections for cleanup (delete attempted in separate test)
         clickTab("connections");
         
-        System.out.println("✓ E2E: Complete workflow executed successfully");
+        System.out.println("[OK] E2E: Complete workflow executed successfully");
     }
 
     // Helper methods

@@ -50,6 +50,6 @@ class PipelineEtlExecutionTestExtractEmptyCsv extends DemoTestBase {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Pipeline should execute successfully even with empty CSV");
 
-        logger.info("✓ Empty CSV extract pipeline test completed successfully");
+        logger.info("[OK] Empty CSV extract pipeline test completed successfully");
     }
 }

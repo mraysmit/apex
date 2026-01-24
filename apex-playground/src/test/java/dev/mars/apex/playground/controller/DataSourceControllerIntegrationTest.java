@@ -78,7 +78,7 @@ class DataSourceControllerIntegrationTest {
             postgresDatabase = postgresContainer.getDatabaseName();
             postgresUsername = postgresContainer.getUsername();
             postgresPassword = postgresContainer.getPassword();
-            System.out.println("✓ PostgreSQL Testcontainer started at " + postgresHost + ":" + postgresPort);
+            System.out.println("[OK] PostgreSQL Testcontainer started at " + postgresHost + ":" + postgresPort);
         } catch (Exception e) {
             // Docker not available, try local PostgreSQL
             System.out.println("⚠ Docker not available, checking for local PostgreSQL...");
@@ -89,7 +89,7 @@ class DataSourceControllerIntegrationTest {
             postgresPassword = "postgres";
 
             if (isLocalPostgreSQLAvailable()) {
-                System.out.println("✓ Local PostgreSQL found at " + postgresHost + ":" + postgresPort);
+                System.out.println("[OK] Local PostgreSQL found at " + postgresHost + ":" + postgresPort);
             } else {
                 System.out.println("⚠ No PostgreSQL available (Docker or local)");
             }
@@ -100,7 +100,7 @@ class DataSourceControllerIntegrationTest {
     static void tearDown() {
         if (postgresContainer != null && postgresContainer.isRunning()) {
             postgresContainer.stop();
-            System.out.println("✓ PostgreSQL Testcontainer stopped");
+            System.out.println("[OK] PostgreSQL Testcontainer stopped");
         }
     }
 
@@ -131,7 +131,7 @@ class DataSourceControllerIntegrationTest {
         assertEquals("H2", response.getBody().getType().toString());
 
         h2ConnectionId = response.getBody().getId();
-        System.out.println("✓ H2 Connection created with ID: " + h2ConnectionId);
+        System.out.println("[OK] H2 Connection created with ID: " + h2ConnectionId);
     }
 
     @Test
@@ -158,7 +158,7 @@ class DataSourceControllerIntegrationTest {
         assertNotNull(response.getBody());
         assertEquals(true, response.getBody().get("success"));
 
-        System.out.println("✓ H2 Connection tested successfully");
+        System.out.println("[OK] H2 Connection tested successfully");
     }
 
     @Test
@@ -201,7 +201,7 @@ class DataSourceControllerIntegrationTest {
             assertEquals(HttpStatus.OK, insertResponse.getStatusCode());
         }
 
-        System.out.println("✓ H2 Test data created: employees table with 5 rows");
+        System.out.println("[OK] H2 Test data created: employees table with 5 rows");
     }
 
     @Test
@@ -231,7 +231,7 @@ class DataSourceControllerIntegrationTest {
         assertEquals(5, rows.size());
         assertEquals(5, response.getBody().get("rowCount"));
 
-        System.out.println("✓ Query executed on H2: Retrieved 5 employees");
+        System.out.println("[OK] Query executed on H2: Retrieved 5 employees");
     }
 
     @Test
@@ -259,7 +259,7 @@ class DataSourceControllerIntegrationTest {
         assertEquals(3, rows.size());
         assertEquals("Eve Davis", rows.get(0).get(0));
 
-        System.out.println("✓ Filtered query executed: 3 Engineering employees");
+        System.out.println("[OK] Filtered query executed: 3 Engineering employees");
     }
 
     @Test
@@ -275,7 +275,7 @@ class DataSourceControllerIntegrationTest {
         assertTrue(response.getBody().containsKey("database"));
         assertTrue(response.getBody().containsKey("tables"));
 
-        System.out.println("✓ H2 Schema retrieved successfully");
+        System.out.println("[OK] H2 Schema retrieved successfully");
     }
 
     @Test
@@ -290,7 +290,7 @@ class DataSourceControllerIntegrationTest {
         assertNotNull(response.getBody());
         assertThat(response.getBody().size(), greaterThanOrEqualTo(1));
 
-        System.out.println("✓ Connection list retrieved");
+        System.out.println("[OK] Connection list retrieved");
     }
 
     @Test
@@ -329,7 +329,7 @@ class DataSourceControllerIntegrationTest {
 
         postgresConnectionId = response.getBody().getId();
 
-        System.out.println("✓ PostgreSQL Connection created with ID: " + postgresConnectionId);
+        System.out.println("[OK] PostgreSQL Connection created with ID: " + postgresConnectionId);
     }
 
     @Test
@@ -357,7 +357,7 @@ class DataSourceControllerIntegrationTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
 
-        System.out.println("✓ PostgreSQL Connection tested");
+        System.out.println("[OK] PostgreSQL Connection tested");
     }
 
     @Test
@@ -382,7 +382,7 @@ class DataSourceControllerIntegrationTest {
         assertNotNull(response.getBody());
         assertTrue(response.getBody().containsKey("columns"));
 
-        System.out.println("✓ Query executed on PostgreSQL");
+        System.out.println("[OK] Query executed on PostgreSQL");
     }
 
     @Test
@@ -398,7 +398,7 @@ class DataSourceControllerIntegrationTest {
         assertEquals(h2ConnectionId, response.getBody().getId());
         assertEquals(H2_CONNECTION_NAME, response.getBody().getName());
 
-        System.out.println("✓ Single connection retrieved");
+        System.out.println("[OK] Single connection retrieved");
     }
 
     @Test
@@ -408,7 +408,7 @@ class DataSourceControllerIntegrationTest {
         if (postgresConnectionId != null) {
             restTemplate.delete(API_BASE + "/connections/" + postgresConnectionId);
 
-            System.out.println("✓ PostgreSQL Connection deleted");
+            System.out.println("[OK] PostgreSQL Connection deleted");
         }
     }
 
@@ -424,7 +424,7 @@ class DataSourceControllerIntegrationTest {
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 
-        System.out.println("✓ H2 Connection deleted");
+        System.out.println("[OK] H2 Connection deleted");
     }
 
     @AfterAll

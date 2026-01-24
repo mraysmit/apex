@@ -161,7 +161,7 @@ public class StageExecutionConcurrencyTest {
                 logger.warn(" Race condition detected: {} empty, {} partial observations",
                     emptyObservations.get(), partialObservations.get());
             } else {
-                logger.info("✓ No race condition observed in this run (may be timing dependent)");
+                logger.info("[OK] No race condition observed in this run (may be timing dependent)");
             }
         }
 
@@ -246,7 +246,7 @@ public class StageExecutionConcurrencyTest {
             
             // This demonstrates the risk - many added keys may be lost
             // The exact count depends on timing, but demonstrates the issue
-            logger.info("✓ Test completed - demonstrates addStageOutput can be lost during setStageOutputs");
+            logger.info("[OK] Test completed - demonstrates addStageOutput can be lost during setStageOutputs");
         }
     }
 
@@ -345,7 +345,7 @@ public class StageExecutionConcurrencyTest {
             if (raceDetected.get()) {
                 logger.warn("⚠️ ConcurrentModificationException detected - race condition confirmed");
             } else {
-                logger.info("✓ No CME, but modifications from both threads affected same list");
+                logger.info("[OK] No CME, but modifications from both threads affected same list");
             }
             
             // Verify the shared state issue
@@ -375,7 +375,7 @@ public class StageExecutionConcurrencyTest {
             assertEquals("original", original.get("stringValue"));
             assertEquals(true, original.get("boolValue"));
             
-            logger.info("✓ Primitive and immutable values are safely isolated in shallow copies");
+            logger.info("[OK] Primitive and immutable values are safely isolated in shallow copies");
         }
     }
 
@@ -458,7 +458,7 @@ public class StageExecutionConcurrencyTest {
             assertEquals(expectedOperations, totalOperations.get(), 
                 "All operations should complete");
             
-            logger.info("✓ Stress test passed: {} operations across {} threads", 
+            logger.info("[OK] Stress test passed: {} operations across {} threads", 
                 totalOperations.get(), threadCount);
         }
 
@@ -525,7 +525,7 @@ public class StageExecutionConcurrencyTest {
             assertEquals(expectedWarnings, scenarioResult.getWarnings().size(),
                 "All warnings should be recorded");
             
-            logger.info("✓ ScenarioExecutionResult concurrent safety verified: {} stages, {} warnings",
+            logger.info("[OK] ScenarioExecutionResult concurrent safety verified: {} stages, {} warnings",
                 scenarioResult.getStageResults().size(), scenarioResult.getWarnings().size());
         }
     }
@@ -591,7 +591,7 @@ public class StageExecutionConcurrencyTest {
             if (inconsistencyDetected.get()) {
                 logger.warn("⚠️ Inconsistency detected when sharing data map across threads");
             } else {
-                logger.info("✓ No inconsistency detected (HashMap may have worked by chance, but is NOT safe)");
+                logger.info("[OK] No inconsistency detected (HashMap may have worked by chance, but is NOT safe)");
             }
             
             // The point: using a regular HashMap across threads is unsafe
@@ -621,7 +621,7 @@ public class StageExecutionConcurrencyTest {
             assertTrue(copy2.containsKey("key1"), "Original should still have key1");
             assertFalse(copy2.containsKey("key3"), "Original should not have key3");
             
-            logger.info("✓ Defensive copy correctly protects internal state");
+            logger.info("[OK] Defensive copy correctly protects internal state");
         }
     }
 
@@ -739,7 +739,7 @@ public class StageExecutionConcurrencyTest {
             assertEquals("50.0", finalOrigRebate.get("rebateAmount"),
                 "Original values should be preserved");
 
-            logger.info("✓ Deep copy correctly isolates all {} nested structure modifications", totalOperations);
+            logger.info("[OK] Deep copy correctly isolates all {} nested structure modifications", totalOperations);
         }
 
         @Test
@@ -821,7 +821,7 @@ public class StageExecutionConcurrencyTest {
 
             assertEquals(1, finalObs.size(), "Original list should still have only 1 element");
 
-            logger.info("✓ Deep copy correctly isolates nested list modifications");
+            logger.info("[OK] Deep copy correctly isolates nested list modifications");
         }
 
         /**

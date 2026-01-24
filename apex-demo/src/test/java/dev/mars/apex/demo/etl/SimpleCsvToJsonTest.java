@@ -49,7 +49,7 @@ class SimpleCsvToJsonTest extends DemoTestBase {
             throw new RuntimeException("Failed to setup test data", e);
         }
 
-        logger.info("✓ Simple CSV to JSON Test setup completed");
+        logger.info("[OK] Simple CSV to JSON Test setup completed");
     }
 
     @AfterEach
@@ -97,7 +97,7 @@ class SimpleCsvToJsonTest extends DemoTestBase {
         assertTrue(jsonContent.contains("Customer-1"), "Should contain first customer");
         assertTrue(jsonContent.contains("Customer-1000"), "Should contain last customer");
 
-        logger.info("✓ Pipeline completed successfully");
+        logger.info("[OK] Pipeline completed successfully");
         logger.info("  - Result type: {}", result.getResultType());
         logger.info("  - Output file: {}", outputFile.toAbsolutePath());
         logger.info("  - Execution time: {}ms", executionTime);

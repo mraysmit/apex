@@ -120,13 +120,13 @@ public class MixedEnrichmentGroupsAndItemsTest {
 
         LOGGER.info("Mixed Enrichment Groups and Items Order Test PASSED");
         LOGGER.info("   Processing Order Verified:");
-        LOGGER.info("   1. E1 (from ref): enrich-market-data ✓");
-        LOGGER.info("   2. E2 (from ref): calculate-greeks ✓");
-        LOGGER.info("   3. E3 (inline): enrich-counterparty-data ✓");
-        LOGGER.info("   4. EG1 (from ref): market-data-enrichment-group ✓");
-        LOGGER.info("   5. EG2 (from ref): risk-metrics-enrichment-group ✓");
-        LOGGER.info("   6. EG3 (inline): compliance-enrichment-group ✓");
-        LOGGER.info("   7. R1: validate-all-enrichments-executed ✓");
+        LOGGER.info("   1. E1 (from ref): enrich-market-data [OK]");
+        LOGGER.info("   2. E2 (from ref): calculate-greeks [OK]");
+        LOGGER.info("   3. E3 (inline): enrich-counterparty-data [OK]");
+        LOGGER.info("   4. EG1 (from ref): market-data-enrichment-group [OK]");
+        LOGGER.info("   5. EG2 (from ref): risk-metrics-enrichment-group [OK]");
+        LOGGER.info("   6. EG3 (inline): compliance-enrichment-group [OK]");
+        LOGGER.info("   7. R1: validate-all-enrichments-executed [OK]");
         LOGGER.info("");
         LOGGER.info("   🎯 COMPLEX INTERLEAVING VERIFIED: Mixed enrichments and groups work correctly!");
     }

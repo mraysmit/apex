@@ -70,7 +70,7 @@ public class JsonBasedMarkdownReportGenerator {
         
         // Compatibility
         if (report.getCompatibility().isCompatible()) {
-            md.append("> ✓ **Compatible Migration:** Target schema is backward compatible with source schema.\n\n");
+            md.append("> [OK] **Compatible Migration:** Target schema is backward compatible with source schema.\n\n");
         } else {
             md.append("> ⚠️ **Incompatible Migration:** Breaking changes detected that may cause data loss or runtime errors.\n\n");
         }

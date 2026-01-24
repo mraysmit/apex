@@ -58,10 +58,10 @@ public class Test4E_MissingReferenceTest extends DemoTestBase {
         assertTrue(errorMessage.contains("group-A"),
             "Error message should mention the group that references it");
 
-        LOGGER.info("✓ TEST 4E PASSED: APEX correctly validates enrichment references");
-        LOGGER.info("  ✓ Missing reference detected during YAML loading");
-        LOGGER.info("  ✓ Clear error message provided");
-        LOGGER.info("  ✓ Configuration error prevented from reaching runtime");
+        LOGGER.info("[OK] TEST 4E PASSED: APEX correctly validates enrichment references");
+        LOGGER.info("  [OK] Missing reference detected during YAML loading");
+        LOGGER.info("  [OK] Clear error message provided");
+        LOGGER.info("  [OK] Configuration error prevented from reaching runtime");
     }
 }
 

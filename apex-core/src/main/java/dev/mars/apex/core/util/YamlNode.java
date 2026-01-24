@@ -153,7 +153,7 @@ public class YamlNode {
         } else if (!yamlValid) {
             return "⚠ (invalid YAML)";
         } else {
-            return "✓";
+            return "[OK]";
         }
     }
     

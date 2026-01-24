@@ -116,7 +116,7 @@ class ReadSchemaCsvPipelineStageTestLarge extends SyncTestBase {
         schema.getColumns().forEach(col -> 
             logger.info("  Column: {} ({})", col.getName(), col.getDataType()));
 
-        logger.info("✓ Successfully read large CSV schema with {} columns", schema.getColumns().size());
+        logger.info("[OK] Successfully read large CSV schema with {} columns", schema.getColumns().size());
     }
 
     /**

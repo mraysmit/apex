@@ -57,7 +57,7 @@ public class RouterPatternEnrichmentGroupTest extends DemoTestBase {
             // ALSO CRITICAL: Clear itemOrder to force section-level processing
             config.setItemOrder(null);
             
-            logger.info("✓ Configuration loaded successfully");
+            logger.info("[OK] Configuration loaded successfully");
 
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
@@ -78,7 +78,7 @@ public class RouterPatternEnrichmentGroupTest extends DemoTestBase {
             // Verify that AUTO_APPROVE enrichments did NOT run
             assertFalse(manualEnriched.containsKey("approvalStatus"), "Should NOT have approvalStatus field");
             
-            logger.info("✓ Scenario 1 passed: Correctly routed to MANUAL_REVIEW");
+            logger.info("[OK] Scenario 1 passed: Correctly routed to MANUAL_REVIEW");
 
 
             // Scenario 2: AUTO_APPROVE
@@ -98,7 +98,7 @@ public class RouterPatternEnrichmentGroupTest extends DemoTestBase {
             // Verify that MANUAL_REVIEW enrichments did NOT run
             assertFalse(approveEnriched.containsKey("reviewStatus"), "Should NOT have reviewStatus field");
             
-            logger.info("✓ Scenario 2 passed: Correctly routed to AUTO_APPROVE");
+            logger.info("[OK] Scenario 2 passed: Correctly routed to AUTO_APPROVE");
 
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);

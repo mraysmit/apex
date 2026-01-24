@@ -121,7 +121,7 @@ class YamlStageValidationIntegrationTest {
             YamlValidationResult result = validator.validateFile(scenarioFile);
             
             if (result.isValid()) {
-                System.out.println("  ✓ VALID");
+                System.out.println("  [OK] VALID");
                 validCount++;
             } else {
                 System.out.println("  ✗ INVALID");
@@ -171,10 +171,10 @@ class YamlStageValidationIntegrationTest {
         }
         
         System.out.println("\nStage validation features verified:");
-        System.out.println("✓ Processing-stages validation");
-        System.out.println("✓ Stage required fields validation (stage-name, config-file, execution-order)");
-        System.out.println("✓ Failure policy validation (terminate, continue-with-warnings, flag-for-review)");
-        System.out.println("✓ Enhanced error reporting with specific stage context");
+        System.out.println("[OK] Processing-stages validation");
+        System.out.println("[OK] Stage required fields validation (stage-name, config-file, execution-order)");
+        System.out.println("[OK] Failure policy validation (terminate, continue-with-warnings, flag-for-review)");
+        System.out.println("[OK] Enhanced error reporting with specific stage context");
         
         // Actually assert the validation passes!
         assertTrue(result.isValid(), 

@@ -120,7 +120,7 @@ public class TypeWideningTest extends SyncTestBase {
                 )
                 """);
 
-            logger.info("✓ Created schemas with widened types: source_schema → target_schema");
+            logger.info("[OK] Created schemas with widened types: source_schema → target_schema");
         }
     }
 
@@ -151,7 +151,7 @@ public class TypeWideningTest extends SyncTestBase {
             assertTrue(steps.stream().anyMatch(s -> "read-target-schema".equals(s.getName())),
                 "Target schema read step should be present");
             
-            logger.info("✓ Integer widening detection test passed");
+            logger.info("[OK] Integer widening detection test passed");
         } finally {
             System.clearProperty("POSTGRES_HOST");
             System.clearProperty("POSTGRES_PORT");
@@ -182,7 +182,7 @@ public class TypeWideningTest extends SyncTestBase {
             List<ExecutionStep> steps = result.getExecutionPath();
             assertFalse(steps.isEmpty(), "Execution path should contain steps");
             
-            logger.info("✓ Decimal precision widening detection test passed");
+            logger.info("[OK] Decimal precision widening detection test passed");
         } finally {
             System.clearProperty("POSTGRES_HOST");
             System.clearProperty("POSTGRES_PORT");

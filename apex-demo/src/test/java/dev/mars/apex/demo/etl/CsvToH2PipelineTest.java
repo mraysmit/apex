@@ -82,7 +82,7 @@ public class CsvToH2PipelineTest extends DemoTestBase {
             String yamlPath = "src/test/java/dev/mars/apex/demo/etl/CsvToH2PipelineTest.yaml";
             rulesEngine = RulesEngine.fromFile(yamlPath);
 
-            logger.info("✓ RulesEngine initialized successfully");
+            logger.info("[OK] RulesEngine initialized successfully");
 
             // Execute the pipeline
             java.util.Map<String, Object> inputData = new java.util.HashMap<>();
@@ -93,7 +93,7 @@ public class CsvToH2PipelineTest extends DemoTestBase {
             assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
                 "Pipeline should execute successfully");
 
-            logger.info("✓ Pipeline executed successfully");
+            logger.info("[OK] Pipeline executed successfully");
             logger.info("Pipeline Results:");
             logger.info("  - Result type: " + result.getResultType());
             logger.info("  - Message: " + result.getMessage());
@@ -101,7 +101,7 @@ public class CsvToH2PipelineTest extends DemoTestBase {
             // Validate actual data was loaded into H2 database
             validateDatabaseContents();
 
-            logger.info("✓ CSV to H2 pipeline execution test completed successfully");
+            logger.info("[OK] CSV to H2 pipeline execution test completed successfully");
 
         } catch (Exception e) {
             logger.error("Pipeline execution test failed: " + e.getMessage(), e);
@@ -124,14 +124,14 @@ public class CsvToH2PipelineTest extends DemoTestBase {
             // Verify table exists
             ResultSet tables = conn.getMetaData().getTables(null, null, "CUSTOMERS", null);
             assertTrue(tables.next(), "Table 'customers' should exist in database");
-            logger.info("✓ Table 'customers' exists");
+            logger.info("[OK] Table 'customers' exists");
 
             // Verify record count (should be 3 data rows, excluding CSV header)
             ResultSet countRs = stmt.executeQuery("SELECT COUNT(*) as cnt FROM customers");
             assertTrue(countRs.next(), "Should have count result");
             int recordCount = countRs.getInt("cnt");
             assertEquals(3, recordCount, "Should have loaded 3 customer records from CSV");
-            logger.info("✓ Database contains {} customer records", recordCount);
+            logger.info("[OK] Database contains {} customer records", recordCount);
 
             // Verify specific customer data values (column names from YAML line 122-123)
             ResultSet dataRs = stmt.executeQuery(
@@ -156,7 +156,7 @@ public class CsvToH2PipelineTest extends DemoTestBase {
             assertEquals("Bob Johnson", dataRs.getString("customer_name"), "Third customer name should match");
             assertEquals("INACTIVE", dataRs.getString("status"), "Third customer status should be INACTIVE");
 
-            logger.info("✓ All {} customer records verified successfully", recordCount);
+            logger.info("[OK] All {} customer records verified successfully", recordCount);
         }
     }
 
@@ -184,7 +184,7 @@ public class CsvToH2PipelineTest extends DemoTestBase {
             writer.write("3,Bob Johnson,bob.johnson@example.com,2023-03-10,INACTIVE\n");
         }
 
-        logger.info("✓ Test data setup completed");
+        logger.info("[OK] Test data setup completed");
         logger.info("  - Data directory: " + dataDir.toAbsolutePath());
         logger.info("  - CSV file: " + csvFile.toAbsolutePath());
         logger.info("  - Output directory: " + outputDir.toAbsolutePath());

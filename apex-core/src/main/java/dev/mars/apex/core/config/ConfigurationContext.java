@@ -387,10 +387,10 @@ public class ConfigurationContext {
                 count += loadFromClasspathUrl(url, classpathPrefix);
             }
         } catch (IOException e) {
-            logger.warn("Failed to scan classpath prefix: {}", classpathPrefix, e);
+            logger.error("Failed to scan classpath prefix: {} - {}", classpathPrefix, e.getMessage());
         }
         
-        logger.info("Loaded {} configurations from classpath prefix: {}", count, classpathPrefix);
+        logger.debug("Loaded {} configurations from classpath prefix: {}", count, classpathPrefix);
         return count;
     }
 
@@ -411,7 +411,7 @@ public class ConfigurationContext {
             registerConfiguration(name, config);
             return config;
         } catch (Exception e) {
-            logger.warn("Failed to load configuration from: {}", path, e);
+            logger.error("Failed to load configuration from: {} - {}", path, e.getMessage());
             return null;
         }
     }
@@ -434,7 +434,7 @@ public class ConfigurationContext {
             registerComponent(name, component);
             return component;
         } catch (Exception e) {
-            logger.warn("Failed to load component from: {}", path, e);
+            logger.error("Failed to load component from: {} - {}", path, e.getMessage());
             return null;
         }
     }
@@ -524,7 +524,7 @@ public class ConfigurationContext {
                 }
             }
         } catch (IOException e) {
-            logger.warn("Failed to scan directory: {}", directory, e);
+            logger.error("Failed to scan directory: {} - {}", directory, e.getMessage());
         }
         return count;
     }
@@ -557,7 +557,7 @@ public class ConfigurationContext {
             }
             return true;
         } catch (Exception e) {
-            logger.warn("Failed to load file: {}", file, e);
+            logger.error("Failed to load file: {} - {}", file, e.getMessage());
             return false;
         }
     }
@@ -570,7 +570,7 @@ public class ConfigurationContext {
                 Path directory = Paths.get(url.toURI());
                 return loadFromDirectory(directory);
             } catch (Exception e) {
-                logger.warn("Failed to load from classpath URL: {}", url, e);
+                logger.error("Failed to load from classpath URL: {} - {}", url, e.getMessage());
             }
         } else {
             logger.debug("JAR classpath scanning not yet implemented for URL: {}", url);

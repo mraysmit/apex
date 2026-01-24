@@ -72,7 +72,7 @@ class YamlDependencyAnalyzerRealFilesTest {
                         System.out.println("  Circular dependencies: " + graph.findCircularDependencies());
                     }
                 } else {
-                    System.out.println("✓ All dependencies are healthy");
+                    System.out.println("[OK] All dependencies are healthy");
                 }
                 
             } catch (Exception e) {

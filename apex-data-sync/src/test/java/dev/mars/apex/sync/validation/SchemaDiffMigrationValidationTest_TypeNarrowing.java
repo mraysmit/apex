@@ -104,8 +104,8 @@ class SchemaDiffMigrationValidationTest_TypeNarrowing {
         assertTrue(reportContent.contains("Changed Columns") || reportContent.contains("changed"),
             "Report should have changed columns section");
         
-        logger.info("✓ Incompatible type narrowing detected");
-        logger.info("✓ VARCHAR narrowing can cause data truncation - migration requires data validation");
+        logger.info("[OK] Incompatible type narrowing detected");
+        logger.info("[OK] VARCHAR narrowing can cause data truncation - migration requires data validation");
     }
 
     private SchemaComparisonResult extractComparisonResult(RuleResult result) {

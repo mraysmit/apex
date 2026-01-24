@@ -3,6 +3,7 @@ package dev.mars.apex.core.service.transformation;
 import dev.mars.apex.core.config.yaml.YamlTransformation;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.exception.ApexTransformationException;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,8 +109,9 @@ public class YamlTransformationProcessor {
                     logger.debug("Skipping transformation (condition not met or disabled): {}", transformation.getId());
                 }
             } catch (Exception e) {
-                logger.error("CRITICAL: Transformation failure in deprecated method cannot be propagated to caller: {} - {}",
-                            transformation.getId(), e.getMessage(), e);
+                logger.error("Transformation failure in deprecated method cannot be propagated to caller: {} - {}",
+                            transformation.getId(), e.getMessage());
+                logger.debug("Full stack trace for transformation failure:", e);
                 // Continue processing other transformations
             }
         }
@@ -154,7 +156,8 @@ public class YamlTransformationProcessor {
                     logger.debug("Skipping transformation (condition not met or disabled): {}", transformation.getId());
                 }
             } catch (Exception e) {
-                logger.error("CRITICAL: Transformation failed: {} - {}", transformation.getId(), e.getMessage(), e);
+                logger.error("CRITICAL: Transformation failed: {} - {}", transformation.getId(), e.getMessage());
+                logger.debug("Full stack trace for transformation failure:", e);
 
                 // Return error result immediately (fail-fast behavior)
                 return RuleResult.error(
@@ -191,7 +194,7 @@ public class YamlTransformationProcessor {
      */
     public RuleResult processTransformationWithResult(YamlTransformation transformation, Object targetObject) {
         if (transformation == null) {
-            logger.error("CRITICAL: Null transformation provided");
+            logger.error("Null transformation provided");
             return RuleResult.error("transformation:null", "Null transformation provided", SeverityConstants.ERROR);
         }
 
@@ -230,7 +233,8 @@ public class YamlTransformationProcessor {
                 );
             }
         } catch (Exception e) {
-            logger.error("CRITICAL: Transformation failed: {} - {}", transformation.getId(), e.getMessage(), e);
+            logger.error("CRITICAL: Transformation failed: {} - {}", transformation.getId(), e.getMessage());
+            logger.debug("Full stack trace for transformation failure:", e);
             return RuleResult.error(
                 "transformation:" + transformation.getId(),
                 "Transformation processing failed: " + e.getMessage(),
@@ -281,7 +285,7 @@ public class YamlTransformationProcessor {
 
         if (type == null) {
             String errorMsg = "Transformation " + transformation.getId() + " has no type specified";
-            logger.error("CRITICAL: {}", errorMsg);
+            logger.error("{}", errorMsg);
             throw new IllegalArgumentException(errorMsg);
         }
 
@@ -291,7 +295,7 @@ public class YamlTransformationProcessor {
             case "conditional-transformation" -> processConditionalTransformation(transformation, targetObject);
             default -> {
                 String errorMsg = "Unknown transformation type: " + type + " for transformation " + transformation.getId();
-                logger.error("CRITICAL: {}", errorMsg);
+                logger.error("{}", errorMsg);
                 throw new IllegalArgumentException(errorMsg);
             }
         };
@@ -334,9 +338,14 @@ public class YamlTransformationProcessor {
 
             return targetObject;
         } catch (Exception e) {
-            logger.error("CRITICAL: Field transformation failed for {}: {}",
-                transformation.getId(), e.getMessage(), e);
-            throw new RuntimeException("Field transformation failed: " + e.getMessage(), e);
+            logger.error("Field transformation failed for {}: {}",
+                transformation.getId(), e.getMessage());
+            logger.debug("Full stack trace for field transformation failure:", e);
+            throw ApexTransformationException.expressionError(
+                transformation.getId(), 
+                transformation.getExpression(), 
+                "Field transformation failed: " + e.getMessage(), 
+                e);
         }
     }
 
@@ -432,7 +441,12 @@ public class YamlTransformationProcessor {
                 String errorMsg = String.format("Failed to process action %s for transformation %s: %s", 
                     action.getType(), transformationId, e.getMessage());
                 logger.error(errorMsg);
-                throw new RuntimeException(errorMsg, e);
+                logger.debug("Full stack trace for action processing failure:", e);
+                throw ApexTransformationException.expressionError(
+                    transformationId, 
+                    action.getType(), 
+                    errorMsg, 
+                    e);
             }
         }
     }

@@ -126,7 +126,7 @@ class PostgreSQLConnectionE2ETest {
         WebElement modal = wait.until(ExpectedConditions.visibilityOfElementLocated(
                 By.id("createConnectionModal")));
         assertTrue(modal.isDisplayed(), "Modal should be visible");
-        System.out.println("✓ Modal opened");
+        System.out.println("[OK] Modal opened");
         printBrowserConsole("After opening modal");
 
         // STEP 2: Fill in PostgreSQL connection details
@@ -156,7 +156,7 @@ class PostgreSQLConnectionE2ETest {
         passwordInput.clear();
         passwordInput.sendKeys(postgres.getPassword());
 
-        System.out.println("✓ Form filled with PostgreSQL credentials");
+        System.out.println("[OK] Form filled with PostgreSQL credentials");
         printBrowserConsole("After filling form");
 
         // STEP 3: Test the connection
@@ -174,7 +174,7 @@ class PostgreSQLConnectionE2ETest {
 
         assertTrue(resultText.contains("successful") || resultText.contains("Connection successful"),
                 "Connection test should succeed. Got: " + resultText);
-        System.out.println("✓ Connection test PASSED");
+        System.out.println("[OK] Connection test PASSED");
 
         // STEP 4: Save the connection
         System.out.println("Step 4: Saving connection...");
@@ -198,7 +198,7 @@ class PostgreSQLConnectionE2ETest {
             // Modal already closed, which is fine
         }
 
-        System.out.println("✓ Connection saved");
+        System.out.println("[OK] Connection saved");
 
         // STEP 5: Switch to Connections tab and verify connection is in the list
         System.out.println("Step 5: Verifying connection appears in list...");
@@ -213,7 +213,7 @@ class PostgreSQLConnectionE2ETest {
         refreshButton.click();
         Thread.sleep(2000);
         printBrowserConsole(
-                "CRITICAL: After clicking Refresh Connections - should show API response and connections array");
+                After clicking Refresh Connections - should show API response and connections array");
 
         // Check if connection appears in the list
         WebElement connectionList = driver.findElement(By.id("connectionList"));
@@ -223,7 +223,7 @@ class PostgreSQLConnectionE2ETest {
         // The UI list may not refresh immediately due to async timing
         boolean connectionInList = listContent.contains(CONNECTION_NAME) || listContent.contains("PostgreSQL");
         if (connectionInList) {
-            System.out.println("✓ Connection appears in list: " + CONNECTION_NAME);
+            System.out.println("[OK] Connection appears in list: " + CONNECTION_NAME);
         } else {
             System.out.println("⚠ Connection not visible in UI list yet (but backend created it successfully)");
             System.out.println("  List content: " + listContent);
@@ -232,11 +232,11 @@ class PostgreSQLConnectionE2ETest {
 
         System.out.println("\n=== PostgreSQL Connection Test COMPLETED SUCCESSFULLY ===");
         System.out.println("All Steps Passed:");
-        System.out.println("  ✓ Step 1: Modal opened");
-        System.out.println("  ✓ Step 2: Form filled with PostgreSQL credentials");
-        System.out.println("  ✓ Step 3: Connection test PASSED");
-        System.out.println("  ✓ Step 4: Connection saved to backend");
-        System.out.println("  ✓ Step 5: Connection appears in UI list");
+        System.out.println("  [OK] Step 1: Modal opened");
+        System.out.println("  [OK] Step 2: Form filled with PostgreSQL credentials");
+        System.out.println("  [OK] Step 3: Connection test PASSED");
+        System.out.println("  [OK] Step 4: Connection saved to backend");
+        System.out.println("  [OK] Step 5: Connection appears in UI list");
         System.out.println("\nPostgreSQL connection test button is fully functional.");
     }
 

@@ -67,7 +67,7 @@ public class ConditionalMappingEnrichmentPhase3Test extends DemoTestBase {
             // Should match highest priority rule
             assertEquals("HIGH_PRIORITY_NDF", resultMap.get("IS_NDF"));
             
-            logger.info("✓ Highest priority rule processing completed successfully");
+            logger.info("[OK] Highest priority rule processing completed successfully");
             logger.info("Result: " + enrichedData);
 
         } catch (Exception e) {
@@ -104,7 +104,7 @@ public class ConditionalMappingEnrichmentPhase3Test extends DemoTestBase {
             // Should match medium priority rule
             assertEquals("N_SWIFT", resultMap.get("IS_NDF"));
             
-            logger.info("✓ Medium priority rule processing completed successfully");
+            logger.info("[OK] Medium priority rule processing completed successfully");
             logger.info("Result: " + enrichedData);
 
         } catch (Exception e) {
@@ -141,7 +141,7 @@ public class ConditionalMappingEnrichmentPhase3Test extends DemoTestBase {
             // Should match other systems rule
             assertEquals("OTHER_SYSTEM_VALUE", resultMap.get("IS_NDF"));
             
-            logger.info("✓ Other systems rule processing completed successfully");
+            logger.info("[OK] Other systems rule processing completed successfully");
             logger.info("Result: " + enrichedData);
 
         } catch (Exception e) {
@@ -178,7 +178,7 @@ public class ConditionalMappingEnrichmentPhase3Test extends DemoTestBase {
             // Should match default rule
             assertEquals("DEFAULT_NDF", resultMap.get("IS_NDF"));
             
-            logger.info("✓ Default rule fallback completed successfully");
+            logger.info("[OK] Default rule fallback completed successfully");
             logger.info("Result: " + enrichedData);
 
         } catch (Exception e) {

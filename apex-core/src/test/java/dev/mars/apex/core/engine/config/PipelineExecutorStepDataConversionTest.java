@@ -102,7 +102,7 @@ public class PipelineExecutorStepDataConversionTest {
         logger.info("  Records: {}/{}", pipelineStep.getRecordsProcessed(), pipelineStep.getRecordsFailed());
         logger.info("  Has Data: {}", pipelineStep.hasStepData());
         
-        logger.info("✓ All fields mapped correctly from PipelineStepResult to ExecutionStep");
+        logger.info("[OK] All fields mapped correctly from PipelineStepResult to ExecutionStep");
     }
 
     // ========================================================================
@@ -150,7 +150,7 @@ public class PipelineExecutorStepDataConversionTest {
             }
         }
         
-        logger.info("✓ Large dataset handled efficiently in {}ms", executionTime);
+        logger.info("[OK] Large dataset handled efficiently in {}ms", executionTime);
     }
 
     // ========================================================================
@@ -194,7 +194,7 @@ public class PipelineExecutorStepDataConversionTest {
             }
         }
         
-        logger.info("✓ Handled {} different data types: {}", dataTypes.size(), dataTypes);
+        logger.info("[OK] Handled {} different data types: {}", dataTypes.size(), dataTypes);
     }
 
     // ========================================================================
@@ -237,7 +237,7 @@ public class PipelineExecutorStepDataConversionTest {
             logger.info("    Skipped: {}", step.getName());
         }
 
-        logger.info("✓ Skipped steps handled correctly");
+        logger.info("[OK] Skipped steps handled correctly");
     }
 
     // ========================================================================
@@ -284,7 +284,7 @@ public class PipelineExecutorStepDataConversionTest {
             }
         }
 
-        logger.info("✓ Failed steps handled correctly");
+        logger.info("[OK] Failed steps handled correctly");
     }
 
     // ========================================================================
@@ -366,7 +366,7 @@ public class PipelineExecutorStepDataConversionTest {
                 "Transform should come before load");
         }
 
-        logger.info("✓ Step order preserved correctly (dependencies respected)");
+        logger.info("[OK] Step order preserved correctly (dependencies respected)");
     }
 }
 

@@ -76,7 +76,7 @@ class RulesEnginePipelineIntegrationTest {
                 TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_Simple.yaml");
 
             assertNotNull(engine, "RulesEngine should be created successfully");
-            logger.info("✓ Pipeline configuration loaded successfully");
+            logger.info("[OK] Pipeline configuration loaded successfully");
 
             engine.shutdown();
         }
@@ -91,7 +91,7 @@ class RulesEnginePipelineIntegrationTest {
                 TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_H2Database.yaml");
 
             assertNotNull(engine, "RulesEngine should be created successfully");
-            logger.info("✓ Data sources initialized (check logs for initialization messages)");
+            logger.info("[OK] Data sources initialized (check logs for initialization messages)");
 
             engine.shutdown();
         }
@@ -106,7 +106,7 @@ class RulesEnginePipelineIntegrationTest {
                 TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_H2Database.yaml");
 
             assertNotNull(engine, "RulesEngine should be created successfully");
-            logger.info("✓ Data sinks initialized (check logs for initialization messages)");
+            logger.info("[OK] Data sinks initialized (check logs for initialization messages)");
 
             engine.shutdown();
         }
@@ -128,7 +128,7 @@ class RulesEnginePipelineIntegrationTest {
             RuleResult result = engine.evaluate(inputData);
 
             assertNotNull(result, "Result should not be null");
-            logger.info("✓ Missing pipeline section handled gracefully");
+            logger.info("[OK] Missing pipeline section handled gracefully");
 
             engine.shutdown();
         }
@@ -144,7 +144,7 @@ class RulesEnginePipelineIntegrationTest {
                 TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_InitFailure.yaml");
 
             assertNotNull(engine, "RulesEngine should be created even if data source init fails");
-            logger.info("✓ Data source initialization failure handled gracefully (check logs for warnings)");
+            logger.info("[OK] Data source initialization failure handled gracefully (check logs for warnings)");
 
             engine.shutdown();
         }
@@ -179,7 +179,7 @@ class RulesEnginePipelineIntegrationTest {
             assertEquals(SeverityConstants.INFO, result.getSeverity(),
                 "Severity should be INFO for successful pipeline");
 
-            logger.info("✓ Simple extract pipeline executed successfully");
+            logger.info("[OK] Simple extract pipeline executed successfully");
             logger.info("  Result: {}", result.getMessage());
 
             engine.shutdown();
@@ -205,7 +205,7 @@ class RulesEnginePipelineIntegrationTest {
             // Verify data was actually loaded into H2 target table
             verifyDataLoadedIntoH2();
 
-            logger.info("✓ Multi-step pipeline executed successfully");
+            logger.info("[OK] Multi-step pipeline executed successfully");
             logger.info("  Result: {}", result.getMessage());
 
             engine.shutdown();
@@ -227,7 +227,7 @@ class RulesEnginePipelineIntegrationTest {
             assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
                 "Inline data pipeline should execute successfully");
 
-            logger.info("✓ Pipeline with inline data executed successfully");
+            logger.info("[OK] Pipeline with inline data executed successfully");
 
             engine.shutdown();
         }
@@ -249,7 +249,7 @@ class RulesEnginePipelineIntegrationTest {
             assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
                 "H2 database pipeline should execute successfully");
 
-            logger.info("✓ Pipeline with H2 database executed successfully");
+            logger.info("[OK] Pipeline with H2 database executed successfully");
 
             engine.shutdown();
         }
@@ -265,14 +265,14 @@ class RulesEnginePipelineIntegrationTest {
                 TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_Simple.yaml");
 
             assertNotNull(engine, "RulesEngine should be created");
-            logger.info("✓ RulesEngine created (PipelineExecutor not yet initialized)");
+            logger.info("[OK] RulesEngine created (PipelineExecutor not yet initialized)");
 
             // Execute pipeline - this should trigger lazy initialization
             Map<String, Object> inputData = new HashMap<>();
             RuleResult result = engine.evaluate(inputData);
 
             assertNotNull(result, "Result should not be null");
-            logger.info("✓ Pipeline executed (PipelineExecutor now initialized)");
+            logger.info("[OK] Pipeline executed (PipelineExecutor now initialized)");
 
             engine.shutdown();
         }
@@ -295,7 +295,7 @@ class RulesEnginePipelineIntegrationTest {
             assertTrue(result.getMessage().contains("Sequential evaluation completed with failures"),
                 "Result message should indicate evaluation failure");
 
-            logger.info("✓ Pipeline execution failure handled correctly");
+            logger.info("[OK] Pipeline execution failure handled correctly");
             logger.info("  Error: {}", result.getMessage());
 
             engine.shutdown();
@@ -315,7 +315,7 @@ class RulesEnginePipelineIntegrationTest {
                 if (rs.next()) {
                     int count = rs.getInt(1);
                     assertTrue(count > 0, "Target table should contain loaded data");
-                    logger.info("✓ Verified {} records loaded into target_customers table", count);
+                    logger.info("[OK] Verified {} records loaded into target_customers table", count);
                 }
             }
         }
@@ -345,7 +345,7 @@ class RulesEnginePipelineIntegrationTest {
             assertNotNull(result, "Result should not be null");
             assertTrue(result.isSuccess(), "Both pipeline and enrichments should execute successfully");
 
-            logger.info("✓ Pipeline and enrichments executed in document order");
+            logger.info("[OK] Pipeline and enrichments executed in document order");
             logger.info("  Result: {}", result.getMessage());
 
             engine.shutdown();
@@ -365,7 +365,7 @@ class RulesEnginePipelineIntegrationTest {
 
             assertNotNull(result, "Result should not be null");
 
-            logger.info("✓ Pipeline and rules executed in document order");
+            logger.info("[OK] Pipeline and rules executed in document order");
             logger.info("  Result: {}", result.getMessage());
 
             engine.shutdown();
@@ -386,7 +386,7 @@ class RulesEnginePipelineIntegrationTest {
             assertNotNull(result, "Result should not be null");
             assertTrue(result.isSuccess(), "All sections should execute successfully");
 
-            logger.info("✓ Pipeline, enrichments, and rules executed in document order");
+            logger.info("[OK] Pipeline, enrichments, and rules executed in document order");
             logger.info("  Result: {}", result.getMessage());
 
             engine.shutdown();
@@ -418,7 +418,7 @@ class RulesEnginePipelineIntegrationTest {
             assertEquals(RuleResult.ResultType.ERROR, result.getResultType(),
                 "Invalid data source should result in ERROR");
 
-            logger.info("✓ Invalid data source reference handled gracefully");
+            logger.info("[OK] Invalid data source reference handled gracefully");
             logger.info("  Error: {}", result.getMessage());
 
             engine.shutdown();
@@ -440,7 +440,7 @@ class RulesEnginePipelineIntegrationTest {
             assertNotNull(result, "Result should not be null");
             // Should execute enrichments successfully even without pipeline
 
-            logger.info("✓ Missing pipeline section skipped gracefully");
+            logger.info("[OK] Missing pipeline section skipped gracefully");
 
             engine.shutdown();
         }
@@ -456,7 +456,7 @@ class RulesEnginePipelineIntegrationTest {
                 TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_InitFailure.yaml");
 
             assertNotNull(engine, "RulesEngine should initialize even with connection failure");
-            logger.info("✓ Data source connection failure handled gracefully during initialization");
+            logger.info("[OK] Data source connection failure handled gracefully during initialization");
 
             // Attempting to execute pipeline should fail gracefully
             Map<String, Object> inputData = new HashMap<>();
@@ -465,7 +465,7 @@ class RulesEnginePipelineIntegrationTest {
             assertNotNull(result, "Result should not be null");
             // May be ERROR or MATCH depending on how gracefully it degrades
 
-            logger.info("✓ Pipeline execution with failed data source handled");
+            logger.info("[OK] Pipeline execution with failed data source handled");
             logger.info("  Result type: {}", result.getResultType());
 
             engine.shutdown();
@@ -490,7 +490,7 @@ class RulesEnginePipelineIntegrationTest {
                     "Should return ERROR result type");
             }, "Pipeline errors should not throw exceptions");
 
-            logger.info("✓ Pipeline errors handled without throwing exceptions");
+            logger.info("[OK] Pipeline errors handled without throwing exceptions");
 
             engine.shutdown();
         }
@@ -519,7 +519,7 @@ class RulesEnginePipelineIntegrationTest {
             assertDoesNotThrow(() -> engine.shutdown(),
                 "Shutdown should not throw exceptions");
 
-            logger.info("✓ Data sources shut down properly (check logs for shutdown messages)");
+            logger.info("[OK] Data sources shut down properly (check logs for shutdown messages)");
         }
 
         @Test
@@ -536,7 +536,7 @@ class RulesEnginePipelineIntegrationTest {
             assertDoesNotThrow(() -> engine.shutdown(),
                 "Shutdown should not throw exceptions");
 
-            logger.info("✓ Data sinks shut down properly (check logs for shutdown messages)");
+            logger.info("[OK] Data sinks shut down properly (check logs for shutdown messages)");
         }
 
         @Test
@@ -552,7 +552,7 @@ class RulesEnginePipelineIntegrationTest {
             assertDoesNotThrow(() -> engine.shutdown(), "Second shutdown should succeed");
             assertDoesNotThrow(() -> engine.shutdown(), "Third shutdown should succeed");
 
-            logger.info("✓ Multiple shutdown calls handled gracefully (idempotent)");
+            logger.info("[OK] Multiple shutdown calls handled gracefully (idempotent)");
         }
 
         @Test
@@ -572,7 +572,7 @@ class RulesEnginePipelineIntegrationTest {
                 logger.debug("Iteration {} completed", i + 1);
             }
 
-            logger.info("✓ No resource leaks detected after 10 create/shutdown cycles");
+            logger.info("[OK] No resource leaks detected after 10 create/shutdown cycles");
         }
     }
 }

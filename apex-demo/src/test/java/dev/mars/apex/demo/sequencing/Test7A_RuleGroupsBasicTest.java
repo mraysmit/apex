@@ -98,13 +98,13 @@ public class Test7A_RuleGroupsBasicTest extends DemoTestBase {
         assertEquals("grouped-rule-1", executionLog.get(2), "Position 2 MUST be grouped-rule-1");
         assertEquals("grouped-rule-2", executionLog.get(3), "Position 3 MUST be grouped-rule-2");
 
-        LOGGER.info("✓ TEST 7A PASSED: All 5 definitive assertion types verified");
-        LOGGER.info("  ✓ Exact count: 4 items");
-        LOGGER.info("  ✓ Exact order: standalone-rule-1, standalone-rule-2, grouped-rule-1, grouped-rule-2");
-        LOGGER.info("  ✓ What executed: 2 standalone + 2 grouped");
-        LOGGER.info("  ✓ No double execution: Each rule executes exactly once");
-        LOGGER.info("  ✓ Position verification: All rules at correct positions");
-        LOGGER.info("  ✓ Rule groups: Groups-only logic works correctly for rules");
+        LOGGER.info("[OK] TEST 7A PASSED: All 5 definitive assertion types verified");
+        LOGGER.info("  [OK] Exact count: 4 items");
+        LOGGER.info("  [OK] Exact order: standalone-rule-1, standalone-rule-2, grouped-rule-1, grouped-rule-2");
+        LOGGER.info("  [OK] What executed: 2 standalone + 2 grouped");
+        LOGGER.info("  [OK] No double execution: Each rule executes exactly once");
+        LOGGER.info("  [OK] Position verification: All rules at correct positions");
+        LOGGER.info("  [OK] Rule groups: Groups-only logic works correctly for rules");
     }
 }
 

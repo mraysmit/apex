@@ -78,7 +78,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 2025-01-21
  * @version 1.0 - Comprehensive error propagation verification
  */
-@DisplayName("CRITICAL: RuleResult Error Propagation Verification")
+@DisplayName("RuleResult Error Propagation Verification")
 public class RuleResultErrorPropagationTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RuleResultErrorPropagationTest.class);
@@ -105,7 +105,7 @@ public class RuleResultErrorPropagationTest {
         assertEquals(RuleResult.ResultType.ERROR, result.getResultType(),
             "RuleResult.getResultType() must be ERROR for: " + errorContext);
         
-        LOGGER.info("✓ Error properly propagated to RuleResult for: {}", errorContext);
+        LOGGER.info("[OK] Error properly propagated to RuleResult for: {}", errorContext);
         LOGGER.info("  - isSuccess: {}", result.isSuccess());
         LOGGER.info("  - hasFailures: {}", result.hasFailures());
         LOGGER.info("  - failureMessages: {}", result.getFailureMessages());
@@ -780,10 +780,10 @@ public class RuleResultErrorPropagationTest {
         LOGGER.info("");
         LOGGER.info("The APEX Rules Engine MUST propagate ALL errors to RuleResult:");
         LOGGER.info("");
-        LOGGER.info("  ✓ RuleResult.isSuccess() returns FALSE for any error");
-        LOGGER.info("  ✓ RuleResult.hasFailures() returns TRUE for any error");
-        LOGGER.info("  ✓ RuleResult.getFailureMessages() contains error details");
-        LOGGER.info("  ✓ RuleResult.getResultType() returns ERROR for system failures");
+        LOGGER.info("  [OK] RuleResult.isSuccess() returns FALSE for any error");
+        LOGGER.info("  [OK] RuleResult.hasFailures() returns TRUE for any error");
+        LOGGER.info("  [OK] RuleResult.getFailureMessages() contains error details");
+        LOGGER.info("  [OK] RuleResult.getResultType() returns ERROR for system failures");
         LOGGER.info("");
         LOGGER.info("Error categories covered by this test suite:");
         LOGGER.info("");
@@ -815,7 +815,7 @@ public class RuleResultErrorPropagationTest {
         LOGGER.info("     - Empty/null YAML");
         LOGGER.info("");
         LOGGER.info("=".repeat(80));
-        LOGGER.info("CRITICAL: If any test in this suite fails, the APEX system");
+        LOGGER.info("If any test in this suite fails, the APEX system");
         LOGGER.info("cannot be trusted to correctly report errors to callers.");
         LOGGER.info("=".repeat(80));
         

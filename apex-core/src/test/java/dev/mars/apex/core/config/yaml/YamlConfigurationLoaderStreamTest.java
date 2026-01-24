@@ -92,7 +92,7 @@ class YamlConfigurationLoaderStreamTest {
             assertEquals("test-config", metadata.get("id"), "Metadata ID should match");
             assertEquals("Test Configuration", metadata.get("name"), "Metadata name should match");
 
-            logger.info("✓ Successfully loaded YAML from InputStream");
+            logger.info("[OK] Successfully loaded YAML from InputStream");
         }
     }
 
@@ -109,7 +109,7 @@ class YamlConfigurationLoaderStreamTest {
         assertTrue(exception.getMessage().contains("null"), 
             "Exception message should mention null");
         
-        logger.info("✓ Correctly threw exception for null InputStream: {}", exception.getMessage());
+        logger.info("[OK] Correctly threw exception for null InputStream: {}", exception.getMessage());
     }
 
     @Test
@@ -125,7 +125,7 @@ class YamlConfigurationLoaderStreamTest {
             () -> loader.loadAsMap(inputStream)
         );
 
-        logger.info("✓ Correctly threw exception for empty YAML: {}", exception.getMessage());
+        logger.info("[OK] Correctly threw exception for empty YAML: {}", exception.getMessage());
     }
 
     @Test
@@ -147,7 +147,7 @@ class YamlConfigurationLoaderStreamTest {
             "Should throw exception for invalid YAML"
         );
 
-        logger.info("✓ Correctly threw exception for invalid YAML syntax");
+        logger.info("[OK] Correctly threw exception for invalid YAML syntax");
     }
 
     @Test
@@ -180,7 +180,7 @@ class YamlConfigurationLoaderStreamTest {
                 assertNotNull(result, "Result should not be null");
                 assertTrue(result.containsKey("metadata"), "Should contain metadata section");
 
-                logger.info("✓ Successfully loaded YAML with properties from InputStream");
+                logger.info("[OK] Successfully loaded YAML with properties from InputStream");
             }
         } finally {
             // Restore original property value
@@ -209,7 +209,7 @@ class YamlConfigurationLoaderStreamTest {
         assertNotNull(result, "Result should not be null");
         assertTrue(result.containsKey("metadata"), "Should contain metadata section");
 
-        logger.info("✓ Successfully loaded YAML from classpath: {}", resourcePath);
+        logger.info("[OK] Successfully loaded YAML from classpath: {}", resourcePath);
     }
 
     @Test
@@ -228,7 +228,7 @@ class YamlConfigurationLoaderStreamTest {
                    exception.getMessage().contains(nonExistentPath),
             "Exception message should mention the missing resource");
 
-        logger.info("✓ Correctly threw exception for non-existent classpath resource: {}", 
+        logger.info("[OK] Correctly threw exception for non-existent classpath resource: {}", 
                    exception.getMessage());
     }
 
@@ -281,7 +281,7 @@ class YamlConfigurationLoaderStreamTest {
             assertEquals("rule-1", rules.get(0).get("id"));
             assertEquals("rule-2", rules.get(1).get("id"));
 
-            logger.info("✓ Stream loading produces expected structure");
+            logger.info("[OK] Stream loading produces expected structure");
         }
     }
 
@@ -338,7 +338,7 @@ class YamlConfigurationLoaderStreamTest {
             assertNotNull(routing, "Should have routing section");
             assertEquals("classification-based", routing.get("strategy"));
 
-            logger.info("✓ Successfully parsed complex nested YAML from stream");
+            logger.info("[OK] Successfully parsed complex nested YAML from stream");
         }
     }
 }

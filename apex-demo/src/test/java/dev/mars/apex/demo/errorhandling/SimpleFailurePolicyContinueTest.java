@@ -58,7 +58,7 @@ public class SimpleFailurePolicyContinueTest extends DemoTestBase {
     public void setUp() {
         super.setUp(); // Call parent setup to initialize APEX services
         logger.info("Setting up continue-with-warnings failure policy test environment");
-        logger.info("✓ Test environment initialized for RulesEngine scenario testing");
+        logger.info("[OK] Test environment initialized for RulesEngine scenario testing");
     }
 
     @Test
@@ -86,8 +86,8 @@ public class SimpleFailurePolicyContinueTest extends DemoTestBase {
         assertEquals(2, scenarioResult.getStageResults().size(), "Both stages should have executed");
         assertTrue(scenarioResult.getSkippedStages().isEmpty(), "No stages should be skipped");
         
-        logger.info("✓ Continue-with-warnings policy allowed processing to continue");
-        logger.info("✓ Warnings were collected: {}", scenarioResult.getWarnings().size());
+        logger.info("[OK] Continue-with-warnings policy allowed processing to continue");
+        logger.info("[OK] Warnings were collected: {}", scenarioResult.getWarnings().size());
         logger.info("Continue-with-warnings failure policy test completed");
     }
 
@@ -111,8 +111,8 @@ public class SimpleFailurePolicyContinueTest extends DemoTestBase {
         assertTrue(scenarioResult.getSkippedStages().isEmpty(), "No stages should be skipped");
         assertFalse(scenarioResult.getStageResults().isEmpty(), "All stages should have executed");
         
-        logger.info("✓ All stages executed despite failures");
-        logger.info("✓ Stage results count: {}", scenarioResult.getStageResults().size());
+        logger.info("[OK] All stages executed despite failures");
+        logger.info("[OK] Stage results count: {}", scenarioResult.getStageResults().size());
         logger.info("Multi-failure continue test completed");
     }
 }

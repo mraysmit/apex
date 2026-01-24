@@ -254,11 +254,11 @@ class VaultPasswordInjectionTest {
                    "Should contain Vault-retrieved username");
         
         logger.info("Vault password injection test completed successfully");
-        logger.info("  ✓ Vault container started and accessible");
-        logger.info("  ✓ Secrets retrieved from Vault KV store");
-        logger.info("  ✓ Vault secrets injected into system properties");
-        logger.info("  ✓ YAML configuration resolved with Vault credentials");
-        logger.info("  ✓ Database connection validated using Vault-retrieved credentials");
+        logger.info("  [OK] Vault container started and accessible");
+        logger.info("  [OK] Secrets retrieved from Vault KV store");
+        logger.info("  [OK] Vault secrets injected into system properties");
+        logger.info("  [OK] YAML configuration resolved with Vault credentials");
+        logger.info("  [OK] Database connection validated using Vault-retrieved credentials");
         logger.info("=================================================================");
     }
 
@@ -350,8 +350,8 @@ class VaultPasswordInjectionTest {
             secrets.put("password", password);
             
             logger.info("Successfully retrieved secrets from Vault:");
-            logger.info("  ✓ Username: {}", username);
-            logger.info("  ✓ Password: [MASKED]");
+            logger.info("  [OK] Username: {}", username);
+            logger.info("  [OK] Password: [MASKED]");
         } else {
             throw new RuntimeException("Failed to retrieve secrets from Vault");
         }

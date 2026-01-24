@@ -91,7 +91,7 @@ public class SimpleJsonDataSourceTest extends DemoTestBase {
             assertEquals("FixedIncome", enrichedData.get("productCategory"));
             assertEquals("T123", enrichedData.get("taskId"));
 
-            logger.info("✓ JSON data source enrichment successful");
+            logger.info("[OK] JSON data source enrichment successful");
         } catch (Exception e) {
             fail("JSON data source test failed: " + e.getMessage());
         }
@@ -128,7 +128,7 @@ public class SimpleJsonDataSourceTest extends DemoTestBase {
             assertNull(enrichedData.get("userEmail"));
             assertNull(enrichedData.get("userRole"));
 
-            logger.info("✓ Missing user ID handled correctly");
+            logger.info("[OK] Missing user ID handled correctly");
         } catch (Exception e) {
             fail("Missing user ID test failed: " + e.getMessage());
         }
@@ -167,7 +167,7 @@ public class SimpleJsonDataSourceTest extends DemoTestBase {
             assertNull(enrichedData.get("userEmail"));
             assertNull(enrichedData.get("userRole"));
 
-            logger.info("✓ Unknown user ID handled correctly");
+            logger.info("[OK] Unknown user ID handled correctly");
         } catch (Exception e) {
             fail("Unknown user ID test failed: " + e.getMessage());
         }

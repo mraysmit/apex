@@ -62,14 +62,14 @@ public class SimpleYamlValidationDemo {
             assertEquals("Simple Age Validation", config.getMetadata().getName());
             assertEquals(1, config.getRules().size(), "Should have exactly 1 rule");
 
-            logger.info("✓ YAML configuration loaded: {}", config.getMetadata().getName());
+            logger.info("[OK] YAML configuration loaded: {}", config.getMetadata().getName());
             logger.info("  Rules count: {}", config.getRules().size());
             
             // Step 2: Create rules engine from YAML using static factory method
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
             assertNotNull(engine, "RulesEngine should be created");
-            logger.info("✓ Rules engine created successfully");
+            logger.info("[OK] Rules engine created successfully");
             
             // Step 3: Test with valid data (age >= 18)
             logger.info("--- Test 1: Valid Age (25) ---");

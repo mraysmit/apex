@@ -411,7 +411,7 @@ public class YamlConfigurationLoader {
                 if (typeObj instanceof String) {
                     boolean isComponent = "component".equals(typeObj);
                     if (isComponent) {
-                        logger.info("✓ Detected component file: {}", filePath);
+                        logger.info("[OK] Detected component file: {}", filePath);
                     } else {
                         logger.debug("File is not a component (type={}): {}", typeObj, filePath);
                     }

@@ -41,7 +41,7 @@ class PipelineEtlExecutionTestLoadDatabase extends DemoTestBase {
             throw new RuntimeException("Failed to create database directory", e);
         }
 
-        logger.info("✓ Database Load Pipeline Test setup completed");
+        logger.info("[OK] Database Load Pipeline Test setup completed");
     }
 
     @AfterEach
@@ -72,6 +72,6 @@ class PipelineEtlExecutionTestLoadDatabase extends DemoTestBase {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Pipeline should execute successfully");
 
-        logger.info("✓ Database load pipeline test completed successfully");
+        logger.info("[OK] Database load pipeline test completed successfully");
     }
 }

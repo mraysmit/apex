@@ -47,7 +47,7 @@ public class ValueThresholdRuleTest {
         // Initialize APEX services
         yamlLoader = new YamlConfigurationLoader();
 
-        logger.info("✓ APEX services initialized successfully");
+        logger.info("[OK] APEX services initialized successfully");
     }
 
     @Test
@@ -58,7 +58,7 @@ public class ValueThresholdRuleTest {
         // Load YAML configuration
         YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/basic/ValueThresholdRuleTest.yaml");
         assertNotNull(config, "Configuration should be loaded");
-        logger.info("✓ Configuration loaded: {} rules", config.getRules().size());
+        logger.info("[OK] Configuration loaded: {} rules", config.getRules().size());
         
         // Create RulesEngine using static factory method
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
@@ -79,7 +79,7 @@ public class ValueThresholdRuleTest {
         RuleResult result1 = engine.executeRule(rule, testData1);
         assertNotNull(result1, "Result should not be null");
         assertTrue(result1.isTriggered(), "Rule should be triggered for amount > 100");
-        logger.info("✓ Test Case 1 passed: {}", result1.getMessage());
+        logger.info("[OK] Test Case 1 passed: {}", result1.getMessage());
         
         // Test Case 2: Value less than 100 (should not pass)
         logger.info("--- Test Case 2: Amount = 50 (should not pass) ---");
@@ -92,7 +92,7 @@ public class ValueThresholdRuleTest {
         RuleResult result2 = engine.executeRule(rule, testData2);
         assertNotNull(result2, "Result should not be null");
         assertFalse(result2.isTriggered(), "Rule should not be triggered for amount <= 100");
-        logger.info("✓ Test Case 2 passed: Rule correctly rejected amount <= 100");
+        logger.info("[OK] Test Case 2 passed: Rule correctly rejected amount <= 100");
         
         // Test Case 3: Value exactly 100 (should not pass)
         logger.info("--- Test Case 3: Amount = 100 (should not pass) ---");
@@ -105,7 +105,7 @@ public class ValueThresholdRuleTest {
         RuleResult result3 = engine.executeRule(rule, testData3);
         assertNotNull(result3, "Result should not be null");
         assertFalse(result3.isTriggered(), "Rule should not be triggered for amount = 100");
-        logger.info("✓ Test Case 3 passed: Rule correctly rejected amount = 100");
+        logger.info("[OK] Test Case 3 passed: Rule correctly rejected amount = 100");
         
         // Test Case 4: Missing amount attribute (should not pass)
         logger.info("--- Test Case 4: Missing amount (should not pass) ---");
@@ -117,8 +117,8 @@ public class ValueThresholdRuleTest {
         RuleResult result4 = engine.executeRule(rule, testData4);
         assertNotNull(result4, "Result should not be null");
         assertFalse(result4.isTriggered(), "Rule should not be triggered when amount is missing");
-        logger.info("✓ Test Case 4 passed: Rule correctly handled missing amount");
+        logger.info("[OK] Test Case 4 passed: Rule correctly handled missing amount");
         
-        logger.info("✓ All value threshold rule tests passed");
+        logger.info("[OK] All value threshold rule tests passed");
     }
 }

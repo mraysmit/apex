@@ -129,7 +129,7 @@ public class SimpleRestApiDataSourceTest extends DemoTestBase {
         assertEquals("AAA", enrichedData.get("creditRating"));
         assertEquals("REQ123", enrichedData.get("requestId"));
 
-        logger.info("✓ REST API data source enrichment successful");
+        logger.info("[OK] REST API data source enrichment successful");
         logger.info("Customer Name: {}", enrichedData.get("customerName"));
         logger.info("Customer Type: {}", enrichedData.get("customerType"));
         logger.info("Credit Rating: {}", enrichedData.get("creditRating"));
@@ -168,7 +168,7 @@ public class SimpleRestApiDataSourceTest extends DemoTestBase {
         assertNull(enrichedData.get("customerType"));
         assertNull(enrichedData.get("creditRating"));
 
-        logger.info("✓ Missing customer ID handled correctly");
+        logger.info("[OK] Missing customer ID handled correctly");
     }
 
     @Test
@@ -206,7 +206,7 @@ public class SimpleRestApiDataSourceTest extends DemoTestBase {
         assertEquals("NR", enrichedData.get("creditRating"));
         assertEquals("REQ123", enrichedData.get("requestId"));
 
-        logger.info("✓ Unknown customer ID handled correctly");
+        logger.info("[OK] Unknown customer ID handled correctly");
     }
 }
 

@@ -102,7 +102,7 @@ class ComponentFailurePolicyTest {
         assertFalse(result.requiresReview(), "Scenario should not require review");
         assertFalse(result.hasWarnings(), "Scenario should not have warnings");
 
-        logger.info("✓ Component executed successfully with all files passing");
+        logger.info("[OK] Component executed successfully with all files passing");
     }
 
     @Test
@@ -128,7 +128,7 @@ class ComponentFailurePolicyTest {
         assertFalse(result.isTerminated(), "Scenario should not be terminated");
         assertTrue(result.hasWarnings(), "Scenario should have warnings");
 
-        logger.info("✓ Component-ref failed but processing continued with warnings");
+        logger.info("[OK] Component-ref failed but processing continued with warnings");
     }
 
     @Test
@@ -154,7 +154,7 @@ class ComponentFailurePolicyTest {
         assertTrue(result.isTerminated(), "Scenario should be terminated");
         assertFalse(result.isSuccessful(), "Scenario should not be successful");
 
-        logger.info("✓ Config-file failed with terminate policy - scenario terminated");
+        logger.info("[OK] Config-file failed with terminate policy - scenario terminated");
     }
 }
 

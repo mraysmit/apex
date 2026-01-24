@@ -41,7 +41,7 @@ class PipelineEtlExecutionTestLoadFilesystem extends DemoTestBase {
             throw new RuntimeException("Failed to create output directory", e);
         }
 
-        logger.info("✓ Filesystem Load Pipeline Test setup completed");
+        logger.info("[OK] Filesystem Load Pipeline Test setup completed");
     }
 
     @AfterEach
@@ -77,7 +77,7 @@ class PipelineEtlExecutionTestLoadFilesystem extends DemoTestBase {
         assertTrue(Files.exists(outputFile), "Output JSON file should be created");
         assertTrue(Files.size(outputFile) > 0, "Output file should not be empty");
 
-        logger.info("✓ Filesystem load pipeline test completed successfully");
+        logger.info("[OK] Filesystem load pipeline test completed successfully");
         logger.info("  - Output file: {}", outputFile.toAbsolutePath());
     }
 }

@@ -79,7 +79,7 @@ public class RulesEnginePipelineStepDataIntegrationTest {
                 "(4, 'Record 4', 400, 'active'), " +
                 "(5, 'Record 5', 500, 'active')");
 
-            logger.info("✓ Simple extract database initialized");
+            logger.info("[OK] Simple extract database initialized");
         }
     }
 
@@ -117,7 +117,7 @@ public class RulesEnginePipelineStepDataIntegrationTest {
             // Clear existing data
             stmt.execute("DELETE FROM target_items");
 
-            logger.info("✓ Multi-step database initialized");
+            logger.info("[OK] Multi-step database initialized");
         }
     }
 
@@ -142,7 +142,7 @@ public class RulesEnginePipelineStepDataIntegrationTest {
                 "(2, 'Valid Record 2', 200, 'valid'), " +
                 "(3, 'Invalid Record', null, 'invalid')");
 
-            logger.info("✓ Partial failure database initialized");
+            logger.info("[OK] Partial failure database initialized");
         }
     }
 
@@ -162,7 +162,7 @@ public class RulesEnginePipelineStepDataIntegrationTest {
 
             // No data inserted - table is empty
 
-            logger.info("✓ Null data database initialized");
+            logger.info("[OK] Null data database initialized");
         }
     }
 
@@ -188,7 +188,7 @@ public class RulesEnginePipelineStepDataIntegrationTest {
                 "(3, 'Product C', 29.99, 'Books'), " +
                 "(4, 'Product D', 199.00, 'Electronics')");
 
-            logger.info("✓ Database extract database initialized");
+            logger.info("[OK] Database extract database initialized");
         }
     }
 
@@ -254,7 +254,7 @@ public class RulesEnginePipelineStepDataIntegrationTest {
         double successRate = extractStep.getSuccessRate();
         assertTrue(successRate >= 0.0 && successRate <= 100.0, "Success rate should be between 0 and 100");
         
-        logger.info("✓ Extract step data captured: {} records processed, {} failed, {}% success rate",
+        logger.info("[OK] Extract step data captured: {} records processed, {} failed, {}% success rate",
             extractStep.getRecordsProcessed(), extractStep.getRecordsFailed(), successRate);
     }
 
@@ -302,7 +302,7 @@ public class RulesEnginePipelineStepDataIntegrationTest {
             assertNotNull(step.getRecordsFailed(), "Step should have records failed metric");
         }
         
-        logger.info("✓ All pipeline steps captured with data and metrics");
+        logger.info("[OK] All pipeline steps captured with data and metrics");
     }
 
     // ========================================================================
@@ -349,7 +349,7 @@ public class RulesEnginePipelineStepDataIntegrationTest {
                 String.format("%.1f", successRate));
         }
 
-        logger.info("✓ Partial failure metrics captured correctly");
+        logger.info("[OK] Partial failure metrics captured correctly");
     }
 
     // ========================================================================
@@ -388,7 +388,7 @@ public class RulesEnginePipelineStepDataIntegrationTest {
             }
         }
 
-        logger.info("✓ Null data handled gracefully without errors");
+        logger.info("[OK] Null data handled gracefully without errors");
     }
 
     // ========================================================================
@@ -434,7 +434,7 @@ public class RulesEnginePipelineStepDataIntegrationTest {
         assertEquals(records.size(), extractStep.getRecordsProcessed(),
             "Records processed should match data size");
 
-        logger.info("✓ Database extract captured {} records", records.size());
+        logger.info("[OK] Database extract captured {} records", records.size());
     }
 
     // ========================================================================
@@ -482,7 +482,7 @@ public class RulesEnginePipelineStepDataIntegrationTest {
         assertEquals(records.size(), extractStep.getRecordsProcessed(),
             "Records processed should match file record count");
 
-        logger.info("✓ File extract captured {} records from file", records.size());
+        logger.info("[OK] File extract captured {} records from file", records.size());
     }
 
     // ========================================================================
@@ -551,7 +551,7 @@ public class RulesEnginePipelineStepDataIntegrationTest {
             }
         }
 
-        logger.info("✓ Step data and metrics preserved through serialization");
+        logger.info("[OK] Step data and metrics preserved through serialization");
     }
 
     // ========================================================================
@@ -618,6 +618,6 @@ public class RulesEnginePipelineStepDataIntegrationTest {
         assertTrue(totalRecordsProcessed >= 0, "Total records processed should be non-negative");
         assertTrue(totalRecordsFailed >= 0, "Total records failed should be non-negative");
 
-        logger.info("✓ Execution path access patterns work correctly");
+        logger.info("[OK] Execution path access patterns work correctly");
     }
 }

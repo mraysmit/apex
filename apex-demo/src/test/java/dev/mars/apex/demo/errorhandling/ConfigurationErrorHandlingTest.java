@@ -70,12 +70,12 @@ public class ConfigurationErrorHandlingTest extends DemoTestBase {
         // Verify rule context
         assertEquals("configuration-loading", result.getRuleName(), "Rule name should indicate configuration loading");
         assertNotNull(result.getMessage(), "Message should be present");
-        assertTrue(result.getMessage().contains("CRITICAL: Configuration file loading failed"),
+        assertTrue(result.getMessage().contains(Configuration file loading failed"),
             "Message should indicate CRITICAL configuration loading failure");
         
-        logger.info("✓ Missing configuration file handled gracefully");
-        logger.info("✓ Error details properly captured in RuleResult");
-        logger.info("✓ No exceptions thrown - proper APEX error handling architecture");
+        logger.info("[OK] Missing configuration file handled gracefully");
+        logger.info("[OK] Error details properly captured in RuleResult");
+        logger.info("[OK] No exceptions thrown - proper APEX error handling architecture");
     }
 
     @Test
@@ -100,19 +100,19 @@ public class ConfigurationErrorHandlingTest extends DemoTestBase {
             assertNotNull(result.getMessage(), "Message should be present");
             assertTrue(result.getMessage().contains("Configuration loaded successfully"),
                 "Message should indicate successful loading");
-            logger.info("✓ Existing configuration file loaded successfully");
+            logger.info("[OK] Existing configuration file loaded successfully");
         } else {
             // File failed to load but was handled gracefully
             assertFalse(result.getFailureMessages().isEmpty(), "Failure messages should be present for failure");
             assertEquals("configuration-loading", result.getRuleName(), "Rule name should indicate configuration loading");
             assertNotNull(result.getMessage(), "Message should be present");
-            assertTrue(result.getMessage().contains("CRITICAL: Configuration file loading failed"),
+            assertTrue(result.getMessage().contains(Configuration file loading failed"),
                 "Message should indicate CRITICAL loading failure");
-            logger.info("✓ Configuration file loading CRITICAL ERROR handled gracefully");
+            logger.info("[OK] Configuration file loading CRITICAL ERROR handled gracefully");
         }
 
-        logger.info("✓ Proper error handling demonstrated (no exceptions thrown)");
-        logger.info("✓ Proper APEX error handling architecture demonstrated");
+        logger.info("[OK] Proper error handling demonstrated (no exceptions thrown)");
+        logger.info("[OK] Proper APEX error handling architecture demonstrated");
     }
 
     @Test
@@ -141,8 +141,8 @@ public class ConfigurationErrorHandlingTest extends DemoTestBase {
         logger.info("Success Result: triggered={}, messages={}", 
             successResult.isTriggered(), successResult.getFailureMessages().size());
         
-        logger.info("✓ APEX error handling architecture properly implemented");
-        logger.info("✓ Configuration loading failures managed gracefully");
-        logger.info("✓ System follows proper error propagation patterns");
+        logger.info("[OK] APEX error handling architecture properly implemented");
+        logger.info("[OK] Configuration loading failures managed gracefully");
+        logger.info("[OK] System follows proper error propagation patterns");
     }
 }

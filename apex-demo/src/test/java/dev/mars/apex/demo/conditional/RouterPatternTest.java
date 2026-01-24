@@ -50,7 +50,7 @@ public class RouterPatternTest extends DemoTestBase {
             // Load YAML configuration
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/RouterPatternTest.yaml");
             assertNotNull(config, "Configuration should not be null");
-            logger.info("✓ Configuration loaded successfully");
+            logger.info("[OK] Configuration loaded successfully");
 
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
@@ -69,7 +69,7 @@ public class RouterPatternTest extends DemoTestBase {
 
             assertTrue(rejectEnriched.containsKey("rejectionReason"), "Should have rejectionReason field");
             assertEquals(true, rejectEnriched.get("rejectionReason"), "Rejection reason flag should be true");
-            logger.info("✓ Scenario 1 passed: Correctly routed to REJECT");
+            logger.info("[OK] Scenario 1 passed: Correctly routed to REJECT");
 
 
             // Scenario 2: REFER_INCOME (Level 2 Failure: Income <= 50000)
@@ -87,7 +87,7 @@ public class RouterPatternTest extends DemoTestBase {
 
             assertTrue(referIncomeEnriched.containsKey("referralReason"), "Should have referralReason field");
             assertEquals(true, referIncomeEnriched.get("referralReason"), "Referral reason flag should be true");
-            logger.info("✓ Scenario 2 passed: Correctly routed to REFER_INCOME");
+            logger.info("[OK] Scenario 2 passed: Correctly routed to REFER_INCOME");
 
 
             // Scenario 3: REFER_DEBT (Level 3 Failure: DTI >= 0.40)
@@ -105,7 +105,7 @@ public class RouterPatternTest extends DemoTestBase {
 
             assertTrue(referDebtEnriched.containsKey("referralReason"), "Should have referralReason field");
             assertEquals(true, referDebtEnriched.get("referralReason"), "Referral reason flag should be true");
-            logger.info("✓ Scenario 3 passed: Correctly routed to REFER_DEBT");
+            logger.info("[OK] Scenario 3 passed: Correctly routed to REFER_DEBT");
 
 
             // Scenario 4: APPROVE (All Levels Pass)
@@ -123,7 +123,7 @@ public class RouterPatternTest extends DemoTestBase {
 
             assertTrue(approveEnriched.containsKey("loanStatus"), "Should have loanStatus field");
             assertEquals(true, approveEnriched.get("loanStatus"), "Loan status flag should be true");
-            logger.info("✓ Scenario 4 passed: Correctly routed to APPROVE");
+            logger.info("[OK] Scenario 4 passed: Correctly routed to APPROVE");
 
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);

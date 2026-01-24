@@ -260,7 +260,7 @@ public class LookupBasicInlineTestB extends DemoTestBase {
                 assertEquals(expectedCountry, enrichedData.get("currencyCountry"), 
                     "Should retrieve correct currency country for " + currency);
 
-                logger.info("✓ Currency {} lookup: {} ({}, {})", currency, expectedName, expectedSymbol, expectedCountry);
+                logger.info("[OK] Currency {} lookup: {} ({}, {})", currency, expectedName, expectedSymbol, expectedCountry);
             }
 
             logger.info("Multiple currency lookups completed successfully");

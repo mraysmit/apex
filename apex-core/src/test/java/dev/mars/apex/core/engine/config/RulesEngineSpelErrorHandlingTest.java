@@ -70,7 +70,7 @@ class RulesEngineSpelErrorHandlingTest {
         assertTrue(result.getMessage().contains("Rule evaluation failed") || result.getMessage().contains("evaluation"),
                   "Error message should indicate evaluation error");
         
-        logger.info("✓ SpEL property not found exception properly converted to RuleResult.error()");
+        logger.info("[OK] SpEL property not found exception properly converted to RuleResult.error()");
     }
     
     @Test
@@ -99,7 +99,7 @@ class RulesEngineSpelErrorHandlingTest {
         assertEquals("price-validation", result.getRuleName(), 
                     "Should identify the rule that caused the error");
         
-        logger.info("✓ SpEL type conversion exception properly converted to RuleResult.error()");
+        logger.info("[OK] SpEL type conversion exception properly converted to RuleResult.error()");
     }
     
     @Test
@@ -136,7 +136,7 @@ class RulesEngineSpelErrorHandlingTest {
         assertEquals("failing-rule", result.getRuleName(), 
                     "Should identify the first rule that failed");
         
-        logger.info("✓ First rule error properly handled - processing stops at first error as expected");
+        logger.info("[OK] First rule error properly handled - processing stops at first error as expected");
     }
     
     @Test
@@ -168,6 +168,6 @@ class RulesEngineSpelErrorHandlingTest {
         assertEquals("Large equity trade detected", result.getMessage(), 
                     "Should return rule message");
         
-        logger.info("✓ Normal rule processing continues to work correctly");
+        logger.info("[OK] Normal rule processing continues to work correctly");
     }
 }

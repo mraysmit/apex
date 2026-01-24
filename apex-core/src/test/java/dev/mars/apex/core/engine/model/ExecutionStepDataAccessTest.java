@@ -56,7 +56,7 @@ public class ExecutionStepDataAccessTest {
         assertNotNull(step.getStepData(), "getStepData() should return the data");
         assertEquals(testData, step.getStepData(), "Data should match what was set");
 
-        logger.info("✓ hasStepData() correctly returns true for step with data");
+        logger.info("[OK] hasStepData() correctly returns true for step with data");
     }
 
     // ========================================================================
@@ -80,7 +80,7 @@ public class ExecutionStepDataAccessTest {
         assertFalse(hasData, "hasStepData() should return false when data is null");
         assertNull(step.getStepData(), "getStepData() should return null");
 
-        logger.info("✓ hasStepData() correctly returns false for step with null data");
+        logger.info("[OK] hasStepData() correctly returns false for step with null data");
     }
 
     // ========================================================================
@@ -108,7 +108,7 @@ public class ExecutionStepDataAccessTest {
         assertTrue(step.getStepData() instanceof List, "Data should be a List");
         assertTrue(((List<?>) step.getStepData()).isEmpty(), "List should be empty");
 
-        logger.info("✓ hasStepData() correctly returns true for empty collection");
+        logger.info("[OK] hasStepData() correctly returns true for empty collection");
     }
 
     // ========================================================================
@@ -132,7 +132,7 @@ public class ExecutionStepDataAccessTest {
         assertFalse(hasData, "hasStepData() should return false when field not set");
         assertNull(step.getStepData(), "getStepData() should return null");
 
-        logger.info("✓ hasStepData() correctly returns false when field not set");
+        logger.info("[OK] hasStepData() correctly returns false when field not set");
     }
 
     // ========================================================================
@@ -177,7 +177,7 @@ public class ExecutionStepDataAccessTest {
             "Success rate should be 100% when no records processed");
         logger.info("  No records: {}%", noRecords.getSuccessRate());
 
-        logger.info("✓ getSuccessRate() calculates correctly for all scenarios");
+        logger.info("[OK] getSuccessRate() calculates correctly for all scenarios");
     }
 
     // ========================================================================
@@ -219,7 +219,7 @@ public class ExecutionStepDataAccessTest {
             "Success rate should be between 0 and 100");
         logger.info("  Failed null: {}%", rate3);
 
-        logger.info("✓ getSuccessRate() handles null metrics gracefully");
+        logger.info("[OK] getSuccessRate() handles null metrics gracefully");
     }
 
     // ========================================================================
@@ -275,7 +275,7 @@ public class ExecutionStepDataAccessTest {
         assertEquals(42, typedCustom.getValue(), "Custom object data should be preserved");
         logger.info("  Custom object preserved: {}", typedCustom);
 
-        logger.info("✓ getStepData() preserves all data types correctly");
+        logger.info("[OK] getStepData() preserves all data types correctly");
     }
 
     // ========================================================================
@@ -319,7 +319,7 @@ public class ExecutionStepDataAccessTest {
 
         logger.info("  All methods are null-safe");
         logger.info("  Success rate with null metrics: {}%", successRate);
-        logger.info("✓ ExecutionStep handles null values safely");
+        logger.info("[OK] ExecutionStep handles null values safely");
     }
 
     // ========================================================================

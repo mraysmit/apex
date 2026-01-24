@@ -90,6 +90,6 @@ public class FieldMappingTest {
         assertEquals(1250000, enrichedMap.get("tradingVolume"));
         assertEquals(0.14, enrichedMap.get("changePercent"));
         
-        System.out.println("✓ Field mapping test passed!");
+        System.out.println("[OK] Field mapping test passed!");
     }
 }

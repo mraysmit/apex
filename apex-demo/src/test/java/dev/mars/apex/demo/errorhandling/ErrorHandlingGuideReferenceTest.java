@@ -97,7 +97,7 @@ class ErrorHandlingGuideReferenceTest extends DemoTestBase {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(), "Result type should be MATCH");
         assertTrue(result.isSuccess(), "Result should be successful");
 
-        logger.info("✓ Happy Path: Condition TRUE → SUCCESS (MATCH)");
+        logger.info("[OK] Happy Path: Condition TRUE → SUCCESS (MATCH)");
         logger.info("This demonstrates that when business rule condition evaluates to TRUE, the rule matches successfully");
     }
 
@@ -132,7 +132,7 @@ class ErrorHandlingGuideReferenceTest extends DemoTestBase {
         assertEquals(RuleResult.ResultType.ERROR, result.getResultType(), "Result type should be ERROR");
         assertFalse(result.isSuccess(), "Result should not be successful");
 
-        logger.info("✓ Error Handling: Condition FALSE + ERROR severity + recovery disabled → FAIL_FAST (ERROR)");
+        logger.info("[OK] Error Handling: Condition FALSE + ERROR severity + recovery disabled → FAIL_FAST (ERROR)");
         logger.info("This demonstrates that when business rule condition evaluates to FALSE with ERROR severity, the system fails fast");
     }
 
@@ -167,7 +167,7 @@ class ErrorHandlingGuideReferenceTest extends DemoTestBase {
         assertEquals(RuleResult.ResultType.NO_MATCH, result.getResultType(), "Result type should be NO_MATCH (recovered)");
         assertTrue(result.isSuccess(), "Result should be successful (recovered)");
 
-        logger.info("✓ Recovery: Condition FALSE + WARNING severity + recovery enabled → CONTINUE (NO_MATCH)");
+        logger.info("[OK] Recovery: Condition FALSE + WARNING severity + recovery enabled → CONTINUE (NO_MATCH)");
         logger.info("This demonstrates that when business rule condition evaluates to FALSE with WARNING severity, recovery allows processing to continue");
     }
 

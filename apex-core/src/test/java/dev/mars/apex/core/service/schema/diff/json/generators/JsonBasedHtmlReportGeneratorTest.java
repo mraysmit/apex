@@ -68,7 +68,7 @@ class JsonBasedHtmlReportGeneratorTest {
         assertTrue(html.contains("Schema Diff Report"));
         assertTrue(html.contains("Matching"));
         assertTrue(html.contains("test-source"));
-        logger.info("  ✓ HTML generation successful - contains expected content");
+        logger.info("  [OK] HTML generation successful - contains expected content");
     }
 
     @Test
@@ -86,7 +86,7 @@ class JsonBasedHtmlReportGeneratorTest {
         String html = Files.readString(Path.of(path));
         assertTrue(html.contains("10")); // matching count
         assertTrue(html.contains("5"));  // added count
-        logger.info("  ✓ Statistics correctly rendered in HTML");
+        logger.info("  [OK] Statistics correctly rendered in HTML");
     }
 
     private SchemaDiffReport createTestReport() {

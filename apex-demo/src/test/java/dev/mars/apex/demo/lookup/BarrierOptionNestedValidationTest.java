@@ -104,7 +104,7 @@ public class BarrierOptionNestedValidationTest {
             assertNotNull(result.getMessage(), "Result should have a message");
             assertEquals("nested-barrier-strike-validation", barrierStrikeRule.getId());
 
-            logger.info("✓ Barrier vs Strike validation rule passed for valid data");
+            logger.info("[OK] Barrier vs Strike validation rule passed for valid data");
 
         } catch (YamlConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
@@ -151,7 +151,7 @@ public class BarrierOptionNestedValidationTest {
             assertTrue(result.isSuccess(), "Rule execution should succeed for valid date consistency");
             assertNotNull(result.getMessage(), "Result should have a message");
 
-            logger.info("✓ Date consistency validation rule passed for valid data");
+            logger.info("[OK] Date consistency validation rule passed for valid data");
 
         } catch (YamlConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
@@ -198,7 +198,7 @@ public class BarrierOptionNestedValidationTest {
             assertTrue(result.isSuccess(), "Rule execution should succeed for valid rebate amount");
             assertNotNull(result.getMessage(), "Result should have a message");
 
-            logger.info("✓ Rebate amount validation rule passed for valid data");
+            logger.info("[OK] Rebate amount validation rule passed for valid data");
 
         } catch (YamlConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
@@ -242,7 +242,7 @@ public class BarrierOptionNestedValidationTest {
             assertTrue(rules.get(2).getCondition().contains("premium"), "Third rule should check premium");
             assertEquals("WARNING", rules.get(2).getSeverity(), "Third rule should be WARNING severity");
 
-            logger.info("✓ All 3 APEX nested validation rules configured successfully:");
+            logger.info("[OK] All 3 APEX nested validation rules configured successfully:");
             logger.info("  - Barrier vs Strike Validation: {} severity", rules.get(0).getSeverity());
             logger.info("  - Date Consistency Validation: {} severity", rules.get(1).getSeverity());
             logger.info("  - Rebate Amount Validation: {} severity", rules.get(2).getSeverity());

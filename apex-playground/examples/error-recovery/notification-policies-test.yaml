@@ -47,7 +47,7 @@ error-recovery:
 rules:
   - id: "notify-critical-001"
     condition: "#balance < 0"
-    message: "Critical: Negative balance detected"
+    message: Negative balance detected"
     severity: "CRITICAL"
 
   - id: "notify-error-001"

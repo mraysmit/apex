@@ -59,7 +59,7 @@ class RestApiLookupServiceDirectTest {
         lookupService = new RestApiLookupService(name, dataSource, endpoint, parameterFields, defaultValues);
         
         System.out.println("Created RestApiLookupService: " + lookupService.getClass().getName());
-        System.out.println("✓ Setup completed successfully");
+        System.out.println("[OK] Setup completed successfully");
     }
 
     @Test
@@ -98,7 +98,7 @@ class RestApiLookupServiceDirectTest {
         System.out.println("Result map keys: " + resultMap.keySet());
         System.out.println("Result map: " + resultMap);
         
-        System.out.println("✓ Direct transform test passed!");
+        System.out.println("[OK] Direct transform test passed!");
     }
 }
 

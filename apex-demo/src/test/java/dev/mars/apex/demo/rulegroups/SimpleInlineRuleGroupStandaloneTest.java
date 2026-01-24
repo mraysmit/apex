@@ -126,8 +126,8 @@ public class SimpleInlineRuleGroupStandaloneTest {
             System.out.println("   • 2 rules: simple-rule-1 (always true), simple-rule-2 (always false)");
             System.out.println("   • 2 rule groups: base-validation (AND), composite-validation (OR)");
             System.out.println("   • 1 inline reference: composite-validation → base-validation");
-            System.out.println("   • Base group (AND): FAILED ✓ (expected)");
-            System.out.println("   • Composite group (OR): PASSED ✓ (expected)");
+            System.out.println("   • Base group (AND): FAILED [OK] (expected)");
+            System.out.println("   • Composite group (OR): PASSED [OK] (expected)");
             System.out.println("\n🚀 Inline rule-group references implementation is working!");
             
         } catch (YamlConfigurationException e) {

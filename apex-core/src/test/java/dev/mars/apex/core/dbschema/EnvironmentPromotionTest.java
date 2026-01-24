@@ -198,7 +198,7 @@ class EnvironmentPromotionTest {
         assertEquals("dev_trading", dataSource.getConnection().get("schema"),
                 "Should be configured with dev_trading schema");
 
-        logger.info("✓ Development environment configured correctly");
+        logger.info("[OK] Development environment configured correctly");
     }
 
     @Test
@@ -225,7 +225,7 @@ class EnvironmentPromotionTest {
         assertEquals("uat_trading", dataSource.getConnection().get("schema"),
                 "Should be configured with uat_trading schema");
 
-        logger.info("✓ UAT environment configured - ZERO YAML changes from DEV");
+        logger.info("[OK] UAT environment configured - ZERO YAML changes from DEV");
     }
 
     @Test
@@ -252,7 +252,7 @@ class EnvironmentPromotionTest {
         assertEquals("trading", dataSource.getConnection().get("schema"),
                 "Should be configured with trading schema (production)");
 
-        logger.info("✓ Production environment configured - ZERO YAML changes from UAT");
+        logger.info("[OK] Production environment configured - ZERO YAML changes from UAT");
     }
 
     @Test
@@ -268,23 +268,23 @@ class EnvironmentPromotionTest {
         YamlRuleConfiguration devConfig = yamlLoader.loadFromFile(configFile);
         updateDataSourceConnectionWithSchema(devConfig, "database", "dev_trading");
         assertEquals("dev_trading", devConfig.getDataSources().get(0).getConnection().get("schema"));
-        logger.info("  ✓ Deployed to DEV: schema=dev_trading");
+        logger.info("  [OK] Deployed to DEV: schema=dev_trading");
 
         // Step 2: Promote to UAT (same YAML)
         logger.info("\n[STEP 2] Promote to UAT (change connection only)");
         YamlRuleConfiguration uatConfig = yamlLoader.loadFromFile(configFile);
         updateDataSourceConnectionWithSchema(uatConfig, "database", "uat_trading");
         assertEquals("uat_trading", uatConfig.getDataSources().get(0).getConnection().get("schema"));
-        logger.info("  ✓ Promoted to UAT: schema=uat_trading");
+        logger.info("  [OK] Promoted to UAT: schema=uat_trading");
 
         // Step 3: Promote to Production (same YAML)
         logger.info("\n[STEP 3] Promote to PRODUCTION (change connection only)");
         YamlRuleConfiguration prodConfig = yamlLoader.loadFromFile(configFile);
         updateDataSourceConnectionWithSchema(prodConfig, "database", "trading");
         assertEquals("trading", prodConfig.getDataSources().get(0).getConnection().get("schema"));
-        logger.info("  ✓ Promoted to PRODUCTION: schema=trading");
+        logger.info("  [OK] Promoted to PRODUCTION: schema=trading");
 
-        logger.info("\n✓ Complete promotion workflow validated");
+        logger.info("\n[OK] Complete promotion workflow validated");
         logger.info("  Result: Zero YAML changes, only connection configuration changed");
     }
 
@@ -314,10 +314,10 @@ class EnvironmentPromotionTest {
             assertEquals(schema, config.getDataSources().get(0).getConnection().get("schema"),
                     "Schema should match environment: " + schema);
 
-            logger.info("  ✓ Environment '{}' correctly isolated", schema);
+            logger.info("  [OK] Environment '{}' correctly isolated", schema);
         }
 
-        logger.info("✓ Environment isolation validated - no cross-environment data leakage");
+        logger.info("[OK] Environment isolation validated - no cross-environment data leakage");
     }
     
     /**

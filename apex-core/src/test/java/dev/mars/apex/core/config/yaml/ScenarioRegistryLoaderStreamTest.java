@@ -102,7 +102,7 @@ class ScenarioRegistryLoaderStreamTest {
 
                 assertNotNull(scenarios, "Scenarios map should not be null");
                 assertFalse(scenarios.isEmpty(), "Scenarios map should not be empty when config-file references are resolved");
-                logger.info("✓ Successfully loaded registry from InputStream, scenarios count: {}", 
+                logger.info("[OK] Successfully loaded registry from InputStream, scenarios count: {}", 
                            scenarios.size());
             }
         }
@@ -118,7 +118,7 @@ class ScenarioRegistryLoaderStreamTest {
                 "Should throw exception for null InputStream"
             );
 
-            logger.info("✓ Correctly threw exception for null InputStream");
+            logger.info("[OK] Correctly threw exception for null InputStream");
         }
 
         @Test
@@ -148,7 +148,7 @@ class ScenarioRegistryLoaderStreamTest {
                 assertTrue(exception.getMessage().contains("empty") || exception.getMessage().contains("scenarios"),
                     "Exception message should mention empty scenarios");
                 
-                logger.info("✓ Correctly threw exception for empty scenarios: {}", exception.getMessage());
+                logger.info("[OK] Correctly threw exception for empty scenarios: {}", exception.getMessage());
             }
         }
     }
@@ -178,7 +178,7 @@ class ScenarioRegistryLoaderStreamTest {
                 assertNotNull(scenarios, "Scenarios map should not be null");
                 
                 // If config-files were resolved, we should have loaded scenario configurations
-                logger.info("✓ Loaded {} scenarios from registry with classpath base", scenarios.size());
+                logger.info("[OK] Loaded {} scenarios from registry with classpath base", scenarios.size());
                 
                 // Verify expected scenarios are present
                 scenarios.forEach((id, config) -> {
@@ -218,10 +218,10 @@ class ScenarioRegistryLoaderStreamTest {
                 if (scenarios.containsKey("basic-validation")) {
                     ScenarioConfiguration config = scenarios.get("basic-validation");
                     assertNotNull(config.getScenarioId(), "Scenario should have ID");
-                    logger.info("✓ Successfully resolved config-file reference for scenario: {}", 
+                    logger.info("[OK] Successfully resolved config-file reference for scenario: {}", 
                                config.getScenarioId());
                 } else {
-                    logger.info("✓ Registry parsed, scenario resolution depends on config-file loading");
+                    logger.info("[OK] Registry parsed, scenario resolution depends on config-file loading");
                 }
             }
         }
@@ -245,7 +245,7 @@ class ScenarioRegistryLoaderStreamTest {
 
             assertNotNull(scenarios, "Scenarios map should not be null");
             
-            logger.info("✓ Successfully loaded registry from classpath: {}", TEST_REGISTRY_PATH);
+            logger.info("[OK] Successfully loaded registry from classpath: {}", TEST_REGISTRY_PATH);
             logger.info("  Scenarios loaded: {}", scenarios.size());
             
             scenarios.forEach((id, config) -> {
@@ -266,7 +266,7 @@ class ScenarioRegistryLoaderStreamTest {
                 "Should throw exception for non-existent resource"
             );
 
-            logger.info("✓ Correctly threw exception for non-existent classpath resource: {}", 
+            logger.info("[OK] Correctly threw exception for non-existent classpath resource: {}", 
                        exception.getMessage());
         }
 
@@ -282,7 +282,7 @@ class ScenarioRegistryLoaderStreamTest {
 
             assertNotNull(scenarios, "Scenarios should be loaded");
             
-            logger.info("✓ Auto-derived classpath base worked correctly");
+            logger.info("[OK] Auto-derived classpath base worked correctly");
         }
     }
 
@@ -305,7 +305,7 @@ class ScenarioRegistryLoaderStreamTest {
 
             assertNotNull(scenario, "Scenario should not be null");
 
-            logger.info("✓ Successfully loaded scenario from classpath: {}", scenarioPath);
+            logger.info("[OK] Successfully loaded scenario from classpath: {}", scenarioPath);
             logger.info("  Scenario ID: {}", scenario.getScenarioId());
             logger.info("  Name: {}", scenario.getName());
         }
@@ -323,7 +323,7 @@ class ScenarioRegistryLoaderStreamTest {
                 "Should throw exception for non-existent scenario"
             );
 
-            logger.info("✓ Correctly threw exception for non-existent scenario");
+            logger.info("[OK] Correctly threw exception for non-existent scenario");
         }
     }
 
@@ -362,7 +362,7 @@ class ScenarioRegistryLoaderStreamTest {
                 assertNotNull(scenario, "Scenario should not be null");
                 assertEquals("stream-scenario", scenario.getScenarioId(), "Scenario ID should match");
 
-                logger.info("✓ Successfully loaded scenario from stream");
+                logger.info("[OK] Successfully loaded scenario from stream");
                 logger.info("  Scenario ID: {}", scenario.getScenarioId());
             }
         }
@@ -378,7 +378,7 @@ class ScenarioRegistryLoaderStreamTest {
                 "Should throw exception for null InputStream"
             );
 
-            logger.info("✓ Correctly threw exception for null InputStream");
+            logger.info("[OK] Correctly threw exception for null InputStream");
         }
 
         @Test
@@ -415,7 +415,7 @@ class ScenarioRegistryLoaderStreamTest {
                 assertNotNull(scenario, "Scenario should not be null");
                 assertEquals("stages-scenario", scenario.getScenarioId(), "Scenario ID should match");
                 
-                logger.info("✓ Successfully loaded scenario with processing stages from stream");
+                logger.info("[OK] Successfully loaded scenario with processing stages from stream");
             }
         }
     }
@@ -443,7 +443,7 @@ class ScenarioRegistryLoaderStreamTest {
 
             assertNotNull(scenarios, "Classpath loading should work");
             
-            logger.info("✓ Classpath loading works correctly (simulates JAR resource access)");
+            logger.info("[OK] Classpath loading works correctly (simulates JAR resource access)");
             logger.info("  This approach avoids the InvalidPathException that occurred with JAR URLs");
         }
 
@@ -476,7 +476,7 @@ class ScenarioRegistryLoaderStreamTest {
                 assertNotNull(scenario, "Stream loading should work");
                 assertEquals("jar-compatible-scenario", scenario.getScenarioId());
 
-                logger.info("✓ Stream-based loading successfully bypasses filesystem path resolution");
+                logger.info("[OK] Stream-based loading successfully bypasses filesystem path resolution");
                 logger.info("  This is the fix for the JAR URL InvalidPathException issue");
             }
         }
@@ -517,7 +517,7 @@ class ScenarioRegistryLoaderStreamTest {
                 assertNotNull(scenario, "Scenario should not be null");
                 assertFalse(scenario.hasStageConfiguration(), "Scenario should not have stage configuration");
 
-                logger.info("✓ Correctly handled scenario with no processing stages");
+                logger.info("[OK] Correctly handled scenario with no processing stages");
             }
         }
 
@@ -551,10 +551,10 @@ class ScenarioRegistryLoaderStreamTest {
                 if (scenarios.containsKey("disabled-scenario")) {
                     ScenarioConfiguration config = scenarios.get("disabled-scenario");
                     assertFalse(config.isEnabled(), "Scenario should be marked as disabled");
-                    logger.info("✓ Disabled scenario loaded with enabled={}", config.isEnabled());
+                    logger.info("[OK] Disabled scenario loaded with enabled={}", config.isEnabled());
                 }
                 
-                logger.info("✓ Registry with disabled scenarios processed correctly");
+                logger.info("[OK] Registry with disabled scenarios processed correctly");
             }
         }
 
@@ -590,7 +590,7 @@ class ScenarioRegistryLoaderStreamTest {
                 assertNotNull(scenario, "Scenario should not be null");
                 assertEquals("metadata-scenario", scenario.getScenarioId());
                 
-                logger.info("✓ Correctly loaded scenario with metadata");
+                logger.info("[OK] Correctly loaded scenario with metadata");
             }
         }
     }

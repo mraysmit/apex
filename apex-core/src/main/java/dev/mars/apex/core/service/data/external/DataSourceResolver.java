@@ -40,7 +40,7 @@ public class DataSourceResolver {
     public DataSourceResolver() {
         this.yamlMapper = new ObjectMapper(new YAMLFactory());
         this.configCache = new ConcurrentHashMap<>();
-        logger.info("DataSourceResolver initialized with YAML mapper and configuration cache");
+        logger.debug("DataSourceResolver initialized");
     }
     
     /**

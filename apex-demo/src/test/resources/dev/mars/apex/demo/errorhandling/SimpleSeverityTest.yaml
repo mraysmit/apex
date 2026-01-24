@@ -48,7 +48,7 @@ rules:
     name: "Critical Amount Validation"
     description: "Amount must be positive - critical error"
     condition: "amount != null && T(java.lang.Double).parseDouble(amount.toString()) > 0"
-    message: "CRITICAL: Amount must be positive, got: {{amount}}"
+    message: Amount must be positive, got: {{amount}}"
     severity: "ERROR"
     priority: 1
     enabled: true
@@ -57,7 +57,7 @@ rules:
     name: "Mandatory Field Validation"
     description: "Trade ID must be present - critical error"
     condition: "tradeId != null && !tradeId.toString().isEmpty()"
-    message: "CRITICAL: Trade ID is mandatory"
+    message: Trade ID is mandatory"
     severity: "ERROR"
     priority: 1
     enabled: true

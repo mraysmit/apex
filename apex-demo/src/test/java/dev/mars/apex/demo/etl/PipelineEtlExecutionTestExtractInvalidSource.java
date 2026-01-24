@@ -49,11 +49,11 @@ class PipelineEtlExecutionTestExtractInvalidSource extends DemoTestBase {
             RuleResult result = rulesEngine.evaluate(inputData);
 
             // Pipeline may return ERROR result instead of throwing exception
-            logger.info("✓ Invalid source extract pipeline test completed");
+            logger.info("[OK] Invalid source extract pipeline test completed");
             logger.info("  - Result type: {}", result.getResultType());
         } catch (Exception e) {
             // Or it may throw an exception
-            logger.info("✓ Invalid source extract pipeline test completed with exception");
+            logger.info("[OK] Invalid source extract pipeline test completed with exception");
             logger.info("  - Exception: {}", e.getMessage());
         }
     }

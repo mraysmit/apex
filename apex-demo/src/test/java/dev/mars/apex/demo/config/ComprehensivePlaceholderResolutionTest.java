@@ -117,7 +117,7 @@ class ComprehensivePlaceholderResolutionTest {
             
             // Verify configuration loaded successfully
             assertEquals("Database Placeholder Resolution Test", config.getMetadata().getName());
-            logger.info("✓ YAML configuration loaded successfully");
+            logger.info("[OK] YAML configuration loaded successfully");
 
             // Verify data source placeholders resolved
             YamlDataSource dataSource = config.getDataSources().get(0);
@@ -132,7 +132,7 @@ class ComprehensivePlaceholderResolutionTest {
             assertEquals(50, connection.get("max-pool-size"));
             assertEquals(30000, connection.get("connection-timeout")); // Default value
             
-            logger.info("✓ All database placeholders resolved correctly");
+            logger.info("[OK] All database placeholders resolved correctly");
             logger.info("  - Host: {}", connection.get("host"));
             logger.info("  - Port: {}", connection.get("port"));
             logger.info("  - Database: {}", connection.get("database"));
@@ -144,7 +144,7 @@ class ComprehensivePlaceholderResolutionTest {
             Map<String, String> queries = dataSource.getQueries();
             assertTrue(queries.get("getUserById").contains("public.users"));
             assertTrue(queries.get("getOrdersByCustomer").contains("public.orders"));
-            logger.info("✓ Query placeholders resolved correctly");
+            logger.info("[OK] Query placeholders resolved correctly");
 
             logger.info("🎉 Database placeholder resolution test PASSED");
 
@@ -186,7 +186,7 @@ class ComprehensivePlaceholderResolutionTest {
             // Test mixed syntax in base-url: "https://${API_HOST}:$(API_PORT)/api/v${API_VERSION:1}"
             String baseUrl = (String) connection.get("base-url");
             assertEquals("https://api.example.com:443/api/v1", baseUrl);
-            logger.info("✓ Mixed syntax base URL: {}", baseUrl);
+            logger.info("[OK] Mixed syntax base URL: {}", baseUrl);
             
             // Test other mixed properties
             assertEquals(5000, connection.get("timeout")); // Default value
@@ -199,7 +199,7 @@ class ComprehensivePlaceholderResolutionTest {
             assertEquals("/health?env=production", endpoints.get("health"));
             assertEquals("/users?limit=100", endpoints.get("users"));
             
-            logger.info("✓ All mixed syntax placeholders resolved correctly");
+            logger.info("[OK] All mixed syntax placeholders resolved correctly");
             logger.info("🎉 Mixed placeholder syntax test PASSED");
 
         } catch (Exception e) {
@@ -234,7 +234,7 @@ class ComprehensivePlaceholderResolutionTest {
             // Test base-url: "http://${HOST:localhost}:${PORT:8080}"
             String baseUrl = (String) connection.get("base-url");
             assertEquals("http://custom.host.com:8080", baseUrl); // HOST set, PORT default
-            logger.info("✓ Base URL with mixed defaults: {}", baseUrl);
+            logger.info("[OK] Base URL with mixed defaults: {}", baseUrl);
             
             // Test all default values
             assertEquals(5000, connection.get("timeout"));
@@ -253,7 +253,7 @@ class ComprehensivePlaceholderResolutionTest {
             assertEquals("guest", auth.get("username"));
             assertEquals("", auth.get("password")); // Empty string default
             
-            logger.info("✓ All default values resolved correctly");
+            logger.info("[OK] All default values resolved correctly");
             logger.info("🎉 Default value resolution test PASSED");
 
         } catch (Exception e) {
@@ -299,28 +299,28 @@ class ComprehensivePlaceholderResolutionTest {
             Map<String, Object> connection = dataSource.getConnection();
             String baseUrl = (String) connection.get("base-url");
             assertEquals("https://complex.api.com:8443/api/v2", baseUrl);
-            logger.info("✓ Complex base URL: {}", baseUrl);
+            logger.info("[OK] Complex base URL: {}", baseUrl);
 
             // Verify complex endpoints
             Map<String, String> endpoints = dataSource.getEndpoints();
             assertEquals("/users?page=2&size=25&sort=name", endpoints.get("users"));
             assertEquals("/orders?status=pending&from=2024-01-01&to=2024-12-31", endpoints.get("orders"));
-            logger.info("✓ Complex endpoints resolved correctly");
+            logger.info("[OK] Complex endpoints resolved correctly");
 
             // Verify nested placeholder in refresh-url: "${PROTOCOL:https}://${AUTH_HOST:${API_HOST}}:${AUTH_PORT:${API_PORT}}/auth/refresh"
             Map<String, Object> auth = dataSource.getAuthentication();
             String refreshUrl = (String) auth.get("refresh-url");
             assertEquals("https://complex.api.com:8443/auth/refresh", refreshUrl);
-            logger.info("✓ Nested placeholder refresh URL: {}", refreshUrl);
+            logger.info("[OK] Nested placeholder refresh URL: {}", refreshUrl);
 
             // Verify enrichment with complex expression
             YamlEnrichment enrichment = config.getEnrichments().get(0);
             YamlEnrichment.CalculationConfig calcConfig = enrichment.getCalculationConfig();
             String expression = calcConfig.getExpression();
             assertEquals("'APEX-PROD-' + #orderId + '-' + 'production'", expression);
-            logger.info("✓ Complex enrichment expression: {}", expression);
+            logger.info("[OK] Complex enrichment expression: {}", expression);
 
-            logger.info("✓ All complex placeholders resolved correctly");
+            logger.info("[OK] All complex placeholders resolved correctly");
             logger.info("🎉 Complex placeholder resolution test PASSED");
 
         } catch (Exception e) {
@@ -353,7 +353,7 @@ class ComprehensivePlaceholderResolutionTest {
             assertTrue(errorMessage.contains("Property not found: API_KEY"),
                       "Exception should indicate API_KEY property not found, but was: " + errorMessage);
 
-            logger.info("✓ Expected failure for missing API_KEY: {}", errorMessage);
+            logger.info("[OK] Expected failure for missing API_KEY: {}", errorMessage);
             logger.info("🎉 Missing required properties test PASSED");
 
         } catch (AssertionError e) {
@@ -390,7 +390,7 @@ class ComprehensivePlaceholderResolutionTest {
 
             Map<String, Object> auth = dataSource.getAuthentication();
             assertEquals("system-user", auth.get("username"));
-            logger.info("✓ System properties take precedence over environment variables");
+            logger.info("[OK] System properties take precedence over environment variables");
 
             logger.info("🎉 Property precedence test PASSED");
 

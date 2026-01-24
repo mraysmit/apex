@@ -161,8 +161,8 @@ class ReadSchemaDatabaseEnumerationPipelineStageTestReport extends SyncTestBase 
         assertTrue(reportContent.contains("ORDERS") || reportContent.contains("orders"), 
             "Report should contain ORDERS table");
 
-        logger.info("✓ HTML report generated: {}", reportPath);
-        logger.info("✓ Successfully enumerated tables with report generation");
+        logger.info("[OK] HTML report generated: {}", reportPath);
+        logger.info("[OK] Successfully enumerated tables with report generation");
     }
 
     private void setupTestDatabase() throws Exception {

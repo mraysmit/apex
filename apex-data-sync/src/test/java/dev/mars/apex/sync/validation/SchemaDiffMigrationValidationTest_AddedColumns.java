@@ -108,8 +108,8 @@ class SchemaDiffMigrationValidationTest_AddedColumns {
         assertTrue(reportContent.contains("status"), "Report should mention status column");
         assertTrue(reportContent.contains("Added Columns"), "Report should have added columns section");
         
-        logger.info("✓ Safe schema evolution validated: 2 columns added, no breaking changes");
-        logger.info("✓ Migration is backward compatible - existing applications will continue to work");
+        logger.info("[OK] Safe schema evolution validated: 2 columns added, no breaking changes");
+        logger.info("[OK] Migration is backward compatible - existing applications will continue to work");
     }
 
     private SchemaComparisonResult extractComparisonResult(RuleResult result) {

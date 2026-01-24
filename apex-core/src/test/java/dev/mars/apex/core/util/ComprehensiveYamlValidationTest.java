@@ -76,7 +76,7 @@ public class ComprehensiveYamlValidationTest {
         for (YamlValidationResult result : summary.getResults()) {
             String status = result.getStatus();
             String indicator = switch (status) {
-                case "VALID" -> "✓";
+                case "VALID" -> "[OK]";
                 case "VALID_WITH_WARNINGS" -> "⚠";
                 case "INVALID" -> "✗";
                 default -> "?";

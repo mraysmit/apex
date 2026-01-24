@@ -42,7 +42,7 @@ class PipelineEtlExecutionTestLoadBatch extends DemoTestBase {
             throw new RuntimeException("Failed to create database directory", e);
         }
 
-        logger.info("✓ Batch Load Pipeline Test setup completed");
+        logger.info("[OK] Batch Load Pipeline Test setup completed");
     }
 
     @AfterEach
@@ -77,7 +77,7 @@ class PipelineEtlExecutionTestLoadBatch extends DemoTestBase {
         Path dbFile = Paths.get("./demo-data/database/batch_db.mv.db");
         assertTrue(Files.exists(dbFile), "Batch database file should be created");
 
-        logger.info("✓ Batch load pipeline test completed successfully");
+        logger.info("[OK] Batch load pipeline test completed successfully");
         logger.info("  - Database file: {}", dbFile.toAbsolutePath());
     }
 }

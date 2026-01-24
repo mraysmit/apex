@@ -193,7 +193,7 @@ public class DataTypeScenarioService {
                 logger.debug("Successfully loaded scenario: {}", scenario.getScenarioId());
                 return scenario;
             } else {
-                logger.warn("No 'scenario' section found in file: {}", configFile);
+                logger.error("No 'scenario' section found in file: {} - configuration is invalid", configFile);
                 return null;
             }
 

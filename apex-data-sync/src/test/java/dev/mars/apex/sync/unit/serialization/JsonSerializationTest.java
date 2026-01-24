@@ -150,7 +150,7 @@ public class JsonSerializationTest extends SyncTestBase {
         assertTrue(firstColumn.has("dataType"), "Column should have dataType");
         assertTrue(firstColumn.has("nullable"), "Column should have nullable flag");
 
-        logger.info("✓ Schema metadata serialized to JSON successfully - {} columns",  columns.size());
+        logger.info("[OK] Schema metadata serialized to JSON successfully - {} columns",  columns.size());
         validateExecutionRate(1, 1, "Schema reading and JSON serialization");
     }
 
@@ -176,7 +176,7 @@ public class JsonSerializationTest extends SyncTestBase {
             assertTrue(column.has("nullable"), "Column should have nullable");
         }
         
-        logger.info("✓ All column data types serialized correctly");
+        logger.info("[OK] All column data types serialized correctly");
         validateExecutionRate(1, 1, "Column data type serialization");
     }
 
@@ -206,7 +206,7 @@ public class JsonSerializationTest extends SyncTestBase {
         assertNotNull(idColumn, "ID column should exist");
         assertFalse(idColumn.get("nullable").asBoolean(), "ID should not be nullable");
         
-        logger.info("✓ Nullable flags serialized correctly");
+        logger.info("[OK] Nullable flags serialized correctly");
         validateExecutionRate(1, 1, "Nullable flag serialization");
     }
 
@@ -228,7 +228,7 @@ public class JsonSerializationTest extends SyncTestBase {
         String sourceType = rootNode.get("sourceType").asText();
         assertTrue(sourceType.contains("Database"), "Source type should indicate database");
         
-        logger.info("✓ Source type information serialized: {}", sourceType);
+        logger.info("[OK] Source type information serialized: {}", sourceType);
         validateExecutionRate(1, 1, "Source type serialization");
     }
 
@@ -252,7 +252,7 @@ public class JsonSerializationTest extends SyncTestBase {
         assertEquals("NAME", columns.get(1).get("name").asText(), "Second column should be NAME");
         assertEquals("EMAIL", columns.get(2).get("name").asText(), "Third column should be EMAIL");
         
-        logger.info("✓ Column order preserved in JSON");
+        logger.info("[OK] Column order preserved in JSON");
         validateExecutionRate(1, 1, "Column order preservation");
     }
 
@@ -279,7 +279,7 @@ public class JsonSerializationTest extends SyncTestBase {
         assertEquals(original.getSourceName(), deserialized.getSourceName());
         assertEquals(original.getColumns().size(), deserialized.getColumns().size());
         
-        logger.info("✓ Round-trip serialization successful");
+        logger.info("[OK] Round-trip serialization successful");
         validateExecutionRate(1, 1, "Round-trip serialization");
     }
 }

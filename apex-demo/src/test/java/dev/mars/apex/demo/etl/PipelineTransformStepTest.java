@@ -90,7 +90,7 @@ public class PipelineTransformStepTest extends DemoTestBase {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Pipeline should execute successfully");
 
-        logger.info("✓ Transformation rules applied successfully");
+        logger.info("[OK] Transformation rules applied successfully");
     }
 
     @Test
@@ -110,7 +110,7 @@ public class PipelineTransformStepTest extends DemoTestBase {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Pipeline should execute successfully");
 
-        logger.info("✓ Record filtering executed successfully");
+        logger.info("[OK] Record filtering executed successfully");
     }
 
     @Test
@@ -130,7 +130,7 @@ public class PipelineTransformStepTest extends DemoTestBase {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Pipeline should execute successfully");
 
-        logger.info("✓ Data aggregation executed successfully");
+        logger.info("[OK] Data aggregation executed successfully");
     }
 
     @Test
@@ -150,7 +150,7 @@ public class PipelineTransformStepTest extends DemoTestBase {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Pipeline should succeed with error-handling: skip-record");
 
-        logger.info("✓ Transformation errors handled gracefully");
+        logger.info("[OK] Transformation errors handled gracefully");
     }
 
     // Helper methods

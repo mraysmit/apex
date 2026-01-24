@@ -83,7 +83,7 @@ public class ConditionalMappingsTest {
             assertEquals("result", fieldMapping.getTargetField(), "Target field should match");
             assertEquals("'OR_MATCHED'", fieldMapping.getExpression(), "Expression should match");
 
-            logger.info("✓ Conditional mappings structure creation successful");
+            logger.info("[OK] Conditional mappings structure creation successful");
 
         } catch (Exception e) {
             logger.severe("Failed to create conditional mappings structure: " + e.getMessage());
@@ -139,7 +139,7 @@ public class ConditionalMappingsTest {
             assertNotNull(enrichedData, "Result should not be null");
             assertEquals("OR_MATCHED", enrichedData.get("result"), "Result should be 'OR_MATCHED'");
 
-            logger.info("✓ OR conditions processing successful");
+            logger.info("[OK] OR conditions processing successful");
 
         } catch (Exception e) {
             logger.severe("Failed to process OR conditions: " + e.getMessage());
@@ -200,7 +200,7 @@ public class ConditionalMappingsTest {
             assertEquals("AND_MATCHED", enrichedData.get("result"), "Result should be 'AND_MATCHED'");
             assertEquals("TEST", enrichedData.get("system"), "System should be 'TEST'");
 
-            logger.info("✓ AND conditions processing successful");
+            logger.info("[OK] AND conditions processing successful");
 
         } catch (Exception e) {
             logger.severe("Failed to process AND conditions: " + e.getMessage());
@@ -256,7 +256,7 @@ public class ConditionalMappingsTest {
             assertNotNull(enrichedData, "Result should not be null");
             assertNull(enrichedData.get("result"), "Result should be null when no conditions match");
 
-            logger.info("✓ Failed conditions handling successful");
+            logger.info("[OK] Failed conditions handling successful");
 
         } catch (Exception e) {
             logger.severe("Failed to handle failed conditions: " + e.getMessage());

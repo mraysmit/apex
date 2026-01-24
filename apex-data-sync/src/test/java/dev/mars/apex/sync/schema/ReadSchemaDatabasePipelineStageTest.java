@@ -114,7 +114,7 @@ class ReadSchemaDatabasePipelineStageTest extends SyncTestBase {
         //assertTrue(idColumn.isPrimaryKey(), "ID should be primary key");
         assertFalse(idColumn.isNullable(), "ID should not be nullable");
 
-        logger.info("✓ Successfully read database schema with {} columns", schema.getColumns().size());
+        logger.info("[OK] Successfully read database schema with {} columns", schema.getColumns().size());
         
         // Display metrics
         displayPipelineMetrics(result);
@@ -153,7 +153,7 @@ class ReadSchemaDatabasePipelineStageTest extends SyncTestBase {
         verifyTableSchema(readSchemaSteps, "inventory", 4);
         verifyTableSchema(readSchemaSteps, "transactions", 8);
 
-        logger.info("✓ Successfully read schemas from 5 H2 database tables");
+        logger.info("[OK] Successfully read schemas from 5 H2 database tables");
         displayPipelineMetrics(result);
     }
 
@@ -178,7 +178,7 @@ class ReadSchemaDatabasePipelineStageTest extends SyncTestBase {
             stmt.execute("INSERT INTO customers VALUES (1, 'John Doe', 'john@example.com')");
             stmt.execute("INSERT INTO customers VALUES (2, 'Jane Smith', 'jane@example.com')");
 
-            logger.info("✓ Test database initialized with customers table");
+            logger.info("[OK] Test database initialized with customers table");
         }
     }
 
@@ -247,7 +247,7 @@ class ReadSchemaDatabasePipelineStageTest extends SyncTestBase {
                         "confirmation_code VARCHAR(100))");
             stmt.execute("INSERT INTO transactions VALUES (1, 1, CURRENT_TIMESTAMP, 99.99, 'CREDIT_CARD', '1234', 'COMPLETED', 'CONF123456')");
 
-            logger.info("✓ Test database initialized with 5 tables: customers(5 cols), orders(6 cols), products(7 cols), inventory(4 cols), transactions(8 cols)");
+            logger.info("[OK] Test database initialized with 5 tables: customers(5 cols), orders(6 cols), products(7 cols), inventory(4 cols), transactions(8 cols)");
         }
     }
 
@@ -268,7 +268,7 @@ class ReadSchemaDatabasePipelineStageTest extends SyncTestBase {
         assertEquals(expectedColumns, schema.getColumns().size(), 
             String.format("Table '%s' should have %d columns", tableName, expectedColumns));
 
-        logger.info("✓ Verified schema for table '{}': {} columns", tableName, expectedColumns);
+        logger.info("[OK] Verified schema for table '{}': {} columns", tableName, expectedColumns);
     }
 
     /**

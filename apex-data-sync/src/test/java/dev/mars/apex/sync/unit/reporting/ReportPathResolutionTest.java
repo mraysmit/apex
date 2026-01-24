@@ -101,7 +101,7 @@ public class ReportPathResolutionTest extends SyncTestBase {
         assertTrue(columnNames.contains("ITEM_ID"), "Should have ITEM_ID column");
         assertTrue(columnNames.contains("WAREHOUSE"), "Should have WAREHOUSE column");
 
-        logger.info("✓ Schema read successfully for report path resolution");
+        logger.info("[OK] Schema read successfully for report path resolution");
         validateExecutionRate(1, 1, "Schema reading for report generation");
     }
 
@@ -124,7 +124,7 @@ public class ReportPathResolutionTest extends SyncTestBase {
         assertTrue(columnNames.contains("ITEM_ID"));
         assertTrue(columnNames.contains("WAREHOUSE"));
         
-        logger.info("✓ Inventory columns validated");
+        logger.info("[OK] Inventory columns validated");
         validateExecutionRate(1, 1, "Column validation");
     }
 
@@ -143,7 +143,7 @@ public class ReportPathResolutionTest extends SyncTestBase {
         assertNotNull(schema.getSourceName());
         assertNotNull(schema.getSourceType());
         
-        logger.info("✓ Source metadata available");
+        logger.info("[OK] Source metadata available");
         validateExecutionRate(1, 1, "Metadata validation");
     }
 }

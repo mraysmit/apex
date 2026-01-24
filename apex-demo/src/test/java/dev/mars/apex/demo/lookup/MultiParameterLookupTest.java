@@ -81,7 +81,7 @@ public class MultiParameterLookupTest {
         try (Connection connection = DriverManager.getConnection(
                 "jdbc:h2:./target/h2-demo/" + DB_NAME, "sa", "")) {
             connection.createStatement().execute("SHUTDOWN");
-            logger.info("✓ Database shutdown completed");
+            logger.info("[OK] Database shutdown completed");
         } catch (Exception e) {
             logger.warn("Failed to shutdown database: " + e.getMessage());
         }
@@ -173,7 +173,7 @@ public class MultiParameterLookupTest {
             ResultSet rs = statement.executeQuery("SELECT COUNT(*) FROM settlement_instructions");
             rs.next();
             int count = rs.getInt(1);
-            logger.info("✓ Database setup completed successfully - {} settlement instructions inserted", count);
+            logger.info("[OK] Database setup completed successfully - {} settlement instructions inserted", count);
 
             // Test the exact query we'll use in APEX
             String testQuery = """
@@ -195,7 +195,7 @@ public class MultiParameterLookupTest {
 
             ResultSet testRs = statement.executeQuery(testQuery);
             if (testRs.next()) {
-                logger.info("✓ Test query found data: instruction_id={}, counterparty_id={}, counterparty_name={}",
+                logger.info("[OK] Test query found data: instruction_id={}, counterparty_id={}, counterparty_name={}",
                     testRs.getString("instruction_id"),
                     testRs.getString("counterparty_id"),
                     testRs.getString("counterparty_name"));
@@ -218,7 +218,7 @@ public class MultiParameterLookupTest {
 
             // Load main configuration
             YamlRuleConfiguration mainConfig = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/lookup/MultiParameterLookupTest.yaml");
-            logger.info("✓ Loaded main configuration: {}", mainConfig.getMetadata().getName());
+            logger.info("[OK] Loaded main configuration: {}", mainConfig.getMetadata().getName());
 
             logger.info("Configuration loaded successfully");
 
@@ -270,7 +270,7 @@ public class MultiParameterLookupTest {
 
             // Validate results
             if (enrichedResult.get("settlementInstructionId") != null) {
-                logger.info("✓ Multi-parameter database lookup successful");
+                logger.info("[OK] Multi-parameter database lookup successful");
                 
                 // Verify expected values
                 assertEquals("SI001", enrichedResult.get("settlementInstructionId"));

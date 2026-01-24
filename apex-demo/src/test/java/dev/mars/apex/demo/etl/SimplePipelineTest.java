@@ -93,7 +93,7 @@ public class SimplePipelineTest extends DemoTestBase {
         // Initialize RulesEngine from YAML file
         rulesEngine = RulesEngine.fromClasspath("dev/mars/apex/demo/etl/SimplePipelineTest.yaml");
         assertNotNull(rulesEngine, "Rules engine should be created");
-        logger.info("✓ RulesEngine initialized successfully");
+        logger.info("[OK] RulesEngine initialized successfully");
 
         // Execute the pipeline
         java.util.Map<String, Object> inputData = new java.util.HashMap<>();
@@ -103,14 +103,14 @@ public class SimplePipelineTest extends DemoTestBase {
         assertNotNull(result, "Pipeline execution result should not be null");
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Pipeline should execute successfully");
-        logger.info("✓ Pipeline executed successfully");
+        logger.info("[OK] Pipeline executed successfully");
         logger.info("  - Result type: {}", result.getResultType());
         logger.info("  - Message: {}", result.getMessage());
 
         // Validate actual data was loaded into H2 database
         validateDatabaseContents();
 
-        logger.info("✓ CSV to H2 pipeline execution test completed successfully");
+        logger.info("[OK] CSV to H2 pipeline execution test completed successfully");
     }
 
     @Test
@@ -129,7 +129,7 @@ public class SimplePipelineTest extends DemoTestBase {
         // Validate pipeline execution
         assertNotNull(result, "Pipeline execution result should not be null");
         assertTrue(result.isSuccess(), "Pipeline should execute successfully");
-        logger.info("✓ Pipeline executed successfully");
+        logger.info("[OK] Pipeline executed successfully");
 
         // Validate specific data was transformed and loaded correctly
         try (Connection conn = getH2Connection()) {
@@ -140,7 +140,7 @@ public class SimplePipelineTest extends DemoTestBase {
             assertTrue(countRs.next(), "Should have count result");
             int recordCount = countRs.getInt("cnt");
             assertEquals(3, recordCount, "Should have loaded 3 records from CSV");
-            logger.info("✓ Verified {} records loaded into database", recordCount);
+            logger.info("[OK] Verified {} records loaded into database", recordCount);
 
             // Verify specific record values
             ResultSet dataRs = stmt.executeQuery("SELECT id, data FROM test ORDER BY id");
@@ -160,10 +160,10 @@ public class SimplePipelineTest extends DemoTestBase {
             assertEquals(3, dataRs.getInt("id"), "Third record ID should be 3");
             assertEquals("test-data-3", dataRs.getString("data"), "Third record data should match");
 
-            logger.info("✓ All record values verified successfully");
+            logger.info("[OK] All record values verified successfully");
         }
 
-        logger.info("✓ Data transformation test completed successfully");
+        logger.info("[OK] Data transformation test completed successfully");
     }
 
     // ========================================
@@ -191,7 +191,7 @@ public class SimplePipelineTest extends DemoTestBase {
                 writer.write("3,test-data-3\n");
             }
 
-            logger.info("✓ Test data setup completed");
+            logger.info("[OK] Test data setup completed");
             logger.info("  - Test directory: {}", testDir.toAbsolutePath());
             logger.info("  - CSV file: {}", csvFile.toAbsolutePath());
         } catch (IOException e) {
@@ -220,14 +220,14 @@ public class SimplePipelineTest extends DemoTestBase {
             // Verify table exists
             ResultSet tables = conn.getMetaData().getTables(null, null, "TEST", null);
             assertTrue(tables.next(), "Table 'test' should exist in database");
-            logger.info("✓ Table 'test' exists");
+            logger.info("[OK] Table 'test' exists");
 
             // Verify record count
             ResultSet countRs = stmt.executeQuery("SELECT COUNT(*) as cnt FROM test");
             assertTrue(countRs.next(), "Should have count result");
             int recordCount = countRs.getInt("cnt");
             assertTrue(recordCount > 0, "Should have loaded at least one record");
-            logger.info("✓ Database contains {} records", recordCount);
+            logger.info("[OK] Database contains {} records", recordCount);
 
             // Verify data integrity
             ResultSet dataRs = stmt.executeQuery("SELECT id, data FROM test ORDER BY id");
@@ -241,7 +241,7 @@ public class SimplePipelineTest extends DemoTestBase {
             }
 
             assertEquals(recordCount, verifiedRecords, "Should verify all records");
-            logger.info("✓ All {} records verified successfully", verifiedRecords);
+            logger.info("[OK] All {} records verified successfully", verifiedRecords);
         }
     }
 }

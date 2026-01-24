@@ -85,7 +85,7 @@ public class TypeNarrowingTest extends SyncTestBase {
         assertTrue(steps.stream().anyMatch(s -> "read-target-schema".equals(s.getName())),
             "Target schema read step should be present");
         
-        logger.info("✓ Type narrowing detection test passed");
+        logger.info("[OK] Type narrowing detection test passed");
     }
 
     @Test
@@ -103,6 +103,6 @@ public class TypeNarrowingTest extends SyncTestBase {
         List<ExecutionStep> steps = result.getExecutionPath();
         assertFalse(steps.isEmpty(), "Execution path should contain steps");
         
-        logger.info("✓ Decimal precision narrowing detection test passed");
+        logger.info("[OK] Decimal precision narrowing detection test passed");
     }
 }

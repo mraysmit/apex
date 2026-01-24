@@ -364,7 +364,7 @@ class PlaygroundExamplesUITest {
             "Enrichment results should contain '" + expectedEnrichment + "' for " + yamlPath +
             ". Actual: " + enrichmentText.substring(0, Math.min(200, enrichmentText.length())));
 
-        logger.info("✓ {} UI test passed", yamlPath);
+        logger.info("[OK] {} UI test passed", yamlPath);
     }
 
     private String loadExampleFile(String relativePath) throws IOException {

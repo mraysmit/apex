@@ -83,7 +83,7 @@ public class DatasetInlineTest {
             assertEquals("1.0.0", config.getMetadata().getVersion(), "Should have correct version");
             assertEquals("dataset", config.getMetadata().getType(), "Should be dataset type");
 
-            logger.info("✓ Dataset configuration loaded successfully");
+            logger.info("[OK] Dataset configuration loaded successfully");
             logger.info("  - ID: {}", config.getMetadata().getId());
             logger.info("  - Name: {}", config.getMetadata().getName());
             logger.info("  - Type: {}", config.getMetadata().getType());
@@ -118,7 +118,7 @@ public class DatasetInlineTest {
             logger.info("  - JPMorgan Chase (LEI: 8EE8DF3643E15DBFDA05, Rating: AA-)");
             logger.info("  - Deutsche Bank (LEI: 7LTWFZYICNSX8D621K86, Rating: A+)");
 
-            logger.info("✓ Counterparty data validation passed");
+            logger.info("[OK] Counterparty data validation passed");
 
         } catch (YamlConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
@@ -148,7 +148,7 @@ public class DatasetInlineTest {
             // Validate metadata structure
             assertNotNull(config.getMetadata().getDescription(), "Should have description field");
 
-            logger.info("✓ Currency data validation passed");
+            logger.info("[OK] Currency data validation passed");
 
         } catch (YamlConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
@@ -178,7 +178,7 @@ public class DatasetInlineTest {
             assertTrue(config.getMetadata().getDescription().contains("inline reference data"),
                 "Description should mention inline reference data");
 
-            logger.info("✓ Instrument data validation passed");
+            logger.info("[OK] Instrument data validation passed");
 
         } catch (YamlConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
@@ -215,7 +215,7 @@ public class DatasetInlineTest {
             // Log the actual description for verification
             logger.info("Actual description: {}", metadata.getDescription());
 
-            logger.info("✓ Complete dataset structure validation passed");
+            logger.info("[OK] Complete dataset structure validation passed");
             logger.info("Dataset contains inline data for:");
             logger.info("  - 3 Counterparty records (Goldman Sachs, JPMorgan Chase, Deutsche Bank)");
             logger.info("  - 2 Currency records (USD, EUR)");

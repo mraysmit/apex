@@ -59,7 +59,7 @@ enrichments:
 enrichment-groups:
   - id: "customer-enrichment-group"
     name: "Customer Enrichment Group"
-    description: "CRITICAL: Group containing database lookup enrichment that requires yamlConfig"
+    description: Group containing database lookup enrichment that requires yamlConfig"
     operator: "AND"
     enrichment-ids:
       - "customer-database-lookup"

@@ -211,7 +211,7 @@ public class SetFieldValueNestedPathTest {
             Map<String, Object> enrichedData = result.getEnrichedData();
             assertNull(enrichedData.get("missing"), "SpEL does not auto-create missing map");
             
-            LOGGER.info("✓ Failure properly propagated to RuleResult: {}", result.getFailureMessages());
+            LOGGER.info("[OK] Failure properly propagated to RuleResult: {}", result.getFailureMessages());
         }
 
         @Test
@@ -237,7 +237,7 @@ public class SetFieldValueNestedPathTest {
             Map<String, Object> enrichedData = result.getEnrichedData();
             assertNull(enrichedData.get("items"), "SpEL does not auto-create missing list");
             
-            LOGGER.info("✓ Failure properly propagated to RuleResult: {}", result.getFailureMessages());
+            LOGGER.info("[OK] Failure properly propagated to RuleResult: {}", result.getFailureMessages());
         }
 
         @Test
@@ -269,7 +269,7 @@ public class SetFieldValueNestedPathTest {
             Map<String, Object> resultA = (Map<String, Object>) enrichedData.get("a");
             assertNull(resultA.get("b"), "SpEL does not auto-create missing intermediate 'b'");
             
-            LOGGER.info("✓ Failure properly propagated to RuleResult: {}", result.getFailureMessages());
+            LOGGER.info("[OK] Failure properly propagated to RuleResult: {}", result.getFailureMessages());
         }
     }
 

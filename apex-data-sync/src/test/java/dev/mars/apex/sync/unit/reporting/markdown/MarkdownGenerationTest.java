@@ -118,7 +118,7 @@ public class MarkdownGenerationTest extends SyncTestBase {
         SchemaMetadata targetSchema = (SchemaMetadata) targetStep.getStepData();
         assertEquals(4, targetSchema.getColumns().size(), "Target should have 4 columns (includes category)");
 
-        logger.info("✓ Schemas read successfully for Markdown generation");
+        logger.info("[OK] Schemas read successfully for Markdown generation");
         validateExecutionRate(2, 2, "Schema reading for Markdown generation");
     }
 
@@ -144,7 +144,7 @@ public class MarkdownGenerationTest extends SyncTestBase {
         assertFalse(sourceHasCategory, "Source should not have CATEGORY");
         assertTrue(targetHasCategory, "Target should have CATEGORY");
         
-        logger.info("✓ Column addition detected");
+        logger.info("[OK] Column addition detected");
         validateExecutionRate(2, 2, "Column addition");
     }
 
@@ -167,7 +167,7 @@ public class MarkdownGenerationTest extends SyncTestBase {
         
         assertNotNull(priceColumn, "Should have PRICE column");
         
-        logger.info("✓ Price column validated");
+        logger.info("[OK] Price column validated");
         validateExecutionRate(2, 2, "Price validation");
     }
 }

@@ -112,7 +112,7 @@ class ReadSchemaCsvTest extends SyncTestBase {
         assertNotNull(schema.getColumns(), "Schema should have columns");
         assertTrue(schema.getColumns().size() >= 3, "Should have at least 3 columns");
 
-        logger.info("✓ Successfully read CSV schema with {} columns", schema.getColumns().size());
+        logger.info("[OK] Successfully read CSV schema with {} columns", schema.getColumns().size());
     }
 
     /**

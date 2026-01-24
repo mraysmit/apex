@@ -90,7 +90,7 @@ public class PropertyResolutionEndToEndTest {
         assertEquals("super_secret_password", userDbConfig.getConnection().getPassword());
         assertEquals("public", userDbConfig.getConnection().getSchema());
         
-        LOGGER.info("✓ PostgreSQL database properties resolved correctly");
+        LOGGER.info("[OK] PostgreSQL database properties resolved correctly");
         
         // Test H2 database with mixed property resolution (some with defaults)
         YamlDataSource testDatabase = config.getDataSources().stream()
@@ -110,7 +110,7 @@ public class PropertyResolutionEndToEndTest {
         assertEquals("test_admin", testDbConfig.getConnection().getUsername());
         assertEquals("", testDbConfig.getConnection().getPassword()); // Default empty password
         
-        LOGGER.info("✓ H2 database properties with defaults resolved correctly");
+        LOGGER.info("[OK] H2 database properties with defaults resolved correctly");
         
         // Verify enrichments were loaded correctly
         assertNotNull(config.getEnrichments());
@@ -120,7 +120,7 @@ public class PropertyResolutionEndToEndTest {
         assertEquals("user-lookup", userLookup.getId());
         assertEquals("User Lookup Enrichment", userLookup.getName());
         
-        LOGGER.info("✓ Enrichments loaded correctly");
+        LOGGER.info("[OK] Enrichments loaded correctly");
         
         // Verify rules were loaded correctly
         assertNotNull(config.getRules());
@@ -130,9 +130,9 @@ public class PropertyResolutionEndToEndTest {
         assertEquals("user-validation", userValidation.getId());
         assertEquals("User Validation Rule", userValidation.getName());
         
-        LOGGER.info("✓ Rules loaded correctly");
+        LOGGER.info("[OK] Rules loaded correctly");
         
-        LOGGER.info("✓ Complete end-to-end property resolution test passed");
+        LOGGER.info("[OK] Complete end-to-end property resolution test passed");
     }
 
     @Test
@@ -177,7 +177,7 @@ public class PropertyResolutionEndToEndTest {
         assertEquals("./target/test/testdb", testDbConfig.getConnection().getDatabase()); // Default
         assertEquals("sa", testDbConfig.getConnection().getUsername()); // Default
         
-        LOGGER.info("✓ Default value handling works correctly");
+        LOGGER.info("[OK] Default value handling works correctly");
     }
 
     @Test
@@ -200,6 +200,6 @@ public class PropertyResolutionEndToEndTest {
         assertTrue(message.contains("Property not found"), 
             "Exception should indicate missing property: " + message);
         
-        LOGGER.info("✓ Missing required properties handled correctly: " + message);
+        LOGGER.info("[OK] Missing required properties handled correctly: " + message);
     }
 }

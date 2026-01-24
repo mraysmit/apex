@@ -58,7 +58,7 @@ public class SimpleFailurePolicyComplianceTest extends DemoTestBase {
     public void setUp() {
         super.setUp(); // Call parent setup to initialize APEX services
         logger.info("Setting up compliance failure policy test environment");
-        logger.info("✓ Test environment initialized for RulesEngine scenario testing");
+        logger.info("[OK] Test environment initialized for RulesEngine scenario testing");
     }
 
     @Test
@@ -84,8 +84,8 @@ public class SimpleFailurePolicyComplianceTest extends DemoTestBase {
         assertFalse(scenarioResult.isTerminated(), "Scenario should not be terminated");
         assertFalse(scenarioResult.getStageResults().isEmpty(), "Should have stage results");
         
-        logger.info("✓ Compliance stage executed despite previous stage issues");
-        logger.info("✓ Compliance rules processed successfully");
+        logger.info("[OK] Compliance stage executed despite previous stage issues");
+        logger.info("[OK] Compliance rules processed successfully");
         logger.info("Compliance after failures test completed");
     }
 
@@ -110,8 +110,8 @@ public class SimpleFailurePolicyComplianceTest extends DemoTestBase {
         // Verify compliance processing
         assertNotNull(scenarioResult, "Scenario result should not be null");
         
-        logger.info("✓ Compliance rules handled high-value transaction");
-        logger.info("✓ Various data conditions processed correctly");
+        logger.info("[OK] Compliance rules handled high-value transaction");
+        logger.info("[OK] Various data conditions processed correctly");
         logger.info("Compliance data conditions test completed");
     }
 
@@ -135,8 +135,8 @@ public class SimpleFailurePolicyComplianceTest extends DemoTestBase {
         // Verify compliance failure handling
         assertNotNull(scenarioResult, "Result should not be null even with compliance issues");
         
-        logger.info("✓ Compliance failure policy applied correctly");
-        logger.info("✓ Problematic data handled according to policy");
+        logger.info("[OK] Compliance failure policy applied correctly");
+        logger.info("[OK] Problematic data handled according to policy");
         logger.info("Compliance failure policy test completed");
     }
 }

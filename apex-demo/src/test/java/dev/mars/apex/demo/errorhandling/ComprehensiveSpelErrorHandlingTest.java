@@ -79,7 +79,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
         assertEquals("Property should exist", result.getMessage(), 
                     "Message should be the rule message");
         
-        logger.info("✓ Property not found handled gracefully");
+        logger.info("[OK] Property not found handled gracefully");
     }
     
     @Test
@@ -110,7 +110,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
         assertEquals("Property should equal TESTVALUE", result.getMessage(), 
                     "Message should be the rule message");
         
-        logger.info("✓ Non-existent property equality comparison handled gracefully");
+        logger.info("[OK] Non-existent property equality comparison handled gracefully");
     }
     
     @Test
@@ -135,7 +135,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
                     "Should return ERROR for null property access");
         assertFalse(result.isTriggered(), "Error rule should not be triggered");
         
-        logger.info("✓ Nested property access on null handled gracefully");
+        logger.info("[OK] Nested property access on null handled gracefully");
     }
     
     // ========================================================================
@@ -163,7 +163,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
                     "Should return ERROR for missing method");
         assertFalse(result.isTriggered(), "Error rule should not be triggered");
         
-        logger.info("✓ Method not found handled gracefully");
+        logger.info("[OK] Method not found handled gracefully");
     }
     
     @Test
@@ -187,7 +187,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
                     "Should return ERROR for wrong method parameters");
         assertFalse(result.isTriggered(), "Error rule should not be triggered");
         
-        logger.info("✓ Method invocation with wrong parameters handled gracefully");
+        logger.info("[OK] Method invocation with wrong parameters handled gracefully");
     }
     
     // ========================================================================
@@ -215,7 +215,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
                     "Should return ERROR for type conversion");
         assertFalse(result.isTriggered(), "Error rule should not be triggered");
         
-        logger.info("✓ Type conversion error handled gracefully");
+        logger.info("[OK] Type conversion error handled gracefully");
     }
     
     @Test
@@ -239,7 +239,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
                     "Should return ERROR for arithmetic error");
         assertFalse(result.isTriggered(), "Error rule should not be triggered");
 
-        logger.info("✓ Arithmetic error handled gracefully");
+        logger.info("[OK] Arithmetic error handled gracefully");
     }
     
     // ========================================================================
@@ -267,7 +267,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
                     "Should return ERROR for array bounds");
         assertFalse(result.isTriggered(), "Error rule should not be triggered");
         
-        logger.info("✓ Array index out of bounds handled gracefully");
+        logger.info("[OK] Array index out of bounds handled gracefully");
     }
     
     // ========================================================================
@@ -295,7 +295,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
                     "Should return ERROR for missing map key");
         assertFalse(result.isTriggered(), "Error rule should not be triggered");
 
-        logger.info("✓ Map key not found handled gracefully");
+        logger.info("[OK] Map key not found handled gracefully");
     }
 
     // ========================================================================
@@ -323,7 +323,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
                     "Should return ERROR for invalid casting");
         assertFalse(result.isTriggered(), "Error rule should not be triggered");
 
-        logger.info("✓ Invalid casting handled gracefully");
+        logger.info("[OK] Invalid casting handled gracefully");
     }
 
     // ========================================================================
@@ -351,7 +351,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
                     "Should return ERROR for complex expression error");
         assertFalse(result.isTriggered(), "Error rule should not be triggered");
 
-        logger.info("✓ Complex nested expression error handled gracefully");
+        logger.info("[OK] Complex nested expression error handled gracefully");
     }
 
     // ========================================================================
@@ -389,7 +389,7 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
             }
         }
 
-        logger.info("✓ Multiple SpEL errors in rule list handled gracefully");
+        logger.info("[OK] Multiple SpEL errors in rule list handled gracefully");
     }
 
     // ========================================================================
@@ -438,11 +438,11 @@ class ComprehensiveSpelErrorHandlingTest extends DemoTestBase {
             assertFalse(result.isTriggered(), "Error rule should not be triggered for " + errorType);
             assertNotNull(result.getMessage(), "Error message should be present for " + errorType);
 
-            logger.info("✓ {} handled gracefully", errorType);
+            logger.info("[OK] {} handled gracefully", errorType);
         }
 
-        logger.info("✓ All SpEL error types handled without stack traces");
-        logger.info("✓ Comprehensive SpEL error handling validation complete");
+        logger.info("[OK] All SpEL error types handled without stack traces");
+        logger.info("[OK] Comprehensive SpEL error handling validation complete");
     }
 
     // ========================================================================

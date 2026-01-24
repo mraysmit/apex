@@ -83,7 +83,7 @@ public class ExternalDataConfigDatabaseTest {
             assertEquals("1.0.0", config.getMetadata().getVersion(), "Should have correct version");
             assertEquals("external-data-config", config.getMetadata().getType(), "Should be external-data-config type");
 
-            logger.info("✓ External data config loaded successfully");
+            logger.info("[OK] External data config loaded successfully");
             logger.info("  - ID: {}", config.getMetadata().getId());
             logger.info("  - Name: {}", config.getMetadata().getName());
             logger.info("  - Type: {}", config.getMetadata().getType());
@@ -117,7 +117,7 @@ public class ExternalDataConfigDatabaseTest {
             logger.info("  - Cache: enabled, TTL 300s, max size 1000");
             logger.info("  - Health Check: enabled, interval 60s");
 
-            logger.info("✓ PostgreSQL data source configuration validation passed");
+            logger.info("[OK] PostgreSQL data source configuration validation passed");
 
         } catch (YamlConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
@@ -151,7 +151,7 @@ public class ExternalDataConfigDatabaseTest {
             assertTrue(config.getMetadata().getDescription().contains("external-data-config"), 
                 "Description should mention external-data-config");
 
-            logger.info("✓ H2 data source configuration validation passed");
+            logger.info("[OK] H2 data source configuration validation passed");
 
         } catch (YamlConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
@@ -181,7 +181,7 @@ public class ExternalDataConfigDatabaseTest {
             assertTrue(config.getMetadata().getDescription().contains("database data sources"), 
                 "Description should mention database data sources");
 
-            logger.info("✓ Cache configuration validation passed");
+            logger.info("[OK] Cache configuration validation passed");
 
         } catch (YamlConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
@@ -211,7 +211,7 @@ public class ExternalDataConfigDatabaseTest {
             assertNotNull(config.getMetadata().getTags(), "Should have tags");
             assertTrue(config.getMetadata().getTags().contains("database"), "Should have database tag");
 
-            logger.info("✓ Health check configuration validation passed");
+            logger.info("[OK] Health check configuration validation passed");
 
         } catch (YamlConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
@@ -248,7 +248,7 @@ public class ExternalDataConfigDatabaseTest {
             // Log the actual description for verification
             logger.info("Actual description: {}", metadata.getDescription());
 
-            logger.info("✓ Complete external data config structure validation passed");
+            logger.info("[OK] Complete external data config structure validation passed");
             logger.info("External data config contains:");
             logger.info("  - 2 Database data sources (PostgreSQL customer-database, H2 transaction-database)");
             logger.info("  - Cache configurations with different TTL and size settings");

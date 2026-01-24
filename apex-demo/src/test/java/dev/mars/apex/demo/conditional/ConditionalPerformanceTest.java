@@ -68,7 +68,7 @@ public class ConditionalPerformanceTest extends DemoTestBase {
 
             
             Map<String, Object> enriched1 = ruleResult1.getEnrichedData();
-            logger.info("✓ Optimized path (cheap check fails): {}ms", String.format("%.3f", ms1));
+            logger.info("[OK] Optimized path (cheap check fails): {}ms", String.format("%.3f", ms1));
             logger.info("  Result: {}", enriched1.get("optimizationLevel"));
 
             // Scenario 2: Expensive condition first (slow path)
@@ -85,16 +85,16 @@ public class ConditionalPerformanceTest extends DemoTestBase {
 
             
             Map<String, Object> enriched2 = ruleResult2.getEnrichedData();
-            logger.info("✓ Unoptimized path (expensive check first): {}ms", String.format("%.3f", ms2));
+            logger.info("[OK] Unoptimized path (expensive check first): {}ms", String.format("%.3f", ms2));
             logger.info("  Result: {}", enriched2.get("optimizationLevel"));
 
             // Both should produce same result
             assertEquals(enriched1.get("optimizationLevel"), enriched2.get("optimizationLevel"),
                         "Both paths should produce same result");
 
-            logger.info("\n✓ Condition ordering impact demonstrated");
-            logger.info("✓ Optimized path: {}ms", String.format("%.3f", ms1));
-            logger.info("✓ Unoptimized path: {}ms", String.format("%.3f", ms2));
+            logger.info("\n[OK] Condition ordering impact demonstrated");
+            logger.info("[OK] Optimized path: {}ms", String.format("%.3f", ms1));
+            logger.info("[OK] Unoptimized path: {}ms", String.format("%.3f", ms2));
 
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
@@ -127,12 +127,12 @@ public class ConditionalPerformanceTest extends DemoTestBase {
             
             Map<String, Object> enriched = ruleResult.getEnrichedData();
 
-            logger.info("✓ AND group with early exit: {}ms", String.format("%.3f", ms));
-            logger.info("✓ Result: {}", enriched.get("andGroupResult"));
+            logger.info("[OK] AND group with early exit: {}ms", String.format("%.3f", ms));
+            logger.info("[OK] Result: {}", enriched.get("andGroupResult"));
             assertEquals("FAILED_EARLY", enriched.get("andGroupResult"),
                         "Should fail early when first rule fails");
 
-            logger.info("✓ Stop-on-first-failure optimization working correctly");
+            logger.info("[OK] Stop-on-first-failure optimization working correctly");
 
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
@@ -165,12 +165,12 @@ public class ConditionalPerformanceTest extends DemoTestBase {
             
             Map<String, Object> enriched = ruleResult.getEnrichedData();
 
-            logger.info("✓ OR group with first-match-wins: {}ms", String.format("%.3f", ms));
-            logger.info("✓ Result: {}", enriched.get("orGroupResult"));
+            logger.info("[OK] OR group with first-match-wins: {}ms", String.format("%.3f", ms));
+            logger.info("[OK] Result: {}", enriched.get("orGroupResult"));
             assertEquals("MATCHED_FIRST", enriched.get("orGroupResult"),
                         "Should match first rule and stop");
 
-            logger.info("✓ First-match-wins optimization working correctly");
+            logger.info("[OK] First-match-wins optimization working correctly");
 
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);
@@ -202,7 +202,7 @@ public class ConditionalPerformanceTest extends DemoTestBase {
 
             
             Map<String, Object> enriched1 = ruleResult1.getEnrichedData();
-            logger.info("✓ First evaluation: {}ms", String.format("%.3f", ms1));
+            logger.info("[OK] First evaluation: {}ms", String.format("%.3f", ms1));
 
             // Second evaluation with same data (cache hit)
             logger.info("\n--- Second Evaluation (Cache Hit) ---");
@@ -213,16 +213,16 @@ public class ConditionalPerformanceTest extends DemoTestBase {
 
             
             Map<String, Object> enriched2 = ruleResult2.getEnrichedData();
-            logger.info("✓ Second evaluation: {}ms", String.format("%.3f", ms2));
+            logger.info("[OK] Second evaluation: {}ms", String.format("%.3f", ms2));
 
             // Results should be identical
             assertEquals(enriched1.get("cachingLevel"), enriched2.get("cachingLevel"),
                         "Cached results should match");
 
-            logger.info("\n✓ Caching benefits demonstrated");
-            logger.info("✓ First call: {}ms", String.format("%.3f", ms1));
-            logger.info("✓ Second call: {}ms", String.format("%.3f", ms2));
-            logger.info("✓ Both calls completed successfully");
+            logger.info("\n[OK] Caching benefits demonstrated");
+            logger.info("[OK] First call: {}ms", String.format("%.3f", ms1));
+            logger.info("[OK] Second call: {}ms", String.format("%.3f", ms2));
+            logger.info("[OK] Both calls completed successfully");
 
         } catch (Exception e) {
             logger.error("Test failed: " + e.getMessage(), e);

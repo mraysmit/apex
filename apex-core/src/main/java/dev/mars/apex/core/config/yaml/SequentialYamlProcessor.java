@@ -188,7 +188,7 @@ public class SequentialYamlProcessor {
             // Step 2: Process and return RuleResult
             return processOrderedConfigurationWithResult(orderedConfig, filePath);
         } catch (Exception e) {
-            logger.error("CRITICAL: Failed to process file '{}': {}", filePath, e.getMessage(), e);
+            logger.error("Failed to process file '{}': {}", filePath, e.getMessage(), e);
             return RuleResult.error(
                 "file:" + filePath,
                 "File processing failed: " + e.getMessage(),
@@ -226,7 +226,7 @@ public class SequentialYamlProcessor {
             // Step 2: Process and return RuleResult
             return processOrderedConfigurationWithResult(orderedConfig, source);
         } catch (Exception e) {
-            logger.error("CRITICAL: Failed to process YAML string from '{}': {}", source, e.getMessage(), e);
+            logger.error("Failed to process YAML string from '{}': {}", source, e.getMessage(), e);
             return RuleResult.error(
                 "yaml-string:" + source,
                 "YAML string processing failed: " + e.getMessage(),
@@ -281,7 +281,7 @@ public class SequentialYamlProcessor {
                     }
                 }
 
-                logger.error("CRITICAL: Sequential processing failed for '{}': {} errors encountered",
+                logger.error("Sequential processing failed for '{}': {} errors encountered",
                     source, result.getErrorsEncountered());
 
                 return RuleResult.error(
@@ -291,7 +291,7 @@ public class SequentialYamlProcessor {
                 );
             }
         } catch (Exception e) {
-            logger.error("CRITICAL: Sequential processing exception for '{}': {}", source, e.getMessage(), e);
+            logger.error("Sequential processing exception for '{}': {}", source, e.getMessage(), e);
             return RuleResult.error(
                 "sequential-processor:" + source,
                 "Sequential processing failed: " + e.getMessage(),

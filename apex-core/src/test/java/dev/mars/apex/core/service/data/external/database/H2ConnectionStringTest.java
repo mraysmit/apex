@@ -353,7 +353,7 @@ class H2ConnectionStringTest {
             JdbcTemplateFactory.createDataSource(dataSourceConfig);
         });
 
-        LOGGER.info("✓ Expected exception caught: {} - {}", exception.getErrorType(), exception.getMessage());
+        LOGGER.info("[OK] Expected exception caught: {} - {}", exception.getErrorType(), exception.getMessage());
         assertTrue(exception.getErrorType() == DataSourceException.ErrorType.CONNECTION_ERROR ||
                    exception.getErrorType() == DataSourceException.ErrorType.CONFIGURATION_ERROR,
                    "Should be connection or configuration error");

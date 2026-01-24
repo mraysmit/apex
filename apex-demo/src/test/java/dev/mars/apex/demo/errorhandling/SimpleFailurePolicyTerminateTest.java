@@ -58,7 +58,7 @@ public class SimpleFailurePolicyTerminateTest extends DemoTestBase {
     public void setUp() {
         super.setUp(); // Call parent setup to initialize APEX services
         logger.info("Setting up terminate failure policy test environment");
-        logger.info("✓ Test environment initialized for RulesEngine scenario testing");
+        logger.info("[OK] Test environment initialized for RulesEngine scenario testing");
     }
 
     @Test
@@ -86,8 +86,8 @@ public class SimpleFailurePolicyTerminateTest extends DemoTestBase {
         assertTrue(scenarioResult.getSkippedStages().containsKey("enrichment"), 
                   "Enrichment stage should be skipped due to termination");
         
-        logger.info("✓ Terminate policy correctly stopped processing after validation failure");
-        logger.info("✓ Enrichment stage was skipped as expected");
+        logger.info("[OK] Terminate policy correctly stopped processing after validation failure");
+        logger.info("[OK] Enrichment stage was skipped as expected");
         logger.info("Terminate failure policy test completed");
     }
 
@@ -110,8 +110,8 @@ public class SimpleFailurePolicyTerminateTest extends DemoTestBase {
         assertTrue(scenarioResult.isTerminated(), "Scenario should be terminated");
         assertFalse(scenarioResult.getSkippedStages().isEmpty(), "Some stages should be skipped");
         
-        logger.info("✓ Multiple stages correctly skipped after termination");
-        logger.info("✓ Skipped stages: {}", scenarioResult.getSkippedStages().keySet());
+        logger.info("[OK] Multiple stages correctly skipped after termination");
+        logger.info("[OK] Skipped stages: {}", scenarioResult.getSkippedStages().keySet());
         logger.info("Multi-stage terminate test completed");
     }
 }

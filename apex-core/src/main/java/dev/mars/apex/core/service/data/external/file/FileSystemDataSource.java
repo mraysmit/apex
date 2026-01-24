@@ -442,7 +442,7 @@ public class FileSystemDataSource implements ExternalDataSource {
                     FileTime lastModified = Files.getLastModifiedTime(filePath);
                     fileModificationTimes.put(cacheKey, lastModified.toInstant());
                 } catch (IOException e) {
-                    LOGGER.warn("Failed to get modification time for file: {}", filePath, e);
+                    LOGGER.debug("Failed to get modification time for file: {} - {}", filePath, e.getMessage());
                 }
             }
             
@@ -747,7 +747,7 @@ public class FileSystemDataSource implements ExternalDataSource {
                         LOGGER.debug("Reloaded modified file: {}", file);
                     }
                 } catch (IOException e) {
-                    LOGGER.warn("Failed to check modification time for file: {}", file, e);
+                    LOGGER.debug("Failed to check modification time for file: {} - {}", file, e.getMessage());
                 }
             }
             

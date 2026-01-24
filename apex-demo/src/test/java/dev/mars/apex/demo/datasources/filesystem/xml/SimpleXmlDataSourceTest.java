@@ -91,7 +91,7 @@ public class SimpleXmlDataSourceTest extends DemoTestBase {
             assertEquals("FixedIncome", enrichedData.get("productCategory"));
             assertEquals("E123", enrichedData.get("employeeId"));
 
-            logger.info("✓ XML data source enrichment successful");
+            logger.info("[OK] XML data source enrichment successful");
         } catch (Exception e) {
             fail("XML data source test failed: " + e.getMessage());
         }
@@ -128,7 +128,7 @@ public class SimpleXmlDataSourceTest extends DemoTestBase {
             assertNull(enrichedData.get("departmentManager"));
             assertNull(enrichedData.get("departmentBudget"));
 
-            logger.info("✓ Missing department ID handled correctly");
+            logger.info("[OK] Missing department ID handled correctly");
         } catch (Exception e) {
             fail("Missing department ID test failed: " + e.getMessage());
         }
@@ -167,7 +167,7 @@ public class SimpleXmlDataSourceTest extends DemoTestBase {
             assertNull(enrichedData.get("departmentManager"));
             assertNull(enrichedData.get("departmentBudget"));
 
-            logger.info("✓ Unknown department ID handled correctly");
+            logger.info("[OK] Unknown department ID handled correctly");
         } catch (Exception e) {
             fail("Unknown department ID test failed: " + e.getMessage());
         }

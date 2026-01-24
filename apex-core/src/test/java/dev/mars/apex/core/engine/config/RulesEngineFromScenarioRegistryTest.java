@@ -89,7 +89,7 @@ class RulesEngineFromScenarioRegistryTest {
             assertTrue(engine.getScenarioRegistry().containsKey("complex-rules"),
                     "Registry should contain 'complex-rules' scenario");
 
-            logger.info("✓ Successfully loaded {} scenarios from classpath", 
+            logger.info("[OK] Successfully loaded {} scenarios from classpath", 
                        engine.getScenarioRegistry().size());
             engine.getScenarioRegistry().keySet().forEach(id -> 
                 logger.info("  - Scenario: {}", id));
@@ -113,7 +113,7 @@ class RulesEngineFromScenarioRegistryTest {
             assertEquals("basic-validation", basicScenario.getScenarioId(), 
                         "Scenario ID should match");
 
-            logger.info("✓ Relative path resolution working correctly");
+            logger.info("[OK] Relative path resolution working correctly");
             logger.info("  - Loaded scenario: {} (domain: {})", 
                        basicScenario.getScenarioId(), basicScenario.getBusinessDomain());
         }
@@ -130,7 +130,7 @@ class RulesEngineFromScenarioRegistryTest {
             assertEquals("Testing", basicScenario.getBusinessDomain(), 
                         "Business domain should be 'Testing'");
 
-            logger.info("✓ Business domain correctly loaded: {}", basicScenario.getBusinessDomain());
+            logger.info("[OK] Business domain correctly loaded: {}", basicScenario.getBusinessDomain());
         }
     }
 
@@ -202,7 +202,7 @@ class RulesEngineFromScenarioRegistryTest {
                 assertTrue(engine.getScenarioRegistry().containsKey("temp-scenario"),
                         "Registry should contain 'temp-scenario'");
 
-                logger.info("✓ Filesystem fallback working correctly");
+                logger.info("[OK] Filesystem fallback working correctly");
             } finally {
                 // Cleanup
                 Files.deleteIfExists(scenariosDir.resolve("temp-scenario.yaml"));
@@ -234,7 +234,7 @@ class RulesEngineFromScenarioRegistryTest {
                 "Should throw exception for non-existent resource"
             );
 
-            logger.info("✓ Correctly threw exception: {}", exception.getMessage());
+            logger.info("[OK] Correctly threw exception: {}", exception.getMessage());
         }
 
         @Test
@@ -248,7 +248,7 @@ class RulesEngineFromScenarioRegistryTest {
                 "Should throw exception for null path"
             );
 
-            logger.info("✓ Correctly threw exception for null path");
+            logger.info("[OK] Correctly threw exception for null path");
         }
 
         @Test
@@ -262,7 +262,7 @@ class RulesEngineFromScenarioRegistryTest {
                 "Should throw exception for empty path"
             );
 
-            logger.info("✓ Correctly threw exception for empty path");
+            logger.info("[OK] Correctly threw exception for empty path");
         }
     }
 
@@ -336,7 +336,7 @@ class RulesEngineFromScenarioRegistryTest {
                 // The key test is that the scenario was loaded successfully
                 assertNotNull(scenario, "Scenario should be loaded");
 
-                logger.info("✓ Backward compatibility maintained");
+                logger.info("[OK] Backward compatibility maintained");
                 logger.info("  - Loaded scenario: {}", scenario.getScenarioId());
             } finally {
                 // Cleanup
@@ -364,7 +364,7 @@ class RulesEngineFromScenarioRegistryTest {
             assertEquals(2, engine.getScenarioRegistry().size(), 
                         "Should load 2 scenarios from classpath");
 
-            logger.info("✓ Classpath loading verified (2 scenarios loaded)");
+            logger.info("[OK] Classpath loading verified (2 scenarios loaded)");
         }
     }
 }

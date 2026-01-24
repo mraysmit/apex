@@ -72,7 +72,7 @@ public class ExternalDataSourceWorkingDemoTest {
         // Initialize APEX services using modern pattern
         yamlLoader = new YamlConfigurationLoader();
 
-        logger.info("✓ APEX services initialized successfully");
+        logger.info("[OK] APEX services initialized successfully");
     }
 
     /**
@@ -109,7 +109,7 @@ public class ExternalDataSourceWorkingDemoTest {
                 ('CUST001', 'Test Customer Corp', 'CORPORATE', 'GOLD', 'NA', 'ACTIVE')
                 """);
 
-            logger.info("✓ H2 database setup completed successfully");
+            logger.info("[OK] H2 database setup completed successfully");
 
         } catch (Exception e) {
             logger.error("Failed to setup H2 database: " + e.getMessage(), e);
@@ -333,7 +333,7 @@ public class ExternalDataSourceWorkingDemoTest {
         try (Connection connection = DriverManager.getConnection(
                 "jdbc:h2:./target/h2-demo/" + DB_NAME, "sa", "")) {
             connection.createStatement().execute("SHUTDOWN");
-            logger.info("✓ Database shutdown completed");
+            logger.info("[OK] Database shutdown completed");
         } catch (Exception e) {
             logger.warn("Failed to shutdown database: " + e.getMessage());
         }

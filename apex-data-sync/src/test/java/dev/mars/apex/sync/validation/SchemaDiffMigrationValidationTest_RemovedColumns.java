@@ -113,8 +113,8 @@ class SchemaDiffMigrationValidationTest_RemovedColumns {
             "Report should mention email column");
         assertTrue(reportContent.contains("Removed Columns"), "Report should have removed columns section");
         
-        logger.info("✓ Breaking changes detected: {} removed columns flagged", comparison.getRemovedColumns().size());
-        logger.info("✓ Migration is NOT backward compatible - existing applications may break");
+        logger.info("[OK] Breaking changes detected: {} removed columns flagged", comparison.getRemovedColumns().size());
+        logger.info("[OK] Migration is NOT backward compatible - existing applications may break");
     }
 
     private SchemaComparisonResult extractComparisonResult(RuleResult result) {

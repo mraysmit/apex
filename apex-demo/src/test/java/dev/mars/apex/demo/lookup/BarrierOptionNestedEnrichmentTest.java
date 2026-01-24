@@ -119,7 +119,7 @@ public class BarrierOptionNestedEnrichmentTest {
             logger.info("Enriched data keys: {}", enrichedData.keySet());
             logger.info("Enriched data: {}", enrichedData);
 
-            logger.info("✓ Level 2 nested field navigation enrichment passed");
+            logger.info("[OK] Level 2 nested field navigation enrichment passed");
 
         } catch (YamlConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
@@ -169,7 +169,7 @@ public class BarrierOptionNestedEnrichmentTest {
             logger.info("Enriched data keys: {}", enrichedData.keySet());
             logger.info("Enriched data: {}", enrichedData);
 
-            logger.info("✓ Cross-nested business calculation enrichment passed");
+            logger.info("[OK] Cross-nested business calculation enrichment passed");
 
         } catch (YamlConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
@@ -219,7 +219,7 @@ public class BarrierOptionNestedEnrichmentTest {
             logger.info("Enriched data keys: {}", enrichedData.keySet());
             logger.info("Enriched data: {}", enrichedData);
 
-            logger.info("✓ Level 3 nested conditional processing enrichment passed");
+            logger.info("[OK] Level 3 nested conditional processing enrichment passed");
 
         } catch (YamlConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
@@ -269,7 +269,7 @@ public class BarrierOptionNestedEnrichmentTest {
             logger.info("Enriched data keys: {}", enrichedData.keySet());
             logger.info("Enriched data: {}", enrichedData);
 
-            logger.info("✓ Nested date calculation with SpEL enrichment passed");
+            logger.info("[OK] Nested date calculation with SpEL enrichment passed");
 
         } catch (YamlConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
@@ -318,7 +318,7 @@ public class BarrierOptionNestedEnrichmentTest {
             assertTrue(enrichments.get(3).getCondition().contains("startDate"), "Fourth enrichment should check startDate");
             assertEquals("calculation-enrichment", enrichments.get(3).getType(), "Fourth enrichment should be calculation type");
 
-            logger.info("✓ All 4 APEX nested enrichments configured successfully:");
+            logger.info("[OK] All 4 APEX nested enrichments configured successfully:");
             logger.info("  - Level 2 Navigation: {} type", enrichments.get(0).getType());
             logger.info("  - Cross-Nested Calculation: {} type", enrichments.get(1).getType());
             logger.info("  - Level 3 Conditional: {} type", enrichments.get(2).getType());

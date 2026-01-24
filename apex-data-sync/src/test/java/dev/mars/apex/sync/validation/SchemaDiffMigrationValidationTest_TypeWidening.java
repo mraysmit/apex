@@ -104,8 +104,8 @@ class SchemaDiffMigrationValidationTest_TypeWidening {
         assertTrue(reportContent.contains("name") || reportContent.contains("NAME"), 
             "Report should mention name column");
         
-        logger.info("✓ Compatible type widening validated");
-        logger.info("✓ VARCHAR widening and DATE→TIMESTAMP are safe migrations");
+        logger.info("[OK] Compatible type widening validated");
+        logger.info("[OK] VARCHAR widening and DATE→TIMESTAMP are safe migrations");
     }
 
     private SchemaComparisonResult extractComparisonResult(RuleResult result) {

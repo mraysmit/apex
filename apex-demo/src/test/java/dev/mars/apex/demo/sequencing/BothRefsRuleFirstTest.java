@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Rules execute BEFORE enrichments (unusual but valid)
  * - ONLY refs (no inline items) - proves placeholder expansion works with refs-only
  */
-@DisplayName("CRITICAL: Both Refs - Rule-Refs First")
+@DisplayName(Both Refs - Rule-Refs First")
 class BothRefsRuleFirstTest extends DemoTestBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BothRefsRuleFirstTest.class);

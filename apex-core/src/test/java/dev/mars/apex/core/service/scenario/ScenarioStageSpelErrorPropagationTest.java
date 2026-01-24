@@ -50,7 +50,7 @@ class ScenarioStageSpelErrorPropagationTest {
 
         // 1. Load scenario that will cause "currency" property not found error
         String registryPath = "src/test/java/dev/mars/apex/core/service/scenario/ScenarioStageSpelErrorPropagationTest-registry.yaml";
-        logger.info("✓ STEP 1: Loading scenario configuration from: {}", registryPath);
+        logger.info("[OK] STEP 1: Loading scenario configuration from: {}", registryPath);
         scenarioService.loadScenarios(registryPath);
         logger.info("  - Scenario registry loaded successfully");
 
@@ -62,12 +62,12 @@ class ScenarioStageSpelErrorPropagationTest {
         testDataWithoutCurrency.put("tradeId", "TRADE-001");
         // Intentionally missing "currency" field
 
-        logger.info("✓ STEP 2: Created test data WITHOUT currency field (will trigger SpEL error)");
+        logger.info("[OK] STEP 2: Created test data WITHOUT currency field (will trigger SpEL error)");
         logger.info("  - Test data: {}", testDataWithoutCurrency);
         logger.info("  - Missing field: currency (will cause 'Property or field cannot be found' error)");
 
         // 3. Execute scenario - should fail with SpEL error
-        logger.info("✓ STEP 3: Executing scenario to trigger SpEL currency error");
+        logger.info("[OK] STEP 3: Executing scenario to trigger SpEL currency error");
         long startTime = System.currentTimeMillis();
         ScenarioExecutionResult result = scenarioService.processDataWithStages(testDataWithoutCurrency, "spel-error-test");
         long executionTime = System.currentTimeMillis() - startTime;

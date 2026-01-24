@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Rule-refs expands BEFORE inline rules
  * - All enrichments execute BEFORE all rules
  */
-@DisplayName("CRITICAL: Both Refs - Enrichment-Refs First")
+@DisplayName(Both Refs - Enrichment-Refs First")
 class BothRefsEnrichmentFirstTest extends DemoTestBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BothRefsEnrichmentFirstTest.class);

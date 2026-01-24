@@ -69,12 +69,12 @@ class JsonReportPipelineIntegrationTest {
 
         // Verify pipeline success
         assertTrue(result.isSuccess(), "Pipeline should execute successfully: " + result.getMessage());
-        logger.info("✓ Pipeline executed successfully");
+        logger.info("[OK] Pipeline executed successfully");
 
         // Verify JSON file was created
         Path jsonPath = Paths.get("apex-data-sync/reports/schema-diff-json-test.json");
         assertTrue(Files.exists(jsonPath), "JSON report file should exist");
-        logger.info("✓ JSON report file created: {}", jsonPath.toAbsolutePath());
+        logger.info("[OK] JSON report file created: {}", jsonPath.toAbsolutePath());
 
         // Verify JSON content is valid
         SchemaDiffJsonSerializer serializer = new SchemaDiffJsonSerializer();
@@ -87,7 +87,7 @@ class JsonReportPipelineIntegrationTest {
         assertNotNull(report.getSummary(), "Report should have summary");
         assertNotNull(report.getColumns(), "Report should have columns");
         
-        logger.info("✓ JSON report structure validated");
+        logger.info("[OK] JSON report structure validated");
         logger.info("  → Source: {} ({})", report.getSource().getName(), report.getSource().getType());
         logger.info("  → Target: {} ({})", report.getTarget().getName(), report.getTarget().getType());
         logger.info("  → Stats: {} matching, {} added",
@@ -109,18 +109,18 @@ class JsonReportPipelineIntegrationTest {
 
         // Verify pipeline success
         assertTrue(result.isSuccess(), "Pipeline should execute successfully");
-        logger.info("✓ Pipeline executed successfully");
+        logger.info("[OK] Pipeline executed successfully");
 
         // Verify JSON report
         Path jsonPath = Paths.get("apex-data-sync/reports/schema-diff-dual-test.json");
         assertTrue(Files.exists(jsonPath), "JSON report should exist");
-        logger.info("✓ JSON report created: {} ({} bytes)", 
+        logger.info("[OK] JSON report created: {} ({} bytes)", 
             jsonPath.toAbsolutePath(), Files.size(jsonPath));
 
         // Verify HTML report
         Path htmlPath = Paths.get("apex-data-sync/reports/schema-diff-dual-test.html");
         assertTrue(Files.exists(htmlPath), "HTML report should exist");
-        logger.info("✓ HTML report created: {} ({} bytes)", 
+        logger.info("[OK] HTML report created: {} ({} bytes)", 
             htmlPath.toAbsolutePath(), Files.size(htmlPath));
 
         // Validate JSON content
@@ -129,7 +129,7 @@ class JsonReportPipelineIntegrationTest {
         
         assertNotNull(report.getMetadata().getReportVersion(), "Should have report version");
         assertNotNull(report.getMetadata().getApexVersion(), "Should have APEX version");
-        logger.info("✓ JSON report version: {}, APEX version: {}", 
+        logger.info("[OK] JSON report version: {}, APEX version: {}", 
             report.getMetadata().getReportVersion(), report.getMetadata().getApexVersion());
 
         // Validate HTML content (generated from JSON model using Handlebars template)
@@ -137,7 +137,7 @@ class JsonReportPipelineIntegrationTest {
         assertTrue(htmlContent.contains("Schema Diff Report"), "HTML should contain schema diff title");
         assertTrue(htmlContent.contains("Matching"), "HTML should contain stats");
         assertTrue(htmlContent.contains("APEX Version"), "HTML should contain APEX version from JSON model");
-        logger.info("✓ HTML report contains expected content (generated from JSON model)");
+        logger.info("[OK] HTML report contains expected content (generated from JSON model)");
     }
 
     @Test
@@ -153,7 +153,7 @@ class JsonReportPipelineIntegrationTest {
         RuleResult result = rulesEngine.evaluate(new HashMap<>());
 
         assertTrue(result.isSuccess(), "Pipeline should execute successfully");
-        logger.info("✓ Pipeline executed successfully");
+        logger.info("[OK] Pipeline executed successfully");
 
         // Load generated JSON report
         Path jsonPath = Paths.get("apex-data-sync/reports/schema-diff-changes-test.json");
@@ -178,7 +178,7 @@ class JsonReportPipelineIntegrationTest {
         assertNotEquals(sourceColumns, targetColumns, "Source and target should have different column counts");
         
         logger.info("  → Source columns: {}, Target columns: {}", sourceColumns, targetColumns);
-        logger.info("✓ JSON report correctly reflects schema differences");
+        logger.info("[OK] JSON report correctly reflects schema differences");
 
         // Verify column details are present
         if (report.getColumns().getAdded() != null && !report.getColumns().getAdded().isEmpty()) {

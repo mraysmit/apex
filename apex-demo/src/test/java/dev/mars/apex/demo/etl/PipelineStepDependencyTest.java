@@ -91,7 +91,7 @@ public class PipelineStepDependencyTest extends DemoTestBase {
         assertEquals(RuleResult.ResultType.MATCH, result.getResultType(),
             "Pipeline should execute successfully");
 
-        logger.info("✓ Steps executed in correct dependency order");
+        logger.info("[OK] Steps executed in correct dependency order");
     }
 
     @Test
@@ -108,10 +108,10 @@ public class PipelineStepDependencyTest extends DemoTestBase {
             java.util.Map<String, Object> inputData = new java.util.HashMap<>();
             RuleResult result = rulesEngine.evaluate(inputData);
 
-            logger.info("✓ Dependency failure test completed");
+            logger.info("[OK] Dependency failure test completed");
             logger.info("  - Result type: {}", result.getResultType());
         } catch (Exception e) {
-            logger.info("✓ Dependency failure test completed with exception");
+            logger.info("[OK] Dependency failure test completed with exception");
             logger.info("  - Exception: {}", e.getMessage());
         }
     }
@@ -160,13 +160,13 @@ public class PipelineStepDependencyTest extends DemoTestBase {
             RuleResult result = rulesEngine.evaluate(inputData);
 
             logger.info("==========================================================================");
-            logger.info("✓ Circular dependency test completed");
-            logger.info("✓ Result type: {}", result.getResultType());
+            logger.info("[OK] Circular dependency test completed");
+            logger.info("[OK] Result type: {}", result.getResultType());
             logger.info("==========================================================================");
         } catch (Exception e) {
             logger.info("==========================================================================");
-            logger.info("✓ Circular dependency test completed with exception");
-            logger.info("✓ Exception: {}", e.getMessage());
+            logger.info("[OK] Circular dependency test completed with exception");
+            logger.info("[OK] Exception: {}", e.getMessage());
             logger.info("==========================================================================");
         }
     }

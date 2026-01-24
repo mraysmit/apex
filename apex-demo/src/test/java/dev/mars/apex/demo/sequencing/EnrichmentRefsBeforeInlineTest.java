@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - All enrichments execute BEFORE rules
  * - Processing order matches document order
  */
-@DisplayName("CRITICAL: Enrichment-Refs BEFORE Inline Enrichments")
+@DisplayName(Enrichment-Refs BEFORE Inline Enrichments")
 class EnrichmentRefsBeforeInlineTest extends DemoTestBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnrichmentRefsBeforeInlineTest.class);
