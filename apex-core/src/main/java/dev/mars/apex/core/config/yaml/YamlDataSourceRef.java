@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *     enabled: true
  * </pre>
  * 
- * @author APEX Core Team
+ * @author Mark A Ray-Smith Cityline Ltd
  * @since 2025-08-28
  * @version 1.0.0
  */

@@ -105,7 +105,7 @@ public class RulesEngineLogger {
      */
     public void ruleEvaluationIssue(String ruleName, Throwable error) {
         if (logger.isInfoEnabled()) {
-            logger.info(RULE_EVALUATION, "[CLEAN-TEST-OUTPUT] Rule evaluation issue for '{}': {}", 
+            logger.info(RULE_EVALUATION, "Rule evaluation issue for '{}': {}", 
                        ruleName, error.getMessage());
             logger.debug("Full exception details for rule '{}':", ruleName, error);
         }
@@ -119,7 +119,7 @@ public class RulesEngineLogger {
      */
     public void ruleEvaluationError(String ruleName, Throwable error) {
         if (logger.isInfoEnabled()) {
-            logger.info(RULE_EVALUATION, "[CLEAN-TEST-OUTPUT] Rule evaluation issue for '{}': {}", 
+            logger.info(RULE_EVALUATION, "Rule evaluation issue for '{}': {}", 
                        ruleName, error.getMessage());
             logger.debug("Full exception details for rule '{}':", ruleName, error);
         }

@@ -14,7 +14,7 @@ metadata:
   id: "simple-extract-pipeline-test"
   name: "Simple Extract Pipeline Test"
   version: "1.0"
-  author: "APEX Core Team"
+  author: "Mark A Ray-Smith Cityline Ltd"
   description: "Test pipeline for capturing step data from simple extract operation"
 
 # Data source with H2 in-memory database

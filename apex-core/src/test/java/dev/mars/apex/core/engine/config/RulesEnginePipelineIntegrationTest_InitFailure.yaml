@@ -19,7 +19,7 @@ metadata:
   name: "RulesEngine Pipeline Integration - Init Failure"
   type: "pipeline-config"
   version: "1.0"
-  author: "APEX Core Team"
+  author: "Mark A Ray-Smith Cityline Ltd"
   tags: ["test", "pipeline", "error-handling", "initialization"]
 
 # Data source with invalid/unreachable database configuration

@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
  * 2. Environment variables (System.getenv())
  * 3. Default value (if specified)
  * 
- * @author APEX Core Team
+ * @author Mark A Ray-Smith Cityline Ltd
  * @since 2025-01-19
  * @version 1.0.0
  */

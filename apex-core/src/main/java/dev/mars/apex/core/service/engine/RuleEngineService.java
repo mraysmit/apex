@@ -92,7 +92,7 @@ public class RuleEngineService {
                     String severity = rule.getSeverity() != null ? rule.getSeverity() : SeverityConstants.ERROR;
                     ruleResult = RuleResult.error(rule.getName(), baseResult.getMessage(), severity);
                     // Log error for test verification
-                    logger.info("[CLEAN-TEST-OUTPUT] Rule evaluation issue for '{}': {}", rule.getName(), baseResult.getMessage());
+                    logger.info("Rule evaluation issue for '{}': {}", rule.getName(), baseResult.getMessage());
                 } else {
                     ruleResult = RuleResult.noMatch();
                 }

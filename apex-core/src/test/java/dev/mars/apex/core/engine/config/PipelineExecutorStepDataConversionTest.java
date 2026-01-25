@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *   <li>Step ordering preservation</li>
  * </ul>
  * 
- * @author APEX Core Team
+ * @author Mark A Ray-Smith Cityline Ltd
  * @since 2026-01-11
  * @version 1.0.0
  */
@@ -52,6 +52,8 @@ public class PipelineExecutorStepDataConversionTest {
 
     @BeforeAll
     public static void classSetUp() {
+        logger.info("[TEST-EXPECTED-ERROR] PipelineExecutorStepDataConversionTest - intentionally uses empty databases");
+        logger.info("[TEST-EXPECTED-ERROR] Expected errors: table not found, no data, load failures, pipeline execution failed");
         logger.info("========================================================================");
         logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-START] PipelineExecutorStepDataConversionTest");
         logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-START] This test class uses empty databases");

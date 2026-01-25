@@ -22,7 +22,7 @@ metadata:
   description: "Validates basic pipeline execution through RulesEngine.evaluate() with inline data source"
   type: "pipeline-config"
   version: "1.0"
-  author: "APEX Core Team"
+  author: "Mark A Ray-Smith Cityline Ltd"
   tags: ["test", "pipeline", "integration", "unit-test"]
 
 # Inline data source - simplest possible configuration

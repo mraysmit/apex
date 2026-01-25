@@ -33,6 +33,7 @@ enrichments:
         type: "database"
         data-source-ref: "test-h2-database"
         query: "SELECT customer_name, credit_rating, country FROM customers WHERE customer_id = :customerId"
+        key-field: "customerId"
         parameters:
           - field: "customerId"
             type: "string"

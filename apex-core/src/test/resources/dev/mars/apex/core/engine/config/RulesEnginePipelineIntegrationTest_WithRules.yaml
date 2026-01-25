@@ -20,7 +20,7 @@ metadata:
   description: "Tests pipeline execution with rule validation"
   type: "rule-config"
   version: "1.0"
-  author: "APEX Core Team"
+  author: "Mark A Ray-Smith Cityline Ltd"
   tags: ["test", "pipeline", "rules", "document-order"]
 
 # Inline data source for pipeline

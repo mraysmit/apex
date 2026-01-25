@@ -52,6 +52,7 @@ enrichments:
       lookup-dataset:
         type: "database"
         data-source-ref: "trading-schema-db"
+        key-field: "key"
         query: |
           SELECT product_name, schema_name
           FROM products
@@ -70,6 +71,7 @@ enrichments:
       lookup-dataset:
         type: "database"
         data-source-ref: "sales-schema-db"
+        key-field: "key"
         query: |
           SELECT product_name, schema_name
           FROM products
@@ -88,6 +90,7 @@ enrichments:
       lookup-dataset:
         type: "database"
         data-source-ref: "inventory-schema-db"
+        key-field: "key"
         query: |
           SELECT product_name, schema_name
           FROM products

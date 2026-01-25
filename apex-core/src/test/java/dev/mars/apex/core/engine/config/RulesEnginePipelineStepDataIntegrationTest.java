@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Serialization preservation
  * - Execution path access patterns
  * 
- * @author APEX Core Team
+ * @author Mark A Ray-Smith Cityline Ltd
  * @since 2026-01-11
  * @version 1.0.0
  */

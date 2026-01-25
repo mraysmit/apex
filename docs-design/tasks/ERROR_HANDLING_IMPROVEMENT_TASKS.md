@@ -172,7 +172,7 @@ TestErrorContext.withExpectedError("testing invalid rule configuration", () -> {
 |---|-------|------|-------|-------|--------|
 | 1 | ScenarioStageExecutor | 95 | 63 | 158 | ✅ DONE |
 | 2 | ScenarioRegistryLoader | 5 | 57 | 62 | ✅ DONE |
-| 3 | DatasetSignature | 47 | 0 | 47 | ❌ TODO (need to fix test configs or mark tests) |
+| 3 | DatasetSignature | 47 | 0 | 47 | ✅ DONE (fixed YAML configs to add key-field) |
 | 4 | PipelineExecutor | 0 | 39 | 39 | ✅ DONE |
 | 5 | PipelineExecutionManager | 31 | 7 | 38 | ⚠️ PARTIAL (ErrorHandlingTests done) |
 | 6 | DatabaseDataSource | 0 | 27 | 27 | ❌ TODO |

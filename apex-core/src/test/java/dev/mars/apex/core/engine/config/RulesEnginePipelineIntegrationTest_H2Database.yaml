@@ -21,7 +21,7 @@ metadata:
   name: "RulesEngine Pipeline Integration - H2 Database"
   type: "pipeline-config"
   version: "1.0"
-  author: "APEX Core Team"
+  author: "Mark A Ray-Smith Cityline Ltd"
   tags: ["test", "pipeline", "integration", "h2", "database"]
 
 # H2 database source

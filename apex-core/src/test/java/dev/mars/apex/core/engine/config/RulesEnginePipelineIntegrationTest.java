@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * 
  * TOTAL: 22 comprehensive unit tests
  * 
- * @author APEX Core Team
+ * @author Mark A Ray-Smith Cityline Ltd
  * @since 2025-11-02
  * @version 1.0.0
  */

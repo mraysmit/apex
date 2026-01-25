@@ -4,7 +4,7 @@ metadata:
   version: 1.0.0
   description: Main config that references level 1 which references level 2 (nested refs)
   type: external-data-config
-  author: APEX Core Team
+  author: Mark A Ray-Smith Cityline Ltd
   created: '2025-11-10'
   tags:
     - test

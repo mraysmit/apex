@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *     description: "Customer data enrichment rules"
  * </pre>
  * 
- * @author APEX Core Team
+ * @author Mark A Ray-Smith Cityline Ltd
  * @since 2025-10-27
  * @version 1.0.0
  */

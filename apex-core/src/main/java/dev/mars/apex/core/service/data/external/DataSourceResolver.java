@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * - Resolve file-based and classpath-based references
  * - Support for environment-specific configurations
  * 
- * @author APEX Core Team
+ * @author Mark A Ray-Smith Cityline Ltd
  * @since 2025-08-28
  * @version 1.0.0
  */

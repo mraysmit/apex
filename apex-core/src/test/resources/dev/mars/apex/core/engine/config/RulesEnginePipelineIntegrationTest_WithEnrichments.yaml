@@ -20,7 +20,7 @@ metadata:
   description: "Tests pipeline execution with enrichment processing"
   type: "rule-config"
   version: "1.0"
-  author: "APEX Core Team"
+  author: "Mark A Ray-Smith Cityline Ltd"
   tags: ["test", "pipeline", "enrichments", "document-order"]
 
 # Inline data source for pipeline

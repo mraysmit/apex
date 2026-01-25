@@ -14,7 +14,7 @@ metadata:
   id: "file-extract-pipeline-test"
   name: "File Extract Pipeline Test"
   version: "1.0"
-  author: "APEX Core Team"
+  author: "Mark A Ray-Smith Cityline Ltd"
   description: "Test pipeline for file extraction with step data capture"
   id: "file-extract-pipeline-test"
   name: "File Extract Pipeline Test"

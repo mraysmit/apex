@@ -365,7 +365,7 @@ public class UnifiedRuleEvaluator {
         
         // Log the enhanced error message
         if (logger.isInfoEnabled()) {
-            logger.info("[CLEAN-TEST-OUTPUT] Rule evaluation issue for '{}': {}", 
+            logger.info("Rule evaluation issue for '{}': {}", 
                 rule.getName(), errorMessage);
         }
 

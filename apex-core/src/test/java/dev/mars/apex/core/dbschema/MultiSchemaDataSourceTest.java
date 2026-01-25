@@ -281,6 +281,7 @@ class MultiSchemaDataSourceTest {
                   lookup-dataset:
                     type: "database"
                     data-source-ref: "public-db"
+                    key-field: "key"
                     query: "SELECT schema_name FROM products WHERE product_id = :key"
                 field-mappings:
                   - source-field: "schema_name"

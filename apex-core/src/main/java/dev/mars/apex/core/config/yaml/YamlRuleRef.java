@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *     description: "Customer validation rules"
  * </pre>
  * 
- * @author APEX Core Team
+ * @author Mark A Ray-Smith Cityline Ltd
  * @since 2025-09-13
  * @version 1.0.0
  */

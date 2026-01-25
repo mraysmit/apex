@@ -31,6 +31,7 @@ enrichments:
       lookup-dataset:
         type: "database"
         data-source-ref: "trading-database"
+        key-field: "key"
         query: |
           SELECT 
             product_name,

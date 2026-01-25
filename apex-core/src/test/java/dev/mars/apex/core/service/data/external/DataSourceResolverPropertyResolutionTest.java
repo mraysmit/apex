@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * are correctly resolved when loading external data-source configurations
  * via loadFromFileSystem or loadFromClasspath methods.
  * 
- * @author APEX Core Team
+ * @author Mark A Ray-Smith Cityline Ltd
  * @since 2025-01-19
  */
 @DisplayName("DataSourceResolver Property Resolution Tests")

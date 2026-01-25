@@ -22,7 +22,7 @@ metadata:
   description: "Tests pipeline execution with H2 embedded database"
   type: "pipeline-config"
   version: "1.0"
-  author: "APEX Core Team"
+  author: "Mark A Ray-Smith Cityline Ltd"
   tags: ["test", "pipeline", "integration", "h2", "database"]
 
 # H2 database source
