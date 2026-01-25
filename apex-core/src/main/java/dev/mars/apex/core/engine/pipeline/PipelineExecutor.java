@@ -20,7 +20,6 @@ import dev.mars.apex.core.service.schema.diff.json.model.SchemaDiffReport;
 import dev.mars.apex.core.service.schema.diff.json.generators.JsonBasedHtmlReportGenerator;
 import dev.mars.apex.core.service.data.external.database.DatabaseDataSource;
 import dev.mars.apex.core.config.datasource.ConnectionConfig;
-import dev.mars.apex.core.util.TestAwareLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.Expression;
@@ -112,8 +111,8 @@ public class PipelineExecutor {
             result.setError(e.getMessage());
             result.setDurationMs(System.currentTimeMillis() - startTime);
 
-            // Use TestAwareLogger to avoid stack trace dumps in test environments
-            TestAwareLogger.error(LOGGER, "Pipeline '{}' failed after {}ms: {}",
+            // Log error without stack trace, with debug for full details
+            LOGGER.error("Pipeline '{}' failed after {}ms: {}",
                 pipeline.getName(), result.getDurationMs(), e.getMessage());
             LOGGER.debug("Full exception details for pipeline '{}':", pipeline.getName(), e);
 
@@ -285,11 +284,11 @@ public class PipelineExecutor {
 
         // Validate retry parameters
         if (maxRetries < 0) {
-            LOGGER.warn("Invalid max-retries value: {}. Using 0 (no retries)", maxRetries);
+            LOGGER.error("Invalid max-retries value: {} in pipeline configuration - must be >= 0. Using 0 (no retries)", maxRetries);
             maxRetries = 0;
         }
         if (retryDelayMs < 0) {
-            LOGGER.warn("Invalid retry-delay-ms value: {}. Using 0 (no delay)", retryDelayMs);
+            LOGGER.error("Invalid retry-delay-ms value: {} in pipeline configuration - must be >= 0. Using 0 (no delay)", retryDelayMs);
             retryDelayMs = 0;
         }
 
@@ -391,11 +390,11 @@ public class PipelineExecutor {
                             LOGGER.info("[Pipeline.Execute] Schema metadata stored: {} columns from {}", 
                                        schema.getColumns().size(), schema.getSourceName());
                         } else {
-                            LOGGER.warn("[Pipeline.Execute] Read-schema step returned unexpected type: {}", 
+                            LOGGER.error("[Pipeline.Execute] Read-schema step returned unexpected type: {} - expected SchemaMetadata or List<SchemaMetadata>", 
                                        stepData.getClass().getName());
                         }
                     } else {
-                        LOGGER.warn("[Pipeline.Execute] Read-schema step returned null data");
+                        LOGGER.error("[Pipeline.Execute] Read-schema step returned null data - source may be unreachable or misconfigured");
                     }
                     // Set metrics for read-schema step
                     stepResult.setRecordsProcessed(1);
@@ -445,7 +444,7 @@ public class PipelineExecutor {
                         throw new DataPipelineException("Required step failed: " + step.getName(), e);
                     }
                 } else {
-                    LOGGER.warn("Step '{}' failed (attempt {}/{}): {}",
+                    LOGGER.error("Step '{}' failed (attempt {}/{}) - will retry: {}",
                         step.getName(), attempt, maxRetries + 1, e.getMessage());
                 }
             }
@@ -508,13 +507,13 @@ public class PipelineExecutor {
      */
     private Object executeTransformStep(PipelineStep step, Object data) throws DataPipelineException {
         if (data == null) {
-            LOGGER.warn("No data available for transform step: {}", step.getName());
+            LOGGER.error("No data available for transform step: {} - upstream extract may have failed", step.getName());
             return null;
         }
 
         List<Map<String, Object>> transformations = step.getTransformations();
         if (transformations == null || transformations.isEmpty()) {
-            LOGGER.warn("No transformations configured for transform step: {}", step.getName());
+            LOGGER.error("No transformations configured for transform step: {} - check pipeline configuration", step.getName());
             return data;
         }
 
@@ -555,7 +554,7 @@ public class PipelineExecutor {
     @SuppressWarnings("unchecked")
     private Object applyTransformations(Object record, List<Map<String, Object>> transformations, String stepName) {
         if (!(record instanceof Map)) {
-            LOGGER.warn("Transform step '{}' can only transform Map records, skipping non-Map record", stepName);
+            LOGGER.error("Transform step '{}' can only transform Map records, skipping non-Map record of type: {}", stepName, record.getClass().getName());
             return record;
         }
 
@@ -567,11 +566,11 @@ public class PipelineExecutor {
             } catch (Exception e) {
                 String errorHandling = (String) transformation.get("error-handling");
                 if ("skip-record".equals(errorHandling)) {
-                    LOGGER.warn("Transformation '{}' failed, skipping record: {}",
+                    LOGGER.error("Transformation '{}' failed, skipping record: {}",
                         transformation.get("name"), e.getMessage());
                     return null; // Skip this record
                 } else {
-                    LOGGER.warn("Transformation '{}' failed, continuing: {}",
+                    LOGGER.error("Transformation '{}' failed, continuing with next transformation: {}",
                         transformation.get("name"), e.getMessage());
                     // Continue with other transformations
                 }
@@ -589,7 +588,7 @@ public class PipelineExecutor {
         String field = (String) transformation.get("field");
 
         if (type == null || field == null) {
-            LOGGER.warn("Transformation missing required 'type' or 'field' property");
+            LOGGER.error("Transformation missing required 'type' or 'field' property - check pipeline configuration");
             return;
         }
 
@@ -608,10 +607,10 @@ public class PipelineExecutor {
                 break;
             case "aggregation":
                 // Aggregation requires multiple records, handled separately
-                LOGGER.warn("Aggregation transformations not yet supported in pipeline transforms");
+                LOGGER.error("Aggregation transformations not yet supported in pipeline transforms - remove from configuration or use supported type");
                 break;
             default:
-                LOGGER.warn("Unknown transformation type: {}", type);
+                LOGGER.error("Unknown transformation type: '{}' - check pipeline configuration for valid types", type);
         }
     }
 
@@ -633,7 +632,7 @@ public class PipelineExecutor {
     private void applyCalculation(Map<String, Object> record, String field, Map<String, Object> transformation) {
         String expression = (String) transformation.get("expression");
         if (expression == null) {
-            LOGGER.warn("Calculation transformation missing 'expression' property");
+            LOGGER.error("Calculation transformation missing 'expression' property - check pipeline configuration");
             return;
         }
 
@@ -658,7 +657,7 @@ public class PipelineExecutor {
 
             LOGGER.debug("Calculated field '{}' = {} using expression: {}", field, result, expression);
         } catch (Exception e) {
-            LOGGER.warn("Failed to evaluate calculation expression '{}' for field '{}': {}",
+            LOGGER.error("Failed to evaluate calculation expression '{}' for field '{}': {}",
                 expression, field, e.getMessage());
         }
     }
@@ -669,7 +668,7 @@ public class PipelineExecutor {
     private void applyValidation(Map<String, Object> record, String field, Map<String, Object> transformation) {
         String rule = (String) transformation.get("rule");
         if (rule == null) {
-            LOGGER.warn("Validation transformation missing 'rule' property");
+            LOGGER.error("Validation transformation missing 'rule' property - check pipeline configuration");
             return;
         }
 
@@ -685,11 +684,11 @@ public class PipelineExecutor {
             case "status-format":
                 // Example validation - could be extended
                 if (value != null && !value.toString().matches("[A-Z]+")) {
-                    LOGGER.warn("Field '{}' does not match status format", field);
+                    LOGGER.error("Field '{}' value '{}' does not match required status format [A-Z]+", field, value);
                 }
                 break;
             default:
-                LOGGER.warn("Unknown validation rule: {}", rule);
+                LOGGER.error("Unknown validation rule: '{}' - check pipeline configuration for valid rules", rule);
         }
     }
 
@@ -735,7 +734,7 @@ public class PipelineExecutor {
                     } catch (DataSinkException e) {
                         if (e.getErrorType() == DataSinkException.ErrorType.DATA_INTEGRITY_ERROR) {
                             // Log and skip data integrity violations
-                            LOGGER.warn("Skipping record due to data integrity violation: {} - Record: {}",
+                            LOGGER.error("Skipping record due to data integrity violation: {} - Record: {}",
                                        e.getMessage(), record);
                             skippedCount++;
                         } else {
@@ -749,7 +748,7 @@ public class PipelineExecutor {
                            step.getName(), successCount, skippedCount);
 
                 if (successCount == 0 && skippedCount > 0) {
-                    LOGGER.warn("All {} records were skipped due to data integrity violations in step '{}'",
+                    LOGGER.error("All {} records were skipped due to data integrity violations in step '{}' - no data was loaded",
                                skippedCount, step.getName());
                 }
 
@@ -763,7 +762,7 @@ public class PipelineExecutor {
                 } catch (DataSinkException e) {
                     if (e.getErrorType() == DataSinkException.ErrorType.DATA_INTEGRITY_ERROR) {
                         // Log and continue for data integrity violations
-                        LOGGER.warn("Skipped single record due to data integrity violation: {} - Record: {}",
+                        LOGGER.error("Skipped single record due to data integrity violation: {} - Record: {}",
                                    e.getMessage(), data);
                         totalRecordsProcessed = 0;
                     } else {
@@ -789,7 +788,7 @@ public class PipelineExecutor {
         }
 
         if (data == null) {
-            LOGGER.warn("No data available for audit step: {}", step.getName());
+            LOGGER.error("No data available for audit step: {} - upstream extract/transform may have failed", step.getName());
             return;
         }
 
@@ -970,15 +969,15 @@ public class PipelineExecutor {
         // Check file extension to determine report format
         String lowerPath = reportPath.toLowerCase();
         if (lowerPath.endsWith(".json")) {
-            LOGGER.warn("[Pipeline.ReadSchema] JSON format not yet supported for read-schema reports. " +
+            LOGGER.error("[Pipeline.ReadSchema] JSON format not yet supported for read-schema reports. " +
                        "Please use .html extension. Skipping report generation for: {}", reportPath);
-            LOGGER.warn("[Pipeline.ReadSchema] Hint: Use 'report-output: \"schema-report.html\"' instead of .json");
+            LOGGER.error("[Pipeline.ReadSchema] Configuration fix: Use 'report-output: \"schema-report.html\"' instead of .json");
             return;
         }
         if (lowerPath.endsWith(".md") || lowerPath.endsWith(".markdown")) {
-            LOGGER.warn("[Pipeline.ReadSchema] Markdown format not yet supported for read-schema reports. " +
+            LOGGER.error("[Pipeline.ReadSchema] Markdown format not yet supported for read-schema reports. " +
                        "Please use .html extension. Skipping report generation for: {}", reportPath);
-            LOGGER.warn("[Pipeline.ReadSchema] Hint: Use 'report-output: \"schema-report.html\"' instead of .md");
+            LOGGER.error("[Pipeline.ReadSchema] Configuration fix: Use 'report-output: \"schema-report.html\"' instead of .md");
             return;
         }
         
@@ -1379,3 +1378,4 @@ public class PipelineExecutor {
         dataSinks.clear();
     }
 }
+

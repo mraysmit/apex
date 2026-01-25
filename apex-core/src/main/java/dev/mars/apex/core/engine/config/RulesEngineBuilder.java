@@ -18,7 +18,8 @@ package dev.mars.apex.core.engine.config;
 import dev.mars.apex.core.config.yaml.ScenarioRegistryLoader;
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
 import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
-import dev.mars.apex.core.util.RulesEngineLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -40,7 +41,7 @@ import java.util.*;
  * @since 3.0
  */
 public class RulesEngineBuilder {
-    private static final RulesEngineLogger builderLogger = new RulesEngineLogger(RulesEngineBuilder.class);
+    private static final Logger logger = LoggerFactory.getLogger(RulesEngineBuilder.class);
     
     private final List<String> filesystemPaths = new ArrayList<>();
     private final List<String> classpathPrefixes = new ArrayList<>();
@@ -60,7 +61,7 @@ public class RulesEngineBuilder {
      * Typically accessed via {@link RulesEngine#builder()}.
      */
     public RulesEngineBuilder() {
-        builderLogger.debug("Created new RulesEngineBuilder");
+        logger.debug("Created new RulesEngineBuilder");
     }
 
     /**
@@ -76,7 +77,7 @@ public class RulesEngineBuilder {
         if (path != null && !path.trim().isEmpty()) {
             String expanded = expandEnvironmentVariables(path.trim());
             filesystemPaths.add(expanded);
-            builderLogger.debug("Added filesystem search path: {}", expanded);
+            logger.debug("Added filesystem search path: {}", expanded);
         }
         return this;
     }
@@ -127,7 +128,7 @@ public class RulesEngineBuilder {
                 normalized = normalized + "/";
             }
             classpathPrefixes.add(normalized);
-            builderLogger.debug("Added classpath prefix: {}", normalized);
+            logger.debug("Added classpath prefix: {}", normalized);
         }
         return this;
     }
@@ -159,7 +160,7 @@ public class RulesEngineBuilder {
     public RulesEngineBuilder withContext(String name, Object value) {
         if (name != null && !name.trim().isEmpty()) {
             contextVariables.put(name.trim(), value);
-            builderLogger.debug("Added context variable: {} = {}", name, value);
+            logger.debug("Added context variable: {} = {}", name, value);
         }
         return this;
     }
@@ -173,7 +174,7 @@ public class RulesEngineBuilder {
     public RulesEngineBuilder withContext(Map<String, Object> context) {
         if (context != null) {
             contextVariables.putAll(context);
-            builderLogger.debug("Added {} context variables", context.size());
+            logger.debug("Added {} context variables", context.size());
         }
         return this;
     }
@@ -187,7 +188,7 @@ public class RulesEngineBuilder {
     public RulesEngineBuilder fromScenarioRegistry(String registryPath) {
         this.sourcePath = registryPath;
         this.sourceType = SourceType.SCENARIO_REGISTRY;
-        builderLogger.debug("Set source: scenario registry at {}", registryPath);
+        logger.debug("Set source: scenario registry at {}", registryPath);
         return this;
     }
 
@@ -200,7 +201,7 @@ public class RulesEngineBuilder {
     public RulesEngineBuilder fromFile(String filePath) {
         this.sourcePath = filePath;
         this.sourceType = SourceType.FILE;
-        builderLogger.debug("Set source: file at {}", filePath);
+        logger.debug("Set source: file at {}", filePath);
         return this;
     }
 
@@ -245,7 +246,7 @@ public class RulesEngineBuilder {
             );
         }
 
-        builderLogger.info("Building RulesEngine from {} at {}", sourceType, sourcePath);
+        logger.info("Building RulesEngine from {} at {}", sourceType, sourcePath);
 
         switch (sourceType) {
             case SCENARIO_REGISTRY:
@@ -261,7 +262,7 @@ public class RulesEngineBuilder {
      * Build RulesEngine from scenario registry with configured search paths.
      */
     private RulesEngine buildFromScenarioRegistry() throws YamlConfigurationException {
-        builderLogger.debug("Creating ScenarioRegistryLoader with {} filesystem paths, {} classpath prefixes",
+        logger.debug("Creating ScenarioRegistryLoader with {} filesystem paths, {} classpath prefixes",
                           filesystemPaths.size(), classpathPrefixes.size());
 
         ScenarioRegistryLoader loader = new ScenarioRegistryLoader();
@@ -277,11 +278,11 @@ public class RulesEngineBuilder {
             if (is != null) {
                 String classpathBase = deriveClasspathBase(sourcePath);
                 scenarios = loader.loadRegistry(is, classpathBase);
-                builderLogger.info("Loaded {} scenarios from classpath registry: {}", scenarios.size(), sourcePath);
+                logger.info("Loaded {} scenarios from classpath registry: {}", scenarios.size(), sourcePath);
             } else {
                 // Fallback to filesystem
                 scenarios = loader.loadRegistry(sourcePath);
-                builderLogger.info("Loaded {} scenarios from filesystem registry: {}", scenarios.size(), sourcePath);
+                logger.info("Loaded {} scenarios from filesystem registry: {}", scenarios.size(), sourcePath);
             }
         } catch (java.io.IOException e) {
             throw new YamlConfigurationException("Failed to load scenario registry: " + sourcePath, e);
@@ -309,7 +310,7 @@ public class RulesEngineBuilder {
      * Build RulesEngine from YAML file with configured search paths.
      */
     private RulesEngine buildFromFile() throws YamlConfigurationException {
-        builderLogger.debug("Loading YAML configuration from: {}", sourcePath);
+        logger.debug("Loading YAML configuration from: {}", sourcePath);
 
         // Resolve the file using search paths
         String resolvedPath = resolveFilePath(sourcePath);
@@ -333,7 +334,7 @@ public class RulesEngineBuilder {
         for (String searchPath : filesystemPaths) {
             String candidate = combinePath(searchPath, filePath);
             if (java.nio.file.Files.exists(java.nio.file.Paths.get(candidate))) {
-                builderLogger.debug("Resolved {} to {}", filePath, candidate);
+                logger.debug("Resolved {} to {}", filePath, candidate);
                 return candidate;
             }
         }
@@ -342,7 +343,7 @@ public class RulesEngineBuilder {
         for (String prefix : classpathPrefixes) {
             String candidate = combineClasspath(prefix, filePath);
             if (getClass().getClassLoader().getResource(candidate) != null) {
-                builderLogger.debug("Resolved {} to classpath:{}", filePath, candidate);
+                logger.debug("Resolved {} to classpath:{}", filePath, candidate);
                 return "classpath:" + candidate;
             }
         }

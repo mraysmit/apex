@@ -263,7 +263,8 @@ public class ClassificationCache {
             return new InMemoryCacheManager(dsConfig);
             
         } catch (Exception e) {
-            logger.error("Failed to create classification cache manager", e);
+            logger.error("Failed to create classification cache manager: {}", e.getMessage());
+            logger.debug("Stack trace for classification cache manager creation failure:", e);
             throw new RuntimeException("Failed to initialize classification cache", e);
         }
     }

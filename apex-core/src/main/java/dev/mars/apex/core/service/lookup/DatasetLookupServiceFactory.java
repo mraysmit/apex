@@ -378,6 +378,7 @@ public class DatasetLookupServiceFactory {
 
         } catch (Exception e) {
             logger.error("Failed to load YAML dataset from file: " + dataset.getFilePath() + ". Error: " + e.getMessage());
+            logger.debug("Full stack trace for YAML dataset load failure:", e);
 
             // Return dataset with empty data on error
             YamlEnrichment.LookupDataset errorDataset = new YamlEnrichment.LookupDataset();
@@ -442,6 +443,7 @@ public class DatasetLookupServiceFactory {
 
         } catch (Exception e) {
             logger.error("Failed to load CSV dataset from file: " + dataset.getFilePath() + ". Error: " + e.getMessage());
+            logger.debug("Full stack trace for CSV dataset load failure:", e);
 
             // Return dataset with empty data on error
             YamlEnrichment.LookupDataset errorDataset = new YamlEnrichment.LookupDataset();
@@ -528,6 +530,7 @@ public class DatasetLookupServiceFactory {
 
         } catch (Exception e) {
             logger.error("Failed to load file-system dataset from file: " + dataset.getFilePath() + ". Error: " + e.getMessage());
+            logger.debug("Full stack trace for file-system dataset load failure:", e);
 
             // Return dataset with empty data on error
             YamlEnrichment.LookupDataset errorDataset = new YamlEnrichment.LookupDataset();

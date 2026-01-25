@@ -175,6 +175,7 @@ public class DataSourceFactory {
 
         } catch (DataSourceException e) {
             LOGGER.error("Failed to create data source '{}': {}", name, e.getMessage());
+            LOGGER.debug("Full stack trace for data source creation failure:", e);
             throw e;
         } catch (Exception e) {
             LOGGER.error("Unexpected error creating data source '{}'", name, e);

@@ -19,7 +19,8 @@ package dev.mars.apex.core.engine.config.scenario;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
 import dev.mars.apex.core.service.scenario.ScenarioStage;
-import dev.mars.apex.core.util.RulesEngineLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +44,7 @@ import java.util.Map;
  */
 public class ScenarioParser {
     
-    private static final RulesEngineLogger logger = new RulesEngineLogger(ScenarioParser.class);
+    private static final Logger logger = LoggerFactory.getLogger(ScenarioParser.class);
     
     /**
      * Parse scenario configuration from YAML configuration object.

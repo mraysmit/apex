@@ -169,7 +169,8 @@ public class FileSystemDataSink implements DataSink {
             LOGGER.info("File system sink shutdown completed: {}", getName());
             
         } catch (Exception e) {
-            LOGGER.error("Error during file system sink shutdown", e);
+            LOGGER.error("Error during file system sink shutdown: {}", e.getMessage());
+            LOGGER.debug("Stack trace for file system sink shutdown error:", e);
         }
     }
     

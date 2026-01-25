@@ -16,7 +16,8 @@ package dev.mars.apex.core.config;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.util.RulesEngineLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -79,7 +80,7 @@ import java.util.Objects;
  */
 public class ResourceResolver {
 
-    private static final RulesEngineLogger logger = new RulesEngineLogger(ResourceResolver.class);
+    private static final Logger logger = LoggerFactory.getLogger(ResourceResolver.class);
 
     /**
      * Resolution strategy determining the order of resolution attempts.

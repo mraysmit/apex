@@ -60,7 +60,6 @@ import java.util.function.Supplier;
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2026-01-24
- * @see TestAwareLogger
  */
 public final class TestErrorContext {
     
@@ -242,6 +241,32 @@ public final class TestErrorContext {
      */
     public static void markExpectedError(String description) {
         LOGGER.info("{} Intentional error expected: {}", EXPECTED_ERROR_PREFIX, description);
+    }
+    
+    /**
+     * Execute an operation that is expected to produce error/warning logs from 
+     * production code (but not throw an exception to the caller).
+     * Wraps the operation with clear start/end markers.
+     * 
+     * @param description Description of the expected error scenario
+     * @param operation The operation to execute
+     */
+    public static void withExpectedErrors(String description, ThrowingRunnable operation) {
+        LOGGER.info("{} START - Executing code that triggers intentional errors: {}", 
+                   EXPECTED_ERROR_PREFIX, description);
+        
+        try {
+            operation.run();
+            LOGGER.info("{} END - Completed (errors above were expected): {}", 
+                       EXPECTED_ERROR_PREFIX, description);
+        } catch (Throwable e) {
+            LOGGER.info("{} END - Completed with exception (expected): {} - {}", 
+                       EXPECTED_ERROR_PREFIX, e.getClass().getSimpleName(), e.getMessage());
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+            throw new RuntimeException(e);
+        }
     }
     
     /**

@@ -131,12 +131,19 @@ public class SequentialProcessor {
         // Store createContext for use in process methods (especially processRuleChainItem)
         final var contextFactory = createContext;
 
+        // DEBUG: Log entry point details for DevOps investigation
+        logger.debug("evaluateSequential() entry - inputData keys: {}, inputData size: {}", 
+                    inputData.keySet(), inputData.size());
+        logger.debug("evaluateSequential() config details - sections: {}, hasPipeline: {}", 
+                    sectionOrder, yamlConfig.getPipeline() != null);
+
         try {
             // Check if item-level order is available
             List<ProcessingItem> itemOrder = yamlConfig.getItemOrder();
 
             if (itemOrder != null && !itemOrder.isEmpty()) {
                 // Item-level processing (APEX 2.1+)
+                logger.debug("Using item-level processing (APEX 2.1+) with {} items", itemOrder.size());
                 processItemOrder(
                     itemOrder, yamlConfig, enrichedData, failureMessages, 
                     individualRuleResults, executionPath, executeRule, createContext);
@@ -144,6 +151,7 @@ public class SequentialProcessor {
                 // Execute pipeline if present (since it's not an item in itemOrder)
                 if (yamlConfig.getPipeline() != null) {
                     logger.info("Processing pipeline (post-item-processing): {}", yamlConfig.getPipeline().getName());
+                    logger.debug("Pipeline execution starting with enrichedData keys: {}", enrichedData.keySet());
                     PipelineExecutionContext pipelineCtx = new PipelineExecutionContext(yamlConfig.getPipeline(), enrichedData);
                     RuleResult pipelineResult = executePipeline.apply(pipelineCtx);
 
@@ -154,10 +162,14 @@ public class SequentialProcessor {
                     if (pipelineResult.getResultType() == RuleResult.ResultType.ERROR) {
                         overallSuccess = false;
                         failureMessages.add("Pipeline execution error: " + pipelineResult.getMessage());
+                        logger.debug("Pipeline execution failed: {}", pipelineResult.getMessage());
+                    } else {
+                        logger.debug("Pipeline execution completed successfully");
                     }
                 }
             } else {
                 // Section-level processing (Legacy fallback)
+                logger.debug("Using section-level processing (Legacy) with {} sections", sectionOrder.size());
                 processSectionOrder(
                     sectionOrder, yamlConfig, enrichedData, failureMessages, 
                     individualRuleResults, executionPath, executeRule, executePipeline, contextFactory);
@@ -169,12 +181,15 @@ public class SequentialProcessor {
             // Return comprehensive result
             if (overallSuccess) {
                 logger.info("Sequential evaluation completed successfully with {} individual rule results", individualRuleResults.size());
+                logger.debug("Final enriched data keys (success): {}", enrichedData.keySet());
+                logger.debug("Execution path summary: {} steps executed", executionPath.size());
                 RuleResult result = RuleResult.evaluationSuccess(enrichedData, "evaluation", "Sequential evaluation completed successfully", individualRuleResults);
                 result.setExecutionPath(executionPath);
                 return result;
             } else {
                 logger.info("Sequential evaluation completed with {} failures", failureMessages.size());
                 logger.debug("Final enriched data keys (failure): {}", enrichedData.keySet());
+                logger.debug("Failure messages: {}", failureMessages);
                 RuleResult result = new RuleResult("evaluation", "Sequential evaluation completed with failures",
                                      false, RuleResult.ResultType.ERROR, enrichedData, failureMessages, false, individualRuleResults);
                 result.setExecutionPath(executionPath);
@@ -203,13 +218,20 @@ public class SequentialProcessor {
             Function<Map<String, Object>, org.springframework.expression.spel.support.StandardEvaluationContext> createContext) {
 
         logger.info("Processing {} items in document order", itemOrder.size());
+        logger.debug("Item order details: {}", itemOrder.stream()
+                    .map(i -> i.getItemId() + "(" + i.getSectionType() + ")")
+                    .toList());
 
         for (ProcessingItem item : itemOrder) {
             logger.debug("Processing item: {} ({})", item.getItemId(), item.getSectionType());
+            logger.debug("Current enrichedData keys before item '{}': {}", item.getItemId(), enrichedData.keySet());
 
             long start = System.currentTimeMillis();
             RuleResult itemResult = processItem(item, yamlConfig, enrichedData, executeRule, createContext);
             long duration = System.currentTimeMillis() - start;
+
+            logger.debug("Item '{}' completed in {}ms - success: {}, resultType: {}", 
+                        item.getItemId(), duration, itemResult.isSuccess(), itemResult.getResultType());
 
             executionPath.add(new ExecutionStep(
                 item.getItemId(), 
@@ -366,13 +388,18 @@ public class SequentialProcessor {
      * Process a single enrichment by ID.
      */
     private RuleResult processEnrichmentItem(String enrichmentId, YamlRuleConfiguration yamlConfig, Map<String, Object> data) {
+        logger.debug("processEnrichmentItem() - looking up enrichment id: '{}'", enrichmentId);
         YamlEnrichment enrichment = findEnrichmentById(yamlConfig, enrichmentId);
         if (enrichment == null) {
             logger.warn("Enrichment not found: {}", enrichmentId);
             return RuleResult.error("enrichment:" + enrichmentId, "Enrichment not found");
         }
 
-        return enrichmentProcessor.processEnrichmentWithResult(enrichment, data, yamlConfig);
+        logger.debug("processEnrichmentItem() - found enrichment '{}', type: {}", 
+                    enrichmentId, enrichment.getType() != null ? enrichment.getType() : "default");
+        RuleResult result = enrichmentProcessor.processEnrichmentWithResult(enrichment, data, yamlConfig);
+        logger.debug("processEnrichmentItem() - enrichment '{}' completed with success={}", enrichmentId, result.isSuccess());
+        return result;
     }
 
     /**
@@ -384,12 +411,14 @@ public class SequentialProcessor {
             Map<String, Object> data,
             Function<RuleExecutionContext, RuleResult> executeRule) {
 
+        logger.debug("processRuleItem() - looking up rule id: '{}'", ruleId);
         Rule rule = null;
         if (yamlConfig != null && yamlConfig.getRules() != null) {
             for (YamlRule yamlRule : yamlConfig.getRules()) {
                 if (ruleId.equals(yamlRule.getId())) {
                     YamlRuleFactory ruleFactory = new YamlRuleFactory();
                     rule = ruleFactory.createRuleWithMetadata(yamlRule);
+                    logger.debug("processRuleItem() - created rule '{}' from yamlConfig", ruleId);
                     break;
                 }
             }
@@ -397,6 +426,9 @@ public class SequentialProcessor {
 
         if (rule == null) {
             rule = configuration.getRuleById(ruleId);
+            if (rule != null) {
+                logger.debug("processRuleItem() - found rule '{}' in engine configuration", ruleId);
+            }
         }
 
         if (rule == null) {
@@ -404,8 +436,11 @@ public class SequentialProcessor {
             return RuleResult.error("rule:" + ruleId, "Rule not found");
         }
 
+        logger.debug("processRuleItem() - executing rule '{}' with condition: {}", ruleId, rule.getCondition());
         RuleExecutionContext ctx = new RuleExecutionContext(rule, data);
         RuleResult result = executeRule.apply(ctx);
+        logger.debug("processRuleItem() - rule '{}' completed - success={}, resultType={}", 
+                    ruleId, result.isSuccess(), result.getResultType());
 
         // Store individual rule result for conditional mapping
         if (enrichmentProcessor != null) {
@@ -421,6 +456,7 @@ public class SequentialProcessor {
      * Process a single enrichment group by ID.
      */
     private RuleResult processEnrichmentGroupItem(String groupId, YamlRuleConfiguration yamlConfig, Map<String, Object> data) {
+        logger.debug("processEnrichmentGroupItem() - looking up enrichment group id: '{}'", groupId);
         EnrichmentGroup group = null;
         if (yamlConfig != null && yamlConfig.getEnrichmentGroups() != null) {
             for (YamlEnrichmentGroup yamlGroup : yamlConfig.getEnrichmentGroups()) {
@@ -429,6 +465,8 @@ public class SequentialProcessor {
                     for (EnrichmentGroup g : groups) {
                         if (groupId.equals(g.getId())) {
                             group = g;
+                            logger.debug("processEnrichmentGroupItem() - found enrichment group '{}' with {} enrichments", 
+                                        groupId, g.getEnrichmentsInOrder().size());
                             break;
                         }
                     }
@@ -439,6 +477,9 @@ public class SequentialProcessor {
 
         if (group == null) {
             group = configuration.getEnrichmentGroupById(groupId);
+            if (group != null) {
+                logger.debug("processEnrichmentGroupItem() - found enrichment group '{}' in engine configuration", groupId);
+            }
         }
 
         if (group == null) {
@@ -446,7 +487,9 @@ public class SequentialProcessor {
             return RuleResult.error("enrichment-group:" + groupId, "Enrichment group not found");
         }
 
-        return enrichmentGroupExecutor.executeEnrichmentGroupsList(List.of(group), data, yamlConfig);
+        RuleResult result = enrichmentGroupExecutor.executeEnrichmentGroupsList(List.of(group), data, yamlConfig);
+        logger.debug("processEnrichmentGroupItem() - enrichment group '{}' completed with success={}", groupId, result.isSuccess());
+        return result;
     }
 
     /**
@@ -454,6 +497,7 @@ public class SequentialProcessor {
      */
     private RuleResult processRuleGroupItem(String groupId, YamlRuleConfiguration yamlConfig, Map<String, Object> data,
                                               Function<Map<String, Object>, org.springframework.expression.spel.support.StandardEvaluationContext> createContext) {
+        logger.debug("processRuleGroupItem() - looking up rule group id: '{}'", groupId);
         RuleGroup group = null;
         if (yamlConfig != null && yamlConfig.getRuleGroups() != null) {
             for (YamlRuleGroup yamlGroup : yamlConfig.getRuleGroups()) {
@@ -469,6 +513,8 @@ public class SequentialProcessor {
                         for (RuleGroup g : groups) {
                             if (groupId.equals(g.getId())) {
                                 group = g;
+                                logger.debug("processRuleGroupItem() - created rule group '{}' with {} rules", 
+                                            groupId, g.getRules() != null ? g.getRules().size() : 0);
                                 break;
                             }
                         }
@@ -483,6 +529,9 @@ public class SequentialProcessor {
 
         if (group == null) {
             group = configuration.getRuleGroupById(groupId);
+            if (group != null) {
+                logger.debug("processRuleGroupItem() - found rule group '{}' in engine configuration", groupId);
+            }
         }
 
         if (group == null) {
@@ -490,7 +539,11 @@ public class SequentialProcessor {
             return RuleResult.error("rule-group:" + groupId, "Rule group not found");
         }
 
+        logger.debug("processRuleGroupItem() - executing rule group '{}' with {} rules", 
+                    groupId, group.getRules() != null ? group.getRules().size() : 0);
         RuleResult result = ruleGroupExecutor.executeRuleGroupsList(List.of(group), data, createContext.apply(data));
+        logger.debug("processRuleGroupItem() - rule group '{}' completed - success={}, resultType={}", 
+                    groupId, result.isSuccess(), result.getResultType());
 
         // Store rule group results for conditional mapping
         if (enrichmentProcessor != null) {
@@ -507,17 +560,22 @@ public class SequentialProcessor {
      * Process a single transformation by ID.
      */
     private RuleResult processTransformationItem(String transformationId, YamlRuleConfiguration yamlConfig, Map<String, Object> data) {
+        logger.debug("processTransformationItem() - looking up transformation id: '{}'", transformationId);
         YamlTransformation transformation = findTransformationById(yamlConfig, transformationId);
         if (transformation == null) {
             logger.warn("Transformation not found: {}", transformationId);
             return RuleResult.error("transformation:" + transformationId, "Transformation not found");
         }
 
+        logger.debug("processTransformationItem() - found transformation '{}', executing with {} data keys", 
+                    transformationId, data.size());
         YamlTransformationProcessor processor = new YamlTransformationProcessor(this.evaluatorService);
         RuleResult transformationResult = processor.processTransformationsWithResult(List.of(transformation), data);
 
         if (transformationResult.getResultType() == RuleResult.ResultType.ERROR) {
             logger.error("Transformation processing failed: {}", transformationResult.getMessage());
+        } else {
+            logger.debug("processTransformationItem() - transformation '{}' completed successfully", transformationId);
         }
 
         return transformationResult;
@@ -527,7 +585,11 @@ public class SequentialProcessor {
      * Process a single rule chain by ID.
      */
     private RuleResult processRuleChainItem(String chainId, YamlRuleConfiguration yamlConfig, Map<String, Object> data, Function<Map<String, Object>, org.springframework.expression.spel.support.StandardEvaluationContext> contextFactory) {
-        return ruleChainExecutor.processRuleChain(chainId, yamlConfig, data, contextFactory);
+        logger.debug("processRuleChainItem() - executing rule chain id: '{}'", chainId);
+        RuleResult result = ruleChainExecutor.processRuleChain(chainId, yamlConfig, data, contextFactory);
+        logger.debug("processRuleChainItem() - rule chain '{}' completed - success={}, resultType={}", 
+                    chainId, result.isSuccess(), result.getResultType());
+        return result;
     }
 
     // ===================================
@@ -641,6 +703,7 @@ public class SequentialProcessor {
                 allRuleGroups = ruleFactory.createRuleGroups(yamlConfig, tempConfig);
             } catch (YamlConfigurationException e) {
                 logger.error("Failed to create rule groups: {}", e.getMessage());
+                logger.debug("Full stack trace for rule group creation failure:", e);
                 failureMessages.add("Rule group creation error: " + e.getMessage());
                 return;
             }

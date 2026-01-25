@@ -166,6 +166,30 @@ TestErrorContext.withExpectedError("testing invalid rule configuration", () -> {
 });
 ```
 
+**Source Classes Producing WARN/ERROR (by count, from test-output-latest.txt):**
+
+| # | Class | WARN | ERROR | Total | Status |
+|---|-------|------|-------|-------|--------|
+| 1 | ScenarioStageExecutor | 95 | 63 | 158 | ✅ DONE |
+| 2 | ScenarioRegistryLoader | 5 | 57 | 62 | ✅ DONE |
+| 3 | DatasetSignature | 47 | 0 | 47 | ❌ TODO (need to fix test configs or mark tests) |
+| 4 | PipelineExecutor | 0 | 39 | 39 | ✅ DONE |
+| 5 | PipelineExecutionManager | 31 | 7 | 38 | ⚠️ PARTIAL (ErrorHandlingTests done) |
+| 6 | DatabaseDataSource | 0 | 27 | 27 | ❌ TODO |
+| 7 | RulesEngine | 0 | 21 | 21 | ⚠️ PARTIAL (ErrorHandlingTests done) |
+| 8 | YamlTransformationProcessor | 0 | 20 | 20 | ❌ TODO |
+| 9 | DataSourceFactory | 0 | 18 | 18 | ❌ TODO |
+| 10 | DatasetLookupService | 17 | 0 | 17 | ❌ TODO |
+| 11 | UnifiedRuleEvaluator | 15 | 14 | 29 | ❌ TODO |
+| 12 | DatabaseHealthIndicator | 13 | 0 | 13 | ❌ TODO |
+| 13 | DataTypeScenarioService | 10 | 0 | 10 | ❌ TODO |
+| 14 | ScenarioConfiguration | 8 | 0 | 8 | ❌ TODO |
+| 15 | YamlDependencyAnalyzer | 7 | 0 | 7 | ❌ TODO |
+| 16 | ValidationService | 6 | 0 | 6 | ❌ TODO |
+| 17 | GenericTransformerService | 5 | 0 | 5 | ❌ TODO |
+| 18 | JdbcParameterUtils | 5 | 0 | 5 | ❌ TODO |
+| 19 | ConditionalChainingExecutor | 4 | 0 | 4 | ❌ TODO |
+
 **Affected Test Classes (from log analysis):**
 - `ConfigurationContextTest$BulkLoadingTests`
 - `CacheDataSourceTest`
@@ -197,6 +221,23 @@ TestErrorContext.withExpectedError("testing invalid rule configuration", () -> {
 | Runtime processing error (recoverable) | WARN | Processing continues with degraded functionality |
 | Runtime processing error (non-recoverable) | ERROR | Processing cannot continue |
 | Expected test error | INFO with [TEST-EXPECTED] prefix | Not a real error |
+| Stack traces / full exception details | DEBUG | Keep ERROR/WARN logs clean; details available when needed |
+
+**Stack Trace Logging Pattern:**
+
+All stack traces MUST be logged at DEBUG level, not ERROR or WARN. The error message should be logged at the appropriate level, with full exception details available via DEBUG:
+
+```java
+// CORRECT: Error message at ERROR, stack trace at DEBUG
+logger.error("Pipeline '{}' failed after {}ms: {}", 
+    pipeline.getName(), durationMs, e.getMessage());
+logger.debug("Full exception details for pipeline '{}':", pipeline.getName(), e);
+
+// WRONG: Stack trace at ERROR level
+logger.error("Pipeline failed", e);  // Don't do this
+```
+
+This keeps production logs clean while preserving full debugging information when needed.
 
 ---
 

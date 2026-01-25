@@ -101,7 +101,7 @@ public class DatasetSignature {
         
         String keyField = dataset.getKeyField();
         if (keyField == null || keyField.trim().isEmpty()) {
-            logger.warn("Dataset key field is null or empty - signature may not be unique");
+            logger.error("Dataset key field is null or empty - signature may not be unique");
             keyField = "unknown";
         }
         

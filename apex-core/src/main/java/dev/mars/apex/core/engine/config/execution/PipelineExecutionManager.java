@@ -22,7 +22,8 @@ import dev.mars.apex.core.service.data.external.manager.ExternalDataSourceManage
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import dev.mars.apex.core.util.RulesEngineLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +60,7 @@ import java.util.Map;
  * @since 2.1
  */
 public class PipelineExecutionManager {
-    private static final RulesEngineLogger logger = new RulesEngineLogger(PipelineExecutionManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(PipelineExecutionManager.class);
 
     private final DataSourceFactory dataSourceFactory;
     private final DataSinkFactory dataSinkFactory;
@@ -224,11 +225,13 @@ public class PipelineExecutionManager {
             return ruleResult;
             
         } catch (DataPipelineException e) {
-            logger.error("Pipeline execution failed with exception", e);
+            logger.error("Pipeline execution failed with exception: {}", e.getMessage());
+            logger.debug("Stack trace for pipeline execution failure:", e);
             return RuleResult.error("pipeline:" + pipeline.getName(),
                     "Pipeline execution failed: " + e.getMessage());
         } catch (Exception e) {
-            logger.error("Unexpected error during pipeline execution", e);
+            logger.error("Unexpected error during pipeline execution: {}", e.getMessage());
+            logger.debug("Stack trace for unexpected pipeline error:", e);
             return RuleResult.error("pipeline:unknown",
                     "Pipeline execution failed: " + e.getMessage());
         }

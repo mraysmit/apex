@@ -25,8 +25,8 @@ import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import dev.mars.apex.core.service.engine.UnifiedRuleEvaluator;
-import dev.mars.apex.core.util.LoggingContext;
-import dev.mars.apex.core.util.RulesEngineLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -85,7 +85,7 @@ import java.util.*;
  * </pre>
  */
 public class RulesEngine {
-    private static final RulesEngineLogger logger = new RulesEngineLogger(RulesEngine.class);
+    private static final Logger logger = LoggerFactory.getLogger(RulesEngine.class);
     private final ExpressionParser parser;
     private final ExpressionEvaluatorService evaluatorService;
     private final RulesEngineConfiguration configuration;
@@ -219,10 +219,7 @@ public class RulesEngine {
             }
         }
 
-        // Initialize logging context
-        LoggingContext.initializeContext();
-
-        logger.configuration("RulesEngine", "Initialized with configuration: " + configuration.getClass().getSimpleName());
+        logger.info("RulesEngine initialized with configuration: {}", configuration.getClass().getSimpleName());
         logger.debug("Using parser: {}", parser.getClass().getSimpleName());
         logger.debug("Using error recovery service: {}", errorRecoveryService.getClass().getSimpleName());
         logger.debug("Using error recovery config: enabled={}, default-strategy={}",errorRecoveryConfig.isEnabled(), errorRecoveryConfig.getDefaultStrategy());
@@ -1100,3 +1097,4 @@ public class RulesEngine {
         return new RulesEngineBuilder();
     }
 }
+

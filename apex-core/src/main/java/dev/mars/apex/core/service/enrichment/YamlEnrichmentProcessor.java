@@ -555,7 +555,8 @@ public class YamlEnrichmentProcessor {
                     logger.trace("Conditional mapping conditions not met, skipping");
                 }
             } catch (Exception e) {
-                logger.warn("Failed to process conditional mapping: " + e.getMessage(), e);
+                logger.warn("Failed to process conditional mapping: {}", e.getMessage());
+                logger.debug("Stack trace for conditional mapping processing failure:", e);
             }
         }
 
@@ -631,7 +632,8 @@ public class YamlEnrichmentProcessor {
                     logger.trace("Mapping rule '" + rule.getId() + "' conditions not met, skipping");
                 }
             } catch (Exception e) {
-                logger.warn("Failed to process mapping rule '" + rule.getId() + "': " + e.getMessage(), e);
+                logger.warn("Failed to process mapping rule '{}': {}", rule.getId(), e.getMessage());
+                logger.debug("Stack trace for mapping rule processing failure:", e);
             }
         }
 
@@ -1497,7 +1499,8 @@ public class YamlEnrichmentProcessor {
                 return null;
             }
         } catch (Exception e) {
-            logger.warn("Failed to apply mapping for rule '" + rule.getId() + "': " + e.getMessage(), e);
+            logger.warn("Failed to apply mapping for rule '{}': {}", rule.getId(), e.getMessage());
+            logger.debug("Stack trace for mapping rule application failure:", e);
 
             // Try fallback value if available
             if (mapping.getFallbackValue() != null && !mapping.getFallbackValue().trim().isEmpty()) {
@@ -1583,7 +1586,9 @@ public class YamlEnrichmentProcessor {
     @Deprecated(since = "3.0", forRemoval = true)
     public RuleResult processEnrichmentsWithResult(List<YamlEnrichment> enrichments, Object targetObject,
                                                   dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
-        logger.debug("Processing enrichments with result tracking for " + (enrichments != null ? enrichments.size() : 0) + " enrichments");
+        logger.debug("processEnrichmentsWithResult() entry - enrichments count: {}, targetObject type: {}", 
+                    enrichments != null ? enrichments.size() : 0, 
+                    targetObject != null ? targetObject.getClass().getSimpleName() : "null");
 
         List<String> failureMessages = new ArrayList<>();
         boolean overallSuccess = true;
@@ -1592,6 +1597,7 @@ public class YamlEnrichmentProcessor {
         this.currentConfiguration = configuration;
 
         if (enrichments == null || enrichments.isEmpty()) {
+            logger.debug("processEnrichmentsWithResult() - no enrichments to process, returning success");
             Map<String, Object> resultData = convertToMap(targetObject);
             return RuleResult.enrichmentSuccess(resultData);
         }
@@ -1602,21 +1608,27 @@ public class YamlEnrichmentProcessor {
             int priority2 = e2.getPriority() != null ? e2.getPriority() : 100;
             return Integer.compare(priority1, priority2);
         });
+        logger.debug("processEnrichmentsWithResult() - enrichments sorted by priority, processing order: {}", 
+                    enrichments.stream().map(YamlEnrichment::getId).toList());
 
         Object enrichedObject = targetObject;
 
         for (YamlEnrichment enrichment : enrichments) {
+            logger.debug("Processing enrichment '{}' (type: {}, priority: {})", 
+                        enrichment.getId(), enrichment.getType(), enrichment.getPriority());
             try {
                 if (shouldProcessEnrichment(enrichment, enrichedObject)) {
                     enrichedObject = processEnrichment(enrichment, enrichedObject);
-                    logger.debug("Successfully processed enrichment: " + enrichment.getId());
+                    logger.debug("Successfully processed enrichment: {} - data keys after: {}", 
+                                enrichment.getId(), 
+                                enrichedObject instanceof Map ? ((Map<?,?>)enrichedObject).keySet() : "N/A");
                 } else {
-                    logger.debug("Skipping enrichment (condition not met): " + enrichment.getId());
+                    logger.debug("Skipping enrichment (condition not met): {}", enrichment.getId());
 
                     // Phase 5: Store result-field for field-enrichment (condition did not match)
                     if ("field-enrichment".equals(enrichment.getType()) && enrichment.getResultField() != null) {
                         setFieldValue(enrichedObject, enrichment.getResultField(), false);
-                        logger.info("Phase 5: Stored field-enrichment result in field: " + enrichment.getResultField() + " = false");
+                        logger.info("Phase 5: Stored field-enrichment result in field: {} = false", enrichment.getResultField());
                     }
                 }
             } catch (Exception e) {
@@ -1648,10 +1660,13 @@ public class YamlEnrichmentProcessor {
 
             // Return appropriate RuleResult with aggregated severity
             if (overallSuccess) {
-                logger.debug("Enrichment processing completed successfully with severity: " + aggregatedSeverity);
+                logger.debug("processEnrichmentsWithResult() completed successfully - enrichedData keys: {}, severity: {}", 
+                            enrichedData.keySet(), aggregatedSeverity);
                 return RuleResult.enrichmentSuccess(enrichedData, aggregatedSeverity);
             } else {
-                logger.error("Enrichment processing completed with failures, severity: " + aggregatedSeverity);
+                logger.error("Enrichment processing completed with failures, severity: {}, failures: {}", 
+                            aggregatedSeverity, failureMessages.size());
+                logger.debug("processEnrichmentsWithResult() failure messages: {}", failureMessages);
                 return RuleResult.enrichmentFailure(failureMessages, enrichedData, aggregatedSeverity);
             }
 
@@ -1934,7 +1949,8 @@ public class YamlEnrichmentProcessor {
                 return codeExpression;
             }
         } catch (Exception e) {
-            logger.warn("Error evaluating code expression '" + codeExpression + "': " + e.getMessage(), e);
+            logger.warn("Error evaluating code expression '{}': {}", codeExpression, e.getMessage());
+            logger.debug("Stack trace for code expression evaluation error:", e);
             return null;
         }
     }
@@ -2005,7 +2021,8 @@ public class YamlEnrichmentProcessor {
                 applyCodeFieldMapping(mapping, mappingContext, targetObject);
             }
         } catch (Exception e) {
-            logger.warn("Error applying field mappings: " + e.getMessage(), e);
+            logger.warn("Error applying field mappings: {}", e.getMessage());
+            logger.debug("Stack trace for field mappings application error:", e);
         }
     }
 
@@ -2037,7 +2054,8 @@ public class YamlEnrichmentProcessor {
             setFieldValue(targetObject, fieldName, value);
             logger.info("Applied field mapping: " + fieldName + " = " + value);
         } catch (Exception e) {
-            logger.warn("Error applying field mapping '" + mapping + "': " + e.getMessage(), e);
+            logger.warn("Error applying field mapping '{}': {}", mapping, e.getMessage());
+            logger.debug("Stack trace for field mapping application error:", e);
         }
     }
 }

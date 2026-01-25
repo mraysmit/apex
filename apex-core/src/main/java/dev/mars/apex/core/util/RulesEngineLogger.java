@@ -78,8 +78,6 @@ public class RulesEngineLogger {
      */
     public void ruleEvaluationStart(String ruleName) {
         if (logger.isInfoEnabled()) {
-            LoggingContext.setRuleName(ruleName);
-            LoggingContext.setRulePhase("evaluation");
             logger.info(RULE_EVALUATION, "Starting evaluation of rule: {}", ruleName);
         }
     }
@@ -93,7 +91,6 @@ public class RulesEngineLogger {
      */
     public void ruleEvaluationComplete(String ruleName, boolean result, double evaluationTimeMs) {
         if (logger.isInfoEnabled()) {
-            LoggingContext.setEvaluationTime(evaluationTimeMs);
             logger.info(RULE_EVALUATION, "Rule '{}' evaluated to {} in {}ms",
                        ruleName, result, String.format("%.2f%%", evaluationTimeMs));
         }
@@ -108,8 +105,6 @@ public class RulesEngineLogger {
      */
     public void ruleEvaluationIssue(String ruleName, Throwable error) {
         if (logger.isInfoEnabled()) {
-            LoggingContext.setRuleName(ruleName);
-            LoggingContext.setRulePhase("error");
             logger.info(RULE_EVALUATION, "[CLEAN-TEST-OUTPUT] Rule evaluation issue for '{}': {}", 
                        ruleName, error.getMessage());
             logger.debug("Full exception details for rule '{}':", ruleName, error);
@@ -124,8 +119,6 @@ public class RulesEngineLogger {
      */
     public void ruleEvaluationError(String ruleName, Throwable error) {
         if (logger.isInfoEnabled()) {
-            LoggingContext.setRuleName(ruleName);
-            LoggingContext.setRulePhase("error");
             logger.info(RULE_EVALUATION, "[CLEAN-TEST-OUTPUT] Rule evaluation issue for '{}': {}", 
                        ruleName, error.getMessage());
             logger.debug("Full exception details for rule '{}':", ruleName, error);
@@ -143,9 +136,6 @@ public class RulesEngineLogger {
      */
     public void performance(String ruleName, double evaluationTimeMs, Long memoryUsed) {
         if (logger.isDebugEnabled()) {
-            LoggingContext.setRuleName(ruleName);
-            LoggingContext.setEvaluationTime(evaluationTimeMs);
-
             if (memoryUsed != null) {
                 logger.debug(PERFORMANCE, "Rule '{}' performance: {}ms, {}KB memory",
                            ruleName, String.format("%.2f%%", evaluationTimeMs), memoryUsed / 1024);
@@ -165,8 +155,6 @@ public class RulesEngineLogger {
      */
     public void slowRule(String ruleName, double evaluationTimeMs, double threshold) {
         if (logger.isWarnEnabled()) {
-            LoggingContext.setRuleName(ruleName);
-            LoggingContext.setEvaluationTime(evaluationTimeMs);
             logger.warn(PERFORMANCE, "Slow rule detected: '{}' took {}ms (threshold: {}ms)",
                        ruleName, String.format("%.2f%%", evaluationTimeMs), String.format("%.2f%%", threshold));
         }
@@ -182,8 +170,6 @@ public class RulesEngineLogger {
      */
     public void errorRecoveryAttempt(String ruleName, String strategy) {
         if (logger.isInfoEnabled()) {
-            LoggingContext.setRuleName(ruleName);
-            LoggingContext.setRulePhase("recovery");
             logger.info(ERROR_RECOVERY, "Attempting error recovery for rule '{}' using strategy: {}", 
                        ruleName, strategy);
         }
@@ -240,7 +226,9 @@ public class RulesEngineLogger {
      * @param message The audit message
      */
     public void audit(String operation, String ruleName, String message) {
-        LoggingContext.auditLog(operation, ruleName, message);
+        if (logger.isInfoEnabled()) {
+            logger.info(AUDIT, "Audit [{}] rule='{}': {}", operation, ruleName, message);
+        }
     }
 
     // Standard Logging Methods with Performance Optimization
@@ -317,7 +305,6 @@ public class RulesEngineLogger {
 
     /**
      * Log warning message with exception.
-     * Uses TestAwareLogger to suppress stack traces in test environments.
      *
      * @param message The message
      * @param throwable The exception
@@ -325,7 +312,7 @@ public class RulesEngineLogger {
      */
     public void warn(String message, Throwable throwable, Object... args) {
         if (logger.isWarnEnabled()) {
-            TestAwareLogger.warn(logger, message, throwable, args);
+            logger.warn(String.format(message, args), throwable);
         }
     }
 

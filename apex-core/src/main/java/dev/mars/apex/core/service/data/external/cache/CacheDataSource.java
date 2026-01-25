@@ -185,7 +185,8 @@ public class CacheDataSource implements ExternalDataSource {
             
         } catch (Exception e) {
             metrics.recordFailedRequest(System.currentTimeMillis() - startTime);
-            LOGGER.error("Failed to get data from cache", e);
+            LOGGER.error("Failed to get data from cache: {}", e.getMessage());
+            LOGGER.debug("Stack trace for cache data retrieval failure:", e);
             return null;
         }
     }

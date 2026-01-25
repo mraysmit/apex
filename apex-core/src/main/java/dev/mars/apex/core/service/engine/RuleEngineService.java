@@ -3,7 +3,8 @@ package dev.mars.apex.core.service.engine;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.util.RulesEngineLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.expression.EvaluationContext;
 
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ import java.util.List;
  * This class handles rule evaluation and result reporting.
  */
 public class RuleEngineService {
-    private final RulesEngineLogger logger = new RulesEngineLogger(RuleEngineService.class);
+    private static final Logger logger = LoggerFactory.getLogger(RuleEngineService.class);
     private final ExpressionEvaluatorService evaluatorService;
     private boolean printResults = true;
 
@@ -91,7 +92,7 @@ public class RuleEngineService {
                     String severity = rule.getSeverity() != null ? rule.getSeverity() : SeverityConstants.ERROR;
                     ruleResult = RuleResult.error(rule.getName(), baseResult.getMessage(), severity);
                     // Log error for test verification
-                    logger.ruleEvaluationError(rule.getName(), new RuntimeException(baseResult.getMessage()));
+                    logger.info("[CLEAN-TEST-OUTPUT] Rule evaluation issue for '{}': {}", rule.getName(), baseResult.getMessage());
                 } else {
                     ruleResult = RuleResult.noMatch();
                 }

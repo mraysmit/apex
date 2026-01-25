@@ -87,7 +87,8 @@ public class TemplateProcessorService {
                 expressionsProcessed++;
                 logger.trace("Expression '" + expr + "' evaluated to: " + value);
             } catch (Exception e) {
-                logger.warn("Error evaluating expression '" + expr + "': " + e.getMessage(), e);
+                logger.warn("Error evaluating expression '{}': {}", expr, e.getMessage());
+                logger.debug("Stack trace for template expression evaluation error:", e);
                 // Keep the original expression on error
                 result.append("#{").append(expr).append("}");
             }
@@ -143,7 +144,8 @@ public class TemplateProcessorService {
                 expressionsProcessed++;
                 logger.trace("XML expression '" + expr + "' evaluated to: " + value + " (escaped: " + escapedValue + ")");
             } catch (Exception e) {
-                logger.warn("Error evaluating XML expression '" + expr + "': " + e.getMessage(), e);
+                logger.warn("Error evaluating XML expression '{}': {}", expr, e.getMessage());
+                logger.debug("Stack trace for XML expression evaluation error:", e);
                 // Keep the original expression on error
                 result.append("#{").append(expr).append("}");
             }
@@ -199,7 +201,8 @@ public class TemplateProcessorService {
                 expressionsProcessed++;
                 logger.trace("JSON expression '" + expr + "' evaluated to: " + value + " (escaped: " + escapedValue + ")");
             } catch (Exception e) {
-                logger.warn("Error evaluating JSON expression '" + expr + "': " + e.getMessage(), e);
+                logger.warn("Error evaluating JSON expression '{}': {}", expr, e.getMessage());
+                logger.debug("Stack trace for JSON expression evaluation error:", e);
                 // Keep the original expression on error
                 result.append("#{").append(expr).append("}");
             }

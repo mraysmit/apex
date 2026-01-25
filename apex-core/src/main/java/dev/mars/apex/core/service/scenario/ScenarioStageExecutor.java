@@ -26,7 +26,6 @@ import dev.mars.apex.core.engine.model.ExecutionStep;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.config.yaml.YamlRuleFactory;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-import dev.mars.apex.core.util.TestAwareLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -335,7 +334,7 @@ public class ScenarioStageExecutor {
             List<String> validationErrors = stage.validate();
             if (!validationErrors.isEmpty()) {
                 String errorMessage = "Stage configuration errors: " + String.join(", ", validationErrors);
-                TestAwareLogger.warn(logger, "Configuration error in stage '{}': {}", stage.getStageName(), errorMessage);
+                logger.warn("Configuration error in stage '{}': {}", stage.getStageName(), errorMessage);
                 return StageExecutionResult.configurationError(stage.getStageName(), errorMessage);
             }
 
@@ -351,7 +350,8 @@ public class ScenarioStageExecutor {
             }
 
         } catch (Exception e) {
-            TestAwareLogger.error(logger, "Error executing stage '{}': {}", stage.getStageName(), e.getMessage(), e);
+            logger.error("Error executing stage '{}': {}", e, stage.getStageName(), e.getMessage());
+            logger.debug("Stack trace for stage '{}' error:", stage.getStageName(), e);
 
             String errorMessage = "Stage execution exception: " + e.getMessage();
             return stage.isRequired() ?
@@ -634,23 +634,23 @@ public class ScenarioStageExecutor {
         String failurePolicy = stage.getFailurePolicy();
         switch (failurePolicy) {
             case ScenarioStage.FAILURE_POLICY_TERMINATE:
-                TestAwareLogger.error(logger, "Stage '{}' failed - terminating scenario execution", stage.getStageName());
+                logger.error("Stage '{}' failed - terminating scenario execution", stage.getStageName());
                 scenarioResult.setTerminated(true);
                 return false;
                 
             case ScenarioStage.FAILURE_POLICY_CONTINUE_WITH_WARNINGS:
-                TestAwareLogger.warn(logger, "Stage '{}' failed - continuing with warnings", stage.getStageName());
+                logger.warn("Stage '{}' failed - continuing with warnings", stage.getStageName());
                 scenarioResult.addWarning("Stage '" + stage.getStageName() + "' failed but processing continued: " + stageResult.getErrorMessage());
                 return true;
                 
             case ScenarioStage.FAILURE_POLICY_FLAG_FOR_REVIEW:
-                TestAwareLogger.warn(logger, "Stage '{}' failed - flagging for manual review", stage.getStageName());
+                logger.warn("Stage '{}' failed - flagging for manual review", stage.getStageName());
                 scenarioResult.setRequiresReview(true);
                 scenarioResult.addReviewFlag("Stage '" + stage.getStageName() + "' requires manual review: " + stageResult.getErrorMessage());
                 return true;
                 
             default:
-                TestAwareLogger.warn(logger, "Unknown failure policy '{}' for stage '{}' - treating as terminate", 
+                logger.warn("Unknown failure policy '{}' for stage '{}' - treating as terminate", 
                                    failurePolicy, stage.getStageName());
                 scenarioResult.setTerminated(true);
                 return false;
@@ -711,3 +711,4 @@ public class ScenarioStageExecutor {
         return filtered;
     }
 }
+

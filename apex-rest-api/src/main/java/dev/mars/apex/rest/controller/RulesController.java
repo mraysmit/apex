@@ -384,7 +384,7 @@ public class RulesController {
 
             // Check for business logic failures (ResultType.ERROR)
             if (result.getResultType() == RuleResult.ResultType.ERROR) {
-                logger.error(Rule execution failed with ERROR result type");
+                logger.error("Rule execution failed with ERROR result type");
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("success", false);
                 errorResponse.put("error", "Rule execution failed");
@@ -466,7 +466,7 @@ public class RulesController {
 
                 // Check for business logic failures (ResultType.ERROR) - fail fast
                 if (result.getResultType() == RuleResult.ResultType.ERROR) {
-                    logger.error(Batch rule execution failed with ERROR result type for rule: {}", rule.getName());
+                    logger.error("Batch rule execution failed with ERROR result type for rule: {}", rule.getName());
                     Map<String, Object> errorResponse = new HashMap<>();
                     errorResponse.put("success", false);
                     errorResponse.put("error", "Batch rule execution failed");

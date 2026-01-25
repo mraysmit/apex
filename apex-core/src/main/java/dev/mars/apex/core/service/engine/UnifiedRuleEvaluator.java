@@ -8,9 +8,8 @@ import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMetrics;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
-import dev.mars.apex.core.util.RulesEngineLogger;
-import dev.mars.apex.core.util.TestAwareLogger;
-import dev.mars.apex.core.util.LoggingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -44,7 +43,7 @@ import java.util.regex.Pattern;
  */
 public class UnifiedRuleEvaluator {
 
-    private static final RulesEngineLogger rulesLogger = new RulesEngineLogger(UnifiedRuleEvaluator.class);
+    private static final Logger logger = LoggerFactory.getLogger(UnifiedRuleEvaluator.class);
 
     private final ExpressionParser parser;
     private final ErrorRecoveryService errorRecoveryService;
@@ -135,14 +134,13 @@ public class UnifiedRuleEvaluator {
      */
     public RuleResult evaluateRule(Rule rule, EvaluationContext context) {
         if (rule == null) {
-            rulesLogger.info("No rule provided for evaluation");
+            logger.info("No rule provided for evaluation");
             return RuleResult.noRules();
         }
         
-        // Set up logging context
-        LoggingContext.setRuleName(rule.getName());
-        LoggingContext.setRulePhase("evaluation");
-        rulesLogger.info("Starting rule evaluation: {}", rule.getName());
+        logger.info("Starting rule evaluation: {}", rule.getName());
+        logger.debug("Rule details - id: '{}', severity: '{}', condition: '{}'", 
+                        rule.getId(), rule.getSeverity(), rule.getCondition());
 
         // Start performance monitoring
         RulePerformanceMetrics.Builder metricsBuilder = performanceMonitor.startEvaluation(rule.getName(), "evaluation");
@@ -150,19 +148,22 @@ public class UnifiedRuleEvaluator {
         try {
             // Validate rule has required condition
             if (rule.getCondition() == null || rule.getCondition().trim().isEmpty()) {
-                TestAwareLogger.warn(rulesLogger, "Rule '{}' has no condition to evaluate", rule.getName());
+                logger.warn("Rule '{}' has no condition to evaluate", rule.getName());
                 RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition());
-                LoggingContext.clearContext();
+                
                 return RuleResult.error(rule.getName(), "Rule has no condition to evaluate", rule.getSeverity(), metrics);
             }
             
             // Parse and evaluate the SpEL expression
+            logger.debug("Parsing SpEL expression for rule '{}': {}", rule.getName(), rule.getCondition());
             Expression exp = parser.parseExpression(rule.getCondition());
             Boolean result;
             
             try {
                 result = exp.getValue(context, Boolean.class);
+                logger.debug("SpEL evaluation for rule '{}' returned: {}", rule.getName(), result);
             } catch (SpelEvaluationException e) {
+                logger.debug("SpEL evaluation exception for rule '{}': {}", rule.getName(), e.getMessage());
                 // Delegate to error recovery handler for consistent error handling
                 // This ensures SpEL evaluation errors go through the same recovery logic
                 // as other exceptions, respecting severity-based recovery policies
@@ -173,15 +174,15 @@ public class UnifiedRuleEvaluator {
             if (rule.getResultField() != null && !rule.getResultField().trim().isEmpty()) {
                 boolean booleanResult = (result != null && result);
                 context.setVariable(rule.getResultField(), booleanResult);
-                rulesLogger.debug("Stored rule result in context: {} = {}", rule.getResultField(), booleanResult);
+                logger.debug("Stored rule result in context: {} = {}", rule.getResultField(), booleanResult);
             }
 
             // Complete performance monitoring for successful evaluation
             RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition());
 
             // Log the completion with performance metrics
-            rulesLogger.info("Rule evaluation completed: {} -> {}", rule.getName(), result != null && result);
-            LoggingContext.clearContext();
+            logger.info("Rule evaluation completed: {} -> {}", rule.getName(), result != null && result);
+            
 
             // Phase 4: Evaluate codes and apply field mappings
             Map<String, Object> enrichedData = new java.util.HashMap<>();
@@ -191,7 +192,7 @@ public class UnifiedRuleEvaluator {
             if (result != null && result) {
                 // Rule matched - evaluate success code
                 evaluatedSuccessCode = evaluateCode(rule.getSuccessCode(), context);
-                rulesLogger.info("Rule matched: {}", rule.getName());
+                logger.info("Rule matched: {}", rule.getName());
 
                 // Apply field mappings if configured
                 if (rule.getMapToField() != null) {
@@ -207,7 +208,7 @@ public class UnifiedRuleEvaluator {
             } else {
                 // Rule did not match - evaluate error code
                 evaluatedErrorCode = evaluateCode(rule.getErrorCode(), context);
-                rulesLogger.debug("Rule did not match: {}", rule.getName());
+                logger.debug("Rule did not match: {}", rule.getName());
 
                 // Apply field mappings if configured
                 if (rule.getMapToField() != null) {
@@ -227,7 +228,7 @@ public class UnifiedRuleEvaluator {
                         // Per design: ERROR/CRITICAL with recovery disabled should use FAIL_FAST
                         resultType = RuleResult.ResultType.ERROR;
                         shouldFail = true;
-                        rulesLogger.warn("Rule '{}' did not match with {} severity - evaluation will fail (recovery disabled)",
+                        logger.warn("Rule '{}' did not match with {} severity - evaluation will fail (recovery disabled)",
                                        rule.getName(), severity);
                     }
                 }
@@ -253,7 +254,9 @@ public class UnifiedRuleEvaluator {
      * @return The rule evaluation result
      */
     public RuleResult evaluateRule(Rule rule, Map<String, Object> facts) {
-        rulesLogger.info("Phase 5: evaluateRule(Rule, Map) called for rule: {}", rule != null ? rule.getName() : "null");
+        logger.info("Phase 5: evaluateRule(Rule, Map) called for rule: {}", rule != null ? rule.getName() : "null");
+        logger.debug("evaluateRule(Rule, Map) - facts keys: {}, facts size: {}", 
+                        facts != null ? facts.keySet() : "null", facts != null ? facts.size() : 0);
 
         if (rule == null) {
             return RuleResult.noRules();
@@ -266,15 +269,18 @@ public class UnifiedRuleEvaluator {
         // This allows the severity-based error recovery to work correctly.
         
         // Create evaluation context
+        logger.debug("Creating evaluation context for rule '{}' with {} fact entries", rule.getName(), facts.size());
         StandardEvaluationContext context = createEvaluationContext(facts);
 
         RuleResult result = evaluateRule(rule, context);
+        logger.debug("Rule '{}' evaluation result - triggered: {}, resultType: {}", 
+                        rule.getName(), result.isTriggered(), result.getResultType());
 
         // Phase 5: Store result in facts and enrichedData if result-field is configured
         if (rule.getResultField() != null && !rule.getResultField().trim().isEmpty()) {
             // Store in facts map for subsequent rules to access (flat key)
             facts.put(rule.getResultField(), result.isTriggered());
-            rulesLogger.info("Phase 5: Stored rule result in facts: {} = {}", rule.getResultField(), result.isTriggered());
+            logger.info("Phase 5: Stored rule result in facts: {} = {}", rule.getResultField(), result.isTriggered());
 
             // Also add to enrichedData so it's returned to the caller
             Map<String, Object> enrichedData = new java.util.HashMap<>(result.getEnrichedData());
@@ -287,7 +293,7 @@ public class UnifiedRuleEvaluator {
                                    result.isTriggered(), result.getResultType(), result.getPerformanceMetrics(),
                                    enrichedData, result.getFailureMessages(), result.isSuccess(),
                                    result.getSuccessCode(), result.getErrorCode(), result.getMapToField());
-            rulesLogger.info("Phase 5: Added result-field to enrichedData: {} = {}", rule.getResultField(), result.isTriggered());
+            logger.info("Phase 5: Added result-field to enrichedData: {} = {}", rule.getResultField(), result.isTriggered());
         }
 
         return result;
@@ -358,8 +364,8 @@ public class UnifiedRuleEvaluator {
         String severity = rule.getSeverity() != null ? rule.getSeverity() : SeverityConstants.ERROR;
         
         // Log the enhanced error message
-        if (rulesLogger.getLogger().isInfoEnabled()) {
-            rulesLogger.getLogger().info("[CLEAN-TEST-OUTPUT] Rule evaluation issue for '{}': {}", 
+        if (logger.isInfoEnabled()) {
+            logger.info("[CLEAN-TEST-OUTPUT] Rule evaluation issue for '{}': {}", 
                 rule.getName(), errorMessage);
         }
 
@@ -374,7 +380,7 @@ public class UnifiedRuleEvaluator {
             String actualStrategy = policy != null ? policy.getStrategy() : "default";
 
             if (errorRecoveryConfig.isLogRecoveryAttempts()) {
-                rulesLogger.info("Attempting error recovery for rule '{}' with severity '{}' using strategy '{}'",
+                logger.info("Attempting error recovery for rule '{}' with severity '{}' using strategy '{}'",
                     rule.getName(), severity, actualStrategy);
             }
 
@@ -382,7 +388,7 @@ public class UnifiedRuleEvaluator {
             if (rule.getDefaultValue() != null) {
                 recoveryStrategy = "RULE_DEFAULT_VALUE";
                 if (errorRecoveryConfig.isLogRecoveryAttempts()) {
-                    rulesLogger.info("Using rule-specific default value for recovery: rule='{}', defaultValue='{}'",
+                    logger.info("Using rule-specific default value for recovery: rule='{}', defaultValue='{}'",
                         rule.getName(), rule.getDefaultValue());
                 }
                 recoverySuccessful = true;
@@ -395,7 +401,7 @@ public class UnifiedRuleEvaluator {
                 RulePerformanceMetrics metrics = buildMetricsWithRecovery(metricsBuilder, rule, exception,
                     recoveryAttempted, recoverySuccessful, recoveryStrategy, recoveryReason, recoveryTime);
 
-                LoggingContext.clearContext();
+                
                 return RuleResult.match(rule.getName(), String.valueOf(rule.getDefaultValue()), severity, metrics);
             }
 
@@ -427,7 +433,7 @@ public class UnifiedRuleEvaluator {
                     metrics
                 );
                 
-                LoggingContext.clearContext();
+                
                 return resultWithCorrectSeverity;
             } else {
                 // Recovery failed
@@ -442,21 +448,21 @@ public class UnifiedRuleEvaluator {
         
         // Log error details at appropriate level based on severity, using enhanced message
         if (SeverityConstants.CRITICAL.equalsIgnoreCase(severity)) {
-            rulesLogger.error("CRITICAL rule evaluation error for '{}': {}", rule.getName(), errorMessage);
+            logger.error("CRITICAL rule evaluation error for '{}': {}", rule.getName(), errorMessage);
         } else if (SeverityConstants.WARNING.equalsIgnoreCase(severity)) {
-            rulesLogger.info("Rule evaluation warning for '{}': {}", rule.getName(), errorMessage);
+            logger.info("Rule evaluation warning for '{}': {}", rule.getName(), errorMessage);
         } else {
-            rulesLogger.info("Rule evaluation error for '{}': {}", rule.getName(), errorMessage);
+            logger.info("Rule evaluation error for '{}': {}", rule.getName(), errorMessage);
         }
 
         // Always log full exception details at DEBUG level for troubleshooting
-        rulesLogger.debug("Full exception details for rule '{}':", rule.getName(), exception);
+        logger.debug("Full exception details for rule '{}':", rule.getName(), exception);
 
         // Complete performance monitoring with recovery metrics (even for failed recovery)
         RulePerformanceMetrics finalMetrics = buildMetricsWithRecovery(metricsBuilder, rule, exception,
             recoveryAttempted, recoverySuccessful, recoveryStrategy, recoveryReason, recoveryTime);
 
-        LoggingContext.clearContext();
+        
         return RuleResult.error(rule.getName(), errorMessage, severity, finalMetrics);
     }
 
@@ -528,11 +534,11 @@ public class UnifiedRuleEvaluator {
      */
     public RuleResult evaluateRules(List<Rule> rules, EvaluationContext context) {
         if (rules == null || rules.isEmpty()) {
-            rulesLogger.info("No rules provided for evaluation");
+            logger.info("No rules provided for evaluation");
             return RuleResult.noRules();
         }
 
-        rulesLogger.info("Evaluating {} rules", rules.size());
+        logger.info("Evaluating {} rules", rules.size());
 
         // Accumulate enrichedData from all rules (even non-matching ones)
         Map<String, Object> accumulatedEnrichedData = new java.util.HashMap<>();
@@ -563,7 +569,7 @@ public class UnifiedRuleEvaluator {
             }
         }
 
-        rulesLogger.info("No rules matched");
+        logger.info("No rules matched");
         // Return noMatch with accumulated enrichedData from all evaluated rules
         return new RuleResult("no-match", "No matching rules found", SeverityConstants.INFO, false, RuleResult.ResultType.NO_MATCH,
                              null, accumulatedEnrichedData, new java.util.ArrayList<>(), true, null, null, null);
@@ -579,13 +585,13 @@ public class UnifiedRuleEvaluator {
      * @return The result with accumulated enrichedData from all rules
      */
     public RuleResult evaluateRules(List<Rule> rules, Map<String, Object> facts) {
-        rulesLogger.info("Phase 5: evaluateRules(List<Rule>, Map) called with {} rules", rules != null ? rules.size() : 0);
+        logger.info("Phase 5: evaluateRules(List<Rule>, Map) called with {} rules", rules != null ? rules.size() : 0);
 
         if (rules == null || rules.isEmpty()) {
             return RuleResult.noRules();
         }
 
-        rulesLogger.info("Evaluating {} rules", rules.size());
+        logger.info("Evaluating {} rules", rules.size());
 
         // Accumulate enrichedData from all rules
         Map<String, Object> accumulatedEnrichedData = new java.util.HashMap<>();
@@ -617,7 +623,7 @@ public class UnifiedRuleEvaluator {
                                  firstSignificantResult.getSuccessCode(), firstSignificantResult.getErrorCode(), firstSignificantResult.getMapToField());
         }
 
-        rulesLogger.info("No rules matched");
+        logger.info("No rules matched");
         // Return noMatch with accumulated enrichedData from all evaluated rules
         return new RuleResult("no-match", "No matching rules found", SeverityConstants.INFO, false, RuleResult.ResultType.NO_MATCH,
                              null, accumulatedEnrichedData, new java.util.ArrayList<>(), true, null, null, null);
@@ -647,7 +653,7 @@ public class UnifiedRuleEvaluator {
                 return codeExpression;
             }
         } catch (Exception e) {
-            rulesLogger.warn("Error evaluating code expression '{}': {}", codeExpression, e.getMessage());
+            logger.warn("Error evaluating code expression '{}': {}", codeExpression, e.getMessage());
             return null;
         }
     }
@@ -698,7 +704,7 @@ public class UnifiedRuleEvaluator {
                 applyFieldMapping(mapping, mappingContext, enrichedData);
             }
         } catch (Exception e) {
-            rulesLogger.warn("Error applying field mappings: {}", e.getMessage());
+            logger.warn("Error applying field mappings: {}", e.getMessage());
         }
     }
 
@@ -715,7 +721,7 @@ public class UnifiedRuleEvaluator {
             // Parse the mapping: "fieldName = expression"
             String[] parts = mapping.split("=", 2);
             if (parts.length != 2) {
-                rulesLogger.warn("Invalid field mapping format: {}. Expected 'fieldName = expression'", mapping);
+                logger.warn("Invalid field mapping format: {}. Expected 'fieldName = expression'", mapping);
                 return;
             }
 
@@ -728,9 +734,9 @@ public class UnifiedRuleEvaluator {
 
             // Store the mapped value in enriched data
             enrichedData.put(fieldName, value);
-            rulesLogger.info("Applied field mapping: {} = {}", fieldName, value);
+            logger.info("Applied field mapping: {} = {}", fieldName, value);
         } catch (Exception e) {
-            rulesLogger.warn("Error applying field mapping '{}': {}", mapping, e.getMessage());
+            logger.warn("Error applying field mapping '{}': {}", mapping, e.getMessage());
         }
     }
     
@@ -816,4 +822,5 @@ public class UnifiedRuleEvaluator {
         return "unknown";
     }
 }
+
 

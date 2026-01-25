@@ -144,6 +144,7 @@ public class YamlRuleFactory {
                     } catch (YamlConfigurationException e) {
                         // Re-throw configuration exceptions to fail fast
                         logger.error("YamlConfigurationException for rule group " + yamlGroup.getId() + ": " + e.getMessage());
+                        logger.debug("Full stack trace for rule group configuration exception:", e);
                         throw e;
                     } catch (Exception e) {
                         logger.warn("Failed to create rule group '" + yamlGroup.getId() +
@@ -223,7 +224,7 @@ public class YamlRuleFactory {
                 try {
                     ruleSet.withEffectiveDate(parseDate(firstRule.getEffectiveDate()));
                 } catch (DateTimeParseException e) {
-                    logger.warn("Invalid effective date format for rule " + firstRule.getId() +
+                    logger.error("Invalid effective date format for rule " + firstRule.getId() +
                                   ": " + firstRule.getEffectiveDate());
                 }
             }
@@ -231,7 +232,7 @@ public class YamlRuleFactory {
                 try {
                     ruleSet.withExpirationDate(parseDate(firstRule.getExpirationDate()));
                 } catch (DateTimeParseException e) {
-                    logger.warn("Invalid expiration date format for rule " + firstRule.getId() +
+                    logger.error("Invalid expiration date format for rule " + firstRule.getId() +
                                   ": " + firstRule.getExpirationDate());
                 }
             }
@@ -369,7 +370,7 @@ public class YamlRuleFactory {
             try {
                 tempRuleSet.withEffectiveDate(parseDate(yamlRule.getEffectiveDate()));
             } catch (DateTimeParseException e) {
-                logger.warn("Invalid effective date format for rule " + yamlRule.getId() +
+                logger.error("Invalid effective date format for rule " + yamlRule.getId() +
                               ": " + yamlRule.getEffectiveDate());
             }
         }
@@ -377,7 +378,7 @@ public class YamlRuleFactory {
             try {
                 tempRuleSet.withExpirationDate(parseDate(yamlRule.getExpirationDate()));
             } catch (DateTimeParseException e) {
-                logger.warn("Invalid expiration date format for rule " + yamlRule.getId() +
+                logger.error("Invalid expiration date format for rule " + yamlRule.getId() +
                               ": " + yamlRule.getExpirationDate());
             }
         }
@@ -418,7 +419,7 @@ public class YamlRuleFactory {
             try {
                 initialMetadataBuilder.effectiveDate(parseDate(effectiveDate));
             } catch (Exception e) {
-                logger.warn("Invalid effective date format for rule " + yamlRule.getId() + ": " + effectiveDate);
+                logger.error("Invalid effective date format for rule " + yamlRule.getId() + ": " + effectiveDate);
             }
         }
 
@@ -431,7 +432,7 @@ public class YamlRuleFactory {
             try {
                 initialMetadataBuilder.expirationDate(parseDate(expirationDate));
             } catch (Exception e) {
-                logger.warn("Invalid expiration date format for rule " + yamlRule.getId() + ": " + expirationDate);
+                logger.error("Invalid expiration date format for rule " + yamlRule.getId() + ": " + expirationDate);
             }
         }
 

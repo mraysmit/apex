@@ -104,6 +104,7 @@ public class SequentialDependencyExecutor extends PatternExecutor {
             
         } catch (Exception e) {
             logger.error("Error executing sequential dependency: " + e.getMessage());
+            logger.debug("Full stack trace for sequential dependency execution error:", e);
             return resultBuilder.errorMessage("Execution error: " + e.getMessage()).build();
         }
     }
@@ -168,6 +169,7 @@ public class SequentialDependencyExecutor extends PatternExecutor {
             
         } catch (Exception e) {
             logger.error("Error executing stage " + stageNumber + ": " + e.getMessage());
+            logger.debug("Full stack trace for stage execution error:", e);
             return false;
         }
     }

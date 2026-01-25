@@ -2,7 +2,8 @@ package dev.mars.apex.core.engine.model;
 
 import dev.mars.apex.core.constants.ErrorHandlingConstants;
 import dev.mars.apex.core.constants.SeverityConstants;
-import dev.mars.apex.core.util.RulesEngineLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -38,7 +39,7 @@ import java.util.stream.Collectors;
  */
 public class RuleGroup implements RuleBase {
     private static final ExpressionParser parser = new SpelExpressionParser();
-    private final RulesEngineLogger logger = new RulesEngineLogger(RuleGroup.class);
+    private static final Logger logger = LoggerFactory.getLogger(RuleGroup.class);
 
     private final UUID uuid;
     private final String id;

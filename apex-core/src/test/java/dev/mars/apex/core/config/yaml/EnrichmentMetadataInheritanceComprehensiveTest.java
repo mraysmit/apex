@@ -6,7 +6,8 @@ import dev.mars.apex.core.service.enrichment.EnrichmentGroupFactory;
 import org.junit.jupiter.api.*;
 
 import java.util.List;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("Enrichment Metadata Inheritance Comprehensive Tests")
 class EnrichmentMetadataInheritanceComprehensiveTest {
 
-    private static final Logger LOGGER = Logger.getLogger(EnrichmentMetadataInheritanceComprehensiveTest.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnrichmentMetadataInheritanceComprehensiveTest.class);
 
     private YamlConfigurationLoader loader;
     private YamlRuleFactory factory;
@@ -526,3 +527,4 @@ class EnrichmentMetadataInheritanceComprehensiveTest {
         assertEquals(expectedExpiration, group.getExpirationDate(), "Expiration date should match");
     }
 }
+

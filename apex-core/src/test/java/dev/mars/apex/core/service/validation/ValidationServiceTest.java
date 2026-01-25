@@ -21,7 +21,6 @@ import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
-import dev.mars.apex.core.util.TestAwareLogger;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;

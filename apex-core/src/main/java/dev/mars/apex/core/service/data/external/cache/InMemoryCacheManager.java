@@ -285,7 +285,8 @@ public class InMemoryCacheManager implements CacheManager {
                 .collect(Collectors.toList());
                 
         } catch (Exception e) {
-            LOGGER.error("Failed to get all keys from cache", e);
+            LOGGER.error("Failed to get all keys from cache: {}", e.getMessage());
+            LOGGER.debug("Stack trace for cache key retrieval failure:", e);
             return Collections.emptyList();
         }
     }
@@ -331,7 +332,8 @@ public class InMemoryCacheManager implements CacheManager {
             }
 
         } catch (Exception e) {
-            LOGGER.error("Failed to evict expired entries", e);
+            LOGGER.error("Failed to evict expired entries: {}", e.getMessage());
+            LOGGER.debug("Stack trace for cache eviction failure:", e);
         } finally {
             evictionLock.writeLock().unlock();
         }
@@ -419,7 +421,8 @@ public class InMemoryCacheManager implements CacheManager {
             }
 
         } catch (Exception e) {
-            LOGGER.error("Failed to evict LRU entry", e);
+            LOGGER.error("Failed to evict LRU entry: {}", e.getMessage());
+            LOGGER.debug("Stack trace for LRU eviction failure:", e);
         }
     }
 

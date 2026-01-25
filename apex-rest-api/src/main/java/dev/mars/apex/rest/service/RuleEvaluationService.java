@@ -8,8 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import dev.mars.apex.rest.util.TestAwareLogger;
-
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,9 +51,6 @@ public class RuleEvaluationService {
 
     @Autowired
     private RulesService rulesService;
-
-    @Autowired
-    private TestAwareLogger testAwareLogger;
     
     /**
      * Validates data against multiple validation rules.
@@ -70,11 +65,7 @@ public class RuleEvaluationService {
         ValidationResponse response = new ValidationResponse();
         
         if (request.getValidationRules() == null || request.getValidationRules().isEmpty()) {
-            if (testAwareLogger != null) {
-                testAwareLogger.warn(logger, "No validation rules provided");
-            } else {
-                logger.warn("No validation rules provided");
-            }
+            logger.warn("No validation rules provided");
             response.setValid(true);
             response.setTotalRules(0);
             response.setPassedRules(0);

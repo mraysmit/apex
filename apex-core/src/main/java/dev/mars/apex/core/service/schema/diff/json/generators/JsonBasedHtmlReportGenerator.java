@@ -48,7 +48,8 @@ public class JsonBasedHtmlReportGenerator {
             this.compiledTemplate = handlebars.compile("main");
             logger.info("[SchemaDiff.HTML] Handlebars template compiled successfully");
         } catch (IOException e) {
-            logger.error("[SchemaDiff.HTML] Failed to compile Handlebars template", e);
+            logger.error("[SchemaDiff.HTML] Failed to compile Handlebars template: {}", e.getMessage());
+            logger.debug("Stack trace for Handlebars template compilation failure:", e);
             throw new RuntimeException("Failed to compile template", e);
         }
     }

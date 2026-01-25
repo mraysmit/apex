@@ -93,7 +93,8 @@ public class DataPipelineEngine {
                        dataSources.size(), dataSinks.size());
 
         } catch (Exception e) {
-            LOGGER.error("Failed to initialize Data Pipeline Engine", e);
+            LOGGER.error("Failed to initialize Data Pipeline Engine: {}", e.getMessage());
+            LOGGER.debug("Stack trace for pipeline initialization failure:", e);
             shutdown(); // Cleanup on failure
             throw new DataPipelineException("Pipeline initialization failed", e);
         }
@@ -169,7 +170,8 @@ public class DataPipelineEngine {
             
         } catch (Exception e) {
             long executionTime = System.currentTimeMillis() - startTime;
-            LOGGER.error("Pipeline execution failed", e);
+            LOGGER.error("Pipeline execution failed: {}", e.getMessage());
+            LOGGER.debug("Stack trace for pipeline execution failure:", e);
             
             return resultBuilder
                 .successful(false)
@@ -250,7 +252,8 @@ public class DataPipelineEngine {
             
         } catch (Exception e) {
             long executionTime = System.currentTimeMillis() - startTime;
-            LOGGER.error("Batch pipeline execution failed", e);
+            LOGGER.error("Batch pipeline execution failed: {}", e.getMessage());
+            LOGGER.debug("Stack trace for batch pipeline execution failure:", e);
             
             return resultBuilder
                 .successful(false)

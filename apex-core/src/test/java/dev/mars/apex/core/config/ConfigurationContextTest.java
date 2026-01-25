@@ -37,6 +37,19 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Comprehensive tests for ConfigurationContext.
  *
+ * <p><strong>INTENTIONAL FAILURE TEST CLASS</strong></p>
+ * <p>This test class includes tests that intentionally trigger ERROR log messages
+ * to verify error handling behavior. DevOps: ERROR messages between the
+ * [INTENTIONAL-FAILURE-TEST-CLASS-START] and [INTENTIONAL-FAILURE-TEST-CLASS-END]
+ * markers are EXPECTED and should NOT be investigated.</p>
+ *
+ * <p>Expected ERROR types in this test class:</p>
+ * <ul>
+ *   <li>Invalid YAML configuration errors (missing required fields)</li>
+ *   <li>Circular component reference detection errors</li>
+ *   <li>Failed component loading errors</li>
+ * </ul>
+ *
  * Tests cover:
  * - Registration and lookup of configurations, data sources, scenarios, and components
  * - Builder pattern
@@ -52,6 +65,25 @@ class ConfigurationContextTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationContextTest.class);
     private ConfigurationContext context;
+
+    @BeforeAll
+    static void classSetUp() {
+        Logger logger = LoggerFactory.getLogger(ConfigurationContextTest.class);
+        logger.info("================================================================================");
+        logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-START] ConfigurationContextTest");
+        logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-START] This test class intentionally triggers ERROR logs");
+        logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected ERRORs: invalid YAML, circular references, failed component loading");
+        logger.info("================================================================================");
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        Logger logger = LoggerFactory.getLogger(ConfigurationContextTest.class);
+        logger.info("================================================================================");
+        logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-END] ConfigurationContextTest");
+        logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-END] All ERROR messages above were EXPECTED and tested intentionally");
+        logger.info("================================================================================");
+    }
 
     @BeforeEach
     void setUp() {

@@ -18,8 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import dev.mars.apex.rest.util.TestAwareLogger;
-
 import java.io.ByteArrayInputStream;
 import java.time.Instant;
 import java.util.HashMap;
@@ -62,9 +60,6 @@ public class ConfigurationController {
 
     @Autowired
     private RulesEngineService rulesEngineService;
-
-    @Autowired
-    private TestAwareLogger testAwareLogger;
     
     // Store the current configuration for inspection
     private YamlRuleConfiguration currentConfiguration;
@@ -163,8 +158,8 @@ public class ConfigurationController {
         logger.debug("YAML content length: {} characters", yamlContent.length());
 
         // Use test-aware logger for enhanced testing capabilities
-        testAwareLogger.warn(logger, "Configuration loading initiated via REST API - this may cause temporary service disruption");
-        testAwareLogger.error(logger, "YAML configuration size: {} bytes", yamlContent.getBytes().length);
+        logger.warn("Configuration loading initiated via REST API - this may cause temporary service disruption");
+        logger.error("YAML configuration size: {} bytes", yamlContent.getBytes().length);
 
         // Load configuration from string content
         YamlRuleConfiguration config = yamlConfigurationLoader.loadFromStream(
@@ -307,3 +302,4 @@ public class ConfigurationController {
         return ResponseEntity.ok(response);
     }
 }
+

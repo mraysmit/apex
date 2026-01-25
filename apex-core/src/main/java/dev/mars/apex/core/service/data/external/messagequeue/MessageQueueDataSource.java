@@ -167,7 +167,8 @@ public class MessageQueueDataSource implements ExternalDataSource {
             
         } catch (Exception e) {
             metrics.recordFailedRequest(System.currentTimeMillis() - startTime);
-            LOGGER.error("Failed to get data from message queue", e);
+            LOGGER.error("Failed to get data from message queue: {}", e.getMessage());
+            LOGGER.debug("Stack trace for message queue data retrieval failure:", e);
             return null;
         }
     }

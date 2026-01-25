@@ -469,7 +469,8 @@ public class DataSourceRegistry {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Error during health check", e);
+            LOGGER.error("Error during health check: {}", e.getMessage());
+            LOGGER.debug("Stack trace for registry health check error:", e);
         }
     }
 
@@ -506,7 +507,8 @@ public class DataSourceRegistry {
             try {
                 listener.onDataSourceEvent(event);
             } catch (Exception e) {
-                LOGGER.error("Error notifying registry listener", e);
+                LOGGER.error("Error notifying registry listener: {}", e.getMessage());
+                LOGGER.debug("Stack trace for registry listener notification error:", e);
             }
         }
     }

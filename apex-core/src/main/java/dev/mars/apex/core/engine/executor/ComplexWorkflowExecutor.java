@@ -117,6 +117,7 @@ public class ComplexWorkflowExecutor extends PatternExecutor {
 
         } catch (Exception e) {
             logger.error("Error executing complex workflow: " + e.getMessage());
+            logger.debug("Full stack trace for complex workflow execution error:", e);
             return resultBuilder.errorMessage("Execution error: " + e.getMessage()).build();
         }
     }
@@ -240,6 +241,7 @@ public class ComplexWorkflowExecutor extends PatternExecutor {
 
         } catch (Exception e) {
             logger.error("Error executing workflow stage '" + stage.getName() + "': " + e.getMessage());
+            logger.debug("Full stack trace for workflow stage execution error:", e);
             return false;
         }
     }
@@ -278,6 +280,7 @@ public class ComplexWorkflowExecutor extends PatternExecutor {
 
         } catch (Exception e) {
             logger.error("Error evaluating conditional stage '" + stage.getName() + "': " + e.getMessage());
+            logger.debug("Full stack trace for conditional stage evaluation error:", e);
             return false;
         }
     }

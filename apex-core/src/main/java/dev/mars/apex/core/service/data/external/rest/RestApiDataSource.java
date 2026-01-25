@@ -137,20 +137,25 @@ public class RestApiDataSource implements ExternalDataSource {
             return response.statusCode() >= 200 && response.statusCode() < 300;
 
         } catch (java.net.http.HttpConnectTimeoutException e) {
-            LOGGER.warn("REST API connection test timed out for '{}'", configuration.getName(), e);
+            LOGGER.warn("REST API connection test timed out for '{}': {}", configuration.getName(), e.getMessage());
+            LOGGER.debug("REST API timeout stack trace:", e);
             return false;
         } catch (java.net.ConnectException e) {
-            LOGGER.warn("REST API connection test failed to connect for '{}'", configuration.getName(), e);
+            LOGGER.warn("REST API connection test failed to connect for '{}': {}", configuration.getName(), e.getMessage());
+            LOGGER.debug("REST API connection error stack trace:", e);
             return false;
         } catch (java.io.IOException e) {
-            LOGGER.warn("REST API connection test failed with IO error for '{}'", configuration.getName(), e);
+            LOGGER.warn("REST API connection test failed with IO error for '{}': {}", configuration.getName(), e.getMessage());
+            LOGGER.debug("REST API IO error stack trace:", e);
             return false;
         } catch (InterruptedException e) {
-            LOGGER.warn("REST API connection test was interrupted for '{}'", configuration.getName(), e);
+            LOGGER.warn("REST API connection test was interrupted for '{}': {}", configuration.getName(), e.getMessage());
+            LOGGER.debug("REST API interrupted stack trace:", e);
             Thread.currentThread().interrupt();
             return false;
         } catch (Exception e) {
-            LOGGER.warn("REST API connection test failed for '{}'", configuration.getName(), e);
+            LOGGER.warn("REST API connection test failed for '{}': {}", configuration.getName(), e.getMessage());
+            LOGGER.debug("REST API general error stack trace:", e);
             return false;
         }
     }
@@ -208,7 +213,8 @@ public class RestApiDataSource implements ExternalDataSource {
             
         } catch (Exception e) {
             metrics.recordFailedRequest(System.currentTimeMillis() - startTime);
-            LOGGER.error("Failed to get data from REST API", e);
+            LOGGER.error("Failed to get data from REST API: {}", e.getMessage());
+            LOGGER.debug("Stack trace for REST API data retrieval failure:", e);
             return null;
         }
     }

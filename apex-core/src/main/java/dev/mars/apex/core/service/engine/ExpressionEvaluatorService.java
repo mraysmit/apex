@@ -2,8 +2,8 @@ package dev.mars.apex.core.service.engine;
 
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.engine.config.MapPropertyAccessor;
-import dev.mars.apex.core.util.RulesEngineLogger;
-import dev.mars.apex.core.util.TestAwareLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -45,7 +45,7 @@ import java.util.Map;
  * for consistent SpEL evaluation behavior across the APEX system.
  */
 public class ExpressionEvaluatorService {
-    private static final RulesEngineLogger rulesLogger = new RulesEngineLogger(ExpressionEvaluatorService.class);
+    private static final Logger logger = LoggerFactory.getLogger(ExpressionEvaluatorService.class);
     private final ExpressionParser parser;
 
     /**
@@ -61,9 +61,9 @@ public class ExpressionEvaluatorService {
      * @param parser The expression parser to use
      */
     public ExpressionEvaluatorService(ExpressionParser parser) {
-        rulesLogger.info("Initializing ExpressionEvaluatorService with enhanced context creation");
+        logger.info("Initializing ExpressionEvaluatorService with enhanced context creation");
         this.parser = parser;
-        rulesLogger.debug("Using parser: {}", this.parser.getClass().getSimpleName());
+        logger.debug("Using parser: {}", this.parser.getClass().getSimpleName());
     }
 
     /**
@@ -76,20 +76,20 @@ public class ExpressionEvaluatorService {
      * @return The result of the evaluation
      */
     public <T> T evaluate(String expression, EvaluationContext context, Class<T> resultType) {
-        rulesLogger.debug("Evaluating expression: {}", expression);
-        rulesLogger.debug("Expected result type: {}", resultType.getSimpleName());
+        logger.debug("Evaluating expression: {}", expression);
+        logger.debug("Expected result type: {}", resultType.getSimpleName());
 
         try {
-            rulesLogger.debug("Parsing expression");
+            logger.debug("Parsing expression");
             Expression exp = parser.parseExpression(expression);
 
-            rulesLogger.debug("Evaluating expression against context");
+            logger.debug("Evaluating expression against context");
             T result = exp.getValue(context, resultType);
 
-            rulesLogger.debug("Expression: {} => {}", expression, result);
+            logger.debug("Expression: {} => {}", expression, result);
             return result;
         } catch (Exception e) {
-            TestAwareLogger.warn(rulesLogger, "Error evaluating expression '{}': {}", expression, e.getMessage());
+            logger.warn("Error evaluating expression '{}': {}", expression, e.getMessage());
             return null;
         }
     }
@@ -105,42 +105,42 @@ public class ExpressionEvaluatorService {
      * @return A RuleResult containing the outcome of the evaluation
      */
     public <T> RuleResult evaluateWithResult(String expression, EvaluationContext context, Class<T> resultType) {
-        rulesLogger.info("Evaluating expression with result tracking: {}", expression);
-        rulesLogger.debug("Expected result type: {}", resultType.getSimpleName());
+        logger.info("Evaluating expression with result tracking: {}", expression);
+        logger.debug("Expected result type: {}", resultType.getSimpleName());
 
         try {
             // Check if the expression contains undefined variables
             if (expression.contains("#undefinedVariable")) {
-                rulesLogger.warn("Expression contains undefined variable: {}", expression);
+                logger.warn("Expression contains undefined variable: {}", expression);
                 return RuleResult.error("Expression", "Error evaluating expression: undefined variable");
             }
 
-            rulesLogger.debug("Parsing expression");
+            logger.debug("Parsing expression");
             Expression exp = parser.parseExpression(expression);
 
-            rulesLogger.debug("Evaluating expression against context");
+            logger.debug("Evaluating expression against context");
             T result = exp.getValue(context, resultType);
 
-            rulesLogger.debug("Expression: {} => {}", expression, result);
+            logger.debug("Expression: {} => {}", expression, result);
 
             // Create a RuleResult based on the evaluation outcome
             if (result == null) {
-                rulesLogger.debug("Result is null, returning noMatch");
+                logger.debug("Result is null, returning noMatch");
                 return RuleResult.noMatch();
             } else if (result instanceof Boolean) {
                 if ((Boolean) result) {
-                    rulesLogger.debug("Boolean result is true, returning match");
+                    logger.debug("Boolean result is true, returning match");
                     return RuleResult.match("Expression", "Expression evaluated to true: " + expression);
                 } else {
-                    rulesLogger.debug("Boolean result is false, returning noMatch");
+                    logger.debug("Boolean result is false, returning noMatch");
                     return RuleResult.noMatch();
                 }
             } else {
-                rulesLogger.debug("Non-boolean result, returning match");
+                logger.debug("Non-boolean result, returning match");
                 return RuleResult.match("Expression", "Expression evaluated successfully: " + expression);
             }
         } catch (Exception e) {
-            TestAwareLogger.warn(rulesLogger, "Error evaluating expression '{}': {}", expression, e.getMessage());
+            logger.warn("Error evaluating expression '{}': {}", expression, e.getMessage());
             return RuleResult.error("Expression", "Error evaluating expression: " + e.getMessage());
         }
     }
@@ -155,16 +155,16 @@ public class ExpressionEvaluatorService {
      * @return The result of the evaluation
      */
     public <T> T evaluateQuietly(String expression, EvaluationContext context, Class<T> resultType) {
-        rulesLogger.debug("Quietly evaluating expression: {}", expression);
-        rulesLogger.debug("Expected result type: {}", resultType.getSimpleName());
+        logger.debug("Quietly evaluating expression: {}", expression);
+        logger.debug("Expected result type: {}", resultType.getSimpleName());
 
         try {
             Expression exp = parser.parseExpression(expression);
             T result = exp.getValue(context, resultType);
-            rulesLogger.debug("Expression evaluated successfully");
+            logger.debug("Expression evaluated successfully");
             return result;
         } catch (Exception e) {
-            TestAwareLogger.warn(rulesLogger, "Error evaluating expression '{}': {}", expression, e.getMessage());
+            logger.warn("Error evaluating expression '{}': {}", expression, e.getMessage());
 
             // For boolean expressions, return false instead of null when there's an error
             if (resultType == Boolean.class || resultType == boolean.class) {
@@ -232,13 +232,13 @@ public class ExpressionEvaluatorService {
      * @return The result of the evaluation
      */
     public <T> T evaluateWithEnhancedContext(String expression, Map<String, Object> facts, Class<T> resultType) {
-        rulesLogger.debug("Evaluating expression with enhanced context: {}", expression);
+        logger.debug("Evaluating expression with enhanced context: {}", expression);
 
         try {
             StandardEvaluationContext context = createEnhancedContext(facts);
             return evaluate(expression, context, resultType);
         } catch (Exception e) {
-            TestAwareLogger.warn(rulesLogger, "Error evaluating expression '{}': {}", expression, e.getMessage());
+            logger.warn("Error evaluating expression '{}': {}", expression, e.getMessage());
 
             // For boolean expressions, return false instead of null when there's an error
             if (resultType == Boolean.class || resultType == boolean.class) {
@@ -248,3 +248,4 @@ public class ExpressionEvaluatorService {
         }
     }
 }
+

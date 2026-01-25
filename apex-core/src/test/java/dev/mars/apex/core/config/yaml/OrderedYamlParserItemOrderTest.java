@@ -5,7 +5,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -27,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class OrderedYamlParserItemOrderTest {
     
-    private static final Logger LOGGER = Logger.getLogger(OrderedYamlParserItemOrderTest.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrderedYamlParserItemOrderTest.class);
     
     private OrderedYamlParser parser;
     
@@ -280,4 +281,5 @@ class OrderedYamlParserItemOrderTest {
         LOGGER.info("All section types extraction test PASSED");
     }
 }
+
 

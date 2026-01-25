@@ -13,16 +13,29 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Tests for PipelineStepResult to ExecutionStep conversion in RulesEngine.
  * 
- * This test suite validates that the conversion from PipelineStepResult to ExecutionStep
- * correctly transfers all data, metrics, and metadata.
+ * <p><b>INTENTIONAL FAILURE TEST CLASS</b></p>
+ * <p>This test suite intentionally uses empty H2 databases without creating tables
+ * to verify pipeline error handling behavior. ERROR log messages during test execution
+ * are EXPECTED and indicate correct error handling, not actual failures.</p>
  * 
- * TEST COVERAGE:
- * - Field mapping verification (6 tests)
- * - Large dataset handling
- * - Different data types
- * - Skipped steps
- * - Failed steps
- * - Step ordering preservation
+ * <p>Expected ERROR messages include:</p>
+ * <ul>
+ *   <li>Table "SOURCE_ITEMS" not found</li>
+ *   <li>Table "MIXED_RECORDS" not found</li>
+ *   <li>No data available for transform step</li>
+ *   <li>Step 'load-items' failed (attempt X/Y)</li>
+ *   <li>Pipeline failed after retries</li>
+ * </ul>
+ * 
+ * <p>TEST COVERAGE:</p>
+ * <ul>
+ *   <li>Field mapping verification (6 tests)</li>
+ *   <li>Large dataset handling</li>
+ *   <li>Different data types</li>
+ *   <li>Skipped steps</li>
+ *   <li>Failed steps</li>
+ *   <li>Step ordering preservation</li>
+ * </ul>
  * 
  * @author APEX Core Team
  * @since 2026-01-11
@@ -36,6 +49,23 @@ public class PipelineExecutorStepDataConversionTest {
     private static final String TEST_YAML_BASE_PATH = "src/test/resources/pipeline-step-data/";
 
     private RulesEngine rulesEngine;
+
+    @BeforeAll
+    public static void classSetUp() {
+        logger.info("========================================================================");
+        logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-START] PipelineExecutorStepDataConversionTest");
+        logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-START] This test class uses empty databases");
+        logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected ERRORs: table not found, no data, load failures");
+        logger.info("========================================================================");
+    }
+
+    @AfterAll
+    public static void classTearDown() {
+        logger.info("========================================================================");
+        logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-END] PipelineExecutorStepDataConversionTest");
+        logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-END] All ERROR messages above were EXPECTED");
+        logger.info("========================================================================");
+    }
 
     @BeforeEach
     public void setUp() {

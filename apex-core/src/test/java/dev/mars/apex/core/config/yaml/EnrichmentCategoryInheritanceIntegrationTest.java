@@ -6,7 +6,8 @@ import dev.mars.apex.core.service.enrichment.EnrichmentGroupFactory;
 import org.junit.jupiter.api.*;
 
 import java.util.List;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("Enrichment Category Inheritance Integration Tests")
 class EnrichmentCategoryInheritanceIntegrationTest {
 
-    private static final Logger LOGGER = Logger.getLogger(EnrichmentCategoryInheritanceIntegrationTest.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnrichmentCategoryInheritanceIntegrationTest.class);
 
     private YamlConfigurationLoader loader;
     private YamlRuleFactory factory;
@@ -342,3 +343,4 @@ class EnrichmentCategoryInheritanceIntegrationTest {
                 .orElse(null);
     }
 }
+

@@ -388,6 +388,7 @@ public class ConfigurationContext {
             }
         } catch (IOException e) {
             logger.error("Failed to scan classpath prefix: {} - {}", classpathPrefix, e.getMessage());
+            logger.debug("Full stack trace for classpath scan failure:", e);
         }
         
         logger.debug("Loaded {} configurations from classpath prefix: {}", count, classpathPrefix);
@@ -412,6 +413,7 @@ public class ConfigurationContext {
             return config;
         } catch (Exception e) {
             logger.error("Failed to load configuration from: {} - {}", path, e.getMessage());
+            logger.debug("Full stack trace for configuration load failure:", e);
             return null;
         }
     }
@@ -435,6 +437,7 @@ public class ConfigurationContext {
             return component;
         } catch (Exception e) {
             logger.error("Failed to load component from: {} - {}", path, e.getMessage());
+            logger.debug("Full stack trace for component load failure:", e);
             return null;
         }
     }
@@ -525,6 +528,7 @@ public class ConfigurationContext {
             }
         } catch (IOException e) {
             logger.error("Failed to scan directory: {} - {}", directory, e.getMessage());
+            logger.debug("Full stack trace for directory scan failure:", e);
         }
         return count;
     }
@@ -558,6 +562,7 @@ public class ConfigurationContext {
             return true;
         } catch (Exception e) {
             logger.error("Failed to load file: {} - {}", file, e.getMessage());
+            logger.debug("Full stack trace for file load failure:", e);
             return false;
         }
     }
@@ -571,6 +576,7 @@ public class ConfigurationContext {
                 return loadFromDirectory(directory);
             } catch (Exception e) {
                 logger.error("Failed to load from classpath URL: {} - {}", url, e.getMessage());
+                logger.debug("Full stack trace for classpath URL load failure:", e);
             }
         } else {
             logger.debug("JAR classpath scanning not yet implemented for URL: {}", url);

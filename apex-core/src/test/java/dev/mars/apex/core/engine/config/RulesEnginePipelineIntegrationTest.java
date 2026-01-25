@@ -18,6 +18,7 @@ package dev.mars.apex.core.engine.config;
 
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.util.TestErrorContext;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -402,26 +403,36 @@ class RulesEnginePipelineIntegrationTest {
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class ErrorHandlingTests {
 
+        @BeforeAll
+        static void classSetUp() {
+            LoggerFactory.getLogger(RulesEnginePipelineIntegrationTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] ErrorHandlingTests intentionally triggers ERROR/WARN logs");
+            LoggerFactory.getLogger(RulesEnginePipelineIntegrationTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: invalid data source, connection failures, pipeline failures");
+        }
+
         @Test
         @Order(1)
         @DisplayName("Should handle invalid data source reference gracefully")
         void shouldHandleInvalidDataSourceReference() throws Exception {
             logger.info("=== Test: Handle Invalid Data Source Reference ===");
 
-            RulesEngine engine = RulesEngine.fromFile(
-                TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_InvalidSource.yaml");
+            TestErrorContext.withExpectedErrors("testing invalid data source reference handling", () -> {
+                RulesEngine engine = RulesEngine.fromFile(
+                    TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_InvalidSource.yaml");
 
-            Map<String, Object> inputData = new HashMap<>();
-            RuleResult result = engine.evaluate(inputData);
+                Map<String, Object> inputData = new HashMap<>();
+                RuleResult result = engine.evaluate(inputData);
 
-            assertNotNull(result, "Result should not be null");
-            assertEquals(RuleResult.ResultType.ERROR, result.getResultType(),
-                "Invalid data source should result in ERROR");
+                assertNotNull(result, "Result should not be null");
+                assertEquals(RuleResult.ResultType.ERROR, result.getResultType(),
+                    "Invalid data source should result in ERROR");
 
-            logger.info("[OK] Invalid data source reference handled gracefully");
-            logger.info("  Error: {}", result.getMessage());
+                logger.info("[OK] Invalid data source reference handled gracefully");
+                logger.info("  Error: {}", result.getMessage());
 
-            engine.shutdown();
+                engine.shutdown();
+            });
         }
 
         @Test
@@ -451,24 +462,26 @@ class RulesEnginePipelineIntegrationTest {
         void shouldHandleDataSourceConnectionFailure() throws Exception {
             logger.info("=== Test: Handle Data Source Connection Failure ===");
 
-            // YAML with unreachable database
-            RulesEngine engine = RulesEngine.fromFile(
-                TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_InitFailure.yaml");
+            TestErrorContext.withExpectedErrors("testing data source connection failure handling", () -> {
+                // YAML with unreachable database
+                RulesEngine engine = RulesEngine.fromFile(
+                    TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_InitFailure.yaml");
 
-            assertNotNull(engine, "RulesEngine should initialize even with connection failure");
-            logger.info("[OK] Data source connection failure handled gracefully during initialization");
+                assertNotNull(engine, "RulesEngine should initialize even with connection failure");
+                logger.info("[OK] Data source connection failure handled gracefully during initialization");
 
-            // Attempting to execute pipeline should fail gracefully
-            Map<String, Object> inputData = new HashMap<>();
-            RuleResult result = engine.evaluate(inputData);
+                // Attempting to execute pipeline should fail gracefully
+                Map<String, Object> inputData = new HashMap<>();
+                RuleResult result = engine.evaluate(inputData);
 
-            assertNotNull(result, "Result should not be null");
-            // May be ERROR or MATCH depending on how gracefully it degrades
+                assertNotNull(result, "Result should not be null");
+                // May be ERROR or MATCH depending on how gracefully it degrades
 
-            logger.info("[OK] Pipeline execution with failed data source handled");
-            logger.info("  Result type: {}", result.getResultType());
+                logger.info("[OK] Pipeline execution with failed data source handled");
+                logger.info("  Result type: {}", result.getResultType());
 
-            engine.shutdown();
+                engine.shutdown();
+            });
         }
 
         @Test
@@ -477,22 +490,24 @@ class RulesEnginePipelineIntegrationTest {
         void shouldNotThrowExceptionsDuringPipelineErrors() throws Exception {
             logger.info("=== Test: No Exceptions During Pipeline Errors ===");
 
-            RulesEngine engine = RulesEngine.fromFile(
-                TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_InvalidSource.yaml");
+            TestErrorContext.withExpectedErrors("testing pipeline error handling without exceptions", () -> {
+                RulesEngine engine = RulesEngine.fromFile(
+                    TEST_YAML_BASE_PATH + "RulesEnginePipelineIntegrationTest_InvalidSource.yaml");
 
-            Map<String, Object> inputData = new HashMap<>();
+                Map<String, Object> inputData = new HashMap<>();
 
-            // Should not throw exception, should return error RuleResult
-            assertDoesNotThrow(() -> {
-                RuleResult result = engine.evaluate(inputData);
-                assertNotNull(result, "Result should not be null even on error");
-                assertEquals(RuleResult.ResultType.ERROR, result.getResultType(),
-                    "Should return ERROR result type");
-            }, "Pipeline errors should not throw exceptions");
+                // Should not throw exception, should return error RuleResult
+                assertDoesNotThrow(() -> {
+                    RuleResult result = engine.evaluate(inputData);
+                    assertNotNull(result, "Result should not be null even on error");
+                    assertEquals(RuleResult.ResultType.ERROR, result.getResultType(),
+                        "Should return ERROR result type");
+                }, "Pipeline errors should not throw exceptions");
 
-            logger.info("[OK] Pipeline errors handled without throwing exceptions");
+                logger.info("[OK] Pipeline errors handled without throwing exceptions");
 
-            engine.shutdown();
+                engine.shutdown();
+            });
         }
     }
 

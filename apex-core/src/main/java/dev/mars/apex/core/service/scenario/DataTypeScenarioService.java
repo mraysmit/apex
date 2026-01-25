@@ -22,7 +22,6 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.config.yaml.YamlRuleFactory;
-import dev.mars.apex.core.util.TestAwareLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -158,7 +157,8 @@ public class DataTypeScenarioService {
             logger.info("Successfully loaded {} scenarios from registry", scenarioCache.size());
 
         } catch (Exception e) {
-            logger.error("Failed to load scenario registry from: {}", registryPath, e);
+            logger.error("Failed to load scenario registry from: {} - {}", registryPath, e.getMessage());
+            logger.debug("Scenario registry load error stack trace:", e);
             throw new RuntimeException("Scenario registry loading failed", e);
         }
     }
@@ -199,6 +199,7 @@ public class DataTypeScenarioService {
 
         } catch (Exception e) {
             logger.error("Failed to load individual scenario from: {} - Error: {}", configFile, e.getMessage());
+            logger.debug("Full stack trace for scenario load failure:", e);
             return null;
         }
     }
@@ -297,7 +298,7 @@ public class DataTypeScenarioService {
     public Object processData(Object data) {
         ScenarioConfiguration scenario = getScenarioForData(data);
         if (scenario == null) {
-            TestAwareLogger.warn(logger, "No scenario found for data type: {}", determineDataType(data));
+            logger.warn("No scenario found for data type: {}", determineDataType(data));
             return RuleResult.noRules();
         }
 
@@ -502,7 +503,7 @@ public class DataTypeScenarioService {
             Boolean required = (Boolean) stageData.get("required");
 
             if (stageName == null || configFile == null || executionOrder == null) {
-                TestAwareLogger.warn(logger, "Missing required stage fields: stage-name, config-file, or execution-order");
+                logger.warn("Missing required stage fields: stage-name, config-file, or execution-order");
                 return null;
             }
 
@@ -539,7 +540,8 @@ public class DataTypeScenarioService {
             return stage;
 
         } catch (Exception e) {
-            TestAwareLogger.error(logger, "Error parsing scenario stage: {}", e.getMessage(), e);
+            logger.error("Error parsing scenario stage: {}", e, e.getMessage());
+            logger.debug("Stack trace for scenario stage parsing error:", e);
             return null;
         }
     }
@@ -557,7 +559,7 @@ public class DataTypeScenarioService {
         try {
             List<String> ruleConfigurations = scenario.getRuleConfigurations();
             if (ruleConfigurations == null || ruleConfigurations.isEmpty()) {
-                TestAwareLogger.warn(logger, "No rule configurations found for scenario '{}'", scenario.getScenarioId());
+                logger.warn("No rule configurations found for scenario '{}'", scenario.getScenarioId());
                 return RuleResult.noRules();
             }
 
@@ -574,7 +576,7 @@ public class DataTypeScenarioService {
             }
 
             if (mergedConfig == null) {
-                TestAwareLogger.warn(logger, "Failed to load any rule configurations for scenario '{}'", scenario.getScenarioId());
+                logger.warn("Failed to load any rule configurations for scenario '{}'", scenario.getScenarioId());
                 return RuleResult.error("No rule configurations loaded", "No configurations could be loaded", "ERROR", null);
             }
 
@@ -597,7 +599,8 @@ public class DataTypeScenarioService {
             return engine.evaluate(mergedConfig, facts);
 
         } catch (Exception e) {
-            TestAwareLogger.error(logger, "Error in legacy processing for scenario '{}': {}", scenario.getScenarioId(), e.getMessage(), e);
+            logger.error("Error in legacy processing for scenario '{}': {}", e, scenario.getScenarioId(), e.getMessage());
+            logger.debug("Stack trace for legacy processing error:", e);
             return RuleResult.error("Legacy processing error", e.getMessage(), "ERROR", null);
         }
     }
@@ -615,7 +618,7 @@ public class DataTypeScenarioService {
     @Deprecated(since = "3.0", forRemoval = true)
     public ScenarioConfiguration getScenarioForMapData(Map<String, Object> data) {
         if (data == null) {
-            TestAwareLogger.warn(logger, "Cannot get scenario for null data");
+            logger.warn("Cannot get scenario for null data");
             return null;
         }
 
@@ -654,7 +657,7 @@ public class DataTypeScenarioService {
     @Deprecated(since = "3.0", forRemoval = true)
     public ScenarioExecutionResult processMapData(Map<String, Object> data) {
         if (data == null) {
-            TestAwareLogger.warn(logger, "Cannot process null data");
+            logger.warn("Cannot process null data");
             ScenarioExecutionResult result = new ScenarioExecutionResult("unknown");
             result.addWarning("Cannot process null data");
             result.setTerminated(true);
@@ -665,7 +668,7 @@ public class DataTypeScenarioService {
         ScenarioConfiguration scenario = getScenarioForMapData(data);
 
         if (scenario == null) {
-            TestAwareLogger.warn(logger, "No scenario found for Map data with fields: {}", data.keySet());
+            logger.warn("No scenario found for Map data with fields: {}", data.keySet());
             ScenarioExecutionResult result = new ScenarioExecutionResult("unknown");
             result.addWarning("No scenario matched the provided data");
             result.setTerminated(true);
@@ -703,3 +706,4 @@ public class DataTypeScenarioService {
         return routing;
     }
 }
+

@@ -6,7 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.AfterEach;
 
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class PropertyResolutionTest {
 
-    private static final Logger LOGGER = Logger.getLogger(PropertyResolutionTest.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(PropertyResolutionTest.class);
 
     @BeforeEach
     void setUp() throws Exception {
@@ -224,3 +225,4 @@ public class PropertyResolutionTest {
         LOGGER.info("[OK] Mixed placeholder syntax works: " + input + " -> [RESULT_MASKED_FOR_SECURITY]");
     }
 }
+

@@ -565,6 +565,7 @@ public class YamlTransformationProcessor {
             expr.setValue(context, value);
         } catch (Exception e) {
             logger.error("Failed to set field value for {}: {}", fieldName, e.getMessage());
+            logger.debug("Full stack trace for field value setting failure:", e);
         }
     }
 

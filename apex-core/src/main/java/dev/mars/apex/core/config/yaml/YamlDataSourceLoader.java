@@ -96,10 +96,12 @@ public class YamlDataSourceLoader {
                 configurations.size());
             
         } catch (DataSourceException e) {
-            LOGGER.error("Failed to load data sources from YAML configuration", e);
+            LOGGER.error("Failed to load data sources from YAML configuration: {}", e.getMessage());
+            LOGGER.debug("Stack trace for YAML data source load failure:", e);
             throw e;
         } catch (Exception e) {
-            LOGGER.error("Unexpected error loading data sources from YAML configuration", e);
+            LOGGER.error("Unexpected error loading data sources from YAML configuration: {}", e.getMessage());
+            LOGGER.debug("Stack trace for unexpected YAML data source load error:", e);
             throw new DataSourceException(DataSourceException.ErrorType.CONFIGURATION_ERROR,
                 "Failed to load data sources from YAML configuration", e);
         }
@@ -125,10 +127,12 @@ public class YamlDataSourceLoader {
                 configuration.getName());
             
         } catch (DataSourceException e) {
-            LOGGER.error("Failed to add data source from YAML configuration", e);
+            LOGGER.error("Failed to add data source from YAML configuration: {}", e.getMessage());
+            LOGGER.debug("Stack trace for YAML data source add failure:", e);
             throw e;
         } catch (Exception e) {
-            LOGGER.error("Unexpected error adding data source from YAML configuration", e);
+            LOGGER.error("Unexpected error adding data source from YAML configuration: {}", e.getMessage());
+            LOGGER.debug("Stack trace for unexpected YAML data source add error:", e);
             throw new DataSourceException(DataSourceException.ErrorType.CONFIGURATION_ERROR,
                 "Failed to add data source from YAML configuration", e);
         }
@@ -172,7 +176,8 @@ public class YamlDataSourceLoader {
             LOGGER.info("Successfully reloaded data sources from YAML configuration");
             
         } catch (DataSourceException e) {
-            LOGGER.error("Failed to reload data sources from YAML configuration", e);
+            LOGGER.error("Failed to reload data sources from YAML configuration: {}", e.getMessage());
+            LOGGER.debug("Stack trace for YAML data source reload failure:", e);
             throw e;
         }
     }

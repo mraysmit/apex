@@ -169,7 +169,8 @@ public class DatabaseDataSink implements DataSink {
             LOGGER.info("Database sink shutdown completed: {}", getName());
 
         } catch (Exception e) {
-            LOGGER.error("Error during database sink shutdown", e);
+            LOGGER.error("Error during database sink shutdown: {}", e.getMessage());
+            LOGGER.debug("Stack trace for database sink shutdown error:", e);
         }
     }
     
@@ -701,7 +702,8 @@ public class DatabaseDataSink implements DataSink {
             LOGGER.debug("Schema initialization script executed successfully");
 
         } catch (Exception e) {
-            LOGGER.error("Failed to execute schema initialization script", e);
+            LOGGER.error("Failed to execute schema initialization script: {}", e.getMessage());
+            LOGGER.debug("Stack trace for schema initialization script execution failure:", e);
             throw DataSinkException.configurationError("Schema initialization script execution failed", e);
         }
     }

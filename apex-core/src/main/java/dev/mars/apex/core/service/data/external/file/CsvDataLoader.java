@@ -111,7 +111,8 @@ public class CsvDataLoader implements DataLoader {
             }
             
         } catch (IOException e) {
-            LOGGER.error("Failed to load CSV file: {}", filePath, e);
+            LOGGER.error("Failed to load CSV file: {} - {}", filePath, e.getMessage());
+            LOGGER.debug("CSV file load error stack trace:", e);
             throw e;
         }
         

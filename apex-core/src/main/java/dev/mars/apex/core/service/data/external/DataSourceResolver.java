@@ -3,7 +3,8 @@ package dev.mars.apex.core.service.data.external;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import dev.mars.apex.core.util.PropertyResolver;
-import dev.mars.apex.core.util.RulesEngineLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -32,7 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DataSourceResolver {
     
-    private final RulesEngineLogger logger = new RulesEngineLogger(DataSourceResolver.class);
+    private static final Logger logger = LoggerFactory.getLogger(DataSourceResolver.class);
 
     private final ObjectMapper yamlMapper;
     private final Map<String, ExternalDataSourceConfig> configCache;

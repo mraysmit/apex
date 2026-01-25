@@ -125,7 +125,8 @@ public class DataSourceConfigurationService implements DataSourceManagerListener
             notifyListeners(DataSourceConfigurationEvent.initialized(configurations.size()));
             
         } catch (DataSourceException e) {
-            LOGGER.error("Failed to initialize DataSourceConfigurationService", e);
+            LOGGER.error("Failed to initialize DataSourceConfigurationService: {}", e.getMessage());
+            LOGGER.debug("Stack trace for DataSourceConfigurationService initialization failure:", e);
             throw e;
         }
     }
@@ -260,7 +261,8 @@ public class DataSourceConfigurationService implements DataSourceManagerListener
             notifyListeners(DataSourceConfigurationEvent.reloaded(configurations.size()));
             
         } catch (DataSourceException e) {
-            LOGGER.error("Failed to reload data source configurations from YAML", e);
+            LOGGER.error("Failed to reload data source configurations from YAML: {}", e.getMessage());
+            LOGGER.debug("Stack trace for data source configuration reload failure:", e);
             throw e;
         }
     }
@@ -415,7 +417,8 @@ public class DataSourceConfigurationService implements DataSourceManagerListener
             try {
                 listener.onConfigurationEvent(event);
             } catch (Exception e) {
-                LOGGER.error("Error notifying configuration listener", e);
+                LOGGER.error("Error notifying configuration listener: {}", e.getMessage());
+                LOGGER.debug("Configuration listener error stack trace:", e);
             }
         }
     }

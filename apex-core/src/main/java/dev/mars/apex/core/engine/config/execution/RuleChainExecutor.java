@@ -73,6 +73,8 @@ public class RuleChainExecutor {
                                       YamlRuleConfiguration yamlConfig, 
                                       Map<String, Object> data,
                                       java.util.function.Function<Map<String, Object>, StandardEvaluationContext> contextFactory) {
+        logger.debug("processRuleChain() entry - chainId: '{}', data keys: {}", chainId, data.keySet());
+        
         // Find rule chain in yamlConfig
         YamlRuleChain chain = findRuleChainById(yamlConfig, chainId);
         if (chain == null) {
@@ -82,15 +84,20 @@ public class RuleChainExecutor {
 
         if (!chain.isEnabled()) {
             logger.info("Rule chain '{}' is disabled, skipping", chainId);
+            logger.debug("processRuleChain() - chain disabled, returning no-match");
             return RuleResult.noMatch(chainId, "Rule chain disabled", SeverityConstants.INFO);
         }
 
         logger.info("Processing rule chain: {} (Pattern: {})", chain.getName(), chain.getPattern());
+        logger.debug("processRuleChain() - chain '{}' has configuration: {}", chainId, 
+                    chain.getConfiguration() != null ? "yes" : "no");
 
         // Handle different patterns
         if ("conditional-chaining".equals(chain.getPattern())) {
+            logger.debug("processRuleChain() - executing conditional-chaining pattern");
             return executeConditionalChainingPattern(chain, data, contextFactory);
         } else if ("result-based-routing".equals(chain.getPattern())) {
+            logger.debug("processRuleChain() - executing result-based-routing pattern");
             return executeResultBasedRoutingPattern(chain, yamlConfig, data, contextFactory);
         } else {
             logger.warn("Rule chain pattern '{}' not yet supported", chain.getPattern());
@@ -242,6 +249,9 @@ public class RuleChainExecutor {
     private RuleResult executeConditionalChainingPattern(YamlRuleChain chain, 
                                                         Map<String, Object> data,
                                                         java.util.function.Function<Map<String, Object>, StandardEvaluationContext> contextFactory) {
+        logger.debug("executeConditionalChainingPattern() - chain: '{}', data size: {}", 
+                    chain.getId(), data.size());
+        
         Map<String, Object> config = chain.getConfiguration();
         if (config == null) {
             return RuleResult.error(chain.getId(), "Missing configuration for rule chain");
@@ -257,20 +267,24 @@ public class RuleChainExecutor {
         String message = (String) triggerRuleConfig.get("message");
         String resultField = (String) triggerRuleConfig.get("result-field");
 
+        logger.debug("executeConditionalChainingPattern() - evaluating trigger-rule with condition: {}", condition);
         StandardEvaluationContext context = contextFactory.apply(data);
         boolean triggered = false;
         try {
             Expression exp = parser.parseExpression(condition);
             Boolean result = exp.getValue(context, Boolean.class);
             triggered = result != null && result;
+            logger.debug("executeConditionalChainingPattern() - trigger-rule evaluated to: {}", triggered);
         } catch (Exception e) {
             logger.error("Error evaluating trigger rule for chain '{}': {}", chain.getId(), e.getMessage());
+            logger.debug("Full stack trace for trigger rule evaluation error:", e);
             return RuleResult.error(chain.getId(), "Trigger evaluation failed: " + e.getMessage());
         }
 
         // Set result field if specified
         if (resultField != null && !resultField.trim().isEmpty()) {
             data.put(resultField, triggered);
+            logger.debug("executeConditionalChainingPattern() - stored result-field '{}' = {}", resultField, triggered);
             logger.debug("Set result field '{}' to {}", resultField, triggered);
         }
 

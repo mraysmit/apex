@@ -168,7 +168,7 @@ public class EnrichmentController {
 
             // Check for business logic failures (ResultType.ERROR)
             if (result.getResultType() == RuleResult.ResultType.ERROR) {
-                logger.error(Enrichment processing failed with ERROR result type");
+                logger.error("Enrichment processing failed with ERROR result type");
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("success", false);
                 errorResponse.put("error", "Enrichment processing failed");
@@ -273,7 +273,7 @@ public class EnrichmentController {
 
                 // Check for business logic failures (ResultType.ERROR)
                 if (result.getResultType() == RuleResult.ResultType.ERROR) {
-                    logger.error(Batch enrichment processing failed with ERROR result type for object");
+                    logger.error("Batch enrichment processing failed with ERROR result type for object");
                     Map<String, Object> errorResponse = new HashMap<>();
                     errorResponse.put("success", false);
                     errorResponse.put("error", "Batch enrichment processing failed");
@@ -376,7 +376,7 @@ public class EnrichmentController {
 
             // Check for business logic failures (ResultType.ERROR)
             if (result.getResultType() == RuleResult.ResultType.ERROR) {
-                logger.error(Predefined enrichment processing failed with ERROR result type");
+                logger.error("Predefined enrichment processing failed with ERROR result type");
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("success", false);
                 errorResponse.put("error", "Predefined enrichment processing failed");

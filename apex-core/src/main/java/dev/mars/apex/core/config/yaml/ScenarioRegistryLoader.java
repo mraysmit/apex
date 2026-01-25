@@ -2,7 +2,8 @@ package dev.mars.apex.core.config.yaml;
 
 import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
 import dev.mars.apex.core.service.scenario.ScenarioStage;
-import dev.mars.apex.core.util.RulesEngineLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -72,7 +73,7 @@ import java.util.*;
  */
 public class ScenarioRegistryLoader {
     
-    private static final RulesEngineLogger logger = new RulesEngineLogger(ScenarioRegistryLoader.class);
+    private static final Logger logger = LoggerFactory.getLogger(ScenarioRegistryLoader.class);
     
     private final YamlConfigurationLoader configLoader;
     
@@ -1158,7 +1159,7 @@ public class ScenarioRegistryLoader {
         }
         
         // Not found - return null to allow caller to handle
-        logger.warn("Config file '{}' not found in any search path", configFile);
+        logger.error("Config file '{}' not found in any search path", configFile);
         return null;
     }
 

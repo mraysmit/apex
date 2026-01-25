@@ -211,7 +211,8 @@ public class FileSystemDataSource implements ExternalDataSource {
             
         } catch (Exception e) {
             metrics.recordFailedRequest(System.currentTimeMillis() - startTime);
-            LOGGER.error("Failed to get data from file system", e);
+            LOGGER.error("Failed to get data from file system: {}", e.getMessage());
+            LOGGER.debug("Stack trace for file system data retrieval failure:", e);
             return null;
         }
     }
@@ -752,7 +753,8 @@ public class FileSystemDataSource implements ExternalDataSource {
             }
             
         } catch (Exception e) {
-            LOGGER.error("Error during file change check", e);
+            LOGGER.error("Error during file change check: {}", e.getMessage());
+            LOGGER.debug("Stack trace for file change check error:", e);
         }
     }
     

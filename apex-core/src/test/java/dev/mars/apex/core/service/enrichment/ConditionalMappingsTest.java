@@ -9,7 +9,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class ConditionalMappingsTest {
 
-    private static final Logger logger = Logger.getLogger(ConditionalMappingsTest.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(ConditionalMappingsTest.class);
 
     @Test
     @DisplayName("Should create conditional-mappings structure from YAML")
@@ -86,7 +87,7 @@ public class ConditionalMappingsTest {
             logger.info("[OK] Conditional mappings structure creation successful");
 
         } catch (Exception e) {
-            logger.severe("Failed to create conditional mappings structure: " + e.getMessage());
+            logger.error("Failed to create conditional mappings structure: " + e.getMessage());
             fail("Should be able to create conditional mappings structure: " + e.getMessage());
         }
     }
@@ -142,7 +143,7 @@ public class ConditionalMappingsTest {
             logger.info("[OK] OR conditions processing successful");
 
         } catch (Exception e) {
-            logger.severe("Failed to process OR conditions: " + e.getMessage());
+            logger.error("Failed to process OR conditions: " + e.getMessage());
             fail("Should be able to process OR conditions: " + e.getMessage());
         }
     }
@@ -203,7 +204,7 @@ public class ConditionalMappingsTest {
             logger.info("[OK] AND conditions processing successful");
 
         } catch (Exception e) {
-            logger.severe("Failed to process AND conditions: " + e.getMessage());
+            logger.error("Failed to process AND conditions: " + e.getMessage());
             fail("Should be able to process AND conditions: " + e.getMessage());
         }
     }
@@ -259,9 +260,10 @@ public class ConditionalMappingsTest {
             logger.info("[OK] Failed conditions handling successful");
 
         } catch (Exception e) {
-            logger.severe("Failed to handle failed conditions: " + e.getMessage());
+            logger.error("Failed to handle failed conditions: " + e.getMessage());
             fail("Should be able to handle failed conditions: " + e.getMessage());
         }
     }
 
 }
+

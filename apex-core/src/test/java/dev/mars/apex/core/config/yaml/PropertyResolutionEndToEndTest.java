@@ -6,7 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.AfterEach;
 
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class PropertyResolutionEndToEndTest {
 
-    private static final Logger LOGGER = Logger.getLogger(PropertyResolutionEndToEndTest.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(PropertyResolutionEndToEndTest.class);
     
     private YamlConfigurationLoader loader;
 
@@ -203,3 +204,4 @@ public class PropertyResolutionEndToEndTest {
         LOGGER.info("[OK] Missing required properties handled correctly: " + message);
     }
 }
+

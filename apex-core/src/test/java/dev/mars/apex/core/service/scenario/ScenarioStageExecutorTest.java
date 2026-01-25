@@ -19,8 +19,12 @@ package dev.mars.apex.core.service.scenario;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlRuleFactory;
+import dev.mars.apex.core.util.TestErrorContext;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -31,11 +35,22 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * Tests stage execution, dependency management, failure policies,
  * and integration with the rules engine.
+ * 
+ * NOTE: This test class INTENTIONALLY triggers ERROR and WARN logs
+ * to verify failure policy handling. All such logs are expected test behavior.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
 class ScenarioStageExecutorTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(ScenarioStageExecutorTest.class);
+
+    @BeforeAll
+    static void classSetUp() {
+        logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-START] ScenarioStageExecutorTest intentionally triggers ERROR/WARN logs");
+        logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: stage failures, termination policies, dependency failures");
+    }
 
     private TestConfigLoader configLoader;
     // Test loader that returns in-memory configs without touching the filesystem
@@ -144,42 +159,44 @@ class ScenarioStageExecutorTest {
      */
     @Test
     void testExecuteStages_FailurePolicyTerminateIntentional() throws Exception {
-        // Arrange
-        ScenarioStage criticalStage = new ScenarioStage("critical-validation", "config/critical.yaml", 1);
-        criticalStage.setFailurePolicy(ScenarioStage.FAILURE_POLICY_TERMINATE);
-        criticalStage.setRequired(true);
+        TestErrorContext.withExpectedErrors("testing TERMINATE failure policy", () -> {
+            // Arrange
+            ScenarioStage criticalStage = new ScenarioStage("critical-validation", "config/critical.yaml", 1);
+            criticalStage.setFailurePolicy(ScenarioStage.FAILURE_POLICY_TERMINATE);
+            criticalStage.setRequired(true);
 
-        ScenarioStage nextStage = new ScenarioStage("next-stage", "config/next.yaml", 2);
+            ScenarioStage nextStage = new ScenarioStage("next-stage", "config/next.yaml", 2);
 
-        List<ScenarioStage> stages = Arrays.asList(criticalStage, nextStage);
-        ScenarioConfiguration scenario = ScenarioConfiguration.withStages("terminate-test", "Terminate Test",
-                                                                          Arrays.asList("TestData"), stages);
+            List<ScenarioStage> stages = Arrays.asList(criticalStage, nextStage);
+            ScenarioConfiguration scenario = ScenarioConfiguration.withStages("terminate-test", "Terminate Test",
+                                                                              Arrays.asList("TestData"), stages);
 
-        // Simulate a configuration error to trigger failure
-        configLoader.addFailure("config/critical.yaml");
-        // Ensure next stage would succeed if executed
-        configLoader.addSuccess("config/next.yaml");
+            // Simulate a configuration error to trigger failure
+            configLoader.addFailure("config/critical.yaml");
+            // Ensure next stage would succeed if executed
+            configLoader.addSuccess("config/next.yaml");
 
 
-        Map<String, Object> testData = new HashMap<>();
-        testData.put("testField", "testValue");
+            Map<String, Object> testData = new HashMap<>();
+            testData.put("testField", "testValue");
 
-        // Act
-        ScenarioExecutionResult result = executor.executeStages(scenario, testData);
+            // Act
+            ScenarioExecutionResult result = executor.executeStages(scenario, testData);
 
-        // Assert
-        assertNotNull(result);
-        assertTrue(result.isTerminated());
-        assertFalse(result.isSuccessful());
+            // Assert
+            assertNotNull(result);
+            assertTrue(result.isTerminated());
+            assertFalse(result.isSuccessful());
 
-        // Should have only one stage result (the failed one)
-        assertEquals(1, result.getStageResults().size());
-        StageExecutionResult stageResult = result.getStageResults().get(0);
-        assertEquals("critical-validation", stageResult.getStageName());
-        assertFalse(stageResult.isSuccessful());
-
-        // Next stage should not have been executed
-        assertTrue(result.getSkippedStages().containsKey("next-stage"));
+            // Should have only one stage result (the failed one)
+            assertEquals(1, result.getStageResults().size());
+            StageExecutionResult stageResult = result.getStageResults().get(0);
+            assertEquals("critical-validation", stageResult.getStageName());
+            assertFalse(stageResult.isSuccessful());
+            
+            // Next stage should not have been executed
+            assertTrue(result.getSkippedStages().containsKey("next-stage"));
+        });
     }
 
     /**
@@ -189,43 +206,44 @@ class ScenarioStageExecutorTest {
      */
     @Test
     void testExecuteStages_FailurePolicyContinueWithWarningsIntentional() throws Exception {
-        // Arrange
-        ScenarioStage warningStage = new ScenarioStage("warning-stage", "config/warning.yaml", 1);
-        warningStage.setFailurePolicy(ScenarioStage.FAILURE_POLICY_CONTINUE_WITH_WARNINGS);
-        warningStage.setRequired(false);
+        TestErrorContext.withExpectedErrors("testing CONTINUE_WITH_WARNINGS failure policy", () -> {
+            // Arrange
+            ScenarioStage warningStage = new ScenarioStage("warning-stage", "config/warning.yaml", 1);
+            warningStage.setFailurePolicy(ScenarioStage.FAILURE_POLICY_CONTINUE_WITH_WARNINGS);
+            warningStage.setRequired(false);
 
-        ScenarioStage nextStage = new ScenarioStage("next-stage", "config/next.yaml", 2);
+            ScenarioStage nextStage = new ScenarioStage("next-stage", "config/next.yaml", 2);
 
-        List<ScenarioStage> stages = Arrays.asList(warningStage, nextStage);
-        ScenarioConfiguration scenario = ScenarioConfiguration.withStages("warning-test", "Warning Test",
-                                                                          Arrays.asList("TestData"), stages);
+            List<ScenarioStage> stages = Arrays.asList(warningStage, nextStage);
+            ScenarioConfiguration scenario = ScenarioConfiguration.withStages("warning-test", "Warning Test",
+                                                                              Arrays.asList("TestData"), stages);
 
-        // Simulate first stage failure and second stage success
-        configLoader.addFailure("config/warning.yaml");
-        configLoader.addSuccess("config/next.yaml");
+            // Simulate first stage failure and second stage success
+            configLoader.addFailure("config/warning.yaml");
+            configLoader.addSuccess("config/next.yaml");
 
-        Map<String, Object> testData = new HashMap<>();
-        testData.put("testField", "testValue");
+            Map<String, Object> testData = new HashMap<>();
+            testData.put("testField", "testValue");
 
-        // Act
-        ScenarioExecutionResult result = executor.executeStages(scenario, testData);
+            // Act
+            ScenarioExecutionResult result = executor.executeStages(scenario, testData);
 
-        // Assert
-        assertNotNull(result);
-        assertFalse(result.isTerminated());
-        assertTrue(result.hasWarnings());
+            // Assert
+            assertNotNull(result);
+            assertFalse(result.isTerminated());
+            assertTrue(result.hasWarnings());
 
-        // Should have executed both stages
-        assertEquals(2, result.getStageResults().size());
+            // Should have executed both stages
+            assertEquals(2, result.getStageResults().size());
 
-        // First stage should have failed
-        StageExecutionResult firstStage = result.getStageResults().get(0);
-        assertEquals("warning-stage", firstStage.getStageName());
-        assertFalse(firstStage.isSuccessful());
+            // First stage should have failed
+            StageExecutionResult firstStage = result.getStageResults().get(0);
+            assertEquals("warning-stage", firstStage.getStageName());
+            assertFalse(firstStage.isSuccessful());
 
-        // Should have warnings
-        assertFalse(result.getWarnings().isEmpty());
-
+            // Should have warnings
+            assertFalse(result.getWarnings().isEmpty());
+        });
     }
 
     /**
@@ -235,31 +253,33 @@ class ScenarioStageExecutorTest {
      */
     @Test
     void testExecuteStages_FailurePolicyFlagForReviewIntentional() throws Exception {
-        // Arrange
-        ScenarioStage reviewStage = new ScenarioStage("review-stage", "config/review.yaml", 1);
-        reviewStage.setFailurePolicy(ScenarioStage.FAILURE_POLICY_FLAG_FOR_REVIEW);
+        TestErrorContext.withExpectedErrors("testing FLAG_FOR_REVIEW failure policy", () -> {
+            // Arrange
+            ScenarioStage reviewStage = new ScenarioStage("review-stage", "config/review.yaml", 1);
+            reviewStage.setFailurePolicy(ScenarioStage.FAILURE_POLICY_FLAG_FOR_REVIEW);
 
-        List<ScenarioStage> stages = Arrays.asList(reviewStage);
-        ScenarioConfiguration scenario = ScenarioConfiguration.withStages("review-test", "Review Test",
-                                                                          Arrays.asList("TestData"), stages);
+            List<ScenarioStage> stages = Arrays.asList(reviewStage);
+            ScenarioConfiguration scenario = ScenarioConfiguration.withStages("review-test", "Review Test",
+                                                                              Arrays.asList("TestData"), stages);
 
-        // Simulate stage failure that should flag for review
-        configLoader.addFailure("config/review.yaml");
+            // Simulate stage failure that should flag for review
+            configLoader.addFailure("config/review.yaml");
 
-        Map<String, Object> testData = new HashMap<>();
-        testData.put("testField", "testValue");
+            Map<String, Object> testData = new HashMap<>();
+            testData.put("testField", "testValue");
 
-        // Act
-        ScenarioExecutionResult result = executor.executeStages(scenario, testData);
+            // Act
+            ScenarioExecutionResult result = executor.executeStages(scenario, testData);
 
-        // Assert
-        assertNotNull(result);
-        assertFalse(result.isTerminated());
-        assertTrue(result.requiresReview());
-        assertTrue(result.hasReviewFlags());
+            // Assert
+            assertNotNull(result);
+            assertFalse(result.isTerminated());
+            assertTrue(result.requiresReview());
+            assertTrue(result.hasReviewFlags());
 
-        // Should have review flags
-        assertFalse(result.getReviewFlags().isEmpty());
+            // Should have review flags
+            assertFalse(result.getReviewFlags().isEmpty());
+        });
 
     }
 
@@ -270,36 +290,37 @@ class ScenarioStageExecutorTest {
      */
     @Test
     void testExecuteStages_SkippedDueToDependenciesIntentional() throws Exception {
-        // Arrange
-        ScenarioStage firstStage = new ScenarioStage("first", "config/first.yaml", 1);
-        firstStage.setFailurePolicy(ScenarioStage.FAILURE_POLICY_TERMINATE);
+        TestErrorContext.withExpectedErrors("testing dependency failure causing stage skip", () -> {
+            // Arrange
+            ScenarioStage firstStage = new ScenarioStage("first", "config/first.yaml", 1);
+            firstStage.setFailurePolicy(ScenarioStage.FAILURE_POLICY_TERMINATE);
 
-        ScenarioStage dependentStage = new ScenarioStage("dependent", "config/dependent.yaml", 2);
-        dependentStage.addDependency("first");
+            ScenarioStage dependentStage = new ScenarioStage("dependent", "config/dependent.yaml", 2);
+            dependentStage.addDependency("first");
 
-        List<ScenarioStage> stages = Arrays.asList(firstStage, dependentStage);
-        ScenarioConfiguration scenario = ScenarioConfiguration.withStages("dependency-test", "Dependency Test",
-                                                                          Arrays.asList("TestData"), stages);
+            List<ScenarioStage> stages = Arrays.asList(firstStage, dependentStage);
+            ScenarioConfiguration scenario = ScenarioConfiguration.withStages("dependency-test", "Dependency Test",
+                                                                              Arrays.asList("TestData"), stages);
 
-        // Simulate first stage failure
-        configLoader.addFailure("config/first.yaml");
+            // Simulate first stage failure
+            configLoader.addFailure("config/first.yaml");
 
-        Map<String, Object> testData = new HashMap<>();
-        testData.put("testField", "testValue");
+            Map<String, Object> testData = new HashMap<>();
+            testData.put("testField", "testValue");
 
-        // Act
-        ScenarioExecutionResult result = executor.executeStages(scenario, testData);
+            // Act
+            ScenarioExecutionResult result = executor.executeStages(scenario, testData);
 
-        // Assert
-        assertNotNull(result);
-        assertTrue(result.isTerminated());
+            // Assert
+            assertNotNull(result);
+            assertTrue(result.isTerminated());
 
-        // Should have one executed stage and one skipped stage
-        assertEquals(1, result.getStageResults().size());
-        assertEquals(1, result.getSkippedStages().size());
+            // Should have one executed stage and one skipped stage
+            assertEquals(1, result.getStageResults().size());
+            assertEquals(1, result.getSkippedStages().size());
 
-        assertTrue(result.getSkippedStages().containsKey("dependent"));
-
+            assertTrue(result.getSkippedStages().containsKey("dependent"));
+        });
     }
 
     @Test

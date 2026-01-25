@@ -68,7 +68,8 @@ public class ExpressionEvaluationService {
             EvaluationContext evalContext = createEvaluationContext(context);
             return expressionEvaluatorService.evaluate(expression, evalContext, Object.class);
         } catch (Exception e) {
-            logger.warn("Error evaluating expression '" + expression + "': " + e.getMessage(), e);
+            logger.warn("Error evaluating expression '{}': {}", expression, e.getMessage());
+            logger.debug("Stack trace for expression evaluation error:", e);
             throw new RuntimeException("Failed to evaluate expression: " + expression, e);
         }
     }
@@ -87,7 +88,8 @@ public class ExpressionEvaluationService {
             EvaluationContext evalContext = createEvaluationContext(context);
             return expressionEvaluatorService.evaluateWithResult(expression, evalContext, Object.class);
         } catch (Exception e) {
-            logger.warn("Error evaluating expression with result '" + expression + "': " + e.getMessage(), e);
+            logger.warn("Error evaluating expression with result '{}': {}", expression, e.getMessage());
+            logger.debug("Stack trace for expression with result evaluation error:", e);
             return RuleResult.error("Expression", "Error evaluating expression: " + e.getMessage());
         }
     }
@@ -126,7 +128,8 @@ public class ExpressionEvaluationService {
             Boolean result = expressionEvaluatorService.evaluate(expression, evalContext, Boolean.class);
             return result != null && result;
         } catch (Exception e) {
-            logger.warn("Error evaluating boolean expression '" + expression + "': " + e.getMessage(), e);
+            logger.warn("Error evaluating boolean expression '{}': {}", expression, e.getMessage());
+            logger.debug("Stack trace for boolean expression evaluation error:", e);
             return false;
         }
     }
@@ -146,7 +149,8 @@ public class ExpressionEvaluationService {
             Object result = expressionEvaluatorService.evaluate(expression, evalContext, Object.class);
             return result != null ? result.toString() : null;
         } catch (Exception e) {
-            logger.warn("Error evaluating string expression '" + expression + "': " + e.getMessage(), e);
+            logger.warn("Error evaluating string expression '{}': {}", expression, e.getMessage());
+            logger.debug("Stack trace for string expression evaluation error:", e);
             return null;
         }
     }
@@ -165,7 +169,8 @@ public class ExpressionEvaluationService {
             EvaluationContext evalContext = createEvaluationContext(context);
             return expressionEvaluatorService.evaluate(expression, evalContext, Number.class);
         } catch (Exception e) {
-            logger.warn("Error evaluating numeric expression '" + expression + "': " + e.getMessage(), e);
+            logger.warn("Error evaluating numeric expression '{}': {}", expression, e.getMessage());
+            logger.debug("Stack trace for numeric expression evaluation error:", e);
             return null;
         }
     }
@@ -186,7 +191,8 @@ public class ExpressionEvaluationService {
             EvaluationContext evalContext = createEvaluationContext(context);
             return expressionEvaluatorService.evaluate(expression, evalContext, resultType);
         } catch (Exception e) {
-            logger.warn("Error evaluating typed expression '" + expression + "': " + e.getMessage(), e);
+            logger.warn("Error evaluating typed expression '{}': {}", expression, e.getMessage());
+            logger.debug("Stack trace for typed expression evaluation error:", e);
             return null;
         }
     }

@@ -5,7 +5,8 @@ import dev.mars.apex.core.engine.config.util.DataCopyUtility;
 import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
 import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
 import dev.mars.apex.core.service.scenario.ScenarioStageExecutor;
-import dev.mars.apex.core.util.RulesEngineLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -41,7 +42,7 @@ import java.util.Map;
  * @since 2.1
  */
 public class ScenarioEvaluationManager {
-    private static final RulesEngineLogger logger = new RulesEngineLogger(ScenarioEvaluationManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(ScenarioEvaluationManager.class);
 
     private final YamlRuleConfiguration yamlConfig;
     private final Map<String, ScenarioConfiguration> scenarioRegistry;

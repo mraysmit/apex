@@ -1,7 +1,6 @@
 package dev.mars.apex.rest.exception;
 
 import dev.mars.apex.rest.dto.ApiErrorResponse;
-import dev.mars.apex.rest.util.TestAwareLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,9 +56,6 @@ public class GlobalExceptionHandler {
     
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     
-    @Autowired
-    private TestAwareLogger testAwareLogger;
-    
     /**
      * Handle validation errors from @Valid annotations.
      */
@@ -84,7 +80,7 @@ public class GlobalExceptionHandler {
             );
         }
         
-        testAwareLogger.warn(logger, "Validation error [{}]: {} field errors for {}",
+        logger.warn("Validation error [{}]: {} field errors for {}",
                            correlationId, errorResponse.getErrors().size(), instance);
         
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
@@ -114,7 +110,7 @@ public class GlobalExceptionHandler {
             );
         }
         
-        testAwareLogger.warn(logger, "Constraint violation [{}]: {} violations for {}",
+        logger.warn("Constraint violation [{}]: {} violations for {}",
                            correlationId, errorResponse.getErrors().size(), instance);
         
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
@@ -144,7 +140,7 @@ public class GlobalExceptionHandler {
             );
         }
         
-        testAwareLogger.warn(logger, "Bind exception [{}]: {} field errors for {}",
+        logger.warn("Bind exception [{}]: {} field errors for {}",
                            correlationId, errorResponse.getErrors().size(), instance);
         
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
@@ -167,7 +163,7 @@ public class GlobalExceptionHandler {
         errorResponse.setCorrelationId(correlationId);
         errorResponse.addFieldError(ex.getParameterName(), "Parameter is required");
         
-        testAwareLogger.warn(logger, "Missing parameter [{}]: {} for {}",
+        logger.warn("Missing parameter [{}]: {} for {}",
                            correlationId, ex.getParameterName(), instance);
         
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
@@ -192,7 +188,7 @@ public class GlobalExceptionHandler {
             String.format("Expected type: %s", ex.getRequiredType().getSimpleName()),
             ex.getValue());
         
-        testAwareLogger.warn(logger, "Type mismatch [{}]: {} for parameter {} in {}",
+        logger.warn("Type mismatch [{}]: {} for parameter {} in {}",
                            correlationId, ex.getValue(), ex.getName(), instance);
         
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
@@ -213,7 +209,7 @@ public class GlobalExceptionHandler {
         );
         errorResponse.setCorrelationId(correlationId);
         
-        testAwareLogger.warn(logger, "Message not readable [{}]: {} for {}",
+        logger.warn("Message not readable [{}]: {} for {}",
                            correlationId, ex.getMessage(), instance);
         
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
@@ -238,7 +234,7 @@ public class GlobalExceptionHandler {
         );
         errorResponse.setCorrelationId(correlationId);
         
-        testAwareLogger.warn(logger, "Method not supported [{}]: {} for {}",
+        logger.warn("Method not supported [{}]: {} for {}",
                            correlationId, ex.getMethod(), instance);
         
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(errorResponse);
@@ -263,7 +259,7 @@ public class GlobalExceptionHandler {
         );
         errorResponse.setCorrelationId(correlationId);
         
-        testAwareLogger.warn(logger, "Media type not supported [{}]: {} for {}",
+        logger.warn("Media type not supported [{}]: {} for {}",
                            correlationId, ex.getContentType(), instance);
         
         return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(errorResponse);
@@ -284,7 +280,7 @@ public class GlobalExceptionHandler {
         );
         errorResponse.setCorrelationId(correlationId);
         
-        testAwareLogger.warn(logger, "Upload size exceeded [{}]: {} for {}",
+        logger.warn("Upload size exceeded [{}]: {} for {}",
                            correlationId, ex.getMaxUploadSize(), instance);
         
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
@@ -306,7 +302,7 @@ public class GlobalExceptionHandler {
         );
         errorResponse.setCorrelationId(correlationId);
         
-        testAwareLogger.warn(logger, "Handler not found [{}]: {} {} for {}",
+        logger.warn("Handler not found [{}]: {} {} for {}",
                            correlationId, ex.getHttpMethod(), ex.getRequestURL(), instance);
         
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
@@ -327,7 +323,7 @@ public class GlobalExceptionHandler {
         );
         errorResponse.setCorrelationId(correlationId);
         
-        testAwareLogger.error(logger, "Unexpected error [{}]: {} for {}",
+        logger.error("Unexpected error [{}]: {} for {}",
                             correlationId, ex.getMessage(), instance, ex);
         
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);

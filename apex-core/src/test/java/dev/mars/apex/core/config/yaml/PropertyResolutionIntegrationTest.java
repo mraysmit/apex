@@ -10,7 +10,8 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.ByteArrayInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class PropertyResolutionIntegrationTest {
 
-    private static final Logger LOGGER = Logger.getLogger(PropertyResolutionIntegrationTest.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(PropertyResolutionIntegrationTest.class);
     
     private YamlConfigurationLoader loader;
 
@@ -279,3 +280,4 @@ public class PropertyResolutionIntegrationTest {
         LOGGER.info("[OK] Complex property patterns work correctly");
     }
 }
+

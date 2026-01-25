@@ -64,7 +64,10 @@ public class RuleGroupExecutor {
         }
 
         logger.info("Executing {} rule groups", ruleGroups.size());
-        logger.debug("Facts provided: {}", facts != null ? facts.keySet() : "none");
+        logger.debug("executeRuleGroupsList() - rule group ids: {}", 
+                    ruleGroups.stream().map(RuleGroup::getId).toList());
+        logger.debug("executeRuleGroupsList() - facts keys: {}, facts size: {}", 
+                    facts != null ? facts.keySet() : "none", facts != null ? facts.size() : 0);
 
         // Track the highest severity from failed rule groups
         String highestFailedSeverity = SeverityConstants.INFO;
@@ -73,21 +76,25 @@ public class RuleGroupExecutor {
 
         // Evaluate rule groups in priority order
         for (RuleGroup group : ruleGroups) {
-            logger.debug("Evaluating rule group: {}", group.getName());
+            logger.debug("Evaluating rule group: '{}' with {} rules", 
+                        group.getName(), group.getRules() != null ? group.getRules().size() : 0);
             try {
                 // Use detailed evaluation to get severity aggregation
+                long startTime = System.currentTimeMillis();
                 RuleGroupEvaluationResult evaluationResult = group.evaluateWithDetails(context);
+                long duration = System.currentTimeMillis() - startTime;
                 boolean result = evaluationResult.isGroupResult();
                 String aggregatedSeverity = evaluationResult.getAggregatedSeverity();
 
-                logger.debug("Rule group '{}' evaluated to: {} with aggregated severity: {}",
-                           group.getName(), result, aggregatedSeverity);
+                logger.debug("Rule group '{}' evaluated in {}ms - result: {}, severity: {}",
+                           group.getName(), duration, result, aggregatedSeverity);
 
                 // Debug: Log individual results
                 logger.debug("Individual results count: {}", evaluationResult.getIndividualResults().size());
                 for (RuleResult individualResult : evaluationResult.getIndividualResults()) {
-                    logger.debug("Individual result: type={}, success={}, message={}",
-                               individualResult.getResultType(), individualResult.isSuccess(), individualResult.getMessage());
+                    logger.debug("  Rule result: name={}, type={}, success={}, triggered={}", 
+                               individualResult.getRuleName(), individualResult.getResultType(), 
+                               individualResult.isSuccess(), individualResult.isTriggered());
                 }
 
                 // Check if any individual rule had an ERROR result type (not just ERROR severity)
