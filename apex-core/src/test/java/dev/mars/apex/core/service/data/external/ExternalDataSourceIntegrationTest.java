@@ -24,9 +24,16 @@ import dev.mars.apex.core.config.datasource.HealthCheckConfig;
 import dev.mars.apex.core.service.data.external.factory.DataSourceFactory;
 
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.Test;
+
 import org.junit.jupiter.api.AfterEach;
+
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +62,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class ExternalDataSourceIntegrationTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExternalDataSourceIntegrationTest.class);

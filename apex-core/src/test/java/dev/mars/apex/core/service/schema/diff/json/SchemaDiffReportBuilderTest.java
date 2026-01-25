@@ -20,7 +20,12 @@ import dev.mars.apex.core.service.schema.DataSourceContext;
 import dev.mars.apex.core.service.schema.diff.SchemaComparisonResult;
 import dev.mars.apex.core.service.schema.diff.json.model.*;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Unit tests for {@link SchemaDiffReportBuilder}.
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class SchemaDiffReportBuilderTest {
 
     private static final Logger logger = LoggerFactory.getLogger(SchemaDiffReportBuilderTest.class);

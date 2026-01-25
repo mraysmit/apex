@@ -1,8 +1,14 @@
 package dev.mars.apex.core.service.engine;
 
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * This test class verifies that the Phase 3 enhancements to ExpressionEvaluatorService
  * provide the same HashMap property access capabilities as UnifiedRuleEvaluator.
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class ExpressionEvaluatorServiceEnhancedTest {
 
     private ExpressionEvaluatorService expressionEvaluator;

@@ -3,8 +3,14 @@ package dev.mars.apex.core.config.yaml;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 1.0
  * @version 1.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class RuleGroupErrorHandlingConfigTest {
 
     private static final Logger logger = LoggerFactory.getLogger(RuleGroupErrorHandlingConfigTest.class);

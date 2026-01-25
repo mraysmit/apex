@@ -22,9 +22,16 @@ import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.service.data.external.DataSourceException;
 import org.junit.jupiter.api.AfterEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +58,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 1.0.0
  * @version 1.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class H2ConnectionStringTest {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(H2ConnectionStringTest.class);

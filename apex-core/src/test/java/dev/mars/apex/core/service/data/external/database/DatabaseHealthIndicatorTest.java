@@ -22,8 +22,14 @@ import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
 import dev.mars.apex.core.config.datasource.HealthCheckConfig;
 import dev.mars.apex.core.service.data.external.DataSourceException;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -51,8 +57,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class DatabaseHealthIndicatorTest {
 
+    private static final Logger logger = LoggerFactory.getLogger(DatabaseHealthIndicatorTest.class);
     private DataSource dataSource;
     private DatabaseHealthIndicator healthIndicator;
     private DataSourceConfiguration configuration;
@@ -114,6 +122,7 @@ class DatabaseHealthIndicatorTest {
     @Test
     @DisplayName("Should handle health check failure with invalid query")
     void testHealthCheckFailureInvalidQuery() throws DataSourceException {
+        logger.info("========== START OF INTENTIONAL ERROR TEST ==========");
         // Create fresh configuration with invalid query
         DataSourceConfiguration failConfig = createTestConfiguration();
         failConfig.getHealthCheck().setEnabled(true);
@@ -123,6 +132,7 @@ class DatabaseHealthIndicatorTest {
         DatabaseHealthIndicator failHealthIndicator = new DatabaseHealthIndicator(failDataSource, failConfig);
 
         boolean healthy = failHealthIndicator.performHealthCheck();
+        logger.info("========== END OF INTENTIONAL ERROR TEST ===========");
 
         assertFalse(healthy);
 
@@ -154,6 +164,7 @@ class DatabaseHealthIndicatorTest {
     @Test
     @DisplayName("Should track consecutive failures")
     void testConsecutiveFailures() throws DataSourceException {
+        logger.info("========== START OF INTENTIONAL ERROR TEST ==========");
         // Create fresh configuration with invalid query
         DataSourceConfiguration failConfig = createTestConfiguration();
         failConfig.getHealthCheck().setEnabled(true);
@@ -166,6 +177,7 @@ class DatabaseHealthIndicatorTest {
         failHealthIndicator.performHealthCheck();
         failHealthIndicator.performHealthCheck();
         failHealthIndicator.performHealthCheck();
+        logger.info("========== END OF INTENTIONAL ERROR TEST ===========");
 
         DatabaseHealthIndicator.HealthStatus status = failHealthIndicator.getHealthStatus();
         // The health indicator performs an initial check when created, so we expect 4 failures (1 initial + 3 manual)

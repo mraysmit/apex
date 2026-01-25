@@ -5,7 +5,11 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlRule;
 import dev.mars.apex.core.config.yaml.YamlEnrichment;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -19,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 2025-09-27
  * @version 1.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class DefaultValueDemoTest {
 
     @Test

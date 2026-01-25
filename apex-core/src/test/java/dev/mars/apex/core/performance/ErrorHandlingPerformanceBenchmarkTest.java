@@ -5,7 +5,12 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.1.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class ErrorHandlingPerformanceBenchmarkTest {
 
     private static final Logger logger = LoggerFactory.getLogger(ErrorHandlingPerformanceBenchmarkTest.class);

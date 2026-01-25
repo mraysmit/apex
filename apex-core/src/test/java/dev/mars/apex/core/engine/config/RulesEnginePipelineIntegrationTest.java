@@ -20,6 +20,10 @@ import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.util.TestErrorContext;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

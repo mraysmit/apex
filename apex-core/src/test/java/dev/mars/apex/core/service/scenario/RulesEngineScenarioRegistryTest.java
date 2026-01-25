@@ -20,7 +20,12 @@ import dev.mars.apex.core.config.yaml.YamlConfigurationException;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
 import org.junit.jupiter.api.*;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

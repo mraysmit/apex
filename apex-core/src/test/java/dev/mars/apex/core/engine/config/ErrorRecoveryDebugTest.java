@@ -4,7 +4,12 @@ import dev.mars.apex.core.config.error.ErrorRecoveryConfig;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Debug test to understand why ErrorHandlingProofTestRunner is failing.
  * Updated to use standard RulesEngine entry point without deprecated EnrichmentService.
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class ErrorRecoveryDebugTest {
 
     private static final Logger logger = LoggerFactory.getLogger(ErrorRecoveryDebugTest.class);

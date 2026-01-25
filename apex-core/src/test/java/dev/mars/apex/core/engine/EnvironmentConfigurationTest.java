@@ -17,7 +17,11 @@ package dev.mars.apex.core.engine;
 
 import dev.mars.apex.core.config.yaml.ScenarioRegistryLoader;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;

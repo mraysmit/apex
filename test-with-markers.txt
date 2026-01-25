@@ -1,0 +1,240 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------------< com.apex:apex-core >-------------------------
+[INFO] Building apex-core 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.13:prepare-agent (prepare-agent) @ apex-core ---
+[INFO] argLine set to -javaagent:C:\\Users\\mraysmit\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.13\\org.jacoco.agent-0.8.13-runtime.jar=destfile=C:\\Users\\mraysmit\\dev\\idea-projects\\apex-rules-engine\\apex-core\\target\\jacoco.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ apex-core ---
+[INFO] Copying 9 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ apex-core ---
+[WARNING] ********************************************************************************************************************************************
+[WARNING] * Required filename-based automodules detected: [handlebars-4.3.1.jar]. Please don't publish this project to a public artifact repository! *
+[WARNING] ********************************************************************************************************************************************
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ apex-core ---
+[INFO] Copying 170 resources from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ apex-core ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- surefire:3.1.2:test (default-test) @ apex-core ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.mars.apex.core.util.TestErrorContextTest
+SLF4J(W): Class path contains multiple SLF4J providers.
+SLF4J(W): Found provider [ch.qos.logback.classic.spi.LogbackServiceProvider@49d3c823]
+SLF4J(W): Found provider [org.slf4j.simple.SimpleServiceProvider@436bc36]
+SLF4J(W): See https://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J(I): Actual provider is of type [ch.qos.logback.classic.spi.LogbackServiceProvider@49d3c823]
+18:56:08.528 [main] INFO  d.m.a.core.util.TestErrorContextTest - ================================================================================
+18:56:08.532 [main] INFO  d.m.a.core.util.TestErrorContextTest - [TEST-CLASS-START] TestErrorContextTest
+18:56:08.534 [main] INFO  d.m.a.core.util.TestErrorContextTest - [TEST-CLASS-START] Full class name: dev.mars.apex.core.util.TestErrorContextTest
+18:56:08.534 [main] INFO  d.m.a.core.util.TestErrorContextTest - ================================================================================
+[INFO] Running dev.mars.apex.core.util.TestErrorContextTest$AssertThrowsWithContextTests
+18:56:08.535 [main] INFO  d.m.a.c.u.TestErrorContextTest$AssertThrowsWithContextTests - ================================================================================
+18:56:08.535 [main] INFO  d.m.a.c.u.TestErrorContextTest$AssertThrowsWithContextTests - [TEST-CLASS-START] AssertThrowsWithContextTests
+18:56:08.535 [main] INFO  d.m.a.c.u.TestErrorContextTest$AssertThrowsWithContextTests - [TEST-CLASS-START] Full class name: dev.mars.apex.core.util.TestErrorContextTest$AssertThrowsWithContextTests
+18:56:08.535 [main] INFO  d.m.a.c.u.TestErrorContextTest$AssertThrowsWithContextTests - ================================================================================
+? STARTING: AssertThrowsWithContextTests.Should fail when wrong exception type is thrown
+18:56:08.568 [main] INFO  d.m.a.core.util.TestErrorContextTest - === Testing assertThrowsWithContext with wrong type ===
+18:56:08.572 [main] INFO  d.m.apex.core.util.TestErrorContext - [TEST-EXPECTED-ERROR] Expecting NullPointerException to be thrown: testing expected NullPointerException but getting IllegalArgument
+18:56:08.573 [main] ERROR d.m.apex.core.util.TestErrorContext - [TEST-EXPECTED-ERROR] TEST FAILURE - Expected NullPointerException but got IllegalArgumentException: testing expected NullPointerException but getting IllegalArgument
+18:56:08.573 [main] INFO  d.m.a.core.util.TestErrorContextTest - [OK] AssertionError thrown for wrong exception type
+[OK] PASSED: AssertThrowsWithContextTests.Should fail when wrong exception type is thrown
+? STARTING: AssertThrowsWithContextTests.Should catch correct exception type
+18:56:08.587 [main] INFO  d.m.a.core.util.TestErrorContextTest - === Testing assertThrowsWithContext with correct type ===
+18:56:08.588 [main] INFO  d.m.apex.core.util.TestErrorContext - [TEST-EXPECTED-ERROR] Expecting YamlConfigurationException to be thrown: testing YAML parse error
+18:56:08.588 [main] INFO  d.m.apex.core.util.TestErrorContext - [TEST-EXPECTED-ERROR] Correct exception caught: YamlConfigurationException - Invalid YAML
+18:56:08.590 [main] INFO  d.m.a.core.util.TestErrorContextTest - [OK] Correct exception type caught
+[OK] PASSED: AssertThrowsWithContextTests.Should catch correct exception type
+? STARTING: AssertThrowsWithContextTests.Should fail when no exception is thrown
+18:56:08.592 [main] INFO  d.m.a.core.util.TestErrorContextTest - === Testing assertThrowsWithContext when no exception ===
+18:56:08.594 [main] INFO  d.m.apex.core.util.TestErrorContext - [TEST-EXPECTED-ERROR] Expecting RuntimeException to be thrown: testing expected exception that never happens
+18:56:08.594 [main] ERROR d.m.apex.core.util.TestErrorContext - [TEST-EXPECTED-ERROR] TEST FAILURE - Expected RuntimeException was not thrown: testing expected exception that never happens
+18:56:08.594 [main] ERROR d.m.apex.core.util.TestErrorContext - [TEST-EXPECTED-ERROR] TEST FAILURE - Expected RuntimeException but got AssertionError: testing expected exception that never happens
+18:56:08.594 [main] INFO  d.m.a.core.util.TestErrorContextTest - [OK] AssertionError thrown when no exception occurred
+[OK] PASSED: AssertThrowsWithContextTests.Should fail when no exception is thrown
+18:56:08.596 [main] INFO  d.m.a.c.u.TestErrorContextTest$AssertThrowsWithContextTests - ================================================================================
+18:56:08.596 [main] INFO  d.m.a.c.u.TestErrorContextTest$AssertThrowsWithContextTests - [TEST-CLASS-END] AssertThrowsWithContextTests
+18:56:08.596 [main] INFO  d.m.a.c.u.TestErrorContextTest$AssertThrowsWithContextTests - [TEST-CLASS-END] All tests completed in: dev.mars.apex.core.util.TestErrorContextTest$AssertThrowsWithContextTests
+18:56:08.596 [main] INFO  d.m.a.c.u.TestErrorContextTest$AssertThrowsWithContextTests - ================================================================================
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.061 s -- in dev.mars.apex.core.util.TestErrorContextTest$AssertThrowsWithContextTests
+[INFO] Running dev.mars.apex.core.util.TestErrorContextTest$ExpectingErrorResultTests
+18:56:08.601 [main] INFO  d.m.a.c.u.TestErrorContextTest$ExpectingErrorResultTests - ================================================================================
+18:56:08.601 [main] INFO  d.m.a.c.u.TestErrorContextTest$ExpectingErrorResultTests - [TEST-CLASS-START] ExpectingErrorResultTests
+18:56:08.601 [main] INFO  d.m.a.c.u.TestErrorContextTest$ExpectingErrorResultTests - [TEST-CLASS-START] Full class name: dev.mars.apex.core.util.TestErrorContextTest$ExpectingErrorResultTests
+18:56:08.601 [main] INFO  d.m.a.c.u.TestErrorContextTest$ExpectingErrorResultTests - ================================================================================
+? STARTING: ExpectingErrorResultTests.Should return result from operation
+18:56:08.606 [main] INFO  d.m.a.core.util.TestErrorContextTest - === Testing expectingErrorResult ===
+18:56:08.607 [main] INFO  d.m.apex.core.util.TestErrorContext - [TEST-EXPECTED-WARNING] Triggering operation expected to produce error result: testing operation that returns error indicator
+18:56:08.607 [main] INFO  d.m.apex.core.util.TestErrorContext - [TEST-EXPECTED-WARNING] Operation completed - verify result indicates expected error
+18:56:08.607 [main] INFO  d.m.a.core.util.TestErrorContextTest - [OK] Result returned correctly
+[OK] PASSED: ExpectingErrorResultTests.Should return result from operation
+? STARTING: ExpectingErrorResultTests.Should work with boolean error indicators
+18:56:08.609 [main] INFO  d.m.a.core.util.TestErrorContextTest - === Testing expectingErrorResult with boolean ===
+18:56:08.610 [main] INFO  d.m.apex.core.util.TestErrorContext - [TEST-EXPECTED-WARNING] Triggering operation expected to produce error result: testing validation that returns false
+18:56:08.610 [main] INFO  d.m.apex.core.util.TestErrorContext - [TEST-EXPECTED-WARNING] Operation completed - verify result indicates expected error
+18:56:08.610 [main] INFO  d.m.a.core.util.TestErrorContextTest - [OK] Boolean error result handled correctly
+[OK] PASSED: ExpectingErrorResultTests.Should work with boolean error indicators
+18:56:08.611 [main] INFO  d.m.a.c.u.TestErrorContextTest$ExpectingErrorResultTests - ================================================================================
+18:56:08.611 [main] INFO  d.m.a.c.u.TestErrorContextTest$ExpectingErrorResultTests - [TEST-CLASS-END] ExpectingErrorResultTests
+18:56:08.611 [main] INFO  d.m.a.c.u.TestErrorContextTest$ExpectingErrorResultTests - [TEST-CLASS-END] All tests completed in: dev.mars.apex.core.util.TestErrorContextTest$ExpectingErrorResultTests
+18:56:08.611 [main] INFO  d.m.a.c.u.TestErrorContextTest$ExpectingErrorResultTests - ================================================================================
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in dev.mars.apex.core.util.TestErrorContextTest$ExpectingErrorResultTests
+[INFO] Running dev.mars.apex.core.util.TestErrorContextTest$ExpectingExceptionTests
+18:56:08.614 [main] INFO  d.m.a.c.u.TestErrorContextTest$ExpectingExceptionTests - ================================================================================
+18:56:08.614 [main] INFO  d.m.a.c.u.TestErrorContextTest$ExpectingExceptionTests - [TEST-CLASS-START] ExpectingExceptionTests
+18:56:08.614 [main] INFO  d.m.a.c.u.TestErrorContextTest$ExpectingExceptionTests - [TEST-CLASS-START] Full class name: dev.mars.apex.core.util.TestErrorContextTest$ExpectingExceptionTests
+18:56:08.614 [main] INFO  d.m.a.c.u.TestErrorContextTest$ExpectingExceptionTests - ================================================================================
+? STARTING: ExpectingExceptionTests.Should catch expected exception and return it
+18:56:08.615 [main] INFO  d.m.a.core.util.TestErrorContextTest - === Testing expectingException with RuntimeException ===
+18:56:08.615 [main] INFO  d.m.apex.core.util.TestErrorContext - [TEST-EXPECTED-ERROR] Triggering intentional error: testing null pointer scenario
+18:56:08.616 [main] INFO  d.m.apex.core.util.TestErrorContext - [TEST-EXPECTED-ERROR] Error correctly caught: RuntimeException - Test error
+18:56:08.616 [main] INFO  d.m.a.core.util.TestErrorContextTest - [OK] Exception caught correctly
+[OK] PASSED: ExpectingExceptionTests.Should catch expected exception and return it
+? STARTING: ExpectingExceptionTests.Should fail when no exception is thrown
+18:56:08.617 [main] INFO  d.m.a.core.util.TestErrorContextTest - === Testing expectingException when no exception thrown ===
+18:56:08.618 [main] INFO  d.m.apex.core.util.TestErrorContext - [TEST-EXPECTED-ERROR] Triggering intentional error: testing operation that should throw but doesn't
+18:56:08.618 [main] ERROR d.m.apex.core.util.TestErrorContext - [TEST-EXPECTED-ERROR] TEST FAILURE - Expected error was not thrown: testing operation that should throw but doesn't
+18:56:08.618 [main] INFO  d.m.a.core.util.TestErrorContextTest - [OK] AssertionError thrown correctly when no exception occurred
+[OK] PASSED: ExpectingExceptionTests.Should fail when no exception is thrown
+? STARTING: ExpectingExceptionTests.Should preserve exception message and type
+18:56:08.620 [main] INFO  d.m.a.core.util.TestErrorContextTest - === Testing exception details preservation ===
+18:56:08.620 [main] INFO  d.m.apex.core.util.TestErrorContext - [TEST-EXPECTED-ERROR] Triggering intentional error: testing illegal argument
+18:56:08.620 [main] INFO  d.m.apex.core.util.TestErrorContext - [TEST-EXPECTED-ERROR] Error correctly caught: IllegalArgumentException - Invalid value: -1
+18:56:08.621 [main] INFO  d.m.a.core.util.TestErrorContextTest - [OK] Exception details preserved correctly
+[OK] PASSED: ExpectingExceptionTests.Should preserve exception message and type
+18:56:08.622 [main] INFO  d.m.a.c.u.TestErrorContextTest$ExpectingExceptionTests - ================================================================================
+18:56:08.622 [main] INFO  d.m.a.c.u.TestErrorContextTest$ExpectingExceptionTests - [TEST-CLASS-END] ExpectingExceptionTests
+18:56:08.622 [main] INFO  d.m.a.c.u.TestErrorContextTest$ExpectingExceptionTests - [TEST-CLASS-END] All tests completed in: dev.mars.apex.core.util.TestErrorContextTest$ExpectingExceptionTests
+18:56:08.622 [main] INFO  d.m.a.c.u.TestErrorContextTest$ExpectingExceptionTests - ================================================================================
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in dev.mars.apex.core.util.TestErrorContextTest$ExpectingExceptionTests
+[INFO] Running dev.mars.apex.core.util.TestErrorContextTest$ExpectingWarningTests
+18:56:08.628 [main] INFO  d.m.a.c.u.TestErrorContextTest$ExpectingWarningTests - ================================================================================
+18:56:08.628 [main] INFO  d.m.a.c.u.TestErrorContextTest$ExpectingWarningTests - [TEST-CLASS-START] ExpectingWarningTests
+18:56:08.628 [main] INFO  d.m.a.c.u.TestErrorContextTest$ExpectingWarningTests - [TEST-CLASS-START] Full class name: dev.mars.apex.core.util.TestErrorContextTest$ExpectingWarningTests
+18:56:08.628 [main] INFO  d.m.a.c.u.TestErrorContextTest$ExpectingWarningTests - ================================================================================
+? STARTING: ExpectingWarningTests.Should return result and log warning context
+18:56:08.629 [main] INFO  d.m.a.core.util.TestErrorContextTest - === Testing expectingWarning ===
+18:56:08.629 [main] INFO  d.m.apex.core.util.TestErrorContext - [TEST-EXPECTED-WARNING] Triggering operation expected to produce warning: testing operation that produces warning but continues
+18:56:08.629 [main] INFO  d.m.apex.core.util.TestErrorContext - [TEST-EXPECTED-WARNING] Operation completed with expected warning
+18:56:08.629 [main] INFO  d.m.a.core.util.TestErrorContextTest - [OK] Result returned with warning context
+[OK] PASSED: ExpectingWarningTests.Should return result and log warning context
+18:56:08.629 [main] INFO  d.m.a.c.u.TestErrorContextTest$ExpectingWarningTests - ================================================================================
+18:56:08.634 [main] INFO  d.m.a.c.u.TestErrorContextTest$ExpectingWarningTests - [TEST-CLASS-END] ExpectingWarningTests
+18:56:08.634 [main] INFO  d.m.a.c.u.TestErrorContextTest$ExpectingWarningTests - [TEST-CLASS-END] All tests completed in: dev.mars.apex.core.util.TestErrorContextTest$ExpectingWarningTests
+18:56:08.634 [main] INFO  d.m.a.c.u.TestErrorContextTest$ExpectingWarningTests - ================================================================================
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in dev.mars.apex.core.util.TestErrorContextTest$ExpectingWarningTests
+[INFO] Running dev.mars.apex.core.util.TestErrorContextTest$IntegrationTests
+18:56:08.637 [main] INFO  d.m.a.c.u.TestErrorContextTest$IntegrationTests - ================================================================================
+18:56:08.637 [main] INFO  d.m.a.c.u.TestErrorContextTest$IntegrationTests - [TEST-CLASS-START] IntegrationTests
+18:56:08.637 [main] INFO  d.m.a.c.u.TestErrorContextTest$IntegrationTests - [TEST-CLASS-START] Full class name: dev.mars.apex.core.util.TestErrorContextTest$IntegrationTests
+18:56:08.637 [main] INFO  d.m.a.c.u.TestErrorContextTest$IntegrationTests - ================================================================================
+? STARTING: IntegrationTests.Should work with real exception scenarios
+18:56:08.639 [main] INFO  d.m.a.core.util.TestErrorContextTest - === Testing real exception scenario ===
+18:56:08.639 [main] INFO  d.m.apex.core.util.TestErrorContext - [TEST-EXPECTED-ERROR] Expecting NullPointerException to be thrown: testing null input validation
+18:56:08.639 [main] INFO  d.m.apex.core.util.TestErrorContext - [TEST-EXPECTED-ERROR] Correct exception caught: NullPointerException - Input cannot be null
+18:56:08.639 [main] INFO  d.m.a.core.util.TestErrorContextTest - [OK] Real exception scenario handled correctly
+[OK] PASSED: IntegrationTests.Should work with real exception scenarios
+? STARTING: IntegrationTests.Should provide clear logging output
+18:56:08.643 [main] INFO  d.m.a.core.util.TestErrorContextTest - === Testing logging clarity ===
+18:56:08.643 [main] INFO  d.m.apex.core.util.TestErrorContext - [TEST-EXPECTED-ERROR] Intentional error expected: testing invalid rule condition
+18:56:08.644 [main] INFO  d.m.apex.core.util.TestErrorContext - [TEST-EXPECTED-ERROR] Error correctly handled: rule condition validation
+18:56:08.644 [main] INFO  d.m.a.core.util.TestErrorContextTest - [OK] Check console output for clear [TEST-EXPECTED-*] markers
+[OK] PASSED: IntegrationTests.Should provide clear logging output
+18:56:08.644 [main] INFO  d.m.a.c.u.TestErrorContextTest$IntegrationTests - ================================================================================
+18:56:08.644 [main] INFO  d.m.a.c.u.TestErrorContextTest$IntegrationTests - [TEST-CLASS-END] IntegrationTests
+18:56:08.644 [main] INFO  d.m.a.c.u.TestErrorContextTest$IntegrationTests - [TEST-CLASS-END] All tests completed in: dev.mars.apex.core.util.TestErrorContextTest$IntegrationTests
+18:56:08.644 [main] INFO  d.m.a.c.u.TestErrorContextTest$IntegrationTests - ================================================================================
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.009 s -- in dev.mars.apex.core.util.TestErrorContextTest$IntegrationTests
+[INFO] Running dev.mars.apex.core.util.TestErrorContextTest$MarkerMethodsTests
+18:56:08.648 [main] INFO  d.m.a.c.u.TestErrorContextTest$MarkerMethodsTests - ================================================================================
+18:56:08.648 [main] INFO  d.m.a.c.u.TestErrorContextTest$MarkerMethodsTests - [TEST-CLASS-START] MarkerMethodsTests
+18:56:08.648 [main] INFO  d.m.a.c.u.TestErrorContextTest$MarkerMethodsTests - [TEST-CLASS-START] Full class name: dev.mars.apex.core.util.TestErrorContextTest$MarkerMethodsTests
+18:56:08.648 [main] INFO  d.m.a.c.u.TestErrorContextTest$MarkerMethodsTests - ================================================================================
+? STARTING: MarkerMethodsTests.Should log expected error marker
+18:56:08.651 [main] INFO  d.m.a.core.util.TestErrorContextTest - === Testing markExpectedError ===
+18:56:08.653 [main] INFO  d.m.apex.core.util.TestErrorContext - [TEST-EXPECTED-ERROR] Intentional error expected: testing invalid configuration
+18:56:08.653 [main] INFO  d.m.a.core.util.TestErrorContextTest - [OK] markExpectedError logged without exception
+[OK] PASSED: MarkerMethodsTests.Should log expected error marker
+? STARTING: MarkerMethodsTests.Should log validation markers
+18:56:08.656 [main] INFO  d.m.a.core.util.TestErrorContextTest - === Testing validation markers ===
+18:56:08.657 [main] INFO  d.m.apex.core.util.TestErrorContext - [TEST-VALIDATION] Starting: field validation
+18:56:08.657 [main] INFO  d.m.apex.core.util.TestErrorContext - [TEST-VALIDATION] Completed: field validation
+18:56:08.657 [main] INFO  d.m.a.core.util.TestErrorContextTest - [OK] Validation markers logged without exception
+[OK] PASSED: MarkerMethodsTests.Should log validation markers
+? STARTING: MarkerMethodsTests.Should log error caught marker
+18:56:08.659 [main] INFO  d.m.a.core.util.TestErrorContextTest - === Testing markErrorCaught ===
+18:56:08.659 [main] INFO  d.m.apex.core.util.TestErrorContext - [TEST-EXPECTED-ERROR] Error correctly handled: invalid configuration handled
+18:56:08.659 [main] INFO  d.m.a.core.util.TestErrorContextTest - [OK] markErrorCaught logged without exception
+[OK] PASSED: MarkerMethodsTests.Should log error caught marker
+18:56:08.660 [main] INFO  d.m.a.c.u.TestErrorContextTest$MarkerMethodsTests - ================================================================================
+18:56:08.661 [main] INFO  d.m.a.c.u.TestErrorContextTest$MarkerMethodsTests - [TEST-CLASS-END] MarkerMethodsTests
+18:56:08.661 [main] INFO  d.m.a.c.u.TestErrorContextTest$MarkerMethodsTests - [TEST-CLASS-END] All tests completed in: dev.mars.apex.core.util.TestErrorContextTest$MarkerMethodsTests
+18:56:08.661 [main] INFO  d.m.a.c.u.TestErrorContextTest$MarkerMethodsTests - ================================================================================
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in dev.mars.apex.core.util.TestErrorContextTest$MarkerMethodsTests
+[INFO] Running dev.mars.apex.core.util.TestErrorContextTest$PrefixConstantsTests
+18:56:08.663 [main] INFO  d.m.a.c.u.TestErrorContextTest$PrefixConstantsTests - ================================================================================
+18:56:08.664 [main] INFO  d.m.a.c.u.TestErrorContextTest$PrefixConstantsTests - [TEST-CLASS-START] PrefixConstantsTests
+18:56:08.664 [main] INFO  d.m.a.c.u.TestErrorContextTest$PrefixConstantsTests - [TEST-CLASS-START] Full class name: dev.mars.apex.core.util.TestErrorContextTest$PrefixConstantsTests
+18:56:08.664 [main] INFO  d.m.a.c.u.TestErrorContextTest$PrefixConstantsTests - ================================================================================
+? STARTING: PrefixConstantsTests.Should have correct prefix values
+18:56:08.666 [main] INFO  d.m.a.core.util.TestErrorContextTest - === Testing prefix constants ===
+18:56:08.667 [main] INFO  d.m.a.core.util.TestErrorContextTest - [OK] All prefix constants have correct values
+[OK] PASSED: PrefixConstantsTests.Should have correct prefix values
+18:56:08.667 [main] INFO  d.m.a.c.u.TestErrorContextTest$PrefixConstantsTests - ================================================================================
+18:56:08.667 [main] INFO  d.m.a.c.u.TestErrorContextTest$PrefixConstantsTests - [TEST-CLASS-END] PrefixConstantsTests
+18:56:08.668 [main] INFO  d.m.a.c.u.TestErrorContextTest$PrefixConstantsTests - [TEST-CLASS-END] All tests completed in: dev.mars.apex.core.util.TestErrorContextTest$PrefixConstantsTests
+18:56:08.668 [main] INFO  d.m.a.c.u.TestErrorContextTest$PrefixConstantsTests - ================================================================================
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in dev.mars.apex.core.util.TestErrorContextTest$PrefixConstantsTests
+[INFO] Running dev.mars.apex.core.util.TestErrorContextTest$ValidationTests
+18:56:08.670 [main] INFO  d.m.a.c.u.TestErrorContextTest$ValidationTests - ================================================================================
+18:56:08.671 [main] INFO  d.m.a.c.u.TestErrorContextTest$ValidationTests - [TEST-CLASS-START] ValidationTests
+18:56:08.672 [main] INFO  d.m.a.c.u.TestErrorContextTest$ValidationTests - [TEST-CLASS-START] Full class name: dev.mars.apex.core.util.TestErrorContextTest$ValidationTests
+18:56:08.672 [main] INFO  d.m.a.c.u.TestErrorContextTest$ValidationTests - ================================================================================
+? STARTING: ValidationTests.Should propagate exceptions from failed validation
+18:56:08.673 [main] INFO  d.m.a.core.util.TestErrorContextTest - === Testing failed validation ===
+18:56:08.675 [main] INFO  d.m.apex.core.util.TestErrorContext - [TEST-VALIDATION] Starting validation: testing validation that should fail
+18:56:08.675 [main] ERROR d.m.apex.core.util.TestErrorContext - [TEST-VALIDATION] Validation failed unexpectedly: testing validation that should fail - Validation failed
+18:56:08.675 [main] INFO  d.m.a.core.util.TestErrorContextTest - [OK] Validation failure propagated correctly
+[OK] PASSED: ValidationTests.Should propagate exceptions from failed validation
+? STARTING: ValidationTests.Should complete validation successfully
+18:56:08.678 [main] INFO  d.m.a.core.util.TestErrorContextTest - === Testing successful validation ===
+18:56:08.680 [main] INFO  d.m.apex.core.util.TestErrorContext - [TEST-VALIDATION] Starting validation: testing that value is not null
+18:56:08.680 [main] INFO  d.m.apex.core.util.TestErrorContext - [TEST-VALIDATION] Validation completed: testing that value is not null
+18:56:08.680 [main] INFO  d.m.a.core.util.TestErrorContextTest - [OK] Validation completed successfully
+[OK] PASSED: ValidationTests.Should complete validation successfully
+18:56:08.680 [main] INFO  d.m.a.c.u.TestErrorContextTest$ValidationTests - ================================================================================
+18:56:08.680 [main] INFO  d.m.a.c.u.TestErrorContextTest$ValidationTests - [TEST-CLASS-END] ValidationTests
+18:56:08.680 [main] INFO  d.m.a.c.u.TestErrorContextTest$ValidationTests - [TEST-CLASS-END] All tests completed in: dev.mars.apex.core.util.TestErrorContextTest$ValidationTests
+18:56:08.680 [main] INFO  d.m.a.c.u.TestErrorContextTest$ValidationTests - ================================================================================
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in dev.mars.apex.core.util.TestErrorContextTest$ValidationTests
+18:56:08.680 [main] INFO  d.m.a.core.util.TestErrorContextTest - ================================================================================
+18:56:08.680 [main] INFO  d.m.a.core.util.TestErrorContextTest - [TEST-CLASS-END] TestErrorContextTest
+18:56:08.680 [main] INFO  d.m.a.core.util.TestErrorContextTest - [TEST-CLASS-END] All tests completed in: dev.mars.apex.core.util.TestErrorContextTest
+18:56:08.680 [main] INFO  d.m.a.core.util.TestErrorContextTest - ================================================================================
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.472 s -- in dev.mars.apex.core.util.TestErrorContextTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jacoco:0.8.13:report (report) @ apex-core ---
+[INFO] Loading execution data file C:\Users\mraysmit\dev\idea-projects\apex-rules-engine\apex-core\target\jacoco.exec
+[INFO] Analyzed bundle 'apex-core' with 391 classes
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  5.350 s
+[INFO] Finished at: 2026-01-25T18:56:11+08:00
+[INFO] ------------------------------------------------------------------------

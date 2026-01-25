@@ -17,6 +17,7 @@ package dev.mars.apex.core.exception;
  */
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2026-01-24
  */
-@ExtendWith(ColoredTestOutputExtension.class)
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 @DisplayName("ApexCacheException Tests")
 class ApexCacheExceptionTest {
 

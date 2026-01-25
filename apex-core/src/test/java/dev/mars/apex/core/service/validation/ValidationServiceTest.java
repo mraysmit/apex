@@ -22,7 +22,11 @@ import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -39,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class ValidationServiceTest {
 
     private LookupServiceRegistry registry;
@@ -117,15 +122,18 @@ class ValidationServiceTest {
     @Test
     @DisplayName("Should return false for non-existent validator")
     void testValidateWithNonExistentValidator() {
+        System.out.println("========== START OF INTENTIONAL ERROR TEST ==========");
         System.out.println("TEST: Triggering intentional error - testing validation with non-existent validator");
         
         boolean result = validationService.validate("nonExistentValidator", "test");
         assertFalse(result, "Validation with non-existent validator should return false");
+        System.out.println("========== END OF INTENTIONAL ERROR TEST ===========");
     }
 
     @Test
     @DisplayName("Should handle type mismatch gracefully")
     void testValidateWithTypeMismatch() {
+        System.out.println("========== START OF INTENTIONAL ERROR TEST ==========");
         System.out.println("TEST: Triggering intentional error - testing validation with type mismatch");
         
         // Register a string validator
@@ -135,6 +143,7 @@ class ValidationServiceTest {
         // Try to validate an integer with string validator
         boolean result = validationService.validate("stringValidator", 123);
         assertFalse(result, "Type mismatch should result in validation failure");
+        System.out.println("========== END OF INTENTIONAL ERROR TEST ===========");
     }
 
     @Test

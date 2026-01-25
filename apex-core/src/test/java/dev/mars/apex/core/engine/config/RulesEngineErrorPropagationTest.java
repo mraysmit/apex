@@ -5,8 +5,14 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlTransformation;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * their return values correctly. The actual error scenarios (missing datasources, invalid
  * expressions, etc.) are tested in the processor-specific test suites.
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class RulesEngineErrorPropagationTest {
 
     private static final Logger logger = LoggerFactory.getLogger(RulesEngineErrorPropagationTest.class);

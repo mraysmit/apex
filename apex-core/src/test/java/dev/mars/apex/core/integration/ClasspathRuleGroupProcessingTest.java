@@ -8,8 +8,14 @@ import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.config.yaml.YamlRuleFactory;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.util.HashMap;
 import java.util.List;

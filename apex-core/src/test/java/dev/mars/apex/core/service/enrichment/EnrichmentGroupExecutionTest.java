@@ -6,8 +6,14 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests for enrichment group execution using RulesEngine.
  * Migrated from deprecated YamlEnrichmentProcessor to RulesEngine API.
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class EnrichmentGroupExecutionTest {
 
     private YamlConfigurationLoader loader;

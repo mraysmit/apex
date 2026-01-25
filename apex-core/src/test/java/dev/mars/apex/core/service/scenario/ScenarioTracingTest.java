@@ -5,7 +5,12 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlRuleFactory;
 import dev.mars.apex.core.engine.model.ExecutionStep;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Tests for Scenario execution tracing.
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class ScenarioTracingTest {
 
     private TestConfigLoader configLoader;

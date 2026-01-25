@@ -21,8 +21,14 @@ import dev.mars.apex.core.config.yaml.YamlMetadataValidator;
 import dev.mars.apex.core.config.yaml.YamlValidationResult;
 import dev.mars.apex.core.config.yaml.YamlValidationSummary;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.Test;
+
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -41,6 +47,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Test class for YamlMetadataValidator.
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class YamlMetadataValidatorTest {
     
     @TempDir

@@ -93,7 +93,13 @@ public class DatasetLookupService extends LookupService {
         Map<String, Map<String, Object>> map = new HashMap<>();
         
         if (dataset.getData() == null || dataset.getData().isEmpty()) {
-            logger.warn("Dataset has no data records");
+            // Don't log warning for database/rest-api types - they use wrapper pattern with intentionally empty datasets
+            String datasetType = dataset.getType();
+            if (datasetType == null || 
+                (!datasetType.equalsIgnoreCase("database") && 
+                 !datasetType.equalsIgnoreCase("rest-api"))) {
+                logger.error("Dataset has no data records - configuration error for type: {}", datasetType);
+            }
             return map;
         }
         

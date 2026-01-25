@@ -11,8 +11,14 @@ import dev.mars.apex.core.service.monitoring.RulePerformanceMetrics;
 import dev.mars.apex.core.service.monitoring.PerformanceSnapshot;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.Test;
+
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Phase 3B: Integration test for end-to-end recovery metrics functionality.
  * Tests the complete flow from rule evaluation through error recovery to metrics collection.
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class RecoveryMetricsIntegrationTest {
 
     private UnifiedRuleEvaluator evaluator;

@@ -20,8 +20,14 @@ package dev.mars.apex.core.api;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.metadata.RuleMetadata;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.time.Instant;
 import java.util.List;
@@ -35,6 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 2025-08-28
  * @version 1.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class RuleSetTest {
 
     private RuleSet.GenericRuleSet ruleSet;

@@ -1,8 +1,14 @@
 package dev.mars.apex.core.config.yaml;
 
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.util.List;
 import org.slf4j.Logger;
@@ -26,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * 
  * @author APEX Sequential Processing Implementation - Step 2
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class OrderedYamlParserItemOrderTest {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderedYamlParserItemOrderTest.class);

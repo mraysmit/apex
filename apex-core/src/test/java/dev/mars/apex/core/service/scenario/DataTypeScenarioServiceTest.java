@@ -19,7 +19,12 @@ package dev.mars.apex.core.service.scenario;
 
 
 import org.junit.jupiter.api.*;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,6 +104,7 @@ class DataTypeScenarioServiceTest {
     @Test
     @DisplayName("Should gracefully handle missing scenario files in registry (Intentional Error)")
     void testLoadScenariosFromRegistryWithMissingFilesIntentional() throws Exception {
+        LOGGER.info("========== START OF INTENTIONAL ERROR TEST ==========");
         LOGGER.info("=== INTENTIONAL ERROR TEST: Scenario registry with missing scenario file ===");
         
         // Create test registry configuration that references a non-existent scenario file
@@ -115,21 +121,25 @@ class DataTypeScenarioServiceTest {
         assertTrue(scenarioService.getAvailableScenarios().isEmpty() || 
                    scenarioService.getAvailableScenarios().size() == 0, 
                    "Should load 0 scenarios when referenced files are missing");
+        LOGGER.info("========== END OF INTENTIONAL ERROR TEST ===========");
     }
 
     @Test
     @DisplayName("Should fail when registry file missing (Intentional Error)")
     void testLoadScenariosWithMissingFileIntentional() {
+        LOGGER.info("========== START OF INTENTIONAL ERROR TEST ==========");
         LOGGER.info("=== INTENTIONAL ERROR TEST: Scenario loading with missing registry file ===");
         
         assertThrows(RuntimeException.class, () -> {
             scenarioService.loadScenarios("nonexistent/path/registry.yaml");
         }, "Missing registry file should throw RuntimeException");
+        LOGGER.info("========== END OF INTENTIONAL ERROR TEST ===========");
     }
 
     @Test
     @DisplayName("Should fail with invalid registry configuration (Intentional Error)")
     void testLoadScenariosWithInvalidConfigIntentional() throws IOException {
+        LOGGER.info("========== START OF INTENTIONAL ERROR TEST ==========");
         LOGGER.info("=== INTENTIONAL ERROR TEST: Scenario loading with invalid configuration ===");
         
         // Create invalid registry file
@@ -138,6 +148,7 @@ class DataTypeScenarioServiceTest {
         assertThrows(RuntimeException.class, () -> {
             scenarioService.loadScenarios(invalidRegistryPath);
         }, "Invalid registry configuration should throw RuntimeException");
+        LOGGER.info("========== END OF INTENTIONAL ERROR TEST ===========");
     }
 
     // ========================================

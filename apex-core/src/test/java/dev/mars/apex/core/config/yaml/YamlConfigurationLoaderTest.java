@@ -18,7 +18,12 @@ package dev.mars.apex.core.config.yaml;
 
 
 import org.junit.jupiter.api.*;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.io.*;
 import java.nio.file.Files;
@@ -39,6 +44,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class YamlConfigurationLoaderTest {
 
     private YamlConfigurationLoader loader;

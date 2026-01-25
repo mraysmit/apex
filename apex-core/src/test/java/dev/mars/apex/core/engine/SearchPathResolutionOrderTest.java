@@ -17,7 +17,12 @@ package dev.mars.apex.core.engine;
 
 import dev.mars.apex.core.config.yaml.ScenarioRegistryLoader;
 import org.junit.jupiter.api.*;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.io.IOException;
 import java.nio.file.Files;

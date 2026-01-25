@@ -5,7 +5,12 @@ import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.model.EnrichmentGroup;
 import dev.mars.apex.core.service.enrichment.EnrichmentGroupFactory;
 import org.junit.jupiter.api.DisplayName;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.util.List;
 
@@ -17,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Parallel execution
  * - Group references (second-pass flattening)
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class EnrichmentGroupsEndToEndIntegrationTest {
 
     private String yamlConfig() {

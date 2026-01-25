@@ -1,10 +1,15 @@
 package dev.mars.apex.core.engine.config;
 
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.test.TestErrorContext;
 import org.junit.jupiter.api.BeforeAll;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.Test;
+
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +21,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 public class InvalidConfigurationTest {
 
     private static final Logger logger = LoggerFactory.getLogger(InvalidConfigurationTest.class);
@@ -30,7 +36,7 @@ public class InvalidConfigurationTest {
 
     @Test
     public void testInvalidDataSourceConfiguration() throws Exception {
-        TestErrorContext.withExpectedErrors("invalid data source missing connection block", () -> {
+        logger.info("========== START OF INTENTIONAL ERROR TEST ==========");
             // Create a YAML file with invalid data source configuration
             String yamlContent = 
                 "metadata:\n" +
@@ -70,6 +76,7 @@ public class InvalidConfigurationTest {
             }
             
             assertTrue(foundExpectedError, "Should contain specific initialization error message. Found: " + failures);
-        });
+        
+        logger.info("========== END OF INTENTIONAL ERROR TEST ===========");
     }
 }

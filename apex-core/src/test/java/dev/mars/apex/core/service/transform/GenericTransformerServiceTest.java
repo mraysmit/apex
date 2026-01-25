@@ -25,7 +25,11 @@ import dev.mars.apex.core.engine.model.TransformerRule;
 import dev.mars.apex.core.service.lookup.LookupService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -44,6 +48,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class GenericTransformerServiceTest {
 
     private LookupServiceRegistry registry;
@@ -184,12 +189,14 @@ class GenericTransformerServiceTest {
     @Test
     @DisplayName("Should return original value for non-existent transformer")
     void testTransformWithNonExistentTransformer() {
+        System.out.println("========== START OF INTENTIONAL ERROR TEST ==========");
         System.out.println("TEST: Triggering intentional error - testing transformation with non-existent transformer");
         
         String original = "test";
         String result = transformerService.transform("nonExistent", original);
         
         assertEquals(original, result, "Non-existent transformer should return original value");
+        System.out.println("========== END OF INTENTIONAL ERROR TEST ===========");
     }
 
     @Test

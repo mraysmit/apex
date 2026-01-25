@@ -17,8 +17,14 @@ package dev.mars.apex.core.service.schema.diff.json;
 
 import dev.mars.apex.core.service.schema.diff.json.model.*;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.Test;
+
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Unit tests for {@link SchemaDiffJsonSerializer}.
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class SchemaDiffJsonSerializerTest {
 
     private static final Logger logger = LoggerFactory.getLogger(SchemaDiffJsonSerializerTest.class);

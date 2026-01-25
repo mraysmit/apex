@@ -19,7 +19,12 @@ package dev.mars.apex.core.service.data.external.file;
 
 import dev.mars.apex.core.config.datasource.FileFormatConfig;
 import org.junit.jupiter.api.*;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 2025-08-28
  * @version 1.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class CsvDataLoaderTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CsvDataLoaderTest.class);

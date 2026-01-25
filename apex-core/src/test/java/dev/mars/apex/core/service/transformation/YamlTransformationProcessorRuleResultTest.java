@@ -4,8 +4,14 @@ import dev.mars.apex.core.config.yaml.YamlTransformation;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * Required by: APEX_ERROR_HANDLING_COMPREHENSIVE_ANALYSIS.md - Day 1 Unit Tests (lines 1878-1882)
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class YamlTransformationProcessorRuleResultTest {
 
     private static final Logger logger = LoggerFactory.getLogger(YamlTransformationProcessorRuleResultTest.class);
@@ -72,6 +79,7 @@ class YamlTransformationProcessorRuleResultTest {
     @Test
     @DisplayName("Test 2: Errors should be tracked in RuleResult.failureMessages when exceptions occur")
     void testErrorsTrackedInFailureMessages() {
+        logger.info("========== START OF INTENTIONAL ERROR TEST ==========");
         logger.info("=== INTENTIONAL ERROR TEST: SpEL accessing missing property ===");
         logger.info("=== Test 2: Testing errors tracked in RuleResult.failureMessages ===");
 

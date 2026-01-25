@@ -19,7 +19,11 @@ package dev.mars.apex.core.config.yaml;
 import dev.mars.apex.core.config.error.ErrorRecoveryConfig;
 import dev.mars.apex.core.config.error.SeverityRecoveryPolicy;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -32,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 2025-09-27
  * @version 1.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class YamlErrorRecoveryIntegrationTest {
 
     private final YamlConfigurationLoader loader = new YamlConfigurationLoader();

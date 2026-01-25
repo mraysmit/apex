@@ -23,7 +23,12 @@ import dev.mars.apex.core.service.data.external.factory.DataSinkFactory;
 import dev.mars.apex.core.service.data.external.DataSink;
 import dev.mars.apex.core.service.data.external.DataSinkType;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

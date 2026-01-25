@@ -21,7 +21,12 @@ import dev.mars.apex.core.config.yaml.YamlMetadataValidator;
 import dev.mars.apex.core.config.yaml.YamlValidationResult;
 import dev.mars.apex.core.config.yaml.YamlValidationSummary;
 import org.junit.jupiter.api.Test;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.io.IOException;
 import java.nio.file.Files;

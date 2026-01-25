@@ -20,6 +20,10 @@ package dev.mars.apex.core.service.data.external.cache;
 import dev.mars.apex.core.config.datasource.*;
 import dev.mars.apex.core.service.data.external.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +48,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class CacheDataSourceTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CacheDataSourceTest.class);

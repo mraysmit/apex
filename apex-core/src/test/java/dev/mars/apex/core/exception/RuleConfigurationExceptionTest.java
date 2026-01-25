@@ -1,8 +1,14 @@
 package dev.mars.apex.core.exception;
 
 import org.junit.jupiter.api.DisplayName;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.Test;
+
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author APEX Test Team
  * @since 1.0.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class RuleConfigurationExceptionTest {
 
     // ========================================

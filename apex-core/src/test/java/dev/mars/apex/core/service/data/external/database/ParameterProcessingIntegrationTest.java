@@ -17,9 +17,16 @@
 package dev.mars.apex.core.service.data.external.database;
 
 import org.junit.jupiter.api.Test;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.BeforeEach;
+
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -38,6 +45,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * 
  * This test proves the refactored parameter processing works end-to-end.
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class ParameterProcessingIntegrationTest {
 
     private Connection connection;

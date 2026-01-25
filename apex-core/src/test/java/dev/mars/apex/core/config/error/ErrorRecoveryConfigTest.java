@@ -18,8 +18,14 @@ package dev.mars.apex.core.config.error;
 
 import dev.mars.apex.core.constants.SeverityConstants;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 

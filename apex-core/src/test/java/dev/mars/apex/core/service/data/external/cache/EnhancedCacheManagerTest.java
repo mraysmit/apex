@@ -19,8 +19,14 @@ package dev.mars.apex.core.service.data.external.cache;
 import dev.mars.apex.core.config.datasource.CacheConfig;
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -31,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 1.0.0
  * @version 1.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class EnhancedCacheManagerTest {
     
     private DataSourceConfiguration configuration;

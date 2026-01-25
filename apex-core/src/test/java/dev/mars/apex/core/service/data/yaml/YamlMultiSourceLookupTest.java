@@ -27,7 +27,12 @@ import dev.mars.apex.core.service.data.external.config.DataSourceConfigurationSe
 import dev.mars.apex.core.service.data.external.factory.DataSourceFactory;
 import dev.mars.apex.core.service.data.external.manager.DataSourceManager;
 import org.junit.jupiter.api.*;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -53,6 +58,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class YamlMultiSourceLookupTest {
 
     @TempDir

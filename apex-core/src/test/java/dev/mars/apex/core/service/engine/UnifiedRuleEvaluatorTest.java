@@ -3,8 +3,16 @@ package dev.mars.apex.core.service.engine;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.Arrays;
@@ -29,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("Unified Rule Evaluator Tests")
 class UnifiedRuleEvaluatorTest {
     
+    private static final Logger logger = LoggerFactory.getLogger(UnifiedRuleEvaluatorTest.class);
     private UnifiedRuleEvaluator evaluator;
     private Map<String, Object> testFacts;
     
@@ -203,11 +212,13 @@ class UnifiedRuleEvaluatorTest {
     @Test
     @DisplayName("Should handle missing parameters gracefully")
     void testEvaluateRule_MissingParameters() {
+        logger.info("========== START OF INTENTIONAL ERROR TEST ==========");
         // Given - Rule that references a parameter not in facts (will throw SpEL exception)
         Rule rule = new Rule("Missing Param", "#missingParam.length() > 100", "Missing parameter test", "ERROR");
 
         // When
         RuleResult result = evaluator.evaluateRule(rule, testFacts);
+        logger.info("========== END OF INTENTIONAL ERROR TEST ===========");
 
         // Then
         assertNotNull(result, "Result should not be null");
@@ -220,11 +231,13 @@ class UnifiedRuleEvaluatorTest {
     @Test
     @DisplayName("Should handle actual SpEL evaluation error with consistent message format")
     void testEvaluateRule_ActualSpelError() {
+        logger.info("========== START OF INTENTIONAL ERROR TEST ==========");
         // Given - Rule with CRITICAL severity to test actual error results (no recovery)
         Rule rule = new Rule("SpEL Error", "#amount.invalidMethod()", "SpEL error test", "CRITICAL");
 
         // When
         RuleResult result = evaluator.evaluateRule(rule, testFacts);
+        logger.info("========== END OF INTENTIONAL ERROR TEST ===========");
 
         // Then
         assertNotNull(result, "Result should not be null");

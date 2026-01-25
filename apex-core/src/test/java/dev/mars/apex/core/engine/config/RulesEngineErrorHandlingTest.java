@@ -19,6 +19,10 @@ package dev.mars.apex.core.engine.config;
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +45,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2.1.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class RulesEngineErrorHandlingTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RulesEngineErrorHandlingTest.class);

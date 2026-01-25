@@ -4,7 +4,11 @@ import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -15,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - ErrorRecoveryConfig is passed to UnifiedRuleEvaluator
  * - Default ErrorRecoveryConfig is used when YAML section is missing
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class RulesEngineErrorRecoveryConfigTest {
 
     @Test

@@ -20,7 +20,11 @@ import dev.mars.apex.core.config.yaml.YamlMetadataValidator;
 import dev.mars.apex.core.config.yaml.YamlValidationResult;
 import dev.mars.apex.core.config.yaml.YamlValidationSummary;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class YamlStageValidationIntegrationTest {
 
     @Test

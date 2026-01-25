@@ -6,7 +6,11 @@ import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.service.enrichment.EnrichmentGroupFactory;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

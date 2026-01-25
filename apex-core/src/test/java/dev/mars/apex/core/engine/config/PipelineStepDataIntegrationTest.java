@@ -3,9 +3,16 @@ package dev.mars.apex.core.engine.config;
 import dev.mars.apex.core.engine.model.ExecutionStep;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.AfterEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.BeforeEach;
+
 import org.junit.jupiter.api.DisplayName;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 
 import java.util.HashMap;
 import java.util.List;

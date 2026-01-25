@@ -21,6 +21,10 @@ import dev.mars.apex.core.config.yaml.YamlDataSource;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

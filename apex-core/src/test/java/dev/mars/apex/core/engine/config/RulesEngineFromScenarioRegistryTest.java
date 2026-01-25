@@ -18,8 +18,14 @@ package dev.mars.apex.core.engine.config;
 
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
 import org.junit.jupiter.api.DisplayName;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.Nested;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

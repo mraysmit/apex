@@ -42,7 +42,7 @@ public class ColoredTestOutputExtension implements BeforeEachCallback, AfterEach
         String testName = context.getDisplayName();
         String className = context.getTestClass().map(Class::getSimpleName).orElse("Unknown");
         
-        System.out.println(BLUE + BOLD + "▶ STARTING: " + RESET + CYAN + className + "." + testName + RESET);
+        System.out.println(BLUE + BOLD + "STARTING: " + RESET + CYAN + className + "." + testName + RESET);
     }
     
     @Override

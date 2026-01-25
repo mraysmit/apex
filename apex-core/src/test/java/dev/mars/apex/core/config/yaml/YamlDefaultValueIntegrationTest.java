@@ -2,6 +2,10 @@ package dev.mars.apex.core.config.yaml;
 
 import dev.mars.apex.core.engine.model.Rule;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import static org.junit.jupiter.api.Assertions.*;
 
 /*
