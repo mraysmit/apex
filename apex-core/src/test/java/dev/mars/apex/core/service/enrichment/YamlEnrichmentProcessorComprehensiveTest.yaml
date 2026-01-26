@@ -1,0 +1,505 @@
+# YamlEnrichmentProcessor Comprehensive Test Configuration
+# This YAML file contains test enrichments for all critical scenarios before deprecation
+
+metadata:
+  name: "YamlEnrichmentProcessor Comprehensive Tests"
+  description: "Test configuration covering all critical functionality before migration to RulesEngine"
+  version: "1.0"
+  author: "Mark Andrew Ray-Smith"
+
+# ========================================
+# TEST 2: Required Field Mapping Tests
+# ========================================
+
+enrichments:
+  # TEST 2.1: Required field mapping that will fail (source field doesn't exist)
+  - id: "required-field-test"
+    type: "lookup-enrichment"
+    enabled: true
+    priority: 10
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        data:
+          - key: "USD"
+            value: "US Dollar"
+          - key: "EUR"
+            value: "Euro"
+        key-field: "key"
+        value-fields:
+          - "value"
+      lookup-key: "#currencyCode"  # This field exists
+    field-mappings:
+      - source-field: "nonExistentField"  # This will fail
+        target-field: "currencyName"
+        required: true  # Marked as required - failure should propagate
+      - source-field: "value"
+        target-field: "currencyDescription"
+
+  # TEST 2.2: Optional field mapping (can be null without failing)
+  - id: "optional-field-test"
+    type: "lookup-enrichment"
+    enabled: true
+    priority: 11
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        data:
+          - key: "USD"
+            rate: 1.0
+        key-field: "key"
+        value-fields:
+          - "rate"
+      lookup-key: "#currencyCode"
+    field-mappings:
+      - source-field: "optionalField"  # Doesn't exist
+        target-field: "optionalValue"
+        required: false  # Not required - null is OK
+      - source-field: "rate"
+        target-field: "exchangeRate"
+
+# ========================================
+# TEST 3: SpEL Expression Failure Tests
+# ========================================
+
+  # TEST 3.1: Invalid SpEL condition (enrichment should be skipped)
+  - id: "invalid-spel-condition"
+    type: "field-enrichment"
+    enabled: true
+    priority: 20
+    condition: "#nonExistentField.someMethod()"  # Invalid - field doesn't exist
+    field-mappings:
+      - source-field: "constant"
+        target-field: "shouldNotBeSet"
+        expression: "'FAILED'"
+
+  # TEST 3.2: Invalid SpEL lookup key (should handle gracefully)
+  - id: "invalid-lookup-key"
+    type: "lookup-enrichment"
+    enabled: true
+    priority: 21
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        data:
+          - key: "TEST"
+            value: "Test Value"
+        key-field: "key"
+        value-fields:
+          - "value"
+      lookup-key: "#missingField.toString()"  # Invalid - field doesn't exist
+    field-mappings:
+      - source-field: "value"
+        target-field: "lookupResult"
+        default-value: "DEFAULT"  # Should use default
+
+# ========================================
+# TEST 4: Parallel Execution Tests
+# ========================================
+
+  # Parallel enrichments (these should all execute even if one fails)
+  - id: "parallel-enrichment-1"
+    type: "calculation-enrichment"
+    enabled: true
+    priority: 30
+    calculation-config:
+      expression: "#value * 2"
+      result-field: "parallelResult1"
+
+  - id: "parallel-enrichment-2"
+    type: "calculation-enrichment"
+    enabled: true
+    priority: 31
+    calculation-config:
+      expression: "#value * 3"
+      result-field: "parallelResult2"
+
+  - id: "parallel-enrichment-3"
+    type: "calculation-enrichment"
+    enabled: true
+    priority: 32
+    calculation-config:
+      expression: "#value * 4"
+      result-field: "parallelResult3"
+
+  # Sequential enrichments (with one that will fail for short-circuit test)
+  - id: "sequential-enrichment-1"
+    type: "calculation-enrichment"
+    enabled: true
+    priority: 40
+    calculation-config:
+      expression: "#value + 10"
+      result-field: "sequentialResult1"
+
+  - id: "sequential-enrichment-2-fails"
+    type: "calculation-enrichment"
+    enabled: true
+    priority: 41
+    condition: "false"  # This will be skipped
+    calculation-config:
+      expression: "#value + 20"
+      result-field: "sequentialResult2"
+
+  - id: "sequential-enrichment-3"
+    type: "calculation-enrichment"
+    enabled: true
+    priority: 42
+    calculation-config:
+      expression: "#value + 30"
+      result-field: "sequentialResult3"
+
+# ========================================
+# TEST 5: Cache Effectiveness Tests
+# ========================================
+
+  # Dataset cache test - both enrichments use identical datasets (should reuse cached instance)
+  - id: "dataset-cache-test-1"
+    type: "lookup-enrichment"
+    enabled: true
+    priority: 50
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        data:
+          - key: "USD"
+            name: "US Dollar"
+            symbol: "$"
+          - key: "EUR"
+            name: "Euro"
+            symbol: "€"
+        key-field: "key"
+        value-fields:
+          - "name"
+          - "symbol"
+      lookup-key: "#currencyCode"
+      cache-enabled: true
+      cache-ttl-seconds: 600
+    field-mappings:
+      - source-field: "name"
+        target-field: "currencyName1"
+
+  - id: "dataset-cache-test-2"
+    type: "lookup-enrichment"
+    enabled: true
+    priority: 51
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        data:
+          - key: "USD"
+            name: "US Dollar"
+            symbol: "$"
+          - key: "EUR"
+            name: "Euro"
+            symbol: "€"
+        key-field: "key"
+        value-fields:
+          - "name"
+          - "symbol"
+      lookup-key: "#currencyCode"
+      cache-enabled: true
+      cache-ttl-seconds: 600
+    field-mappings:
+      - source-field: "symbol"
+        target-field: "currencySymbol1"
+
+  # Expression cache test - same expression used multiple times
+  - id: "expression-cache-test"
+    type: "calculation-enrichment"
+    enabled: true
+    priority: 52
+    calculation-config:
+      expression: "#amount * 0.10"  # Same expression will be reused
+      result-field: "calculatedFee"
+
+# ========================================
+# TEST 6: Enrichment Group Tests
+# ========================================
+
+  # AND group enrichments (all must succeed)
+  - id: "and-group-enrichment-1"
+    type: "field-enrichment"
+    enabled: true
+    priority: 60
+    field-mappings:
+      - source-field: "constant"
+        target-field: "andField1"
+        expression: "'SUCCESS'"
+
+  - id: "and-group-enrichment-2"
+    type: "field-enrichment"
+    enabled: true
+    priority: 61
+    field-mappings:
+      - source-field: "constant"
+        target-field: "andField2"
+        expression: "'SUCCESS'"
+
+  # OR group enrichments (any can succeed)
+  - id: "or-group-enrichment-1"
+    type: "field-enrichment"
+    enabled: true
+    priority: 70
+    condition: "false"  # This will fail
+    field-mappings:
+      - source-field: "constant"
+        target-field: "orField1"
+        expression: "'FAILED'"
+
+  - id: "or-group-enrichment-2"
+    type: "field-enrichment"
+    enabled: true
+    priority: 71
+    condition: "true"  # This will succeed
+    field-mappings:
+      - source-field: "constant"
+        target-field: "orField2"
+        expression: "'SUCCESS'"
+
+# ========================================
+# TEST 7: Priority-Based Processing
+# ========================================
+
+  # Priority test enrichments (should execute in priority order)
+  - id: "priority-high"
+    type: "field-enrichment"
+    enabled: true
+    priority: 1  # Highest priority
+    field-mappings:
+      - source-field: "constant"
+        target-field: "priorityStep"
+        expression: "'STEP1-HIGH'"
+
+  - id: "priority-medium"
+    type: "field-enrichment"
+    enabled: true
+    priority: 50  # Medium priority
+    field-mappings:
+      - source-field: "constant"
+        target-field: "priorityStep"
+        expression: "'STEP2-MEDIUM'"
+
+  - id: "priority-low"
+    type: "field-enrichment"
+    enabled: true
+    priority: 100  # Low priority (default)
+    field-mappings:
+      - source-field: "constant"
+        target-field: "priorityStep"
+        expression: "'STEP3-LOW'"
+
+  # Execution order tracking
+  - id: "priority-tracker"
+    type: "calculation-enrichment"
+    enabled: true
+    priority: 150  # Last to execute
+    calculation-config:
+      expression: "'Execution completed'"
+      result-field: "executionOrder"
+
+# ========================================
+# TEST 8: V2.1 Null Value Handling Tests
+# ========================================
+
+  # TEST 8.1: Null on optional field (should succeed)
+  - id: "null-optional-field-test"
+    type: "lookup-enrichment"
+    enabled: true
+    priority: 100
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        data:
+          - key: "USD"
+            value: "US Dollar"
+        key-field: "key"
+        value-fields:
+          - "value"
+      lookup-key: "#currencyCode"  # Will be null if missing
+    field-mappings:
+      - source-field: "value"
+        target-field: "currencyName"
+        required: false  # Optional - null is acceptable
+
+  # TEST 8.2: Null source with default values (should use defaults)
+  - id: "null-source-default-test"
+    type: "lookup-enrichment"
+    enabled: true
+    priority: 101
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        data:
+          - key: "USD"
+            value: "US Dollar"
+        key-field: "key"
+        value-fields:
+          - "value"
+      lookup-key: "#currencyCode"  # Will lookup but return null for INVALID key
+    field-mappings:
+      - source-field: "value"
+        target-field: "currencyName"
+        default-value: "UNKNOWN"
+        required: false
+
+  # TEST 8.3: Required field with null from expression (should fail)
+  - id: "required-null-expression-test"
+    type: "field-enrichment"
+    enabled: true
+    priority: 102
+    field-mappings:
+      - source-field: "missingField"  # Doesn't exist
+        target-field: "requiredValue"
+        expression: "#missingField?.toString()"  # Will produce null
+        required: true  # Required - null should fail
+
+# ========================================
+# TEST 9: Constant and Expression Mappings
+# ========================================
+
+  # TEST 9.1: Explicit constant mapping
+  - id: "explicit-constant-test"
+    type: "field-enrichment"
+    enabled: true
+    priority: 110
+    field-mappings:
+      - source-field: "constant"
+        target-field: "baseCurrency"
+        expression: "'USD'"
+
+  # TEST 9.2: Implicit constant mapping (empty source-field)
+  - id: "implicit-constant-test"
+    type: "field-enrichment"
+    enabled: true
+    priority: 111
+    field-mappings:
+      - source-field: ""  # Empty = implicit constant
+        target-field: "calculatedFee"
+        expression: "#amount * 0.10"
+
+  # TEST 9.3: Expression transformation on source value
+  - id: "expression-transform-test"
+    type: "field-enrichment"
+    enabled: true
+    priority: 112
+    field-mappings:
+      - source-field: "baseCurrency"
+        target-field: "normalizedCurrency"
+        expression: "#baseCurrency?.toUpperCase()"  # Transform to uppercase
+
+# ========================================
+# TEST 10: Calculation Enrichment Variations
+# ========================================
+
+  # TEST 10.1: Calculation with field mappings (lines 466-475)
+  - id: "calculation-field-mapping-test"
+    type: "calculation-enrichment"
+    enabled: true
+    priority: 120
+    calculation-config:
+      expression: "#baseAmount * (1 + #taxRate)"
+      result-field: "grossAmount"
+    field-mappings:
+      - source-field: "grossAmount"  # Map from result-field
+        target-field: "totalAmount"
+        expression: "#grossAmount"
+
+  # TEST 10.2: Calculation error recovery with default-value
+  - id: "calculation-error-recovery-test"
+    type: "calculation-enrichment"
+    enabled: true
+    priority: 121
+    calculation-config:
+      expression: "#missingField * 100"  # Will fail
+      result-field: "calculationResult"
+      default-value: 0.0  # Error recovery
+
+# ========================================
+# TEST 11: Target Type Filtering
+# ========================================
+
+  # TEST 11.1: Target type match (HashMap)
+  - id: "target-type-match-test"
+    type: "field-enrichment"
+    enabled: true
+    priority: 130
+    target-type: "java.util.HashMap"  # Matches test data type
+    field-mappings:
+      - source-field: "constant"
+        target-field: "typeMatchResult"
+        expression: "'PROCESSED'"
+
+  # TEST 11.2: Target type mismatch (String - won't match HashMap)
+  - id: "target-type-mismatch-test"
+    type: "field-enrichment"
+    enabled: true
+    priority: 131
+    target-type: "java.lang.String"  # Won't match HashMap test data
+    field-mappings:
+      - source-field: "constant"
+        target-field: "typeMismatchResult"
+        expression: "'SHOULD_NOT_PROCESS'"
+
+# ========================================
+# Additional Test Enrichments
+# ========================================
+
+  # Success/error code test
+  - id: "code-test-success"
+    type: "field-enrichment"
+    enabled: true
+    priority: 80
+    condition: "#value > 50"
+    success-code: "SUCCESS_001"
+    error-code: "ERROR_001"
+    map-to-field: "statusCode = #success_code"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "processStatus"
+        expression: "'PROCESSED'"
+
+  # Conditional mapping test
+  - id: "conditional-mapping-test"
+    type: "conditional-mapping-enrichment"
+    enabled: true
+    priority: 85
+    target-field: "riskLevel"
+    mapping-rules:
+      - id: "high-risk"
+        priority: 1
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#amount > 10000"
+        mapping:
+          type: "direct"
+          expression: "'HIGH'"
+      - id: "medium-risk"
+        priority: 2
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#amount > 1000"
+        mapping:
+          type: "direct"
+          expression: "'MEDIUM'"
+      - id: "low-risk"
+        priority: 3
+        mapping:
+          type: "direct"
+          expression: "'LOW'"
+    execution-settings:
+      stop-on-first-match: true
+      log-matched-rule: true
+
+  # Result field test
+  - id: "result-field-test"
+    type: "field-enrichment"
+    enabled: true
+    priority: 90
+    condition: "#value > 0"
+    result-field: "enrichmentPassed"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "resultFieldValue"
+        expression: "'ENRICHED'"

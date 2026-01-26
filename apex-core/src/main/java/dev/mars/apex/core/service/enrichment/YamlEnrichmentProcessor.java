@@ -789,10 +789,17 @@ public class YamlEnrichmentProcessor {
     /**
      * Apply field mappings from lookup result to target object.
      *
+     * <p><strong>Null Value Handling (v2.1):</strong></p>
+     * <ul>
+     *   <li>Required fields with null values → Enrichment fails</li>
+     *   <li>Optional fields with null values → Attempts to set null; skips if setter incompatible (e.g., primitives)</li>
+     *   <li>Non-null values that fail to set → Enrichment fails</li>
+     * </ul>
+     *
      * @param fieldMappings The field mapping configurations
      * @param sourceObject The source object (lookup result)
      * @param targetObject The target object to enrich
-     * @return The enriched target object
+     * @return The enriched target object, or null if any required field mapping failed
      */
     private Object applyFieldMappings(List<YamlEnrichment.FieldMapping> fieldMappings,
                                      Object sourceObject, Object targetObject) {
@@ -839,15 +846,6 @@ public class YamlEnrichmentProcessor {
                     // For non-constant mappings, extract source value from source object
                     sourceValue = getFieldValue(sourceObject, mapping.getSourceField());
                     logger.debug("Source value for '" + mapping.getSourceField() + "': " + sourceValue);
-
-                    // Handle missing required fields (only for successful lookups)
-                    if (sourceValue == null && mapping.getRequired() != null && mapping.getRequired()) {
-                        logger.error("CRITICAL ERROR: Required field '" + mapping.getSourceField() +
-                                    "' is missing from lookup result");
-                        hasRequiredFieldFailure = true;
-                        // Skip this mapping and continue with next one
-                        continue;
-                    }
                 }
 
                 // Use default value if source value is null (or for failed lookups)
@@ -860,36 +858,43 @@ public class YamlEnrichmentProcessor {
                     logger.trace("Value after expression: " + valueToSet);
                 }
 
-                // Set the target field only if we have a value to set
-                if (valueToSet != null) {
-                    boolean setSuccess = setFieldValue(targetObject, mapping.getTargetField(), valueToSet);
-                    if (setSuccess) {
-                        logger.debug("Successfully mapped field: " + mapping.getSourceField() + " -> " +
-                                   mapping.getTargetField() + " (value: " + valueToSet + ")");
-                    } else {
-                        // CRITICAL: setFieldValue failed - this is a serious error
-                        // The target field could not be set (e.g., SpEL path to non-existent structure)
-                        logger.error("FIELD SET FAILED: source-field '" + mapping.getSourceField() +
-                                   "' -> target-field '" + mapping.getTargetField() +
-                                   "' with value '" + valueToSet + "'. The setFieldValue operation failed. " +
-                                   "Check: (1) target path exists, (2) intermediate structures are pre-created, " +
-                                   "(3) SpEL expression is valid. This failure will be reported in the RuleResult.");
-                        hasRequiredFieldFailure = true;
-                    }
+                // Consolidated handling for setting mapped value (including nulls)
+                String targetField = mapping.getTargetField();
+                String sourceField = mapping.getSourceField();
+                boolean isRequired = mapping.getRequired() != null && mapping.getRequired();
+
+                if (valueToSet == null && isRequired) {
+                    // Required field produced null - this is a failure
+                    logger.error("REQUIRED FIELD MAPPING FAILED: source-field '" + sourceField +
+                               "' -> target-field '" + targetField +
+                               "' produced NULL value but field is marked as required. " +
+                               "Check: (1) source field exists, (2) expression is valid, (3) default-value is provided.");
+                    hasRequiredFieldFailure = true;
                 } else {
-                    // Value is null - check if the field is required
-                    boolean isRequired = mapping.getRequired() != null && mapping.getRequired();
-                    if (isRequired) {
-                        // Required field produced null - this is a failure
-                        logger.error("REQUIRED FIELD MAPPING FAILED: source-field '" + mapping.getSourceField() +
-                                   "' -> target-field '" + mapping.getTargetField() +
-                                   "' produced NULL value but field is marked as required. " +
-                                   "Check: (1) source field exists, (2) expression is valid, (3) default-value is provided.");
-                        hasRequiredFieldFailure = true;
+                    // BEHAVIORAL CHANGE (v2.1): Now attempts to set null values on optional fields
+                    // Previous versions skipped null values entirely. This allows clearing fields.
+                    // Attempt to set the value (may be null for non-required mappings)
+                    boolean setSuccess = setFieldValue(targetObject, targetField, valueToSet);
+                    if (setSuccess) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Successfully mapped field: " + sourceField + " -> " +
+                                       targetField + " (value: " + valueToSet + ")");
+                        }
                     } else {
-                        // Non-required field with null value - just skip it (this is OK)
-                        logger.debug("Field mapping skipped (null value, not required): source-field '" + 
-                                   mapping.getSourceField() + "' -> target-field '" + mapping.getTargetField() + "'");
+                        if (valueToSet == null) {
+                            // If setting null fails (e.g., primitive target), log and continue without failing the enrichment
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Skipping null set for non-required target field '" + targetField + "' (setter not compatible or missing)");
+                            }
+                        } else {
+                            // Non-null value failed to set - this is a serious error
+                            logger.error("FIELD SET FAILED: source-field '" + sourceField +
+                                       "' -> target-field '" + targetField +
+                                       "' with value '" + valueToSet + "'. The setFieldValue operation failed. " +
+                                       "Check: (1) target path exists, (2) intermediate structures are pre-created, " +
+                                       "(3) SpEL expression is valid. This failure will be reported in the RuleResult.");
+                            hasRequiredFieldFailure = true;
+                        }
                     }
                 }
 
@@ -1878,33 +1883,57 @@ public class YamlEnrichmentProcessor {
                 results.add(RuleResult.enrichmentFailure(msgs, data, SeverityConstants.ERROR));
             } finally {
                 executor.shutdownNow();
- }
-        }
-
-        // Sequential branch (with possible short-circuiting)
-        boolean overall = andOp; // AND starts true, OR starts false
-        if (!andOp) overall = false;
-        for (YamlEnrichment enrichment : ordered) {
-            RuleResult r = processEnrichmentWithResult(enrichment, targetObject);
-            results.add(r);
-            boolean ok = r.isSuccess();
-
-            if (andOp) {
-                if (!ok) {
-                    overall = false;
-                    if (shortCircuit) break;
-                }
-            } else { // OR
-                if (ok) {
-                    overall = true;
-                    if (shortCircuit) break;
+            }
+            
+            // For parallel execution: determine overall result from parallel results
+            boolean overall = andOp; // AND starts true, OR starts false
+            if (!andOp) overall = false;
+            
+            for (RuleResult r : results) {
+                boolean ok = r.isSuccess();
+                if (andOp) {
+                    if (!ok) {
+                        overall = false;
+                        break; // Short-circuit for AND
+                    }
+                } else { // OR
+                    if (ok) {
+                        overall = true;
+                        break; // Short-circuit for OR
+                    }
                 }
             }
-        }
+            
+            long elapsed = System.currentTimeMillis() - start;
+            String message = overall ? "Enrichment group succeeded" : "Enrichment group failed";
+            return EnrichmentGroupResult.of(group.getId(), overall, message, results, elapsed);
+            
+        } else {
+            // Sequential branch (with possible short-circuiting)
+            boolean overall = andOp; // AND starts true, OR starts false
+            if (!andOp) overall = false;
+            for (YamlEnrichment enrichment : ordered) {
+                RuleResult r = processEnrichmentWithResult(enrichment, targetObject);
+                results.add(r);
+                boolean ok = r.isSuccess();
 
-        long elapsed = System.currentTimeMillis() - start;
-        String message = overall ? "Enrichment group succeeded" : "Enrichment group failed";
-        return EnrichmentGroupResult.of(group.getId(), overall, message, results, elapsed);
+                if (andOp) {
+                    if (!ok) {
+                        overall = false;
+                        if (shortCircuit) break;
+                    }
+                } else { // OR
+                    if (ok) {
+                        overall = true;
+                        if (shortCircuit) break;
+                    }
+                }
+            }
+
+            long elapsed = System.currentTimeMillis() - start;
+            String message = overall ? "Enrichment group succeeded" : "Enrichment group failed";
+            return EnrichmentGroupResult.of(group.getId(), overall, message, results, elapsed);
+        }
     }
 
     /**
