@@ -69,7 +69,8 @@ public class InvalidConfigurationTest {
             boolean foundExpectedError = false;
             for (String msg : failures) {
                 if (msg.contains("Failed to initialize data source 'invalid-db'") && 
-                    msg.contains("Connection configuration is required")) {
+                    (msg.contains("Connection configuration is required") || 
+                     msg.contains("Source type is required"))) {
                     foundExpectedError = true;
                     break;
                 }

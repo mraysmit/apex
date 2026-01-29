@@ -435,6 +435,10 @@ public class DataSourceRegistry {
     /**
      * Build cache key for JDBC connection pool.
      * Key is based on connection details, not data source name.
+     * 
+     * IMPORTANT: Schema IS included because the schema is baked into the JDBC URL
+     * (e.g., PostgreSQL uses currentSchema parameter). Different schemas need
+     * separate connection pools to ensure correct query routing.
      */
     private String buildJdbcPoolKey(DataSourceConfiguration config) {
         StringBuilder key = new StringBuilder("jdbc:");
@@ -442,8 +446,10 @@ public class DataSourceRegistry {
             key.append(config.getConnection().getHost()).append(":");
             key.append(config.getConnection().getPort()).append(":");
             key.append(config.getConnection().getDatabase()).append(":");
-            key.append(config.getConnection().getUsername());
-            // Note: Schema is NOT included - same pool can serve different schemas
+            key.append(config.getConnection().getUsername()).append(":");
+            // Schema IS included - JDBC URL contains schema (e.g., PostgreSQL currentSchema)
+            String schema = config.getConnection().getSchema();
+            key.append(schema != null ? schema : "default");
         }
         return key.toString();
     }
@@ -755,10 +761,10 @@ public class DataSourceRegistry {
     }
     
     /**
-     * Clear all caches and registered data sources for testing purposes.
-     * Does NOT close connection pools - use shutdown() for full cleanup.
+     * Clear all caches and registered data sources.
+     * This method CLOSES connection pools to ensure proper isolation.
      */
-    public void clearForTesting() {
+    public void clear() {
         LOGGER.info("Clearing registry for testing - {} data sources, {} pools", 
             dataSources.size(), jdbcPoolCache.size());
         
@@ -779,7 +785,19 @@ public class DataSourceRegistry {
             tagIndex.clear();
         }
         
-        // Clear caches
+        // Close JDBC connection pools (critical for Testcontainers - ports change between test classes)
+        LOGGER.info("Closing {} JDBC connection pools for test isolation", jdbcPoolCache.size());
+        for (Map.Entry<String, DataSource> entry : jdbcPoolCache.entrySet()) {
+            try {
+                DataSource pool = entry.getValue();
+                if (pool instanceof HikariDataSource) {
+                    ((HikariDataSource) pool).close();
+                    LOGGER.debug("Closed JDBC pool: {}", entry.getKey());
+                }
+            } catch (Exception e) {
+                LOGGER.warn("Error closing JDBC pool '{}': {}", entry.getKey(), e.getMessage());
+            }
+        }
         jdbcPoolCache.clear();
         httpClientCache.clear();
         

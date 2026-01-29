@@ -28,6 +28,10 @@ module dev.mars.apex.core {
     requires transitive spring.expression;
     requires spring.context;
     requires spring.core;
+    requires spring.jdbc;
+    
+    // Connection pooling
+    requires com.zaxxer.hikari;
 
     // Logging dependencies
     requires transitive org.slf4j;

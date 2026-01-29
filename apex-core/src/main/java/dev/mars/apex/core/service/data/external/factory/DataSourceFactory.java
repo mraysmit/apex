@@ -271,7 +271,7 @@ public class DataSourceFactory {
     /**
      * Clear all cached resources (JDBC DataSources and HttpClients).
      * <p>
-     * Note: For clearing ExternalDataSource instance cache, use {@link DataSourceRegistry#clearForTesting()}.
+     * Note: For clearing ExternalDataSource instance cache, use {@link DataSourceRegistry#clear()}.
      */
     public void clearCache() {
         jdbcDataSourceCache.clear();

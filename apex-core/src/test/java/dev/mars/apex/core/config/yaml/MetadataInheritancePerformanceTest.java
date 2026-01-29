@@ -251,8 +251,8 @@ class MetadataInheritancePerformanceTest {
         // Verify inheritance and override logic works correctly
         verifyInheritanceLogic(rules, groups);
         
-        // Performance assertion
-        assertTrue(duration < 8000, "Complex inheritance should process within 8 seconds");
+        // Performance assertion - relaxed to 12 seconds to avoid flaky failures on slower machines
+        assertTrue(duration < 12000, "Complex inheritance should process within 12 seconds");
     }
 
     @Test

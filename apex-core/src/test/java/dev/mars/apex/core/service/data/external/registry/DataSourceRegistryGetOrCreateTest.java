@@ -62,13 +62,13 @@ class DataSourceRegistryGetOrCreateTest {
     @BeforeEach
     void setUp() {
         registry = DataSourceRegistry.getInstance();
-        registry.clearForTesting();
+        registry.clear();
         LOGGER.info("Registry cleared for test isolation");
     }
     
     @AfterEach
     void tearDown() {
-        registry.clearForTesting();
+        registry.clear();
     }
     
     @Test

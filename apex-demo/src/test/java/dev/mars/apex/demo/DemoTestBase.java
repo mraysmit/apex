@@ -102,6 +102,15 @@ public abstract class DemoTestBase {
             logger.warn("Error clearing DataSourceFactory cache", e);
         }
 
+        // Clear DataSourceRegistry singleton to prevent "already registered" errors
+        // This is critical for test isolation when tests register data sources
+        try {
+            dev.mars.apex.core.service.data.external.registry.DataSourceRegistry.getInstance().clear();
+            logger.info("DataSourceRegistry cleared for test isolation");
+        } catch (Exception e) {
+            logger.warn("Error clearing DataSourceRegistry", e);
+        }
+
         // Shutdown H2 database to release locks and close connections
         try {
             // Execute H2 SHUTDOWN command to properly close the database
@@ -195,7 +204,7 @@ public abstract class DemoTestBase {
             failureMessages.add("Error details: " + e.getMessage());
 
             return RuleResult.evaluationFailure(failureMessages, new HashMap<String, Object>(),
-                "configuration-loading", Configuration file loading failed: " + e.getMessage());
+                "configuration-loading", "Configuration file loading failed: " + e.getMessage());
 
         } catch (Exception e) {
             logger.error("Unexpected error loading YAML configuration: {}", e.getMessage(), e);

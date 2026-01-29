@@ -638,19 +638,19 @@ public class TransformationExpressionAliasTest extends DemoTestBase {
             // CRITICAL: These assertions would have FAILED in the production outage
             // because the transformation keyword was not recognized
             assertNotNull(enriched.get("criticalStatus"),
-                criticalStatus must not be null - this was the production outage!");
+                "criticalStatus must not be null - this was the production outage!");
             assertEquals("VALIDATED", enriched.get("criticalStatus"),
-                criticalStatus must be set to VALIDATED");
+                "criticalStatus must be set to VALIDATED");
 
             assertNotNull(enriched.get("approvalRequired"),
-                approvalRequired must not be null");
+                "approvalRequired must not be null");
             assertTrue((Boolean) enriched.get("approvalRequired"),
-                approvalRequired must be true");
+                "approvalRequired must be true");
 
             assertNotNull(enriched.get("riskScore"),
-                riskScore must not be null");
+                "riskScore must not be null");
             assertEquals(100, enriched.get("riskScore"),
-                riskScore must be 100");
+                "riskScore must be 100");
 
             logger.info("[OK] Silent failure prevention test passed - all critical values are set correctly");
             logger.info("  This test would have CAUGHT the production outage!");

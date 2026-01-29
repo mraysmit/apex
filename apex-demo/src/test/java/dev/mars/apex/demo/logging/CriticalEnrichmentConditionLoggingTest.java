@@ -69,7 +69,7 @@ class CriticalEnrichmentConditionLoggingTest {
     }
 
     @Test
-    @DisplayName(Enrichment condition evaluation failures must log as SEVERE")
+    @DisplayName("Enrichment condition evaluation failures must log as SEVERE")
     void testCriticalEnrichmentConditionFailureLogging() throws Exception {
         logger.info("=== CRITICAL ENRICHMENT CONDITION LOGGING TEST ===");
         logger.info("🎯 PURPOSE: Verify that enrichment condition evaluation failures are logged as SEVERE");

@@ -4,6 +4,7 @@ import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.service.data.external.registry.DataSourceRegistry;
 import dev.mars.apex.core.test.TestContainerImages;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -128,6 +129,9 @@ class PostgreSQLSchemaConfigurationTest {
 
     @BeforeEach
     void setupDatabase() throws Exception {
+        // Clear stale JDBC pools from previous test classes (critical for Testcontainers)
+        DataSourceRegistry.getInstance().clear();
+        
         if (!postgres.isRunning()) {
             return;
         }

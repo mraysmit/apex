@@ -70,7 +70,7 @@ public class ConfigurationErrorHandlingTest extends DemoTestBase {
         // Verify rule context
         assertEquals("configuration-loading", result.getRuleName(), "Rule name should indicate configuration loading");
         assertNotNull(result.getMessage(), "Message should be present");
-        assertTrue(result.getMessage().contains(Configuration file loading failed"),
+        assertTrue(result.getMessage().contains("Configuration file loading failed"),
             "Message should indicate CRITICAL configuration loading failure");
         
         logger.info("[OK] Missing configuration file handled gracefully");
@@ -106,7 +106,7 @@ public class ConfigurationErrorHandlingTest extends DemoTestBase {
             assertFalse(result.getFailureMessages().isEmpty(), "Failure messages should be present for failure");
             assertEquals("configuration-loading", result.getRuleName(), "Rule name should indicate configuration loading");
             assertNotNull(result.getMessage(), "Message should be present");
-            assertTrue(result.getMessage().contains(Configuration file loading failed"),
+            assertTrue(result.getMessage().contains("Configuration file loading failed"),
                 "Message should indicate CRITICAL loading failure");
             logger.info("[OK] Configuration file loading CRITICAL ERROR handled gracefully");
         }

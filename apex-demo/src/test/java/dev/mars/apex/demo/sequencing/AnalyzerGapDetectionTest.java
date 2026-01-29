@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *   <li>error-recovery - Section-level only (not in itemOrder)</li>
  * </ul>
  */
-@DisplayName(Analyzer Gap Detection Test")
+@DisplayName("Analyzer Gap Detection Test")
 public class AnalyzerGapDetectionTest extends DemoTestBase {
 
     private final YamlProcessingSequenceAnalyzer analyzer = new YamlProcessingSequenceAnalyzer();
@@ -158,7 +158,7 @@ public class AnalyzerGapDetectionTest extends DemoTestBase {
     }
 
     @Test
-    @DisplayName(Analyzer shows MULTIPLE items in SAME section")
+    @DisplayName("Analyzer shows MULTIPLE items in SAME section")
     void testAnalyzerShowsMultipleItemsInSameSection() {
         // Test4B has 4 enrichment items in ONE enrichments section
         String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/Test4B_AllStandaloneTest.yaml";
@@ -181,7 +181,7 @@ public class AnalyzerGapDetectionTest extends DemoTestBase {
     }
 
     @Test
-    @DisplayName(COMPLEX YAML - Multiple sections with multiple items AND groups-only logic")
+    @DisplayName("COMPLEX YAML - Multiple sections with multiple items AND groups-only logic")
     void testAnalyzerComplexYamlWithGroupsOnlyLogic() {
         // Test4 has:
         // - enrichments section with 4 items (standalone-1, grouped-1, standalone-2, grouped-2)
@@ -223,7 +223,7 @@ public class AnalyzerGapDetectionTest extends DemoTestBase {
     }
 
     @Test
-    @DisplayName(MOST COMPLEX YAML - Numbered suffixes + multiple groups + interleaving")
+    @DisplayName("MOST COMPLEX YAML - Numbered suffixes + multiple groups + interleaving")
     void testAnalyzerMostComplexYaml() {
         // Test6B has:
         // - enrichments-1 (2 items: standalone-1, grouped-A1)
