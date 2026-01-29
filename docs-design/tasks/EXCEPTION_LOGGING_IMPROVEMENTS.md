@@ -131,6 +131,5 @@ After changes:
 ## Related Issues
 
 - Debug Logging Standardization (completed)
-- RulesEngineLogger adoption (in progress)
 - System.out/System.err elimination (in progress)
 
