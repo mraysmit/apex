@@ -1,6 +1,8 @@
 package dev.mars.apex.core.service.lookup;
 
 import dev.mars.apex.core.config.yaml.YamlEnrichment;
+import dev.mars.apex.core.service.data.external.DataSourceException;
+import dev.mars.apex.core.service.data.external.registry.DataSourceRegistry;
 import dev.mars.apex.core.service.enrichment.EnrichmentException;
 import dev.mars.apex.core.service.data.external.file.CsvDataLoader;
 import dev.mars.apex.core.service.data.external.file.JsonDataLoader;
@@ -281,19 +283,16 @@ public class DatasetLookupServiceFactory {
         }
 
         try {
-            // Check if data source already exists in registry (prevents duplicate creation)
-            dev.mars.apex.core.service.data.external.ExternalDataSource dataSource = null;
+            // Use the unified DataSourceRegistry as the single source of truth
+            // This handles caching, deduplication, and connection pool sharing automatically
+            DataSourceRegistry registry = DataSourceRegistry.getInstance();
+            dev.mars.apex.core.service.data.external.ExternalDataSource dataSource = 
+                registry.getOrCreate(connectionName, dataSourceConfig.toDataSourceConfiguration());
+            logger.info("Obtained data source '{}' from DataSourceRegistry", connectionName);
             
-            if (dataSourceRegistry != null && dataSourceRegistry.containsKey(connectionName)) {
-                dataSource = dataSourceRegistry.get(connectionName);
-                logger.info("REUSING existing data source '{}' from RulesEngine registry (prevents duplicate creation)", connectionName);
-            } else {
-                // Create new database data source using existing infrastructure
-                logger.info("Creating NEW data source '{}' (not found in registry)", connectionName);
-                dev.mars.apex.core.service.data.external.factory.DataSourceFactory factory =
-                    dev.mars.apex.core.service.data.external.factory.DataSourceFactory.getInstance();
-
-                dataSource = factory.createDataSource(dataSourceConfig.toDataSourceConfiguration());
+            // Also update the local registry if provided (for backward compatibility)
+            if (dataSourceRegistry != null && !dataSourceRegistry.containsKey(connectionName)) {
+                dataSourceRegistry.put(connectionName, dataSource);
             }
 
             // Extract parameter field names from dataset configuration
@@ -855,12 +854,11 @@ public class DatasetLookupServiceFactory {
         }
 
         try {
-            // Create REST API data source using existing infrastructure
-            dev.mars.apex.core.service.data.external.factory.DataSourceFactory factory =
-                dev.mars.apex.core.service.data.external.factory.DataSourceFactory.getInstance();
-
+            // Use the unified DataSourceRegistry as the single source of truth
+            DataSourceRegistry registry = DataSourceRegistry.getInstance();
             dev.mars.apex.core.service.data.external.ExternalDataSource dataSource =
-                factory.createDataSource(dataSourceConfig.toDataSourceConfiguration());
+                registry.getOrCreate(connectionName, dataSourceConfig.toDataSourceConfiguration());
+            logger.info("Obtained REST API data source '{}' from DataSourceRegistry", connectionName);
 
             // Extract parameter field names from dataset configuration
             java.util.List<String> parameterFields = new java.util.ArrayList<>();

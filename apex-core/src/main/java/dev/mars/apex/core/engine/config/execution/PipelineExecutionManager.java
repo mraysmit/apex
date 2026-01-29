@@ -19,6 +19,7 @@ import dev.mars.apex.core.service.data.external.ExternalDataSource;
 import dev.mars.apex.core.service.data.external.factory.DataSinkFactory;
 import dev.mars.apex.core.service.data.external.factory.DataSourceFactory;
 import dev.mars.apex.core.service.data.external.manager.ExternalDataSourceManager;
+import dev.mars.apex.core.service.data.external.registry.DataSourceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
@@ -64,6 +65,7 @@ public class PipelineExecutionManager {
 
     private final DataSourceFactory dataSourceFactory;
     private final DataSinkFactory dataSinkFactory;
+    private final DataSourceRegistry dataSourceRegistry;
     private final Map<String, ExternalDataSource> dataSources;
     private final Map<String, DataSink> dataSinks;
     private final List<String> initializationErrors;
@@ -91,6 +93,7 @@ public class PipelineExecutionManager {
             ExpressionEvaluatorService evaluatorService) {
         this.dataSourceFactory = dataSourceFactory;
         this.dataSinkFactory = dataSinkFactory;
+        this.dataSourceRegistry = DataSourceRegistry.getInstance();
         this.dataSources = dataSources;
         this.dataSinks = dataSinks;
         this.initializationErrors = initializationErrors;
@@ -108,15 +111,16 @@ public class PipelineExecutionManager {
         YamlEnrichmentProcessor updatedProcessor = null;
         
         try {
-            // Initialize data sources
+            // Initialize data sources using the unified DataSourceRegistry
             if (yamlConfig.getDataSources() != null && !yamlConfig.getDataSources().isEmpty()) {
-                logger.info("Initializing {} data sources", yamlConfig.getDataSources().size());
+                logger.info("Initializing {} data sources via DataSourceRegistry", yamlConfig.getDataSources().size());
                 for (YamlDataSource yamlDataSource : yamlConfig.getDataSources()) {
                     try {
                         DataSourceConfiguration config = yamlDataSource.toDataSourceConfiguration();
-                        ExternalDataSource dataSource = dataSourceFactory.createDataSource(config);
+                        // Use DataSourceRegistry.getOrCreate() - the single source of truth
+                        ExternalDataSource dataSource = dataSourceRegistry.getOrCreate(config.getName(), config);
                         dataSources.put(config.getName(), dataSource);
-                        logger.debug("Initialized data source: {}", config.getName());
+                        logger.debug("Initialized data source via registry: {}", config.getName());
                     } catch (DataSourceException e) {
                         logger.warn("Failed to initialize data source '{}': {}", yamlDataSource.getName(), e.getMessage());
                         initializationErrors.add("Failed to initialize data source '" + yamlDataSource.getName() + "': " + e.getMessage());

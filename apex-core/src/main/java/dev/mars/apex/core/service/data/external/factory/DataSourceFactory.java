@@ -29,9 +29,7 @@ import dev.mars.apex.core.service.data.external.messagequeue.MessageQueueDataSou
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 
 import javax.sql.DataSource;
 import java.net.http.HttpClient;
@@ -40,20 +38,47 @@ import java.util.Map;
 /**
  * Factory for creating external data source instances.
  * 
- * This factory creates and configures data source instances based on
- * configuration objects, handling the complexity of different data source
- * types and their specific initialization requirements.
+ * <h2>Architecture Role</h2>
+ * <p>
+ * This factory is a <b>low-level component</b> that creates ExternalDataSource instances.
+ * It does NOT cache data source instances - that responsibility belongs to
+ * {@link dev.mars.apex.core.service.data.external.registry.DataSourceRegistry}.
+ * </p>
  * 
- * Features:
- * - Type-based data source creation
- * - Configuration validation
- * - Resource management and caching
- * - Error handling and fallback mechanisms
- * - Extensible architecture for custom data sources
+ * <h2>Caching Hierarchy</h2>
+ * <pre>
+ * DataSourceRegistry (SINGLE SOURCE OF TRUTH)
+ *    │
+ *    │  calls when cache miss
+ *    ↓
+ * DataSourceFactory (this class)
+ *    │
+ *    ├── jdbcDataSourceCache: HikariCP DataSource pools
+ *    └── httpClientCache: HttpClient instances
+ * </pre>
+ * 
+ * <p>
+ * <b>Important:</b> Direct use of this factory is discouraged. Instead, use
+ * {@code DataSourceRegistry.getInstance().getOrCreate(name, config)} which provides:
+ * </p>
+ * <ul>
+ *   <li>Automatic caching and deduplication</li>
+ *   <li>Thread-safe concurrent access</li>
+ *   <li>Consistent lifecycle management</li>
+ * </ul>
+ * 
+ * <h2>Features</h2>
+ * <ul>
+ *   <li>Type-based data source creation (database, REST, file, cache, message queue)</li>
+ *   <li>Configuration validation before creation</li>
+ *   <li>Underlying resource caching (JDBC pools, HTTP clients)</li>
+ *   <li>Extensible architecture via custom DataSourceProvider registration</li>
+ * </ul>
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
- * @version 1.0
+ * @since 2025-12-01
+ * @version 2.0
+ * @see dev.mars.apex.core.service.data.external.registry.DataSourceRegistry
  */
 public class DataSourceFactory {
     
@@ -69,9 +94,6 @@ public class DataSourceFactory {
 
     // Custom data source providers
     private final Map<String, DataSourceProvider> customProviders = new ConcurrentHashMap<>();
-
-    // Concurrent creation deduplication
-    private final Map<String, CompletableFuture<ExternalDataSource>> pendingCreations = new ConcurrentHashMap<>();
     
     /**
      * Private constructor for singleton pattern.
@@ -99,6 +121,9 @@ public class DataSourceFactory {
     
     /**
      * Create a data source from configuration.
+     * <p>
+     * Note: For deduplication and instance reuse, use {@link DataSourceRegistry#getOrCreate(String, DataSourceConfiguration)}
+     * instead of calling this method directly. This method creates a new instance each time.
      *
      * @param configuration The data source configuration
      * @return Configured data source instance
@@ -118,47 +143,7 @@ public class DataSourceFactory {
                 "Invalid configuration: " + e.getMessage(), e);
         }
 
-        // Generate unique key for deduplication
-        String creationKey = generateCreationKey(configuration);
-
-        // Use computeIfAbsent to ensure only one creation per unique configuration
-        CompletableFuture<ExternalDataSource> future = pendingCreations.computeIfAbsent(creationKey,
-            k -> CompletableFuture.supplyAsync(() -> {
-                try {
-                    return createDataSourceInternal(configuration);
-                } catch (DataSourceException e) {
-                    throw new RuntimeException(e);
-                } finally {
-                    // Remove from pending creations when done
-                    pendingCreations.remove(k);
-                }
-            }));
-
-        try {
-            return future.get();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new DataSourceException(DataSourceException.ErrorType.CONFIGURATION_ERROR,
-                "Data source creation was interrupted", e, configuration.getName(), "createDataSource", false);
-        } catch (ExecutionException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof RuntimeException && cause.getCause() instanceof DataSourceException) {
-                throw (DataSourceException) cause.getCause();
-            } else if (cause instanceof DataSourceException) {
-                throw (DataSourceException) cause;
-            } else {
-                throw new DataSourceException(DataSourceException.ErrorType.CONFIGURATION_ERROR,
-                    "Failed to create data source '" + configuration.getName() + "'", cause,
-                    configuration.getName(), "createDataSource", false);
-            }
-        }
-    }
-
-    /**
-     * Internal method to create a data source without deduplication.
-     * This is the actual implementation that was previously in createDataSource.
-     */
-    private ExternalDataSource createDataSourceInternal(DataSourceConfiguration configuration) throws DataSourceException {
+        // Create the data source directly - deduplication is handled by DataSourceRegistry
         DataSourceType type = configuration.getDataSourceType();
         String name = configuration.getName();
 
@@ -284,21 +269,14 @@ public class DataSourceFactory {
     }
     
     /**
-     * Clear all cached resources.
+     * Clear all cached resources (JDBC DataSources and HttpClients).
+     * <p>
+     * Note: For clearing ExternalDataSource instance cache, use {@link DataSourceRegistry#clearForTesting()}.
      */
     public void clearCache() {
         jdbcDataSourceCache.clear();
         httpClientCache.clear();
-        // Wait for any pending creations to complete before clearing
-        pendingCreations.values().forEach(future -> {
-            try {
-                future.get();
-            } catch (Exception e) {
-                LOGGER.debug("Error waiting for pending data source creation during cache clear: {}", e.getMessage());
-            }
-        });
-        pendingCreations.clear();
-        LOGGER.debug("Cleared data source factory cache");
+        LOGGER.info("Cleared data source factory cache");
     }
 
     /**
@@ -354,6 +332,9 @@ public class DataSourceFactory {
             LOGGER.info("CACHE-KEY-DEBUG: Schema in configuration: {}", 
                 configuration.getConnection() != null ? configuration.getConnection().getSchema() : "null");
             
+            // Track whether key was already present before computeIfAbsent
+            boolean wasPresent = jdbcDataSourceCache.containsKey(cacheKey);
+            
             DataSource jdbcDataSource = jdbcDataSourceCache.computeIfAbsent(cacheKey, 
                 k -> {
                     try {
@@ -364,8 +345,8 @@ public class DataSourceFactory {
                     }
                 });
             
-            LOGGER.info("CACHE-RESULT-DEBUG: Using JDBC DataSource (cached: {})", 
-                !jdbcDataSourceCache.get(cacheKey).equals(jdbcDataSource));
+            // Log accurate cache status based on pre-check (wasPresent reflects true reuse)
+            LOGGER.info("CACHE-RESULT-DEBUG: Using JDBC DataSource (cached: {})", wasPresent);
             
             return new DatabaseDataSource(jdbcDataSource, configuration);
             
@@ -507,36 +488,6 @@ public class DataSourceFactory {
             // Include schema in cache key - different schemas need different data sources
             String schema = configuration.getConnection().getSchema();
             key.append(schema != null ? schema : "default");
-        }
-
-        return key.toString();
-    }
-
-    /**
-     * Generate unique key for data source creation deduplication.
-     * This key should uniquely identify configurations that would result in identical data sources.
-     */
-    private String generateCreationKey(DataSourceConfiguration configuration) {
-        StringBuilder key = new StringBuilder();
-        key.append(configuration.getName()).append(":");
-        key.append(configuration.getType()).append(":");
-        key.append(configuration.getSourceType()).append(":");
-
-        if (configuration.getConnection() != null) {
-            key.append(configuration.getConnection().getHost()).append(":");
-            key.append(configuration.getConnection().getPort()).append(":");
-            key.append(configuration.getConnection().getDatabase()).append(":");
-            key.append(configuration.getConnection().getUsername()).append(":");
-            key.append(configuration.getConnection().getBaseUrl()).append(":");
-            key.append(configuration.getConnection().getBasePath()).append(":");
-            // Include schema to ensure different schemas get different data sources
-            String schema = configuration.getConnection().getSchema();
-            key.append(schema != null ? schema : "default");
-        }
-
-        if (configuration.getCache() != null) {
-            key.append(":cache:").append(configuration.getCache().getMaxSize())
-               .append(":").append(configuration.getCache().getTtlSeconds());
         }
 
         return key.toString();

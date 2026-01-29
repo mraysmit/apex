@@ -199,8 +199,8 @@ public class RulesEngine {
             this.ruleChainExecutor
         );
 
-        // Initialize pipeline components
-        this.dataSources = new HashMap<>();
+        // Initialize pipeline components with thread-safe maps for parallel scenario evaluation
+        this.dataSources = new java.util.concurrent.ConcurrentHashMap<>();
         this.dataSinks = new HashMap<>();
         this.pipelineExecutionManager = new PipelineExecutionManager(
             DataSourceFactory.getInstance(),
