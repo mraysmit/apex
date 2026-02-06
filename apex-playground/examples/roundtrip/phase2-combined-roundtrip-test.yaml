@@ -1,0 +1,63 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Purpose: Combined Phase 2 test with error-recovery + categories + data-sinks
+# Phase 2 comprehensive roundtrip regression test
+# ============================================================================
+
+metadata:
+  id: "phase2-combined-test"
+  name: "Phase 2 Combined Roundtrip Test"
+  version: "1.0.0"
+  description: "Tests that all Phase 2 import fixes work together"
+  type: "rule-config"
+  author: "APEX Test Suite"
+  created-by: "Phase2 Tester"
+  created-date: "2025-09-01"
+
+error-recovery:
+  enabled: true
+  log-recovery-attempts: true
+  metrics-enabled: false
+  default-strategy: "CONTINUE_WITH_DEFAULT"
+
+  severity-policies:
+    CRITICAL:
+      recovery-enabled: false
+      strategy: "FAIL_FAST"
+    WARNING:
+      recovery-enabled: true
+      strategy: "SKIP_RULE"
+      max-retries: 2
+      retry-delay: 200
+
+categories:
+  - name: "trade-validation"
+    description: "Trade validation rules"
+    priority: "10"
+    business-domain: "Trading"
+    business-owner: "trade-ops@example.com"
+
+data-sinks:
+  - id: "audit-sink"
+    type: "database"
+    description: "Audit trail database"
+    enabled: true
+    database: "jdbc:postgresql://localhost:5432/audit"
+    table-name: "audit_log"
+    operation: "INSERT"
+
+rules:
+  - id: "basic-check"
+    name: "Basic Check"
+    condition: "#amount > 0"
+    message: "Amount is positive"
+    severity: "INFO"
+
+enrichments:
+  - id: "calculate-total"
+    type: "calculation-enrichment"
+    description: "Calculate total value"
+    field-mappings:
+      - target-field: "totalValue"
+        expression: "#quantity * #price"

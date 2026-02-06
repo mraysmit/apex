@@ -1,0 +1,29 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Purpose: Test that all metadata fields survive import → blocks → YAML roundtrip
+# Phase 1 regression test for metadata field import fix
+# ============================================================================
+
+metadata:
+  id: "metadata-roundtrip-test"
+  name: "Metadata Roundtrip Test"
+  version: "2.1.0"
+  description: "Verifies all metadata fields are preserved through import/export cycle"
+  type: "rule-config"
+  author: "APEX Test Suite"
+  created-by: "John Smith"
+  created-date: "2025-01-15"
+  last-modified: "2025-06-20"
+  business-domain: "Trade Settlement"
+  effective-date: "2025-02-01"
+  expiration-date: "2026-12-31"
+  tags: ["roundtrip", "metadata", "phase1"]
+  owner: "Compliance Team"
+
+rules:
+  - id: "placeholder-rule"
+    name: "Placeholder Rule"
+    condition: "#amount > 0"
+    message: "Amount is positive"
+    severity: "INFO"

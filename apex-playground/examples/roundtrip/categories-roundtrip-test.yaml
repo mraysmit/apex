@@ -1,0 +1,40 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Purpose: Test categories section import → blocks → YAML roundtrip
+# Phase 2 regression test for categories import fix
+# ============================================================================
+
+metadata:
+  id: "categories-roundtrip-test"
+  name: "Categories Roundtrip Test"
+  version: "1.0.0"
+  description: "Verifies categories section is imported and preserved"
+  type: "rule-config"
+  author: "APEX Test Suite"
+
+categories:
+  - name: "validation"
+    description: "Data validation checks"
+    priority: "10"
+    business-domain: "Trade Processing"
+    business-owner: "trade-team@example.com"
+    created-by: "Admin"
+  - name: "compliance"
+    description: "Regulatory compliance rules"
+    priority: "20"
+    business-domain: "Regulatory"
+    business-owner: "compliance@example.com"
+    created-by: "Compliance Officer"
+  - name: "enrichment"
+    description: "Data enrichment operations"
+    priority: "30"
+    business-domain: "Data Engineering"
+    business-owner: "data-eng@example.com"
+
+rules:
+  - id: "placeholder-rule"
+    name: "Placeholder Rule"
+    condition: "#amount > 0"
+    message: "Amount is positive"
+    severity: "INFO"

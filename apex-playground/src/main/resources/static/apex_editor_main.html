@@ -3331,6 +3331,9 @@
                 let transformations = [];
                 let dataSourceRefs = [];
                 let errorRecovery = null;
+                let ruleChains = [];
+                let categories = [];
+                let dataSinks = [];
 
                 if (sectionsCode) {
                     const sections = JSON.parse(`[${sectionsCode.replace(/,\s*$/, '')}]`);
@@ -3342,6 +3345,9 @@
                         if (section.type === 'transformations') transformations = section.content;
                         if (section.type === 'data-source-refs') dataSourceRefs = section.content;
                         if (section.type === 'error-recovery') errorRecovery = section.content;
+                        if (section.type === 'rule-chains') ruleChains = section.content;
+                        if (section.type === 'categories') categories = section.content;
+                        if (section.type === 'data-sinks') dataSinks = section.content;
                     });
                 }
 
@@ -3380,6 +3386,9 @@
                 if (enrichments.length > 0) config.enrichments = enrichments;
                 if (enrichmentGroups.length > 0) config["enrichment-groups"] = enrichmentGroups;
                 if (transformations.length > 0) config.transformations = transformations;
+                if (ruleChains.length > 0) config["rule-chains"] = ruleChains;
+                if (categories.length > 0) config.categories = categories;
+                if (dataSinks.length > 0) config["data-sinks"] = dataSinks;
 
                 return JSON.stringify(config, null, 2);
             };
@@ -4692,8 +4701,12 @@
                 // Process stages
                 const stagesCode = generator.statementToCode(block, 'STAGES');
                 if (stagesCode) {
-                    const stagesArray = stagesCode.split(',').filter(s => s.trim()).map(s => JSON.parse(s));
-                    pipelineObj.pipeline.stages = stagesArray;
+                    try {
+                        const stagesArray = JSON.parse(`[${stagesCode.replace(/,\s*$/, '')}]`);
+                        pipelineObj.pipeline.stages = stagesArray;
+                    } catch (e) {
+                        console.error("Error parsing pipeline stages", e);
+                    }
                 }
 
                 return JSON.stringify(pipelineObj);
@@ -5080,7 +5093,8 @@
                 'apex_data_source_config',
                 'apex_scenario_config',
                 'apex_scenario_registry',
-                'apex_component_config'
+                'apex_component_config',
+                'apex_pipeline_config'
             ];
 
             function updateYaml() {
@@ -6985,7 +6999,9 @@
 
                 try {
                     const config = jsyaml.load(yamlText);
-                    if (!config || !config.metadata) {
+
+                    // Support pipeline configs which may not have metadata
+                    if (!config || (!config.metadata && !config.pipeline)) {
                         showToast('Invalid APEX YAML: missing metadata section.', 'error');
                         return;
                     }
@@ -6994,12 +7010,21 @@
                     workspace.clear();
 
                     // Determine config type and create root block
-                    const configType = config.metadata.type || 'rule-config';
-
-                    if (configType === 'data-source-config') {
-                        createDataSourceConfigBlock(config);
+                    if (config.pipeline) {
+                        createPipelineConfigBlock(config);
                     } else {
-                        createRuleConfigBlock(config);
+                        const configType = config.metadata.type || 'rule-config';
+                        if (configType === 'data-source-config') {
+                            createDataSourceConfigBlock(config);
+                        } else if (configType === 'scenario') {
+                            createScenarioConfigBlock(config);
+                        } else if (configType === 'scenario-registry') {
+                            createScenarioRegistryBlock(config);
+                        } else if (configType === 'component') {
+                            createComponentConfigBlock(config);
+                        } else {
+                            createRuleConfigBlock(config);
+                        }
                     }
 
                     closeYamlImportModal();
@@ -7020,6 +7045,9 @@
                 block.setFieldValue(meta.version || '1.0.0', 'VERSION');
                 block.setFieldValue(meta.description || '', 'DESCRIPTION');
                 block.setFieldValue(meta.author || '', 'AUTHOR');
+                block.setFieldValue(meta['created-by'] || '', 'CREATED_BY');
+                block.setFieldValue(meta['created-date'] || '', 'CREATED_DATE');
+                block.setFieldValue(meta['last-modified'] || '', 'LAST_MODIFIED');
                 block.setFieldValue(meta['business-domain'] || '', 'BUSINESS_DOMAIN');
                 block.setFieldValue(meta['effective-date'] || '', 'EFFECTIVE_DATE');
                 block.setFieldValue(meta['expiration-date'] || '', 'EXPIRATION_DATE');
@@ -7134,7 +7162,148 @@
                     });
                 }
 
+                // Create Error Recovery Section
+                if (config['error-recovery']) {
+                    const er = config['error-recovery'];
+                    const sectionBlock = createSectionBlock('apex_error_recovery', block, 'SECTIONS', lastSectionBlock);
+                    lastSectionBlock = sectionBlock;
+
+                    sectionBlock.setFieldValue(er.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                    sectionBlock.setFieldValue(er['log-recovery-attempts'] !== false ? 'TRUE' : 'FALSE', 'LOG_RECOVERY');
+                    sectionBlock.setFieldValue(er['metrics-enabled'] === true ? 'TRUE' : 'FALSE', 'METRICS_ENABLED');
+                    if (er['default-strategy']) {
+                        sectionBlock.setFieldValue(er['default-strategy'], 'DEFAULT_STRATEGY');
+                    }
+
+                    // Create severity policy blocks
+                    if (er['severity-policies']) {
+                        let lastPolicyBlock = null;
+                        Object.entries(er['severity-policies']).forEach(([severity, policy]) => {
+                            const policyBlock = workspace.newBlock('apex_severity_policy');
+                            policyBlock.setFieldValue(severity, 'SEVERITY');
+                            policyBlock.setFieldValue(policy['recovery-enabled'] === true ? 'TRUE' : 'FALSE', 'RECOVERY_ENABLED');
+                            if (policy.strategy) {
+                                policyBlock.setFieldValue(policy.strategy, 'STRATEGY');
+                            }
+                            policyBlock.setFieldValue(policy['max-retries'] || 0, 'MAX_RETRIES');
+                            policyBlock.setFieldValue(policy['retry-delay'] || 100, 'RETRY_DELAY');
+                            policyBlock.initSvg();
+                            policyBlock.render();
+                            connectToStatement(sectionBlock, 'SEVERITY_POLICIES', policyBlock, lastPolicyBlock);
+                            lastPolicyBlock = policyBlock;
+                        });
+                    }
+                }
+
+                // Create Categories Section
+                if (config.categories && config.categories.length > 0) {
+                    const sectionBlock = createSectionBlock('apex_section_categories', block, 'SECTIONS', lastSectionBlock);
+                    lastSectionBlock = sectionBlock;
+
+                    let lastCatBlock = null;
+                    config.categories.forEach(cat => {
+                        const catBlock = workspace.newBlock('apex_category');
+                        catBlock.setFieldValue(cat.name || '', 'NAME');
+                        catBlock.setFieldValue(cat.description || '', 'DESCRIPTION');
+                        catBlock.setFieldValue(cat.priority || '', 'PRIORITY');
+                        catBlock.setFieldValue(cat['business-domain'] || '', 'BUSINESS_DOMAIN');
+                        catBlock.setFieldValue(cat['business-owner'] || '', 'BUSINESS_OWNER');
+                        catBlock.setFieldValue(cat['created-by'] || '', 'CREATED_BY');
+                        catBlock.setFieldValue(cat.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                        catBlock.initSvg();
+                        catBlock.render();
+                        connectToStatement(sectionBlock, 'CATEGORIES', catBlock, lastCatBlock);
+                        lastCatBlock = catBlock;
+                    });
+                }
+
+                // Create Data Sinks Section
+                if (config['data-sinks'] && config['data-sinks'].length > 0) {
+                    const sectionBlock = createSectionBlock('apex_section_data_sinks', block, 'SECTIONS', lastSectionBlock);
+                    lastSectionBlock = sectionBlock;
+
+                    let lastSinkBlock = null;
+                    config['data-sinks'].forEach(sink => {
+                        const sinkBlock = createDataSinkBlock(sink);
+                        if (sinkBlock) {
+                            connectToStatement(sectionBlock, 'DATA_SINKS', sinkBlock, lastSinkBlock);
+                            lastSinkBlock = sinkBlock;
+                        }
+                    });
+                }
+
                 return block;
+            }
+
+            function createDataSinkBlock(sink) {
+                const sinkType = sink.type || '';
+
+                if (sinkType === 'database-sink' || sinkType === 'database') {
+                    const block = workspace.newBlock('apex_data_sink_database');
+                    block.setFieldValue(sink.id || sink.name || '', 'NAME');
+                    block.setFieldValue(sink.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                    block.setFieldValue(sink.description || '', 'DESCRIPTION');
+                    block.setFieldValue(sink.database || sink['data-source-ref'] || sink.url || '', 'DATABASE');
+                    block.setFieldValue(sink.username || '', 'USERNAME');
+                    block.setFieldValue(sink.password || '', 'PASSWORD');
+                    block.setFieldValue(sink['table-name'] || sink.table || '', 'TABLE_NAME');
+                    block.setFieldValue(sink.operation || 'INSERT', 'OPERATION');
+                    if (sink['source-type']) {
+                        block.setFieldValue(sink['source-type'], 'SOURCE_TYPE');
+                    }
+                    block.initSvg();
+                    block.render();
+                    return block;
+                } else if (sinkType === 'file-sink' || sinkType === 'file-system') {
+                    const block = workspace.newBlock('apex_data_sink_file');
+                    block.setFieldValue(sink.id || sink.name || '', 'NAME');
+                    block.setFieldValue(sink.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                    block.setFieldValue(sink.description || '', 'DESCRIPTION');
+                    block.setFieldValue(sink['base-path'] || sink.path || '', 'BASE_PATH');
+                    block.setFieldValue(sink['file-pattern'] || '', 'FILE_PATTERN');
+                    block.setFieldValue(sink.encoding || 'UTF-8', 'ENCODING');
+                    if (sink.format) {
+                        block.setFieldValue(sink.format, 'FORMAT');
+                    }
+                    if (sink['source-type']) {
+                        block.setFieldValue(sink['source-type'], 'SOURCE_TYPE');
+                    }
+                    block.initSvg();
+                    block.render();
+                    return block;
+                } else if (sinkType === 'rest-sink' || sinkType === 'rest-api') {
+                    const block = workspace.newBlock('apex_data_sink_rest');
+                    block.setFieldValue(sink.id || sink.name || '', 'NAME');
+                    block.setFieldValue(sink.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                    block.setFieldValue(sink.description || '', 'DESCRIPTION');
+                    block.setFieldValue(sink['base-url'] || sink.url || '', 'BASE_URL');
+                    block.setFieldValue(sink.endpoint || '', 'ENDPOINT');
+                    if (sink.method) {
+                        block.setFieldValue(sink.method, 'METHOD');
+                    }
+                    if (sink['content-type']) {
+                        block.setFieldValue(sink['content-type'], 'CONTENT_TYPE');
+                    }
+                    block.initSvg();
+                    block.render();
+                    return block;
+                } else if (sinkType === 'queue-sink' || sinkType === 'message-queue') {
+                    const block = workspace.newBlock('apex_data_sink_queue');
+                    block.setFieldValue(sink.id || sink.name || '', 'NAME');
+                    block.setFieldValue(sink.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                    block.setFieldValue(sink.description || '', 'DESCRIPTION');
+                    if (sink['queue-type']) {
+                        block.setFieldValue(sink['queue-type'], 'QUEUE_TYPE');
+                    }
+                    block.setFieldValue(sink['queue-name'] || '', 'QUEUE_NAME');
+                    block.setFieldValue(sink['connection-string'] || sink.connection || '', 'CONNECTION_STRING');
+                    block.initSvg();
+                    block.render();
+                    return block;
+                }
+
+                console.warn('Unknown data sink type:', sinkType);
+                return null;
             }
 
             function createDataSourceConfigBlock(config) {
@@ -7145,6 +7314,9 @@
                 block.setFieldValue(meta.version || '1.0.0', 'VERSION');
                 block.setFieldValue(meta.description || '', 'DESCRIPTION');
                 block.setFieldValue(meta.author || '', 'AUTHOR');
+                block.setFieldValue(meta['created-by'] || '', 'CREATED_BY');
+                block.setFieldValue(meta['created-date'] || '', 'CREATED_DATE');
+                block.setFieldValue(meta['last-modified'] || '', 'LAST_MODIFIED');
                 block.setFieldValue(meta['business-domain'] || '', 'BUSINESS_DOMAIN');
                 block.setFieldValue(meta['effective-date'] || '', 'EFFECTIVE_DATE');
                 block.setFieldValue(meta['expiration-date'] || '', 'EXPIRATION_DATE');
@@ -7164,6 +7336,220 @@
                             connectToStatement(block, 'DATA_SOURCES', dsBlock, lastDsBlock);
                             lastDsBlock = dsBlock;
                         }
+                    });
+                }
+
+                return block;
+            }
+
+            // --- Phase 3: Scenario Config Import ---
+            function createScenarioConfigBlock(config) {
+                const block = workspace.newBlock('apex_scenario_config');
+                const meta = config.metadata || {};
+
+                block.setFieldValue(meta.id || 'imported-scenario', 'ID');
+                block.setFieldValue(meta.name || '', 'NAME');
+                block.setFieldValue(meta.version || '1.0.0', 'VERSION');
+                block.setFieldValue(meta['business-domain'] || '', 'BUSINESS_DOMAIN');
+                block.setFieldValue(meta.description || '', 'DESCRIPTION');
+                block.setFieldValue(meta.author || '', 'AUTHOR');
+                block.setFieldValue(meta['created-by'] || '', 'CREATED_BY');
+                block.setFieldValue(meta['created-date'] || '', 'CREATED_DATE');
+                block.setFieldValue(meta['last-modified'] || '', 'LAST_MODIFIED');
+                block.setFieldValue(meta.owner || '', 'OWNER');
+                block.setFieldValue((meta.tags || []).join(', '), 'TAGS');
+
+                block.initSvg();
+                block.render();
+                block.moveBy(50, 50);
+
+                // Create scenario section if present
+                if (config.scenario) {
+                    const scenario = config.scenario;
+                    const scenarioBlock = workspace.newBlock('apex_section_scenario');
+                    scenarioBlock.setFieldValue(scenario['scenario-id'] || '', 'SCENARIO_ID');
+                    scenarioBlock.setFieldValue(scenario.description || '', 'DESCRIPTION');
+                    scenarioBlock.setFieldValue((scenario['data-types'] || []).join(', '), 'DATA_TYPES');
+                    scenarioBlock.initSvg();
+                    scenarioBlock.render();
+
+                    // Connect to SCENARIO statement input
+                    const scenarioInput = block.getInput('SCENARIO');
+                    if (scenarioInput && scenarioInput.connection) {
+                        scenarioInput.connection.connect(scenarioBlock.previousConnection);
+                    }
+
+                    // Create classification rule if present
+                    if (scenario['classification-rule']) {
+                        const cr = scenario['classification-rule'];
+                        const crBlock = workspace.newBlock('apex_classification_rule');
+                        crBlock.setFieldValue(cr.description || '', 'DESCRIPTION');
+                        crBlock.initSvg();
+                        crBlock.render();
+
+                        // Create condition value block
+                        if (cr.condition) {
+                            const condBlock = createConditionBlock(cr.condition);
+                            if (condBlock) {
+                                const condInput = crBlock.getInput('CONDITION');
+                                if (condInput && condInput.connection) {
+                                    condInput.connection.connect(condBlock.outputConnection);
+                                }
+                            }
+                        }
+
+                        // Connect classification rule to value input
+                        const crInput = scenarioBlock.getInput('CLASSIFICATION_RULE');
+                        if (crInput && crInput.connection) {
+                            crInput.connection.connect(crBlock.outputConnection);
+                        }
+                    }
+
+                    // Create processing stages
+                    if (scenario['processing-stages'] && scenario['processing-stages'].length > 0) {
+                        let lastStageBlock = null;
+                        scenario['processing-stages'].forEach(stage => {
+                            const stageBlock = workspace.newBlock('apex_processing_stage');
+                            stageBlock.setFieldValue(stage['stage-name'] || '', 'STAGE_NAME');
+                            stageBlock.setFieldValue(stage.description || '', 'DESCRIPTION');
+                            stageBlock.setFieldValue(stage['config-file'] || '', 'CONFIG_FILE');
+                            stageBlock.setFieldValue(stage['execution-order'] !== undefined ? String(stage['execution-order']) : '1', 'EXECUTION_ORDER');
+                            stageBlock.setFieldValue(stage['failure-policy'] || 'terminate', 'FAILURE_POLICY');
+                            stageBlock.setFieldValue(stage.required !== false ? 'TRUE' : 'FALSE', 'REQUIRED');
+                            stageBlock.setFieldValue(
+                                Array.isArray(stage['depends-on']) ? stage['depends-on'].join(', ') : (stage['depends-on'] || ''),
+                                'DEPENDS_ON'
+                            );
+                            stageBlock.initSvg();
+                            stageBlock.render();
+
+                            connectToStatement(scenarioBlock, 'PROCESSING_STAGES', stageBlock, lastStageBlock);
+                            lastStageBlock = stageBlock;
+                        });
+                    }
+                }
+
+                return block;
+            }
+
+            // --- Phase 3: Scenario Registry Import ---
+            function createScenarioRegistryBlock(config) {
+                const block = workspace.newBlock('apex_scenario_registry');
+                const meta = config.metadata || {};
+
+                block.setFieldValue(meta.id || 'imported-registry', 'ID');
+                block.setFieldValue(meta.name || '', 'NAME');
+                block.setFieldValue(meta.version || '1.0.0', 'VERSION');
+                block.setFieldValue(meta.description || '', 'DESCRIPTION');
+                block.setFieldValue(meta['created-by'] || '', 'CREATED_BY');
+                block.setFieldValue(meta['created-date'] || '', 'CREATED_DATE');
+                block.setFieldValue(meta['last-modified'] || '', 'LAST_MODIFIED');
+                block.setFieldValue((meta.tags || []).join(', '), 'TAGS');
+
+                // Routing configuration
+                const routing = config.routing || {};
+                block.setFieldValue(routing.strategy || 'type-based', 'ROUTING_STRATEGY');
+                block.setFieldValue(routing['default-scenario'] || '', 'DEFAULT_SCENARIO');
+
+                block.initSvg();
+                block.render();
+                block.moveBy(50, 50);
+
+                // Create scenario references
+                if (config.scenarios && config.scenarios.length > 0) {
+                    let lastRefBlock = null;
+                    config.scenarios.forEach(scenRef => {
+                        const refBlock = workspace.newBlock('apex_scenario_ref');
+                        refBlock.setFieldValue(scenRef['scenario-id'] || '', 'SCENARIO_ID');
+                        refBlock.setFieldValue(scenRef['config-file'] || '', 'CONFIG_FILE');
+                        refBlock.setFieldValue(scenRef['business-domain'] || '', 'BUSINESS_DOMAIN');
+                        refBlock.initSvg();
+                        refBlock.render();
+
+                        connectToStatement(block, 'SCENARIOS', refBlock, lastRefBlock);
+                        lastRefBlock = refBlock;
+                    });
+                }
+
+                return block;
+            }
+
+            // --- Phase 3: Component Config Import ---
+            function createComponentConfigBlock(config) {
+                const block = workspace.newBlock('apex_component_config');
+                const meta = config.metadata || {};
+
+                block.setFieldValue(meta.id || 'imported-component', 'ID');
+                block.setFieldValue(meta.name || '', 'NAME');
+                block.setFieldValue(meta.version || '1.0.0', 'VERSION');
+                block.setFieldValue(meta.description || '', 'DESCRIPTION');
+                block.setFieldValue(meta['business-domain'] || '', 'BUSINESS_DOMAIN');
+                block.setFieldValue(meta.owner || '', 'OWNER');
+                block.setFieldValue(meta['created-by'] || '', 'CREATED_BY');
+                block.setFieldValue(meta['created-date'] || '', 'CREATED_DATE');
+                block.setFieldValue(meta['last-modified'] || '', 'LAST_MODIFIED');
+                block.setFieldValue(meta.criticality || 'medium', 'CRITICALITY');
+                block.setFieldValue(meta['sla-ms'] !== undefined ? String(meta['sla-ms']) : '200', 'SLA_MS');
+                block.setFieldValue((meta.tags || []).join(', '), 'TAGS');
+
+                block.initSvg();
+                block.render();
+                block.moveBy(50, 50);
+
+                // Create file references from grouped sections
+                const refTypes = ['rule-configurations', 'enrichment-refs', 'component-refs', 'config-files'];
+                let lastRefBlock = null;
+
+                refTypes.forEach(refType => {
+                    if (config[refType] && config[refType].length > 0) {
+                        config[refType].forEach(ref => {
+                            const refBlock = workspace.newBlock('apex_file_reference');
+                            refBlock.setFieldValue(refType, 'REF_TYPE');
+                            refBlock.setFieldValue(ref.file || '', 'FILE');
+                            refBlock.setFieldValue(ref['execution-order'] !== undefined ? String(ref['execution-order']) : '1', 'EXECUTION_ORDER');
+                            refBlock.setFieldValue(ref['failure-policy'] || 'terminate', 'FAILURE_POLICY');
+                            refBlock.initSvg();
+                            refBlock.render();
+
+                            connectToStatement(block, 'FILE_REFS', refBlock, lastRefBlock);
+                            lastRefBlock = refBlock;
+                        });
+                    }
+                });
+
+                return block;
+            }
+
+            // --- Phase 3: Pipeline Config Import ---
+            function createPipelineConfigBlock(config) {
+                const pipeline = config.pipeline || {};
+                const block = workspace.newBlock('apex_pipeline_config');
+
+                block.setFieldValue(pipeline.id || 'imported-pipeline', 'ID');
+                block.setFieldValue(pipeline.mode || 'sequential', 'MODE');
+                block.setFieldValue(pipeline['error-handling'] || 'fail-fast', 'ERROR_HANDLING');
+                block.setFieldValue(pipeline['max-retries'] !== undefined ? String(pipeline['max-retries']) : '3', 'MAX_RETRIES');
+                block.setFieldValue(pipeline['retry-delay-ms'] !== undefined ? String(pipeline['retry-delay-ms']) : '1000', 'RETRY_DELAY_MS');
+                block.setFieldValue(pipeline['collect-metrics'] !== false ? 'TRUE' : 'FALSE', 'COLLECT_METRICS');
+
+                block.initSvg();
+                block.render();
+                block.moveBy(50, 50);
+
+                // Create pipeline stages
+                if (pipeline.stages && pipeline.stages.length > 0) {
+                    let lastStageBlock = null;
+                    pipeline.stages.forEach(stage => {
+                        const stageBlock = workspace.newBlock('apex_pipeline_stage');
+                        stageBlock.setFieldValue(stage.name || '', 'NAME');
+                        stageBlock.setFieldValue(stage.order !== undefined ? String(stage.order) : '1', 'ORDER');
+                        stageBlock.setFieldValue(stage.enabled !== false ? 'TRUE' : 'FALSE', 'ENABLED');
+                        stageBlock.setFieldValue(stage['depends-on'] || '', 'DEPENDS_ON');
+                        stageBlock.initSvg();
+                        stageBlock.render();
+
+                        connectToStatement(block, 'STAGES', stageBlock, lastStageBlock);
+                        lastStageBlock = stageBlock;
                     });
                 }
 
@@ -7548,7 +7934,7 @@
                 } else if (type === 'database') {
                     const block = workspace.newBlock('apex_lookup_dataset_database');
                     block.setFieldValue(dataset['data-source-ref'] || '', 'DS_REF');
-                    block.setFieldValue(dataset.query || '', 'QUERY');
+                    block.setFieldValue(dataset.query || dataset['query-ref'] || '', 'QUERY');
                     block.initSvg();
                     block.render();
 

@@ -1,0 +1,50 @@
+metadata:
+  id: "fx-forward-scenario"
+  name: "FX Forward Processing"
+  type: "scenario"
+  version: "2.1.0"
+  description: "FX forward trade validation and settlement"
+  author: "trading-team@example.com"
+  created-by: "john.doe"
+  created-date: "2025-01-15"
+  last-modified: "2025-06-20"
+  business-domain: "FX Trading"
+  owner: "fx-desk@example.com"
+  tags:
+    - fx
+    - forward
+    - scenario
+
+scenario:
+  scenario-id: "fx-forward-validation"
+  description: "Validates and processes FX forward trades"
+  classification-rule:
+    condition: "#trade['productType'] == 'FX_FORWARD'"
+    description: "Match FX forward trades"
+  data-types:
+    - HashMap
+    - Map
+  processing-stages:
+    - stage-name: "validation"
+      description: "Validate trade fields"
+      config-file: "config/fx-validation-rules.yaml"
+      execution-order: 1
+      failure-policy: "terminate"
+      required: true
+    - stage-name: "enrichment"
+      description: "Enrich with market data"
+      config-file: "config/fx-enrichment.yaml"
+      execution-order: 2
+      failure-policy: "continue-with-warnings"
+      required: true
+      depends-on:
+        - validation
+    - stage-name: "settlement"
+      description: "Calculate settlement amounts"
+      config-file: "config/fx-settlement.yaml"
+      execution-order: 3
+      failure-policy: "flag-for-review"
+      required: false
+      depends-on:
+        - validation
+        - enrichment

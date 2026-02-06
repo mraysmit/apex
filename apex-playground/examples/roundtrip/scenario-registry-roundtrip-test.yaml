@@ -1,0 +1,27 @@
+metadata:
+  id: "trade-processing-registry"
+  name: "Trade Processing Registry"
+  version: "1.5.0"
+  type: "scenario-registry"
+  description: "Routes trades to appropriate processing scenarios"
+  created-by: "admin"
+  created-date: "2025-03-10"
+  last-modified: "2025-07-01"
+  tags:
+    - registry
+    - trading
+
+scenarios:
+  - scenario-id: "fx-forward-scenario"
+    config-file: "scenarios/fx-forward.yaml"
+    business-domain: "FX Trading"
+  - scenario-id: "equity-swap-scenario"
+    config-file: "scenarios/equity-swap.yaml"
+    business-domain: "Equities"
+  - scenario-id: "irs-scenario"
+    config-file: "scenarios/interest-rate-swap.yaml"
+    business-domain: "Rates"
+
+routing:
+  strategy: "classification-based"
+  default-scenario: "fx-forward-scenario"

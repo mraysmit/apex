@@ -213,7 +213,7 @@ class PostgreSQLConnectionE2ETest {
         refreshButton.click();
         Thread.sleep(2000);
         printBrowserConsole(
-                After clicking Refresh Connections - should show API response and connections array");
+                "After clicking Refresh Connections - should show API response and connections array");
 
         // Check if connection appears in the list
         WebElement connectionList = driver.findElement(By.id("connectionList"));

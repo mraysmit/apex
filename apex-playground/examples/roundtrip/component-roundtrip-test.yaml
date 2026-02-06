@@ -1,0 +1,35 @@
+metadata:
+  id: "comprehensive-validation"
+  name: "Comprehensive Validation Component"
+  version: "3.0.0"
+  type: "component"
+  description: "Groups validation, enrichment, and compliance rules"
+  business-domain: "Trade Processing"
+  owner: "compliance-team@example.com"
+  created-by: "jane.smith"
+  created-date: "2025-02-01"
+  last-modified: "2025-08-15"
+  criticality: "high"
+  sla-ms: 500
+  tags:
+    - validation
+    - compliance
+    - component
+
+rule-configurations:
+  - file: "rules/basic-validation.yaml"
+    execution-order: 1
+    failure-policy: "terminate"
+  - file: "rules/compliance-rules.yaml"
+    execution-order: 2
+    failure-policy: "continue-with-warnings"
+
+enrichment-refs:
+  - file: "enrichments/market-data.yaml"
+    execution-order: 10
+    failure-policy: "continue-with-warnings"
+
+component-refs:
+  - file: "components/sub-component.yaml"
+    execution-order: 20
+    failure-policy: "flag-for-review"
