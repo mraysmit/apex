@@ -754,6 +754,167 @@
                 background: rgba(231, 76, 60, 0.2);
                 color: #e74c3c;
             }
+
+            /* Load Example Modal */
+            .example-modal-body {
+                display: flex;
+                flex-direction: column;
+                height: 680px;
+                min-height: 400px;
+                overflow: hidden;
+            }
+            .example-categories {
+                display: flex;
+                flex: 1 1 60%;
+                min-height: 120px;
+                border: 1px solid #3a3a3a;
+                border-radius: 6px 6px 0 0;
+                overflow: hidden;
+            }
+            .example-category-list {
+                width: 200px;
+                min-width: 200px;
+                background: #1e1e2e;
+                border-right: 1px solid #3a3a3a;
+                overflow-y: auto;
+            }
+            .example-category-item {
+                padding: 8px 12px;
+                cursor: pointer;
+                border-bottom: 1px solid #2a2a3a;
+                font-size: 0.85rem;
+                color: #ccc;
+                transition: background 0.15s;
+            }
+            .example-category-item:hover {
+                background: #2a2a4a;
+            }
+            .example-category-item.active {
+                background: #3a3a6a;
+                color: #fff;
+                font-weight: 600;
+            }
+            .example-category-item .badge {
+                float: right;
+                font-size: 0.7rem;
+            }
+            .example-item-list {
+                flex: 1;
+                overflow-y: auto;
+                padding: 8px;
+            }
+            .example-card {
+                background: #2a2a3e;
+                border: 1px solid #3a3a4a;
+                border-radius: 6px;
+                padding: 10px 12px;
+                margin-bottom: 6px;
+                cursor: pointer;
+                transition: border-color 0.15s, background 0.15s;
+            }
+            .example-card:hover {
+                border-color: #5a8dee;
+                background: #2e2e48;
+            }
+            .example-card.selected {
+                border-color: #5a8dee;
+                background: #2e2e52;
+            }
+            .example-card .example-name {
+                font-weight: 600;
+                color: #e0e0e0;
+                font-size: 0.9rem;
+            }
+            .example-card .example-meta {
+                font-size: 0.75rem;
+                color: #888;
+                margin-top: 2px;
+            }
+            .example-card .example-badges {
+                margin-top: 4px;
+            }
+            .example-card .example-badges .badge {
+                font-size: 0.7rem;
+                margin-right: 4px;
+            }
+            /* Horizontal resizer handle */
+            .example-resizer {
+                height: 6px;
+                min-height: 6px;
+                background: #2a2a3a;
+                cursor: ns-resize;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                user-select: none;
+                flex-shrink: 0;
+                border-left: 1px solid #3a3a3a;
+                border-right: 1px solid #3a3a3a;
+                transition: background 0.15s;
+            }
+            .example-resizer:hover,
+            .example-resizer.dragging {
+                background: #5a8dee;
+            }
+            .example-resizer::after {
+                content: '';
+                width: 40px;
+                height: 2px;
+                background: #666;
+                border-radius: 1px;
+            }
+            .example-resizer:hover::after,
+            .example-resizer.dragging::after {
+                background: #fff;
+            }
+            .example-preview {
+                flex: 0 1 40%;
+                min-height: 80px;
+                overflow-y: auto;
+                border: 1px solid #3a3a3a;
+                border-top: none;
+                border-radius: 0 0 6px 6px;
+                padding: 10px 12px;
+            }
+            .example-preview pre {
+                flex: 1;
+                overflow-y: auto;
+                background: #1a1a2e;
+                border: 1px solid #333;
+                border-radius: 4px;
+                padding: 8px;
+                font-size: 0.78rem;
+                color: #aaa;
+                margin: 0;
+            }
+
+            /* Global Drag-and-Drop Overlay */
+            #dropOverlay {
+                display: none;
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(90, 141, 238, 0.15);
+                border: 3px dashed #5a8dee;
+                z-index: 9999;
+                pointer-events: none;
+                align-items: center;
+                justify-content: center;
+            }
+            #dropOverlay.active {
+                display: flex;
+            }
+            #dropOverlay .drop-message {
+                background: rgba(0, 0, 0, 0.85);
+                color: #fff;
+                padding: 24px 40px;
+                border-radius: 12px;
+                font-size: 1.2rem;
+                text-align: center;
+            }
+            #dropOverlay .drop-message .drop-icon {
+                font-size: 2.5rem;
+                margin-bottom: 8px;
+            }
         </style>
     </head>
 
@@ -778,6 +939,7 @@
                         </li>
                     </ul>
                     <div class="d-flex gap-2">
+                        <button class="btn btn-warning btn-sm" onclick="openLoadExampleModal()">Load Example</button>
                         <button class="btn btn-success btn-sm" onclick="openInPlayground()">Open in Playground</button>
                         <button id="quickSaveBtn" class="btn btn-primary btn-sm" onclick="quickSaveTemplate()" disabled title="Load a template first">Save</button>
                         <button class="btn btn-outline-light btn-sm" onclick="openSaveTemplateModal()">Save Template</button>
@@ -895,6 +1057,75 @@
                         <button type="button" class="btn btn-primary" onclick="saveConnection()">Create Connection</button>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Load Example Modal -->
+        <div class="modal fade" id="loadExampleModal" tabindex="-1" aria-labelledby="loadExampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered">
+                <div class="modal-content bg-dark text-light">
+                    <div class="modal-header border-secondary">
+                        <h5 class="modal-title" id="loadExampleModalLabel">Load Example</h5>
+                        <div class="d-flex align-items-center gap-2 ms-3 flex-grow-1">
+                            <input type="text" id="exampleSearchInput" class="form-control form-control-sm bg-dark text-light border-secondary" placeholder="Search examples..." style="max-width: 300px;" oninput="filterExamples()">
+                        </div>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-0">
+                        <div id="exampleLoadingSpinner" class="text-center p-5" style="display:none;"><div class="spinner-border text-primary" role="status"></div><p class="mt-2 text-muted">Loading examples...</p></div>
+                        <div id="exampleLoadError" class="alert alert-danger m-3" style="display:none;"></div>
+                        <div class="example-modal-body" id="exampleModalBody">
+                            <div class="example-categories" id="exampleBrowser">
+                                <div class="example-category-list" id="exampleCategoryList"></div>
+                                <div class="example-item-list" id="exampleItemList">
+                                    <p class="text-muted fst-italic p-3">Select a category to browse examples</p>
+                                </div>
+                            </div>
+                            <div class="example-resizer" id="exampleResizer" title="Drag to resize" style="display:none;"></div>
+                            <div class="example-preview" id="examplePreview" style="display:none;">
+                                <div class="d-flex gap-2 mb-2">
+                                    <div class="flex-grow-1">
+                                        <strong class="text-light" id="previewName"></strong>
+                                        <span class="text-muted ms-2" id="previewCategory"></span>
+                                    </div>
+                                    <div class="d-flex gap-1 align-items-center">
+                                        <span class="badge bg-success" id="previewHasYaml" style="display:none;">YAML</span>
+                                        <span class="badge bg-info" id="previewHasData" style="display:none;">JSON Data</span>
+                                        <div class="btn-group btn-group-sm ms-2" id="previewTabGroup" style="display:none;">
+                                            <button class="btn btn-outline-light btn-sm active" id="previewTabYaml" onclick="switchPreviewTab('yaml')">YAML</button>
+                                            <button class="btn btn-outline-light btn-sm" id="previewTabJson" onclick="switchPreviewTab('json')">JSON</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <pre id="previewContent"></pre>
+                                <pre id="previewContentJson" style="display:none;"></pre>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-secondary">
+                        <div class="d-flex gap-2 me-auto">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="loadExampleYaml" checked>
+                                <label class="form-check-label text-light" for="loadExampleYaml">Load YAML into workspace</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="loadExampleData" checked>
+                                <label class="form-check-label text-light" for="loadExampleData">Load JSON into eval data</label>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="loadExampleBtn" onclick="loadSelectedExample()" disabled>Load Example</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Global Drag-and-Drop Overlay -->
+        <div id="dropOverlay">
+            <div class="drop-message">
+                <div class="drop-icon">&#128230;</div>
+                <div>Drop <strong>.yaml</strong> or <strong>.json</strong> files to load</div>
+                <div class="small text-muted mt-1">YAML → workspace &nbsp;|&nbsp; JSON → eval data</div>
             </div>
         </div>
 
@@ -8654,6 +8885,471 @@
                 // Placeholder - implementation would inspect schema and create blocks
                 showToast("Schema loading logic not yet implemented", "info");
             }
+
+            // ================================================================
+            // LOAD EXAMPLE — Resizer
+            // ================================================================
+            (function initExampleResizer() {
+                const resizer = document.getElementById('exampleResizer');
+                const container = document.getElementById('exampleModalBody');
+                const topPanel = document.getElementById('exampleBrowser');
+                const bottomPanel = document.getElementById('examplePreview');
+                let isDragging = false;
+                let startY = 0;
+                let startTopFlex = 0;
+
+                resizer.addEventListener('mousedown', function(e) {
+                    e.preventDefault();
+                    isDragging = true;
+                    startY = e.clientY;
+                    startTopFlex = topPanel.getBoundingClientRect().height;
+                    resizer.classList.add('dragging');
+                    document.body.style.cursor = 'ns-resize';
+                    document.body.style.userSelect = 'none';
+                });
+
+                document.addEventListener('mousemove', function(e) {
+                    if (!isDragging) return;
+                    const containerRect = container.getBoundingClientRect();
+                    const resizerHeight = resizer.getBoundingClientRect().height;
+                    const available = containerRect.height - resizerHeight;
+                    const delta = e.clientY - startY;
+                    let newTopHeight = startTopFlex + delta;
+
+                    // Clamp: min 120px top, min 80px bottom
+                    newTopHeight = Math.max(120, Math.min(newTopHeight, available - 80));
+                    const topPct = (newTopHeight / available) * 100;
+                    const bottomPct = 100 - topPct;
+
+                    topPanel.style.flex = '0 0 ' + topPct + '%';
+                    bottomPanel.style.flex = '0 0 ' + bottomPct + '%';
+                });
+
+                document.addEventListener('mouseup', function() {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    resizer.classList.remove('dragging');
+                    document.body.style.cursor = '';
+                    document.body.style.userSelect = '';
+                });
+            })();
+
+            // ================================================================
+            // LOAD EXAMPLE (Option A)
+            // ================================================================
+            let loadExampleModalInstance = null;
+            let exampleCatalog = null;         // cached API response
+            let selectedExample = null;        // { category, id }
+            let selectedExampleDetail = null;  // full API response for selected
+
+            function openLoadExampleModal() {
+                if (!loadExampleModalInstance) {
+                    loadExampleModalInstance = new bootstrap.Modal(document.getElementById('loadExampleModal'));
+                }
+                loadExampleModalInstance.show();
+                selectedExample = null;
+                selectedExampleDetail = null;
+                document.getElementById('loadExampleBtn').disabled = true;
+                document.getElementById('examplePreview').style.display = 'none';
+                document.getElementById('exampleResizer').style.display = 'none';
+                document.getElementById('exampleSearchInput').value = '';
+
+                if (!exampleCatalog) {
+                    fetchExampleCatalog();
+                } else {
+                    renderCategoryList();
+                }
+            }
+
+            async function fetchExampleCatalog() {
+                const spinner = document.getElementById('exampleLoadingSpinner');
+                const errorDiv = document.getElementById('exampleLoadError');
+                spinner.style.display = 'block';
+                errorDiv.style.display = 'none';
+                document.getElementById('exampleBrowser').style.display = 'none';
+
+                try {
+                    const response = await fetch('/playground/api/examples');
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
+                    const data = await response.json();
+
+                    // data is { categoryName: [ {id, name, description, ...} ], ... , timestamp, message }
+                    // Filter out non-array metadata keys
+                    exampleCatalog = {};
+                    for (const [key, val] of Object.entries(data)) {
+                        if (Array.isArray(val) && val.length > 0) {
+                            exampleCatalog[key] = val;
+                        }
+                    }
+
+                    spinner.style.display = 'none';
+                    document.getElementById('exampleBrowser').style.display = 'flex';
+                    renderCategoryList();
+
+                } catch (e) {
+                    spinner.style.display = 'none';
+                    errorDiv.textContent = 'Failed to load examples: ' + e.message;
+                    errorDiv.style.display = 'block';
+                }
+            }
+
+            function renderCategoryList() {
+                const container = document.getElementById('exampleCategoryList');
+                const categories = Object.keys(exampleCatalog).sort();
+                let html = '';
+                categories.forEach(cat => {
+                    const count = exampleCatalog[cat].length;
+                    const displayName = cat.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                    html += `<div class="example-category-item" data-category="${cat}" onclick="selectExampleCategory('${cat}')">`;
+                    html += `${displayName} <span class="badge bg-secondary">${count}</span></div>`;
+                });
+                container.innerHTML = html;
+
+                // Auto-select first category
+                if (categories.length > 0) {
+                    selectExampleCategory(categories[0]);
+                }
+            }
+
+            function selectExampleCategory(category) {
+                // Update active state
+                document.querySelectorAll('.example-category-item').forEach(el => {
+                    el.classList.toggle('active', el.dataset.category === category);
+                });
+
+                const searchTerm = (document.getElementById('exampleSearchInput').value || '').toLowerCase();
+                renderExampleItems(category, searchTerm);
+            }
+
+            function renderExampleItems(category, searchTerm) {
+                const container = document.getElementById('exampleItemList');
+                const items = exampleCatalog[category] || [];
+
+                const filtered = searchTerm
+                    ? items.filter(item => item.name.toLowerCase().includes(searchTerm) || (item.id && item.id.toLowerCase().includes(searchTerm)))
+                    : items;
+
+                if (filtered.length === 0) {
+                    container.innerHTML = '<p class="text-muted fst-italic p-3">No examples match the search</p>';
+                    return;
+                }
+
+                let html = '';
+                filtered.forEach(item => {
+                    const isSelected = selectedExample && selectedExample.category === category && selectedExample.id === item.id;
+                    html += `<div class="example-card${isSelected ? ' selected' : ''}" onclick="selectExample('${category}', '${item.id}')">`;
+                    html += `<div class="example-name">${escapeHtml(item.name)}</div>`;
+                    html += `<div class="example-meta">${escapeHtml(item.id)}</div>`;
+                    if (item.size) {
+                        html += `<div class="example-badges">`;
+                        html += `<span class="badge bg-secondary">${(item.size / 1024).toFixed(1)} KB</span>`;
+                        html += `</div>`;
+                    }
+                    html += `</div>`;
+                });
+                container.innerHTML = html;
+            }
+
+            function filterExamples() {
+                const activeCategory = document.querySelector('.example-category-item.active');
+                if (activeCategory) {
+                    const searchTerm = (document.getElementById('exampleSearchInput').value || '').toLowerCase();
+                    renderExampleItems(activeCategory.dataset.category, searchTerm);
+                }
+            }
+
+            async function selectExample(category, id) {
+                selectedExample = { category, id };
+                selectedExampleDetail = null;
+
+                // Update card selection visual
+                document.querySelectorAll('.example-card').forEach(el => el.classList.remove('selected'));
+                event.currentTarget.classList.add('selected');
+
+                // Show preview area with loading state
+                const previewDiv = document.getElementById('examplePreview');
+                previewDiv.style.display = 'flex';
+                previewDiv.style.flexDirection = 'column';
+                document.getElementById('exampleResizer').style.display = 'flex';
+                // Reset to default 60/40 split
+                document.getElementById('exampleBrowser').style.flex = '1 1 60%';
+                previewDiv.style.flex = '0 1 40%';
+                document.getElementById('previewContent').textContent = 'Loading...';
+                document.getElementById('previewName').textContent = id.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                document.getElementById('previewCategory').textContent = category;
+                document.getElementById('previewHasYaml').style.display = 'none';
+                document.getElementById('previewHasData').style.display = 'none';
+                document.getElementById('loadExampleBtn').disabled = true;
+
+                try {
+                    const response = await fetch(`/playground/api/examples/${category}/${id}`);
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
+                    const detail = await response.json();
+                    selectedExampleDetail = detail;
+
+                    // Show badges
+                    if (detail.yaml) {
+                        document.getElementById('previewHasYaml').style.display = 'inline';
+                    }
+                    if (detail.sampleData) {
+                        document.getElementById('previewHasData').style.display = 'inline';
+                    }
+
+                    // Show preview (first 50 lines of YAML)
+                    const preview = detail.yaml
+                        ? detail.yaml.split('\n').slice(0, 50).join('\n') + (detail.yaml.split('\n').length > 50 ? '\n# ...' : '')
+                        : '(no YAML content)';
+                    document.getElementById('previewContent').textContent = preview;
+
+                    // Show JSON preview if available
+                    const jsonPre = document.getElementById('previewContentJson');
+                    const tabGroup = document.getElementById('previewTabGroup');
+                    if (detail.sampleData) {
+                        try {
+                            const jsonObj = typeof detail.sampleData === 'string' ? JSON.parse(detail.sampleData) : detail.sampleData;
+                            const jsonStr = JSON.stringify(jsonObj, null, 2);
+                            const jsonLines = jsonStr.split('\n');
+                            const jsonPreview = jsonLines.slice(0, 50).join('\n') + (jsonLines.length > 50 ? '\n// ...' : '');
+                            jsonPre.textContent = jsonPreview;
+                        } catch (e2) {
+                            jsonPre.textContent = typeof detail.sampleData === 'string' ? detail.sampleData : JSON.stringify(detail.sampleData);
+                        }
+                        tabGroup.style.display = 'flex';
+                        switchPreviewTab('yaml');
+                    } else {
+                        jsonPre.textContent = '';
+                        jsonPre.style.display = 'none';
+                        tabGroup.style.display = 'none';
+                        document.getElementById('previewContent').style.display = 'block';
+                    }
+
+                    document.getElementById('loadExampleBtn').disabled = false;
+
+                } catch (e) {
+                    document.getElementById('previewContent').textContent = 'Error loading: ' + e.message;
+                }
+            }
+
+            function switchPreviewTab(tab) {
+                const yamlPre = document.getElementById('previewContent');
+                const jsonPre = document.getElementById('previewContentJson');
+                const yamlBtn = document.getElementById('previewTabYaml');
+                const jsonBtn = document.getElementById('previewTabJson');
+                if (tab === 'json') {
+                    yamlPre.style.display = 'none';
+                    jsonPre.style.display = 'block';
+                    yamlBtn.classList.remove('active');
+                    jsonBtn.classList.add('active');
+                } else {
+                    yamlPre.style.display = 'block';
+                    jsonPre.style.display = 'none';
+                    yamlBtn.classList.add('active');
+                    jsonBtn.classList.remove('active');
+                }
+            }
+
+            function loadSelectedExample() {
+                if (!selectedExampleDetail) return;
+
+                const loadYaml = document.getElementById('loadExampleYaml').checked;
+                const loadData = document.getElementById('loadExampleData').checked;
+
+                if (!loadYaml && !loadData) {
+                    showToast('Select at least one option to load.', 'warning');
+                    return;
+                }
+
+                // Confirm if workspace has blocks
+                if (loadYaml && workspace.getAllBlocks(false).length > 0) {
+                    if (!confirm('Loading YAML will replace all current blocks. Continue?')) {
+                        return;
+                    }
+                }
+
+                let loaded = [];
+
+                // Load JSON into eval data editor FIRST (before YAML)
+                // so field paths are available when blocks generate expressions
+                if (loadData && selectedExampleDetail.sampleData) {
+                    try {
+                        const jsonStr = typeof selectedExampleDetail.sampleData === 'string'
+                            ? selectedExampleDetail.sampleData
+                            : JSON.stringify(selectedExampleDetail.sampleData, null, 2);
+                        setEvalJsonInEditor(jsonStr);
+                        loadFieldsIntoEditor();
+                        // Open the eval data accordion
+                        const evalSection = document.getElementById('evalDataSection');
+                        if (!evalSection.classList.contains('expanded')) {
+                            toggleAccordion('evalDataSection');
+                        }
+                        loaded.push('eval data');
+                    } catch (e) {
+                        showToast('Error loading eval data: ' + e.message, 'error');
+                    }
+                }
+
+                // Load YAML into workspace (after JSON context is ready)
+                if (loadYaml && selectedExampleDetail.yaml) {
+                    try {
+                        const config = jsyaml.load(selectedExampleDetail.yaml);
+                        if (config && (config.metadata || config.pipeline)) {
+                            workspace.clear();
+                            if (config.pipeline) {
+                                createPipelineConfigBlock(config);
+                            } else {
+                                const configType = config.metadata.type || 'rule-config';
+                                if (configType === 'data-source-config') createDataSourceConfigBlock(config);
+                                else if (configType === 'scenario') createScenarioConfigBlock(config);
+                                else if (configType === 'scenario-registry') createScenarioRegistryBlock(config);
+                                else if (configType === 'component') createComponentConfigBlock(config);
+                                else createRuleConfigBlock(config);
+                            }
+                            updateYaml();
+                            loaded.push('YAML rules');
+                        }
+                    } catch (e) {
+                        showToast('Error loading YAML: ' + e.message, 'error');
+                    }
+                }
+
+                if (loadExampleModalInstance) loadExampleModalInstance.hide();
+
+                if (loaded.length > 0) {
+                    showToast('Loaded: ' + loaded.join(' + '), 'success');
+                } else {
+                    showToast('Nothing was loaded (no content available).', 'warning');
+                }
+            }
+
+            // ================================================================
+            // GLOBAL DRAG-AND-DROP (Option E)
+            // ================================================================
+            (function initGlobalDragDrop() {
+                let dragCounter = 0;
+                const overlay = document.getElementById('dropOverlay');
+
+                // Prevent default on all drag events to enable drop
+                document.addEventListener('dragenter', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dragCounter++;
+                    if (hasFileItems(e)) {
+                        overlay.classList.add('active');
+                    }
+                });
+
+                document.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dragCounter--;
+                    if (dragCounter <= 0) {
+                        dragCounter = 0;
+                        overlay.classList.remove('active');
+                    }
+                });
+
+                document.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+
+                document.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dragCounter = 0;
+                    overlay.classList.remove('active');
+
+                    // Don't intercept drops on existing drop zones (eval file drop area)
+                    if (e.target.closest && e.target.closest('#evalFileDrop')) return;
+
+                    const files = Array.from(e.dataTransfer.files);
+                    if (files.length === 0) return;
+
+                    const yamlFiles = files.filter(f => f.name.endsWith('.yaml') || f.name.endsWith('.yml'));
+                    const jsonFiles = files.filter(f => f.name.endsWith('.json'));
+                    const otherFiles = files.filter(f => !f.name.endsWith('.yaml') && !f.name.endsWith('.yml') && !f.name.endsWith('.json'));
+
+                    if (otherFiles.length > 0 && yamlFiles.length === 0 && jsonFiles.length === 0) {
+                        showToast('Unsupported file type. Drop .yaml or .json files.', 'warning');
+                        return;
+                    }
+
+                    let loaded = [];
+
+                    // Process YAML files (use the first one for workspace)
+                    if (yamlFiles.length > 0) {
+                        const yamlFile = yamlFiles[0];
+                        const reader = new FileReader();
+                        reader.onload = function(evt) {
+                            try {
+                                const yamlText = evt.target.result;
+                                const config = jsyaml.load(yamlText);
+                                if (!config || (!config.metadata && !config.pipeline)) {
+                                    showToast('Invalid APEX YAML: missing metadata section.', 'error');
+                                    return;
+                                }
+                                if (workspace.getAllBlocks(false).length > 0) {
+                                    if (!confirm('Dropping YAML will replace all current blocks. Continue?')) return;
+                                }
+                                workspace.clear();
+                                if (config.pipeline) {
+                                    createPipelineConfigBlock(config);
+                                } else {
+                                    const configType = config.metadata.type || 'rule-config';
+                                    if (configType === 'data-source-config') createDataSourceConfigBlock(config);
+                                    else if (configType === 'scenario') createScenarioConfigBlock(config);
+                                    else if (configType === 'scenario-registry') createScenarioRegistryBlock(config);
+                                    else if (configType === 'component') createComponentConfigBlock(config);
+                                    else createRuleConfigBlock(config);
+                                }
+                                updateYaml();
+                                showToast('Loaded YAML: ' + yamlFile.name, 'success');
+                            } catch (err) {
+                                showToast('Error parsing YAML: ' + err.message, 'error');
+                            }
+                        };
+                        reader.readAsText(yamlFile);
+                        loaded.push(yamlFile.name);
+                    }
+
+                    // Process JSON files (use the first one for eval data)
+                    if (jsonFiles.length > 0) {
+                        const jsonFile = jsonFiles[0];
+                        const reader = new FileReader();
+                        reader.onload = function(evt) {
+                            try {
+                                const jsonText = evt.target.result;
+                                JSON.parse(jsonText); // Validate
+                                setEvalJsonInEditor(jsonText);
+                                loadFieldsIntoEditor();
+                                // Open the eval data accordion
+                                const evalSection = document.getElementById('evalDataSection');
+                                if (!evalSection.classList.contains('expanded')) {
+                                    toggleAccordion('evalDataSection');
+                                }
+                                showToast('Loaded JSON: ' + jsonFile.name, 'success');
+                            } catch (err) {
+                                showToast('Error parsing JSON: ' + err.message, 'error');
+                            }
+                        };
+                        reader.readAsText(jsonFile);
+                    }
+
+                    if (yamlFiles.length > 1) {
+                        showToast('Multiple YAML files dropped — only the first was loaded.', 'info');
+                    }
+                    if (jsonFiles.length > 1) {
+                        showToast('Multiple JSON files dropped — only the first was loaded.', 'info');
+                    }
+                });
+
+                function hasFileItems(e) {
+                    if (e.dataTransfer && e.dataTransfer.types) {
+                        return e.dataTransfer.types.indexOf('Files') !== -1;
+                    }
+                    return false;
+                }
+            })();
 
         </script>
 

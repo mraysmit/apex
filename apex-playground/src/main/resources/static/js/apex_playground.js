@@ -1277,15 +1277,15 @@ function hideUploadProgress() {
  * Toggle the bottom right panel collapse state
  */
 function toggleBottomRightPanel() {
-    const grid = document.querySelector('.playground-grid');
+    const panel = document.getElementById('bottomRightPanel');
     const btn = document.getElementById('collapseBottomRightBtn');
 
-    if (grid.classList.contains('bottom-right-collapsed')) {
-        grid.classList.remove('bottom-right-collapsed');
+    if (panel.classList.contains('panel-collapsed')) {
+        panel.classList.remove('panel-collapsed');
         btn.classList.remove('collapsed');
         btn.title = 'Collapse panel';
     } else {
-        grid.classList.add('bottom-right-collapsed');
+        panel.classList.add('panel-collapsed');
         btn.classList.add('collapsed');
         btn.title = 'Expand panel';
     }
@@ -1295,15 +1295,15 @@ function toggleBottomRightPanel() {
  * Toggle the bottom left panel collapse state
  */
 function toggleBottomLeftPanel() {
-    const grid = document.querySelector('.playground-grid');
+    const panel = document.getElementById('bottomLeftPanel');
     const btn = document.getElementById('collapseBottomLeftBtn');
 
-    if (grid.classList.contains('bottom-left-collapsed')) {
-        grid.classList.remove('bottom-left-collapsed');
+    if (panel.classList.contains('panel-collapsed')) {
+        panel.classList.remove('panel-collapsed');
         btn.classList.remove('collapsed');
         btn.title = 'Collapse panel';
     } else {
-        grid.classList.add('bottom-left-collapsed');
+        panel.classList.add('panel-collapsed');
         btn.classList.add('collapsed');
         btn.title = 'Expand panel';
     }
