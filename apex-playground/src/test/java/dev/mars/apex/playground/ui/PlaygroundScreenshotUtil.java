@@ -223,9 +223,7 @@ public class PlaygroundScreenshotUtil {
         }
 
         if (data.getYamlRules() != null) {
-            WebElement yamlEditor = driver.findElement(By.id("yamlRulesEditor"));
-            yamlEditor.clear();
-            yamlEditor.sendKeys(data.getYamlRules());
+            CodeMirrorTestHelper.setYamlContent(driver, data.getYamlRules());
         }
 
         if (data.shouldProcess()) {

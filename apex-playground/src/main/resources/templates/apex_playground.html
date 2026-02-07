@@ -8,9 +8,11 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
-    <!-- CodeMirror CSS for syntax highlighting -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.0.1/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.0.1/theme/monokai.min.css">
+    <!-- CodeMirror 5 CSS for syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.19/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.19/theme/material-darker.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.19/theme/eclipse.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.19/addon/hint/show-hint.min.css">
     
     <!-- Custom CSS -->
     <link rel="stylesheet" th:href="@{/css/apex_playground.css(v=${#dates.createNow().getTime()})}">
@@ -84,7 +86,10 @@
                             <i class="fas fa-file-download"></i> Save YAML
                         </button>
                     </div>
-                    <div class="ms-auto">
+                    <div class="ms-auto d-flex gap-1">
+                        <button type="button" class="btn btn-outline-secondary" id="themeToggleBtn" title="Toggle Dark/Light Mode" onclick="toggleEditorTheme()">
+                            <i class="fas fa-moon" id="themeToggleIcon"></i>
+                        </button>
                         <button type="button" class="btn btn-outline-secondary" id="settingsBtn" title="Settings">
                             <i class="fas fa-cog"></i>
                         </button>
@@ -193,7 +198,13 @@
                         <div class="card-header p-2">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <h6 class="mb-0">YAML Rules Configuration</h6>
-                                <span class="badge bg-secondary" id="yamlStatus">Not Validated</span>
+                                <div class="d-flex align-items-center gap-1">
+                                    <button class="btn btn-outline-secondary btn-sm yaml-zoom-btn" style="min-width: 24px; padding: 0 4px; line-height: 1.4;" onclick="zoomYamlEditor(-1)" title="Zoom out">-</button>
+                                    <span id="yamlZoomLevel" class="small text-muted" style="min-width: 32px; text-align: center;">14px</span>
+                                    <button class="btn btn-outline-secondary btn-sm yaml-zoom-btn" style="min-width: 24px; padding: 0 4px; line-height: 1.4;" onclick="zoomYamlEditor(1)" title="Zoom in">+</button>
+                                    <button class="btn btn-outline-secondary btn-sm ms-1" style="padding: 0 6px; line-height: 1.4;" onclick="copyYamlToClipboard()" title="Copy YAML to clipboard"><i class="fas fa-copy"></i></button>
+                                    <span class="badge bg-secondary ms-1" id="yamlStatus">Not Validated</span>
+                                </div>
                             </div>
                             <div class="d-flex align-items-center">
                                 <small class="text-muted me-2">
@@ -316,10 +327,15 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- CodeMirror JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.0.1/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.0.1/mode/javascript/javascript.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.0.1/mode/yaml/yaml.min.js"></script>
+    <!-- CodeMirror 5 JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.19/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.19/mode/yaml/yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.19/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.19/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.19/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.19/addon/selection/active-line.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.19/addon/mode/overlay.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.19/addon/display/placeholder.min.js"></script>
     
     <!-- Font Awesome for icons -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>

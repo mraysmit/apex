@@ -212,17 +212,12 @@ class DragDropFileUploadUITest {
         driver.get(baseUrl + "/playground");
         WebElement yamlEditor = driver.findElement(By.id("yamlRulesEditor"));
 
-        // When - Simulate file drop using JavaScript
+        // When - Simulate file drop using JavaScript (set via CodeMirror)
         String fileContent = Files.readString(yamlFile.toPath());
-        jsExecutor.executeScript(
-            "var editor = arguments[0];" +
-            "var content = arguments[1];" +
-            "editor.value = content;" +
-            "editor.dispatchEvent(new Event('input', { bubbles: true }));",
-            yamlEditor, fileContent);
+        CodeMirrorTestHelper.setYamlContent(driver, fileContent);
 
         // Then - Verify content was loaded
-        String editorContent = yamlEditor.getDomProperty("value");
+        String editorContent = CodeMirrorTestHelper.getYamlContent(driver);
         assertTrue(editorContent.contains("metadata:"), "Editor should contain YAML metadata");
         assertTrue(editorContent.contains("Test Configuration"), "Editor should contain YAML name");
         assertTrue(editorContent.contains("test-rule"), "Editor should contain rule ID");

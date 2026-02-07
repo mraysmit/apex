@@ -705,3 +705,37 @@ body {
     padding: 1px 5px;
     border-radius: 3px;
 }
+
+/* ===== CodeMirror YAML Editor Styling ===== */
+
+/* CodeMirror sizing - fill the card body */
+.playground-panel .CodeMirror {
+    height: 100% !important;
+    border: none;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 14px;
+    line-height: 1.4;
+    flex: 1;
+}
+
+/* APEX keyword syntax highlighting — Dark mode (material-darker) */
+.cm-apex-metadata { color: #64B5F6 !important; font-weight: bold; }
+.cm-apex-rules { color: #81C784 !important; font-weight: bold; }
+.cm-apex-enrichment { color: #BA68C8 !important; font-weight: bold; }
+.cm-apex-rulegroup { color: #FFB74D !important; font-weight: bold; }
+.cm-apex-datasource { color: #4DD0E1 !important; font-weight: bold; }
+.cm-apex-scenario { color: #F48FB1 !important; font-weight: bold; }
+.cm-apex-pipeline { color: #AED581 !important; font-weight: bold; }
+.cm-apex-common { color: #FFE082 !important; font-weight: bold; }
+.cm-apex-spel { color: #EF5350 !important; }
+
+/* APEX keyword syntax highlighting — Light mode (eclipse) */
+.cm-s-eclipse .cm-apex-metadata { color: #1565C0 !important; font-weight: bold; }
+.cm-s-eclipse .cm-apex-rules { color: #2E7D32 !important; font-weight: bold; }
+.cm-s-eclipse .cm-apex-enrichment { color: #7B1FA2 !important; font-weight: bold; }
+.cm-s-eclipse .cm-apex-rulegroup { color: #E65100 !important; font-weight: bold; }
+.cm-s-eclipse .cm-apex-datasource { color: #00838F !important; font-weight: bold; }
+.cm-s-eclipse .cm-apex-scenario { color: #AD1457 !important; font-weight: bold; }
+.cm-s-eclipse .cm-apex-pipeline { color: #558B2F !important; font-weight: bold; }
+.cm-s-eclipse .cm-apex-common { color: #F9A825 !important; font-weight: bold; }
+.cm-s-eclipse .cm-apex-spel { color: #C62828 !important; }

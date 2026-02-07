@@ -6,9 +6,104 @@
  */
 
 // Global variables
-let sourceDataEditor, yamlRulesEditor;
+let sourceDataEditor;
+let yamlCmEditor = null; // CodeMirror instance for YAML editor
 let currentDataFormat = 'JSON';
 let currentExample = null;
+
+// Backward-compatible yamlRulesEditor reference (used by drag-drop setup)
+let yamlRulesEditor;
+
+// ========================================================================
+// APEX Keyword Colorization — matches Visual Rule Editor exactly
+// ========================================================================
+const APEX_KEYWORDS = {
+    metadata: ['metadata', 'id', 'type', 'version', 'description', 'author', 'business-domain', 'effective-date', 'expiration-date', 'tags'],
+    rules: ['rules', 'rule', 'condition', 'message', 'severity', 'priority', 'category', 'result-field', 'error-code', 'success-code', 'no-match-message'],
+    enrichment: ['enrichments', 'enrichment', 'enrichment-groups', 'field-mappings', 'source-field', 'target-field', 'expression', 'calculation-config', 'lookup-config', 'lookup-key', 'lookup-dataset', 'field-enrichment', 'calculation-enrichment', 'lookup-enrichment'],
+    rulegroup: ['rule-groups', 'rule-group', 'rule-ids', 'operator', 'enrichment-ids'],
+    datasource: ['data-sources', 'data-source', 'data-source-refs', 'connection-config', 'host', 'port', 'database', 'username', 'password', 'base-url', 'timeout', 'queries', 'query', 'endpoints', 'endpoint', 'path', 'base-path', 'file-pattern', 'format', 'parameters'],
+    scenario: ['scenario', 'scenarios', 'input-type', 'rule-config', 'enrichment-config'],
+    pipeline: ['pipeline', 'pipelines', 'stages', 'stage', 'mode', 'error-handling', 'max-retries', 'retry-delay-ms'],
+    common: ['enabled', 'name', 'source', 'value', 'field', 'key-field']
+};
+
+// Build reverse lookup: keyword → category
+const KEYWORD_CATEGORY_MAP = {};
+for (const [category, keywords] of Object.entries(APEX_KEYWORDS)) {
+    keywords.forEach(kw => KEYWORD_CATEGORY_MAP[kw] = category);
+}
+
+// ========================================================================
+// YAML Editor Value Helpers (abstracts CodeMirror vs textarea)
+// ========================================================================
+function getYamlContent() {
+    return yamlCmEditor ? yamlCmEditor.getValue() : '';
+}
+
+function setYamlContent(value) {
+    if (yamlCmEditor) {
+        yamlCmEditor.setValue(value || '');
+        yamlCmEditor.save(); // Sync back to hidden textarea for Selenium compatibility
+    }
+}
+
+// ========================================================================
+// Font Zoom Controls for YAML Editor
+// ========================================================================
+let yamlEditorFontSize = 14;
+const YAML_MIN_FONT_SIZE = 8;
+const YAML_MAX_FONT_SIZE = 28;
+
+function zoomYamlEditor(delta) {
+    yamlEditorFontSize = Math.max(YAML_MIN_FONT_SIZE, Math.min(YAML_MAX_FONT_SIZE, yamlEditorFontSize + delta));
+    document.getElementById('yamlZoomLevel').textContent = yamlEditorFontSize + 'px';
+    if (yamlCmEditor) {
+        const wrapper = yamlCmEditor.getWrapperElement();
+        wrapper.style.fontSize = yamlEditorFontSize + 'px';
+        yamlCmEditor.refresh();
+    }
+}
+
+// ========================================================================
+// Copy YAML to Clipboard
+// ========================================================================
+function copyYamlToClipboard() {
+    const content = getYamlContent();
+    if (!content) {
+        showAlert('No YAML content to copy.', 'warning');
+        return;
+    }
+    navigator.clipboard.writeText(content).then(() => {
+        // Brief visual feedback on the copy button
+        const btn = document.querySelector('[onclick="copyYamlToClipboard()"]');
+        if (btn) {
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i>';
+            btn.classList.replace('btn-outline-secondary', 'btn-success');
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.classList.replace('btn-success', 'btn-outline-secondary');
+            }, 1000);
+        }
+    }).catch(() => {
+        // Fallback for older browsers
+        const textarea = document.createElement('textarea');
+        textarea.value = content;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            document.execCommand('copy');
+            showAlert('YAML copied to clipboard!', 'success');
+        } catch (err) {
+            showAlert('Failed to copy to clipboard.', 'danger');
+        } finally {
+            document.body.removeChild(textarea);
+        }
+    });
+}
 
 // Initialize playground when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
@@ -23,9 +118,42 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializePlayground() {
     console.log('Initializing APEX Playground...');
 
-    // Initialize editors (placeholder - will be enhanced with CodeMirror in Phase 3)
+    // Initialize source data editor (plain textarea)
     sourceDataEditor = document.getElementById('sourceDataEditor');
+
+    // Keep reference to textarea for drag-drop setup
     yamlRulesEditor = document.getElementById('yamlRulesEditor');
+
+    // Initialize CodeMirror on the YAML editor with APEX keyword highlighting
+    yamlCmEditor = CodeMirror.fromTextArea(document.getElementById('yamlRulesEditor'), {
+        mode: 'yaml',
+        theme: currentEditorTheme,
+        lineNumbers: true,
+        lineWrapping: false,
+        indentUnit: 2,
+        tabSize: 2,
+        indentWithTabs: false,
+        styleActiveLine: true,
+        matchBrackets: true,
+        autoCloseBrackets: true,
+        placeholder: 'Enter your YAML rules configuration here or drag and drop a YAML file...',
+        extraKeys: {
+            Tab: function(cm) {
+                cm.replaceSelection('  ', 'end');
+            }
+        }
+    });
+
+    // Apply APEX keyword overlay for colorization
+    applyApexOverlay(yamlCmEditor);
+
+    // Set initial theme toggle icon
+    updateThemeToggleIcon();
+
+    // Keep hidden textarea in sync for Selenium test compatibility
+    yamlCmEditor.on('change', function() {
+        yamlCmEditor.save();
+    });
 
     // Set initial data format
     updateDataFormat('JSON');
@@ -34,6 +162,77 @@ function initializePlayground() {
     loadTransferredData();
 
     console.log('Playground initialized successfully');
+}
+
+/**
+ * Apply APEX keyword colorization overlay to CodeMirror.
+ * This adds color classes to YAML keys matching APEX domain keywords,
+ * exactly matching the Visual Rule Editor's Prism-based colorization.
+ */
+function applyApexOverlay(cm) {
+    CodeMirror.defineMode('yaml-apex', function(config) {
+        const yamlMode = CodeMirror.getMode(config, 'yaml');
+        return CodeMirror.overlayMode(yamlMode, {
+            token: function(stream) {
+                // Match YAML keys at start of a line (optional whitespace, then key, then colon)
+                if (stream.sol() || stream.peek() === ' ' || stream.peek() === '-') {
+                    // Skip leading whitespace and list markers
+                    stream.eatWhile(/[\s-]/);
+                    // Try to match a YAML key
+                    const keyMatch = stream.match(/^([a-zA-Z][a-zA-Z0-9_-]*)(?=\s*:)/);
+                    if (keyMatch) {
+                        const keyword = keyMatch[1];
+                        const category = KEYWORD_CATEGORY_MAP[keyword];
+                        if (category) {
+                            return 'apex-' + category;
+                        }
+                    }
+                }
+                // Match SpEL expressions in strings (contains #)
+                if (stream.match(/#[a-zA-Z{]/)) {
+                    stream.skipTo('"') || stream.skipTo("'") || stream.skipToEnd();
+                    return 'apex-spel';
+                }
+                stream.next();
+                return null;
+            }
+        });
+    });
+    cm.setOption('mode', 'yaml-apex');
+}
+
+// ========================================================================
+// Dark / Light Theme Toggle
+// ========================================================================
+const DARK_THEME = 'material-darker';
+const LIGHT_THEME = 'eclipse';
+let currentEditorTheme = localStorage.getItem('apex_editor_theme') || DARK_THEME;
+
+/**
+ * Toggle the YAML editor between dark and light mode.
+ * Persists the choice to localStorage.
+ */
+function toggleEditorTheme() {
+    if (!yamlCmEditor) return;
+    currentEditorTheme = (currentEditorTheme === DARK_THEME) ? LIGHT_THEME : DARK_THEME;
+    yamlCmEditor.setOption('theme', currentEditorTheme);
+    localStorage.setItem('apex_editor_theme', currentEditorTheme);
+    updateThemeToggleIcon();
+}
+
+/**
+ * Update the toggle button icon: moon for dark mode, sun for light mode.
+ */
+function updateThemeToggleIcon() {
+    const icon = document.getElementById('themeToggleIcon');
+    if (!icon) return;
+    if (currentEditorTheme === DARK_THEME) {
+        icon.className = 'fas fa-moon';
+        icon.parentElement.title = 'Switch to Light Mode';
+    } else {
+        icon.className = 'fas fa-sun';
+        icon.parentElement.title = 'Switch to Dark Mode';
+    }
 }
 
 /**
@@ -58,7 +257,7 @@ function loadTransferredData() {
 
         // Load YAML into the rules editor
         if (transferData.yaml && yamlRulesEditor) {
-            yamlRulesEditor.value = transferData.yaml;
+            setYamlContent(transferData.yaml);
             document.getElementById('yamlRulesFileName').textContent = 'From Visual Editor';
             console.log('Loaded YAML from Visual Editor');
         }
@@ -131,9 +330,11 @@ function setupEventListeners() {
     setupDragAndDrop();
     
     // Reset validation status when YAML content changes
-    yamlRulesEditor.addEventListener('input', function() {
-        resetYamlValidationStatus();
-    });
+    if (yamlCmEditor) {
+        yamlCmEditor.on('change', function() {
+            resetYamlValidationStatus();
+        });
+    }
 
     // Settings button
     document.getElementById('settingsBtn').addEventListener('click', openSettings);
@@ -234,7 +435,7 @@ function updateResolvedPath(resolvedPath, exists) {
 async function processData() {
     const processBtn = document.getElementById('processBtn');
     const sourceData = sourceDataEditor.value.trim();
-    const yamlRules = yamlRulesEditor.value.trim();
+    const yamlRules = getYamlContent().trim();
 
     if (!sourceData || !yamlRules) {
         showAlert('Please provide both source data and YAML rules configuration.', 'warning');
@@ -299,7 +500,7 @@ async function processData() {
  * @returns {Promise<{valid: boolean, message: string}>} Validation result
  */
 async function validateYaml() {
-    const yamlRules = yamlRulesEditor.value.trim();
+    const yamlRules = getYamlContent().trim();
 
     if (!yamlRules) {
         showAlert('Please provide YAML rules configuration to validate.', 'warning');
@@ -394,7 +595,7 @@ function showConfirmationModal(message, onConfirm) {
  */
 function resetPlayground() {
     sourceDataEditor.value = '';
-    yamlRulesEditor.value = '';
+    setYamlContent('');
     document.getElementById('validationResults').innerHTML = '<p class="text-muted">Click "Process" to see validation results...</p>';
     document.getElementById('enrichmentResults').innerHTML = '<p class="text-muted">Click "Process" to see enrichment results and performance metrics...</p>';
     document.getElementById('traceResults').innerHTML = '<p class="text-muted">Click "Process" to see execution trace...</p>';
@@ -464,7 +665,7 @@ rules:
     message: "Valid email address required"`;
     
     sourceDataEditor.value = JSON.stringify(exampleData, null, 2);
-    yamlRulesEditor.value = exampleYaml;
+    setYamlContent(exampleYaml);
 
     // Update file name displays for example
     updateSourceDataFileName('example-data.json', JSON.stringify(exampleData, null, 2).length);
@@ -604,7 +805,7 @@ async function loadSpecificExample(category, id) {
 
         // Load the example data
         if (example.yaml) {
-            yamlRulesEditor.value = example.yaml;
+            setYamlContent(example.yaml);
             updateYamlRulesFileName(`${example.name.toLowerCase().replace(/\s+/g, '-')}.yaml`, example.yaml.length);
         }
 
@@ -630,7 +831,7 @@ async function loadSpecificExample(category, id) {
 function saveConfiguration() {
     const config = {
         sourceData: sourceDataEditor.value,
-        yamlRules: yamlRulesEditor.value,
+        yamlRules: getYamlContent(),
         dataFormat: currentDataFormat,
         timestamp: new Date().toISOString()
     };
@@ -699,7 +900,7 @@ async function saveData() {
  * Save YAML rules to file or server
  */
 async function saveYaml() {
-    const content = yamlRulesEditor.value;
+    const content = getYamlContent();
     if (!content) {
         showAlert('No YAML rules to save.', 'warning');
         return;
@@ -1083,7 +1284,7 @@ function handleYamlFileDrop(e) {
         const file = files[0];
         if (validateYamlFile(file)) {
             readFileContent(file, (content) => {
-                yamlRulesEditor.value = content;
+                setYamlContent(content);
                 showAlert(`YAML file "${file.name}" loaded successfully!`, 'success');
 
                 // Update file name display
@@ -1130,7 +1331,7 @@ function handleYamlFileUpload(event) {
         showUploadProgress(file);
 
         readFileContent(file, (content) => {
-            yamlRulesEditor.value = content;
+            setYamlContent(content);
             hideUploadProgress();
             showAlert(`YAML file "${file.name}" uploaded successfully!`, 'success');
 
@@ -1164,7 +1365,7 @@ function handleConfigFileUpload(event) {
                 }
 
                 if (config.yamlRules) {
-                    yamlRulesEditor.value = config.yamlRules;
+                    setYamlContent(config.yamlRules);
                     updateYamlRulesFileName('loaded-rules.yaml', config.yamlRules.length);
                 }
 

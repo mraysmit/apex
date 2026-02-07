@@ -114,8 +114,7 @@ class ApexEngineOutputDebugUITest {
         sourceEditor.clear();
         sourceEditor.sendKeys(jsonData);
         
-        yamlEditor.clear();
-        yamlEditor.sendKeys(yamlRules);
+        CodeMirrorTestHelper.setYamlContent(driver, yamlRules);
         
         WebElement processBtn = driver.findElement(By.id("processBtn"));
         processBtn.click();
@@ -196,8 +195,7 @@ class ApexEngineOutputDebugUITest {
         sourceEditor.clear();
         sourceEditor.sendKeys(jsonData);
         
-        yamlEditor.clear();
-        yamlEditor.sendKeys(yamlRules);
+        CodeMirrorTestHelper.setYamlContent(driver, yamlRules);
         
         WebElement processBtn = driver.findElement(By.id("processBtn"));
         processBtn.click();

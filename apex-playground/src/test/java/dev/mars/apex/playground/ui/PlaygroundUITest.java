@@ -542,16 +542,11 @@ class PlaygroundUITest {
     }
 
     private void clearAndEnterText(WebElement element, String text) {
-        element.clear();
-        element.sendKeys(text);
+        CodeMirrorTestHelper.clearAndEnterText(driver, element, text);
     }
 
     private String getTextAreaContent(WebElement element) {
-        String value = element.getDomProperty("value");
-        if (value != null && !value.isEmpty()) {
-            return value;
-        }
-        return element.getText();
+        return CodeMirrorTestHelper.getTextContent(driver, element);
     }
 }
 

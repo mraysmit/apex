@@ -320,13 +320,18 @@ class ApexEngineContentProcessingUITest {
     // Helper methods for creating test files
 
     private void uploadFileToEditor(String editorId, File file) throws IOException {
-        WebElement editor = driver.findElement(By.id(editorId));
         String fileContent = Files.readString(file.toPath());
         
-        // Clear and set content
-        jsExecutor.executeScript(
-            "arguments[0].value = arguments[1]; arguments[0].dispatchEvent(new Event('input'));",
-            editor, fileContent);
+        if ("yamlRulesEditor".equals(editorId)) {
+            // Use CodeMirror helper for the YAML editor
+            CodeMirrorTestHelper.setYamlContent(driver, fileContent);
+        } else {
+            // Standard textarea: set value directly
+            WebElement editor = driver.findElement(By.id(editorId));
+            jsExecutor.executeScript(
+                "arguments[0].value = arguments[1]; arguments[0].dispatchEvent(new Event('input'));",
+                editor, fileContent);
+        }
     }
 
     private File createTestJsonFileWithSpecificData() throws IOException {

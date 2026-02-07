@@ -83,10 +83,10 @@ class ApexPlaygroundSaveFunctionalityTest {
         driver.get(baseUrl);
         
         WebElement sourceDataEditor = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("sourceDataEditor")));
-        WebElement yamlRulesEditor = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("yamlRulesEditor")));
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("yamlRulesEditor")));
         
         assertEquals("", sourceDataEditor.getAttribute("value"), "Source Data editor should be empty on startup");
-        assertEquals("", yamlRulesEditor.getAttribute("value"), "YAML Rules editor should be empty on startup");
+        assertEquals("", CodeMirrorTestHelper.getYamlContent(driver), "YAML Rules editor should be empty on startup");
     }
 
     @Test
@@ -107,14 +107,14 @@ class ApexPlaygroundSaveFunctionalityTest {
         exampleItem.click();
         
         // Wait for editors to be populated
-        WebElement yamlRulesEditor = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("yamlRulesEditor")));
-        wait.until(ExpectedConditions.not(ExpectedConditions.attributeToBe(yamlRulesEditor, "value", "")));
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("yamlRulesEditor")));
+        // Wait for CodeMirror to have content
+        wait.until(d -> !CodeMirrorTestHelper.getYamlContent(d).isEmpty());
         
         // 2. Modify the YAML content
-        String originalContent = yamlRulesEditor.getAttribute("value");
+        String originalContent = CodeMirrorTestHelper.getYamlContent(driver);
         String newContent = originalContent + "\n# Modified by Selenium Test";
-        yamlRulesEditor.clear();
-        yamlRulesEditor.sendKeys(newContent);
+        CodeMirrorTestHelper.setYamlContent(driver, newContent);
         
         // 3. Click Save YAML
         WebElement saveYamlBtn = wait.until(ExpectedConditions.elementToBeClickable(By.id("saveYamlBtn")));

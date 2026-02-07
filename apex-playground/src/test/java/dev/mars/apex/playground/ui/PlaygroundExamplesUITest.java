@@ -391,11 +391,7 @@ class PlaygroundExamplesUITest {
     }
 
     private void clearAndEnterText(WebElement element, String text) {
-        element.clear();
-        // Use JavaScript to set value for large text blocks
-        jsExecutor.executeScript("arguments[0].value = arguments[1];", element, text);
-        // Trigger input event so any listeners are notified
-        jsExecutor.executeScript("arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", element);
+        CodeMirrorTestHelper.clearAndEnterText(driver, element, text);
     }
 }
 
