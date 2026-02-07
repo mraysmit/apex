@@ -320,13 +320,17 @@
                         <div class="card-header p-2">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <h6 class="mb-0">Source Data</h6>
-                                <div class="btn-group btn-group-sm" role="group">
-                                    <input type="radio" class="btn-check" name="dataFormat" id="jsonFormat" value="JSON" checked>
-                                    <label class="btn btn-outline-secondary py-0 px-2" for="jsonFormat">JSON</label>
-                                    <input type="radio" class="btn-check" name="dataFormat" id="xmlFormat" value="XML">
-                                    <label class="btn btn-outline-secondary py-0 px-2" for="xmlFormat">XML</label>
-                                    <input type="radio" class="btn-check" name="dataFormat" id="csvFormat" value="CSV">
-                                    <label class="btn btn-outline-secondary py-0 px-2" for="csvFormat">CSV</label>
+                                <div class="d-flex gap-1 align-items-center">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <input type="radio" class="btn-check" name="dataFormat" id="jsonFormat" value="JSON" checked>
+                                        <label class="btn btn-outline-secondary py-0 px-2" for="jsonFormat">JSON</label>
+                                        <input type="radio" class="btn-check" name="dataFormat" id="xmlFormat" value="XML">
+                                        <label class="btn btn-outline-secondary py-0 px-2" for="xmlFormat">XML</label>
+                                        <input type="radio" class="btn-check" name="dataFormat" id="csvFormat" value="CSV">
+                                        <label class="btn btn-outline-secondary py-0 px-2" for="csvFormat">CSV</label>
+                                    </div>
+                                    <button class="btn btn-outline-secondary btn-sm py-0 px-2" onclick="formatSourceJson()" title="Format JSON">Format</button>
+                                    <button class="btn btn-outline-secondary btn-sm py-0 px-2" onclick="clearSourceData()" title="Clear all data">Clear</button>
                                 </div>
                             </div>
                             <div class="d-flex align-items-center">
@@ -337,16 +341,55 @@
                                 <small class="text-muted" id="sourceDataFileSize"></small>
                             </div>
                         </div>
-                        <div class="card-body p-0 position-relative">
-                            <div id="dataDropZone" class="drop-zone position-absolute w-100 h-100 d-none">
-                                <div class="drop-zone-content">
-                                    <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
-                                    <h5>Drop your data file here</h5>
-                                    <p class="text-muted">Supports JSON, XML, CSV, and TXT files</p>
+                        <div class="card-body p-0 d-flex flex-column">
+                            <div id="sourceDataOutput">
+                                <!-- Tabs -->
+                                <ul class="nav nav-tabs nav-tabs-sm px-2 pt-1" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" onclick="switchSourceDataTab('editor')">Editor</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" onclick="switchSourceDataTab('tree')">Tree View</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" onclick="switchSourceDataTab('files')">Files</button>
+                                    </li>
+                                </ul>
+
+                                <!-- Editor Panel -->
+                                <div id="sourceEditorPanel" class="source-data-panel active">
+                                    <div class="position-relative flex-grow-1 d-flex flex-column">
+                                        <div id="dataDropZone" class="drop-zone position-absolute w-100 h-100 d-none" style="z-index: 10;">
+                                            <div class="drop-zone-content">
+                                                <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                                                <h5>Drop your data file here</h5>
+                                                <p class="text-muted">Supports JSON, XML, CSV, and TXT files</p>
+                                            </div>
+                                        </div>
+                                        <textarea id="sourceDataEditor" class="form-control flex-grow-1"
+                                                  placeholder="Enter your source data here (JSON, XML, or CSV) or drag and drop a file..."></textarea>
+                                        <div id="sourceJsonError" class="alert alert-danger m-2 small py-1 px-2" style="display: none;"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Tree View Panel -->
+                                <div id="sourceTreePanel" class="source-data-panel">
+                                    <div class="source-tree-container" id="sourceTreeContainer">
+                                        <p class="text-muted fst-italic p-3">Enter JSON in the Editor tab to see a tree view</p>
+                                    </div>
+                                </div>
+
+                                <!-- Files Panel -->
+                                <div id="sourceFilesPanel" class="source-data-panel">
+                                    <div class="source-file-drop" id="sourceFileDrop">
+                                        <p class="mb-1"><i class="fas fa-cloud-upload-alt text-primary"></i> Drag and drop data files here</p>
+                                        <p class="small text-muted mb-2">JSON, XML, CSV supported</p>
+                                        <input type="file" id="sourceFileInput" accept=".json,.xml,.csv,.txt" multiple style="display: none;">
+                                        <button class="btn btn-outline-primary btn-sm" onclick="document.getElementById('sourceFileInput').click()">Browse Files</button>
+                                    </div>
+                                    <div class="source-file-list" id="sourceFileList"></div>
                                 </div>
                             </div>
-                            <textarea id="sourceDataEditor" class="form-control h-100"
-                                      placeholder="Enter your source data here (JSON, XML, or CSV) or drag and drop a file..."></textarea>
                         </div>
                     </div>
                 </div>

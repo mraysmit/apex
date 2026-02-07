@@ -110,6 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializePlayground();
     setupEventListeners();
     initPlaygroundExampleModal();
+    initSourceFileHandlers();
     // loadDefaultExample(); // Disabled to start with empty UI
 });
 
@@ -606,7 +607,13 @@ function resetPlayground() {
     // Clear file name displays
     clearSourceDataFileName();
     clearYamlRulesFileName();
-    
+
+    // Clear source data panel state
+    sourceDataFiles = [];
+    renderSourceFileList();
+    document.getElementById('sourceJsonError').style.display = 'none';
+    updateSourceTreeView();
+
     // Clear current example context
     currentExample = null;
 }
@@ -834,6 +841,298 @@ async function saveYaml() {
 function updateDataFormat(format) {
     currentDataFormat = format;
     console.log('Data format updated to:', format);
+}
+
+// ========================================================================
+// Source Data — Tabbed Panel (Editor / Tree View / Files)
+// ========================================================================
+let sourceDataFiles = [];
+
+/**
+ * Switch between Editor, Tree View and Files tabs
+ */
+function switchSourceDataTab(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('#sourceDataOutput .nav-link').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    if (event && event.target) {
+        event.target.classList.add('active');
+    }
+
+    // Update panels
+    document.querySelectorAll('.source-data-panel').forEach(panel => {
+        panel.classList.remove('active');
+    });
+
+    if (tabName === 'editor') {
+        document.getElementById('sourceEditorPanel').classList.add('active');
+    } else if (tabName === 'tree') {
+        document.getElementById('sourceTreePanel').classList.add('active');
+        updateSourceTreeView();
+    } else if (tabName === 'files') {
+        document.getElementById('sourceFilesPanel').classList.add('active');
+    }
+}
+
+/**
+ * Format JSON in the source data editor
+ */
+function formatSourceJson() {
+    const text = sourceDataEditor.value.trim();
+    if (!text) return;
+
+    try {
+        const parsed = JSON.parse(text);
+        sourceDataEditor.value = JSON.stringify(parsed, null, 2);
+        document.getElementById('sourceJsonError').style.display = 'none';
+        // Ensure JSON format is selected
+        document.getElementById('jsonFormat').checked = true;
+        updateDataFormat('JSON');
+    } catch (e) {
+        document.getElementById('sourceJsonError').textContent = 'JSON Error: ' + e.message;
+        document.getElementById('sourceJsonError').style.display = 'block';
+    }
+}
+
+/**
+ * Clear all source data
+ */
+function clearSourceData() {
+    sourceDataEditor.value = '';
+    document.getElementById('sourceJsonError').style.display = 'none';
+    sourceDataFiles = [];
+    renderSourceFileList();
+    updateSourceTreeView();
+    clearSourceDataFileName();
+}
+
+/**
+ * Update the tree view panel from current editor content
+ */
+function updateSourceTreeView() {
+    const container = document.getElementById('sourceTreeContainer');
+    const text = sourceDataEditor.value.trim();
+
+    if (!text) {
+        container.innerHTML = '<p class="text-muted fst-italic p-3">Enter JSON in the Editor tab to see a tree view</p>';
+        return;
+    }
+
+    try {
+        const data = JSON.parse(text);
+        container.innerHTML = renderSourceJsonTree(data, '');
+    } catch (e) {
+        container.innerHTML = '<p class="text-danger p-3">Invalid JSON: ' + escapeHtmlSimple(e.message) + '</p>';
+    }
+}
+
+/**
+ * Render a JSON value as an interactive collapsible tree
+ */
+function renderSourceJsonTree(data, path) {
+    if (data === null) {
+        return '<span class="source-tree-null">null</span>';
+    }
+    if (typeof data === 'string') {
+        return '<span class="source-tree-string">"' + escapeHtmlSimple(data) + '"</span>';
+    }
+    if (typeof data === 'number') {
+        return '<span class="source-tree-number">' + data + '</span>';
+    }
+    if (typeof data === 'boolean') {
+        return '<span class="source-tree-boolean">' + data + '</span>';
+    }
+
+    if (Array.isArray(data)) {
+        if (data.length === 0) return '<span class="text-muted">[]</span>';
+
+        const id = 'stree_' + Math.random().toString(36).substr(2, 9);
+        let html = '<span class="source-tree-toggle" onclick="toggleSourceTreeNode(\'' + id + '\')">&#9660;</span>';
+        html += '<span class="text-muted">[</span>';
+        html += '<span class="text-muted" style="font-size: 0.8em;"> ' + data.length + ' items</span>';
+        html += '<div id="' + id + '" class="source-tree-node">';
+        data.forEach((item, idx) => {
+            html += '<div>';
+            html += '<span class="source-tree-key">[' + idx + ']</span>: ';
+            html += renderSourceJsonTree(item, path + '[' + idx + ']');
+            if (idx < data.length - 1) html += ',';
+            html += '</div>';
+        });
+        html += '</div>';
+        html += '<span class="text-muted">]</span>';
+        return html;
+    }
+
+    if (typeof data === 'object') {
+        const keys = Object.keys(data);
+        if (keys.length === 0) return '<span class="text-muted">{}</span>';
+
+        const id = 'stree_' + Math.random().toString(36).substr(2, 9);
+        let html = '<span class="source-tree-toggle" onclick="toggleSourceTreeNode(\'' + id + '\')">&#9660;</span>';
+        html += '<span class="text-muted">{</span>';
+        html += '<div id="' + id + '" class="source-tree-node">';
+        keys.forEach((key, idx) => {
+            html += '<div>';
+            html += '<span class="source-tree-key">"' + escapeHtmlSimple(key) + '"</span>: ';
+            html += renderSourceJsonTree(data[key], path + '.' + key);
+            if (idx < keys.length - 1) html += ',';
+            html += '</div>';
+        });
+        html += '</div>';
+        html += '<span class="text-muted">}</span>';
+        return html;
+    }
+
+    return '<span>' + String(data) + '</span>';
+}
+
+/**
+ * Toggle collapse/expand of a tree node
+ */
+function toggleSourceTreeNode(id) {
+    const node = document.getElementById(id);
+    const toggle = node.previousElementSibling.previousElementSibling;
+    if (node.style.display === 'none') {
+        node.style.display = 'block';
+        toggle.innerHTML = '&#9660;';
+    } else {
+        node.style.display = 'none';
+        toggle.innerHTML = '&#9654;';
+    }
+}
+
+/**
+ * Simple HTML escaping for display
+ */
+function escapeHtmlSimple(text) {
+    if (text === null || text === undefined) return '';
+    const div = document.createElement('div');
+    div.textContent = String(text);
+    return div.innerHTML;
+}
+
+// --- Source Data Files Panel ---
+
+/**
+ * Initialize file handlers for the Files tab
+ */
+function initSourceFileHandlers() {
+    const dropZone = document.getElementById('sourceFileDrop');
+    const fileInput = document.getElementById('sourceFileInput');
+    if (!dropZone || !fileInput) return;
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        handleSourceFiles(e.dataTransfer.files);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        handleSourceFiles(e.target.files);
+        e.target.value = '';
+    });
+}
+
+/**
+ * Handle dropped or selected files
+ */
+function handleSourceFiles(files) {
+    Array.from(files).forEach(file => {
+        const ext = file.name.split('.').pop().toLowerCase();
+        if (!['json', 'xml', 'csv', 'txt'].includes(ext)) {
+            showAlert('Unsupported file type: ' + file.name, 'warning');
+            return;
+        }
+
+        const existingIndex = sourceDataFiles.findIndex(f => f.name === file.name);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const fileData = {
+                name: file.name,
+                size: file.size,
+                content: e.target.result,
+                format: ext.toUpperCase()
+            };
+
+            if (existingIndex >= 0) {
+                sourceDataFiles[existingIndex] = fileData;
+            } else {
+                sourceDataFiles.push(fileData);
+            }
+            renderSourceFileList();
+        };
+        reader.readAsText(file);
+    });
+}
+
+/**
+ * Render the file list in the Files tab
+ */
+function renderSourceFileList() {
+    const list = document.getElementById('sourceFileList');
+    if (sourceDataFiles.length === 0) {
+        list.innerHTML = '';
+        return;
+    }
+
+    let html = '';
+    sourceDataFiles.forEach((file, idx) => {
+        const sizeStr = file.size < 1024 ? file.size + ' B' :
+                       file.size < 1024 * 1024 ? (file.size / 1024).toFixed(1) + ' KB' :
+                       (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+        const formatBadge = '<span class="badge bg-secondary ms-1">' + (file.format || '?') + '</span>';
+
+        html += '<div class="source-file-item">';
+        html += '<div>';
+        html += '<span class="source-file-name">' + escapeHtmlSimple(file.name) + '</span>';
+        html += formatBadge;
+        html += '<span class="source-file-size">' + sizeStr + '</span>';
+        html += '</div>';
+        html += '<div class="d-flex gap-1">';
+        html += '<button class="btn btn-success btn-sm py-0 px-2" style="font-size:0.75rem;" onclick="loadSourceFileToEditor(' + idx + ')">Open</button>';
+        html += '<button class="btn btn-outline-danger btn-sm py-0 px-2" style="font-size:0.75rem;" onclick="removeSourceFile(' + idx + ')">&#x2715;</button>';
+        html += '</div>';
+        html += '</div>';
+    });
+    list.innerHTML = html;
+}
+
+/**
+ * Load a file from the Files list into the Editor tab
+ */
+function loadSourceFileToEditor(idx) {
+    const file = sourceDataFiles[idx];
+    if (!file) return;
+
+    sourceDataEditor.value = file.content;
+    updateSourceDataFileName(file.name, file.size);
+
+    // Auto-detect format
+    autoDetectDataFormat(file.name);
+
+    // Switch to Editor tab
+    document.querySelectorAll('#sourceDataOutput .nav-link').forEach(tab => tab.classList.remove('active'));
+    document.querySelector('#sourceDataOutput .nav-link').classList.add('active');
+    document.querySelectorAll('.source-data-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('sourceEditorPanel').classList.add('active');
+}
+
+/**
+ * Remove a file from the Files list
+ */
+function removeSourceFile(idx) {
+    sourceDataFiles.splice(idx, 1);
+    renderSourceFileList();
 }
 
 /**

@@ -614,3 +614,134 @@ body {
 .cm-s-eclipse .cm-apex-pipeline { color: #558B2F !important; font-weight: bold; }
 .cm-s-eclipse .cm-apex-common { color: #F9A825 !important; font-weight: bold; }
 .cm-s-eclipse .cm-apex-spel { color: #C62828 !important; }
+
+/* ===== Source Data Tabbed Panel ===== */
+
+/* Outer container fills the card body */
+#sourceDataOutput {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* Compact tab bar */
+.nav-tabs-sm {
+    border-bottom: 1px solid #dee2e6;
+}
+
+.nav-tabs-sm .nav-link {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.75rem;
+    color: #6c757d;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+}
+
+.nav-tabs-sm .nav-link:hover {
+    color: #495057;
+    border-color: transparent;
+}
+
+.nav-tabs-sm .nav-link.active {
+    color: #0d6efd;
+    background: transparent;
+    border-color: transparent;
+    border-bottom-color: #0d6efd;
+}
+
+/* Tab panels */
+.source-data-panel {
+    display: none;
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+}
+
+.source-data-panel.active {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Tree View */
+.source-tree-container {
+    flex: 1;
+    overflow: auto;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 0.5rem;
+}
+
+.source-tree-node {
+    padding-left: 1rem;
+}
+
+.source-tree-key { color: #1565C0; }
+.source-tree-string { color: #b5461e; }
+.source-tree-number { color: #2E7D32; }
+.source-tree-boolean { color: #7B1FA2; }
+.source-tree-null { color: #7B1FA2; font-style: italic; }
+
+.source-tree-toggle {
+    cursor: pointer;
+    user-select: none;
+    color: #999;
+    margin-right: 0.25rem;
+}
+
+.source-tree-toggle:hover {
+    color: #333;
+}
+
+/* Files Panel */
+.source-file-drop {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    color: #6c757d;
+    margin: 0.5rem;
+    transition: all 0.2s;
+}
+
+.source-file-drop.dragover {
+    border-color: #0d6efd;
+    background: rgba(13, 110, 253, 0.05);
+    color: #333;
+}
+
+.source-file-list {
+    flex: 1;
+    overflow: auto;
+    padding: 0 0.5rem;
+}
+
+.source-file-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 0.5rem;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    margin-bottom: 0.25rem;
+}
+
+.source-file-item:hover {
+    background: #e9ecef;
+}
+
+.source-file-name {
+    color: #212529;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.source-file-size {
+    color: #6c757d;
+    font-size: 0.75rem;
+    margin-left: 0.5rem;
+}
