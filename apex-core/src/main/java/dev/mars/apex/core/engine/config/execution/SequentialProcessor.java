@@ -395,6 +395,12 @@ public class SequentialProcessor {
             return RuleResult.error("enrichment:" + enrichmentId, "Enrichment not found");
         }
 
+        // Check if enrichment is enabled (default is true when not specified)
+        if (enrichment.getEnabled() != null && !enrichment.getEnabled()) {
+            logger.info("Enrichment '{}' is disabled, skipping execution", enrichmentId);
+            return RuleResult.noMatch(enrichmentId, "Enrichment is disabled", SeverityConstants.INFO);
+        }
+
         logger.debug("processEnrichmentItem() - found enrichment '{}', type: {}", 
                     enrichmentId, enrichment.getType() != null ? enrichment.getType() : "default");
         RuleResult result = enrichmentProcessor.processEnrichmentWithResult(enrichment, data, yamlConfig);
@@ -416,6 +422,11 @@ public class SequentialProcessor {
         if (yamlConfig != null && yamlConfig.getRules() != null) {
             for (YamlRule yamlRule : yamlConfig.getRules()) {
                 if (ruleId.equals(yamlRule.getId())) {
+                    // Check if rule is enabled (default is true when not specified)
+                    if (yamlRule.getEnabled() != null && !yamlRule.getEnabled()) {
+                        logger.info("Rule '{}' is disabled, skipping execution", ruleId);
+                        return RuleResult.noMatch(ruleId, "Rule is disabled", SeverityConstants.INFO);
+                    }
                     YamlRuleFactory ruleFactory = new YamlRuleFactory();
                     rule = ruleFactory.createRuleWithMetadata(yamlRule);
                     logger.debug("processRuleItem() - created rule '{}' from yamlConfig", ruleId);
@@ -502,6 +513,11 @@ public class SequentialProcessor {
         if (yamlConfig != null && yamlConfig.getRuleGroups() != null) {
             for (YamlRuleGroup yamlGroup : yamlConfig.getRuleGroups()) {
                 if (groupId.equals(yamlGroup.getId())) {
+                    // Check if rule group is enabled (default is true when not specified)
+                    if (yamlGroup.getEnabled() != null && !yamlGroup.getEnabled()) {
+                        logger.info("Rule group '{}' is disabled, skipping execution", groupId);
+                        return RuleResult.noMatch(groupId, "Rule group is disabled", SeverityConstants.INFO);
+                    }
                     try {
                         YamlRuleFactory ruleFactory = new YamlRuleFactory();
                         RulesEngineConfiguration tempConfig = new RulesEngineConfiguration();
