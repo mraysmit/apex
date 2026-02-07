@@ -49,7 +49,7 @@ public class Enrichment {
     private final String successCode;
     private final String errorCode;
     private final Object mapToField;  // String or List<String>
-    private final String resultField;  // Phase 5: Result field support
+    private final String resultField;  // Result field support
 
     // Enterprise metadata fields
     private String createdBy;

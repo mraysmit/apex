@@ -58,7 +58,7 @@ public class PerformanceSnapshot implements Serializable {
     private final Instant lastEvaluation;
     private final Instant lastUpdated;
 
-    // Phase 3B: Recovery metrics fields
+    // Recovery metrics fields
     private final long recoveryAttempts;
     private final long successfulRecoveries;
     private final double recoverySuccessRate;
@@ -92,7 +92,7 @@ public class PerformanceSnapshot implements Serializable {
         this.lastEvaluation = metrics.getStartTime();
         this.lastUpdated = Instant.now();
 
-        // Phase 3B: Initialize recovery metrics from first metrics
+        // Initialize recovery metrics from first metrics
         this.recoveryAttempts = metrics.isRecoveryAttempted() ? 1 : 0;
         this.successfulRecoveries = metrics.isRecoverySuccessful() ? 1 : 0;
         this.recoverySuccessRate = metrics.isRecoveryAttempted() ?
@@ -132,7 +132,7 @@ public class PerformanceSnapshot implements Serializable {
         this.lastEvaluation = lastEvaluation;
         this.lastUpdated = lastUpdated;
 
-        // Phase 3B: Initialize recovery metrics
+        // Initialize recovery metrics
         this.recoveryAttempts = recoveryAttempts;
         this.successfulRecoveries = successfulRecoveries;
         this.recoverySuccessRate = recoverySuccessRate;
@@ -177,7 +177,7 @@ public class PerformanceSnapshot implements Serializable {
         Instant newLastEvaluation = metrics.getStartTime().isAfter(lastEvaluation) ?
                                    metrics.getStartTime() : lastEvaluation;
 
-        // Phase 3B: Update recovery statistics
+        // Update recovery statistics
         long newRecoveryAttempts = recoveryAttempts + (metrics.isRecoveryAttempted() ? 1 : 0);
         long newSuccessfulRecoveries = successfulRecoveries + (metrics.isRecoverySuccessful() ? 1 : 0);
         double newRecoverySuccessRate = newRecoveryAttempts > 0 ?
@@ -222,7 +222,7 @@ public class PerformanceSnapshot implements Serializable {
     public Instant getLastEvaluation() { return lastEvaluation; }
     public Instant getLastUpdated() { return lastUpdated; }
 
-    // Phase 3B: Recovery metrics getters
+    // Recovery metrics getters
     public long getRecoveryAttempts() { return recoveryAttempts; }
     public long getSuccessfulRecoveries() { return successfulRecoveries; }
     public double getRecoverySuccessRate() { return recoverySuccessRate; }

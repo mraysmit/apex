@@ -97,11 +97,15 @@ public class YamlRule {
     @JsonProperty("custom-properties")
     private Map<String, Object> customProperties;
 
+    // No-match message: separate message for when condition evaluates to false
+    @JsonProperty("no-match-message")
+    private String noMatchMessage;
+
     // Phase 3A Enhancement: Default value for error recovery
     @JsonProperty("default-value")
     private Object defaultValue;
 
-    // Phase 4: Error and Success Code Support
+    // Error and Success Code Support
     @JsonProperty("success-code")
     private String successCode;
 
@@ -111,7 +115,7 @@ public class YamlRule {
     @JsonProperty("map-to-field")
     private Object mapToField;  // String or List<String>
 
-    // Phase 5: Result Field Support - Store rule evaluation result for subsequent rules
+    // Result Field Support - Store rule evaluation result for subsequent rules
     @JsonProperty("result-field")
     private String resultField;
 
@@ -176,6 +180,14 @@ public class YamlRule {
     
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getNoMatchMessage() {
+        return noMatchMessage;
+    }
+
+    public void setNoMatchMessage(String noMatchMessage) {
+        this.noMatchMessage = noMatchMessage;
     }
     
     public Integer getPriority() {

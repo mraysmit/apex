@@ -210,7 +210,7 @@ public class YamlEnrichmentProcessor {
                 } else {
                     logger.debug("Skipping enrichment (condition not met): " + enrichment.getId());
 
-                    // Phase 5: Store result-field for field-enrichment (condition did not match)
+                    // Store result-field for field-enrichment (condition did not match)
                     if ("field-enrichment".equals(enrichment.getType()) && enrichment.getResultField() != null) {
                         setFieldValue(enrichedObject, enrichment.getResultField(), false);
                         logger.info("Phase 5: Stored field-enrichment result in field: " + enrichment.getResultField() + " = false");
@@ -247,7 +247,7 @@ public class YamlEnrichmentProcessor {
         if (!conditionMatched) {
             logger.debug("Enrichment " + enrichment.getId() + " should not be processed");
 
-            // Phase 4: Evaluate error code when condition doesn't match
+            // Evaluate error code when condition doesn't match
             if (enrichment.getErrorCode() != null) {
                 StandardEvaluationContext context = createEvaluationContext(targetObject);
                 String evaluatedErrorCode = evaluateCode(enrichment.getErrorCode(), context);
@@ -265,7 +265,7 @@ public class YamlEnrichmentProcessor {
 
         logger.debug("Enrichment " + enrichment.getId() + " passed conditions, proceeding with processing");
 
-        // Phase 5: Store result-field for field-enrichment (condition matched)
+        // Store result-field for field-enrichment (condition matched)
         if ("field-enrichment".equals(enrichment.getType()) && enrichment.getResultField() != null) {
             setFieldValue(targetObject, enrichment.getResultField(), true);
             logger.info("Phase 5: Stored field-enrichment result in field: " + enrichment.getResultField() + " = true");
@@ -291,7 +291,7 @@ public class YamlEnrichmentProcessor {
                 result = targetObject;
         }
 
-        // Phase 4: Evaluate success code when enrichment succeeds
+        // Evaluate success code when enrichment succeeds
         if (enrichment.getSuccessCode() != null) {
             StandardEvaluationContext context = createEvaluationContext(result);
             String evaluatedSuccessCode = evaluateCode(enrichment.getSuccessCode(), context);
@@ -415,7 +415,7 @@ public class YamlEnrichmentProcessor {
             logger.debug("Lookup returned null result for key: " + lookupKey + ", applying default values");
         }
 
-        // Phase 5: Store result-field if configured (boolean indicating lookup success)
+        // Store result-field if configured (boolean indicating lookup success)
         boolean lookupSucceeded = (lookupResult != null);
         if (enrichment.getResultField() != null) {
             setFieldValue(targetObject, enrichment.getResultField(), lookupSucceeded);
@@ -601,7 +601,7 @@ public class YamlEnrichmentProcessor {
         boolean logMatchedRule = executionSettings != null && executionSettings.getLogMatchedRule() != null ?
                                 executionSettings.getLogMatchedRule() : false;
 
-        // Phase 5: Track whether any mapping rule matched
+        // Track whether any mapping rule matched
         boolean anyRuleMatched = false;
 
         // Process rules in priority order
@@ -609,7 +609,7 @@ public class YamlEnrichmentProcessor {
             try {
                 // Check if rule conditions are met
                 if (evaluateMappingRuleConditions(rule, targetObject)) {
-                    anyRuleMatched = true;  // Phase 5: Track that a rule matched
+                    anyRuleMatched = true;  // Track that a rule matched
 
                     if (logMatchedRule) {
                         logger.info("Matched mapping rule: " + rule.getId() + " (priority: " + rule.getPriority() + ")");
@@ -637,7 +637,7 @@ public class YamlEnrichmentProcessor {
             }
         }
 
-        // Phase 5: Store result-field if configured (boolean indicating if any mapping matched)
+        // Store result-field if configured (boolean indicating if any mapping matched)
         if (enrichment.getResultField() != null) {
             setFieldValue(targetObject, enrichment.getResultField(), anyRuleMatched);
             logger.info("Phase 5: Stored conditional-mapping result in field: " + enrichment.getResultField() + " = " + anyRuleMatched);
@@ -1630,7 +1630,7 @@ public class YamlEnrichmentProcessor {
                 } else {
                     logger.debug("Skipping enrichment (condition not met): {}", enrichment.getId());
 
-                    // Phase 5: Store result-field for field-enrichment (condition did not match)
+                    // Store result-field for field-enrichment (condition did not match)
                     if ("field-enrichment".equals(enrichment.getType()) && enrichment.getResultField() != null) {
                         setFieldValue(enrichedObject, enrichment.getResultField(), false);
                         logger.info("Phase 5: Stored field-enrichment result in field: {} = false", enrichment.getResultField());

@@ -61,13 +61,16 @@ public class Rule implements RuleBase {
     // Phase 3A Enhancement: Default value for error recovery
     private final Object defaultValue;
 
-    // Phase 4: Error and Success Code Support
+    // Error and Success Code Support
     private final String successCode;
     private final String errorCode;
     private final Object mapToField;  // String or List<String>
 
-    // Phase 5: Result Field Support - Store rule evaluation result for subsequent rules
+    // Result Field Support - Store rule evaluation result for subsequent rules
     private final String resultField;
+
+    // Phase 6: No-match message - separate message for when condition evaluates to false
+    private final String noMatchMessage;
 
     /**
      * Create a new business rule with minimal information.
@@ -108,6 +111,7 @@ public class Rule implements RuleBase {
         this.errorCode = null;
         this.mapToField = null;
         this.resultField = null; // No result field for backward compatibility
+        this.noMatchMessage = null;
         this.metadata = RuleMetadata.builder()
             .createdByUser("system")
             .build();
@@ -158,6 +162,7 @@ public class Rule implements RuleBase {
         this.errorCode = null;
         this.mapToField = null;
         this.resultField = null; // No result field for backward compatibility
+        this.noMatchMessage = null;
         this.metadata = RuleMetadata.builder()
             .createdByUser("system")
             .build();
@@ -233,6 +238,7 @@ public class Rule implements RuleBase {
         this.errorCode = null;
         this.mapToField = null;
         this.resultField = null; // No result field for backward compatibility
+        this.noMatchMessage = null;
         this.metadata = RuleMetadata.builder()
             .createdByUser("system")
             .build();
@@ -282,6 +288,7 @@ public class Rule implements RuleBase {
         this.errorCode = null;
         this.mapToField = null;
         this.resultField = null; // No result field for backward compatibility
+        this.noMatchMessage = null;
         this.metadata = RuleMetadata.builder()
             .createdByUser("system")
             .build();
@@ -335,6 +342,7 @@ public class Rule implements RuleBase {
         this.errorCode = null;
         this.mapToField = null;
         this.resultField = null; // No result field for backward compatibility
+        this.noMatchMessage = null;
         this.metadata = metadata != null ? metadata : RuleMetadata.builder().createdByUser("system").build();
     }
 
@@ -370,6 +378,7 @@ public class Rule implements RuleBase {
         this.errorCode = null;
         this.mapToField = null;
         this.resultField = null; // No result field for backward compatibility
+        this.noMatchMessage = null;
         this.metadata = metadata != null ? metadata : RuleMetadata.builder().createdByUser("system").build();
     }
 
@@ -421,6 +430,34 @@ public class Rule implements RuleBase {
                 String message, String description, int priority, String severity,
                 RuleMetadata metadata, Object defaultValue, String successCode, String errorCode,
                 Object mapToField, String resultField) {
+        this(id, categories, name, condition, message, description, priority, severity,
+             metadata, defaultValue, successCode, errorCode, mapToField, resultField, null);
+    }
+
+    /**
+     * Create a new business rule with full metadata support, default value, error/success codes, result field, and no-match message.
+     * This is the canonical constructor that all other constructors ultimately delegate to for full-featured rules.
+     *
+     * @param id The unique identifier of the rule
+     * @param categories The category objects of the rule
+     * @param name The name of the rule
+     * @param condition The SpEL condition that determines if the rule applies
+     * @param message The message to display when the rule matches (condition=true)
+     * @param description The description of what the rule does
+     * @param priority The priority of the rule (lower numbers = higher priority)
+     * @param severity The severity level (ERROR, WARNING, INFO)
+     * @param metadata The extensible metadata for the rule
+     * @param defaultValue The default value to use for error recovery (null if no default)
+     * @param successCode The code to use when rule succeeds (null if no code)
+     * @param errorCode The code to use when rule fails (null if no code)
+     * @param mapToField Field mapping expressions for enriching data (null if no mapping)
+     * @param resultField Field name where the boolean condition result will be stored (null if no storage)
+     * @param noMatchMessage The message to display when the rule does not match (condition=false), null to use message
+     */
+    public Rule(String id, Set<Category> categories, String name, String condition,
+                String message, String description, int priority, String severity,
+                RuleMetadata metadata, Object defaultValue, String successCode, String errorCode,
+                Object mapToField, String resultField, String noMatchMessage) {
         this.uuid = UUID.randomUUID();
         this.id = id;
         this.categories = new HashSet<>(categories);
@@ -435,6 +472,7 @@ public class Rule implements RuleBase {
         this.errorCode = errorCode;
         this.mapToField = mapToField;
         this.resultField = resultField;
+        this.noMatchMessage = noMatchMessage;
         this.metadata = metadata != null ? metadata : RuleMetadata.builder().createdByUser("system").build();
     }
 
@@ -520,6 +558,18 @@ public class Rule implements RuleBase {
      */
     public String getMessage() {
         return message;
+    }
+
+    /**
+     * Get the no-match message of the rule.
+     * This is the message displayed when the rule condition evaluates to false (no match).
+     * If null, the standard message is used for both match and no-match outcomes.
+     * Supports the same {{#expression}} and #{expression} placeholder formats as message.
+     *
+     * @return The no-match message, or null if the standard message should be used
+     */
+    public String getNoMatchMessage() {
+        return noMatchMessage;
     }
 
     /**
@@ -677,7 +727,8 @@ public class Rule implements RuleBase {
      * This preserves immutability while allowing metadata updates.
      */
     public Rule withMetadata(RuleMetadata newMetadata) {
-        return new Rule(id, categories, name, condition, message, description, priority, newMetadata);
+        return new Rule(id, categories, name, condition, message, description, priority, severity,
+                       newMetadata, defaultValue, successCode, errorCode, mapToField, resultField, noMatchMessage);
     }
 
     /**

@@ -183,7 +183,7 @@ public class SeverityValidationTest {
     @Test
     @DisplayName("Should demonstrate Phase 3 completion - API layer severity support")
     void testPhase3Completion() throws Exception {
-        logger.info("=== Testing Phase 3: API Layer Severity Support Completion ===");
+        logger.info("=== Testing API Layer Severity Support Completion ===");
 
         // Test 1: Verify RuleResult factory methods support severity
         RuleResult errorResult = RuleResult.match("test-rule", "test-message", "ERROR", null);

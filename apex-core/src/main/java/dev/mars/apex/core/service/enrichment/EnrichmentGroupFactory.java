@@ -14,7 +14,7 @@ import java.util.*;
 
 /**
  * Factory to build runtime EnrichmentGroup models from YAML configuration.
- * Phase 3: mapping only (no execution). Group references/depends-on handled later.
+ * mapping only (no execution). Group references/depends-on handled later.
  */
 public class EnrichmentGroupFactory {
 
@@ -110,7 +110,7 @@ public class EnrichmentGroupFactory {
             groupsById.put(yg.getId(), g);
         }
 
-        // Second phase: process enrichment-group-references recursively
+        // process enrichment-group-references recursively
         Map<String, YamlEnrichmentGroup> yamlGroupsById = new HashMap<>();
         for (YamlEnrichmentGroup yg : config.getEnrichmentGroups()) {
             if (yg != null && yg.getId() != null) {

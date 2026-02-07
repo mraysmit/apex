@@ -99,7 +99,7 @@ public class YamlEnrichment {
     @JsonProperty("metadata")
     private Map<String, Object> metadata;
 
-    // Phase 4: Error and Success Code Support
+    //Error and Success Code Support
     @JsonProperty("success-code")
     private String successCode;
 
@@ -109,7 +109,7 @@ public class YamlEnrichment {
     @JsonProperty("map-to-field")
     private Object mapToField;  // String or List<String>
 
-    // Phase 5: Result Field Support for Enrichments
+    //Result Field Support for Enrichments
     @JsonProperty("result-field")
     private String resultField;
 

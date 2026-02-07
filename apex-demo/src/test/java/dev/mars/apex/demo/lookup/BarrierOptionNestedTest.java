@@ -94,7 +94,7 @@ public class BarrierOptionNestedTest extends DemoTestBase {
     }
 
     @Test
-    @DisplayName("Validate APEX Nested Validation Rules Processing - Phase 3: Complete Validation")
+    @DisplayName("Validate APEX Nested Validation Rules Processing - Complete Validation")
     void testApexNestedValidationCapabilities() {
         logger.info("=== Testing APEX Nested Validation Rules Processing ===");
 

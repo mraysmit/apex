@@ -27,7 +27,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Phase 3B: Integration test for end-to-end recovery metrics functionality.
+ * Integration test for end-to-end recovery metrics functionality.
  * Tests the complete flow from rule evaluation through error recovery to metrics collection.
  */
 @ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})

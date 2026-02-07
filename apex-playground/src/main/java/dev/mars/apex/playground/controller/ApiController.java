@@ -468,4 +468,51 @@ public class ApiController {
             return "JSON"; // Default for .json and .txt files
         }
     }
+
+    // ========================================================================
+    // Settings Endpoints
+    // ========================================================================
+
+    /**
+     * Get current playground settings.
+     */
+    @GetMapping("/settings")
+    @Operation(summary = "Get settings", description = "Get current playground settings")
+    @ApiResponse(responseCode = "200", description = "Settings retrieved")
+    public ResponseEntity<Map<String, Object>> getSettings() {
+        Map<String, Object> settings = new HashMap<>();
+        settings.put("examplesDir", exampleService.getExamplesDir());
+        settings.put("resolvedExamplesPath", exampleService.getResolvedExamplesPath());
+        java.io.File dir = new java.io.File(exampleService.getExamplesDir());
+        settings.put("directoryExists", dir.exists() && dir.isDirectory());
+        return ResponseEntity.ok(settings);
+    }
+
+    /**
+     * Update playground settings.
+     */
+    @PutMapping("/settings")
+    @Operation(summary = "Update settings", description = "Update playground settings")
+    @ApiResponse(responseCode = "200", description = "Settings updated")
+    public ResponseEntity<Map<String, Object>> updateSettings(@RequestBody Map<String, Object> settings) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            if (settings.containsKey("examplesDir")) {
+                String newDir = String.valueOf(settings.get("examplesDir"));
+                exampleService.setExamplesDir(newDir);
+                result.put("examplesDir", exampleService.getExamplesDir());
+                result.put("resolvedExamplesPath", exampleService.getResolvedExamplesPath());
+                
+                // Check if directory exists
+                java.io.File dir = new java.io.File(exampleService.getExamplesDir());
+                result.put("directoryExists", dir.exists() && dir.isDirectory());
+            }
+            result.put("success", true);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(result);
+        }
+    }
 }

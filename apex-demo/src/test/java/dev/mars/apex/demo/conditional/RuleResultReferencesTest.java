@@ -31,7 +31,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test class for Phase 1: Rule Result References functionality.
+ * Test class for Rule Result References functionality.
  *
  * Tests the ability to reference individual rule results and rule group results
  * in field mappings for conditional processing.

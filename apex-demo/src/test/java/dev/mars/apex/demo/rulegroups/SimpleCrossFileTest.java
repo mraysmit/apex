@@ -90,8 +90,8 @@ public class SimpleCrossFileTest {
             System.out.println(" All 3 rules (1 local + 2 from referenced group) are working correctly");
             System.out.println("\n IMPLEMENTATION SUMMARY:");
             System.out.println(" Modified YamlRuleFactory to use two-phase rule group creation");
-            System.out.println(" Phase 1: Create all rule groups and register them in global registry");
-            System.out.println(" Phase 2: Resolve cross-file rule-group-references using global registry");
+            System.out.println(" Create all rule groups and register them in global registry");
+            System.out.println(" Resolve cross-file rule-group-references using global registry");
             System.out.println(" Cross-file rule-group references now work just like enrichment groups!");
 
         } catch (Exception e) {

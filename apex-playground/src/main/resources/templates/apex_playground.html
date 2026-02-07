@@ -84,6 +84,11 @@
                             <i class="fas fa-file-download"></i> Save YAML
                         </button>
                     </div>
+                    <div class="ms-auto">
+                        <button type="button" class="btn btn-outline-secondary" id="settingsBtn" title="Settings">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -138,6 +143,41 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="button" class="btn btn-danger" id="confirmActionBtn">Clear All</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="settingsModalLabel"><i class="fas fa-cog me-2"></i>Settings</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="examplesDirInput" class="form-label fw-bold">Examples Folder</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="examplesDirInput" placeholder="examples">
+                                <button class="btn btn-outline-secondary" type="button" id="resetExamplesDirBtn" title="Reset to default">
+                                    <i class="fas fa-undo"></i>
+                                </button>
+                            </div>
+                            <div class="form-text" id="resolvedPathText">
+                                <i class="fas fa-folder-open me-1"></i>Resolved path: <span id="resolvedPathValue">--</span>
+                            </div>
+                            <div id="dirStatusBadge" class="mt-1" style="display: none;">
+                                <span class="badge" id="dirExistsBadge"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="saveSettingsBtn">
+                            <i class="fas fa-save me-1"></i>Save
+                        </button>
                     </div>
                 </div>
             </div>

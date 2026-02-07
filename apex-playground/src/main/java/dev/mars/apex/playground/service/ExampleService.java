@@ -40,7 +40,33 @@ public class ExampleService {
     
     private static final Logger logger = LoggerFactory.getLogger(ExampleService.class);
     
-    private static final String EXAMPLES_DIR = "examples";
+    private static final String DEFAULT_EXAMPLES_DIR = "examples";
+    
+    private volatile String examplesDir = DEFAULT_EXAMPLES_DIR;
+
+    /**
+     * Get the current examples directory path.
+     */
+    public String getExamplesDir() {
+        return examplesDir;
+    }
+
+    /**
+     * Set the examples directory path.
+     * @param examplesDir the new directory path
+     */
+    public void setExamplesDir(String examplesDir) {
+        this.examplesDir = (examplesDir != null && !examplesDir.trim().isEmpty()) 
+                ? examplesDir.trim() : DEFAULT_EXAMPLES_DIR;
+        logger.info("Examples directory updated to: {}", this.examplesDir);
+    }
+
+    /**
+     * Get the resolved absolute path of the current examples directory.
+     */
+    public String getResolvedExamplesPath() {
+        return new java.io.File(examplesDir).getAbsolutePath();
+    }
 
     /**
      * Get all available example categories and their configurations.
@@ -50,7 +76,7 @@ public class ExampleService {
         
         try {
             // Load examples from the examples directory and its subdirectories
-            java.io.File examplesDir = new java.io.File(EXAMPLES_DIR);
+            java.io.File examplesDir = new java.io.File(this.examplesDir);
             if (examplesDir.exists() && examplesDir.isDirectory()) {
                 // Scan subdirectories
                 java.io.File[] subDirs = examplesDir.listFiles(java.io.File::isDirectory);
@@ -72,7 +98,7 @@ public class ExampleService {
                 examples.put("message", "No examples found in " + examplesDir.getAbsolutePath());
             }
             
-            logger.info("Loaded examples from {}", EXAMPLES_DIR);
+            logger.info("Loaded examples from {}", this.examplesDir);
             
         } catch (Exception e) {
             logger.error("Error loading examples: {}", e.getMessage());
@@ -116,9 +142,9 @@ public class ExampleService {
     public void saveExampleYaml(String category, String name, String content) throws IOException {
         java.io.File file;
         if ("uncategorized".equals(category)) {
-            file = new java.io.File(EXAMPLES_DIR, name + ".yaml");
+            file = new java.io.File(examplesDir, name + ".yaml");
         } else {
-            file = new java.io.File(new java.io.File(EXAMPLES_DIR, category), name + ".yaml");
+            file = new java.io.File(new java.io.File(examplesDir, category), name + ".yaml");
         }
         
         // Ensure parent directory exists
@@ -136,9 +162,9 @@ public class ExampleService {
     public void saveExampleData(String category, String name, String content) throws IOException {
         java.io.File file;
         if ("uncategorized".equals(category)) {
-            file = new java.io.File(EXAMPLES_DIR, name + ".json");
+            file = new java.io.File(examplesDir, name + ".json");
         } else {
-            file = new java.io.File(new java.io.File(EXAMPLES_DIR, category), name + ".json");
+            file = new java.io.File(new java.io.File(examplesDir, category), name + ".json");
         }
         
         // Ensure parent directory exists
@@ -178,9 +204,9 @@ public class ExampleService {
     private String loadExampleFile(String category, String fileName) throws IOException {
         java.io.File file;
         if ("uncategorized".equals(category)) {
-            file = new java.io.File(EXAMPLES_DIR, fileName);
+            file = new java.io.File(examplesDir, fileName);
         } else {
-            file = new java.io.File(new java.io.File(EXAMPLES_DIR, category), fileName);
+            file = new java.io.File(new java.io.File(examplesDir, category), fileName);
         }
         
         if (file.exists()) {

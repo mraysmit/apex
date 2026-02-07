@@ -14,7 +14,7 @@ import java.time.Instant;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Phase 3B: Unit tests for recovery metrics in RulePerformanceMetrics.
+ * Unit tests for recovery metrics in RulePerformanceMetrics.
  * Tests the new recovery-related fields and methods added to support recovery metrics collection.
  */
 @ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})

@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test class for Phase 2: Conditional Mappings functionality.
+ * Test class forConditional Mappings functionality.
  * Tests the new conditional-mappings syntax in YamlEnrichmentProcessor.
  */
 public class ConditionalMappingsTest {

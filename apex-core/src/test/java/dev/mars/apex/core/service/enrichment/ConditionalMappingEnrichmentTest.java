@@ -21,7 +21,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test class for Phase 3: Conditional Mapping Enrichment functionality.
+ * Test class for Conditional Mapping Enrichment functionality.
  * Tests the new conditional-mapping-enrichment type with priority-based processing.
  */
 public class ConditionalMappingEnrichmentTest {

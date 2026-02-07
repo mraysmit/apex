@@ -63,6 +63,14 @@ public class UnifiedRuleEvaluator {
     private static final Pattern SPEL_VARIABLE_PATTERN = Pattern.compile("#(\\w+)");
     
     /**
+     * Pattern to match Handlebars-style placeholders in rule messages.
+     * Matches {{#expression}} format used in YAML rule message templates.
+     * Also supports #{expression} format used by TemplateProcessorService.
+     */
+    private static final Pattern HANDLEBARS_PLACEHOLDER_PATTERN = Pattern.compile("\\{\\{(#[^}]+)\\}\\}");
+    private static final Pattern HASH_PLACEHOLDER_PATTERN = Pattern.compile("#\\{([^}]+)\\}");
+    
+    /**
      * Create a new UnifiedRuleEvaluator with default components.
      */
     public UnifiedRuleEvaluator() {
@@ -170,7 +178,7 @@ public class UnifiedRuleEvaluator {
                 return handleEvaluationError(rule, e, metricsBuilder);
             }
 
-            // Phase 5: Store result in context if result-field is configured
+            // Store result in context if result-field is configured
             if (rule.getResultField() != null && !rule.getResultField().trim().isEmpty()) {
                 boolean booleanResult = (result != null && result);
                 context.setVariable(rule.getResultField(), booleanResult);
@@ -184,7 +192,7 @@ public class UnifiedRuleEvaluator {
             logger.info("Rule evaluation completed: {} -> {}", rule.getName(), result != null && result);
             
 
-            // Phase 4: Evaluate codes and apply field mappings
+            // Evaluate codes and apply field mappings
             Map<String, Object> enrichedData = new java.util.HashMap<>();
             String evaluatedSuccessCode = null;
             String evaluatedErrorCode = null;
@@ -201,7 +209,8 @@ public class UnifiedRuleEvaluator {
 
                 // When condition is TRUE, the rule matched successfully - severity is irrelevant
                 // Always return MATCH with success=true
-                RuleResult matchResult = new RuleResult(rule.getId(), rule.getName(), rule.getMessage(), rule.getSeverity(),
+                String resolvedMessage = resolveMessageTemplate(rule.getMessage(), context);
+                RuleResult matchResult = new RuleResult(rule.getId(), rule.getName(), resolvedMessage, rule.getSeverity(),
                                                        true, RuleResult.ResultType.MATCH, metrics, enrichedData,
                                                        new java.util.ArrayList<>(), true, evaluatedSuccessCode, null, rule.getMapToField());
                 return matchResult;
@@ -234,7 +243,9 @@ public class UnifiedRuleEvaluator {
                 }
 
                 // Return result with codes and mappings
-                RuleResult noMatchResult = new RuleResult(rule.getId(), rule.getName(), rule.getMessage(), rule.getSeverity(),
+                String noMatchMessageTemplate = rule.getNoMatchMessage() != null ? rule.getNoMatchMessage() : rule.getMessage();
+                String resolvedNoMatchMessage = resolveMessageTemplate(noMatchMessageTemplate, context);
+                RuleResult noMatchResult = new RuleResult(rule.getId(), rule.getName(), resolvedNoMatchMessage, rule.getSeverity(),
                                                          false, resultType, metrics, enrichedData,
                                                          new java.util.ArrayList<>(), !shouldFail, null, evaluatedErrorCode, rule.getMapToField());
                 return noMatchResult;
@@ -276,7 +287,7 @@ public class UnifiedRuleEvaluator {
         logger.debug("Rule '{}' evaluation result - triggered: {}, resultType: {}", 
                         rule.getName(), result.isTriggered(), result.getResultType());
 
-        // Phase 5: Store result in facts and enrichedData if result-field is configured
+        // Store result in facts and enrichedData if result-field is configured
         if (rule.getResultField() != null && !rule.getResultField().trim().isEmpty()) {
             // Store in facts map for subsequent rules to access (flat key)
             facts.put(rule.getResultField(), result.isTriggered());
@@ -351,7 +362,7 @@ public class UnifiedRuleEvaluator {
      * @return The error result or recovered result
      */
     private RuleResult handleEvaluationError(Rule rule, Exception exception, RulePerformanceMetrics.Builder metricsBuilder) {
-        // Phase 3B: Initialize recovery tracking variables
+        // Initialize recovery tracking variables
         boolean recoveryAttempted = false;
         boolean recoverySuccessful = false;
         String recoveryStrategy = null;
@@ -371,7 +382,7 @@ public class UnifiedRuleEvaluator {
 
         // Attempt error recovery based on configurable severity policies
         if (errorRecoveryConfig.isRecoveryEnabledForSeverity(severity)) {
-            // Phase 3B: Start recovery timing
+            // Start recovery timing
             recoveryAttempted = true;
             recoveryStartTime = Instant.now();
 
@@ -392,7 +403,7 @@ public class UnifiedRuleEvaluator {
                         rule.getName(), rule.getDefaultValue());
                 }
                 recoverySuccessful = true;
-                // Phase 3B: Calculate recovery time
+                // Calculate recovery time
                 if (recoveryStartTime != null) {
                     recoveryTime = Duration.between(recoveryStartTime, Instant.now());
                 }
@@ -413,7 +424,7 @@ public class UnifiedRuleEvaluator {
             if (recoveryResult != null && recoveryResult.isSuccessful()) {
                 recoverySuccessful = true;
                 recoveryStrategy = actualStrategy;
-                // Phase 3B: Calculate recovery time
+                // Calculate recovery time
                 if (recoveryStartTime != null) {
                     recoveryTime = Duration.between(recoveryStartTime, Instant.now());
                 }
@@ -439,7 +450,7 @@ public class UnifiedRuleEvaluator {
                 // Recovery failed
                 recoverySuccessful = false;
                 recoveryStrategy = actualStrategy;
-                // Phase 3B: Calculate recovery time even for failed recovery
+                // Calculate recovery time even for failed recovery
                 if (recoveryStartTime != null) {
                     recoveryTime = Duration.between(recoveryStartTime, Instant.now());
                 }
@@ -467,7 +478,7 @@ public class UnifiedRuleEvaluator {
     }
 
     /**
-     * Phase 3B: Build performance metrics with recovery information.
+     * Build performance metrics with recovery information.
      * Only includes recovery metrics if metrics are enabled in configuration.
      */
     private RulePerformanceMetrics buildMetricsWithRecovery(RulePerformanceMetrics.Builder metricsBuilder,
@@ -478,7 +489,7 @@ public class UnifiedRuleEvaluator {
         // Complete the basic evaluation metrics first
         RulePerformanceMetrics baseMetrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition(), exception);
 
-        // Phase 3B: Only add recovery metrics if metrics are enabled
+        // Only add recovery metrics if metrics are enabled
         if (errorRecoveryConfig.isMetricsEnabled()) {
             // Create a new builder from the base metrics and add recovery information
             return new RulePerformanceMetrics.Builder(baseMetrics.getRuleName())
@@ -578,7 +589,7 @@ public class UnifiedRuleEvaluator {
     /**
      * Evaluate a list of rules against the provided facts map.
      * Convenience method that creates the evaluation context.
-     * Phase 5: Evaluates ALL rules to ensure result-field values are stored for all rules.
+     * Evaluates ALL rules to ensure result-field values are stored for all rules.
      *
      * @param rules The rules to evaluate
      * @param facts The facts to evaluate against
@@ -597,7 +608,7 @@ public class UnifiedRuleEvaluator {
         Map<String, Object> accumulatedEnrichedData = new java.util.HashMap<>();
         RuleResult firstSignificantResult = null; // First error OR first match, whichever comes first
 
-        // Phase 5: Evaluate ALL rules to ensure result-field values are stored
+        // Evaluate ALL rules to ensure result-field values are stored
         for (Rule rule : rules) {
             // Evaluate each rule individually to ensure result-field storage
             RuleResult result = evaluateRule(rule, facts);
@@ -820,6 +831,83 @@ public class UnifiedRuleEvaluator {
         }
         
         return "unknown";
+    }
+    
+    /**
+     * Resolve message template placeholders against the SpEL evaluation context.
+     * Supports two placeholder formats:
+     * <ul>
+     *   <li>{@code {{#expression}}} - Handlebars-style (used in most YAML configs)</li>
+     *   <li>{@code #{expression}} - SpEL template style (used by TemplateProcessorService)</li>
+     * </ul>
+     * 
+     * The expression inside the placeholder is evaluated as a SpEL expression against
+     * the provided context. If evaluation fails, the original placeholder is preserved.
+     *
+     * @param message The message template to resolve
+     * @param context The SpEL evaluation context containing variable bindings
+     * @return The message with all resolvable placeholders replaced by their values
+     */
+    String resolveMessageTemplate(String message, EvaluationContext context) {
+        if (message == null || context == null) {
+            return message;
+        }
+        
+        // Quick check: if no placeholders, return as-is
+        if (!message.contains("{{#") && !message.contains("#{")) {
+            return message;
+        }
+        
+        String resolved = message;
+        
+        // Resolve {{#expression}} (Handlebars-style) placeholders
+        if (resolved.contains("{{#")) {
+            Matcher hbMatcher = HANDLEBARS_PLACEHOLDER_PATTERN.matcher(resolved);
+            StringBuilder sb = new StringBuilder();
+            while (hbMatcher.find()) {
+                String spelExpr = hbMatcher.group(1); // e.g., "#age" or "#amount"
+                try {
+                    Expression expression = parser.parseExpression(spelExpr);
+                    Object value = expression.getValue(context);
+                    String replacement = value != null ? Matcher.quoteReplacement(value.toString()) : "";
+                    hbMatcher.appendReplacement(sb, replacement);
+                    logger.trace("Resolved message placeholder '{{{{{}}}}}' to '{}'", spelExpr, value);
+                } catch (Exception e) {
+                    // Preserve original placeholder on error
+                    hbMatcher.appendReplacement(sb, Matcher.quoteReplacement(hbMatcher.group(0)));
+                    logger.debug("Could not resolve message placeholder '{}': {}", spelExpr, e.getMessage());
+                }
+            }
+            hbMatcher.appendTail(sb);
+            resolved = sb.toString();
+        }
+        
+        //Resolve #{expression} (SpEL template) placeholders
+        if (resolved.contains("#{")) {
+            Matcher spelMatcher = HASH_PLACEHOLDER_PATTERN.matcher(resolved);
+            StringBuilder sb = new StringBuilder();
+            while (spelMatcher.find()) {
+                String spelExpr = spelMatcher.group(1); // e.g., "age" or "amount"
+                try {
+                    Expression expression = parser.parseExpression(spelExpr);
+                    Object value = expression.getValue(context);
+                    String replacement = value != null ? Matcher.quoteReplacement(value.toString()) : "";
+                    spelMatcher.appendReplacement(sb, replacement);
+                    logger.trace("Resolved message placeholder '#{{{}}}' to '{}'", spelExpr, value);
+                } catch (Exception e) {
+                    spelMatcher.appendReplacement(sb, Matcher.quoteReplacement(spelMatcher.group(0)));
+                    logger.debug("Could not resolve message placeholder '{}': {}", spelExpr, e.getMessage());
+                }
+            }
+            spelMatcher.appendTail(sb);
+            resolved = sb.toString();
+        }
+        
+        if (!resolved.equals(message)) {
+            logger.debug("Resolved message template: '{}' -> '{}'", message, resolved);
+        }
+        
+        return resolved;
     }
 }
 

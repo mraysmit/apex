@@ -337,4 +337,207 @@ class UnifiedRuleEvaluatorTest {
         assertTrue(result.isTriggered(), "Should return first matching rule");
         assertEquals("Good Rule", result.getRuleName(), "Should return first matching rule, not error");
     }
+    
+    // =========================================================================
+    // Message Template Resolution Tests
+    // =========================================================================
+    
+    @Test
+    @DisplayName("Should resolve {{#variable}} placeholders in rule messages on MATCH")
+    void testMessageResolution_HandlebarsFormat_Match() {
+        // Given: Rule with {{#amount}} placeholder, condition that matches
+        Rule rule = new Rule("Amount Rule", "#amount > 500", 
+                            "Amount {{#amount}} exceeds threshold", "INFO");
+        
+        // When
+        RuleResult result = evaluator.evaluateRule(rule, testFacts);
+        
+        // Then
+        assertTrue(result.isTriggered(), "Rule should match");
+        assertEquals("Amount 1000.0 exceeds threshold", result.getMessage(),
+                    "Message should have {{#amount}} resolved to actual value");
+    }
+    
+    @Test
+    @DisplayName("Should resolve {{#variable}} placeholders in rule messages on NO_MATCH")
+    void testMessageResolution_HandlebarsFormat_NoMatch() {
+        // Given: Rule with {{#amount}} placeholder, condition that does NOT match
+        Rule rule = new Rule("High Amount Rule", "#amount > 5000", 
+                            "Amount {{#amount}} is below threshold", "INFO");
+        
+        // When
+        RuleResult result = evaluator.evaluateRule(rule, testFacts);
+        
+        // Then
+        assertFalse(result.isTriggered(), "Rule should not match");
+        assertEquals("Amount 1000.0 is below threshold", result.getMessage(),
+                    "Message should have {{#amount}} resolved even on NO_MATCH");
+    }
+    
+    @Test
+    @DisplayName("Should resolve multiple placeholders in a single message")
+    void testMessageResolution_MultiplePlaceholders() {
+        // Given
+        Rule rule = new Rule("Multi Rule", "#amount > 500", 
+                            "Amount {{#amount}} in {{#currency}} for {{#customerType}} customer", "INFO");
+        
+        // When
+        RuleResult result = evaluator.evaluateRule(rule, testFacts);
+        
+        // Then
+        assertTrue(result.isTriggered());
+        assertEquals("Amount 1000.0 in USD for PREMIUM customer", result.getMessage(),
+                    "All placeholders should be resolved");
+    }
+    
+    @Test
+    @DisplayName("Should preserve message when no placeholders are present")
+    void testMessageResolution_NoPlaceholders() {
+        // Given
+        Rule rule = new Rule("Simple Rule", "#amount > 500", 
+                            "Static message with no placeholders", "INFO");
+        
+        // When
+        RuleResult result = evaluator.evaluateRule(rule, testFacts);
+        
+        // Then
+        assertTrue(result.isTriggered());
+        assertEquals("Static message with no placeholders", result.getMessage());
+    }
+    
+    @Test
+    @DisplayName("Should resolve unresolvable placeholders to empty string")
+    void testMessageResolution_UnresolvablePlaceholder() {
+        // Given: Placeholder references a variable not in the facts
+        // SpEL evaluates #nonExistentVariable to null (not an error), so it resolves to ""
+        Rule rule = new Rule("Missing Var Rule", "#amount > 500", 
+                            "Value {{#nonExistentVariable}} is unknown", "INFO");
+        
+        // When
+        RuleResult result = evaluator.evaluateRule(rule, testFacts);
+        
+        // Then
+        assertTrue(result.isTriggered());
+        assertEquals("Value  is unknown", result.getMessage(),
+                    "Undefined variable placeholders should resolve to empty string");
+    }
+    
+    @Test
+    @DisplayName("Should resolve #{expression} placeholders (SpEL template format)")
+    void testMessageResolution_SpelTemplateFormat() {
+        // Given: Using #{} format — inside #{}, the expression is plain SpEL
+        // For SpEL variable references, we need the # prefix inside the placeholder
+        StandardEvaluationContext context = new StandardEvaluationContext();
+        context.setVariable("amount", 1000.0);
+        context.setVariable("currency", "USD");
+        
+        // #{#amount} means: SpEL template placeholder containing SpEL variable #amount
+        String result = evaluator.resolveMessageTemplate(
+                "Amount #{#amount} in #{#currency}", context);
+        
+        assertEquals("Amount 1000.0 in USD", result);
+    }
+    
+    @Test
+    @DisplayName("Should handle null message gracefully")
+    void testMessageResolution_NullMessage() {
+        StandardEvaluationContext context = new StandardEvaluationContext();
+        
+        String result = evaluator.resolveMessageTemplate(null, context);
+        
+        assertNull(result, "Null message should return null");
+    }
+    
+    @Test
+    @DisplayName("Should handle null context gracefully")
+    void testMessageResolution_NullContext() {
+        String result = evaluator.resolveMessageTemplate("Message {{#age}}", null);
+        
+        assertEquals("Message {{#age}}", result, 
+                    "Null context should return message unchanged");
+    }
+
+    // ========================================================================
+    // No-Match Message Tests (Phase 6)
+    // ========================================================================
+
+    @Test
+    @DisplayName("Should use no-match-message with {{#}} placeholders on NO_MATCH")
+    void testNoMatchMessage_HandlebarsFormat() {
+        // Given: Rule with separate match and no-match messages using {{#}} placeholders
+        java.util.Set<dev.mars.apex.core.engine.model.Category> categories = new java.util.HashSet<>();
+        categories.add(new dev.mars.apex.core.engine.model.Category("test", 100));
+        Rule rule = new Rule("no-match-test", categories, "Amount Check",
+                "#amount > 5000", "Amount {{#amount}} exceeds threshold",
+                "Checks amount threshold", 100, "INFO", null, null, null, null, null, null,
+                "Amount {{#amount}} is within normal range");
+
+        // When: condition is false (1000 < 5000)
+        RuleResult result = evaluator.evaluateRule(rule, testFacts);
+
+        // Then: should use the no-match-message with resolved placeholders
+        assertFalse(result.isTriggered(), "Rule should not match");
+        assertEquals("Amount 1000.0 is within normal range", result.getMessage(),
+                "NO_MATCH should use no-match-message with resolved {{#amount}} placeholder");
+    }
+
+    @Test
+    @DisplayName("Should use standard message when no-match-message is null")
+    void testNoMatchMessage_FallbackToMessage() {
+        // Given: Rule WITHOUT no-match-message (null)
+        java.util.Set<dev.mars.apex.core.engine.model.Category> categories = new java.util.HashSet<>();
+        categories.add(new dev.mars.apex.core.engine.model.Category("test", 100));
+        Rule rule = new Rule("fallback-test", categories, "Amount Check",
+                "#amount > 5000", "Amount {{#amount}} exceeds threshold",
+                "Checks amount threshold", 100, "INFO", null, null, null, null, null, null,
+                null);  // no-match-message is null
+
+        // When: condition is false
+        RuleResult result = evaluator.evaluateRule(rule, testFacts);
+
+        // Then: should fall back to the standard message
+        assertFalse(result.isTriggered(), "Rule should not match");
+        assertEquals("Amount 1000.0 exceeds threshold", result.getMessage(),
+                "NO_MATCH without no-match-message should fall back to standard message");
+    }
+
+    @Test
+    @DisplayName("Should use match message on MATCH even when no-match-message is set")
+    void testNoMatchMessage_MatchUsesStandardMessage() {
+        // Given: Rule with both messages, condition that MATCHES
+        java.util.Set<dev.mars.apex.core.engine.model.Category> categories = new java.util.HashSet<>();
+        categories.add(new dev.mars.apex.core.engine.model.Category("test", 100));
+        Rule rule = new Rule("match-msg-test", categories, "Amount Check",
+                "#amount > 500", "Amount {{#amount}} exceeds threshold",
+                "Checks amount threshold", 100, "INFO", null, null, null, null, null, null,
+                "Amount {{#amount}} is within normal range");
+
+        // When: condition is true (1000 > 500)
+        RuleResult result = evaluator.evaluateRule(rule, testFacts);
+
+        // Then: MATCH should use the standard message, not the no-match-message
+        assertTrue(result.isTriggered(), "Rule should match");
+        assertEquals("Amount 1000.0 exceeds threshold", result.getMessage(),
+                "MATCH should use standard message, not no-match-message");
+    }
+
+    @Test
+    @DisplayName("Should resolve #{} SpEL format in no-match-message")
+    void testNoMatchMessage_SpelFormat() {
+        // Given: Rule with no-match-message using #{} SpEL template format
+        java.util.Set<dev.mars.apex.core.engine.model.Category> categories = new java.util.HashSet<>();
+        categories.add(new dev.mars.apex.core.engine.model.Category("test", 100));
+        Rule rule = new Rule("spel-nomatch-test", categories, "Amount Check",
+                "#amount > 5000", "Over #{#amount}",
+                "Checks amount", 100, "INFO", null, null, null, null, null, null,
+                "Under #{#amount}");
+
+        // When: condition is false
+        RuleResult result = evaluator.evaluateRule(rule, testFacts);
+
+        // Then
+        assertFalse(result.isTriggered());
+        assertEquals("Under 1000.0", result.getMessage(),
+                "NO_MATCH should resolve #{} in no-match-message");
+    }
 }

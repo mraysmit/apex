@@ -134,6 +134,98 @@ function setupEventListeners() {
     yamlRulesEditor.addEventListener('input', function() {
         resetYamlValidationStatus();
     });
+
+    // Settings button
+    document.getElementById('settingsBtn').addEventListener('click', openSettings);
+    document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
+    document.getElementById('resetExamplesDirBtn').addEventListener('click', () => {
+        document.getElementById('examplesDirInput').value = 'examples';
+        previewSettingsPath('examples');
+    });
+    document.getElementById('examplesDirInput').addEventListener('input', function() {
+        previewSettingsPath(this.value);
+    });
+}
+
+/**
+ * Open the settings modal and load current settings from the server
+ */
+async function openSettings() {
+    try {
+        const response = await fetch(`${window.playgroundConfig.apiBaseUrl}/settings`);
+        if (!response.ok) throw new Error('Failed to load settings');
+        const data = await response.json();
+        document.getElementById('examplesDirInput').value = data.examplesDir || 'examples';
+        updateResolvedPath(data.resolvedExamplesPath, data.directoryExists);
+        const modal = new bootstrap.Modal(document.getElementById('settingsModal'));
+        modal.show();
+    } catch (error) {
+        console.error('Error loading settings:', error);
+        showAlert('Failed to load settings.', 'danger');
+    }
+}
+
+/**
+ * Preview the resolved path while the user types
+ */
+async function previewSettingsPath(dir) {
+    if (!dir || !dir.trim()) {
+        document.getElementById('resolvedPathValue').textContent = '--';
+        document.getElementById('dirStatusBadge').style.display = 'none';
+        return;
+    }
+    try {
+        const response = await fetch(`${window.playgroundConfig.apiBaseUrl}/settings`);
+        if (response.ok) {
+            const data = await response.json();
+            // Show the current resolved path as a hint; actual preview requires save
+            updateResolvedPath(data.resolvedExamplesPath, true);
+        }
+    } catch (e) {
+        // Silently ignore preview errors
+    }
+}
+
+/**
+ * Save settings to the server
+ */
+async function saveSettings() {
+    const examplesDir = document.getElementById('examplesDirInput').value.trim();
+    if (!examplesDir) {
+        showAlert('Examples folder path cannot be empty.', 'warning');
+        return;
+    }
+    try {
+        const response = await fetch(`${window.playgroundConfig.apiBaseUrl}/settings`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ examplesDir: examplesDir })
+        });
+        if (!response.ok) throw new Error('Failed to save settings');
+        const data = await response.json();
+        updateResolvedPath(data.resolvedExamplesPath, data.directoryExists);
+        bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide();
+        showAlert('Settings saved successfully.', 'success');
+    } catch (error) {
+        console.error('Error saving settings:', error);
+        showAlert('Failed to save settings.', 'danger');
+    }
+}
+
+/**
+ * Update the resolved path display and directory-exists badge
+ */
+function updateResolvedPath(resolvedPath, exists) {
+    document.getElementById('resolvedPathValue').textContent = resolvedPath || '--';
+    const badge = document.getElementById('dirExistsBadge');
+    const container = document.getElementById('dirStatusBadge');
+    if (resolvedPath) {
+        container.style.display = '';
+        badge.className = exists ? 'badge bg-success' : 'badge bg-warning text-dark';
+        badge.textContent = exists ? 'Directory exists' : 'Directory not found';
+    } else {
+        container.style.display = 'none';
+    }
 }
 
 /**
@@ -305,6 +397,7 @@ function resetPlayground() {
     yamlRulesEditor.value = '';
     document.getElementById('validationResults').innerHTML = '<p class="text-muted">Click "Process" to see validation results...</p>';
     document.getElementById('enrichmentResults').innerHTML = '<p class="text-muted">Click "Process" to see enrichment results and performance metrics...</p>';
+    document.getElementById('traceResults').innerHTML = '<p class="text-muted">Click "Process" to see execution trace...</p>';
     updateYamlStatus(true, 'Valid');
     updateProcessingTime(0);
 
@@ -667,11 +760,10 @@ function updateYamlStatus(isValid, message) {
 }
 
 /**
- * Display validation results
+ * Display validation results with structured per-rule rendering
  */
 function displayValidationResults(results) {
     console.log('displayValidationResults called with:', results);
-    console.log('results.valid =', results?.valid, 'type:', typeof results?.valid);
 
     const container = document.getElementById('validationResults');
     if (!container) {
@@ -679,34 +771,109 @@ function displayValidationResults(results) {
         return;
     }
 
-    // Determine validation status - check for "valid" field in results
+    // Determine validation status
     const isValid = results && results.valid === true;
-    console.log('isValid =', isValid);
     const statusIcon = isValid
         ? '<span class="validation-status-icon valid">✓</span>'
         : '<span class="validation-status-icon invalid">✗</span>';
     const statusText = isValid ? 'PASSED' : 'FAILED';
     const statusClass = isValid ? 'validation-passed' : 'validation-failed';
 
-    // Build the HTML with status indicator at the top
-    const statusHtml = `
-        <div class="validation-status ${statusClass}">
-            ${statusIcon}
-            <span class="validation-status-text">${statusText}</span>
-        </div>
-        <pre>${JSON.stringify(results, null, 2)}</pre>
-    `;
+    let html = '';
 
-    container.innerHTML = statusHtml;
+    // Status banner
+    html += `<div class="validation-status ${statusClass}">
+        ${statusIcon}
+        <span class="validation-status-text">${statusText}</span>
+    </div>`;
 
-    // Visual feedback for update
+    // Summary counts
+    if (results.rulesExecuted != null) {
+        html += '<div class="validation-summary">';
+        html += `<span class="validation-summary-item"><strong>${results.rulesExecuted}</strong> executed</span>`;
+        html += `<span class="validation-summary-item text-success"><strong>${results.rulesPassed || 0}</strong> passed</span>`;
+        html += `<span class="validation-summary-item text-danger"><strong>${results.rulesFailed || 0}</strong> failed</span>`;
+        html += '</div>';
+    }
+
+    // Per-rule results
+    if (results.results && results.results.length > 0) {
+        html += '<div class="validation-rules-list">';
+        results.results.forEach((rule, index) => {
+            const passed = rule.passed === true;
+            const ruleIcon = passed
+                ? '<i class="fas fa-check-circle text-success me-2"></i>'
+                : '<i class="fas fa-times-circle text-danger me-2"></i>';
+            const ruleClass = passed ? 'validation-rule-passed' : 'validation-rule-failed';
+
+            // Severity badge
+            let severityBadge = '';
+            if (rule.severity) {
+                const sevClass = rule.severity === 'ERROR' ? 'bg-danger'
+                    : rule.severity === 'WARNING' ? 'bg-warning text-dark'
+                    : rule.severity === 'CRITICAL' ? 'bg-dark'
+                    : 'bg-info';
+                severityBadge = `<span class="badge ${sevClass} ms-2" style="font-size: 0.7em">${rule.severity}</span>`;
+            }
+
+            // Category badge
+            let categoryBadge = '';
+            if (rule.category) {
+                categoryBadge = `<span class="badge bg-secondary ms-1" style="font-size: 0.7em">${rule.category}</span>`;
+            }
+
+            html += `<div class="validation-rule-item ${ruleClass}">`;
+            html += `<div class="d-flex align-items-start">`;
+            html += `<div class="validation-rule-icon">${ruleIcon}</div>`;
+            html += `<div class="flex-grow-1">`;
+
+            // Rule header: name/id + badges
+            html += `<div class="validation-rule-header">`;
+            html += `<span class="validation-rule-name">${rule.ruleName || rule.ruleId || 'Rule ' + (index + 1)}</span>`;
+            if (rule.ruleId && rule.ruleName && rule.ruleId !== rule.ruleName) {
+                html += `<span class="validation-rule-id ms-2">(${rule.ruleId})</span>`;
+            }
+            html += severityBadge;
+            html += categoryBadge;
+            html += '</div>';
+
+            // Message
+            if (rule.message) {
+                html += `<div class="validation-rule-message">${escapeHtml(rule.message)}</div>`;
+            }
+
+            // Condition (collapsed by default)
+            if (rule.condition) {
+                html += `<div class="validation-rule-condition"><code>${escapeHtml(rule.condition)}</code></div>`;
+            }
+
+            html += '</div></div></div>';
+        });
+        html += '</div>';
+    } else if (results.message) {
+        // Fallback for simple message-only responses
+        html += `<div class="mt-2"><pre>${escapeHtml(typeof results.message === 'string' ? results.message : JSON.stringify(results.message, null, 2))}</pre></div>`;
+    }
+
+    container.innerHTML = html;
+
+    // Visual feedback flash
     const originalBg = container.style.backgroundColor;
     container.style.transition = 'background-color 0.3s';
-    container.style.backgroundColor = isValid ? '#d4edda' : '#f8d7da'; // Green or red tint
-
+    container.style.backgroundColor = isValid ? '#d4edda' : '#f8d7da';
     setTimeout(() => {
         container.style.backgroundColor = originalBg || '#f8f9fa';
     }, 500);
+}
+
+/**
+ * Escape HTML special characters for safe display
+ */
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode(text));
+    return div.innerHTML;
 }
 
 /**

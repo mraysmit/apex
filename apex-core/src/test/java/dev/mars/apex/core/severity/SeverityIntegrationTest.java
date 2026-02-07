@@ -48,11 +48,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Complete workflow integration
  *
  * Tests all phases of the APEX Severity Validation Implementation Plan:
- * - Phase 1: SeverityConstants creation
- * - Phase 2: Existing severity code refactoring
- * - Phase 3: Enrichment severity validation
- * - Phase 4: Enrichment processing with severity
- * - Phase 5: Integration testing (this test)
+ * - SeverityConstants creation
+ * - Existing severity code refactoring
+ * - Enrichment severity validation
+ * - Enrichment processing with severity
+ * - Integration testing (this test)
  *
  * Updated to use YamlEnrichmentProcessor directly instead of deprecated EnrichmentService.
  *

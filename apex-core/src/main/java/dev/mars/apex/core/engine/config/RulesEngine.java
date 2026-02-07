@@ -593,7 +593,7 @@ public class RulesEngine {
         // Delegate to the unified evaluator for consistent behavior
         RuleResult result = unifiedEvaluator.evaluateRule(rule, facts);
 
-        // Phase 5: Store result in facts if result-field is configured
+        // Store result in facts if result-field is configured
         if (rule.getResultField() != null && !rule.getResultField().trim().isEmpty()) {
             facts.put(rule.getResultField(), result.isTriggered());
             logger.debug("Stored rule result in facts: {} = {}", rule.getResultField(), result.isTriggered());

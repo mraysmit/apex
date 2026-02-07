@@ -10,7 +10,7 @@ import java.util.UUID;
  * Core model representing a group of enrichments to be executed with
  * AND/OR semantics, optional short-circuiting, and optional parallel execution.
  *
- * Phase 1: data model + simple helpers. Execution wiring comes in later phases.
+ * data model + simple helpers. Execution wiring comes in later phases.
  */
 public class EnrichmentGroup {
     private final UUID uuid;

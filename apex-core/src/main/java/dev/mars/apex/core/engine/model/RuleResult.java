@@ -56,7 +56,7 @@ public class RuleResult implements Serializable {
     private final List<String> failureMessages;
     private final boolean success;
 
-    // Phase 4: Error and Success Code Support
+    // Error and Success Code Support
     private final String successCode;
     private final String errorCode;
     private final Object mapToField;  // String or List<String>
@@ -497,7 +497,7 @@ public class RuleResult implements Serializable {
         return new RuleResult(ruleName, errorMessage, severity, false, ResultType.ERROR, performanceMetrics);
     }
 
-    // Phase 4: Factory methods for error and success codes
+    // Factory methods for error and success codes
 
     /**
      * Create a new rule result for a rule that was triggered with success code.

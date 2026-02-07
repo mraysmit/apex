@@ -119,27 +119,27 @@ class AllSectionTypesSequentialTest extends DemoTestBase {
         
         // ULTIMATE VERIFICATION: All processing in correct order
         
-        // Phase 1: Enrichments from external file (E1, E2)
+        // Enrichments from external file (E1, E2)
         assertTrue(enrichedData.containsKey("currentSpotPrice"),
             "E1 (from ref): currentSpotPrice should be enriched");
         assertTrue(enrichedData.containsKey("optionDelta"),
             "E2 (from ref): optionDelta should be enriched");
         
-        // Phase 2: Inline enrichment (E3)
+        //Inline enrichment (E3)
         assertTrue(enrichedData.containsKey("counterpartyRating"),
             "E3 (inline): counterpartyRating should be enriched");
         
-        // Phase 3: Enrichment groups from external file (EG1, EG2)
+        // Enrichment groups from external file (EG1, EG2)
         assertTrue(enrichedData.containsKey("impliedVolatility"),
             "EG1 (from ref): impliedVolatility should be enriched");
         assertTrue(enrichedData.containsKey("valueAtRisk"),
             "EG2 (from ref): valueAtRisk should be enriched");
         
-        // Phase 4: Inline enrichment group (EG3)
+        // Inline enrichment group (EG3)
         assertTrue(enrichedData.containsKey("productCategory"),
             "EG3 (inline): productCategory should be enriched");
         
-        // Phase 5: Validation should succeed
+        // Validation should succeed
         assertTrue(result.isSuccess(),
             "All validations should pass with complete data");
         

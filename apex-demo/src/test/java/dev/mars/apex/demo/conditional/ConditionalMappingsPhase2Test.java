@@ -31,7 +31,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test class for Phase 2: Conditional Mappings (Design V1) functionality.
+ * Test class forConditional Mappings (Design V1) functionality.
  * Tests the new conditional-mappings syntax in field-enrichment.
  */
 public class ConditionalMappingsPhase2Test extends DemoTestBase {

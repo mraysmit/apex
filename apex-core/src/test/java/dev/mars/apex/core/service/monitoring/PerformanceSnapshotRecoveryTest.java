@@ -14,7 +14,7 @@ import java.time.Instant;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Phase 3B: Unit tests for recovery metrics in PerformanceSnapshot.
+ * Unit tests for recovery metrics in PerformanceSnapshot.
  * Tests the aggregation of recovery metrics across multiple rule evaluations.
  */
 @ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})

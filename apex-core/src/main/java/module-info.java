@@ -105,7 +105,7 @@ module dev.mars.apex.core {
     // Pipeline configuration exports
     exports dev.mars.apex.core.config.pipeline;
 
-    // Phase 1.2 exports - Input Data Classification System
+    // exports - Input Data Classification System
     exports dev.mars.apex.core.service.classification;
 
     // Transformation service exports

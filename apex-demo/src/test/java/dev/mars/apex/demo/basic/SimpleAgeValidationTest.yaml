@@ -24,6 +24,7 @@ rules:
     description: "Validates that age is at least 18"
     condition: "#age != null && #age >= 18"
     message: "Age {{#age}} is valid (18 or older)"
+    no-match-message: "Age {{#age}} does not meet minimum requirement of 18"
     severity: "INFO"
     priority: 1
     enabled: true

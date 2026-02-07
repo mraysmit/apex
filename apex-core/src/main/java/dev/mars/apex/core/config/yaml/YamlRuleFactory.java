@@ -130,7 +130,7 @@ public class YamlRuleFactory {
         if (yamlConfig.getRuleGroups() != null) {
             logger.info("Processing " + yamlConfig.getRuleGroups().size() + " rule groups using two-phase approach");
 
-            // Phase 1: Create all rule groups and register them (no cross-references yet)
+            // Create all rule groups and register them (no cross-references yet)
             Map<String, RuleGroup> ruleGroupsById = new HashMap<>();
             for (YamlRuleGroup yamlGroup : yamlConfig.getRuleGroups()) {
                 logger.info("Phase 1 - Creating rule group: " + yamlGroup.getId() + ", enabled: " + yamlGroup.getEnabled());
@@ -155,12 +155,12 @@ public class YamlRuleFactory {
                 }
             }
 
-            // Phase 2: Process rule group references now that all rule groups are created and registered
+            //Process rule group references now that all rule groups are created and registered
             logger.info("Phase 2 - Processing rule group references with global registry");
             processRuleGroupReferencesWithGlobalRegistry(yamlConfig, config, ruleGroupsById);
         }
 
-        // Phase 3: Create and register enrichment groups
+        // Create and register enrichment groups
         if (yamlConfig.getEnrichmentGroups() != null && !yamlConfig.getEnrichmentGroups().isEmpty()) {
             logger.info("Creating enrichment groups from YAML configuration");
             List<EnrichmentGroup> enrichmentGroups = EnrichmentGroupFactory.buildEnrichmentGroups(yamlConfig);
@@ -450,10 +450,11 @@ public class YamlRuleFactory {
         String errorCode = yamlRule.getErrorCode();
         Object mapToField = yamlRule.getMapToField();
         String resultField = yamlRule.getResultField();
+        String noMatchMessage = yamlRule.getNoMatchMessage();
 
         Rule createdRule = new Rule(ruleId, categories, name, condition, message, description,
                                    yamlRule.getPriority() != null ? yamlRule.getPriority() : 100,
-                                   severity, metadata, yamlRule.getDefaultValue(), successCode, errorCode, mapToField, resultField);
+                                   severity, metadata, yamlRule.getDefaultValue(), successCode, errorCode, mapToField, resultField, noMatchMessage);
 
         // Apply custom properties if available
         if (yamlRule.getCustomProperties() != null && !yamlRule.getCustomProperties().isEmpty()) {

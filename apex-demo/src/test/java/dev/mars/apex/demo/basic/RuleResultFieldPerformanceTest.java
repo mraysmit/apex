@@ -70,8 +70,8 @@ public class RuleResultFieldPerformanceTest extends DemoTestBase {
             }
             logger.info("[OK] Warmup completed");
             
-            // Benchmark Phase 1: Rules WITHOUT result-field
-            logger.info("\n--- Benchmark Phase 1: Rules WITHOUT result-field ---");
+            // Benchmark Rules WITHOUT result-field
+            logger.info("\n--- Benchmark Rules WITHOUT result-field ---");
             List<Long> baselineTimes = new ArrayList<>();
             
             for (int i = 0; i < BENCHMARK_ITERATIONS; i++) {
@@ -92,8 +92,8 @@ public class RuleResultFieldPerformanceTest extends DemoTestBase {
             logger.info("  Max:     {}", formatTime(baselineStats.max));
             logger.info("  StdDev:  {}", formatTime(baselineStats.stdDev));
             
-            // Benchmark Phase 2: Rules WITH result-field
-            logger.info("\n--- Benchmark Phase 2: Rules WITH result-field ---");
+            // Benchmark Rules WITH result-field
+            logger.info("\n--- Benchmark Rules WITH result-field ---");
             List<Long> resultFieldTimes = new ArrayList<>();
             
             for (int i = 0; i < BENCHMARK_ITERATIONS; i++) {

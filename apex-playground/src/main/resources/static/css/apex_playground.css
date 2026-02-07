@@ -624,3 +624,84 @@ body {
     text-transform: uppercase;
     letter-spacing: 1px;
 }
+
+/* Validation Summary */
+.validation-summary {
+    display: flex;
+    gap: 16px;
+    padding: 6px 12px;
+    margin-bottom: 10px;
+    font-size: 0.85rem;
+    color: #495057;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.validation-summary-item {
+    white-space: nowrap;
+}
+
+/* Per-rule results list */
+.validation-rules-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.validation-rule-item {
+    padding: 8px 10px;
+    border-radius: 4px;
+    border-left: 3px solid transparent;
+}
+
+.validation-rule-item.validation-rule-passed {
+    background-color: #f0faf0;
+    border-left-color: #28a745;
+}
+
+.validation-rule-item.validation-rule-failed {
+    background-color: #fef6f6;
+    border-left-color: #dc3545;
+}
+
+.validation-rule-icon {
+    flex-shrink: 0;
+    padding-top: 1px;
+}
+
+.validation-rule-header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2px;
+}
+
+.validation-rule-name {
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: #212529;
+}
+
+.validation-rule-id {
+    font-size: 0.78rem;
+    color: #6c757d;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+}
+
+.validation-rule-message {
+    margin-top: 3px;
+    font-size: 0.83rem;
+    color: #495057;
+    line-height: 1.4;
+}
+
+.validation-rule-condition {
+    margin-top: 3px;
+}
+
+.validation-rule-condition code {
+    font-size: 0.78rem;
+    color: #6f42c1;
+    background-color: rgba(111, 66, 193, 0.08);
+    padding: 1px 5px;
+    border-radius: 3px;
+}
