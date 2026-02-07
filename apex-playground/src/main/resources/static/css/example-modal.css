@@ -1,0 +1,137 @@
+/**
+ * APEX Example Modal — Shared Styles
+ * Used by both the Playground and the Visual Rule Editor.
+ */
+
+/* Load Example Modal */
+.example-modal-body {
+    display: flex;
+    flex-direction: column;
+    height: 680px;
+    min-height: 400px;
+    overflow: hidden;
+}
+.example-categories {
+    display: flex;
+    flex: 1 1 60%;
+    min-height: 120px;
+    border: 1px solid #3a3a3a;
+    border-radius: 6px 6px 0 0;
+    overflow: hidden;
+}
+.example-category-list {
+    width: 200px;
+    min-width: 200px;
+    background: #1e1e2e;
+    border-right: 1px solid #3a3a3a;
+    overflow-y: auto;
+}
+.example-category-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #2a2a3a;
+    font-size: 0.85rem;
+    color: #ccc;
+    transition: background 0.15s;
+}
+.example-category-item:hover {
+    background: #2a2a4a;
+}
+.example-category-item.active {
+    background: #3a3a6a;
+    color: #fff;
+    font-weight: 600;
+}
+.example-category-item .badge {
+    float: right;
+    font-size: 0.7rem;
+}
+.example-item-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+}
+.example-card {
+    background: #2a2a3e;
+    border: 1px solid #3a3a4a;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+}
+.example-card:hover {
+    border-color: #5a8dee;
+    background: #2e2e48;
+}
+.example-card.selected {
+    border-color: #5a8dee;
+    background: #2e2e52;
+}
+.example-card .example-name {
+    font-weight: 600;
+    color: #e0e0e0;
+    font-size: 0.9rem;
+}
+.example-card .example-meta {
+    font-size: 0.75rem;
+    color: #888;
+    margin-top: 2px;
+}
+.example-card .example-badges {
+    margin-top: 4px;
+}
+.example-card .example-badges .badge {
+    font-size: 0.7rem;
+    margin-right: 4px;
+}
+/* Horizontal resizer handle */
+.example-resizer {
+    height: 6px;
+    min-height: 6px;
+    background: #2a2a3a;
+    cursor: ns-resize;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    flex-shrink: 0;
+    border-left: 1px solid #3a3a3a;
+    border-right: 1px solid #3a3a3a;
+    transition: background 0.15s;
+}
+.example-resizer:hover,
+.example-resizer.dragging {
+    background: #5a8dee;
+}
+.example-resizer::after {
+    content: '';
+    width: 40px;
+    height: 2px;
+    background: #666;
+    border-radius: 1px;
+}
+.example-resizer:hover::after,
+.example-resizer.dragging::after {
+    background: #fff;
+}
+.example-preview {
+    flex: 0 1 40%;
+    min-height: 80px;
+    overflow-y: auto;
+    border: 1px solid #3a3a3a;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    padding: 10px 12px;
+}
+.example-preview pre {
+    flex: 1;
+    overflow-y: auto;
+    background: #1a1a2e;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 0.78rem;
+    color: #aaa;
+    margin: 0;
+}

@@ -109,6 +109,7 @@ function copyYamlToClipboard() {
 document.addEventListener('DOMContentLoaded', function() {
     initializePlayground();
     setupEventListeners();
+    initPlaygroundExampleModal();
     // loadDefaultExample(); // Disabled to start with empty UI
 });
 
@@ -296,7 +297,7 @@ function setupEventListeners() {
     document.getElementById('clearBtn').addEventListener('click', clearAll);
     
     // Load example button
-    document.getElementById('loadExampleBtn').addEventListener('click', loadExample);
+    document.getElementById('loadExampleBtn').addEventListener('click', openLoadExampleModal);
     
     // Save config button
     document.getElementById('saveConfigBtn').addEventListener('click', saveConfiguration);
@@ -611,30 +612,65 @@ function resetPlayground() {
 }
 
 /**
- * Load an example configuration
+ * Example Modal — adapter for shared ExampleModal module.
+ * Initializes the shared module with Playground-specific callbacks.
  */
-async function loadExample() {
-    try {
-        const response = await fetch(window.playgroundConfig.apiBaseUrl + '/examples');
-        const data = await response.json();
+function initPlaygroundExampleModal() {
+    ExampleModal.init({
+        apiBaseUrl: window.playgroundConfig.apiBaseUrl,
+        loadBtnId: 'loadSelectedExampleBtn',
+        escapeHtml: escapeHtml,
+        formatFileSize: formatFileSize,
+        onLoad: function (detail, options) {
+            // Clear existing content before loading new example
+            resetPlayground();
 
-        if (data.error) {
-            console.error('Error from server:', data.error);
-            loadDefaultExample();
-            return;
+            let loaded = [];
+
+            // Set current example context
+            currentExample = {
+                category: options.category,
+                id: options.id,
+                name: detail.name || options.id
+            };
+
+            // Load YAML
+            if (options.loadYaml && detail.yaml) {
+                setYamlContent(detail.yaml);
+                updateYamlRulesFileName(currentExample.name.toLowerCase().replace(/\s+/g, '-') + '.yaml', detail.yaml.length);
+                loaded.push('YAML');
+            }
+
+            // Load JSON data
+            if (options.loadData && detail.sampleData) {
+                const jsonStr = typeof detail.sampleData === 'string'
+                    ? detail.sampleData
+                    : JSON.stringify(detail.sampleData, null, 2);
+                sourceDataEditor.value = jsonStr;
+                updateSourceDataFileName(currentExample.name.toLowerCase().replace(/\s+/g, '-') + '-data.json', jsonStr.length);
+                loaded.push('JSON data');
+            }
+
+            resetYamlValidationStatus();
+
+            if (loaded.length > 0) {
+                showAlert('Loaded: ' + loaded.join(' + ') + ' from "' + currentExample.name + '"', 'success');
+            } else {
+                showAlert('Nothing was loaded (no content available).', 'warning');
+            }
+        },
+        onToast: function (message, type) {
+            showAlert(message, type === 'error' ? 'danger' : type);
         }
+    });
+}
 
-        // Show example selection dialog
-        showExampleSelectionDialog(data);
-
-    } catch (error) {
-        console.error('Error loading examples:', error);
-        loadDefaultExample();
-    }
+function openLoadExampleModal() {
+    ExampleModal.open();
 }
 
 /**
- * Load default example data
+ * Load default example data (fallback)
  */
 function loadDefaultExample() {
     // Clear existing content
@@ -672,157 +708,6 @@ rules:
     updateYamlRulesFileName('example-rules.yaml', exampleYaml.length);
 
     resetYamlValidationStatus();
-}
-
-/**
- * Show example selection dialog
- */
-function showExampleSelectionDialog(examplesData) {
-    // Create modal dialog
-    const modal = document.createElement('div');
-    modal.className = 'example-modal';
-    modal.innerHTML = `
-        <div class="example-modal-content">
-            <div class="example-modal-header">
-                <h3>Select Example</h3>
-                <button class="example-modal-close">&times;</button>
-            </div>
-            <div class="example-modal-body">
-                ${createExampleCategoriesHTML(examplesData)}
-            </div>
-        </div>
-    `;
-
-    document.body.appendChild(modal);
-
-    // Attach listeners to example items
-    attachExampleListeners();
-
-    // Add event listeners
-    modal.querySelector('.example-modal-close').addEventListener('click', () => {
-        document.body.removeChild(modal);
-    });
-
-    // Close on background click
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            document.body.removeChild(modal);
-        }
-    });
-}
-
-/**
- * Create HTML for example categories using Bootstrap Accordion
- */
-function createExampleCategoriesHTML(examplesData) {
-    let html = '<div class="accordion" id="examplesAccordion">';
-    let index = 0;
-
-    Object.keys(examplesData).forEach(category => {
-        if (category === 'timestamp' || category === 'message' || category === 'error') return;
-
-        const examples = examplesData[category];
-        if (Array.isArray(examples) && examples.length > 0) {
-            const categoryId = `category-${index}`;
-            const isFirst = index === 0;
-            
-            html += `
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="heading-${categoryId}">
-                        <button class="accordion-button ${isFirst ? '' : 'collapsed'}" type="button" 
-                                data-bs-toggle="collapse" data-bs-target="#collapse-${categoryId}" 
-                                aria-expanded="${isFirst}" aria-controls="collapse-${categoryId}">
-                            ${category.charAt(0).toUpperCase() + category.slice(1)}
-                            <span class="badge bg-secondary ms-2">${examples.length}</span>
-                        </button>
-                    </h2>
-                    <div id="collapse-${categoryId}" class="accordion-collapse collapse ${isFirst ? 'show' : ''}" 
-                         aria-labelledby="heading-${categoryId}" data-bs-parent="#examplesAccordion">
-                        <div class="accordion-body p-0">
-                            <div class="list-group list-group-flush">
-                                ${examples.map(example => `
-                                    <button type="button" class="list-group-item list-group-item-action example-item ${example.available ? '' : 'disabled'}"
-                                            data-category="${category}"
-                                            data-id="${example.id}">
-                                        <div class="d-flex w-100 justify-content-between">
-                                            <h6 class="mb-1">${example.name}</h6>
-                                            <small class="text-muted">${formatFileSize(example.size)}</small>
-                                        </div>
-                                        <p class="mb-1 small text-muted">${example.description || 'No description available'}</p>
-                                    </button>
-                                `).join('')}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            index++;
-        }
-    });
-
-    html += '</div>';
-
-    return html;
-}
-
-/**
- * Attach event listeners to example items
- */
-function attachExampleListeners() {
-    document.querySelectorAll('.example-item:not(.disabled)').forEach(item => {
-        item.addEventListener('click', () => {
-            const category = item.dataset.category;
-            const id = item.dataset.id;
-            loadSpecificExample(category, id);
-            document.querySelector('.example-modal').remove();
-        });
-    });
-}
-
-/**
- * Load a specific example by category and ID
- */
-async function loadSpecificExample(category, id) {
-    try {
-        const response = await fetch(`${window.playgroundConfig.apiBaseUrl}/examples/${category}/${id}`);
-        const example = await response.json();
-
-        if (example.error) {
-            console.error('Error loading example:', example.error);
-            loadDefaultExample();
-            return;
-        }
-
-        // Clear existing content before loading new example
-        resetPlayground();
-        
-        // Set current example context
-        currentExample = {
-            category: category,
-            id: id,
-            name: example.name
-        };
-
-        // Load the example data
-        if (example.yaml) {
-            setYamlContent(example.yaml);
-            updateYamlRulesFileName(`${example.name.toLowerCase().replace(/\s+/g, '-')}.yaml`, example.yaml.length);
-        }
-
-        if (example.sampleData) {
-            sourceDataEditor.value = JSON.stringify(example.sampleData, null, 2);
-            updateSourceDataFileName(`${example.name.toLowerCase().replace(/\s+/g, '-')}-data.json`, JSON.stringify(example.sampleData, null, 2).length);
-        }
-
-        // Reset validation status when loading a new example
-        resetYamlValidationStatus();
-
-        showAlert(`Example "${example.name}" loaded successfully`, 'success');
-
-    } catch (error) {
-        console.error('Error loading specific example:', error);
-        loadDefaultExample();
-    }
 }
 
 /**
