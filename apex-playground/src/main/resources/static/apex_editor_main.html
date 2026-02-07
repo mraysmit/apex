@@ -1046,6 +1046,9 @@
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link" onclick="switchYamlTab('config')">Configuration Context</button>
                                 </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" onclick="switchYamlTab('files')">Files</button>
+                                </li>
                             </ul>
 
                             <!-- Generated YAML Panel -->
@@ -1078,6 +1081,17 @@
                                         <div id="configContextBlocks" style="max-height: 400px; overflow-y: auto; border: 1px solid #3a3a3a; border-radius: 4px; padding: 8px;"></div>
                                     </div>
                                 </div>
+                            </div>
+
+                            <!-- YAML Files Panel -->
+                            <div id="yamlFilesPanel" class="yaml-panel">
+                                <div class="eval-file-drop" id="yamlFileDrop">
+                                    <p>Drag and drop YAML files here</p>
+                                    <p class="small text-muted">or</p>
+                                    <input type="file" id="yamlFileInput" accept=".yaml,.yml" multiple style="display: none;">
+                                    <button class="btn btn-outline-primary" onclick="document.getElementById('yamlFileInput').click()">Browse Files</button>
+                                </div>
+                                <div class="eval-file-list" id="yamlFileList"></div>
                             </div>
                         </div>
                     </div>
@@ -1168,6 +1182,9 @@
                                 </li>
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link" onclick="switchDataSourceTab('connections')">Connections</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" onclick="switchDataSourceTab('files')">Files</button>
                                 </li>
                             </ul>
 
@@ -1269,6 +1286,17 @@
                                 <div class="connection-list" id="connectionList">
                                     <div class="text-muted text-center py-4">No connections configured. Click "Create Connection" to add one.</div>
                                 </div>
+                            </div>
+
+                            <!-- SQL Files Panel -->
+                            <div id="sqlFilesPanel" class="datasource-panel">
+                                <div class="eval-file-drop" id="sqlFileDrop">
+                                    <p>Drag and drop SQL files here</p>
+                                    <p class="small text-muted">or</p>
+                                    <input type="file" id="sqlFileInput" accept=".sql" multiple style="display: none;">
+                                    <button class="btn btn-outline-primary" onclick="document.getElementById('sqlFileInput').click()">Browse Files</button>
+                                </div>
+                                <div class="eval-file-list" id="sqlFileList"></div>
                             </div>
                         </div>
                     </div>
@@ -5413,6 +5441,8 @@
                     document.getElementById('dataContextPanel').classList.add('active');
                 } else if (tabName === 'config') {
                     document.getElementById('configContextPanel').classList.add('active');
+                } else if (tabName === 'files') {
+                    document.getElementById('yamlFilesPanel').classList.add('active');
                 }
             }
 
@@ -5472,6 +5502,8 @@
                 } else if (tabName === 'connections') {
                     document.getElementById('connectionsPanel').classList.add('active');
                     refreshConnections();
+                } else if (tabName === 'files') {
+                    document.getElementById('sqlFilesPanel').classList.add('active');
                 }
             }
 
@@ -6766,8 +6798,298 @@
                 }
             }
 
+            // --- YAML File Management ---
+            let yamlFiles = [];
+
+            function initYamlFileHandlers() {
+                const dropZone = document.getElementById('yamlFileDrop');
+                const fileInput = document.getElementById('yamlFileInput');
+                if (!dropZone || !fileInput) return;
+
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('dragover');
+                });
+
+                dropZone.addEventListener('dragleave', () => {
+                    dropZone.classList.remove('dragover');
+                });
+
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('dragover');
+                    handleYamlFiles(e.dataTransfer.files);
+                });
+
+                fileInput.addEventListener('change', (e) => {
+                    handleYamlFiles(e.target.files);
+                    e.target.value = '';
+                });
+            }
+
+            function handleYamlFiles(files) {
+                Array.from(files).forEach(file => {
+                    if (file.name.endsWith('.yaml') || file.name.endsWith('.yml')) {
+                        const existingIndex = yamlFiles.findIndex(f => f.name === file.name);
+
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const content = e.target.result;
+                            const fileData = {
+                                name: file.name,
+                                size: file.size,
+                                content: content
+                            };
+
+                            if (existingIndex >= 0) {
+                                yamlFiles[existingIndex] = fileData;
+                            } else {
+                                yamlFiles.push(fileData);
+                            }
+                            renderYamlFileList();
+                        };
+                        reader.readAsText(file);
+                    } else {
+                        showToast('Only .yaml and .yml files are supported: ' + file.name, 'error');
+                    }
+                });
+            }
+
+            function renderYamlFileList() {
+                const list = document.getElementById('yamlFileList');
+
+                if (yamlFiles.length === 0) {
+                    list.innerHTML = '';
+                    return;
+                }
+
+                let html = '';
+                yamlFiles.forEach((file, idx) => {
+                    const sizeStr = file.size < 1024 ? file.size + ' B' :
+                                   file.size < 1024 * 1024 ? (file.size / 1024).toFixed(1) + ' KB' :
+                                   (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+
+                    html += '<div class="eval-file-item">';
+                    html += '<div>';
+                    html += '<span class="eval-file-name">' + escapeHtml(file.name) + '</span>';
+                    html += '<span class="eval-file-size">' + sizeStr + '</span>';
+                    html += '</div>';
+                    html += '<div style="display: flex; gap: 0.25rem;">';
+                    html += '<button class="btn" style="padding: 2px 8px; font-size: 0.75rem; background: #198754; color: #fff;" onclick="loadYamlFileToEditor(' + idx + ')">Open</button>';
+                    html += '<button class="btn" style="padding: 2px 8px; font-size: 0.75rem; background: #c0392b; color: #fff;" onclick="removeYamlFile(' + idx + ')">X</button>';
+                    html += '</div>';
+                    html += '</div>';
+                });
+
+                list.innerHTML = html;
+            }
+
+            /**
+             * Extract SpEL #variable references from a parsed YAML config object.
+             * Scans all string values recursively for patterns like #fieldName, #trade.amount, etc.
+             * Excludes system references like #ruleResults and #ruleGroupResults.
+             * Returns unique variable paths (without the # prefix) suitable for loadedFieldPaths.
+             */
+            function extractVariableRefsFromConfig(obj) {
+                const refs = new Set();
+                const systemRefs = ['ruleResults', 'ruleGroupResults', 'root', 'this'];
+
+                function scanValue(val) {
+                    if (typeof val === 'string') {
+                        // Match #variableName or #variable.path patterns in SpEL expressions
+                        const regex = /#([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)*)/g;
+                        let match;
+                        while ((match = regex.exec(val)) !== null) {
+                            const varPath = match[1];
+                            // Get the root variable name (before first dot)
+                            const rootVar = varPath.split('.')[0];
+                            if (!systemRefs.includes(rootVar)) {
+                                refs.add(varPath);
+                            }
+                        }
+                    } else if (Array.isArray(val)) {
+                        val.forEach(item => scanValue(item));
+                    } else if (val && typeof val === 'object') {
+                        Object.values(val).forEach(v => scanValue(v));
+                    }
+                }
+
+                scanValue(obj);
+                return Array.from(refs).sort();
+            }
+
+            function loadYamlFileToEditor(idx) {
+                if (yamlFiles[idx]) {
+                    const yamlText = yamlFiles[idx].content;
+
+                    try {
+                        const config = jsyaml.load(yamlText);
+
+                        // Support pipeline configs which may not have metadata
+                        if (!config || (!config.metadata && !config.pipeline)) {
+                            showToast('Invalid APEX YAML: missing metadata section in ' + yamlFiles[idx].name, 'error');
+                            return;
+                        }
+
+                        // Extract #variable references and load into data context
+                        const varRefs = extractVariableRefsFromConfig(config);
+                        if (varRefs.length > 0) {
+                            varRefs.forEach(path => {
+                                if (!loadedFieldPaths.includes(path)) {
+                                    loadedFieldPaths.push(path);
+                                }
+                            });
+                            loadedFieldPaths.sort();
+                            updateDataContextDisplay();
+                        }
+
+                        // Clear existing blocks and rebuild from YAML
+                        workspace.clear();
+
+                        if (config.pipeline) {
+                            createPipelineConfigBlock(config);
+                        } else {
+                            const configType = config.metadata.type || 'rule-config';
+                            if (configType === 'data-source-config') {
+                                createDataSourceConfigBlock(config);
+                            } else if (configType === 'scenario') {
+                                createScenarioConfigBlock(config);
+                            } else if (configType === 'scenario-registry') {
+                                createScenarioRegistryBlock(config);
+                            } else if (configType === 'component') {
+                                createComponentConfigBlock(config);
+                            } else {
+                                createRuleConfigBlock(config);
+                            }
+                        }
+
+                        // Regenerate YAML output with proper highlighting
+                        updateYaml();
+
+                    } catch (e) {
+                        console.error('YAML File Load Error:', e);
+                        showToast('Error parsing YAML file: ' + e.message, 'error');
+                        // Still show content in YAML panel even if block import fails
+                        currentYamlText = yamlText;
+                        renderYamlWithPrism(yamlText);
+                    }
+
+                    // Switch to Generated YAML tab
+                    document.querySelectorAll('#yamlOutputContainer .nav-link').forEach(tab => tab.classList.remove('active'));
+                    document.querySelector('#yamlOutputContainer .nav-link').classList.add('active');
+                    document.querySelectorAll('.yaml-panel').forEach(panel => panel.classList.remove('active'));
+                    document.getElementById('yamlPanel').classList.add('active');
+                }
+            }
+
+            function removeYamlFile(idx) {
+                yamlFiles.splice(idx, 1);
+                renderYamlFileList();
+            }
+
+            // --- SQL File Management ---
+            let sqlFiles = [];
+
+            function initSqlFileHandlers() {
+                const dropZone = document.getElementById('sqlFileDrop');
+                const fileInput = document.getElementById('sqlFileInput');
+                if (!dropZone || !fileInput) return;
+
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('dragover');
+                });
+
+                dropZone.addEventListener('dragleave', () => {
+                    dropZone.classList.remove('dragover');
+                });
+
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('dragover');
+                    handleSqlFiles(e.dataTransfer.files);
+                });
+
+                fileInput.addEventListener('change', (e) => {
+                    handleSqlFiles(e.target.files);
+                    e.target.value = '';
+                });
+            }
+
+            function handleSqlFiles(files) {
+                Array.from(files).forEach(file => {
+                    if (file.name.endsWith('.sql')) {
+                        const existingIndex = sqlFiles.findIndex(f => f.name === file.name);
+
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const content = e.target.result;
+                            const fileData = {
+                                name: file.name,
+                                size: file.size,
+                                content: content
+                            };
+
+                            if (existingIndex >= 0) {
+                                sqlFiles[existingIndex] = fileData;
+                            } else {
+                                sqlFiles.push(fileData);
+                            }
+                            renderSqlFileList();
+                        };
+                        reader.readAsText(file);
+                    } else {
+                        showToast('Only .sql files are supported: ' + file.name, 'error');
+                    }
+                });
+            }
+
+            function renderSqlFileList() {
+                const list = document.getElementById('sqlFileList');
+
+                if (sqlFiles.length === 0) {
+                    list.innerHTML = '';
+                    return;
+                }
+
+                let html = '';
+                sqlFiles.forEach((file, idx) => {
+                    const sizeStr = file.size < 1024 ? file.size + ' B' :
+                                   file.size < 1024 * 1024 ? (file.size / 1024).toFixed(1) + ' KB' :
+                                   (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+
+                    html += '<div class="eval-file-item">';
+                    html += '<div>';
+                    html += '<span class="eval-file-name">' + escapeHtml(file.name) + '</span>';
+                    html += '<span class="eval-file-size">' + sizeStr + '</span>';
+                    html += '</div>';
+                    html += '<div style="display: flex; gap: 0.25rem;">';
+                    html += '<button class="btn" style="padding: 2px 8px; font-size: 0.75rem; background: #198754; color: #fff;" onclick="loadSqlFileToEditor(' + idx + ')">Open</button>';
+                    html += '<button class="btn" style="padding: 2px 8px; font-size: 0.75rem; background: #c0392b; color: #fff;" onclick="removeSqlFile(' + idx + ')">X</button>';
+                    html += '</div>';
+                    html += '</div>';
+                });
+
+                list.innerHTML = html;
+            }
+
+            function loadSqlFileToEditor(idx) {
+                if (sqlFiles[idx]) {
+                    document.getElementById('sqlEditor').value = sqlFiles[idx].content;
+                    // Switch to SQL Editor tab
+                    switchDataSourceTab('sql');
+                }
+            }
+
+            function removeSqlFile(idx) {
+                sqlFiles.splice(idx, 1);
+                renderSqlFileList();
+            }
+
             // Initialize file handlers when DOM is ready
             document.addEventListener('DOMContentLoaded', initFileHandlers);
+            document.addEventListener('DOMContentLoaded', initYamlFileHandlers);
+            document.addEventListener('DOMContentLoaded', initSqlFileHandlers);
 
             // Also add input event listener for live validation
             setTimeout(() => {
@@ -6776,6 +7098,8 @@
                     editor.addEventListener('input', validateAndParseJson);
                 }
                 initFileHandlers();
+                initYamlFileHandlers();
+                initSqlFileHandlers();
             }, 100);
 
             // --- 5c. YAML Import Functions ---
@@ -7107,6 +7431,18 @@
                     if (!config || (!config.metadata && !config.pipeline)) {
                         showToast('Invalid APEX YAML: missing metadata section.', 'error');
                         return;
+                    }
+
+                    // Extract #variable references and load into data context
+                    const varRefs = extractVariableRefsFromConfig(config);
+                    if (varRefs.length > 0) {
+                        varRefs.forEach(path => {
+                            if (!loadedFieldPaths.includes(path)) {
+                                loadedFieldPaths.push(path);
+                            }
+                        });
+                        loadedFieldPaths.sort();
+                        updateDataContextDisplay();
                     }
 
                     // Clear existing blocks
