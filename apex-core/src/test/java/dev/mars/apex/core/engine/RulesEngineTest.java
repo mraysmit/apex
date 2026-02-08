@@ -17,9 +17,13 @@ package dev.mars.apex.core.engine;
  */
 
 
+import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.config.RuleBuilder;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
+import dev.mars.apex.core.engine.model.Category;
 import dev.mars.apex.core.engine.model.Rule;
+import dev.mars.apex.core.engine.config.RuleBuilder;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -33,6 +37,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -66,7 +71,7 @@ class RulesEngineTest {
     @DisplayName("Should create rule with basic constructor")
     void testRuleCreation() {
         // Test the basic Rule constructor
-        Rule rule = new Rule("testRule", "amount > 100", "HIGH_VALUE");
+        Rule rule = new RuleBuilder().withName("testRule").withCondition("amount > 100").withMessage("HIGH_VALUE").withSeverity(SeverityConstants.INFO).build();
 
         assertNotNull(rule);
         assertEquals("testRule", rule.getName());
@@ -81,8 +86,9 @@ class RulesEngineTest {
     @DisplayName("Should create rule with full constructor")
     void testRuleCreationWithFullConstructor() {
         // Test the full Rule constructor
-        Rule rule = new Rule("R001", "validation", "testRule", "amount > 100", 
-                           "HIGH_VALUE", "Rule for high value transactions", 1);
+        Rule rule = new Rule("R001", Set.of(new Category("validation", 1)),
+                "testRule", "amount > 100", "HIGH_VALUE", "Rule for high value transactions",
+                1, SeverityConstants.INFO, null, null, null, null, null, null, null, true);
 
         assertNotNull(rule);
         assertEquals("R001", rule.getId());
@@ -111,7 +117,7 @@ class RulesEngineTest {
     @Test
     @DisplayName("Should handle rule evaluation context")
     void testRuleEvaluationContext() {
-        Rule rule = new Rule("contextRule", "name != null && age > 18", "VALID_ADULT");
+        Rule rule = new RuleBuilder().withName("contextRule").withCondition("name != null && age > 18").withMessage("VALID_ADULT").withSeverity(SeverityConstants.INFO).build();
 
         // Create evaluation context
         Map<String, Object> context = new HashMap<>();
@@ -127,7 +133,7 @@ class RulesEngineTest {
     @Test
     @DisplayName("Should handle rule metadata")
     void testRuleMetadata() {
-        Rule rule = new Rule("metadataRule", "true", "Always true");
+        Rule rule = new RuleBuilder().withName("metadataRule").withCondition("true").withMessage("Always true").withSeverity(SeverityConstants.INFO).build();
 
         assertNotNull(rule.getMetadata());
         assertNotNull(rule.getMetadata().getCreatedDate());
@@ -137,7 +143,7 @@ class RulesEngineTest {
     @Test
     @DisplayName("Should handle rule categories")
     void testRuleCategories() {
-        Rule rule = new Rule("categoryRule", "true", "Test rule");
+        Rule rule = new RuleBuilder().withName("categoryRule").withCondition("true").withMessage("Test rule").withSeverity(SeverityConstants.INFO).build();
 
         assertNotNull(rule.getCategories());
         assertFalse(rule.getCategories().isEmpty());

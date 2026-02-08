@@ -18,9 +18,12 @@ package dev.mars.apex.core.integration;
 
 import dev.mars.apex.core.config.yaml.YamlEnrichment;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.config.RuleBuilder;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.Rule;
+import dev.mars.apex.core.engine.config.RuleBuilder;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -72,7 +75,7 @@ class ApexNegativeCasesTest {
         System.out.println("=== Testing Age Validation Failures ===");
         
         // Create age validation rule
-        Rule ageRule = new Rule("age-validation", "#age >= 18", "Must be 18 or older");
+        Rule ageRule = new RuleBuilder().withName("age-validation").withCondition("#age >= 18").withMessage("Must be 18 or older").withSeverity(SeverityConstants.INFO).build();
         
         // Test underage scenario
         Map<String, Object> underageData = new HashMap<>();
@@ -111,7 +114,7 @@ class ApexNegativeCasesTest {
         System.out.println("=== Testing Credit Limit Failures ===");
         
         // Create credit limit validation rule
-        Rule creditRule = new Rule("credit-check", "#amount <= #creditLimit", "Amount exceeds credit limit");
+        Rule creditRule = new RuleBuilder().withName("credit-check").withCondition("#amount <= #creditLimit").withMessage("Amount exceeds credit limit").withSeverity(SeverityConstants.INFO).build();
         
         // Test over-limit scenario
         Map<String, Object> overLimitData = new HashMap<>();
@@ -148,7 +151,7 @@ class ApexNegativeCasesTest {
         System.out.println("=== Testing Income Requirement Failures ===");
         
         // Create income requirement rule
-        Rule incomeRule = new Rule("income-check", "#income >= 30000", "Minimum income of $30,000 required");
+        Rule incomeRule = new RuleBuilder().withName("income-check").withCondition("#income >= 30000").withMessage("Minimum income of $30,000 required").withSeverity(SeverityConstants.INFO).build();
         
         // Test insufficient income scenario
         Map<String, Object> lowIncomeData = new HashMap<>();
@@ -182,11 +185,11 @@ class ApexNegativeCasesTest {
         
         // Create comprehensive loan application rules
         List<Rule> loanRules = Arrays.asList(
-            new Rule("age-check", "#age >= 18", "Must be 18 or older"),
-            new Rule("income-check", "#income >= 30000", "Minimum income of $30,000 required"),
-            new Rule("credit-score-check", "#creditScore >= 650", "Credit score must be at least 650"),
-            new Rule("debt-ratio-check", "#debtRatio <= 0.4", "Debt-to-income ratio must be 40% or less"),
-            new Rule("employment-check", "#employmentStatus == 'FULL_TIME'", "Full-time employment required")
+            new RuleBuilder().withName("age-check").withCondition("#age >= 18").withMessage("Must be 18 or older").withSeverity(SeverityConstants.INFO).build(),
+            new RuleBuilder().withName("income-check").withCondition("#income >= 30000").withMessage("Minimum income of $30,000 required").withSeverity(SeverityConstants.INFO).build(),
+            new RuleBuilder().withName("credit-score-check").withCondition("#creditScore >= 650").withMessage("Credit score must be at least 650").withSeverity(SeverityConstants.INFO).build(),
+            new RuleBuilder().withName("debt-ratio-check").withCondition("#debtRatio <= 0.4").withMessage("Debt-to-income ratio must be 40% or less").withSeverity(SeverityConstants.INFO).build(),
+            new RuleBuilder().withName("employment-check").withCondition("#employmentStatus == 'FULL_TIME'").withMessage("Full-time employment required").withSeverity(SeverityConstants.INFO).build()
         );
         
         // Test data that fails multiple rules
@@ -355,17 +358,17 @@ class ApexNegativeCasesTest {
         // Create a complex financial risk assessment scenario
         List<Rule> riskAssessmentRules = Arrays.asList(
             // Primary validation rules
-            new Rule("data-completeness", "#customerId != null && #amount != null", "Required data missing"),
-            new Rule("amount-positive", "#amount > 0", "Amount must be positive"),
+            new RuleBuilder().withName("data-completeness").withCondition("#customerId != null && #amount != null").withMessage("Required data missing").withSeverity(SeverityConstants.INFO).build(),
+            new RuleBuilder().withName("amount-positive").withCondition("#amount > 0").withMessage("Amount must be positive").withSeverity(SeverityConstants.INFO).build(),
 
             // Risk calculation rules (depend on primary validation)
-            new Rule("small-transaction", "#amount <= 1000", "Small transaction - low risk"),
-            new Rule("medium-transaction", "#amount > 1000 && #amount <= 10000", "Medium transaction - moderate risk"),
-            new Rule("large-transaction", "#amount > 10000", "Large transaction - high risk"),
+            new RuleBuilder().withName("small-transaction").withCondition("#amount <= 1000").withMessage("Small transaction - low risk").withSeverity(SeverityConstants.INFO).build(),
+            new RuleBuilder().withName("medium-transaction").withCondition("#amount > 1000 && #amount <= 10000").withMessage("Medium transaction - moderate risk").withSeverity(SeverityConstants.INFO).build(),
+            new RuleBuilder().withName("large-transaction").withCondition("#amount > 10000").withMessage("Large transaction - high risk").withSeverity(SeverityConstants.INFO).build(),
 
             // Risk limit rules (depend on risk calculation)
-            new Rule("risk-limit-check", "#amount <= #riskLimit", "Transaction exceeds risk limit"),
-            new Rule("daily-limit-check", "#dailyTotal + #amount <= #dailyLimit", "Daily limit would be exceeded")
+            new RuleBuilder().withName("risk-limit-check").withCondition("#amount <= #riskLimit").withMessage("Transaction exceeds risk limit").withSeverity(SeverityConstants.INFO).build(),
+            new RuleBuilder().withName("daily-limit-check").withCondition("#dailyTotal + #amount <= #dailyLimit").withMessage("Daily limit would be exceeded").withSeverity(SeverityConstants.INFO).build()
         );
 
         // Test data that will cause cascading failures
@@ -428,7 +431,7 @@ class ApexNegativeCasesTest {
         System.out.println("=== Testing Failure Recovery Patterns ===");
 
         // Create rules that can demonstrate different recovery strategies
-        Rule criticalRule = new Rule("critical-validation", "#amount > 0 && #customerId != null", "Critical data validation failed");
+        Rule criticalRule = new RuleBuilder().withName("critical-validation").withCondition("#amount > 0 && #customerId != null").withMessage("Critical data validation failed").withSeverity(SeverityConstants.INFO).build();
         // Test data with multiple issues
         Map<String, Object> problematicData = new HashMap<>();
         problematicData.put("amount", -100.0);      // Critical failure

@@ -15,6 +15,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
+import dev.mars.apex.core.engine.config.RuleBuilder;
 
 /**
  * Demonstration of the new clean RuleResult API design.
@@ -45,8 +46,8 @@ public class NewRuleResultApiDemonstrationTest {
         // Create a rule group that will match
         RuleGroup successGroup = new RuleGroup("success-group", "test", "Success Group", 
                                               "All rules pass", 10, true, true, false, false);
-        successGroup.addRule(new Rule("rule1", "true", "Rule 1 passed", "INFO"), 1);
-        successGroup.addRule(new Rule("rule2", "true", "Rule 2 passed", "WARNING"), 2);
+        successGroup.addRule(new RuleBuilder().withName("rule1").withCondition("true").withMessage("Rule 1 passed").withSeverity("INFO").build(), 1);
+        successGroup.addRule(new RuleBuilder().withName("rule2").withCondition("true").withMessage("Rule 2 passed").withSeverity("WARNING").build(), 2);
         
         // Execute the rule group
         RuleResult result = rulesEngine.executeRuleGroupsList(java.util.List.of(successGroup), new HashMap<>());
@@ -83,9 +84,9 @@ public class NewRuleResultApiDemonstrationTest {
         // Create a rule group that will fail
         RuleGroup failureGroup = new RuleGroup("failure-group", "test", "Failure Group", 
                                               "Some rules fail", 10, true, true, false, false);
-        failureGroup.addRule(new Rule("rule1", "true", "Rule 1 passed", "INFO"), 1);
-        failureGroup.addRule(new Rule("rule2", "false", "Rule 2 failed", "ERROR"), 2);  // This will fail
-        failureGroup.addRule(new Rule("rule3", "true", "Rule 3 passed", "WARNING"), 3);
+        failureGroup.addRule(new RuleBuilder().withName("rule1").withCondition("true").withMessage("Rule 1 passed").withSeverity("INFO").build(), 1);
+        failureGroup.addRule(new RuleBuilder().withName("rule2").withCondition("false").withMessage("Rule 2 failed").withSeverity("ERROR").build(), 2);  // This will fail
+        failureGroup.addRule(new RuleBuilder().withName("rule3").withCondition("true").withMessage("Rule 3 passed").withSeverity("WARNING").build(), 3);
         
         // Execute the rule group
         RuleResult result = rulesEngine.executeRuleGroupsList(java.util.List.of(failureGroup), new HashMap<>());
@@ -122,7 +123,7 @@ public class NewRuleResultApiDemonstrationTest {
         // Create a failing rule group
         RuleGroup group = new RuleGroup("test-group", "test", "Test Group", 
                                        "Test message", 10, true, true, false, false);
-        group.addRule(new Rule("rule1", "false", "Failed rule", "ERROR"), 1);
+        group.addRule(new RuleBuilder().withName("rule1").withCondition("false").withMessage("Failed rule").withSeverity("ERROR").build(), 1);
         
         RuleResult result = rulesEngine.executeRuleGroupsList(java.util.List.of(group), new HashMap<>());
         

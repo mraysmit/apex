@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - The ScenarioExecutionResult.hasWarnings() returns true
  * - All stages execute even if some fail
  *
- * Uses DataTypeScenarioService to execute scenarios with stages and verifies
+ * Uses RulesEngine to execute scenarios with stages and verifies
  * that continue-with-warnings behavior works correctly.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd

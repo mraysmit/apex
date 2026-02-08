@@ -1,6 +1,7 @@
 package dev.mars.apex.core.service.engine;
 
 import dev.mars.apex.core.engine.model.Rule;
+import dev.mars.apex.core.engine.config.RuleBuilder;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -32,7 +33,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Consistent error message formatting
  * 
  * @author Mark A Ray-Smith
- * @since Phase 1 - Unified Evaluation Engine
+ * @version 1.0
+ * @since 2025-09-01
  */
 @DisplayName("Unified Rule Evaluator Tests")
 class UnifiedRuleEvaluatorTest {
@@ -57,7 +59,7 @@ class UnifiedRuleEvaluatorTest {
     @DisplayName("Should evaluate simple rule that matches")
     void testEvaluateRule_SimpleMatch() {
         // Given
-        Rule rule = new Rule("Amount Check", "#amount > 500", "Amount exceeds threshold", "INFO");
+        Rule rule = new RuleBuilder().withName("Amount Check").withCondition("#amount > 500").withMessage("Amount exceeds threshold").withSeverity("INFO").build();
         
         // When
         RuleResult result = evaluator.evaluateRule(rule, testFacts);
@@ -75,7 +77,7 @@ class UnifiedRuleEvaluatorTest {
     @DisplayName("Should evaluate simple rule that does not match")
     void testEvaluateRule_SimpleNoMatch() {
         // Given
-        Rule rule = new Rule("High Amount Check", "#amount > 2000", "Amount is very high", "WARNING");
+        Rule rule = new RuleBuilder().withName("High Amount Check").withCondition("#amount > 2000").withMessage("Amount is very high").withSeverity("WARNING").build();
         
         // When
         RuleResult result = evaluator.evaluateRule(rule, testFacts);
@@ -101,8 +103,11 @@ class UnifiedRuleEvaluatorTest {
     @Test
     @DisplayName("Should handle rule with empty condition")
     void testEvaluateRule_EmptyCondition() {
-        // Given
-        Rule rule = new Rule("Empty Rule", "", "Empty condition", "ERROR");
+        // Given - Use 16-param constructor to bypass RuleBuilder validation,
+        // since this test verifies the evaluator's handling of invalid rules
+        Rule rule = new Rule("R-empty", java.util.Set.of(new dev.mars.apex.core.engine.model.Category("default", 100)),
+                "Empty Rule", "", "Empty condition", "Empty condition", 100, "ERROR",
+                null, null, null, null, null, null, null, true);
         
         // When
         RuleResult result = evaluator.evaluateRule(rule, testFacts);
@@ -120,7 +125,7 @@ class UnifiedRuleEvaluatorTest {
     @DisplayName("Should handle SpEL evaluation error with consistent message format")
     void testEvaluateRule_SpelError() {
         // Given - Rule with invalid property reference (will throw SpEL exception)
-        Rule rule = new Rule("Invalid Property", "#nonExistentProperty.length() > 100", "Invalid property test", "ERROR");
+        Rule rule = new RuleBuilder().withName("Invalid Property").withCondition("#nonExistentProperty.length() > 100").withMessage("Invalid property test").withSeverity("ERROR").build();
 
         // When
         RuleResult result = evaluator.evaluateRule(rule, testFacts);
@@ -141,7 +146,7 @@ class UnifiedRuleEvaluatorTest {
     @DisplayName("Should attempt error recovery for WARNING severity")
     void testEvaluateRule_ErrorRecovery_Warning() {
         // Given - Rule with SpEL error but WARNING severity (should attempt recovery)
-        Rule rule = new Rule("Warning Rule", "#invalidProperty == 'test'", "Warning test", "WARNING");
+        Rule rule = new RuleBuilder().withName("Warning Rule").withCondition("#invalidProperty == 'test'").withMessage("Warning test").withSeverity("WARNING").build();
         
         // When
         RuleResult result = evaluator.evaluateRule(rule, testFacts);
@@ -160,7 +165,7 @@ class UnifiedRuleEvaluatorTest {
     @DisplayName("Should not attempt error recovery for CRITICAL severity")
     void testEvaluateRule_NoErrorRecovery_Critical() {
         // Given - Rule with SpEL error and CRITICAL severity (should not attempt recovery)
-        Rule rule = new Rule("Critical Rule", "#invalidProperty == 'test'", "Critical test", "CRITICAL");
+        Rule rule = new RuleBuilder().withName("Critical Rule").withCondition("#invalidProperty == 'test'").withMessage("Critical test").withSeverity("CRITICAL").build();
         
         // When
         RuleResult result = evaluator.evaluateRule(rule, testFacts);
@@ -177,10 +182,7 @@ class UnifiedRuleEvaluatorTest {
     @DisplayName("Should evaluate complex SpEL expression")
     void testEvaluateRule_ComplexExpression() {
         // Given
-        Rule rule = new Rule("Complex Rule", 
-                           "#amount > 500 && #currency == 'USD' && #customerType == 'PREMIUM'", 
-                           "Premium USD customer with high amount", 
-                           "INFO");
+        Rule rule = new RuleBuilder().withName("Complex Rule").withCondition("#amount > 500 && #currency == 'USD' && #customerType == 'PREMIUM'").withMessage("Premium USD customer with high amount").withSeverity("INFO").build();
         
         // When
         RuleResult result = evaluator.evaluateRule(rule, testFacts);
@@ -196,7 +198,7 @@ class UnifiedRuleEvaluatorTest {
     @DisplayName("Should evaluate rule with EvaluationContext directly")
     void testEvaluateRule_WithEvaluationContext() {
         // Given
-        Rule rule = new Rule("Context Rule", "#testValue == 'direct'", "Direct context test", "INFO");
+        Rule rule = new RuleBuilder().withName("Context Rule").withCondition("#testValue == 'direct'").withMessage("Direct context test").withSeverity("INFO").build();
         StandardEvaluationContext context = new StandardEvaluationContext();
         context.setVariable("testValue", "direct");
         
@@ -214,7 +216,7 @@ class UnifiedRuleEvaluatorTest {
     void testEvaluateRule_MissingParameters() {
         logger.info("========== START OF INTENTIONAL ERROR TEST ==========");
         // Given - Rule that references a parameter not in facts (will throw SpEL exception)
-        Rule rule = new Rule("Missing Param", "#missingParam.length() > 100", "Missing parameter test", "ERROR");
+        Rule rule = new RuleBuilder().withName("Missing Param").withCondition("#missingParam.length() > 100").withMessage("Missing parameter test").withSeverity("ERROR").build();
 
         // When
         RuleResult result = evaluator.evaluateRule(rule, testFacts);
@@ -233,7 +235,7 @@ class UnifiedRuleEvaluatorTest {
     void testEvaluateRule_ActualSpelError() {
         logger.info("========== START OF INTENTIONAL ERROR TEST ==========");
         // Given - Rule with CRITICAL severity to test actual error results (no recovery)
-        Rule rule = new Rule("SpEL Error", "#amount.invalidMethod()", "SpEL error test", "CRITICAL");
+        Rule rule = new RuleBuilder().withName("SpEL Error").withCondition("#amount.invalidMethod()").withMessage("SpEL error test").withSeverity("CRITICAL").build();
 
         // When
         RuleResult result = evaluator.evaluateRule(rule, testFacts);
@@ -255,7 +257,7 @@ class UnifiedRuleEvaluatorTest {
     @DisplayName("Should include performance metrics in result")
     void testEvaluateRule_PerformanceMetrics() {
         // Given
-        Rule rule = new Rule("Performance Test", "#amount > 0", "Performance test", "INFO");
+        Rule rule = new RuleBuilder().withName("Performance Test").withCondition("#amount > 0").withMessage("Performance test").withSeverity("INFO").build();
         
         // When
         RuleResult result = evaluator.evaluateRule(rule, testFacts);
@@ -272,9 +274,9 @@ class UnifiedRuleEvaluatorTest {
     void testEvaluateRules_FirstMatch() {
         // Given
         List<Rule> rules = Arrays.asList(
-            new Rule("Rule 1", "#amount > 2000", "High amount", "WARNING"),  // Won't match
-            new Rule("Rule 2", "#currency == 'USD'", "USD currency", "INFO"), // Will match
-            new Rule("Rule 3", "#amount > 0", "Any amount", "INFO")           // Would match but won't be reached
+            new RuleBuilder().withName("Rule 1").withCondition("#amount > 2000").withMessage("High amount").withSeverity("WARNING").build(),  // Won't match
+            new RuleBuilder().withName("Rule 2").withCondition("#currency == 'USD'").withMessage("USD currency").withSeverity("INFO").build(), // Will match
+            new RuleBuilder().withName("Rule 3").withCondition("#amount > 0").withMessage("Any amount").withSeverity("INFO").build()           // Would match but won't be reached
         );
 
         // When
@@ -292,9 +294,9 @@ class UnifiedRuleEvaluatorTest {
     void testEvaluateRules_NoMatch() {
         // Given
         List<Rule> rules = Arrays.asList(
-            new Rule("Rule 1", "#amount > 2000", "High amount", "WARNING"),
-            new Rule("Rule 2", "#currency == 'EUR'", "EUR currency", "INFO"),
-            new Rule("Rule 3", "#customerType == 'BASIC'", "Basic customer", "INFO")
+            new RuleBuilder().withName("Rule 1").withCondition("#amount > 2000").withMessage("High amount").withSeverity("WARNING").build(),
+            new RuleBuilder().withName("Rule 2").withCondition("#currency == 'EUR'").withMessage("EUR currency").withSeverity("INFO").build(),
+            new RuleBuilder().withName("Rule 3").withCondition("#customerType == 'BASIC'").withMessage("Basic customer").withSeverity("INFO").build()
         );
 
         // When
@@ -325,8 +327,8 @@ class UnifiedRuleEvaluatorTest {
     void testEvaluateRules_ErrorResult() {
         // Given
         List<Rule> rules = Arrays.asList(
-            new Rule("Good Rule", "#amount > 0", "Valid rule", "INFO"),
-            new Rule("Bad Rule", "#invalidMethod()", "Invalid rule", "ERROR")
+            new RuleBuilder().withName("Good Rule").withCondition("#amount > 0").withMessage("Valid rule").withSeverity("INFO").build(),
+            new RuleBuilder().withName("Bad Rule").withCondition("#invalidMethod()").withMessage("Invalid rule").withSeverity("ERROR").build()
         );
 
         // When
@@ -346,8 +348,7 @@ class UnifiedRuleEvaluatorTest {
     @DisplayName("Should resolve {{#variable}} placeholders in rule messages on MATCH")
     void testMessageResolution_HandlebarsFormat_Match() {
         // Given: Rule with {{#amount}} placeholder, condition that matches
-        Rule rule = new Rule("Amount Rule", "#amount > 500", 
-                            "Amount {{#amount}} exceeds threshold", "INFO");
+        Rule rule = new RuleBuilder().withName("Amount Rule").withCondition("#amount > 500").withMessage("Amount {{#amount}} exceeds threshold").withSeverity("INFO").build();
         
         // When
         RuleResult result = evaluator.evaluateRule(rule, testFacts);
@@ -362,8 +363,7 @@ class UnifiedRuleEvaluatorTest {
     @DisplayName("Should resolve {{#variable}} placeholders in rule messages on NO_MATCH")
     void testMessageResolution_HandlebarsFormat_NoMatch() {
         // Given: Rule with {{#amount}} placeholder, condition that does NOT match
-        Rule rule = new Rule("High Amount Rule", "#amount > 5000", 
-                            "Amount {{#amount}} is below threshold", "INFO");
+        Rule rule = new RuleBuilder().withName("High Amount Rule").withCondition("#amount > 5000").withMessage("Amount {{#amount}} is below threshold").withSeverity("INFO").build();
         
         // When
         RuleResult result = evaluator.evaluateRule(rule, testFacts);
@@ -378,8 +378,7 @@ class UnifiedRuleEvaluatorTest {
     @DisplayName("Should resolve multiple placeholders in a single message")
     void testMessageResolution_MultiplePlaceholders() {
         // Given
-        Rule rule = new Rule("Multi Rule", "#amount > 500", 
-                            "Amount {{#amount}} in {{#currency}} for {{#customerType}} customer", "INFO");
+        Rule rule = new RuleBuilder().withName("Multi Rule").withCondition("#amount > 500").withMessage("Amount {{#amount}} in {{#currency}} for {{#customerType}} customer").withSeverity("INFO").build();
         
         // When
         RuleResult result = evaluator.evaluateRule(rule, testFacts);
@@ -394,8 +393,7 @@ class UnifiedRuleEvaluatorTest {
     @DisplayName("Should preserve message when no placeholders are present")
     void testMessageResolution_NoPlaceholders() {
         // Given
-        Rule rule = new Rule("Simple Rule", "#amount > 500", 
-                            "Static message with no placeholders", "INFO");
+        Rule rule = new RuleBuilder().withName("Simple Rule").withCondition("#amount > 500").withMessage("Static message with no placeholders").withSeverity("INFO").build();
         
         // When
         RuleResult result = evaluator.evaluateRule(rule, testFacts);
@@ -410,8 +408,7 @@ class UnifiedRuleEvaluatorTest {
     void testMessageResolution_UnresolvablePlaceholder() {
         // Given: Placeholder references a variable not in the facts
         // SpEL evaluates #nonExistentVariable to null (not an error), so it resolves to ""
-        Rule rule = new Rule("Missing Var Rule", "#amount > 500", 
-                            "Value {{#nonExistentVariable}} is unknown", "INFO");
+        Rule rule = new RuleBuilder().withName("Missing Var Rule").withCondition("#amount > 500").withMessage("Value {{#nonExistentVariable}} is unknown").withSeverity("INFO").build();
         
         // When
         RuleResult result = evaluator.evaluateRule(rule, testFacts);
@@ -470,7 +467,7 @@ class UnifiedRuleEvaluatorTest {
         Rule rule = new Rule("no-match-test", categories, "Amount Check",
                 "#amount > 5000", "Amount {{#amount}} exceeds threshold",
                 "Checks amount threshold", 100, "INFO", null, null, null, null, null, null,
-                "Amount {{#amount}} is within normal range");
+                "Amount {{#amount}} is within normal range", true);
 
         // When: condition is false (1000 < 5000)
         RuleResult result = evaluator.evaluateRule(rule, testFacts);
@@ -490,7 +487,7 @@ class UnifiedRuleEvaluatorTest {
         Rule rule = new Rule("fallback-test", categories, "Amount Check",
                 "#amount > 5000", "Amount {{#amount}} exceeds threshold",
                 "Checks amount threshold", 100, "INFO", null, null, null, null, null, null,
-                null);  // no-match-message is null
+                null, true);  // no-match-message is null
 
         // When: condition is false
         RuleResult result = evaluator.evaluateRule(rule, testFacts);
@@ -510,7 +507,7 @@ class UnifiedRuleEvaluatorTest {
         Rule rule = new Rule("match-msg-test", categories, "Amount Check",
                 "#amount > 500", "Amount {{#amount}} exceeds threshold",
                 "Checks amount threshold", 100, "INFO", null, null, null, null, null, null,
-                "Amount {{#amount}} is within normal range");
+                "Amount {{#amount}} is within normal range", true);
 
         // When: condition is true (1000 > 500)
         RuleResult result = evaluator.evaluateRule(rule, testFacts);
@@ -530,7 +527,7 @@ class UnifiedRuleEvaluatorTest {
         Rule rule = new Rule("spel-nomatch-test", categories, "Amount Check",
                 "#amount > 5000", "Over #{#amount}",
                 "Checks amount", 100, "INFO", null, null, null, null, null, null,
-                "Under #{#amount}");
+                "Under #{#amount}", true);
 
         // When: condition is false
         RuleResult result = evaluator.evaluateRule(rule, testFacts);

@@ -1,6 +1,7 @@
 package dev.mars.apex.rest.controller;
 
 import dev.mars.apex.core.api.RulesService;
+import dev.mars.apex.core.engine.config.RuleBuilder;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
@@ -372,12 +373,12 @@ public class RulesController {
         try {
             // Create Rule object from request
             String severity = request.getRule().getSeverity() != null ? request.getRule().getSeverity() : "INFO";
-            Rule rule = new Rule(
-                request.getRule().getName(),
-                request.getRule().getCondition(),
-                request.getRule().getMessage(),
-                severity
-            );
+            Rule rule = new RuleBuilder()
+                .withName(request.getRule().getName())
+                .withCondition(request.getRule().getCondition())
+                .withMessage(request.getRule().getMessage())
+                .withSeverity(severity)
+                .build();
 
             // Execute the rule
             RuleResult result = rulesEngine.executeRule(rule, request.getFacts());
@@ -455,7 +456,12 @@ public class RulesController {
             List<Rule> rules = new ArrayList<>();
             for (RuleDto ruleDto : request.getRules()) {
                 String severity = ruleDto.getSeverity() != null ? ruleDto.getSeverity() : "INFO";
-                Rule rule = new Rule(ruleDto.getName(), ruleDto.getCondition(), ruleDto.getMessage(), severity);
+                Rule rule = new RuleBuilder()
+                    .withName(ruleDto.getName())
+                    .withCondition(ruleDto.getCondition())
+                    .withMessage(ruleDto.getMessage())
+                    .withSeverity(severity)
+                    .build();
                 rules.add(rule);
             }
 

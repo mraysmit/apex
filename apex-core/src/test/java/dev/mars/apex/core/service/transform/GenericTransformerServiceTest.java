@@ -17,9 +17,12 @@ package dev.mars.apex.core.service.transform;
  */
 
 
+import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.config.RuleBuilder;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.Rule;
+import dev.mars.apex.core.engine.config.RuleBuilder;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.engine.model.TransformerRule;
 import dev.mars.apex.core.service.lookup.LookupService;
@@ -307,7 +310,7 @@ class GenericTransformerServiceTest {
         List<TransformerRule<String>> rules = new ArrayList<>();
 
         // Create a simple rule
-        Rule rule = new Rule("testRule", "true", "Test transformation rule");
+        Rule rule = new RuleBuilder().withName("testRule").withCondition("true").withMessage("Test transformation rule").withSeverity(SeverityConstants.INFO).build();
 
         // Create field transformer actions
         List<FieldTransformerAction<String>> positiveActions = new ArrayList<>();
@@ -332,7 +335,7 @@ class GenericTransformerServiceTest {
         List<TransformerRule<TestComplexObject>> rules = new ArrayList<>();
 
         // Create a simple rule
-        Rule rule = new Rule("complexRule", "true", "Test complex object transformation rule");
+        Rule rule = new RuleBuilder().withName("complexRule").withCondition("true").withMessage("Test complex object transformation rule").withSeverity(SeverityConstants.INFO).build();
 
         // Create field transformer actions
         List<FieldTransformerAction<TestComplexObject>> positiveActions = new ArrayList<>();

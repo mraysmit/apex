@@ -165,10 +165,8 @@ public class ScenarioConfiguration {
 
     /**
      * Sets legacy rule configurations.
-     *
-     * @deprecated Use setProcessingStages for new stage-based configuration
+     * When possible, prefer {@link #setProcessingStages(List)} for new stage-based configuration.
      */
-    @Deprecated
     public void setRuleConfigurations(List<String> ruleConfigurations) {
         this.ruleConfigurations = ruleConfigurations;
     }
@@ -419,11 +417,11 @@ public class ScenarioConfiguration {
      * against a Map of data. Data fields are accessible directly by name (e.g., tradeId, amount)
      * or as variables with # prefix (e.g., #tradeId, #amount).
      *
-     * @deprecated Use {@link #matchesClassificationRule(Map, ExpressionEvaluatorService)} instead to ensure consistent context creation.
+     * @deprecated since 2.4. Use {@link #matchesClassificationRule(Map, ExpressionEvaluatorService)} instead to ensure consistent context creation.
      * @param data the data to evaluate against (Map<String, Object>)
      * @return true if the classification rule matches, false otherwise
      */
-    @Deprecated
+    @Deprecated(since = "2.4")
     public boolean matchesClassificationRule(Map<String, Object> data) {
         if (!hasClassificationRule()) {
             return false;

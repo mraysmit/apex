@@ -24,11 +24,10 @@ import dev.mars.apex.core.engine.model.EnrichmentGroup;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.enrichment.EnrichmentGroupFactory;
+import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.engine.UnifiedRuleEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.expression.Expression;
-import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.ArrayList;
@@ -48,14 +47,14 @@ import java.util.Map;
 public class RuleChainExecutor {
     private static final Logger logger = LoggerFactory.getLogger(RuleChainExecutor.class);
     
-    private final ExpressionParser parser;
+    private final ExpressionEvaluatorService evaluatorService;
     private final UnifiedRuleEvaluator unifiedEvaluator;
     private final EnrichmentGroupExecutor enrichmentGroupExecutor;
     
-    public RuleChainExecutor(ExpressionParser parser, 
+    public RuleChainExecutor(ExpressionEvaluatorService evaluatorService, 
                             UnifiedRuleEvaluator unifiedEvaluator,
                             EnrichmentGroupExecutor enrichmentGroupExecutor) {
-        this.parser = parser;
+        this.evaluatorService = evaluatorService;
         this.unifiedEvaluator = unifiedEvaluator;
         this.enrichmentGroupExecutor = enrichmentGroupExecutor;
     }
@@ -82,7 +81,7 @@ public class RuleChainExecutor {
             return RuleResult.error("rule-chain:" + chainId, "Rule chain not found");
         }
 
-        if (!chain.isEnabled()) {
+        if (!dev.mars.apex.core.util.EnabledFilter.isEnabled(chain)) {
             logger.info("Rule chain '{}' is disabled, skipping", chainId);
             logger.debug("processRuleChain() - chain disabled, returning no-match");
             return RuleResult.noMatch(chainId, "Rule chain disabled", SeverityConstants.INFO);
@@ -154,8 +153,7 @@ public class RuleChainExecutor {
         StandardEvaluationContext context = contextFactory.apply(data);
         String routeKey = null;
         try {
-            Expression exp = parser.parseExpression(condition);
-            Object result = exp.getValue(context);
+            Object result = evaluatorService.evaluate(condition, context, Object.class);
             routeKey = result != null ? result.toString() : "null";
         } catch (Exception e) {
             logger.error("Error evaluating router rule for chain '{}': {}", chain.getId(), e.getMessage());
@@ -268,12 +266,24 @@ public class RuleChainExecutor {
         String resultField = (String) triggerRuleConfig.get("result-field");
 
         logger.debug("executeConditionalChainingPattern() - evaluating trigger-rule with condition: {}", condition);
-        StandardEvaluationContext context = contextFactory.apply(data);
         boolean triggered = false;
         try {
-            Expression exp = parser.parseExpression(condition);
-            Boolean result = exp.getValue(context, Boolean.class);
-            triggered = result != null && result;
+            // Route trigger-rule through UnifiedRuleEvaluator for error recovery and monitoring
+            Rule triggerRule = new Rule(
+                chain.getId() + "-trigger",
+                Collections.singleton(new Category("chain-trigger", 100)),
+                "Trigger-" + chain.getId(),
+                condition,
+                message != null ? message : "Rule chain trigger",
+                message,
+                100,
+                SeverityConstants.INFO,
+                null, null, null, null, null,
+                resultField,
+                null, true
+            );
+            RuleResult triggerResult = unifiedEvaluator.evaluateRule(triggerRule, data);
+            triggered = triggerResult.isTriggered();
             logger.debug("executeConditionalChainingPattern() - trigger-rule evaluated to: {}", triggered);
         } catch (Exception e) {
             logger.error("Error evaluating trigger rule for chain '{}': {}", chain.getId(), e.getMessage());
@@ -281,12 +291,7 @@ public class RuleChainExecutor {
             return RuleResult.error(chain.getId(), "Trigger evaluation failed: " + e.getMessage());
         }
 
-        // Set result field if specified
-        if (resultField != null && !resultField.trim().isEmpty()) {
-            data.put(resultField, triggered);
-            logger.debug("executeConditionalChainingPattern() - stored result-field '{}' = {}", resultField, triggered);
-            logger.debug("Set result field '{}' to {}", resultField, triggered);
-        }
+        // Result-field storage handled by UnifiedRuleEvaluator.evaluateRule() above
 
         // 2. Execute Conditional Rules
         Map<String, Object> conditionalRules = (Map<String, Object>) config.get("conditional-rules");
@@ -366,7 +371,9 @@ public class RuleChainExecutor {
                 null, // successCode
                 null, // errorCode
                 null, // mapToField
-                ruleResultField // resultField
+                ruleResultField, // resultField
+                null, // noMatchMessage
+                true  // enabled
             );
             rules.add(r);
         }

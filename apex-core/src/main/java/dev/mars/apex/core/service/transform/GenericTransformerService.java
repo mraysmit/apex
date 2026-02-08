@@ -1,6 +1,8 @@
 package dev.mars.apex.core.service.transform;
 
+import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.config.RuleBuilder;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.engine.model.TransformerRule;
@@ -311,11 +313,12 @@ public class GenericTransformerService {
         logger.debug("Applying rule condition to value: " + ruleCondition);
 
         // Create a rule from the condition
-        Rule rule = new Rule(
-            "Transformation Rule",
-            ruleCondition,
-            "Transformation rule with condition: " + ruleCondition
-        );
+        Rule rule = new RuleBuilder()
+            .withName("Transformation Rule")
+            .withCondition(ruleCondition)
+            .withMessage("Transformation rule with condition: " + ruleCondition)
+            .withSeverity(SeverityConstants.INFO)
+            .build();
 
         // Apply the rule
         return applyRule(rule, value, additionalFacts, transformerName);
@@ -341,11 +344,12 @@ public class GenericTransformerService {
         additionalFacts.put("lookupData", lookupData);
 
         // Create a rule from the condition that uses lookupData instead of additionalFacts
-        Rule rule = new Rule(
-            "Transformation Rule",
-            ruleCondition.replace("#coreData", "#value"),
-            "Transformation rule with condition: " + ruleCondition
-        );
+        Rule rule = new RuleBuilder()
+            .withName("Transformation Rule")
+            .withCondition(ruleCondition.replace("#coreData", "#value"))
+            .withMessage("Transformation rule with condition: " + ruleCondition)
+            .withSeverity(SeverityConstants.INFO)
+            .build();
 
         // Apply the rule
         return applyRule(rule, value, additionalFacts, transformerName);

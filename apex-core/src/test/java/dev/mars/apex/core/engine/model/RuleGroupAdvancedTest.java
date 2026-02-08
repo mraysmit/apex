@@ -1,5 +1,7 @@
 package dev.mars.apex.core.engine.model;
 
+import dev.mars.apex.core.constants.SeverityConstants;
+import dev.mars.apex.core.engine.config.RuleBuilder;
 import org.junit.jupiter.api.BeforeEach;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
@@ -111,9 +113,9 @@ class RuleGroupAdvancedTest {
                                           "Test AND", 10, true, true, false, false);
             
             // Add rules: first passes, second fails, third would pass
-            Rule rule1 = new Rule("rule1", "#age > 18", "Age check");
-            Rule rule2 = new Rule("rule2", "#income > 100000", "High income check"); // This will fail
-            Rule rule3 = new Rule("rule3", "#score > 80", "Score check"); // This should not be evaluated
+            Rule rule1 = new RuleBuilder().withName("rule1").withCondition("#age > 18").withMessage("Age check").withSeverity(SeverityConstants.INFO).build();
+            Rule rule2 = new RuleBuilder().withName("rule2").withCondition("#income > 100000").withMessage("High income check").withSeverity(SeverityConstants.INFO).build(); // This will fail
+            Rule rule3 = new RuleBuilder().withName("rule3").withCondition("#score > 80").withMessage("Score check").withSeverity(SeverityConstants.INFO).build(); // This should not be evaluated
             
             group.addRule(rule1, 1);
             group.addRule(rule2, 2);
@@ -134,9 +136,9 @@ class RuleGroupAdvancedTest {
                                           "Test AND", 10, true, false, false, false);
             
             // Add rules: first passes, second fails, third passes
-            Rule rule1 = new Rule("rule1", "#age > 18", "Age check");
-            Rule rule2 = new Rule("rule2", "#income > 100000", "High income check"); // This will fail
-            Rule rule3 = new Rule("rule3", "#score > 80", "Score check");
+            Rule rule1 = new RuleBuilder().withName("rule1").withCondition("#age > 18").withMessage("Age check").withSeverity(SeverityConstants.INFO).build();
+            Rule rule2 = new RuleBuilder().withName("rule2").withCondition("#income > 100000").withMessage("High income check").withSeverity(SeverityConstants.INFO).build(); // This will fail
+            Rule rule3 = new RuleBuilder().withName("rule3").withCondition("#score > 80").withMessage("Score check").withSeverity(SeverityConstants.INFO).build();
             
             group.addRule(rule1, 1);
             group.addRule(rule2, 2);
@@ -155,9 +157,9 @@ class RuleGroupAdvancedTest {
                                           "Test OR", 10, false, true, false, false);
             
             // Add rules: first fails, second passes, third would fail
-            Rule rule1 = new Rule("rule1", "#age > 50", "Senior check"); // This will fail
-            Rule rule2 = new Rule("rule2", "#income > 30000", "Income check"); // This will pass
-            Rule rule3 = new Rule("rule3", "#score > 90", "High score check"); // This should not be evaluated
+            Rule rule1 = new RuleBuilder().withName("rule1").withCondition("#age > 50").withMessage("Senior check").withSeverity(SeverityConstants.INFO).build(); // This will fail
+            Rule rule2 = new RuleBuilder().withName("rule2").withCondition("#income > 30000").withMessage("Income check").withSeverity(SeverityConstants.INFO).build(); // This will pass
+            Rule rule3 = new RuleBuilder().withName("rule3").withCondition("#score > 90").withMessage("High score check").withSeverity(SeverityConstants.INFO).build(); // This should not be evaluated
             
             group.addRule(rule1, 1);
             group.addRule(rule2, 2);
@@ -176,9 +178,9 @@ class RuleGroupAdvancedTest {
                                           "Test OR", 10, false, false, false, false);
             
             // Add rules: first fails, second passes, third fails
-            Rule rule1 = new Rule("rule1", "#age > 50", "Senior check"); // This will fail
-            Rule rule2 = new Rule("rule2", "#income > 30000", "Income check"); // This will pass
-            Rule rule3 = new Rule("rule3", "#score > 90", "High score check"); // This will fail
+            Rule rule1 = new RuleBuilder().withName("rule1").withCondition("#age > 50").withMessage("Senior check").withSeverity(SeverityConstants.INFO).build(); // This will fail
+            Rule rule2 = new RuleBuilder().withName("rule2").withCondition("#income > 30000").withMessage("Income check").withSeverity(SeverityConstants.INFO).build(); // This will pass
+            Rule rule3 = new RuleBuilder().withName("rule3").withCondition("#score > 90").withMessage("High score check").withSeverity(SeverityConstants.INFO).build(); // This will fail
             
             group.addRule(rule1, 1);
             group.addRule(rule2, 2);
@@ -206,9 +208,9 @@ class RuleGroupAdvancedTest {
                                           "Test Debug", 10, true, true, false, true);
             
             // Add rules where second rule fails
-            Rule rule1 = new Rule("rule1", "#age > 18", "Age check");
-            Rule rule2 = new Rule("rule2", "#income > 100000", "High income check"); // This will fail
-            Rule rule3 = new Rule("rule3", "#score > 80", "Score check");
+            Rule rule1 = new RuleBuilder().withName("rule1").withCondition("#age > 18").withMessage("Age check").withSeverity(SeverityConstants.INFO).build();
+            Rule rule2 = new RuleBuilder().withName("rule2").withCondition("#income > 100000").withMessage("High income check").withSeverity(SeverityConstants.INFO).build(); // This will fail
+            Rule rule3 = new RuleBuilder().withName("rule3").withCondition("#score > 80").withMessage("Score check").withSeverity(SeverityConstants.INFO).build();
             
             group.addRule(rule1, 1);
             group.addRule(rule2, 2);
@@ -262,9 +264,9 @@ class RuleGroupAdvancedTest {
                                           "Test Parallel", 10, true, false, true, false);
             
             // Add multiple rules that should all pass
-            Rule rule1 = new Rule("rule1", "#age > 18", "Age check");
-            Rule rule2 = new Rule("rule2", "#income > 30000", "Income check");
-            Rule rule3 = new Rule("rule3", "#score > 80", "Score check");
+            Rule rule1 = new RuleBuilder().withName("rule1").withCondition("#age > 18").withMessage("Age check").withSeverity(SeverityConstants.INFO).build();
+            Rule rule2 = new RuleBuilder().withName("rule2").withCondition("#income > 30000").withMessage("Income check").withSeverity(SeverityConstants.INFO).build();
+            Rule rule3 = new RuleBuilder().withName("rule3").withCondition("#score > 80").withMessage("Score check").withSeverity(SeverityConstants.INFO).build();
             
             group.addRule(rule1, 1);
             group.addRule(rule2, 2);
@@ -283,7 +285,7 @@ class RuleGroupAdvancedTest {
                                           "Test Parallel Single", 10, true, false, true, false);
             
             // Add single rule
-            Rule rule1 = new Rule("rule1", "#age > 18", "Age check");
+            Rule rule1 = new RuleBuilder().withName("rule1").withCondition("#age > 18").withMessage("Age check").withSeverity(SeverityConstants.INFO).build();
             group.addRule(rule1, 1);
             
             boolean result = group.evaluate(context);
@@ -307,10 +309,10 @@ class RuleGroupAdvancedTest {
             RuleGroup group = new RuleGroup("complex", "test", "Complex Group", 
                                           "Complex test", 10, true, false, false, true);
             
-            Rule rule1 = new Rule("rule1", "#age >= 18", "Adult check");           // Pass
-            Rule rule2 = new Rule("rule2", "#income >= 40000", "Income check");    // Pass  
-            Rule rule3 = new Rule("rule3", "#score >= 85", "Score check");         // Pass
-            Rule rule4 = new Rule("rule4", "#email != null", "Email check");       // Pass
+            Rule rule1 = new RuleBuilder().withName("rule1").withCondition("#age >= 18").withMessage("Adult check").withSeverity(SeverityConstants.INFO).build();           // Pass
+            Rule rule2 = new RuleBuilder().withName("rule2").withCondition("#income >= 40000").withMessage("Income check").withSeverity(SeverityConstants.INFO).build();    // Pass  
+            Rule rule3 = new RuleBuilder().withName("rule3").withCondition("#score >= 85").withMessage("Score check").withSeverity(SeverityConstants.INFO).build();         // Pass
+            Rule rule4 = new RuleBuilder().withName("rule4").withCondition("#email != null").withMessage("Email check").withSeverity(SeverityConstants.INFO).build();       // Pass
             
             group.addRule(rule1, 1);
             group.addRule(rule2, 2);
@@ -340,7 +342,7 @@ class RuleGroupAdvancedTest {
                                           "Null test", 10, true, false, false, false);
             
             // Add rule that might return null (invalid expression)
-            Rule rule1 = new Rule("rule1", "#nonexistentField > 0", "Null check");
+            Rule rule1 = new RuleBuilder().withName("rule1").withCondition("#nonexistentField > 0").withMessage("Null check").withSeverity(SeverityConstants.INFO).build();
             group.addRule(rule1, 1);
             
             boolean result = group.evaluate(context);

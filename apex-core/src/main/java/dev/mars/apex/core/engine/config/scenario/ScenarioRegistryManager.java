@@ -171,7 +171,6 @@ public class ScenarioRegistryManager {
 
     /**
      * Parse scenario configuration from YAML data map.
-     * Follows the same pattern as DataTypeScenarioService.parseScenarioConfiguration.
      *
      * @param scenarioData The scenario data map from YAML
      * @return Parsed ScenarioConfiguration
@@ -243,7 +242,6 @@ public class ScenarioRegistryManager {
 
     /**
      * Parse a scenario stage from YAML data.
-     * Follows the same pattern as DataTypeScenarioService.parseScenarioStage.
      *
      * @param stageData The stage data map from YAML
      * @return Parsed ScenarioStage or null if parsing fails

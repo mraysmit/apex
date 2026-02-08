@@ -267,8 +267,8 @@ public class OrderedYamlParser {
      * and extracts the ID of each item to create a complete ordering of all processable
      * items in the document.
      *
-     * <p>Note: Single-object sections like 'pipeline' are not included in item order
-     * as they are processed at section-level only.
+     * <p>Note: Single-object sections like 'pipeline' are not included in item order.
+     * The pipeline is handled separately in {@code SequentialProcessor} after item processing.
      *
      * @param yamlMap Ordered map from SnakeYAML parsing
      * @return List of processing items in document order
@@ -287,9 +287,9 @@ public class OrderedYamlParser {
             "enrichment-refs", "rule-refs"
         );
 
-        // Note: 'pipeline' is currently a single object (not a list) in YamlRuleConfiguration
-        // and is processed at section-level, not item-level. If pipeline becomes a list in
-        // the future (to support multiple pipelines per document), add it to LIST_SECTIONS.
+        // Note: 'pipeline' is a single object (not a list) in YamlRuleConfiguration
+        // and is processed separately in SequentialProcessor after item processing.
+        // If pipeline becomes a list in the future, add it to LIST_SECTIONS.
 
         // LinkedHashMap from SnakeYAML preserves insertion order
         for (String sectionName : yamlMap.keySet()) {
@@ -332,7 +332,7 @@ public class OrderedYamlParser {
                 logger.debug("Added placeholder for reference section: " + sectionName);
             }
             // Single-object sections (like 'pipeline') are not included in item order
-            // They are processed at section-level only
+            // They are handled separately in SequentialProcessor
         }
 
         logger.info("Extracted " + itemOrder.size() + " items in document order");

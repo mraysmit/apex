@@ -20,6 +20,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -73,7 +74,7 @@ public class YamlRuleFactory {
      * @return A configured RulesEngineConfiguration
      */
     public RulesEngineConfiguration createRulesEngineConfiguration(YamlRuleConfiguration yamlConfig) throws YamlConfigurationException {
-        logger.info("Creating RulesEngineConfiguration from YAML configuration using generic architecture");
+        logger.info("Creating RulesEngineConfiguration from YAML configuration");
 
         RulesEngineConfiguration config = new RulesEngineConfiguration();
 
@@ -181,7 +182,7 @@ public class YamlRuleFactory {
     
     /**
      * Create a GenericRuleSet from YAML configuration for a specific category.
-     * This method leverages the new generic architecture with full enterprise metadata support.
+
      *
      * This is a public API method intended for advanced users who need fine-grained control
      * over rule set creation for specific categories.
@@ -448,13 +449,15 @@ public class YamlRuleFactory {
         // Extract error/success codes, field mappings, and result field from YAML rule
         String successCode = yamlRule.getSuccessCode();
         String errorCode = yamlRule.getErrorCode();
-        Object mapToField = yamlRule.getMapToField();
+        List<String> mapToField = yamlRule.getMapToField();
         String resultField = yamlRule.getResultField();
         String noMatchMessage = yamlRule.getNoMatchMessage();
 
+        boolean enabled = yamlRule.getEnabled() == null || yamlRule.getEnabled();
+
         Rule createdRule = new Rule(ruleId, categories, name, condition, message, description,
                                    yamlRule.getPriority() != null ? yamlRule.getPriority() : 100,
-                                   severity, metadata, yamlRule.getDefaultValue(), successCode, errorCode, mapToField, resultField, noMatchMessage);
+                                   severity, metadata, yamlRule.getDefaultValue(), successCode, errorCode, mapToField, resultField, noMatchMessage, enabled);
 
         // Apply custom properties if available
         if (yamlRule.getCustomProperties() != null && !yamlRule.getCustomProperties().isEmpty()) {
@@ -474,49 +477,7 @@ public class YamlRuleFactory {
         return createdRule;
     }
 
-    /**
-     * Create a Rule from YAML rule configuration (legacy method for backward compatibility).
-     *
-     * @param yamlRule The YAML rule configuration
-     * @return A Rule object
-     * @deprecated Use createRuleWithMetadata for enhanced features
-     */
-    @Deprecated
-    public Rule createRule(YamlRule yamlRule) {
-        logger.debug("Creating rule (legacy): " + yamlRule.getId() + " (" + yamlRule.getName() + ")");
 
-        // For backward compatibility, try to use the new method first
-        try {
-            return createRuleWithMetadata(yamlRule);
-        } catch (Exception e) {
-            logger.warn("Failed to create rule with metadata, falling back to legacy creation: " + e.getMessage());
-
-            // Fallback to legacy creation
-            String id = yamlRule.getId();
-            String name = yamlRule.getName();
-            String condition = yamlRule.getCondition();
-            String message = yamlRule.getMessage() != null ? yamlRule.getMessage() : "Rule " + name + " triggered";
-            String description = yamlRule.getDescription() != null ? yamlRule.getDescription() : "";
-            int priority = yamlRule.getPriority() != null ? yamlRule.getPriority() : 100;
-
-            // Extract severity from YAML rule, default to ERROR if not specified
-            String severity = yamlRule.getSeverity() != null ? yamlRule.getSeverity() : SeverityConstants.DEFAULT_SEVERITY;
-
-            // Determine category
-            Category category = null;
-            if (yamlRule.getCategory() != null) {
-                category = getOrCreateCategory(yamlRule.getCategory(), priority);
-            } else if (yamlRule.getCategories() != null && !yamlRule.getCategories().isEmpty()) {
-                // Use the first category if multiple are specified
-                category = getOrCreateCategory(yamlRule.getCategories().get(0), priority);
-            } else {
-                // Default category
-                category = getOrCreateCategory("default", priority);
-            }
-
-            return new Rule(id, category, name, condition, message, description, priority, severity);
-        }
-    }
     
     /**
      * Create a RuleGroup from YAML rule group configuration without processing rule-group-references.
@@ -994,6 +955,55 @@ public class YamlRuleFactory {
         
         return groups;
     }
+
+    /**
+     * Create a lookup index of rules keyed by their ID.
+     * 
+     * <p>This is an optimisation method for the item-level processing path in
+     * {@link dev.mars.apex.core.engine.config.execution.SequentialProcessor}. Instead of
+     * iterating the YAML rule list and calling {@code createRuleWithMetadata} for
+     * every individual item lookup, callers build the index once and perform
+     * O(1) lookups thereafter.</p>
+     *
+     * @param yamlConfig The YAML configuration containing rules
+     * @return Map of rule ID → Rule; empty map if no rules are defined
+     */
+    public Map<String, Rule> createRuleIndex(YamlRuleConfiguration yamlConfig) {
+        List<Rule> rules = createRules(yamlConfig);
+        Map<String, Rule> index = new LinkedHashMap<>(rules.size());
+        for (Rule rule : rules) {
+            if (rule.getId() != null) {
+                index.put(rule.getId(), rule);
+            } else if (rule.getName() != null) {
+                index.put(rule.getName(), rule);
+            }
+        }
+        return index;
+    }
+
+    /**
+     * Create a lookup index of rule groups keyed by their ID.
+     *
+     * <p>Counterpart to {@link #createRuleIndex(YamlRuleConfiguration)} for rule groups.
+     * Builds all rules first (needed for group membership resolution), then all groups,
+     * and returns an O(1) lookup map.</p>
+     *
+     * @param yamlConfig The YAML configuration containing rule groups
+     * @param config The rules engine configuration (for rule resolution within groups)
+     * @return Map of group ID → RuleGroup; empty map if no groups are defined
+     * @throws YamlConfigurationException if group creation fails
+     */
+    public Map<String, RuleGroup> createRuleGroupIndex(YamlRuleConfiguration yamlConfig,
+                                                        RulesEngineConfiguration config) throws YamlConfigurationException {
+        List<RuleGroup> groups = createRuleGroups(yamlConfig, config);
+        Map<String, RuleGroup> index = new LinkedHashMap<>(groups.size());
+        for (RuleGroup group : groups) {
+            if (group.getId() != null) {
+                index.put(group.getId(), group);
+            }
+        }
+        return index;
+    }
     
     /**
      * Create a list of categories from YAML configuration.
@@ -1130,7 +1140,15 @@ public class YamlRuleFactory {
             originalRule.getMessage(),
             originalRule.getDescription(),
             newPriority,
-            originalRule.getMetadata()
+            originalRule.getSeverity(),
+            originalRule.getMetadata(),
+            originalRule.getDefaultValue(),
+            originalRule.getSuccessCode(),
+            originalRule.getErrorCode(),
+            originalRule.getMapToField(),
+            originalRule.getResultField(),
+            originalRule.getNoMatchMessage(),
+            originalRule.isEnabled()
         );
 
         return newRule;

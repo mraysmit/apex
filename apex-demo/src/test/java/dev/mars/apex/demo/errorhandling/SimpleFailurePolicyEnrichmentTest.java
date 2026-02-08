@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - How enrichment results are captured and field mappings work
  * - How enrichment stages handle missing or invalid data
  *
- * Uses DataTypeScenarioService to execute enrichment scenarios and verifies
+ * Uses RulesEngine to execute enrichment scenarios and verifies
  * that enrichment processing works correctly under various failure conditions.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd

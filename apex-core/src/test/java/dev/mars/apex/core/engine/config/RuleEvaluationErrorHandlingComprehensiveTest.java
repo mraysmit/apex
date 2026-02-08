@@ -1,6 +1,7 @@
 package dev.mars.apex.core.engine.config;
 
 import dev.mars.apex.core.engine.model.Rule;
+import dev.mars.apex.core.engine.config.RuleBuilder;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.engine.RuleEngineService;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
@@ -69,12 +70,12 @@ class RuleEvaluationErrorHandlingComprehensiveTest {
     @DisplayName("PATH 1: executeRule() should return ERROR RuleResult for missing property with ERROR severity")
     void testExecuteRule_MissingProperty_ErrorSeverity() {
         // Given: Rule that references missing property with ERROR severity
-        Rule rule = new Rule(
-            "missing-property-test",
-            "#nonExistentField.length() > 0",  // Method call throws exception
-            "Property should exist",
-            "ERROR"  // Pass severity in constructor
-        );
+        Rule rule = new RuleBuilder()
+            .withName("missing-property-test")
+            .withCondition("#nonExistentField.length() > 0")  // Method call throws exception
+            .withMessage("Property should exist")
+            .withSeverity("ERROR")
+            .build();
 
         Map<String, Object> facts = createFactsWithoutProperty();
 
@@ -99,12 +100,12 @@ class RuleEvaluationErrorHandlingComprehensiveTest {
     @DisplayName("PATH 1: executeRule() should return ERROR RuleResult for missing property with CRITICAL severity")
     void testExecuteRule_MissingProperty_CriticalSeverity() {
         // Given: Rule that references missing property with CRITICAL severity
-        Rule rule = new Rule(
-            "critical-missing-property",
-            "#criticalField.toString().length() > 0",
-            "Critical field must exist",
-            "CRITICAL"  // Pass severity in constructor
-        );
+        Rule rule = new RuleBuilder()
+            .withName("critical-missing-property")
+            .withCondition("#criticalField.toString().length() > 0")
+            .withMessage("Critical field must exist")
+            .withSeverity("CRITICAL")
+            .build();
 
         Map<String, Object> facts = createFactsWithoutProperty();
 
@@ -129,12 +130,12 @@ class RuleEvaluationErrorHandlingComprehensiveTest {
     @DisplayName("PATH 1: executeRule() should return ERROR RuleResult for type mismatch with WARNING severity")
     void testExecuteRule_TypeMismatch_WarningSeverity() {
         // Given: Rule that causes type mismatch with WARNING severity
-        Rule rule = new Rule(
-            "type-mismatch-test",
-            "#stringField > 100",  // Comparing string to number
-            "Should be numeric comparison",
-            "WARNING"  // Pass severity in constructor
-        );
+        Rule rule = new RuleBuilder()
+            .withName("type-mismatch-test")
+            .withCondition("#stringField > 100")  // Comparing string to number
+            .withMessage("Should be numeric comparison")
+            .withSeverity("WARNING")
+            .build();
 
         Map<String, Object> facts = createFactsWithStringField();
 
@@ -257,12 +258,12 @@ class RuleEvaluationErrorHandlingComprehensiveTest {
     @DisplayName("EDGE CASE: Null pointer access should return structured error")
     void testNullPointerAccess_StructuredError() {
         // Given: Rule that will cause null pointer access
-        Rule rule = new Rule(
-            "null-pointer-test",
-            "#nullField.toString().length() > 0",
-            "Null field access",
-            "ERROR"  // Pass severity in constructor
-        );
+        Rule rule = new RuleBuilder()
+            .withName("null-pointer-test")
+            .withCondition("#nullField.toString().length() > 0")
+            .withMessage("Null field access")
+            .withSeverity("ERROR")
+            .build();
 
         Map<String, Object> facts = new HashMap<>();
         facts.put("nullField", null);  // Explicitly null
@@ -286,12 +287,12 @@ class RuleEvaluationErrorHandlingComprehensiveTest {
     @DisplayName("EDGE CASE: Method not found should return structured error")
     void testMethodNotFound_StructuredError() {
         // Given: Rule that calls non-existent method
-        Rule rule = new Rule(
-            "method-not-found-test",
-            "#quantity.nonExistentMethod() > 0",
-            "Method should exist",
-            "CRITICAL"  // Pass severity in constructor
-        );
+        Rule rule = new RuleBuilder()
+            .withName("method-not-found-test")
+            .withCondition("#quantity.nonExistentMethod() > 0")
+            .withMessage("Method should exist")
+            .withSeverity("CRITICAL")
+            .build();
 
         Map<String, Object> facts = createValidFacts();
 
@@ -340,10 +341,10 @@ class RuleEvaluationErrorHandlingComprehensiveTest {
     }
 
     private Rule createFailingRule(String id, String condition, String severity) {
-        return new Rule(id, condition, "This rule will fail", severity);
+        return new RuleBuilder().withName(id).withCondition(condition).withMessage("This rule will fail").withSeverity(severity).build();
     }
 
     private Rule createValidRule(String id, String condition, String severity) {
-        return new Rule(id, condition, "This rule should pass", severity);
+        return new RuleBuilder().withName(id).withCondition(condition).withMessage("This rule should pass").withSeverity(severity).build();
     }
 }

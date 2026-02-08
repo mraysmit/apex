@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Unit tests for malformed scenario registry handling in RulesEngine.
  * 
- * <p>Migrated from DataTypeScenarioServiceMalformedRegistryTest to use the new RulesEngine API.</p>
+ * <p>Replaces the deleted DataTypeScenarioServiceMalformedRegistryTest, using the new RulesEngine API.</p>
  * 
  * <p>Tests cover:</p>
  * <ul>

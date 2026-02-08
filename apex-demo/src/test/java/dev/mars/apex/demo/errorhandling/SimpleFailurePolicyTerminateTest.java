@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - The ScenarioExecutionResult.isTerminated() returns true
  * - No further processing occurs after the failure
  *
- * Uses DataTypeScenarioService to execute scenarios with stages and verifies
+ * Uses RulesEngine to execute scenarios with stages and verifies
  * that termination behavior works correctly.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd

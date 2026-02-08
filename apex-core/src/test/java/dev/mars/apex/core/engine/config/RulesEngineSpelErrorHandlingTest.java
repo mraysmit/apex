@@ -1,6 +1,7 @@
 package dev.mars.apex.core.engine.config;
 
 import dev.mars.apex.core.engine.model.Rule;
+import dev.mars.apex.core.engine.config.RuleBuilder;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -47,12 +48,12 @@ class RulesEngineSpelErrorHandlingTest {
     @DisplayName("Should return RuleResult.error() for SpEL property not found exception")
     void shouldReturnErrorResultForSpelPropertyNotFound() {
         // Given: Rule that tries to access a property that doesn't exist
-        Rule ruleWithMissingProperty = new Rule(
-            "currency-validation",
-            "#currency.length() == 3",  // Direct method call on missing variable throws exception
-            "Currency must be a valid 3-character code",
-            "CRITICAL"
-        );
+        Rule ruleWithMissingProperty = new RuleBuilder()
+            .withName("currency-validation")
+            .withCondition("#currency.length() == 3")  // Direct method call on missing variable throws exception
+            .withMessage("Currency must be a valid 3-character code")
+            .withSeverity("CRITICAL")
+            .build();
         
         List<Rule> rules = Collections.singletonList(ruleWithMissingProperty);
         
@@ -83,12 +84,7 @@ class RulesEngineSpelErrorHandlingTest {
     @DisplayName("Should return RuleResult.error() for SpEL type conversion exception")
     void shouldReturnErrorResultForSpelTypeConversion() {
         // Given: Rule with type conversion that will fail
-        Rule ruleWithTypeError = new Rule(
-            "price-validation",
-            "#price > 0 && #price.someInvalidMethod()",
-            "Price must be positive",
-            "CRITICAL"
-        );
+        Rule ruleWithTypeError = new RuleBuilder().withName("price-validation").withCondition("#price > 0 && #price.someInvalidMethod()").withMessage("Price must be positive").withSeverity("CRITICAL").build();
         
         List<Rule> rules = Collections.singletonList(ruleWithTypeError);
         
@@ -112,19 +108,9 @@ class RulesEngineSpelErrorHandlingTest {
     @DisplayName("Should continue processing other rules after SpEL error in multi-rule scenario")
     void shouldProcessOtherRulesAfterSpelError() {
         // Given: Multiple rules where first causes SpEL error, second should succeed
-        Rule failingRule = new Rule(
-            "failing-rule",
-            "#missingField.toString().length() > 0",
-            "This rule will fail",
-            "CRITICAL"
-        );
+        Rule failingRule = new RuleBuilder().withName("failing-rule").withCondition("#missingField.toString().length() > 0").withMessage("This rule will fail").withSeverity("CRITICAL").build();
 
-        Rule successRule = new Rule(
-            "success-rule",
-            "#quantity > 500",
-            "Quantity is high",
-            "INFO"
-        );
+        Rule successRule = new RuleBuilder().withName("success-rule").withCondition("#quantity > 500").withMessage("Quantity is high").withSeverity("INFO").build();
         
         List<Rule> rules = Arrays.asList(failingRule, successRule);
         
@@ -149,12 +135,7 @@ class RulesEngineSpelErrorHandlingTest {
     @DisplayName("Should validate that normal rule processing still works")
     void shouldValidateNormalRuleProcessingStillWorks() {
         // Given: Valid rule with data that will match
-        Rule validRule = new Rule(
-            "valid-rule",
-            "#quantity > 100 && #instrumentType == 'EQUITY'",
-            "Large equity trade detected",
-            "INFO"
-        );
+        Rule validRule = new RuleBuilder().withName("valid-rule").withCondition("#quantity > 100 && #instrumentType == 'EQUITY'").withMessage("Large equity trade detected").withSeverity("INFO").build();
         
         List<Rule> rules = Collections.singletonList(validRule);
         

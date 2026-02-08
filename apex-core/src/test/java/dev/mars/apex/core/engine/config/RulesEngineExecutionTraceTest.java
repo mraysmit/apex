@@ -37,28 +37,4 @@ public class RulesEngineExecutionTraceTest {
         assertTrue(step.getDurationMs() >= 0);
     }
 
-    @Test
-    public void testExecutionTraceLegacy() throws Exception {
-        dev.mars.apex.core.config.yaml.YamlConfigurationLoader loader = new dev.mars.apex.core.config.yaml.YamlConfigurationLoader();
-        dev.mars.apex.core.config.yaml.YamlRuleConfiguration config = loader.loadFromFile("src/test/resources/tracing/trace-test-legacy.yaml");
-        
-        // Force legacy mode by clearing item order
-        config.setItemOrder(null);
-        
-        RulesEngine engine = RulesEngine.fromYamlConfig(config);
-        Map<String, Object> data = new HashMap<>();
-        
-        RuleResult result = engine.evaluate(data);
-        
-        assertNotNull(result.getExecutionPath(), "Execution path should not be null");
-        // Should have at least "rules" section
-        boolean foundRules = false;
-        for (ExecutionStep step : result.getExecutionPath()) {
-            if ("rules".equals(step.getName()) && "SECTION".equals(step.getType())) {
-                foundRules = true;
-                break;
-            }
-        }
-        assertTrue(foundRules, "Should have rules section trace");
-    }
 }

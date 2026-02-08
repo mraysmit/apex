@@ -37,12 +37,7 @@ class SimpleErrorHandlingTest {
         logger.info("Testing actual behavior of missing property access");
         
         // Create rule that accesses missing property
-        Rule rule = new Rule(
-            "missing-property-test",
-            "#nonExistentField != null",
-            "Property should exist",
-            "ERROR"
-        );
+        Rule rule = new RuleBuilder().withName("missing-property-test").withCondition("#nonExistentField != null").withMessage("Property should exist").withSeverity("ERROR").build();
         
         // Create facts without the property
         Map<String, Object> facts = new HashMap<>();
@@ -67,12 +62,7 @@ class SimpleErrorHandlingTest {
         logger.info("Testing actual behavior of null access");
         
         // Create rule that accesses null field
-        Rule rule = new Rule(
-            "null-access-test",
-            "#nullField.toString() != null",
-            "Null field access",
-            "ERROR"
-        );
+        Rule rule = new RuleBuilder().withName("null-access-test").withCondition("#nullField.toString() != null").withMessage("Null field access").withSeverity("ERROR").build();
         
         // Create facts with null field
         Map<String, Object> facts = new HashMap<>();
@@ -95,12 +85,7 @@ class SimpleErrorHandlingTest {
         logger.info("Testing actual behavior of type error");
         
         // Create rule that causes type error
-        Rule rule = new Rule(
-            "type-error-test",
-            "#stringField > 100",
-            "Type error test",
-            "WARNING"
-        );
+        Rule rule = new RuleBuilder().withName("type-error-test").withCondition("#stringField > 100").withMessage("Type error test").withSeverity("WARNING").build();
         
         // Create facts with string field
         Map<String, Object> facts = new HashMap<>();
@@ -123,12 +108,7 @@ class SimpleErrorHandlingTest {
         logger.info("Testing actual behavior of method not found");
         
         // Create rule that calls non-existent method
-        Rule rule = new Rule(
-            "method-not-found-test",
-            "#value.nonExistentMethod() > 0",
-            "Method not found test",
-            "CRITICAL"
-        );
+        Rule rule = new RuleBuilder().withName("method-not-found-test").withCondition("#value.nonExistentMethod() > 0").withMessage("Method not found test").withSeverity("CRITICAL").build();
         
         // Create facts with valid data
         Map<String, Object> facts = new HashMap<>();

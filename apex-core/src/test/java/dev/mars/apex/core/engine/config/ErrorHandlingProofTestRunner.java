@@ -1,6 +1,7 @@
 package dev.mars.apex.core.engine.config;
 
 import dev.mars.apex.core.engine.model.Rule;
+import dev.mars.apex.core.engine.config.RuleBuilder;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.engine.RuleEngineService;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
@@ -92,14 +93,14 @@ class ErrorHandlingProofTestRunner {
         // Note: "#missing != null" evaluates to false (not an error) when missing is undefined
         // We need an expression that actually causes an evaluation error
         assertStructuredError(() -> {
-            Rule rule = new Rule("test-rule", "#missing.length() > 0", "Test", "CRITICAL");
+            Rule rule = new RuleBuilder().withName("test-rule").withCondition("#missing.length() > 0").withMessage("Test").withSeverity("CRITICAL").build();
             return rulesEngine.executeRule(rule, createEmptyFacts());
         }, "PATH 1: executeRule() missing property");
 
         // Test type mismatch error - comparing string to number causes SpEL error
         // Use CRITICAL severity to ensure error recovery is disabled and we get ERROR result
         assertStructuredError(() -> {
-            Rule rule = new Rule("type-rule", "#text > 100", "Test", "CRITICAL");
+            Rule rule = new RuleBuilder().withName("type-rule").withCondition("#text > 100").withMessage("Test").withSeverity("CRITICAL").build();
             return rulesEngine.executeRule(rule, createTextFacts());
         }, "PATH 1: executeRule() type mismatch");
     }
@@ -166,13 +167,13 @@ class ErrorHandlingProofTestRunner {
         
         // Test CRITICAL severity - should return ERROR (recovery disabled)
         assertStructuredErrorWithSeverity(() -> {
-            Rule rule = new Rule("critical-rule", "#missing.critical()", "Critical test", "CRITICAL");
+            Rule rule = new RuleBuilder().withName("critical-rule").withCondition("#missing.critical()").withMessage("Critical test").withSeverity("CRITICAL").build();
             return rulesEngine.executeRule(rule, createEmptyFacts());
         }, "CRITICAL", RuleResult.ResultType.ERROR, "PATH 5: CRITICAL severity handling");
 
         // Test WARNING severity - should recover to NO_MATCH (recovery enabled)
         assertStructuredErrorWithSeverity(() -> {
-            Rule rule = new Rule("warning-rule", "#missing.warning()", "Warning test", "WARNING");
+            Rule rule = new RuleBuilder().withName("warning-rule").withCondition("#missing.warning()").withMessage("Warning test").withSeverity("WARNING").build();
             return rulesEngine.executeRule(rule, createEmptyFacts());
         }, "WARNING", RuleResult.ResultType.NO_MATCH, "PATH 5: WARNING severity handling (with recovery)");
     }
@@ -182,13 +183,13 @@ class ErrorHandlingProofTestRunner {
         
         // Test null pointer access
         assertStructuredError(() -> {
-            Rule rule = new Rule("null-rule", "#nullField.toString()", "Null test", "CRITICAL");
+            Rule rule = new RuleBuilder().withName("null-rule").withCondition("#nullField.toString()").withMessage("Null test").withSeverity("CRITICAL").build();
             return rulesEngine.executeRule(rule, createNullFacts());
         }, "PATH 6: Null pointer handling");
 
         // Test method not found
         assertStructuredError(() -> {
-            Rule rule = new Rule("method-rule", "#value.nonExistentMethod()", "Method test", "CRITICAL");
+            Rule rule = new RuleBuilder().withName("method-rule").withCondition("#value.nonExistentMethod()").withMessage("Method test").withSeverity("CRITICAL").build();
             return rulesEngine.executeRule(rule, createValidFacts());
         }, "PATH 6: Method not found handling");
     }
@@ -274,6 +275,6 @@ class ErrorHandlingProofTestRunner {
     }
     
     private Rule createFailingRule(String id, String condition, String severity) {
-        return new Rule(id, condition, "This rule will fail", severity);
+        return new RuleBuilder().withName(id).withCondition(condition).withMessage("This rule will fail").withSeverity(severity).build();
     }
 }

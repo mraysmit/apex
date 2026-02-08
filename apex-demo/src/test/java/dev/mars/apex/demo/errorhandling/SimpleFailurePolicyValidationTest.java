@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - How validation failures interact with different failure policies
  * - How validation results are captured and reported
  *
- * Uses DataTypeScenarioService to execute validation scenarios and verifies
+ * Uses RulesEngine to execute validation scenarios and verifies
  * that validation rule processing works correctly under various conditions.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd

@@ -252,7 +252,7 @@ public class YamlTransformationProcessor {
      */
     private boolean shouldProcessTransformation(YamlTransformation transformation, Object targetObject) {
         // Check if transformation is enabled
-        if (transformation.getEnabled() != null && !transformation.getEnabled()) {
+        if (!dev.mars.apex.core.util.EnabledFilter.isEnabled(transformation)) {
             return false;
         }
         

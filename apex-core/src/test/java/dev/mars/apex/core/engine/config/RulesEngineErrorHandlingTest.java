@@ -40,7 +40,6 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Error recovery via default values in YAML
  * 
  * This is the RECOMMENDED approach for all new APEX applications.
- * See {@link dev.mars.apex.core.service.scenario.DataTypeScenarioServiceStageTest} for legacy patterns.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2.1.0

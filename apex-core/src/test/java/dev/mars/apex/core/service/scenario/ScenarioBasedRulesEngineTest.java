@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Modern test for scenario-based validation and enrichment using the new RulesEngine API.
  * 
- * This test replaces the deprecated DataTypeScenarioService tests by using the same
+ * This test replaces the deleted DataTypeScenarioService tests by using the same
  * valid YAML configurations with the new RulesEngine architecture.
  * 
  * The YAML files contain real business logic for OTC option trade processing including:

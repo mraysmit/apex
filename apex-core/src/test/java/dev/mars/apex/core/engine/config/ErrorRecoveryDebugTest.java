@@ -2,6 +2,7 @@ package dev.mars.apex.core.engine.config;
 
 import dev.mars.apex.core.config.error.ErrorRecoveryConfig;
 import dev.mars.apex.core.engine.model.Rule;
+import dev.mars.apex.core.engine.config.RuleBuilder;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -67,7 +68,7 @@ class ErrorRecoveryDebugTest {
         logger.info("Testing ERROR severity rule evaluation");
 
         // Create a rule that will fail with ERROR severity
-        Rule rule = new Rule("test-rule", "#missing != null", "Test", "ERROR");
+        Rule rule = new RuleBuilder().withName("test-rule").withCondition("#missing != null").withMessage("Test").withSeverity("ERROR").build();
         Map<String, Object> facts = createEmptyFacts();
 
         logger.info("Executing rule: {}", rule.getName());
@@ -90,7 +91,7 @@ class ErrorRecoveryDebugTest {
         logger.info("Testing CRITICAL severity rule evaluation");
 
         // Create a rule that will fail with CRITICAL severity
-        Rule rule = new Rule("test-rule", "#missing != null", "Test", "CRITICAL");
+        Rule rule = new RuleBuilder().withName("test-rule").withCondition("#missing != null").withMessage("Test").withSeverity("CRITICAL").build();
         Map<String, Object> facts = createEmptyFacts();
 
         logger.info("Executing rule: {}", rule.getName());
@@ -113,7 +114,7 @@ class ErrorRecoveryDebugTest {
         logger.info("Testing WARNING severity rule evaluation");
         
         // Create a rule that will fail with WARNING severity
-        Rule rule = new Rule("warning-rule", "#missing != null", "Test", "WARNING");
+        Rule rule = new RuleBuilder().withName("warning-rule").withCondition("#missing != null").withMessage("Test").withSeverity("WARNING").build();
         Map<String, Object> facts = createEmptyFacts();
         
         logger.info("Executing rule: {}", rule.getName());
@@ -133,7 +134,7 @@ class ErrorRecoveryDebugTest {
         logger.info("Testing exact replication of ErrorHandlingProofTestRunner logic");
 
         // This is the exact same test that's failing in ErrorHandlingProofTestRunner
-        Rule rule = new Rule("test-rule", "#missing != null", "Test", "CRITICAL");
+        Rule rule = new RuleBuilder().withName("test-rule").withCondition("#missing != null").withMessage("Test").withSeverity("CRITICAL").build();
         Map<String, Object> facts = createEmptyFacts();
 
         logger.info("Executing rule: {}", rule.getName());

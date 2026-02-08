@@ -113,7 +113,7 @@ public class YamlRule {
     private String errorCode;
 
     @JsonProperty("map-to-field")
-    private Object mapToField;  // String or List<String>
+    private Object mapToField;
 
     // Result Field Support - Store rule evaluation result for subsequent rules
     @JsonProperty("result-field")
@@ -320,10 +320,29 @@ public class YamlRule {
         this.errorCode = errorCode;
     }
 
-    public Object getMapToField() {
-        return mapToField;
+    /**
+     * Get the map-to-field configuration, normalized to a List of String.
+     * Handles both String (single mapping) and List (multiple mappings) from YAML.
+     *
+     * @return The field mapping(s) as a List, or null if not configured
+     */
+    public List<String> getMapToField() {
+        if (mapToField == null) return null;
+        if (mapToField instanceof String s) return List.of(s);
+        if (mapToField instanceof List<?> list) {
+            return list.stream()
+                .filter(String.class::isInstance)
+                .map(String.class::cast)
+                .toList();
+        }
+        return null;
     }
 
+    /**
+     * Set the map-to-field configuration.
+     *
+     * @param mapToField The field mapping(s) — String or List from Jackson
+     */
     public void setMapToField(Object mapToField) {
         this.mapToField = mapToField;
     }

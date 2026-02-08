@@ -5,6 +5,7 @@ import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.engine.model.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import dev.mars.apex.core.engine.config.RuleBuilder;
 
 /**
  * COMPREHENSIVE TEST: Tests ALL APEX processors with the SAME YAML file
@@ -198,19 +200,19 @@ class AllProcessorsTest {
             RulesEngine engine = new RulesEngine(rulesEngineConfiguration);
             
             // Create individual rules for testing
-            dev.mars.apex.core.engine.model.Rule riskScoreRule = 
-                new dev.mars.apex.core.engine.model.Rule(
-                    "risk-score-check", 
-                    "#riskScore != null && #riskScore >= 0", 
-                    "Risk score validation"
-                );
+            Rule riskScoreRule = new RuleBuilder()
+                .withName("risk-score-check")
+                .withCondition("#riskScore != null && #riskScore >= 0")
+                .withMessage("Risk score validation")
+                .withSeverity(dev.mars.apex.core.constants.SeverityConstants.INFO)
+                .build();
                 
-            dev.mars.apex.core.engine.model.Rule riskCategoryRule = 
-                new dev.mars.apex.core.engine.model.Rule(
-                    "risk-category-check", 
-                    "#riskCategory != null && (#riskCategory == 'HIGH_RISK' || #riskCategory == 'MEDIUM_RISK' || #riskCategory == 'LOW_RISK')", 
-                    "Risk category validation"
-                );
+            Rule riskCategoryRule = new RuleBuilder()
+                .withName("risk-category-check")
+                .withCondition("#riskCategory != null && (#riskCategory == 'HIGH_RISK' || #riskCategory == 'MEDIUM_RISK' || #riskCategory == 'LOW_RISK')")
+                .withMessage("Risk category validation")
+                .withSeverity(dev.mars.apex.core.constants.SeverityConstants.INFO)
+                .build();
             
             // Execute individual rules
             RuleResult riskScoreResult = engine.executeRule(riskScoreRule, testData);

@@ -4,6 +4,7 @@ import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.engine.UnifiedRuleEvaluator;
 import dev.mars.apex.demo.DemoTestBase;
+import dev.mars.apex.core.engine.config.RuleBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -154,12 +155,7 @@ public class DynamicArrayIndexTest extends DemoTestBase {
         logger.info("  3. otcLeg[{}].stbRuleName → get stbRuleName property", testData.get("legIndex"));
         logger.info("  4. Final evaluation: stbRuleName != null → should be true");
 
-        Rule rule = new Rule(
-            "variable-index-test",
-            "#trade.otcTrade.otcLeg[#legIndex].stbRuleName != null",
-            "Variable index access successful: otcLeg[#legIndex].stbRuleName found",
-            "INFO"
-        );
+        Rule rule = new RuleBuilder().withName("variable-index-test").withCondition("#trade.otcTrade.otcLeg[#legIndex].stbRuleName != null").withMessage("Variable index access successful: otcLeg[#legIndex].stbRuleName found").withSeverity("INFO").build();
 
         logger.info("Executing rule evaluation...");
         RuleResult result = ruleEvaluator.evaluateRule(rule, testData);
@@ -191,12 +187,7 @@ public class DynamicArrayIndexTest extends DemoTestBase {
         logger.info("  3. otcLeg[{}].stbRuleName → get stbRuleName property from selected element", selectedIndex);
         logger.info("  4. Final evaluation: stbRuleName != null → should be true");
 
-        Rule rule = new Rule(
-            "dynamic-field-index-test",
-            "#trade.otcTrade.otcLeg[#trade.selectedLegIndex].stbRuleName != null",
-            "Dynamic field index access successful: otcLeg[selectedLegIndex].stbRuleName found",
-            "INFO"
-        );
+        Rule rule = new RuleBuilder().withName("dynamic-field-index-test").withCondition("#trade.otcTrade.otcLeg[#trade.selectedLegIndex].stbRuleName != null").withMessage("Dynamic field index access successful: otcLeg[selectedLegIndex].stbRuleName found").withSeverity("INFO").build();
 
         logger.info("Executing rule evaluation...");
         RuleResult result = ruleEvaluator.evaluateRule(rule, testData);
@@ -231,12 +222,7 @@ public class DynamicArrayIndexTest extends DemoTestBase {
         logger.info("  4. If bounds check passes: #trade.otcTrade.otcLeg[{}]?.stbRuleName → access element safely", legIndex);
         logger.info("  5. Final evaluation: (bounds check) && (element.stbRuleName != null) → should be true");
 
-        Rule rule = new Rule(
-            "safe-dynamic-index-test",
-            "#trade?.otcTrade?.otcLeg?.size() > #legIndex && #trade.otcTrade.otcLeg[#legIndex]?.stbRuleName != null",
-            "Safe dynamic index access successful: bounds checked and element found",
-            "INFO"
-        );
+        Rule rule = new RuleBuilder().withName("safe-dynamic-index-test").withCondition("#trade?.otcTrade?.otcLeg?.size() > #legIndex && #trade.otcTrade.otcLeg[#legIndex]?.stbRuleName != null").withMessage("Safe dynamic index access successful: bounds checked and element found").withSeverity("INFO").build();
 
         logger.info("Executing rule evaluation...");
         RuleResult result = ruleEvaluator.evaluateRule(rule, testData);
@@ -272,12 +258,7 @@ public class DynamicArrayIndexTest extends DemoTestBase {
         logger.info("  6. Expected result: items[{}].status = '{}'", calculatedIndex,
                    items.get(calculatedIndex).get("status"));
 
-        Rule rule = new Rule(
-            "index-calculation-test",
-            "#items[#currentIndex + 1]?.status != null",
-            "Index calculation access successful: items[currentIndex + 1].status found",
-            "INFO"
-        );
+        Rule rule = new RuleBuilder().withName("index-calculation-test").withCondition("#items[#currentIndex + 1]?.status != null").withMessage("Index calculation access successful: items[currentIndex + 1].status found").withSeverity("INFO").build();
 
         logger.info("Executing rule evaluation...");
         RuleResult result = ruleEvaluator.evaluateRule(rule, testData);

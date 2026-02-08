@@ -5,12 +5,7 @@ package dev.mars.apex.core.engine.pipeline;
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 1.0.0
- * @deprecated since 3.0, for removal in 4.0. This result type is specific to the deprecated
- *             {@link DataPipelineEngine} and {@link YamlPipelineExecutionResult}. Use
- *             {@link dev.mars.apex.core.engine.model.RuleResult} returned by
- *             {@link dev.mars.apex.core.engine.config.RulesEngine#evaluate(java.util.Map)} instead.
  */
-@Deprecated(since = "3.0", forRemoval = true)
 public class PipelineStepResult {
     
     private final String stepName;

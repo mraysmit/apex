@@ -29,6 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import dev.mars.apex.core.engine.config.RuleBuilder;
 
 /**
  * Test class for Rule Group Severity Aggregation functionality.
@@ -137,9 +138,9 @@ public class SeverityAggregationTest {
     @DisplayName("Rule group evaluation should aggregate severity correctly")
     void testRuleGroupEvaluationWithSeverity() {
         // Create rules with different severities
-        Rule errorRule = new Rule("error-rule", "false", "Error rule message", "ERROR");
-        Rule warningRule = new Rule("warning-rule", "true", "Warning rule message", "WARNING");
-        Rule infoRule = new Rule("info-rule", "true", "Info rule message", "INFO");
+        Rule errorRule = new RuleBuilder().withName("error-rule").withCondition("false").withMessage("Error rule message").withSeverity("ERROR").build();
+        Rule warningRule = new RuleBuilder().withName("warning-rule").withCondition("true").withMessage("Warning rule message").withSeverity("WARNING").build();
+        Rule infoRule = new RuleBuilder().withName("info-rule").withCondition("true").withMessage("Info rule message").withSeverity("INFO").build();
         
         // Create AND rule group with short-circuiting disabled to evaluate all rules
         RuleGroup andGroup = new RuleGroup("test-and-group", "default", "Test AND Group",
@@ -168,9 +169,9 @@ public class SeverityAggregationTest {
     @DisplayName("OR group evaluation should use first match severity")
     void testOrGroupEvaluationWithSeverity() {
         // Create rules with different severities
-        Rule infoRule = new Rule("info-rule", "false", "Info rule message", "INFO");
-        Rule warningRule = new Rule("warning-rule", "true", "Warning rule message", "WARNING");
-        Rule errorRule = new Rule("error-rule", "true", "Error rule message", "ERROR");
+        Rule infoRule = new RuleBuilder().withName("info-rule").withCondition("false").withMessage("Info rule message").withSeverity("INFO").build();
+        Rule warningRule = new RuleBuilder().withName("warning-rule").withCondition("true").withMessage("Warning rule message").withSeverity("WARNING").build();
+        Rule errorRule = new RuleBuilder().withName("error-rule").withCondition("true").withMessage("Error rule message").withSeverity("ERROR").build();
         
         // Create OR rule group with short-circuiting disabled to evaluate all rules
         RuleGroup orGroup = new RuleGroup("test-or-group", "default", "Test OR Group",

@@ -59,13 +59,214 @@ public class RuleResult implements Serializable {
     // Error and Success Code Support
     private final String successCode;
     private final String errorCode;
-    private final Object mapToField;  // String or List<String>
+    private final List<String> mapToField;
 
     // Child results for composite evaluations (e.g., evaluateSequential)
     private final List<RuleResult> childResults;
 
     // New field for execution trace
     private List<ExecutionStep> executionPath = new ArrayList<>();
+
+
+    /**
+     * Private all-fields constructor used exclusively by the Builder.
+     * All public constructors remain for backward compatibility.
+     */
+    private RuleResult(Builder builder) {
+        this.id = builder.id != null ? builder.id : UUID.randomUUID();
+        this.ruleId = builder.ruleId;
+        this.ruleName = builder.ruleName;
+        this.message = builder.message;
+        this.severity = builder.severity != null ? builder.severity : SeverityConstants.INFO;
+        this.triggered = builder.triggered;
+        this.timestamp = builder.timestamp != null ? builder.timestamp : Instant.now();
+        this.resultType = builder.resultType;
+        this.performanceMetrics = builder.performanceMetrics;
+        this.enrichedData = builder.enrichedData != null ? new HashMap<>(builder.enrichedData) : new HashMap<>();
+        this.failureMessages = builder.failureMessages != null ? new ArrayList<>(builder.failureMessages) : new ArrayList<>();
+        this.success = builder.success;
+        this.successCode = builder.successCode;
+        this.errorCode = builder.errorCode;
+        this.mapToField = builder.mapToField;
+        this.childResults = builder.childResults != null ? new ArrayList<>(builder.childResults) : new ArrayList<>();
+        this.executionPath = builder.executionPath != null ? new ArrayList<>(builder.executionPath) : new ArrayList<>();
+    }
+
+    /**
+     * Create a new Builder for constructing RuleResult instances.
+     *
+     * @return a new Builder
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /**
+     * Create a Builder pre-populated with values from this RuleResult.
+     * Useful for creating modified copies of an existing result.
+     * Note: generates a new UUID and timestamp for the copy.
+     *
+     * @return a Builder pre-populated with this result's values
+     */
+    public Builder toBuilder() {
+        Builder b = new Builder();
+        // Note: id and timestamp are NOT copied — each result gets fresh values
+        b.ruleId = this.ruleId;
+        b.ruleName = this.ruleName;
+        b.message = this.message;
+        b.severity = this.severity;
+        b.triggered = this.triggered;
+        b.resultType = this.resultType;
+        b.performanceMetrics = this.performanceMetrics;
+        b.enrichedData = this.enrichedData != null ? new HashMap<>(this.enrichedData) : new HashMap<>();
+        b.failureMessages = this.failureMessages != null ? new ArrayList<>(this.failureMessages) : new ArrayList<>();
+        b.success = this.success;
+        b.successCode = this.successCode;
+        b.errorCode = this.errorCode;
+        b.mapToField = this.mapToField;
+        b.childResults = this.childResults != null ? new ArrayList<>(this.childResults) : new ArrayList<>();
+        b.executionPath = this.executionPath != null ? new ArrayList<>(this.executionPath) : new ArrayList<>();
+        return b;
+    }
+
+    /**
+     * Builder for constructing RuleResult instances with a fluent API.
+     * Replaces the need for 12+ parameter constructors.
+     *
+     * <p>Usage example:</p>
+     * <pre>{@code
+     * RuleResult result = RuleResult.builder()
+     *     .ruleName("trade-validation")
+     *     .message("Trade passed validation")
+     *     .severity(SeverityConstants.INFO)
+     *     .triggered(true)
+     *     .resultType(ResultType.MATCH)
+     *     .enrichedData(enrichments)
+     *     .success(true)
+     *     .build();
+     * }</pre>
+     *
+     * <p>To create a modified copy:</p>
+     * <pre>{@code
+     * RuleResult updated = existingResult.toBuilder()
+     *     .message("Updated message")
+     *     .enrichedData(mergedData)
+     *     .build();
+     * }</pre>
+     */
+    public static class Builder {
+        private UUID id;
+        private String ruleId;
+        private String ruleName;
+        private String message;
+        private String severity;
+        private boolean triggered;
+        private Instant timestamp;
+        private ResultType resultType;
+        private RulePerformanceMetrics performanceMetrics;
+        private Map<String, Object> enrichedData;
+        private List<String> failureMessages;
+        private boolean success;
+        private String successCode;
+        private String errorCode;
+        private List<String> mapToField;
+        private List<RuleResult> childResults;
+        private List<ExecutionStep> executionPath;
+
+        private Builder() {
+            // defaults
+            this.severity = SeverityConstants.INFO;
+            this.success = true;
+        }
+
+        public Builder ruleId(String ruleId) {
+            this.ruleId = ruleId;
+            return this;
+        }
+
+        public Builder ruleName(String ruleName) {
+            this.ruleName = ruleName;
+            return this;
+        }
+
+        public Builder message(String message) {
+            this.message = message;
+            return this;
+        }
+
+        public Builder severity(String severity) {
+            this.severity = severity;
+            return this;
+        }
+
+        public Builder triggered(boolean triggered) {
+            this.triggered = triggered;
+            return this;
+        }
+
+        public Builder resultType(ResultType resultType) {
+            this.resultType = resultType;
+            return this;
+        }
+
+        public Builder performanceMetrics(RulePerformanceMetrics performanceMetrics) {
+            this.performanceMetrics = performanceMetrics;
+            return this;
+        }
+
+        public Builder enrichedData(Map<String, Object> enrichedData) {
+            this.enrichedData = enrichedData;
+            return this;
+        }
+
+        public Builder failureMessages(List<String> failureMessages) {
+            this.failureMessages = failureMessages;
+            return this;
+        }
+
+        public Builder success(boolean success) {
+            this.success = success;
+            return this;
+        }
+
+        public Builder successCode(String successCode) {
+            this.successCode = successCode;
+            return this;
+        }
+
+        public Builder errorCode(String errorCode) {
+            this.errorCode = errorCode;
+            return this;
+        }
+
+        public Builder mapToField(List<String> mapToField) {
+            this.mapToField = mapToField;
+            return this;
+        }
+
+        public Builder childResults(List<RuleResult> childResults) {
+            this.childResults = childResults;
+            return this;
+        }
+
+        public Builder executionPath(List<ExecutionStep> executionPath) {
+            this.executionPath = executionPath;
+            return this;
+        }
+
+        /**
+         * Build the RuleResult instance.
+         *
+         * @return a new RuleResult
+         * @throws IllegalStateException if resultType is not set
+         */
+        public RuleResult build() {
+            if (resultType == null) {
+                throw new IllegalStateException("resultType must be set");
+            }
+            return new RuleResult(this);
+        }
+    }
 
     /**
      * Enum representing the type of result.
@@ -267,7 +468,7 @@ public class RuleResult implements Serializable {
      */
     public RuleResult(String ruleName, String message, String severity, boolean triggered, ResultType resultType,
                      RulePerformanceMetrics performanceMetrics, Map<String, Object> enrichedData,
-                     List<String> failureMessages, boolean success, String successCode, String errorCode, Object mapToField) {
+                     List<String> failureMessages, boolean success, String successCode, String errorCode, List<String> mapToField) {
         this.id = UUID.randomUUID();
         this.ruleId = null;  // No ruleId for backward compatibility
         this.ruleName = ruleName;
@@ -308,7 +509,7 @@ public class RuleResult implements Serializable {
      */
     public RuleResult(String ruleId, String ruleName, String message, String severity, boolean triggered, ResultType resultType,
                      RulePerformanceMetrics performanceMetrics, Map<String, Object> enrichedData,
-                     List<String> failureMessages, boolean success, String successCode, String errorCode, Object mapToField) {
+                     List<String> failureMessages, boolean success, String successCode, String errorCode, List<String> mapToField) {
         this.id = UUID.randomUUID();
         this.ruleId = ruleId;
         this.ruleName = ruleName;
@@ -806,9 +1007,9 @@ public class RuleResult implements Serializable {
      * Get the field mapping expressions for this rule result.
      * Phase 4 Enhancement: Returns field mapping expressions that were applied.
      *
-     * @return The field mapping expressions (String or List<String>), or null if no mapping was specified
+     * @return The field mapping expressions, or null if no mapping was specified
      */
-    public Object getMapToField() {
+    public List<String> getMapToField() {
         return mapToField;
     }
 

@@ -16,6 +16,7 @@
 
 package dev.mars.apex.demo.conditional;
 
+import dev.mars.apex.core.config.yaml.ProcessingItem;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
@@ -25,7 +26,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,12 +50,13 @@ public class RouterPatternEnrichmentGroupTest extends DemoTestBase {
             YamlRuleConfiguration config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/conditional/RouterPatternEnrichmentGroupTest.yaml");
             assertNotNull(config, "Configuration should not be null");
             
-            // CRITICAL: Override section order to ONLY execute rule-chains.
-            // This prevents the enrichment-groups from being executed globally by the engine,
-            // ensuring that they are only executed if the Router triggers them.
-            config.setSectionOrder(List.of("rule-chains"));
-            // ALSO CRITICAL: Clear itemOrder to force section-level processing
-            config.setItemOrder(null);
+            // CRITICAL: Filter itemOrder to ONLY include rule-chains items.
+            // This prevents enrichments and enrichment-groups from being executed globally
+            // by the engine, ensuring they are only executed if the Router triggers them.
+            List<ProcessingItem> ruleChainsOnly = config.getItemOrder().stream()
+                    .filter(item -> "rule-chains".equals(item.getSectionType()))
+                    .toList();
+            config.setItemOrder(ruleChainsOnly);
             
             logger.info("[OK] Configuration loaded successfully");
 

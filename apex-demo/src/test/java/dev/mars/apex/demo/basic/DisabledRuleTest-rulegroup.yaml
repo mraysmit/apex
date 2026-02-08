@@ -1,0 +1,63 @@
+# Test YAML for disabled rules inside rule groups
+# Verifies that:
+# 1. A disabled rule INSIDE a rule group is skipped
+# 2. A disabled rule group (entire group) is skipped
+# 3. Enabled rules in the same group still evaluate normally
+metadata:
+  id: "disabled-rule-group-test"
+  name: "Disabled Rule Group Test"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "Tests disabled rules within rule groups"
+  author: "APEX Demo"
+
+rules:
+  - id: "group-enabled-rule"
+    name: "Group Enabled Rule"
+    condition: "#age >= 18"
+    message: "Age check passed"
+    severity: "INFO"
+    enabled: true
+
+  - id: "group-disabled-rule"
+    name: "Group Disabled Rule"
+    condition: "#age >= 18"
+    message: "This should never appear - disabled rule in group"
+    severity: "ERROR"
+    enabled: false
+
+  - id: "group-another-enabled-rule"
+    name: "Group Another Enabled Rule"
+    condition: "#name != null"
+    message: "Name check passed"
+    severity: "INFO"
+    enabled: true
+
+  - id: "disabled-group-rule-a"
+    name: "Disabled Group Rule A"
+    condition: "#age >= 18"
+    message: "Rule A in disabled group"
+    severity: "INFO"
+
+  - id: "disabled-group-rule-b"
+    name: "Disabled Group Rule B"
+    condition: "#name != null"
+    message: "Rule B in disabled group"
+    severity: "INFO"
+
+rule-groups:
+  - id: "and-group-with-disabled-rule"
+    name: "AND Group With Disabled Rule"
+    operator: "AND"
+    rule-ids:
+      - "group-enabled-rule"
+      - "group-disabled-rule"
+      - "group-another-enabled-rule"
+
+  - id: "disabled-group"
+    name: "Disabled Group"
+    operator: "AND"
+    enabled: false
+    rule-ids:
+      - "disabled-group-rule-a"
+      - "disabled-group-rule-b"

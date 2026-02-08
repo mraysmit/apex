@@ -1,0 +1,55 @@
+# Test YAML for disabled enrichments
+# Verifies that enrichments with enabled: false are skipped
+metadata:
+  id: "disabled-enrichment-test"
+  name: "Disabled Enrichment Test"
+  type: "rule-config"
+  version: "1.0.0"
+  description: "Tests that disabled enrichments are not processed"
+  author: "APEX Demo"
+
+enrichments:
+  - id: "enabled-enrichment"
+    name: "Enabled Enrichment"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#category != null"
+    lookup-config:
+      lookup-key: "#category"
+      lookup-dataset:
+        type: "inline"
+        key-field: "category"
+        data:
+          - category: "A"
+            rate: 0.05
+          - category: "B"
+            rate: 0.10
+    field-mappings:
+      - source-field: "rate"
+        target-field: "lookupRate"
+
+  - id: "disabled-enrichment"
+    name: "Disabled Enrichment"
+    type: "lookup-enrichment"
+    enabled: false
+    condition: "#category != null"
+    lookup-config:
+      lookup-key: "#category"
+      lookup-dataset:
+        type: "inline"
+        key-field: "category"
+        data:
+          - category: "A"
+            bonus: 999
+          - category: "B"
+            bonus: 888
+    field-mappings:
+      - source-field: "bonus"
+        target-field: "bonusValue"
+
+rules:
+  - id: "post-enrichment-rule"
+    name: "Post Enrichment Rule"
+    condition: "#lookupRate != null"
+    message: "Lookup rate was enriched"
+    severity: "INFO"

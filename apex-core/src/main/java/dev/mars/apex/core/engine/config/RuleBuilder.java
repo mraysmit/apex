@@ -364,15 +364,22 @@ public class RuleBuilder {
             categories.add(new Category("default", priority));
         }
 
+        // Set default createdByUser if not explicitly set
+        RuleMetadata tempMetadata = metadataBuilder.build();
+        if (tempMetadata.getCreatedByUser() == null) {
+            metadataBuilder.createdByUser("system");
+        }
+
         // Auto-detect complexity if not set
-        if (metadataBuilder.build().getComplexity() == RuleComplexity.MEDIUM) {
+        if (tempMetadata.getComplexity() == RuleComplexity.MEDIUM) {
             metadataBuilder.complexity(RuleComplexity.fromCondition(condition));
         }
 
         // Build metadata
         RuleMetadata metadata = metadataBuilder.build();
 
-        Rule rule = new Rule(id, categories, name, condition, message, description, priority, severity, metadata);
+        Rule rule = new Rule(id, categories, name, condition, message, description, priority, severity,
+                metadata, null, null, null, null, null, null, true);
 
         // Auto-register the rule if configuration is available
         if (configuration != null) {

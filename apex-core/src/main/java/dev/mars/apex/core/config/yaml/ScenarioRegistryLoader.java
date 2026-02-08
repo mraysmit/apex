@@ -668,8 +668,7 @@ public class ScenarioRegistryLoader {
     
     /**
      * Parse scenario configuration from YAML data map.
-     * This follows the same pattern as DataTypeScenarioService.parseScenarioConfiguration.
-     * 
+     *
      * @param scenarioData The scenario data map from YAML
      * @return Parsed ScenarioConfiguration
      */

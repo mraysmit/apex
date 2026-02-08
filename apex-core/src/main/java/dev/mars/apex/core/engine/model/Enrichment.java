@@ -48,7 +48,7 @@ public class Enrichment {
     private final String targetField;
     private final String successCode;
     private final String errorCode;
-    private final Object mapToField;  // String or List<String>
+    private final List<String> mapToField;
     private final String resultField;  // Result field support
 
     // Enterprise metadata fields
@@ -203,7 +203,7 @@ public class Enrichment {
         return errorCode;
     }
 
-    public Object getMapToField() {
+    public List<String> getMapToField() {
         return mapToField;
     }
 

@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Integration tests for RulesEngine classification-based routing.
  * 
- * <p>Migrated from DataTypeScenarioServiceClassificationTest to use the new RulesEngine API.</p>
+ * <p>Replaces the deleted DataTypeScenarioServiceClassificationTest, using the new RulesEngine API.</p>
  * 
  * <p>Tests the complete end-to-end flow:</p>
  * <ol>

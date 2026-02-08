@@ -62,6 +62,7 @@ module dev.mars.apex.core {
     exports dev.mars.apex.core.exception;
     exports dev.mars.apex.core.service.error;
     exports dev.mars.apex.core.api;
+    exports dev.mars.apex.core.constants;
 
     // YAML configuration exports
     exports dev.mars.apex.core.config.yaml;
@@ -104,9 +105,6 @@ module dev.mars.apex.core {
 
     // Pipeline configuration exports
     exports dev.mars.apex.core.config.pipeline;
-
-    // exports - Input Data Classification System
-    exports dev.mars.apex.core.service.classification;
 
     // Transformation service exports
     exports dev.mars.apex.core.service.transformation;

@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import dev.mars.apex.core.engine.config.RuleBuilder;
 
 /**
  * Integration test for RulesEngine with Rule Group Severity Aggregation.
@@ -49,9 +50,9 @@ public class RulesEngineIntegrationTest {
     @DisplayName("RulesEngine should return rule group result with aggregated severity")
     void testRulesEngineWithSeverityAggregation() {
         // Create rules with different severities
-        Rule errorRule = new Rule("error-rule", "false", "Error rule failed", "ERROR");
-        Rule warningRule = new Rule("warning-rule", "true", "Warning rule passed", "WARNING");
-        Rule infoRule = new Rule("info-rule", "true", "Info rule passed", "INFO");
+        Rule errorRule = new RuleBuilder().withName("error-rule").withCondition("false").withMessage("Error rule failed").withSeverity("ERROR").build();
+        Rule warningRule = new RuleBuilder().withName("warning-rule").withCondition("true").withMessage("Warning rule passed").withSeverity("WARNING").build();
+        Rule infoRule = new RuleBuilder().withName("info-rule").withCondition("true").withMessage("Info rule passed").withSeverity("INFO").build();
         
         // Create AND rule group (should fail due to error rule)
         RuleGroup andGroup = new RuleGroup("test-and-group", "default", "Test AND Group", 
@@ -94,9 +95,9 @@ public class RulesEngineIntegrationTest {
     @DisplayName("RulesEngine should return matching rule group with aggregated severity")
     void testRulesEngineWithMatchingRuleGroup() {
         // Create rules where all pass
-        Rule errorRule = new Rule("error-rule", "true", "Error rule passed", "ERROR");
-        Rule warningRule = new Rule("warning-rule", "true", "Warning rule passed", "WARNING");
-        Rule infoRule = new Rule("info-rule", "true", "Info rule passed", "INFO");
+        Rule errorRule = new RuleBuilder().withName("error-rule").withCondition("true").withMessage("Error rule passed").withSeverity("ERROR").build();
+        Rule warningRule = new RuleBuilder().withName("warning-rule").withCondition("true").withMessage("Warning rule passed").withSeverity("WARNING").build();
+        Rule infoRule = new RuleBuilder().withName("info-rule").withCondition("true").withMessage("Info rule passed").withSeverity("INFO").build();
         
         // Create AND rule group (should pass since all rules pass)
         RuleGroup andGroup = new RuleGroup("test-and-group", "default", "Test AND Group", 
@@ -128,9 +129,9 @@ public class RulesEngineIntegrationTest {
     @DisplayName("RulesEngine should handle OR groups with first match severity")
     void testRulesEngineWithOrGroupSeverity() {
         // Create rules where first matching rule has WARNING severity
-        Rule infoRule = new Rule("info-rule", "false", "Info rule failed", "INFO");
-        Rule warningRule = new Rule("warning-rule", "true", "Warning rule passed", "WARNING");
-        Rule errorRule = new Rule("error-rule", "true", "Error rule passed", "ERROR");
+        Rule infoRule = new RuleBuilder().withName("info-rule").withCondition("false").withMessage("Info rule failed").withSeverity("INFO").build();
+        Rule warningRule = new RuleBuilder().withName("warning-rule").withCondition("true").withMessage("Warning rule passed").withSeverity("WARNING").build();
+        Rule errorRule = new RuleBuilder().withName("error-rule").withCondition("true").withMessage("Error rule passed").withSeverity("ERROR").build();
         
         // Create OR rule group (should pass with WARNING severity from first match)
         RuleGroup orGroup = new RuleGroup("test-or-group", "default", "Test OR Group", 
@@ -162,13 +163,13 @@ public class RulesEngineIntegrationTest {
     @DisplayName("RulesEngine should evaluate multiple rule groups in priority order")
     void testRulesEngineWithMultipleRuleGroups() {
         // Create first rule group (higher priority, should be evaluated first)
-        Rule highPriorityRule = new Rule("high-priority-rule", "true", "High priority rule", "WARNING");
+        Rule highPriorityRule = new RuleBuilder().withName("high-priority-rule").withCondition("true").withMessage("High priority rule").withSeverity("WARNING").build();
         RuleGroup highPriorityGroup = new RuleGroup("high-priority-group", "default", "High Priority Group", 
                                                    "High Priority Group Description", 1, true);
         highPriorityGroup.addRule(highPriorityRule, 1);
         
         // Create second rule group (lower priority)
-        Rule lowPriorityRule = new Rule("low-priority-rule", "true", "Low priority rule", "ERROR");
+        Rule lowPriorityRule = new RuleBuilder().withName("low-priority-rule").withCondition("true").withMessage("Low priority rule").withSeverity("ERROR").build();
         RuleGroup lowPriorityGroup = new RuleGroup("low-priority-group", "default", "Low Priority Group", 
                                                   "Low Priority Group Description", 2, true);
         lowPriorityGroup.addRule(lowPriorityRule, 1);

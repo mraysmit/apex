@@ -75,7 +75,8 @@ class RecoveryMetricsIntegrationTest {
             1,  // priority
             "ERROR",
             null,  // metadata
-            "defaultValue123"  // Phase 3A default-value
+            "defaultValue123",  // Phase 3A default-value
+            null, null, null, null, null, true
         );
 
         Map<String, Object> facts = new HashMap<>();
@@ -133,7 +134,8 @@ class RecoveryMetricsIntegrationTest {
             1,  // priority
             "ERROR",
             null,  // metadata
-            "defaultValue"
+            "defaultValue",
+            null, null, null, null, null, true
         );
         
         Map<String, Object> facts = new HashMap<>();
@@ -170,7 +172,8 @@ class RecoveryMetricsIntegrationTest {
             1,  // priority
             "ERROR",
             null,  // metadata
-            "defaultValue"
+            "defaultValue",
+            null, null, null, null, null, true
         );
         
         Map<String, Object> facts = new HashMap<>();
@@ -219,7 +222,8 @@ class RecoveryMetricsIntegrationTest {
             1,  // priority
             "ERROR",
             null,  // metadata
-            null   // no default value
+            null,  // no default value
+            null, null, null, null, null, true
         );
         
         Map<String, Object> facts = new HashMap<>();

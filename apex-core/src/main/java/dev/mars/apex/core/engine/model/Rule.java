@@ -6,6 +6,7 @@ import dev.mars.apex.core.engine.model.metadata.RuleStatus;
 
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -30,21 +31,20 @@ import java.util.stream.Collectors;
 /**
  * Represents a business rule with a condition, message, and extensible metadata.
  *
-* This class is part of the APEX A powerful expression processor for Java applications.
+ * <p>This class is part of the APEX rules engine for Java applications.
+ *
+ * <p>Supports comprehensive metadata including:
+ * <ul>
+ *   <li>Audit trail (creation/modification dates and users)</li>
+ *   <li>Version information</li>
+ *   <li>Business context (owner, domain, purpose)</li>
+ *   <li>Technical attributes (complexity, tags, source system)</li>
+ *   <li>Extensible custom properties</li>
+ * </ul>
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-07-27
  * @version 1.0
- */
-/**
- * Represents a business rule with a condition, message, and extensible metadata.
- *
- * This class now supports comprehensive metadata including:
- * - Audit trail (creation/modification dates and users)
- * - Version information
- * - Business context (owner, domain, purpose)
- * - Technical attributes (complexity, tags, source system)
- * - Extensible custom properties
  */
 public class Rule implements RuleBase {
     private final UUID uuid;
@@ -53,390 +53,25 @@ public class Rule implements RuleBase {
     private final String name;
     private final String condition;
     private final String message;
+    private final String noMatchMessage;
     private final String description;
     private final String severity;
     private final int priority;
     private final RuleMetadata metadata;
 
-    // Phase 3A Enhancement: Default value for error recovery
+    // Default value for error recovery
     private final Object defaultValue;
 
-    // Error and Success Code Support
     private final String successCode;
     private final String errorCode;
-    private final Object mapToField;  // String or List<String>
-
-    // Result Field Support - Store rule evaluation result for subsequent rules
+    private final List<String> mapToField;
     private final String resultField;
-
-    // Phase 6: No-match message - separate message for when condition evaluates to false
-    private final String noMatchMessage;
-
-    /**
-     * Create a new business rule with minimal information.
-     * This constructor is provided for compatibility with the legacy Rule class.
-     * It automatically generates an ID, uses a default category, and sets a default priority.
-     *
-     * @param name The name of the rule
-     * @param condition The SpEL condition that determines if the rule applies
-     * @param message The message to display when the rule applies
-     */
-    public Rule(String name, String condition, String message) {
-        this(name, condition, message, SeverityConstants.INFO); // Default severity for backward compatibility
-    }
+    private final boolean enabled;  
+    
 
     /**
-     * Create a new business rule with minimal information and severity.
-     * This constructor is provided for compatibility with the legacy Rule class.
-     * It automatically generates an ID, uses a default category, and sets a default priority.
-     *
-     * @param name The name of the rule
-     * @param condition The SpEL condition that determines if the rule applies
-     * @param message The message to display when the rule applies
-     * @param severity The severity level (ERROR, WARNING, INFO)
-     */
-    public Rule(String name, String condition, String message, String severity) {
-        this.uuid = UUID.randomUUID();
-        this.id = "R" + UUID.randomUUID().toString().substring(0, 8);
-        this.categories = new HashSet<>();
-        this.categories.add(new Category("default", 100));
-        this.name = name;
-        this.condition = condition;
-        this.message = message;
-        this.description = message; // Use message as description for backward compatibility
-        this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
-        this.priority = 100; // Default priority
-        this.defaultValue = null; // No default value for backward compatibility
-        this.successCode = null;
-        this.errorCode = null;
-        this.mapToField = null;
-        this.resultField = null; // No result field for backward compatibility
-        this.noMatchMessage = null;
-        this.metadata = RuleMetadata.builder()
-            .createdByUser("system")
-            .build();
-    }
-
-    /**
-     * Create a new business rule with a single category.
-     *
-     * @param id The unique identifier of the rule
-     * @param category The category of the rule
-     * @param name The name of the rule
-     * @param condition The SpEL condition that determines if the rule applies
-     * @param message The message to display when the rule applies
-     * @param description The description of what the rule does
-     * @param priority The priority of the rule (lower numbers = higher priority)
-     */
-    public Rule(String id, String category, String name, String condition,
-                String message, String description, int priority) {
-        this(id, category, name, condition, message, description, priority, SeverityConstants.INFO); // Default severity
-    }
-
-    /**
-     * Create a new business rule with a single category and severity.
-     *
-     * @param id The unique identifier of the rule
-     * @param category The category of the rule
-     * @param name The name of the rule
-     * @param condition The SpEL condition that determines if the rule applies
-     * @param message The message to display when the rule applies
-     * @param description The description of what the rule does
-     * @param priority The priority of the rule (lower numbers = higher priority)
-     * @param severity The severity level (ERROR, WARNING, INFO)
-     */
-    public Rule(String id, String category, String name, String condition,
-                String message, String description, int priority, String severity) {
-        this.uuid = UUID.randomUUID();
-        this.id = id;
-        this.categories = new HashSet<>();
-        this.categories.add(new Category(category, priority));
-        this.name = name;
-        this.condition = condition;
-        this.message = message;
-        this.description = description;
-        this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
-        this.priority = priority;
-        this.defaultValue = null; // No default value for backward compatibility
-        this.successCode = null;
-        this.errorCode = null;
-        this.mapToField = null;
-        this.resultField = null; // No result field for backward compatibility
-        this.noMatchMessage = null;
-        this.metadata = RuleMetadata.builder()
-            .createdByUser("system")
-            .build();
-    }
-
-    /**
-     * Create a rule from a set of category names.
-     * 
-     * @param id The unique identifier of the rule
-     * @param categoryNames The names of the categories of the rule
-     * @param name The name of the rule
-     * @param condition The SpEL condition that determines if the rule applies
-     * @param message The message to display when the rule applies
-     * @param description The description of what the rule does
-     * @param priority The priority of the rule (lower numbers = higher priority)
-     * @return A new Rule instance
-     */
-    public static Rule fromCategoryNames(String id, Set<String> categoryNames, String name, String condition,
-                                        String message, String description, int priority) {
-        return fromCategoryNames(id, categoryNames, name, condition, message, description, priority, SeverityConstants.INFO);
-    }
-
-    public static Rule fromCategoryNames(String id, Set<String> categoryNames, String name, String condition,
-                                        String message, String description, int priority, String severity) {
-        Set<Category> categoryObjects = categoryNames.stream()
-            .map(c -> new Category(c, priority))
-            .collect(Collectors.toSet());
-        return new Rule(id, categoryObjects, name, condition, message, description, priority, severity);
-    }
-
-    /**
-     * Create a new business rule with a single category object.
-     *
-     * @param id The unique identifier of the rule
-     * @param category The category object of the rule
-     * @param name The name of the rule
-     * @param condition The SpEL condition that determines if the rule applies
-     * @param message The message to display when the rule applies
-     * @param description The description of what the rule does
-     * @param priority The priority of the rule (lower numbers = higher priority)
-     */
-    public Rule(String id, Category category, String name, String condition,
-                String message, String description, int priority) {
-        this(id, category, name, condition, message, description, priority, SeverityConstants.INFO); // Default severity
-    }
-
-    /**
-     * Create a new business rule with a single category object and severity.
-     *
-     * @param id The unique identifier of the rule
-     * @param category The category object of the rule
-     * @param name The name of the rule
-     * @param condition The SpEL condition that determines if the rule applies
-     * @param message The message to display when the rule applies
-     * @param description The description of what the rule does
-     * @param priority The priority of the rule (lower numbers = higher priority)
-     * @param severity The severity level (ERROR, WARNING, INFO)
-     */
-    public Rule(String id, Category category, String name, String condition,
-                String message, String description, int priority, String severity) {
-        this.uuid = UUID.randomUUID();
-        this.id = id;
-        this.categories = new HashSet<>();
-        this.categories.add(category);
-        this.name = name;
-        this.condition = condition;
-        this.message = message;
-        this.description = description;
-        this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
-        this.priority = priority;
-        this.defaultValue = null; // No default value for backward compatibility
-        this.successCode = null;
-        this.errorCode = null;
-        this.mapToField = null;
-        this.resultField = null; // No result field for backward compatibility
-        this.noMatchMessage = null;
-        this.metadata = RuleMetadata.builder()
-            .createdByUser("system")
-            .build();
-    }
-
-    /**
-     * Create a new business rule with multiple category objects.
-     *
-     * @param id The unique identifier of the rule
-     * @param categories The category objects of the rule
-     * @param name The name of the rule
-     * @param condition The SpEL condition that determines if the rule applies
-     * @param message The message to display when the rule applies
-     * @param description The description of what the rule does
-     * @param priority The priority of the rule (lower numbers = higher priority)
-     */
-    public Rule(String id, Set<Category> categories, String name, String condition,
-                String message, String description, int priority) {
-        this(id, categories, name, condition, message, description, priority, SeverityConstants.INFO); // Default severity
-    }
-
-    /**
-     * Create a new business rule with multiple category objects and severity.
-     *
-     * @param id The unique identifier of the rule
-     * @param categories The category objects of the rule
-     * @param name The name of the rule
-     * @param condition The SpEL condition that determines if the rule applies
-     * @param message The message to display when the rule applies
-     * @param description The description of what the rule does
-     * @param priority The priority of the rule (lower numbers = higher priority)
-     * @param severity The severity level (ERROR, WARNING, INFO)
-     */
-    public Rule(String id, Set<Category> categories, String name, String condition,
-                String message, String description, int priority, String severity) {
-        this.uuid = UUID.randomUUID();
-        this.id = id;
-        this.categories = new HashSet<>(categories);
-        this.name = name;
-        this.condition = condition;
-        this.message = message;
-        this.description = description;
-        this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
-        this.priority = priority;
-        this.defaultValue = null; // No default value for backward compatibility
-        this.successCode = null;
-        this.errorCode = null;
-        this.mapToField = null;
-        this.resultField = null; // No result field for backward compatibility
-        this.noMatchMessage = null;
-        this.metadata = RuleMetadata.builder()
-            .createdByUser("system")
-            .build();
-    }
-
-    /**
-     * Create a new business rule with full metadata support.
-     * This is the primary constructor for creating rules with comprehensive metadata.
-     *
-     * @param id The unique identifier of the rule
-     * @param categories The category objects of the rule
-     * @param name The name of the rule
-     * @param condition The SpEL condition that determines if the rule applies
-     * @param message The message to display when the rule applies
-     * @param description The description of what the rule does
-     * @param priority The priority of the rule (lower numbers = higher priority)
-     * @param metadata The extensible metadata for the rule
-     */
-    public Rule(String id, Set<Category> categories, String name, String condition,
-                String message, String description, int priority, RuleMetadata metadata) {
-        this(id, categories, name, condition, message, description, priority, SeverityConstants.INFO, metadata); // Default severity
-    }
-
-    /**
-     * Create a new business rule with full metadata support and severity.
-     * This is the primary constructor for creating rules with comprehensive metadata and severity.
-     *
-     * @param id The unique identifier of the rule
-     * @param categories The category objects of the rule
-     * @param name The name of the rule
-     * @param condition The SpEL condition that determines if the rule applies
-     * @param message The message to display when the rule applies
-     * @param description The description of what the rule does
-     * @param priority The priority of the rule (lower numbers = higher priority)
-     * @param severity The severity level (ERROR, WARNING, INFO)
-     * @param metadata The extensible metadata for the rule
-     */
-    public Rule(String id, Set<Category> categories, String name, String condition,
-                String message, String description, int priority, String severity, RuleMetadata metadata) {
-        this.uuid = UUID.randomUUID();
-        this.id = id;
-        this.categories = new HashSet<>(categories);
-        this.name = name;
-        this.condition = condition;
-        this.message = message;
-        this.description = description;
-        this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
-        this.priority = priority;
-        this.defaultValue = null; // No default value for backward compatibility
-        this.successCode = null;
-        this.errorCode = null;
-        this.mapToField = null;
-        this.resultField = null; // No result field for backward compatibility
-        this.noMatchMessage = null;
-        this.metadata = metadata != null ? metadata : RuleMetadata.builder().createdByUser("system").build();
-    }
-
-    /**
-     * Create a new business rule with full metadata support and default value for error recovery.
-     * This constructor supports Phase 3A enhancement for configurable error recovery.
-     *
-     * @param id The unique identifier of the rule
-     * @param categories The category objects of the rule
-     * @param name The name of the rule
-     * @param condition The SpEL condition that determines if the rule applies
-     * @param message The message to display when the rule applies
-     * @param description The description of what the rule does
-     * @param priority The priority of the rule (lower numbers = higher priority)
-     * @param severity The severity level (ERROR, WARNING, INFO)
-     * @param metadata The extensible metadata for the rule
-     * @param defaultValue The default value to use for error recovery (null if no default)
-     */
-    public Rule(String id, Set<Category> categories, String name, String condition,
-                String message, String description, int priority, String severity,
-                RuleMetadata metadata, Object defaultValue) {
-        this.uuid = UUID.randomUUID();
-        this.id = id;
-        this.categories = new HashSet<>(categories);
-        this.name = name;
-        this.condition = condition;
-        this.message = message;
-        this.description = description;
-        this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
-        this.priority = priority;
-        this.defaultValue = defaultValue;
-        this.successCode = null;
-        this.errorCode = null;
-        this.mapToField = null;
-        this.resultField = null; // No result field for backward compatibility
-        this.noMatchMessage = null;
-        this.metadata = metadata != null ? metadata : RuleMetadata.builder().createdByUser("system").build();
-    }
-
-    /**
-     * Create a new business rule with full metadata support, default value, and error/success codes.
-     * This constructor supports Phase 4 enhancement for error and success codes.
-     *
-     * @param id The unique identifier of the rule
-     * @param categories The category objects of the rule
-     * @param name The name of the rule
-     * @param condition The SpEL condition that determines if the rule applies
-     * @param message The message to display when the rule applies
-     * @param description The description of what the rule does
-     * @param priority The priority of the rule (lower numbers = higher priority)
-     * @param severity The severity level (ERROR, WARNING, INFO)
-     * @param metadata The extensible metadata for the rule
-     * @param defaultValue The default value to use for error recovery (null if no default)
-     * @param successCode The code to use when rule succeeds (null if no code)
-     * @param errorCode The code to use when rule fails (null if no code)
-     * @param mapToField Field mapping expressions for enriching data (null if no mapping)
-     */
-    public Rule(String id, Set<Category> categories, String name, String condition,
-                String message, String description, int priority, String severity,
-                RuleMetadata metadata, Object defaultValue, String successCode, String errorCode, Object mapToField) {
-        this(id, categories, name, condition, message, description, priority, severity,
-             metadata, defaultValue, successCode, errorCode, mapToField, null);
-    }
-
-    /**
-     * Create a new business rule with full metadata support, default value, error/success codes, and result field.
-     * This constructor supports Phase 5 enhancement for storing rule evaluation results.
-     *
-     * @param id The unique identifier of the rule
-     * @param categories The category objects of the rule
-     * @param name The name of the rule
-     * @param condition The SpEL condition that determines if the rule applies
-     * @param message The message to display when the rule applies
-     * @param description The description of what the rule does
-     * @param priority The priority of the rule (lower numbers = higher priority)
-     * @param severity The severity level (ERROR, WARNING, INFO)
-     * @param metadata The extensible metadata for the rule
-     * @param defaultValue The default value to use for error recovery (null if no default)
-     * @param successCode The code to use when rule succeeds (null if no code)
-     * @param errorCode The code to use when rule fails (null if no code)
-     * @param mapToField Field mapping expressions for enriching data (null if no mapping)
-     * @param resultField Field name where the boolean condition result will be stored (null if no storage)
-     */
-    public Rule(String id, Set<Category> categories, String name, String condition,
-                String message, String description, int priority, String severity,
-                RuleMetadata metadata, Object defaultValue, String successCode, String errorCode,
-                Object mapToField, String resultField) {
-        this(id, categories, name, condition, message, description, priority, severity,
-             metadata, defaultValue, successCode, errorCode, mapToField, resultField, null);
-    }
-
-    /**
-     * Create a new business rule with full metadata support, default value, error/success codes, result field, and no-match message.
-     * This is the canonical constructor that all other constructors ultimately delegate to for full-featured rules.
+     * Create a new business rule with full metadata support including enabled flag.
+     * This is the canonical constructor that all other constructors ultimately delegate to.
      *
      * @param id The unique identifier of the rule
      * @param categories The category objects of the rule
@@ -453,11 +88,12 @@ public class Rule implements RuleBase {
      * @param mapToField Field mapping expressions for enriching data (null if no mapping)
      * @param resultField Field name where the boolean condition result will be stored (null if no storage)
      * @param noMatchMessage The message to display when the rule does not match (condition=false), null to use message
+     * @param enabled Whether the rule is enabled for evaluation (false = skip evaluation)
      */
     public Rule(String id, Set<Category> categories, String name, String condition,
                 String message, String description, int priority, String severity,
                 RuleMetadata metadata, Object defaultValue, String successCode, String errorCode,
-                Object mapToField, String resultField, String noMatchMessage) {
+                List<String> mapToField, String resultField, String noMatchMessage, boolean enabled) {
         this.uuid = UUID.randomUUID();
         this.id = id;
         this.categories = new HashSet<>(categories);
@@ -473,6 +109,7 @@ public class Rule implements RuleBase {
         this.mapToField = mapToField;
         this.resultField = resultField;
         this.noMatchMessage = noMatchMessage;
+        this.enabled = enabled;
         this.metadata = metadata != null ? metadata : RuleMetadata.builder().createdByUser("system").build();
     }
 
@@ -624,9 +261,9 @@ public class Rule implements RuleBase {
      * Get the field mapping expressions for this rule.
      * Phase 4 Enhancement: Returns field mapping expressions to enrich the dataset.
      *
-     * @return The field mapping expressions (String or List<String>), or null if no mapping is specified
+     * @return The field mapping expressions, or null if no mapping is specified
      */
-    public Object getMapToField() {
+    public List<String> getMapToField() {
         return mapToField;
     }
 
@@ -647,6 +284,16 @@ public class Rule implements RuleBase {
      */
     public int getPriority() {
         return priority;
+    }
+
+    /**
+     * Check if the rule is enabled for evaluation.
+     * Disabled rules are skipped during evaluation without producing errors.
+     *
+     * @return true if the rule is enabled (default), false if disabled
+     */
+    public boolean isEnabled() {
+        return enabled;
     }
 
     /**
@@ -728,7 +375,7 @@ public class Rule implements RuleBase {
      */
     public Rule withMetadata(RuleMetadata newMetadata) {
         return new Rule(id, categories, name, condition, message, description, priority, severity,
-                       newMetadata, defaultValue, successCode, errorCode, mapToField, resultField, noMatchMessage);
+                       newMetadata, defaultValue, successCode, errorCode, mapToField, resultField, noMatchMessage, this.enabled);
     }
 
     /**

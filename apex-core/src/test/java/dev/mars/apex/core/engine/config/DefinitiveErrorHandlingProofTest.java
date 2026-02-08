@@ -1,6 +1,7 @@
 package dev.mars.apex.core.engine.config;
 
 import dev.mars.apex.core.engine.model.Rule;
+import dev.mars.apex.core.engine.config.RuleBuilder;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -55,12 +56,7 @@ class DefinitiveErrorHandlingProofTest {
         logger.info("Testing CRITICAL error handling - should return ERROR result");
         
         // Given: Rule with CRITICAL severity that will fail
-        Rule rule = new Rule(
-            "critical-method-error",
-            "#'value'].nonExistentMethod() > 0",
-            "Critical method error test",
-            "CRITICAL"
-        );
+        Rule rule = new RuleBuilder().withName("critical-method-error").withCondition("#'value'].nonExistentMethod() > 0").withMessage("Critical method error test").withSeverity("CRITICAL").build();
         
         // Create a simple object that has a value property to test method call errors
         Map<String, Object> facts = new HashMap<>();
@@ -92,12 +88,12 @@ class DefinitiveErrorHandlingProofTest {
         logger.info("Testing non-critical error handling - should log error and recover");
 
         // Given: Rule with WARNING severity that will throw exception (non-critical)
-        Rule rule = new Rule(
-            "warning-missing-property",
-            "#nonExistentField.length() > 0",  // Method call on missing variable throws exception
-            "Missing property test",
-            "WARNING"
-        );
+        Rule rule = new RuleBuilder()
+            .withName("warning-missing-property")
+            .withCondition("#nonExistentField.length() > 0")  // Method call on missing variable throws exception
+            .withMessage("Missing property test")
+            .withSeverity("WARNING")
+            .build();
         
         Map<String, Object> facts = new HashMap<>();
         facts.put("quantity", 100);
@@ -126,12 +122,7 @@ class DefinitiveErrorHandlingProofTest {
         logger.info("Testing WARNING error handling - should log at INFO level and recover");
         
         // Given: Rule with WARNING severity that will fail
-        Rule rule = new Rule(
-            "warning-type-error",
-            "#stringField > 100",
-            "Type comparison warning",
-            "WARNING"
-        );
+        Rule rule = new RuleBuilder().withName("warning-type-error").withCondition("#stringField > 100").withMessage("Type comparison warning").withSeverity("WARNING").build();
         
         Map<String, Object> facts = new HashMap<>();
         facts.put("stringField", "not-a-number");
@@ -157,12 +148,7 @@ class DefinitiveErrorHandlingProofTest {
         logger.info("Testing multiple CRITICAL errors - all should return ERROR results");
         
         // Test 1: Null pointer with CRITICAL severity
-        Rule nullRule = new Rule(
-            "critical-null-error",
-            "#nullField.toString() != null",
-            "Critical null access",
-            "CRITICAL"
-        );
+        Rule nullRule = new RuleBuilder().withName("critical-null-error").withCondition("#nullField.toString() != null").withMessage("Critical null access").withSeverity("CRITICAL").build();
         
         Map<String, Object> nullFacts = new HashMap<>();
         nullFacts.put("nullField", null);
@@ -175,12 +161,7 @@ class DefinitiveErrorHandlingProofTest {
                     "Should preserve CRITICAL severity");
         
         // Test 2: Property access with CRITICAL severity
-        Rule propertyRule = new Rule(
-            "critical-property-error",
-            "#missing.length() > 0",
-            "Critical property access",
-            "CRITICAL"
-        );
+        Rule propertyRule = new RuleBuilder().withName("critical-property-error").withCondition("#missing.length() > 0").withMessage("Critical property access").withSeverity("CRITICAL").build();
         
         Map<String, Object> propertyFacts = new HashMap<>();
         propertyFacts.put("existing", "value");
@@ -202,12 +183,7 @@ class DefinitiveErrorHandlingProofTest {
         logger.info("Testing error context preservation - should maintain rule information");
         
         // Given: Rule that will fail with specific context
-        Rule rule = new Rule(
-            "context-preservation-test",
-            "#complexObject.deepProperty.method() == true",
-            "Complex context preservation test",
-            "CRITICAL"
-        );
+        Rule rule = new RuleBuilder().withName("context-preservation-test").withCondition("#complexObject.deepProperty.method() == true").withMessage("Complex context preservation test").withSeverity("CRITICAL").build();
         
         Map<String, Object> facts = new HashMap<>();
         facts.put("simpleProperty", "value");
@@ -255,12 +231,12 @@ class DefinitiveErrorHandlingProofTest {
             for (int i = 0; i < conditions.length; i++) {
                 totalTests++;
                 
-                Rule rule = new Rule(
-                    "summary-test-" + severity.toLowerCase() + "-" + i,
-                    conditions[i],
-                    "Summary test",
-                    severity
-                );
+                Rule rule = new RuleBuilder()
+                    .withName("summary-test-" + severity.toLowerCase() + "-" + i)
+                    .withCondition(conditions[i])
+                    .withMessage("Summary test")
+                    .withSeverity(severity)
+                    .build();
                 
                 Map<String, Object> facts = new HashMap<>();
                 facts.put("value", 100);

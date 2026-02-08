@@ -29,3 +29,10 @@ rules:
     message: "Name is provided"
     severity: "INFO"
     enabled: true
+
+  - id: "implicit-enabled-rule"
+    name: "Implicit Enabled Rule"
+    condition: "#age > 0"
+    message: "Age is positive"
+    severity: "INFO"
+    # enabled is omitted - should default to true

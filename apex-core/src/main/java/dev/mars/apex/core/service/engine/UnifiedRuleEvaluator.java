@@ -146,6 +146,12 @@ public class UnifiedRuleEvaluator {
             return RuleResult.noRules();
         }
         
+        // Skip disabled rules - they should not be evaluated
+        if (!dev.mars.apex.core.util.EnabledFilter.isEnabled(rule)) {
+            logger.info("Rule '{}' is disabled, skipping evaluation", rule.getName());
+            return RuleResult.noMatch(rule.getName(), "Rule is disabled", SeverityConstants.INFO);
+        }
+        
         logger.info("Starting rule evaluation: {}", rule.getName());
         logger.debug("Rule details - id: '{}', severity: '{}', condition: '{}'", 
                         rule.getId(), rule.getSeverity(), rule.getCondition());
@@ -673,13 +679,13 @@ public class UnifiedRuleEvaluator {
      * Apply field mappings to the enriched data.
      * Phase 4 Enhancement: Supports generic field mapping using SpEL expressions.
      *
-     * @param mapToField The field mapping configuration (String or List<String>)
+     * @param mapToField The field mapping configuration
      * @param context The evaluation context for SpEL expressions
      * @param enrichedData The enriched data map to update with mapped values
      * @param successCode The evaluated success code (available as #success-code in expressions)
      * @param errorCode The evaluated error code (available as #error-code in expressions)
      */
-    private void applyFieldMappings(Object mapToField, EvaluationContext context, Map<String, Object> enrichedData,
+    private void applyFieldMappings(List<String> mapToField, EvaluationContext context, Map<String, Object> enrichedData,
                                    String successCode, String errorCode) {
         if (mapToField == null) {
             return;
@@ -698,20 +704,8 @@ public class UnifiedRuleEvaluator {
             }
 
             // Handle both single mapping (String) and multiple mappings (List<String>)
-            java.util.List<String> mappings = new java.util.ArrayList<>();
-            if (mapToField instanceof String) {
-                mappings.add((String) mapToField);
-            } else if (mapToField instanceof java.util.List) {
-                java.util.List<?> list = (java.util.List<?>) mapToField;
-                for (Object item : list) {
-                    if (item instanceof String) {
-                        mappings.add((String) item);
-                    }
-                }
-            }
-
             // Apply each mapping
-            for (String mapping : mappings) {
+            for (String mapping : mapToField) {
                 applyFieldMapping(mapping, mappingContext, enrichedData);
             }
         } catch (Exception e) {

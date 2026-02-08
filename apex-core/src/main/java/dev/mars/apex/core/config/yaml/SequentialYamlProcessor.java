@@ -506,8 +506,13 @@ public class SequentialYamlProcessor {
                 currentData = new java.util.HashMap<String, Object>();
             }
 
-            // Process transformations
-            Object transformedData = processor.processTransformations(transformations, currentData);
+            // Process transformations using the result-returning method for proper error propagation
+            dev.mars.apex.core.engine.model.RuleResult transformResult = 
+                processor.processTransformationsWithResult(transformations, currentData);
+
+            // Extract transformed data from result
+            Object transformedData = transformResult.getEnrichedData() != null 
+                ? transformResult.getEnrichedData() : currentData;
 
             // Update context with transformed data
             context.setState("currentData", transformedData);

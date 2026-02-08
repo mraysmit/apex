@@ -188,7 +188,7 @@ public class RulesEngine {
         // Initialize executors (after dependencies are initialized)
         this.enrichmentGroupExecutor = new EnrichmentGroupExecutor(this.enrichmentProcessor);
         this.ruleGroupExecutor = new RuleGroupExecutor(this.unifiedEvaluator);
-        this.ruleChainExecutor = new RuleChainExecutor(this.parser, this.unifiedEvaluator, this.enrichmentGroupExecutor);
+        this.ruleChainExecutor = new RuleChainExecutor(this.evaluatorService, this.unifiedEvaluator, this.enrichmentGroupExecutor);
         this.sequentialProcessor = new SequentialProcessor(
             this.configuration,
             this.enrichmentProcessor,
@@ -591,15 +591,9 @@ public class RulesEngine {
      */
     public RuleResult executeRule(Rule rule, Map<String, Object> facts) {
         // Delegate to the unified evaluator for consistent behavior
-        RuleResult result = unifiedEvaluator.evaluateRule(rule, facts);
-
-        // Store result in facts if result-field is configured
-        if (rule.getResultField() != null && !rule.getResultField().trim().isEmpty()) {
-            facts.put(rule.getResultField(), result.isTriggered());
-            logger.debug("Stored rule result in facts: {} = {}", rule.getResultField(), result.isTriggered());
-        }
-
-        return result;
+        // Note: result-field storage is handled by UnifiedRuleEvaluator.evaluateRule(Rule, Map)
+        // which supports nested field paths and enrichedData population
+        return unifiedEvaluator.evaluateRule(rule, facts);
     }
 
     /**
@@ -657,44 +651,7 @@ public class RulesEngine {
         return executeRules(rules, facts);
     }
 
-    /**
-     * Simple evaluation method that returns only a boolean indicating whether a rule was triggered.
-     * This method is provided for simplicity when only the boolean result is needed.
-     *
-     * @param rule The Rule object to evaluate
-     * @param facts The facts to evaluate the rule against
-     * @return true if the rule was triggered, false otherwise
-     */
-    public boolean evaluateRule(Rule rule, Map<String, Object> facts) {
-        RuleResult result = executeRule(rule, facts);
-        return result.isTriggered();
-    }
 
-    /**
-     * Simple evaluation method that returns only a boolean indicating whether any rule in the list was triggered.
-     * This method is provided for simplicity when only the boolean result is needed.
-     *
-     * @param rules The list of Rule objects to evaluate
-     * @param facts The facts to evaluate the rules against
-     * @return true if any rule was triggered, false otherwise
-     */
-    public boolean evaluateRules(List<RuleBase> rules, Map<String, Object> facts) {
-        RuleResult result = executeRules(rules, facts);
-        return result.isTriggered();
-    }
-
-    /**
-     * Simple evaluation method that returns only a boolean indicating whether any rule in the specified category was triggered.
-     * This method is provided for simplicity when only the boolean result is needed.
-     *
-     * @param category The category of rules to evaluate
-     * @param facts The facts to evaluate the rules against
-     * @return true if any rule was triggered, false otherwise
-     */
-    public boolean evaluateRulesForCategory(String category, Map<String, Object> facts) {
-        RuleResult result = executeRulesForCategory(category, facts);
-        return result.isTriggered();
-    }
 
 
 
@@ -732,36 +689,10 @@ public class RulesEngine {
             return RuleResult.evaluationFailure(failureMessages, new HashMap<>(), "evaluation", "Null input data");
         }
 
-        // Determine execution order
-        List<String> sectionOrder = yamlConfig.getSectionOrder();
-        
-        if (sectionOrder == null || sectionOrder.isEmpty()) {
-            // Fallback to standard legacy order if no section order is defined
-            logger.info("No section order defined - using default standard order");
-            sectionOrder = Arrays.asList("rules", "rule-groups", "enrichments", "enrichment-groups", "transformations", "pipeline");
-        }
-
-        logger.info("Executing sections in order: {}", sectionOrder);
-        return evaluateSequential(yamlConfig, inputData, sectionOrder);
-    }
-
-    /**
-     * Evaluate using sequential processing - execute sections in YAML document order.
-     * This respects the developer's intent as expressed through YAML structure.
-     *
-     * <p>Delegates to SequentialProcessor which handles both item-level and section-level processing.</p>
-     *
-     * @param yamlConfig The YAML configuration to evaluate
-     * @param inputData The input data to process
-     * @param sectionOrder The order of sections from the YAML document (used for fallback)
-     * @return RuleResult containing execution results, enriched data, and execution path
-     */
-    private RuleResult evaluateSequential(YamlRuleConfiguration yamlConfig, Map<String, Object> inputData, List<String> sectionOrder) {
-        // Delegate to SequentialProcessor with method references for executeRule, executePipeline, and createContext
+        // Delegate to SequentialProcessor for document-order processing
         return sequentialProcessor.evaluateSequential(
             yamlConfig,
             inputData,
-            sectionOrder,
             ctx -> executeRule(ctx.getRule(), ctx.getData()),
             ctx -> executePipeline(ctx.getPipeline(), ctx.getData()),
             this::createContext

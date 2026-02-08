@@ -32,23 +32,6 @@ public class ProcessingSequenceReport {
     private final List<ProcessingItem> filteredItems;
     
     /**
-     * Creates a new processing sequence report (backward compatibility constructor).
-     *
-     * @param yamlFilePath The path to the YAML file analyzed
-     * @param originalSequence The original item order from the YAML document
-     * @param plannedSequence The planned execution order after filtering
-     * @param filteredItems Items removed by groups-only logic
-     * @deprecated Use {@link #ProcessingSequenceReport(String, List, List, List, List)} instead
-     */
-    @Deprecated
-    public ProcessingSequenceReport(String yamlFilePath,
-                                   List<ProcessingItem> originalSequence,
-                                   List<ProcessingItem> plannedSequence,
-                                   List<ProcessingItem> filteredItems) {
-        this(yamlFilePath, new ArrayList<>(), originalSequence, plannedSequence, filteredItems);
-    }
-
-    /**
      * Creates a new processing sequence report with configuration sections.
      *
      * @param yamlFilePath The path to the YAML file analyzed

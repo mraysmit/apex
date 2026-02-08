@@ -11,6 +11,7 @@ import dev.mars.apex.core.service.lookup.DatasetSignature;
 import dev.mars.apex.core.service.lookup.LookupService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.engine.model.Rule;
+import dev.mars.apex.core.engine.config.RuleBuilder;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.engine.model.EnrichmentGroup;
@@ -59,18 +60,11 @@ import java.util.concurrent.Future;
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-07-27
  * @version 1.0
- * @deprecated since 3.0, for removal in 4.0. This specialized processor is redundant - use the universal
- *             {@link dev.mars.apex.core.engine.config.RulesEngine} instead, which handles enrichments, rules,
- *             rule-groups, pipelines, and all other YAML content types automatically. Developers should not
- *             need to know whether YAML contains only enrichments to choose the correct processor.
- *             <p>Migration: Replace {@code new YamlEnrichmentProcessor(registry, evaluator)} with
- *             {@code new RulesEngine(config)} and use {@code engine.evaluate(yamlConfig, inputData)}.</p>
  */
 /**
  * Processor for executing YAML-defined enrichment configurations.
  * This class bridges the gap between YAML configuration and runtime enrichment execution.
  */
-@Deprecated(since = "3.0", forRemoval = true)
 public class YamlEnrichmentProcessor {
     
     private static final Logger logger = LoggerFactory.getLogger(YamlEnrichmentProcessor.class);
@@ -92,7 +86,6 @@ public class YamlEnrichmentProcessor {
     private final Map<String, Map<String, Object>> ruleGroupResults = new java.util.concurrent.ConcurrentHashMap<>();
     private final Map<String, Boolean> individualRuleResults = new java.util.concurrent.ConcurrentHashMap<>();
 
-    @Deprecated(since = "3.0", forRemoval = true)
     public YamlEnrichmentProcessor(LookupServiceRegistry serviceRegistry,
                                    ExpressionEvaluatorService evaluatorService) {
         this(serviceRegistry, evaluatorService, null);
@@ -323,7 +316,7 @@ public class YamlEnrichmentProcessor {
         }
 
         // Check if enrichment is enabled
-        if (enrichment.getEnabled() != null && !enrichment.getEnabled()) {
+        if (!dev.mars.apex.core.util.EnabledFilter.isEnabled(enrichment)) {
             return false;
         }
 
@@ -1263,7 +1256,6 @@ public class YamlEnrichmentProcessor {
      * @param passed Whether the rule group passed
      * @param ruleResults Map of individual rule results within the group
      */
-    @Deprecated(since = "3.0", forRemoval = true)
     public void storeRuleGroupResult(String ruleGroupId, boolean passed, Map<String, Boolean> ruleResults) {
         Map<String, Object> groupRuleResults = new HashMap<>();
         groupRuleResults.put("passed", passed);
@@ -1303,7 +1295,6 @@ public class YamlEnrichmentProcessor {
      * @param ruleId The ID of the rule
      * @param passed Whether the rule passed
      */
-    @Deprecated(since = "3.0", forRemoval = true)
     public void storeIndividualRuleResult(String ruleId, boolean passed) {
         individualRuleResults.put(ruleId, passed);
         logger.debug("Stored individual rule result: " + ruleId + " -> passed=" + passed);
@@ -1331,9 +1322,12 @@ public class YamlEnrichmentProcessor {
                 for (YamlRule yamlRule : configuration.getRules()) {
                     try {
                         // Create Rule object from YAML configuration
-                        Rule rule = new Rule(yamlRule.getName() != null ? yamlRule.getName() : yamlRule.getId(),
-                                           yamlRule.getCondition(),
-                                           yamlRule.getMessage() != null ? yamlRule.getMessage() : "Rule " + yamlRule.getId());
+                        Rule rule = new RuleBuilder()
+                            .withName(yamlRule.getName() != null ? yamlRule.getName() : yamlRule.getId())
+                            .withCondition(yamlRule.getCondition())
+                            .withMessage(yamlRule.getMessage() != null ? yamlRule.getMessage() : "Rule " + yamlRule.getId())
+                            .withSeverity(SeverityConstants.INFO)
+                            .build();
 
                         // Evaluate rule
                         Expression exp = getOrCompileExpression(rule.getCondition());
@@ -1383,9 +1377,12 @@ public class YamlEnrichmentProcessor {
                                 // Find the rule in the configuration
                                 YamlRule yamlRule = findRuleById(configuration, ruleId);
                                 if (yamlRule != null) {
-                                    Rule rule = new Rule(yamlRule.getName() != null ? yamlRule.getName() : yamlRule.getId(),
-                                                       yamlRule.getCondition(),
-                                                       yamlRule.getMessage() != null ? yamlRule.getMessage() : "Rule " + yamlRule.getId());
+                                    Rule rule = new RuleBuilder()
+                                        .withName(yamlRule.getName() != null ? yamlRule.getName() : yamlRule.getId())
+                                        .withCondition(yamlRule.getCondition())
+                                        .withMessage(yamlRule.getMessage() != null ? yamlRule.getMessage() : "Rule " + yamlRule.getId())
+                                        .withSeverity(SeverityConstants.INFO)
+                                        .build();
                                     ruleGroup.addRule(rule, sequence++);
                                 }
                             }
@@ -1588,7 +1585,6 @@ public class YamlEnrichmentProcessor {
      * @param configuration The full YAML configuration (required for database lookups)
      * @return A RuleResult containing success status, enriched data, and failure messages
      */
-    @Deprecated(since = "3.0", forRemoval = true)
     public RuleResult processEnrichmentsWithResult(List<YamlEnrichment> enrichments, Object targetObject,
                                                   dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
         logger.debug("processEnrichmentsWithResult() entry - enrichments count: {}, targetObject type: {}", 
@@ -1710,7 +1706,6 @@ public class YamlEnrichmentProcessor {
      * @param configuration The full YAML configuration (required for conditional mapping with rule group results)
      * @return A RuleResult containing success status, enriched data, and failure messages
      */
-    @Deprecated(since = "3.0", forRemoval = true)
     public RuleResult processEnrichmentWithResult(YamlEnrichment enrichment, Object targetObject,
                                                   dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
         if (enrichment == null) {
@@ -1988,13 +1983,13 @@ public class YamlEnrichmentProcessor {
      * Apply field mappings for success/error codes to the target object.
      * Phase 4 Enhancement: Supports generic field mapping using SpEL expressions.
      *
-     * @param mapToField The field mapping configuration (String or List<String>)
+     * @param mapToField The field mapping configuration
      * @param context The evaluation context for SpEL expressions
      * @param targetObject The target object to update with mapped values
      * @param successCode The evaluated success code (available as #success_code in expressions)
      * @param errorCode The evaluated error code (available as #error_code in expressions)
      */
-    private void applyCodeFieldMappings(Object mapToField, StandardEvaluationContext context, Object targetObject,
+    private void applyCodeFieldMappings(List<String> mapToField, StandardEvaluationContext context, Object targetObject,
                                        String successCode, String errorCode) {
         if (mapToField == null) {
             return;
@@ -2032,21 +2027,8 @@ public class YamlEnrichmentProcessor {
                 mappingContext.setVariable("error_code", errorCode);
             }
 
-            // Handle both single mapping (String) and multiple mappings (List<String>)
-            List<String> mappings = new ArrayList<>();
-            if (mapToField instanceof String) {
-                mappings.add((String) mapToField);
-            } else if (mapToField instanceof List) {
-                List<?> list = (List<?>) mapToField;
-                for (Object item : list) {
-                    if (item instanceof String) {
-                        mappings.add((String) item);
-                    }
-                }
-            }
-
             // Apply each mapping
-            for (String mapping : mappings) {
+            for (String mapping : mapToField) {
                 applyCodeFieldMapping(mapping, mappingContext, targetObject);
             }
         } catch (Exception e) {

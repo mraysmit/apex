@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Comprehensive unit tests for RulesEngine scenario registry functionality.
  * 
- * <p>Migrated from DataTypeScenarioServiceTest to use the new RulesEngine API.</p>
+ * <p>Replaces the deleted DataTypeScenarioServiceTest, using the new RulesEngine API.</p>
  * 
  * <p>Tests cover:</p>
  * <ul>

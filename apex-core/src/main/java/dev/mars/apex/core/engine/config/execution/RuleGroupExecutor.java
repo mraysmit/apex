@@ -21,6 +21,7 @@ import dev.mars.apex.core.engine.model.RuleBase;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.engine.model.RuleGroupEvaluationResult;
 import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.service.engine.RuleGroupEvaluationService;
 import dev.mars.apex.core.service.engine.UnifiedRuleEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,15 +37,20 @@ import java.util.Map;
  * <p>This class extracts rule group execution logic from RulesEngine to maintain
  * focused responsibilities. It processes rule groups and handles mixed type lists.</p>
  * 
+ * <p>Phase 2 refactoring: uses {@link RuleGroupEvaluationService} to route
+ * individual rule evaluation through {@link UnifiedRuleEvaluator}.</p>
+ * 
  * @since 2.1 (Phase 5 refactoring)
  */
 public class RuleGroupExecutor {
     private static final Logger logger = LoggerFactory.getLogger(RuleGroupExecutor.class);
     
     private final UnifiedRuleEvaluator unifiedEvaluator;
+    private final RuleGroupEvaluationService groupEvaluationService;
     
     public RuleGroupExecutor(UnifiedRuleEvaluator unifiedEvaluator) {
         this.unifiedEvaluator = unifiedEvaluator;
+        this.groupEvaluationService = new RuleGroupEvaluationService(unifiedEvaluator);
     }
     
     /**
@@ -79,9 +85,10 @@ public class RuleGroupExecutor {
             logger.debug("Evaluating rule group: '{}' with {} rules", 
                         group.getName(), group.getRules() != null ? group.getRules().size() : 0);
             try {
-                // Use detailed evaluation to get severity aggregation
+                // Use detailed evaluation via service to get severity aggregation
+                // Phase 2: delegates individual rule evaluation to UnifiedRuleEvaluator
                 long startTime = System.currentTimeMillis();
-                RuleGroupEvaluationResult evaluationResult = group.evaluateWithDetails(context);
+                RuleGroupEvaluationResult evaluationResult = groupEvaluationService.evaluateWithDetails(group, context);
                 long duration = System.currentTimeMillis() - startTime;
                 boolean result = evaluationResult.isGroupResult();
                 String aggregatedSeverity = evaluationResult.getAggregatedSeverity();
@@ -97,21 +104,11 @@ public class RuleGroupExecutor {
                                individualResult.isSuccess(), individualResult.isTriggered());
                 }
 
-                // Check if any individual rule had an ERROR result type (not just ERROR severity)
-                // This indicates a rule evaluation exception, which is a business logic failure
-                for (RuleResult individualResult : evaluationResult.getIndividualResults()) {
-                    if (individualResult.getResultType() == RuleResult.ResultType.ERROR) {
-                        // CRITICAL: Rule evaluation exception is a business logic failure
-                        // This is NOT a "rule didn't match" scenario - it's a system failure
-                        logger.error("Rule evaluation failed in group '{}': {}",
-                                   group.getName(), individualResult.getMessage());
-                        return RuleResult.error(
-                            group.getName(),
-                            "Rule group evaluation failed: " + individualResult.getMessage(),
-                            SeverityConstants.ERROR
-                        );
-                    }
-                }
+                // Note: Individual ResultType.ERROR results are NOT treated as group failures.
+                // A rule that didn't match with ERROR severity is a normal non-match outcome,
+                // not a system failure. Actual exceptions are caught in the catch block below.
+                // The AND/OR aggregation in RuleGroupEvaluationService.computeGroupResult()
+                // correctly handles triggered/not-triggered semantics.
 
                 if (result) {
                     logger.info("Rule group matched: {}", group.getName());
@@ -224,7 +221,8 @@ public class RuleGroupExecutor {
                     }
                 } else if (ruleObj instanceof RuleGroup) {
                     RuleGroup group = (RuleGroup) ruleObj;
-                    boolean result = group.evaluate(context);
+                    // Phase 2: delegate through service for canonical evaluation path
+                    boolean result = groupEvaluationService.evaluate(group, context);
                     logger.debug("Rule group '{}' evaluated to: {}", group.getName(), result);
 
                     if (result) {

@@ -2,6 +2,7 @@ package dev.mars.apex.core.engine.model;
 
 import dev.mars.apex.core.constants.ErrorHandlingConstants;
 import dev.mars.apex.core.constants.SeverityConstants;
+import dev.mars.apex.core.util.EnabledFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.Expression;
@@ -394,6 +395,12 @@ public class RuleGroup implements RuleBase {
                 continue;
             }
 
+            // Skip disabled rules
+            if (!EnabledFilter.isEnabled(rule)) {
+                logger.info("Rule '{}' in group '{}' is disabled, skipping", rule.getName(), name);
+                continue;
+            }
+
             try {
                 Expression exp = parser.parseExpression(rule.getCondition());
                 Boolean ruleResult = exp.getValue(context, Boolean.class);
@@ -496,6 +503,15 @@ public class RuleGroup implements RuleBase {
             Rule rule = rulesBySequence.get(seq);
             if (rule == null) {
                 logger.error("Null rule found at sequence {} in group '{}', skipping", seq, name);
+                continue;
+            }
+
+            // Skip disabled rules
+            if (!EnabledFilter.isEnabled(rule)) {
+                logger.info("Rule '{}' in group '{}' is disabled, skipping", rule.getName(), name);
+                // Track disabled rule result for completeness
+                RuleResult disabledResult = RuleResult.noMatch(rule.getName(), "Rule is disabled", SeverityConstants.INFO);
+                individualRuleResults.add(disabledResult);
                 continue;
             }
 
@@ -603,6 +619,12 @@ public class RuleGroup implements RuleBase {
             Rule rule = rulesBySequence.get(seq);
             if (rule == null) {
                 logger.error("Null rule found at sequence {} in group '{}', skipping", seq, name);
+                continue;
+            }
+
+            // Skip disabled rules
+            if (!EnabledFilter.isEnabled(rule)) {
+                logger.info("Rule '{}' in group '{}' is disabled, skipping (parallel)", rule.getName(), name);
                 continue;
             }
 
@@ -722,6 +744,15 @@ public class RuleGroup implements RuleBase {
             Rule rule = rulesBySequence.get(seq);
             if (rule == null) {
                 logger.error("Null rule found at sequence {} in group '{}', skipping", seq, name);
+                continue;
+            }
+
+            // Skip disabled rules
+            if (!EnabledFilter.isEnabled(rule)) {
+                logger.info("Rule '{}' in group '{}' is disabled, skipping (parallel)", rule.getName(), name);
+                // Track disabled rule result for completeness
+                RuleResult disabledResult = RuleResult.noMatch(rule.getName(), "Rule is disabled", SeverityConstants.INFO);
+                individualRuleResults.add(disabledResult);
                 continue;
             }
 
@@ -960,6 +991,29 @@ public class RuleGroup implements RuleBase {
      */
     public Map<String, Boolean> getRuleResults() {
         return new HashMap<>(ruleResults);
+    }
+
+    /**
+     * Update the internal rule results map and individual results from an external evaluation.
+     * Used by {@code RuleGroupEvaluationService} (Phase 2) to propagate results back to the
+     * group so that downstream code (e.g., enrichments referencing {@code #ruleResults['rule-id']})
+     * can access individual outcomes.
+     *
+     * @param results     the individual rule results from the evaluation
+     * @param groupResult the overall group boolean result
+     */
+    public void updateEvaluationResults(List<RuleResult> results, boolean groupResult) {
+        this.ruleResults.clear();
+        this.individualRuleResults.clear();
+        for (RuleResult r : results) {
+            if (r.getRuleId() != null) {
+                this.ruleResults.put(r.getRuleId(), r.isTriggered());
+            } else if (r.getRuleName() != null) {
+                this.ruleResults.put(r.getRuleName(), r.isTriggered());
+            }
+            this.individualRuleResults.add(r);
+        }
+        this.groupResult = groupResult;
     }
 
     /**
