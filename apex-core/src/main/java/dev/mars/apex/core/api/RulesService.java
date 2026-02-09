@@ -1,7 +1,7 @@
 package dev.mars.apex.core.api;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
+import dev.mars.apex.core.engine.core.RulesEngine;
+import dev.mars.apex.core.engine.core.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
 

@@ -21,7 +21,7 @@ package dev.mars.apex.sync.unit.serialization;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.mars.apex.sync.SyncTestBase;
-import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.core.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.engine.model.ExecutionStep;
 import dev.mars.apex.core.service.schema.SchemaMetadata;

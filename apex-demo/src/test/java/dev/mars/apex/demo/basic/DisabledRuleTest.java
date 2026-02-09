@@ -19,7 +19,7 @@ import dev.mars.apex.core.config.exception.YamlConfigurationException;
 import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.constants.SeverityConstants;
-import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.core.RulesEngine;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import dev.mars.apex.core.engine.config.RuleBuilder;
+import dev.mars.apex.core.engine.core.RuleBuilder;
 
 /**
  * Comprehensive tests that rules/groups/enrichments with enabled: false are skipped.

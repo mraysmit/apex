@@ -18,12 +18,12 @@ package dev.mars.apex.core.engine;
 
 
 import dev.mars.apex.core.constants.SeverityConstants;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.config.RuleBuilder;
-import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
+import dev.mars.apex.core.engine.core.RulesEngine;
+import dev.mars.apex.core.engine.core.RuleBuilder;
+import dev.mars.apex.core.engine.core.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.Category;
 import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.config.RuleBuilder;
+import dev.mars.apex.core.engine.core.RuleBuilder;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import org.junit.jupiter.api.BeforeEach;
 

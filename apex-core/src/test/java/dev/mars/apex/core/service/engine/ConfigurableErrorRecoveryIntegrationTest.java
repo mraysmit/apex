@@ -20,7 +20,7 @@ import dev.mars.apex.core.config.error.ErrorRecoveryConfig;
 import dev.mars.apex.core.config.error.SeverityRecoveryPolicy;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.config.RuleBuilder;
+import dev.mars.apex.core.engine.core.RuleBuilder;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;

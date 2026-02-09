@@ -18,7 +18,7 @@ package dev.mars.apex.demo.basic;
 
 import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.core.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import org.junit.jupiter.api.DisplayName;

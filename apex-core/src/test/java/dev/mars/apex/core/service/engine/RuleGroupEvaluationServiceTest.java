@@ -3,7 +3,7 @@ package dev.mars.apex.core.service.engine;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.model.Category;
 import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.config.RuleBuilder;
+import dev.mars.apex.core.engine.core.RuleBuilder;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.engine.model.RuleGroupEvaluationResult;
 import dev.mars.apex.core.engine.model.RuleResult;

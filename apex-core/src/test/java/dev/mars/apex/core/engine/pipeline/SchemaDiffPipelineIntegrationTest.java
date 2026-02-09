@@ -16,7 +16,7 @@ package dev.mars.apex.core.engine.pipeline;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.core.RulesEngine;
 import dev.mars.apex.core.engine.model.ExecutionStep;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.schema.SchemaMetadata;

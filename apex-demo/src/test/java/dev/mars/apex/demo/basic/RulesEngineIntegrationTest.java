@@ -16,8 +16,8 @@
 
 package dev.mars.apex.demo.basic;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
+import dev.mars.apex.core.engine.core.RulesEngine;
+import dev.mars.apex.core.engine.core.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.engine.model.RuleResult;
@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import dev.mars.apex.core.engine.config.RuleBuilder;
+import dev.mars.apex.core.engine.core.RuleBuilder;
 
 /**
  * Integration test for RulesEngine with Rule Group Severity Aggregation.

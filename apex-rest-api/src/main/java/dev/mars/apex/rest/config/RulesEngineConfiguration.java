@@ -4,7 +4,7 @@ import dev.mars.apex.core.api.RulesService;
 import dev.mars.apex.core.api.SimpleRulesEngine;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleFactory;
-import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.core.RulesEngine;
 import dev.mars.apex.core.service.data.DataServiceManager;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.engine.RuleGroupEvaluationService;
@@ -99,8 +99,8 @@ public class RulesEngineConfiguration {
     public RulesEngine defaultRulesEngine(YamlConfigurationLoader loader) {
         try {
             // Create base engine configuration
-            dev.mars.apex.core.engine.config.RulesEngineConfiguration engineConfig =
-                new dev.mars.apex.core.engine.config.RulesEngineConfiguration();
+            dev.mars.apex.core.engine.core.RulesEngineConfiguration engineConfig =
+                new dev.mars.apex.core.engine.core.RulesEngineConfiguration();
 
             // Configure performance monitoring
             if (rulesProperties.getPerformance().getMonitoring().isEnabled()) {
@@ -140,7 +140,7 @@ public class RulesEngineConfiguration {
         } catch (Exception e) {
             logger.error("Error creating RulesEngine: {}", e.getMessage(), e);
             logger.info("Falling back to empty configuration");
-            return new RulesEngine(new dev.mars.apex.core.engine.config.RulesEngineConfiguration());
+            return new RulesEngine(new dev.mars.apex.core.engine.core.RulesEngineConfiguration());
         }
     }
 

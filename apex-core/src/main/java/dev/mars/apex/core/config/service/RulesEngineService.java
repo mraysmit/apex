@@ -4,8 +4,8 @@ import dev.mars.apex.core.config.YamlRuleFactory;
 import dev.mars.apex.core.config.exception.*;
 import dev.mars.apex.core.config.loader.*;
 import dev.mars.apex.core.config.model.*;
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
+import dev.mars.apex.core.engine.core.RulesEngine;
+import dev.mars.apex.core.engine.core.RulesEngineConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

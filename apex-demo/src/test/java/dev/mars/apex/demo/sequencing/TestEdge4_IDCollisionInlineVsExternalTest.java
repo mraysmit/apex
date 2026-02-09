@@ -1,7 +1,7 @@
 package dev.mars.apex.demo.sequencing;
 
 import dev.mars.apex.core.config.exception.YamlConfigurationException;
-import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.core.RulesEngine;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

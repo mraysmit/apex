@@ -56,7 +56,10 @@ module dev.mars.apex.core {
     exports dev.mars.apex.core.service.lookup;
     exports dev.mars.apex.core.engine.model;
     exports dev.mars.apex.core.engine.model.metadata;
-    exports dev.mars.apex.core.engine.config;
+    exports dev.mars.apex.core.engine.core;
+    exports dev.mars.apex.core.engine.execution;
+    exports dev.mars.apex.core.engine.scenario;
+    exports dev.mars.apex.core.engine.util;
 
     // New exports for enhanced error handling
     exports dev.mars.apex.core.exception;

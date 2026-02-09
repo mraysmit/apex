@@ -2,7 +2,7 @@ package dev.mars.apex.core.service.engine;
 
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleGroup;
-import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
+import dev.mars.apex.core.engine.core.RulesEngineConfiguration;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd

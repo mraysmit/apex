@@ -1,7 +1,7 @@
 package dev.mars.apex.core.service.engine;
 
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.engine.config.MapPropertyAccessor;
+import dev.mars.apex.core.engine.core.MapPropertyAccessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.EvaluationContext;

@@ -20,7 +20,7 @@ package dev.mars.apex.rest.controller;
 import dev.mars.apex.core.config.yaml.RulesEngineService;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.core.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 
 import io.swagger.v3.oas.annotations.Operation;

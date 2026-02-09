@@ -1,7 +1,7 @@
 package dev.mars.apex.demo.basic;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
-import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
+import dev.mars.apex.core.engine.core.RulesEngine;
+import dev.mars.apex.core.engine.core.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.engine.model.RuleResult;
@@ -15,7 +15,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
-import dev.mars.apex.core.engine.config.RuleBuilder;
+import dev.mars.apex.core.engine.core.RuleBuilder;
 
 /**
  * Demonstration of the new clean RuleResult API design.

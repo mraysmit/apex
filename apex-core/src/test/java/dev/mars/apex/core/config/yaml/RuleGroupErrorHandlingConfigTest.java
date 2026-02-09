@@ -4,7 +4,7 @@ import dev.mars.apex.core.config.loader.*;
 import dev.mars.apex.core.config.exception.*;
 import dev.mars.apex.core.config.service.*;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.core.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleGroup;
 import org.junit.jupiter.api.BeforeEach;
 

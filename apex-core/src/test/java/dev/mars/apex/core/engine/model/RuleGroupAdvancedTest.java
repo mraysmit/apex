@@ -1,7 +1,7 @@
 package dev.mars.apex.core.engine.model;
 
 import dev.mars.apex.core.constants.SeverityConstants;
-import dev.mars.apex.core.engine.config.RuleBuilder;
+import dev.mars.apex.core.engine.core.RuleBuilder;
 import dev.mars.apex.core.service.engine.RuleGroupEvaluationService;
 import dev.mars.apex.core.service.engine.UnifiedRuleEvaluator;
 import org.junit.jupiter.api.BeforeEach;

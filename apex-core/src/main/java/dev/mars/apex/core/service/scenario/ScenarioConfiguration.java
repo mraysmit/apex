@@ -27,7 +27,7 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-import dev.mars.apex.core.engine.config.MapPropertyAccessor;
+import dev.mars.apex.core.engine.core.MapPropertyAccessor;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 
 /**

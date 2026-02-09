@@ -5,7 +5,7 @@ import dev.mars.apex.core.config.model.*;
 import dev.mars.apex.core.api.RuleSet;
 import dev.mars.apex.core.constants.ErrorHandlingConstants;
 import dev.mars.apex.core.constants.SeverityConstants;
-import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
+import dev.mars.apex.core.engine.core.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.Category;
 import dev.mars.apex.core.engine.model.EnrichmentGroup;
 import dev.mars.apex.core.engine.model.Rule;
@@ -962,7 +962,7 @@ public class YamlRuleFactory {
      * Create a lookup index of rules keyed by their ID.
      * 
      * <p>This is an optimisation method for the item-level processing path in
-     * {@link dev.mars.apex.core.engine.config.execution.SequentialProcessor}. Instead of
+     * {@link dev.mars.apex.core.engine.execution.SequentialProcessor}. Instead of
      * iterating the YAML rule list and calling {@code createRuleWithMetadata} for
      * every individual item lookup, callers build the index once and perform
      * O(1) lookups thereafter.</p>

@@ -16,7 +16,7 @@ package dev.mars.apex.core.config.component;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.core.RulesEngine;
 import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
 import dev.mars.apex.core.service.scenario.StageExecutionResult;
 import dev.mars.apex.core.util.TestErrorContext;

@@ -18,7 +18,7 @@
 package dev.mars.apex.sync.validation;
 
 import dev.mars.apex.sync.SyncTestBase;
-import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.core.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.schema.diff.SchemaComparisonResult;
 import org.junit.jupiter.api.*;

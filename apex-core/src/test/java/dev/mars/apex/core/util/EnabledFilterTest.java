@@ -22,7 +22,7 @@ import dev.mars.apex.core.config.model.YamlRuleGroup;
 import dev.mars.apex.core.config.model.YamlTransformation;
 import dev.mars.apex.core.engine.model.Category;
 import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.config.RuleBuilder;
+import dev.mars.apex.core.engine.core.RuleBuilder;
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

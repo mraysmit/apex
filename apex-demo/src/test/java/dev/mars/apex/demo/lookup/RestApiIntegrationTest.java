@@ -20,7 +20,7 @@ import dev.mars.apex.demo.DemoTestBase;
 import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
 import dev.mars.apex.core.config.loader.YamlDataSourceLoader;
 
-import dev.mars.apex.core.engine.config.RulesEngine;
+import dev.mars.apex.core.engine.core.RulesEngine;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.AfterEach;
