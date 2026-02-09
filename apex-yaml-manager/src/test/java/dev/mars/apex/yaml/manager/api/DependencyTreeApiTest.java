@@ -87,7 +87,7 @@ class DependencyTreeApiTest {
     @Test
     void loaderSeesRuleConfigurationsKey() throws Exception {
         String abs = Paths.get("src/test/resources/apex-yaml-samples/scenario-registry.yaml").toAbsolutePath().toString();
-        dev.mars.apex.core.config.YamlConfigurationLoader loader = new dev.mars.apex.core.config.YamlConfigurationLoader();
+        dev.mars.apex.core.config.loader.YamlConfigurationLoader loader = new dev.mars.apex.core.config.loader.YamlConfigurationLoader();
         java.util.Map<String, Object> map = loader.loadAsMap(abs);
         System.out.println("MAP KEYS=" + map.keySet());
         org.junit.jupiter.api.Assertions.assertTrue(map.containsKey("rule-configurations"), "YAML should contain 'rule-configurations' key");

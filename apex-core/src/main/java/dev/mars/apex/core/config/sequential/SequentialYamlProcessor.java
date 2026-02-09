@@ -1,8 +1,8 @@
 package dev.mars.apex.core.config.sequential;
 
-import dev.mars.apex.core.config.YamlConfigurationException;
-import dev.mars.apex.core.config.YamlRuleConfiguration;
-import dev.mars.apex.core.config.YamlTransformation;
+import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.YamlTransformation;
 import dev.mars.apex.core.config.sequential.OrderedYamlConfiguration.ProcessingMode;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.model.RuleResult;
@@ -29,7 +29,7 @@ import java.util.List;
  * 3. Process each section in document order
  * 4. Return processed configuration with results
  * 
- * @author APEX Sequential Processing Implementation
+ * @author Mark Andrew Ray-Smith Cityline Ltd 
  * @since 2025-10-29
  * @version 1.0
  */

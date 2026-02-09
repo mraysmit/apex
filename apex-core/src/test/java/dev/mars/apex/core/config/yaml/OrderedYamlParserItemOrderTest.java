@@ -1,4 +1,8 @@
 package dev.mars.apex.core.config;
+import dev.mars.apex.core.config.model.*;
+import dev.mars.apex.core.config.loader.*;
+import dev.mars.apex.core.config.exception.*;
+import dev.mars.apex.core.config.service.*;
 
 import dev.mars.apex.core.config.sequential.OrderedYamlConfiguration;
 import dev.mars.apex.core.config.sequential.OrderedYamlParser;
@@ -33,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Multiple items within same section
  * - Edge cases (empty sections, missing IDs, etc.)
  * 
- * @author APEX Sequential Processing Implementation - Step 2
+ * @author Mark Andrew Ray-Smith Cityline Ltd  - Step 2
  */
 @ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class OrderedYamlParserItemOrderTest {

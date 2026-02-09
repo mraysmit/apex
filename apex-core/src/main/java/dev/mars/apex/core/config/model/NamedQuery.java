@@ -1,4 +1,6 @@
-package dev.mars.apex.core.config;
+package dev.mars.apex.core.config.model;
+
+import dev.mars.apex.core.config.exception.YamlConfigurationException;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -23,64 +25,116 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Model class for named endpoint definitions in array format.
+ * Model class for named query definitions in array format.
  * 
- * Used for REST API endpoint configurations with metadata.
+ * Supports rich metadata for queries including description, parameters,
+ * versioning, and categorization via tags.
  * 
  * <p>Example YAML:
  * <pre>
- * endpoints:
- *   - id: "EP-001"
- *     name: "getCustomer"
- *     endpoint: "/api/customers/{id}"
- *     description: "Retrieve customer by ID"
- *     method: "GET"
+ * queries:
+ *   - id: "Q-001"
+ *     name: "getCustomerById"
+ *     description: "Retrieve customer profile by ID"
+ *     query: "SELECT * FROM customers WHERE id = :id"
  *     parameters: ["id"]
- *     tags: ["customer", "rest-api"]
+ *     tags: ["customer", "read"]
+ *     version: "1.0"
  * </pre>
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2026-01-16
  * @version 1.0
  */
-public class NamedEndpoint {
+public class NamedQuery {
     
+    /**
+     * Unique identifier for the query (optional, for documentation).
+     */
     @JsonProperty("id")
     private String id;
     
+    /**
+     * Query name - used as the map key for lookups (REQUIRED).
+     */
     @JsonProperty("name")
     private String name;
     
-    @JsonProperty("endpoint")
-    private String endpoint;
+    /**
+     * The actual SQL or query string (REQUIRED).
+     */
+    @JsonProperty("query")
+    private String query;
     
+    /**
+     * Human-readable description of what the query does.
+     */
     @JsonProperty("description")
     private String description;
     
-    @JsonProperty("method")
-    private String method;
-    
+    /**
+     * List of parameter names used in the query.
+     */
     @JsonProperty("parameters")
     private List<String> parameters = new ArrayList<>();
     
+    /**
+     * Tags for categorization and discovery.
+     */
     @JsonProperty("tags")
     private List<String> tags = new ArrayList<>();
     
+    /**
+     * Version identifier for the query.
+     */
     @JsonProperty("version")
     private String version;
     
+    /**
+     * Whether this query is deprecated.
+     */
     @JsonProperty("deprecated")
     private boolean deprecated = false;
     
+    /**
+     * Deprecation message if deprecated is true.
+     */
     @JsonProperty("deprecation-message")
     private String deprecationMessage;
     
-    public NamedEndpoint() {
+    /**
+     * Author or team responsible for the query.
+     */
+    @JsonProperty("author")
+    private String author;
+    
+    /**
+     * Last modification date/timestamp.
+     */
+    @JsonProperty("last-modified")
+    private String lastModified;
+    
+    /**
+     * Compliance tags (e.g., GDPR, PCI-DSS).
+     */
+    @JsonProperty("compliance")
+    private List<String> compliance = new ArrayList<>();
+    
+    /**
+     * Default constructor.
+     */
+    public NamedQuery() {
     }
     
-    public NamedEndpoint(String name, String endpoint) {
+    /**
+     * Constructor with required fields.
+     * 
+     * @param name Query name (used as map key)
+     * @param query The SQL/query string
+     */
+    public NamedQuery(String name, String query) {
         this.name = name;
-        this.endpoint = endpoint;
+        this.query = query;
     }
     
     // Getters and Setters
@@ -101,12 +155,12 @@ public class NamedEndpoint {
         this.name = name;
     }
     
-    public String getEndpoint() {
-        return endpoint;
+    public String getQuery() {
+        return query;
     }
     
-    public void setEndpoint(String endpoint) {
-        this.endpoint = endpoint;
+    public void setQuery(String query) {
+        this.query = query;
     }
     
     public String getDescription() {
@@ -115,14 +169,6 @@ public class NamedEndpoint {
     
     public void setDescription(String description) {
         this.description = description;
-    }
-    
-    public String getMethod() {
-        return method;
-    }
-    
-    public void setMethod(String method) {
-        this.method = method;
     }
     
     public List<String> getParameters() {
@@ -165,12 +211,41 @@ public class NamedEndpoint {
         this.deprecationMessage = deprecationMessage;
     }
     
+    public String getAuthor() {
+        return author;
+    }
+    
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+    
+    public String getLastModified() {
+        return lastModified;
+    }
+    
+    public void setLastModified(String lastModified) {
+        this.lastModified = lastModified;
+    }
+    
+    public List<String> getCompliance() {
+        return compliance;
+    }
+    
+    public void setCompliance(List<String> compliance) {
+        this.compliance = compliance != null ? compliance : new ArrayList<>();
+    }
+    
+    /**
+     * Validates that required fields are present.
+     * 
+     * @throws YamlConfigurationException if validation fails
+     */
     public void validate() throws YamlConfigurationException {
         if (name == null || name.trim().isEmpty()) {
-            throw new YamlConfigurationException("Named endpoint must have a 'name' field");
+            throw new YamlConfigurationException("Named query must have a 'name' field");
         }
-        if (endpoint == null || endpoint.trim().isEmpty()) {
-            throw new YamlConfigurationException("Named endpoint '" + name + "' must have an 'endpoint' field");
+        if (query == null || query.trim().isEmpty()) {
+            throw new YamlConfigurationException("Named query '" + name + "' must have a 'query' field");
         }
     }
     
@@ -178,7 +253,7 @@ public class NamedEndpoint {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        NamedEndpoint that = (NamedEndpoint) o;
+        NamedQuery that = (NamedQuery) o;
         return Objects.equals(name, that.name);
     }
     
@@ -189,11 +264,9 @@ public class NamedEndpoint {
     
     @Override
     public String toString() {
-        return "NamedEndpoint{" +
+        return "NamedQuery{" +
                "id='" + id + '\'' +
                ", name='" + name + '\'' +
-               ", endpoint='" + endpoint + '\'' +
-               ", method='" + method + '\'' +
                ", description='" + description + '\'' +
                ", version='" + version + '\'' +
                ", deprecated=" + deprecated +

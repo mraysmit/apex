@@ -1,4 +1,4 @@
-package dev.mars.apex.core.config;
+package dev.mars.apex.core.config.model;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -16,8 +16,8 @@ package dev.mars.apex.core.config;
  * limitations under the License.
  */
 
+import dev.mars.apex.core.config.exception.YamlConfigurationException;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

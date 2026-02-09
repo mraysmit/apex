@@ -16,7 +16,7 @@ package dev.mars.apex.core.util;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.YamlConfigurationException;
+import dev.mars.apex.core.config.exception.YamlConfigurationException;
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
 import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;

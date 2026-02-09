@@ -1,4 +1,4 @@
-package dev.mars.apex.core.config;
+package dev.mars.apex.core.config.exception;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd

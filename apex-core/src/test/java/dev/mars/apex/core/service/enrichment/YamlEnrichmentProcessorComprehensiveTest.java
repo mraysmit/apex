@@ -1,9 +1,9 @@
 package dev.mars.apex.core.service.enrichment;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
-import dev.mars.apex.core.config.YamlEnrichment;
-import dev.mars.apex.core.config.YamlRuleConfiguration;
-import dev.mars.apex.core.config.YamlConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlEnrichment;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
 import dev.mars.apex.core.engine.model.EnrichmentGroup;
 import dev.mars.apex.core.engine.model.EnrichmentGroupResult;
 import dev.mars.apex.core.engine.model.RuleResult;

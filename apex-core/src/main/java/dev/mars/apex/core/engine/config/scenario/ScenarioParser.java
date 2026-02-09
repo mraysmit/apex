@@ -16,7 +16,7 @@ package dev.mars.apex.core.engine.config.scenario;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
 import dev.mars.apex.core.service.scenario.ScenarioStage;
 import org.slf4j.Logger;

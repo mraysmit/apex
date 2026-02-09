@@ -1,6 +1,6 @@
 package dev.mars.apex.core.service.transform;
 
-import dev.mars.apex.core.config.YamlTransformation;
+import dev.mars.apex.core.config.model.YamlTransformation;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.exception.ApexTransformationException;

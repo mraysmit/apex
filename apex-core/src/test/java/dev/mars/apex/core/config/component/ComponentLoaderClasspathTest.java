@@ -17,7 +17,7 @@ package dev.mars.apex.core.config.component;
  */
 
 import dev.mars.apex.core.config.ResourceResolver;
-import dev.mars.apex.core.config.YamlConfigurationException;
+import dev.mars.apex.core.config.exception.YamlConfigurationException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 

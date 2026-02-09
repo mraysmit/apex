@@ -16,7 +16,7 @@ package dev.mars.apex.core.service.scenario;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.YamlConfigurationException;
+import dev.mars.apex.core.config.exception.YamlConfigurationException;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import org.junit.jupiter.api.BeforeEach;
 

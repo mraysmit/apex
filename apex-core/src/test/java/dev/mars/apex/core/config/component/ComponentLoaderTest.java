@@ -16,7 +16,7 @@ package dev.mars.apex.core.config.component;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.YamlConfigurationException;
+import dev.mars.apex.core.config.exception.YamlConfigurationException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 

@@ -1,6 +1,6 @@
 package dev.mars.apex.core.engine.model;
 
-import dev.mars.apex.core.config.YamlEnrichment;
+import dev.mars.apex.core.config.model.YamlEnrichment;
 import dev.mars.apex.core.constants.ErrorHandlingConstants;
 
 import java.util.*;

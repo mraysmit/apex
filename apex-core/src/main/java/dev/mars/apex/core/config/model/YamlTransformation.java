@@ -1,4 +1,4 @@
-package dev.mars.apex.core.config;
+package dev.mars.apex.core.config.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

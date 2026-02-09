@@ -2,7 +2,7 @@ package dev.mars.apex.demo.database;
 
 import dev.mars.apex.demo.DemoTestBase;
 import dev.mars.apex.demo.util.TestContainerImages;
-import dev.mars.apex.core.config.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.*;

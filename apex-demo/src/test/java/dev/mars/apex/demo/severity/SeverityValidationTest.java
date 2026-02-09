@@ -16,8 +16,8 @@
 
 package dev.mars.apex.demo.severity;
 
-import dev.mars.apex.core.config.YamlConfigurationLoader;
-import dev.mars.apex.core.config.YamlRuleConfiguration;
+import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.config.YamlRuleFactory;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.config.RulesEngine;

@@ -17,8 +17,8 @@ package dev.mars.apex.demo.lookup;
 
 import dev.mars.apex.demo.DemoTestBase;
 
-import dev.mars.apex.core.config.YamlConfigurationLoader;
-import dev.mars.apex.core.config.YamlDataSourceLoader;
+import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.YamlDataSourceLoader;
 
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.Rule;

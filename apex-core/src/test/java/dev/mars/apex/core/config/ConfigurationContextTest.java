@@ -1,4 +1,8 @@
 package dev.mars.apex.core.config;
+import dev.mars.apex.core.config.model.*;
+import dev.mars.apex.core.config.loader.*;
+import dev.mars.apex.core.config.exception.*;
+import dev.mars.apex.core.config.service.*;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -17,8 +21,8 @@ package dev.mars.apex.core.config;
  */
 
 import dev.mars.apex.core.config.component.ComponentConfiguration;
-import dev.mars.apex.core.config.YamlDataSource;
-import dev.mars.apex.core.config.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.YamlDataSource;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;

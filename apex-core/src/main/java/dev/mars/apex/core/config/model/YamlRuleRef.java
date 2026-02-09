@@ -1,26 +1,27 @@
-package dev.mars.apex.core.config;
+package dev.mars.apex.core.config.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * YAML configuration class for external data-source references.
+ * YAML configuration class for external rule file references.
  * 
- * This class represents a reference to an external data-source configuration file,
- * enabling separation of infrastructure configuration from business logic configuration.
+ * This class represents a reference to an external rule configuration file,
+ * enabling separation of rule definitions across multiple files.
  * 
  * Example YAML structure:
  * <pre>
- * data-source-refs:
- *   - name: "customer-database"
- *     source: "data-sources/customer-database.yaml"
+ * rule-refs:
+ *   - name: "customer-rules"
+ *     source: "rules/customer-rules.yaml"
  *     enabled: true
+ *     description: "Customer validation rules"
  * </pre>
  * 
  * @author Mark A Ray-Smith Cityline Ltd
- * @since 2025-08-28
+ * @since 2025-09-13
  * @version 1.0.0
  */
-public class YamlDataSourceRef {
+public class YamlRuleRef {
     
     @JsonProperty("name")
     private String name;
@@ -35,15 +36,15 @@ public class YamlDataSourceRef {
     private String description;
     
     // Constructors
-    public YamlDataSourceRef() {}
+    public YamlRuleRef() {}
     
-    public YamlDataSourceRef(String name, String source) {
+    public YamlRuleRef(String name, String source) {
         this.name = name;
         this.source = source;
         this.enabled = true;
     }
     
-    public YamlDataSourceRef(String name, String source, Boolean enabled, String description) {
+    public YamlRuleRef(String name, String source, Boolean enabled, String description) {
         this.name = name;
         this.source = source;
         this.enabled = enabled;
@@ -84,7 +85,7 @@ public class YamlDataSourceRef {
     }
     
     /**
-     * Check if this data-source reference is enabled.
+     * Check if this rule reference is enabled.
      * Defaults to true if not explicitly set.
      */
     public boolean isEnabled() {
@@ -93,7 +94,7 @@ public class YamlDataSourceRef {
     
     @Override
     public String toString() {
-        return "YamlDataSourceRef{" +
+        return "YamlRuleRef{" +
                 "name='" + name + '\'' +
                 ", source='" + source + '\'' +
                 ", enabled=" + enabled +

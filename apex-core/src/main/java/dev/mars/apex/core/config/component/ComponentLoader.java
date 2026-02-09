@@ -20,9 +20,9 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import dev.mars.apex.core.config.ResourceNotFoundException;
+import dev.mars.apex.core.config.exception.ResourceNotFoundException;
 import dev.mars.apex.core.config.ResourceResolver;
-import dev.mars.apex.core.config.YamlConfigurationException;
+import dev.mars.apex.core.config.exception.YamlConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

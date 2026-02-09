@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * 4. Unresolvable dependency handling
  * 5. Deferred processing queue management
  * 
- * @author APEX Sequential Processing Implementation
+ * @author Mark Andrew Ray-Smith Cityline Ltd 
  * @version 1.0
  * @since Phase 3
  */

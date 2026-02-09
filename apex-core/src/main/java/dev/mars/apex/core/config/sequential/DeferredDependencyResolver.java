@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
  * 3. Rule groups referencing rules defined later
  * 4. Cross-section references and complex chains
  * 
- * @author APEX Sequential Processing Implementation
+ * @author Mark Andrew Ray-Smith Cityline Ltd 
  * @since 2025-10-29
  * @version 1.0
  */

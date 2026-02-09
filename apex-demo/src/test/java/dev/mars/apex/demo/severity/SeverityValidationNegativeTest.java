@@ -16,8 +16,8 @@
 
 package dev.mars.apex.demo.severity;
 
-import dev.mars.apex.core.config.YamlConfigurationException;
-import dev.mars.apex.core.config.YamlConfigurationLoader;
+import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,6 +1,8 @@
 package dev.mars.apex.core.config.sequential;
 
 import dev.mars.apex.core.config.*;
+import dev.mars.apex.core.config.exception.*;
+import dev.mars.apex.core.config.model.*;
 import dev.mars.apex.core.config.deserializer.SequentialConfigDeserializer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -29,7 +31,7 @@ import java.util.*;
  * - Supports all existing YAML features (property resolution, validation, etc.)
  * - Enables sequential processing that respects developer intent
  *
- * @author APEX Sequential Processing Implementation
+ * @author Mark Andrew Ray-Smith Cityline Ltd 
  * @since 2025-10-29
  */
 public class OrderedYamlParser {

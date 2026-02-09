@@ -1,6 +1,8 @@
 package dev.mars.apex.demo.sequencing;
 
 import dev.mars.apex.core.config.*;
+import dev.mars.apex.core.config.loader.*;
+import dev.mars.apex.core.config.model.*;
 import dev.mars.apex.core.config.sequential.*;
 import dev.mars.apex.core.engine.model.RuleResult;
 
@@ -26,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * 4. Backward Compatibility with Standard Processing
  * 5. Core Sequential Processing Functionality
  *
- * @author APEX Sequential Processing Implementation
+ * @author Mark Andrew Ray-Smith Cityline Ltd 
  * @since Phase 4 - Integration
  */
 @DisplayName("Phase 4: Sequential Processing Integration Tests")

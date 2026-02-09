@@ -1,8 +1,8 @@
 package dev.mars.apex.core.engine.config;
 
-import dev.mars.apex.core.config.YamlConfigurationLoader;
-import dev.mars.apex.core.config.YamlRuleConfiguration;
-import dev.mars.apex.core.config.YamlConfigurationException;
+import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.exception.YamlConfigurationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 

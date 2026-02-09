@@ -3,7 +3,7 @@ package dev.mars.apex.core.config.deserializer;
 import dev.mars.apex.core.config.sequential.OrderedYamlConfiguration;
 import dev.mars.apex.core.config.sequential.ProcessingItem;
 import dev.mars.apex.core.config.sequential.SectionRegistry;
-import dev.mars.apex.core.config.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;

@@ -15,11 +15,11 @@
  */
 package dev.mars.apex.core.util;
 
-import dev.mars.apex.core.config.YamlEnrichment;
-import dev.mars.apex.core.config.YamlRule;
-import dev.mars.apex.core.config.YamlRuleChain;
-import dev.mars.apex.core.config.YamlRuleGroup;
-import dev.mars.apex.core.config.YamlTransformation;
+import dev.mars.apex.core.config.model.YamlEnrichment;
+import dev.mars.apex.core.config.model.YamlRule;
+import dev.mars.apex.core.config.model.YamlRuleChain;
+import dev.mars.apex.core.config.model.YamlRuleGroup;
+import dev.mars.apex.core.config.model.YamlTransformation;
 import dev.mars.apex.core.engine.model.Rule;
 
 import java.util.List;

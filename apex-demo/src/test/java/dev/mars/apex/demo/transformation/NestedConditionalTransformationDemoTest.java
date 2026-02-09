@@ -1,9 +1,9 @@
 package dev.mars.apex.demo.transformation;
 
-import dev.mars.apex.core.config.YamlRuleConfiguration;
-import dev.mars.apex.core.config.YamlTransformation;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.YamlTransformation;
 import dev.mars.apex.core.service.transform.YamlTransformationProcessor;
-import dev.mars.apex.core.config.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import org.junit.jupiter.api.BeforeEach;

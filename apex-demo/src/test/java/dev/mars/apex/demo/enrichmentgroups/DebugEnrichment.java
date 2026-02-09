@@ -1,7 +1,7 @@
 package dev.mars.apex.demo.enrichmentgroups;
 
-import dev.mars.apex.core.config.YamlConfigurationLoader;
-import dev.mars.apex.core.config.YamlRuleConfiguration;
+import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.enrichment.EnrichmentGroupFactory;

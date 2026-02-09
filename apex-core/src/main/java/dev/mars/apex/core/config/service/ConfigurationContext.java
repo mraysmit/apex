@@ -1,4 +1,4 @@
-package dev.mars.apex.core.config;
+package dev.mars.apex.core.config.service;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -16,12 +16,13 @@ package dev.mars.apex.core.config;
  * limitations under the License.
  */
 
+import dev.mars.apex.core.config.ResourceResolver;
 import dev.mars.apex.core.config.component.ComponentConfiguration;
 import dev.mars.apex.core.config.component.ComponentLoader;
-import dev.mars.apex.core.config.YamlConfigurationLoader;
-import dev.mars.apex.core.config.YamlDataSource;
-import dev.mars.apex.core.config.YamlRuleConfiguration;
-import dev.mars.apex.core.config.ScenarioRegistryLoader;
+import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlDataSource;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.loader.ScenarioRegistryLoader;
 import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

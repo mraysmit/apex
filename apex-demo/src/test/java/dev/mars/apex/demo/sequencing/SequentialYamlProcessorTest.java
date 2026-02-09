@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.config.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Validate enriched data values not section order
  * - Follow patterns from RuleGroupsSequentialBasicTest
  *
- * @author APEX Sequential Processing Implementation
+ * @author Mark Andrew Ray-Smith Cityline Ltd 
  * @version 2.0 - Rewritten to follow APEX testing principles
  */
 public class SequentialYamlProcessorTest extends DemoTestBase {

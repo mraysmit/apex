@@ -1,7 +1,7 @@
 package dev.mars.apex.demo.categories;
 
 import dev.mars.apex.demo.DemoTestBase;
-import dev.mars.apex.core.config.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

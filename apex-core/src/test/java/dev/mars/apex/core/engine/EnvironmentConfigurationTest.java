@@ -15,7 +15,7 @@
  */
 package dev.mars.apex.core.engine;
 
-import dev.mars.apex.core.config.ScenarioRegistryLoader;
+import dev.mars.apex.core.config.loader.ScenarioRegistryLoader;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 

@@ -1,5 +1,9 @@
-package dev.mars.apex.core.config;
+package dev.mars.apex.core.config.service;
 
+import dev.mars.apex.core.config.YamlRuleFactory;
+import dev.mars.apex.core.config.exception.*;
+import dev.mars.apex.core.config.loader.*;
+import dev.mars.apex.core.config.model.*;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import org.slf4j.Logger;
@@ -31,7 +35,7 @@ import java.io.InputStream;
  *   processing-mode: "sequential"  # or "standard"
  * ```
  *
- * @author APEX Sequential Processing Implementation
+ * @author Mark Andrew Ray-Smith Cityline Ltd 
  * @since 2025-10-30
  */
 public class RulesEngineService {

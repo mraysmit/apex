@@ -1,6 +1,6 @@
 package dev.mars.apex.core.config.sequential;
 
-import dev.mars.apex.core.config.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.config.sequential.OrderedYamlConfiguration.ProcessingMode;
 import dev.mars.apex.core.config.sequential.ProcessingContext.ProcessingError;
 
@@ -23,7 +23,7 @@ import java.util.Map;
  * - Performance metrics
  * - Success/failure determination
  * 
- * @author APEX Sequential Processing Implementation
+ * @author Mark Andrew Ray-Smith Cityline Ltd 
  * @since 2025-10-29
  * @version 1.0
  */

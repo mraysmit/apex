@@ -16,10 +16,10 @@ package dev.mars.apex.demo.rulegroups;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.YamlConfigurationException;
-import dev.mars.apex.core.config.YamlConfigurationLoader;
-import dev.mars.apex.core.config.YamlRuleConfiguration;
-import dev.mars.apex.core.config.YamlRuleGroup;
+import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.YamlRuleGroup;
 
 /**
  * Simple YAML Test for Inline Rule Group References.

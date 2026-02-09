@@ -17,9 +17,9 @@ package dev.mars.apex.core.config.validation;
  */
 
 
-import dev.mars.apex.core.config.YamlConfigurationException;
-import dev.mars.apex.core.config.YamlConfigurationLoader;
-import dev.mars.apex.core.config.YamlRuleConfiguration;
+import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

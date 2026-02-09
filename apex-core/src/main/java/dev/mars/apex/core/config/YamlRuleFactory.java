@@ -1,5 +1,7 @@
 package dev.mars.apex.core.config;
 
+import dev.mars.apex.core.config.exception.*;
+import dev.mars.apex.core.config.model.*;
 import dev.mars.apex.core.api.RuleSet;
 import dev.mars.apex.core.constants.ErrorHandlingConstants;
 import dev.mars.apex.core.constants.SeverityConstants;
@@ -1161,7 +1163,7 @@ public class YamlRuleFactory {
      * @param yamlEnrichment The YAML enrichment configuration
      * @return An Enrichment object with inherited metadata
      */
-    public dev.mars.apex.core.engine.model.Enrichment createEnrichmentWithMetadata(dev.mars.apex.core.config.YamlEnrichment yamlEnrichment) {
+    public dev.mars.apex.core.engine.model.Enrichment createEnrichmentWithMetadata(dev.mars.apex.core.config.model.YamlEnrichment yamlEnrichment) {
         if (yamlEnrichment == null) {
             throw new IllegalArgumentException("YamlEnrichment cannot be null");
         }
@@ -1260,7 +1262,7 @@ public class YamlRuleFactory {
         }
 
         if (yamlConfig.getEnrichments() != null) {
-            for (dev.mars.apex.core.config.YamlEnrichment yamlEnrichment : yamlConfig.getEnrichments()) {
+            for (dev.mars.apex.core.config.model.YamlEnrichment yamlEnrichment : yamlConfig.getEnrichments()) {
                 if (yamlEnrichment.getEnabled() == null || yamlEnrichment.getEnabled()) {
                     enrichments.add(createEnrichmentWithMetadata(yamlEnrichment));
                 }

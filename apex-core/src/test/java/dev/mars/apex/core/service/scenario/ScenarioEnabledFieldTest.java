@@ -16,8 +16,8 @@ package dev.mars.apex.core.service.scenario;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.ScenarioRegistryLoader;
-import dev.mars.apex.core.config.YamlConfigurationException;
+import dev.mars.apex.core.config.loader.ScenarioRegistryLoader;
+import dev.mars.apex.core.config.exception.YamlConfigurationException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 

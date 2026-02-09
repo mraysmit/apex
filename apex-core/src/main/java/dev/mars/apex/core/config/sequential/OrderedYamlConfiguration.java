@@ -1,6 +1,6 @@
 package dev.mars.apex.core.config.sequential;
 
-import dev.mars.apex.core.config.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 
 import java.util.*;
 import org.slf4j.Logger;
@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
  * - Maintains full compatibility with existing YamlRuleConfiguration
  * - Supports processing mode detection and selection
  *
- * @author APEX Sequential Processing Implementation
+ * @author Mark Andrew Ray-Smith Cityline Ltd 
  * @since 2025-10-29
  */
 public class OrderedYamlConfiguration {

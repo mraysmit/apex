@@ -16,8 +16,8 @@ package dev.mars.apex.core.integration;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.YamlEnrichment;
-import dev.mars.apex.core.config.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.YamlEnrichment;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RuleBuilder;

@@ -15,9 +15,9 @@
  */
 package dev.mars.apex.demo.scenario;
 
-import dev.mars.apex.core.config.ScenarioRegistryLoader;
-import dev.mars.apex.core.config.YamlConfigurationException;
-import dev.mars.apex.core.config.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ScenarioRegistryLoader;
+import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
 import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
 import dev.mars.apex.core.service.scenario.ScenarioStage;
 import dev.mars.apex.demo.DemoTestBase;

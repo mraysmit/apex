@@ -1,4 +1,4 @@
-package dev.mars.apex.core.config;
+package dev.mars.apex.core.config.model;
 
 import dev.mars.apex.core.config.deserializer.FlexibleEndpointsDeserializer;
 import dev.mars.apex.core.config.deserializer.FlexibleOperationsDeserializer;

@@ -3,9 +3,9 @@ package dev.mars.apex.core.util;
 import dev.mars.apex.core.config.sequential.OrderedYamlConfiguration;
 import dev.mars.apex.core.config.sequential.OrderedYamlParser;
 import dev.mars.apex.core.config.sequential.ProcessingItem;
-import dev.mars.apex.core.config.YamlEnrichmentGroup;
-import dev.mars.apex.core.config.YamlRuleConfiguration;
-import dev.mars.apex.core.config.YamlRuleGroup;
+import dev.mars.apex.core.config.model.YamlEnrichmentGroup;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.YamlRuleGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

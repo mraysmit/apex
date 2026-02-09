@@ -15,8 +15,8 @@
  */
 package dev.mars.apex.core.engine.config.execution;
 
-import dev.mars.apex.core.config.YamlRuleChain;
-import dev.mars.apex.core.config.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.YamlRuleChain;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.engine.UnifiedRuleEvaluator;

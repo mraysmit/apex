@@ -15,7 +15,7 @@
  */
 package dev.mars.apex.demo.database;
 
-import dev.mars.apex.core.config.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
 
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;

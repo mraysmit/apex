@@ -1,6 +1,6 @@
 package dev.mars.apex.compiler.lexical;
 
-import dev.mars.apex.core.config.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 

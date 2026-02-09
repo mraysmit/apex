@@ -16,6 +16,7 @@ package dev.mars.apex.core.config;
  * limitations under the License.
  */
 
+import dev.mars.apex.core.config.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,8 +76,8 @@ import java.util.Objects;
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2026-01-08
- * @see dev.mars.apex.core.config.YamlConfigurationLoader
- * @see dev.mars.apex.core.config.ScenarioRegistryLoader
+ * @see dev.mars.apex.core.config.loader.YamlConfigurationLoader
+ * @see dev.mars.apex.core.config.loader.ScenarioRegistryLoader
  */
 public class ResourceResolver {
 

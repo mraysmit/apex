@@ -21,7 +21,7 @@ import java.util.*;
  * - State management across sections
  * - Debugging and logging support
  * 
- * @author APEX Sequential Processing Implementation
+ * @author Mark Andrew Ray-Smith Cityline Ltd 
  * @since 2025-10-29
  * @version 1.0
  */

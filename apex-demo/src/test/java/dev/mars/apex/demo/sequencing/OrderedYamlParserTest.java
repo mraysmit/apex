@@ -2,8 +2,8 @@ package dev.mars.apex.demo.sequencing;
 
 import dev.mars.apex.core.config.sequential.OrderedYamlConfiguration;
 import dev.mars.apex.core.config.sequential.OrderedYamlParser;
-import dev.mars.apex.core.config.YamlConfigurationException;
-import dev.mars.apex.core.config.YamlRuleConfiguration;
+import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Compatibility with existing YamlRuleConfiguration structure
  * - Edge cases and error handling
  * 
- * @author APEX Sequential Processing Implementation - Phase 1
+ * @author Mark Andrew Ray-Smith Cityline Ltd  - Phase 1
  */
 class OrderedYamlParserTest {
     

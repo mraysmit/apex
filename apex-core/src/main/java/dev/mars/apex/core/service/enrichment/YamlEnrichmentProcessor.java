@@ -1,8 +1,8 @@
 package dev.mars.apex.core.service.enrichment;
 
 import dev.mars.apex.core.cache.ApexCacheManager;
-import dev.mars.apex.core.config.YamlEnrichment;
-import dev.mars.apex.core.config.YamlRuleConfiguration;
+import dev.mars.apex.core.config.model.YamlEnrichment;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.DatasetLookupService;
@@ -16,8 +16,8 @@ import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.engine.model.EnrichmentGroup;
 import dev.mars.apex.core.engine.model.EnrichmentGroupResult;
-import dev.mars.apex.core.config.YamlRule;
-import dev.mars.apex.core.config.YamlRuleGroup;
+import dev.mars.apex.core.config.model.YamlRule;
+import dev.mars.apex.core.config.model.YamlRuleGroup;
 import dev.mars.apex.core.service.engine.RuleGroupEvaluationService;
 import dev.mars.apex.core.service.data.external.cache.CacheStatistics;
 import org.springframework.expression.Expression;
@@ -84,7 +84,7 @@ public class YamlEnrichmentProcessor {
     private final RuleGroupEvaluationService ruleGroupEvaluationService;
 
     // Current configuration context for database lookups
-    private dev.mars.apex.core.config.YamlRuleConfiguration currentConfiguration;
+    private dev.mars.apex.core.config.model.YamlRuleConfiguration currentConfiguration;
 
     // Rule result tracking for conditional mapping support
     private final Map<String, Map<String, Object>> ruleGroupResults = new java.util.concurrent.ConcurrentHashMap<>();
@@ -159,7 +159,7 @@ public class YamlEnrichmentProcessor {
      */
     @Deprecated(since = "1.1", forRemoval = true)
     public Object processEnrichments(List<YamlEnrichment> enrichments, Object targetObject,
-                                   dev.mars.apex.core.config.YamlRuleConfiguration configuration) {
+                                   dev.mars.apex.core.config.model.YamlRuleConfiguration configuration) {
         // Runtime deprecation warning
         logger.warn("DEPRECATED: processEnrichments(List, Object, YamlRuleConfiguration) is deprecated since 1.1 and will be removed in 2.0. " +
                     "Use processEnrichmentsWithResult(List, Object, YamlRuleConfiguration) instead for proper error propagation. " +
@@ -1308,7 +1308,7 @@ public class YamlEnrichmentProcessor {
      * @param configuration The YAML configuration containing rules and rule groups
      * @param targetObject The object to evaluate rules against
      */
-    private void processRulesAndRuleGroups(dev.mars.apex.core.config.YamlRuleConfiguration configuration, Object targetObject) {
+    private void processRulesAndRuleGroups(dev.mars.apex.core.config.model.YamlRuleConfiguration configuration, Object targetObject) {
         // Clear previous results
         ruleGroupResults.clear();
         individualRuleResults.clear();
@@ -1442,7 +1442,7 @@ public class YamlEnrichmentProcessor {
      * @param ruleId The rule ID to find
      * @return The YamlRule if found, null otherwise
      */
-    private YamlRule findRuleById(dev.mars.apex.core.config.YamlRuleConfiguration configuration, String ruleId) {
+    private YamlRule findRuleById(dev.mars.apex.core.config.model.YamlRuleConfiguration configuration, String ruleId) {
         if (configuration.getRules() != null) {
             for (YamlRule rule : configuration.getRules()) {
                 if (ruleId.equals(rule.getId())) {
@@ -1588,7 +1588,7 @@ public class YamlEnrichmentProcessor {
      * @return A RuleResult containing success status, enriched data, and failure messages
      */
     public RuleResult processEnrichmentsWithResult(List<YamlEnrichment> enrichments, Object targetObject,
-                                                  dev.mars.apex.core.config.YamlRuleConfiguration configuration) {
+                                                  dev.mars.apex.core.config.model.YamlRuleConfiguration configuration) {
         logger.debug("processEnrichmentsWithResult() entry - enrichments count: {}, targetObject type: {}", 
                     enrichments != null ? enrichments.size() : 0, 
                     targetObject != null ? targetObject.getClass().getSimpleName() : "null");
@@ -1709,7 +1709,7 @@ public class YamlEnrichmentProcessor {
      * @return A RuleResult containing success status, enriched data, and failure messages
      */
     public RuleResult processEnrichmentWithResult(YamlEnrichment enrichment, Object targetObject,
-                                                  dev.mars.apex.core.config.YamlRuleConfiguration configuration) {
+                                                  dev.mars.apex.core.config.model.YamlRuleConfiguration configuration) {
         if (enrichment == null) {
             logger.debug("No enrichment provided");
             Map<String, Object> resultData = convertToMap(targetObject);
