@@ -20,7 +20,7 @@ package dev.mars.apex.playground.service;
 import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-import dev.mars.apex.core.config.yaml.YamlMetadataValidator;
+import dev.mars.apex.core.config.yaml.validation.YamlMetadataValidator;
 import dev.mars.apex.playground.model.YamlValidationResponse;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import org.slf4j.Logger;

@@ -17,7 +17,8 @@ package dev.mars.apex.core.service.yaml;
  */
 
 
-import dev.mars.apex.core.config.yaml.YamlValidationSummary;
+import dev.mars.apex.core.config.yaml.validation.YamlValidationResult;
+import dev.mars.apex.core.config.yaml.validation.YamlValidationSummary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -208,16 +209,16 @@ public class YamlManagementService {
      * Result of comprehensive analysis for a single file.
      */
     public static class ComprehensiveAnalysisResult {
-        private final dev.mars.apex.core.config.yaml.YamlValidationResult validationResult;
+        private final YamlValidationResult validationResult;
         private final YamlDependencyService.DependencyReport dependencyReport;
 
-        public ComprehensiveAnalysisResult(dev.mars.apex.core.config.yaml.YamlValidationResult validationResult,
+        public ComprehensiveAnalysisResult(YamlValidationResult validationResult,
                                          YamlDependencyService.DependencyReport dependencyReport) {
             this.validationResult = validationResult;
             this.dependencyReport = dependencyReport;
         }
 
-        public dev.mars.apex.core.config.yaml.YamlValidationResult getValidationResult() { return validationResult; }
+        public YamlValidationResult getValidationResult() { return validationResult; }
         public YamlDependencyService.DependencyReport getDependencyReport() { return dependencyReport; }
         
         public boolean hasIssues() {

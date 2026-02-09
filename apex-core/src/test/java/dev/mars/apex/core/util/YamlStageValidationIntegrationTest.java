@@ -16,9 +16,9 @@ package dev.mars.apex.core.util;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.yaml.YamlMetadataValidator;
-import dev.mars.apex.core.config.yaml.YamlValidationResult;
-import dev.mars.apex.core.config.yaml.YamlValidationSummary;
+import dev.mars.apex.core.config.yaml.validation.YamlMetadataValidator;
+import dev.mars.apex.core.config.yaml.validation.YamlValidationResult;
+import dev.mars.apex.core.config.yaml.validation.YamlValidationSummary;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
