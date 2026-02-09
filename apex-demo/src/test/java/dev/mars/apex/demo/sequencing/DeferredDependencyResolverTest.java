@@ -1,10 +1,10 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.config.yaml.DeferredDependencyResolver;
-import dev.mars.apex.core.config.yaml.DeferredDependencyResolver.DependencyAnalysis;
-import dev.mars.apex.core.config.yaml.DeferredDependencyResolver.DeferredSection;
-import dev.mars.apex.core.config.yaml.DeferredDependencyResolver.CircularDependencyResult;
-import dev.mars.apex.core.config.yaml.DeferredDependencyResolver.DependencyResolutionStatus;
+import dev.mars.apex.core.config.yaml.sequential.DeferredDependencyResolver;
+import dev.mars.apex.core.config.yaml.sequential.DeferredDependencyResolver.DependencyAnalysis;
+import dev.mars.apex.core.config.yaml.sequential.DeferredDependencyResolver.DeferredSection;
+import dev.mars.apex.core.config.yaml.sequential.DeferredDependencyResolver.CircularDependencyResult;
+import dev.mars.apex.core.config.yaml.sequential.DeferredDependencyResolver.DependencyResolutionStatus;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

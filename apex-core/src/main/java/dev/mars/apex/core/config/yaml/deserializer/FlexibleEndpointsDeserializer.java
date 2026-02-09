@@ -1,4 +1,4 @@
-package dev.mars.apex.core.config.yaml;
+package dev.mars.apex.core.config.yaml.deserializer;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -28,13 +28,13 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * Custom Jackson deserializer that handles both map and array formats for operations.
+ * Custom Jackson deserializer that handles both map and array formats for endpoints.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2026-01-16
  * @version 1.0
  */
-public class FlexibleOperationsDeserializer extends JsonDeserializer<Map<String, String>> {
+public class FlexibleEndpointsDeserializer extends JsonDeserializer<Map<String, String>> {
     
     @Override
     public Map<String, String> deserialize(JsonParser parser, DeserializationContext ctx) 
@@ -48,7 +48,7 @@ public class FlexibleOperationsDeserializer extends JsonDeserializer<Map<String,
             return deserializeArrayFormat(node, ctx, parser);
         } else {
             throw new JsonMappingException(parser,
-                "Field 'operations' must be either a map object or an array of operation objects. " +
+                "Field 'endpoints' must be either a map object or an array of endpoint objects. " +
                 "Found: " + node.getNodeType());
         }
     }
@@ -80,31 +80,31 @@ public class FlexibleOperationsDeserializer extends JsonDeserializer<Map<String,
         for (JsonNode item : node) {
             if (!item.isObject()) {
                 throw new JsonMappingException(parser,
-                    "Array format for 'operations' must contain objects with 'name' and 'query' fields");
+                    "Array format for 'endpoints' must contain objects with 'name' and 'endpoint' fields");
             }
             
             JsonNode nameNode = item.get("name");
-            JsonNode queryNode = item.get("query");
+            JsonNode endpointNode = item.get("endpoint");
             
             if (nameNode == null || !nameNode.isTextual()) {
                 throw new JsonMappingException(parser,
-                    "Each operation object must have a 'name' field (string)");
+                    "Each endpoint object must have a 'name' field (string)");
             }
             
-            if (queryNode == null) {
+            if (endpointNode == null) {
                 throw new JsonMappingException(parser,
-                    "Operation object with name '" + nameNode.asText() + "' must have a 'query' field");
+                    "Endpoint object with name '" + nameNode.asText() + "' must have an 'endpoint' field");
             }
             
             String name = nameNode.asText();
-            String query = queryNode.isTextual() ? queryNode.asText() : queryNode.toString();
+            String endpoint = endpointNode.isTextual() ? endpointNode.asText() : endpointNode.toString();
             
             if (result.containsKey(name)) {
                 throw new JsonMappingException(parser,
-                    "Duplicate operation name: '" + name + "'");
+                    "Duplicate endpoint name: '" + name + "'");
             }
             
-            result.put(name, query);
+            result.put(name, endpoint);
         }
         
         return result;

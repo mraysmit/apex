@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.config.yaml.ProcessingItem;
+import dev.mars.apex.core.config.yaml.sequential.ProcessingItem;
 import dev.mars.apex.core.util.ProcessingSequenceReport;
 import dev.mars.apex.core.util.YamlProcessingSequenceAnalyzer;
 import dev.mars.apex.demo.DemoTestBase;

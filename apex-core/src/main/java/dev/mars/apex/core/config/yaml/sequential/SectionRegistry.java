@@ -1,4 +1,4 @@
-package dev.mars.apex.core.config.yaml;
+package dev.mars.apex.core.config.yaml.sequential;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -161,9 +161,8 @@ public class SectionRegistry {
 
     /**
      * Clear caches (for testing).
-     * Package-private for test access only.
      */
-    void clearCaches() {
+    public void clearCaches() {
         normalizedCache.clear();
         strategyCache.clear();
         precomputeCommonSections();

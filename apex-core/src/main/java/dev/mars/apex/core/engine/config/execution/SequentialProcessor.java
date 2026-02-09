@@ -16,6 +16,7 @@
 package dev.mars.apex.core.engine.config.execution;
 
 import dev.mars.apex.core.config.yaml.*;
+import dev.mars.apex.core.config.yaml.sequential.ProcessingItem;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.model.EnrichmentGroup;
 import dev.mars.apex.core.engine.model.ExecutionStep;

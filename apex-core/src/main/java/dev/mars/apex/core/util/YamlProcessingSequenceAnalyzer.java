@@ -1,8 +1,8 @@
 package dev.mars.apex.core.util;
 
-import dev.mars.apex.core.config.yaml.OrderedYamlConfiguration;
-import dev.mars.apex.core.config.yaml.OrderedYamlParser;
-import dev.mars.apex.core.config.yaml.ProcessingItem;
+import dev.mars.apex.core.config.yaml.sequential.OrderedYamlConfiguration;
+import dev.mars.apex.core.config.yaml.sequential.OrderedYamlParser;
+import dev.mars.apex.core.config.yaml.sequential.ProcessingItem;
 import dev.mars.apex.core.config.yaml.YamlEnrichmentGroup;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import dev.mars.apex.core.config.yaml.YamlRuleGroup;

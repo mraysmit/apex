@@ -1,7 +1,7 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.config.yaml.OrderedYamlConfiguration;
-import dev.mars.apex.core.config.yaml.OrderedYamlParser;
+import dev.mars.apex.core.config.yaml.sequential.OrderedYamlConfiguration;
+import dev.mars.apex.core.config.yaml.sequential.OrderedYamlParser;
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
 import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 import org.junit.jupiter.api.BeforeEach;

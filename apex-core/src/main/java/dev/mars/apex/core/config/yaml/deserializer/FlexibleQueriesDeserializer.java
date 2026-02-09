@@ -1,4 +1,4 @@
-package dev.mars.apex.core.config.yaml;
+package dev.mars.apex.core.config.yaml.deserializer;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -28,13 +28,20 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * Custom Jackson deserializer that handles both map and array formats for endpoints.
+ * Custom Jackson deserializer that handles both map and array formats for queries.
+ * 
+ * Supports two formats:
+ * 1. Map format (traditional): { "queryName": "SELECT ..." }
+ * 2. Array format (new): [ { "name": "queryName", "query": "SELECT ...", ... } ]
+ * 
+ * The deserializer automatically detects the format and converts both to Map<String, String>
+ * for consistent runtime usage.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2026-01-16
  * @version 1.0
  */
-public class FlexibleEndpointsDeserializer extends JsonDeserializer<Map<String, String>> {
+public class FlexibleQueriesDeserializer extends JsonDeserializer<Map<String, String>> {
     
     @Override
     public Map<String, String> deserialize(JsonParser parser, DeserializationContext ctx) 
@@ -43,16 +50,21 @@ public class FlexibleEndpointsDeserializer extends JsonDeserializer<Map<String, 
         JsonNode node = parser.getCodec().readTree(parser);
         
         if (node.isObject()) {
+            // Traditional map format: { "key": "value" }
             return deserializeMapFormat(node);
         } else if (node.isArray()) {
+            // New array format: [ { "name": "key", "query": "value" } ]
             return deserializeArrayFormat(node, ctx, parser);
         } else {
             throw new JsonMappingException(parser,
-                "Field 'endpoints' must be either a map object or an array of endpoint objects. " +
+                "Field 'queries' must be either a map object or an array of query objects. " +
                 "Found: " + node.getNodeType());
         }
     }
     
+    /**
+     * Deserialize traditional map format.
+     */
     private Map<String, String> deserializeMapFormat(JsonNode node) {
         Map<String, String> result = new HashMap<>();
         Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
@@ -65,6 +77,7 @@ public class FlexibleEndpointsDeserializer extends JsonDeserializer<Map<String, 
             if (valueNode.isTextual()) {
                 result.put(key, valueNode.asText());
             } else {
+                // Handle multi-line strings and other types
                 result.put(key, valueNode.toString());
             }
         }
@@ -72,6 +85,9 @@ public class FlexibleEndpointsDeserializer extends JsonDeserializer<Map<String, 
         return result;
     }
     
+    /**
+     * Deserialize new array format with NamedQuery objects.
+     */
     private Map<String, String> deserializeArrayFormat(JsonNode node, 
                                                        DeserializationContext ctx,
                                                        JsonParser parser) throws IOException {
@@ -80,31 +96,35 @@ public class FlexibleEndpointsDeserializer extends JsonDeserializer<Map<String, 
         for (JsonNode item : node) {
             if (!item.isObject()) {
                 throw new JsonMappingException(parser,
-                    "Array format for 'endpoints' must contain objects with 'name' and 'endpoint' fields");
+                    "Array format for 'queries' must contain objects with 'name' and 'query' fields. " +
+                    "Found array element of type: " + item.getNodeType());
             }
             
+            // Extract required fields
             JsonNode nameNode = item.get("name");
-            JsonNode endpointNode = item.get("endpoint");
+            JsonNode queryNode = item.get("query");
             
             if (nameNode == null || !nameNode.isTextual()) {
                 throw new JsonMappingException(parser,
-                    "Each endpoint object must have a 'name' field (string)");
+                    "Each query object must have a 'name' field (string). " +
+                    "Found: " + (nameNode == null ? "missing" : nameNode.getNodeType()));
             }
             
-            if (endpointNode == null) {
+            if (queryNode == null) {
                 throw new JsonMappingException(parser,
-                    "Endpoint object with name '" + nameNode.asText() + "' must have an 'endpoint' field");
+                    "Query object with name '" + nameNode.asText() + "' must have a 'query' field");
             }
             
             String name = nameNode.asText();
-            String endpoint = endpointNode.isTextual() ? endpointNode.asText() : endpointNode.toString();
+            String query = queryNode.isTextual() ? queryNode.asText() : queryNode.toString();
             
+            // Check for duplicates
             if (result.containsKey(name)) {
                 throw new JsonMappingException(parser,
-                    "Duplicate endpoint name: '" + name + "'");
+                    "Duplicate query name found: '" + name + "'. Query names must be unique.");
             }
             
-            result.put(name, endpoint);
+            result.put(name, query);
         }
         
         return result;

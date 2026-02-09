@@ -1,4 +1,4 @@
-package dev.mars.apex.core.config.yaml;
+package dev.mars.apex.core.config.yaml.sequential;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd

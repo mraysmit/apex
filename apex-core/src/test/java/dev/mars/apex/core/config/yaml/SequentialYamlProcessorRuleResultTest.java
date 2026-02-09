@@ -1,5 +1,6 @@
 package dev.mars.apex.core.config.yaml;
 
+import dev.mars.apex.core.config.yaml.sequential.SequentialYamlProcessor;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
 

@@ -1,6 +1,6 @@
-package dev.mars.apex.core.config.yaml;
+package dev.mars.apex.core.config.yaml.sequential;
 
-import dev.mars.apex.core.config.yaml.OrderedYamlConfiguration.ProcessingMode;
+import dev.mars.apex.core.config.yaml.sequential.OrderedYamlConfiguration.ProcessingMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

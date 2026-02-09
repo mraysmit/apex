@@ -1,6 +1,6 @@
 package dev.mars.apex.core.util;
 
-import dev.mars.apex.core.config.yaml.ProcessingItem;
+import dev.mars.apex.core.config.yaml.sequential.ProcessingItem;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -1,4 +1,6 @@
-package dev.mars.apex.core.config.yaml;
+package dev.mars.apex.core.config.yaml.sequential;
+
+import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
 
 import java.util.*;
 import org.slf4j.Logger;

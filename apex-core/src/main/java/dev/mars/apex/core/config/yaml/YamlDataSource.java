@@ -1,5 +1,9 @@
 package dev.mars.apex.core.config.yaml;
 
+import dev.mars.apex.core.config.yaml.deserializer.FlexibleEndpointsDeserializer;
+import dev.mars.apex.core.config.yaml.deserializer.FlexibleOperationsDeserializer;
+import dev.mars.apex.core.config.yaml.deserializer.FlexibleQueriesDeserializer;
+
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
  *
