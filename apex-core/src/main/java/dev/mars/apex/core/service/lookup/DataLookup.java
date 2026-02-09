@@ -32,7 +32,7 @@ import dev.mars.apex.core.service.validation.Validator;
  * Legacy interface that combines validation and transformation capabilities.
  * Kept for backward compatibility.
  */
-public interface IDataLookup extends Validator<Object> {
+public interface DataLookup extends Validator<Object> {
     /**
      * Transform a value of type Object.
      * 

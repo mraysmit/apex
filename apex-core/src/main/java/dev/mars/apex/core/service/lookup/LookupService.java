@@ -30,7 +30,7 @@ import java.util.function.Function;
  * @since 2025-07-27
  * @version 1.0
  */
-public class LookupService implements IDataLookup {
+public class LookupService implements DataLookup {
     private List<String> lookupValues;
     private String name;
     private Map<String, Object> enrichmentData;
