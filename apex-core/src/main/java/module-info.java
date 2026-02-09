@@ -93,7 +93,6 @@ module dev.mars.apex.core {
 
     // Export other existing services
     exports dev.mars.apex.core.service.engine;
-    exports dev.mars.apex.core.service.data;
     exports dev.mars.apex.core.service.transform;
     exports dev.mars.apex.core.service.enrichment;
     exports dev.mars.apex.core.service.scenario;
