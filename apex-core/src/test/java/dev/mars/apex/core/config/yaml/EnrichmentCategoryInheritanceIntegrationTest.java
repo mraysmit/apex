@@ -1,4 +1,4 @@
-package dev.mars.apex.core.config.yaml;
+package dev.mars.apex.core.config;
 
 import dev.mars.apex.core.engine.model.Enrichment;
 import dev.mars.apex.core.engine.model.EnrichmentGroup;

@@ -1,8 +1,8 @@
 package dev.mars.apex.core.service.enrichment;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlEnrichmentGroup;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.config.YamlConfigurationLoader;
+import dev.mars.apex.core.config.YamlEnrichmentGroup;
+import dev.mars.apex.core.config.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.model.EnrichmentGroup;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

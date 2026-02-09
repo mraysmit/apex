@@ -65,14 +65,14 @@ module dev.mars.apex.core {
     exports dev.mars.apex.core.constants;
 
     // YAML configuration exports
-    exports dev.mars.apex.core.config.yaml;
-    opens dev.mars.apex.core.config.yaml to com.fasterxml.jackson.databind;
-    exports dev.mars.apex.core.config.yaml.deserializer;
-    opens dev.mars.apex.core.config.yaml.deserializer to com.fasterxml.jackson.databind;
-    exports dev.mars.apex.core.config.yaml.sequential;
-    opens dev.mars.apex.core.config.yaml.sequential to com.fasterxml.jackson.databind;
-    exports dev.mars.apex.core.config.yaml.validation;
-    opens dev.mars.apex.core.config.yaml.validation to com.fasterxml.jackson.databind;
+    exports dev.mars.apex.core.config;
+    opens dev.mars.apex.core.config to com.fasterxml.jackson.databind;
+    exports dev.mars.apex.core.config.deserializer;
+    opens dev.mars.apex.core.config.deserializer to com.fasterxml.jackson.databind;
+    exports dev.mars.apex.core.config.sequential;
+    opens dev.mars.apex.core.config.sequential to com.fasterxml.jackson.databind;
+    exports dev.mars.apex.core.config.validation;
+    opens dev.mars.apex.core.config.validation to com.fasterxml.jackson.databind;
     exports dev.mars.apex.core.service.yaml;
 
     // New exports for performance monitoring

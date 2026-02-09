@@ -1,9 +1,9 @@
 package dev.mars.apex.core.service.enrichment;
 
-import dev.mars.apex.core.config.yaml.YamlCategory;
-import dev.mars.apex.core.config.yaml.YamlEnrichment;
-import dev.mars.apex.core.config.yaml.YamlEnrichmentGroup;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.config.YamlCategory;
+import dev.mars.apex.core.config.YamlEnrichment;
+import dev.mars.apex.core.config.YamlEnrichmentGroup;
+import dev.mars.apex.core.config.YamlRuleConfiguration;
 import dev.mars.apex.core.constants.ErrorHandlingConstants;
 import dev.mars.apex.core.engine.model.Category;
 import dev.mars.apex.core.engine.model.EnrichmentGroup;

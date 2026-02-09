@@ -16,8 +16,8 @@ package dev.mars.apex.core.service.lookup;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.yaml.YamlEnrichment.LookupDataset;
-import dev.mars.apex.core.config.yaml.YamlEnrichment.LookupDataset.ParameterMapping;
+import dev.mars.apex.core.config.YamlEnrichment.LookupDataset;
+import dev.mars.apex.core.config.YamlEnrichment.LookupDataset.ParameterMapping;
 import org.junit.jupiter.api.DisplayName;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;

@@ -1,9 +1,9 @@
 package dev.mars.apex.core.constants;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlRule;
-import dev.mars.apex.core.config.yaml.YamlEnrichment;
+import dev.mars.apex.core.config.YamlConfigurationLoader;
+import dev.mars.apex.core.config.YamlRuleConfiguration;
+import dev.mars.apex.core.config.YamlRule;
+import dev.mars.apex.core.config.YamlEnrichment;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 

@@ -18,10 +18,10 @@ package dev.mars.apex.core.config;
 
 import dev.mars.apex.core.config.component.ComponentConfiguration;
 import dev.mars.apex.core.config.component.ComponentLoader;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlDataSource;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.ScenarioRegistryLoader;
+import dev.mars.apex.core.config.YamlConfigurationLoader;
+import dev.mars.apex.core.config.YamlDataSource;
+import dev.mars.apex.core.config.YamlRuleConfiguration;
+import dev.mars.apex.core.config.ScenarioRegistryLoader;
 import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -18,13 +18,13 @@ package dev.mars.apex.demo;
 
 import java.io.File;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlConfigurationMerger;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.config.YamlConfigurationLoader;
+import dev.mars.apex.core.config.YamlConfigurationMerger;
+import dev.mars.apex.core.config.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.config.RulesEngineConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.config.yaml.YamlConfigurationException;
+import dev.mars.apex.core.config.YamlConfigurationException;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 

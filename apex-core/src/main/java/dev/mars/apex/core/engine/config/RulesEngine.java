@@ -2,7 +2,7 @@ package dev.mars.apex.core.engine.config;
 
 import dev.mars.apex.core.config.error.ErrorRecoveryConfig;
 import dev.mars.apex.core.config.pipeline.PipelineConfiguration;
-import dev.mars.apex.core.config.yaml.*;
+import dev.mars.apex.core.config.*;
 import dev.mars.apex.core.engine.config.execution.EnrichmentGroupExecutor;
 import dev.mars.apex.core.engine.config.execution.PipelineExecutionManager;
 import dev.mars.apex.core.engine.config.execution.RuleChainExecutor;
@@ -70,7 +70,7 @@ import java.util.*;
  * Configuration is handled by the RulesEngineConfiguration class.
  *
  * <p><b>Recommended Usage:</b></p>
- * For production code, use {@link dev.mars.apex.core.config.yaml.RulesEngineService} to create
+ * For production code, use {@link dev.mars.apex.core.config.RulesEngineService} to create
  * RulesEngine instances. This provides simplified, content-agnostic YAML processing that handles
  * all YAML content types (enrichments, rules, rule-groups, transformations, etc.) automatically.
  *

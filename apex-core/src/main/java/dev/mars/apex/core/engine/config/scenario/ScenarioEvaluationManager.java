@@ -1,6 +1,6 @@
 package dev.mars.apex.core.engine.config.scenario;
 
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.config.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.util.DataCopyUtility;
 import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
 import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;

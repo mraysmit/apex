@@ -1,6 +1,6 @@
 package dev.mars.apex.core.service.lookup;
 
-import dev.mars.apex.core.config.yaml.YamlEnrichment;
+import dev.mars.apex.core.config.YamlEnrichment;
 import dev.mars.apex.core.service.data.external.DataSourceException;
 import dev.mars.apex.core.service.data.external.registry.DataSourceRegistry;
 import dev.mars.apex.core.service.enrichment.EnrichmentException;
@@ -72,7 +72,7 @@ public class DatasetLookupServiceFactory {
      */
     public static DatasetLookupService createDatasetLookupService(String serviceName,
                                                                   YamlEnrichment.LookupDataset dataset,
-                                                                  dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
+                                                                  dev.mars.apex.core.config.YamlRuleConfiguration configuration) {
         return createDatasetLookupService(serviceName, dataset, configuration, null);
     }
 
@@ -89,7 +89,7 @@ public class DatasetLookupServiceFactory {
      */
     public static DatasetLookupService createDatasetLookupService(String serviceName,
                                                                   YamlEnrichment.LookupDataset dataset,
-                                                                  dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration,
+                                                                  dev.mars.apex.core.config.YamlRuleConfiguration configuration,
                                                                   Map<String, dev.mars.apex.core.service.data.external.ExternalDataSource> dataSourceRegistry) {
         if (dataset == null) {
             throw new EnrichmentException("Dataset configuration cannot be null");
@@ -217,7 +217,7 @@ public class DatasetLookupServiceFactory {
      */
     private static DatasetLookupService createDatabaseDatasetService(String serviceName,
                                                                      YamlEnrichment.LookupDataset dataset,
-                                                                     dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
+                                                                     dev.mars.apex.core.config.YamlRuleConfiguration configuration) {
         return createDatabaseDatasetService(serviceName, dataset, configuration, null);
     }
 
@@ -232,7 +232,7 @@ public class DatasetLookupServiceFactory {
      */
     private static DatasetLookupService createDatabaseDatasetService(String serviceName,
                                                                      YamlEnrichment.LookupDataset dataset,
-                                                                     dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration,
+                                                                     dev.mars.apex.core.config.YamlRuleConfiguration configuration,
                                                                      Map<String, dev.mars.apex.core.service.data.external.ExternalDataSource> dataSourceRegistry) {
         logger.debug("Creating database dataset service: " + serviceName);
 
@@ -267,9 +267,9 @@ public class DatasetLookupServiceFactory {
         }
 
         // Find the data source configuration using the resolved connection name
-        dev.mars.apex.core.config.yaml.YamlDataSource dataSourceConfig = null;
+        dev.mars.apex.core.config.YamlDataSource dataSourceConfig = null;
         if (configuration.getDataSources() != null) {
-            for (dev.mars.apex.core.config.yaml.YamlDataSource ds : configuration.getDataSources()) {
+            for (dev.mars.apex.core.config.YamlDataSource ds : configuration.getDataSources()) {
                 if (connectionName.equals(ds.getName())) {
                     dataSourceConfig = ds;
                     break;
@@ -323,13 +323,13 @@ public class DatasetLookupServiceFactory {
     /**
      * Get available data source names for error messages.
      */
-    private static String getAvailableDataSourceNames(dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
+    private static String getAvailableDataSourceNames(dev.mars.apex.core.config.YamlRuleConfiguration configuration) {
         if (configuration.getDataSources() == null || configuration.getDataSources().isEmpty()) {
             return "none";
         }
 
         return configuration.getDataSources().stream()
-            .map(dev.mars.apex.core.config.yaml.YamlDataSource::getName)
+            .map(dev.mars.apex.core.config.YamlDataSource::getName)
             .collect(java.util.stream.Collectors.joining(", "));
     }
 
@@ -760,13 +760,13 @@ public class DatasetLookupServiceFactory {
      * @throws EnrichmentException if the named query cannot be resolved
      */
     private static String resolveNamedQuery(String connectionName, String queryRef,
-                                          dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
+                                          dev.mars.apex.core.config.YamlRuleConfiguration configuration) {
         logger.debug("Resolving named query '" + queryRef + "' from data-source '" + connectionName + "'");
 
         // Find the data source configuration
-        dev.mars.apex.core.config.yaml.YamlDataSource dataSourceConfig = null;
+        dev.mars.apex.core.config.YamlDataSource dataSourceConfig = null;
         if (configuration.getDataSources() != null) {
-            for (dev.mars.apex.core.config.yaml.YamlDataSource ds : configuration.getDataSources()) {
+            for (dev.mars.apex.core.config.YamlDataSource ds : configuration.getDataSources()) {
                 if (connectionName.equals(ds.getName())) {
                     dataSourceConfig = ds;
                     break;
@@ -807,7 +807,7 @@ public class DatasetLookupServiceFactory {
      */
     private static DatasetLookupService createRestApiDatasetService(String serviceName,
                                                                    YamlEnrichment.LookupDataset dataset,
-                                                                   dev.mars.apex.core.config.yaml.YamlRuleConfiguration configuration) {
+                                                                   dev.mars.apex.core.config.YamlRuleConfiguration configuration) {
         logger.debug("Creating REST API dataset service: " + serviceName);
 
         // Validate REST API-specific configuration
@@ -838,9 +838,9 @@ public class DatasetLookupServiceFactory {
         String endpointIdentifier = operationRef != null && !operationRef.trim().isEmpty() ? operationRef : endpoint;
 
         // Find the data source configuration using the resolved connection name
-        dev.mars.apex.core.config.yaml.YamlDataSource dataSourceConfig = null;
+        dev.mars.apex.core.config.YamlDataSource dataSourceConfig = null;
         if (configuration.getDataSources() != null) {
-            for (dev.mars.apex.core.config.yaml.YamlDataSource ds : configuration.getDataSources()) {
+            for (dev.mars.apex.core.config.YamlDataSource ds : configuration.getDataSources()) {
                 if (connectionName.equals(ds.getName())) {
                     dataSourceConfig = ds;
                     break;

@@ -17,8 +17,8 @@ package dev.mars.apex.core.config;
  */
 
 import dev.mars.apex.core.config.component.ComponentConfiguration;
-import dev.mars.apex.core.config.yaml.YamlDataSource;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.config.YamlDataSource;
+import dev.mars.apex.core.config.YamlRuleConfiguration;
 import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;

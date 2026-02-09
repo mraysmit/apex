@@ -18,13 +18,13 @@ package dev.mars.apex.core.service.scenario;
 
 import dev.mars.apex.core.config.component.ComponentConfiguration;
 import dev.mars.apex.core.config.component.ComponentLoader;
-import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.config.YamlConfigurationException;
+import dev.mars.apex.core.config.YamlConfigurationLoader;
+import dev.mars.apex.core.config.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.ExecutionStep;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.config.yaml.YamlRuleFactory;
+import dev.mars.apex.core.config.YamlRuleFactory;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -370,7 +370,7 @@ public class ScenarioStageExecutor {
         YamlRuleConfiguration stageConfig;
         try {
             stageConfig = configLoader.loadFromFile(stage.getConfigFile());
-        } catch (dev.mars.apex.core.config.yaml.YamlConfigurationException e) {
+        } catch (dev.mars.apex.core.config.YamlConfigurationException e) {
             // Fallback: treat path as classpath resource (tests/resources)
             stageConfig = configLoader.loadFromClasspath(stage.getConfigFile());
         }
@@ -518,7 +518,7 @@ public class ScenarioStageExecutor {
         YamlRuleConfiguration config;
         try {
             config = configLoader.loadFromFile(configFilePath);
-        } catch (dev.mars.apex.core.config.yaml.YamlConfigurationException e) {
+        } catch (dev.mars.apex.core.config.YamlConfigurationException e) {
             // Fallback: treat path as classpath resource
             config = configLoader.loadFromClasspath(configFilePath);
         }

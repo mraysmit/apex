@@ -18,11 +18,11 @@ package dev.mars.apex.playground.examples;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.validation.YamlMetadataValidator;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.validation.YamlValidationResult;
+import dev.mars.apex.core.config.YamlConfigurationException;
+import dev.mars.apex.core.config.YamlConfigurationLoader;
+import dev.mars.apex.core.config.validation.YamlMetadataValidator;
+import dev.mars.apex.core.config.YamlRuleConfiguration;
+import dev.mars.apex.core.config.validation.YamlValidationResult;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;

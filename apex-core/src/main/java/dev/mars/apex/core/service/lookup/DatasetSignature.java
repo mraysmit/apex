@@ -16,9 +16,9 @@ package dev.mars.apex.core.service.lookup;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.yaml.YamlDataSource;
-import dev.mars.apex.core.config.yaml.YamlEnrichment.LookupDataset;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.config.YamlDataSource;
+import dev.mars.apex.core.config.YamlEnrichment.LookupDataset;
+import dev.mars.apex.core.config.YamlRuleConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

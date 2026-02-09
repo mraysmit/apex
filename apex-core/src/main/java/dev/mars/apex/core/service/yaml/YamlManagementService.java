@@ -17,8 +17,8 @@ package dev.mars.apex.core.service.yaml;
  */
 
 
-import dev.mars.apex.core.config.yaml.validation.YamlValidationResult;
-import dev.mars.apex.core.config.yaml.validation.YamlValidationSummary;
+import dev.mars.apex.core.config.validation.YamlValidationResult;
+import dev.mars.apex.core.config.validation.YamlValidationSummary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

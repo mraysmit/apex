@@ -1,6 +1,6 @@
 package dev.mars.apex.core.service.transform;
 
-import dev.mars.apex.core.config.yaml.YamlTransformation;
+import dev.mars.apex.core.config.YamlTransformation;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
 

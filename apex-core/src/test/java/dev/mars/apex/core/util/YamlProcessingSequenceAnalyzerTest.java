@@ -1,6 +1,6 @@
 package dev.mars.apex.core.util;
 
-import dev.mars.apex.core.config.yaml.sequential.ProcessingItem;
+import dev.mars.apex.core.config.sequential.ProcessingItem;
 import org.junit.jupiter.api.BeforeEach;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;

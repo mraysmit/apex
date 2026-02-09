@@ -22,7 +22,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import dev.mars.apex.core.config.ResourceNotFoundException;
 import dev.mars.apex.core.config.ResourceResolver;
-import dev.mars.apex.core.config.yaml.YamlConfigurationException;
+import dev.mars.apex.core.config.YamlConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

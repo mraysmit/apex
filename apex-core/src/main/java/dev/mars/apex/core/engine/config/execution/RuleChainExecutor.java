@@ -15,9 +15,9 @@
  */
 package dev.mars.apex.core.engine.config.execution;
 
-import dev.mars.apex.core.config.yaml.YamlEnrichmentGroup;
-import dev.mars.apex.core.config.yaml.YamlRuleChain;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.config.YamlEnrichmentGroup;
+import dev.mars.apex.core.config.YamlRuleChain;
+import dev.mars.apex.core.config.YamlRuleConfiguration;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.model.Category;
 import dev.mars.apex.core.engine.model.EnrichmentGroup;

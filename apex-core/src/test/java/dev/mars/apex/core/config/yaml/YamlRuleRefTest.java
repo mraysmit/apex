@@ -1,4 +1,4 @@
-package dev.mars.apex.core.config.yaml;
+package dev.mars.apex.core.config;
 
 import org.junit.jupiter.api.DisplayName;
 

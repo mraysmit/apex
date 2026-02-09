@@ -1,8 +1,8 @@
 package dev.mars.apex.core.engine.config;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationException;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
+import dev.mars.apex.core.config.YamlConfigurationException;
+import dev.mars.apex.core.config.YamlConfigurationLoader;
+import dev.mars.apex.core.config.YamlRuleConfiguration;
 import dev.mars.apex.core.engine.model.RuleResult;
 import org.junit.jupiter.api.DisplayName;
 
@@ -239,7 +239,7 @@ class RulesEngineStaticFactoryMethodsTest {
         YamlConfigurationLoader loader = new YamlConfigurationLoader();
         YamlRuleConfiguration yamlConfig = loader.loadFromFile(yamlFile.toString());
 
-        dev.mars.apex.core.config.yaml.YamlRuleFactory ruleFactory = new dev.mars.apex.core.config.yaml.YamlRuleFactory();
+        dev.mars.apex.core.config.YamlRuleFactory ruleFactory = new dev.mars.apex.core.config.YamlRuleFactory();
         RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
 
         RulesEngine verboseEngine = new RulesEngine(config);

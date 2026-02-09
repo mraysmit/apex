@@ -1,4 +1,4 @@
-package dev.mars.apex.core.config.yaml;
+package dev.mars.apex.core.config;
 
 import dev.mars.apex.core.util.PropertyResolver;
 import org.junit.jupiter.api.BeforeEach;

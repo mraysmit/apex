@@ -17,7 +17,7 @@ package dev.mars.apex.core.service.lookup;
  */
 
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
-import dev.mars.apex.core.config.yaml.YamlEnrichment;
+import dev.mars.apex.core.config.YamlEnrichment;
 import dev.mars.apex.core.service.data.external.*;
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
 import dev.mars.apex.core.test.extension.TestClassLoggingExtension;

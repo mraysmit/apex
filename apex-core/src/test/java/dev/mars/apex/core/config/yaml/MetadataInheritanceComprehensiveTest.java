@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.mars.apex.core.config.yaml;
+package dev.mars.apex.core.config;
 
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.model.RuleGroup;

@@ -1,6 +1,6 @@
-package dev.mars.apex.core.config.yaml;
+package dev.mars.apex.core.config;
 
-import dev.mars.apex.core.config.yaml.sequential.SectionRegistry;
+import dev.mars.apex.core.config.sequential.SectionRegistry;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd

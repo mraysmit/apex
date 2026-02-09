@@ -17,9 +17,9 @@ package dev.mars.apex.core.util;
  */
 
 
-import dev.mars.apex.core.config.yaml.validation.YamlMetadataValidator;
-import dev.mars.apex.core.config.yaml.validation.YamlValidationResult;
-import dev.mars.apex.core.config.yaml.validation.YamlValidationSummary;
+import dev.mars.apex.core.config.validation.YamlMetadataValidator;
+import dev.mars.apex.core.config.validation.YamlValidationResult;
+import dev.mars.apex.core.config.validation.YamlValidationSummary;
 import org.junit.jupiter.api.Test;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
