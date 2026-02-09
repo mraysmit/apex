@@ -1,4 +1,4 @@
-package dev.mars.apex.core.service.expression;
+package dev.mars.apex.core.service.engine;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -18,7 +18,6 @@ package dev.mars.apex.core.service.expression;
 
 
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
