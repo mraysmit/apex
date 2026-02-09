@@ -18,8 +18,8 @@
 package dev.mars.apex.sync.validation;
 
 import dev.mars.apex.sync.SyncTestBase;
-import dev.mars.apex.core.engine.core.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

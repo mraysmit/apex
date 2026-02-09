@@ -17,9 +17,9 @@ package dev.mars.apex.demo.rulegroups;
  */
 
 import dev.mars.apex.core.config.exception.YamlConfigurationException;
-import dev.mars.apex.core.engine.core.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleGroup;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleGroup;
+import dev.mars.apex.engine.model.RuleResult;
 
 import java.util.List;
 import java.util.Map;

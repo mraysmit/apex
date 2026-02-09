@@ -4,10 +4,10 @@ import dev.mars.apex.core.config.loader.*;
 import dev.mars.apex.core.config.exception.*;
 import dev.mars.apex.core.config.service.*;
 
-import dev.mars.apex.core.engine.model.Enrichment;
-import dev.mars.apex.core.engine.model.EnrichmentGroup;
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.model.RuleGroup;
+import dev.mars.apex.engine.model.Enrichment;
+import dev.mars.apex.engine.model.EnrichmentGroup;
+import dev.mars.apex.engine.model.Rule;
+import dev.mars.apex.engine.model.RuleGroup;
 import dev.mars.apex.core.service.enrichment.EnrichmentGroupFactory;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;

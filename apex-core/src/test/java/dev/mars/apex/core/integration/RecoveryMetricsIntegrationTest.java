@@ -2,9 +2,9 @@ package dev.mars.apex.core.integration;
 
 import dev.mars.apex.core.config.error.ErrorRecoveryConfig;
 import dev.mars.apex.core.config.error.SeverityRecoveryPolicy;
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.engine.UnifiedRuleEvaluator;
+import dev.mars.apex.engine.model.Rule;
+import dev.mars.apex.engine.model.RuleResult;
+import dev.mars.apex.engine.core.UnifiedRuleEvaluator;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMetrics;

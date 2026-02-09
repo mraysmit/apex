@@ -5,7 +5,7 @@ import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.config.model.YamlTransformation;
 import dev.mars.apex.core.config.sequential.OrderedYamlConfiguration.ProcessingMode;
 import dev.mars.apex.core.constants.SeverityConstants;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.model.RuleResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -510,7 +510,7 @@ public class SequentialYamlProcessor {
             }
 
             // Process transformations using the result-returning method for proper error propagation
-            dev.mars.apex.core.engine.model.RuleResult transformResult = 
+            dev.mars.apex.engine.model.RuleResult transformResult = 
                 processor.processTransformationsWithResult(transformations, currentData);
 
             // Extract transformed data from result

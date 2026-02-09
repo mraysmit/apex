@@ -15,8 +15,8 @@
  */
 package dev.mars.apex.sync.test;
 
-import dev.mars.apex.core.engine.core.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;

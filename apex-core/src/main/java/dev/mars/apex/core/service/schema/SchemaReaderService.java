@@ -1,6 +1,6 @@
 package dev.mars.apex.core.service.schema;
 
-import dev.mars.apex.core.engine.pipeline.DataPipelineException;
+import dev.mars.apex.engine.pipeline.DataPipelineException;
 import dev.mars.apex.core.service.data.external.DataSourceType;
 import dev.mars.apex.core.service.data.external.ExternalDataSource;
 import dev.mars.apex.core.service.data.external.database.DatabaseDataSource;

@@ -22,14 +22,6 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.expression.Expression;
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
-
-import dev.mars.apex.core.engine.core.MapPropertyAccessor;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
-
 /**
  * Configuration class representing a complete data type processing scenario.
  *
@@ -56,6 +48,7 @@ import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
  * - SpEL-based classification rules for Map<String, Object> data
  * - Embedded classification rules in scenario files (Option B)
  * - Validation ensures either classification-rule OR data-types exists
+ * - Classification rule evaluation is handled by {@link dev.mars.apex.engine.scenario.ScenarioRegistryManager}
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-08-02
@@ -63,7 +56,6 @@ import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 public class ScenarioConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(ScenarioConfiguration.class);
-    private static final ExpressionParser parser = new SpelExpressionParser();
 
     private String scenarioId;
     private String name;
@@ -376,79 +368,7 @@ public class ScenarioConfiguration {
         return classificationRuleCondition != null && !classificationRuleCondition.trim().isEmpty();
     }
 
-    /**
-     * Evaluates the classification rule against the provided data using the provided evaluator service.
-     *
-     * Uses SpEL (Spring Expression Language) to evaluate the classification rule condition
-     * against a Map of data. Data fields are accessible directly by name (e.g., tradeId, amount)
-     * or as variables with # prefix (e.g., #tradeId, #amount).
-     *
-     * @param data the data to evaluate against (Map<String, Object>)
-     * @param evaluatorService the service to use for creating the evaluation context
-     * @return true if the classification rule matches, false otherwise
-     */
-    public boolean matchesClassificationRule(Map<String, Object> data, ExpressionEvaluatorService evaluatorService) {
-        if (!hasClassificationRule()) {
-            return false;
-        }
 
-        if (data == null) {
-            logger.debug("Cannot evaluate classification rule against null data for scenario: " + scenarioId);
-            return false;
-        }
-
-        try {
-            Expression expression = parser.parseExpression(classificationRuleCondition);
-            StandardEvaluationContext context = evaluatorService.createEvaluationContext(data);
-
-            Boolean result = expression.getValue(context, Boolean.class);
-            return result != null && result;
-
-        } catch (Exception e) {
-            logger.warn("Failed to evaluate classification rule for scenario '" + scenarioId + "': " + e.getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * Evaluates the classification rule against the provided data.
-     *
-     * Uses SpEL (Spring Expression Language) to evaluate the classification rule condition
-     * against a Map of data. Data fields are accessible directly by name (e.g., tradeId, amount)
-     * or as variables with # prefix (e.g., #tradeId, #amount).
-     *
-     * @deprecated since 2.4. Use {@link #matchesClassificationRule(Map, ExpressionEvaluatorService)} instead to ensure consistent context creation.
-     * @param data the data to evaluate against (Map<String, Object>)
-     * @return true if the classification rule matches, false otherwise
-     */
-    @Deprecated(since = "2.4")
-    public boolean matchesClassificationRule(Map<String, Object> data) {
-        if (!hasClassificationRule()) {
-            return false;
-        }
-
-        if (data == null) {
-            logger.debug("Cannot evaluate classification rule against null data for scenario: " + scenarioId);
-            return false;
-        }
-
-        try {
-            Expression expression = parser.parseExpression(classificationRuleCondition);
-            StandardEvaluationContext context = new StandardEvaluationContext(data);
-            context.addPropertyAccessor(new MapPropertyAccessor());
-            // Add map entries as variables for #fieldName access
-            for (Map.Entry<String, Object> entry : data.entrySet()) {
-                context.setVariable(entry.getKey(), entry.getValue());
-            }
-
-            Boolean result = expression.getValue(context, Boolean.class);
-            return result != null && result;
-
-        } catch (Exception e) {
-            logger.warn("Failed to evaluate classification rule for scenario '" + scenarioId + "': " + e.getMessage());
-            return false;
-        }
-    }
 
     /**
      * Validates the scenario configuration.

@@ -1,6 +1,7 @@
 package dev.mars.apex.core.config.loader;
 
 import dev.mars.apex.core.config.exception.*;
+import dev.mars.apex.engine.scenario.ScenarioParser;
 import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
 import dev.mars.apex.core.service.scenario.ScenarioStage;
 import org.slf4j.Logger;
@@ -77,6 +78,7 @@ public class ScenarioRegistryLoader {
     private static final Logger logger = LoggerFactory.getLogger(ScenarioRegistryLoader.class);
     
     private final YamlConfigurationLoader configLoader;
+    private final ScenarioParser scenarioParser;
     
     // Global search paths (can be set programmatically or via environment)
     private final List<String> globalFilesystemPaths;
@@ -87,6 +89,7 @@ public class ScenarioRegistryLoader {
      */
     public ScenarioRegistryLoader() {
         this.configLoader = new YamlConfigurationLoader();
+        this.scenarioParser = new ScenarioParser();
         this.globalFilesystemPaths = new ArrayList<>();
         this.globalClasspathPrefixes = new ArrayList<>();
         initializeFromEnvironment();
@@ -99,6 +102,7 @@ public class ScenarioRegistryLoader {
      */
     public ScenarioRegistryLoader(YamlConfigurationLoader configLoader) {
         this.configLoader = configLoader;
+        this.scenarioParser = new ScenarioParser();
         this.globalFilesystemPaths = new ArrayList<>();
         this.globalClasspathPrefixes = new ArrayList<>();
         initializeFromEnvironment();
@@ -673,161 +677,26 @@ public class ScenarioRegistryLoader {
      * @param scenarioData The scenario data map from YAML
      * @return Parsed ScenarioConfiguration
      */
-    @SuppressWarnings("unchecked")
+    /**
+     * Parse scenario configuration from YAML data map.
+     * Delegates to {@link ScenarioParser} for all parsing logic.
+     *
+     * @param scenarioData The scenario data map from YAML
+     * @return Parsed ScenarioConfiguration
+     */
     private ScenarioConfiguration parseScenarioConfiguration(Map<String, Object> scenarioData) {
-        ScenarioConfiguration scenario = new ScenarioConfiguration();
-        
-        scenario.setScenarioId((String) scenarioData.get("scenario-id"));
-        scenario.setName((String) scenarioData.get("name"));
-        scenario.setDescription((String) scenarioData.get("description"));
-        
-        // Parse data types
-        List<String> dataTypes = (List<String>) scenarioData.get("data-types");
-        if (dataTypes != null) {
-            scenario.setDataTypes(dataTypes);
-        }
-        
-        // Parse classification rule - can be either a string or an object with condition/description
-        Object classificationRuleObj = scenarioData.get("classification-rule");
-        if (classificationRuleObj != null) {
-            if (classificationRuleObj instanceof String) {
-                // Simple string format
-                scenario.setClassificationRuleCondition((String) classificationRuleObj);
-            } else if (classificationRuleObj instanceof Map) {
-                // Object format with condition and description
-                Map<String, Object> classificationRuleMap = (Map<String, Object>) classificationRuleObj;
-                String condition = (String) classificationRuleMap.get("condition");
-                if (condition != null) {
-                    scenario.setClassificationRuleCondition(condition);
-                }
-            }
-        }
-        
-        // Parse metadata
-        Map<String, Object> metadata = (Map<String, Object>) scenarioData.get("metadata");
-        if (metadata != null) {
-            scenario.setMetadata(metadata);
-        }
-        
-        // Parse processing stages (modern approach)
-        List<Map<String, Object>> stagesData = (List<Map<String, Object>>) scenarioData.get("processing-stages");
-        if (stagesData != null) {
-            List<ScenarioStage> stages = new ArrayList<>();
-            for (Map<String, Object> stageData : stagesData) {
-                ScenarioStage stage = parseScenarioStage(stageData);
-                stages.add(stage);
-            }
-            scenario.setProcessingStages(stages);
-        }
-        
-        // Parse rule configurations (legacy approach)
-        List<String> ruleConfigurations = (List<String>) scenarioData.get("rule-configurations");
-        if (ruleConfigurations != null) {
-            scenario.setRuleConfigurations(ruleConfigurations);
-        }
+        ScenarioConfiguration scenario = scenarioParser.parseScenarioConfiguration(scenarioData);
 
-        // Parse enabled flag from scenario file (default: true)
-        // Note: This can be overridden by the registry entry's enabled flag
-        Object enabledValue = scenarioData.get("enabled");
-        if (enabledValue != null) {
-            if (enabledValue instanceof Boolean) {
-                scenario.setEnabled((Boolean) enabledValue);
-            } else if (enabledValue instanceof String) {
-                scenario.setEnabled(Boolean.parseBoolean((String) enabledValue));
+        // Post-parse: validate component files for each stage (Loader-specific concern)
+        if (scenario.getProcessingStages() != null) {
+            for (ScenarioStage stage : scenario.getProcessingStages()) {
+                if (stage.getConfigFile() != null) {
+                    validateAndLogComponentFile(stage.getConfigFile(), stage.getStageName());
+                }
             }
         }
 
         return scenario;
-    }
-    
-    /**
-     * Parse a scenario stage from YAML data.
-     *
-     * @param stageData The stage data map from YAML
-     * @return Parsed ScenarioStage
-     */
-    @SuppressWarnings("unchecked")
-    private ScenarioStage parseScenarioStage(Map<String, Object> stageData) {
-        ScenarioStage stage = new ScenarioStage();
-
-        // Set stage name - try both "stage-name" (modern) and "stage-id" (legacy)
-        String stageName = (String) stageData.get("stage-name");
-        if (stageName == null) {
-            stageName = (String) stageData.get("stage-id");
-        }
-        stage.setStageName(stageName);
-
-        // Set config file - try both "config-file" (modern) and "rule-configuration" (legacy)
-        String configFile = (String) stageData.get("config-file");
-        if (configFile == null) {
-            configFile = (String) stageData.get("rule-configuration");
-        }
-        stage.setConfigFile(configFile);
-
-        // Detect and log if this is a component file
-        if (configFile != null) {
-            validateAndLogComponentFile(configFile, stageName);
-        }
-
-        // Set failure policy
-        stage.setFailurePolicy((String) stageData.get("failure-policy"));
-
-        // Set condition (optional SpEL expression for conditional execution)
-        stage.setCondition((String) stageData.get("condition"));
-
-        // Set execution order
-        Object executionOrder = stageData.get("execution-order");
-        if (executionOrder != null) {
-            if (executionOrder instanceof Integer) {
-                stage.setExecutionOrder((Integer) executionOrder);
-            } else if (executionOrder instanceof String) {
-                try {
-                    stage.setExecutionOrder(Integer.parseInt((String) executionOrder));
-                } catch (NumberFormatException e) {
-                    // Ignore invalid execution order
-                }
-            }
-        }
-
-        // Set required flag
-        Object required = stageData.get("required");
-        if (required != null) {
-            if (required instanceof Boolean) {
-                stage.setRequired((Boolean) required);
-            } else if (required instanceof String) {
-                stage.setRequired(Boolean.parseBoolean((String) required));
-            }
-        }
-
-        // Set enabled flag (default: true)
-        Object enabled = stageData.get("enabled");
-        if (enabled != null) {
-            if (enabled instanceof Boolean) {
-                stage.setEnabled((Boolean) enabled);
-            } else if (enabled instanceof String) {
-                stage.setEnabled(Boolean.parseBoolean((String) enabled));
-            }
-        }
-
-        // Set description - try both direct "description" and nested "stage-metadata.description"
-        String description = (String) stageData.get("description");
-        if (description == null) {
-            Map<String, Object> stageMetadata = (Map<String, Object>) stageData.get("stage-metadata");
-            if (stageMetadata != null) {
-                description = (String) stageMetadata.get("description");
-            }
-        }
-        if (description != null) {
-            stage.setDescription(description);
-        }
-
-        // Parse dependencies
-        List<String> dependencies = (List<String>) stageData.get("depends-on");
-        if (dependencies != null) {
-            stage.setDependsOn(dependencies);
-        }
-
-        return stage;
     }
 
     /**

@@ -20,10 +20,10 @@ package dev.mars.apex.sync;
 
 import dev.mars.apex.core.cache.ApexCacheManager;
 import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
-import dev.mars.apex.core.engine.core.RulesEngineConfiguration;
+import dev.mars.apex.engine.core.RulesEngineConfiguration;
 import dev.mars.apex.core.service.data.external.database.JdbcTemplateFactory;
 import dev.mars.apex.core.service.data.external.factory.DataSourceFactory;
-import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+import dev.mars.apex.engine.core.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

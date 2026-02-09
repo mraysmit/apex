@@ -16,7 +16,7 @@ package dev.mars.apex.core.service.scenario;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.engine.core.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
 import dev.mars.apex.core.service.scenario.StageExecutionResult;
 import org.junit.jupiter.api.BeforeEach;

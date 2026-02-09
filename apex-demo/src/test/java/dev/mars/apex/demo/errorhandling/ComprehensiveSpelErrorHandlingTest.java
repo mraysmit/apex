@@ -1,10 +1,10 @@
 package dev.mars.apex.demo.errorhandling;
 
-import dev.mars.apex.core.engine.core.RulesEngine;
-import dev.mars.apex.core.engine.core.RulesEngineConfiguration;
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.engine.UnifiedRuleEvaluator;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngineConfiguration;
+import dev.mars.apex.engine.model.Rule;
+import dev.mars.apex.engine.model.RuleResult;
+import dev.mars.apex.engine.core.UnifiedRuleEvaluator;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import dev.mars.apex.core.engine.core.RuleBuilder;
+import dev.mars.apex.engine.core.RuleBuilder;
 
 /**
  * Comprehensive test suite for SpEL exception handling across all APEX components.

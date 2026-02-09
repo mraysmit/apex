@@ -16,7 +16,7 @@ package dev.mars.apex.core.service.scenario;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.model.RuleResult;
 
 import java.util.Collections;
 import java.util.HashMap;

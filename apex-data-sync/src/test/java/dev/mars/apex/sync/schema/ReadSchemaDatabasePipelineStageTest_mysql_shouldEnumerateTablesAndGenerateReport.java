@@ -18,8 +18,8 @@
 
 package dev.mars.apex.sync.schema;
 
-import dev.mars.apex.core.engine.core.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

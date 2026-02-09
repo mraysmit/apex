@@ -20,10 +20,10 @@ import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.config.YamlRuleFactory;
 import dev.mars.apex.core.constants.SeverityConstants;
-import dev.mars.apex.core.engine.core.RulesEngine;
-import dev.mars.apex.core.engine.core.RulesEngineConfiguration;
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngineConfiguration;
+import dev.mars.apex.engine.model.Rule;
+import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import dev.mars.apex.core.engine.core.RuleBuilder;
+import dev.mars.apex.engine.core.RuleBuilder;
 
 /**
  * Test to validate that severity attribute is properly handled throughout the APEX system.

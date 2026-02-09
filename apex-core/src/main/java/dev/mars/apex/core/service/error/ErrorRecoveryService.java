@@ -1,7 +1,7 @@
 package dev.mars.apex.core.service.error;
 
 import dev.mars.apex.core.constants.SeverityConstants;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.model.RuleResult;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;

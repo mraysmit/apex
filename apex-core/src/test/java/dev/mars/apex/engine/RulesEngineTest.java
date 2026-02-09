@@ -1,0 +1,173 @@
+package dev.mars.apex.engine;
+
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+import dev.mars.apex.core.constants.SeverityConstants;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.core.RuleBuilder;
+import dev.mars.apex.engine.core.RulesEngineConfiguration;
+import dev.mars.apex.engine.model.Category;
+import dev.mars.apex.engine.model.Rule;
+import dev.mars.apex.engine.core.RuleBuilder;
+import dev.mars.apex.engine.model.RuleGroup;
+import org.junit.jupiter.api.BeforeEach;
+
+import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
+import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
+import org.junit.jupiter.api.Test;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * Unit tests for the core RulesEngine functionality.
+ *
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-08-28
+ * @version 1.0
+ */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
+class RulesEngineTest {
+
+    private RulesEngine rulesEngine;
+    private RulesEngineConfiguration configuration;
+
+    @BeforeEach
+    void setUp() {
+        configuration = new RulesEngineConfiguration();
+        rulesEngine = new RulesEngine(configuration);
+    }
+
+    @Test
+    @DisplayName("Should create rules engine with valid configuration")
+    void testRulesEngineCreation() {
+        assertNotNull(rulesEngine);
+        assertNotNull(rulesEngine.getConfiguration());
+    }
+
+    @Test
+    @DisplayName("Should create rule with basic constructor")
+    void testRuleCreation() {
+        // Test the basic Rule constructor
+        Rule rule = new RuleBuilder().withName("testRule").withCondition("amount > 100").withMessage("HIGH_VALUE").withSeverity(SeverityConstants.INFO).build();
+
+        assertNotNull(rule);
+        assertEquals("testRule", rule.getName());
+        assertEquals("amount > 100", rule.getCondition());
+        assertEquals("HIGH_VALUE", rule.getMessage());
+        assertNotNull(rule.getId());
+        assertNotNull(rule.getUuid());
+        assertEquals(100, rule.getPriority()); // Default priority
+    }
+
+    @Test
+    @DisplayName("Should create rule with full constructor")
+    void testRuleCreationWithFullConstructor() {
+        // Test the full Rule constructor
+        Rule rule = new Rule("R001", Set.of(new Category("validation", 1)),
+                "testRule", "amount > 100", "HIGH_VALUE", "Rule for high value transactions",
+                1, SeverityConstants.INFO, null, null, null, null, null, null, null, true);
+
+        assertNotNull(rule);
+        assertEquals("R001", rule.getId());
+        assertEquals("testRule", rule.getName());
+        assertEquals("amount > 100", rule.getCondition());
+        assertEquals("HIGH_VALUE", rule.getMessage());
+        assertEquals("Rule for high value transactions", rule.getDescription());
+        assertEquals(1, rule.getPriority());
+    }
+
+    @Test
+    @DisplayName("Should create rule group")
+    void testRuleGroupCreation() {
+        // Test RuleGroup creation
+        RuleGroup ruleGroup = new RuleGroup("RG001", "validation", "Test Group", 
+                                           "Test group description", 1, true);
+
+        assertNotNull(ruleGroup);
+        assertEquals("RG001", ruleGroup.getId());
+        assertEquals("Test Group", ruleGroup.getName());
+        assertEquals("Test group description", ruleGroup.getDescription());
+        assertEquals(1, ruleGroup.getPriority());
+        assertTrue(ruleGroup.isAndOperator());
+    }
+
+    @Test
+    @DisplayName("Should handle rule evaluation context")
+    void testRuleEvaluationContext() {
+        Rule rule = new RuleBuilder().withName("contextRule").withCondition("name != null && age > 18").withMessage("VALID_ADULT").withSeverity(SeverityConstants.INFO).build();
+
+        // Create evaluation context
+        Map<String, Object> context = new HashMap<>();
+        context.put("name", "John Doe");
+        context.put("age", 25);
+
+        // Test that rule can access its properties
+        assertNotNull(rule.getCondition());
+        assertTrue(rule.getCondition().contains("name"));
+        assertTrue(rule.getCondition().contains("age"));
+    }
+
+    @Test
+    @DisplayName("Should handle rule metadata")
+    void testRuleMetadata() {
+        Rule rule = new RuleBuilder().withName("metadataRule").withCondition("true").withMessage("Always true").withSeverity(SeverityConstants.INFO).build();
+
+        assertNotNull(rule.getMetadata());
+        assertNotNull(rule.getMetadata().getCreatedDate());
+        assertEquals("system", rule.getMetadata().getCreatedByUser());
+    }
+
+    @Test
+    @DisplayName("Should handle rule categories")
+    void testRuleCategories() {
+        Rule rule = new RuleBuilder().withName("categoryRule").withCondition("true").withMessage("Test rule").withSeverity(SeverityConstants.INFO).build();
+
+        assertNotNull(rule.getCategories());
+        assertFalse(rule.getCategories().isEmpty());
+        // Should have default category
+        assertEquals(1, rule.getCategories().size());
+    }
+
+    @Test
+    @DisplayName("Should handle rule group with multiple categories")
+    void testRuleGroupWithMultipleCategories() {
+        // Test creating rule group with multiple categories
+        java.util.Set<String> categoryNames = new java.util.HashSet<>();
+        categoryNames.add("validation");
+        categoryNames.add("business");
+
+        RuleGroup ruleGroup = RuleGroup.fromCategoryNames("RG002", categoryNames, 
+                                                         "Multi-Category Group", 
+                                                         "Group with multiple categories", 
+                                                         1, false);
+
+        assertNotNull(ruleGroup);
+        assertEquals("RG002", ruleGroup.getId());
+        assertEquals("Multi-Category Group", ruleGroup.getName());
+        assertFalse(ruleGroup.isAndOperator()); // OR operator
+        assertEquals(2, ruleGroup.getCategories().size());
+    }
+}

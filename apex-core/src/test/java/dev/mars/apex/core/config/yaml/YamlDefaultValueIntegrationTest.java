@@ -4,7 +4,7 @@ import dev.mars.apex.core.config.loader.*;
 import dev.mars.apex.core.config.exception.*;
 import dev.mars.apex.core.config.service.*;
 
-import dev.mars.apex.core.engine.model.Rule;
+import dev.mars.apex.engine.model.Rule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 

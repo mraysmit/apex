@@ -18,12 +18,12 @@ package dev.mars.apex.rest.controller;
 
 
 import dev.mars.apex.core.service.transform.GenericTransformerService;
-import dev.mars.apex.core.engine.model.TransformerRule;
+import dev.mars.apex.engine.model.TransformerRule;
 import dev.mars.apex.core.service.transform.FieldTransformerAction;
 import dev.mars.apex.core.service.transform.FieldTransformerActionBuilder;
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.core.RuleBuilder;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.model.Rule;
+import dev.mars.apex.engine.core.RuleBuilder;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.rest.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

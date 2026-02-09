@@ -5,12 +5,12 @@ import dev.mars.apex.core.config.model.*;
 import dev.mars.apex.core.api.RuleSet;
 import dev.mars.apex.core.constants.ErrorHandlingConstants;
 import dev.mars.apex.core.constants.SeverityConstants;
-import dev.mars.apex.core.engine.core.RulesEngineConfiguration;
-import dev.mars.apex.core.engine.model.Category;
-import dev.mars.apex.core.engine.model.EnrichmentGroup;
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.model.RuleGroup;
-import dev.mars.apex.core.engine.model.metadata.RuleMetadata;
+import dev.mars.apex.engine.core.RulesEngineConfiguration;
+import dev.mars.apex.engine.model.Category;
+import dev.mars.apex.engine.model.EnrichmentGroup;
+import dev.mars.apex.engine.model.Rule;
+import dev.mars.apex.engine.model.RuleGroup;
+import dev.mars.apex.engine.model.metadata.RuleMetadata;
 import dev.mars.apex.core.service.enrichment.EnrichmentGroupFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -272,15 +272,15 @@ public class YamlRuleFactory {
 
             if (yamlRule.getCustomProperties() != null && !yamlRule.getCustomProperties().isEmpty()) {
                 // Create new metadata with custom properties
-                dev.mars.apex.core.engine.model.metadata.RuleMetadata.Builder metadataBuilder =
-                    dev.mars.apex.core.engine.model.metadata.RuleMetadata.builder(createdRule.getMetadata());
+                dev.mars.apex.engine.model.metadata.RuleMetadata.Builder metadataBuilder =
+                    dev.mars.apex.engine.model.metadata.RuleMetadata.builder(createdRule.getMetadata());
 
                 for (Map.Entry<String, Object> entry : yamlRule.getCustomProperties().entrySet()) {
                     metadataBuilder.customProperty(entry.getKey(), entry.getValue());
                 }
 
                 // Create new rule with updated metadata
-                dev.mars.apex.core.engine.model.metadata.RuleMetadata updatedMetadata = metadataBuilder.build();
+                dev.mars.apex.engine.model.metadata.RuleMetadata updatedMetadata = metadataBuilder.build();
                 Rule updatedRule = createdRule.withMetadata(updatedMetadata);
 
                 // Replace the rule in the list (this is a limitation of the current design)
@@ -464,15 +464,15 @@ public class YamlRuleFactory {
         // Apply custom properties if available
         if (yamlRule.getCustomProperties() != null && !yamlRule.getCustomProperties().isEmpty()) {
             // Create new metadata with custom properties
-            dev.mars.apex.core.engine.model.metadata.RuleMetadata.Builder metadataBuilder =
-                dev.mars.apex.core.engine.model.metadata.RuleMetadata.builder(createdRule.getMetadata());
+            dev.mars.apex.engine.model.metadata.RuleMetadata.Builder metadataBuilder =
+                dev.mars.apex.engine.model.metadata.RuleMetadata.builder(createdRule.getMetadata());
 
             for (Map.Entry<String, Object> entry : yamlRule.getCustomProperties().entrySet()) {
                 metadataBuilder.customProperty(entry.getKey(), entry.getValue());
             }
 
             // Create new rule with updated metadata
-            dev.mars.apex.core.engine.model.metadata.RuleMetadata updatedMetadata = metadataBuilder.build();
+            dev.mars.apex.engine.model.metadata.RuleMetadata updatedMetadata = metadataBuilder.build();
             createdRule = createdRule.withMetadata(updatedMetadata);
         }
 
@@ -962,7 +962,7 @@ public class YamlRuleFactory {
      * Create a lookup index of rules keyed by their ID.
      * 
      * <p>This is an optimisation method for the item-level processing path in
-     * {@link dev.mars.apex.core.engine.execution.SequentialProcessor}. Instead of
+     * {@link dev.mars.apex.engine.execution.SequentialProcessor}. Instead of
      * iterating the YAML rule list and calling {@code createRuleWithMetadata} for
      * every individual item lookup, callers build the index once and perform
      * O(1) lookups thereafter.</p>
@@ -1163,7 +1163,7 @@ public class YamlRuleFactory {
      * @param yamlEnrichment The YAML enrichment configuration
      * @return An Enrichment object with inherited metadata
      */
-    public dev.mars.apex.core.engine.model.Enrichment createEnrichmentWithMetadata(dev.mars.apex.core.config.model.YamlEnrichment yamlEnrichment) {
+    public dev.mars.apex.engine.model.Enrichment createEnrichmentWithMetadata(dev.mars.apex.core.config.model.YamlEnrichment yamlEnrichment) {
         if (yamlEnrichment == null) {
             throw new IllegalArgumentException("YamlEnrichment cannot be null");
         }
@@ -1184,7 +1184,7 @@ public class YamlRuleFactory {
                    (yamlCategory != null ? ", businessOwner: " + yamlCategory.getBusinessOwner() : ""));
 
         // Create enrichment with category
-        dev.mars.apex.core.engine.model.Enrichment enrichment = new dev.mars.apex.core.engine.model.Enrichment(id, categoryName, name, description, type, priority);
+        dev.mars.apex.engine.model.Enrichment enrichment = new dev.mars.apex.engine.model.Enrichment(id, categoryName, name, description, type, priority);
 
         // Apply enterprise metadata with category inheritance
         // Enrichment metadata takes precedence, but inherit from category if not specified
@@ -1247,8 +1247,8 @@ public class YamlRuleFactory {
      * @param yamlConfig The YAML configuration
      * @return List of Enrichment objects with inherited metadata
      */
-    public List<dev.mars.apex.core.engine.model.Enrichment> createEnrichments(YamlRuleConfiguration yamlConfig) {
-        List<dev.mars.apex.core.engine.model.Enrichment> enrichments = new ArrayList<>();
+    public List<dev.mars.apex.engine.model.Enrichment> createEnrichments(YamlRuleConfiguration yamlConfig) {
+        List<dev.mars.apex.engine.model.Enrichment> enrichments = new ArrayList<>();
 
         // Process categories first to populate cache for metadata inheritance
         if (yamlConfig.getCategories() != null) {

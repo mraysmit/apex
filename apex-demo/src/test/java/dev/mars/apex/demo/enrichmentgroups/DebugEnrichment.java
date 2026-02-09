@@ -2,10 +2,10 @@ package dev.mars.apex.demo.enrichmentgroups;
 
 import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
-import dev.mars.apex.core.engine.core.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.core.service.enrichment.EnrichmentGroupFactory;
-import dev.mars.apex.core.engine.model.EnrichmentGroup;
+import dev.mars.apex.engine.model.EnrichmentGroup;
 
 import java.util.HashMap;
 import java.util.List;

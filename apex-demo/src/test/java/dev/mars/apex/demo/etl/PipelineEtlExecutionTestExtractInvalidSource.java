@@ -1,8 +1,8 @@
 package dev.mars.apex.demo.etl;
 
-import dev.mars.apex.core.engine.core.RulesEngine;
-import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.engine.pipeline.DataPipelineException;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.RuleResult;
+import dev.mars.apex.engine.pipeline.DataPipelineException;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;

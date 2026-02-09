@@ -3,7 +3,7 @@ package dev.mars.apex.core.service.scenario;
 import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.config.YamlRuleFactory;
-import dev.mars.apex.core.engine.model.ExecutionStep;
+import dev.mars.apex.engine.model.ExecutionStep;
 import org.junit.jupiter.api.BeforeEach;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;

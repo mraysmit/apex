@@ -2,7 +2,6 @@ package dev.mars.apex.core.integration;
 
 import dev.mars.apex.core.config.exception.YamlConfigurationException;
 import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
-import dev.mars.apex.core.config.service.YamlRulesEngineService;
 import org.junit.jupiter.api.BeforeEach;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
@@ -30,7 +29,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class RuleReferenceErrorHandlingTest {
 
     private YamlConfigurationLoader configLoader;
-    private YamlRulesEngineService rulesEngineService;
     
     @TempDir
     Path tempDir;
@@ -38,7 +36,6 @@ class RuleReferenceErrorHandlingTest {
     @BeforeEach
     void setUp() {
         configLoader = new YamlConfigurationLoader();
-        rulesEngineService = new YamlRulesEngineService();
     }
 
     @Test

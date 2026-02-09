@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.scenario;
 
-import dev.mars.apex.core.engine.core.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

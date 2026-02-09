@@ -4,7 +4,7 @@ import dev.mars.apex.core.config.*;
 import dev.mars.apex.core.config.loader.*;
 import dev.mars.apex.core.config.model.*;
 import dev.mars.apex.core.config.sequential.*;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.model.RuleResult;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

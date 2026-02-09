@@ -20,7 +20,7 @@ import dev.mars.apex.core.config.model.YamlRule;
 import dev.mars.apex.core.config.model.YamlRuleChain;
 import dev.mars.apex.core.config.model.YamlRuleGroup;
 import dev.mars.apex.core.config.model.YamlTransformation;
-import dev.mars.apex.core.engine.model.Rule;
+import dev.mars.apex.engine.model.Rule;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 /**
  * Centralised utility for determining whether APEX configuration items are enabled.
  *
- * <p>Phase 3 refactoring: replaces 11+ scattered enabled checks across 6 classes
+ * <p>refactoring: replaces 11+ scattered enabled checks across 6 classes
  * with a single consistent location. Two conventions are unified:</p>
  * <ul>
  *   <li><b>Domain objects</b> ({@link Rule}): {@code isEnabled()} returning {@code boolean}, default {@code true}</li>

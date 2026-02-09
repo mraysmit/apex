@@ -19,9 +19,9 @@ import dev.mars.apex.core.config.loader.*;
 import dev.mars.apex.core.config.exception.*;
 import dev.mars.apex.core.config.service.*;
 
-import dev.mars.apex.core.engine.core.RulesEngineConfiguration;
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.model.RuleGroup;
+import dev.mars.apex.engine.core.RulesEngineConfiguration;
+import dev.mars.apex.engine.model.Rule;
+import dev.mars.apex.engine.model.RuleGroup;
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

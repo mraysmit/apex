@@ -1,9 +1,9 @@
 package dev.mars.apex.core.api;
 
 import dev.mars.apex.core.constants.SeverityConstants;
-import dev.mars.apex.core.engine.core.RulesEngine;
-import dev.mars.apex.core.engine.core.RulesEngineConfiguration;
-import dev.mars.apex.core.engine.model.Rule;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.core.RulesEngineConfiguration;
+import dev.mars.apex.engine.model.Rule;
 
 import java.time.Instant;
 import java.util.ArrayList;

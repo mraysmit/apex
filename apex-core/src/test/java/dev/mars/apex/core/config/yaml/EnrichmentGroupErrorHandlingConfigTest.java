@@ -4,8 +4,8 @@ import dev.mars.apex.core.config.loader.*;
 import dev.mars.apex.core.config.exception.*;
 import dev.mars.apex.core.config.service.*;
 
-import dev.mars.apex.core.engine.core.RulesEngine;
-import dev.mars.apex.core.engine.model.EnrichmentGroup;
+import dev.mars.apex.engine.core.RulesEngine;
+import dev.mars.apex.engine.model.EnrichmentGroup;
 import org.junit.jupiter.api.BeforeEach;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;

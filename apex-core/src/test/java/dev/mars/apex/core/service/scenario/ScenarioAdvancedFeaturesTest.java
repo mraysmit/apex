@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+import static dev.mars.apex.engine.scenario.ScenarioRegistryManager.matchesClassificationRule;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -90,7 +91,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("type", "OTC");
 
             // Then: Should match
-            assertTrue(scenario.matchesClassificationRule(data),
+            assertTrue(matchesClassificationRule(scenario, data),
                 "Should match when first OR condition is true");
         }
 
@@ -107,7 +108,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("type", "LISTED");
 
             // Then: Should match
-            assertTrue(scenario.matchesClassificationRule(data),
+            assertTrue(matchesClassificationRule(scenario, data),
                 "Should match when second OR condition is true");
         }
 
@@ -124,7 +125,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("type", "DERIVATIVE");
 
             // Then: Should not match
-            assertFalse(scenario.matchesClassificationRule(data),
+            assertFalse(matchesClassificationRule(scenario, data),
                 "Should not match when no OR conditions are true");
         }
 
@@ -141,7 +142,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("type", null);
 
             // Then: Should match because second condition is true
-            assertTrue(scenario.matchesClassificationRule(data),
+            assertTrue(matchesClassificationRule(scenario, data),
                 "Should match when second OR condition (null check) is true");
         }
 
@@ -159,7 +160,7 @@ class ScenarioAdvancedFeaturesTest {
             // 'category' field is missing
 
             // Then: Should match because first condition is true
-            assertTrue(scenario.matchesClassificationRule(data),
+            assertTrue(matchesClassificationRule(scenario, data),
                 "Should match when first OR condition is true, even if second field is missing");
         }
     }
@@ -187,7 +188,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("trade", trade);
 
             // Then: Should match
-            assertTrue(scenario.matchesClassificationRule(data),
+            assertTrue(matchesClassificationRule(scenario, data),
                 "Should access single-level nested field");
         }
 
@@ -208,7 +209,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("trade", trade);
 
             // Then: Should match
-            assertTrue(scenario.matchesClassificationRule(data),
+            assertTrue(matchesClassificationRule(scenario, data),
                 "Should access multi-level nested field");
         }
 
@@ -225,7 +226,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("trade", null);
 
             // Then: Should not throw exception
-            assertFalse(scenario.matchesClassificationRule(data),
+            assertFalse(matchesClassificationRule(scenario, data),
                 "Should handle null nested fields gracefully");
         }
 
@@ -242,7 +243,7 @@ class ScenarioAdvancedFeaturesTest {
             // 'trade' object is missing entirely
 
             // Then: Should not throw exception, should return false
-            assertFalse(scenario.matchesClassificationRule(data),
+            assertFalse(matchesClassificationRule(scenario, data),
                 "Should handle missing nested objects gracefully without throwing exception");
         }
 
@@ -262,7 +263,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("trade", trade);
 
             // Then: Should not throw exception, should return false
-            assertFalse(scenario.matchesClassificationRule(data),
+            assertFalse(matchesClassificationRule(scenario, data),
                 "Should handle partial nested structures gracefully");
         }
     }
@@ -288,7 +289,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("description", "This is an urgent trade");
 
             // Then: Should match
-            assertTrue(scenario.matchesClassificationRule(data),
+            assertTrue(matchesClassificationRule(scenario, data),
                 "Should support .contains() string operation");
         }
 
@@ -305,7 +306,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("code", "OTC-12345");
 
             // Then: Should match
-            assertTrue(scenario.matchesClassificationRule(data),
+            assertTrue(matchesClassificationRule(scenario, data),
                 "Should support .startsWith() string operation");
         }
 
@@ -322,7 +323,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("name", "LongName");
 
             // Then: Should match
-            assertTrue(scenario.matchesClassificationRule(data),
+            assertTrue(matchesClassificationRule(scenario, data),
                 "Should support .length() string operation");
         }
 
@@ -339,7 +340,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("description", null);
 
             // Then: Should not throw exception, should return false
-            assertFalse(scenario.matchesClassificationRule(data),
+            assertFalse(matchesClassificationRule(scenario, data),
                 "Should handle null strings gracefully in string operations");
         }
 
@@ -356,7 +357,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("code", "");
 
             // Then: Should not match (empty string has length 0)
-            assertFalse(scenario.matchesClassificationRule(data),
+            assertFalse(matchesClassificationRule(scenario, data),
                 "Should correctly evaluate empty strings in length operations");
         }
 
@@ -373,7 +374,7 @@ class ScenarioAdvancedFeaturesTest {
             data.put("code", "otc-12345");
 
             // Then: Should not match (case-sensitive)
-            assertFalse(scenario.matchesClassificationRule(data),
+            assertFalse(matchesClassificationRule(scenario, data),
                 "String operations should be case-sensitive");
         }
     }

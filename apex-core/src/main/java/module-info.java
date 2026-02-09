@@ -54,12 +54,12 @@ module dev.mars.apex.core {
     exports dev.mars.apex.core.service.validation;
     exports dev.mars.apex.core.service;
     exports dev.mars.apex.core.service.lookup;
-    exports dev.mars.apex.core.engine.model;
-    exports dev.mars.apex.core.engine.model.metadata;
-    exports dev.mars.apex.core.engine.core;
-    exports dev.mars.apex.core.engine.execution;
-    exports dev.mars.apex.core.engine.scenario;
-    exports dev.mars.apex.core.engine.util;
+    exports dev.mars.apex.engine.model;
+    exports dev.mars.apex.engine.model.metadata;
+    exports dev.mars.apex.engine.core;
+    exports dev.mars.apex.engine.execution;
+    exports dev.mars.apex.engine.scenario;
+    exports dev.mars.apex.engine.util;
 
     // New exports for enhanced error handling
     exports dev.mars.apex.core.exception;
@@ -92,7 +92,6 @@ module dev.mars.apex.core {
     // Note: dev.mars.apex.core.api is already exported above
 
     // Export other existing services
-    exports dev.mars.apex.core.service.engine;
     exports dev.mars.apex.core.service.transform;
     exports dev.mars.apex.core.service.enrichment;
     exports dev.mars.apex.core.service.scenario;
@@ -116,7 +115,7 @@ module dev.mars.apex.core {
     exports dev.mars.apex.core.service.data.external.database;
 
     // Pipeline engine exports
-    exports dev.mars.apex.core.engine.pipeline;
+    exports dev.mars.apex.engine.pipeline;
 
     // Pipeline configuration exports
     exports dev.mars.apex.core.config.pipeline;

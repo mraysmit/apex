@@ -5,8 +5,8 @@ import dev.mars.apex.core.config.model.YamlEnrichment;
 import dev.mars.apex.core.config.model.YamlEnrichmentGroup;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.constants.ErrorHandlingConstants;
-import dev.mars.apex.core.engine.model.Category;
-import dev.mars.apex.core.engine.model.EnrichmentGroup;
+import dev.mars.apex.engine.model.Category;
+import dev.mars.apex.engine.model.EnrichmentGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

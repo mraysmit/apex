@@ -5,7 +5,7 @@ import dev.mars.apex.core.config.exception.*;
 import dev.mars.apex.core.config.service.*;
 
 import dev.mars.apex.core.config.sequential.SequentialYamlProcessor;
-import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;

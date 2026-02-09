@@ -17,8 +17,8 @@ package dev.mars.apex.core.api;
  */
 
 
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.model.metadata.RuleMetadata;
+import dev.mars.apex.engine.model.Rule;
+import dev.mars.apex.engine.model.metadata.RuleMetadata;
 import org.junit.jupiter.api.BeforeEach;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;

@@ -16,13 +16,13 @@
 
 package dev.mars.apex.demo.severity;
 
-import dev.mars.apex.core.engine.model.Rule;
-import dev.mars.apex.core.engine.model.RuleGroup;
-import dev.mars.apex.core.engine.model.RuleGroupEvaluationResult;
-import dev.mars.apex.core.engine.model.RuleGroupSeverityAggregator;
-import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.engine.RuleGroupEvaluationService;
-import dev.mars.apex.core.service.engine.UnifiedRuleEvaluator;
+import dev.mars.apex.engine.model.Rule;
+import dev.mars.apex.engine.model.RuleGroup;
+import dev.mars.apex.engine.model.RuleGroupEvaluationResult;
+import dev.mars.apex.engine.model.RuleGroupSeverityAggregator;
+import dev.mars.apex.engine.model.RuleResult;
+import dev.mars.apex.engine.execution.RuleGroupEvaluationService;
+import dev.mars.apex.engine.core.UnifiedRuleEvaluator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -31,7 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import dev.mars.apex.core.engine.core.RuleBuilder;
+import dev.mars.apex.engine.core.RuleBuilder;
 
 /**
  * Test class for Rule Group Severity Aggregation functionality.
