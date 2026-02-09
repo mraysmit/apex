@@ -237,45 +237,37 @@ class RuleGroupEvaluationServiceTest {
     }
 
     // =========================================================================
-    // 6. Equivalence with Legacy RuleGroup.evaluate()
+    // 6. Service-based evaluation (replaces legacy RuleGroup.evaluate())
     // =========================================================================
 
     @Test
-    @DisplayName("Service evaluation produces same boolean as legacy RuleGroup.evaluate()")
-    void testEquivalenceWithLegacyEvaluate() {
+    @DisplayName("Service evaluation returns true when all AND rules pass")
+    void testServiceEvaluateAllPass() {
         Rule rule1 = createRule("r1", "check-a", "#a > 10", SeverityConstants.INFO);
         Rule rule2 = createRule("r2", "check-b", "#b == true", SeverityConstants.WARNING);
 
-        // Create two identical groups
-        RuleGroup legacyGroup = createAndGroup("g1", "legacy", rule1, rule2);
         RuleGroup serviceGroup = createAndGroup("g1", "service", rule1, rule2);
 
         StandardEvaluationContext context = createContext(Map.of("a", 20, "b", true));
 
-        boolean legacyResult = legacyGroup.evaluate(context);
         boolean serviceResult = service.evaluate(serviceGroup, context);
 
-        assertEquals(legacyResult, serviceResult,
-                "Service should produce the same boolean result as legacy RuleGroup.evaluate()");
-        assertTrue(serviceResult);
+        assertTrue(serviceResult, "AND group should pass when all rules pass");
     }
 
     @Test
-    @DisplayName("Service evaluation produces same boolean as legacy for failing groups")
-    void testEquivalenceWithLegacyFailing() {
+    @DisplayName("Service evaluation returns false when an AND rule fails")
+    void testServiceEvaluateFailing() {
         Rule rule1 = createRule("r1", "check-a", "#a > 10", SeverityConstants.INFO);
         Rule rule2 = createRule("r2", "check-b", "#b == true", SeverityConstants.WARNING);
 
-        RuleGroup legacyGroup = createAndGroup("g1", "legacy", rule1, rule2);
         RuleGroup serviceGroup = createAndGroup("g1", "service", rule1, rule2);
 
         StandardEvaluationContext context = createContext(Map.of("a", 5, "b", true));
 
-        boolean legacyResult = legacyGroup.evaluate(context);
         boolean serviceResult = service.evaluate(serviceGroup, context);
 
-        assertEquals(legacyResult, serviceResult);
-        assertFalse(serviceResult, "Both should fail since a <= 10");
+        assertFalse(serviceResult, "AND group should fail since a <= 10");
     }
 
     // =========================================================================

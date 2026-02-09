@@ -6,7 +6,7 @@ metadata:
   name: "Schema Diff - Removed Columns Test"
   description: "Tests schema-diff detecting removed columns as breaking change"
   version: "1.0"
-  author: "APEX Test Team"
+  author: "Mark Andrew Ray-Smith Cityline Ltd "
   type: "pipeline-config"
 
 data-sources:

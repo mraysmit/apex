@@ -6,7 +6,7 @@ metadata:
   name: "Schema Diff - Case-Insensitive Test"
   description: "Tests case-insensitive column name matching"
   version: "1.0"
-  author: "APEX Test Team"
+  author: "Mark Andrew Ray-Smith Cityline Ltd "
   type: "pipeline-config"
 
 data-sources:

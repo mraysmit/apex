@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Error handling and edge cases
  * - Integration with ValidationResult
  * 
- * @author APEX Test Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd 
  * @since 1.0.0
  */
 @ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})

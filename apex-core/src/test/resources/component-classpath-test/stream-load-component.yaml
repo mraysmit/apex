@@ -8,7 +8,7 @@ metadata:
   version: "1.0.0"
   description: Tests loadComponent(InputStream) method
   business-domain: testing
-  owner: APEX Test Team
+  owner: Mark Andrew Ray-Smith Cityline Ltd 
   criticality: medium
   sla-ms: 50
   enabled: true

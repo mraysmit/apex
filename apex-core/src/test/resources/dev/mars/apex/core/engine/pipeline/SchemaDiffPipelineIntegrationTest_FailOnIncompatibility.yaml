@@ -6,7 +6,7 @@ metadata:
   name: "Schema Diff - Fail on Incompatibility Test"
   description: "Tests fail-on-incompatibility parameter causes pipeline failure"
   version: "1.0"
-  author: "APEX Test Team"
+  author: "Mark Andrew Ray-Smith Cityline Ltd "
   type: "pipeline-config"
 
 data-sources:

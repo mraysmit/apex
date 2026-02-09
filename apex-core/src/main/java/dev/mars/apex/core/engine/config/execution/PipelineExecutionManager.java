@@ -21,6 +21,7 @@ import dev.mars.apex.core.service.data.external.factory.DataSourceFactory;
 import dev.mars.apex.core.service.data.external.manager.ExternalDataSourceManager;
 import dev.mars.apex.core.service.data.external.registry.DataSourceRegistry;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+import dev.mars.apex.core.service.engine.RuleGroupEvaluationService;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import org.slf4j.Logger;
@@ -70,6 +71,7 @@ public class PipelineExecutionManager {
     private final Map<String, DataSink> dataSinks;
     private final List<String> initializationErrors;
     private final ExpressionEvaluatorService evaluatorService;
+    private final RuleGroupEvaluationService ruleGroupEvaluationService;
     
     private PipelineExecutor pipelineExecutor; // Lazy-initialized
     private YamlEnrichmentProcessor enrichmentProcessor; // Re-initialized with data sources
@@ -83,6 +85,7 @@ public class PipelineExecutionManager {
      * @param dataSinks Map to store initialized data sinks
      * @param initializationErrors List to collect initialization errors
      * @param evaluatorService Expression evaluator service for enrichments
+     * @param ruleGroupEvaluationService Service for canonical rule group evaluation (required)
      */
     public PipelineExecutionManager(
             DataSourceFactory dataSourceFactory,
@@ -90,7 +93,8 @@ public class PipelineExecutionManager {
             Map<String, ExternalDataSource> dataSources,
             Map<String, DataSink> dataSinks,
             List<String> initializationErrors,
-            ExpressionEvaluatorService evaluatorService) {
+            ExpressionEvaluatorService evaluatorService,
+            RuleGroupEvaluationService ruleGroupEvaluationService) {
         this.dataSourceFactory = dataSourceFactory;
         this.dataSinkFactory = dataSinkFactory;
         this.dataSourceRegistry = DataSourceRegistry.getInstance();
@@ -98,6 +102,8 @@ public class PipelineExecutionManager {
         this.dataSinks = dataSinks;
         this.initializationErrors = initializationErrors;
         this.evaluatorService = evaluatorService;
+        this.ruleGroupEvaluationService = java.util.Objects.requireNonNull(ruleGroupEvaluationService,
+                "RuleGroupEvaluationService is required");
     }
 
     /**
@@ -133,7 +139,8 @@ public class PipelineExecutionManager {
                 updatedProcessor = new YamlEnrichmentProcessor(
                     new LookupServiceRegistry(), 
                     this.evaluatorService,
-                    this.dataSources
+                    this.dataSources,
+                    this.ruleGroupEvaluationService
                 );
             }
 

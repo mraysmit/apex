@@ -18,6 +18,7 @@ import dev.mars.apex.core.engine.model.EnrichmentGroup;
 import dev.mars.apex.core.engine.model.EnrichmentGroupResult;
 import dev.mars.apex.core.config.yaml.YamlRule;
 import dev.mars.apex.core.config.yaml.YamlRuleGroup;
+import dev.mars.apex.core.service.engine.RuleGroupEvaluationService;
 import dev.mars.apex.core.service.data.external.cache.CacheStatistics;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -79,6 +80,9 @@ public class YamlEnrichmentProcessor {
     // Data source registry from RulesEngine - prevents duplicate data source creation
     private final Map<String, dev.mars.apex.core.service.data.external.ExternalDataSource> dataSourceRegistry;
 
+    // Rule group evaluation service for canonical evaluation path (Phase 2)
+    private final RuleGroupEvaluationService ruleGroupEvaluationService;
+
     // Current configuration context for database lookups
     private dev.mars.apex.core.config.yaml.YamlRuleConfiguration currentConfiguration;
 
@@ -86,31 +90,29 @@ public class YamlEnrichmentProcessor {
     private final Map<String, Map<String, Object>> ruleGroupResults = new java.util.concurrent.ConcurrentHashMap<>();
     private final Map<String, Boolean> individualRuleResults = new java.util.concurrent.ConcurrentHashMap<>();
 
-    public YamlEnrichmentProcessor(LookupServiceRegistry serviceRegistry,
-                                   ExpressionEvaluatorService evaluatorService) {
-        this(serviceRegistry, evaluatorService, null);
-    }
-
     /**
-     * Constructor with data source registry support.
-     * This constructor accepts a data source registry from RulesEngine to prevent duplicate
-     * data source creation during enrichment processing.
+     * Constructor with all required dependencies.
      *
      * @param serviceRegistry The lookup service registry
      * @param evaluatorService The expression evaluator service
-     * @param dataSourceRegistry Optional data source registry from RulesEngine
+     * @param dataSourceRegistry Data source registry from RulesEngine (null-safe, defaults to empty map)
+     * @param ruleGroupEvaluationService Service for canonical rule group evaluation (required)
      */
     public YamlEnrichmentProcessor(LookupServiceRegistry serviceRegistry,
                                    ExpressionEvaluatorService evaluatorService,
-                                   Map<String, dev.mars.apex.core.service.data.external.ExternalDataSource> dataSourceRegistry) {
+                                   Map<String, dev.mars.apex.core.service.data.external.ExternalDataSource> dataSourceRegistry,
+                                   RuleGroupEvaluationService ruleGroupEvaluationService) {
         this.serviceRegistry = serviceRegistry;
         this.evaluatorService = evaluatorService;
         this.parser = new SpelExpressionParser();
         this.cacheManager = ApexCacheManager.getInstance();
         this.dataSourceRegistry = dataSourceRegistry != null ? dataSourceRegistry : new java.util.HashMap<>();
+        this.ruleGroupEvaluationService = java.util.Objects.requireNonNull(ruleGroupEvaluationService,
+                "RuleGroupEvaluationService is required — use RuleGroupEvaluationService(new UnifiedRuleEvaluator())");
 
         logger.info("YamlEnrichmentProcessor initialized with unified cache manager" + 
-                   (dataSourceRegistry != null ? " and data source registry (" + dataSourceRegistry.size() + " data sources)" : ""));
+                   (dataSourceRegistry != null ? " and data source registry (" + dataSourceRegistry.size() + " data sources)" : "") +
+                   " and RuleGroupEvaluationService");
     }
     
     /**
@@ -1388,8 +1390,8 @@ public class YamlEnrichmentProcessor {
                             }
                         }
 
-                        // Evaluate rule group
-                        boolean groupResult = ruleGroup.evaluate(context);
+                        // Evaluate rule group through canonical path
+                        boolean groupResult = ruleGroupEvaluationService.evaluate(ruleGroup, context);
 
                         // Store rule group results
                         Map<String, Object> groupRuleResults = new HashMap<>();

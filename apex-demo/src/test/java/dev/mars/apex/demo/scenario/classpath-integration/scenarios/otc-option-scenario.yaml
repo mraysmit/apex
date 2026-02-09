@@ -8,7 +8,7 @@ metadata:
   description: "Validates and enriches OTC option trade data loaded from classpath"
   type: "scenario"
   version: "1.0.0"
-  owner: "APEX Test Team"
+  owner: "Mark Andrew Ray-Smith Cityline Ltd "
   business-domain: "OTC Derivatives"
 
 scenario:

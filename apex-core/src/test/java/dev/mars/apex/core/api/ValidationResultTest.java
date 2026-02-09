@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Validation statistics and metrics
  * - Integration with ValidationBuilder
  * 
- * @author APEX Test Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd 
  * @since 1.0.0
  */
 @ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})

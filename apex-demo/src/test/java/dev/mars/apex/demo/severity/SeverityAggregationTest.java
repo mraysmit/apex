@@ -21,6 +21,8 @@ import dev.mars.apex.core.engine.model.RuleGroup;
 import dev.mars.apex.core.engine.model.RuleGroupEvaluationResult;
 import dev.mars.apex.core.engine.model.RuleGroupSeverityAggregator;
 import dev.mars.apex.core.engine.model.RuleResult;
+import dev.mars.apex.core.service.engine.RuleGroupEvaluationService;
+import dev.mars.apex.core.service.engine.UnifiedRuleEvaluator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -149,9 +151,10 @@ public class SeverityAggregationTest {
         andGroup.addRule(warningRule, 2);
         andGroup.addRule(infoRule, 3);
         
-        // Evaluate with details
+        // Evaluate with details via canonical service path
         StandardEvaluationContext context = new StandardEvaluationContext();
-        RuleGroupEvaluationResult result = andGroup.evaluateWithDetails(context);
+        RuleGroupEvaluationService evaluationService = new RuleGroupEvaluationService(new UnifiedRuleEvaluator());
+        RuleGroupEvaluationResult result = evaluationService.evaluateWithDetails(andGroup, context);
         
         // Verify results
         assertFalse(result.isGroupResult(), "AND group should fail when one rule fails");
@@ -180,9 +183,10 @@ public class SeverityAggregationTest {
         orGroup.addRule(warningRule, 2);
         orGroup.addRule(errorRule, 3);
         
-        // Evaluate with details
+        // Evaluate with details via canonical service path
         StandardEvaluationContext context = new StandardEvaluationContext();
-        RuleGroupEvaluationResult result = orGroup.evaluateWithDetails(context);
+        RuleGroupEvaluationService evaluationService = new RuleGroupEvaluationService(new UnifiedRuleEvaluator());
+        RuleGroupEvaluationResult result = evaluationService.evaluateWithDetails(orGroup, context);
         
         // Verify results
         assertTrue(result.isGroupResult(), "OR group should pass when any rule passes");

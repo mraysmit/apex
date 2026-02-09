@@ -8,7 +8,7 @@ metadata:
   description: "Basic trade validation scenario loaded from classpath"
   type: "scenario"
   version: "1.0.0"
-  owner: "APEX Test Team"
+  owner: "Mark Andrew Ray-Smith Cityline Ltd "
   business-domain: "Trading"
 
 scenario:

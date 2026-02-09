@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - parallel-execution configuration
  * - debug-mode configuration
  * 
- * @author APEX Test Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd 
  * @since 1.0.0
  */
 @ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})

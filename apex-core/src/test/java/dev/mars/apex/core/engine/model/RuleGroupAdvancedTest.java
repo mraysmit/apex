@@ -2,6 +2,8 @@ package dev.mars.apex.core.engine.model;
 
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.engine.config.RuleBuilder;
+import dev.mars.apex.core.service.engine.RuleGroupEvaluationService;
+import dev.mars.apex.core.service.engine.UnifiedRuleEvaluator;
 import org.junit.jupiter.api.BeforeEach;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
@@ -27,14 +29,16 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Debug mode
  * - AND/OR operator configuration
  * 
- * @author APEX Test Team
- * @since 1.0.0
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-09-23
+ * @version 1.0 
  */
 @ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class RuleGroupAdvancedTest {
 
     private StandardEvaluationContext context;
     private Map<String, Object> testData;
+    private RuleGroupEvaluationService evaluationService;
 
     @BeforeEach
     void setUp() {
@@ -46,6 +50,8 @@ class RuleGroupAdvancedTest {
         
         context = new StandardEvaluationContext();
         context.setVariables(testData);
+
+        evaluationService = new RuleGroupEvaluationService(new UnifiedRuleEvaluator());
     }
 
     // ========================================
@@ -121,7 +127,7 @@ class RuleGroupAdvancedTest {
             group.addRule(rule2, 2);
             group.addRule(rule3, 3);
             
-            boolean result = group.evaluate(context);
+            boolean result = evaluationService.evaluate(group, context);
             
             assertFalse(result, "AND group should fail when any rule fails");
             // Note: We can't directly test that rule3 wasn't evaluated without modifying the implementation
@@ -144,7 +150,7 @@ class RuleGroupAdvancedTest {
             group.addRule(rule2, 2);
             group.addRule(rule3, 3);
             
-            boolean result = group.evaluate(context);
+            boolean result = evaluationService.evaluate(group, context);
             
             assertFalse(result, "AND group should still fail, but all rules should be evaluated");
         }
@@ -165,7 +171,7 @@ class RuleGroupAdvancedTest {
             group.addRule(rule2, 2);
             group.addRule(rule3, 3);
             
-            boolean result = group.evaluate(context);
+            boolean result = evaluationService.evaluate(group, context);
             
             assertTrue(result, "OR group should pass when any rule passes");
         }
@@ -186,7 +192,7 @@ class RuleGroupAdvancedTest {
             group.addRule(rule2, 2);
             group.addRule(rule3, 3);
             
-            boolean result = group.evaluate(context);
+            boolean result = evaluationService.evaluate(group, context);
             
             assertTrue(result, "OR group should pass, and all rules should be evaluated");
         }
@@ -216,7 +222,7 @@ class RuleGroupAdvancedTest {
             group.addRule(rule2, 2);
             group.addRule(rule3, 3);
             
-            boolean result = group.evaluate(context);
+            boolean result = evaluationService.evaluate(group, context);
             
             assertFalse(result, "AND group should fail");
             assertTrue(group.isDebugMode(), "Debug mode should be enabled");
@@ -272,7 +278,7 @@ class RuleGroupAdvancedTest {
             group.addRule(rule2, 2);
             group.addRule(rule3, 3);
             
-            boolean result = group.evaluate(context);
+            boolean result = evaluationService.evaluate(group, context);
             
             assertTrue(result, "All rules should pass in parallel execution");
         }
@@ -288,7 +294,7 @@ class RuleGroupAdvancedTest {
             Rule rule1 = new RuleBuilder().withName("rule1").withCondition("#age > 18").withMessage("Age check").withSeverity(SeverityConstants.INFO).build();
             group.addRule(rule1, 1);
             
-            boolean result = group.evaluate(context);
+            boolean result = evaluationService.evaluate(group, context);
             
             assertTrue(result, "Single rule should pass");
         }
@@ -319,7 +325,7 @@ class RuleGroupAdvancedTest {
             group.addRule(rule3, 3);
             group.addRule(rule4, 4);
             
-            boolean result = group.evaluate(context);
+            boolean result = evaluationService.evaluate(group, context);
             
             assertTrue(result, "All rules should pass");
         }
@@ -330,7 +336,7 @@ class RuleGroupAdvancedTest {
             RuleGroup group = new RuleGroup("empty", "test", "Empty Group", 
                                           "Empty test", 10, true, true, false, false);
             
-            boolean result = group.evaluate(context);
+            boolean result = evaluationService.evaluate(group, context);
             
             assertFalse(result, "Empty rule group should return false");
         }
@@ -345,7 +351,7 @@ class RuleGroupAdvancedTest {
             Rule rule1 = new RuleBuilder().withName("rule1").withCondition("#nonexistentField > 0").withMessage("Null check").withSeverity(SeverityConstants.INFO).build();
             group.addRule(rule1, 1);
             
-            boolean result = group.evaluate(context);
+            boolean result = evaluationService.evaluate(group, context);
             
             assertFalse(result, "Null rule results should be treated as false");
         }

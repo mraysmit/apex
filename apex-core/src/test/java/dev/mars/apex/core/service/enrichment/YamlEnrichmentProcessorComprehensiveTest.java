@@ -8,6 +8,8 @@ import dev.mars.apex.core.engine.model.EnrichmentGroup;
 import dev.mars.apex.core.engine.model.EnrichmentGroupResult;
 import dev.mars.apex.core.engine.model.RuleResult;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
+import dev.mars.apex.core.service.engine.RuleGroupEvaluationService;
+import dev.mars.apex.core.service.engine.UnifiedRuleEvaluator;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -72,7 +74,8 @@ class YamlEnrichmentProcessorComprehensiveTest {
         logger.info("🔧 Setting up YamlEnrichmentProcessor test environment");
         serviceRegistry = new LookupServiceRegistry();
         evaluatorService = new ExpressionEvaluatorService();
-        processor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService);
+        processor = new YamlEnrichmentProcessor(serviceRegistry, evaluatorService, null,
+                new RuleGroupEvaluationService(new UnifiedRuleEvaluator()));
         yamlLoader = new YamlConfigurationLoader();
         logger.info("✅ Test environment initialized");
     }

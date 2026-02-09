@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Message formatting and error details
  * - Cause chain handling and stack traces
  * 
- * @author APEX Test Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd 
  * @since 1.0.0
  */
 @ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})

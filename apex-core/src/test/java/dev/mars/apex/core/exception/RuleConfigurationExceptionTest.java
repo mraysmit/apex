@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Error message formatting and context information
  * - Integration with base exception functionality
  * 
- * @author APEX Test Team
+ * @author Mark Andrew Ray-Smith Cityline Ltd 
  * @since 1.0.0
  */
 @ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})

@@ -3,7 +3,7 @@ metadata:
   name: "Schema Changes Detection Test"
   type: "pipeline-config"
   version: "1.0"
-  author: "APEX Test Team"
+  author: "Mark Andrew Ray-Smith Cityline Ltd "
   description: "Test that schema changes are properly reflected in JSON report"
 
 data-sources:

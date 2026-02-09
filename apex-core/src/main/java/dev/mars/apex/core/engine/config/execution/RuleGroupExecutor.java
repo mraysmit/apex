@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Mars Raysmit
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd 
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,17 @@ public class RuleGroupExecutor {
     public RuleGroupExecutor(UnifiedRuleEvaluator unifiedEvaluator) {
         this.unifiedEvaluator = unifiedEvaluator;
         this.groupEvaluationService = new RuleGroupEvaluationService(unifiedEvaluator);
+    }
+
+    /**
+     * Returns the {@link RuleGroupEvaluationService} used by this executor.
+     * This allows other components (e.g., {@code YamlEnrichmentProcessor}) to route
+     * rule group evaluation through the canonical path.
+     *
+     * @return the rule group evaluation service
+     */
+    public RuleGroupEvaluationService getGroupEvaluationService() {
+        return groupEvaluationService;
     }
     
     /**

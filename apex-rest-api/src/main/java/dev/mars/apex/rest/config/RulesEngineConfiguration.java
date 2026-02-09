@@ -7,6 +7,8 @@ import dev.mars.apex.core.config.yaml.YamlRuleFactory;
 import dev.mars.apex.core.engine.config.RulesEngine;
 import dev.mars.apex.core.service.data.DataServiceManager;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
+import dev.mars.apex.core.service.engine.RuleGroupEvaluationService;
+import dev.mars.apex.core.service.engine.UnifiedRuleEvaluator;
 
 import dev.mars.apex.core.service.engine.TemplateProcessorService;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
@@ -197,14 +199,24 @@ public class RulesEngineConfiguration {
     }
 
     /**
+     * RuleGroupEvaluationService bean for canonical rule group evaluation.
+     */
+    @Bean
+    public RuleGroupEvaluationService ruleGroupEvaluationService() {
+        logger.info("Creating RuleGroupEvaluationService bean");
+        return new RuleGroupEvaluationService(new UnifiedRuleEvaluator());
+    }
+
+    /**
      * YamlEnrichmentProcessor bean for data enrichment operations.
      */
     @Bean
     public YamlEnrichmentProcessor yamlEnrichmentProcessor(
             LookupServiceRegistry lookupServiceRegistry,
-            ExpressionEvaluatorService expressionEvaluatorService) {
+            ExpressionEvaluatorService expressionEvaluatorService,
+            RuleGroupEvaluationService ruleGroupEvaluationService) {
         logger.info("Creating YamlEnrichmentProcessor bean");
-        return new YamlEnrichmentProcessor(lookupServiceRegistry, expressionEvaluatorService);
+        return new YamlEnrichmentProcessor(lookupServiceRegistry, expressionEvaluatorService, null, ruleGroupEvaluationService);
     }
 
     /**

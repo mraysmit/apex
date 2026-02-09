@@ -6,7 +6,7 @@ metadata:
   name: "Schema Diff - Type Mappings Test"
   description: "Tests type mapping for SQL Server to PostgreSQL migration"
   version: "1.0"
-  author: "APEX Test Team"
+  author: "Mark Andrew Ray-Smith Cityline Ltd "
   type: "pipeline-config"
 
 data-sources:

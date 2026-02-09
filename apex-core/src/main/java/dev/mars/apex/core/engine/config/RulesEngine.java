@@ -175,19 +175,25 @@ public class RulesEngine {
             this.scenarioParser,
             new ScenarioLookupStrategyImpl()
         );
-        // Note: enrichmentProcessor will be re-initialized after data sources are created
-        // to ensure it has access to the data source registry
-        this.enrichmentProcessor = new YamlEnrichmentProcessor(new LookupServiceRegistry(), this.evaluatorService);
-
         // Load error recovery configuration from YAML if available, otherwise use defaults
         ErrorRecoveryConfig errorRecoveryConfig = loadErrorRecoveryConfig(yamlConfig);
 
         // Initialize the unified evaluator with error recovery configuration from YAML
         this.unifiedEvaluator = new UnifiedRuleEvaluator(this.evaluatorService, errorRecoveryService, performanceMonitor, errorRecoveryConfig);
 
-        // Initialize executors (after dependencies are initialized)
-        this.enrichmentGroupExecutor = new EnrichmentGroupExecutor(this.enrichmentProcessor);
+        // Initialize ruleGroupExecutor first so its evaluation service is available for enrichmentProcessor
         this.ruleGroupExecutor = new RuleGroupExecutor(this.unifiedEvaluator);
+
+        // Note: enrichmentProcessor will be re-initialized after data sources are created
+        // to ensure it has access to the data source registry.
+        // Phase 2: pass RuleGroupEvaluationService so rule groups within enrichments
+        // are evaluated through the canonical UnifiedRuleEvaluator path.
+        this.enrichmentProcessor = new YamlEnrichmentProcessor(
+            new LookupServiceRegistry(), this.evaluatorService, null,
+            this.ruleGroupExecutor.getGroupEvaluationService());
+
+        // Initialize remaining executors (after dependencies are initialized)
+        this.enrichmentGroupExecutor = new EnrichmentGroupExecutor(this.enrichmentProcessor);
         this.ruleChainExecutor = new RuleChainExecutor(this.evaluatorService, this.unifiedEvaluator, this.enrichmentGroupExecutor);
         this.sequentialProcessor = new SequentialProcessor(
             this.configuration,
@@ -208,7 +214,8 @@ public class RulesEngine {
             this.dataSources,
             this.dataSinks,
             this.initializationErrors,
-            this.evaluatorService
+            this.evaluatorService,
+            this.ruleGroupExecutor.getGroupEvaluationService()
         );
 
         // Initialize data sources and sinks if yamlConfig is provided

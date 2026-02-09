@@ -8,7 +8,7 @@ metadata:
   description: "Registry for testing classpath-based scenario loading with components and rules"
   type: "scenario-registry"
   version: "1.0.0"
-  created-by: "APEX Test Team"
+  created-by: "Mark Andrew Ray-Smith Cityline Ltd "
 
 scenarios:
   - scenario-id: "otc-option-validation"

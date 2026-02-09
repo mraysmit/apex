@@ -3,7 +3,7 @@ metadata:
   name: "JSON Report Generation Test"
   type: "pipeline-config"
   version: "1.0"
-  author: "APEX Test Team"
+  author: "Mark Andrew Ray-Smith Cityline Ltd "
   description: "Test JSON report generation from schema-diff pipeline"
 
 data-sources:
