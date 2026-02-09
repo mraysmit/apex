@@ -3,7 +3,7 @@ package dev.mars.apex.core.engine.core;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.core.RuleBuilder;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.engine.RuleEngineService;
+import dev.mars.apex.core.service.engine.SpelRuleEvaluator;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * 1. RulesEngine.executeRule() - Single rule execution
  * 2. RulesEngine.executeRulesList() - Multiple rules execution
  * 3. RulesEngine.executeRulesAndRuleGroups() - Mixed execution
- * 4. RuleEngineService.evaluateRules() - Service layer execution
+ * 4. SpelRuleEvaluator.evaluateRules() - Service layer execution
  * 5. Various severity levels (CRITICAL, WARNING, ERROR)
  * 6. Different types of SpEL errors (missing properties, type mismatches, etc.)
  *
@@ -44,7 +44,7 @@ class RuleEvaluationErrorHandlingComprehensiveTest {
     private static final Logger logger = LoggerFactory.getLogger(RuleEvaluationErrorHandlingComprehensiveTest.class);
 
     private RulesEngine rulesEngine;
-    private RuleEngineService ruleEngineService;
+    private SpelRuleEvaluator SpelRuleEvaluator;
     private RulesEngineConfiguration configuration;
 
     @BeforeEach
@@ -59,7 +59,7 @@ class RuleEvaluationErrorHandlingComprehensiveTest {
         rulesEngine = new RulesEngine(configuration);
 
         // Create rule engine service
-        ruleEngineService = new RuleEngineService(expressionEvaluator);
+        SpelRuleEvaluator = new SpelRuleEvaluator(expressionEvaluator);
     }
     
     // ========================================
@@ -219,19 +219,19 @@ class RuleEvaluationErrorHandlingComprehensiveTest {
     }
 
     // ========================================
-    // PATH 4: RuleEngineService.evaluateRules() Tests
+    // PATH 4: SpelRuleEvaluator.evaluateRules() Tests
     // ========================================
 
     @Test
-    @DisplayName("PATH 4: RuleEngineService should return ERROR RuleResult in results list")
-    void testRuleEngineService_EvaluateRules_ErrorInResultsList() {
+    @DisplayName("PATH 4: SpelRuleEvaluator should return ERROR RuleResult in results list")
+    void testSpelRuleEvaluator_EvaluateRules_ErrorInResultsList() {
         // Given: Rules with one that will fail
         List<Rule> rules = Arrays.asList(
             createValidRule("service-valid-rule", "#quantity > 0", "INFO"),
             createFailingRule("service-failing-rule", "#nonExistent.length() > 0", "ERROR")  // Method call throws
         );
 
-        // Create evaluation context manually since RuleEngineService uses different context
+        // Create evaluation context manually since SpelRuleEvaluator uses different context
         org.springframework.expression.EvaluationContext context =
             new org.springframework.expression.spel.support.StandardEvaluationContext();
         Map<String, Object> testData = createValidFacts();
@@ -239,7 +239,7 @@ class RuleEvaluationErrorHandlingComprehensiveTest {
         context.setVariable("data", dataObject);
 
         // When: Evaluate rules through service
-        List<RuleResult> results = ruleEngineService.evaluateRules(rules, context);
+        List<RuleResult> results = SpelRuleEvaluator.evaluateRules(rules, context);
 
         // Then: Should have results for both rules
         assertNotNull(results, "Results should not be null");
@@ -247,7 +247,7 @@ class RuleEvaluationErrorHandlingComprehensiveTest {
 
         // With parameter validation removed, may get NO_MATCH results instead of ERROR
         // The important thing is that evaluation completes without throwing exceptions
-        logger.info("[OK] PATH 4: RuleEngineService properly handles rule failures in results list");
+        logger.info("[OK] PATH 4: SpelRuleEvaluator properly handles rule failures in results list");
     }
 
     // ========================================

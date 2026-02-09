@@ -39,13 +39,13 @@ import java.util.List;
  * Service for evaluating business rules using SpEL expressions.
  * This class handles rule evaluation and result reporting.
  */
-public class RuleEngineService {
-    private static final Logger logger = LoggerFactory.getLogger(RuleEngineService.class);
+public class SpelRuleEvaluator {
+    private static final Logger logger = LoggerFactory.getLogger(SpelRuleEvaluator.class);
     private final ExpressionEvaluatorService evaluatorService;
     private boolean printResults = true;
 
-    public RuleEngineService(ExpressionEvaluatorService evaluatorService) {
-        logger.info("Initializing RuleEngineService");
+    public SpelRuleEvaluator(ExpressionEvaluatorService evaluatorService) {
+        logger.info("Initializing SpelRuleEvaluator");
         this.evaluatorService = evaluatorService;
         logger.debug("Using evaluator service: {}", evaluatorService.getClass().getSimpleName());
     }
@@ -56,7 +56,7 @@ public class RuleEngineService {
      * @param printResults True to print results, false to suppress output
      * @return This service for method chaining
      */
-    public RuleEngineService setPrintResults(boolean printResults) {
+    public SpelRuleEvaluator setPrintResults(boolean printResults) {
         logger.debug("Setting printResults to: {}", printResults);
         this.printResults = printResults;
         return this;

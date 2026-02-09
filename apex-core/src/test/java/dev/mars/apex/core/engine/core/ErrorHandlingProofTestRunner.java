@@ -3,7 +3,7 @@ package dev.mars.apex.core.engine.core;
 import dev.mars.apex.core.engine.model.Rule;
 import dev.mars.apex.core.engine.core.RuleBuilder;
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.engine.RuleEngineService;
+import dev.mars.apex.core.service.engine.SpelRuleEvaluator;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.config.error.ErrorRecoveryConfig;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +35,7 @@ class ErrorHandlingProofTestRunner {
     private static final Logger logger = LoggerFactory.getLogger(ErrorHandlingProofTestRunner.class);
 
     private RulesEngine rulesEngine;
-    private RuleEngineService ruleEngineService;
+    private SpelRuleEvaluator SpelRuleEvaluator;
     private int totalTests = 0;
     private int passedTests = 0;
 
@@ -55,7 +55,7 @@ class ErrorHandlingProofTestRunner {
         // Create RulesEngine
         rulesEngine = new RulesEngine(configuration);
 
-        ruleEngineService = new RuleEngineService(expressionEvaluator);
+        SpelRuleEvaluator = new SpelRuleEvaluator(expressionEvaluator);
         totalTests = 0;
         passedTests = 0;
     }
@@ -69,7 +69,7 @@ class ErrorHandlingProofTestRunner {
         testPath1_ExecuteRule();
         testPath2_ExecuteRulesList();
         testPath3_ExecuteRules();
-        testPath4_RuleEngineService();
+        testPath4_SpelRuleEvaluator();
         testPath5_SeverityHandling();
         testPath6_EdgeCases();
         
@@ -128,8 +128,8 @@ class ErrorHandlingProofTestRunner {
         }, "PATH 3: executeRules() failure");
     }
     
-    private void testPath4_RuleEngineService() {
-        logger.info("Testing PATH 4: RuleEngineService.evaluateRules()");
+    private void testPath4_SpelRuleEvaluator() {
+        logger.info("Testing PATH 4: SpelRuleEvaluator.evaluateRules()");
         
         totalTests++;
         try {
@@ -142,7 +142,7 @@ class ErrorHandlingProofTestRunner {
                 new org.springframework.expression.spel.support.StandardEvaluationContext();
             context.setVariable("data", new HashMap<>());
             
-            List<RuleResult> results = ruleEngineService.evaluateRules(rules, context);
+            List<RuleResult> results = SpelRuleEvaluator.evaluateRules(rules, context);
             
             assertNotNull(results, "Results should not be null");
             assertFalse(results.isEmpty(), "Should have results");
@@ -156,9 +156,9 @@ class ErrorHandlingProofTestRunner {
             assertEquals("CRITICAL", errorResult.getSeverity(), "Should preserve severity");
             
             passedTests++;
-            logger.info("   PATH 4: RuleEngineService properly handles errors");
+            logger.info("   PATH 4: SpelRuleEvaluator properly handles errors");
         } catch (Exception e) {
-            logger.error("   PATH 4: RuleEngineService failed: {}", e.getMessage());
+            logger.error("   PATH 4: SpelRuleEvaluator failed: {}", e.getMessage());
         }
     }
     
