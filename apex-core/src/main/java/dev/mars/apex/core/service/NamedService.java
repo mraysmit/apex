@@ -1,4 +1,4 @@
-package dev.mars.apex.core.service.common;
+package dev.mars.apex.core.service;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -18,9 +18,6 @@ package dev.mars.apex.core.service.common;
 
 /**
  * Base interface for all named services.
- *
- * This interface is part of the PeeGeeQ message queue system, providing
- * production-ready PostgreSQL-based message queuing capabilities.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-07-27

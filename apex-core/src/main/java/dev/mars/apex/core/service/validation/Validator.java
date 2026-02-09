@@ -1,7 +1,7 @@
 package dev.mars.apex.core.service.validation;
 
 import dev.mars.apex.core.engine.model.RuleResult;
-import dev.mars.apex.core.service.common.NamedService;
+import dev.mars.apex.core.service.NamedService;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd

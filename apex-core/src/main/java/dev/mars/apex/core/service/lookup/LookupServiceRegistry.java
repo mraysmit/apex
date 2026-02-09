@@ -1,6 +1,6 @@
 package dev.mars.apex.core.service.lookup;
 
-import dev.mars.apex.core.service.common.NamedService;
+import dev.mars.apex.core.service.NamedService;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -52,7 +52,7 @@ module dev.mars.apex.core {
 
     // Existing exports
     exports dev.mars.apex.core.service.validation;
-    exports dev.mars.apex.core.service.common;
+    exports dev.mars.apex.core.service;
     exports dev.mars.apex.core.service.lookup;
     exports dev.mars.apex.core.engine.model;
     exports dev.mars.apex.core.engine.model.metadata;

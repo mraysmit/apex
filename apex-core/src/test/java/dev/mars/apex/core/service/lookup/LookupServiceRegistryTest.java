@@ -17,7 +17,7 @@ package dev.mars.apex.core.service.lookup;
  */
 
 
-import dev.mars.apex.core.service.common.NamedService;
+import dev.mars.apex.core.service.NamedService;
 import dev.mars.apex.core.service.validation.Validator;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
