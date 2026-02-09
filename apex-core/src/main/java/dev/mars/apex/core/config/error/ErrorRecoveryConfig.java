@@ -57,7 +57,7 @@ import java.util.Map;
  * }</pre>
  *
  * @author Mark A Ray-Smith
- * @since 1.0
+ * @since 2025-09-27
  * @version 1.0
  */
 public class ErrorRecoveryConfig {

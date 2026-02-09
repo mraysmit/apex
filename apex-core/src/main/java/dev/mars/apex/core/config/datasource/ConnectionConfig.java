@@ -28,7 +28,7 @@ import java.util.Objects;
  * database name, URLs, timeouts, and connection pooling parameters.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-07-30
  * @version 1.0
  */
 public class ConnectionConfig {

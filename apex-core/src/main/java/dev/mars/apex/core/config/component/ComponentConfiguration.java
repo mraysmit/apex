@@ -41,7 +41,7 @@ import java.util.*;
  * - If not specified, inherits from stage-level failure-policy
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 2.2.0
+ * @since 2025-11-12
  */
 public class ComponentConfiguration {
 

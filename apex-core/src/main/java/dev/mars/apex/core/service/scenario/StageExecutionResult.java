@@ -37,7 +37,7 @@ import java.util.Map;
  * - NON_CRITICAL_FAILURE: Optional stage failed, scenario can continue
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-09-27
  */
 public class StageExecutionResult {
     

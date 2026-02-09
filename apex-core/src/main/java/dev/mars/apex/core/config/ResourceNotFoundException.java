@@ -24,7 +24,7 @@ package dev.mars.apex.core.config;
  * strategy.</p>
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 3.0
+ * @since 2026-01-08
  * @see ResourceResolver
  */
 public class ResourceNotFoundException extends Exception {

@@ -7,7 +7,7 @@ import dev.mars.apex.core.service.data.external.ExternalDataSource;
  * Provides access to configured data sources by name.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-09-05
  */
 public interface ExternalDataSourceManager {
     

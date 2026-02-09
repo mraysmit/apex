@@ -55,7 +55,7 @@ import java.util.function.Function;
  * </ul>
  *
  * @author APEX Team
- * @since 2.1
+ * @since 2026-01-22
  */
 public class SequentialProcessor {
     private static final Logger logger = LoggerFactory.getLogger(SequentialProcessor.class);

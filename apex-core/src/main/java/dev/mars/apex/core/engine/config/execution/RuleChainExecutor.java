@@ -42,7 +42,7 @@ import java.util.Map;
  * <p>This class extracts rule chain execution logic from RulesEngine to maintain
  * focused responsibilities. It supports multiple chain patterns for complex routing logic.</p>
  * 
- * @since 2.1 (Phase 6 refactoring)
+ * @since 2026-01-22
  */
 public class RuleChainExecutor {
     private static final Logger logger = LoggerFactory.getLogger(RuleChainExecutor.class);

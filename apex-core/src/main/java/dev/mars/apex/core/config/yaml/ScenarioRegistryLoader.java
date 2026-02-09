@@ -68,7 +68,7 @@ import java.util.*;
  * </pre>
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 3.0
+ * @since 2025-11-03
  * @see ScenarioConfiguration
  */
 public class ScenarioRegistryLoader {

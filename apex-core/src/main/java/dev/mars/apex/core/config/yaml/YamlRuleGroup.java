@@ -81,7 +81,7 @@ public class YamlRuleGroup {
      * Note: This is different from stop-on-first-failure which controls
      * business logic short-circuiting (AND/OR evaluation).
      *
-     * @since 1.0
+     * @since 2025-07-30
      */
     @JsonProperty("error-handling")
     private String errorHandling;

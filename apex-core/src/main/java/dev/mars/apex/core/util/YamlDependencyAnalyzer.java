@@ -47,7 +47,7 @@ import java.util.regex.Pattern;
  * - include/import statements
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-08-02
  */
 public class YamlDependencyAnalyzer {
     

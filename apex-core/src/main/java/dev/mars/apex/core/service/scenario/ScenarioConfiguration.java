@@ -58,7 +58,7 @@ import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
  * - Validation ensures either classification-rule OR data-types exists
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-08-02
  */
 public class ScenarioConfiguration {
 

@@ -33,7 +33,7 @@ import java.nio.file.Paths;
  * Generates HTML reports from JSON schema diff data using Handlebars templates.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 2.1.0
+ * @since 2026-01-18
  */
 public class JsonBasedHtmlReportGenerator {
 

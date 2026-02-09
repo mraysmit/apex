@@ -9,7 +9,7 @@ import java.util.Map;
  * Each step represents a unit of work (extract, transform, load, etc.).
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-09-05
  */
 public class PipelineStep {
     

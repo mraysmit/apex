@@ -40,7 +40,7 @@ import java.util.Map;
  * <p>Phase 2 refactoring: uses {@link RuleGroupEvaluationService} to route
  * individual rule evaluation through {@link UnifiedRuleEvaluator}.</p>
  * 
- * @since 2.1 (Phase 5 refactoring)
+ * @since 2026-01-22
  */
 public class RuleGroupExecutor {
     private static final Logger logger = LoggerFactory.getLogger(RuleGroupExecutor.class);

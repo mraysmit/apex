@@ -34,7 +34,7 @@ package dev.mars.apex.core.config.yaml;
  * </pre>
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-11-06
  */
 public class ProcessingItem {
 

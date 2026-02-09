@@ -31,7 +31,7 @@ import java.util.*;
  * - No shared mutable state
  *
  * @author APEX Performance Optimization
- * @since 2.0
+ * @since 2025-12-13
  * @see apex_architecture_and_code_review.md - Section 2: Double-Parsing Elimination
  */
 public class SequentialConfigDeserializer extends JsonDeserializer<OrderedYamlConfiguration> {

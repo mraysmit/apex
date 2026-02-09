@@ -27,7 +27,7 @@ import java.util.List;
  * type, existence status, validity, and its relationships to other files.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-08-02
  */
 public class YamlNode {
     

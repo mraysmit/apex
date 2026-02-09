@@ -9,7 +9,7 @@ import java.util.Objects;
  * Contains information about columns, types, and constraints.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 2.1.0
+ * @since 2026-01-11
  */
 public class SchemaMetadata {
 

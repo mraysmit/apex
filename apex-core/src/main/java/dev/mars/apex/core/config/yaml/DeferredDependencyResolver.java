@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
  * 4. Cross-section references and complex chains
  * 
  * @author APEX Sequential Processing Implementation
- * @since 1.0
+ * @since 2025-10-29
  * @version 1.0
  */
 public class DeferredDependencyResolver {

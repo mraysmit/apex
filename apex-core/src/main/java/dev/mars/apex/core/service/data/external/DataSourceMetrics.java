@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * All metrics are thread-safe and can be updated concurrently.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-07-30
  * @version 1.0
  */
 public class DataSourceMetrics {

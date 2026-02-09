@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
  * This class provides public static methods to merge multiple YAML configurations,
  * making the merge functionality available to both production code and tests.
  * 
- * @since 3.0
+ * @since 2025-11-02
  */
 public class YamlConfigurationMerger {
     

@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * including write times, error rates, throughput, and connection health.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-09-04
  * @version 1.0
  */
 public class DataSinkMetrics {

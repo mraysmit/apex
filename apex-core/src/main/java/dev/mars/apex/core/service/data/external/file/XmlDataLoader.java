@@ -46,7 +46,7 @@ import java.util.regex.Pattern;
  * In production, you would typically use a proper XML parser like DOM or SAX.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-07-30
  * @version 1.0
  */
 public class XmlDataLoader implements DataLoader {

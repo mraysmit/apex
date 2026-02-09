@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
  * - O(1) lookup time (~10ns vs ~800ns)
  *
  * @author APEX Performance Optimization
- * @since 2.1
+ * @since 2025-12-14
  */
 public class SectionRegistry {
 

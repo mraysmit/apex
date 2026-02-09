@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  * - Supports processing mode detection and selection
  *
  * @author APEX Sequential Processing Implementation
- * @since 1.0
+ * @since 2025-10-29
  */
 public class OrderedYamlConfiguration {
     

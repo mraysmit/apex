@@ -58,7 +58,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * LRU eviction, statistics tracking, and thread-safe operations.</p>
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-10-09
  * @version 1.0
  */
 public class ApexCacheManager {

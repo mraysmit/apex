@@ -30,7 +30,7 @@ import java.nio.file.Paths;
  * Generates Markdown reports from JSON schema diff data.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 2.1.0
+ * @since 2026-01-18
  */
 public class JsonBasedMarkdownReportGenerator {
 

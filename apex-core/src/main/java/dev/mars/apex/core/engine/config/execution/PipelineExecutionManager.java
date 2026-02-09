@@ -59,7 +59,7 @@ import java.util.Map;
  * </ul>
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 2.1
+ * @since 2026-01-22
  */
 public class PipelineExecutionManager {
     private static final Logger logger = LoggerFactory.getLogger(PipelineExecutionManager.class);

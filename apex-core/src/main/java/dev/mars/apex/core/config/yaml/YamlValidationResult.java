@@ -27,7 +27,7 @@ import java.util.List;
  * validation process for a specific YAML file.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-11-17
  */
 public class YamlValidationResult {
     

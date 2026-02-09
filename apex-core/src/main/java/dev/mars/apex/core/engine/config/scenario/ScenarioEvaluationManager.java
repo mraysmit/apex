@@ -39,7 +39,7 @@ import java.util.Map;
  * <p>All methods perform deep copying of input data to ensure thread safety and data isolation.</p>
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 2.1
+ * @since 2026-01-22
  */
 public class ScenarioEvaluationManager {
     private static final Logger logger = LoggerFactory.getLogger(ScenarioEvaluationManager.class);
@@ -225,7 +225,7 @@ public class ScenarioEvaluationManager {
      * Fluent API interface for scenario evaluation.
      * Provides type-safe method chaining for scenario operations.
      *
-     * @since 3.0
+     * @since 2026-01-22
      */
     public interface ScenarioEvaluator {
         /**
@@ -261,7 +261,7 @@ public class ScenarioEvaluationManager {
      * Implementation of ScenarioEvaluator interface.
      * Delegates all calls back to the ScenarioEvaluationManager.
      *
-     * @since 3.0
+     * @since 2026-01-22
      */
     private static class ScenarioEvaluatorImpl implements ScenarioEvaluator {
         private final ScenarioEvaluationManager manager;

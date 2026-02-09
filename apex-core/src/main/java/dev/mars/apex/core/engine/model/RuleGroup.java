@@ -55,7 +55,7 @@ public class RuleGroup implements RuleBase {
      * Valid values: {@link ErrorHandlingConstants#FAIL_FAST}, {@link ErrorHandlingConstants#CONTINUE_ON_ERROR}, {@link ErrorHandlingConstants#SKIP_ON_ERROR}
      * Default: {@link ErrorHandlingConstants#DEFAULT_STRATEGY}
      *
-     * @since 1.0
+     * @since 2025-07-30
      */
     private final String errorHandling;
 

@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Migration recommendation with actionable steps.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 2.1.0
+ * @since 2026-01-18
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Recommendation {

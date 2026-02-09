@@ -4,7 +4,7 @@ package dev.mars.apex.core.engine.pipeline;
  * Result of a single pipeline step execution.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-09-05
  */
 public class PipelineStepResult {
     

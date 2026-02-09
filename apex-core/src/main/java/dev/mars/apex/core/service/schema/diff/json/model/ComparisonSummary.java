@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Summary statistics for schema comparison.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 2.1.0
+ * @since 2026-01-18
  */
 public class ComparisonSummary {
 

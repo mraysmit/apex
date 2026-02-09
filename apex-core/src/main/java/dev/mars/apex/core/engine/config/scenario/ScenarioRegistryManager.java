@@ -41,7 +41,7 @@ import java.util.Map;
  * from core rule execution. Supports both legacy (data-types, rule-configurations) and modern
  * (classification-rule, processing-stages) scenario formats.</p>
  *
- * @since 2.1
+ * @since 2026-01-22
  * @see ScenarioConfiguration
  * @see ScenarioStage
  */

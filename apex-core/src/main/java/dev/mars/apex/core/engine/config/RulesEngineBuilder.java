@@ -38,7 +38,7 @@ import java.util.*;
  *   <li>Default resolution (relative to source file)</li>
  * </ol>
  *
- * @since 3.0
+ * @since 2026-01-22
  */
 public class RulesEngineBuilder {
     private static final Logger logger = LoggerFactory.getLogger(RulesEngineBuilder.class);

@@ -48,7 +48,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * - Background health monitoring
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-07-30
  * @version 1.0
  */
 public class DatabaseHealthIndicator {

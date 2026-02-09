@@ -61,7 +61,7 @@ import java.util.Map;
  * </ul>
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 3.0
+ * @since 2025-11-03
  * @see RulesEngine#asScenario()
  * @see ScenarioExecutionResult
  */

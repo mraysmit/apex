@@ -16,7 +16,7 @@ import java.util.Map;
  * Creates detailed reports showing tables, columns, data types, keys, and other schema information.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 2.1.0
+ * @since 2026-01-11
  */
 public class SchemaHtmlReportGenerator {
 

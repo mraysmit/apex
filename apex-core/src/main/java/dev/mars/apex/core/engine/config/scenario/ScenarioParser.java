@@ -40,7 +40,7 @@ import java.util.Map;
  * </ul>
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 2.2.0
+ * @since 2026-01-22
  */
 public class ScenarioParser {
     

@@ -25,7 +25,7 @@ package dev.mars.apex.core.util;
  * within the YAML structure where the reference occurs.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-08-02
  */
 public class YamlDependency {
     

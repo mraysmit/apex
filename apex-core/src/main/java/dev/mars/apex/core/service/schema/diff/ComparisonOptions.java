@@ -24,7 +24,7 @@ import java.util.Map;
  * Configuration options for schema comparison.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 2.1.0
+ * @since 2026-01-13
  */
 public class ComparisonOptions {
 

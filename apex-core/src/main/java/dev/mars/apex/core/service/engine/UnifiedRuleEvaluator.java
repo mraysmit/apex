@@ -38,7 +38,7 @@ import java.util.regex.Pattern;
  * - Graceful error handling following APEX principles
  *
  * @author Mark A Ray-Smith
- * @since 1.0
+ * @since 2025-09-27
  * @version 1.0
  */
 public class UnifiedRuleEvaluator {

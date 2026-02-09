@@ -38,7 +38,7 @@ import java.util.Map;
  * for consistent runtime usage.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 2.2.0
+ * @since 2026-01-16
  * @version 1.0
  */
 public class FlexibleQueriesDeserializer extends JsonDeserializer<Map<String, String>> {

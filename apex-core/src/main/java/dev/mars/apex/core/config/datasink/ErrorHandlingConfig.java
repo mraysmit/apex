@@ -27,7 +27,7 @@ import java.util.Map;
  * including retry strategies, dead letter handling, and error reporting.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-09-04
  * @version 1.0
  */
 public class ErrorHandlingConfig {

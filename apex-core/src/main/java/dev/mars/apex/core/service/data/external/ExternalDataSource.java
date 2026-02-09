@@ -38,7 +38,7 @@ import java.util.Map;
  * - Configuration-driven initialization
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-07-30
  * @version 1.0
  */
 public interface ExternalDataSource extends DataSource {

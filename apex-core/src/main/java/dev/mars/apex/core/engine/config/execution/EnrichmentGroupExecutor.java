@@ -47,7 +47,7 @@ import java.util.concurrent.Future;
  *   <li>Result aggregation and error handling</li>
  * </ul>
  *
- * @since 2.1.0
+ * @since 2026-01-22
  */
 public class EnrichmentGroupExecutor {
     private static final Logger logger = LoggerFactory.getLogger(EnrichmentGroupExecutor.class);

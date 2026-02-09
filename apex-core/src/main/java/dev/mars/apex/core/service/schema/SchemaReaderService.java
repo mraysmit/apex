@@ -17,7 +17,7 @@ import java.util.*;
  * Supports databases and CSV files.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 2.1.0
+ * @since 2026-01-11
  */
 public class SchemaReaderService {
 

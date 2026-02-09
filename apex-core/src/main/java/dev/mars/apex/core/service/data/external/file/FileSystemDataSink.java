@@ -37,7 +37,7 @@ import java.util.Map;
  * including CSV, JSON, XML, and plain text.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-09-04
  * @version 1.0
  */
 public class FileSystemDataSink implements DataSink {

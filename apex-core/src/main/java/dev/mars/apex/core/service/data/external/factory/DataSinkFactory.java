@@ -34,7 +34,7 @@ import java.util.function.Supplier;
  * based on their type and configuration.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-09-04
  * @version 1.0
  */
 public class DataSinkFactory {

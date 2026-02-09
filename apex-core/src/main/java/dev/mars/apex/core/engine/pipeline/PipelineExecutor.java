@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  * Handles step dependencies, error handling, and monitoring.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-09-05
  */
 public class PipelineExecutor {
 

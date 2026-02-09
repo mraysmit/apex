@@ -40,7 +40,7 @@ import java.util.Objects;
  * </pre>
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 2.2.0
+ * @since 2026-01-16
  * @version 1.0
  */
 public class NamedEndpoint {

@@ -7,7 +7,7 @@ import java.util.List;
  * Result of YAML-defined pipeline execution containing overall status and individual step results.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-09-05
  */
 public class YamlPipelineExecutionResult {
     

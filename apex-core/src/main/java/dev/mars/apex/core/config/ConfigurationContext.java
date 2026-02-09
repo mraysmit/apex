@@ -73,7 +73,7 @@ import java.util.stream.Stream;
  * Registration and lookup operations are safe for concurrent use.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 2.2.0
+ * @since 2026-01-08
  */
 public class ConfigurationContext {
 

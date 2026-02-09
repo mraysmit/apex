@@ -32,7 +32,7 @@ import java.io.InputStream;
  * ```
  *
  * @author APEX Sequential Processing Implementation
- * @since 1.0
+ * @since 2025-10-30
  */
 public class RulesEngineService {
 

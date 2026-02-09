@@ -36,7 +36,7 @@ import java.util.Objects;
  * operation definitions, error handling, and performance tuning.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-09-04
  * @version 1.0
  */
 public class DataSinkConfiguration {

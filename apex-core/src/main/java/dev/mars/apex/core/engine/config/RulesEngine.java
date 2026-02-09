@@ -297,7 +297,7 @@ public class RulesEngine {
      * @param resourcePath The classpath resource path (e.g., "config/test-config.yaml")
      * @return A configured RulesEngine ready to evaluate rules
      * @throws YamlConfigurationException if the resource cannot be found or loaded
-     * @since 2.1.0
+     * @since 2026-01-18
      */
     public static RulesEngine fromClasspath(String resourcePath) throws YamlConfigurationException {
         logger.info("Creating RulesEngine from classpath resource: {}", resourcePath);
@@ -492,7 +492,7 @@ public class RulesEngine {
      * @param registryPath The path to the scenario registry YAML file
      * @return A configured RulesEngine ready to evaluate scenarios
      * @throws YamlConfigurationException if the registry file cannot be loaded or parsed
-     * @since 3.0
+     * @since 2025-11-03
      * @see #evaluateScenario(String, Map)
      * @see #evaluateWithClassification(Map)
      * @see #asScenario()
@@ -570,7 +570,7 @@ public class RulesEngine {
      * {@link #fromScenarioRegistry(String)}.</p>
      *
      * @return The scenario registry map, or null if not a scenario-based engine
-     * @since 3.0
+     * @since 2025-11-03
      */
     public Map<String, ScenarioConfiguration> getScenarioRegistry() {
         return scenarioRegistry;
@@ -763,7 +763,7 @@ public class RulesEngine {
      *         warnings, review flags, and overall execution status
      * @throws IllegalStateException if the configuration does not contain a scenario
      * @throws NullPointerException if inputData is null
-     * @since 3.0
+     * @since 2025-11-03
      */
     public ScenarioExecutionResult evaluateScenario(Map<String, Object> inputData) {
         return scenarioEvaluationManager.evaluateScenario(inputData);
@@ -794,7 +794,7 @@ public class RulesEngine {
      * @throws IllegalArgumentException if scenarioId is not found in the registry
      * @throws IllegalStateException if the configuration does not contain a scenario registry
      * @throws NullPointerException if scenarioId or inputData is null
-     * @since 3.0
+     * @since 2025-11-03
      */
     public ScenarioExecutionResult evaluateScenario(String scenarioId, Map<String, Object> inputData) {
         return scenarioEvaluationManager.evaluateScenario(scenarioId, inputData);
@@ -829,7 +829,7 @@ public class RulesEngine {
      *         If no scenario matches, returns a result with status indicating no match found.
      * @throws IllegalStateException if the configuration does not contain a scenario registry
      * @throws NullPointerException if inputData is null
-     * @since 3.0
+     * @since 2025-11-03
      */
     public ScenarioExecutionResult evaluateWithClassification(Map<String, Object> inputData) {
         return scenarioEvaluationManager.evaluateWithClassification(inputData);
@@ -865,7 +865,7 @@ public class RulesEngine {
      *
      * @return A ScenarioEvaluator instance for fluent scenario evaluation
      * @throws IllegalStateException if the configuration does not contain scenarios
-     * @since 3.0
+     * @since 2025-11-03
      * @see ScenarioEvaluator
      */
     public ScenarioEvaluationManager.ScenarioEvaluator asScenario() {
@@ -975,7 +975,7 @@ public class RulesEngine {
      *   <li>Classification-based evaluation - for automatic scenario selection</li>
      * </ul>
      *
-     * @since 3.0
+     * @since 2026-01-08
      */
     private class ScenarioLookupStrategyImpl implements ScenarioEvaluationManager.ScenarioLookupStrategy {
         @Override
@@ -1029,7 +1029,7 @@ public class RulesEngine {
      * }</pre>
      *
      * @return A new RulesEngineBuilder instance
-     * @since 3.0
+     * @since 2026-01-08
      */
     public static RulesEngineBuilder builder() {
         return new RulesEngineBuilder();

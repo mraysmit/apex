@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  * various analysis results like missing files and circular dependencies.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-08-02
  */
 public class YamlDependencyGraph {
     

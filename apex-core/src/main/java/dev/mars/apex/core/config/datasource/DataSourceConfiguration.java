@@ -32,7 +32,7 @@ import java.util.Objects;
  * caching configuration, health checks, and authentication.
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-07-30
  * @version 1.0
  */
 public class DataSourceConfiguration {

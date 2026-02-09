@@ -23,7 +23,7 @@ import java.util.Map;
  * - Success/failure determination
  * 
  * @author APEX Sequential Processing Implementation
- * @since 1.0
+ * @since 2025-10-29
  * @version 1.0
  */
 public class SequentialProcessingResult {

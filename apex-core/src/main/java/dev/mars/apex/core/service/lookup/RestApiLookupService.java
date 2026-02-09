@@ -37,7 +37,7 @@ import java.util.*;
  * - Integration with existing REST API infrastructure
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-09-21
  * @version 1.0
  */
 public class RestApiLookupService extends LookupService {

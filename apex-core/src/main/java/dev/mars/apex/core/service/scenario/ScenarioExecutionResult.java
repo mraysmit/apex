@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
  * - PARTIAL_SUCCESS: Some stages succeeded, others failed with warnings
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 1.0.0
+ * @since 2025-09-27
  */
 public class ScenarioExecutionResult {
     

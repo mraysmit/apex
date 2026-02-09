@@ -37,7 +37,7 @@ import java.util.List;
  * Follows the same format as SchemaHtmlReportGenerator for consistency.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
- * @since 2.1
+ * @since 2026-01-13
  */
 public class SchemaDiffHtmlReportGenerator {
     private static final Logger logger = LoggerFactory.getLogger(SchemaDiffHtmlReportGenerator.class);
