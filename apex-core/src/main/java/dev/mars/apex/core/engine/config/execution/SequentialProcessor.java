@@ -29,7 +29,7 @@ import dev.mars.apex.core.service.enrichment.EnrichmentGroupFactory;
 import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.engine.UnifiedRuleEvaluator;
-import dev.mars.apex.core.service.transformation.YamlTransformationProcessor;
+import dev.mars.apex.core.service.transform.YamlTransformationProcessor;
 import dev.mars.apex.core.config.yaml.YamlConfigurationException;
 import dev.mars.apex.core.util.EnabledFilter;
 import org.slf4j.Logger;

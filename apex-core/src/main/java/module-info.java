@@ -105,7 +105,4 @@ module dev.mars.apex.core {
 
     // Pipeline configuration exports
     exports dev.mars.apex.core.config.pipeline;
-
-    // Transformation service exports
-    exports dev.mars.apex.core.service.transformation;
 }

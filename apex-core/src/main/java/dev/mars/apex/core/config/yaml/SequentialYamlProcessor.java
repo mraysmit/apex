@@ -492,8 +492,8 @@ public class SequentialYamlProcessor {
             logger.debug("Processing transformations section");
 
             // Create transformation processor
-            dev.mars.apex.core.service.transformation.YamlTransformationProcessor processor =
-                new dev.mars.apex.core.service.transformation.YamlTransformationProcessor();
+            dev.mars.apex.core.service.transform.YamlTransformationProcessor processor =
+                new dev.mars.apex.core.service.transform.YamlTransformationProcessor();
 
             // Process each transformation in document order
             List<YamlTransformation> transformations = context.getConfiguration().getConfiguration().getTransformations();
