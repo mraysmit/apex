@@ -15,35 +15,28 @@
  */
 package dev.mars.apex.core.engine.scenario;
 
-import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
-import dev.mars.apex.core.service.scenario.ScenarioStage;
 import dev.mars.apex.core.service.engine.ExpressionEvaluatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**
- * Manages scenario registry operations including lookup, classification matching,
- * and YAML parsing for scenario configurations.
+ * Manages scenario registry operations including lookup and classification matching.
  *
- * <p>This manager handles three core responsibilities:</p>
+ * <p>This manager handles two core responsibilities:</p>
  * <ul>
  *   <li><b>Scenario Lookup:</b> Retrieves scenarios by ID with validation (enabled check)</li>
  *   <li><b>Classification Matching:</b> Finds matching scenarios via SpEL-based classification rules</li>
- *   <li><b>YAML Parsing:</b> Parses scenario configurations from YAML with legacy/modern support</li>
  * </ul>
  *
  * <p><b>Design Pattern:</b> Extracted from RulesEngine to separate scenario registry concerns
- * from core rule execution. Supports both legacy (data-types, rule-configurations) and modern
- * (classification-rule, processing-stages) scenario formats.</p>
+ * from core rule execution.</p>
  *
  * @since 2026-01-22
  * @see ScenarioConfiguration
- * @see ScenarioStage
+ * @see ScenarioParser
  */
 public class ScenarioRegistryManager {
     private static final Logger logger = LoggerFactory.getLogger(ScenarioRegistryManager.class);
@@ -143,161 +136,5 @@ public class ScenarioRegistryManager {
 
         logger.warn("No matching scenario found for input data");
         return null;
-    }
-
-    /**
-     * Parse scenario configuration from YamlRuleConfiguration.
-     *
-     * @param yamlConfig The YAML configuration containing scenario data
-     * @return Parsed ScenarioConfiguration
-     * @throws IllegalStateException if scenario data is missing or invalid
-     */
-    @SuppressWarnings("unchecked")
-    public ScenarioConfiguration parseScenarioFromYaml(
-            YamlRuleConfiguration yamlConfig) {
-
-        if (!yamlConfig.hasScenario()) {
-            throw new IllegalStateException("YAML configuration does not contain a scenario section");
-        }
-
-        Object scenarioData = yamlConfig.getScenarioData();
-        if (!(scenarioData instanceof Map)) {
-            throw new IllegalStateException("Scenario data must be a Map");
-        }
-
-        Map<String, Object> scenarioMap = (Map<String, Object>) scenarioData;
-        return parseScenarioConfiguration(scenarioMap);
-    }
-
-    /**
-     * Parse scenario configuration from YAML data map.
-     *
-     * @param scenarioData The scenario data map from YAML
-     * @return Parsed ScenarioConfiguration
-     */
-    @SuppressWarnings("unchecked")
-    public ScenarioConfiguration parseScenarioConfiguration(
-            Map<String, Object> scenarioData) {
-
-        ScenarioConfiguration scenario = new ScenarioConfiguration();
-
-        scenario.setScenarioId((String) scenarioData.get("scenario-id"));
-        scenario.setName((String) scenarioData.get("name"));
-        scenario.setDescription((String) scenarioData.get("description"));
-
-        // Parse data types (legacy)
-        List<String> dataTypes = (List<String>) scenarioData.get("data-types");
-        if (dataTypes != null) {
-            scenario.setDataTypes(dataTypes);
-        }
-
-        // Parse classification rule (modern Map-based routing)
-        Map<String, Object> classificationRule =
-            (Map<String, Object>) scenarioData.get("classification-rule");
-        if (classificationRule != null) {
-            String condition = (String) classificationRule.get("condition");
-            String description = (String) classificationRule.get("description");
-
-            if (condition != null) {
-                scenario.setClassificationRuleCondition(condition);
-            }
-            if (description != null) {
-                scenario.setClassificationRuleDescription(description);
-            }
-        }
-
-        // Parse rule configurations (legacy)
-        List<String> ruleConfigurations =
-            (List<String>) scenarioData.get("rule-configurations");
-        if (ruleConfigurations != null) {
-            scenario.setRuleConfigurations(ruleConfigurations);
-        }
-
-        // Parse processing stages (modern stage-based configuration)
-        List<Map<String, Object>> processingStages =
-            (List<Map<String, Object>>) scenarioData.get("processing-stages");
-        if (processingStages != null) {
-            List<ScenarioStage> stages = new ArrayList<>();
-            for (Map<String, Object> stageData : processingStages) {
-                ScenarioStage stage = parseScenarioStage(stageData);
-                if (stage != null) {
-                    stages.add(stage);
-                }
-            }
-
-            // Preserve classification rule fields when creating stage-based scenario
-            String classificationCondition = scenario.getClassificationRuleCondition();
-            String classificationDescription = scenario.getClassificationRuleDescription();
-            String description = scenario.getDescription();
-
-            scenario = ScenarioConfiguration.withStages(
-                scenario.getScenarioId(), scenario.getName(), scenario.getDataTypes(), stages);
-            scenario.setDescription(description);
-            scenario.setClassificationRuleCondition(classificationCondition);
-            scenario.setClassificationRuleDescription(classificationDescription);
-        }
-
-        return scenario;
-    }
-
-    /**
-     * Parse a scenario stage from YAML data.
-     *
-     * @param stageData The stage data map from YAML
-     * @return Parsed ScenarioStage or null if parsing fails
-     */
-    @SuppressWarnings("unchecked")
-    public ScenarioStage parseScenarioStage(
-            Map<String, Object> stageData) {
-
-        try {
-            String stageName = (String) stageData.get("stage-name");
-            String configFile = (String) stageData.get("config-file");
-            Integer executionOrder = (Integer) stageData.get("execution-order");
-            String failurePolicy = (String) stageData.get("failure-policy");
-            String condition = (String) stageData.get("condition");
-            Boolean required = (Boolean) stageData.get("required");
-
-            if (stageName == null || configFile == null || executionOrder == null) {
-                logger.warn("Missing required stage fields: stage-name, config-file, or execution-order");
-                return null;
-            }
-
-            ScenarioStage stage =
-                new ScenarioStage(stageName, configFile, executionOrder);
-
-            if (failurePolicy != null) {
-                stage.setFailurePolicy(failurePolicy);
-            }
-
-            if (condition != null) {
-                stage.setCondition(condition);
-            }
-
-            if (required != null) {
-                stage.setRequired(required);
-            }
-
-            // Parse dependencies
-            List<String> dependsOn = (List<String>) stageData.get("depends-on");
-            if (dependsOn != null) {
-                for (String dependency : dependsOn) {
-                    stage.addDependency(dependency);
-                }
-            }
-
-            // Parse stage metadata
-            Map<String, Object> stageMetadata =
-                (Map<String, Object>) stageData.get("stage-metadata");
-            if (stageMetadata != null) {
-                stage.setStageMetadata(stageMetadata);
-            }
-
-            return stage;
-
-        } catch (Exception e) {
-            logger.error("Error parsing scenario stage: {}", e.getMessage());
-            return null;
-        }
     }
 }
