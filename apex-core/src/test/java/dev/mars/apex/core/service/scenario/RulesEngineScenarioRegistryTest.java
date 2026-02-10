@@ -237,9 +237,9 @@ class RulesEngineScenarioRegistryTest {
         
         Map<String, Object> inputData = new HashMap<>();
         
-        assertThrows(NullPointerException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             engine.evaluateScenario(null, inputData);
-        }, "Null scenario ID should throw NullPointerException");
+        }, "Null scenario ID should throw IllegalArgumentException");
     }
 
     @Test
@@ -248,9 +248,9 @@ class RulesEngineScenarioRegistryTest {
         String registryPath = createTestRegistryWithScenario();
         RulesEngine engine = RulesEngine.fromScenarioRegistry(registryPath);
         
-        assertThrows(NullPointerException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             engine.evaluateScenario("test-scenario", null);
-        }, "Null input data should throw NullPointerException");
+        }, "Null input data should throw IllegalArgumentException");
     }
 
     // ========================================

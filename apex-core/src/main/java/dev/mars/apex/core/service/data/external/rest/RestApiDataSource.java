@@ -376,7 +376,9 @@ public class RestApiDataSource implements ExternalDataSource {
         if (response.statusCode() >= 200 && response.statusCode() < 300) {
             return parseResponse(response.body());
         } else {
-            throw new RuntimeException("API call failed with status: " + response.statusCode());
+            throw new DataSourceException(DataSourceException.ErrorType.EXECUTION_ERROR,
+                "API call failed with status: " + response.statusCode(),
+                configuration.getName(), "executeApiCall", true);
         }
     }
     

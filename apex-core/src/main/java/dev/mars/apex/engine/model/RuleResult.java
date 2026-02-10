@@ -418,6 +418,36 @@ public class RuleResult implements Serializable {
         return builder().ruleName(ruleName).message(errorMessage).severity(severity).triggered(false).resultType(ResultType.ERROR).performanceMetrics(performanceMetrics).success(false).build();
     }
 
+    /**
+     * Create a new rule result for when an error occurred, with severity and error code.
+     * Phase 2 Enhancement: Supports structured error codes for programmatic error identification.
+     *
+     * @param ruleName The name of the rule/component that caused the error
+     * @param errorMessage The error message
+     * @param severity The severity level (ERROR, WARNING, INFO)
+     * @param errorCode The APEX error code (e.g., APEX-RULE-001)
+     * @return A new RuleResult instance
+     */
+    public static RuleResult errorWithCode(String ruleName, String errorMessage, String severity, String errorCode) {
+        return builder().ruleName(ruleName).message(errorMessage).severity(severity).errorCode(errorCode).triggered(false).resultType(ResultType.ERROR).success(false).build();
+    }
+
+    /**
+     * Create a new rule result for when an error occurred, with severity, error code, and performance metrics.
+     * Phase 2 Enhancement: Supports structured error codes for programmatic error identification.
+     *
+     * @param ruleName The name of the rule/component that caused the error
+     * @param errorMessage The error message
+     * @param severity The severity level (ERROR, WARNING, INFO)
+     * @param errorCode The APEX error code (e.g., APEX-RULE-001)
+     * @param performanceMetrics The performance metrics for this evaluation
+     * @return A new RuleResult instance
+     */
+    public static RuleResult errorWithCode(String ruleName, String errorMessage, String severity, String errorCode,
+                                           RulePerformanceMetrics performanceMetrics) {
+        return builder().ruleName(ruleName).message(errorMessage).severity(severity).errorCode(errorCode).triggered(false).resultType(ResultType.ERROR).performanceMetrics(performanceMetrics).success(false).build();
+    }
+
     // Factory methods for error and success codes
 
     /**
@@ -496,6 +526,20 @@ public class RuleResult implements Serializable {
      */
     public static RuleResult enrichmentFailure(List<String> failureMessages, Map<String, Object> enrichedData, String severity) {
         return builder().ruleName("enrichment").message("Required field enrichment failed").severity(severity).triggered(false).resultType(ResultType.ERROR).enrichedData(enrichedData).failureMessages(failureMessages).success(false).build();
+    }
+
+    /**
+     * Create a new rule result for failed enrichment evaluation with specified severity and error code.
+     * Phase 2 Enhancement: Supports structured error codes for programmatic error identification.
+     *
+     * @param failureMessages List of failure messages from enrichments
+     * @param enrichedData The enriched data map (may be partial if some enrichments failed)
+     * @param severity The severity level of the enrichment failure
+     * @param errorCode The APEX error code (e.g., APEX-ENRICH-001)
+     * @return A new RuleResult instance representing failed enrichment
+     */
+    public static RuleResult enrichmentFailure(List<String> failureMessages, Map<String, Object> enrichedData, String severity, String errorCode) {
+        return builder().ruleName("enrichment").message("Required field enrichment failed").severity(severity).errorCode(errorCode).triggered(false).resultType(ResultType.ERROR).enrichedData(enrichedData).failureMessages(failureMessages).success(false).build();
     }
 
     /**

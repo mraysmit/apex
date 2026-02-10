@@ -348,12 +348,13 @@ public class YamlEnrichmentProcessor {
 
                 return result != null && result;
             } catch (Exception e) {
-                // Enrichment condition evaluation failure - log error without stack trace
-                logger.error("Enrichment condition evaluation failed for '{}' - condition: '{}' - Error: {}",
+                // Condition evaluation failure is a configuration error — propagate to caller
+                // The caller's catch block will properly record this in failureMessages/RuleResult
+                logger.error("[APEX-ENRICH-005] Enrichment condition evaluation failed for '{}' - condition: '{}' - Error: {}",
                           enrichment.getId(), enrichment.getCondition(), e.getMessage());
-
-                // Return false to skip this enrichment (error will be reported in RuleResult)
-                return false;
+                logger.debug("Full stack trace for condition evaluation failure:", e);
+                throw new EnrichmentException(
+                    "Condition evaluation failed for enrichment '" + enrichment.getId() + "': " + e.getMessage(), e);
             }
         }
 
@@ -550,8 +551,10 @@ public class YamlEnrichmentProcessor {
                     logger.trace("Conditional mapping conditions not met, skipping");
                 }
             } catch (Exception e) {
-                logger.warn("Failed to process conditional mapping: {}", e.getMessage());
+                logger.error("[APEX-ENRICH-005] Failed to process conditional mapping: {}", e.getMessage());
                 logger.debug("Stack trace for conditional mapping processing failure:", e);
+                throw new EnrichmentException(
+                    "Conditional mapping processing failed: " + e.getMessage(), e);
             }
         }
 
@@ -689,8 +692,11 @@ public class YamlEnrichmentProcessor {
                 }
             } catch (Exception e) {
                 // ERROR: OR condition evaluation failure indicates configuration problem
-                logger.error("ERROR: Failed to evaluate OR condition: '" + rule.getCondition() +
-                          "' - Error: " + e.getMessage(), e);
+                logger.error("[APEX-ENRICH-005] Failed to evaluate OR condition: '{}' - Error: {}",
+                          rule.getCondition(), e.getMessage());
+                logger.debug("Full stack trace for OR condition evaluation failure:", e);
+                throw new EnrichmentException(
+                    "OR condition evaluation failed: '" + rule.getCondition() + "': " + e.getMessage(), e);
             }
         }
         return false; // No conditions were true
@@ -708,9 +714,11 @@ public class YamlEnrichmentProcessor {
                 }
             } catch (Exception e) {
                 // ERROR: AND condition evaluation failure indicates configuration problem
-                logger.error("ERROR: Failed to evaluate AND condition: '" + rule.getCondition() +
-                          "' - Error: " + e.getMessage(), e);
-                return false; // Treat evaluation errors as false for AND logic
+                logger.error("[APEX-ENRICH-005] Failed to evaluate AND condition: '{}' - Error: {}",
+                          rule.getCondition(), e.getMessage());
+                logger.debug("Full stack trace for AND condition evaluation failure:", e);
+                throw new EnrichmentException(
+                    "AND condition evaluation failed: '" + rule.getCondition() + "': " + e.getMessage(), e);
             }
         }
         return true; // All conditions were true
@@ -1670,17 +1678,18 @@ public class YamlEnrichmentProcessor {
                 logger.error("Enrichment processing completed with failures, severity: {}, failures: {}", 
                             aggregatedSeverity, failureMessages.size());
                 logger.debug("processEnrichmentsWithResult() failure messages: {}", failureMessages);
-                return RuleResult.enrichmentFailure(failureMessages, enrichedData, aggregatedSeverity);
+                return RuleResult.enrichmentFailure(failureMessages, enrichedData, aggregatedSeverity, "APEX-ENRICH-001");
             }
 
         } catch (Exception e) {
             logger.error("CRITICAL: Exception during enrichment processing: {}", e.getMessage());
             logger.debug("Full stack trace for enrichment exception:", e);
             // Business logic failure - return error result
-            return RuleResult.error(
+            return RuleResult.errorWithCode(
                 "enrichments",
                 "Enrichment processing failed: " + e.getMessage(),
-                SeverityConstants.ERROR
+                SeverityConstants.ERROR,
+                "APEX-ENRICH-999"
             );
         }
     }

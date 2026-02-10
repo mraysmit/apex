@@ -215,10 +215,11 @@ class YamlEnrichmentProcessorComprehensiveTest {
         RuleResult result = processor.processEnrichmentsWithResult(enrichments, testData, config);
 
         assertNotNull(result, "Result should not be null");
-        // Should succeed because enrichment is skipped (condition fails)
-        assertTrue(result.isSuccess(), "Invalid condition should skip enrichment but not fail");
+        // Phase 2: Invalid SpEL conditions now properly propagate as failures instead of being silently skipped
+        assertFalse(result.isSuccess(), "Invalid SpEL condition should now report failure (not silently skip)");
+        assertFalse(result.getFailureMessages().isEmpty(), "Should have failure messages for invalid SpEL condition");
         
-        logger.info("✅ TEST 3.1 PASSED: Invalid SpEL condition handled gracefully");
+        logger.info("✅ TEST 3.1 PASSED: Invalid SpEL condition properly reported as failure");
     }
 
     @Test

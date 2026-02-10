@@ -319,12 +319,14 @@ class RulesEngineClassificationRoutingTest {
     void testLevel4_NullDataHandling() {
         logger.info("=== Level 4: Null Data Handling ===");
         
-        // RulesEngine.evaluateWithClassification() throws NullPointerException for null data
-        assertThrows(NullPointerException.class, () -> {
+        // Phase 2: evaluateWithClassification() now validates null input with IllegalArgumentException
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             engine.evaluateWithClassification(null);
-        }, "Should throw NullPointerException for null data");
+        }, "Should throw IllegalArgumentException for null data");
         
-        logger.info("[OK] VERIFICATION: Null data throws NullPointerException as expected");
+        assertTrue(exception.getMessage().contains("null"), "Exception message should mention null");
+        
+        logger.info("[OK] VERIFICATION: Null data throws IllegalArgumentException as expected");
     }
     
     // ========================================

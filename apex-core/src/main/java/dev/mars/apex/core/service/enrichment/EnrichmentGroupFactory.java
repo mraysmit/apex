@@ -138,7 +138,8 @@ public class EnrichmentGroupFactory {
         }
 
         if (resolvingGroups.contains(groupId)) {
-            throw new RuntimeException("Circular dependency detected in enrichment groups: " + resolvingGroups + " -> " + groupId);
+            throw new EnrichmentConfigurationException(groupId,
+                "Circular dependency detected in enrichment groups: " + resolvingGroups + " -> " + groupId);
         }
 
         resolvingGroups.add(groupId);

@@ -3,6 +3,7 @@ package dev.mars.apex.engine.core;
 import dev.mars.apex.core.config.error.ErrorRecoveryConfig;
 import dev.mars.apex.core.config.pipeline.PipelineConfiguration;
 import dev.mars.apex.core.config.*;
+import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.config.exception.*;
 import dev.mars.apex.core.config.loader.*;
 import dev.mars.apex.core.config.model.*;
@@ -726,11 +727,13 @@ public class RulesEngine {
      */
     public RuleResult evaluate(Map<String, Object> inputData) {
         if (this.yamlConfig == null) {
-            throw new IllegalStateException(
-                "Cannot use simplified evaluate(Map) method - this RulesEngine was not created with a YAML configuration. " +
+            logger.error("[APEX-CFG-999] Cannot use simplified evaluate(Map) method - engine was not created with a YAML configuration");
+            List<String> failureMessages = new ArrayList<>();
+            failureMessages.add("Cannot use simplified evaluate(Map) method - this RulesEngine was not created with a YAML configuration. " +
                 "Either use RulesEngine.fromFile() or RulesEngine.fromYamlConfig() to create the engine, " +
-                "or use the explicit evaluate(YamlRuleConfiguration, Map) method instead."
-            );
+                "or use the explicit evaluate(YamlRuleConfiguration, Map) method instead.");
+            return RuleResult.evaluationFailure(failureMessages, inputData != null ? new HashMap<>(inputData) : new HashMap<>(),
+                "evaluation", "Engine not configured with YAML configuration", SeverityConstants.ERROR);
         }
 
         return evaluate(this.yamlConfig, inputData);

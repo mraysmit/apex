@@ -313,12 +313,14 @@ public class DataSourceManager implements DataSourceRegistryListener {
             try {
                 ExternalDataSource dataSource = registry.getDataSource(dataSourceName);
                 if (dataSource == null) {
-                    throw new RuntimeException("Data source not found: " + dataSourceName);
+                    throw new DataSourceResolutionException("Data source not found: " + dataSourceName);
                 }
                 
                 return dataSource.query(query, parameters);
+            } catch (DataSourceResolutionException e) {
+                throw e;
             } catch (Exception e) {
-                throw new RuntimeException("Async query failed", e);
+                throw new DataSourceResolutionException("Async query failed for data source '" + dataSourceName + "'", e);
             }
         }, queryExecutor);
     }

@@ -278,7 +278,7 @@ public class DataSourceRegistry {
                 try {
                     return createAndRegister(name, config);
                 } catch (DataSourceException e) {
-                    throw new RuntimeException(e);
+                    throw new DataSourceResolutionException("Failed to create data source: " + name, e);
                 } finally {
                     pendingCreations.remove(k);
                 }
@@ -292,7 +292,7 @@ public class DataSourceRegistry {
                 "Data source creation was interrupted: " + name, e);
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
-            if (cause instanceof RuntimeException && cause.getCause() instanceof DataSourceException) {
+            if (cause instanceof DataSourceResolutionException && cause.getCause() instanceof DataSourceException) {
                 throw (DataSourceException) cause.getCause();
             } else if (cause instanceof DataSourceException) {
                 throw (DataSourceException) cause;
@@ -394,7 +394,7 @@ public class DataSourceRegistry {
                 LOGGER.info("Creating new JDBC connection pool: {}", poolKey);
                 return JdbcTemplateFactory.createDataSource(config);
             } catch (DataSourceException e) {
-                throw new RuntimeException(e);
+                throw new DataSourceResolutionException("Failed to create JDBC connection pool: " + poolKey, e);
             }
         });
         
@@ -421,7 +421,7 @@ public class DataSourceRegistry {
                 LOGGER.info("Creating new HTTP client: {}", clientKey);
                 return RestTemplateFactory.createHttpClient(config);
             } catch (DataSourceException e) {
-                throw new RuntimeException(e);
+                throw new DataSourceResolutionException("Failed to create HTTP client: " + clientKey, e);
             }
         });
         

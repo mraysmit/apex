@@ -341,7 +341,7 @@ public class DataSourceFactory {
                         LOGGER.info("CACHE-MISS-DEBUG: Cache miss - creating NEW JDBC DataSource for key: {}", k);
                         return JdbcTemplateFactory.createDataSource(configuration);
                     } catch (DataSourceException e) {
-                        throw new RuntimeException(e);
+                        throw new DataSourceResolutionException("Failed to create JDBC DataSource for key: " + k, e);
                     }
                 });
             
@@ -370,7 +370,7 @@ public class DataSourceFactory {
                     try {
                         return RestTemplateFactory.createHttpClient(configuration);
                     } catch (DataSourceException e) {
-                        throw new RuntimeException(e);
+                        throw new DataSourceResolutionException("Failed to create HTTP client for key: " + k, e);
                     }
                 });
             

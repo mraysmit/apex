@@ -142,25 +142,26 @@ class RulesEngineStaticFactoryMethodsTest {
     }
 
     @Test
-    @DisplayName("evaluate(Map) should throw IllegalStateException when engine created without YAML config")
-    void testEvaluateThrowsExceptionWhenNoYamlConfig() {
+    @DisplayName("evaluate(Map) should return error RuleResult when engine created without YAML config")
+    void testEvaluateReturnsErrorWhenNoYamlConfig() {
         // Create engine using constructor (without YAML config)
         RulesEngineConfiguration config = new RulesEngineConfiguration();
         RulesEngine engine = new RulesEngine(config);
 
-        // Test: Simplified evaluate should throw exception
+        // Test: Simplified evaluate should return error RuleResult
         Map<String, Object> inputData = new HashMap<>();
         inputData.put("test", "value");
 
-        IllegalStateException exception = assertThrows(
-            IllegalStateException.class,
-            () -> engine.evaluate(inputData)
-        );
+        RuleResult result = engine.evaluate(inputData);
 
-        // Verify: Exception message is helpful
-        assertTrue(exception.getMessage().contains("Cannot use simplified evaluate(Map) method"));
-        assertTrue(exception.getMessage().contains("RulesEngine.fromFile()"));
-        assertTrue(exception.getMessage().contains("RulesEngine.fromYamlConfig()"));
+        // Phase 2: Returns RuleResult with failure details instead of throwing
+        assertNotNull(result, "Result should not be null");
+        assertFalse(result.isSuccess(), "Result should indicate failure");
+        assertFalse(result.getFailureMessages().isEmpty(), "Should have failure messages");
+        assertTrue(result.getFailureMessages().stream().anyMatch(m -> m.contains("Cannot use simplified evaluate(Map) method")),
+                  "Failure messages should explain the problem");
+        assertTrue(result.getFailureMessages().stream().anyMatch(m -> m.contains("RulesEngine.fromFile()")),
+                  "Failure messages should suggest using static factory methods");
     }
 
     @Test

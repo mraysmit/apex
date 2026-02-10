@@ -165,7 +165,7 @@ public class UnifiedRuleEvaluator {
                 logger.warn("Rule '{}' has no condition to evaluate", rule.getName());
                 RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition());
                 
-                return RuleResult.error(rule.getName(), "Rule has no condition to evaluate", rule.getSeverity(), metrics);
+                return RuleResult.errorWithCode(rule.getName(), "Rule has no condition to evaluate", rule.getSeverity(), "APEX-RULE-001", metrics);
             }
             
             // Parse and evaluate the SpEL expression
@@ -493,8 +493,10 @@ public class UnifiedRuleEvaluator {
         RulePerformanceMetrics finalMetrics = buildMetricsWithRecovery(metricsBuilder, rule, exception,
             recoveryAttempted, recoverySuccessful, recoveryStrategy, recoveryReason, recoveryTime);
 
+        // Classify error code based on exception type and message
+        String errorCode = classifyErrorCode(exception);
         
-        return RuleResult.error(rule.getName(), errorMessage, severity, finalMetrics);
+        return RuleResult.errorWithCode(rule.getName(), errorMessage, severity, errorCode, finalMetrics);
     }
 
     /**
@@ -771,6 +773,55 @@ public class UnifiedRuleEvaluator {
         }
     }
     
+    /**
+     * Classify the APEX error code based on the exception type and message.
+     * Maps SpEL exceptions and other errors to standardized APEX error codes from the error registry.
+     *
+     * @param exception The exception that occurred during rule evaluation
+     * @return The APEX error code (e.g., APEX-RULE-001, APEX-RULE-002)
+     */
+    private String classifyErrorCode(Exception exception) {
+        String message = exception.getMessage();
+        if (message == null) {
+            return "APEX-RULE-999";
+        }
+        
+        // EL1008E: Property or field not found
+        if (message.contains("EL1008E") || message.contains("Property or field") || message.contains("cannot be found")) {
+            return "APEX-RULE-002";
+        }
+        // EL1004E: Method not found
+        if (message.contains("EL1004E") || message.contains("Method call:")) {
+            return "APEX-RULE-005";
+        }
+        // EL1011E: Null context / undefined variable
+        if (message.contains("EL1011E") || message.contains("null context object")) {
+            return "APEX-RULE-004";
+        }
+        // EL1001E: Type conversion error
+        if (message.contains("EL1001E") || message.contains("Type conversion")) {
+            return "APEX-RULE-003";
+        }
+        // EL1030E: Operator overloading / arithmetic error
+        if (message.contains("EL1030E") || message.contains("divide by zero") || message.contains("Division by zero")) {
+            return "APEX-RULE-007";
+        }
+        // EL1041E: Access denied
+        if (message.contains("EL1041E") || message.contains("not accessible")) {
+            return "APEX-RULE-006";
+        }
+        // SpelParseException: expression syntax error
+        if (exception instanceof org.springframework.expression.spel.SpelParseException) {
+            return "APEX-RULE-001";
+        }
+        // SpelEvaluationException: generic evaluation error
+        if (exception instanceof org.springframework.expression.spel.SpelEvaluationException) {
+            return "APEX-RULE-001";
+        }
+        // Default: general rule error
+        return "APEX-RULE-999";
+    }
+
     /**
      * Create enhanced error message that provides helpful context about undefined variables.
      * Detects SpEL errors related to undefined/null variables and enhances the message.

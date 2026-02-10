@@ -217,7 +217,7 @@ public class DatabaseDataSource implements ExternalDataSource {
             throw DataSourceException.configurationError("Query cannot be null");
         }
         if (parameters == null) {
-            throw new NullPointerException("Parameters cannot be null");
+            throw DataSourceException.configurationError("Parameters cannot be null");
         }
 
         long startTime = System.currentTimeMillis();

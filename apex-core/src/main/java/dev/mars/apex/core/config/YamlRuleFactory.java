@@ -195,7 +195,7 @@ public class YamlRuleFactory {
      */
     @SuppressWarnings("unused") // Public API method for advanced users
     public RuleSet.GenericRuleSet createGenericRuleSet(String categoryName, List<YamlRule> yamlRules) {
-        logger.debug("Creating GenericRuleSet for category: " + categoryName + " with " + yamlRules.size() + " rules");
+        logger.info("Creating GenericRuleSet for category: " + categoryName + " with " + yamlRules.size() + " rules");
 
         // Validate category name using the same validation as the generic API
         if (categoryName == null || categoryName.trim().isEmpty()) {
@@ -254,12 +254,12 @@ public class YamlRuleFactory {
 
                 ruleSet.customRuleWithSeverity(name, condition, message, description, severity);
 
-                logger.debug("Added rule '" + name + "' with severity '" + severity + "' to GenericRuleSet for category: " + categoryName);
+                logger.info("Added rule '" + name + "' with severity '" + severity + "' to RuleSet for category: " + categoryName);
 
             } catch (Exception e) {
-                logger.warn("Failed to add rule '" + yamlRule.getName() +
+                logger.error("Failed to add rule '" + yamlRule.getName() +
                               "' to GenericRuleSet: " + e.getMessage());
-                throw new RuntimeException("Failed to create rule '" + yamlRule.getName() +
+                throw new IllegalStateException("Failed to create rule '" + yamlRule.getName() +
                                          "' in category '" + categoryName + "'", e);
             }
         }
@@ -302,7 +302,7 @@ public class YamlRuleFactory {
         String name = yamlCategory.getName();
         int priority = yamlCategory.getPriority() != null ? yamlCategory.getPriority() : 100;
 
-        logger.debug("Creating category: " + name + " with priority: " + priority);
+        logger.info("Creating category: " + name + " with priority: " + priority);
 
         return new Category(name, priority);
     }
@@ -316,7 +316,7 @@ public class YamlRuleFactory {
      * @return A Rule object with full metadata
      */
     public Rule createRuleWithMetadata(YamlRule yamlRule) {
-        logger.debug("Creating rule with metadata: " + yamlRule.getId() + " (" + yamlRule.getName() + ")");
+        logger.info("Creating rule with metadata: " + yamlRule.getId() + " (" + yamlRule.getName() + ")");
 
         // Determine category
         String categoryName = yamlRule.getCategory() != null ? yamlRule.getCategory() : "default";

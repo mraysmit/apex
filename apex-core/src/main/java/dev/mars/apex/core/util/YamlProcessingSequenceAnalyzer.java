@@ -96,7 +96,7 @@ public class YamlProcessingSequenceAnalyzer {
 
             return new ProcessingSequenceReport(yamlFilePath, configurationSections, originalSequence, plannedSequence, filteredItems);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to analyze YAML file: " + yamlFilePath, e);
+            throw new IllegalStateException("Failed to analyze YAML file: " + yamlFilePath, e);
         }
     }
     
@@ -145,7 +145,7 @@ public class YamlProcessingSequenceAnalyzer {
 
             return new ProcessingSequenceReport(identifier, configurationSections, originalSequence, plannedSequence, filteredItems);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to analyze YAML content: " + identifier, e);
+            throw new IllegalStateException("Failed to analyze YAML content: " + identifier, e);
         }
     }
 

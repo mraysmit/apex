@@ -101,7 +101,7 @@ public class YamlDependencyAnalyzer {
                 graph.getTotalFiles(), graph.getMaxDepth());
         } catch (Exception e) {
             logger.error("Failed to analyze YAML dependencies for: {}", yamlFilePath, e);
-            throw new RuntimeException("YAML dependency analysis failed", e);
+            throw new IllegalStateException("YAML dependency analysis failed for: " + yamlFilePath, e);
         }
         
         return graph;
@@ -404,7 +404,7 @@ public class YamlDependencyAnalyzer {
                 filePath, depth
             );
             logger.error(errorMsg);
-            throw new RuntimeException(errorMsg);
+            throw new IllegalStateException(errorMsg);
         } else if (depth >= 3) {
             logger.warn(
                 "Component nesting depth warning: Component '{}' is at depth {}. " +

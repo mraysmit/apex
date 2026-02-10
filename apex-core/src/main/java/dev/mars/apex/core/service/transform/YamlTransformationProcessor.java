@@ -160,10 +160,11 @@ public class YamlTransformationProcessor {
                 logger.debug("Full stack trace for transformation failure:", e);
 
                 // Return error result immediately (fail-fast behavior)
-                return RuleResult.error(
+                return RuleResult.errorWithCode(
                     "transformation:" + transformation.getId(),
                     "Transformation processing failed: " + e.getMessage(),
-                    SeverityConstants.ERROR
+                    SeverityConstants.ERROR,
+                    classifyTransformationErrorCode(e)
                 );
             }
         }
@@ -195,7 +196,7 @@ public class YamlTransformationProcessor {
     public RuleResult processTransformationWithResult(YamlTransformation transformation, Object targetObject) {
         if (transformation == null) {
             logger.error("Null transformation provided");
-            return RuleResult.error("transformation:null", "Null transformation provided", SeverityConstants.ERROR);
+            return RuleResult.errorWithCode("transformation:null", "Null transformation provided", SeverityConstants.ERROR, "APEX-TRANS-005");
         }
 
         logger.debug("Processing single transformation with result tracking: {}", transformation.getId());
@@ -235,12 +236,42 @@ public class YamlTransformationProcessor {
         } catch (Exception e) {
             logger.error("CRITICAL: Transformation failed: {} - {}", transformation.getId(), e.getMessage());
             logger.debug("Full stack trace for transformation failure:", e);
-            return RuleResult.error(
+            return RuleResult.errorWithCode(
                 "transformation:" + transformation.getId(),
                 "Transformation processing failed: " + e.getMessage(),
-                SeverityConstants.ERROR
+                SeverityConstants.ERROR,
+                classifyTransformationErrorCode(e)
             );
         }
+    }
+
+    /**
+     * Classify the APEX error code based on the transformation exception type and message.
+     * Maps exceptions to standardized APEX-TRANS error codes from the error registry.
+     *
+     * @param exception The exception that occurred during transformation
+     * @return The APEX error code (e.g., APEX-TRANS-001, APEX-TRANS-002)
+     */
+    private String classifyTransformationErrorCode(Exception exception) {
+        if (exception instanceof dev.mars.apex.core.exception.ApexTransformationException ate) {
+            return switch (ate.getErrorType()) {
+                case EXPRESSION_ERROR -> "APEX-TRANS-001";
+                case TYPE_CONVERSION_ERROR -> "APEX-TRANS-002";
+                case CONFIGURATION_ERROR -> "APEX-TRANS-005";
+                default -> "APEX-TRANS-999";
+            };
+        }
+        String message = exception.getMessage();
+        if (message == null) {
+            return "APEX-TRANS-999";
+        }
+        if (message.contains("EL1004E") || message.contains("EL1008E") || message.contains("expression")) {
+            return "APEX-TRANS-001";
+        }
+        if (message.contains("Type conversion") || message.contains("cannot convert")) {
+            return "APEX-TRANS-002";
+        }
+        return "APEX-TRANS-999";
     }
 
     /**
@@ -264,9 +295,18 @@ public class YamlTransformationProcessor {
                 Boolean result = conditionExpr.getValue(context, Boolean.class);
                 return result != null && result;
             } catch (Exception e) {
-                logger.warn("Failed to evaluate transformation condition for {}: {}", 
+                // Condition evaluation failure is a configuration error — propagate to caller
+                // The caller's catch block will properly record this in RuleResult
+                logger.error("[APEX-TRANS-006] Failed to evaluate transformation condition for {}: {}", 
                     transformation.getId(), e.getMessage());
-                return false;
+                logger.debug("Full stack trace for condition evaluation failure:", e);
+                throw new dev.mars.apex.core.exception.ApexTransformationException(
+                    dev.mars.apex.core.exception.ApexTransformationException.ErrorType.EXPRESSION_ERROR,
+                    transformation.getId(),
+                    transformation.getCondition(),
+                    "Condition evaluation failed for transformation '" + transformation.getId() + "': " + e.getMessage(),
+                    null,
+                    e);
             }
         }
         
@@ -286,7 +326,7 @@ public class YamlTransformationProcessor {
         if (type == null) {
             String errorMsg = "Transformation " + transformation.getId() + " has no type specified";
             logger.error("{}", errorMsg);
-            throw new IllegalArgumentException(errorMsg);
+            throw ApexTransformationException.configurationError(transformation.getId(), errorMsg);
         }
 
         return switch (type) {
@@ -296,7 +336,7 @@ public class YamlTransformationProcessor {
             default -> {
                 String errorMsg = "Unknown transformation type: " + type + " for transformation " + transformation.getId();
                 logger.error("{}", errorMsg);
-                throw new IllegalArgumentException(errorMsg);
+                throw ApexTransformationException.configurationError(transformation.getId(), errorMsg);
             }
         };
     }

@@ -107,7 +107,7 @@ public class RuleSet {
         try {
             return ruleSetClass.getDeclaredConstructor(String.class).newInstance(categoryName);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to create rule set of type " + ruleSetClass.getSimpleName(), e);
+            throw new IllegalStateException("Failed to create rule set of type " + ruleSetClass.getSimpleName(), e);
         }
     }
 

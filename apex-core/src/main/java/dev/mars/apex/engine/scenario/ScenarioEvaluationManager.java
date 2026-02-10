@@ -78,11 +78,11 @@ public class ScenarioEvaluationManager {
      * @param inputData The input data to process through the scenario stages
      * @return ScenarioExecutionResult containing the results of all stage executions
      * @throws IllegalStateException if the configuration does not contain a scenario
-     * @throws NullPointerException if inputData is null
+     * @throws IllegalArgumentException if inputData is null
      */
     public ScenarioExecutionResult evaluateScenario(Map<String, Object> inputData) {
         if (inputData == null) {
-            throw new NullPointerException("Input data cannot be null");
+            throw new IllegalArgumentException("Input data cannot be null");
         }
 
         if (this.yamlConfig == null) {
@@ -126,14 +126,14 @@ public class ScenarioEvaluationManager {
      * @return ScenarioExecutionResult containing the results of all stage executions
      * @throws IllegalArgumentException if scenarioId is not found in the registry
      * @throws IllegalStateException if the configuration does not contain a scenario registry
-     * @throws NullPointerException if scenarioId or inputData is null
+     * @throws IllegalArgumentException if scenarioId or inputData is null
      */
     public ScenarioExecutionResult evaluateScenario(String scenarioId, Map<String, Object> inputData) {
         if (scenarioId == null) {
-            throw new NullPointerException("Scenario ID cannot be null");
+            throw new IllegalArgumentException("Scenario ID cannot be null");
         }
         if (inputData == null) {
-            throw new NullPointerException("Input data cannot be null");
+            throw new IllegalArgumentException("Input data cannot be null");
         }
 
         if (this.scenarioRegistry == null) {
@@ -167,11 +167,11 @@ public class ScenarioEvaluationManager {
      * @param inputData The input data to classify and process
      * @return ScenarioExecutionResult containing the results of the matched scenario execution
      * @throws IllegalStateException if the configuration does not contain a scenario registry or no match found
-     * @throws NullPointerException if inputData is null
+     * @throws IllegalArgumentException if inputData is null
      */
     public ScenarioExecutionResult evaluateWithClassification(Map<String, Object> inputData) {
         if (inputData == null) {
-            throw new NullPointerException("Input data cannot be null");
+            throw new IllegalArgumentException("Input data cannot be null");
         }
 
         if (this.scenarioRegistry == null) {
