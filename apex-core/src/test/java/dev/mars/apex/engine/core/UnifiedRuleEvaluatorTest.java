@@ -3,6 +3,8 @@ package dev.mars.apex.engine.core;
 import dev.mars.apex.engine.model.Rule;
 import dev.mars.apex.engine.core.RuleBuilder;
 import dev.mars.apex.engine.model.RuleResult;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
@@ -14,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.Arrays;
@@ -43,6 +46,15 @@ class UnifiedRuleEvaluatorTest {
     private UnifiedRuleEvaluator evaluator;
     private Map<String, Object> testFacts;
     
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(UnifiedRuleEvaluatorTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] UnifiedRuleEvaluatorTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(UnifiedRuleEvaluatorTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: SpEL failures, missing properties, invalid expressions");
+    }
+
     @BeforeEach
     void setUp() {
         evaluator = new UnifiedRuleEvaluator();
@@ -536,5 +548,12 @@ class UnifiedRuleEvaluatorTest {
         assertFalse(result.isTriggered());
         assertEquals("Under 1000.0", result.getMessage(),
                 "NO_MATCH should resolve #{} in no-match-message");
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(UnifiedRuleEvaluatorTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] UnifiedRuleEvaluatorTest intentional error tests completed");
+        MDC.remove("testContext");
     }
 }

@@ -26,6 +26,7 @@ import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
 import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -409,10 +410,18 @@ class RulesEnginePipelineIntegrationTest {
 
         @BeforeAll
         static void classSetUp() {
+            MDC.put("testContext", "[EXPECTED] ");
             LoggerFactory.getLogger(RulesEnginePipelineIntegrationTest.class)
                 .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] ErrorHandlingTests intentionally triggers ERROR/WARN logs");
             LoggerFactory.getLogger(RulesEnginePipelineIntegrationTest.class)
                 .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: invalid data source, connection failures, pipeline failures");
+        }
+
+        @AfterAll
+        static void classTearDown() {
+            LoggerFactory.getLogger(RulesEnginePipelineIntegrationTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] ErrorHandlingTests intentional error tests completed");
+            MDC.remove("testContext");
         }
 
         @Test

@@ -19,6 +19,8 @@ package dev.mars.apex.core.service.scenario;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
 import dev.mars.apex.core.service.scenario.StageExecutionResult;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
@@ -30,6 +32,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.HashMap;
 import java.util.List;
@@ -69,9 +72,25 @@ class RulesEngineClassificationRoutingTest {
     private static final Logger logger = LoggerFactory.getLogger(RulesEngineClassificationRoutingTest.class);
     
     private static final String REGISTRY_PATH = 
-        "src/test/java/dev/mars/apex/core/service/scenario/RulesEngineClassificationRoutingTest-registry.yaml";
+        "dev/mars/apex/core/service/scenario/RulesEngineClassificationRoutingTest-registry.yaml";
     
     private RulesEngine engine;
+
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(RulesEngineClassificationRoutingTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] RulesEngineClassificationRoutingTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(RulesEngineClassificationRoutingTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: no-match IllegalStateException, null NullPointerException");
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(RulesEngineClassificationRoutingTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] RulesEngineClassificationRoutingTest intentional error tests completed");
+        MDC.remove("testContext");
+    }
     
     @BeforeEach
     void setUp() throws Exception {

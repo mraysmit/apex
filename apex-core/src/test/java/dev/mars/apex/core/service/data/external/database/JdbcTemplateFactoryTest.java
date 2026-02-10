@@ -28,6 +28,7 @@ import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
 import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -58,6 +59,15 @@ import static org.junit.jupiter.api.Assertions.*;
 class JdbcTemplateFactoryTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JdbcTemplateFactoryTest.class);
+
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(JdbcTemplateFactoryTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] JdbcTemplateFactoryTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(JdbcTemplateFactoryTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: connection failures, non-existent hosts, invalid JDBC configurations");
+    }
 
     @BeforeEach
     void setUp() {
@@ -511,5 +521,12 @@ class JdbcTemplateFactoryTest {
             current = current.getCause();
         }
         return false;
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(JdbcTemplateFactoryTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] JdbcTemplateFactoryTest intentional error tests completed");
+        MDC.remove("testContext");
     }
 }

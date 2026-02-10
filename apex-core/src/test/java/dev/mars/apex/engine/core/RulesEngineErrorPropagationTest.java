@@ -4,6 +4,8 @@ import dev.mars.apex.core.config.model.YamlEnrichment;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.config.model.YamlTransformation;
 import dev.mars.apex.engine.model.RuleResult;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.*;
 
@@ -38,6 +41,22 @@ import static org.junit.jupiter.api.Assertions.*;
 class RulesEngineErrorPropagationTest {
 
     private static final Logger logger = LoggerFactory.getLogger(RulesEngineErrorPropagationTest.class);
+
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(RulesEngineErrorPropagationTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] RulesEngineErrorPropagationTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(RulesEngineErrorPropagationTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: missing datasource, invalid expressions, enrichment/transformation failures");
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(RulesEngineErrorPropagationTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] RulesEngineErrorPropagationTest intentional error tests completed");
+        MDC.remove("testContext");
+    }
 
     private RulesEngine rulesEngine;
 

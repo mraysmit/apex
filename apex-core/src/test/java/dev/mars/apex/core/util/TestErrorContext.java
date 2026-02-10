@@ -18,6 +18,7 @@ package dev.mars.apex.core.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.concurrent.Callable;
 import java.util.function.Supplier;
@@ -74,6 +75,12 @@ public final class TestErrorContext {
     /** Prefix for validation test messages in test logs */
     public static final String VALIDATION_PREFIX = "[TEST-VALIDATION]";
     
+    /** MDC key used to tag all log output within expected-error blocks */
+    public static final String MDC_KEY = "testContext";
+    
+    /** MDC value that appears in every log line inside expected-error/warning blocks */
+    public static final String MDC_EXPECTED = "[EXPECTED] ";
+    
     private TestErrorContext() {
         // Utility class - no instantiation
     }
@@ -90,6 +97,7 @@ public final class TestErrorContext {
      */
     public static <E extends Throwable> E expectingException(String description, ThrowingRunnable operation) {
         LOGGER.info("{} Triggering intentional error: {}", EXPECTED_ERROR_PREFIX, description);
+        MDC.put(MDC_KEY, MDC_EXPECTED);
         
         try {
             operation.run();
@@ -105,6 +113,8 @@ public final class TestErrorContext {
             @SuppressWarnings("unchecked")
             E result = (E) e;
             return result;
+        } finally {
+            MDC.remove(MDC_KEY);
         }
     }
     
@@ -120,12 +130,17 @@ public final class TestErrorContext {
     public static <T> T expectingErrorResult(String description, Supplier<T> operation) {
         LOGGER.info("{} Triggering operation expected to produce error result: {}", 
                    EXPECTED_WARNING_PREFIX, description);
+        MDC.put(MDC_KEY, MDC_EXPECTED);
         
-        T result = operation.get();
-        
-        LOGGER.info("{} Operation completed - verify result indicates expected error", 
-                   EXPECTED_WARNING_PREFIX);
-        return result;
+        try {
+            T result = operation.get();
+            
+            LOGGER.info("{} Operation completed - verify result indicates expected error", 
+                       EXPECTED_WARNING_PREFIX);
+            return result;
+        } finally {
+            MDC.remove(MDC_KEY);
+        }
     }
     
     /**
@@ -139,11 +154,16 @@ public final class TestErrorContext {
     public static <T> T expectingWarning(String description, Supplier<T> operation) {
         LOGGER.info("{} Triggering operation expected to produce warning: {}", 
                    EXPECTED_WARNING_PREFIX, description);
+        MDC.put(MDC_KEY, MDC_EXPECTED);
         
-        T result = operation.get();
-        
-        LOGGER.info("{} Operation completed with expected warning", EXPECTED_WARNING_PREFIX);
-        return result;
+        try {
+            T result = operation.get();
+            
+            LOGGER.info("{} Operation completed with expected warning", EXPECTED_WARNING_PREFIX);
+            return result;
+        } finally {
+            MDC.remove(MDC_KEY);
+        }
     }
     
     /**
@@ -154,6 +174,7 @@ public final class TestErrorContext {
      */
     public static void validation(String description, Runnable operation) {
         LOGGER.info("{} Starting validation: {}", VALIDATION_PREFIX, description);
+        MDC.put(MDC_KEY, MDC_EXPECTED);
         
         try {
             operation.run();
@@ -162,6 +183,8 @@ public final class TestErrorContext {
             LOGGER.error("{} Validation failed unexpectedly: {} - {}", 
                         VALIDATION_PREFIX, description, e.getMessage());
             throw e;
+        } finally {
+            MDC.remove(MDC_KEY);
         }
     }
     
@@ -177,6 +200,7 @@ public final class TestErrorContext {
      */
     public static <T> Throwable expectingExceptionFrom(String description, Callable<T> operation) {
         LOGGER.info("{} Triggering intentional error from callable: {}", EXPECTED_ERROR_PREFIX, description);
+        MDC.put(MDC_KEY, MDC_EXPECTED);
         
         try {
             T result = operation.call();
@@ -190,6 +214,8 @@ public final class TestErrorContext {
             LOGGER.info("{} Error correctly caught: {} - {}", EXPECTED_ERROR_PREFIX, 
                        e.getClass().getSimpleName(), e.getMessage());
             return e;
+        } finally {
+            MDC.remove(MDC_KEY);
         }
     }
     
@@ -210,6 +236,7 @@ public final class TestErrorContext {
         
         LOGGER.info("{} Expecting {} to be thrown: {}", 
                    EXPECTED_ERROR_PREFIX, expectedType.getSimpleName(), description);
+        MDC.put(MDC_KEY, MDC_EXPECTED);
         
         try {
             operation.run();
@@ -230,6 +257,8 @@ public final class TestErrorContext {
                 LOGGER.error("{} TEST FAILURE - {}", EXPECTED_ERROR_PREFIX, errorMsg);
                 throw new AssertionError(errorMsg, e);
             }
+        } finally {
+            MDC.remove(MDC_KEY);
         }
     }
     
@@ -254,6 +283,7 @@ public final class TestErrorContext {
     public static void withExpectedErrors(String description, ThrowingRunnable operation) {
         LOGGER.info("{} START - Executing code that triggers intentional errors: {}", 
                    EXPECTED_ERROR_PREFIX, description);
+        MDC.put(MDC_KEY, MDC_EXPECTED);
         
         try {
             operation.run();
@@ -266,6 +296,8 @@ public final class TestErrorContext {
                 throw (RuntimeException) e;
             }
             throw new RuntimeException(e);
+        } finally {
+            MDC.remove(MDC_KEY);
         }
     }
     

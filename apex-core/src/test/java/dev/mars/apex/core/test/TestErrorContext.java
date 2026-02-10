@@ -18,6 +18,7 @@ package dev.mars.apex.core.test;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 /**
  * Utility class for marking intentional test errors in log output.
@@ -58,6 +59,12 @@ public class TestErrorContext {
      */
     public static final String VALIDATION_PREFIX = "[TEST-VALIDATION]";
     
+    /** MDC key used to tag all log output within expected-error blocks */
+    public static final String MDC_KEY = "testContext";
+    
+    /** MDC value that appears in every log line inside expected-error/warning blocks */
+    public static final String MDC_EXPECTED = "[EXPECTED] ";
+    
     /**
      * Functional interface for code that may throw exceptions.
      */
@@ -75,9 +82,11 @@ public class TestErrorContext {
      */
     public static void withExpectedErrors(String description, ThrowingRunnable runnable) throws Exception {
         logger.info("{} Starting: {}", EXPECTED_ERROR_PREFIX, description);
+        MDC.put(MDC_KEY, MDC_EXPECTED);
         try {
             runnable.run();
         } finally {
+            MDC.remove(MDC_KEY);
             logger.info("{} Completed: {}", EXPECTED_ERROR_PREFIX, description);
         }
     }
@@ -90,9 +99,11 @@ public class TestErrorContext {
      */
     public static void withExpectedErrors(String description, Runnable runnable) {
         logger.info("{} Starting: {}", EXPECTED_ERROR_PREFIX, description);
+        MDC.put(MDC_KEY, MDC_EXPECTED);
         try {
             runnable.run();
         } finally {
+            MDC.remove(MDC_KEY);
             logger.info("{} Completed: {}", EXPECTED_ERROR_PREFIX, description);
         }
     }
@@ -106,9 +117,11 @@ public class TestErrorContext {
      */
     public static void withExpectedWarnings(String description, ThrowingRunnable runnable) throws Exception {
         logger.info("{} Starting: {}", EXPECTED_WARNING_PREFIX, description);
+        MDC.put(MDC_KEY, MDC_EXPECTED);
         try {
             runnable.run();
         } finally {
+            MDC.remove(MDC_KEY);
             logger.info("{} Completed: {}", EXPECTED_WARNING_PREFIX, description);
         }
     }
@@ -121,9 +134,11 @@ public class TestErrorContext {
      */
     public static void withExpectedWarnings(String description, Runnable runnable) {
         logger.info("{} Starting: {}", EXPECTED_WARNING_PREFIX, description);
+        MDC.put(MDC_KEY, MDC_EXPECTED);
         try {
             runnable.run();
         } finally {
+            MDC.remove(MDC_KEY);
             logger.info("{} Completed: {}", EXPECTED_WARNING_PREFIX, description);
         }
     }
@@ -137,9 +152,11 @@ public class TestErrorContext {
      */
     public static void withValidation(String description, ThrowingRunnable runnable) throws Exception {
         logger.info("{} Starting: {}", VALIDATION_PREFIX, description);
+        MDC.put(MDC_KEY, MDC_EXPECTED);
         try {
             runnable.run();
         } finally {
+            MDC.remove(MDC_KEY);
             logger.info("{} Completed: {}", VALIDATION_PREFIX, description);
         }
     }
@@ -152,9 +169,11 @@ public class TestErrorContext {
      */
     public static void withValidation(String description, Runnable runnable) {
         logger.info("{} Starting: {}", VALIDATION_PREFIX, description);
+        MDC.put(MDC_KEY, MDC_EXPECTED);
         try {
             runnable.run();
         } finally {
+            MDC.remove(MDC_KEY);
             logger.info("{} Completed: {}", VALIDATION_PREFIX, description);
         }
     }

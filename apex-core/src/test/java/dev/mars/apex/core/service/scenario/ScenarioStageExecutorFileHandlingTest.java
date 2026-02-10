@@ -17,6 +17,8 @@ package dev.mars.apex.core.service.scenario;
  */
 
 import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
@@ -28,6 +30,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.*;
 
@@ -59,6 +62,15 @@ class ScenarioStageExecutorFileHandlingTest {
     
     private ScenarioStageExecutor stageExecutor;
     private YamlConfigurationLoader configLoader;
+
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(ScenarioStageExecutorFileHandlingTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] ScenarioStageExecutorFileHandlingTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(ScenarioStageExecutorFileHandlingTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: missing config files, invalid file paths, file loading errors");
+    }
 
     @BeforeEach
     void setUp() {
@@ -355,6 +367,13 @@ class ScenarioStageExecutorFileHandlingTest {
         // Then: Should return failure result
         assertNotNull(result, "Should return ScenarioExecutionResult");
         assertFalse(result.isSuccessful(), "Should indicate failure");
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(ScenarioStageExecutorFileHandlingTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] ScenarioStageExecutorFileHandlingTest intentional error tests completed");
+        MDC.remove("testContext");
     }
 }
 

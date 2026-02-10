@@ -974,6 +974,12 @@ public class ScenarioRegistryLoader {
             return new ResolvedPath(classpathResource, true);
         }
         
+        // 2.5. Try the raw path directly as a classpath resource
+        if (classpathResourceExists(configFile)) {
+            logger.debug("Found config file as direct classpath resource: {}", configFile);
+            return new ResolvedPath(configFile, true);
+        }
+        
         // 3. Try registry-level filesystem paths
         for (String searchPath : searchPathConfig.filesystemPaths) {
             String candidate = combinePath(searchPath, configFile);

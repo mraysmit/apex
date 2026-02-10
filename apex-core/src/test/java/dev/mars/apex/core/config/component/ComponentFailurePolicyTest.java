@@ -27,6 +27,7 @@ import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
 import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -56,6 +57,7 @@ class ComponentFailurePolicyTest {
 
     @BeforeAll
     static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
         // Mark that this test class intentionally triggers ERROR/WARN logs
         logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-START] ComponentFailurePolicyTest intentionally triggers ERROR/WARN logs");
         logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: missing file errors from ScenarioRegistryLoader, validation failures");
@@ -70,6 +72,13 @@ class ComponentFailurePolicyTest {
     void tearDown() {
         logger.info("=".repeat(80));
         logger.info("");
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(ComponentFailurePolicyTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] ComponentFailurePolicyTest intentional error tests completed");
+        MDC.remove("testContext");
     }
 
     @Test

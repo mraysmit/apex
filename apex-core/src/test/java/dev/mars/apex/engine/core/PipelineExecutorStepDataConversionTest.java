@@ -9,6 +9,7 @@ import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
 import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.*;
 
@@ -56,6 +57,7 @@ public class PipelineExecutorStepDataConversionTest {
 
     @BeforeAll
     public static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
         logger.info("[TEST-EXPECTED-ERROR] PipelineExecutorStepDataConversionTest - intentionally uses empty databases");
         logger.info("[TEST-EXPECTED-ERROR] Expected errors: table not found, no data, load failures, pipeline execution failed");
         logger.info("========================================================================");
@@ -71,6 +73,7 @@ public class PipelineExecutorStepDataConversionTest {
         logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-END] PipelineExecutorStepDataConversionTest");
         logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-END] All ERROR messages above were EXPECTED");
         logger.info("========================================================================");
+        MDC.remove("testContext");
     }
 
     @BeforeEach

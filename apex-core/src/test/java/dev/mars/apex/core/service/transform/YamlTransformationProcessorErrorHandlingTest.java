@@ -2,6 +2,8 @@ package dev.mars.apex.core.service.transform;
 
 import dev.mars.apex.core.config.model.YamlTransformation;
 import dev.mars.apex.engine.model.RuleResult;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
@@ -13,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,6 +41,15 @@ class YamlTransformationProcessorErrorHandlingTest {
 
     private static final Logger logger = LoggerFactory.getLogger(YamlTransformationProcessorErrorHandlingTest.class);
     private YamlTransformationProcessor transformationProcessor;
+
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(YamlTransformationProcessorErrorHandlingTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] YamlTransformationProcessorErrorHandlingTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(YamlTransformationProcessorErrorHandlingTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: invalid SpEL expressions, division by zero, null object access");
+    }
 
     @BeforeEach
     void setUp() {
@@ -199,5 +211,12 @@ class YamlTransformationProcessorErrorHandlingTest {
      *
      * These tests verify that the error handling code works correctly in various scenarios.
      */
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(YamlTransformationProcessorErrorHandlingTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] YamlTransformationProcessorErrorHandlingTest intentional error tests completed");
+        MDC.remove("testContext");
+    }
 }
 

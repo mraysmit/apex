@@ -31,6 +31,7 @@ import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
 import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -76,6 +77,7 @@ class ConfigurationContextTest {
 
     @BeforeAll
     static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
         Logger logger = LoggerFactory.getLogger(ConfigurationContextTest.class);
         logger.info("================================================================================");
         logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-START] ConfigurationContextTest");
@@ -91,6 +93,7 @@ class ConfigurationContextTest {
         logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-END] ConfigurationContextTest");
         logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-END] All ERROR messages above were EXPECTED and tested intentionally");
         logger.info("================================================================================");
+        MDC.remove("testContext");
     }
 
     @BeforeEach

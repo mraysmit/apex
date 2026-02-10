@@ -3,6 +3,8 @@ package dev.mars.apex.engine.core;
 import dev.mars.apex.engine.model.Rule;
 import dev.mars.apex.engine.core.RuleBuilder;
 import dev.mars.apex.engine.model.RuleResult;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
@@ -14,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.*;
 
@@ -33,6 +36,22 @@ import static org.junit.jupiter.api.Assertions.*;
 class RulesEngineSpelErrorHandlingTest {
     
     private static final Logger logger = LoggerFactory.getLogger(RulesEngineSpelErrorHandlingTest.class);
+
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(RulesEngineSpelErrorHandlingTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] RulesEngineSpelErrorHandlingTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(RulesEngineSpelErrorHandlingTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: SpEL property-not-found, null pointer, method failures");
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(RulesEngineSpelErrorHandlingTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] RulesEngineSpelErrorHandlingTest intentional error tests completed");
+        MDC.remove("testContext");
+    }
     
     private RulesEngine rulesEngine;
     

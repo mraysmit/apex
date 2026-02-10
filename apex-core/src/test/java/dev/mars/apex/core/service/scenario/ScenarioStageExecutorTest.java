@@ -20,6 +20,7 @@ import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.config.YamlRuleFactory;
 import dev.mars.apex.core.util.TestErrorContext;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.*;
 
@@ -55,8 +57,15 @@ class ScenarioStageExecutorTest {
 
     @BeforeAll
     static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
         logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-START] ScenarioStageExecutorTest intentionally triggers ERROR/WARN logs");
         logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: stage failures, termination policies, dependency failures");
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        logger.info("[INTENTIONAL-FAILURE-TEST-CLASS-END] ScenarioStageExecutorTest intentional error tests completed");
+        MDC.remove("testContext");
     }
 
     private TestConfigLoader configLoader;

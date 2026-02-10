@@ -4,6 +4,8 @@ import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.engine.model.RuleResult;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,6 +41,15 @@ class RulesEngineRuleGroupErrorHandlingTest {
 
     private static final Logger logger = LoggerFactory.getLogger(RulesEngineRuleGroupErrorHandlingTest.class);
     private YamlConfigurationLoader yamlLoader;
+
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(RulesEngineRuleGroupErrorHandlingTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] RulesEngineRuleGroupErrorHandlingTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(RulesEngineRuleGroupErrorHandlingTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: NPE in rule groups, SpEL exceptions, error propagation in group evaluation");
+    }
 
     @BeforeEach
     void setUp() {
@@ -214,5 +226,12 @@ class RulesEngineRuleGroupErrorHandlingTest {
      *
      * These tests verify that the error handling code works correctly in various scenarios.
      */
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(RulesEngineRuleGroupErrorHandlingTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] RulesEngineRuleGroupErrorHandlingTest intentional error tests completed");
+        MDC.remove("testContext");
+    }
 }
 

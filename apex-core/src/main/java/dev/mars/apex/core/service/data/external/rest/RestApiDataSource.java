@@ -225,43 +225,45 @@ public class RestApiDataSource implements ExternalDataSource {
         long startTime = System.currentTimeMillis();
 
         try {
-            System.out.println("DEBUG: RestApiDataSource.query called with query='" + query + "', parameters=" + parameters);
+            LOGGER.debug("RestApiDataSource.query called with query='{}', parameters={}", query, parameters);
             // First, resolve named query from configuration
             String actualQuery = resolveNamedQuery(query);
-            System.out.println("DEBUG: query='" + query + "', actualQuery='" + actualQuery + "', parameters=" + parameters);
+            LOGGER.debug("query='{}', actualQuery='{}', parameters={}", query, actualQuery, parameters);
             String endpoint = buildEndpoint(actualQuery, parameters);
-            System.out.println("DEBUG: Final endpoint URL: " + endpoint);
-            System.out.println("DEBUG: About to build HTTP request...");
+            LOGGER.debug("Final endpoint URL: {}", endpoint);
+            LOGGER.debug("About to build HTTP request...");
             HttpRequest request = buildHttpRequest(endpoint, "GET", null);
-            System.out.println("DEBUG: HTTP request built successfully");
+            LOGGER.debug("HTTP request built successfully");
 
-            System.out.println("DEBUG: About to send HTTP request...");
+            LOGGER.debug("About to send HTTP request...");
             HttpResponse<String> response;
             try {
                 response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-                System.out.println("DEBUG: HTTP response status: " + response.statusCode());
-                System.out.println("DEBUG: HTTP response body length: " + response.body().length());
-                System.out.println("DEBUG: HTTP response body: " + response.body());
+                LOGGER.debug("HTTP response status: {}", response.statusCode());
+                LOGGER.debug("HTTP response body length: {}", response.body().length());
+                LOGGER.debug("HTTP response body: {}", response.body());
             } catch (Exception e) {
-                System.out.println("DEBUG: HTTP request failed with exception: " + e.getClass().getName() + ": " + e.getMessage());
-                e.printStackTrace();
+                LOGGER.error("HTTP request failed for endpoint '{}': {}", endpoint, e.getMessage());
+                LOGGER.debug("HTTP request exception detail:", e);
                 throw e;
             }
 
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                System.out.println("DEBUG: HTTP response successful, about to parse response");
+                LOGGER.debug("HTTP response successful, about to parse response");
                 try {
                     List<T> result = parseResponseToList(response.body());
-                    System.out.println("DEBUG: Parsed result: " + result);
-                    System.out.println("DEBUG: Parsed result size: " + (result != null ? result.size() : "null"));
+                    LOGGER.debug("Parsed result: {}", result);
+                    LOGGER.debug("Parsed result size: {}", result != null ? result.size() : "null");
                     metrics.recordSuccessfulRequest(System.currentTimeMillis() - startTime);
                     return result;
                 } catch (Exception e) {
-                    System.out.println("DEBUG: Exception during response parsing: " + e.getClass().getName() + ": " + e.getMessage());
-                    e.printStackTrace();
+                    LOGGER.error("Response parsing failed for query '{}': {}", query, e.getMessage());
+                    LOGGER.debug("Response parsing exception detail:", e);
                     throw e;
                 }
             } else {
+                LOGGER.error("REST API call failed for query '{}': HTTP status {}", query, response.statusCode());
+                LOGGER.debug("Failed response body: {}", response.body());
                 metrics.recordFailedRequest(System.currentTimeMillis() - startTime);
                 throw new DataSourceException(DataSourceException.ErrorType.EXECUTION_ERROR,
                     "API call failed with status: " + response.statusCode(), null,
@@ -269,6 +271,8 @@ public class RestApiDataSource implements ExternalDataSource {
             }
 
         } catch (IOException | InterruptedException e) {
+            LOGGER.error("REST API call failed for query '{}': {}", query, e.getMessage());
+            LOGGER.debug("REST API call exception detail:", e);
             metrics.recordFailedRequest(System.currentTimeMillis() - startTime);
             throw DataSourceException.executionError("REST API call failed", e, "query");
         } catch (DataSourceException e) {
@@ -280,14 +284,17 @@ public class RestApiDataSource implements ExternalDataSource {
     
     @Override
     public <T> T queryForObject(String query, Map<String, Object> parameters) throws DataSourceException {
-        System.out.println("DEBUG: queryForObject called with query='" + query + "', parameters=" + parameters);
+        LOGGER.debug("queryForObject called with query='{}', parameters={}", query, parameters);
         try {
             List<T> results = query(query, parameters);
-            System.out.println("DEBUG: queryForObject got results: " + results);
+            LOGGER.debug("queryForObject got results: {}", results);
             return results.isEmpty() ? null : results.get(0);
+        } catch (DataSourceException e) {
+            // Already logged at ERROR in query() — just propagate
+            throw e;
         } catch (Exception e) {
-            System.out.println("DEBUG: queryForObject caught exception: " + e.getClass().getName() + ": " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.error("queryForObject failed for query '{}': {}", query, e.getMessage());
+            LOGGER.debug("queryForObject exception detail:", e);
             throw e;
         }
     }
@@ -450,25 +457,25 @@ public class RestApiDataSource implements ExternalDataSource {
      * Checks both queries and endpoints maps for the query name.
      */
     private String resolveNamedQuery(String query) {
-        System.out.println("DEBUG: resolveNamedQuery called with query='" + query + "'");
-        System.out.println("DEBUG: Available queries: " + configuration.getQueries());
-        System.out.println("DEBUG: Available endpoints: " + configuration.getEndpoints());
+        LOGGER.debug("resolveNamedQuery called with query='{}'", query);
+        LOGGER.debug("Available queries: {}", configuration.getQueries());
+        LOGGER.debug("Available endpoints: {}", configuration.getEndpoints());
 
         // First check queries map (for backward compatibility)
         if (configuration.getQueries() != null && configuration.getQueries().containsKey(query)) {
             String result = configuration.getQueries().get(query);
-            System.out.println("DEBUG: Found query '" + query + "' in queries map: '" + result + "'");
+            LOGGER.debug("Found query '{}' in queries map: '{}'", query, result);
             return result;
         }
 
         // Then check endpoints map (for REST API endpoint names)
         if (configuration.getEndpoints() != null && configuration.getEndpoints().containsKey(query)) {
             String result = configuration.getEndpoints().get(query);
-            System.out.println("DEBUG: Found query '" + query + "' in endpoints map: '" + result + "'");
+            LOGGER.debug("Found query '{}' in endpoints map: '{}'", query, result);
             return result;
         }
 
-        System.out.println("DEBUG: Query '" + query + "' not found in queries or endpoints, returning as-is");
+        LOGGER.debug("Query '{}' not found in queries or endpoints, returning as-is", query);
         return query; // Return as-is if not found in named queries or endpoints
     }
 
@@ -590,18 +597,18 @@ public class RestApiDataSource implements ExternalDataSource {
      */
     @SuppressWarnings("unchecked")
     private <T> List<T> parseResponseToList(String responseBody) {
-        System.out.println("DEBUG: parseResponseToList called with: " + responseBody);
+        LOGGER.debug("parseResponseToList called with: {}", responseBody);
         Object parsed = parseResponse(responseBody);
-        System.out.println("DEBUG: parseResponse returned: " + parsed);
-        System.out.println("DEBUG: parseResponse type: " + (parsed != null ? parsed.getClass().getName() : "null"));
+        LOGGER.debug("parseResponse returned: {}", parsed);
+        LOGGER.debug("parseResponse type: {}", parsed != null ? parsed.getClass().getName() : "null");
 
         if (parsed instanceof List) {
-            System.out.println("DEBUG: Parsed result is a List, returning as-is");
+            LOGGER.debug("Parsed result is a List, returning as-is");
             return (List<T>) parsed;
         } else {
-            System.out.println("DEBUG: Parsed result is not a List, wrapping in singletonList");
+            LOGGER.debug("Parsed result is not a List, wrapping in singletonList");
             List<T> result = Collections.singletonList((T) parsed);
-            System.out.println("DEBUG: Wrapped result: " + result);
+            LOGGER.debug("Wrapped result: {}", result);
             return result;
         }
     }
@@ -610,17 +617,18 @@ public class RestApiDataSource implements ExternalDataSource {
      * Simple JSON object parsing (placeholder implementation).
      */
     private Map<String, Object> parseJsonObject(String json) {
-        System.out.println("DEBUG: parseJsonObject called with: " + json);
+        LOGGER.debug("parseJsonObject called with: {}", json);
 
         // Use Jackson ObjectMapper for proper JSON parsing
         try {
             ObjectMapper mapper = new ObjectMapper();
             @SuppressWarnings("unchecked")
             Map<String, Object> result = mapper.readValue(json, Map.class);
-            System.out.println("DEBUG: parseJsonObject returning: " + result);
+            LOGGER.debug("parseJsonObject returning: {}", result);
             return result;
         } catch (Exception e) {
-            System.out.println("DEBUG: JSON parsing failed: " + e.getMessage());
+            LOGGER.error("JSON parsing failed for REST API response: {}", e.getMessage());
+            LOGGER.debug("JSON parsing exception detail:", e);
             // Fallback to raw JSON if parsing fails
             Map<String, Object> result = new HashMap<>();
             result.put("raw", json);

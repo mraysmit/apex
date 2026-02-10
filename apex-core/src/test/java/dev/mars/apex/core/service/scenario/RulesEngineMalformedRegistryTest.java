@@ -18,6 +18,8 @@ package dev.mars.apex.core.service.scenario;
 
 import dev.mars.apex.core.config.exception.YamlConfigurationException;
 import dev.mars.apex.engine.core.RulesEngine;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
@@ -29,6 +31,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -70,6 +73,15 @@ class RulesEngineMalformedRegistryTest {
     
     private static final Logger logger = LoggerFactory.getLogger(RulesEngineMalformedRegistryTest.class);
     
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(RulesEngineMalformedRegistryTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] RulesEngineMalformedRegistryTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(RulesEngineMalformedRegistryTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: missing scenarios, invalid YAML, malformed registry structures");
+    }
+
     // ========================================
     // Missing Scenarios Section Tests
     // ========================================
@@ -365,5 +377,12 @@ class RulesEngineMalformedRegistryTest {
         Files.writeString(registryFile, content);
         registryFile.toFile().deleteOnExit();
         return registryFile;
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(RulesEngineMalformedRegistryTest.class)
+                .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] RulesEngineMalformedRegistryTest intentional error tests completed");
+        MDC.remove("testContext");
     }
 }

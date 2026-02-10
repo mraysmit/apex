@@ -18,6 +18,8 @@ package dev.mars.apex.engine.core;
 
 import dev.mars.apex.core.config.exception.YamlConfigurationException;
 import dev.mars.apex.engine.model.RuleResult;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -25,6 +27,7 @@ import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
 import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.*;
 
@@ -48,6 +51,22 @@ import static org.junit.jupiter.api.Assertions.*;
 class RulesEngineErrorHandlingTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RulesEngineErrorHandlingTest.class);
+
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(RulesEngineErrorHandlingTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] RulesEngineErrorHandlingTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(RulesEngineErrorHandlingTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: SpEL evaluation errors, missing fields, null config");
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(RulesEngineErrorHandlingTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] RulesEngineErrorHandlingTest intentional error tests completed");
+        MDC.remove("testContext");
+    }
 
     /**
      * Intentional error test: Verifies that RulesEngine handles SpEL evaluation errors gracefully

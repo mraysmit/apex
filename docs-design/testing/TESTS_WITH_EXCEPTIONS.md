@@ -194,10 +194,7 @@ Each test needs individual verification to determine proper classification.
 
 ### Error Handling Principles Established:
 1. **Graceful Error Handling**: Exceptions caught, logged, and converted to failure results (RuleResult, StageExecutionResult)
-2. **Error Logging Standards**:
-   - ERROR level for serious issues (config errors, data validation failures)
-   - Clean messages preferred (no stack traces) for handled errors
-   - Stack traces acceptable for config file errors in ScenarioStageExecutor
+2. **Error Logging Standards**: See [APEX Error Logging Standard](#apex-error-logging-standard) below
 3. **RuleResult API**: Programmatic error access via `hasFailures()`, `getFailureMessages()`
 4. **YAML Severity**: Controls error recovery behavior (WARNING/INFO → continue with defaults, ERROR → fail), NOT Java logging level
 
@@ -208,6 +205,205 @@ The YAML `severity` field (WARNING, INFO, ERROR) controls **error recovery behav
 - `severity: "ERROR"` → recovery disabled → failure added to RuleResult
 
 Java logging is independent and based on technical severity (config errors, data validation failures).
+
+---
+
+## APEX Error Logging Standard
+
+**Date Established**: February 10, 2026
+
+### Core Principle: Separate Concerns Between Log Levels
+
+APEX follows a strict two-tier error logging pattern that separates **operational visibility** (ERROR level) from **diagnostic detail** (DEBUG level):
+
+| Log Level | Purpose | Content | Stack Trace |
+|-----------|---------|---------|-------------|
+| **ERROR** | Operational alerting — what failed & where | Clean one-line message with business context (query name, endpoint, entity ID) | **NEVER** |
+| **DEBUG** | Developer troubleshooting — why it failed | Full exception detail | **ALWAYS** (pass exception as last arg) |
+
+### Why This Matters
+
+1. **Production log hygiene**: ERROR-level logs are monitored by operations teams and alerting systems. Stack traces at ERROR level create noise, making it harder to spot true issues and inflating log storage costs.
+2. **On-demand diagnosis**: When investigating a failure, operators enable DEBUG logging for the specific class/package. Stack traces then appear in context with full diagnostic detail.
+3. **Structured error propagation**: Exceptions are not just logged — they are converted to structured `RuleResult` or `DataSourceException` objects for programmatic handling by calling applications.
+
+### The Pattern
+
+#### ✅ CORRECT: Two-tier logging with error propagation
+
+```java
+try {
+    response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+} catch (Exception e) {
+    // ERROR level: clean message with context — NO stack trace
+    LOGGER.error("HTTP request failed for endpoint '{}': {}", endpoint, e.getMessage());
+    // DEBUG level: full stack trace for diagnostics
+    LOGGER.debug("HTTP request exception detail:", e);
+    // Propagate as structured error
+    throw DataSourceException.executionError("REST API call failed", e, "query");
+}
+```
+
+#### ❌ WRONG: Stack trace at ERROR level
+
+```java
+} catch (Exception e) {
+    LOGGER.error("HTTP request failed", e);  // Stack trace pollutes ERROR logs
+    throw e;
+}
+```
+
+#### ❌ WRONG: System.out.println for debugging
+
+```java
+} catch (Exception e) {
+    System.out.println("DEBUG: HTTP request failed: " + e.getMessage());  // Bypasses log framework
+    e.printStackTrace();  // Uncontrolled output to stderr
+    throw e;
+}
+```
+
+#### ❌ WRONG: Swallowing errors without propagation
+
+```java
+} catch (Exception e) {
+    LOGGER.error("Something failed: {}", e.getMessage());
+    return null;  // Error is lost — caller has no way to detect failure
+}
+```
+
+### ERROR Message Format Guidelines
+
+ERROR messages must include **enough context to identify the failure** without needing the stack trace:
+
+```java
+// ✅ GOOD: includes the operation, the target, and the cause
+LOGGER.error("REST API call failed for query '{}': HTTP status {}", query, response.statusCode());
+LOGGER.error("Response parsing failed for query '{}': {}", query, e.getMessage());
+LOGGER.error("JSON parsing failed for REST API response: {}", e.getMessage());
+LOGGER.error("Database connection failed for datasource '{}': {}", config.getName(), e.getMessage());
+
+// ❌ BAD: generic messages with no context
+LOGGER.error("An error occurred");
+LOGGER.error("Request failed");
+LOGGER.error("Exception: {}", e.toString());
+```
+
+### Error Propagation Chain
+
+Errors must flow through the APEX architecture and ultimately be accessible via `RuleResult`:
+
+```
+Exception thrown
+  → catch block logs ERROR (clean message) + DEBUG (stack trace)
+  → wraps in DataSourceException / EnrichmentException
+  → caught by RulesEngine / EnrichmentProcessor / TransformationProcessor
+  → converted to RuleResult with ResultType.ERROR
+  → RuleResult.hasFailures() == true
+  → RuleResult.getFailureMessages() contains error details
+  → calling application can detect and handle programmatically
+```
+
+#### Key Classes in the Propagation Chain
+
+| Layer | Class | Error Output |
+|-------|-------|-------------|
+| Data Source | `RestApiDataSource`, `DatabaseDataSource` | Throws `DataSourceException` |
+| Enrichment | `EnrichmentService`, `DatasetLookupService` | Throws `EnrichmentException` or returns `RuleResult` |
+| Transformation | `YamlTransformationProcessor` | Returns `RuleResult` with `ResultType.ERROR` |
+| Rule Evaluation | `UnifiedRuleEvaluator` | Returns `RuleResult.error()` via `handleEvaluationError()` |
+| Engine | `RulesEngine.evaluate()` | Returns `RuleResult.evaluationFailure()` |
+| Scenario | `ScenarioStageExecutor` | Returns `ScenarioExecutionResult` with failure status |
+
+### Avoiding Double-Logging
+
+When an exception is already logged at ERROR by an inner method, the outer method should **not** log it again:
+
+```java
+// In queryForObject() — query() already logs at ERROR
+public <T> T queryForObject(String query, Map<String, Object> parameters) throws DataSourceException {
+    try {
+        List<T> results = query(query, parameters);  // Logs ERROR internally on failure
+        return results.isEmpty() ? null : results.get(0);
+    } catch (DataSourceException e) {
+        // Already logged at ERROR in query() — just propagate
+        throw e;
+    } catch (Exception e) {
+        // Only log if this is a NEW exception not already handled
+        LOGGER.error("queryForObject failed for query '{}': {}", query, e.getMessage());
+        LOGGER.debug("queryForObject exception detail:", e);
+        throw e;
+    }
+}
+```
+
+### Test Verification Pattern for Error Propagation
+
+Tests that exercise error paths must verify the **full propagation chain**, not just that "no exception was thrown":
+
+```java
+@Test
+void testErrorPropagationIntentionalError() {
+    LOGGER.info("=== INTENTIONAL ERROR TEST: Verifying error propagation ===");
+
+    // 1. Create configuration that will trigger an error
+    YamlRuleConfiguration config = createConfigWithMissingDatasource();
+
+    // 2. Evaluate — should NOT throw (errors are captured)
+    RuleResult result = engine.evaluate(config, inputData);
+
+    // 3. Verify error is captured in RuleResult (NOT just assertNotNull!)
+    assertNotNull(result, "Result should not be null");
+    assertFalse(result.isSuccess(), "Should be marked as failed");
+    assertTrue(result.hasFailures(), "Should have failures");
+
+    // 4. Verify failure messages contain actionable detail
+    List<String> failures = result.getFailureMessages();
+    assertFalse(failures.isEmpty(), "Should have failure messages");
+    assertTrue(failures.stream().anyMatch(msg -> msg.contains("missing-datasource")),
+        "Failure messages should identify the failed component. Got: " + failures);
+
+    // 5. Verify ResultType
+    assertEquals(RuleResult.ResultType.ERROR, result.getResultType(),
+        "ResultType should be ERROR for infrastructure failures");
+}
+```
+
+### Intentional Error Test Markers
+
+Tests that **deliberately** trigger errors must be clearly marked so ERROR-level log output is not mistaken for real failures:
+
+```java
+// Class-level markers (for test classes where ALL tests trigger errors)
+LOGGER.info("[INTENTIONAL-FAILURE-TEST-CLASS-START] {} intentionally triggers ERROR/WARN logs",
+    getClass().getSimpleName());
+// ... tests ...
+LOGGER.info("[INTENTIONAL-FAILURE-TEST-CLASS-END] All ERROR messages above were EXPECTED");
+
+// Method-level markers
+LOGGER.info("=== INTENTIONAL ERROR TEST: Description of what error is being tested ===");
+
+// Test naming convention
+void testSomethingIntentionalError() { ... }  // Suffix signals intentional error path
+```
+
+### Applied Example: RestApiDataSource Cleanup (February 2026)
+
+**Before**: 32 bare `System.out.println("DEBUG: ...")` statements + 3 `e.printStackTrace()` calls.
+No ERROR-level logging. No structured error propagation. Stack traces sent to stderr bypassing SLF4J.
+
+**After**: All converted to proper SLF4J with two-tier pattern:
+
+| Error Site | ERROR Level | DEBUG Level |
+|---|---|---|
+| HTTP request failure | `HTTP request failed for endpoint '{}': {}` | `HTTP request exception detail:` + exception |
+| Response parse failure | `Response parsing failed for query '{}': {}` | `Response parsing exception detail:` + exception |
+| Non-2xx HTTP status | `REST API call failed for query '{}': HTTP status {}` | Failed response body |
+| IOException/Interrupted | `REST API call failed for query '{}': {}` | `REST API call exception detail:` + exception |
+| queryForObject failure | `queryForObject failed for query '{}': {}` | `queryForObject exception detail:` + exception |
+| JSON parse failure | `JSON parsing failed for REST API response: {}` | `JSON parsing exception detail:` + exception |
+
+All exceptions are wrapped in `DataSourceException` and propagated to the caller for structured handling.
 
 ### Test Enhancements (30+ tests):
 - Renamed with `IntentionalError` suffix for clarity
