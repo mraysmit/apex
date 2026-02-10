@@ -1,5 +1,10 @@
 # Exception Logging Improvements
 
+**Updated**: February 10, 2026  
+**Status**: 🟠 Not started — ~23 occurrences across 10 files  
+**Priority**: HIGH — swallowed stack traces make debugging difficult  
+**Branch**: refactor/rules-engine-decomposition
+
 ## Problem Statement
 
 Developers have reported that exception details are being swallowed and not available in debug logging. When exceptions are caught and logged with only `e.getMessage()`, the full stack trace is lost, making debugging extremely difficult.

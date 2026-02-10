@@ -238,8 +238,6 @@ class RuleResultBuilderTest {
     @Test
     @DisplayName("Builder produces equivalent result to 4-param constructor")
     void testBuilderEquivalentToFourParamConstructor() {
-        RuleResult legacy = new RuleResult("rule-x", "msg-x", true, RuleResult.ResultType.MATCH);
-
         RuleResult built = RuleResult.builder()
                 .ruleName("rule-x")
                 .message("msg-x")
@@ -247,12 +245,12 @@ class RuleResultBuilderTest {
                 .resultType(RuleResult.ResultType.MATCH)
                 .build();
 
-        assertEquals(legacy.getRuleName(), built.getRuleName());
-        assertEquals(legacy.getMessage(), built.getMessage());
-        assertEquals(legacy.isTriggered(), built.isTriggered());
-        assertEquals(legacy.getResultType(), built.getResultType());
-        assertEquals(legacy.getSeverity(), built.getSeverity());
-        assertEquals(legacy.isSuccess(), built.isSuccess());
+        assertEquals("rule-x", built.getRuleName());
+        assertEquals("msg-x", built.getMessage());
+        assertTrue(built.isTriggered());
+        assertEquals(RuleResult.ResultType.MATCH, built.getResultType());
+        assertEquals(SeverityConstants.INFO, built.getSeverity());
+        assertTrue(built.isSuccess());
     }
 
     @Test
@@ -260,10 +258,6 @@ class RuleResultBuilderTest {
     void testBuilderEquivalentToThirteenParamConstructor() {
         Map<String, Object> data = Map.of("k", "v");
         List<String> fails = List.of("f1");
-
-        RuleResult legacy = new RuleResult("rid", "rname", "msg",
-                SeverityConstants.WARNING, true, RuleResult.ResultType.MATCH,
-                null, data, fails, true, "SC", "EC", List.of("field"));
 
         RuleResult built = RuleResult.builder()
                 .ruleId("rid")
@@ -280,18 +274,18 @@ class RuleResultBuilderTest {
                 .mapToField(List.of("field"))
                 .build();
 
-        assertEquals(legacy.getRuleId(), built.getRuleId());
-        assertEquals(legacy.getRuleName(), built.getRuleName());
-        assertEquals(legacy.getMessage(), built.getMessage());
-        assertEquals(legacy.getSeverity(), built.getSeverity());
-        assertEquals(legacy.isTriggered(), built.isTriggered());
-        assertEquals(legacy.getResultType(), built.getResultType());
-        assertEquals(legacy.getEnrichedData(), built.getEnrichedData());
-        assertEquals(legacy.getFailureMessages(), built.getFailureMessages());
-        assertEquals(legacy.isSuccess(), built.isSuccess());
-        assertEquals(legacy.getSuccessCode(), built.getSuccessCode());
-        assertEquals(legacy.getErrorCode(), built.getErrorCode());
-        assertEquals(legacy.getMapToField(), built.getMapToField());
+        assertEquals("rid", built.getRuleId());
+        assertEquals("rname", built.getRuleName());
+        assertEquals("msg", built.getMessage());
+        assertEquals(SeverityConstants.WARNING, built.getSeverity());
+        assertTrue(built.isTriggered());
+        assertEquals(RuleResult.ResultType.MATCH, built.getResultType());
+        assertEquals(data, built.getEnrichedData());
+        assertEquals(fails, built.getFailureMessages());
+        assertTrue(built.isSuccess());
+        assertEquals("SC", built.getSuccessCode());
+        assertEquals("EC", built.getErrorCode());
+        assertEquals(List.of("field"), built.getMapToField());
     }
 
     // =========================================================================

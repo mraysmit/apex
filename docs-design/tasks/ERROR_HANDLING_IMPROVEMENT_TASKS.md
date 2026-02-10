@@ -1,10 +1,22 @@
 # APEX Error Handling Improvement Tasks
 
-**Document Version:** 1.1  
+**Document Version:** 1.2  
 **Created:** January 24, 2026  
-**Updated:** January 24, 2026  
-**Status:** Draft  
-**Branch:** refactor/rules-engine-decomposition
+**Updated:** February 10, 2026  
+**Status:** In Progress — Task 1 partially complete, Tasks 2-6 not started  
+**Branch:** refactor/rules-engine-decomposition  
+**Test Baseline:** apex-core: 2,861 tests, apex-demo: 908 tests — 0 failures, 0 errors
+
+## Task Priority Summary
+
+| Task | Priority | Status | Effort |
+|------|----------|--------|--------|
+| Task 4: Error propagation to RuleResult | 🔴 **CRITICAL** | Not started | High |
+| Task 3: APEX-specific exceptions | 🔴 **CRITICAL** | Not started | Medium |
+| Task 1: Test context markers | 🟠 HIGH | **Partial** — 4/19 classes done | Medium |
+| Task 2: Correct log levels | 🟠 HIGH | Not started | Low |
+| Task 6: Error propagation integration tests | 🟠 HIGH | Not started | Medium |
+| Task 5: Reduce stack trace verbosity | 🟡 MEDIUM | Not started | Low |
 
 ## Governing Document
 
@@ -140,8 +152,9 @@ dev.mars.apex.core.config.yaml.YamlConfigurationException: Rule name is required
 
 ### Task 1: Add Test Context Markers for Intentional Errors
 
-**Priority:** High  
+**Priority:** 🟠 High  
 **Effort:** Medium  
+**Status:** PARTIAL — 4 of 19 source classes done (ScenarioStageExecutor, ScenarioRegistryLoader, DatasetSignature, PipelineExecutor)  
 **Files to Modify:**
 - Test classes that intentionally trigger error conditions
 - Logging framework configuration (optional)
@@ -201,8 +214,9 @@ TestErrorContext.withExpectedError("testing invalid rule configuration", () -> {
 
 ### Task 2: Correct Log Levels for Error Conditions
 
-**Priority:** High  
+**Priority:** 🟠 High  
 **Effort:** Low  
+**Status:** Not started  
 **Files to Modify:**
 
 | File | Current Level | Required Level | Condition |
@@ -243,8 +257,9 @@ This keeps production logs clean while preserving full debugging information whe
 
 ### Task 3: Create APEX-Specific Exception Types
 
-**Priority:** High  
+**Priority:** 🔴 CRITICAL  
 **Effort:** Medium  
+**Status:** Not started  
 **APEX Error Handling Guide Compliance:** Section "Exception Hierarchy" (lines 1319-1614)
 
 The guide already defines exception patterns that MUST be followed:
@@ -310,8 +325,9 @@ ApexCacheException.lookupFailed(cacheName, key, cause);
 
 ### Task 4: Ensure Error Propagation to RuleResult
 
-**Priority:** Critical  
+**Priority:** 🔴 CRITICAL  
 **Effort:** High  
+**Status:** Not started  
 **APEX Error Handling Guide Compliance:** Sections "Error Propagation Pattern" (lines 227-256), "Enrichment Error Handling" (lines 760-810), "Transformation Error Handling" (lines 812-860)
 
 **Files to Modify:**
@@ -420,8 +436,9 @@ Create `docs/APEX_ERROR_CODES.md` with standardized error codes:
 
 ### Task 5: Reduce Stack Trace Verbosity for Expected Errors
 
-**Priority:** Medium  
+**Priority:** 🟡 Medium  
 **Effort:** Low  
+**Status:** Not started  
 **Files to Modify:**
 
 5.1. **Update logging pattern for validation errors:**
@@ -445,8 +462,9 @@ log.debug("Full stack trace for debugging:", exception);
 
 ### Task 6: Add Integration Tests for Error Propagation
 
-**Priority:** High  
+**Priority:** 🟠 High  
 **Effort:** Medium  
+**Status:** Not started  
 **APEX Error Handling Guide Compliance:** Section "Best Practices" point 5 "Test Error Scenarios" (lines 977-992)
 
 **Files to Create:**

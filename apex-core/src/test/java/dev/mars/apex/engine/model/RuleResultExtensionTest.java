@@ -42,8 +42,8 @@ class RuleResultExtensionTest {
     @Test
     @DisplayName("Test backward compatibility - existing constructors work with new fields")
     void testBackwardCompatibility() {
-        // Test basic constructor
-        RuleResult result1 = new RuleResult("test-rule", "Test message", true, RuleResult.ResultType.MATCH);
+        // Test basic builder usage
+        RuleResult result1 = RuleResult.builder().ruleName("test-rule").message("Test message").triggered(true).resultType(RuleResult.ResultType.MATCH).build();
         
         assertNotNull(result1);
         assertEquals("test-rule", result1.getRuleName());
@@ -183,9 +183,11 @@ class RuleResultExtensionTest {
         
         List<String> failureMessages = Arrays.asList("Warning: partial processing");
         
-        RuleResult result = new RuleResult("test-rule", "Test completed", true, 
-                                          RuleResult.ResultType.MATCH, null, 
-                                          enrichedData, failureMessages, true);
+        RuleResult result = RuleResult.builder()
+                .ruleName("test-rule").message("Test completed").triggered(true)
+                .resultType(RuleResult.ResultType.MATCH)
+                .enrichedData(enrichedData).failureMessages(failureMessages).success(true)
+                .build();
         
         assertNotNull(result);
         assertEquals("test-rule", result.getRuleName());

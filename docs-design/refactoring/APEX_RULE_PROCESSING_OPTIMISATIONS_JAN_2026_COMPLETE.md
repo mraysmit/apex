@@ -1,5 +1,10 @@
 # APEX Rule Processing Optimisations
 
+**Status:** ✅ ALL 6 PHASES COMPLETE  
+**Branch:** `refactor/rules-engine-decomposition`  
+**Last Updated:** February 10, 2026  
+**Test Baseline:** apex-core: 2,861 tests, apex-demo: 908 tests — 0 failures, 0 errors
+
 ## Overview
 
 Analysis of the evaluation pipeline across 8 core classes (~5,920 lines) reveals significant accidental complexity, duplicated evaluation paths, and inconsistent cross-cutting concerns. This document outlines the findings and a prioritised refactoring plan.
@@ -12,7 +17,7 @@ Analysis of the evaluation pipeline across 8 core classes (~5,920 lines) reveals
 | `UnifiedRuleEvaluator` | 920 | Core SpEL evaluation, error recovery, message templating |
 | `SequentialProcessor` | 935 | Document-order orchestration, item/section routing |
 | `RuleGroup` | 1,068 | Group AND/OR logic with **own** SpEL evaluation pipeline |
-| `RuleResult` | 935 | Result object — 12 constructors, 22 factory methods |
+| `RuleResult` | ~700 | Result object — 1 private constructor (Builder), 22 factory methods |
 | `RuleGroupExecutor` | 290 | Thin wrapper dispatching to RuleGroup/UnifiedRuleEvaluator |
 | `RuleChainExecutor` | 375 | Chain pattern routing with **own** direct SpEL evaluation |
 | `EnrichmentGroupExecutor` | 297 | Enrichment group logic (parallel/sequential) |
@@ -112,11 +117,13 @@ Same naming pattern, silently different termination behaviour.
 Add `RuleResult.Builder` and `RuleResult.toBuilder()` copy method. Eliminates all 12-13 parameter constructor calls and the "reconstruct everything to change one field" anti-pattern. Every subsequent refactoring benefits from this foundation.
 
 **Solution:**
-1. Add a `public static class Builder` inside `RuleResult` with fluent setters for all fields (`ruleName()`, `message()`, `severity()`, `triggered()`, `resultType()`, `performanceMetrics()`, `enrichedData()`, `failureMessages()`, `success()`, `successCode()`, `errorCode()`, `mapToField()`, `ruleId()`, `individualRuleResults()`)
-2. Add `public Builder toBuilder()` instance method that pre-populates a new Builder from `this`
-3. Keep a single private all-fields constructor; deprecate all 12 public constructors
-4. Migrate all `new RuleResult(...)` call sites in `UnifiedRuleEvaluator` (8 sites), `SequentialProcessor`, and `RuleGroupExecutor` to use the builder
-5. Simplify the 22 static factory methods to delegate to `Builder` internally (keep factory methods as public API for backward compatibility)
+1. ✅ Added `public static class Builder` inside `RuleResult` with fluent setters for all 16 fields
+2. ✅ Added `public Builder toBuilder()` instance method that pre-populates a new Builder from `this`
+3. ✅ **All 12 public constructors REMOVED** (not just deprecated) — only 1 private `RuleResult(Builder)` constructor remains
+4. ✅ Migrated all `new RuleResult(...)` call sites — zero remaining in production code, zero in test code
+5. ✅ All 22 static factory methods now delegate to `Builder` internally (public API preserved for backward compatibility)
+
+**Final State:** `RuleResult` has exactly 1 constructor (private, takes Builder). All creation goes through `builder()`, `toBuilder()`, or factory methods (`match()`, `noMatch()`, `error()`, etc.).
 
 ### Phase 2: Extract Evaluation from RuleGroup
 
@@ -202,7 +209,7 @@ Route chain router/trigger evaluation through `UnifiedRuleEvaluator` instead of 
 |---|---|---|
 | Total lines across pipeline | ~5,920 | ~4,200 |
 | Independent SpEL evaluation paths | 4 | 1 |
-| RuleResult constructors | 12 | 1 (builder) |
+| RuleResult constructors | 12 | 1 (private Builder constructor) |
 | Enabled-check locations | 11 | 1-2 |
 | YamlRuleFactory instantiations per evaluation | 4 | 1 |
 | Near-clone method pairs | 2 | 0 |
@@ -211,9 +218,39 @@ Route chain router/trigger evaluation through `UnifiedRuleEvaluator` instead of 
 
 ## Progress Tracker
 
-- [x] **Phase 1: RuleResult Builder** — Add `RuleResult.Builder` and `toBuilder()` copy method (11 tests)
+- [x] **Phase 1: RuleResult Builder** — Builder + toBuilder() added, all 12 public constructors **removed**, zero `new RuleResult(...)` calls remain (11 tests)
 - [x] **Phase 2: Extract Evaluation from RuleGroup** — Move SpEL evaluation into `RuleGroupEvaluationService`, delegate to `UnifiedRuleEvaluator` (13 tests)
 - [x] **Phase 3: Centralise Enabled Checks** — Single `EnabledFilter` utility, remove 10 downstream checks (31 tests)
 - [x] **Phase 4: Cache YamlRuleFactory in SequentialProcessor** — Field-level factory, pre-built lookup maps (8 tests)
 - [x] **Phase 5: Clean Up RulesEngine Delegation** — Remove boolean wrappers, inline pass-throughs, fix double result-field storage
 - [x] **Phase 6: Unify RuleChainExecutor SpEL Calls** — Route through `UnifiedRuleEvaluator`, deprecate `engine.executor.RuleChainExecutor` (14 tests)
+
+---
+
+## Remaining Work (Other Documents)
+
+The following tasks from separate task documents are **not part of this optimisation effort** but represent the outstanding refactoring work on the branch:
+
+### 🔴 CRITICAL
+
+| Task | Document | Description |
+|------|----------|-------------|
+| Error propagation to RuleResult | `ERROR_HANDLING_IMPROVEMENT_TASKS.md` Task 4 | Audit all error paths — ensure every failure returns `RuleResult` with `ResultType.ERROR`, error code, severity from `SeverityConstants`, and actionable message. Fail-fast enforcement for enrichments/transformations. |
+| APEX-specific exceptions | `ERROR_HANDLING_IMPROVEMENT_TASKS.md` Task 3 | Replace `NullPointerException`, `RuntimeException`, `IllegalArgumentException` in core code with `ApexTransformationException`, `ApexCacheException`, etc. |
+
+### 🟠 HIGH
+
+| Task | Document | Description |
+|------|----------|-------------|
+| Test context markers | `ERROR_HANDLING_IMPROVEMENT_TASKS.md` Task 1 | Add `[TEST-EXPECTED-*]` prefixes — 4 of 19 source classes done, 15 remaining |
+| Correct log levels | `ERROR_HANDLING_IMPROVEMENT_TASKS.md` Task 2 | WARN→ERROR for configuration load failures and non-recoverable errors |
+| Error propagation integration tests | `ERROR_HANDLING_IMPROVEMENT_TASKS.md` Task 6 | New test class verifying error details survive through full pipeline |
+| Exception logging fixes | `EXCEPTION_LOGGING_IMPROVEMENTS.md` | ~18 occurrences across 8 files where `e.getMessage()` swallows stack traces |
+
+### 🟡 MEDIUM
+
+| Task | Document | Description |
+|------|----------|-------------|
+| Stack trace verbosity | `ERROR_HANDLING_IMPROVEMENT_TASKS.md` Task 5 | Move stack traces to DEBUG level for expected validation errors |
+| Remove deprecated classes | `APEX_TECHNICAL_DEBT_ANALYSIS.md` Phase 2 | `DataTypeScenarioService`, pipeline deprecations, `YamlEnrichmentProcessor` deprecated methods |
+| Clean TODO placeholders | `APEX_TECHNICAL_DEBT_ANALYSIS.md` Phase 1 | 3 TODOs in `SequentialYamlProcessor`, 8 TODOs in `YamlDataSink` |

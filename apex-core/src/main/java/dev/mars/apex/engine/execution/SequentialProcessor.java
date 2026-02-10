@@ -183,9 +183,17 @@ public class SequentialProcessor {
                 logger.info("Sequential evaluation completed with {} failures", failureMessages.size());
                 logger.debug("Final enriched data keys (failure): {}", enrichedData.keySet());
                 logger.debug("Failure messages: {}", failureMessages);
-                RuleResult result = new RuleResult("evaluation", "Sequential evaluation completed with failures",
-                                     false, RuleResult.ResultType.ERROR, enrichedData, failureMessages, false, individualRuleResults);
-                result.setExecutionPath(executionPath);
+                RuleResult result = RuleResult.builder()
+                        .ruleName("evaluation")
+                        .message("Sequential evaluation completed with failures")
+                        .triggered(false)
+                        .resultType(RuleResult.ResultType.ERROR)
+                        .enrichedData(enrichedData)
+                        .failureMessages(failureMessages)
+                        .success(false)
+                        .childResults(individualRuleResults)
+                        .executionPath(executionPath)
+                        .build();
                 return result;
             }
 

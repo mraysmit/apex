@@ -105,7 +105,7 @@ class StageDataPersistenceTest {
             logger.info("TEST: Stage outputs stored and retrieved");
             
             // Create a successful result
-            RuleResult ruleResult = new RuleResult("test-rule", "Test passed", true, RuleResult.ResultType.MATCH);
+            RuleResult ruleResult = RuleResult.match("test-rule", "Test passed");
             StageExecutionResult result = StageExecutionResult.success("test-stage", ruleResult);
             
             // Add stage outputs
@@ -128,7 +128,7 @@ class StageDataPersistenceTest {
         void testSetStageOutputs() {
             logger.info("TEST: setStageOutputs works correctly");
             
-            RuleResult ruleResult = new RuleResult("test-rule", "Test passed", true, RuleResult.ResultType.MATCH);
+            RuleResult ruleResult = RuleResult.match("test-rule", "Test passed");
             StageExecutionResult result = StageExecutionResult.success("test-stage", ruleResult);
             
             Map<String, Object> outputs = new HashMap<>();
@@ -169,7 +169,7 @@ class StageDataPersistenceTest {
         void testGetStageOutputsReturnsDefensiveCopy() {
             logger.info("TEST: getStageOutputs returns defensive copy");
             
-            RuleResult ruleResult = new RuleResult("test-rule", "Test passed", true, RuleResult.ResultType.MATCH);
+            RuleResult ruleResult = RuleResult.match("test-rule", "Test passed");
             StageExecutionResult result = StageExecutionResult.success("test-stage", ruleResult);
             
             result.addStageOutput("original", "value");
@@ -202,7 +202,7 @@ class StageDataPersistenceTest {
             
             ScenarioExecutionResult scenarioResult = new ScenarioExecutionResult("test-scenario");
             
-            RuleResult ruleResult = new RuleResult("test-rule", "Test passed", true, RuleResult.ResultType.MATCH);
+            RuleResult ruleResult = RuleResult.match("test-rule", "Test passed");
             
             // Add 2 successful and 1 failed stage
             scenarioResult.addStageResult(StageExecutionResult.success("stage1", ruleResult));
@@ -227,7 +227,7 @@ class StageDataPersistenceTest {
             
             ScenarioExecutionResult scenarioResult = new ScenarioExecutionResult("test-scenario");
             
-            RuleResult ruleResult = new RuleResult("test-rule", "Test passed", true, RuleResult.ResultType.MATCH);
+            RuleResult ruleResult = RuleResult.match("test-rule", "Test passed");
             
             scenarioResult.addStageResult(StageExecutionResult.success("stage1", ruleResult));
             scenarioResult.addStageResult(StageExecutionResult.failure("stage2", "Failed"));
@@ -249,7 +249,7 @@ class StageDataPersistenceTest {
             
             ScenarioExecutionResult scenarioResult = new ScenarioExecutionResult("test-scenario");
             
-            RuleResult ruleResult = new RuleResult("test-rule", "Test passed", true, RuleResult.ResultType.MATCH);
+            RuleResult ruleResult = RuleResult.match("test-rule", "Test passed");
             
             scenarioResult.addStageResult(StageExecutionResult.success("validation", ruleResult));
             scenarioResult.addStageResult(StageExecutionResult.failure("enrichment", "Failed"));

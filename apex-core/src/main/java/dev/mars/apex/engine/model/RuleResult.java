@@ -283,286 +283,6 @@ public class RuleResult implements Serializable {
     }
 
     /**
-     * Create a new rule result with the specified parameters.
-     *
-     * @param ruleName The name of the rule that was evaluated
-     * @param message The message associated with the rule
-     * @param triggered Whether the rule was triggered (true) or not (false)
-     * @param resultType The type of result
-     */
-    public RuleResult(String ruleName, String message, boolean triggered, ResultType resultType) {
-        this(ruleName, message, SeverityConstants.INFO, triggered, resultType); // Default severity for backward compatibility
-    }
-
-    /**
-     * Create a new rule result with the specified parameters including severity.
-     *
-     * @param ruleName The name of the rule that was evaluated
-     * @param message The message associated with the rule
-     * @param severity The severity level (ERROR, WARNING, INFO)
-     * @param triggered Whether the rule was triggered (true) or not (false)
-     * @param resultType The type of result
-     */
-    public RuleResult(String ruleName, String message, String severity, boolean triggered, ResultType resultType) {
-        this.id = UUID.randomUUID();
-        this.ruleId = null;  // No ruleId for backward compatibility
-        this.ruleName = ruleName;
-        this.message = message;
-        this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
-        this.triggered = triggered;
-        this.timestamp = Instant.now();
-        this.resultType = resultType;
-        this.performanceMetrics = null; // No performance metrics for basic constructor
-
-        // Initialize new fields with defaults for backward compatibility
-        this.enrichedData = new HashMap<>();
-        this.failureMessages = new ArrayList<>();
-        this.success = (resultType == ResultType.MATCH || resultType == ResultType.NO_MATCH);
-        this.successCode = null;
-        this.errorCode = null;
-        this.mapToField = null;
-        this.childResults = new ArrayList<>();
-    }
-
-    /**
-     * Create a new rule result with the specified parameters including performance metrics.
-     *
-     * @param ruleName The name of the rule that was evaluated
-     * @param message The message associated with the rule
-     * @param triggered Whether the rule was triggered (true) or not (false)
-     * @param resultType The type of result
-     * @param performanceMetrics The performance metrics for this rule evaluation
-     */
-    public RuleResult(String ruleName, String message, boolean triggered, ResultType resultType, RulePerformanceMetrics performanceMetrics) {
-        this(ruleName, message, SeverityConstants.INFO, triggered, resultType, performanceMetrics); // Default severity
-    }
-
-    /**
-     * Create a new rule result with the specified parameters including performance metrics and severity.
-     *
-     * @param ruleName The name of the rule that was evaluated
-     * @param message The message associated with the rule
-     * @param severity The severity level (ERROR, WARNING, INFO)
-     * @param triggered Whether the rule was triggered (true) or not (false)
-     * @param resultType The type of result
-     * @param performanceMetrics The performance metrics for this rule evaluation
-     */
-    public RuleResult(String ruleName, String message, String severity, boolean triggered, ResultType resultType, RulePerformanceMetrics performanceMetrics) {
-        this.id = UUID.randomUUID();
-        this.ruleId = null;  // No ruleId for backward compatibility
-        this.ruleName = ruleName;
-        this.message = message;
-        this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
-        this.triggered = triggered;
-        this.timestamp = Instant.now();
-        this.resultType = resultType;
-        this.performanceMetrics = performanceMetrics;
-
-        // Initialize new fields with defaults for backward compatibility
-        this.enrichedData = new HashMap<>();
-        this.failureMessages = new ArrayList<>();
-        this.success = (resultType == ResultType.MATCH || resultType == ResultType.NO_MATCH);
-        this.successCode = null;
-        this.errorCode = null;
-        this.mapToField = null;
-        this.childResults = new ArrayList<>();
-    }
-
-    /**
-     * Create a new rule result with the specified parameters.
-     * The rule is considered triggered if resultType is MATCH.
-     *
-     * @param ruleName The name of the rule that was evaluated
-     * @param message The message associated with the rule
-     * @param resultType The type of result
-     */
-    public RuleResult(String ruleName, String message, ResultType resultType) {
-        this(ruleName, message, resultType == ResultType.MATCH, resultType);
-    }
-
-    /**
-     * Create a new rule result with the specified parameters including performance metrics.
-     * The rule is considered triggered if resultType is MATCH.
-     *
-     * @param ruleName The name of the rule that was evaluated
-     * @param message The message associated with the rule
-     * @param resultType The type of result
-     * @param performanceMetrics The performance metrics for this rule evaluation
-     */
-    public RuleResult(String ruleName, String message, ResultType resultType, RulePerformanceMetrics performanceMetrics) {
-        this(ruleName, message, resultType == ResultType.MATCH, resultType, performanceMetrics);
-    }
-
-    /**
-     * Create a new rule result with comprehensive evaluation information.
-     * This constructor supports the complete APEX evaluation workflow including enrichments.
-     *
-     * @param ruleName The name of the rule that was evaluated
-     * @param message The message associated with the rule
-     * @param triggered Whether the rule was triggered (true) or not (false)
-     * @param resultType The type of result
-     * @param performanceMetrics The performance metrics for this rule evaluation
-     * @param enrichedData The enriched data map containing all enrichment results
-     * @param failureMessages List of failure messages from enrichments and rules
-     * @param success Overall success status of the evaluation
-     */
-    public RuleResult(String ruleName, String message, boolean triggered, ResultType resultType,
-                     RulePerformanceMetrics performanceMetrics, Map<String, Object> enrichedData,
-                     List<String> failureMessages, boolean success) {
-        this(ruleName, message, SeverityConstants.INFO, triggered, resultType, performanceMetrics, enrichedData, failureMessages, success); // Default severity
-    }
-
-    /**
-     * Create a new rule result with comprehensive evaluation information including severity.
-     * This constructor supports the complete APEX evaluation workflow including enrichments and severity.
-     *
-     * @param ruleName The name of the rule that was evaluated
-     * @param message The message associated with the rule
-     * @param severity The severity level (ERROR, WARNING, INFO)
-     * @param triggered Whether the rule was triggered (true) or not (false)
-     * @param resultType The type of result
-     * @param performanceMetrics The performance metrics for this rule evaluation
-     * @param enrichedData The enriched data map containing all enrichment results
-     * @param failureMessages List of failure messages from enrichments and rules
-     * @param success Overall success status of the evaluation
-     */
-    public RuleResult(String ruleName, String message, String severity, boolean triggered, ResultType resultType,
-                     RulePerformanceMetrics performanceMetrics, Map<String, Object> enrichedData,
-                     List<String> failureMessages, boolean success) {
-        this.id = UUID.randomUUID();
-        this.ruleId = null;  // No ruleId for backward compatibility
-        this.ruleName = ruleName;
-        this.message = message;
-        this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
-        this.triggered = triggered;
-        this.timestamp = Instant.now();
-        this.resultType = resultType;
-        this.performanceMetrics = performanceMetrics;
-
-        // Initialize new fields with provided values
-        this.enrichedData = enrichedData != null ? new HashMap<>(enrichedData) : new HashMap<>();
-        this.failureMessages = failureMessages != null ? new ArrayList<>(failureMessages) : new ArrayList<>();
-        this.success = success;
-        this.successCode = null;
-        this.errorCode = null;
-        this.mapToField = null;
-        this.childResults = new ArrayList<>();
-    }
-
-    /**
-     * Create a new rule result with error and success codes support.
-     * Phase 4 Enhancement: Supports error/success codes and field mappings.
-     *
-     * @param ruleName The name of the rule that was evaluated
-     * @param message The message associated with the rule
-     * @param severity The severity level (ERROR, WARNING, INFO)
-     * @param triggered Whether the rule was triggered (true) or not (false)
-     * @param resultType The type of result
-     * @param performanceMetrics The performance metrics for this rule evaluation
-     * @param enrichedData The enriched data map containing all enrichment results
-     * @param failureMessages List of failure messages from enrichments and rules
-     * @param success Overall success status of the evaluation
-     * @param successCode The code evaluated when rule succeeded (null if no code)
-     * @param errorCode The code evaluated when rule failed (null if no code)
-     * @param mapToField Field mapping expressions (null if no mapping)
-     */
-    public RuleResult(String ruleName, String message, String severity, boolean triggered, ResultType resultType,
-                     RulePerformanceMetrics performanceMetrics, Map<String, Object> enrichedData,
-                     List<String> failureMessages, boolean success, String successCode, String errorCode, List<String> mapToField) {
-        this.id = UUID.randomUUID();
-        this.ruleId = null;  // No ruleId for backward compatibility
-        this.ruleName = ruleName;
-        this.message = message;
-        this.severity = severity != null ? severity : SeverityConstants.INFO; // Default to INFO if null
-        this.triggered = triggered;
-        this.timestamp = Instant.now();
-        this.resultType = resultType;
-        this.performanceMetrics = performanceMetrics;
-
-        // Initialize new fields with provided values
-        this.enrichedData = enrichedData != null ? new HashMap<>(enrichedData) : new HashMap<>();
-        this.failureMessages = failureMessages != null ? new ArrayList<>(failureMessages) : new ArrayList<>();
-        this.success = success;
-        this.successCode = successCode;
-        this.errorCode = errorCode;
-        this.mapToField = mapToField;
-        this.childResults = new ArrayList<>();
-    }
-
-    /**
-     * Create a new rule result with ruleId for individual rule tracking.
-     * This constructor is used by UnifiedRuleEvaluator to create results with proper rule identification.
-     *
-     * @param ruleId The rule's ID from YAML configuration
-     * @param ruleName The name of the rule that was evaluated
-     * @param message The message associated with the rule
-     * @param severity The severity level (ERROR, WARNING, INFO)
-     * @param triggered Whether the rule was triggered (true) or not (false)
-     * @param resultType The type of result
-     * @param performanceMetrics The performance metrics for this rule evaluation
-     * @param enrichedData The enriched data map containing all enrichment results
-     * @param failureMessages List of failure messages from enrichments and rules
-     * @param success Overall success status of the evaluation
-     * @param successCode The code evaluated when rule succeeded (null if no code)
-     * @param errorCode The code evaluated when rule failed (null if no code)
-     * @param mapToField Field mapping expressions (null if no mapping)
-     */
-    public RuleResult(String ruleId, String ruleName, String message, String severity, boolean triggered, ResultType resultType,
-                     RulePerformanceMetrics performanceMetrics, Map<String, Object> enrichedData,
-                     List<String> failureMessages, boolean success, String successCode, String errorCode, List<String> mapToField) {
-        this.id = UUID.randomUUID();
-        this.ruleId = ruleId;
-        this.ruleName = ruleName;
-        this.message = message;
-        this.severity = severity != null ? severity : SeverityConstants.INFO;
-        this.triggered = triggered;
-        this.timestamp = Instant.now();
-        this.resultType = resultType;
-        this.performanceMetrics = performanceMetrics;
-        this.enrichedData = enrichedData != null ? new HashMap<>(enrichedData) : new HashMap<>();
-        this.failureMessages = failureMessages != null ? new ArrayList<>(failureMessages) : new ArrayList<>();
-        this.success = success;
-        this.successCode = successCode;
-        this.errorCode = errorCode;
-        this.mapToField = mapToField;
-        this.childResults = new ArrayList<>();
-    }
-
-    /**
-     * Create a new rule result with childResults for composite evaluations.
-     * This constructor is used by evaluateSequential to create results containing individual rule results.
-     *
-     * @param ruleName The name of the evaluation
-     * @param message The message associated with the evaluation
-     * @param triggered Whether the evaluation was triggered (true) or not (false)
-     * @param resultType The type of result
-     * @param enrichedData The enriched data map containing all enrichment results
-     * @param failureMessages List of failure messages from enrichments and rules
-     * @param success Overall success status of the evaluation
-     * @param childResults List of individual rule results
-     */
-    public RuleResult(String ruleName, String message, boolean triggered, ResultType resultType,
-                     Map<String, Object> enrichedData, List<String> failureMessages, boolean success,
-                     List<RuleResult> childResults) {
-        this.id = UUID.randomUUID();
-        this.ruleId = null;
-        this.ruleName = ruleName;
-        this.message = message;
-        this.severity = SeverityConstants.INFO;
-        this.triggered = triggered;
-        this.timestamp = Instant.now();
-        this.resultType = resultType;
-        this.performanceMetrics = null;
-        this.enrichedData = enrichedData != null ? new HashMap<>(enrichedData) : new HashMap<>();
-        this.failureMessages = failureMessages != null ? new ArrayList<>(failureMessages) : new ArrayList<>();
-        this.success = success;
-        this.successCode = null;
-        this.errorCode = null;
-        this.mapToField = null;
-        this.childResults = childResults != null ? new ArrayList<>(childResults) : new ArrayList<>();
-    }
-
-    /**
      * Create a new rule result for a rule that was triggered.
      *
      * @param ruleName The name of the rule that was triggered
@@ -570,7 +290,7 @@ public class RuleResult implements Serializable {
      * @return A new RuleResult instance
      */
     public static RuleResult match(String ruleName, String message) {
-        return new RuleResult(ruleName, message, true, ResultType.MATCH);
+        return builder().ruleName(ruleName).message(message).triggered(true).resultType(ResultType.MATCH).build();
     }
 
     /**
@@ -582,7 +302,7 @@ public class RuleResult implements Serializable {
      * @return A new RuleResult instance
      */
     public static RuleResult match(String ruleName, String message, RulePerformanceMetrics performanceMetrics) {
-        return new RuleResult(ruleName, message, true, ResultType.MATCH, performanceMetrics);
+        return builder().ruleName(ruleName).message(message).triggered(true).resultType(ResultType.MATCH).performanceMetrics(performanceMetrics).build();
     }
 
     /**
@@ -594,7 +314,7 @@ public class RuleResult implements Serializable {
      * @return A new RuleResult instance
      */
     public static RuleResult match(String ruleName, String message, String severity) {
-        return new RuleResult(ruleName, message, severity, true, ResultType.MATCH);
+        return builder().ruleName(ruleName).message(message).severity(severity).triggered(true).resultType(ResultType.MATCH).build();
     }
 
     /**
@@ -607,7 +327,7 @@ public class RuleResult implements Serializable {
      * @return A new RuleResult instance
      */
     public static RuleResult match(String ruleName, String message, String severity, RulePerformanceMetrics performanceMetrics) {
-        return new RuleResult(ruleName, message, severity, true, ResultType.MATCH, performanceMetrics);
+        return builder().ruleName(ruleName).message(message).severity(severity).triggered(true).resultType(ResultType.MATCH).performanceMetrics(performanceMetrics).build();
     }
 
     /**
@@ -616,7 +336,7 @@ public class RuleResult implements Serializable {
      * @return A new RuleResult instance
      */
     public static RuleResult noMatch() {
-        return new RuleResult("no-match", "No matching rules found", false, ResultType.NO_MATCH);
+        return builder().ruleName("no-match").message("No matching rules found").triggered(false).resultType(ResultType.NO_MATCH).build();
     }
 
     /**
@@ -626,7 +346,7 @@ public class RuleResult implements Serializable {
      * @return A new RuleResult instance
      */
     public static RuleResult noMatch(RulePerformanceMetrics performanceMetrics) {
-        return new RuleResult("no-match", "No matching rules found", false, ResultType.NO_MATCH, performanceMetrics);
+        return builder().ruleName("no-match").message("No matching rules found").triggered(false).resultType(ResultType.NO_MATCH).performanceMetrics(performanceMetrics).build();
     }
 
     /**
@@ -638,7 +358,7 @@ public class RuleResult implements Serializable {
      * @return A new RuleResult instance
      */
     public static RuleResult noMatch(String ruleName, String message, String severity) {
-        return new RuleResult(ruleName, message, severity, false, ResultType.NO_MATCH);
+        return builder().ruleName(ruleName).message(message).severity(severity).triggered(false).resultType(ResultType.NO_MATCH).build();
     }
 
     /**
@@ -647,7 +367,7 @@ public class RuleResult implements Serializable {
      * @return A new RuleResult instance
      */
     public static RuleResult noRules() {
-        return new RuleResult("no-rule", "No rules provided", false, ResultType.NO_RULES);
+        return builder().ruleName("no-rule").message("No rules provided").triggered(false).resultType(ResultType.NO_RULES).build();
     }
 
     /**
@@ -658,7 +378,7 @@ public class RuleResult implements Serializable {
      * @return A new RuleResult instance
      */
     public static RuleResult error(String ruleName, String errorMessage) {
-        return new RuleResult(ruleName, errorMessage, false, ResultType.ERROR);
+        return builder().ruleName(ruleName).message(errorMessage).triggered(false).resultType(ResultType.ERROR).success(false).build();
     }
 
     /**
@@ -670,7 +390,7 @@ public class RuleResult implements Serializable {
      * @return A new RuleResult instance
      */
     public static RuleResult error(String ruleName, String errorMessage, String severity) {
-        return new RuleResult(ruleName, errorMessage, severity, false, ResultType.ERROR);
+        return builder().ruleName(ruleName).message(errorMessage).severity(severity).triggered(false).resultType(ResultType.ERROR).success(false).build();
     }
 
     /**
@@ -682,7 +402,7 @@ public class RuleResult implements Serializable {
      * @return A new RuleResult instance
      */
     public static RuleResult error(String ruleName, String errorMessage, RulePerformanceMetrics performanceMetrics) {
-        return new RuleResult(ruleName, errorMessage, false, ResultType.ERROR, performanceMetrics);
+        return builder().ruleName(ruleName).message(errorMessage).triggered(false).resultType(ResultType.ERROR).performanceMetrics(performanceMetrics).success(false).build();
     }
 
     /**
@@ -695,7 +415,7 @@ public class RuleResult implements Serializable {
      * @return A new RuleResult instance
      */
     public static RuleResult error(String ruleName, String errorMessage, String severity, RulePerformanceMetrics performanceMetrics) {
-        return new RuleResult(ruleName, errorMessage, severity, false, ResultType.ERROR, performanceMetrics);
+        return builder().ruleName(ruleName).message(errorMessage).severity(severity).triggered(false).resultType(ResultType.ERROR).performanceMetrics(performanceMetrics).success(false).build();
     }
 
     // Factory methods for error and success codes
@@ -711,8 +431,7 @@ public class RuleResult implements Serializable {
      * @return A new RuleResult instance
      */
     public static RuleResult matchWithCode(String ruleName, String message, String severity, String successCode) {
-        // Since RuleResult is immutable, we need to use the constructor that accepts codes
-        return new RuleResult(ruleName, message, severity, true, ResultType.MATCH, null, new HashMap<>(), new ArrayList<>(), true, successCode, null, null);
+        return builder().ruleName(ruleName).message(message).severity(severity).triggered(true).resultType(ResultType.MATCH).success(true).successCode(successCode).build();
     }
 
     /**
@@ -726,7 +445,7 @@ public class RuleResult implements Serializable {
      * @return A new RuleResult instance
      */
     public static RuleResult noMatchWithCode(String ruleName, String message, String severity, String errorCode) {
-        return new RuleResult(ruleName, message, severity, false, ResultType.NO_MATCH, null, new HashMap<>(), new ArrayList<>(), true, null, errorCode, null);
+        return builder().ruleName(ruleName).message(message).severity(severity).triggered(false).resultType(ResultType.NO_MATCH).success(true).errorCode(errorCode).build();
     }
 
     // New factory methods for enrichment results
@@ -751,8 +470,7 @@ public class RuleResult implements Serializable {
      * @return A new RuleResult instance representing successful enrichment
      */
     public static RuleResult enrichmentSuccess(Map<String, Object> enrichedData, String severity) {
-        return new RuleResult("enrichment", "Enrichment completed successfully",
-                             severity, true, ResultType.MATCH, null, enrichedData, new ArrayList<>(), true);
+        return builder().ruleName("enrichment").message("Enrichment completed successfully").severity(severity).triggered(true).resultType(ResultType.MATCH).enrichedData(enrichedData).success(true).build();
     }
 
     /**
@@ -777,8 +495,7 @@ public class RuleResult implements Serializable {
      * @return A new RuleResult instance representing failed enrichment
      */
     public static RuleResult enrichmentFailure(List<String> failureMessages, Map<String, Object> enrichedData, String severity) {
-        return new RuleResult("enrichment", "Required field enrichment failed",
-                             severity, false, ResultType.ERROR, null, enrichedData, failureMessages, false);
+        return builder().ruleName("enrichment").message("Required field enrichment failed").severity(severity).triggered(false).resultType(ResultType.ERROR).enrichedData(enrichedData).failureMessages(failureMessages).success(false).build();
     }
 
     /**
@@ -791,8 +508,7 @@ public class RuleResult implements Serializable {
      * @return A new RuleResult instance representing successful complete evaluation
      */
     public static RuleResult evaluationSuccess(Map<String, Object> enrichedData, String ruleName, String ruleMessage) {
-        return new RuleResult(ruleName, ruleMessage,
-                             true, ResultType.MATCH, null, enrichedData, new ArrayList<>(), true);
+        return builder().ruleName(ruleName).message(ruleMessage).triggered(true).resultType(ResultType.MATCH).enrichedData(enrichedData).success(true).build();
     }
 
     /**
@@ -808,8 +524,7 @@ public class RuleResult implements Serializable {
      */
     public static RuleResult evaluationSuccess(Map<String, Object> enrichedData, String ruleName, String ruleMessage,
                                               List<RuleResult> childResults) {
-        return new RuleResult(ruleName, ruleMessage,
-                             true, ResultType.MATCH, enrichedData, new ArrayList<>(), true, childResults);
+        return builder().ruleName(ruleName).message(ruleMessage).triggered(true).resultType(ResultType.MATCH).enrichedData(enrichedData).success(true).childResults(childResults).build();
     }
 
     /**
@@ -824,8 +539,7 @@ public class RuleResult implements Serializable {
      */
     public static RuleResult evaluationFailure(List<String> failureMessages, Map<String, Object> enrichedData,
                                               String ruleName, String errorMessage) {
-        return new RuleResult(ruleName, errorMessage,
-                             false, ResultType.ERROR, null, enrichedData, failureMessages, false);
+        return builder().ruleName(ruleName).message(errorMessage).triggered(false).resultType(ResultType.ERROR).enrichedData(enrichedData).failureMessages(failureMessages).success(false).build();
     }
 
     /**
@@ -842,46 +556,7 @@ public class RuleResult implements Serializable {
      */
     public static RuleResult evaluationFailure(List<String> failureMessages, Map<String, Object> enrichedData,
                                               String ruleName, String errorMessage, String severity) {
-        return new RuleResult(ruleName, errorMessage, severity,
-                             false, ResultType.ERROR, null, enrichedData, failureMessages, false);
-    }
-
-    /**
-     * Constructor for backward compatibility.
-     * This constructor tries to determine the result type based on the ruleName.
-     *
-     * @param ruleName The name of the rule
-     * @param message The message associated with the rule
-     */
-    public RuleResult(String ruleName, String message) {
-        this.id = UUID.randomUUID();
-        this.ruleId = null;  // No ruleId for backward compatibility
-        this.ruleName = ruleName;
-        this.message = message;
-        this.severity = SeverityConstants.INFO; // Default severity for backward compatibility
-        this.timestamp = Instant.now();
-        this.performanceMetrics = null; // No performance metrics for backward compatibility
-
-        // Try to determine the result type based on the ruleName
-        if ("no-rule".equals(ruleName)) {
-            this.resultType = ResultType.NO_RULES;
-            this.triggered = false;
-        } else if ("no-match".equals(ruleName)) {
-            this.resultType = ResultType.NO_MATCH;
-            this.triggered = false;
-        } else {
-            this.resultType = ResultType.MATCH;
-            this.triggered = true;
-        }
-
-        // Initialize new fields with defaults for backward compatibility
-        this.enrichedData = new HashMap<>();
-        this.failureMessages = new ArrayList<>();
-        this.success = (this.resultType == ResultType.MATCH || this.resultType == ResultType.NO_MATCH);
-        this.successCode = null;
-        this.errorCode = null;
-        this.mapToField = null;
-        this.childResults = new ArrayList<>();
+        return builder().ruleName(ruleName).message(errorMessage).severity(severity).triggered(false).resultType(ResultType.ERROR).enrichedData(enrichedData).failureMessages(failureMessages).success(false).build();
     }
 
     /**

@@ -197,10 +197,10 @@ public class SeverityValidationTest {
         assertEquals("INFO", infoResult.getSeverity(), "RuleResult.match should support INFO severity");
         logger.info("RuleResult factory methods support all severity levels");
 
-        // Test 2: Verify RuleResult constructors support severity
-        RuleResult constructedResult = new RuleResult("test-rule", "test-message", "ERROR", true, RuleResult.ResultType.MATCH);
-        assertEquals("ERROR", constructedResult.getSeverity(), "RuleResult constructor should support severity");
-        logger.info("RuleResult constructors support severity");
+        // Test 2: Verify RuleResult builder supports severity
+        RuleResult constructedResult = RuleResult.builder().ruleName("test-rule").message("test-message").severity("ERROR").triggered(true).resultType(RuleResult.ResultType.MATCH).build();
+        assertEquals("ERROR", constructedResult.getSeverity(), "RuleResult builder should support severity");
+        logger.info("RuleResult builder supports severity");
 
         // Test 3: Verify Rule objects support severity (already tested in Phase 1)
         Rule errorRule = new RuleBuilder().withName("critical-check").withCondition("#amount > 10000").withMessage("Critical amount detected").withSeverity("ERROR").build();

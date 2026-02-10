@@ -1,7 +1,9 @@
 # APEX Technical Debt Analysis & Cleanup Plan
 
 **Date**: December 14, 2025  
-**Status**: Analysis Complete - Ready for Step 4 Implementation  
+**Updated**: February 10, 2026  
+**Status**: 🟡 Not started — deferred to separate cleanup effort  
+**Priority**: MEDIUM — no functional impact, all deprecated code still works  
 **Related**: apex_architecture_and_code_review.md - Section 4: Technical Debt Inventory
 
 ---

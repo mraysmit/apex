@@ -216,9 +216,19 @@ public class UnifiedRuleEvaluator {
                 // When condition is TRUE, the rule matched successfully - severity is irrelevant
                 // Always return MATCH with success=true
                 String resolvedMessage = resolveMessageTemplate(rule.getMessage(), context);
-                RuleResult matchResult = new RuleResult(rule.getId(), rule.getName(), resolvedMessage, rule.getSeverity(),
-                                                       true, RuleResult.ResultType.MATCH, metrics, enrichedData,
-                                                       new java.util.ArrayList<>(), true, evaluatedSuccessCode, null, rule.getMapToField());
+                RuleResult matchResult = RuleResult.builder()
+                        .ruleId(rule.getId())
+                        .ruleName(rule.getName())
+                        .message(resolvedMessage)
+                        .severity(rule.getSeverity())
+                        .triggered(true)
+                        .resultType(RuleResult.ResultType.MATCH)
+                        .performanceMetrics(metrics)
+                        .enrichedData(enrichedData)
+                        .success(true)
+                        .successCode(evaluatedSuccessCode)
+                        .mapToField(rule.getMapToField())
+                        .build();
                 return matchResult;
             } else {
                 // Rule did not match - evaluate error code
@@ -251,9 +261,19 @@ public class UnifiedRuleEvaluator {
                 // Return result with codes and mappings
                 String noMatchMessageTemplate = rule.getNoMatchMessage() != null ? rule.getNoMatchMessage() : rule.getMessage();
                 String resolvedNoMatchMessage = resolveMessageTemplate(noMatchMessageTemplate, context);
-                RuleResult noMatchResult = new RuleResult(rule.getId(), rule.getName(), resolvedNoMatchMessage, rule.getSeverity(),
-                                                         false, resultType, metrics, enrichedData,
-                                                         new java.util.ArrayList<>(), !shouldFail, null, evaluatedErrorCode, rule.getMapToField());
+                RuleResult noMatchResult = RuleResult.builder()
+                        .ruleId(rule.getId())
+                        .ruleName(rule.getName())
+                        .message(resolvedNoMatchMessage)
+                        .severity(rule.getSeverity())
+                        .triggered(false)
+                        .resultType(resultType)
+                        .performanceMetrics(metrics)
+                        .enrichedData(enrichedData)
+                        .success(!shouldFail)
+                        .errorCode(evaluatedErrorCode)
+                        .mapToField(rule.getMapToField())
+                        .build();
                 return noMatchResult;
             }
             
@@ -305,11 +325,10 @@ public class UnifiedRuleEvaluator {
             // Support nested field notation (e.g., "validation.isHighValue" creates nested structure)
             setNestedValue(enrichedData, rule.getResultField(), result.isTriggered());
 
-            // Create new RuleResult with updated enrichedData
-            result = new RuleResult(result.getRuleName(), result.getMessage(), result.getSeverity(),
-                                   result.isTriggered(), result.getResultType(), result.getPerformanceMetrics(),
-                                   enrichedData, result.getFailureMessages(), result.isSuccess(),
-                                   result.getSuccessCode(), result.getErrorCode(), result.getMapToField());
+            // Create new RuleResult with updated enrichedData using toBuilder()
+            result = result.toBuilder()
+                    .enrichedData(enrichedData)
+                    .build();
             logger.info("Phase 5: Added result-field to enrichedData: {} = {}", rule.getResultField(), result.isTriggered());
         }
 
@@ -441,16 +460,11 @@ public class UnifiedRuleEvaluator {
 
                 // Preserve original rule severity in recovery result
                 RuleResult originalResult = recoveryResult.getRuleResult();
-                RuleResult resultWithCorrectSeverity = new RuleResult(
-                    originalResult.getRuleName(),
-                    originalResult.getMessage(),
-                    severity,  // Preserve original rule severity, not recovery default
-                    false,     // Not triggered
-                    originalResult.getResultType(),
-                    metrics
-                );
-                
-                
+                RuleResult resultWithCorrectSeverity = originalResult.toBuilder()
+                        .severity(severity)  // Preserve original rule severity, not recovery default
+                        .triggered(false)
+                        .performanceMetrics(metrics)
+                        .build();
                 return resultWithCorrectSeverity;
             } else {
                 // Recovery failed
@@ -577,10 +591,9 @@ public class UnifiedRuleEvaluator {
                         mergedData.putAll(result.getEnrichedData());
                     }
                     // Create new result with merged enrichedData
-                    return new RuleResult(result.getRuleName(), result.getMessage(), result.getSeverity(),
-                                         result.isTriggered(), result.getResultType(), result.getPerformanceMetrics(),
-                                         mergedData, result.getFailureMessages(), result.isSuccess(),
-                                         result.getSuccessCode(), result.getErrorCode(), result.getMapToField());
+                    return result.toBuilder()
+                            .enrichedData(mergedData)
+                            .build();
                 }
                 return result;
             }
@@ -588,8 +601,15 @@ public class UnifiedRuleEvaluator {
 
         logger.info("No rules matched");
         // Return noMatch with accumulated enrichedData from all evaluated rules
-        return new RuleResult("no-match", "No matching rules found", SeverityConstants.INFO, false, RuleResult.ResultType.NO_MATCH,
-                             null, accumulatedEnrichedData, new java.util.ArrayList<>(), true, null, null, null);
+        return RuleResult.builder()
+                .ruleName("no-match")
+                .message("No matching rules found")
+                .severity(SeverityConstants.INFO)
+                .triggered(false)
+                .resultType(RuleResult.ResultType.NO_MATCH)
+                .enrichedData(accumulatedEnrichedData)
+                .success(true)
+                .build();
     }
 
     /**
@@ -634,16 +654,22 @@ public class UnifiedRuleEvaluator {
 
         // Return first significant result if any (error or match, whichever came first)
         if (firstSignificantResult != null) {
-            return new RuleResult(firstSignificantResult.getRuleName(), firstSignificantResult.getMessage(), firstSignificantResult.getSeverity(),
-                                 firstSignificantResult.isTriggered(), firstSignificantResult.getResultType(), firstSignificantResult.getPerformanceMetrics(),
-                                 accumulatedEnrichedData, firstSignificantResult.getFailureMessages(), firstSignificantResult.isSuccess(),
-                                 firstSignificantResult.getSuccessCode(), firstSignificantResult.getErrorCode(), firstSignificantResult.getMapToField());
+            return firstSignificantResult.toBuilder()
+                    .enrichedData(accumulatedEnrichedData)
+                    .build();
         }
 
         logger.info("No rules matched");
         // Return noMatch with accumulated enrichedData from all evaluated rules
-        return new RuleResult("no-match", "No matching rules found", SeverityConstants.INFO, false, RuleResult.ResultType.NO_MATCH,
-                             null, accumulatedEnrichedData, new java.util.ArrayList<>(), true, null, null, null);
+        return RuleResult.builder()
+                .ruleName("no-match")
+                .message("No matching rules found")
+                .severity(SeverityConstants.INFO)
+                .triggered(false)
+                .resultType(RuleResult.ResultType.NO_MATCH)
+                .enrichedData(accumulatedEnrichedData)
+                .success(true)
+                .build();
     }
 
     /**
