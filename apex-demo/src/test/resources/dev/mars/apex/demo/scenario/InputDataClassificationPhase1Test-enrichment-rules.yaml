@@ -1,0 +1,36 @@
+# ============================================================================
+# APEX Enrichment Stage Configuration for InputDataClassificationPhase1Test
+# ============================================================================
+# PURPOSE:
+# This file provides the configuration for the "enrichment" STAGE in the
+# InputDataClassificationPhase1Test scenario. It uses validation rules
+# (type: rule-config) to SIMULATE enrichment processing for testing purposes.
+# ============================================================================
+
+metadata:
+  id: "input-classification-enrichment-rules"
+  name: "Input Classification Enrichment Rules"
+  version: "1.0.0"
+  description: "Validation rules that simulate enrichment stage for input data classification"
+  type: "rule-config"
+  author: "APEX Demo"
+
+# Simulated enrichment rules for classification
+rules:
+  - id: "classification-label-check"
+    name: "Classification Label Check"
+    description: "Verify classification label assignment (simulates enrichment)"
+    condition: "true"
+    severity: "INFO"
+    category: "enrichment"
+    message: "Classification label verified"
+    enabled: true
+
+  - id: "classification-confidence-check"
+    name: "Classification Confidence Check"
+    description: "Verify classification confidence score (simulates enrichment)"
+    condition: "true"
+    severity: "INFO"
+    category: "enrichment"
+    message: "Classification confidence verified"
+    enabled: true

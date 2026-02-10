@@ -1,7 +1,9 @@
 metadata:
+  id: "custom-handlers-test"
   name: "Custom Error Handlers Test"
   version: "1.0"
   type: "rule-config"
+  author: "APEX Demo Team"
   description: "Test custom error handling strategies and recovery procedures"
 
 error-recovery:

@@ -1,7 +1,9 @@
 metadata:
+  id: "composite-enrichments-test"
   name: "Composite Enrichments Test"
   version: "1.0"
   type: "rule-config"
+  author: "APEX Demo Team"
   description: "Test composite enrichment combining multiple enrichment types"
 
 enrichments:

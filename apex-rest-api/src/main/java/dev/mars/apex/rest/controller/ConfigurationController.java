@@ -1,8 +1,8 @@
 package dev.mars.apex.rest.controller;
 
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.RulesEngineService;
+import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.exception.YamlConfigurationException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -57,9 +57,6 @@ public class ConfigurationController {
 
     @Autowired
     private YamlConfigurationLoader yamlConfigurationLoader;
-
-    @Autowired
-    private RulesEngineService rulesEngineService;
     
     // Store the current configuration for inspection
     private YamlRuleConfiguration currentConfiguration;
@@ -152,7 +149,7 @@ public class ConfigurationController {
                     )
                 )
             )
-            String yamlContent) throws dev.mars.apex.core.config.yaml.YamlConfigurationException {
+            String yamlContent) throws YamlConfigurationException {
 
         logger.info("Loading new YAML configuration");
         logger.debug("YAML content length: {} characters", yamlContent.length());
@@ -208,7 +205,7 @@ public class ConfigurationController {
     })
     public ResponseEntity<Map<String, Object>> uploadConfiguration(
             @Parameter(description = "YAML configuration file to upload")
-            @RequestParam("file") MultipartFile file) throws dev.mars.apex.core.config.yaml.YamlConfigurationException, java.io.IOException {
+            @RequestParam("file") MultipartFile file) throws YamlConfigurationException, java.io.IOException {
 
         if (file.isEmpty()) {
             return ResponseEntity.badRequest()
@@ -271,7 +268,7 @@ public class ConfigurationController {
         @ApiResponse(responseCode = "400", description = "Configuration is invalid")
     })
     public ResponseEntity<Map<String, Object>> validateConfiguration(
-            @RequestBody String yamlContent) throws dev.mars.apex.core.config.yaml.YamlConfigurationException {
+            @RequestBody String yamlContent) throws YamlConfigurationException {
 
         logger.info("Validating YAML configuration");
 

@@ -1,7 +1,9 @@
 metadata:
+  id: "fallback-values-test"
   name: "Fallback Values Test"
   version: "1.0"
   type: "rule-config"
+  author: "APEX Demo Team"
   description: "Test lookup enrichments with fallback and default values"
 
 enrichments:

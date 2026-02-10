@@ -1,7 +1,10 @@
 metadata:
+  id: "basic-rules-test"
   name: "Basic Rules Test"
   version: "1.0"
+  type: "rule-config"
   description: "Test basic rule block import"
+  author: "APEX Demo Team"
 
 rules:
   - id: "rule-001"

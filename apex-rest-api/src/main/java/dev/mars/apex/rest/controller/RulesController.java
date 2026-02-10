@@ -5,7 +5,6 @@ import dev.mars.apex.engine.core.RuleBuilder;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.Rule;
 import dev.mars.apex.engine.model.RuleResult;
-import dev.mars.apex.core.config.yaml.RulesEngineService;
 import dev.mars.apex.rest.dto.*;
 import dev.mars.apex.rest.service.RuleEvaluationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -70,9 +69,6 @@ public class RulesController {
 
     @Autowired
     private RulesEngine rulesEngine;
-
-    @Autowired
-    private RulesEngineService rulesEngineService;
     
     /**
      * Simple rule check endpoint.

@@ -1,6 +1,10 @@
 metadata:
+  id: "scenario-classification-test"
   name: "Scenario Test"
   version: "1.0"
+  type: "rule-config"
+  description: "Test scenario-based classification routing"
+  author: "APEX Demo Team"
 
 scenario:
   name: "Trade Classification"

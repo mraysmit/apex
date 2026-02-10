@@ -38,7 +38,9 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Manual Selenium test for accordion functionality - runs in VISIBLE browser mode.
  * This test actually clicks on UI elements and verifies visible state changes.
+ * Uses @TestInstance(PER_CLASS) to reuse a single browser across all test methods.
  */
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DisplayName("Accordion Manual UI Test")
@@ -52,12 +54,9 @@ class AccordionManualTest {
     private String baseUrl;
 
     @BeforeAll
-    static void setupClass() {
+    void setupBrowser() {
         WebDriverManager.chromedriver().setup();
-    }
 
-    @BeforeEach
-    void setUp() {
         ChromeOptions options = new ChromeOptions();
         // NO HEADLESS - we want to see the browser
         options.addArguments("--no-sandbox");
@@ -69,8 +68,8 @@ class AccordionManualTest {
         baseUrl = "http://localhost:" + port;
     }
 
-    @AfterEach
-    void tearDown() {
+    @AfterAll
+    void tearDownBrowser() {
         if (driver != null) {
             driver.quit();
         }

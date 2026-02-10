@@ -1,3 +1,11 @@
+metadata:
+  id: "pipeline-roundtrip-test"
+  name: "Pipeline Roundtrip Test"
+  version: "1.0"
+  type: "rule-config"
+  description: "Test pipeline configuration roundtrip"
+  author: "APEX Demo Team"
+
 pipeline:
   id: "data-processing-pipeline"
   mode: "sequential"

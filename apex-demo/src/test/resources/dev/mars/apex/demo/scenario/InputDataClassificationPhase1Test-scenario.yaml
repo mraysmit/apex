@@ -1,0 +1,44 @@
+# Input Data Classification Scenario Configuration
+# Scenario definition with classification-based processing stages
+
+metadata:
+  id: "input-data-classification"
+  name: "Input Data Classification"
+  version: "1.0.0"
+  description: "Two-stage input data classification with validation and enrichment"
+  type: "scenario"
+  business-domain: "DataClassification"
+  owner: "test@example.com"
+
+scenario:
+  scenario-id: "input-data-classification"
+  name: "Input Data Classification"
+  description: "Classifies input data through validation and enrichment stages"
+
+  data-types:
+    - "Trade"
+    - "java.util.Map"
+
+  processing-stages:
+
+    # Stage 1: Validation (must pass)
+    - stage-name: "validation"
+      config-file: "src/test/java/dev/mars/apex/demo/scenario/InputDataClassificationPhase1Test-validation-rules.yaml"
+      execution-order: 1
+      failure-policy: "terminate"
+      required: true
+      depends-on: []
+      stage-metadata:
+        description: "Input data validation for classification"
+        sla-ms: 1000
+
+    # Stage 2: Enrichment (optional)
+    - stage-name: "enrichment"
+      config-file: "src/test/java/dev/mars/apex/demo/scenario/InputDataClassificationPhase1Test-enrichment-rules.yaml"
+      execution-order: 2
+      failure-policy: "continue-with-warnings"
+      required: false
+      depends-on: ["validation"]
+      stage-metadata:
+        description: "Data enrichment for classification (simulated using validation rules)"
+        sla-ms: 2000

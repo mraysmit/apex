@@ -1,7 +1,9 @@
 metadata:
+  id: "hybrid-classification-test"
   name: "Hybrid Classification Test"
   version: "1.0"
   type: "rule-config"
+  author: "APEX Demo Team"
   description: "Test scenario with both classification and inline rules"
 
 scenario:

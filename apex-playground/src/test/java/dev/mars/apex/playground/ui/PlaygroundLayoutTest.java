@@ -16,6 +16,11 @@ import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Tests for APEX Playground 2x2 grid layout.
+ * Uses @TestInstance(PER_CLASS) to reuse a single browser across all test methods.
+ */
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(properties = {
     "logging.level.dev.mars.apex=WARN",
@@ -31,12 +36,9 @@ class PlaygroundLayoutTest {
     private String baseUrl;
 
     @BeforeAll
-    static void setupClass() {
+    void setupBrowser() {
         WebDriverManager.chromedriver().setup();
-    }
 
-    @BeforeEach
-    void setUp() {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless");
         options.addArguments("--no-sandbox");
@@ -49,8 +51,8 @@ class PlaygroundLayoutTest {
         baseUrl = "http://localhost:" + port;
     }
 
-    @AfterEach
-    void tearDown() {
+    @AfterAll
+    void tearDownBrowser() {
         if (driver != null) {
             driver.quit();
         }

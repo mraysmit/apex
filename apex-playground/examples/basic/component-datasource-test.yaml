@@ -3,6 +3,8 @@ metadata:
   name: "Component Test"
   type: "rule-config"
   version: "1.0"
+  description: "Component with external data source references test"
+  author: "APEX Demo Team"
 
 data-source-refs:
   - name: "trade-database"

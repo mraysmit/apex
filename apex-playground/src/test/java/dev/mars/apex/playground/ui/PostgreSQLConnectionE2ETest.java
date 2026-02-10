@@ -33,7 +33,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * 4. Connection can be selected
  * 5. SQL query can be executed
  * 6. Results are displayed
+ *
+ * Uses @TestInstance(PER_CLASS) to reuse browser across test methods.
  */
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Testcontainers
@@ -55,13 +58,8 @@ class PostgreSQLConnectionE2ETest {
     private static final String CONNECTION_NAME = "E2E PostgreSQL Test";
 
     @BeforeAll
-    static void setupClass() {
+    void setupBrowser() {
         WebDriverManager.chromedriver().setup();
-    }
-
-    @BeforeEach
-    void setup() {
-        // Testcontainers handles the DB, so we don't need manual assumptions
 
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless");
@@ -79,8 +77,11 @@ class PostgreSQLConnectionE2ETest {
 
         driver = new ChromeDriver(options);
         wait = new WebDriverWait(driver, Duration.ofSeconds(30));
-
         baseUrl = "http://localhost:" + port;
+    }
+
+    @BeforeEach
+    void navigateToPage() {
         driver.get(baseUrl + "/apex_editor_main.html");
 
         // Wait for page to fully load
@@ -96,8 +97,8 @@ class PostgreSQLConnectionE2ETest {
         }
     }
 
-    @AfterEach
-    void tearDown() {
+    @AfterAll
+    void tearDownBrowser() {
         if (driver != null) {
             driver.quit();
         }

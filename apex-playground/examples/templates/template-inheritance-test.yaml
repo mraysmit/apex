@@ -1,7 +1,9 @@
 metadata:
+  id: "template-inheritance-test"
   name: "Template Inheritance Test"
   version: "1.0"
   type: "rule-config"
+  author: "APEX Demo Team"
   description: "Test template inheritance and extension patterns"
 
 templates:

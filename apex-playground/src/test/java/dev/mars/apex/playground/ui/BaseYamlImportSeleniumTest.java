@@ -53,11 +53,16 @@ import static org.junit.jupiter.api.Assertions.*;
  *   <li>Screenshot capture on test failures</li>
  *   <li>Helper methods for YAML import/export and block validation</li>
  * </ul>
+ * 
+ * <p><b>Performance optimization:</b> Uses {@code @TestInstance(PER_CLASS)} to reuse
+ * a single Chrome browser instance across all test methods in each subclass,
+ * avoiding the ~5-7s overhead of launching a new ChromeDriver per test.</p>
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-12-19
- * @version 1.0
+ * @version 1.1
  */
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(properties = {
     "logging.level.dev.mars.apex=INFO",
@@ -75,27 +80,21 @@ public abstract class BaseYamlImportSeleniumTest {
     protected int port;
 
     /**
-     * Setup WebDriverManager to automatically manage ChromeDriver versions.
-     * This runs once before all tests in the class.
+     * Setup WebDriverManager and create a single Chrome browser instance for
+     * all tests in this class. Using @TestInstance(PER_CLASS) allows this
+     * instance method to access the injected @LocalServerPort.
      */
     @BeforeAll
-    static void setupClass() {
+    void setupBrowser() {
         WebDriverManager.chromedriver().setup();
-    }
 
-    /**
-     * Initialize WebDriver, WebDriverWait, and JavascriptExecutor before each test.
-     * Configures Chrome in headless mode with standard options for CI/CD compatibility.
-     */
-    @BeforeEach
-    void setUp() {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-gpu");
         options.addArguments("--window-size=1920,1080");
-        
+
         driver = new ChromeDriver(options);
         js = (JavascriptExecutor) driver;
         wait = new WebDriverWait(driver, Duration.ofSeconds(15));
@@ -103,10 +102,10 @@ public abstract class BaseYamlImportSeleniumTest {
     }
 
     /**
-     * Clean up WebDriver resources after each test.
+     * Clean up WebDriver resources after all tests in this class have run.
      */
-    @AfterEach
-    void tearDown() {
+    @AfterAll
+    void tearDownBrowser() {
         if (driver != null) {
             driver.quit();
         }

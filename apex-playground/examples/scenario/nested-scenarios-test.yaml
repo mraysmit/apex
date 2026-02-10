@@ -1,7 +1,9 @@
 metadata:
+  id: "nested-scenarios-test"
   name: "Nested Scenarios Test"
   version: "1.0"
   type: "rule-config"
+  author: "APEX Demo Team"
   description: "Test nested scenario structures with multi-level classification"
 
 scenario:

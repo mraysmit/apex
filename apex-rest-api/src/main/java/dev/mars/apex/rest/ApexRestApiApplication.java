@@ -34,6 +34,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @version 1.0
  */
 @SpringBootApplication(exclude = {
+    org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration.class,
+    org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration.class,
     org.springframework.boot.actuate.autoconfigure.metrics.task.TaskExecutorMetricsAutoConfiguration.class
 })
 @OpenAPIDefinition(

@@ -1,7 +1,9 @@
 metadata:
+  id: "custom-expressions-test"
   name: "Custom Expression Transformations Test"
   version: "1.0"
   type: "rule-config"
+  author: "APEX Demo Team"
   description: "Test custom SpEL expression-based transformations"
 
 transformations:

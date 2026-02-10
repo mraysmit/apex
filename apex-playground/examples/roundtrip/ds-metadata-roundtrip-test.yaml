@@ -7,7 +7,8 @@
 
 metadata:
   id: "ds-metadata-roundtrip-test"
-  type: "data-source-config"
+  name: "Data Source Metadata Roundtrip Test"
+  type: "external-data-config"
   version: "1.0.0"
   description: "Data source config with all metadata fields"
   author: "APEX Test Suite"

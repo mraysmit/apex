@@ -1,7 +1,9 @@
 metadata:
+  id: "notification-policies-test"
   name: "Notification Policies Test"
   version: "1.0"
   type: "rule-config"
+  author: "APEX Demo Team"
   description: "Test error recovery with notification and alerting policies"
 
 error-recovery:

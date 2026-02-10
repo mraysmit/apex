@@ -254,14 +254,9 @@ class DatabaseHealthIndicatorTest {
         DataSource failDataSource = JdbcTemplateFactory.createDataSource(failConfig);
         DatabaseHealthIndicator failHealthIndicator = new DatabaseHealthIndicator(failDataSource, failConfig);
 
-        // Wait a moment for the initial background check to complete
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
-        // Perform manual health checks to reach the failure threshold
+        // Perform manual health checks to deterministically reach the failure threshold
+        // (don't rely on background check timing - that causes flaky tests)
+        failHealthIndicator.performHealthCheck();
         failHealthIndicator.performHealthCheck();
 
         // Check status after reaching threshold

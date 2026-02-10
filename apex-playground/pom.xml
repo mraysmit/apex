@@ -290,6 +290,21 @@
                     -->
                     <!-- Show test output in console for progress visibility -->
                     <redirectTestOutputToFile>false</redirectTestOutputToFile>
+
+                    <!-- JUnit 5 parallel execution: run test CLASSES concurrently,
+                         but methods within each class sequentially (same_thread).
+                         Combined with @TestInstance(PER_CLASS) browser reuse,
+                         each class gets its own Chrome instance in its own thread. -->
+                    <properties>
+                        <configurationParameters>
+                            junit.jupiter.execution.parallel.enabled = true
+                            junit.jupiter.execution.parallel.mode.default = same_thread
+                            junit.jupiter.execution.parallel.mode.classes.default = concurrent
+                            junit.jupiter.execution.parallel.config.strategy = fixed
+                            junit.jupiter.execution.parallel.config.fixed.parallelism = 3
+                        </configurationParameters>
+                    </properties>
+
                     <excludes>
                         <!-- Exclude all UI tests - require browser drivers -->
                         <exclude>**/ui/**/*UITest.java</exclude>

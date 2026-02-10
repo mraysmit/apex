@@ -17,9 +17,8 @@ package dev.mars.apex.rest.controller;
  */
 
 
-import dev.mars.apex.core.config.yaml.RulesEngineService;
-import dev.mars.apex.core.config.yaml.YamlRuleConfiguration;
-import dev.mars.apex.core.config.yaml.YamlConfigurationLoader;
+import dev.mars.apex.core.config.model.YamlRuleConfiguration;
+import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
 
@@ -56,9 +55,6 @@ import java.util.*;
 public class EnrichmentController {
 
     private static final Logger logger = LoggerFactory.getLogger(EnrichmentController.class);
-
-    @Autowired
-    private RulesEngineService rulesEngineService;
 
     @Autowired
     private YamlConfigurationLoader yamlConfigurationLoader;
@@ -151,8 +147,7 @@ public class EnrichmentController {
             );
 
             // Create RulesEngine and evaluate (universal YAML processing)
-            @SuppressWarnings("deprecation")
-            RulesEngine rulesEngine = rulesEngineService.createRulesEngineFromConfig(yamlConfig);
+            RulesEngine rulesEngine = RulesEngine.fromYamlConfig(yamlConfig);
 
             // Convert target object to Map for RulesEngine.evaluate()
             Map<String, Object> inputData = new HashMap<>();
@@ -253,8 +248,7 @@ public class EnrichmentController {
             );
 
             // Create RulesEngine for universal YAML processing
-            @SuppressWarnings("deprecation")
-            RulesEngine rulesEngine = rulesEngineService.createRulesEngineFromConfig(yamlConfig);
+            RulesEngine rulesEngine = RulesEngine.fromYamlConfig(yamlConfig);
 
             // Process all objects
             List<Object> enrichedObjects = new ArrayList<>();
@@ -359,8 +353,7 @@ public class EnrichmentController {
             );
 
             // Create RulesEngine and evaluate (universal YAML processing)
-            @SuppressWarnings("deprecation")
-            RulesEngine rulesEngine = rulesEngineService.createRulesEngineFromConfig(config);
+            RulesEngine rulesEngine = RulesEngine.fromYamlConfig(config);
 
             // Convert target object to Map for RulesEngine.evaluate()
             Map<String, Object> inputData = new HashMap<>();

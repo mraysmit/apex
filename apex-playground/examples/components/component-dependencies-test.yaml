@@ -4,6 +4,7 @@ metadata:
   version: "1.0"
   type: "rule-config"
   description: "Test component dependency chains and failure propagation"
+  author: "APEX Demo Team"
 
 components:
   - id: "foundation-component"

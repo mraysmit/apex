@@ -1,6 +1,10 @@
 metadata:
+  id: "calculation-enrichment-test"
   name: "Calculation Test"
   version: "1.0"
+  type: "rule-config"
+  description: "Test calculation-based enrichments"
+  author: "APEX Demo Team"
 
 enrichments:
   - id: "total-value-calc"

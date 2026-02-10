@@ -1,7 +1,9 @@
 metadata:
+  id: "conditional-enablement-test"
   name: "Conditional Data Source Enablement Test"
   version: "1.0"
   type: "rule-config"
+  author: "APEX Demo Team"
   description: "Test conditional enabling/disabling of data sources based on context"
 
 data-source-refs:

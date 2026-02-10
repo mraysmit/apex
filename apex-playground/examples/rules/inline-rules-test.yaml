@@ -1,7 +1,9 @@
 metadata:
+  id: "inline-rules-test"
   name: "Inline Rules Test"
   version: "1.0"
   type: "rule-config"
+  author: "APEX Demo Team"
   description: "Test inline rule definitions within components and scenarios"
 
 components:

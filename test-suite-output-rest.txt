@@ -1,0 +1,978 @@
+[INFO] Scanning for projects...
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for com.apex:apex-playground:jar:1.0-SNAPSHOT
+[WARNING] 'dependencies.dependency.(groupId:artifactId:type:classifier)' must be unique: org.springframework.boot:spring-boot-starter-actuator:jar -> duplicate declaration of version (?) @ line 89, column 21
+[WARNING] 
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+[WARNING] 
+[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
+[WARNING] 
+[INFO] 
+[INFO] -----------------------< com.apex:apex-rest-api >-----------------------
+[INFO] Building APEX REST API 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ apex-rest-api ---
+[INFO] Copying 4 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ apex-rest-api ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ apex-rest-api ---
+[INFO] Copying 4 resources from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ apex-rest-api ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO] 
+[INFO] --- surefire:3.1.2:test (default-test) @ apex-rest-api ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running dev.mars.apex.rest.controller.ApiVersionControllerTest
+[main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [dev.mars.apex.rest.controller.ApiVersionControllerTest]: ApiVersionControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+[main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration dev.mars.apex.rest.ApexRestApiApplication for test class dev.mars.apex.rest.controller.ApiVersionControllerTest
+[INFO] Running dev.mars.apex.rest.controller.ApiVersionControllerTest$VersionHealthTests
+[main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [dev.mars.apex.rest.controller.ApiVersionControllerTest$VersionHealthTests]: VersionHealthTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+[main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration dev.mars.apex.rest.ApexRestApiApplication for test class dev.mars.apex.rest.controller.ApiVersionControllerTest$VersionHealthTests
+[main] INFO dev.mars.apex.rest.controller.ApiVersionControllerTest - Starting ApiVersionControllerTest using Java 25 with PID 22316 (started by markr in C:\Users\markr\dev\java\corejava\apex-rules-engine\apex-rest-api)
+[main] INFO dev.mars.apex.rest.controller.ApiVersionControllerTest - The following 1 profile is active: "test"
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by org.apache.tomcat.jni.Library in an unnamed module (file:/C:/Users/markr/.m2/repository/org/apache/tomcat/embed/tomcat-embed-core/10.1.33/tomcat-embed-core-10.1.33.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+[main] INFO org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port 0 (http)
+[main] INFO org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1477 ms
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Creating YamlConfigurationLoader bean
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Creating DataSourceManager bean
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Creating ExpressionEvaluationService bean
+[main] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Creating primary RulesService bean
+[main] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[main] INFO dev.mars.apex.core.cache.ApexCacheManager - ApexCacheManager initialized with 4 cache scopes: expression, lookup-result, dataset, service-registry
+[main] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[main] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Error recovery enabled
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Loading rules configuration from: classpath:rules/test-rules.yaml
+[main] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Loading YAML configuration from classpath: rules/test-rules.yaml
+[main] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Loading YAML configuration from input stream
+[main] INFO dev.mars.apex.core.config.sequential.OrderedYamlParser - Successfully parsed YAML with preserved order from: <stream> (sections: 3, items: 2)
+[main] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Expanded item order from 2 to 2 items
+[main] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - === APPLYING GROUPS-ONLY LOGIC ===
+[main] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Item order size BEFORE filtering: 2
+[main] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - No groups found - skipping groups-only logic (all items execute at definition position)
+[main] WARN dev.mars.apex.rest.config.RulesEngineConfiguration - Could not load rules configuration from classpath:rules/test-rules.yaml: lookup-key is required in lookup-config for enrichment: test-enrichment
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Continuing with empty rules configuration
+[main] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[main] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[main] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Creating ExpressionEvaluatorService bean
+[main] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Creating TemplateProcessorService bean
+[main] INFO dev.mars.apex.rest.service.TemplateProcessorService - Initializing TemplateProcessorService
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Creating LookupServiceRegistry bean
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Creating GenericTransformerService bean
+[main] INFO dev.mars.apex.core.service.transform.GenericTransformerService - GenericTransformerService initialized with custom RulesEngine
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Creating RuleGroupEvaluationService bean
+[main] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Creating YamlEnrichmentProcessor bean
+[main] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Creating YamlRuleFactory bean
+[main] INFO org.springframework.boot.actuate.endpoint.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+[main] INFO org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 54855 (http) with context path '/'
+[main] INFO dev.mars.apex.rest.controller.ApiVersionControllerTest - Started ApiVersionControllerTest in 3.126 seconds (process running for 4.086)
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build what is described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#0.3
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+WARNING: A Java agent has been loaded dynamically (C:\Users\markr\.m2\repository\net\bytebuddy\byte-buddy-agent\1.15.10\byte-buddy-agent-1.15.10.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+[http-nio-auto-1-exec-1] INFO org.springframework.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+[http-nio-auto-1-exec-1] INFO org.springframework.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.954 s -- in dev.mars.apex.rest.controller.ApiVersionControllerTest$VersionHealthTests
+[INFO] Running dev.mars.apex.rest.controller.ApiVersionControllerTest$DeprecationInformationTests
+[main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [dev.mars.apex.rest.controller.ApiVersionControllerTest$DeprecationInformationTests]: DeprecationInformationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+[main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration dev.mars.apex.rest.ApexRestApiApplication for test class dev.mars.apex.rest.controller.ApiVersionControllerTest$DeprecationInformationTests
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.033 s -- in dev.mars.apex.rest.controller.ApiVersionControllerTest$DeprecationInformationTests
+[INFO] Running dev.mars.apex.rest.controller.ApiVersionControllerTest$VersionInformationTests
+[main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [dev.mars.apex.rest.controller.ApiVersionControllerTest$VersionInformationTests]: VersionInformationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+[main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration dev.mars.apex.rest.ApexRestApiApplication for test class dev.mars.apex.rest.controller.ApiVersionControllerTest$VersionInformationTests
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.052 s -- in dev.mars.apex.rest.controller.ApiVersionControllerTest$VersionInformationTests
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.381 s -- in dev.mars.apex.rest.controller.ApiVersionControllerTest
+[INFO] Running dev.mars.apex.rest.controller.EnrichmentControllerTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in dev.mars.apex.rest.controller.EnrichmentControllerTest
+[INFO] Running dev.mars.apex.rest.controller.ExpressionControllerIntegrationTest
+[main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [dev.mars.apex.rest.controller.ExpressionControllerIntegrationTest]: ExpressionControllerIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+[main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration dev.mars.apex.rest.ApexRestApiApplication for test class dev.mars.apex.rest.controller.ExpressionControllerIntegrationTest
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.rest.controller.ExpressionController - Validating expression syntax: invalid syntax +++
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.rest.controller.ExpressionController - Expression validation completed: valid=false
+[http-nio-auto-1-exec-8] INFO dev.mars.apex.rest.controller.ExpressionController - Evaluating expression: #amount * #taxRate
+[http-nio-auto-1-exec-8] INFO dev.mars.apex.rest.service.ExpressionEvaluationService - Evaluating expression: #amount * #taxRate
+[http-nio-auto-1-exec-8] INFO dev.mars.apex.rest.controller.ExpressionController - Expression evaluation completed successfully: 80.0
+[http-nio-auto-1-exec-9] INFO dev.mars.apex.rest.controller.ExpressionController - Validating expression syntax: amount > 1000 && status == 'ACTIVE'
+[http-nio-auto-1-exec-9] INFO dev.mars.apex.rest.controller.ExpressionController - Expression validation completed: valid=true
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.rest.controller.ExpressionController - Evaluating expression: 2 + 3 * 4
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.rest.service.ExpressionEvaluationService - Evaluating expression: 2 + 3 * 4
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.rest.controller.ExpressionController - Expression evaluation completed successfully: 14
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.144 s -- in dev.mars.apex.rest.controller.ExpressionControllerIntegrationTest
+[INFO] Running dev.mars.apex.rest.controller.ExpressionControllerTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in dev.mars.apex.rest.controller.ExpressionControllerTest
+[INFO] Running dev.mars.apex.rest.controller.RulesControllerIntegrationTest
+[main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [dev.mars.apex.rest.controller.RulesControllerIntegrationTest]: RulesControllerIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+[main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration dev.mars.apex.rest.ApexRestApiApplication for test class dev.mars.apex.rest.controller.RulesControllerIntegrationTest
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.rest.controller.RulesController - Evaluating rule check: null
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: Check -> false
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.rest.controller.RulesController - Rule check completed: matched=false
+[http-nio-auto-1-exec-2] INFO dev.mars.apex.rest.controller.RulesController - Evaluating rule check: null
+[http-nio-auto-1-exec-2] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[http-nio-auto-1-exec-2] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[http-nio-auto-1-exec-2] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: Check -> true
+[http-nio-auto-1-exec-2] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule matched: Check
+[http-nio-auto-1-exec-2] INFO dev.mars.apex.rest.controller.RulesController - Rule check completed: matched=true
+[http-nio-auto-1-exec-5] INFO dev.mars.apex.rest.controller.RulesController - Evaluating rule check: null
+[http-nio-auto-1-exec-5] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[http-nio-auto-1-exec-5] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[http-nio-auto-1-exec-5] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation issue for 'Check': Rule evaluation failed: Check - Expression [invalid expression syntax +++] @8: EL1041E: After parsing a valid expression, there is still more data in the expression: 'expression'
+[http-nio-auto-1-exec-5] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Attempting error recovery for rule 'Check' with severity 'INFO' using strategy 'CONTINUE_WITH_DEFAULT'
+[http-nio-auto-1-exec-5] INFO dev.mars.apex.core.service.error.ErrorRecoveryService - Attempting error recovery for rule: Check
+[http-nio-auto-1-exec-5] INFO dev.mars.apex.core.service.error.ErrorRecoveryService - Using default recovery for rule: Check
+[http-nio-auto-1-exec-5] INFO dev.mars.apex.rest.controller.RulesController - Rule check completed: matched=false
+[http-nio-auto-1-exec-6] INFO dev.mars.apex.rest.controller.RulesController - Starting validation with 1 rules
+[http-nio-auto-1-exec-6] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[http-nio-auto-1-exec-6] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[http-nio-auto-1-exec-6] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[http-nio-auto-1-exec-6] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[http-nio-auto-1-exec-6] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[http-nio-auto-1-exec-6] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: Check -> true
+[http-nio-auto-1-exec-6] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule matched: Check
+[http-nio-auto-1-exec-6] INFO dev.mars.apex.rest.service.RuleEvaluationService - Validation completed: valid=true, passed=1, failed=0
+[http-nio-auto-1-exec-6] INFO dev.mars.apex.rest.controller.RulesController - Validation completed: valid=true, errors=0, warnings=0
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.076 s -- in dev.mars.apex.rest.controller.RulesControllerIntegrationTest
+[INFO] Running dev.mars.apex.rest.controller.TemplateControllerIntegrationTest
+[main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [dev.mars.apex.rest.controller.TemplateControllerIntegrationTest]: TemplateControllerIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+[main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration dev.mars.apex.rest.ApexRestApiApplication for test class dev.mars.apex.rest.controller.TemplateControllerIntegrationTest
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.rest.controller.TemplateController - Processing XML template
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.rest.service.TemplateProcessorService - Processing XML template with 75 characters
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.rest.service.TemplateProcessorService - XML template processing completed, 2 expressions processed
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.rest.controller.TemplateController - XML template processing completed successfully
+[http-nio-auto-1-exec-8] INFO dev.mars.apex.rest.controller.TemplateController - Processing JSON template
+[http-nio-auto-1-exec-8] INFO dev.mars.apex.rest.service.TemplateProcessorService - Processing JSON template with 56 characters
+[http-nio-auto-1-exec-8] INFO dev.mars.apex.rest.service.TemplateProcessorService - JSON template processing completed, 2 expressions processed
+[http-nio-auto-1-exec-8] INFO dev.mars.apex.rest.controller.TemplateController - JSON template processing completed successfully
+[http-nio-auto-1-exec-9] INFO dev.mars.apex.rest.controller.TemplateController - Processing text template
+[http-nio-auto-1-exec-9] INFO dev.mars.apex.rest.service.TemplateProcessorService - Processing template with 59 characters
+[http-nio-auto-1-exec-9] INFO dev.mars.apex.rest.service.TemplateProcessorService - Template processing completed, 2 expressions processed
+[http-nio-auto-1-exec-9] INFO dev.mars.apex.rest.controller.TemplateController - Text template processing completed successfully
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.rest.controller.TemplateController - Processing text template
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.rest.service.TemplateProcessorService - Processing template with 44 characters
+[http-nio-auto-1-exec-10] WARN dev.mars.apex.rest.service.TemplateProcessorService - Error evaluating expression 'nonExistentVariable': EL1008E: Property or field 'nonExistentVariable' cannot be found on object of type 'java.util.LinkedHashMap' - maybe not public or not valid?
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.rest.service.TemplateProcessorService - Template processing completed, 0 expressions processed
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.rest.controller.TemplateController - Text template processing completed successfully
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.039 s -- in dev.mars.apex.rest.controller.TemplateControllerIntegrationTest
+[INFO] Running dev.mars.apex.rest.controller.TransformationControllerTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in dev.mars.apex.rest.controller.TransformationControllerTest
+[INFO] Running dev.mars.apex.rest.integration.ApexRestApiIntegrationTest
+[INFO] Running dev.mars.apex.rest.integration.ApexRestApiIntegrationTest$RulesManagementTests
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in dev.mars.apex.rest.integration.ApexRestApiIntegrationTest$RulesManagementTests
+[INFO] Running dev.mars.apex.rest.integration.ApexRestApiIntegrationTest$ErrorHandlingTests
+[http-nio-auto-1-exec-4] WARN dev.mars.apex.rest.exception.GlobalExceptionHandler - Validation error [b4f27c70-1f45-4018-8357-37b54558a44c]: 1 field errors for /api/rules/check
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.rest.controller.RulesController - Evaluating rule check: null
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation issue for 'Check': Rule evaluation failed: Check - EL1008E: Property or field 'nonExistentProperty' cannot be found on object of type 'java.util.LinkedHashMap' - maybe not public or not valid?
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Attempting error recovery for rule 'Check' with severity 'INFO' using strategy 'CONTINUE_WITH_DEFAULT'
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.core.service.error.ErrorRecoveryService - Attempting error recovery for rule: Check
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.core.service.error.ErrorRecoveryService - Using default recovery for rule: Check
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.rest.controller.RulesController - Rule check completed: matched=false
+[http-nio-auto-1-exec-2] INFO dev.mars.apex.rest.controller.RulesController - Evaluating rule check: null
+[http-nio-auto-1-exec-2] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[http-nio-auto-1-exec-2] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[http-nio-auto-1-exec-2] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation issue for 'Check': Rule evaluation failed: Check - Expression [invalid.expression.syntax(] @25: EL1051E: Unexpectedly ran out of arguments
+[http-nio-auto-1-exec-2] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Attempting error recovery for rule 'Check' with severity 'INFO' using strategy 'CONTINUE_WITH_DEFAULT'
+[http-nio-auto-1-exec-2] INFO dev.mars.apex.core.service.error.ErrorRecoveryService - Attempting error recovery for rule: Check
+[http-nio-auto-1-exec-2] INFO dev.mars.apex.core.service.error.ErrorRecoveryService - Using default recovery for rule: Check
+[http-nio-auto-1-exec-2] INFO dev.mars.apex.rest.controller.RulesController - Rule check completed: matched=false
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.054 s -- in dev.mars.apex.rest.integration.ApexRestApiIntegrationTest$ErrorHandlingTests
+[INFO] Running dev.mars.apex.rest.integration.ApexRestApiIntegrationTest$RuleCheckTests
+[http-nio-auto-1-exec-5] INFO dev.mars.apex.rest.controller.RulesController - Evaluating rule check: null
+[http-nio-auto-1-exec-5] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[http-nio-auto-1-exec-5] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[http-nio-auto-1-exec-5] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: Check -> true
+[http-nio-auto-1-exec-5] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule matched: Check
+[http-nio-auto-1-exec-5] INFO dev.mars.apex.rest.controller.RulesController - Rule check completed: matched=true
+[http-nio-auto-1-exec-6] INFO dev.mars.apex.rest.controller.RulesController - Evaluating rule check: null
+[http-nio-auto-1-exec-6] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[http-nio-auto-1-exec-6] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[http-nio-auto-1-exec-6] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: Check -> false
+[http-nio-auto-1-exec-6] INFO dev.mars.apex.rest.controller.RulesController - Rule check completed: matched=false
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.rest.controller.RulesController - Evaluating rule check: null
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: Check -> true
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule matched: Check
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.rest.controller.RulesController - Rule check completed: matched=true
+[http-nio-auto-1-exec-8] INFO dev.mars.apex.rest.controller.RulesController - Evaluating rule check: null
+[http-nio-auto-1-exec-8] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[http-nio-auto-1-exec-8] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[http-nio-auto-1-exec-8] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: Check -> true
+[http-nio-auto-1-exec-8] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule matched: Check
+[http-nio-auto-1-exec-8] INFO dev.mars.apex.rest.controller.RulesController - Rule check completed: matched=true
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.046 s -- in dev.mars.apex.rest.integration.ApexRestApiIntegrationTest$RuleCheckTests
+[INFO] Running dev.mars.apex.rest.integration.ApexRestApiIntegrationTest$HealthCheckTests
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.028 s -- in dev.mars.apex.rest.integration.ApexRestApiIntegrationTest$HealthCheckTests
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.147 s -- in dev.mars.apex.rest.integration.ApexRestApiIntegrationTest
+[INFO] Running dev.mars.apex.rest.integration.ApiVersionIntegrationTest
+[INFO] Running dev.mars.apex.rest.integration.ApiVersionIntegrationTest$VersionDocumentationTests
+[main] INFO dev.mars.apex.rest.integration.ApiVersionIntegrationTest - Starting ApiVersionIntegrationTest using Java 25 with PID 22316 (started by markr in C:\Users\markr\dev\java\corejava\apex-rules-engine\apex-rest-api)
+[main] INFO dev.mars.apex.rest.integration.ApiVersionIntegrationTest - The following 1 profile is active: "test"
+[main] INFO org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port 0 (http)
+[main] INFO org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 361 ms
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Creating YamlConfigurationLoader bean
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Creating DataSourceManager bean
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Creating ExpressionEvaluationService bean
+[main] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Creating primary RulesService bean
+[main] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[main] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[main] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Error recovery enabled
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Loading rules configuration from: classpath:rules/test-rules.yaml
+[main] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Loading YAML configuration from classpath: rules/test-rules.yaml
+[main] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Loading YAML configuration from input stream
+[main] INFO dev.mars.apex.core.config.sequential.OrderedYamlParser - Successfully parsed YAML with preserved order from: <stream> (sections: 3, items: 2)
+[main] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Expanded item order from 2 to 2 items
+[main] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - === APPLYING GROUPS-ONLY LOGIC ===
+[main] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Item order size BEFORE filtering: 2
+[main] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - No groups found - skipping groups-only logic (all items execute at definition position)
+[main] WARN dev.mars.apex.rest.config.RulesEngineConfiguration - Could not load rules configuration from classpath:rules/test-rules.yaml: lookup-key is required in lookup-config for enrichment: test-enrichment
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Continuing with empty rules configuration
+[main] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[main] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[main] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Creating ExpressionEvaluatorService bean
+[main] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Creating TemplateProcessorService bean
+[main] INFO dev.mars.apex.rest.service.TemplateProcessorService - Initializing TemplateProcessorService
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Creating LookupServiceRegistry bean
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Creating GenericTransformerService bean
+[main] INFO dev.mars.apex.core.service.transform.GenericTransformerService - GenericTransformerService initialized with custom RulesEngine
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Creating RuleGroupEvaluationService bean
+[main] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Creating YamlEnrichmentProcessor bean
+[main] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[main] INFO dev.mars.apex.rest.config.RulesEngineConfiguration - Creating YamlRuleFactory bean
+[main] INFO org.springframework.boot.actuate.endpoint.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+[main] INFO org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 54858 (http) with context path '/'
+[main] INFO dev.mars.apex.rest.integration.ApiVersionIntegrationTest - Started ApiVersionIntegrationTest in 0.628 seconds (process running for 6.042)
+[http-nio-auto-2-exec-2] INFO org.springframework.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+[http-nio-auto-2-exec-2] INFO org.springframework.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.649 s -- in dev.mars.apex.rest.integration.ApiVersionIntegrationTest$VersionDocumentationTests
+[INFO] Running dev.mars.apex.rest.integration.ApiVersionIntegrationTest$VersionHeaderTests
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.022 s -- in dev.mars.apex.rest.integration.ApiVersionIntegrationTest$VersionHeaderTests
+[INFO] Running dev.mars.apex.rest.integration.ApiVersionIntegrationTest$VersionInformationTests
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.035 s -- in dev.mars.apex.rest.integration.ApiVersionIntegrationTest$VersionInformationTests
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.713 s -- in dev.mars.apex.rest.integration.ApiVersionIntegrationTest
+[INFO] Running dev.mars.apex.rest.integration.ConfigurationApiIntegrationTest
+[INFO] Running dev.mars.apex.rest.integration.ConfigurationApiIntegrationTest$ErrorHandlingTests
+[http-nio-auto-2-exec-8] INFO dev.mars.apex.rest.controller.ConfigurationController - Loading new YAML configuration
+[http-nio-auto-2-exec-8] WARN dev.mars.apex.rest.controller.ConfigurationController - Configuration loading initiated via REST API - this may cause temporary service disruption
+[http-nio-auto-2-exec-8] ERROR dev.mars.apex.rest.controller.ConfigurationController - YAML configuration size: 24 bytes
+[http-nio-auto-2-exec-8] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Loading YAML configuration from input stream
+[http-nio-auto-2-exec-8] INFO dev.mars.apex.core.config.sequential.OrderedYamlParser - Successfully parsed YAML with preserved order from: <stream> (sections: 0, items: 0)
+[http-nio-auto-2-exec-8] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - === APPLYING GROUPS-ONLY LOGIC ===
+[http-nio-auto-2-exec-8] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - No item order to filter - skipping groups-only logic
+[http-nio-auto-2-exec-8] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Successfully loaded configuration: unnamed
+[http-nio-auto-2-exec-8] INFO dev.mars.apex.rest.controller.ConfigurationController - Configuration loaded successfully: 0 rules, 0 enrichments
+[http-nio-auto-2-exec-9] WARN dev.mars.apex.rest.exception.GlobalExceptionHandler - Method not supported [bfd4de41-a018-4fd9-b558-0e6baa0d33ca]: DELETE for /api/config/info
+[http-nio-auto-2-exec-10] ERROR dev.mars.apex.rest.exception.GlobalExceptionHandler - Unexpected error [fb37c79e-3dd5-473e-8139-8c36042378e8]: No static resource api/config/nonexistent. for /api/config/nonexistent
+org.springframework.web.servlet.resource.NoResourceFoundException: No static resource api/config/nonexistent.
+	at org.springframework.web.servlet.resource.ResourceHttpRequestHandler.handleRequest(ResourceHttpRequestHandler.java:585)
+	at org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter.handle(HttpRequestHandlerAdapter.java:52)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1088)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:978)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+[http-nio-auto-2-exec-2] INFO dev.mars.apex.rest.controller.ConfigurationController - Loading new YAML configuration
+[http-nio-auto-2-exec-2] WARN dev.mars.apex.rest.controller.ConfigurationController - Configuration loading initiated via REST API - this may cause temporary service disruption
+[http-nio-auto-2-exec-2] ERROR dev.mars.apex.rest.controller.ConfigurationController - YAML configuration size: 15 bytes
+[http-nio-auto-2-exec-2] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Loading YAML configuration from input stream
+[http-nio-auto-2-exec-2] ERROR dev.mars.apex.rest.exception.GlobalExceptionHandler - Unexpected error [908ecb1f-48d7-4657-a278-b79462075099]: YAML parsing error in <stream>: Unexpected IOException (of type java.io.IOException): YAML syntax error: Expected object start, got: VALUE_STRING for /api/config/load
+dev.mars.apex.core.config.exception.YamlConfigurationException: YAML parsing error in <stream>: Unexpected IOException (of type java.io.IOException): YAML syntax error: Expected object start, got: VALUE_STRING
+	at dev.mars.apex.core.config.sequential.OrderedYamlParser.parseYamlString(OrderedYamlParser.java:154)
+	at dev.mars.apex.core.config.loader.YamlConfigurationLoader.loadFromStream(YamlConfigurationLoader.java:207)
+	at dev.mars.apex.rest.controller.ConfigurationController.loadConfiguration(ConfigurationController.java:162)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1088)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:978)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+Caused by: com.fasterxml.jackson.databind.JsonMappingException: Unexpected IOException (of type java.io.IOException): YAML syntax error: Expected object start, got: VALUE_STRING
+	at com.fasterxml.jackson.databind.JsonMappingException.fromUnexpectedIOE(JsonMappingException.java:345)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3864)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3828)
+	at dev.mars.apex.core.config.sequential.OrderedYamlParser.parseYamlString(OrderedYamlParser.java:137)
+	... 54 more
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.137 s -- in dev.mars.apex.rest.integration.ConfigurationApiIntegrationTest$ErrorHandlingTests
+[INFO] Running dev.mars.apex.rest.integration.ConfigurationApiIntegrationTest$ConfigurationLoadingTests
+[http-nio-auto-2-exec-3] INFO dev.mars.apex.rest.controller.ConfigurationController - Uploading configuration file: test-config.yaml
+[http-nio-auto-2-exec-3] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Loading YAML configuration from input stream
+[http-nio-auto-2-exec-3] INFO dev.mars.apex.core.config.sequential.OrderedYamlParser - Successfully parsed YAML with preserved order from: <stream> (sections: 2, items: 1)
+[http-nio-auto-2-exec-3] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Expanded item order from 1 to 1 items
+[http-nio-auto-2-exec-3] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - === APPLYING GROUPS-ONLY LOGIC ===
+[http-nio-auto-2-exec-3] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Item order size BEFORE filtering: 1
+[http-nio-auto-2-exec-3] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - No groups found - skipping groups-only logic (all items execute at definition position)
+[http-nio-auto-2-exec-3] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Successfully loaded configuration: Upload Test Configuration
+[http-nio-auto-2-exec-3] INFO dev.mars.apex.rest.controller.ConfigurationController - Configuration file loaded successfully: test-config.yaml (263 bytes)
+[http-nio-auto-2-exec-4] INFO dev.mars.apex.rest.controller.ConfigurationController - Loading new YAML configuration
+[http-nio-auto-2-exec-4] WARN dev.mars.apex.rest.controller.ConfigurationController - Configuration loading initiated via REST API - this may cause temporary service disruption
+[http-nio-auto-2-exec-4] ERROR dev.mars.apex.rest.controller.ConfigurationController - YAML configuration size: 190 bytes
+[http-nio-auto-2-exec-4] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Loading YAML configuration from input stream
+[http-nio-auto-2-exec-4] INFO dev.mars.apex.core.config.sequential.OrderedYamlParser - Successfully parsed YAML with preserved order from: <stream> (sections: 2, items: 1)
+[http-nio-auto-2-exec-4] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Expanded item order from 1 to 1 items
+[http-nio-auto-2-exec-4] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - === APPLYING GROUPS-ONLY LOGIC ===
+[http-nio-auto-2-exec-4] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Item order size BEFORE filtering: 1
+[http-nio-auto-2-exec-4] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - No groups found - skipping groups-only logic (all items execute at definition position)
+[http-nio-auto-2-exec-4] ERROR dev.mars.apex.rest.exception.GlobalExceptionHandler - Unexpected error [4b1e36f1-9fc6-4b12-9670-187f90abaea1]: Rule name is required for rule: test-rule for /api/config/load
+dev.mars.apex.core.config.exception.YamlConfigurationException: Rule name is required for rule: test-rule
+	at dev.mars.apex.core.config.loader.YamlConfigurationLoader.validateRule(YamlConfigurationLoader.java:1456)
+	at dev.mars.apex.core.config.loader.YamlConfigurationLoader.validateRules(YamlConfigurationLoader.java:1443)
+	at dev.mars.apex.core.config.loader.YamlConfigurationLoader.validateConfiguration(YamlConfigurationLoader.java:1413)
+	at dev.mars.apex.core.config.loader.YamlConfigurationLoader.loadFromStream(YamlConfigurationLoader.java:231)
+	at dev.mars.apex.rest.controller.ConfigurationController.loadConfiguration(ConfigurationController.java:162)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1088)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:978)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+[http-nio-auto-2-exec-5] INFO dev.mars.apex.rest.controller.ConfigurationController - Validating YAML configuration
+[http-nio-auto-2-exec-5] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Loading YAML configuration from input stream
+[http-nio-auto-2-exec-5] ERROR dev.mars.apex.rest.exception.GlobalExceptionHandler - Unexpected error [1c51f504-4403-427b-9bd6-dd46f0cfce1a]: YAML parsing error in <stream>: Unexpected IOException (of type java.io.IOException): YAML syntax error: Expected object start, got: VALUE_STRING for /api/config/validate
+dev.mars.apex.core.config.exception.YamlConfigurationException: YAML parsing error in <stream>: Unexpected IOException (of type java.io.IOException): YAML syntax error: Expected object start, got: VALUE_STRING
+	at dev.mars.apex.core.config.sequential.OrderedYamlParser.parseYamlString(OrderedYamlParser.java:154)
+	at dev.mars.apex.core.config.loader.YamlConfigurationLoader.loadFromStream(YamlConfigurationLoader.java:207)
+	at dev.mars.apex.rest.controller.ConfigurationController.validateConfiguration(ConfigurationController.java:276)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1088)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:978)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+Caused by: com.fasterxml.jackson.databind.JsonMappingException: Unexpected IOException (of type java.io.IOException): YAML syntax error: Expected object start, got: VALUE_STRING
+	at com.fasterxml.jackson.databind.JsonMappingException.fromUnexpectedIOE(JsonMappingException.java:345)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3864)
+	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3828)
+	at dev.mars.apex.core.config.sequential.OrderedYamlParser.parseYamlString(OrderedYamlParser.java:137)
+	... 54 more
+[http-nio-auto-2-exec-7] INFO dev.mars.apex.rest.controller.ConfigurationController - Loading new YAML configuration
+[http-nio-auto-2-exec-7] WARN dev.mars.apex.rest.controller.ConfigurationController - Configuration loading initiated via REST API - this may cause temporary service disruption
+[http-nio-auto-2-exec-7] ERROR dev.mars.apex.rest.controller.ConfigurationController - YAML configuration size: 199 bytes
+[http-nio-auto-2-exec-7] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Loading YAML configuration from input stream
+[http-nio-auto-2-exec-7] INFO dev.mars.apex.core.config.sequential.OrderedYamlParser - Successfully parsed YAML with preserved order from: <stream> (sections: 2, items: 1)
+[http-nio-auto-2-exec-7] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Expanded item order from 1 to 1 items
+[http-nio-auto-2-exec-7] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - === APPLYING GROUPS-ONLY LOGIC ===
+[http-nio-auto-2-exec-7] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Item order size BEFORE filtering: 1
+[http-nio-auto-2-exec-7] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - No groups found - skipping groups-only logic (all items execute at definition position)
+[http-nio-auto-2-exec-7] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Successfully loaded configuration: Workflow Test
+[http-nio-auto-2-exec-7] INFO dev.mars.apex.rest.controller.ConfigurationController - Configuration loaded successfully: 1 rules, 0 enrichments
+[http-nio-auto-2-exec-10] INFO dev.mars.apex.rest.controller.ConfigurationController - Loading new YAML configuration
+[http-nio-auto-2-exec-10] WARN dev.mars.apex.rest.controller.ConfigurationController - Configuration loading initiated via REST API - this may cause temporary service disruption
+[http-nio-auto-2-exec-10] ERROR dev.mars.apex.rest.controller.ConfigurationController - YAML configuration size: 631 bytes
+[http-nio-auto-2-exec-10] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Loading YAML configuration from input stream
+[http-nio-auto-2-exec-10] INFO dev.mars.apex.core.config.sequential.OrderedYamlParser - Successfully parsed YAML with preserved order from: <stream> (sections: 3, items: 2)
+[http-nio-auto-2-exec-10] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Expanded item order from 2 to 2 items
+[http-nio-auto-2-exec-10] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - === APPLYING GROUPS-ONLY LOGIC ===
+[http-nio-auto-2-exec-10] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Item order size BEFORE filtering: 2
+[http-nio-auto-2-exec-10] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - No groups found - skipping groups-only logic (all items execute at definition position)
+[http-nio-auto-2-exec-10] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Successfully loaded configuration: Test Configuration
+[http-nio-auto-2-exec-10] INFO dev.mars.apex.rest.controller.ConfigurationController - Configuration loaded successfully: 1 rules, 1 enrichments
+[http-nio-auto-2-exec-2] INFO dev.mars.apex.rest.controller.ConfigurationController - Validating YAML configuration
+[http-nio-auto-2-exec-2] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Loading YAML configuration from input stream
+[http-nio-auto-2-exec-2] INFO dev.mars.apex.core.config.sequential.OrderedYamlParser - Successfully parsed YAML with preserved order from: <stream> (sections: 2, items: 1)
+[http-nio-auto-2-exec-2] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Expanded item order from 1 to 1 items
+[http-nio-auto-2-exec-2] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - === APPLYING GROUPS-ONLY LOGIC ===
+[http-nio-auto-2-exec-2] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Item order size BEFORE filtering: 1
+[http-nio-auto-2-exec-2] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - No groups found - skipping groups-only logic (all items execute at definition position)
+[http-nio-auto-2-exec-2] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Successfully loaded configuration: Validation Test
+[http-nio-auto-2-exec-2] INFO dev.mars.apex.rest.controller.ConfigurationController - Configuration validation successful
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.169 s -- in dev.mars.apex.rest.integration.ConfigurationApiIntegrationTest$ConfigurationLoadingTests
+[INFO] Running dev.mars.apex.rest.integration.ConfigurationApiIntegrationTest$ConfigurationInfoTests
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in dev.mars.apex.rest.integration.ConfigurationApiIntegrationTest$ConfigurationInfoTests
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.324 s -- in dev.mars.apex.rest.integration.ConfigurationApiIntegrationTest
+[INFO] Running dev.mars.apex.rest.integration.ErrorHandlingRestApiIntegrationTest
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.rest.controller.EnrichmentController - Enriching object using YAML configuration
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Loading YAML configuration from input stream
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.core.config.sequential.OrderedYamlParser - Successfully parsed YAML with preserved order from: <stream> (sections: 2, items: 1)
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Expanded item order from 1 to 1 items
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - === APPLYING GROUPS-ONLY LOGIC ===
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Item order size BEFORE filtering: 1
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - No groups found - skipping groups-only logic (all items execute at definition position)
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Successfully loaded configuration: Successful Enrichment Test
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.engine.core.RulesEngine - Creating RulesEngine from YamlRuleConfiguration
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.core.config.YamlRuleFactory - Creating RulesEngineConfiguration from YAML configuration
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.core.config.YamlRuleFactory - Successfully created RulesEngineConfiguration with 0 rules, 0 rule groups, and 0 enrichment groups
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.engine.core.RulesEngine - Starting unified evaluation with enrichments and rules
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.engine.execution.SequentialProcessor - Processing 1 items in document order
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.core.service.lookup.DatasetLookupServiceFactory - Creating DatasetLookupService 'dataset-inline-9e630581' with type: inline
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.core.service.lookup.DatasetLookupService - Created DatasetLookupService 'dataset-inline-9e630581' with 1 records, key field: customerId
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - Dataset cache MISS - Created and cached dataset lookup service: dataset-inline-9e630581 (type: inline, records: 1, signature: inline-9e630581)
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.engine.execution.SequentialProcessor - Sequential evaluation completed successfully with 0 individual rule results
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.rest.controller.EnrichmentController - Object enrichment completed successfully
+[http-nio-auto-1-exec-1] INFO dev.mars.apex.rest.controller.EnrichmentController - Enriching object using YAML configuration
+[http-nio-auto-1-exec-1] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Loading YAML configuration from input stream
+[http-nio-auto-1-exec-1] INFO dev.mars.apex.core.config.sequential.OrderedYamlParser - Successfully parsed YAML with preserved order from: <stream> (sections: 2, items: 1)
+[http-nio-auto-1-exec-1] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Expanded item order from 1 to 1 items
+[http-nio-auto-1-exec-1] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - === APPLYING GROUPS-ONLY LOGIC ===
+[http-nio-auto-1-exec-1] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Item order size BEFORE filtering: 1
+[http-nio-auto-1-exec-1] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - No groups found - skipping groups-only logic (all items execute at definition position)
+[http-nio-auto-1-exec-1] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Successfully loaded configuration: Error Details Test
+[http-nio-auto-1-exec-1] INFO dev.mars.apex.engine.core.RulesEngine - Creating RulesEngine from YamlRuleConfiguration
+[http-nio-auto-1-exec-1] INFO dev.mars.apex.core.config.YamlRuleFactory - Creating RulesEngineConfiguration from YAML configuration
+[http-nio-auto-1-exec-1] INFO dev.mars.apex.core.config.YamlRuleFactory - Successfully created RulesEngineConfiguration with 0 rules, 0 rule groups, and 0 enrichment groups
+[http-nio-auto-1-exec-1] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[http-nio-auto-1-exec-1] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[http-nio-auto-1-exec-1] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[http-nio-auto-1-exec-1] INFO dev.mars.apex.engine.core.RulesEngine - Starting unified evaluation with enrichments and rules
+[http-nio-auto-1-exec-1] INFO dev.mars.apex.engine.execution.SequentialProcessor - Processing 1 items in document order
+[http-nio-auto-1-exec-1] INFO dev.mars.apex.core.service.lookup.DatasetLookupServiceFactory - Creating DatasetLookupService 'dataset-inline-7dfaf26c' with type: inline
+[http-nio-auto-1-exec-1] INFO dev.mars.apex.core.service.lookup.DatasetLookupService - Created DatasetLookupService 'dataset-inline-7dfaf26c' with 1 records, key field: customerId
+[http-nio-auto-1-exec-1] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - Dataset cache MISS - Created and cached dataset lookup service: dataset-inline-7dfaf26c (type: inline, records: 1, signature: inline-7dfaf26c)
+[http-nio-auto-1-exec-1] ERROR dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - REQUIRED FIELD MAPPING FAILED: source-field 'missingRequiredField' -> target-field 'targetField' produced NULL value but field is marked as required. Check: (1) source field exists, (2) expression is valid, (3) default-value is provided.
+[http-nio-auto-1-exec-1] ERROR dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - Lookup enrichment 'failing-enrichment' failed: one or more field mappings could not be applied. Check: (1) target paths exist, (2) intermediate structures are pre-created, (3) SpEL expressions are valid.
+[http-nio-auto-1-exec-1] ERROR dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - CRITICAL: Enrichment processing failed: failing-enrichment - Lookup enrichment 'failing-enrichment' failed: one or more field mappings could not be applied. Check: (1) target paths exist, (2) intermediate structures are pre-created, (3) SpEL expressions are valid.
+[http-nio-auto-1-exec-1] ERROR dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - Enrichment failed due to required field mapping failures
+[http-nio-auto-1-exec-1] ERROR dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - Enrichment processing completed with failures, severity: ERROR, failures: 2
+[http-nio-auto-1-exec-1] INFO dev.mars.apex.engine.execution.SequentialProcessor - Sequential evaluation completed with 1 failures
+[http-nio-auto-1-exec-1] ERROR dev.mars.apex.rest.controller.EnrichmentController - Enrichment processing failed with ERROR result type
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.rest.controller.EnrichmentController - Enriching object using YAML configuration
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Loading YAML configuration from input stream
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.core.config.sequential.OrderedYamlParser - Successfully parsed YAML with preserved order from: <stream> (sections: 2, items: 1)
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Expanded item order from 1 to 1 items
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - === APPLYING GROUPS-ONLY LOGIC ===
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Item order size BEFORE filtering: 1
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - No groups found - skipping groups-only logic (all items execute at definition position)
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Successfully loaded configuration: Required Field Failure Test
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.engine.core.RulesEngine - Creating RulesEngine from YamlRuleConfiguration
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.core.config.YamlRuleFactory - Creating RulesEngineConfiguration from YAML configuration
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.core.config.YamlRuleFactory - Successfully created RulesEngineConfiguration with 0 rules, 0 rule groups, and 0 enrichment groups
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.engine.core.RulesEngine - Starting unified evaluation with enrichments and rules
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.engine.execution.SequentialProcessor - Processing 1 items in document order
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.core.service.lookup.DatasetLookupServiceFactory - Creating DatasetLookupService 'dataset-inline-ed66d3c5' with type: inline
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.core.service.lookup.DatasetLookupService - Created DatasetLookupService 'dataset-inline-ed66d3c5' with 1 records, key field: customerId
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - Dataset cache MISS - Created and cached dataset lookup service: dataset-inline-ed66d3c5 (type: inline, records: 1, signature: inline-ed66d3c5)
+[http-nio-auto-1-exec-4] ERROR dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - REQUIRED FIELD MAPPING FAILED: source-field 'missingField' -> target-field 'targetField' produced NULL value but field is marked as required. Check: (1) source field exists, (2) expression is valid, (3) default-value is provided.
+[http-nio-auto-1-exec-4] ERROR dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - Lookup enrichment 'test-enrichment' failed: one or more field mappings could not be applied. Check: (1) target paths exist, (2) intermediate structures are pre-created, (3) SpEL expressions are valid.
+[http-nio-auto-1-exec-4] ERROR dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - CRITICAL: Enrichment processing failed: test-enrichment - Lookup enrichment 'test-enrichment' failed: one or more field mappings could not be applied. Check: (1) target paths exist, (2) intermediate structures are pre-created, (3) SpEL expressions are valid.
+[http-nio-auto-1-exec-4] ERROR dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - Enrichment failed due to required field mapping failures
+[http-nio-auto-1-exec-4] ERROR dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - Enrichment processing completed with failures, severity: ERROR, failures: 2
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.engine.execution.SequentialProcessor - Sequential evaluation completed with 1 failures
+[http-nio-auto-1-exec-4] ERROR dev.mars.apex.rest.controller.EnrichmentController - Enrichment processing failed with ERROR result type
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.rest.controller.EnrichmentController - Enriching object using YAML configuration
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Loading YAML configuration from input stream
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.core.config.sequential.OrderedYamlParser - Successfully parsed YAML with preserved order from: <stream> (sections: 2, items: 1)
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Expanded item order from 1 to 1 items
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - === APPLYING GROUPS-ONLY LOGIC ===
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Item order size BEFORE filtering: 1
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - No groups found - skipping groups-only logic (all items execute at definition position)
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Successfully loaded configuration: Transformation Error Test
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.engine.core.RulesEngine - Creating RulesEngine from YamlRuleConfiguration
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.core.config.YamlRuleFactory - Creating RulesEngineConfiguration from YAML configuration
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.core.config.YamlRuleFactory - Successfully created RulesEngineConfiguration with 0 rules, 0 rule groups, and 0 enrichment groups
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.engine.core.RulesEngine - Starting unified evaluation with enrichments and rules
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.engine.execution.SequentialProcessor - Processing 1 items in document order
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.core.service.transform.YamlTransformationProcessor - YamlTransformationProcessor initialized
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.core.service.transform.YamlTransformationProcessor - Processing 1 transformations with result tracking
+[http-nio-auto-1-exec-7] ERROR dev.mars.apex.core.service.transform.YamlTransformationProcessor - Transformation invalid-transformation has no type specified
+[http-nio-auto-1-exec-7] ERROR dev.mars.apex.core.service.transform.YamlTransformationProcessor - CRITICAL: Transformation failed: invalid-transformation - Transformation invalid-transformation has no type specified
+[http-nio-auto-1-exec-7] ERROR dev.mars.apex.engine.execution.SequentialProcessor - Transformation processing failed: Transformation processing failed: Transformation invalid-transformation has no type specified
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.engine.execution.SequentialProcessor - Sequential evaluation completed with 1 failures
+[http-nio-auto-1-exec-7] ERROR dev.mars.apex.rest.controller.EnrichmentController - Enrichment processing failed with ERROR result type
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.084 s -- in dev.mars.apex.rest.integration.ErrorHandlingRestApiIntegrationTest
+[INFO] Running dev.mars.apex.rest.integration.RestApiIntegrationTest
+[http-nio-auto-1-exec-2] INFO dev.mars.apex.rest.controller.ExpressionController - Evaluating expression: #amount * #rate + #fee
+[http-nio-auto-1-exec-2] INFO dev.mars.apex.rest.service.ExpressionEvaluationService - Evaluating expression: #amount * #rate + #fee
+[http-nio-auto-1-exec-2] INFO dev.mars.apex.rest.controller.ExpressionController - Expression evaluation completed successfully: 75.0
+[http-nio-auto-1-exec-5] INFO dev.mars.apex.rest.controller.ExpressionController - Validating expression syntax: #amount > 1000 && #currency == 'USD'
+[http-nio-auto-1-exec-5] INFO dev.mars.apex.rest.controller.ExpressionController - Expression validation completed: valid=true
+[http-nio-auto-1-exec-6] INFO dev.mars.apex.rest.controller.RulesController - Executing rule: high-value-transaction
+[http-nio-auto-1-exec-6] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: high-value-transaction
+[http-nio-auto-1-exec-6] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: high-value-transaction
+[http-nio-auto-1-exec-6] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: high-value-transaction -> true
+[http-nio-auto-1-exec-6] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule matched: high-value-transaction
+[http-nio-auto-1-exec-6] INFO dev.mars.apex.rest.controller.RulesController - Rule execution completed: triggered=true
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.rest.controller.TemplateController - Processing JSON template
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.rest.service.TemplateProcessorService - Processing JSON template with 200 characters
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.rest.service.TemplateProcessorService - JSON template processing completed, 5 expressions processed
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.rest.controller.TemplateController - JSON template processing completed successfully
+[http-nio-auto-1-exec-8] INFO dev.mars.apex.rest.controller.ExpressionController - Evaluating 3 expressions in batch
+[http-nio-auto-1-exec-8] INFO dev.mars.apex.rest.service.ExpressionEvaluationService - Evaluating expression: #amount * #rate
+[http-nio-auto-1-exec-8] INFO dev.mars.apex.rest.service.ExpressionEvaluationService - Evaluating expression: #age >= 18
+[http-nio-auto-1-exec-8] INFO dev.mars.apex.rest.service.ExpressionEvaluationService - Evaluating expression: #currency == 'USD'
+[http-nio-auto-1-exec-8] INFO dev.mars.apex.rest.controller.ExpressionController - Batch expression evaluation completed
+[http-nio-auto-1-exec-9] INFO dev.mars.apex.rest.controller.EnrichmentController - Enriching object using YAML configuration
+[http-nio-auto-1-exec-9] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Loading YAML configuration from input stream
+[http-nio-auto-1-exec-9] INFO dev.mars.apex.core.config.sequential.OrderedYamlParser - Successfully parsed YAML with preserved order from: <stream> (sections: 2, items: 1)
+[http-nio-auto-1-exec-9] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Expanded item order from 1 to 1 items
+[http-nio-auto-1-exec-9] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - === APPLYING GROUPS-ONLY LOGIC ===
+[http-nio-auto-1-exec-9] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Item order size BEFORE filtering: 1
+[http-nio-auto-1-exec-9] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - No groups found - skipping groups-only logic (all items execute at definition position)
+[http-nio-auto-1-exec-9] INFO dev.mars.apex.core.config.loader.YamlConfigurationLoader - Successfully loaded configuration: Test Enrichment
+[http-nio-auto-1-exec-9] INFO dev.mars.apex.engine.core.RulesEngine - Creating RulesEngine from YamlRuleConfiguration
+[http-nio-auto-1-exec-9] INFO dev.mars.apex.core.config.YamlRuleFactory - Creating RulesEngineConfiguration from YAML configuration
+[http-nio-auto-1-exec-9] INFO dev.mars.apex.core.config.YamlRuleFactory - Successfully created RulesEngineConfiguration with 0 rules, 0 rule groups, and 0 enrichment groups
+[http-nio-auto-1-exec-9] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[http-nio-auto-1-exec-9] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[http-nio-auto-1-exec-9] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[http-nio-auto-1-exec-9] INFO dev.mars.apex.engine.core.RulesEngine - Starting unified evaluation with enrichments and rules
+[http-nio-auto-1-exec-9] INFO dev.mars.apex.engine.execution.SequentialProcessor - Processing 1 items in document order
+[http-nio-auto-1-exec-9] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - Dataset cache HIT for signature: inline-9e630581
+[http-nio-auto-1-exec-9] INFO dev.mars.apex.engine.execution.SequentialProcessor - Sequential evaluation completed successfully with 0 individual rule results
+[http-nio-auto-1-exec-9] INFO dev.mars.apex.rest.controller.EnrichmentController - Object enrichment completed successfully
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.rest.controller.EnrichmentController - Retrieving predefined enrichment configurations
+[http-nio-auto-1-exec-10] INFO dev.mars.apex.rest.controller.EnrichmentController - Retrieved 4 predefined configurations
+[http-nio-auto-1-exec-1] INFO dev.mars.apex.rest.controller.TemplateController - Processing XML template
+[http-nio-auto-1-exec-1] INFO dev.mars.apex.rest.service.TemplateProcessorService - Processing XML template with 155 characters
+[http-nio-auto-1-exec-1] INFO dev.mars.apex.rest.service.TemplateProcessorService - XML template processing completed, 3 expressions processed
+[http-nio-auto-1-exec-1] INFO dev.mars.apex.rest.controller.TemplateController - XML template processing completed successfully
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.rest.controller.TemplateController - Processing 3 templates in batch
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.rest.service.TemplateProcessorService - Processing JSON template with 16 characters
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.rest.service.TemplateProcessorService - JSON template processing completed, 1 expressions processed
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.rest.service.TemplateProcessorService - Processing XML template with 15 characters
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.rest.service.TemplateProcessorService - XML template processing completed, 1 expressions processed
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.rest.service.TemplateProcessorService - Processing template with 10 characters
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.rest.service.TemplateProcessorService - Template processing completed, 1 expressions processed
+[http-nio-auto-1-exec-4] INFO dev.mars.apex.rest.controller.TemplateController - Batch template processing completed
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.rest.controller.TransformationController - Applying dynamic transformation with 2 rules
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRules(List<Rule>, Map) called with 1 rules
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Evaluating 1 rules
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: normalize-firstName
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: normalize-firstName
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: normalize-firstName -> false
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - No rules matched
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRules(List<Rule>, Map) called with 1 rules
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Evaluating 1 rules
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: normalize-email
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: normalize-email
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: normalize-email -> false
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - No rules matched
+[http-nio-auto-1-exec-7] INFO dev.mars.apex.rest.controller.TransformationController - Dynamic transformation completed successfully
+[http-nio-auto-1-exec-5] INFO dev.mars.apex.rest.controller.TransformationController - Retrieving registered transformers
+[http-nio-auto-1-exec-5] INFO dev.mars.apex.rest.controller.TransformationController - Retrieved 0 registered transformers
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.rest.controller.RulesController - Executing 3 rules in batch
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: high-value
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: high-value
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: high-value -> true
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule matched: high-value
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: gold-customer
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: gold-customer
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: gold-customer -> true
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule matched: gold-customer
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: usd-currency
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: usd-currency
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: usd-currency -> true
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule matched: usd-currency
+[http-nio-auto-1-exec-3] INFO dev.mars.apex.rest.controller.RulesController - Batch rule execution completed: 3/3 rules triggered
+[http-nio-auto-1-exec-8] INFO dev.mars.apex.rest.controller.DataSourceController - Performing lookup on data source 'testDataSource' with key: TEST_KEY
+[ERROR] Tests run: 15, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.177 s <<< FAILURE! -- in dev.mars.apex.rest.integration.RestApiIntegrationTest
+[ERROR] dev.mars.apex.rest.integration.RestApiIntegrationTest.testPerformDataSourceLookup -- Time elapsed: 0.015 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <200 OK> but was: <404 NOT_FOUND>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:177)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at dev.mars.apex.rest.integration.RestApiIntegrationTest.testPerformDataSourceLookup(RestApiIntegrationTest.java:313)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
+[INFO] Running dev.mars.apex.rest.integration.RulesApiIntegrationTest
+[http-nio-auto-2-exec-3] INFO dev.mars.apex.rest.controller.RulesController - Evaluating rule check: age-check
+[http-nio-auto-2-exec-3] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[http-nio-auto-2-exec-3] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[http-nio-auto-2-exec-3] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: Check -> true
+[http-nio-auto-2-exec-3] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule matched: Check
+[http-nio-auto-2-exec-3] INFO dev.mars.apex.rest.controller.RulesController - Rule check completed: matched=true
+[http-nio-auto-2-exec-4] INFO dev.mars.apex.rest.controller.RulesController - Defined rule: positive-check with condition: #value > 0
+[http-nio-auto-2-exec-6] INFO dev.mars.apex.rest.controller.RulesController - Evaluating rule check: age-check
+[http-nio-auto-2-exec-6] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[http-nio-auto-2-exec-6] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[http-nio-auto-2-exec-6] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: Check -> false
+[http-nio-auto-2-exec-6] INFO dev.mars.apex.rest.controller.RulesController - Rule check completed: matched=false
+[http-nio-auto-2-exec-7] INFO dev.mars.apex.rest.controller.RulesController - Starting validation with 2 rules
+[http-nio-auto-2-exec-7] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[http-nio-auto-2-exec-7] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[http-nio-auto-2-exec-7] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[http-nio-auto-2-exec-7] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[http-nio-auto-2-exec-7] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[http-nio-auto-2-exec-7] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: Check -> true
+[http-nio-auto-2-exec-7] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule matched: Check
+[http-nio-auto-2-exec-7] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[http-nio-auto-2-exec-7] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[http-nio-auto-2-exec-7] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: Check -> true
+[http-nio-auto-2-exec-7] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule matched: Check
+[http-nio-auto-2-exec-7] INFO dev.mars.apex.rest.service.RuleEvaluationService - Validation completed: valid=true, passed=2, failed=0
+[http-nio-auto-2-exec-7] INFO dev.mars.apex.rest.controller.RulesController - Validation completed: valid=true, errors=0, warnings=0
+[http-nio-auto-2-exec-8] INFO dev.mars.apex.rest.controller.RulesController - Evaluating rule check: invalid-rule
+[http-nio-auto-2-exec-8] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[http-nio-auto-2-exec-8] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[http-nio-auto-2-exec-8] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation issue for 'Check': Rule evaluation failed: Check - EL1007E: Property or field 'syntax' cannot be found on null
+[http-nio-auto-2-exec-8] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Attempting error recovery for rule 'Check' with severity 'INFO' using strategy 'CONTINUE_WITH_DEFAULT'
+[http-nio-auto-2-exec-8] INFO dev.mars.apex.core.service.error.ErrorRecoveryService - Attempting error recovery for rule: Check
+[http-nio-auto-2-exec-8] INFO dev.mars.apex.core.service.error.ErrorRecoveryService - Using default recovery for rule: Check
+[http-nio-auto-2-exec-8] INFO dev.mars.apex.rest.controller.RulesController - Rule check completed: matched=false
+[http-nio-auto-2-exec-2] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[http-nio-auto-2-exec-2] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[http-nio-auto-2-exec-2] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: Check -> true
+[http-nio-auto-2-exec-2] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule matched: Check
+[http-nio-auto-2-exec-1] INFO dev.mars.apex.rest.controller.RulesController - Starting validation with 2 rules
+[http-nio-auto-2-exec-1] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[http-nio-auto-2-exec-1] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[http-nio-auto-2-exec-1] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[http-nio-auto-2-exec-1] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[http-nio-auto-2-exec-1] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[http-nio-auto-2-exec-1] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: Check -> false
+[http-nio-auto-2-exec-1] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[http-nio-auto-2-exec-1] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[http-nio-auto-2-exec-1] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: Check -> false
+[http-nio-auto-2-exec-1] INFO dev.mars.apex.rest.service.RuleEvaluationService - Validation completed: valid=false, passed=0, failed=2
+[http-nio-auto-2-exec-1] INFO dev.mars.apex.rest.controller.RulesController - Validation completed: valid=false, errors=2, warnings=0
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.115 s -- in dev.mars.apex.rest.integration.RulesApiIntegrationTest
+[INFO] Running dev.mars.apex.rest.service.RuleEvaluationServiceTest
+[main] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[main] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[main] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[main] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[main] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[main] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[main] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[main] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[main] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: Check -> true
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule matched: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: Check -> false
+[main] INFO dev.mars.apex.rest.service.RuleEvaluationService - Validation completed: valid=false, passed=1, failed=1
+[main] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[main] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[main] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[main] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[main] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[main] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: Check -> true
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule matched: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: Check -> true
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule matched: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: Check -> true
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule matched: Check
+[main] INFO dev.mars.apex.rest.service.RuleEvaluationService - Validation completed: valid=true, passed=3, failed=0
+[main] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[main] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[main] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[main] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[main] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[main] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: Check -> false
+[main] INFO dev.mars.apex.rest.service.RuleEvaluationService - Validation completed: valid=false, passed=0, failed=1
+[main] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[main] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[main] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[main] WARN dev.mars.apex.rest.service.RuleEvaluationService - No validation rules provided
+[main] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[main] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[main] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+TEST: Triggering intentional error - testing invalid condition handling with graceful degradation
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation issue for 'Check': Rule evaluation failed: Check - EL1007E: Property or field 'syntax' cannot be found on null
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Attempting error recovery for rule 'Check' with severity 'INFO' using strategy 'CONTINUE_WITH_DEFAULT'
+[main] INFO dev.mars.apex.core.service.error.ErrorRecoveryService - Attempting error recovery for rule: Check
+[main] INFO dev.mars.apex.core.service.error.ErrorRecoveryService - Using default recovery for rule: Check
+[main] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[main] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[main] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[main] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[main] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[main] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: Check -> false
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: Check -> true
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule matched: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: Check -> false
+[main] INFO dev.mars.apex.rest.service.RuleEvaluationService - Validation completed: valid=false, passed=1, failed=2
+[main] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[main] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[main] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: Check -> true
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule matched: Check
+[main] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[main] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[main] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: Check -> true
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule matched: Check
+[main] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[main] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[main] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation issue for 'Check': Rule evaluation failed: Check - EL1007E: Property or field 'syntax' cannot be found on null
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Attempting error recovery for rule 'Check' with severity 'INFO' using strategy 'CONTINUE_WITH_DEFAULT'
+[main] INFO dev.mars.apex.core.service.error.ErrorRecoveryService - Attempting error recovery for rule: Check
+[main] INFO dev.mars.apex.core.service.error.ErrorRecoveryService - Using default recovery for rule: Check
+[main] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[main] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[main] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: Check -> false
+[main] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[main] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[main] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[main] WARN dev.mars.apex.rest.service.RuleEvaluationService - No validation rules provided
+[main] INFO dev.mars.apex.engine.core.ExpressionEvaluatorService - Initializing ExpressionEvaluatorService with enhanced context creation
+[main] INFO dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor - YamlEnrichmentProcessor initialized with unified cache manager and RuleGroupEvaluationService
+[main] INFO dev.mars.apex.engine.core.RulesEngine - RulesEngine initialized with configuration: RulesEngineConfiguration
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Phase 5: evaluateRule(Rule, Map) called for rule: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Starting rule evaluation: Check
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule evaluation completed: Check -> true
+[main] INFO dev.mars.apex.engine.core.UnifiedRuleEvaluator - Rule matched: Check
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in dev.mars.apex.rest.service.RuleEvaluationServiceTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   RestApiIntegrationTest.testPerformDataSourceLookup:313 expected: <200 OK> but was: <404 NOT_FOUND>
+[INFO] 
+[ERROR] Tests run: 107, Failures: 1, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  8.900 s
+[INFO] Finished at: 2026-02-10T11:39:55+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.1.2:test (default-test) on project apex-rest-api: There are test failures.
+[ERROR] 
+[ERROR] Please refer to C:\Users\markr\dev\java\corejava\apex-rules-engine\apex-rest-api\target\surefire-reports for the individual test results.
+[ERROR] Please refer to dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

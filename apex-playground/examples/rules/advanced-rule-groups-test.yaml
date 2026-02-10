@@ -1,7 +1,9 @@
 metadata:
+  id: "advanced-rule-groups-test"
   name: "Advanced Rule Groups Test"
   version: "1.0"
   type: "rule-config"
+  author: "APEX Demo Team"
   description: "Test advanced rule group features with priorities and dependencies"
 
 rule-groups:

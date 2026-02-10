@@ -17,8 +17,8 @@ package dev.mars.apex.rest.controller;
  */
 
 
-import dev.mars.apex.core.service.data.DataServiceManager;
-import dev.mars.apex.core.service.data.DataSource;
+import dev.mars.apex.core.service.data.external.manager.DataSourceManager;
+import dev.mars.apex.core.service.data.external.ExternalDataSource;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -54,7 +54,7 @@ public class DataSourceController {
     private static final Logger logger = LoggerFactory.getLogger(DataSourceController.class);
 
     @Autowired
-    private DataServiceManager dataServiceManager;
+    private DataSourceManager dataSourceManager;
 
     /**
      * Get all registered data sources.
@@ -70,11 +70,11 @@ public class DataSourceController {
 
         try {
             // Get all registered data sources
-            String[] dataSourceNames = dataServiceManager.getRegisteredDataSources();
+            Set<String> dataSourceNames = dataSourceManager.getDataSourceNames();
 
             List<Map<String, Object>> dataSources = new ArrayList<>();
             for (String name : dataSourceNames) {
-                DataSource dataSource = dataServiceManager.getDataSource(name);
+                ExternalDataSource dataSource = dataSourceManager.getDataSource(name);
                 if (dataSource != null) {
                     Map<String, Object> dsInfo = new HashMap<>();
                     dsInfo.put("name", name);
@@ -124,7 +124,7 @@ public class DataSourceController {
         logger.debug("Retrieving data source: {}", name);
 
         try {
-            DataSource dataSource = dataServiceManager.getDataSource(name);
+            ExternalDataSource dataSource = dataSourceManager.getDataSource(name);
             if (dataSource == null) {
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("success", false);
@@ -191,7 +191,7 @@ public class DataSourceController {
         logger.info("Testing data source: {}", name);
 
         try {
-            DataSource dataSource = dataServiceManager.getDataSource(name);
+            ExternalDataSource dataSource = dataSourceManager.getDataSource(name);
             if (dataSource == null) {
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("success", false);
@@ -283,7 +283,7 @@ public class DataSourceController {
         logger.info("Performing lookup on data source '{}' with key: {}", name, request.getKey());
 
         try {
-            DataSource dataSource = dataServiceManager.getDataSource(name);
+            ExternalDataSource dataSource = dataSourceManager.getDataSource(name);
             if (dataSource == null) {
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("success", false);
@@ -324,7 +324,7 @@ public class DataSourceController {
     /**
      * Get a description for a data source (helper method).
      */
-    private String getDataSourceDescription(DataSource dataSource) {
+    private String getDataSourceDescription(ExternalDataSource dataSource) {
         String className = dataSource.getClass().getSimpleName();
         switch (className) {
             case "MockDataSource":

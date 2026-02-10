@@ -1,7 +1,9 @@
 metadata:
+  id: "multiple-refs-test"
   name: "Multiple Data Source References Test"
   version: "1.0"
   type: "rule-config"
+  author: "APEX Demo Team"
   description: "Test configuration with multiple external data source references"
 
 data-source-refs:

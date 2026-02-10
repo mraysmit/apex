@@ -1,0 +1,40 @@
+# ============================================================================
+# APEX Validation Rules for InputDataClassificationPhase1Test
+# ============================================================================
+# Validation rules for input data classification scenario
+# Used to demonstrate classification-based scenario execution
+# ============================================================================
+
+metadata:
+  id: "input-classification-validation-rules"
+  name: "Input Classification Validation Rules"
+  version: "1.0.0"
+  description: "Validation rules for input data classification processing"
+  type: "rule-config"
+  author: "APEX Demo"
+
+# Validation rules for input data classification
+rules:
+  - id: "input-data-present"
+    name: "Input Data Present"
+    description: "Validate that input data is present and not empty"
+    condition: "#tradeId != null && !#tradeId.toString().isEmpty()"
+    message: "Input data is present and valid"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "data-type-valid"
+    name: "Data Type Valid"
+    description: "Validate that the data type is classifiable"
+    condition: "#instrumentType != null && (#instrumentType == 'EQUITY' || #instrumentType == 'BOND' || #instrumentType == 'OPTION' || #instrumentType == 'FUTURE')"
+    message: "Data type is valid for classification"
+    severity: "ERROR"
+    enabled: true
+
+  - id: "classification-field-present"
+    name: "Classification Field Present"
+    description: "Validate that required classification fields are available"
+    condition: "#quantity != null && T(java.lang.Double).parseDouble(#quantity.toString()) > 0"
+    message: "Classification fields are present"
+    severity: "ERROR"
+    enabled: true

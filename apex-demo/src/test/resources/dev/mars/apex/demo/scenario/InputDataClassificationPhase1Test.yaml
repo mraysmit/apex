@@ -1,0 +1,18 @@
+# Input Data Classification Phase 1 Test Registry
+# Registry file that references the actual scenario configuration
+
+metadata:
+  id: "input-data-classification-phase1-test"
+  name: "Input Data Classification Phase 1 Test"
+  version: "1.0.0"
+  description: "Test scenario registry for input data classification processing"
+  type: "scenario-registry"
+  created-by: "test@example.com"
+
+scenarios:
+  - scenario-id: "input-data-classification"
+    config-file: "src/test/java/dev/mars/apex/demo/scenario/InputDataClassificationPhase1Test-scenario.yaml"
+
+routing:
+  strategy: "type-based"
+  default-scenario: "input-data-classification"
