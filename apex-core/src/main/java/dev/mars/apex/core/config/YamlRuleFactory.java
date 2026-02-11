@@ -5,6 +5,7 @@ import dev.mars.apex.core.config.model.*;
 import dev.mars.apex.core.api.RuleSet;
 import dev.mars.apex.core.constants.ErrorHandlingConstants;
 import dev.mars.apex.core.constants.SeverityConstants;
+import dev.mars.apex.core.util.EnabledFilter;
 import dev.mars.apex.engine.core.RulesEngineConfiguration;
 import dev.mars.apex.engine.model.Category;
 import dev.mars.apex.engine.model.EnrichmentGroup;
@@ -83,7 +84,7 @@ public class YamlRuleFactory {
         // Process categories first to populate cache
         if (yamlConfig.getCategories() != null) {
             for (YamlCategory yamlCategory : yamlConfig.getCategories()) {
-                if (yamlCategory.getEnabled() == null || yamlCategory.getEnabled()) {
+                if (EnabledFilter.isEnabled(yamlCategory)) {
                     Category category = createCategory(yamlCategory);
                     categoryCache.put(category.getName(), category);
                     // Also cache the YAML category for metadata inheritance
@@ -98,7 +99,7 @@ public class YamlRuleFactory {
         // Group rules by category for GenericRuleSet creation
         if (yamlConfig.getRules() != null) {
             Map<String, List<YamlRule>> rulesByCategory = yamlConfig.getRules().stream()
-                .filter(rule -> rule.getEnabled() == null || rule.getEnabled())
+                .filter(EnabledFilter::isEnabled)
                 .collect(Collectors.groupingBy(rule ->
                     rule.getCategory() != null ? rule.getCategory() : "default"));
 
@@ -137,7 +138,7 @@ public class YamlRuleFactory {
             Map<String, RuleGroup> ruleGroupsById = new HashMap<>();
             for (YamlRuleGroup yamlGroup : yamlConfig.getRuleGroups()) {
                 logger.info("Phase 1 - Creating rule group: " + yamlGroup.getId() + ", enabled: " + yamlGroup.getEnabled());
-                if (yamlGroup.getEnabled() == null || yamlGroup.getEnabled()) {
+                if (EnabledFilter.isEnabled(yamlGroup)) {
                     try {
                         logger.info("Creating rule group: " + yamlGroup.getId());
                         RuleGroup group = createRuleGroupWithoutReferences(yamlGroup, config);
@@ -455,7 +456,7 @@ public class YamlRuleFactory {
         String resultField = yamlRule.getResultField();
         String noMatchMessage = yamlRule.getNoMatchMessage();
 
-        boolean enabled = yamlRule.getEnabled() == null || yamlRule.getEnabled();
+        boolean enabled = EnabledFilter.isEnabled(yamlRule);
 
         Rule createdRule = new Rule(ruleId, categories, name, condition, message, description,
                                    yamlRule.getPriority() != null ? yamlRule.getPriority() : 100,
@@ -729,7 +730,7 @@ public class YamlRuleFactory {
             logger.info("Processing " + yamlGroup.getRuleReferences().size() + " rule references for group: " + yamlGroup.getId());
             for (YamlRuleGroup.RuleReference ref : yamlGroup.getRuleReferences()) {
                 logger.info("Processing rule reference: " + ref.getRuleId() + ", enabled: " + ref.getEnabled() + ", override-priority: " + ref.getOverridePriority());
-                if (ref.getEnabled() == null || ref.getEnabled()) {
+                if (EnabledFilter.isEnabled(ref)) {
                     Rule originalRule = config.getRuleById(ref.getRuleId());
                     if (originalRule != null) {
                         int sequence = ref.getSequence() != null ? ref.getSequence() : 1;
@@ -779,7 +780,7 @@ public class YamlRuleFactory {
             logger.info("Processing " + yamlGroup.getRuleReferences().size() + " rule references for group: " + yamlGroup.getId());
             for (YamlRuleGroup.RuleReference ref : yamlGroup.getRuleReferences()) {
                 logger.info("Processing rule reference: " + ref.getRuleId() + ", enabled: " + ref.getEnabled() + ", override-priority: " + ref.getOverridePriority());
-                if (ref.getEnabled() == null || ref.getEnabled()) {
+                if (EnabledFilter.isEnabled(ref)) {
                     Rule originalRule = config.getRuleById(ref.getRuleId());
                     if (originalRule != null) {
                         int sequence = ref.getSequence() != null ? ref.getSequence() : 1;
@@ -911,7 +912,7 @@ public class YamlRuleFactory {
         // Process categories first to populate cache for metadata inheritance
         if (yamlConfig.getCategories() != null) {
             for (YamlCategory yamlCategory : yamlConfig.getCategories()) {
-                if (yamlCategory.getEnabled() == null || yamlCategory.getEnabled()) {
+                if (EnabledFilter.isEnabled(yamlCategory)) {
                     Category category = createCategory(yamlCategory);
                     categoryCache.put(category.getName(), category);
                     // Also cache the YAML category for metadata inheritance
@@ -925,7 +926,7 @@ public class YamlRuleFactory {
 
         if (yamlConfig.getRules() != null) {
             for (YamlRule yamlRule : yamlConfig.getRules()) {
-                if (yamlRule.getEnabled() == null || yamlRule.getEnabled()) {
+                if (EnabledFilter.isEnabled(yamlRule)) {
                     rules.add(createRuleWithMetadata(yamlRule));
                 }
             }
@@ -949,7 +950,7 @@ public class YamlRuleFactory {
         
         if (yamlConfig.getRuleGroups() != null) {
             for (YamlRuleGroup yamlGroup : yamlConfig.getRuleGroups()) {
-                if (yamlGroup.getEnabled() == null || yamlGroup.getEnabled()) {
+                if (EnabledFilter.isEnabled(yamlGroup)) {
                     groups.add(createRuleGroup(yamlGroup, config));
                 }
             }
@@ -1021,7 +1022,7 @@ public class YamlRuleFactory {
         
         if (yamlConfig.getCategories() != null) {
             for (YamlCategory yamlCategory : yamlConfig.getCategories()) {
-                if (yamlCategory.getEnabled() == null || yamlCategory.getEnabled()) {
+                if (EnabledFilter.isEnabled(yamlCategory)) {
                     categories.add(createCategory(yamlCategory));
                 }
             }
@@ -1253,7 +1254,7 @@ public class YamlRuleFactory {
         // Process categories first to populate cache for metadata inheritance
         if (yamlConfig.getCategories() != null) {
             for (YamlCategory yamlCategory : yamlConfig.getCategories()) {
-                if (yamlCategory.getEnabled() == null || yamlCategory.getEnabled()) {
+                if (EnabledFilter.isEnabled(yamlCategory)) {
                     Category category = createCategory(yamlCategory);
                     categoryCache.put(yamlCategory.getName(), category);
                     yamlCategoryCache.put(yamlCategory.getName(), yamlCategory);
@@ -1263,7 +1264,7 @@ public class YamlRuleFactory {
 
         if (yamlConfig.getEnrichments() != null) {
             for (dev.mars.apex.core.config.model.YamlEnrichment yamlEnrichment : yamlConfig.getEnrichments()) {
-                if (yamlEnrichment.getEnabled() == null || yamlEnrichment.getEnabled()) {
+                if (EnabledFilter.isEnabled(yamlEnrichment)) {
                     enrichments.add(createEnrichmentWithMetadata(yamlEnrichment));
                 }
             }

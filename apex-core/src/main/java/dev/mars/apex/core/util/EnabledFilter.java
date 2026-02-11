@@ -15,7 +15,9 @@
  */
 package dev.mars.apex.core.util;
 
+import dev.mars.apex.core.config.model.YamlCategory;
 import dev.mars.apex.core.config.model.YamlEnrichment;
+import dev.mars.apex.core.config.model.YamlEnrichmentGroup;
 import dev.mars.apex.core.config.model.YamlRule;
 import dev.mars.apex.core.config.model.YamlRuleChain;
 import dev.mars.apex.core.config.model.YamlRuleGroup;
@@ -100,6 +102,30 @@ public final class EnabledFilter {
     public static boolean isEnabled(YamlRuleChain ruleChain) {
         if (ruleChain == null) return true;
         return ruleChain.getEnabled() == null || ruleChain.getEnabled();
+    }
+
+    /**
+     * @return {@code true} if the YAML category is enabled (null → enabled)
+     */
+    public static boolean isEnabled(YamlCategory category) {
+        if (category == null) return true;
+        return category.getEnabled() == null || category.getEnabled();
+    }
+
+    /**
+     * @return {@code true} if the rule reference is enabled (null → enabled)
+     */
+    public static boolean isEnabled(YamlRuleGroup.RuleReference ref) {
+        if (ref == null) return true;
+        return ref.getEnabled() == null || ref.getEnabled();
+    }
+
+    /**
+     * @return {@code true} if the enrichment reference is enabled (null → enabled)
+     */
+    public static boolean isEnabled(YamlEnrichmentGroup.EnrichmentReference ref) {
+        if (ref == null) return true;
+        return ref.getEnabled() == null || ref.getEnabled();
     }
 
     // =========================================================================

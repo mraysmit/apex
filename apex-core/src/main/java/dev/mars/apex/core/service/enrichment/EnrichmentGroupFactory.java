@@ -5,6 +5,7 @@ import dev.mars.apex.core.config.model.YamlEnrichment;
 import dev.mars.apex.core.config.model.YamlEnrichmentGroup;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.constants.ErrorHandlingConstants;
+import dev.mars.apex.core.util.EnabledFilter;
 import dev.mars.apex.engine.model.Category;
 import dev.mars.apex.engine.model.EnrichmentGroup;
 import org.slf4j.Logger;
@@ -94,7 +95,7 @@ public class EnrichmentGroupFactory {
             if (yg.getEnrichmentReferences() != null && !yg.getEnrichmentReferences().isEmpty()) {
                 for (YamlEnrichmentGroup.EnrichmentReference ref : yg.getEnrichmentReferences()) {
                     if (ref == null || ref.getEnrichmentId() == null) continue;
-                    if (Boolean.FALSE.equals(ref.getEnabled())) continue; // skip disabled refs
+                    if (!EnabledFilter.isEnabled(ref)) continue; // skip disabled refs
                     int sequence = ref.getSequence() != null ? ref.getSequence() : 1;
                     YamlEnrichment e = enrichmentById.get(ref.getEnrichmentId());
                     if (e == null) {
@@ -214,7 +215,7 @@ public class EnrichmentGroupFactory {
                                           Map<String, YamlCategory> yamlCategoryCache) {
         if (config.getCategories() != null) {
             for (YamlCategory yamlCategory : config.getCategories()) {
-                if (yamlCategory.getEnabled() == null || yamlCategory.getEnabled()) {
+                if (EnabledFilter.isEnabled(yamlCategory)) {
                     Category category = createCategory(yamlCategory);
                     categoryCache.put(category.getName(), category);
                     // Also cache the YAML category for metadata inheritance
