@@ -182,7 +182,7 @@ public class ScenarioRegistryManager {
             return result != null && result;
 
         } catch (Exception e) {
-            logger.warn("Failed to evaluate classification rule for scenario '{}': {}",
+            logger.error("Failed to evaluate classification rule for scenario '{}': {}",
                     scenario.getScenarioId(), e.getMessage());
             return false;
         }
@@ -228,7 +228,7 @@ public class ScenarioRegistryManager {
             return result != null && result;
 
         } catch (Exception e) {
-            logger.warn("Failed to evaluate classification rule for scenario '{}': {}",
+            logger.error("Failed to evaluate classification rule for scenario '{}': {}",
                     scenario.getScenarioId(), e.getMessage());
             return false;
         }

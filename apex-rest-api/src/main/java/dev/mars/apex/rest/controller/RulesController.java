@@ -379,8 +379,8 @@ public class RulesController {
             // Execute the rule
             RuleResult result = rulesEngine.executeRule(rule, request.getFacts());
 
-            // Check for business logic failures (ResultType.ERROR)
-            if (result.getResultType() == RuleResult.ResultType.ERROR) {
+            // Check for business logic failures (ResultType.ERROR or ENRICHMENT_FAILURE)
+            if (result.isError()) {
                 logger.error("Rule execution failed with ERROR result type");
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("success", false);
@@ -466,8 +466,8 @@ public class RulesController {
             for (Rule rule : rules) {
                 RuleResult result = rulesEngine.executeRule(rule, request.getFacts());
 
-                // Check for business logic failures (ResultType.ERROR) - fail fast
-                if (result.getResultType() == RuleResult.ResultType.ERROR) {
+                // Check for business logic failures (ResultType.ERROR or ENRICHMENT_FAILURE) - fail fast
+                if (result.isError()) {
                     logger.error("Batch rule execution failed with ERROR result type for rule: {}", rule.getName());
                     Map<String, Object> errorResponse = new HashMap<>();
                     errorResponse.put("success", false);

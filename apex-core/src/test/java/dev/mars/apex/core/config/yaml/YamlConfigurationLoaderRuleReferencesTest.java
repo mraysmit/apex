@@ -1,4 +1,4 @@
-package dev.mars.apex.core.config;
+package dev.mars.apex.core.config.yaml;
 import dev.mars.apex.core.config.model.*;
 import dev.mars.apex.core.config.loader.*;
 import dev.mars.apex.core.config.exception.*;

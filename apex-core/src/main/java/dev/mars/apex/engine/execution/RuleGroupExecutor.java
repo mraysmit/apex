@@ -126,7 +126,7 @@ public class RuleGroupExecutor {
                     return RuleResult.match(group.getName(), group.getMessage(), aggregatedSeverity);
                 } else {
                     // Track failed group with highest severity
-                    if (getSeverityPriority(aggregatedSeverity) > getSeverityPriority(highestFailedSeverity)) {
+                    if (SeverityConstants.getSeverityPriority(aggregatedSeverity) > SeverityConstants.getSeverityPriority(highestFailedSeverity)) {
                         highestFailedSeverity = aggregatedSeverity;
                         lastFailedGroupName = group.getName();
                         lastFailedGroupMessage = group.getMessage();
@@ -270,30 +270,5 @@ public class RuleGroupExecutor {
 
         logger.info("No rules or rule groups matched");
         return RuleResult.noMatch();
-    }
-    
-    /**
-     * Get severity priority for comparison.
-     * 
-     * @param severity The severity level
-     * @return Priority value (higher = more severe)
-     */
-    private int getSeverityPriority(String severity) {
-        if (severity == null) {
-            return 0;
-        }
-        
-        switch (severity.toUpperCase()) {
-            case "CRITICAL":
-                return 4;
-            case "ERROR":
-                return 3;
-            case "WARNING":
-                return 2;
-            case "INFO":
-                return 1;
-            default:
-                return 0;
-        }
     }
 }

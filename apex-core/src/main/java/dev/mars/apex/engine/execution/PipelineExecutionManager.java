@@ -128,7 +128,7 @@ public class PipelineExecutionManager {
                         dataSources.put(config.getName(), dataSource);
                         logger.debug("Initialized data source via registry: {}", config.getName());
                     } catch (DataSourceException e) {
-                        logger.warn("Failed to initialize data source '{}': {}", yamlDataSource.getName(), e.getMessage());
+                        logger.error("Failed to initialize data source '{}': {}", yamlDataSource.getName(), e.getMessage());
                         initializationErrors.add("Failed to initialize data source '" + yamlDataSource.getName() + "': " + e.getMessage());
                     }
                 }
@@ -154,7 +154,7 @@ public class PipelineExecutionManager {
                         dataSinks.put(config.getName(), dataSink);
                         logger.debug("Initialized data sink: {}", config.getName());
                     } catch (DataSinkException e) {
-                        logger.warn("Failed to initialize data sink '{}': {}", yamlDataSink.getName(), e.getMessage());
+                        logger.error("Failed to initialize data sink '{}': {}", yamlDataSink.getName(), e.getMessage());
                         initializationErrors.add("Failed to initialize data sink '" + yamlDataSink.getName() + "': " + e.getMessage());
                     }
                 }

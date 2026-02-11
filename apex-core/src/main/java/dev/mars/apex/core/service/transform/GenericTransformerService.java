@@ -237,7 +237,7 @@ public class GenericTransformerService {
             GenericTransformer<T> typedTransformer = (GenericTransformer<T>) transformer;
             return typedTransformer.transformWithResult(value);
         } catch (Exception e) {
-            logger.warn("Error transforming value: {}", e.getMessage());
+            logger.error("Error transforming value: {}", e.getMessage());
             logger.debug("Full exception details:", e);
             return RuleResult.error(transformerName, "Error transforming value: " + e.getMessage());
         }

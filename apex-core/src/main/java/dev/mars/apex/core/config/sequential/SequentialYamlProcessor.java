@@ -61,7 +61,7 @@ public class SequentialYamlProcessor {
      *             programmatic access to error details. Errors must be caught and inspected via exception messages.</p>
      *             <p><strong>Migration:</strong> Replace {@code SequentialProcessingResult result = processor.processFile(filePath)}
      *             with {@code RuleResult result = processor.processFileWithResult(filePath)}
-     *             and check {@code result.getResultType() == ResultType.ERROR} to detect failures.</p>
+     *             and check {@code result.isError()} to detect failures (covers both ERROR and ENRICHMENT_FAILURE).</p>
      */
     @Deprecated(since = "1.1", forRemoval = true)
     public SequentialProcessingResult processFile(String filePath) throws YamlConfigurationException {
@@ -92,7 +92,7 @@ public class SequentialYamlProcessor {
      *             programmatic access to error details. Errors must be caught and inspected via exception messages.</p>
      *             <p><strong>Migration:</strong> Replace {@code SequentialProcessingResult result = processor.processYamlString(yamlContent)}
      *             with {@code RuleResult result = processor.processYamlStringWithResult(yamlContent)}
-     *             and check {@code result.getResultType() == ResultType.ERROR} to detect failures.</p>
+     *             and check {@code result.isError()} to detect failures (covers both ERROR and ENRICHMENT_FAILURE).</p>
      */
     @Deprecated(since = "1.1", forRemoval = true)
     public SequentialProcessingResult processYamlString(String yamlContent) throws YamlConfigurationException {
@@ -118,7 +118,7 @@ public class SequentialYamlProcessor {
      *             programmatic access to error details. Errors must be caught and inspected via exception messages.</p>
      *             <p><strong>Migration:</strong> Replace {@code SequentialProcessingResult result = processor.processYamlString(yamlContent, source)}
      *             with {@code RuleResult result = processor.processYamlStringWithResult(yamlContent, source)}
-     *             and check {@code result.getResultType() == ResultType.ERROR} to detect failures.</p>
+     *             and check {@code result.isError()} to detect failures (covers both ERROR and ENRICHMENT_FAILURE).</p>
      */
     @Deprecated(since = "1.1", forRemoval = true)
     public SequentialProcessingResult processYamlString(String yamlContent, String source) throws YamlConfigurationException {
@@ -150,7 +150,7 @@ public class SequentialYamlProcessor {
      *             programmatic access to error details. Errors must be caught and inspected via exception messages.</p>
      *             <p><strong>Migration:</strong> Replace {@code SequentialProcessingResult result = processor.processOrderedConfiguration(config, source)}
      *             with {@code RuleResult result = processor.processOrderedConfigurationWithResult(config, source)}
-     *             and check {@code result.getResultType() == ResultType.ERROR} to detect failures.</p>
+     *             and check {@code result.isError()} to detect failures (covers both ERROR and ENRICHMENT_FAILURE).</p>
      */
     @Deprecated(since = "1.1", forRemoval = true)
     public SequentialProcessingResult processOrderedConfiguration(OrderedYamlConfiguration orderedConfig, String source)

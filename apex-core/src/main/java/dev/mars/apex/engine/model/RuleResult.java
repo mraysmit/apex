@@ -279,7 +279,9 @@ public class RuleResult implements Serializable {
         /** No rules were provided for evaluation */
         NO_RULES,
         /** An error occurred during rule evaluation */
-        ERROR
+        ERROR,
+        /** An enrichment operation failed */
+        ENRICHMENT_FAILURE
     }
 
     /**
@@ -525,7 +527,7 @@ public class RuleResult implements Serializable {
      * @return A new RuleResult instance representing failed enrichment
      */
     public static RuleResult enrichmentFailure(List<String> failureMessages, Map<String, Object> enrichedData, String severity) {
-        return builder().ruleName("enrichment").message("Required field enrichment failed").severity(severity).triggered(false).resultType(ResultType.ERROR).enrichedData(enrichedData).failureMessages(failureMessages).success(false).build();
+        return builder().ruleName("enrichment").message("Required field enrichment failed").severity(severity).triggered(false).resultType(ResultType.ENRICHMENT_FAILURE).enrichedData(enrichedData).failureMessages(failureMessages).success(false).build();
     }
 
     /**
@@ -539,7 +541,7 @@ public class RuleResult implements Serializable {
      * @return A new RuleResult instance representing failed enrichment
      */
     public static RuleResult enrichmentFailure(List<String> failureMessages, Map<String, Object> enrichedData, String severity, String errorCode) {
-        return builder().ruleName("enrichment").message("Required field enrichment failed").severity(severity).errorCode(errorCode).triggered(false).resultType(ResultType.ERROR).enrichedData(enrichedData).failureMessages(failureMessages).success(false).build();
+        return builder().ruleName("enrichment").message("Required field enrichment failed").severity(severity).errorCode(errorCode).triggered(false).resultType(ResultType.ENRICHMENT_FAILURE).enrichedData(enrichedData).failureMessages(failureMessages).success(false).build();
     }
 
     /**
@@ -802,6 +804,18 @@ public class RuleResult implements Serializable {
      */
     public boolean hasFailures() {
         return !success || (failureMessages != null && !failureMessages.isEmpty());
+    }
+
+    /**
+     * Check if the result type indicates an error condition.
+     * Returns true for both ERROR and ENRICHMENT_FAILURE result types.
+     * This method provides a convenient way to check for any error without
+     * explicitly comparing against all error-related ResultType values.
+     *
+     * @return true if resultType is ERROR or ENRICHMENT_FAILURE, false otherwise
+     */
+    public boolean isError() {
+        return resultType == ResultType.ERROR || resultType == ResultType.ENRICHMENT_FAILURE;
     }
 
     /**

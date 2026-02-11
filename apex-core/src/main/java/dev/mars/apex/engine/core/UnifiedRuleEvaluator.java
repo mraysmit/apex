@@ -585,7 +585,7 @@ public class UnifiedRuleEvaluator {
             }
 
             // Return first match or error (but with accumulated enrichedData)
-            if (result.isTriggered() || result.getResultType() == RuleResult.ResultType.ERROR) {
+            if (result.isTriggered() || result.isError()) {
                 // If this result doesn't have all accumulated data, merge it
                 if (accumulatedEnrichedData.size() > (result.getEnrichedData() != null ? result.getEnrichedData().size() : 0)) {
                     Map<String, Object> mergedData = new java.util.HashMap<>(accumulatedEnrichedData);
@@ -648,7 +648,7 @@ public class UnifiedRuleEvaluator {
 
             // Track first significant result (error or match), preserving order
             if (firstSignificantResult == null) {
-                if (result.getResultType() == RuleResult.ResultType.ERROR || result.isTriggered()) {
+                if (result.isError() || result.isTriggered()) {
                     firstSignificantResult = result;
                 }
             }
@@ -698,7 +698,8 @@ public class UnifiedRuleEvaluator {
                 return codeExpression;
             }
         } catch (Exception e) {
-            logger.warn("Error evaluating code expression '{}': {}", codeExpression, e.getMessage());
+            logger.error("[APEX-RULE-003] Error evaluating code expression '{}': {}", codeExpression, e.getMessage());
+            logger.debug("Full exception details for code expression '{}':", codeExpression, e);
             return null;
         }
     }
@@ -737,7 +738,8 @@ public class UnifiedRuleEvaluator {
                 applyFieldMapping(mapping, mappingContext, enrichedData);
             }
         } catch (Exception e) {
-            logger.warn("Error applying field mappings: {}", e.getMessage());
+            logger.error("[APEX-RULE-004] Error applying field mappings: {}", e.getMessage());
+            logger.debug("Full exception details for field mappings:", e);
         }
     }
 
@@ -769,7 +771,8 @@ public class UnifiedRuleEvaluator {
             enrichedData.put(fieldName, value);
             logger.info("Applied field mapping: {} = {}", fieldName, value);
         } catch (Exception e) {
-            logger.warn("Error applying field mapping '{}': {}", mapping, e.getMessage());
+            logger.error("[APEX-RULE-004] Error applying field mapping '{}': {}", mapping, e.getMessage());
+            logger.debug("Full exception details for field mapping '{}':", mapping, e);
         }
     }
     

@@ -428,7 +428,7 @@ public class YamlConfigurationLoader {
             logger.debug("File has no type metadata: {}", filePath);
             return false;
         } catch (Exception e) {
-            logger.warn("Failed to check if file is component: {} - {}", filePath, e.getMessage());
+            logger.error("Failed to check if file is component: {} - {}", filePath, e.getMessage());
             return false;
         }
     }

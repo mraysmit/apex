@@ -141,8 +141,8 @@ public class ExpressionController {
             // Evaluate with detailed result
             RuleResult result = expressionEvaluationService.evaluateWithResult(request.getExpression(), request.getContext());
 
-            // Check for business logic failures (ResultType.ERROR)
-            if (result.getResultType() == RuleResult.ResultType.ERROR) {
+            // Check for business logic failures (ResultType.ERROR or ENRICHMENT_FAILURE)
+            if (result.isError()) {
                 logger.error("Expression evaluation failed with ERROR result type");
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("success", false);

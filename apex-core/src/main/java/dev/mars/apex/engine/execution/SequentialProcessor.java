@@ -159,7 +159,7 @@ public class SequentialProcessor {
                     executionPath.addAll(pipelineResult.getExecutionPath());
                 }
 
-                if (pipelineResult.getResultType() == RuleResult.ResultType.ERROR) {
+                if (pipelineResult.isError()) {
                     overallSuccess = false;
                     failureMessages.add("Pipeline execution error: " + pipelineResult.getMessage());
                     logger.debug("Pipeline execution failed: {}", pipelineResult.getMessage());
@@ -188,6 +188,7 @@ public class SequentialProcessor {
                         .message("Sequential evaluation completed with failures")
                         .triggered(false)
                         .resultType(RuleResult.ResultType.ERROR)
+                        .severity(SeverityConstants.ERROR)
                         .enrichedData(enrichedData)
                         .failureMessages(failureMessages)
                         .success(false)
@@ -198,10 +199,10 @@ public class SequentialProcessor {
             }
 
         } catch (Exception e) {
-            logger.error("Sequential evaluation failed with exception: {}", e.getMessage());
+            logger.error("[APEX-RULE-999] Sequential evaluation failed with exception: {}", e.getMessage());
             logger.debug("Full sequential evaluation exception details:", e);
-            failureMessages.add("Sequential evaluation failed: " + e.getMessage());
-            return RuleResult.evaluationFailure(failureMessages, enrichedData, "evaluation", "Sequential evaluation failed");
+            failureMessages.add("[APEX-RULE-999] Sequential evaluation failed: " + e.getMessage());
+            return RuleResult.evaluationFailure(failureMessages, enrichedData, "evaluation", "Sequential evaluation failed", SeverityConstants.ERROR);
         }
     }
 
@@ -288,7 +289,9 @@ public class SequentialProcessor {
             }
             groupIndex = ruleFactory.createRuleGroupIndex(yamlConfig, tempConfig);
         } catch (YamlConfigurationException e) {
-            logger.error("Failed to build rule-group index: {}", e.getMessage());
+            logger.error("[APEX-CFG-003] Failed to build rule-group index: {}", e.getMessage());
+            logger.debug("Full exception details for rule-group index build failure:", e);
+            failureMessages.add("[APEX-CFG-003] Rule-group index build failed: " + e.getMessage());
             groupIndex = Map.of();
         }
 
@@ -317,7 +320,7 @@ public class SequentialProcessor {
             }
 
             // Check for ERROR result type
-            if (itemResult.getResultType() == RuleResult.ResultType.ERROR) {
+            if (itemResult.isError()) {
                 failureMessages.add(item.getSectionType() + " '" + item.getItemId() + "' error: " + itemResult.getMessage());
             }
 
@@ -552,7 +555,7 @@ public class SequentialProcessor {
         YamlTransformationProcessor processor = new YamlTransformationProcessor(this.evaluatorService);
         RuleResult transformationResult = processor.processTransformationsWithResult(List.of(transformation), data);
 
-        if (transformationResult.getResultType() == RuleResult.ResultType.ERROR) {
+        if (transformationResult.isError()) {
             logger.error("Transformation processing failed: {}", transformationResult.getMessage());
         } else {
             logger.debug("processTransformationItem() - transformation '{}' completed successfully", transformationId);

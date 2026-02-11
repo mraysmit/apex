@@ -51,6 +51,15 @@ spring*.log
 *.log.zip
 /logs/**
 **/logs/**
+
+### Test output files (use target/test-logs/ for timestamped audit trail) ###
+test-logs/
+*-output.txt
+*-output-*.txt
+test-suite-output*.txt
+compile-errors.txt
+test-markers-output.txt
+test-with-markers.txt
 # Add these case variations
 *.LOG
 *.Log

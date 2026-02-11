@@ -80,7 +80,7 @@ public class YamlTransformationProcessor {
      *             making it impossible for callers to detect failures. Errors are lost and only appear in logs.</p>
      *             <p><strong>Migration:</strong> Replace {@code Object result = processor.processTransformations(transformations, data)}
      *             with {@code RuleResult result = processor.processTransformationsWithResult(transformations, data)}
-     *             and check {@code result.getResultType() == ResultType.ERROR} to detect failures.</p>
+     *             and check {@code result.isError()} to detect failures (covers both ERROR and ENRICHMENT_FAILURE).</p>
      */
     @Deprecated(since = "1.1", forRemoval = true)
     public Object processTransformations(List<YamlTransformation> transformations, Object targetObject) {
@@ -446,9 +446,13 @@ public class YamlTransformationProcessor {
                     Boolean result = conditionExpr.getValue(context, Boolean.class);
                     conditionMet = result != null && result;
                 } catch (Exception e) {
-                    logger.warn("Failed to evaluate rule condition for transformation {}: {}", 
+                    logger.error("[APEX-TRANS-002] Failed to evaluate rule condition for transformation '{}': {}",
                         transformationId, e.getMessage());
-                    conditionMet = false;
+                    logger.debug("Full exception details for transformation condition failure:", e);
+                    throw new ApexTransformationException(
+                        ApexTransformationException.ErrorType.CONDITION_ERROR,
+                        transformationId, rule.getCondition(),
+                        "[APEX-TRANS-006] Condition evaluation failed: " + e.getMessage(), null, e);
                 }
             }
             

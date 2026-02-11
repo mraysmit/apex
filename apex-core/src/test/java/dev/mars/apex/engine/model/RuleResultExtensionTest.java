@@ -100,7 +100,7 @@ class RuleResultExtensionTest {
         assertEquals("enrichment", result.getRuleName());
         assertEquals("Required field enrichment failed", result.getMessage());
         assertFalse(result.isTriggered());
-        assertEquals(RuleResult.ResultType.ERROR, result.getResultType());
+        assertEquals(RuleResult.ResultType.ENRICHMENT_FAILURE, result.getResultType());
         
         // Test new API methods
         assertFalse(result.isSuccess(), "Enrichment failure should not be successful");

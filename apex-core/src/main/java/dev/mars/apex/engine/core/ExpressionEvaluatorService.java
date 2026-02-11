@@ -89,7 +89,7 @@ public class ExpressionEvaluatorService {
             logger.debug("Expression: {} => {}", expression, result);
             return result;
         } catch (Exception e) {
-            logger.warn("Error evaluating expression '{}': {}", expression, e.getMessage());
+            logger.error("Error evaluating expression '{}': {}", expression, e.getMessage());
             return null;
         }
     }
@@ -140,7 +140,7 @@ public class ExpressionEvaluatorService {
                 return RuleResult.match("Expression", "Expression evaluated successfully: " + expression);
             }
         } catch (Exception e) {
-            logger.warn("Error evaluating expression '{}': {}", expression, e.getMessage());
+            logger.error("Error evaluating expression '{}': {}", expression, e.getMessage());
             return RuleResult.error("Expression", "Error evaluating expression: " + e.getMessage());
         }
     }
@@ -164,7 +164,7 @@ public class ExpressionEvaluatorService {
             logger.debug("Expression evaluated successfully");
             return result;
         } catch (Exception e) {
-            logger.warn("Error evaluating expression '{}': {}", expression, e.getMessage());
+            logger.error("Error evaluating expression '{}': {}", expression, e.getMessage());
 
             // For boolean expressions, return false instead of null when there's an error
             if (resultType == Boolean.class || resultType == boolean.class) {
@@ -238,7 +238,7 @@ public class ExpressionEvaluatorService {
             StandardEvaluationContext context = createEnhancedContext(facts);
             return evaluate(expression, context, resultType);
         } catch (Exception e) {
-            logger.warn("Error evaluating expression '{}': {}", expression, e.getMessage());
+            logger.error("Error evaluating expression '{}': {}", expression, e.getMessage());
 
             // For boolean expressions, return false instead of null when there's an error
             if (resultType == Boolean.class || resultType == boolean.class) {

@@ -475,8 +475,8 @@ class DatabaseDataSourceTest {
     @Test
     @DisplayName("Should handle null parameters in query")
     void testNullParametersInQuery() {
-        // The implementation doesn't handle null parameters gracefully
-        assertThrows(NullPointerException.class, () -> {
+        // Implementation validates null parameters and throws DataSourceException
+        assertThrows(DataSourceException.class, () -> {
             databaseDataSource.query("SELECT * FROM test_users", null);
         });
     }

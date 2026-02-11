@@ -190,7 +190,7 @@ public class ScenarioStageExecutor {
             logger.info("Stage '{}' completed: {}", stage.getStageName(), stageResult.getExecutionSummary());
 
             if (!handleStageResult(stage, stageResult, result)) {
-                logger.warn("Terminating scenario execution due to stage '{}' failure policy", stage.getStageName());
+                logger.error("Terminating scenario execution due to stage '{}' failure policy", stage.getStageName());
 
                 // Mark remaining stages as skipped due to termination
                 for (int i = currentStageIndex + 1; i < stages.size(); i++) {
@@ -248,8 +248,9 @@ public class ScenarioStageExecutor {
                 logger.debug("Stage '{}' condition met: {}",
                     stage.getStageName(), stage.getCondition());
             } catch (Exception e) {
-                logger.warn("Stage '{}' condition evaluation failed - skipping: {}",
+                logger.error("[APEX-CFG-002] Stage '{}' condition evaluation failed - skipping: {}",
                     stage.getStageName(), e.getMessage());
+                logger.debug("Full exception details for stage condition evaluation failure:", e);
                 return false;
             }
         }
@@ -334,7 +335,7 @@ public class ScenarioStageExecutor {
             List<String> validationErrors = stage.validate();
             if (!validationErrors.isEmpty()) {
                 String errorMessage = "Stage configuration errors: " + String.join(", ", validationErrors);
-                logger.warn("Configuration error in stage '{}': {}", stage.getStageName(), errorMessage);
+                logger.error("Configuration error in stage '{}': {}", stage.getStageName(), errorMessage);
                 return StageExecutionResult.configurationError(stage.getStageName(), errorMessage);
             }
 
@@ -350,10 +351,10 @@ public class ScenarioStageExecutor {
             }
 
         } catch (Exception e) {
-            logger.error("Error executing stage '{}': {}", e, stage.getStageName(), e.getMessage());
-            logger.debug("Stack trace for stage '{}' error:", stage.getStageName(), e);
+            logger.error("[APEX-RULE-999] Error executing stage '{}': {}", stage.getStageName(), e.getMessage());
+            logger.debug("Full exception details for stage '{}' error:", stage.getStageName(), e);
 
-            String errorMessage = "Stage execution exception: " + e.getMessage();
+            String errorMessage = "[APEX-RULE-999] Stage execution exception: " + e.getMessage();
             return stage.isRequired() ?
                 StageExecutionResult.criticalFailure(stage.getStageName(), errorMessage) :
                 StageExecutionResult.failure(stage.getStageName(), errorMessage);
@@ -484,7 +485,7 @@ public class ScenarioStageExecutor {
             // Check if we should terminate based on failure policy
             if (!fileResult.isSuccessful()) {
                 if ("terminate".equals(effectiveFailurePolicy)) {
-                    logger.warn("Component file '{}' failed with terminate policy - stopping component execution",
+                    logger.error("Component file '{}' failed with terminate policy - stopping component execution",
                                fileRef.getFilePath());
                     // Return a failure result
                     StageExecutionResult failureResult = StageExecutionResult.criticalFailure(

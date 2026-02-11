@@ -378,7 +378,7 @@ public class RestApiDataSource implements ExternalDataSource {
         } else {
             throw new DataSourceException(DataSourceException.ErrorType.EXECUTION_ERROR,
                 "API call failed with status: " + response.statusCode(),
-                configuration.getName(), "executeApiCall", true);
+                null, configuration.getName(), "executeApiCall", true);
         }
     }
     

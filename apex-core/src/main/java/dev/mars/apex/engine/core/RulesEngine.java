@@ -398,22 +398,23 @@ public class RulesEngine {
             
         } catch (YamlConfigurationException e) {
             // YAML parsing or validation error - return as RuleResult
-            logger.error("YAML configuration error: {}", e.getMessage());
+            logger.error("[APEX-CFG-001] YAML configuration error: {}", e.getMessage());
+            logger.debug("Full exception details for YAML configuration error:", e);
             List<String> failureMessages = new ArrayList<>();
-            failureMessages.add("YAML configuration error: " + e.getMessage());
+            failureMessages.add("[APEX-CFG-001] YAML configuration error: " + e.getMessage());
             if (e.getCause() != null) {
                 failureMessages.add("Caused by: " + e.getCause().getMessage());
             }
             Map<String, Object> data = inputData != null ? new HashMap<>(inputData) : new HashMap<>();
-            return RuleResult.evaluationFailure(failureMessages, data, "yaml-configuration", "YAML configuration error");
+            return RuleResult.evaluationFailure(failureMessages, data, "yaml-configuration", "YAML configuration error", SeverityConstants.ERROR);
             
         } catch (Exception e) {
             // Any other unexpected error - return as RuleResult
-            logger.error("Unexpected error during YAML evaluation: {}", e.getMessage(), e);
+            logger.error("[APEX-RULE-999] Unexpected error during YAML evaluation: {}", e.getMessage(), e);
             List<String> failureMessages = new ArrayList<>();
-            failureMessages.add("Unexpected error: " + e.getMessage());
+            failureMessages.add("[APEX-RULE-999] Unexpected error: " + e.getMessage());
             Map<String, Object> data = inputData != null ? new HashMap<>(inputData) : new HashMap<>();
-            return RuleResult.evaluationFailure(failureMessages, data, "unexpected-error", "Unexpected error during evaluation");
+            return RuleResult.evaluationFailure(failureMessages, data, "unexpected-error", "Unexpected error during evaluation", SeverityConstants.ERROR);
         }
     }
 
@@ -442,21 +443,22 @@ public class RulesEngine {
             return engine.evaluate(inputData);
             
         } catch (YamlConfigurationException e) {
-            logger.error("YAML configuration error: {}", e.getMessage());
+            logger.error("[APEX-CFG-001] YAML configuration error: {}", e.getMessage());
+            logger.debug("Full exception details for YAML file configuration error:", e);
             List<String> failureMessages = new ArrayList<>();
-            failureMessages.add("YAML configuration error: " + e.getMessage());
+            failureMessages.add("[APEX-CFG-001] YAML configuration error: " + e.getMessage());
             if (e.getCause() != null) {
                 failureMessages.add("Caused by: " + e.getCause().getMessage());
             }
             Map<String, Object> data = inputData != null ? new HashMap<>(inputData) : new HashMap<>();
-            return RuleResult.evaluationFailure(failureMessages, data, "yaml-configuration", "YAML configuration error");
+            return RuleResult.evaluationFailure(failureMessages, data, "yaml-configuration", "YAML configuration error", SeverityConstants.ERROR);
             
         } catch (Exception e) {
-            logger.error("Unexpected error during YAML file evaluation: {}", e.getMessage(), e);
+            logger.error("[APEX-RULE-999] Unexpected error during YAML file evaluation: {}", e.getMessage(), e);
             List<String> failureMessages = new ArrayList<>();
-            failureMessages.add("Unexpected error: " + e.getMessage());
+            failureMessages.add("[APEX-RULE-999] Unexpected error: " + e.getMessage());
             Map<String, Object> data = inputData != null ? new HashMap<>(inputData) : new HashMap<>();
-            return RuleResult.evaluationFailure(failureMessages, data, "unexpected-error", "Unexpected error during evaluation");
+            return RuleResult.evaluationFailure(failureMessages, data, "unexpected-error", "Unexpected error during evaluation", SeverityConstants.ERROR);
         }
     }
 
@@ -686,7 +688,7 @@ public class RulesEngine {
 
         // Handle null inputs gracefully
         if (yamlConfig == null) {
-            logger.warn("YAML configuration is null");
+            logger.error("YAML configuration is null");
             List<String> failureMessages = new ArrayList<>();
             failureMessages.add("YAML configuration is null");
             Map<String, Object> enrichedData = inputData != null ? new HashMap<>(inputData) : new HashMap<>();
@@ -694,7 +696,7 @@ public class RulesEngine {
         }
 
         if (inputData == null) {
-            logger.warn("Input data is null");
+            logger.error("Input data is null");
             List<String> failureMessages = new ArrayList<>();
             failureMessages.add("Input data is null");
             return RuleResult.evaluationFailure(failureMessages, new HashMap<>(), "evaluation", "Null input data");

@@ -128,7 +128,7 @@ public class YamlEnrichmentProcessor {
      *             making it impossible for callers to detect failures. Errors are lost and only appear in logs.</p>
      *             <p><strong>Migration:</strong> Replace {@code Object result = processor.processEnrichments(enrichments, data)}
      *             with {@code RuleResult result = processor.processEnrichmentsWithResult(enrichments, data)}
-     *             and check {@code result.getResultType() == ResultType.ERROR} to detect failures.</p>
+     *             and check {@code result.isError()} to detect failures (covers both ERROR and ENRICHMENT_FAILURE).</p>
      */
     @Deprecated(since = "1.1", forRemoval = true)
     public Object processEnrichments(List<YamlEnrichment> enrichments, Object targetObject) {
@@ -155,7 +155,7 @@ public class YamlEnrichmentProcessor {
      *             making it impossible for callers to detect failures. Errors are lost and only appear in logs.</p>
      *             <p><strong>Migration:</strong> Replace {@code Object result = processor.processEnrichments(enrichments, data, config)}
      *             with {@code RuleResult result = processor.processEnrichmentsWithResult(enrichments, data, config)}
-     *             and check {@code result.getResultType() == ResultType.ERROR} to detect failures.</p>
+     *             and check {@code result.isError()} to detect failures (covers both ERROR and ENRICHMENT_FAILURE).</p>
      */
     @Deprecated(since = "1.1", forRemoval = true)
     public Object processEnrichments(List<YamlEnrichment> enrichments, Object targetObject,
@@ -746,10 +746,12 @@ public class YamlEnrichmentProcessor {
                 return false;
             }
         } catch (Exception e) {
-            // ERROR: Condition evaluation failure indicates configuration problem
-            logger.error("ERROR: Failed to evaluate condition: '" + rule.getCondition() +
-                      "' - Error: " + e.getMessage(), e);
-            return false;
+            // Condition evaluation failure indicates a configuration problem — propagate to caller
+            logger.error("[APEX-ENRICH-006] Failed to evaluate condition rule: '{}' - Error: {}",
+                      rule.getCondition(), e.getMessage());
+            logger.debug("Full exception details for condition rule evaluation failure:", e);
+            throw new EnrichmentException(
+                "[APEX-ENRICH-006] Condition rule evaluation failed for '" + rule.getCondition() + "': " + e.getMessage(), e);
         }
     }
 

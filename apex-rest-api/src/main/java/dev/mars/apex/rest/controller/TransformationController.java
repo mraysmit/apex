@@ -198,7 +198,7 @@ public class TransformationController {
                 "message", result.getMessage(),
                 "result", result.getMessage(),
                 "executionTime", result.hasPerformanceMetrics() ? result.getPerformanceMetrics().getEvaluationTimeMillis() : 0,
-                "error", result.getResultType() == RuleResult.ResultType.ERROR ? result.getMessage() : null
+                "error", result.isError() ? result.getMessage() : null
             ));
             response.put("timestamp", Instant.now());
 
