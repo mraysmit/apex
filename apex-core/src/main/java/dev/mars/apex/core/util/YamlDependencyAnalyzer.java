@@ -100,7 +100,8 @@ public class YamlDependencyAnalyzer {
             logger.info("Completed YAML dependency analysis. Found {} files, max depth: {}", 
                 graph.getTotalFiles(), graph.getMaxDepth());
         } catch (Exception e) {
-            logger.error("Failed to analyze YAML dependencies for: {}", yamlFilePath, e);
+            logger.error("Failed to analyze YAML dependencies for: {}: {}", yamlFilePath, e.getMessage());
+            logger.debug("Full exception details:", e);
             throw new IllegalStateException("YAML dependency analysis failed for: " + yamlFilePath, e);
         }
         
@@ -197,7 +198,8 @@ public class YamlDependencyAnalyzer {
             Map<String, Object> config = configLoader.loadAsMap(fullPath);
             extractReferencesFromMap(config, references, "");
         } catch (Exception e) {
-            logger.error("Failed to extract references from: {}", filePath, e);
+            logger.error("Failed to extract references from: {}: {}", filePath, e.getMessage());
+            logger.debug("Full exception details:", e);
         }
         
         return references;

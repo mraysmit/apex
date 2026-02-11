@@ -101,9 +101,11 @@ public class DatabaseDataSource implements ExternalDataSource {
                         }
                     } catch (SQLException e) {
                         LOGGER.warn("Database connectivity check failed: {}", e.getMessage());
+                        LOGGER.debug("Full exception details for connectivity check:", e);
                     }
                 } catch (SQLException e) {
                     LOGGER.error("Failed to test database connectivity: {}", e.getMessage());
+                    LOGGER.debug("Full exception details for connectivity test:", e);
                 }
             } else {
                 throw new DataSourceException(DataSourceException.ErrorType.CONNECTION_ERROR,
@@ -142,6 +144,7 @@ public class DatabaseDataSource implements ExternalDataSource {
             return connection != null && !connection.isClosed();
         } catch (SQLException e) {
             LOGGER.warn("Database connection test failed: {}", e.getMessage());
+            LOGGER.debug("Full exception details for connection test:", e);
             return false;
         }
     }
@@ -280,12 +283,14 @@ public class DatabaseDataSource implements ExternalDataSource {
             switch (errorType) {
                 case CONFIGURATION_ERROR:
                     LOGGER.error("Database configuration error in query: {}", e.getMessage());
+                    LOGGER.debug("Full exception details for query configuration error:", e);
                     throw new DataSourceException(DataSourceException.ErrorType.CONFIGURATION_ERROR,
                                                  "Database configuration error: " + errorDescription, e,
                                                  configuration.getName(), "query", false);
 
                 case TRANSIENT_ERROR:
                     LOGGER.warn("Transient database error in query: {}", e.getMessage());
+                    LOGGER.debug("Full exception details for transient query error:", e);
                     throw new DataSourceException(DataSourceException.ErrorType.CONNECTION_ERROR,
                                                  "Transient database error: " + errorDescription, e,
                                                  configuration.getName(), "query", true); // Retryable
@@ -294,6 +299,7 @@ public class DatabaseDataSource implements ExternalDataSource {
                 case FATAL_ERROR:
                 default:
                     LOGGER.error("Database query failed: {}", e.getMessage());
+                    LOGGER.debug("Full exception details for query failure:", e);
                     throw DataSourceException.executionError("Database query failed: " + errorDescription, e, "query");
             }
         }
@@ -373,23 +379,27 @@ public class DatabaseDataSource implements ExternalDataSource {
             switch (errorType) {
                 case CONFIGURATION_ERROR:
                     LOGGER.error("Database configuration error in batch update: {}", e.getMessage());
+                    LOGGER.debug("Full exception details for batch update configuration error:", e);
                     throw new DataSourceException(DataSourceException.ErrorType.CONFIGURATION_ERROR,
                                                  "Database configuration error: " + errorDescription, e,
                                                  configuration.getName(), "batchUpdate", false);
 
                 case TRANSIENT_ERROR:
                     LOGGER.warn("Transient database error in batch update: {}", e.getMessage());
+                    LOGGER.debug("Full exception details for transient batch update error:", e);
                     throw new DataSourceException(DataSourceException.ErrorType.CONNECTION_ERROR,
                                                  "Transient database error: " + errorDescription, e,
                                                  configuration.getName(), "batchUpdate", true); // Retryable
 
                 case DATA_INTEGRITY_VIOLATION:
                     LOGGER.warn("Data integrity violation in batch update: {}", e.getMessage());
+                    LOGGER.debug("Full exception details for batch update integrity violation:", e);
                     throw DataSourceException.executionError("Data integrity violation: " + errorDescription, e, "batchUpdate");
 
                 case FATAL_ERROR:
                 default:
                     LOGGER.error("Batch update failed: {}", e.getMessage());
+                    LOGGER.debug("Full exception details for batch update failure:", e);
                     throw DataSourceException.executionError("Batch update failed: " + errorDescription, e, "batchUpdate");
             }
         }

@@ -143,7 +143,8 @@ public class SchemaReaderService {
             LOGGER.info("[SchemaReader] Successfully enumerated {} tables", tableSchemas.size());
             
         } catch (Exception e) {
-            LOGGER.error("[SchemaReader] Failed to enumerate tables: {}", e.getMessage(), e);
+            LOGGER.error("[SchemaReader] Failed to enumerate tables: {}", e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             throw new DataPipelineException("Failed to enumerate database tables: " + e.getMessage(), e);
         }
         
@@ -335,7 +336,8 @@ public class SchemaReaderService {
 
         } catch (Exception e) {
             LOGGER.error("[SchemaReader.DB] Failed to read database schema for table '{}': {}", 
-                        tableName, e.getMessage(), e);
+                        tableName, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             throw new DataPipelineException("Failed to read database schema: " + e.getMessage(), e);
         }
 
@@ -448,7 +450,8 @@ public class SchemaReaderService {
 
         } catch (Exception e) {
             LOGGER.error("[SchemaReader.CSV] Failed to read CSV schema from '{}': {}", 
-                        csvFilePath, e.getMessage(), e);
+                        csvFilePath, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             throw new DataPipelineException("Failed to read CSV schema: " + e.getMessage(), e);
         }
 

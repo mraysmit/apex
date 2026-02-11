@@ -74,7 +74,8 @@ public class YamlDependencyService {
             LOGGER.debug("Dependency analysis completed for: {}", filePath);
             return graph;
         } catch (Exception e) {
-            LOGGER.error("Failed to analyze dependencies for {}: {}", filePath, e.getMessage(), e);
+            LOGGER.error("Failed to analyze dependencies for {}: {}", filePath, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             throw new DependencyAnalysisException("Failed to analyze dependencies for " + filePath, e);
         }
     }
@@ -97,6 +98,7 @@ public class YamlDependencyService {
                 graphs.add(graph);
             } catch (Exception e) {
                 LOGGER.warn("Failed to analyze dependencies for {}: {}", filePath, e.getMessage());
+                LOGGER.debug("Full exception details for dependency analysis of '{}':", filePath, e);
                 failedFiles.add(filePath);
             }
         }
@@ -117,6 +119,7 @@ public class YamlDependencyService {
             return !stats.isHealthy();
         } catch (Exception e) {
             LOGGER.warn("Error checking dependency issues for {}: {}", filePath, e.getMessage());
+            LOGGER.debug("Full exception details for dependency issue check of '{}':", filePath, e);
             return true; // Assume issues if analysis fails
         }
     }
@@ -133,6 +136,7 @@ public class YamlDependencyService {
             return new ArrayList<>(graph.getMissingFiles());
         } catch (Exception e) {
             LOGGER.warn("Error getting missing dependencies for {}: {}", filePath, e.getMessage());
+            LOGGER.debug("Full exception details for missing dependencies of '{}':", filePath, e);
             return new ArrayList<>();
         }
     }
@@ -149,6 +153,7 @@ public class YamlDependencyService {
             return graph.findCircularDependencies();
         } catch (Exception e) {
             LOGGER.warn("Error checking circular dependencies for {}: {}", filePath, e.getMessage());
+            LOGGER.debug("Full exception details for circular dependency check of '{}':", filePath, e);
             return new ArrayList<>();
         }
     }
@@ -165,6 +170,7 @@ public class YamlDependencyService {
             return graph.getStatistics();
         } catch (Exception e) {
             LOGGER.warn("Error getting dependency statistics for {}: {}", filePath, e.getMessage());
+            LOGGER.debug("Full exception details for dependency statistics of '{}':", filePath, e);
             return new DependencyStatistics(0, 0, 0, 0, 0, 0);
         }
     }
@@ -193,7 +199,8 @@ public class YamlDependencyService {
                 getDependencyTree(graph, filePath)
             );
         } catch (Exception e) {
-            LOGGER.error("Failed to generate dependency report for {}: {}", filePath, e.getMessage(), e);
+            LOGGER.error("Failed to generate dependency report for {}: {}", filePath, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             throw new DependencyAnalysisException("Failed to generate dependency report for " + filePath, e);
         }
     }

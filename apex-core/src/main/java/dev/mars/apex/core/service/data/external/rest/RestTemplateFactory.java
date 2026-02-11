@@ -239,6 +239,7 @@ public class RestTemplateFactory {
             
         } catch (Exception e) {
             LOGGER.warn("HTTP client test failed for '{}': {}", config.getName(), e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             return false;
         }
     }

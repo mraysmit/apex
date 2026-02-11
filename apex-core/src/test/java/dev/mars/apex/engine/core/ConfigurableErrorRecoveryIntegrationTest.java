@@ -24,6 +24,8 @@ import dev.mars.apex.engine.core.RuleBuilder;
 import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
@@ -35,6 +37,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.util.HashMap;
@@ -48,10 +51,27 @@ import static org.junit.jupiter.api.Assertions.*;
  * This test demonstrates the complete configurable error recovery system
  * working end-to-end with different severity levels and recovery policies.
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 @DisplayName("Configurable Error Recovery Integration Tests")
 class ConfigurableErrorRecoveryIntegrationTest {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurableErrorRecoveryIntegrationTest.class);
+
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(ConfigurableErrorRecoveryIntegrationTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] ConfigurableErrorRecoveryIntegrationTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(ConfigurableErrorRecoveryIntegrationTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: error recovery attempts, severity-based recovery policies");
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(ConfigurableErrorRecoveryIntegrationTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] ConfigurableErrorRecoveryIntegrationTest intentional error tests completed");
+        MDC.remove("testContext");
+    }
 
     private UnifiedRuleEvaluator evaluator;
     private ErrorRecoveryConfig config;

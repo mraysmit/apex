@@ -114,8 +114,8 @@ public class YamlRuleFactory {
                             Rule rule = createRuleWithMetadata(yamlRule);
                             config.registerRule(rule);
                         } catch (Exception ruleException) {
-                            logger.warn("Failed to create rule '" + yamlRule.getId() +
-                                          "': " + ruleException.getMessage());
+                            logger.error("Failed to create rule '{}': {}", yamlRule.getId(), ruleException.getMessage());
+                            logger.debug("Full exception details for rule '{}':", yamlRule.getId(), ruleException);
                         }
                     }
 
@@ -123,8 +123,8 @@ public class YamlRuleFactory {
                                "' using enhanced metadata support");
 
                 } catch (Exception e) {
-                    logger.warn("Failed to create rules for category '" + categoryName +
-                                  "': " + e.getMessage());
+                    logger.error("Failed to create rules for category '{}': {}", categoryName, e.getMessage());
+                    logger.debug("Full exception details for category '{}':", categoryName, e);
                 }
             }
         }
@@ -150,8 +150,8 @@ public class YamlRuleFactory {
                         logger.debug("Full stack trace for rule group configuration exception:", e);
                         throw e;
                     } catch (Exception e) {
-                        logger.warn("Failed to create rule group '" + yamlGroup.getId() +
-                                      "': " + e.getMessage());
+                        logger.error("Failed to create rule group '{}': {}", yamlGroup.getId(), e.getMessage());
+                        logger.debug("Full exception details for rule group '{}':", yamlGroup.getId(), e);
                     }
                 } else {
                     logger.info("Skipping disabled rule group: " + yamlGroup.getId());

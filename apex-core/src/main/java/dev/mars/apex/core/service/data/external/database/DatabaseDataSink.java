@@ -263,6 +263,7 @@ public class DatabaseDataSink implements DataSink {
                 case CONFIGURATION_ERROR:
                     // These are serious configuration issues that should fail fast
                     LOGGER.error("Database configuration error in operation '{}': {}", operation, e.getMessage());
+                    LOGGER.debug("Full exception details:", e);
 
                     throw DataSinkException.configurationError("Database configuration error: " + errorDescription, e);
 
@@ -270,6 +271,7 @@ public class DatabaseDataSink implements DataSink {
                 default:
                     // Unknown errors should be escalated
                     LOGGER.error("Fatal database error in operation '{}': {}", operation, e.getMessage());
+                    LOGGER.debug("Full exception details:", e);
 
                     throw DataSinkException.writeError("Fatal database error: " + errorDescription, e,
                         "Operation: " + operation + ", Data: " + (data != null ? data.getClass().getSimpleName() : "null"));
@@ -415,12 +417,14 @@ public class DatabaseDataSink implements DataSink {
             switch (errorType) {
                 case DATA_INTEGRITY_VIOLATION:
                     LOGGER.warn("Data integrity violation in execute operation '{}': {}", operation, e.getMessage());
+                    LOGGER.debug("Full exception details:", e);
                     throw DataSinkException.dataIntegrityError(
                         "Data integrity violation: " + errorDescription, e,
                         "Operation: " + operation + ", Parameters: " + parameters);
 
                 case TRANSIENT_ERROR:
                     LOGGER.warn("Transient database error in execute operation '{}': {}", operation, e.getMessage());
+                    LOGGER.debug("Full exception details:", e);
                     throw new DataSinkException(DataSinkException.ErrorType.CONNECTION_ERROR,
                                                "Transient database error: " + errorDescription, e,
                                                "Operation: " + operation,
@@ -428,11 +432,13 @@ public class DatabaseDataSink implements DataSink {
 
                 case CONFIGURATION_ERROR:
                     LOGGER.error("Database configuration error in execute operation '{}': {}", operation, e.getMessage());
+                    LOGGER.debug("Full exception details:", e);
                     throw DataSinkException.configurationError("Database configuration error: " + errorDescription, e);
 
                 case FATAL_ERROR:
                 default:
                     LOGGER.error("Fatal database error in execute operation '{}': {}", operation, e.getMessage());
+                    LOGGER.debug("Full exception details:", e);
                     throw DataSinkException.writeError("Fatal database error: " + errorDescription, e,
                         "Operation: " + operation + ", Parameters: " + parameters);
             }
@@ -691,6 +697,7 @@ public class DatabaseDataSink implements DataSink {
                             LOGGER.info("[OK] Statement {}/{} executed successfully", i + 1, statements.length);
                         } catch (Exception e) {
                             LOGGER.error("X Statement {}/{} failed: {}", i + 1, statements.length, e.getMessage());
+                            LOGGER.debug("Full exception details:", e);
                             throw e;
                         }
                     } else {
@@ -732,7 +739,8 @@ public class DatabaseDataSink implements DataSink {
             }
 
         } catch (Exception e) {
-            LOGGER.error("X Schema verification failed for database sink: {}", getName(), e);
+            LOGGER.error("X Schema verification failed for database sink '{}': {}", getName(), e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             throw DataSinkException.configurationError("Schema verification failed", e);
         }
     }
@@ -748,6 +756,7 @@ public class DatabaseDataSink implements DataSink {
             LOGGER.info("[OK] Table '{}' exists and is accessible", tableName);
         } catch (Exception e) {
             LOGGER.error("X Table '{}' verification failed: {}", tableName, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             throw new Exception("Table '" + tableName + "' does not exist or is not accessible", e);
         }
     }
@@ -772,6 +781,7 @@ public class DatabaseDataSink implements DataSink {
 
         } catch (Exception e) {
             LOGGER.error("X Database connectivity verification failed: {}", e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             throw new Exception("Database connectivity verification failed", e);
         }
     }

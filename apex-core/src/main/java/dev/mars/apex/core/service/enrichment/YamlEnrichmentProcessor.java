@@ -214,7 +214,8 @@ public class YamlEnrichmentProcessor {
             } catch (Exception e) {
                 // CRITICAL: Enrichment processing failure is a serious configuration error
                 logger.error("Enrichment failure in deprecated method cannot be propagated to caller: " + enrichment.getId() +
-                          " - Error: " + e.getMessage(), e);
+                          " - Error: " + e.getMessage());
+                logger.debug("Full exception details:", e);
                 // Continue processing other enrichments for now (backward compatibility)
                 // TODO: Consider fail-fast behavior for critical enrichments
             }
@@ -1357,7 +1358,8 @@ public class YamlEnrichmentProcessor {
                     } catch (Exception e) {
                         // CRITICAL: Rule evaluation failure is a serious configuration error
                         logger.error("Rule evaluation failed for '" + yamlRule.getId() +
-                                  "' - condition: '" + yamlRule.getCondition() + "' - Error: " + e.getMessage(), e);
+                                  "' - condition: '" + yamlRule.getCondition() + "' - Error: " + e.getMessage());
+                        logger.debug("Full exception details:", e);
                         individualRuleResults.put(yamlRule.getId(), false);
                     }
                 }
@@ -1428,7 +1430,8 @@ public class YamlEnrichmentProcessor {
                     } catch (Exception e) {
                         // CRITICAL: Rule group evaluation failure is a serious configuration error
                         logger.error("Rule group evaluation failed for '" + yamlRuleGroup.getId() +
-                                  "' - Error: " + e.getMessage(), e);
+                                  "' - Error: " + e.getMessage());
+                        logger.debug("Full exception details:", e);
                         Map<String, Object> failedResult = new HashMap<>();
                         failedResult.put("passed", false);
                         failedResult.put("passedRules", new ArrayList<String>());
@@ -1523,7 +1526,8 @@ public class YamlEnrichmentProcessor {
                     Expression fallbackExpr = getOrCompileExpression(mapping.getFallbackValue());
                     return fallbackExpr.getValue(context);
                 } catch (Exception fallbackException) {
-                    logger.warn("Failed to apply fallback value: " + fallbackException.getMessage(), fallbackException);
+                    logger.warn("Failed to apply fallback value: " + fallbackException.getMessage());
+                    logger.debug("Full exception details:", fallbackException);
                 }
             }
 

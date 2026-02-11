@@ -158,7 +158,8 @@ public class DataSourceConfigurationService implements DataSourceManagerListener
             notifyListeners(DataSourceConfigurationEvent.configurationAdded(name, configuration));
             
         } catch (DataSourceException e) {
-            LOGGER.error("Failed to add data source configuration '{}'", name, e);
+            LOGGER.error("Failed to add data source configuration '{}': {}", name, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             throw e;
         }
     }
@@ -193,7 +194,8 @@ public class DataSourceConfigurationService implements DataSourceManagerListener
             return removed;
             
         } catch (Exception e) {
-            LOGGER.error("Error removing data source configuration '{}'", name, e);
+            LOGGER.error("Error removing data source configuration '{}': {}", name, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             return false;
         }
     }

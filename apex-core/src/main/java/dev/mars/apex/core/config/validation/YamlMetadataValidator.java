@@ -211,7 +211,8 @@ public class YamlMetadataValidator {
 
         } catch (Exception e) {
             result.addError("Failed to parse YAML file: " + e.getMessage());
-            logger.error("Validation failed for file: {}", filePath, e);
+            logger.error("Validation failed for file '{}': {}", filePath, e.getMessage());
+            logger.debug("Full exception details:", e);
         }
         
         return result;

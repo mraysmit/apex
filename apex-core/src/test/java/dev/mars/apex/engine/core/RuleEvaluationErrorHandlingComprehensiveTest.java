@@ -3,6 +3,8 @@ package dev.mars.apex.engine.core;
 import dev.mars.apex.engine.model.Rule;
 import dev.mars.apex.engine.core.RuleBuilder;
 import dev.mars.apex.engine.model.RuleResult;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
@@ -14,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.*;
 
@@ -35,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author GitHub Copilot
  * @since 2025-09-26
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 @DisplayName("Comprehensive Rule Evaluation Error Handling Tests")
 class RuleEvaluationErrorHandlingComprehensiveTest {
 
@@ -42,6 +46,22 @@ class RuleEvaluationErrorHandlingComprehensiveTest {
 
     private RulesEngine rulesEngine;
     private RulesEngineConfiguration configuration;
+
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(RuleEvaluationErrorHandlingComprehensiveTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] RuleEvaluationErrorHandlingComprehensiveTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(RuleEvaluationErrorHandlingComprehensiveTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: SpEL evaluation errors, missing properties, type mismatches");
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(RuleEvaluationErrorHandlingComprehensiveTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] RuleEvaluationErrorHandlingComprehensiveTest intentional error tests completed");
+        MDC.remove("testContext");
+    }
 
     @BeforeEach
     void setUp() {

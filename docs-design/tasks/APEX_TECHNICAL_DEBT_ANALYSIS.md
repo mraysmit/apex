@@ -1,8 +1,8 @@
 # APEX Technical Debt Analysis & Cleanup Plan
 
 **Date**: December 14, 2025  
-**Updated**: February 10, 2026  
-**Status**: 🟡 Not started — deferred to separate cleanup effort  
+**Updated**: February 11, 2026  
+**Status**: 🟡 Partially complete — 2 of 5 deprecated classes already deleted  
 **Priority**: MEDIUM — no functional impact, all deprecated code still works  
 **Related**: apex_architecture_and_code_review.md - Section 4: Technical Debt Inventory
 
@@ -14,10 +14,9 @@
 
 #### 1.1 DataTypeScenarioService
 **File**: `apex-core/src/main/java/dev/mars/apex/core/service/scenario/DataTypeScenarioService.java`
-- **Status**: `@Deprecated(since = "3.0", forRemoval = true)`
-- **Occurrences**: 3 deprecation annotations (class + 2 constructors)
-- **Usage**: Found in tests (`EnhancedDataTypeScenarioService` extends it)
-- **Risk**: MEDIUM - Has subclass, needs migration path
+- **Status**: ✅ **DELETED** — class no longer exists in codebase
+- ~~`@Deprecated(since = "3.0", forRemoval = true)`~~
+- ~~3 deprecation annotations (class + 2 constructors)~~
 
 #### 1.2 YamlEnrichmentProcessor
 **File**: `apex-core/src/main/java/dev/mars/apex/core/service/enrichment/YamlEnrichmentProcessor.java`
@@ -28,12 +27,11 @@
 
 #### 1.3 Pipeline Components
 **Files**:
-- `DataPipelineEngine.java` - `@Deprecated(since = "3.0", forRemoval = true)`
-- `DataPipelineException.java` - `@Deprecated(since = "3.0", forRemoval = true)`
-- `PipelineStepResult.java` - `@Deprecated(since = "3.0", forRemoval = true)`
-- `YamlPipelineExecutionResult.java` - `@Deprecated(since = "3.0", forRemoval = true)`
-- **Usage**: Still referenced in tests and other pipeline classes
-- **Risk**: HIGH - Core infrastructure, needs careful removal
+- `DataPipelineEngine.java` - ✅ **DELETED** — class no longer exists in codebase
+- `DataPipelineException.java` - Still exists, no `@Deprecated` annotation
+- `PipelineStepResult.java` - Still exists, no `@Deprecated` annotation
+- `YamlPipelineExecutionResult.java` - Still exists, no `@Deprecated` annotation
+- **Remaining Risk**: 3 pipeline classes still present without deprecation markers
 
 ---
 

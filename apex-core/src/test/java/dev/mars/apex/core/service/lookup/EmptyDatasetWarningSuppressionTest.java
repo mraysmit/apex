@@ -19,9 +19,14 @@ package dev.mars.apex.core.service.lookup;
 import dev.mars.apex.core.config.model.YamlEnrichment;
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
 import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.Collections;
 
@@ -45,6 +50,24 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class EmptyDatasetWarningSuppressionTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(EmptyDatasetWarningSuppressionTest.class);
+
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(EmptyDatasetWarningSuppressionTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] EmptyDatasetWarningSuppressionTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(EmptyDatasetWarningSuppressionTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: empty dataset errors for inline types, suppressed warnings for database/REST types");
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(EmptyDatasetWarningSuppressionTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] EmptyDatasetWarningSuppressionTest intentional error tests completed");
+        MDC.remove("testContext");
+    }
 
     @Test
     @DisplayName("Database-type dataset with empty data (wrapper pattern)")

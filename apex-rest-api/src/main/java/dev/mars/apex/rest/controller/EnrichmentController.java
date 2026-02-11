@@ -91,7 +91,8 @@ public class EnrichmentController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error retrieving configurations: {}", e.getMessage(), e);
+            logger.error("Error retrieving configurations: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Configuration retrieval failed");
@@ -197,7 +198,8 @@ public class EnrichmentController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error during object enrichment: {}", e.getMessage(), e);
+            logger.error("Error during object enrichment: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Object enrichment failed");
@@ -304,7 +306,8 @@ public class EnrichmentController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error during batch enrichment: {}", e.getMessage(), e);
+            logger.error("Error during batch enrichment: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Batch enrichment failed");
@@ -399,7 +402,8 @@ public class EnrichmentController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error during predefined enrichment: {}", e.getMessage(), e);
+            logger.error("Error during predefined enrichment: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Predefined enrichment failed");

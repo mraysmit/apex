@@ -355,7 +355,8 @@ public class FileSystemDataSource implements ExternalDataSource {
             }
             
         } catch (Exception e) {
-            LOGGER.error("Failed to load initial data for file system data source '{}'", getName(), e);
+            LOGGER.error("Failed to load initial data for file system data source '{}': {}", getName(), e.getMessage());
+            LOGGER.debug("Full exception details:", e);
         }
     }
     
@@ -450,7 +451,8 @@ public class FileSystemDataSource implements ExternalDataSource {
             LOGGER.debug("Loaded and cached file: {}", filePath);
             
         } catch (Exception e) {
-            LOGGER.error("Failed to load file: {}", filePath, e);
+            LOGGER.error("Failed to load file '{}': {}", filePath, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
         }
     }
     

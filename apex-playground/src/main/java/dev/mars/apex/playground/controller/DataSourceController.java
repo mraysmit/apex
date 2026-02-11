@@ -117,7 +117,8 @@ public class DataSourceController {
             DataSourceConnection created = dataSourceService.createConnection(connection);
             return ResponseEntity.ok(created);
         } catch (Exception e) {
-            logger.error("Failed to create connection: {}", e.getMessage(), e);
+            logger.error("Failed to create connection: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -156,6 +157,7 @@ public class DataSourceController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("Connection test error for {}: {}", connection.getName(), e.getMessage());
+            logger.debug("Full exception details:", e);
             response.put("success", false);
             response.put("message", e.getMessage());
             return ResponseEntity.ok(response);
@@ -188,7 +190,8 @@ public class DataSourceController {
             DataSourceConnection updated = dataSourceService.updateConnection(connectionId, connection);
             return ResponseEntity.ok(updated);
         } catch (Exception e) {
-            logger.error("Failed to update connection {}: {}", connectionId, e.getMessage(), e);
+            logger.error("Failed to update connection {}: {}", connectionId, e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -245,6 +248,7 @@ public class DataSourceController {
             return ResponseEntity.ok(connection);
         } catch (Exception e) {
             logger.error("Failed to connect: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -303,7 +307,8 @@ public class DataSourceController {
             QueryResult result = dataSourceService.executeQuery(connectionId, request);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
-            logger.error("Query execution failed on connection {}: {}", connectionId, e.getMessage(), e);
+            logger.error("Query execution failed on connection {}: {}", connectionId, e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -334,6 +339,7 @@ public class DataSourceController {
             return ResponseEntity.ok(schema);
         } catch (Exception e) {
             logger.error("Schema introspection failed for connection {}: {}", connectionId, e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -364,6 +370,7 @@ public class DataSourceController {
             return ResponseEntity.ok(schemas);
         } catch (Exception e) {
             logger.error("Schema listing failed for connection {}: {}", connectionId, e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -394,6 +401,7 @@ public class DataSourceController {
             return ResponseEntity.ok(schemas);
         } catch (Exception e) {
             logger.error("Schema listing failed for test connection: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

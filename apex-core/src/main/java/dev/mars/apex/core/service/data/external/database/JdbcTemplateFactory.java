@@ -213,7 +213,8 @@ public class JdbcTemplateFactory {
         try {
             return new SimpleDataSource(config);
         } catch (Exception e) {
-            LOGGER.error("Failed to create SimpleDataSource for '{}': {}", config.getName(), e.getMessage(), e);
+            LOGGER.error("Failed to create SimpleDataSource for '{}': {}", config.getName(), e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             throw e;
         }
     }

@@ -369,7 +369,8 @@ public class DatasetLookupServiceFactory {
                 fileDataset.setData(Collections.emptyList());
 
             } catch (Exception e) {
-                logger.warn("Failed to read YAML file: " + dataset.getFilePath() + ". Error: " + e.getMessage());
+                logger.warn("Failed to read YAML file: {}. Error: {}", dataset.getFilePath(), e.getMessage());
+                logger.debug("Full exception details for YAML file read '{}':", dataset.getFilePath(), e);
                 fileDataset.setData(Collections.emptyList());
             }
 
@@ -570,7 +571,8 @@ public class DatasetLookupServiceFactory {
             return mapData;
 
         } catch (Exception e) {
-            logger.warn("JsonDataLoader failed, falling back to simple JSON parsing: " + e.getMessage());
+            logger.warn("JsonDataLoader failed, falling back to simple JSON parsing: {}", e.getMessage());
+            logger.debug("Full exception details for JsonDataLoader fallback:", e);
             return loadJsonFileSimple(filePath);
         }
     }
@@ -620,7 +622,8 @@ public class DatasetLookupServiceFactory {
             return mapData;
 
         } catch (Exception e) {
-            logger.warn("XmlDataLoader failed, falling back to simple XML parsing: " + e.getMessage());
+            logger.warn("XmlDataLoader failed, falling back to simple XML parsing: {}", e.getMessage());
+            logger.debug("Full exception details for XmlDataLoader fallback:", e);
             return loadXmlFileSimple(filePath);
         }
     }
@@ -673,7 +676,8 @@ public class DatasetLookupServiceFactory {
             return mapData;
 
         } catch (Exception e) {
-            logger.warn("CsvDataLoader failed: " + e.getMessage());
+            logger.warn("CsvDataLoader failed: {}", e.getMessage());
+            logger.debug("Full exception details for CsvDataLoader failure:", e);
             throw e;
         }
     }

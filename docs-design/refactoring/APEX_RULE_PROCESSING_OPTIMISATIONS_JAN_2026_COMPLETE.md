@@ -2,7 +2,7 @@
 
 **Status:** ✅ ALL 6 PHASES COMPLETE  
 **Branch:** `refactor/rules-engine-decomposition`  
-**Last Updated:** February 10, 2026  
+**Last Updated:** February 11, 2026  
 **Test Baseline:** apex-core: 2,861 tests, apex-demo: 908 tests — 0 failures, 0 errors
 
 ## Overview
@@ -231,26 +231,28 @@ Route chain router/trigger evaluation through `UnifiedRuleEvaluator` instead of 
 
 The following tasks from separate task documents are **not part of this optimisation effort** but represent the outstanding refactoring work on the branch:
 
-### 🔴 CRITICAL
+### ✅ COMPLETED (since initial document)
+
+| Task | Document | Status |
+|------|----------|--------|
+| Error propagation to RuleResult | `ERROR_HANDLING_IMPROVEMENT_TASKS.md` Task 4 | ✅ Complete (Feb 13, 2026) |
+| APEX-specific exceptions | `ERROR_HANDLING_IMPROVEMENT_TASKS.md` Task 3 | ✅ Complete (Feb 11, 2026) |
+| Correct log levels (WARN→ERROR) | `ERROR_HANDLING_IMPROVEMENT_TASKS.md` Task 2 | ✅ Complete (Feb 11, 2026) — 16 changes across 8 files |
+| Stack trace verbosity | `ERROR_HANDLING_IMPROVEMENT_TASKS.md` Task 5 | ✅ Complete — error+debug pattern in ConfigurationContext, ComponentLoader, YamlConfigurationLoader |
+| APEX Error Codes document | `ERROR_HANDLING_IMPROVEMENT_TASKS.md` Task 4.4 | ✅ Complete — `docs/APEX_ERROR_CODES.md` exists |
+
+### 🟠 HIGH (Outstanding)
 
 | Task | Document | Description |
 |------|----------|-------------|
-| Error propagation to RuleResult | `ERROR_HANDLING_IMPROVEMENT_TASKS.md` Task 4 | Audit all error paths — ensure every failure returns `RuleResult` with `ResultType.ERROR`, error code, severity from `SeverityConstants`, and actionable message. Fail-fast enforcement for enrichments/transformations. |
-| APEX-specific exceptions | `ERROR_HANDLING_IMPROVEMENT_TASKS.md` Task 3 | Replace `NullPointerException`, `RuntimeException`, `IllegalArgumentException` in core code with `ApexTransformationException`, `ApexCacheException`, etc. |
-
-### 🟠 HIGH
-
-| Task | Document | Description |
-|------|----------|-------------|
-| Test context markers | `ERROR_HANDLING_IMPROVEMENT_TASKS.md` Task 1 | Add `[TEST-EXPECTED-*]` prefixes — 4 of 19 source classes done, 15 remaining |
-| Correct log levels | `ERROR_HANDLING_IMPROVEMENT_TASKS.md` Task 2 | WARN→ERROR for configuration load failures and non-recoverable errors |
+| Exception logging fixes | `EXCEPTION_LOGGING_IMPROVEMENTS.md` | 80+ occurrences across apex-core, apex-rest-api, apex-yaml-manager where `e.getMessage()` swallows stack traces |
 | Error propagation integration tests | `ERROR_HANDLING_IMPROVEMENT_TASKS.md` Task 6 | New test class verifying error details survive through full pipeline |
-| Exception logging fixes | `EXCEPTION_LOGGING_IMPROVEMENTS.md` | ~18 occurrences across 8 files where `e.getMessage()` swallows stack traces |
+| Test context markers | `ERROR_HANDLING_IMPROVEMENT_TASKS.md` Task 1 | Add `[TEST-EXPECTED-*]` prefixes — 4 of 19 source classes done, 15 remaining |
 
-### 🟡 MEDIUM
+### 🟡 MEDIUM (Outstanding)
 
 | Task | Document | Description |
 |------|----------|-------------|
-| Stack trace verbosity | `ERROR_HANDLING_IMPROVEMENT_TASKS.md` Task 5 | Move stack traces to DEBUG level for expected validation errors |
-| Remove deprecated classes | `APEX_TECHNICAL_DEBT_ANALYSIS.md` Phase 2 | `DataTypeScenarioService`, pipeline deprecations, `YamlEnrichmentProcessor` deprecated methods |
+| EnabledFilter adoption in YamlRuleFactory | Phase 3 residual | 10+ inline `getEnabled() == null \|\| getEnabled()` checks not migrated to `EnabledFilter` |
+| Remove deprecated pipeline classes | `APEX_TECHNICAL_DEBT_ANALYSIS.md` Phase 2 | 3 pipeline classes remain: `DataPipelineException`, `PipelineStepResult`, `YamlPipelineExecutionResult` (2 others already deleted) |
 | Clean TODO placeholders | `APEX_TECHNICAL_DEBT_ANALYSIS.md` Phase 1 | 3 TODOs in `SequentialYamlProcessor`, 8 TODOs in `YamlDataSink` |

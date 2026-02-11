@@ -90,6 +90,7 @@ public class ExpressionEvaluatorService {
             return result;
         } catch (Exception e) {
             logger.error("Error evaluating expression '{}': {}", expression, e.getMessage());
+            logger.debug("Full exception details:", e);
             return null;
         }
     }
@@ -141,6 +142,7 @@ public class ExpressionEvaluatorService {
             }
         } catch (Exception e) {
             logger.error("Error evaluating expression '{}': {}", expression, e.getMessage());
+            logger.debug("Full exception details:", e);
             return RuleResult.error("Expression", "Error evaluating expression: " + e.getMessage());
         }
     }
@@ -165,6 +167,7 @@ public class ExpressionEvaluatorService {
             return result;
         } catch (Exception e) {
             logger.error("Error evaluating expression '{}': {}", expression, e.getMessage());
+            logger.debug("Full exception details:", e);
 
             // For boolean expressions, return false instead of null when there's an error
             if (resultType == Boolean.class || resultType == boolean.class) {
@@ -239,6 +242,7 @@ public class ExpressionEvaluatorService {
             return evaluate(expression, context, resultType);
         } catch (Exception e) {
             logger.error("Error evaluating expression '{}': {}", expression, e.getMessage());
+            logger.debug("Full exception details:", e);
 
             // For boolean expressions, return false instead of null when there's an error
             if (resultType == Boolean.class || resultType == boolean.class) {

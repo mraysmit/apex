@@ -90,7 +90,8 @@ public class DependencyAnalysisService {
             return response;
             
         } catch (Exception e) {
-            logger.error("Failed to generate dependency tree for: " + rootFile, e);
+            logger.error("Failed to generate dependency tree for: {}: {}", rootFile, e.getMessage());
+            logger.debug("Full exception details:", e);
             throw new RuntimeException("Failed to generate dependency tree: " + e.getMessage(), e);
         }
     }
@@ -127,7 +128,8 @@ public class DependencyAnalysisService {
             return response;
             
         } catch (Exception e) {
-            logger.error("Failed to analyze dependencies for: " + filePath, e);
+            logger.error("Failed to analyze dependencies for: {}: {}", filePath, e.getMessage());
+            logger.debug("Full exception details:", e);
             throw new RuntimeException("Failed to analyze dependencies: " + e.getMessage(), e);
         }
     }
@@ -161,7 +163,8 @@ public class DependencyAnalysisService {
             return response;
             
         } catch (Exception e) {
-            logger.error("Failed to validate dependency tree for: " + rootFile, e);
+            logger.error("Failed to validate dependency tree for: {}: {}", rootFile, e.getMessage());
+            logger.debug("Full exception details:", e);
             throw new RuntimeException("Failed to validate dependency tree: " + e.getMessage(), e);
         }
     }
@@ -203,7 +206,8 @@ public class DependencyAnalysisService {
             return response;
             
         } catch (Exception e) {
-            logger.error("Failed to get node details for: " + filePath, e);
+            logger.error("Failed to get node details for: {}: {}", filePath, e.getMessage());
+            logger.debug("Full exception details:", e);
             throw new RuntimeException("Failed to get node details: " + e.getMessage(), e);
         }
     }
@@ -249,7 +253,8 @@ public class DependencyAnalysisService {
             return response;
             
         } catch (IOException e) {
-            logger.error("Failed to scan folder: " + folderPath, e);
+            logger.error("Failed to scan folder: {}: {}", folderPath, e.getMessage());
+            logger.debug("Full exception details:", e);
             throw new RuntimeException("Failed to scan folder: " + e.getMessage(), e);
         }
     }
@@ -289,7 +294,8 @@ public class DependencyAnalysisService {
             return this.currentGraph;
             
         } catch (Exception e) {
-            logger.error("Failed to analyze dependencies internally for: " + rootFile, e);
+            logger.error("Failed to analyze dependencies internally for: {}: {}", rootFile, e.getMessage());
+            logger.debug("Full exception details:", e);
             throw new RuntimeException("Dependency analysis failed: " + e.getMessage(), e);
         }
     }
@@ -498,7 +504,8 @@ public class DependencyAnalysisService {
             logger.debug("Successfully read file content: {} bytes", content.length());
 
         } catch (Exception e) {
-            logger.error("Failed to read file content for: " + filePath, e);
+            logger.error("Failed to read file content for: {}: {}", filePath, e.getMessage());
+            logger.debug("Full exception details:", e);
             result.put("filePath", filePath);
             result.put("exists", false);
             result.put("error", e.getMessage());

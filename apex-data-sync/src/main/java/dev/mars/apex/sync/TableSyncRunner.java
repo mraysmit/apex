@@ -103,7 +103,8 @@ public class TableSyncRunner {
 
             System.exit(result.isSuccess() ? 0 : 1);
         } catch (Exception e) {
-            logger.error("Runner failed", e);
+            logger.error("Runner failed: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             System.exit(2);
         }
     }

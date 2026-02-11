@@ -410,7 +410,8 @@ public class RulesEngine {
             
         } catch (Exception e) {
             // Any other unexpected error - return as RuleResult
-            logger.error("[APEX-RULE-999] Unexpected error during YAML evaluation: {}", e.getMessage(), e);
+            logger.error("[APEX-RULE-999] Unexpected error during YAML evaluation: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             List<String> failureMessages = new ArrayList<>();
             failureMessages.add("[APEX-RULE-999] Unexpected error: " + e.getMessage());
             Map<String, Object> data = inputData != null ? new HashMap<>(inputData) : new HashMap<>();
@@ -454,7 +455,8 @@ public class RulesEngine {
             return RuleResult.evaluationFailure(failureMessages, data, "yaml-configuration", "YAML configuration error", SeverityConstants.ERROR);
             
         } catch (Exception e) {
-            logger.error("[APEX-RULE-999] Unexpected error during YAML file evaluation: {}", e.getMessage(), e);
+            logger.error("[APEX-RULE-999] Unexpected error during YAML file evaluation: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             List<String> failureMessages = new ArrayList<>();
             failureMessages.add("[APEX-RULE-999] Unexpected error: " + e.getMessage());
             Map<String, Object> data = inputData != null ? new HashMap<>(inputData) : new HashMap<>();
@@ -895,6 +897,7 @@ public class RulesEngine {
                 entry.getValue().shutdown();
             } catch (Exception e) {
                 logger.warn("Error shutting down data source '{}': {}", entry.getKey(), e.getMessage());
+                logger.debug("Full exception details:", e);
             }
         }
 
@@ -905,6 +908,7 @@ public class RulesEngine {
                 entry.getValue().shutdown();
             } catch (Exception e) {
                 logger.warn("Error shutting down data sink '{}': {}", entry.getKey(), e.getMessage());
+                logger.debug("Full exception details:", e);
             }
         }
 

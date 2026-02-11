@@ -17,6 +17,8 @@ package dev.mars.apex.core.util;
  */
 
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
@@ -25,6 +27,9 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 
 import java.io.IOException;
@@ -50,10 +55,28 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class YamlDependencyAnalyzerTest {
     
+    private static final Logger logger = LoggerFactory.getLogger(YamlDependencyAnalyzerTest.class);
+
     @TempDir
     Path tempDir;
     
     private YamlDependencyAnalyzer analyzer;
+
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(YamlDependencyAnalyzerTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] YamlDependencyAnalyzerTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(YamlDependencyAnalyzerTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: YAML parsing errors, missing file references, circular dependency warnings");
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(YamlDependencyAnalyzerTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] YamlDependencyAnalyzerTest intentional error tests completed");
+        MDC.remove("testContext");
+    }
     
     @BeforeEach
     void setUp() {

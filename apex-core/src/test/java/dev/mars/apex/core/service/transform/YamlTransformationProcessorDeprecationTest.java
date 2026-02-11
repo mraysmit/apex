@@ -2,6 +2,8 @@ package dev.mars.apex.core.service.transform;
 
 import dev.mars.apex.core.config.model.YamlTransformation;
 import dev.mars.apex.engine.model.RuleResult;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
@@ -13,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,11 +37,28 @@ import static org.junit.jupiter.api.Assertions.*;
  * Instead, we focus on testing that deprecated methods still work (backward compatibility)
  * and that new methods properly propagate errors.
  */
+@ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 @DisplayName("YamlTransformationProcessor Deprecation Tests")
 class YamlTransformationProcessorDeprecationTest {
 
     private static final Logger logger = LoggerFactory.getLogger(YamlTransformationProcessorDeprecationTest.class);
     private YamlTransformationProcessor processor;
+
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(YamlTransformationProcessorDeprecationTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] YamlTransformationProcessorDeprecationTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(YamlTransformationProcessorDeprecationTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: deprecation warnings, backward compatibility error handling");
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(YamlTransformationProcessorDeprecationTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] YamlTransformationProcessorDeprecationTest intentional error tests completed");
+        MDC.remove("testContext");
+    }
 
     @BeforeEach
     void setUp() {

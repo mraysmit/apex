@@ -517,6 +517,7 @@ public class DataSourceRegistry {
                 dataSource.shutdown();
             } catch (Exception e) {
                 LOGGER.warn("Error shutting down data source '{}': {}", name, e.getMessage());
+                LOGGER.debug("Full exception details:", e);
             }
             
             LOGGER.info("Unregistered data source '{}'", name);
@@ -742,6 +743,7 @@ public class DataSourceRegistry {
                 }
             } catch (Exception e) {
                 LOGGER.warn("Error closing JDBC pool '{}': {}", entry.getKey(), e.getMessage());
+                LOGGER.debug("Full exception details:", e);
             }
         }
         jdbcPoolCache.clear();
@@ -796,6 +798,7 @@ public class DataSourceRegistry {
                 }
             } catch (Exception e) {
                 LOGGER.warn("Error closing JDBC pool '{}': {}", entry.getKey(), e.getMessage());
+                LOGGER.debug("Full exception details:", e);
             }
         }
         jdbcPoolCache.clear();

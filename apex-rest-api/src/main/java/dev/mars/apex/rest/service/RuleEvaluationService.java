@@ -121,7 +121,8 @@ public class RuleEvaluationService {
                     }
                     
                 } catch (Exception e) {
-                    logger.error("Error evaluating rule '{}': {}", rule.getName(), e.getMessage(), e);
+                    logger.error("Error evaluating rule '{}': {}", rule.getName(), e.getMessage());
+                    logger.debug("Full exception details:", e);
                     failedRules++;
                     
                     if (request.isIncludeDetails()) {
@@ -162,7 +163,8 @@ public class RuleEvaluationService {
             return response;
             
         } catch (Exception e) {
-            logger.error("Error during validation: {}", e.getMessage(), e);
+            logger.error("Error during validation: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             
             // Create error response
             ValidationResponse errorResponse = new ValidationResponse();
@@ -217,7 +219,8 @@ public class RuleEvaluationService {
             return response;
             
         } catch (Exception e) {
-            logger.error("Error evaluating rule: {}", e.getMessage(), e);
+            logger.error("Error evaluating rule: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             
             RuleEvaluationResponse errorResponse = RuleEvaluationResponse.error(
                 "Rule evaluation failed", e.getMessage()
@@ -265,6 +268,7 @@ public class RuleEvaluationService {
             return rulesService.check(condition, data);
         } catch (Exception e) {
             logger.warn("Quick check failed for condition '{}': {}", condition, e.getMessage());
+            logger.debug("Full exception details:", e);
             return false;
         }
     }

@@ -3,6 +3,8 @@ package dev.mars.apex.core.service.transform;
 import dev.mars.apex.core.config.model.YamlTransformation;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.engine.model.RuleResult;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
@@ -14,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.*;
 
@@ -37,6 +40,22 @@ class YamlTransformationProcessorRuleResultTest {
     private static final Logger logger = LoggerFactory.getLogger(YamlTransformationProcessorRuleResultTest.class);
 
     private YamlTransformationProcessor processor;
+
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(YamlTransformationProcessorRuleResultTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] YamlTransformationProcessorRuleResultTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(YamlTransformationProcessorRuleResultTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: transformation errors, SpEL evaluation failures, null handling");
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(YamlTransformationProcessorRuleResultTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] YamlTransformationProcessorRuleResultTest intentional error tests completed");
+        MDC.remove("testContext");
+    }
 
     @BeforeEach
     void setUp() {

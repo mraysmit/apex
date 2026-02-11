@@ -133,7 +133,8 @@ public class RulesEngineConfiguration {
 
             return new RulesEngine(engineConfig);
         } catch (Exception e) {
-            logger.error("Error creating RulesEngine: {}", e.getMessage(), e);
+            logger.error("Error creating RulesEngine: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             logger.info("Falling back to empty configuration");
             return new RulesEngine(new dev.mars.apex.engine.core.RulesEngineConfiguration());
         }

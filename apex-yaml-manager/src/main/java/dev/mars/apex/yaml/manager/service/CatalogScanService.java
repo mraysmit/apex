@@ -203,7 +203,8 @@ public class CatalogScanService {
             
         } catch (Exception e) {
             String error = "Classpath scan failed: " + e.getMessage();
-            logger.error(error, e);
+            logger.error(error);
+            logger.debug("Full exception details:", e);
             result.put("success", false);
             result.put("error", error);
             result.put("errors", errors);

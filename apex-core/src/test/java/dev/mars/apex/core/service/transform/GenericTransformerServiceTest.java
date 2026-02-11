@@ -33,6 +33,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
 import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -54,9 +57,26 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class GenericTransformerServiceTest {
 
+    private static final Logger logger = LoggerFactory.getLogger(GenericTransformerServiceTest.class);
     private LookupServiceRegistry registry;
     private RulesEngine rulesEngine;
     private GenericTransformerService transformerService;
+
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(GenericTransformerServiceTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] GenericTransformerServiceTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(GenericTransformerServiceTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: transformation errors, rule-based transform failures, type mismatches");
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(GenericTransformerServiceTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] GenericTransformerServiceTest intentional error tests completed");
+        MDC.remove("testContext");
+    }
 
     @BeforeEach
     void setUp() {

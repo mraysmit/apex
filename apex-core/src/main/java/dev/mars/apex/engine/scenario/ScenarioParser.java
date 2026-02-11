@@ -253,6 +253,7 @@ public class ScenarioParser {
 
         } catch (Exception e) {
             logger.error("Error parsing scenario stage: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return null;
         }
     }

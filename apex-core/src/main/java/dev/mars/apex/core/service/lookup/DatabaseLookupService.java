@@ -106,10 +106,12 @@ public class DatabaseLookupService extends LookupService {
             }
             
         } catch (DataSourceException e) {
-            LOGGER.error("Database lookup failed for key '{}': {}", key, e.getMessage(), e);
+            LOGGER.error("Database lookup failed for key '{}': {}", key, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             return defaultValues.isEmpty() ? null : new HashMap<>(defaultValues);
         } catch (Exception e) {
-            LOGGER.error("Unexpected error during database lookup for key '{}': {}", key, e.getMessage(), e);
+            LOGGER.error("Unexpected error during database lookup for key '{}': {}", key, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             return defaultValues.isEmpty() ? null : new HashMap<>(defaultValues);
         }
     }

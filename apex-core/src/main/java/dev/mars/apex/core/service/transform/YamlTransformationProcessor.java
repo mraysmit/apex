@@ -565,6 +565,7 @@ public class YamlTransformationProcessor {
             return expr.getValue(context);
         } catch (Exception e) {
             logger.warn("Failed to get field value for {}: {}", fieldName, e.getMessage());
+            logger.debug("Full exception details:", e);
             return null;
         }
     }

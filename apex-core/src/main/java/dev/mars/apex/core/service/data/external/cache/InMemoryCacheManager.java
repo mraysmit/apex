@@ -149,7 +149,8 @@ public class InMemoryCacheManager implements CacheManager {
             }
 
         } catch (Exception e) {
-            LOGGER.error("Failed to put value in cache for key: {}", key, e);
+            LOGGER.error("Failed to put value in cache for key '{}': {}", key, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
         }
     }
     
@@ -189,7 +190,8 @@ public class InMemoryCacheManager implements CacheManager {
             return entry.getValue();
             
         } catch (Exception e) {
-            LOGGER.error("Failed to get value from cache for key: {}", key, e);
+            LOGGER.error("Failed to get value from cache for key '{}': {}", key, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             statistics.recordMiss();
             return null;
         }
@@ -211,7 +213,8 @@ public class InMemoryCacheManager implements CacheManager {
             return false;
 
         } catch (Exception e) {
-            LOGGER.error("Failed to remove value from cache for key: {}", key, e);
+            LOGGER.error("Failed to remove value from cache for key '{}': {}", key, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             return false;
         }
     }
@@ -241,7 +244,8 @@ public class InMemoryCacheManager implements CacheManager {
             return true;
             
         } catch (Exception e) {
-            LOGGER.error("Failed to check key existence in cache: {}", key, e);
+            LOGGER.error("Failed to check key existence in cache for key '{}': {}", key, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             return false;
         }
     }
@@ -269,7 +273,8 @@ public class InMemoryCacheManager implements CacheManager {
                 .collect(Collectors.toList());
                 
         } catch (Exception e) {
-            LOGGER.error("Failed to get keys by pattern: {}", pattern, e);
+            LOGGER.error("Failed to get keys by pattern '{}': {}", pattern, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             return Collections.emptyList();
         }
     }
@@ -304,7 +309,8 @@ public class InMemoryCacheManager implements CacheManager {
             LOGGER.debug("Cache '{}' cleared", configuration.getName());
 
         } catch (Exception e) {
-            LOGGER.error("Failed to clear cache '{}'", configuration.getName(), e);
+            LOGGER.error("Failed to clear cache '{}': {}", configuration.getName(), e.getMessage());
+            LOGGER.debug("Full exception details:", e);
         }
     }
     

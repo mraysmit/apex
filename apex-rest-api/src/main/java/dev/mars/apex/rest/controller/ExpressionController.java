@@ -112,7 +112,8 @@ public class ExpressionController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error evaluating expression: {}", e.getMessage(), e);
+            logger.error("Error evaluating expression: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Expression evaluation failed");
@@ -178,7 +179,8 @@ public class ExpressionController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error during detailed expression evaluation: {}", e.getMessage(), e);
+            logger.error("Error during detailed expression evaluation: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Detailed expression evaluation failed");
@@ -221,6 +223,7 @@ public class ExpressionController {
 
                 } catch (Exception e) {
                     logger.warn("Error evaluating expression '{}': {}", expressionItem.getName(), e.getMessage());
+                    logger.debug("Full exception details:", e);
                     expressionResult.put("success", false);
                     expressionResult.put("error", e.getMessage());
                 }
@@ -242,7 +245,8 @@ public class ExpressionController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error during batch expression evaluation: {}", e.getMessage(), e);
+            logger.error("Error during batch expression evaluation: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Batch expression evaluation failed");
@@ -296,7 +300,8 @@ public class ExpressionController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error validating expression: {}", e.getMessage(), e);
+            logger.error("Error validating expression: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("expression", request.getExpression());

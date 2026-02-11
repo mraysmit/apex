@@ -429,6 +429,7 @@ public class YamlConfigurationLoader {
             return false;
         } catch (Exception e) {
             logger.error("Failed to check if file is component: {} - {}", filePath, e.getMessage());
+            logger.debug("Full exception details:", e);
             return false;
         }
     }

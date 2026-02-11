@@ -10,6 +10,8 @@ import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMetrics;
 import dev.mars.apex.core.service.monitoring.PerformanceSnapshot;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
@@ -18,6 +20,10 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 
 import java.util.HashMap;
@@ -33,9 +39,26 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class RecoveryMetricsIntegrationTest {
 
+    private static final Logger logger = LoggerFactory.getLogger(RecoveryMetricsIntegrationTest.class);
     private UnifiedRuleEvaluator evaluator;
     private RulePerformanceMonitor performanceMonitor;
     private ErrorRecoveryConfig errorRecoveryConfig;
+
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(RecoveryMetricsIntegrationTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] RecoveryMetricsIntegrationTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(RecoveryMetricsIntegrationTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: recovery metrics collection, error recovery attempts");
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(RecoveryMetricsIntegrationTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] RecoveryMetricsIntegrationTest intentional error tests completed");
+        MDC.remove("testContext");
+    }
 
     @BeforeEach
     void setUp() {

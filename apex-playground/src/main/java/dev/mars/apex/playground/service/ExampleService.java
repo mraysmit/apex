@@ -225,6 +225,7 @@ public class ExampleService {
             return data;
         } catch (Exception e) {
             logger.warn("Could not load JSON data for example {}/{}: {}", category, name, e.getMessage());
+            logger.debug("Full exception details:", e);
             
             // Fallback to hardcoded logic if JSON file not found
             if (name.contains("financial")) {

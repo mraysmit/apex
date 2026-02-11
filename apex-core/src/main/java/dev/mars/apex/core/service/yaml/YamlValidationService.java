@@ -195,7 +195,8 @@ public class YamlValidationService {
                      yamlFiles.add(relativePath);
                  });
         } catch (IOException e) {
-            LOGGER.error("Error discovering YAML files in {}: {}", basePath, e.getMessage(), e);
+            LOGGER.error("Error discovering YAML files in {}: {}", basePath, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
         }
         
         LOGGER.debug("Discovered {} YAML files in {}", yamlFiles.size(), basePath);

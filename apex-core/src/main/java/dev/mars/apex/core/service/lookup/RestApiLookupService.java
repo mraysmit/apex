@@ -144,7 +144,8 @@ public class RestApiLookupService extends LookupService {
         } catch (Exception e) {
             System.out.println("DEBUG: Exception caught: " + e.getMessage());
             e.printStackTrace();
-            LOGGER.error("Unexpected error during REST API lookup for key '{}': {}", key, e.getMessage(), e);
+            LOGGER.error("Unexpected error during REST API lookup for key '{}': {}", key, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             return defaultValues.isEmpty() ? null : new HashMap<>(defaultValues);
         }
     }

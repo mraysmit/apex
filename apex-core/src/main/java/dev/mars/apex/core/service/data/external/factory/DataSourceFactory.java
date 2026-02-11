@@ -163,7 +163,8 @@ public class DataSourceFactory {
             LOGGER.debug("Full stack trace for data source creation failure:", e);
             throw e;
         } catch (Exception e) {
-            LOGGER.error("Unexpected error creating data source '{}'", name, e);
+            LOGGER.error("Unexpected error creating data source '{}': {}", name, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             throw new DataSourceException(DataSourceException.ErrorType.CONFIGURATION_ERROR,
                 "Failed to create data source '" + name + "'", e, name, "createDataSource", false);
         }

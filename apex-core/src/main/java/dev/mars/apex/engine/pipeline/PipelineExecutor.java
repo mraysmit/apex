@@ -937,7 +937,8 @@ public class PipelineExecutor {
 
         } catch (Exception e) {
             LOGGER.error("[Pipeline.ReadSchema] Read-schema step failed for '{}': {}", 
-                        step.getName(), e.getMessage(), e);
+                        step.getName(), e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             throw new DataPipelineException("Read-schema step failed: " + step.getName(), e);
         }
     }
@@ -1006,6 +1007,7 @@ public class PipelineExecutor {
             LOGGER.info("[Pipeline.ReadSchema] HTML report generated successfully: {}", reportPath);
         } catch (Exception e) {
             LOGGER.warn("[Pipeline.ReadSchema] Failed to generate HTML report: {}", e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             // Don't fail the pipeline if report generation fails
         }
     }
@@ -1042,6 +1044,7 @@ public class PipelineExecutor {
             }
         } catch (Exception e) {
             LOGGER.warn("[Pipeline.ReadSchema] Could not create report directory: {}", e.getMessage());
+            LOGGER.debug("Full exception details:", e);
         }
         
         return reportPath;
@@ -1279,7 +1282,8 @@ public class PipelineExecutor {
                 }
                 
             } catch (Exception e) {
-                LOGGER.warn("[Pipeline.SchemaDiff] Failed to generate reports: {}", e.getMessage(), e);
+                LOGGER.warn("[Pipeline.SchemaDiff] Failed to generate reports: {}", e.getMessage());
+                LOGGER.debug("Full exception details:", e);
                 // Don't fail the pipeline for report generation errors
             }
         } else {
@@ -1373,6 +1377,7 @@ public class PipelineExecutor {
                 sink.shutdown();
             } catch (Exception e) {
                 LOGGER.warn("Error shutting down data sink: {}", e.getMessage());
+                LOGGER.debug("Full exception details:", e);
             }
         }
         dataSinks.clear();

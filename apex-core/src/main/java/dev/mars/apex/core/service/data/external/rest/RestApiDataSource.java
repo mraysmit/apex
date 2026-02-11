@@ -103,7 +103,8 @@ public class RestApiDataSource implements ExternalDataSource {
             throw e;
         } catch (Exception e) {
             this.connectionStatus = ConnectionStatus.error("Initialization failed", e);
-            LOGGER.warn("REST API data source '{}' initialized but encountered error during connection test", config.getName(), e);
+            LOGGER.warn("REST API data source '{}' initialized but encountered error during connection test: {}", config.getName(), e.getMessage());
+            LOGGER.debug("Full exception details:", e);
         }
     }
     

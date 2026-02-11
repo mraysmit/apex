@@ -482,7 +482,8 @@ public class FileSystemDataSink implements DataSink {
             lastFlushTime = System.currentTimeMillis();
 
         } catch (Exception e) {
-            LOGGER.error("Failed to flush buffer to file: {}", e.getMessage(), e);
+            LOGGER.error("Failed to flush buffer to file: {}", e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             throw new IOException("Failed to write data to file: " + e.getMessage(), e);
         }
     }

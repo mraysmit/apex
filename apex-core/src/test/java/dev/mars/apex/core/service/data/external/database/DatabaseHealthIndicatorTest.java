@@ -24,12 +24,11 @@ import dev.mars.apex.core.service.data.external.DataSourceException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-
-
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
 import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -64,6 +63,22 @@ class DatabaseHealthIndicatorTest {
     private DataSource dataSource;
     private DatabaseHealthIndicator healthIndicator;
     private DataSourceConfiguration configuration;
+
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(DatabaseHealthIndicatorTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] DatabaseHealthIndicatorTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(DatabaseHealthIndicatorTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: health check failures, connection errors, timeout scenarios");
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(DatabaseHealthIndicatorTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] DatabaseHealthIndicatorTest intentional error tests completed");
+        MDC.remove("testContext");
+    }
 
     @BeforeEach
     void setUp() throws DataSourceException, SQLException {

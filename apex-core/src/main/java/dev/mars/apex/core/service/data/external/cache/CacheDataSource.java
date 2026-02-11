@@ -129,7 +129,8 @@ public class CacheDataSource implements ExternalDataSource {
             return testValue.equals(retrieved);
             
         } catch (Exception e) {
-            LOGGER.warn("Cache connection test failed for '{}'", configuration.getName(), e);
+            LOGGER.warn("Cache connection test failed for '{}': {}", configuration.getName(), e.getMessage());
+            LOGGER.debug("Full exception details:", e);
             return false;
         }
     }

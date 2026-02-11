@@ -423,7 +423,8 @@ public class RulesController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error executing rule: {}", e.getMessage(), e);
+            logger.error("Error executing rule: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Rule execution failed");
@@ -513,7 +514,8 @@ public class RulesController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error during batch rule execution: {}", e.getMessage(), e);
+            logger.error("Error during batch rule execution: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Batch rule execution failed");

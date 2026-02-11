@@ -26,6 +26,7 @@ import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
 import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -52,6 +53,22 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class DataSourceFactoryTest {
+
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(DataSourceFactoryTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] DataSourceFactoryTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(DataSourceFactoryTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: invalid data source configs, unsupported types, factory errors");
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(DataSourceFactoryTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] DataSourceFactoryTest intentional error tests completed");
+        MDC.remove("testContext");
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceFactoryTest.class);
 

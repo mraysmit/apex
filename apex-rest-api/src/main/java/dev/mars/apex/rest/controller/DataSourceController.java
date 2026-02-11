@@ -95,7 +95,8 @@ public class DataSourceController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error retrieving data sources: {}", e.getMessage(), e);
+            logger.error("Error retrieving data sources: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Failed to retrieve data sources");
@@ -146,7 +147,8 @@ public class DataSourceController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error retrieving data source '{}': {}", name, e.getMessage(), e);
+            logger.error("Error retrieving data source '{}': {}", name, e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Failed to retrieve data source");
@@ -239,7 +241,8 @@ public class DataSourceController {
             }
 
         } catch (Exception e) {
-            logger.error("Error testing data source '{}': {}", name, e.getMessage(), e);
+            logger.error("Error testing data source '{}': {}", name, e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Failed to test data source");
@@ -309,7 +312,8 @@ public class DataSourceController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error performing lookup on '{}': {}", name, e.getMessage(), e);
+            logger.error("Error performing lookup on '{}': {}", name, e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Lookup failed");

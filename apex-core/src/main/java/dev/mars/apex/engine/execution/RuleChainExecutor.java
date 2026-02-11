@@ -157,6 +157,7 @@ public class RuleChainExecutor {
             routeKey = result != null ? result.toString() : "null";
         } catch (Exception e) {
             logger.error("Error evaluating router rule for chain '{}': {}", chain.getId(), e.getMessage());
+            logger.debug("Full exception details:", e);
             return RuleResult.error(chain.getId(), "Router evaluation failed: " + e.getMessage());
         }
 

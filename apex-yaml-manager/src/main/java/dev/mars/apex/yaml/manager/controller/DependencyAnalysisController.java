@@ -947,7 +947,8 @@ public class DependencyAnalysisController {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Failed to get node details", e);
+            logger.error("Failed to get node details: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest().body(Map.of(
                     "status", "error",
                     "message", e.getMessage()
@@ -1027,7 +1028,8 @@ public class DependencyAnalysisController {
 
             return ResponseEntity.ok(response);
         } catch (IOException e) {
-            logger.error("Failed to browse files", e);
+            logger.error("Failed to browse files: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest().body(Map.of(
                     "status", "error",
                     "message", "Failed to browse directory: " + e.getMessage()
@@ -1095,7 +1097,8 @@ public class DependencyAnalysisController {
 
             return ResponseEntity.ok(response);
         } catch (IOException e) {
-            logger.error("Failed to read file content", e);
+            logger.error("Failed to read file content: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.badRequest().body(Map.of(
                     "status", "error",
                     "message", "Failed to read file: " + e.getMessage()

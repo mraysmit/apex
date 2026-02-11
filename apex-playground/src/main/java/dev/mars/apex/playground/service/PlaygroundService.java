@@ -191,6 +191,7 @@ public class PlaygroundService {
 
         } catch (YamlConfigurationException e) {
             logger.error("YAML configuration error: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             response.setSuccess(false);
             response.setMessage("YAML configuration error: " + e.getMessage());
             response.addError("YAML configuration error: " + e.getMessage());

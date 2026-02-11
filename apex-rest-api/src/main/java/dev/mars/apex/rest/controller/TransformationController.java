@@ -88,7 +88,8 @@ public class TransformationController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error retrieving transformers: {}", e.getMessage(), e);
+            logger.error("Error retrieving transformers: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Transformer retrieval failed");
@@ -159,7 +160,8 @@ public class TransformationController {
                     .withAdditionalInfo("transformerName", transformerName));
 
         } catch (Exception e) {
-            logger.error("Error during transformation: {}", e.getMessage(), e);
+            logger.error("Error during transformation: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.<Map<String, Object>>error("Transformation failed", e.getMessage())
                     .withAdditionalInfo("transformerName", transformerName));
@@ -206,7 +208,8 @@ public class TransformationController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error during detailed transformation: {}", e.getMessage(), e);
+            logger.error("Error during detailed transformation: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Detailed transformation failed");
@@ -283,7 +286,8 @@ public class TransformationController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error("Error during dynamic transformation: {}", e.getMessage(), e);
+            logger.error("Error during dynamic transformation: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", "Dynamic transformation failed");

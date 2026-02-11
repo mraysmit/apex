@@ -324,6 +324,7 @@ public class ApiController {
 
         } catch (IllegalArgumentException e) {
             logger.warn("Invalid data file upload: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", e.getMessage());
@@ -381,6 +382,7 @@ public class ApiController {
 
         } catch (IllegalArgumentException e) {
             logger.warn("Invalid YAML file upload: {}", e.getMessage());
+            logger.debug("Full exception details:", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("error", e.getMessage());

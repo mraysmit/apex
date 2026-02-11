@@ -27,6 +27,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
 import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -46,9 +49,26 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class ValidationServiceTest {
 
+    private static final Logger logger = LoggerFactory.getLogger(ValidationServiceTest.class);
     private LookupServiceRegistry registry;
     private RulesEngine rulesEngine;
     private ValidationService validationService;
+
+    @BeforeAll
+    static void classSetUp() {
+        MDC.put("testContext", "[EXPECTED] ");
+        LoggerFactory.getLogger(ValidationServiceTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] ValidationServiceTest intentionally triggers ERROR/WARN logs");
+        LoggerFactory.getLogger(ValidationServiceTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-START] Expected: validation failures, type checking errors, null handling");
+    }
+
+    @AfterAll
+    static void classTearDown() {
+        LoggerFactory.getLogger(ValidationServiceTest.class)
+            .info("[INTENTIONAL-FAILURE-TEST-CLASS-END] ValidationServiceTest intentional error tests completed");
+        MDC.remove("testContext");
+    }
 
     @BeforeEach
     void setUp() {

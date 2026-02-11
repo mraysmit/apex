@@ -231,6 +231,7 @@ public class RuleGroupEvaluationService {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             logger.error("Parallel evaluation interrupted for group '{}': {}", group.getName(), e.getMessage());
+            logger.debug("Full exception details:", e);
         } finally {
             executor.shutdown();
         }

@@ -384,7 +384,8 @@ public class ApexCacheManager {
             try {
                 entry.getValue().shutdown();
             } catch (Exception e) {
-                LOGGER.error("Error shutting down cache '{}'", entry.getKey(), e);
+                LOGGER.error("Error shutting down cache '{}': {}", entry.getKey(), e.getMessage());
+                LOGGER.debug("Full exception details:", e);
             }
         }
         
