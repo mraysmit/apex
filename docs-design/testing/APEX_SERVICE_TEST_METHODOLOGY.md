@@ -43,30 +43,35 @@ This document outlines the comprehensive testing methodology employed for the AP
 **Characteristics:**
 - Fast execution (< 100ms per test)
 - No external dependencies
-- Mocked collaborators
+- Real service instances (no mocking—APEX policy)
 - High code coverage (>90%)
+
+> **APEX Testing Policy**: This project uses real services exclusively—Mockito and all mocking
+> frameworks are forbidden. Tests use `DemoTestBase`, `ColoredTestOutputExtension`, real YAML
+> configurations, and real APEX service instances. 
 
 **Example Pattern:**
 ```java
-@ExtendWith(MockitoExtension.class)
-class CacheDataSourceTest {
-    @Mock
-    private CacheProvider cacheProvider;
+@ExtendWith(ColoredTestOutputExtension.class)
+class CacheDataSourceTest extends DemoTestBase {
     
-    @InjectMocks
     private CacheDataSource cacheDataSource;
+    
+    @BeforeEach
+    void setUp() {
+        cacheDataSource = new CacheDataSource(new SimpleCacheProvider());
+    }
     
     @Test
     void shouldRetrieveDataFromCache() {
-        // Given
-        when(cacheProvider.get("key")).thenReturn("cached-value");
+        // Given - use real cache provider
+        cacheDataSource.putData("key", "cached-value");
         
         // When
         Object result = cacheDataSource.getData("key");
         
         // Then
         assertEquals("cached-value", result);
-        verify(cacheProvider).get("key");
     }
 }
 ```
@@ -455,7 +460,7 @@ void testCircuitBreakerBehavior() {
 2. **In-Memory Alternatives**
    - H2 for database tests
    - Embedded cache providers
-   - Mock file systems
+   - Temporary file systems (Java NIO temp directories)
 
 3. **Cloud-Based Testing**
    - Managed test databases

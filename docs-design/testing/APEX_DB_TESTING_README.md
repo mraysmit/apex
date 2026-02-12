@@ -28,18 +28,7 @@ queries:
   getProduct: "SELECT * FROM products"  # ← No schema prefix needed
 ```
 
-### 2. JdbcUrlSchemaParameterTest.java
-**Purpose**: Low-level JDBC URL validation
-
-**Tests**:
-- JDBC URL includes `?currentSchema=<schema>` parameter
-- PostgreSQL `search_path` is correctly configured
-- Different `currentSchema` values query different schemas
-- Schema isolation prevents accidental public schema queries
-
-**Implementation Reference**: See `JdbcTemplateFactory.java` lines 237-241
-
-### 3. EnvironmentPromotionTest.java
+### 2. EnvironmentPromotionTest.java
 **Purpose**: Validates zero-code-change environment promotion pattern
 
 **Tests**:
@@ -109,10 +98,10 @@ class PostgreSQLSchemaConfigurationTest {
 
 ### Instance Container Pattern (Per-Test Isolation)
 
-For tests requiring complete isolation between test methods:
+For tests requiring complete isolation between test methods, use an instance (non-static) `@Container` field:
 
 ```java
-class JdbcUrlSchemaParameterTest {
+class IsolatedSchemaTest {
     
     // Instance variable = new container for each @Test method
     @Container
@@ -173,14 +162,14 @@ String url = jdbcUrl() + "?currentSchema=trading";
 **Startup Timing Resilience**:
 - GenericContainer with `Wait.forListeningPort()` may return before PostgreSQL is fully initialized
 - Add retry logic in `@BeforeEach`/`@BeforeAll` setup methods (3 attempts, 1-second delays)
-- See `JdbcUrlSchemaParameterTest.setupTestSchemas()` for reference implementation
+- Add retry logic in `@BeforeEach`/`@BeforeAll` setup methods for reference
 
 ## Running Tests
 
 ```bash
 # Run all schema tests
 cd apex-core
-mvn test -Dtest="PostgreSQLSchemaConfigurationTest,JdbcUrlSchemaParameterTest,EnvironmentPromotionTest"
+mvn test -Dtest="PostgreSQLSchemaConfigurationTest,EnvironmentPromotionTest"
 
 # Run single test suite
 mvn test -Dtest="PostgreSQLSchemaConfigurationTest"

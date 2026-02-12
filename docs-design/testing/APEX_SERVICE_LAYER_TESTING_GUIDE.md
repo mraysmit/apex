@@ -24,7 +24,7 @@ apex-core/src/test/java/dev/mars/apex/core/service/
 
 ## Cache Services Testing
 
-### CacheDataSourceTest (37 tests)
+### CacheDataSourceTest (35 tests)
 
 **Purpose:** Tests the cache-based data source implementation that provides high-performance data access through caching mechanisms.
 
@@ -330,7 +330,7 @@ void shouldFallbackToDataSourceOnCacheMiss() {
   - Event queue management
   - Recovery mechanisms
 
-### DataSourceConfigurationListenerTest (14 tests)
+### DataSourceConfigurationListenerTest (16 tests)
 
 **Purpose:** Tests event listeners for configuration change notifications.
 
@@ -341,13 +341,13 @@ void shouldFallbackToDataSourceOnCacheMiss() {
   - Listener priority handling
   - Dynamic listener management
 
-- **Event Handling** (5 tests)
+- **Event Handling** (6 tests)
   - Configuration change processing
   - Event filtering and routing
   - Asynchronous processing
   - Error propagation
 
-- **Integration Testing** (4 tests)
+- **Integration Testing** (5 tests)
   - Service integration
   - Event system integration
   - Monitoring integration
@@ -355,7 +355,7 @@ void shouldFallbackToDataSourceOnCacheMiss() {
 
 ## Factory Services Testing
 
-### DataSourceFactoryTest (20 tests)
+### DataSourceFactoryTest (23 tests)
 
 **Purpose:** Tests the factory pattern implementation for creating data source instances.
 
@@ -379,29 +379,6 @@ void shouldFallbackToDataSourceOnCacheMiss() {
   - Resource cleanup
 
 ## Core Data Services Testing
-
-### CustomDataSourceTest (32 tests)
-
-**Purpose:** Tests custom data source implementations and extensibility.
-
-**Key Test Categories:**
-- **Custom Implementation** (12 tests)
-  - Custom data source registration
-  - Implementation validation
-  - Interface compliance
-  - Performance characteristics
-
-- **Integration Testing** (10 tests)
-  - Factory integration
-  - Configuration integration
-  - Monitoring integration
-  - Event system integration
-
-- **Extensibility** (10 tests)
-  - Plugin architecture support
-  - Dynamic loading
-  - Version compatibility
-  - Migration support
 
 ### DataSourceTypeTest (33 tests)
 
@@ -490,23 +467,6 @@ void shouldFallbackToDataSourceOnCacheMiss() {
   - Configuration system integration
   - Monitoring system integration
   - Error handling integration
-
-### YamlDatasetIntegrationTest (9 tests)
-
-**Purpose:** Tests YAML-based dataset configuration and integration.
-
-**Key Test Categories:**
-- **YAML Processing** (4 tests)
-  - YAML parsing and validation
-  - Configuration mapping
-  - Schema compliance
-  - Error handling
-
-- **Dataset Integration** (5 tests)
-  - Dataset loading and initialization
-  - Data source binding
-  - Performance optimization
-  - Memory management
 
 ## Running the Tests
 
