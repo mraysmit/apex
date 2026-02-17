@@ -17,6 +17,7 @@ package dev.mars.apex.engine.scenario;
 
 import dev.mars.apex.engine.core.MapPropertyAccessor;
 import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
+import dev.mars.apex.core.util.EnabledFilter;
 import dev.mars.apex.engine.core.ExpressionEvaluatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,7 +90,7 @@ public class ScenarioRegistryManager {
         }
 
         // Check if scenario is enabled
-        if (!scenario.isEnabled()) {
+        if (!EnabledFilter.isEnabled(scenario)) {
             throw new IllegalArgumentException(
                 "Scenario '" + scenarioId + "' is disabled and cannot be executed. " +
                 "Enable the scenario in the registry or use a different scenario."
@@ -122,7 +123,7 @@ public class ScenarioRegistryManager {
 
         for (ScenarioConfiguration scenario : this.scenarioRegistry.values()) {
             // Skip disabled scenarios
-            if (!scenario.isEnabled()) {
+            if (!EnabledFilter.isEnabled(scenario)) {
                 logger.debug("Scenario {} is disabled - skipping", scenario.getScenarioId());
                 continue;
             }

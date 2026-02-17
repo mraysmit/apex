@@ -13,6 +13,7 @@ import dev.mars.apex.core.config.component.ComponentLoader;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.service.data.external.DataSourceResolver;
 import dev.mars.apex.core.service.data.external.ExternalDataSourceConfig;
+import dev.mars.apex.core.util.EnabledFilter;
 import dev.mars.apex.core.util.PropertyResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -513,7 +514,7 @@ public class YamlConfigurationLoader {
 
         // Process each data-source reference
         for (YamlDataSourceRef ref : config.getDataSourceRefs()) {
-            if (!ref.isEnabled()) {
+            if (!EnabledFilter.isEnabled(ref)) {
                 logger.info("Skipping disabled data-source reference: " + ref.getName());
                 continue;
             }
@@ -567,7 +568,7 @@ public class YamlConfigurationLoader {
 
         // Process each rule reference
         for (YamlRuleRef ref : config.getRuleRefs()) {
-            if (!ref.isEnabled()) {
+            if (!EnabledFilter.isEnabled(ref)) {
                 logger.info("Skipping disabled rule reference: " + ref.getName());
                 continue;
             }
@@ -665,7 +666,7 @@ public class YamlConfigurationLoader {
 
         // Process each rule reference
         for (YamlRuleRef ref : config.getRuleRefs()) {
-            if (!ref.isEnabled()) {
+            if (!EnabledFilter.isEnabled(ref)) {
                 logger.debug("Skipping disabled rule reference: " + ref.getName());
                 continue;
             }
@@ -764,7 +765,7 @@ public class YamlConfigurationLoader {
 
         // Process each enrichment reference
         for (YamlEnrichmentRef ref : config.getEnrichmentRefs()) {
-            if (!ref.isEnabled()) {
+            if (!EnabledFilter.isEnabled(ref)) {
                 logger.info("Skipping disabled enrichment reference: " + ref.getName());
                 continue;
             }
@@ -885,7 +886,7 @@ public class YamlConfigurationLoader {
 
         // Process each enrichment reference
         for (YamlEnrichmentRef ref : config.getEnrichmentRefs()) {
-            if (!ref.isEnabled()) {
+            if (!EnabledFilter.isEnabled(ref)) {
                 logger.debug("Skipping disabled enrichment reference: " + ref.getName());
                 continue;
             }
@@ -1551,7 +1552,7 @@ public class YamlConfigurationLoader {
             if (group.getEnrichmentReferences() != null && !group.getEnrichmentReferences().isEmpty()) {
                 Set<Integer> sequences = new HashSet<>();
                 for (YamlEnrichmentGroup.EnrichmentReference ref : group.getEnrichmentReferences()) {
-                    if (ref == null || Boolean.FALSE.equals(ref.getEnabled())) continue;
+                    if (!EnabledFilter.isEnabled(ref)) continue;
                     int seq = ref.getSequence() != null ? ref.getSequence() : 1;
                     if (!sequences.add(seq)) {
                         throw new YamlConfigurationException("Duplicate enrichment reference sequence " + seq + " in group: " + group.getId());

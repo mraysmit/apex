@@ -18,6 +18,7 @@ package dev.mars.apex.core.config.component;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.mars.apex.core.util.EnabledFilter;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import dev.mars.apex.core.config.exception.ResourceNotFoundException;
@@ -147,7 +148,7 @@ public class ComponentLoader {
             detectCircularReferences(component, componentFilePath, classpathBase);
 
             // Log enabled status
-            boolean enabled = component.getMetadata() != null && component.getMetadata().isEnabled();
+            boolean enabled = EnabledFilter.isEnabled(component);
             logger.info("Successfully loaded component: {} (id: {}, enabled: {})",
                        component.getName(), component.getId(), enabled);
             return component;
@@ -194,7 +195,7 @@ public class ComponentLoader {
             // For stream-loaded components, we can't detect circular references without a file path
             // The caller should ensure the component structure is valid
             
-            boolean enabled = component.getMetadata() != null && component.getMetadata().isEnabled();
+            boolean enabled = EnabledFilter.isEnabled(component);
             logger.info("Successfully loaded component from stream: {} (id: {}, enabled: {})",
                        component.getName(), component.getId(), enabled);
             return component;
@@ -227,7 +228,7 @@ public class ComponentLoader {
      * @return true if enabled (default), false if explicitly disabled
      */
     public boolean isComponentEnabled(ComponentConfiguration component) {
-        return component.getMetadata() == null || component.getMetadata().isEnabled();
+        return EnabledFilter.isEnabled(component);
     }
 
     /**

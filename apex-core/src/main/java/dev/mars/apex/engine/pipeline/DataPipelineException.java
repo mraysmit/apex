@@ -17,13 +17,17 @@ package dev.mars.apex.engine.pipeline;
  */
 
 /**
- * Exception thrown by the Data Pipeline Engine.
+ * Unchecked exception thrown by the Data Pipeline Engine.
+ *
+ * <p>Converted from checked to unchecked (RuntimeException) as part of the
+ * pipeline class consolidation in Feb 2026. Pipeline errors are caught and
+ * converted to {@code RuleResult.error()} at the boundary.</p>
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-09-04
- * @version 1.0
+ * @version 1.1
  */
-public class DataPipelineException extends Exception {
+public class DataPipelineException extends RuntimeException {
     
     private static final long serialVersionUID = 1L;
     

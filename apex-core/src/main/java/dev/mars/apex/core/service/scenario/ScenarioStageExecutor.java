@@ -25,6 +25,7 @@ import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.ExecutionStep;
 import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.core.config.YamlRuleFactory;
+import dev.mars.apex.core.util.EnabledFilter;
 import dev.mars.apex.engine.core.ExpressionEvaluatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -229,7 +230,7 @@ public class ScenarioStageExecutor {
      */
     private boolean shouldExecuteStage(ScenarioStage stage, Object data, ScenarioExecutionResult result) {
         // First check if stage is enabled
-        if (!stage.isEnabled()) {
+        if (!EnabledFilter.isEnabled(stage)) {
             logger.debug("Stage '{}' is disabled", stage.getStageName());
             return false;
         }
@@ -282,7 +283,7 @@ public class ScenarioStageExecutor {
      */
     private String getSkipReason(ScenarioStage stage, Object data, ScenarioExecutionResult result) {
         // Check enabled flag first
-        if (!stage.isEnabled()) {
+        if (!EnabledFilter.isEnabled(stage)) {
             return "Stage is disabled (enabled: false)";
         }
 

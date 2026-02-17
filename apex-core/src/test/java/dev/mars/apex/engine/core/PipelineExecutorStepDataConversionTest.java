@@ -16,7 +16,10 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for PipelineStepResult to ExecutionStep conversion in RulesEngine.
+ * Tests for pipeline step to ExecutionStep conversion in RulesEngine.
+ * 
+ * <p>PipelineExecutor now builds ExecutionStep objects directly,
+ * eliminating the intermediate PipelineStepResult conversion layer.</p>
  * 
  * <p><b>INTENTIONAL FAILURE TEST CLASS</b></p>
  * <p>This test suite intentionally uses empty H2 databases without creating tables
@@ -96,18 +99,18 @@ public class PipelineExecutorStepDataConversionTest {
     
     @Test
     @Order(9)
-    @DisplayName("Should convert PipelineStepResult to ExecutionStep with all fields")
+    @DisplayName("Should produce ExecutionStep with all fields from pipeline execution")
     public void shouldConvertPipelineStepResultToExecutionStep() throws Exception {
         logger.info("=== Test 9: Field Mapping Verification ===");
         
-        // Given: A pipeline that will create PipelineStepResult objects
+        // Given: A pipeline that produces ExecutionStep objects directly
         rulesEngine = RulesEngine.fromFile(TEST_YAML_BASE_PATH + "simple-extract-pipeline.yaml");
         Map<String, Object> inputData = new HashMap<>();
         
         // When: Execute the pipeline (triggers conversion)
         RuleResult result = rulesEngine.evaluate(inputData);
         
-        // Then: Verify ExecutionStep was created from PipelineStepResult
+        // Then: Verify ExecutionStep was created directly by PipelineExecutor
         assertNotNull(result, "Result should not be null");
         List<ExecutionStep> executionPath = result.getExecutionPath();
         assertNotNull(executionPath, "Execution path should not be null");
@@ -141,7 +144,7 @@ public class PipelineExecutorStepDataConversionTest {
         logger.info("  Records: {}/{}", pipelineStep.getRecordsProcessed(), pipelineStep.getRecordsFailed());
         logger.info("  Has Data: {}", pipelineStep.hasStepData());
         
-        logger.info("[OK] All fields mapped correctly from PipelineStepResult to ExecutionStep");
+        logger.info("[OK] All fields mapped correctly in ExecutionStep from pipeline execution");
     }
 
     // ========================================================================

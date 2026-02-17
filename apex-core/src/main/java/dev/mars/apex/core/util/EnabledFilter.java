@@ -15,13 +15,19 @@
  */
 package dev.mars.apex.core.util;
 
+import dev.mars.apex.core.config.component.ComponentConfiguration;
 import dev.mars.apex.core.config.model.YamlCategory;
+import dev.mars.apex.core.config.model.YamlDataSourceRef;
 import dev.mars.apex.core.config.model.YamlEnrichment;
 import dev.mars.apex.core.config.model.YamlEnrichmentGroup;
+import dev.mars.apex.core.config.model.YamlEnrichmentRef;
 import dev.mars.apex.core.config.model.YamlRule;
 import dev.mars.apex.core.config.model.YamlRuleChain;
 import dev.mars.apex.core.config.model.YamlRuleGroup;
+import dev.mars.apex.core.config.model.YamlRuleRef;
 import dev.mars.apex.core.config.model.YamlTransformation;
+import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
+import dev.mars.apex.core.service.scenario.ScenarioStage;
 import dev.mars.apex.engine.model.Rule;
 
 import java.util.List;
@@ -126,6 +132,61 @@ public final class EnabledFilter {
     public static boolean isEnabled(YamlEnrichmentGroup.EnrichmentReference ref) {
         if (ref == null) return true;
         return ref.getEnabled() == null || ref.getEnabled();
+    }
+
+    // =========================================================================
+    // External reference checks (boolean via isEnabled(), default true)
+    // =========================================================================
+
+    /**
+     * @return {@code true} if the data-source reference is enabled
+     */
+    public static boolean isEnabled(YamlDataSourceRef ref) {
+        return ref == null || ref.isEnabled();
+    }
+
+    /**
+     * @return {@code true} if the rule reference is enabled
+     */
+    public static boolean isEnabled(YamlRuleRef ref) {
+        return ref == null || ref.isEnabled();
+    }
+
+    /**
+     * @return {@code true} if the enrichment reference is enabled
+     */
+    public static boolean isEnabled(YamlEnrichmentRef ref) {
+        return ref == null || ref.isEnabled();
+    }
+
+    // =========================================================================
+    // Scenario checks (boolean primitive, default true)
+    // =========================================================================
+
+    /**
+     * @return {@code true} if the scenario configuration is enabled
+     */
+    public static boolean isEnabled(ScenarioConfiguration scenario) {
+        return scenario == null || scenario.isEnabled();
+    }
+
+    /**
+     * @return {@code true} if the scenario stage is enabled
+     */
+    public static boolean isEnabled(ScenarioStage stage) {
+        return stage == null || stage.isEnabled();
+    }
+
+    // =========================================================================
+    // Component checks (metadata-based, null metadata = enabled)
+    // =========================================================================
+
+    /**
+     * @return {@code true} if the component is enabled (null metadata → enabled)
+     */
+    public static boolean isEnabled(ComponentConfiguration component) {
+        if (component == null) return true;
+        return component.getMetadata() == null || component.getMetadata().isEnabled();
     }
 
     // =========================================================================

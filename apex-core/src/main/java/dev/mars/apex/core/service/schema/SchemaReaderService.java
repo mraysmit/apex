@@ -29,10 +29,10 @@ public class SchemaReaderService {
      * @param dataSource the data source to read schema from
      * @param parameters optional parameters (e.g., table name, CSV file path)
      * @return schema metadata (single table) or null if enumerating all tables
-     * @throws DataPipelineException if schema reading fails
+     * @throws DataPipelineException if the operation fails (unchecked)
      */
     public SchemaMetadata readSchema(ExternalDataSource dataSource, Map<String, Object> parameters) 
-            throws DataPipelineException {
+            {
         
         LOGGER.debug("[SchemaReader] readSchema() called with dataSource={}, parameters={}", 
                      dataSource != null ? dataSource.getName() : "null", parameters);
@@ -67,10 +67,10 @@ public class SchemaReaderService {
      * @param dataSource the database data source
      * @param parameters optional parameters (schema filter, table pattern, exclusions)
      * @return map of table name to schema metadata
-     * @throws DataPipelineException if enumeration fails
+     * @throws DataPipelineException if the operation fails (unchecked)
      */
     public Map<String, SchemaMetadata> enumerateAllTables(ExternalDataSource dataSource, Map<String, Object> parameters) 
-            throws DataPipelineException {
+            {
         
         LOGGER.debug("[SchemaReader] enumerateAllTables() called with dataSource={}, parameters={}", 
                      dataSource != null ? dataSource.getName() : "null", parameters);
@@ -240,7 +240,7 @@ public class SchemaReaderService {
      * Use enumerateAllTables() instead for bulk table enumeration.
      */
     private SchemaMetadata readDatabaseSchema(ExternalDataSource dataSource, Map<String, Object> parameters) 
-            throws DataPipelineException {
+            {
         
         LOGGER.debug("[SchemaReader.DB] Starting database schema read for source: {}", dataSource.getName());
         
@@ -376,7 +376,7 @@ public class SchemaReaderService {
      * Read schema from a CSV file.
      */
     private SchemaMetadata readCsvSchema(ExternalDataSource dataSource, Map<String, Object> parameters) 
-            throws DataPipelineException {
+            {
         
         LOGGER.debug("[SchemaReader.CSV] Starting CSV schema read for source: {}", dataSource.getName());
         
@@ -534,7 +534,7 @@ public class SchemaReaderService {
      * Get a required parameter from the map.
      */
     private String getRequiredParameter(Map<String, Object> parameters, String key, String errorMessage) 
-            throws DataPipelineException {
+            {
         
         LOGGER.debug("[SchemaReader] Getting required parameter: {}", key);
         

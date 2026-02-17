@@ -2,6 +2,9 @@ package dev.mars.apex.engine.pipeline;
 
 import dev.mars.apex.core.config.pipeline.PipelineConfiguration;
 import dev.mars.apex.core.config.pipeline.PipelineStep;
+import dev.mars.apex.core.constants.SeverityConstants;
+import dev.mars.apex.engine.model.ExecutionStep;
+import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.core.service.data.external.ExternalDataSource;
 import dev.mars.apex.core.service.data.external.DataSink;
 import dev.mars.apex.core.service.data.external.DataSinkException;
@@ -45,7 +48,7 @@ public class PipelineExecutor {
     private final ExternalDataSourceManager dataSourceManager;
     private final Map<String, DataSink> dataSinks;
     private final Map<String, Object> pipelineContext;
-    private final Map<String, PipelineStepResult> stepResults;
+    private final Map<String, ExecutionStep> stepResults;
     private PipelineConfiguration currentPipeline; // Store current pipeline for access to execution config
     private final ExpressionParser expressionParser;
     private final SchemaReaderService schemaReaderService;
@@ -71,9 +74,16 @@ public class PipelineExecutor {
     }
     
     /**
-     * Execute a pipeline configuration.
+     * Execute a pipeline configuration and return a RuleResult directly.
+     *
+     * <p>Pipeline steps are captured as {@link ExecutionStep} objects in the result's
+     * execution path, eliminating the intermediate PipelineStepResult/YamlPipelineExecutionResult
+     * conversion layer.</p>
+     *
+     * @param pipeline the pipeline configuration to execute
+     * @return RuleResult with execution path containing pipeline steps
      */
-    public YamlPipelineExecutionResult execute(PipelineConfiguration pipeline) throws DataPipelineException {
+    public RuleResult execute(PipelineConfiguration pipeline) {
         if (pipeline == null) {
             throw new DataPipelineException("Pipeline configuration is null");
         }
@@ -84,7 +94,7 @@ public class PipelineExecutor {
         this.currentPipeline = pipeline;
 
         long startTime = System.currentTimeMillis();
-        YamlPipelineExecutionResult result = new YamlPipelineExecutionResult(pipeline.getName());
+        List<ExecutionStep> executionSteps = new ArrayList<>();
 
         try {
             // Validate pipeline configuration
@@ -95,45 +105,45 @@ public class PipelineExecutor {
 
             // Execute pipeline steps
             if ("parallel".equalsIgnoreCase(pipeline.getExecution().getMode())) {
-                executeStepsInParallel(pipeline.getSteps(), result);
+                executeStepsInParallel(pipeline.getSteps(), executionSteps);
             } else {
-                executeStepsSequentially(pipeline.getSteps(), result);
+                executeStepsSequentially(pipeline.getSteps(), executionSteps);
             }
 
-            result.setSuccess(true);
-            result.setDurationMs(System.currentTimeMillis() - startTime);
+            long durationMs = System.currentTimeMillis() - startTime;
 
             LOGGER.info("Pipeline '{}' completed successfully in {}ms",
-                pipeline.getName(), result.getDurationMs());
+                pipeline.getName(), durationMs);
+
+            RuleResult result = RuleResult.match("pipeline:" + pipeline.getName(),
+                    "Pipeline executed successfully", SeverityConstants.INFO);
+            result.setExecutionPath(executionSteps);
+            return result;
 
         } catch (Exception e) {
-            result.setSuccess(false);
-            result.setError(e.getMessage());
-            result.setDurationMs(System.currentTimeMillis() - startTime);
+            long durationMs = System.currentTimeMillis() - startTime;
 
             // Log error without stack trace, with debug for full details
             LOGGER.error("Pipeline '{}' failed after {}ms: {}",
-                pipeline.getName(), result.getDurationMs(), e.getMessage());
+                pipeline.getName(), durationMs, e.getMessage());
             LOGGER.debug("Full exception details for pipeline '{}':", pipeline.getName(), e);
 
-            // Don't throw exception - return result with step data even on failure
-            // This allows RulesEngine to capture pipeline steps in execution path
-            // if (!"continue-on-error".equals(pipeline.getExecution().getErrorHandling())) {
-            //     throw new DataPipelineException("Pipeline execution failed: " + e.getMessage(), e);
-            // }
+            RuleResult result = RuleResult.error("pipeline:" + pipeline.getName(),
+                    "Pipeline execution failed: " + e.getMessage());
+            result.setExecutionPath(executionSteps);
+            return result;
+
         } finally {
             // Note: Data sinks are NOT shut down here - they are managed by the RulesEngine
             // and will be shut down when RulesEngine.shutdown() is called
             this.currentPipeline = null;
         }
-
-        return result;
     }
     
     /**
      * Validate pipeline configuration.
      */
-    private void validatePipeline(PipelineConfiguration pipeline) throws DataPipelineException {
+    private void validatePipeline(PipelineConfiguration pipeline) {
         if (pipeline.getSteps() == null || pipeline.getSteps().isEmpty()) {
             throw new DataPipelineException("Pipeline has no steps defined");
         }
@@ -150,7 +160,7 @@ public class PipelineExecutor {
     /**
      * Validate individual step configuration.
      */
-    private void validateStep(PipelineStep step) throws DataPipelineException {
+    private void validateStep(PipelineStep step) {
         if (step.getName() == null || step.getName().trim().isEmpty()) {
             throw new DataPipelineException("Step name is required");
         }
@@ -179,7 +189,7 @@ public class PipelineExecutor {
     /**
      * Validate step dependencies for circular references.
      */
-    private void validateStepDependencies(List<PipelineStep> steps) throws DataPipelineException {
+    private void validateStepDependencies(List<PipelineStep> steps) {
         Map<String, Set<String>> dependencies = new HashMap<>();
 
         // Build dependency graph
@@ -231,7 +241,7 @@ public class PipelineExecutor {
     /**
      * Initialize data sinks referenced in pipeline steps.
      */
-    private void initializeDataSinks(PipelineConfiguration pipeline) throws DataPipelineException {
+    private void initializeDataSinks(PipelineConfiguration pipeline) {
         for (PipelineStep step : pipeline.getSteps()) {
             if (step.getSink() != null && !dataSinks.containsKey(step.getSink())) {
                 try {
@@ -248,35 +258,37 @@ public class PipelineExecutor {
     /**
      * Execute steps sequentially.
      */
-    private void executeStepsSequentially(List<PipelineStep> steps, YamlPipelineExecutionResult result)
-            throws DataPipelineException {
+    private void executeStepsSequentially(List<PipelineStep> steps, List<ExecutionStep> executionSteps) {
 
         // Sort steps by dependencies
         List<PipelineStep> sortedSteps = topologicalSort(steps);
 
         for (PipelineStep step : sortedSteps) {
-            executeStep(step, result);
+            executeStep(step, executionSteps);
         }
     }
 
     /**
      * Execute steps in parallel where possible.
      */
-    private void executeStepsInParallel(List<PipelineStep> steps, YamlPipelineExecutionResult result)
-            throws DataPipelineException {
+    private void executeStepsInParallel(List<PipelineStep> steps, List<ExecutionStep> executionSteps) {
 
         // For now, implement as sequential - parallel execution would require more complex dependency management
-        executeStepsSequentially(steps, result);
+        executeStepsSequentially(steps, executionSteps);
     }
     
     /**
      * Execute a single pipeline step with retry support.
      */
-    private void executeStep(PipelineStep step, YamlPipelineExecutionResult result) throws DataPipelineException {
+    private void executeStep(PipelineStep step, List<ExecutionStep> executionSteps) {
         LOGGER.info("Executing step: {} ({})", step.getName(), step.getType());
 
         long stepStartTime = System.currentTimeMillis();
-        PipelineStepResult stepResult = new PipelineStepResult(step.getName());
+        ExecutionStep stepResult = new ExecutionStep();
+        stepResult.setName(step.getName());
+        stepResult.setType("PIPELINE_STEP");
+        stepResult.setRecordsProcessed(0);
+        stepResult.setRecordsFailed(0);
 
         // Get retry configuration from step or use defaults
         int maxRetries = getMaxRetries(step);
@@ -307,8 +319,8 @@ public class PipelineExecutor {
                 // Check dependencies
                 if (step.hasDependencies()) {
                     for (String dependency : step.getDependsOn()) {
-                        PipelineStepResult depResult = stepResults.get(dependency);
-                        if (depResult == null || !depResult.isSuccess()) {
+                        ExecutionStep depResult = stepResults.get(dependency);
+                        if (depResult == null || !"SUCCESS".equals(depResult.getStatus())) {
                             throw new DataPipelineException("Dependency step failed or not found: " + dependency);
                         }
                     }
@@ -410,12 +422,13 @@ public class PipelineExecutor {
                     stepResult.setRecordsProcessed(1);
                 }
 
-                stepResult.setSuccess(true);
-                stepResult.setData(stepData);
+                stepResult.setStatus("SUCCESS");
+                stepResult.setMessage("Step completed successfully");
+                stepResult.setStepData(stepData);
                 stepResult.setDurationMs(System.currentTimeMillis() - stepStartTime);
 
                 stepResults.put(step.getName(), stepResult);
-                result.addStepResult(stepResult);
+                executionSteps.add(stepResult);
 
                 LOGGER.info("Step '{}' completed successfully in {}ms",
                     step.getName(), stepResult.getDurationMs());
@@ -430,12 +443,12 @@ public class PipelineExecutor {
 
                 if (attempt > maxRetries) {
                     // All retries exhausted
-                    stepResult.setSuccess(false);
-                    stepResult.setError(e.getMessage());
+                    stepResult.setStatus("FAILURE");
+                    stepResult.setMessage(e.getMessage());
                     stepResult.setDurationMs(System.currentTimeMillis() - stepStartTime);
 
                     stepResults.put(step.getName(), stepResult);
-                    result.addStepResult(stepResult);
+                    executionSteps.add(stepResult);
 
                     LOGGER.error("Step '{}' failed after {}ms and {} retries: {}",
                         step.getName(), stepResult.getDurationMs(), maxRetries, e.getMessage());
@@ -486,7 +499,7 @@ public class PipelineExecutor {
     /**
      * Execute an extract step.
      */
-    private Object executeExtractStep(PipelineStep step) throws DataPipelineException {
+    private Object executeExtractStep(PipelineStep step) {
         ExternalDataSource dataSource = dataSourceManager.getDataSource(step.getSource());
         if (dataSource == null) {
             throw new DataPipelineException("Data source not found: " + step.getSource());
@@ -505,7 +518,7 @@ public class PipelineExecutor {
      * Execute a transform step.
      * Applies transformations to data from previous steps.
      */
-    private Object executeTransformStep(PipelineStep step, Object data) throws DataPipelineException {
+    private Object executeTransformStep(PipelineStep step, Object data) {
         if (data == null) {
             LOGGER.error("No data available for transform step: {} - upstream extract may have failed", step.getName());
             return null;
@@ -697,7 +710,7 @@ public class PipelineExecutor {
      *
      * @return the number of records successfully processed
      */
-    private int executeLoadStep(PipelineStep step, Object data) throws DataPipelineException {
+    private int executeLoadStep(PipelineStep step, Object data) {
         LOGGER.info("Looking for data sink: '{}' in available sinks: {}", step.getSink(), dataSinks.keySet());
         DataSink dataSink = dataSinks.get(step.getSink());
         if (dataSink == null) {
@@ -781,7 +794,7 @@ public class PipelineExecutor {
     /**
      * Execute an audit step.
      */
-    private void executeAuditStep(PipelineStep step, Object data) throws DataPipelineException {
+    private void executeAuditStep(PipelineStep step, Object data) {
         DataSink dataSink = dataSinks.get(step.getSink());
         if (dataSink == null) {
             throw new DataPipelineException("Data sink not found for audit step: " + step.getSink());
@@ -840,9 +853,9 @@ public class PipelineExecutor {
      *
      * @param step the read-schema step configuration
      * @return SchemaMetadata for single table/file, or Map<String, SchemaMetadata> for table enumeration
-     * @throws DataPipelineException if schema reading fails
+     * @throws DataPipelineException if the operation fails (unchecked)
      */
-    private Object executeReadSchemaStep(PipelineStep step) throws DataPipelineException {
+    private Object executeReadSchemaStep(PipelineStep step) {
         LOGGER.info("Executing read-schema step: {}", step.getName());
         LOGGER.debug("[Pipeline.ReadSchema] Step details: type={}, source={}, description={}", 
                     step.getType(), step.getSource(), step.getDescription());
@@ -1174,9 +1187,9 @@ public class PipelineExecutor {
      *
      * @param step the schema-diff pipeline step
      * @return SchemaComparisonResult containing diff details
-     * @throws DataPipelineException if comparison fails
+     * @throws DataPipelineException if the operation fails (unchecked)
      */
-    private SchemaComparisonResult executeSchemaDiffStep(PipelineStep step) throws DataPipelineException {
+    private SchemaComparisonResult executeSchemaDiffStep(PipelineStep step) {
         LOGGER.info("Executing schema-diff step: {}", step.getName());
 
         Map<String, Object> parameters = step.getParameters();
@@ -1304,13 +1317,13 @@ public class PipelineExecutor {
     /**
      * Retrieve SchemaMetadata from a previous pipeline step's result.
      */
-    private SchemaMetadata retrieveSchemaFromStep(String stepName) throws DataPipelineException {
-        PipelineStepResult stepResult = stepResults.get(stepName);
+    private SchemaMetadata retrieveSchemaFromStep(String stepName) {
+        ExecutionStep stepResult = stepResults.get(stepName);
         if (stepResult == null) {
             throw new DataPipelineException("Step not found: " + stepName);
         }
 
-        Object stepData = stepResult.getData();
+        Object stepData = stepResult.getStepData();
         if (stepData instanceof SchemaMetadata) {
             return (SchemaMetadata) stepData;
         } else if (stepData != null) {

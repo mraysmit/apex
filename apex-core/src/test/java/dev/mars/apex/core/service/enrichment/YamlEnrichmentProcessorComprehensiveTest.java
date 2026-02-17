@@ -4,8 +4,6 @@ import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
 import dev.mars.apex.core.config.model.YamlEnrichment;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
-import dev.mars.apex.engine.model.EnrichmentGroup;
-import dev.mars.apex.engine.model.EnrichmentGroupResult;
 import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.engine.core.ExpressionEvaluatorService;
 import dev.mars.apex.engine.execution.RuleGroupEvaluationService;
@@ -92,7 +90,7 @@ class YamlEnrichmentProcessorComprehensiveTest {
         Map<String, Object> testData = new HashMap<>();
         testData.put("value", 100);
 
-        RuleResult result = processor.processEnrichmentsWithResult(null, testData);
+        RuleResult result = processor.processEnrichmentsWithResult(null, testData, null);
 
         assertNotNull(result, "Result should not be null");
         assertTrue(result.isSuccess(), "Null enrichment list should return success");
@@ -110,7 +108,7 @@ class YamlEnrichmentProcessorComprehensiveTest {
         Map<String, Object> testData = new HashMap<>();
         testData.put("value", 100);
 
-        RuleResult result = processor.processEnrichmentsWithResult(emptyList, testData);
+        RuleResult result = processor.processEnrichmentsWithResult(emptyList, testData, null);
 
         assertNotNull(result, "Result should not be null");
         assertTrue(result.isSuccess(), "Empty enrichment list should return success");
@@ -132,7 +130,7 @@ class YamlEnrichmentProcessorComprehensiveTest {
         enrichments.add(enrichment);
 
         // Processor should handle null target gracefully
-        RuleResult result = processor.processEnrichmentsWithResult(enrichments, null);
+        RuleResult result = processor.processEnrichmentsWithResult(enrichments, null, null);
 
         assertNotNull(result, "Result should not be null");
         // May return success (skip enrichments) or failure (null object) - both are acceptable
@@ -244,295 +242,6 @@ class YamlEnrichmentProcessorComprehensiveTest {
         // This is acceptable behavior - check logs for LOOKUP KEY EVALUATION FAILED
         
         logger.info("✅ TEST 3.2 PASSED: Invalid lookup key handled: success={}", result.isSuccess());
-    }
-
-    // ========================================
-    // TEST 4: Parallel Execution
-    // ========================================
-
-    @Test
-    @DisplayName("TEST 4.1: Parallel execution should process all enrichments (no short-circuit)")
-    void testParallelExecutionNoShortCircuit() throws Exception {
-        logger.info("🧪 TEST 4.1: Parallel execution processes all enrichments");
-
-        String yamlPath = "src/test/java/dev/mars/apex/core/service/enrichment/YamlEnrichmentProcessorComprehensiveTest.yaml";
-        YamlRuleConfiguration config = yamlLoader.loadFromFile(yamlPath);
-
-        Map<String, Object> testData = new HashMap<>();
-        testData.put("value", 100);
-
-        // Create enrichment group with parallel execution
-        EnrichmentGroup group = new EnrichmentGroup("parallel-test-group")
-            .setName("Parallel Execution Test")
-            .setDescription("Test that all enrichments execute in parallel")
-            .setPriority(100)
-            .setAndOperator(true)  // AND operator
-            .setStopOnFirstFailure(false) // Don't stop on first failure
-            .setParallelExecution(true)  // Parallel execution enabled
-            .setDebugMode(false);  // Not debug mode
-
-        // Add multiple enrichments to the group
-        List<YamlEnrichment> enrichments = config.getEnrichments().stream()
-                .filter(e -> e.getId().startsWith("parallel-"))
-                .toList();
-
-        int sequence = 1;
-        for (YamlEnrichment enrichment : enrichments) {
-            group.addEnrichment(sequence++, enrichment);
-        }
-
-        EnrichmentGroupResult result = processor.processEnrichmentGroup(group, testData, config);
-
-        assertNotNull(result, "Result should not be null");
-        assertEquals(enrichments.size(), result.getEnrichmentResults().size(), 
-                    "All enrichments should execute in parallel mode");
-        
-        logger.info("✅ TEST 4.1 PASSED: {} enrichments executed in parallel", 
-                   result.getEnrichmentResults().size());
-    }
-
-    @Test
-    @DisplayName("TEST 4.2: Sequential execution with stop-on-first-failure should short-circuit")
-    void testSequentialExecutionWithShortCircuit() throws Exception {
-        logger.info("🧪 TEST 4.2: Sequential execution with short-circuit");
-
-        String yamlPath = "src/test/java/dev/mars/apex/core/service/enrichment/YamlEnrichmentProcessorComprehensiveTest.yaml";
-        YamlRuleConfiguration config = yamlLoader.loadFromFile(yamlPath);
-
-        Map<String, Object> testData = new HashMap<>();
-        testData.put("value", 100);
-
-        EnrichmentGroup group = new EnrichmentGroup("sequential-test-group")
-            .setName("Sequential Execution Test")
-            .setDescription("Test that execution stops on first failure")
-            .setPriority(100)
-            .setAndOperator(true)  // AND operator
-            .setStopOnFirstFailure(true)  // Stop on first failure
-            .setParallelExecution(false) // Sequential execution
-            .setDebugMode(false);  // Not debug mode
-
-        // Add enrichments including one that will fail
-        List<YamlEnrichment> enrichments = config.getEnrichments().stream()
-                .filter(e -> e.getId().startsWith("sequential-"))
-                .toList();
-
-        int sequence = 1;
-        for (YamlEnrichment enrichment : enrichments) {
-            group.addEnrichment(sequence++, enrichment);
-        }
-
-        EnrichmentGroupResult result = processor.processEnrichmentGroup(group, testData, config);
-
-        assertNotNull(result, "Result should not be null");
-        // Should have fewer results than total enrichments due to short-circuit
-        assertTrue(result.getEnrichmentResults().size() <= enrichments.size(), 
-                  "Sequential execution should short-circuit on failure");
-        
-        logger.info("✅ TEST 4.2 PASSED: Executed {} out of {} enrichments before short-circuit", 
-                   result.getEnrichmentResults().size(), enrichments.size());
-    }
-
-    // ========================================
-    // TEST 5: Cache Effectiveness
-    // ========================================
-
-    @Test
-    @DisplayName("TEST 5.1: Dataset caching should reuse DatasetLookupService instances")
-    void testDatasetCaching() throws Exception {
-        logger.info("🧪 TEST 5.1: Dataset caching effectiveness");
-
-        String yamlPath = "src/test/java/dev/mars/apex/core/service/enrichment/YamlEnrichmentProcessorComprehensiveTest.yaml";
-        YamlRuleConfiguration config = yamlLoader.loadFromFile(yamlPath);
-
-        Map<String, Object> testData = new HashMap<>();
-        testData.put("currencyCode", "USD");
-
-        // Get cache stats before
-        Map<String, Object> statsBefore = processor.getCacheStatistics();
-        Number datasetCacheSizeBefore = (Number) statsBefore.get("datasetCacheSize");
-
-        // Process enrichments with dataset lookups (first time)
-        List<YamlEnrichment> enrichments = new ArrayList<>(config.getEnrichments().stream()
-                .filter(e -> "dataset-cache-test-1".equals(e.getId()) || "dataset-cache-test-2".equals(e.getId()))
-                .toList());
-
-        processor.processEnrichmentsWithResult(enrichments, testData, config);
-
-        // Get cache stats after
-        Map<String, Object> statsAfter = processor.getCacheStatistics();
-        Number datasetCacheSizeAfter = (Number) statsAfter.get("datasetCacheSize");
-        Number datasetCacheHits = (Number) statsAfter.get("datasetCacheHits");
-
-        assertTrue(datasetCacheSizeAfter.longValue() > datasetCacheSizeBefore.longValue(), 
-                  "Dataset cache should have entries after processing");
-        
-        logger.info("✅ TEST 5.1 PASSED: Dataset cache size: before={}, after={}, hits={}", 
-                   datasetCacheSizeBefore, datasetCacheSizeAfter, datasetCacheHits);
-    }
-
-    @Test
-    @DisplayName("TEST 5.2: Expression caching should reuse compiled expressions")
-    void testExpressionCaching() throws Exception {
-        logger.info("🧪 TEST 5.2: Expression caching effectiveness");
-
-        String yamlPath = "src/test/java/dev/mars/apex/core/service/enrichment/YamlEnrichmentProcessorComprehensiveTest.yaml";
-        YamlRuleConfiguration config = yamlLoader.loadFromFile(yamlPath);
-
-        Map<String, Object> testData = new HashMap<>();
-        testData.put("amount", 1000.0);
-
-        // Get cache stats before
-        Map<String, Object> statsBefore = processor.getCacheStatistics();
-        Number expressionCacheSizeBefore = (Number) statsBefore.get("expressionCacheSize");
-
-        // Process enrichments with SpEL expressions (first time)
-        List<YamlEnrichment> enrichments = new ArrayList<>(config.getEnrichments().stream()
-                .filter(e -> "expression-cache-test".equals(e.getId()))
-                .toList());
-
-        processor.processEnrichmentsWithResult(enrichments, testData, config);
-
-        // Get cache stats after first execution
-        Map<String, Object> statsAfter1 = processor.getCacheStatistics();
-        Number expressionCacheSizeAfter1 = (Number) statsAfter1.get("expressionCacheSize");
-
-        assertTrue(expressionCacheSizeAfter1.longValue() > expressionCacheSizeBefore.longValue(), 
-                  "Expression cache should have entries after first execution");
-
-        // Process same enrichments again
-        processor.processEnrichmentsWithResult(enrichments, testData, config);
-
-        // Get cache stats after second execution
-        Map<String, Object> statsAfter2 = processor.getCacheStatistics();
-        Number expressionCacheHits = (Number) statsAfter2.get("expressionCacheHits");
-
-        assertTrue(expressionCacheHits.longValue() > 0, 
-                  "Expression cache should have hits on second execution");
-        
-        logger.info("✅ TEST 5.2 PASSED: Expression cache size: before={}, after={}, hits={}", 
-                   expressionCacheSizeBefore, expressionCacheSizeAfter1, expressionCacheHits);
-    }
-
-    @Test
-    @DisplayName("TEST 5.3: Clear cache should reset all caches")
-    void testClearCache() throws Exception {
-        logger.info("🧪 TEST 5.3: Cache clearing");
-
-        String yamlPath = "src/test/java/dev/mars/apex/core/service/enrichment/YamlEnrichmentProcessorComprehensiveTest.yaml";
-        YamlRuleConfiguration config = yamlLoader.loadFromFile(yamlPath);
-
-        Map<String, Object> testData = new HashMap<>();
-        testData.put("amount", 1000.0);
-
-        // Build up cache
-        processor.processEnrichmentsWithResult(config.getEnrichments(), testData, config);
-
-        Map<String, Object> statsBefore = processor.getCacheStatistics();
-        Number totalSizeBefore = ((Number) statsBefore.get("datasetCacheSize")).longValue() + 
-                              ((Number) statsBefore.get("expressionCacheSize")).longValue() + 
-                              ((Number) statsBefore.get("lookupCacheSize")).longValue();
-
-        // Clear cache
-        processor.clearCache();
-
-        Map<String, Object> statsAfter = processor.getCacheStatistics();
-        Number totalSizeAfter = ((Number) statsAfter.get("datasetCacheSize")).longValue() + 
-                             ((Number) statsAfter.get("expressionCacheSize")).longValue() + 
-                             ((Number) statsAfter.get("lookupCacheSize")).longValue();
-
-        assertEquals(0L, totalSizeAfter.longValue(), "All caches should be empty after clear");
-        
-        logger.info("✅ TEST 5.3 PASSED: Cache cleared: before={}, after={}", totalSizeBefore, totalSizeAfter);
-    }
-
-    // ========================================
-    // TEST 6: Enrichment Group AND/OR Semantics
-    // ========================================
-
-    @Test
-    @DisplayName("TEST 6.1: Enrichment group with AND operator - all must succeed")
-    void testEnrichmentGroupAndOperator() throws Exception {
-        logger.info("🧪 TEST 6.1: Enrichment group AND operator");
-
-        String yamlPath = "src/test/java/dev/mars/apex/core/service/enrichment/YamlEnrichmentProcessorComprehensiveTest.yaml";
-        YamlRuleConfiguration config = yamlLoader.loadFromFile(yamlPath);
-
-        Map<String, Object> testData = new HashMap<>();
-        testData.put("value", 100);
-
-        EnrichmentGroup andGroup = new EnrichmentGroup("and-group-test")
-            .setName("AND Group Test")
-            .setDescription("All enrichments must succeed")
-            .setPriority(100)
-            .setAndOperator(true)  // AND operator
-            .setStopOnFirstFailure(false)
-            .setParallelExecution(false)
-            .setDebugMode(false);
-
-        List<YamlEnrichment> enrichments = config.getEnrichments().stream()
-                .filter(e -> e.getId().startsWith("and-group-"))
-                .toList();
-
-        int sequence = 1;
-        for (YamlEnrichment enrichment : enrichments) {
-            andGroup.addEnrichment(sequence++, enrichment);
-        }
-
-        EnrichmentGroupResult result = processor.processEnrichmentGroup(andGroup, testData, config);
-
-        assertNotNull(result, "Result should not be null");
-        
-        // With AND operator, all enrichments must succeed for group to succeed
-        boolean allSucceeded = result.getEnrichmentResults().stream()
-                .allMatch(RuleResult::isSuccess);
-        assertEquals(allSucceeded, result.isSuccess(), 
-                    "AND group should pass only if all enrichments succeed");
-        
-        logger.info("✅ TEST 6.1 PASSED: AND group result: {}, all succeeded: {}", 
-                   result.isSuccess(), allSucceeded);
-    }
-
-    @Test
-    @DisplayName("TEST 6.2: Enrichment group with OR operator - any can succeed")
-    void testEnrichmentGroupOrOperator() throws Exception {
-        logger.info("🧪 TEST 6.2: Enrichment group OR operator");
-
-        String yamlPath = "src/test/java/dev/mars/apex/core/service/enrichment/YamlEnrichmentProcessorComprehensiveTest.yaml";
-        YamlRuleConfiguration config = yamlLoader.loadFromFile(yamlPath);
-
-        Map<String, Object> testData = new HashMap<>();
-        testData.put("value", 100);
-
-        EnrichmentGroup orGroup = new EnrichmentGroup("or-group-test")
-            .setName("OR Group Test")
-            .setDescription("Any enrichment can succeed")
-            .setPriority(100)
-            .setAndOperator(false) // OR operator
-            .setStopOnFirstFailure(false)
-            .setParallelExecution(false)
-            .setDebugMode(false);
-
-        List<YamlEnrichment> enrichments = config.getEnrichments().stream()
-                .filter(e -> e.getId().startsWith("or-group-"))
-                .toList();
-
-        int sequence = 1;
-        for (YamlEnrichment enrichment : enrichments) {
-            orGroup.addEnrichment(sequence++, enrichment);
-        }
-
-        EnrichmentGroupResult result = processor.processEnrichmentGroup(orGroup, testData, config);
-
-        assertNotNull(result, "Result should not be null");
-        
-        // With OR operator, group succeeds if any enrichment succeeds
-        boolean anySucceeded = result.getEnrichmentResults().stream()
-                .anyMatch(RuleResult::isSuccess);
-        assertEquals(anySucceeded, result.isSuccess(), 
-                    "OR group should pass if any enrichment succeeds");
-        
-        logger.info("✅ TEST 6.2 PASSED: OR group result: {}, any succeeded: {}", 
-                   result.isSuccess(), anySucceeded);
     }
 
     // ========================================
@@ -882,13 +591,6 @@ class YamlEnrichmentProcessorComprehensiveTest {
         logger.info("📊 Enriched data keys: {}", 
                    result.getEnrichedData() instanceof Map ? 
                    ((Map<?,?>)result.getEnrichedData()).keySet() : "N/A");
-
-        // Verify cache effectiveness
-        Map<String, Object> cacheStats = processor.getCacheStatistics();
-        logger.info("💾 Cache statistics: dataset={}, expression={}, lookup={}", 
-                   cacheStats.get("datasetCacheSize"),
-                   cacheStats.get("expressionCacheSize"),
-                   cacheStats.get("lookupCacheSize"));
 
         logger.info("✅ INTEGRATION TEST PASSED: Complete workflow executed successfully");
     }

@@ -2,8 +2,8 @@
 
 **Status:** ✅ ALL 6 PHASES COMPLETE  
 **Branch:** `refactor/rules-engine-decomposition`  
-**Last Updated:** February 11, 2026  
-**Test Baseline:** apex-core: 2,861 tests, apex-demo: 908 tests — 0 failures, 0 errors
+**Last Updated:** February 14, 2026  
+**Test Baseline:** apex-core: 2,877 tests, apex-demo: 908 tests — 0 failures, 0 errors
 
 ## Overview
 
@@ -240,19 +240,16 @@ The following tasks from separate task documents are **not part of this optimisa
 | Correct log levels (WARN→ERROR) | `ERROR_HANDLING_IMPROVEMENT_TASKS.md` Task 2 | ✅ Complete (Feb 11, 2026) — 16 changes across 8 files |
 | Stack trace verbosity | `ERROR_HANDLING_IMPROVEMENT_TASKS.md` Task 5 | ✅ Complete — error+debug pattern in ConfigurationContext, ComponentLoader, YamlConfigurationLoader |
 | APEX Error Codes document | `ERROR_HANDLING_IMPROVEMENT_TASKS.md` Task 4.4 | ✅ Complete — `docs/APEX_ERROR_CODES.md` exists |
+| Exception logging fixes | `EXCEPTION_LOGGING_IMPROVEMENTS.md` | ✅ Complete (Feb 11, 2026) — 76 fixes across 28 files in 3 modules |
+| Error propagation integration tests | `ERROR_HANDLING_IMPROVEMENT_TASKS.md` Task 6 | ✅ Complete (Feb 13, 2026) — 23 tests in 7 nested classes |
+| Test context markers | `ERROR_HANDLING_IMPROVEMENT_TASKS.md` Task 1 | ✅ Complete (Feb 12, 2026) — 15 new + 4 previously done, MDC-based `[EXPECTED]` prefix |
+| EnabledFilter adoption | Phase 3 residual + broader codebase | ✅ Complete (Feb 13, 2026) — 14 inline checks migrated across 5 files, 7 new overloads added to `EnabledFilter` |
+| Remove deprecated pipeline classes | `APEX_TECHNICAL_DEBT_ANALYSIS.md` Phase 2 | ✅ Complete (Feb 13, 2026) — 4 classes removed: `PipelineExecutionResult` (dead code), `PipelineStepResult`, `YamlPipelineExecutionResult` (replaced by `ExecutionStep`/`RuleResult`), `DataPipelineException` converted to `RuntimeException`. `PipelineExecutor` now returns `RuleResult` directly. |
+| Clean TODO placeholders | `APEX_TECHNICAL_DEBT_ANALYSIS.md` Phase 1 | ✅ Complete (Feb 13, 2026) — 8 `YamlDataSink` conversion methods implemented, stale `YamlEnrichmentProcessor` TODO fixed. 3 `SequentialYamlProcessor` TODOs retained (real feature work referencing non-existent processor classes). |
+| Remove deprecated `YamlEnrichmentProcessor` methods | `APEX_TECHNICAL_DEBT_ANALYSIS.md` Section 1.2 | ✅ Complete (Feb 14, 2026) — 8 deprecated methods removed (314 lines), `processEnrichment(2-arg)` un-deprecated and made private. 7 test methods removed from `YamlEnrichmentProcessorComprehensiveTest`. Class retained as core infrastructure (3 non-deprecated methods actively used by `SequentialProcessor`, `EnrichmentGroupExecutor`, `RulesEngine`). |
 
-### 🟠 HIGH (Outstanding)
+### 🟡 REMAINING (Outstanding)
 
 | Task | Document | Description |
 |------|----------|-------------|
-| Exception logging fixes | `EXCEPTION_LOGGING_IMPROVEMENTS.md` | 80+ occurrences across apex-core, apex-rest-api, apex-yaml-manager where `e.getMessage()` swallows stack traces |
-| Error propagation integration tests | `ERROR_HANDLING_IMPROVEMENT_TASKS.md` Task 6 | New test class verifying error details survive through full pipeline |
-| Test context markers | `ERROR_HANDLING_IMPROVEMENT_TASKS.md` Task 1 | Add `[TEST-EXPECTED-*]` prefixes — 4 of 19 source classes done, 15 remaining |
-
-### 🟡 MEDIUM (Outstanding)
-
-| Task | Document | Description |
-|------|----------|-------------|
-| EnabledFilter adoption in YamlRuleFactory | Phase 3 residual | 10+ inline `getEnabled() == null \|\| getEnabled()` checks not migrated to `EnabledFilter` |
-| Remove deprecated pipeline classes | `APEX_TECHNICAL_DEBT_ANALYSIS.md` Phase 2 | 3 pipeline classes remain: `DataPipelineException`, `PipelineStepResult`, `YamlPipelineExecutionResult` (2 others already deleted) |
-| Clean TODO placeholders | `APEX_TECHNICAL_DEBT_ANALYSIS.md` Phase 1 | 3 TODOs in `SequentialYamlProcessor`, 8 TODOs in `YamlDataSink` |
+| `SequentialYamlProcessor` integration TODOs | `APEX_TECHNICAL_DEBT_ANALYSIS.md` Section 2 | 3 TODOs reference non-existent processor classes — real feature work, not cleanup |

@@ -6,12 +6,8 @@ import dev.mars.apex.core.config.pipeline.PipelineConfiguration;
 import dev.mars.apex.core.config.model.YamlDataSink;
 import dev.mars.apex.core.config.model.YamlDataSource;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
-import dev.mars.apex.core.constants.SeverityConstants;
-import dev.mars.apex.engine.model.ExecutionStep;
 import dev.mars.apex.engine.model.RuleResult;
-import dev.mars.apex.engine.pipeline.DataPipelineException;
 import dev.mars.apex.engine.pipeline.PipelineExecutor;
-import dev.mars.apex.engine.pipeline.YamlPipelineExecutionResult;
 import dev.mars.apex.core.service.data.external.DataSink;
 import dev.mars.apex.core.service.data.external.DataSinkException;
 import dev.mars.apex.core.service.data.external.DataSourceException;
@@ -27,7 +23,6 @@ import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -177,6 +172,9 @@ public class PipelineExecutionManager {
     /**
      * Execute a pipeline configuration.
      *
+     * <p>Delegates to {@link PipelineExecutor#execute(PipelineConfiguration)} which returns
+     * a {@link RuleResult} directly with pipeline steps captured in the execution path.</p>
+     *
      * @param pipeline The pipeline configuration to execute
      * @param inputData The input data for the pipeline (not used directly but kept for API consistency)
      * @return RuleResult indicating success or failure
@@ -195,53 +193,9 @@ public class PipelineExecutionManager {
                 }
             }
 
-            // Execute pipeline
-            YamlPipelineExecutionResult result = pipelineExecutor.execute(pipeline);
+            // Execute pipeline - returns RuleResult directly with ExecutionSteps
+            return pipelineExecutor.execute(pipeline);
 
-            // Convert pipeline steps to ExecutionSteps for tracing
-            List<ExecutionStep> pipelineSteps = new ArrayList<>();
-            if (result.getStepResults() != null) {
-                for (dev.mars.apex.engine.pipeline.PipelineStepResult stepResult : result.getStepResults()) {
-                    String status = stepResult.isSuccess() ? "SUCCESS" : (stepResult.isSkipped() ? "SKIPPED" : "FAILURE");
-                    String message = stepResult.getError() != null ? stepResult.getError() :
-                                   (stepResult.isSkipped() ? "Step skipped" : "Step completed successfully");
-
-                    // Use new constructor that captures step data and metrics
-                    pipelineSteps.add(new ExecutionStep(
-                        stepResult.getStepName(),
-                        "PIPELINE_STEP",
-                        status,
-                        message,
-                        stepResult.getDurationMs(),
-                        stepResult.getData(),              // Capture step data
-                        stepResult.getRecordsProcessed(),  // Capture metrics
-                        stepResult.getRecordsFailed()      // Capture metrics
-                    ));
-                }
-            }
-
-            // Convert to RuleResult
-            RuleResult ruleResult;
-            if (result.isSuccess()) {
-                logger.info("Pipeline '{}' executed successfully in {}ms",
-                        pipeline.getName(), result.getDurationMs());
-                ruleResult = RuleResult.match("pipeline:" + pipeline.getName(),
-                        "Pipeline executed successfully", SeverityConstants.INFO);
-            } else {
-                logger.error("Pipeline '{}' execution failed: {}", pipeline.getName(), result.getError());
-                ruleResult = RuleResult.error("pipeline:" + pipeline.getName(),
-                        "Pipeline execution failed: " + result.getError());
-            }
-            
-            // Attach the execution path
-            ruleResult.setExecutionPath(pipelineSteps);
-            return ruleResult;
-            
-        } catch (DataPipelineException e) {
-            logger.error("Pipeline execution failed with exception: {}", e.getMessage());
-            logger.debug("Stack trace for pipeline execution failure:", e);
-            return RuleResult.error("pipeline:" + pipeline.getName(),
-                    "Pipeline execution failed: " + e.getMessage());
         } catch (Exception e) {
             logger.error("Unexpected error during pipeline execution: {}", e.getMessage());
             logger.debug("Stack trace for unexpected pipeline error:", e);
