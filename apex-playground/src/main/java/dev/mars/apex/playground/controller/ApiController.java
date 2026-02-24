@@ -69,6 +69,36 @@ public class ApiController {
     }
 
     /**
+     * Root API endpoint - returns API info and available endpoints.
+     */
+    @GetMapping({"", "/"})
+    @Operation(
+        summary = "API info",
+        description = "Returns basic API information and a list of available endpoints."
+    )
+    @ApiResponse(responseCode = "200", description = "API info returned")
+    public ResponseEntity<Map<String, Object>> apiInfo() {
+        logger.debug("API info requested");
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("service", "apex-playground");
+        response.put("version", "1.0.0");
+        response.put("description", "APEX Playground REST API");
+        response.put("endpoints", Map.of(
+            "health", "GET /playground/api/health",
+            "process", "POST /playground/api/process",
+            "validate", "POST /playground/api/validate",
+            "examples", "GET /playground/api/examples",
+            "settings", "GET /playground/api/settings",
+            "upload-data", "POST /playground/api/upload/data",
+            "upload-yaml", "POST /playground/api/upload/yaml",
+            "datasources", "GET /playground/api/datasources/connections"
+        ));
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * Health check endpoint for the playground API.
      */
     @GetMapping("/health")
