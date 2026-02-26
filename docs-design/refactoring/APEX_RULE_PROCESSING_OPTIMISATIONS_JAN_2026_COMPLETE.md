@@ -2,7 +2,7 @@
 
 **Status:** ✅ ALL 6 PHASES COMPLETE  
 **Branch:** `refactor/rules-engine-decomposition`  
-**Last Updated:** February 14, 2026  
+**Last Updated:** February 26, 2026  
 **Test Baseline:** apex-core: 2,877 tests, apex-demo: 908 tests — 0 failures, 0 errors
 
 ## Overview
@@ -121,9 +121,9 @@ Add `RuleResult.Builder` and `RuleResult.toBuilder()` copy method. Eliminates al
 2. ✅ Added `public Builder toBuilder()` instance method that pre-populates a new Builder from `this`
 3. ✅ **All 12 public constructors REMOVED** (not just deprecated) — only 1 private `RuleResult(Builder)` constructor remains
 4. ✅ Migrated all `new RuleResult(...)` call sites — zero remaining in production code, zero in test code
-5. ✅ All 22 static factory methods now delegate to `Builder` internally (public API preserved for backward compatibility)
+5. ✅ All 25 static factory methods now delegate to `Builder` internally (public API preserved for backward compatibility)
 
-**Final State:** `RuleResult` has exactly 1 constructor (private, takes Builder). All creation goes through `builder()`, `toBuilder()`, or factory methods (`match()`, `noMatch()`, `error()`, etc.).
+**Final State:** `RuleResult` has exactly 1 constructor (private, takes Builder). All creation goes through `builder()`, `toBuilder()`, or factory methods (`match()`, `noMatch()`, `error()`, `errorWithCode()`, `enrichmentFailure()`, `evaluationFailure()`, etc.).
 
 ### Phase 2: Extract Evaluation from RuleGroup
 
@@ -136,7 +136,7 @@ Move SpEL evaluation out of `RuleGroup` (a model class) into a `RuleGroupEvaluat
 - Collapses `evaluateSequential` / `evaluateSequentialWithDetails` into one parameterised method
 
 **Solution:**
-1. Create `RuleGroupEvaluationService` in `service.engine` package with a constructor accepting `UnifiedRuleEvaluator`
+1. Create `RuleGroupEvaluationService` in `engine.execution` package with a constructor accepting `UnifiedRuleEvaluator`
 2. Move the 4 evaluation methods from `RuleGroup` into the new service, refactored into 2 methods: `evaluateSequential(RuleGroup, context, boolean withDetails)` and `evaluateParallel(RuleGroup, context, boolean withDetails)` — the `withDetails` flag controls whether individual `RuleResult` objects are collected
 3. Replace the per-rule `parser.parseExpression()` calls with `unifiedRuleEvaluator.evaluateRule(rule, context)` — this automatically gains error recovery, performance monitoring, message templating, codes, and field mappings
 4. Remove the `private static final ExpressionParser parser` field from `RuleGroup`
@@ -159,10 +159,10 @@ Create a single `EnabledFilter` utility applied once at the earliest entry point
 
 **Risk: Low | Impact: Medium | Effort: Small**
 
-Make `YamlRuleFactory` a field instead of instantiating 4 times. Pre-build rules/groups once in `evaluateSequential()` instead of per-item. Build a lookup map (`Map<String, Rule>`, `Map<String, RuleGroup>`) at the start of processing.
+Make `YamlRuleFactory` a field (instantiated once in the constructor) instead of instantiating per-item. Pre-build rules/groups once in `evaluateSequential()` instead of per-item. Build a lookup map (`Map<String, Rule>`, `Map<String, RuleGroup>`) at the start of processing.
 
 **Solution:**
-1. Add `private final YamlRuleFactory ruleFactory` field to `SequentialProcessor` constructor
+1. Add `private final YamlRuleFactory ruleFactory` field to `SequentialProcessor`, instantiated once in the constructor
 2. At the start of `evaluateSequential()`, build lookup maps once:
    ```java
    Map<String, Rule> ruleIndex = ruleFactory.createRuleIndex(yamlConfig);
@@ -170,7 +170,7 @@ Make `YamlRuleFactory` a field instead of instantiating 4 times. Pre-build rules
    ```
 3. Add `createRuleIndex()` and `createRuleGroupIndex()` methods to `YamlRuleFactory` that return `Map<String, T>` keyed by ID
 4. Refactor `processRuleItem()` and `processRuleGroupItem()` to do a simple `ruleIndex.get(id)` lookup instead of iterating YAML lists and recreating all rules/groups
-5. Remove all 4 `new YamlRuleFactory()` instantiations from `SequentialProcessor`
+5. Remove all per-item `new YamlRuleFactory()` instantiations from `SequentialProcessor` (single constructor-level instantiation remains)
 
 ### Phase 5: Clean Up RulesEngine Delegation
 
@@ -196,10 +196,10 @@ Route chain router/trigger evaluation through `UnifiedRuleEvaluator` instead of 
 **Solution:**
 1. Audit both `RuleChainExecutor` classes to identify which patterns each supports — `config.execution` handles `conditional-chaining` and `result-based-routing`; `engine.executor` handles `sequential-dependency` and other patterns via `PatternExecutor` subclasses
 2. Merge into a single `RuleChainExecutor` in `engine.config.execution`, incorporating any missing pattern handlers from `engine.executor`
-3. For router-rule evaluation (line 157): create a transient `Rule` object from the chain's condition/result-field and evaluate via `unifiedRuleEvaluator.evaluateRule(rule, context)` instead of raw `parser.parseExpression(condition).getValue(context)`
-4. For trigger-rule evaluation (line 274): same approach — wrap condition in a `Rule` and delegate to `UnifiedRuleEvaluator`
-5. Remove the `ExpressionParser parser` field from `RuleChainExecutor` — it should only hold `UnifiedRuleEvaluator`
-6. Delete `engine.executor.RuleChainExecutor` after migration; update any references from `PatternExecutor` subclasses
+3. For trigger-rule evaluation: create a transient `Rule` object from the chain's condition/result-field and evaluate via `unifiedRuleEvaluator.evaluateRule(rule, context)` instead of raw `parser.parseExpression(condition).getValue(context)` — ✅ Done
+4. For router-rule evaluation in `executeResultBasedRoutingPattern()`: still evaluates via `ExpressionEvaluatorService` directly — 🟡 Not yet routed through `UnifiedRuleEvaluator` (lower risk: router conditions are simple boolean expressions without error recovery needs)
+5. Remove the `ExpressionParser parser` field from `RuleChainExecutor` — ✅ Done, field replaced with `ExpressionEvaluatorService` and `UnifiedRuleEvaluator`
+6. Delete `engine.executor.RuleChainExecutor` after migration — ✅ Done, consolidated into single `engine.execution.RuleChainExecutor`
 
 ---
 
@@ -208,7 +208,7 @@ Route chain router/trigger evaluation through `UnifiedRuleEvaluator` instead of 
 | Metric | Before | After (est.) |
 |---|---|---|
 | Total lines across pipeline | ~5,920 | ~4,200 |
-| Independent SpEL evaluation paths | 4 | 1 |
+| Independent SpEL evaluation paths | 4 | 2 (canonical `UnifiedRuleEvaluator` + router-rule via `ExpressionEvaluatorService`) |
 | RuleResult constructors | 12 | 1 (private Builder constructor) |
 | Enabled-check locations | 11 | 1-2 |
 | YamlRuleFactory instantiations per evaluation | 4 | 1 |
@@ -218,12 +218,12 @@ Route chain router/trigger evaluation through `UnifiedRuleEvaluator` instead of 
 
 ## Progress Tracker
 
-- [x] **Phase 1: RuleResult Builder** — Builder + toBuilder() added, all 12 public constructors **removed**, zero `new RuleResult(...)` calls remain (11 tests)
+- [x] **Phase 1: RuleResult Builder** — Builder + toBuilder() added, all 12 public constructors **removed**, zero `new RuleResult(...)` calls remain, 25 factory methods delegate to Builder (11 tests)
 - [x] **Phase 2: Extract Evaluation from RuleGroup** — Move SpEL evaluation into `RuleGroupEvaluationService`, delegate to `UnifiedRuleEvaluator` (13 tests)
 - [x] **Phase 3: Centralise Enabled Checks** — Single `EnabledFilter` utility, remove 10 downstream checks (31 tests)
 - [x] **Phase 4: Cache YamlRuleFactory in SequentialProcessor** — Field-level factory, pre-built lookup maps (8 tests)
 - [x] **Phase 5: Clean Up RulesEngine Delegation** — Remove boolean wrappers, inline pass-throughs, fix double result-field storage
-- [x] **Phase 6: Unify RuleChainExecutor SpEL Calls** — Route through `UnifiedRuleEvaluator`, deprecate `engine.executor.RuleChainExecutor` (14 tests)
+- [x] **Phase 6: Unify RuleChainExecutor SpEL Calls** — Trigger evaluation routed through `UnifiedRuleEvaluator`, two executor classes consolidated into one in `engine.execution`. Router-rule in result-based-routing still uses `ExpressionEvaluatorService` directly (14 tests)
 
 ---
 
@@ -245,11 +245,13 @@ The following tasks from separate task documents are **not part of this optimisa
 | Test context markers | `ERROR_HANDLING_IMPROVEMENT_TASKS.md` Task 1 | ✅ Complete (Feb 12, 2026) — 15 new + 4 previously done, MDC-based `[EXPECTED]` prefix |
 | EnabledFilter adoption | Phase 3 residual + broader codebase | ✅ Complete (Feb 13, 2026) — 14 inline checks migrated across 5 files, 7 new overloads added to `EnabledFilter` |
 | Remove deprecated pipeline classes | `APEX_TECHNICAL_DEBT_ANALYSIS.md` Phase 2 | ✅ Complete (Feb 13, 2026) — 4 classes removed: `PipelineExecutionResult` (dead code), `PipelineStepResult`, `YamlPipelineExecutionResult` (replaced by `ExecutionStep`/`RuleResult`), `DataPipelineException` converted to `RuntimeException`. `PipelineExecutor` now returns `RuleResult` directly. |
-| Clean TODO placeholders | `APEX_TECHNICAL_DEBT_ANALYSIS.md` Phase 1 | ✅ Complete (Feb 13, 2026) — 8 `YamlDataSink` conversion methods implemented, stale `YamlEnrichmentProcessor` TODO fixed. 3 `SequentialYamlProcessor` TODOs retained (real feature work referencing non-existent processor classes). |
+| Clean TODO placeholders | `APEX_TECHNICAL_DEBT_ANALYSIS.md` Phase 1 | ✅ Complete (Feb 13, 2026) — 8 `YamlDataSink` conversion methods implemented, stale `YamlEnrichmentProcessor` TODO fixed. |
+| Delete dead `SequentialYamlProcessor` prototype | `APEX_TECHNICAL_DEBT_ANALYSIS.md` Section 2 | ✅ Complete (Feb 26, 2026) — `SequentialYamlProcessor`, `ProcessingContext`, `SequentialProcessingResult` deleted (dead no-op prototype with 3 TODO stubs referencing non-existent classes). `SequentialYamlProcessorRuleResultTest` deleted. `SequentialProcessingIntegrationTest` migrated to use `RulesEngine` pipeline. 2 `.bak` files in apex-rest-api deleted. |
+| Remove meaningless `ProcessingMode` concept | Codebase audit | ✅ Complete (Feb 26, 2026) — `ProcessingMode` enum (STANDARD/SEQUENTIAL) deleted from `OrderedYamlConfiguration`. `processingMode` field/getter/setter removed from `YamlRuleConfiguration.Metadata`. `processing-mode` stripped from 40 YAML files. `testProcessingModeDetection()` test deleted. The production pipeline (`RulesEngine` → `SequentialProcessor`) never checked this value — there is only one processing mode (document-order sequential). |
 | Remove deprecated `YamlEnrichmentProcessor` methods | `APEX_TECHNICAL_DEBT_ANALYSIS.md` Section 1.2 | ✅ Complete (Feb 14, 2026) — 8 deprecated methods removed (314 lines), `processEnrichment(2-arg)` un-deprecated and made private. 7 test methods removed from `YamlEnrichmentProcessorComprehensiveTest`. Class retained as core infrastructure (3 non-deprecated methods actively used by `SequentialProcessor`, `EnrichmentGroupExecutor`, `RulesEngine`). |
 
 ### 🟡 REMAINING (Outstanding)
 
 | Task | Document | Description |
 |------|----------|-------------|
-| `SequentialYamlProcessor` integration TODOs | `APEX_TECHNICAL_DEBT_ANALYSIS.md` Section 2 | 3 TODOs reference non-existent processor classes — real feature work, not cleanup |
+| Route result-based-routing router through `UnifiedRuleEvaluator` | Phase 6 residual | Router-rule in `RuleChainExecutor.executeResultBasedRoutingPattern()` still uses `ExpressionEvaluatorService` directly — low priority, simple boolean expressions |
