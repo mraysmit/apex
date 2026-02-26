@@ -254,7 +254,7 @@ public class ProcessingSequenceReport {
      */
     private String getConfigurationSectionDescription(String sectionName) {
         return switch (sectionName) {
-            case "metadata" -> "File metadata and processing mode";
+            case "metadata" -> "File metadata and configuration identity";
             case "categories" -> "Category definitions for metadata inheritance";
             case "data-sources" -> "Data source connections (databases, APIs, files)";
             case "data-source-refs" -> "External data source references";

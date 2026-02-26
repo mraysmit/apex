@@ -2,7 +2,6 @@ metadata:
   name: "Enrichment-Refs Sequential Order Test"
   type: "rule-config"
   version: "1.0.0"
-  processing-mode: "sequential"
   description: |
     Test that enrichment-refs placeholder is expanded at the correct position in document order.
 

@@ -1,7 +1,6 @@
 metadata:
   name: "Validate-Then-Enrich Test"
   type: "rule-config"
-  processing-mode: "sequential"
   description: "Demonstrates validate-then-enrich pattern with rules before enrichments"
 
 rules:

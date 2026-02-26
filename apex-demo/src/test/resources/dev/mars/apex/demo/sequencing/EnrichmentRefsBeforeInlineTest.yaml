@@ -2,7 +2,6 @@ metadata:
   name: "Enrichment-Refs BEFORE Inline Enrichments Test"
   type: "rule-config"
   version: "1.0.0"
-  processing-mode: "sequential"
   description: |
     CRITICAL TEST: Verify enrichment-refs can appear BEFORE inline enrichments.
 

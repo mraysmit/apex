@@ -5,8 +5,6 @@ metadata:
   type: rule-config
   description: Test configuration for enrichment-group-references with external files
   author: Test Author
-  processing-mode: "sequential"
-
 enrichment-refs:
   - name: rule builder
     source: config/test.yaml

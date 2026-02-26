@@ -1,7 +1,6 @@
 metadata:
   name: "Complex Ordering Test"
   type: "rule-config"
-  processing-mode: "sequential"
   description: "Tests complex section ordering with multiple section types"
 
 categories:

@@ -49,7 +49,6 @@ class OrderedYamlParserTest {
             metadata:
               name: "Order Preservation Test"
               type: "test-config"
-              processing-mode: "sequential"
             
             enrichments:
               - id: "enrich-customer-data"

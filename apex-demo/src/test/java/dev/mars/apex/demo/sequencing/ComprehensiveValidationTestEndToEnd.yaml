@@ -1,7 +1,6 @@
 metadata:
   name: "comprehensive-sequential-test"
   type: "rule-config"
-  processing-mode: "sequential"
   description: "Complete test of sequential processing"
 
 data-sources:

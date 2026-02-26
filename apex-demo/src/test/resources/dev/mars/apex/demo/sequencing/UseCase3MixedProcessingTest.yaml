@@ -1,4 +1,4 @@
-﻿# ============================================================================
+# ============================================================================
 # USE CASE 3: Mixed Processing
 # ============================================================================
 # Business Scenario: Complex international transaction processing
@@ -23,8 +23,6 @@ metadata:
   created: "2025-10-30"
   business-domain: "International Transaction Processing"
   tags: ["use-case", "mixed-processing", "multi-phase", "sequential-processing"]
-  processing-mode: "sequential"
-
 # PHASE 1: Load reference data (processed first due to YAML order)
 # Note: Using inline lookup-dataset instead of separate data-sources for test compatibility
 

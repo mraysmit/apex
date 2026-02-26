@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * <p>Expected execution order: transform-1, transform-2, transform-3
  *
- * <p>NOTE: Disabled until transformations section is fully implemented in SequentialYamlProcessor
+ * <p>NOTE: Disabled until transformations section is fully implemented in SequentialProcessor
  */
 @DisplayName("Test 8: Transformations Basic Test")
 public class Test8_TransformationsBasicTest extends DemoTestBase {

@@ -210,23 +210,6 @@ public class OrderedYamlConfiguration {
     }
     
     /**
-     * Determine the processing mode based on metadata or default to STANDARD.
-     *
-     * @return The processing mode (STANDARD or SEQUENTIAL)
-     */
-    public ProcessingMode getProcessingMode() {
-        if (configuration.getMetadata() != null) {
-            String processingMode = configuration.getMetadata().getProcessingMode();
-            if ("sequential".equalsIgnoreCase(processingMode)) {
-                return ProcessingMode.SEQUENTIAL;
-            }
-        }
-
-        // Default to STANDARD for backward compatibility
-        return ProcessingMode.STANDARD;
-    }
-    
-    /**
      * Create a position map for fast section position lookups.
      * 
      * @param sectionOrder The ordered list of sections
@@ -240,30 +223,12 @@ public class OrderedYamlConfiguration {
         return positions;
     }
     
-    /**
-     * Processing mode enumeration.
-     */
-    public enum ProcessingMode {
-        /**
-         * Standard processing mode - uses hardcoded processing orders (current behavior).
-         * Maintains backward compatibility.
-         */
-        STANDARD,
-        
-        /**
-         * Sequential processing mode - processes sections in document order.
-         * Respects developer intent expressed through YAML structure.
-         */
-        SEQUENTIAL
-    }
-    
     @Override
     public String toString() {
         return "OrderedYamlConfiguration{" +
                 "sectionOrder=" + sectionOrder +
                 ", populatedSections=" + getPopulatedSections() +
                 ", itemOrder=" + itemOrder.size() + " items" +
-                ", processingMode=" + getProcessingMode() +
                 '}';
     }
 }

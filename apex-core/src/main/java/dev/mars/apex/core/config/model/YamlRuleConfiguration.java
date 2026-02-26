@@ -319,9 +319,6 @@ public class YamlRuleConfiguration {
         @JsonProperty("tags")
         private List<String> tags;
 
-        @JsonProperty("processing-mode")
-        private String processingMode;
-
         // Default constructor
         public ConfigurationMetadata() {}
 
@@ -398,13 +395,6 @@ public class YamlRuleConfiguration {
             this.tags = tags;
         }
 
-        public String getProcessingMode() {
-            return processingMode;
-        }
-
-        public void setProcessingMode(String processingMode) {
-            this.processingMode = processingMode;
-        }
     }
 
     /**

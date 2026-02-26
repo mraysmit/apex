@@ -20,8 +20,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * Minimal test demonstrating sequential processing where a rule depends on enrichment results.
  *
  * This test follows the established pattern from other sequencing tests and demonstrates
- * sequential processing: respecting YAML document order when processing-mode
- * is set to "sequential".
+ * sequential processing: respecting YAML document order when processing
+ * configurations.
  */
 class AMinimalSequentialProcessingTest {
 
@@ -106,21 +106,21 @@ class AMinimalSequentialProcessingTest {
     }
 
     @Test
-    @DisplayName("COMPARISON: Sequential vs Standard Processing")
+    @DisplayName("COMPARISON: Both YAML configurations produce same result")
     void testProcessingModeComparison() throws Exception {
-        LOGGER.info("=== COMPARISON: Sequential vs Standard Processing Modes ===");
+        LOGGER.info("=== COMPARISON: Both YAML configurations produce same enrichment result ===");
 
-        // Test both modes with same data
+        // Test both configs with same data
         Map<String, Object> testData = new HashMap<>();
         testData.put("customerId", "CUST001");
 
-        // Sequential mode
+        // First configuration
         String sequentialPath = "src/test/java/dev/mars/apex/demo/sequencing/AMinimalSequentialProcessingTest.yaml";
         YamlRuleConfiguration sequentialConfig = yamlLoader.loadFromFile(sequentialPath);
         RulesEngine sequentialEngine = RulesEngine.fromFile(sequentialPath);
         RuleResult sequentialResult = sequentialEngine.evaluate(sequentialConfig, new HashMap<>(testData));
 
-        // Standard mode
+        // Second configuration
         String standardPath = "src/test/java/dev/mars/apex/demo/sequencing/AMinimalStandardProcessingTest.yaml";
         YamlRuleConfiguration standardConfig = yamlLoader.loadFromFile(standardPath);
         RulesEngine standardEngine = RulesEngine.fromFile(standardPath);
@@ -129,17 +129,14 @@ class AMinimalSequentialProcessingTest {
         Map<String, Object> sequentialData = sequentialResult.getEnrichedData();
         Map<String, Object> standardData = standardResult.getEnrichedData();
 
-        LOGGER.info("* Sequential result: {}", sequentialData);
-        LOGGER.info("* Standard result: {}", standardData);
+        LOGGER.info("* First config result: {}", sequentialData);
+        LOGGER.info("* Second config result: {}", standardData);
 
         // Both should have enriched the customer tier
         assertEquals(sequentialData.get("customerTier"), standardData.get("customerTier"),
-                    "Both modes should enrich customer tier");
+                    "Both configurations should enrich customer tier identically");
 
-        LOGGER.info("* KEY INSIGHT: The difference is in PROCESSING ORDER, not final result");
-        LOGGER.info("   - SEQUENTIAL: Respects YAML document order (Enrichment -> Rule)");
-        LOGGER.info("   - STANDARD: Uses hardcoded order (may be Rule -> Enrichment)");
-        LOGGER.info("   - This matters when rules depend on enrichment results!");
+        LOGGER.info("* Both configurations produce identical enrichment results");
     }
 }
 
