@@ -15,7 +15,6 @@
  */
 package dev.mars.apex.engine.execution;
 
-import dev.mars.apex.core.config.model.YamlEnrichmentGroup;
 import dev.mars.apex.core.config.model.YamlRuleChain;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.constants.SeverityConstants;
@@ -23,7 +22,6 @@ import dev.mars.apex.engine.model.Category;
 import dev.mars.apex.engine.model.EnrichmentGroup;
 import dev.mars.apex.engine.model.Rule;
 import dev.mars.apex.engine.model.RuleResult;
-import dev.mars.apex.core.service.enrichment.EnrichmentGroupFactory;
 import dev.mars.apex.engine.core.UnifiedRuleEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,12 +60,14 @@ public class RuleChainExecutor {
      * @param yamlConfig The YAML configuration
      * @param data The data to evaluate
      * @param contextFactory Function to create evaluation context
+     * @param enrichmentGroupIndex Pre-built index of enrichment groups for O(1) lookup (may be null or empty)
      * @return RuleResult from processing the rule chain
      */
     public RuleResult processRuleChain(String chainId, 
                                       YamlRuleConfiguration yamlConfig, 
                                       Map<String, Object> data,
-                                      java.util.function.Function<Map<String, Object>, StandardEvaluationContext> contextFactory) {
+                                      java.util.function.Function<Map<String, Object>, StandardEvaluationContext> contextFactory,
+                                      Map<String, EnrichmentGroup> enrichmentGroupIndex) {
         logger.debug("processRuleChain() entry - chainId: '{}', data keys: {}", chainId, data.keySet());
         
         // Find rule chain in yamlConfig
@@ -93,7 +93,7 @@ public class RuleChainExecutor {
             return executeConditionalChainingPattern(chain, data, contextFactory);
         } else if ("result-based-routing".equals(chain.getPattern())) {
             logger.debug("processRuleChain() - executing result-based-routing pattern");
-            return executeResultBasedRoutingPattern(chain, yamlConfig, data, contextFactory);
+            return executeResultBasedRoutingPattern(chain, yamlConfig, data, contextFactory, enrichmentGroupIndex);
         } else {
             logger.warn("Rule chain pattern '{}' not yet supported", chain.getPattern());
             return RuleResult.noMatch(chainId, "Pattern not supported: " + chain.getPattern(), SeverityConstants.INFO);
@@ -125,13 +125,15 @@ public class RuleChainExecutor {
      * @param yamlConfig The YAML configuration
      * @param data The data to evaluate
      * @param contextFactory Function to create evaluation context
+     * @param enrichmentGroupIndex Pre-built enrichment group index for O(1) lookup
      * @return RuleResult from execution
      */
     @SuppressWarnings("unchecked")
     private RuleResult executeResultBasedRoutingPattern(YamlRuleChain chain, 
                                                        YamlRuleConfiguration yamlConfig, 
                                                        Map<String, Object> data,
-                                                       java.util.function.Function<Map<String, Object>, StandardEvaluationContext> contextFactory) {
+                                                       java.util.function.Function<Map<String, Object>, StandardEvaluationContext> contextFactory,
+                                                       Map<String, EnrichmentGroup> enrichmentGroupIndex) {
         Map<String, Object> config = chain.getConfiguration();
         if (config == null) {
             return RuleResult.error(chain.getId(), "Missing configuration for rule chain");
@@ -187,7 +189,7 @@ public class RuleChainExecutor {
                     List<EnrichmentGroup> groupsToExecute = new ArrayList<>();
                     
                     for (String groupId : enrichmentGroupRefs) {
-                        EnrichmentGroup group = findEnrichmentGroup(groupId, yamlConfig);
+                        EnrichmentGroup group = findEnrichmentGroup(groupId, enrichmentGroupIndex);
                         if (group != null) {
                             groupsToExecute.add(group);
                         } else {
@@ -311,26 +313,19 @@ public class RuleChainExecutor {
     }
     
     /**
-     * Find an enrichment group by ID.
-     * 
+     * Find an enrichment group by ID using the pre-built index.
+     *
+     * <p>Phase 7 optimisation: uses the cached enrichment group index instead of calling
+     * {@code EnrichmentGroupFactory.buildEnrichmentGroups()} per lookup — eliminates
+     * O(n×m) factory rebuilds.</p>
+     *
      * @param groupId The enrichment group ID
-     * @param yamlConfig The YAML configuration
+     * @param enrichmentGroupIndex Pre-built enrichment group index
      * @return The enrichment group if found, null otherwise
      */
-    private EnrichmentGroup findEnrichmentGroup(String groupId, YamlRuleConfiguration yamlConfig) {
-        // Try to find in YAML config first
-        if (yamlConfig != null && yamlConfig.getEnrichmentGroups() != null) {
-            for (YamlEnrichmentGroup yamlGroup : yamlConfig.getEnrichmentGroups()) {
-                if (groupId.equals(yamlGroup.getId())) {
-                    // Found in YAML, build it
-                    List<EnrichmentGroup> groups = EnrichmentGroupFactory.buildEnrichmentGroups(yamlConfig);
-                    for (EnrichmentGroup g : groups) {
-                        if (groupId.equals(g.getId())) {
-                            return g;
-                        }
-                    }
-                }
-            }
+    private EnrichmentGroup findEnrichmentGroup(String groupId, Map<String, EnrichmentGroup> enrichmentGroupIndex) {
+        if (enrichmentGroupIndex != null) {
+            return enrichmentGroupIndex.get(groupId);
         }
         return null;
     }

@@ -107,7 +107,7 @@ rules:
     severity: "INFO"
     enabled: true
 
-# PHASE 6: Inline rule group (RG3) - references rule defined above
+# Inline rule group (RG3) - references rule defined above
 rule-groups:
   - id: "final-validation-group"
     name: "Final Validation Group"

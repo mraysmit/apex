@@ -294,12 +294,20 @@ public class SequentialProcessor {
             groupIndex = Map.of();
         }
 
+        // Phase 7 optimisation: build enrichment group, enrichment, and transformation
+        // index maps once for O(1) access — eliminates O(n×m) EnrichmentGroupFactory rebuilds
+        // and O(n) linear scans per item lookup
+        Map<String, EnrichmentGroup> enrichmentGroupIndex = buildEnrichmentGroupIndex(yamlConfig);
+        Map<String, YamlEnrichment> enrichmentIndex = buildEnrichmentIndex(yamlConfig);
+        Map<String, YamlTransformation> transformationIndex = buildTransformationIndex(yamlConfig);
+
         for (ProcessingItem item : itemOrder) {
             logger.debug("Processing item: {} ({})", item.getItemId(), item.getSectionType());
             logger.debug("Current enrichedData keys before item '{}': {}", item.getItemId(), enrichedData.keySet());
 
             long start = System.currentTimeMillis();
-            RuleResult itemResult = processItem(item, yamlConfig, enrichedData, executeRule, createContext, ruleIndex, groupIndex);
+            RuleResult itemResult = processItem(item, yamlConfig, enrichedData, executeRule, createContext,
+                    ruleIndex, groupIndex, enrichmentGroupIndex, enrichmentIndex, transformationIndex);
             long duration = System.currentTimeMillis() - start;
 
             logger.debug("Item '{}' completed in {}ms - success: {}, resultType: {}", 
@@ -340,7 +348,10 @@ public class SequentialProcessor {
             Function<RuleExecutionContext, RuleResult> executeRule,
             Function<Map<String, Object>, org.springframework.expression.spel.support.StandardEvaluationContext> createContext,
             Map<String, Rule> ruleIndex,
-            Map<String, RuleGroup> groupIndex) {
+            Map<String, RuleGroup> groupIndex,
+            Map<String, EnrichmentGroup> enrichmentGroupIndex,
+            Map<String, YamlEnrichment> enrichmentIndex,
+            Map<String, YamlTransformation> transformationIndex) {
 
         String sectionType = item.getSectionType();
         String itemId = item.getItemId();
@@ -349,18 +360,18 @@ public class SequentialProcessor {
 
         switch (sectionType) {
             case "enrichments":
-                return processEnrichmentItem(itemId, yamlConfig, data);
+                return processEnrichmentItem(itemId, yamlConfig, data, enrichmentIndex);
             case "rules":
                 return processRuleItem(itemId, yamlConfig, data, executeRule, ruleIndex);
             case "enrichment-groups":
-                return processEnrichmentGroupItem(itemId, yamlConfig, data);
+                return processEnrichmentGroupItem(itemId, yamlConfig, data, enrichmentGroupIndex);
             case "rule-groups":
                 return processRuleGroupItem(itemId, yamlConfig, data, createContext, groupIndex);
             case "transformations":
                 logger.debug("Matched transformations case, calling processTransformationItem");
-                return processTransformationItem(itemId, yamlConfig, data);
+                return processTransformationItem(itemId, yamlConfig, data, transformationIndex);
             case "rule-chains":
-                return processRuleChainItem(itemId, yamlConfig, data, createContext);
+                return processRuleChainItem(itemId, yamlConfig, data, createContext, enrichmentGroupIndex);
             default:
                 logger.error("Unknown section type: {}", sectionType);
                 return RuleResult.error(sectionType + ":" + itemId, "Unknown section type");
@@ -372,11 +383,12 @@ public class SequentialProcessor {
     // ===================================
 
     /**
-     * Process a single enrichment by ID.
+     * Process a single enrichment by ID using the pre-built enrichment index.
      */
-    private RuleResult processEnrichmentItem(String enrichmentId, YamlRuleConfiguration yamlConfig, Map<String, Object> data) {
-        logger.debug("processEnrichmentItem() - looking up enrichment id: '{}'", enrichmentId);
-        YamlEnrichment enrichment = findEnrichmentById(yamlConfig, enrichmentId);
+    private RuleResult processEnrichmentItem(String enrichmentId, YamlRuleConfiguration yamlConfig, Map<String, Object> data,
+                                             Map<String, YamlEnrichment> enrichmentIndex) {
+        logger.debug("processEnrichmentItem() - looking up enrichment id: '{}' (indexed)", enrichmentId);
+        YamlEnrichment enrichment = enrichmentIndex.get(enrichmentId);
         if (enrichment == null) {
             logger.warn("Enrichment not found: {}", enrichmentId);
             return RuleResult.error("enrichment:" + enrichmentId, "Enrichment not found");
@@ -451,29 +463,22 @@ public class SequentialProcessor {
     }
 
     /**
-     * Process a single enrichment group by ID.
+     * Process a single enrichment group by ID using the pre-built enrichment group index.
+     *
+     * <p>Phase 7 optimisation: uses the cached enrichment group index built once in
+     * {@code processItemOrder()} instead of calling {@code EnrichmentGroupFactory.buildEnrichmentGroups()}
+     * per item — eliminates O(n×m) factory rebuilds.</p>
      */
-    private RuleResult processEnrichmentGroupItem(String groupId, YamlRuleConfiguration yamlConfig, Map<String, Object> data) {
-        logger.debug("processEnrichmentGroupItem() - looking up enrichment group id: '{}'", groupId);
-        EnrichmentGroup group = null;
-        if (yamlConfig != null && yamlConfig.getEnrichmentGroups() != null) {
-            for (YamlEnrichmentGroup yamlGroup : yamlConfig.getEnrichmentGroups()) {
-                if (groupId.equals(yamlGroup.getId())) {
-                    List<EnrichmentGroup> groups = EnrichmentGroupFactory.buildEnrichmentGroups(yamlConfig);
-                    for (EnrichmentGroup g : groups) {
-                        if (groupId.equals(g.getId())) {
-                            group = g;
-                            logger.debug("processEnrichmentGroupItem() - found enrichment group '{}' with {} enrichments", 
-                                        groupId, g.getEnrichmentsInOrder().size());
-                            break;
-                        }
-                    }
-                    break;
-                }
-            }
-        }
+    private RuleResult processEnrichmentGroupItem(String groupId, YamlRuleConfiguration yamlConfig, Map<String, Object> data,
+                                                  Map<String, EnrichmentGroup> enrichmentGroupIndex) {
+        logger.debug("processEnrichmentGroupItem() - looking up enrichment group id: '{}' (indexed)", groupId);
+        EnrichmentGroup group = enrichmentGroupIndex.get(groupId);
 
-        if (group == null) {
+        if (group != null) {
+            logger.debug("processEnrichmentGroupItem() - found enrichment group '{}' with {} enrichments",
+                        groupId, group.getEnrichmentsInOrder().size());
+        } else {
+            // Fallback: check engine configuration (for programmatic registrations)
             group = configuration.getEnrichmentGroupById(groupId);
             if (group != null) {
                 logger.debug("processEnrichmentGroupItem() - found enrichment group '{}' in engine configuration", groupId);
@@ -539,11 +544,12 @@ public class SequentialProcessor {
     }
 
     /**
-     * Process a single transformation by ID.
+     * Process a single transformation by ID using the pre-built transformation index.
      */
-    private RuleResult processTransformationItem(String transformationId, YamlRuleConfiguration yamlConfig, Map<String, Object> data) {
-        logger.debug("processTransformationItem() - looking up transformation id: '{}'", transformationId);
-        YamlTransformation transformation = findTransformationById(yamlConfig, transformationId);
+    private RuleResult processTransformationItem(String transformationId, YamlRuleConfiguration yamlConfig, Map<String, Object> data,
+                                                 Map<String, YamlTransformation> transformationIndex) {
+        logger.debug("processTransformationItem() - looking up transformation id: '{}' (indexed)", transformationId);
+        YamlTransformation transformation = transformationIndex.get(transformationId);
         if (transformation == null) {
             logger.warn("Transformation not found: {}", transformationId);
             return RuleResult.error("transformation:" + transformationId, "Transformation not found");
@@ -566,44 +572,74 @@ public class SequentialProcessor {
     /**
      * Process a single rule chain by ID.
      */
-    private RuleResult processRuleChainItem(String chainId, YamlRuleConfiguration yamlConfig, Map<String, Object> data, Function<Map<String, Object>, org.springframework.expression.spel.support.StandardEvaluationContext> contextFactory) {
+    private RuleResult processRuleChainItem(String chainId, YamlRuleConfiguration yamlConfig, Map<String, Object> data,
+                                            Function<Map<String, Object>, org.springframework.expression.spel.support.StandardEvaluationContext> contextFactory,
+                                            Map<String, EnrichmentGroup> enrichmentGroupIndex) {
         logger.debug("processRuleChainItem() - executing rule chain id: '{}'", chainId);
-        RuleResult result = ruleChainExecutor.processRuleChain(chainId, yamlConfig, data, contextFactory);
+        RuleResult result = ruleChainExecutor.processRuleChain(chainId, yamlConfig, data, contextFactory, enrichmentGroupIndex);
         logger.debug("processRuleChainItem() - rule chain '{}' completed - success={}, resultType={}", 
                     chainId, result.isSuccess(), result.getResultType());
         return result;
     }
 
     // ===================================
-    // Helper Methods
+    // Index Builders
     // ===================================
 
     /**
-     * Find a transformation by ID in the configuration.
+     * Build an enrichment group index from YAML configuration.
+     * Calls {@link EnrichmentGroupFactory#buildEnrichmentGroups(YamlRuleConfiguration)} once
+     * and indexes the results by ID for O(1) lookup.
+     *
+     * @param yamlConfig The YAML configuration
+     * @return Map of enrichment group ID → EnrichmentGroup
      */
-    private YamlTransformation findTransformationById(YamlRuleConfiguration config, String transformationId) {
-        if (config.getTransformations() != null) {
-            for (YamlTransformation transformation : config.getTransformations()) {
-                if (transformationId.equals(transformation.getId())) {
-                    return transformation;
-                }
-            }
+    private Map<String, EnrichmentGroup> buildEnrichmentGroupIndex(YamlRuleConfiguration yamlConfig) {
+        List<EnrichmentGroup> groups = EnrichmentGroupFactory.buildEnrichmentGroups(yamlConfig);
+        Map<String, EnrichmentGroup> index = new HashMap<>();
+        for (EnrichmentGroup g : groups) {
+            index.put(g.getId(), g);
         }
-        return null;
+        logger.debug("Built enrichment group index with {} entries", index.size());
+        return index;
     }
 
     /**
-     * Find an enrichment by ID in the configuration.
+     * Build an enrichment index from YAML configuration for O(1) lookup by ID.
+     *
+     * @param yamlConfig The YAML configuration
+     * @return Map of enrichment ID → YamlEnrichment
      */
-    private YamlEnrichment findEnrichmentById(YamlRuleConfiguration config, String enrichmentId) {
-        if (config.getEnrichments() != null) {
-            for (YamlEnrichment enrichment : config.getEnrichments()) {
-                if (enrichmentId.equals(enrichment.getId())) {
-                    return enrichment;
+    private Map<String, YamlEnrichment> buildEnrichmentIndex(YamlRuleConfiguration yamlConfig) {
+        Map<String, YamlEnrichment> index = new HashMap<>();
+        if (yamlConfig.getEnrichments() != null) {
+            for (YamlEnrichment enrichment : yamlConfig.getEnrichments()) {
+                if (enrichment.getId() != null) {
+                    index.put(enrichment.getId(), enrichment);
                 }
             }
         }
-        return null;
+        logger.debug("Built enrichment index with {} entries", index.size());
+        return index;
+    }
+
+    /**
+     * Build a transformation index from YAML configuration for O(1) lookup by ID.
+     *
+     * @param yamlConfig The YAML configuration
+     * @return Map of transformation ID → YamlTransformation
+     */
+    private Map<String, YamlTransformation> buildTransformationIndex(YamlRuleConfiguration yamlConfig) {
+        Map<String, YamlTransformation> index = new HashMap<>();
+        if (yamlConfig.getTransformations() != null) {
+            for (YamlTransformation transformation : yamlConfig.getTransformations()) {
+                if (transformation.getId() != null) {
+                    index.put(transformation.getId(), transformation);
+                }
+            }
+        }
+        logger.debug("Built transformation index with {} entries", index.size());
+        return index;
     }
 
     // ===================================

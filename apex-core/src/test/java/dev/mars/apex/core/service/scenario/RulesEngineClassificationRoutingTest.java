@@ -319,7 +319,7 @@ class RulesEngineClassificationRoutingTest {
     void testLevel4_NullDataHandling() {
         logger.info("=== Level 4: Null Data Handling ===");
         
-        // Phase 2: evaluateWithClassification() now validates null input with IllegalArgumentException
+        // evaluateWithClassification() now validates null input with IllegalArgumentException
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             engine.evaluateWithClassification(null);
         }, "Should throw IllegalArgumentException for null data");

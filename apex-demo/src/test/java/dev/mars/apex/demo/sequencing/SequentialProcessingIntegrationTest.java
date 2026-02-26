@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since Phase 4 - Integration
  */
 @ExtendWith(ColoredTestOutputExtension.class)
-@DisplayName("Phase 4: Sequential Processing Integration Tests")
+@DisplayName("Sequential Processing Integration Tests")
 class SequentialProcessingIntegrationTest extends DemoTestBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SequentialProcessingIntegrationTest.class);

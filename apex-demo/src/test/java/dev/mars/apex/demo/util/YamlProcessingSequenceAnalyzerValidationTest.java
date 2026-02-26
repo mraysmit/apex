@@ -255,7 +255,7 @@ public class YamlProcessingSequenceAnalyzerValidationTest extends DemoTestBase {
         String formatted = report.getFormattedReport();
         
         // Verify report contains key sections
-        assertTrue(formatted.contains("PHASE 2: EXECUTION SEQUENCE"), "Report should show execution sequence");
+        assertTrue(formatted.contains("EXECUTION SEQUENCE"), "Report should show execution sequence");
         assertTrue(formatted.contains("FILTERED ITEMS"), "Report should show filtered items");
         assertTrue(formatted.contains("PLANNED EXECUTION SEQUENCE"), "Report should show planned sequence");
         assertTrue(formatted.contains("SUMMARY"), "Report should show summary");

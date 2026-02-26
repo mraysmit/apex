@@ -154,7 +154,7 @@ class RulesEngineStaticFactoryMethodsTest {
 
         RuleResult result = engine.evaluate(inputData);
 
-        // Phase 2: Returns RuleResult with failure details instead of throwing
+        // Returns RuleResult with failure details instead of throwing
         assertNotNull(result, "Result should not be null");
         assertFalse(result.isSuccess(), "Result should indicate failure");
         assertFalse(result.getFailureMessages().isEmpty(), "Should have failure messages");

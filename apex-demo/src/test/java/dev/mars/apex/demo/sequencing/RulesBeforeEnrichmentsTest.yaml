@@ -24,14 +24,14 @@ error-recovery:
       strategy: "CONTINUE_WITH_DEFAULT"
       max-retries: 0
 
-# PHASE 1: Load external rules (R1, R2) and rule groups (RG1, RG2)
+# Load external rules (R1, R2) and rule groups (RG1, RG2)
 rule-refs:
   - name: "external-rules"
     source: "src/test/java/dev/mars/apex/demo/sequencing/external-rules-otc.yaml"
   - name: "external-rule-groups"
     source: "src/test/java/dev/mars/apex/demo/sequencing/external-rule-groups-otc.yaml"
 
-# PHASE 2: Inline rule (R3)
+# Inline rule (R3)
 rules:
   - id: "validate-product-type"
     name: "Validate Product Type"
@@ -47,7 +47,7 @@ rules:
     severity: "INFO"
     enabled: true
 
-# PHASE 3: Inline rule group (RG3) - references rule defined above
+# Inline rule group (RG3) - references rule defined above
 rule-groups:
   - id: "input-validation-group"
     name: "Input Validation Group"
@@ -57,14 +57,14 @@ rule-groups:
     rule-ids:
       - "validate-required-fields"
 
-# PHASE 4: Load external enrichments (E1, E2) and enrichment groups (EG1, EG2)
+# Load external enrichments (E1, E2) and enrichment groups (EG1, EG2)
 enrichment-refs:
   - name: "external-enrichments"
     source: "src/test/java/dev/mars/apex/demo/sequencing/external-enrichments-otc.yaml"
   - name: "external-enrichment-groups"
     source: "src/test/java/dev/mars/apex/demo/sequencing/external-enrichment-groups-otc.yaml"
 
-# PHASE 5: Inline enrichments (E3, E4)
+# Inline enrichments (E3, E4)
 enrichments:
   - id: "enrich-counterparty-data"
     name: "Enrich Counterparty Data"
@@ -100,7 +100,7 @@ enrichments:
         target-field: "productCategory"
         expression: "#optionType == 'CALL' ? 'EQUITY_CALL_OPTION' : 'EQUITY_PUT_OPTION'"
 
-# PHASE 6: Inline enrichment group (EG3) - references enrichment defined above
+# Inline enrichment group (EG3) - references enrichment defined above
 enrichment-groups:
   - id: "product-enrichment-group"
     name: "Product Enrichment Group"

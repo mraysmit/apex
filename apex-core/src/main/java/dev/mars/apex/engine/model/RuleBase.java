@@ -21,8 +21,8 @@ import java.util.Set;
 /**
  * Interface defining contracts for RuleBase functionality.
  *
- * This interface is part of the PeeGeeQ message queue system, providing
- * production-ready PostgreSQL-based message queuing capabilities.
+ * This interface is part of the APEX Rules Engine, providing
+ * production-ready rules evaluation capabilities.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-07-27

@@ -97,7 +97,7 @@ public class RuleGroupExecutor {
                         group.getName(), group.getRules() != null ? group.getRules().size() : 0);
             try {
                 // Use detailed evaluation via service to get severity aggregation
-                // Phase 2: delegates individual rule evaluation to UnifiedRuleEvaluator
+                // delegates individual rule evaluation to UnifiedRuleEvaluator
                 long startTime = System.currentTimeMillis();
                 RuleGroupEvaluationResult evaluationResult = groupEvaluationService.evaluateWithDetails(group, context);
                 long duration = System.currentTimeMillis() - startTime;
@@ -233,7 +233,7 @@ public class RuleGroupExecutor {
                     }
                 } else if (ruleObj instanceof RuleGroup) {
                     RuleGroup group = (RuleGroup) ruleObj;
-                    // Phase 2: delegate through service for canonical evaluation path
+                    // delegate through service for canonical evaluation path
                     boolean result = groupEvaluationService.evaluate(group, context);
                     logger.debug("Rule group '{}' evaluated to: {}", group.getName(), result);
 

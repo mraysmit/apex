@@ -283,44 +283,6 @@ public class RuleGroup implements RuleBase {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Update the message based on the evaluation result
-     */
-    private void updateMessage() {
-        List<Rule> rules = getRules();
-
-        if (rules.isEmpty()) {
-            this.message = "No rules in group";
-            return;
-        }
-
-        if (rules.size() == 1) {
-            this.message = rules.get(0).getMessage();
-            return;
-        }
-
-        StringBuilder messageBuilder = new StringBuilder();
-        messageBuilder.append(name).append(": ");
-
-        if (isAndOperator) {
-            for (int i = 0; i < rules.size(); i++) {
-                if (i > 0) {
-                    messageBuilder.append(" AND ");
-                }
-                messageBuilder.append(rules.get(i).getMessage());
-            }
-        } else {
-            for (int i = 0; i < rules.size(); i++) {
-                if (i > 0) {
-                    messageBuilder.append(" OR ");
-                }
-                messageBuilder.append(rules.get(i).getMessage());
-            }
-        }
-
-        this.message = messageBuilder.toString();
-    }
-
     public String getId() {
         return id;
     }

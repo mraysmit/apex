@@ -1,6 +1,6 @@
 # APEX Rule Processing Optimisations — February 2026
 
-**Status:** 🟡 ANALYSIS COMPLETE — IMPLEMENTATION NOT STARTED  
+**Status:** 🟡 PHASES 7-8 COMPLETE — REMAINING PHASES NOT STARTED  
 **Branch:** `refactor/rules-engine-decomposition`  
 **Last Updated:** February 26, 2026  
 **Test Baseline:** apex-core: 2,873 tests, apex-demo: 908 tests — 0 failures, 0 errors  
@@ -14,14 +14,14 @@ Following the completion of all 6 phases from the January 2026 optimisation effo
 
 | Class | Lines | Package | Responsibility |
 |---|---|---|---|
-| `RulesEngine` | 961 | `engine.core` | Public API, factory methods, delegation, sequential orchestration |
-| `UnifiedRuleEvaluator` | 971 | `engine.core` | Canonical SpEL evaluation, error recovery, message templating, router expressions |
+| `RulesEngine` | 960 | `engine.core` | Public API, factory methods, delegation, sequential orchestration |
+| `UnifiedRuleEvaluator` | 922 | `engine.core` | Canonical SpEL evaluation, error recovery, message templating, router expressions |
 | `ExpressionEvaluatorService` | 227 | `engine.core` | Low-level SpEL parsing, context creation, used by REST API |
-| `SequentialProcessor` | 581 | `engine.execution` | Document-order orchestration, item/section routing |
-| `RuleGroup` | 458 | `engine.model` | Group AND/OR logic (evaluation delegated to `RuleGroupEvaluationService`) |
-| `RuleResult` | 781 | `engine.model` | Result object — 1 private constructor (Builder), 25 factory methods |
+| `SequentialProcessor` | 615 | `engine.execution` | Document-order orchestration, item/section routing, index builders |
+| `RuleGroup` | 426 | `engine.model` | Group AND/OR logic (evaluation delegated to `RuleGroupEvaluationService`) |
+| `RuleResult` | 775 | `engine.model` | Result object — 1 private constructor (Builder), 25 factory methods |
 | `RuleGroupExecutor` | 250 | `engine.execution` | Thin wrapper dispatching to RuleGroupEvaluationService/UnifiedRuleEvaluator |
-| `RuleChainExecutor` | 357 | `engine.execution` | Chain pattern routing via `UnifiedRuleEvaluator` |
+| `RuleChainExecutor` | 352 | `engine.execution` | Chain pattern routing via `UnifiedRuleEvaluator` |
 | `EnrichmentGroupExecutor` | 268 | `engine.execution` | Enrichment group logic (parallel/sequential) |
 | `YamlRuleFactory` | 1,128 | `core.config` | Rule/group construction from YAML configuration |
 | `EnrichmentGroupFactory` | 277 | `core.service.enrichment` | Enrichment group construction from YAML configuration |
@@ -204,33 +204,37 @@ These fields should ideally live in a separate `RuleGroupEvaluationResult` value
 
 ## Refactoring Plan
 
-### Phase 7: Cache EnrichmentGroupFactory Results
+### Phase 7: Cache EnrichmentGroupFactory Results ✅
 
 **Risk: Low | Impact: High | Effort: Small**
 
 Apply the same caching pattern used for `YamlRuleFactory` in Phase 4 to `EnrichmentGroupFactory`. Build enrichment groups once per evaluation pass and look up by ID from a cached map.
 
 **Solution:**
-1. In `SequentialProcessor`, add `Map<String, EnrichmentGroup> enrichmentGroupIndex` built once at the start of `evaluateSequential()` via `EnrichmentGroupFactory.buildEnrichmentGroups(yamlConfig)` → stream to `Map<String, EnrichmentGroup>` keyed by `getId()`
-2. In `SequentialProcessor.processEnrichmentGroupItem()`, replace the `buildEnrichmentGroups()` call with `enrichmentGroupIndex.get(groupId)`
-3. In `RuleChainExecutor`, accept a pre-built `Map<String, EnrichmentGroup>` (or the `List<EnrichmentGroup>`) via method parameter or constructor, and look up by ID instead of rebuilding
-4. Add index maps for enrichments and transformations in `SequentialProcessor` at the same time (Problem 4)
+1. ✅ In `SequentialProcessor`, added `buildEnrichmentGroupIndex()`, `buildEnrichmentIndex()`, and `buildTransformationIndex()` — built once at the start of `processItemOrder()` alongside existing `ruleIndex`/`groupIndex`
+2. ✅ In `SequentialProcessor.processEnrichmentGroupItem()`, replaced `buildEnrichmentGroups()` call with `enrichmentGroupIndex.get(groupId)` — O(1) lookup
+3. ✅ In `RuleChainExecutor`, added `enrichmentGroupIndex` parameter to `processRuleChain()` and `executeResultBasedRoutingPattern()` — index flows from `SequentialProcessor` through the call chain
+4. ✅ In `RuleChainExecutor.findEnrichmentGroup()`, replaced `EnrichmentGroupFactory.buildEnrichmentGroups()` call with index lookup — O(1)
+5. ✅ Removed `YamlEnrichmentGroup` and `EnrichmentGroupFactory` imports from `RuleChainExecutor` (no longer needed)
+6. ✅ Replaced O(n) linear scans `findEnrichmentById()` and `findTransformationById()` in `SequentialProcessor` with pre-built index maps — O(1) lookups
+7. ✅ Updated `RuleChainExecutorSpELRoutingTest` — added convenience wrapper for the new 5-arg signature
 
-**Eliminates:** 2 × O(n×m) factory calls per evaluation, O(n) linear scans per enrichment/transformation lookup
+**Net result:** SequentialProcessor 655→615 lines (−40), RuleChainExecutor 379→352 lines (−27). `EnrichmentGroupFactory.buildEnrichmentGroups()` called exactly once per evaluation pass. All enrichment, enrichment group, and transformation lookups are O(1).
 
-### Phase 8: Remove Dead Code
+### Phase 8: Remove Dead Code ✅
 
 **Risk: None | Impact: Low | Effort: Trivial**
 
 Remove verified dead code with zero callers.
 
 **Solution:**
-1. Delete `UnifiedRuleEvaluator.extractVariableName()` — 44 lines, 0 callers
-2. Delete `RuleGroup.updateMessage()` — 28 lines, 0 callers
-3. Convert `RulesEngine.parser` field to local variable in constructor (used only for `ExpressionEvaluatorService` init + 1 debug log)
-4. Fix `RuleResult` Javadoc: replace "PeeGeeQ" with "APEX Rules Engine"
+1. ✅ Deleted `UnifiedRuleEvaluator.extractVariableName()` — 49 lines removed (971→922)
+2. ✅ Deleted `RuleGroup.updateMessage()` — 32 lines removed (458→426)
+3. ✅ Converted `RulesEngine.parser` field to local variable in constructor (961→960)
+4. ✅ Fixed `RuleResult` Javadoc: replaced duplicate block referencing "PeeGeeQ message queue system" with consolidated Javadoc (781→775)
+5. ✅ Fixed "PeeGeeQ" Javadoc in 8 additional source files: `RuleStatus`, `RuleComplexity`, `RuleBase`, `Validator`, `DataLookup`, `ErrorContextService`, `RecordMatcher`, `ErrorRecoveryService`
 
-**Eliminates:** ~74 lines of dead code
+**Net result:** −88 lines removed from 4 files. 9 stale "PeeGeeQ" Javadoc references corrected to "APEX Rules Engine".
 
 ### Phase 9: Resolve evaluateRules() Semantic Split
 
@@ -289,8 +293,8 @@ Phases 7 and 8 are independent and could be executed in parallel. Phase 9 requir
 
 ## Progress Tracker
 
-- [ ] **Phase 7: Cache EnrichmentGroupFactory** — Cache enrichment groups once per evaluation, eliminate O(n×m) factory rebuilds, add enrichment/transformation index maps
-- [ ] **Phase 8: Remove Dead Code** — Delete `extractVariableName()`, `updateMessage()`, localise `parser` field, fix "PeeGeeQ" Javadoc
+- [x] **Phase 7: Cache EnrichmentGroupFactory** — ✅ Complete (Feb 26, 2026). Enrichment groups, enrichments, and transformations indexed once per evaluation pass. 2 × O(n×m) factory rebuilds and O(n) linear scans eliminated. SequentialProcessor 655→615, RuleChainExecutor 379→352. Tests: 2,873 + 908 = 3,781, 0 failures.
+- [x] **Phase 8: Remove Dead Code** — ✅ Complete (Feb 26, 2026). Removed `extractVariableName()` (49 lines), `updateMessage()` (32 lines), localised `parser` field, consolidated duplicate Javadoc. Fixed 9 "PeeGeeQ" references across codebase. Net −88 lines. Tests: 2,873 + 908 = 3,781, 0 failures.
 - [ ] **Phase 9: Resolve evaluateRules() Split** — Rename or unify the two `evaluateRules()` overloads with silently different semantics
 - [ ] **Phase 10: Consolidate evaluateYaml** — Extract shared error handling into `safeEvaluate()` helper
 - [ ] **Phase 11: Structural Improvements** — Remove mutable setter, fix double defensive copying, cache transformation processor, downgrade INFO→DEBUG logging

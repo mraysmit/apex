@@ -103,7 +103,7 @@ public class RuleGroupEvaluationService {
 
         groupResult = computeGroupResult(individualResults, group.isAndOperator());
 
-        // Phase 2: propagate individual results back to the group so that
+        // propagate individual results back to the group so that
         // downstream enrichments can reference #ruleResults['rule-id']
         group.updateEvaluationResults(individualResults, groupResult);
 

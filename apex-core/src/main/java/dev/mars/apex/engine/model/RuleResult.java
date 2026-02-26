@@ -25,18 +25,12 @@ import java.util.*;
 
 /**
  * Represents the result of evaluating a rule or rule group.
- *
- * This enum is part of the PeeGeeQ message queue system, providing
- * production-ready PostgreSQL-based message queuing capabilities.
+ * This class contains information about the rule that was evaluated,
+ * whether it was triggered, and any message associated with the result.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-07-27
  * @version 1.0
- */
-/**
- * Represents the result of evaluating a rule or rule group.
- * This class contains information about the rule that was evaluated,
- * whether it was triggered, and any message associated with the result.
  */
 public class RuleResult implements Serializable {
     private static final long serialVersionUID = 1L;

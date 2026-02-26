@@ -114,7 +114,7 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
     @DisplayName("Should validate H2 database setup and connectivity")
     void testH2DatabaseSetup() {
         logger.info("=".repeat(80));
-        logger.info("PHASE 1: H2 Database Setup Validation");
+        logger.info("H2 Database Setup Validation");
         logger.info("=".repeat(80));
 
         String jdbcUrl = "jdbc:h2:./target/h2-demo/" + DB_NAME + ";MODE=PostgreSQL";
@@ -167,7 +167,7 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
     @DisplayName("Should perform comprehensive customer profile database enrichment")
     void testComprehensiveCustomerProfileDatabaseEnrichment() {
         logger.info("=".repeat(80));
-        logger.info("PHASE 2: Comprehensive Customer Profile Database Enrichment");
+        logger.info("Comprehensive Customer Profile Database Enrichment");
         logger.info("=".repeat(80));
 
         try {
@@ -237,7 +237,7 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
     @DisplayName("Should handle multiple customer profiles with different tiers")
     void testMultipleCustomerProfileEnrichment() {
         logger.info("=".repeat(80));
-        logger.info("PHASE 3: Multiple Customer Profile Enrichment Testing");
+        logger.info("Multiple Customer Profile Enrichment Testing");
         logger.info("=".repeat(80));
 
         try {
@@ -284,7 +284,7 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
     @DisplayName("Should handle non-existent customer gracefully")
     void testNonExistentCustomerHandling() {
         logger.info("=".repeat(80));
-        logger.info("PHASE 4: Non-Existent Customer Handling");
+        logger.info("Non-Existent Customer Handling");
         logger.info("=".repeat(80));
 
         try {
@@ -327,7 +327,7 @@ public class PostgreSQLSimpleDatabaseEnrichmentTest extends DemoTestBase {
     @DisplayName("Should validate enrichment condition handling")
     void testEnrichmentConditionHandling() {
         logger.info("=".repeat(80));
-        logger.info("PHASE 5: Enrichment Condition Handling");
+        logger.info("Enrichment Condition Handling");
         logger.info("=".repeat(80));
 
         try {

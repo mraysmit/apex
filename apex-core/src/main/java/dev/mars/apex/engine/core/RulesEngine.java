@@ -90,7 +90,6 @@ import java.util.*;
  */
 public class RulesEngine {
     private static final Logger logger = LoggerFactory.getLogger(RulesEngine.class);
-    private final ExpressionParser parser;
     private final ExpressionEvaluatorService evaluatorService;
     private final RulesEngineConfiguration configuration;
     private final ErrorRecoveryService errorRecoveryService;
@@ -164,8 +163,8 @@ public class RulesEngine {
         this.configuration = configuration;
         this.yamlConfig = yamlConfig;
         this.scenarioRegistry = scenarioRegistry;
-        this.parser = new SpelExpressionParser();
-        this.evaluatorService = new ExpressionEvaluatorService(this.parser);
+        ExpressionParser parser = new SpelExpressionParser();
+        this.evaluatorService = new ExpressionEvaluatorService(parser);
         this.errorRecoveryService = new ErrorRecoveryService();
         this.performanceMonitor = new RulePerformanceMonitor();
         this.scenarioParser = new ScenarioParser();  // Initialize scenario parser
@@ -190,7 +189,7 @@ public class RulesEngine {
 
         // Note: enrichmentProcessor will be re-initialized after data sources are created
         // to ensure it has access to the data source registry.
-        // Phase 2: pass RuleGroupEvaluationService so rule groups within enrichments
+        // pass RuleGroupEvaluationService so rule groups within enrichments
         // are evaluated through the canonical UnifiedRuleEvaluator path.
         this.enrichmentProcessor = new YamlEnrichmentProcessor(
             new LookupServiceRegistry(), this.evaluatorService, null,

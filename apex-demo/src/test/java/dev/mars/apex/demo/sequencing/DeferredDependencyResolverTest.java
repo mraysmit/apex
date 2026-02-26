@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @version 1.0
  * @since Phase 3
  */
-@DisplayName("Phase 3: Deferred Dependency Resolution Tests")
+@DisplayName("Deferred Dependency Resolution Tests")
 public class DeferredDependencyResolverTest {
     
     private static final Logger LOGGER = Logger.getLogger(DeferredDependencyResolverTest.class.getName());

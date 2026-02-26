@@ -291,7 +291,7 @@ public class UnifiedRuleEvaluator {
      * @return The rule evaluation result
      */
     public RuleResult evaluateRule(Rule rule, Map<String, Object> facts) {
-        logger.info("Phase 5: evaluateRule(Rule, Map) called for rule: {}", rule != null ? rule.getName() : "null");
+        logger.info("evaluateRule(Rule, Map) called for rule: {}", rule != null ? rule.getName() : "null");
         logger.debug("evaluateRule(Rule, Map) - facts keys: {}, facts size: {}", 
                         facts != null ? facts.keySet() : "null", facts != null ? facts.size() : 0);
 
@@ -317,7 +317,7 @@ public class UnifiedRuleEvaluator {
         if (rule.getResultField() != null && !rule.getResultField().trim().isEmpty()) {
             // Store in facts map for subsequent rules to access (flat key)
             facts.put(rule.getResultField(), result.isTriggered());
-            logger.info("Phase 5: Stored rule result in facts: {} = {}", rule.getResultField(), result.isTriggered());
+            logger.info("Stored rule result in facts: {} = {}", rule.getResultField(), result.isTriggered());
 
             // Also add to enrichedData so it's returned to the caller
             Map<String, Object> enrichedData = new java.util.HashMap<>(result.getEnrichedData());
@@ -329,7 +329,7 @@ public class UnifiedRuleEvaluator {
             result = result.toBuilder()
                     .enrichedData(enrichedData)
                     .build();
-            logger.info("Phase 5: Added result-field to enrichedData: {} = {}", rule.getResultField(), result.isTriggered());
+            logger.info("Added result-field to enrichedData: {} = {}", rule.getResultField(), result.isTriggered());
         }
 
         return result;
@@ -694,7 +694,7 @@ public class UnifiedRuleEvaluator {
      * @return The result with accumulated enrichedData from all rules
      */
     public RuleResult evaluateRules(List<Rule> rules, Map<String, Object> facts) {
-        logger.info("Phase 5: evaluateRules(List<Rule>, Map) called with {} rules", rules != null ? rules.size() : 0);
+        logger.info("evaluateRules(List<Rule>, Map) called with {} rules", rules != null ? rules.size() : 0);
 
         if (rules == null || rules.isEmpty()) {
             return RuleResult.noRules();
@@ -926,55 +926,6 @@ public class UnifiedRuleEvaluator {
         
         // For other exceptions, use standard format
         return String.format(ERROR_MESSAGE_FORMAT, rule.getName(), baseMessage);
-    }
-    
-    /**
-     * Extract variable name from SpEL exception message or condition.
-     * Attempts to parse messages like "Property or field 'age' cannot be found"
-     * or extract from condition like "#undefinedVariable.length() > 0"
-     *
-     * @param exceptionMessage The exception message
-     * @param condition The rule condition that failed
-     * @return The variable name, or "unknown" if not parseable
-     */
-    private String extractVariableName(String exceptionMessage, String condition) {
-        if (exceptionMessage == null && condition == null) {
-            return "unknown";
-        }
-        
-        // First try to extract variable name from exception message
-        // Patterns like: "Property or field 'varName'"
-        if (exceptionMessage != null) {
-            int startQuote = exceptionMessage.indexOf('\'');
-            if (startQuote >= 0) {
-                int endQuote = exceptionMessage.indexOf('\'', startQuote + 1);
-                if (endQuote > startQuote) {
-                    return exceptionMessage.substring(startQuote + 1, endQuote);
-                }
-            }
-        }
-        
-        // If that didn't work, try to extract from condition
-        // Pattern: #variableName or #variableName.something
-        if (condition != null && condition.contains("#")) {
-            int hashIndex = condition.indexOf('#');
-            int endIndex = hashIndex + 1;
-            
-            // Find the end of the variable name (stops at space, dot, bracket, or operator)
-            while (endIndex < condition.length()) {
-                char c = condition.charAt(endIndex);
-                if (!Character.isLetterOrDigit(c) && c != '_') {
-                    break;
-                }
-                endIndex++;
-            }
-            
-            if (endIndex > hashIndex + 1) {
-                return condition.substring(hashIndex + 1, endIndex);
-            }
-        }
-        
-        return "unknown";
     }
     
     /**

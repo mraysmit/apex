@@ -151,7 +151,7 @@ public class YamlEnrichmentProcessor {
         // Store result-field for field-enrichment (condition matched)
         if ("field-enrichment".equals(enrichment.getType()) && enrichment.getResultField() != null) {
             setFieldValue(targetObject, enrichment.getResultField(), true);
-            logger.info("Phase 5: Stored field-enrichment result in field: " + enrichment.getResultField() + " = true");
+            logger.info("Stored field-enrichment result in field: " + enrichment.getResultField() + " = true");
         }
 
         // Process the enrichment based on type
@@ -303,7 +303,7 @@ public class YamlEnrichmentProcessor {
         boolean lookupSucceeded = (lookupResult != null);
         if (enrichment.getResultField() != null) {
             setFieldValue(targetObject, enrichment.getResultField(), lookupSucceeded);
-            logger.info("Phase 5: Stored lookup result in field: " + enrichment.getResultField() + " = " + lookupSucceeded);
+            logger.info("Stored lookup result in field: " + enrichment.getResultField() + " = " + lookupSucceeded);
         }
 
         // 4. Apply field mappings (even if lookup result is null, to apply default values)
@@ -526,7 +526,7 @@ public class YamlEnrichmentProcessor {
         // Store result-field if configured (boolean indicating if any mapping matched)
         if (enrichment.getResultField() != null) {
             setFieldValue(targetObject, enrichment.getResultField(), anyRuleMatched);
-            logger.info("Phase 5: Stored conditional-mapping result in field: " + enrichment.getResultField() + " = " + anyRuleMatched);
+            logger.info("Stored conditional-mapping result in field: " + enrichment.getResultField() + " = " + anyRuleMatched);
         }
 
         return targetObject;
@@ -1477,7 +1477,7 @@ public class YamlEnrichmentProcessor {
                     // Store result-field for field-enrichment (condition did not match)
                     if ("field-enrichment".equals(enrichment.getType()) && enrichment.getResultField() != null) {
                         setFieldValue(enrichedObject, enrichment.getResultField(), false);
-                        logger.info("Phase 5: Stored field-enrichment result in field: {} = false", enrichment.getResultField());
+                        logger.info("Stored field-enrichment result in field: {} = false", enrichment.getResultField());
                     }
                 }
             } catch (Exception e) {

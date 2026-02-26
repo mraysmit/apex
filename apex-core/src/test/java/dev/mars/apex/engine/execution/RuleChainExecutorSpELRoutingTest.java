@@ -46,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * </ul>
  */
 @ExtendWith(ColoredTestOutputExtension.class)
-@DisplayName("Phase 6: RuleChainExecutor SpEL Routing")
+@DisplayName("RuleChainExecutor SpEL Routing")
 class RuleChainExecutorSpELRoutingTest {
 
     private UnifiedRuleEvaluator unifiedEvaluator;
@@ -70,6 +70,17 @@ class RuleChainExecutorSpELRoutingTest {
     // ================================
     // Helper methods
     // ================================
+
+    /**
+     * Convenience wrapper: calls processRuleChain with an empty enrichment group index.
+     * Phase 7 added the enrichmentGroupIndex parameter — these tests don't exercise
+     * enrichment groups, so an empty map is used.
+     */
+    private RuleResult processRuleChain(String chainId, YamlRuleConfiguration yamlConfig,
+                                        Map<String, Object> data,
+                                        java.util.function.Function<Map<String, Object>, StandardEvaluationContext> ctxFactory) {
+        return executor.processRuleChain(chainId, yamlConfig, data, ctxFactory, Map.of());
+    }
 
     private YamlRuleChain createConditionalChainingChain(String id, String triggerCondition,
                                                          String triggerMessage, String resultField) {
@@ -149,7 +160,7 @@ class RuleChainExecutorSpELRoutingTest {
             Map<String, Object> data = new HashMap<>();
             data.put("amount", 500);
 
-            RuleResult result = executor.processRuleChain("chain-1", yamlConfig, data, contextFactory);
+            RuleResult result = processRuleChain("chain-1", yamlConfig, data, contextFactory);
 
             assertNotNull(result, "Result should not be null");
             assertTrue(result.isTriggered(), "Trigger condition should be TRUE for amount=500 > 100");
@@ -166,7 +177,7 @@ class RuleChainExecutorSpELRoutingTest {
             Map<String, Object> data = new HashMap<>();
             data.put("amount", 50);
 
-            RuleResult result = executor.processRuleChain("chain-2", yamlConfig, data, contextFactory);
+            RuleResult result = processRuleChain("chain-2", yamlConfig, data, contextFactory);
 
             assertNotNull(result, "Result should not be null");
             assertFalse(result.isTriggered(), "Trigger condition should be FALSE for amount=50 <= 100");
@@ -182,7 +193,7 @@ class RuleChainExecutorSpELRoutingTest {
             Map<String, Object> data = new HashMap<>();
             data.put("amount", 500);
 
-            executor.processRuleChain("chain-3", yamlConfig, data, contextFactory);
+            processRuleChain("chain-3", yamlConfig, data, contextFactory);
 
             // UnifiedRuleEvaluator stores Boolean result via resultField
             assertTrue(data.containsKey("triggerResult"), "Result-field should be stored in data");
@@ -210,7 +221,7 @@ class RuleChainExecutorSpELRoutingTest {
             Map<String, Object> data = new HashMap<>();
             data.put("amount", 500);
 
-            RuleResult result = executor.processRuleChain("chain-4", yamlConfig, data, contextFactory);
+            RuleResult result = processRuleChain("chain-4", yamlConfig, data, contextFactory);
 
             assertTrue(result.isTriggered(), "Chain should be triggered");
             // The on-trigger conditional rule should also have been evaluated
@@ -238,7 +249,7 @@ class RuleChainExecutorSpELRoutingTest {
             Map<String, Object> data = new HashMap<>();
             data.put("amount", 50);
 
-            RuleResult result = executor.processRuleChain("chain-5", yamlConfig, data, contextFactory);
+            RuleResult result = processRuleChain("chain-5", yamlConfig, data, contextFactory);
 
             assertFalse(result.isTriggered(), "Chain should NOT be triggered");
             assertTrue(data.containsKey("isLow"), "On-no-trigger path rule result-field should be stored");
@@ -257,7 +268,7 @@ class RuleChainExecutorSpELRoutingTest {
             data.put("amount", 100);
 
             // Should not throw — error is captured in RuleResult
-            RuleResult result = executor.processRuleChain("chain-err", yamlConfig, data, contextFactory);
+            RuleResult result = processRuleChain("chain-err", yamlConfig, data, contextFactory);
             assertNotNull(result, "Result should not be null even for errors");
         }
 
@@ -273,7 +284,7 @@ class RuleChainExecutorSpELRoutingTest {
             YamlRuleConfiguration yamlConfig = wrapInConfig(chain);
             Map<String, Object> data = new HashMap<>();
 
-            RuleResult result = executor.processRuleChain("chain-no-trigger", yamlConfig, data, contextFactory);
+            RuleResult result = processRuleChain("chain-no-trigger", yamlConfig, data, contextFactory);
 
             assertNotNull(result);
             assertEquals("ERROR", result.getResultType().name(),
@@ -305,7 +316,7 @@ class RuleChainExecutorSpELRoutingTest {
             Map<String, Object> data = new HashMap<>();
             data.put("amount", 500);
 
-            RuleResult result = executor.processRuleChain("router-1", yamlConfig, data, contextFactory);
+            RuleResult result = processRuleChain("router-1", yamlConfig, data, contextFactory);
 
             assertNotNull(result, "Result should not be null");
             // Router stores the route key
@@ -328,7 +339,7 @@ class RuleChainExecutorSpELRoutingTest {
             Map<String, Object> data = new HashMap<>();
             data.put("amount", 25);
 
-            executor.processRuleChain("router-2", yamlConfig, data, contextFactory);
+            processRuleChain("router-2", yamlConfig, data, contextFactory);
 
             assertTrue(data.containsKey("belowMin"),
                     "LOW route rule result-field should be stored");
@@ -350,7 +361,7 @@ class RuleChainExecutorSpELRoutingTest {
             Map<String, Object> data = new HashMap<>();
 
             // Route key 'UNKNOWN' has no matching route — should return no-match
-            RuleResult result = executor.processRuleChain("router-3", yamlConfig, data, contextFactory);
+            RuleResult result = processRuleChain("router-3", yamlConfig, data, contextFactory);
 
             assertNotNull(result, "Should handle missing route without NPE");
         }
@@ -364,7 +375,7 @@ class RuleChainExecutorSpELRoutingTest {
 
             Map<String, Object> data = new HashMap<>();
 
-            RuleResult result = executor.processRuleChain("router-err", yamlConfig, data, contextFactory);
+            RuleResult result = processRuleChain("router-err", yamlConfig, data, contextFactory);
 
             assertNotNull(result, "Should handle invalid router expression without NPE");
             // UnifiedRuleEvaluator returns null for errors, which produces route "null" → no match
@@ -392,7 +403,7 @@ class RuleChainExecutorSpELRoutingTest {
             Map<String, Object> data = new HashMap<>();
             data.put("amount", 100);
 
-            RuleResult result = executor.processRuleChain("disabled-chain", yamlConfig, data, contextFactory);
+            RuleResult result = processRuleChain("disabled-chain", yamlConfig, data, contextFactory);
 
             assertNotNull(result);
             assertFalse(result.isTriggered(), "Disabled chain should not trigger");
@@ -403,7 +414,7 @@ class RuleChainExecutorSpELRoutingTest {
         void nonExistentChain() {
             YamlRuleConfiguration yamlConfig = new YamlRuleConfiguration();
 
-            RuleResult result = executor.processRuleChain("no-such-chain", yamlConfig,
+            RuleResult result = processRuleChain("no-such-chain", yamlConfig,
                     new HashMap<>(), contextFactory);
 
             assertNotNull(result);
@@ -421,7 +432,7 @@ class RuleChainExecutorSpELRoutingTest {
             chain.setConfiguration(new HashMap<>());
             YamlRuleConfiguration yamlConfig = wrapInConfig(chain);
 
-            RuleResult result = executor.processRuleChain("unknown-pattern", yamlConfig,
+            RuleResult result = processRuleChain("unknown-pattern", yamlConfig,
                     new HashMap<>(), contextFactory);
 
             assertNotNull(result);

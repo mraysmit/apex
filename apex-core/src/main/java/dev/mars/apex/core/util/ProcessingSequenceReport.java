@@ -129,7 +129,7 @@ public class ProcessingSequenceReport {
 
         // Configuration/Initialization Phase
         if (!configurationSections.isEmpty()) {
-            sb.append("PHASE 1: CONFIGURATION/INITIALIZATION (").append(configurationSections.size()).append(" sections - processed at load time)\n");
+            sb.append("CONFIGURATION/INITIALIZATION (").append(configurationSections.size()).append(" sections - processed at load time)\n");
             sb.append("-".repeat(100)).append("\n");
             for (int i = 0; i < configurationSections.size(); i++) {
                 String section = configurationSections.get(i);
@@ -142,7 +142,7 @@ public class ProcessingSequenceReport {
         }
 
         // Original sequence
-        sb.append("PHASE 2: EXECUTION SEQUENCE (").append(originalSequence.size()).append(" items in YAML document order)\n");
+        sb.append("EXECUTION SEQUENCE (").append(originalSequence.size()).append(" items in YAML document order)\n");
         sb.append("-".repeat(100)).append("\n");
         if (originalSequence.isEmpty()) {
             sb.append("  (empty)\n");

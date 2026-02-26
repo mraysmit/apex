@@ -143,7 +143,7 @@ class RulesEngineEvaluateTest {
         Map<String, Object> inputData = new HashMap<>();
         inputData.put("test", "value");
 
-        // Phase 2: evaluate(Map) now returns RuleResult.evaluationFailure() instead of throwing
+        // evaluate(Map) now returns RuleResult.evaluationFailure() instead of throwing
         RuleResult result = rulesEngine.evaluate(inputData);
 
         assertNotNull(result, "Result should not be null");
