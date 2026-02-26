@@ -538,6 +538,76 @@ public class UnifiedRuleEvaluator {
     }
 
     /**
+     * Evaluate a router expression that returns a non-boolean value (e.g., a route key).
+     *
+     * <p>This method is the canonical path for evaluating router-rule expressions in
+     * result-based-routing chains. Unlike {@link #evaluateRule(Rule, Map)}, which evaluates
+     * conditions as {@code Boolean.class}, this method evaluates as {@code Object.class}
+     * to support expressions that return strings, numbers, or other route key values.</p>
+     *
+     * <p>Provides the same cross-cutting concerns as standard rule evaluation:
+     * <ul>
+     *   <li>Performance monitoring (timing, metrics)</li>
+     *   <li>Error recovery (severity-based policies)</li>
+     *   <li>Consistent logging</li>
+     * </ul>
+     *
+     * @param ruleId The identifier for the router rule (used in logging and metrics)
+     * @param expression The SpEL expression to evaluate
+     * @param data The facts/data map for evaluation context
+     * @return The expression result as an Object, or null if evaluation fails
+     * @throws dev.mars.apex.core.exception.ApexEvaluationException if a CRITICAL error occurs
+     *         and recovery is not enabled
+     * @since 2026-02-26
+     */
+    public Object evaluateRouterExpression(String ruleId, String expression, Map<String, Object> data) {
+        logger.info("Evaluating router expression for '{}': {}", ruleId, expression);
+
+        // Start performance monitoring
+        RulePerformanceMetrics.Builder metricsBuilder = performanceMonitor.startEvaluation(ruleId, "router-evaluation");
+
+        try {
+            StandardEvaluationContext context = createEvaluationContext(data);
+            Expression exp = parser.parseExpression(expression);
+            Object result = exp.getValue(context, Object.class);
+
+            // Complete performance monitoring
+            performanceMonitor.completeEvaluation(metricsBuilder, expression);
+            logger.info("Router expression for '{}' evaluated to: {}", ruleId, result);
+            return result;
+        } catch (Exception e) {
+            logger.error("Error evaluating router expression for '{}': {}", ruleId, e.getMessage());
+            logger.debug("Full exception details for router evaluation:", e);
+
+            // Apply error recovery using a transient Rule for consistent severity handling
+            String severity = SeverityConstants.ERROR;
+            if (errorRecoveryConfig.isRecoveryEnabledForSeverity(severity)) {
+                SeverityRecoveryPolicy policy = errorRecoveryConfig.getSeverityPolicy(severity);
+                String strategyName = policy != null ? policy.getStrategy() : "CONTINUE_WITH_DEFAULT";
+
+                if (errorRecoveryConfig.isLogRecoveryAttempts()) {
+                    logger.info("Attempting error recovery for router '{}' with strategy '{}'", ruleId, strategyName);
+                }
+
+                ErrorRecoveryService.ErrorRecoveryStrategy strategy = "FAIL_FAST".equals(strategyName) ?
+                    ErrorRecoveryService.ErrorRecoveryStrategy.FAIL_FAST :
+                    ErrorRecoveryService.ErrorRecoveryStrategy.CONTINUE_WITH_DEFAULT;
+                ErrorRecoveryService.RecoveryResult recoveryResult =
+                    errorRecoveryService.attemptRecovery(ruleId, expression, null, e, strategy);
+
+                if (recoveryResult != null && recoveryResult.isSuccessful()) {
+                    logger.info("Recovery successful for router '{}', returning null route key", ruleId);
+                    performanceMonitor.completeEvaluation(metricsBuilder, expression, e);
+                    return null;
+                }
+            }
+
+            performanceMonitor.completeEvaluation(metricsBuilder, expression, e);
+            return null;
+        }
+    }
+
+    /**
      * Get the current error recovery configuration.
      *
      * @return The error recovery configuration

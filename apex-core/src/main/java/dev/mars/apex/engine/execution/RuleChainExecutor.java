@@ -24,7 +24,6 @@ import dev.mars.apex.engine.model.EnrichmentGroup;
 import dev.mars.apex.engine.model.Rule;
 import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.core.service.enrichment.EnrichmentGroupFactory;
-import dev.mars.apex.engine.core.ExpressionEvaluatorService;
 import dev.mars.apex.engine.core.UnifiedRuleEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,14 +46,11 @@ import java.util.Map;
 public class RuleChainExecutor {
     private static final Logger logger = LoggerFactory.getLogger(RuleChainExecutor.class);
     
-    private final ExpressionEvaluatorService evaluatorService;
     private final UnifiedRuleEvaluator unifiedEvaluator;
     private final EnrichmentGroupExecutor enrichmentGroupExecutor;
     
-    public RuleChainExecutor(ExpressionEvaluatorService evaluatorService, 
-                            UnifiedRuleEvaluator unifiedEvaluator,
+    public RuleChainExecutor(UnifiedRuleEvaluator unifiedEvaluator,
                             EnrichmentGroupExecutor enrichmentGroupExecutor) {
-        this.evaluatorService = evaluatorService;
         this.unifiedEvaluator = unifiedEvaluator;
         this.enrichmentGroupExecutor = enrichmentGroupExecutor;
     }
@@ -150,10 +146,9 @@ public class RuleChainExecutor {
         String condition = (String) routerRuleConfig.get("condition");
         String resultField = (String) routerRuleConfig.get("result-field");
 
-        StandardEvaluationContext context = contextFactory.apply(data);
         String routeKey = null;
         try {
-            Object result = evaluatorService.evaluate(condition, context, Object.class);
+            Object result = unifiedEvaluator.evaluateRouterExpression(chain.getId() + "-router", condition, data);
             routeKey = result != null ? result.toString() : "null";
         } catch (Exception e) {
             logger.error("Error evaluating router rule for chain '{}': {}", chain.getId(), e.getMessage());

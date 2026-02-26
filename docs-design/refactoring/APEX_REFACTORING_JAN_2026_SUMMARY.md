@@ -15,10 +15,10 @@ Successfully decomposed the monolithic `RulesEngine` class (3,308 lines) into fo
 
 | Metric | Before | After | Change |
 |--------|--------|-------|--------|
-| **RulesEngine Size** | 3,308 lines | 1,009 lines | -2,299 lines (-70%) |
-| **Number of Classes** | 1 monolith | 10 focused classes | +9 new classes |
+| **RulesEngine Size** | 3,308 lines | 961 lines | -2,347 lines (-71%) |
+| **Number of Classes** | 1 monolith | 11 focused classes | +10 new classes |
 | **Test Coverage** | 915 tests passing | 915 tests passing | 100% maintained |
-| **Lines Extracted** | - | 2,299+ lines | Distributed across 9 new classes |
+| **Lines Extracted** | - | 2,347+ lines | Distributed across 10 new classes |
 
 ---
 
@@ -26,20 +26,21 @@ Successfully decomposed the monolithic `RulesEngine` class (3,308 lines) into fo
 
 ### New Package Structure
 ```
-dev.mars.apex.core.engine.config/
-├── RulesEngine.java (1,009 lines - main facade, -70%)
-├── execution/
-│   ├── EnrichmentGroupExecutor.java (268 lines - Phase 4)
-│   ├── RuleGroupExecutor.java (259 lines - Phase 5)
-│   ├── RuleChainExecutor.java (340 lines - Phase 6)
-│   ├── SequentialProcessor.java (741 lines - Phase 7)
-│   └── PipelineExecutionManager.java (249 lines - Phase 9)
-├── scenario/
-│   ├── ScenarioParser.java (189 lines - Phase 3)
-│   ├── ScenarioEvaluationManager.java (282 lines - Phase 9)
-│   └── ScenarioRegistryManager.java (262 lines - Phase 9)
-└── util/
-    └── DataCopyUtility.java (128 lines - Phase 2)
+dev.mars.apex.engine.core/
+├── RulesEngine.java (961 lines - main facade, -71%)
+dev.mars.apex.engine.execution/
+├── EnrichmentGroupExecutor.java (268 lines - Phase 4)
+├── RuleGroupExecutor.java (250 lines - Phase 5)
+├── RuleGroupEvaluationService.java (236 lines - Phase 2 optimisation)
+├── RuleChainExecutor.java (357 lines - Phase 6)
+├── SequentialProcessor.java (581 lines - Phase 7)
+└── PipelineExecutionManager.java (221 lines - Phase 9)
+dev.mars.apex.engine.scenario/
+├── ScenarioParser.java (244 lines - Phase 3)
+├── ScenarioEvaluationManager.java (283 lines - Phase 9)
+└── ScenarioRegistryManager.java (209 lines - Phase 9)
+dev.mars.apex.engine.util/
+└── DataCopyUtility.java (128 lines - Phase 2)
 ```
 
 ---
@@ -318,8 +319,8 @@ private RuleResult delegateToMyExecutor(InputData data) {
 
 The RulesEngine refactoring successfully achieved its goals:
 
-✅ **70% size reduction** (3,308 → 1,009 lines)
-✅ **9 focused components** extracted (6 executors + 3 managers)
+✅ **71% size reduction** (3,308 → 961 lines)
+✅ **10 focused components** extracted (7 executors/services + 3 managers)
 
 The refactored codebase is now:
 - **More maintainable** - focused responsibilities
@@ -336,19 +337,20 @@ This refactoring provides a solid foundation for future APEX development and dem
 ### File Size Comparison
 | File | Before | After | Delta |
 |------|--------|-------|-------|
-| RulesEngine.java | 3,308 | 1,009 | -2,299 (-70%) |
+| RulesEngine.java | 3,308 | 961 | -2,347 (-71%) |
 | DataCopyUtility.java | - | 128 | +128 (new) |
-| ScenarioParser.java | - | 189 | +189 (new) |
+| ScenarioParser.java | - | 244 | +244 (new) |
 | EnrichmentGroupExecutor.java | - | 268 | +268 (new) |
-| RuleGroupExecutor.java | - | 259 | +259 (new) |
-| RuleChainExecutor.java | - | 340 | +340 (new) |
-| SequentialProcessor.java | - | 741 | +741 (new) |
-| PipelineExecutionManager.java | - | 249 | +249 (new) |
-| ScenarioEvaluationManager.java | - | 282 | +282 (new) |
-| ScenarioRegistryManager.java | - | 262 | +262 (new) |
-| **Total** | 3,308 | 3,727 | +419 (net) |
+| RuleGroupExecutor.java | - | 250 | +250 (new) |
+| RuleGroupEvaluationService.java | - | 236 | +236 (new) |
+| RuleChainExecutor.java | - | 357 | +357 (new) |
+| SequentialProcessor.java | - | 581 | +581 (new) |
+| PipelineExecutionManager.java | - | 221 | +221 (new) |
+| ScenarioEvaluationManager.java | - | 283 | +283 (new) |
+| ScenarioRegistryManager.java | - | 209 | +209 (new) |
+| **Total** | 3,308 | 3,738 | +430 (net) |
 
-*Note: Net increase due to additional JavaDoc, class headers, and separation overhead. The modest net increase (13%) demonstrates efficient extraction with minimal overhead.*
+*Note: Net increase due to additional JavaDoc, class headers, and separation overhead. The modest net increase (13%) demonstrates efficient extraction with minimal overhead. Line counts verified against source code on February 26, 2026.*
 
 ### Related Documentation
 - [APEX Components Configuration Guide](APEX_COMPONENTS_CONFIGURATION_GUIDE.md)
@@ -358,6 +360,6 @@ This refactoring provides a solid foundation for future APEX development and dem
 
 ---
 
-**Document Version:** 2.0
-**Last Updated:** January 23, 2026
+**Document Version:** 2.1
+**Last Updated:** February 26, 2026
 **Author:** APEX Refactoring Team

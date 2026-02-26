@@ -18,7 +18,6 @@ package dev.mars.apex.engine.execution;
 import dev.mars.apex.core.config.model.YamlRuleChain;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.model.RuleResult;
-import dev.mars.apex.engine.core.ExpressionEvaluatorService;
 import dev.mars.apex.engine.core.UnifiedRuleEvaluator;
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,12 +33,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Phase 6 Tests: Verifies that RuleChainExecutor routes SpEL evaluation through
- * ExpressionEvaluatorService and UnifiedRuleEvaluator instead of raw parser calls.
+ * UnifiedRuleEvaluator instead of raw parser calls.
  *
  * <p>Tests cover:
  * <ul>
  *   <li>Trigger-rule evaluation routes through UnifiedRuleEvaluator (conditional-chaining)</li>
- *   <li>Router-rule evaluation routes through ExpressionEvaluatorService (result-based-routing)</li>
+ *   <li>Router-rule evaluation routes through UnifiedRuleEvaluator (result-based-routing)</li>
  *   <li>Result-field storage by UnifiedRuleEvaluator (no double storage)</li>
  *   <li>Conditional rules on trigger/no-trigger paths</li>
  *   <li>Disabled chain handling</li>
@@ -50,17 +49,15 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("Phase 6: RuleChainExecutor SpEL Routing")
 class RuleChainExecutorSpELRoutingTest {
 
-    private ExpressionEvaluatorService evaluatorService;
     private UnifiedRuleEvaluator unifiedEvaluator;
     private RuleChainExecutor executor;
     private java.util.function.Function<Map<String, Object>, StandardEvaluationContext> contextFactory;
 
     @BeforeEach
     void setUp() {
-        evaluatorService = new ExpressionEvaluatorService();
         unifiedEvaluator = new UnifiedRuleEvaluator();
         // EnrichmentGroupExecutor not needed for these tests (no enrichment groups used)
-        executor = new RuleChainExecutor(evaluatorService, unifiedEvaluator, null);
+        executor = new RuleChainExecutor(unifiedEvaluator, null);
 
         // Context factory: creates a StandardEvaluationContext with data variables
         contextFactory = data -> {
@@ -293,7 +290,7 @@ class RuleChainExecutorSpELRoutingTest {
     class ResultBasedRoutingTests {
 
         @Test
-        @DisplayName("Should evaluate router condition via ExpressionEvaluatorService")
+        @DisplayName("Should evaluate router condition via UnifiedRuleEvaluator")
         void routerConditionEvaluated() {
             Map<String, List<Map<String, Object>>> routes = new HashMap<>();
             routes.put("HIGH", Collections.singletonList(
@@ -370,7 +367,7 @@ class RuleChainExecutorSpELRoutingTest {
             RuleResult result = executor.processRuleChain("router-err", yamlConfig, data, contextFactory);
 
             assertNotNull(result, "Should handle invalid router expression without NPE");
-            // ExpressionEvaluatorService returns null for errors, which produces route "null" → no match
+            // UnifiedRuleEvaluator returns null for errors, which produces route "null" → no match
             assertFalse(result.isTriggered(),
                     "Invalid router expression should not trigger");
         }

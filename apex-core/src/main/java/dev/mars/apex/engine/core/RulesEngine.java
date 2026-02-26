@@ -198,7 +198,7 @@ public class RulesEngine {
 
         // Initialize remaining executors (after dependencies are initialized)
         this.enrichmentGroupExecutor = new EnrichmentGroupExecutor(this.enrichmentProcessor);
-        this.ruleChainExecutor = new RuleChainExecutor(this.evaluatorService, this.unifiedEvaluator, this.enrichmentGroupExecutor);
+        this.ruleChainExecutor = new RuleChainExecutor(this.unifiedEvaluator, this.enrichmentGroupExecutor);
         this.sequentialProcessor = new SequentialProcessor(
             this.configuration,
             this.enrichmentProcessor,
