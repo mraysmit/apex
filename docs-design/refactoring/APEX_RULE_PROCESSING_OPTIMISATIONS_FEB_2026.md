@@ -1,8 +1,8 @@
 # APEX Rule Processing Optimisations — February 2026
 
-**Status:** 🟡 PHASES 7-9 COMPLETE — REMAINING PHASES NOT STARTED  
+**Status:** 🟡 PHASES 7-9 COMPLETE, DECOMPOSITION COMPLETE — PHASES 10-11 NOT STARTED  
 **Branch:** `refactor/rules-engine-decomposition`  
-**Last Updated:** February 27, 2026  
+**Last Updated:** February 28, 2026  
 **Test Baseline:** apex-core: 2,873 tests, apex-demo: 908 tests — 0 failures, 0 errors  
 **Predecessor:** `APEX_RULE_PROCESSING_OPTIMISATIONS_JAN_2026_COMPLETE.md` (6 phases, all complete)
 
@@ -15,7 +15,10 @@ Following the completion of all 6 phases from the January 2026 optimisation effo
 | Class | Lines | Package | Responsibility |
 |---|---|---|---|
 | `RulesEngine` | 960 | `engine.core` | Public API, factory methods, delegation, sequential orchestration |
-| `UnifiedRuleEvaluator` | 877 | `engine.core` | Canonical SpEL evaluation, error recovery, message templating, router expressions |
+| `UnifiedRuleEvaluator` | ~~877~~ 481 | `engine.core` | Canonical SpEL evaluation, delegates to collaborators for error recovery, message templating, field mapping |
+| `MessageTemplateResolver` | 117 | `engine.core` | Resolves `{{#expr}}` and `#{expr}` placeholders in rule messages (extracted from UnifiedRuleEvaluator) |
+| `FieldMappingProcessor` | 148 | `engine.core` | Evaluates success/error codes and applies map-to-field SpEL mappings (extracted from UnifiedRuleEvaluator) |
+| `ErrorRecoveryHandler` | 261 | `engine.core` | Severity-based error recovery, enhanced error messages, error code classification (extracted from UnifiedRuleEvaluator) |
 | `ExpressionEvaluatorService` | 227 | `engine.core` | Low-level SpEL parsing, context creation, used by REST API |
 | `SequentialProcessor` | 615 | `engine.execution` | Document-order orchestration, item/section routing, index builders |
 | `RuleGroup` | 426 | `engine.model` | Group AND/OR logic (evaluation delegated to `RuleGroupEvaluationService`) |
@@ -272,7 +275,27 @@ Address remaining code quality items.
 1. Remove `RuleResult.setExecutionPath()` — replace all callers with `toBuilder().executionPath(path).build()`
 2. Eliminate double defensive copying in `RuleResult`: use `Collections.unmodifiableMap()` / `Collections.unmodifiableList()` wrappers in constructor, return fields directly in getters
 3. Cache `YamlTransformationProcessor` as a field in `SequentialProcessor` (same pattern as `YamlRuleFactory`)
-4. Downgrade `logger.info()` to `logger.debug()` in `UnifiedRuleEvaluator.evaluateRules()` hot loops
+
+### Decomposition: UnifiedRuleEvaluator → Focused Collaborators ✅
+
+**Risk: Low | Impact: High | Effort: Medium**
+
+Decompose the 958-line `UnifiedRuleEvaluator` monolith into three focused collaborators, each with a single responsibility.
+
+**Problems addressed:**
+- Problem 6 (handleEvaluationError() God Method)
+- Problem 13 (INFO-Level Logging in Hot Loops)
+- Implicit coupling of template resolution, field mapping, and error recovery within one class
+
+**Solution:**
+1. ✅ Extracted `MessageTemplateResolver` (117 lines) — resolves `{{#expr}}` and `#{expr}` placeholders in rule messages. Dependencies: `ExpressionParser` only.
+2. ✅ Extracted `FieldMappingProcessor` (148 lines) — evaluates success/error code expressions and applies `map-to-field` SpEL mappings. Dependencies: `ExpressionParser` only.
+3. ✅ Extracted `ErrorRecoveryHandler` (261 lines) — full error-recovery lifecycle: enhanced error messages, severity-based policy lookup, recovery execution, metrics construction, error code classification. Dependencies: `ErrorRecoveryConfig`, `ErrorRecoveryService`, `RulePerformanceMonitor`.
+4. ✅ Retained `resolveMessageTemplate()` package-private delegation in `UnifiedRuleEvaluator` for test backward-compatibility (existing tests call it directly).
+5. ✅ Downgraded 13 `logger.info()` calls to `logger.debug()` in hot evaluation paths (per-rule, per-batch, per-router calls). Recovery logging within `errorRecoveryConfig.isLogRecoveryAttempts()` guards retained at INFO.
+6. ✅ Removed 6 unused imports (`Duration`, `Instant`, `Matcher`, `Pattern`, and constants/patterns moved to collaborators).
+
+**Net result:** UnifiedRuleEvaluator 958→481 lines (−477, −50%). Three new collaborators created. All 3,781 tests pass (2,873 + 908, 0 failures).
 
 ---
 
@@ -297,5 +320,6 @@ Phases 7 and 8 are independent and could be executed in parallel. Phase 9 requir
 - [x] **Phase 7: Cache EnrichmentGroupFactory** — ✅ Complete (Feb 26, 2026). Enrichment groups, enrichments, and transformations indexed once per evaluation pass. 2 × O(n×m) factory rebuilds and O(n) linear scans eliminated. SequentialProcessor 655→615, RuleChainExecutor 379→352. Tests: 2,873 + 908 = 3,781, 0 failures.
 - [x] **Phase 8: Remove Dead Code** — ✅ Complete (Feb 26, 2026). Removed `extractVariableName()` (49 lines), `updateMessage()` (32 lines), localised `parser` field, consolidated duplicate Javadoc. Fixed 9 "PeeGeeQ" references across codebase. Net −88 lines. Tests: 2,873 + 908 = 3,781, 0 failures.
 - [x] **Phase 9: Resolve evaluateRules() Split** — ✅ Complete (Feb 27, 2026). Deleted dead `evaluateRules(List<Rule>, EvaluationContext)` overload (0 callers). Only evaluate-all semantics remain. UnifiedRuleEvaluator 922→877 (−45 lines). Tests: 2,873 + 908 = 3,781, 0 failures.
+- [x] **Decomposition: UnifiedRuleEvaluator** — ✅ Complete (Feb 28, 2026). Extracted 3 collaborator classes: `MessageTemplateResolver` (117 lines), `FieldMappingProcessor` (148 lines), `ErrorRecoveryHandler` (261 lines). Downgraded 13 hot-path `logger.info()` → `logger.debug()`. UnifiedRuleEvaluator 958→481 (−477 lines, −50%). Tests: 2,873 + 908 = 3,781, 0 failures.
 - [ ] **Phase 10: Consolidate evaluateYaml** — Extract shared error handling into `safeEvaluate()` helper
-- [ ] **Phase 11: Structural Improvements** — Remove mutable setter, fix double defensive copying, cache transformation processor, downgrade INFO→DEBUG logging
+- [ ] **Phase 11: Structural Improvements** — Remove mutable setter, fix double defensive copying, cache transformation processor

@@ -17,12 +17,8 @@ import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Unified Rule Evaluator - Single evaluation engine for all APEX rule evaluation paths.
@@ -50,25 +46,11 @@ public class UnifiedRuleEvaluator {
     private final RulePerformanceMonitor performanceMonitor;
     private final ErrorRecoveryConfig errorRecoveryConfig;
     private final ExpressionEvaluatorService evaluatorService;
-    
-    /**
-     * Standard error message format for consistency across all evaluation paths.
-     */
-    private static final String ERROR_MESSAGE_FORMAT = "Rule evaluation failed: %s - %s";
-    
-    /**
-     * Pattern to extract variable names from SpEL expressions.
-     * Matches #variableName patterns.
-     */
-    private static final Pattern SPEL_VARIABLE_PATTERN = Pattern.compile("#(\\w+)");
-    
-    /**
-     * Pattern to match Handlebars-style placeholders in rule messages.
-     * Matches {{#expression}} format used in YAML rule message templates.
-     * Also supports #{expression} format used by TemplateProcessorService.
-     */
-    private static final Pattern HANDLEBARS_PLACEHOLDER_PATTERN = Pattern.compile("\\{\\{(#[^}]+)\\}\\}");
-    private static final Pattern HASH_PLACEHOLDER_PATTERN = Pattern.compile("#\\{([^}]+)\\}");
+
+    // Collaborators extracted from this class for single-responsibility
+    private final MessageTemplateResolver messageTemplateResolver;
+    private final FieldMappingProcessor fieldMappingProcessor;
+    private final ErrorRecoveryHandler errorRecoveryHandler;
     
     /**
      * Create a new UnifiedRuleEvaluator with default components.
@@ -79,6 +61,9 @@ public class UnifiedRuleEvaluator {
         this.performanceMonitor = new RulePerformanceMonitor();
         this.errorRecoveryConfig = new ErrorRecoveryConfig();
         this.evaluatorService = new ExpressionEvaluatorService(this.parser);
+        this.messageTemplateResolver = new MessageTemplateResolver(this.parser);
+        this.fieldMappingProcessor = new FieldMappingProcessor(this.parser);
+        this.errorRecoveryHandler = new ErrorRecoveryHandler(this.errorRecoveryConfig, this.errorRecoveryService, this.performanceMonitor);
     }
     
     /**
@@ -111,6 +96,9 @@ public class UnifiedRuleEvaluator {
         this.performanceMonitor = performanceMonitor != null ? performanceMonitor : new RulePerformanceMonitor();
         this.errorRecoveryConfig = errorRecoveryConfig != null ? errorRecoveryConfig : new ErrorRecoveryConfig();
         this.evaluatorService = new ExpressionEvaluatorService(this.parser);
+        this.messageTemplateResolver = new MessageTemplateResolver(this.parser);
+        this.fieldMappingProcessor = new FieldMappingProcessor(this.parser);
+        this.errorRecoveryHandler = new ErrorRecoveryHandler(this.errorRecoveryConfig, this.errorRecoveryService, this.performanceMonitor);
     }
 
     /**
@@ -130,6 +118,9 @@ public class UnifiedRuleEvaluator {
         this.errorRecoveryService = errorRecoveryService != null ? errorRecoveryService : new ErrorRecoveryService();
         this.performanceMonitor = performanceMonitor != null ? performanceMonitor : new RulePerformanceMonitor();
         this.errorRecoveryConfig = errorRecoveryConfig != null ? errorRecoveryConfig : new ErrorRecoveryConfig();
+        this.messageTemplateResolver = new MessageTemplateResolver(this.parser);
+        this.fieldMappingProcessor = new FieldMappingProcessor(this.parser);
+        this.errorRecoveryHandler = new ErrorRecoveryHandler(this.errorRecoveryConfig, this.errorRecoveryService, this.performanceMonitor);
     }
     
     /**
@@ -142,17 +133,17 @@ public class UnifiedRuleEvaluator {
      */
     public RuleResult evaluateRule(Rule rule, EvaluationContext context) {
         if (rule == null) {
-            logger.info("No rule provided for evaluation");
+            logger.debug("No rule provided for evaluation");
             return RuleResult.noRules();
         }
         
         // Skip disabled rules - they should not be evaluated
         if (!dev.mars.apex.core.util.EnabledFilter.isEnabled(rule)) {
-            logger.info("Rule '{}' is disabled, skipping evaluation", rule.getName());
+            logger.debug("Rule '{}' is disabled, skipping evaluation", rule.getName());
             return RuleResult.noMatch(rule.getName(), "Rule is disabled", SeverityConstants.INFO);
         }
         
-        logger.info("Starting rule evaluation: {}", rule.getName());
+        logger.debug("Starting rule evaluation: {}", rule.getName());
         logger.debug("Rule details - id: '{}', severity: '{}', condition: '{}'", 
                         rule.getId(), rule.getSeverity(), rule.getCondition());
 
@@ -181,7 +172,7 @@ public class UnifiedRuleEvaluator {
                 // Delegate to error recovery handler for consistent error handling
                 // This ensures SpEL evaluation errors go through the same recovery logic
                 // as other exceptions, respecting severity-based recovery policies
-                return handleEvaluationError(rule, e, metricsBuilder);
+                return errorRecoveryHandler.handleEvaluationError(rule, e, metricsBuilder);
             }
 
             // Store result in context if result-field is configured
@@ -195,7 +186,7 @@ public class UnifiedRuleEvaluator {
             RulePerformanceMetrics metrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition());
 
             // Log the completion with performance metrics
-            logger.info("Rule evaluation completed: {} -> {}", rule.getName(), result != null && result);
+            logger.debug("Rule evaluation completed: {} -> {}", rule.getName(), result != null && result);
             
 
             // Evaluate codes and apply field mappings
@@ -205,17 +196,17 @@ public class UnifiedRuleEvaluator {
 
             if (result != null && result) {
                 // Rule matched - evaluate success code
-                evaluatedSuccessCode = evaluateCode(rule.getSuccessCode(), context);
-                logger.info("Rule matched: {}", rule.getName());
+                evaluatedSuccessCode = fieldMappingProcessor.evaluateCode(rule.getSuccessCode(), context);
+                logger.debug("Rule matched: {}", rule.getName());
 
                 // Apply field mappings if configured
                 if (rule.getMapToField() != null) {
-                    applyFieldMappings(rule.getMapToField(), context, enrichedData, evaluatedSuccessCode, null);
+                    fieldMappingProcessor.applyFieldMappings(rule.getMapToField(), (StandardEvaluationContext) context, enrichedData, evaluatedSuccessCode, null);
                 }
 
                 // When condition is TRUE, the rule matched successfully - severity is irrelevant
                 // Always return MATCH with success=true
-                String resolvedMessage = resolveMessageTemplate(rule.getMessage(), context);
+                String resolvedMessage = messageTemplateResolver.resolve(rule.getMessage(), context);
                 RuleResult matchResult = RuleResult.builder()
                         .ruleId(rule.getId())
                         .ruleName(rule.getName())
@@ -232,12 +223,12 @@ public class UnifiedRuleEvaluator {
                 return matchResult;
             } else {
                 // Rule did not match - evaluate error code
-                evaluatedErrorCode = evaluateCode(rule.getErrorCode(), context);
+                evaluatedErrorCode = fieldMappingProcessor.evaluateCode(rule.getErrorCode(), context);
                 logger.debug("Rule did not match: {}", rule.getName());
 
                 // Apply field mappings if configured
                 if (rule.getMapToField() != null) {
-                    applyFieldMappings(rule.getMapToField(), context, enrichedData, null, evaluatedErrorCode);
+                    fieldMappingProcessor.applyFieldMappings(rule.getMapToField(), (StandardEvaluationContext) context, enrichedData, null, evaluatedErrorCode);
                 }
 
                 // Determine ResultType based on severity and error recovery configuration
@@ -260,7 +251,7 @@ public class UnifiedRuleEvaluator {
 
                 // Return result with codes and mappings
                 String noMatchMessageTemplate = rule.getNoMatchMessage() != null ? rule.getNoMatchMessage() : rule.getMessage();
-                String resolvedNoMatchMessage = resolveMessageTemplate(noMatchMessageTemplate, context);
+                String resolvedNoMatchMessage = messageTemplateResolver.resolve(noMatchMessageTemplate, context);
                 RuleResult noMatchResult = RuleResult.builder()
                         .ruleId(rule.getId())
                         .ruleName(rule.getName())
@@ -278,7 +269,7 @@ public class UnifiedRuleEvaluator {
             }
             
         } catch (Exception e) {
-            return handleEvaluationError(rule, e, metricsBuilder);
+            return errorRecoveryHandler.handleEvaluationError(rule, e, metricsBuilder);
         }
     }
     
@@ -291,7 +282,7 @@ public class UnifiedRuleEvaluator {
      * @return The rule evaluation result
      */
     public RuleResult evaluateRule(Rule rule, Map<String, Object> facts) {
-        logger.info("evaluateRule(Rule, Map) called for rule: {}", rule != null ? rule.getName() : "null");
+        logger.debug("evaluateRule(Rule, Map) called for rule: {}", rule != null ? rule.getName() : "null");
         logger.debug("evaluateRule(Rule, Map) - facts keys: {}, facts size: {}", 
                         facts != null ? facts.keySet() : "null", facts != null ? facts.size() : 0);
 
@@ -317,7 +308,7 @@ public class UnifiedRuleEvaluator {
         if (rule.getResultField() != null && !rule.getResultField().trim().isEmpty()) {
             // Store in facts map for subsequent rules to access (flat key)
             facts.put(rule.getResultField(), result.isTriggered());
-            logger.info("Stored rule result in facts: {} = {}", rule.getResultField(), result.isTriggered());
+            logger.debug("Stored rule result in facts: {} = {}", rule.getResultField(), result.isTriggered());
 
             // Also add to enrichedData so it's returned to the caller
             Map<String, Object> enrichedData = new java.util.HashMap<>(result.getEnrichedData());
@@ -329,7 +320,7 @@ public class UnifiedRuleEvaluator {
             result = result.toBuilder()
                     .enrichedData(enrichedData)
                     .build();
-            logger.info("Added result-field to enrichedData: {} = {}", rule.getResultField(), result.isTriggered());
+            logger.debug("Added result-field to enrichedData: {} = {}", rule.getResultField(), result.isTriggered());
         }
 
         return result;
@@ -377,165 +368,6 @@ public class UnifiedRuleEvaluator {
         // Set the final value
         current.put(parts[parts.length - 1], value);
     }
-    
-    /**
-     * Handle evaluation errors with consistent error recovery logic.
-     *
-     * @param rule The rule that failed evaluation
-     * @param exception The exception that occurred
-     * @param metricsBuilder The performance metrics builder
-     * @return The error result or recovered result
-     */
-    private RuleResult handleEvaluationError(Rule rule, Exception exception, RulePerformanceMetrics.Builder metricsBuilder) {
-        // Initialize recovery tracking variables
-        boolean recoveryAttempted = false;
-        boolean recoverySuccessful = false;
-        String recoveryStrategy = null;
-        String recoveryReason = exception.getClass().getSimpleName();
-        Instant recoveryStartTime = null;
-        Duration recoveryTime = null;
-
-        // Create enhanced error message with undefined variable detection
-        String errorMessage = createEnhancedErrorMessage(rule, exception);
-        String severity = rule.getSeverity() != null ? rule.getSeverity() : SeverityConstants.ERROR;
-        
-        // Log the enhanced error message
-        if (logger.isInfoEnabled()) {
-            logger.info("Rule evaluation issue for '{}': {}", 
-                rule.getName(), errorMessage);
-        }
-
-        // Attempt error recovery based on configurable severity policies
-        if (errorRecoveryConfig.isRecoveryEnabledForSeverity(severity)) {
-            // Start recovery timing
-            recoveryAttempted = true;
-            recoveryStartTime = Instant.now();
-
-            SeverityRecoveryPolicy policy = errorRecoveryConfig.getSeverityPolicy(severity);
-
-            String actualStrategy = policy != null ? policy.getStrategy() : "default";
-
-            if (errorRecoveryConfig.isLogRecoveryAttempts()) {
-                logger.info("Attempting error recovery for rule '{}' with severity '{}' using strategy '{}'",
-                    rule.getName(), severity, actualStrategy);
-            }
-
-            // Phase 3A Enhancement: Check if rule has a specific default-value
-            if (rule.getDefaultValue() != null) {
-                recoveryStrategy = "RULE_DEFAULT_VALUE";
-                if (errorRecoveryConfig.isLogRecoveryAttempts()) {
-                    logger.info("Using rule-specific default value for recovery: rule='{}', defaultValue='{}'",
-                        rule.getName(), rule.getDefaultValue());
-                }
-                recoverySuccessful = true;
-                // Calculate recovery time
-                if (recoveryStartTime != null) {
-                    recoveryTime = Duration.between(recoveryStartTime, Instant.now());
-                }
-
-                // Complete performance monitoring with recovery metrics
-                RulePerformanceMetrics metrics = buildMetricsWithRecovery(metricsBuilder, rule, exception,
-                    recoveryAttempted, recoverySuccessful, recoveryStrategy, recoveryReason, recoveryTime);
-
-                
-                return RuleResult.match(rule.getName(), String.valueOf(rule.getDefaultValue()), severity, metrics);
-            }
-
-            // Use the error recovery service with the determined strategy
-            ErrorRecoveryService.ErrorRecoveryStrategy strategy = "FAIL_FAST".equals(actualStrategy) ?
-                ErrorRecoveryService.ErrorRecoveryStrategy.FAIL_FAST :
-                ErrorRecoveryService.ErrorRecoveryStrategy.CONTINUE_WITH_DEFAULT;
-            ErrorRecoveryService.RecoveryResult recoveryResult = errorRecoveryService.attemptRecovery(rule.getName(), rule.getCondition(), null, exception, strategy);
-            if (recoveryResult != null && recoveryResult.isSuccessful()) {
-                recoverySuccessful = true;
-                recoveryStrategy = actualStrategy;
-                // Calculate recovery time
-                if (recoveryStartTime != null) {
-                    recoveryTime = Duration.between(recoveryStartTime, Instant.now());
-                }
-
-                // Complete performance monitoring with recovery metrics
-                RulePerformanceMetrics metrics = buildMetricsWithRecovery(metricsBuilder, rule, exception,
-                    recoveryAttempted, recoverySuccessful, recoveryStrategy, recoveryReason, recoveryTime);
-
-                // Preserve original rule severity in recovery result
-                RuleResult originalResult = recoveryResult.getRuleResult();
-                RuleResult resultWithCorrectSeverity = originalResult.toBuilder()
-                        .severity(severity)  // Preserve original rule severity, not recovery default
-                        .triggered(false)
-                        .performanceMetrics(metrics)
-                        .build();
-                return resultWithCorrectSeverity;
-            } else {
-                // Recovery failed
-                recoverySuccessful = false;
-                recoveryStrategy = actualStrategy;
-                // Calculate recovery time even for failed recovery
-                if (recoveryStartTime != null) {
-                    recoveryTime = Duration.between(recoveryStartTime, Instant.now());
-                }
-            }
-        }
-        
-        // Log error details at appropriate level based on severity, using enhanced message
-        if (SeverityConstants.CRITICAL.equalsIgnoreCase(severity)) {
-            logger.error("CRITICAL rule evaluation error for '{}': {}", rule.getName(), errorMessage);
-        } else if (SeverityConstants.WARNING.equalsIgnoreCase(severity)) {
-            logger.info("Rule evaluation warning for '{}': {}", rule.getName(), errorMessage);
-        } else {
-            logger.info("Rule evaluation error for '{}': {}", rule.getName(), errorMessage);
-        }
-
-        // Always log full exception details at DEBUG level for troubleshooting
-        logger.debug("Full exception details for rule '{}':", rule.getName(), exception);
-
-        // Complete performance monitoring with recovery metrics (even for failed recovery)
-        RulePerformanceMetrics finalMetrics = buildMetricsWithRecovery(metricsBuilder, rule, exception,
-            recoveryAttempted, recoverySuccessful, recoveryStrategy, recoveryReason, recoveryTime);
-
-        // Classify error code based on exception type and message
-        String errorCode = classifyErrorCode(exception);
-        
-        return RuleResult.errorWithCode(rule.getName(), errorMessage, severity, errorCode, finalMetrics);
-    }
-
-    /**
-     * Build performance metrics with recovery information.
-     * Only includes recovery metrics if metrics are enabled in configuration.
-     */
-    private RulePerformanceMetrics buildMetricsWithRecovery(RulePerformanceMetrics.Builder metricsBuilder,
-                                                           Rule rule, Exception exception,
-                                                           boolean recoveryAttempted, boolean recoverySuccessful,
-                                                           String recoveryStrategy, String recoveryReason,
-                                                           Duration recoveryTime) {
-        // Complete the basic evaluation metrics first
-        RulePerformanceMetrics baseMetrics = performanceMonitor.completeEvaluation(metricsBuilder, rule.getCondition(), exception);
-
-        // Only add recovery metrics if metrics are enabled
-        if (errorRecoveryConfig.isMetricsEnabled()) {
-            // Create a new builder from the base metrics and add recovery information
-            return new RulePerformanceMetrics.Builder(baseMetrics.getRuleName())
-                .startTime(baseMetrics.getStartTime())
-                .endTime(baseMetrics.getEndTime())
-                .evaluationTime(baseMetrics.getEvaluationTime())
-                .memoryUsed(baseMetrics.getMemoryUsedBytes())
-                .memoryBefore(baseMetrics.getMemoryBeforeBytes())
-                .memoryAfter(baseMetrics.getMemoryAfterBytes())
-                .expressionComplexity(baseMetrics.getExpressionComplexity())
-                .cacheHit(baseMetrics.isCacheHit())
-                .evaluationPhase(baseMetrics.getEvaluationPhase())
-                .evaluationException(baseMetrics.getEvaluationException())
-                .recoveryAttempted(recoveryAttempted)
-                .recoverySuccessful(recoverySuccessful)
-                .recoveryStrategy(recoveryStrategy)
-                .recoveryReason(recoveryReason)
-                .recoveryTime(recoveryTime)
-                .build();
-        } else {
-            // Return base metrics without recovery information
-            return baseMetrics;
-        }
-    }
 
     /**
      * Evaluate a router expression that returns a non-boolean value (e.g., a route key).
@@ -561,7 +393,7 @@ public class UnifiedRuleEvaluator {
      * @since 2026-02-26
      */
     public Object evaluateRouterExpression(String ruleId, String expression, Map<String, Object> data) {
-        logger.info("Evaluating router expression for '{}': {}", ruleId, expression);
+        logger.debug("Evaluating router expression for '{}': {}", ruleId, expression);
 
         // Start performance monitoring
         RulePerformanceMetrics.Builder metricsBuilder = performanceMonitor.startEvaluation(ruleId, "router-evaluation");
@@ -573,7 +405,7 @@ public class UnifiedRuleEvaluator {
 
             // Complete performance monitoring
             performanceMonitor.completeEvaluation(metricsBuilder, expression);
-            logger.info("Router expression for '{}' evaluated to: {}", ruleId, result);
+            logger.debug("Router expression for '{}' evaluated to: {}", ruleId, result);
             return result;
         } catch (Exception e) {
             logger.error("Error evaluating router expression for '{}': {}", ruleId, e.getMessage());
@@ -628,79 +460,27 @@ public class UnifiedRuleEvaluator {
     }
 
     /**
-     * Evaluate a list of rules against the provided context.
-     * Returns the first rule that matches, or NO_MATCH if none match.
-     *
-     * @param rules The rules to evaluate
-     * @param context The evaluation context
-     * @return The result of the first matching rule, or NO_MATCH
-     */
-    public RuleResult evaluateRules(List<Rule> rules, EvaluationContext context) {
-        if (rules == null || rules.isEmpty()) {
-            logger.info("No rules provided for evaluation");
-            return RuleResult.noRules();
-        }
-
-        logger.info("Evaluating {} rules", rules.size());
-
-        // Accumulate enrichedData from all rules (even non-matching ones)
-        Map<String, Object> accumulatedEnrichedData = new java.util.HashMap<>();
-
-        for (Rule rule : rules) {
-            RuleResult result = evaluateRule(rule, context);
-
-            // Accumulate enrichedData from this rule (field mappings)
-            if (result.getEnrichedData() != null) {
-                accumulatedEnrichedData.putAll(result.getEnrichedData());
-            }
-
-            // Return first match or error (but with accumulated enrichedData)
-            if (result.isTriggered() || result.isError()) {
-                // If this result doesn't have all accumulated data, merge it
-                if (accumulatedEnrichedData.size() > (result.getEnrichedData() != null ? result.getEnrichedData().size() : 0)) {
-                    Map<String, Object> mergedData = new java.util.HashMap<>(accumulatedEnrichedData);
-                    if (result.getEnrichedData() != null) {
-                        mergedData.putAll(result.getEnrichedData());
-                    }
-                    // Create new result with merged enrichedData
-                    return result.toBuilder()
-                            .enrichedData(mergedData)
-                            .build();
-                }
-                return result;
-            }
-        }
-
-        logger.info("No rules matched");
-        // Return noMatch with accumulated enrichedData from all evaluated rules
-        return RuleResult.builder()
-                .ruleName("no-match")
-                .message("No matching rules found")
-                .severity(SeverityConstants.INFO)
-                .triggered(false)
-                .resultType(RuleResult.ResultType.NO_MATCH)
-                .enrichedData(accumulatedEnrichedData)
-                .success(true)
-                .build();
-    }
-
-    /**
      * Evaluate a list of rules against the provided facts map.
-     * Convenience method that creates the evaluation context.
-     * Evaluates ALL rules to ensure result-field values are stored for all rules.
+     * Evaluates ALL rules to ensure result-field values are stored for all rules,
+     * then returns the first significant result (error or match, whichever came first).
+     *
+     * <p><strong>Termination semantics:</strong> All rules are always evaluated (no short-circuit).
+     * This ensures that result-field values from every rule are available in enrichedData,
+     * even if an earlier rule matched or errored.</p>
      *
      * @param rules The rules to evaluate
      * @param facts The facts to evaluate against
-     * @return The result with accumulated enrichedData from all rules
+     * @return The first significant result with accumulated enrichedData from all rules,
+     *         or NO_MATCH if no rules matched
      */
     public RuleResult evaluateRules(List<Rule> rules, Map<String, Object> facts) {
-        logger.info("evaluateRules(List<Rule>, Map) called with {} rules", rules != null ? rules.size() : 0);
+        logger.debug("evaluateRules(List<Rule>, Map) called with {} rules", rules != null ? rules.size() : 0);
 
         if (rules == null || rules.isEmpty()) {
             return RuleResult.noRules();
         }
 
-        logger.info("Evaluating {} rules", rules.size());
+        logger.debug("Evaluating {} rules", rules.size());
 
         // Accumulate enrichedData from all rules
         Map<String, Object> accumulatedEnrichedData = new java.util.HashMap<>();
@@ -731,7 +511,7 @@ public class UnifiedRuleEvaluator {
                     .build();
         }
 
-        logger.info("No rules matched");
+        logger.debug("No rules matched");
         // Return noMatch with accumulated enrichedData from all evaluated rules
         return RuleResult.builder()
                 .ruleName("no-match")
@@ -745,265 +525,12 @@ public class UnifiedRuleEvaluator {
     }
 
     /**
-     * Evaluate a code expression (either constant or SpEL).
-     * Phase 4 Enhancement: Supports both constant strings and SpEL expressions for codes.
-     *
-     * @param codeExpression The code expression to evaluate (e.g., "SUCCESS_CODE" or "#amount > 100 ? 'HIGH' : 'LOW'")
-     * @param context The evaluation context for SpEL expressions
-     * @return The evaluated code string, or null if evaluation fails
-     */
-    private String evaluateCode(String codeExpression, EvaluationContext context) {
-        if (codeExpression == null || codeExpression.trim().isEmpty()) {
-            return null;
-        }
 
-        try {
-            // Check if it's a SpEL expression (starts with #)
-            if (codeExpression.trim().startsWith("#")) {
-                Expression exp = parser.parseExpression(codeExpression);
-                Object result = exp.getValue(context);
-                return result != null ? result.toString() : null;
-            } else {
-                // It's a constant string
-                return codeExpression;
-            }
-        } catch (Exception e) {
-            logger.error("[APEX-RULE-003] Error evaluating code expression '{}': {}", codeExpression, e.getMessage());
-            logger.debug("Full exception details for code expression '{}':", codeExpression, e);
-            return null;
-        }
-    }
-
-    /**
-     * Apply field mappings to the enriched data.
-     * Phase 4 Enhancement: Supports generic field mapping using SpEL expressions.
-     *
-     * @param mapToField The field mapping configuration
-     * @param context The evaluation context for SpEL expressions
-     * @param enrichedData The enriched data map to update with mapped values
-     * @param successCode The evaluated success code (available as #success-code in expressions)
-     * @param errorCode The evaluated error code (available as #error-code in expressions)
-     */
-    private void applyFieldMappings(List<String> mapToField, EvaluationContext context, Map<String, Object> enrichedData,
-                                   String successCode, String errorCode) {
-        if (mapToField == null) {
-            return;
-        }
-
-        try {
-            // Create a context that includes the codes
-            StandardEvaluationContext mappingContext = (StandardEvaluationContext) context;
-            if (successCode != null) {
-                // Use underscore instead of hyphen for SpEL compatibility
-                mappingContext.setVariable("success_code", successCode);
-            }
-            if (errorCode != null) {
-                // Use underscore instead of hyphen for SpEL compatibility
-                mappingContext.setVariable("error_code", errorCode);
-            }
-
-            // Handle both single mapping (String) and multiple mappings (List<String>)
-            // Apply each mapping
-            for (String mapping : mapToField) {
-                applyFieldMapping(mapping, mappingContext, enrichedData);
-            }
-        } catch (Exception e) {
-            logger.error("[APEX-RULE-004] Error applying field mappings: {}", e.getMessage());
-            logger.debug("Full exception details for field mappings:", e);
-        }
-    }
-
-    /**
-     * Apply a single field mapping expression.
-     * Parses expressions like "fieldName = #success-code" or "status = #amount > 100 ? 'HIGH' : 'LOW'"
-     *
-     * @param mapping The mapping expression
-     * @param context The evaluation context
-     * @param enrichedData The enriched data map to update
-     */
-    private void applyFieldMapping(String mapping, StandardEvaluationContext context, Map<String, Object> enrichedData) {
-        try {
-            // Parse the mapping: "fieldName = expression"
-            String[] parts = mapping.split("=", 2);
-            if (parts.length != 2) {
-                logger.warn("Invalid field mapping format: {}. Expected 'fieldName = expression'", mapping);
-                return;
-            }
-
-            String fieldName = parts[0].trim();
-            String expression = parts[1].trim();
-
-            // Evaluate the expression
-            Expression exp = parser.parseExpression(expression);
-            Object value = exp.getValue(context);
-
-            // Store the mapped value in enriched data
-            enrichedData.put(fieldName, value);
-            logger.info("Applied field mapping: {} = {}", fieldName, value);
-        } catch (Exception e) {
-            logger.error("[APEX-RULE-004] Error applying field mapping '{}': {}", mapping, e.getMessage());
-            logger.debug("Full exception details for field mapping '{}':", mapping, e);
-        }
-    }
-    
-    /**
-     * Classify the APEX error code based on the exception type and message.
-     * Maps SpEL exceptions and other errors to standardized APEX error codes from the error registry.
-     *
-     * @param exception The exception that occurred during rule evaluation
-     * @return The APEX error code (e.g., APEX-RULE-001, APEX-RULE-002)
-     */
-    private String classifyErrorCode(Exception exception) {
-        String message = exception.getMessage();
-        if (message == null) {
-            return "APEX-RULE-999";
-        }
-        
-        // EL1008E: Property or field not found
-        if (message.contains("EL1008E") || message.contains("Property or field") || message.contains("cannot be found")) {
-            return "APEX-RULE-002";
-        }
-        // EL1004E: Method not found
-        if (message.contains("EL1004E") || message.contains("Method call:")) {
-            return "APEX-RULE-005";
-        }
-        // EL1011E: Null context / undefined variable
-        if (message.contains("EL1011E") || message.contains("null context object")) {
-            return "APEX-RULE-004";
-        }
-        // EL1001E: Type conversion error
-        if (message.contains("EL1001E") || message.contains("Type conversion")) {
-            return "APEX-RULE-003";
-        }
-        // EL1030E: Operator overloading / arithmetic error
-        if (message.contains("EL1030E") || message.contains("divide by zero") || message.contains("Division by zero")) {
-            return "APEX-RULE-007";
-        }
-        // EL1041E: Access denied
-        if (message.contains("EL1041E") || message.contains("not accessible")) {
-            return "APEX-RULE-006";
-        }
-        // SpelParseException: expression syntax error
-        if (exception instanceof org.springframework.expression.spel.SpelParseException) {
-            return "APEX-RULE-001";
-        }
-        // SpelEvaluationException: generic evaluation error
-        if (exception instanceof org.springframework.expression.spel.SpelEvaluationException) {
-            return "APEX-RULE-001";
-        }
-        // Default: general rule error
-        return "APEX-RULE-999";
-    }
-
-    /**
-     * Create enhanced error message that provides helpful context about undefined variables.
-     * Detects SpEL errors related to undefined/null variables and enhances the message.
-     *
-     * @param rule The rule that failed
-     * @param exception The exception that occurred
-     * @return Enhanced error message with undefined variable details
-     */
-    private String createEnhancedErrorMessage(Rule rule, Exception exception) {
-        String baseMessage = exception.getMessage();
-        
-        // Check if this is a "null context object" error (EL1011E) which typically means undefined variable
-        if (baseMessage != null && (baseMessage.contains("EL1011E") || 
-                                   baseMessage.contains("null context object") ||
-                                   baseMessage.contains("Attempted to call method"))) {
-            
-            // Try to extract the variable name from the rule condition
-            String condition = rule.getCondition();
-            if (condition != null && condition.contains("#")) {
-                // Find all #variable references in the condition
-                Matcher matcher = SPEL_VARIABLE_PATTERN.matcher(condition);
-                if (matcher.find()) {
-                    String varName = matcher.group(1);
-                    return String.format("Rule evaluation failed: %s - Rule references undefined or inaccessible variable '%s' in condition: %s",
-                        rule.getName(), varName, baseMessage);
-                }
-            }
-        }
-        
-        // For other exceptions, use standard format
-        return String.format(ERROR_MESSAGE_FORMAT, rule.getName(), baseMessage);
-    }
-    
-    /**
-     * Resolve message template placeholders against the SpEL evaluation context.
-     * Supports two placeholder formats:
-     * <ul>
-     *   <li>{@code {{#expression}}} - Handlebars-style (used in most YAML configs)</li>
-     *   <li>{@code #{expression}} - SpEL template style (used by TemplateProcessorService)</li>
-     * </ul>
-     * 
-     * The expression inside the placeholder is evaluated as a SpEL expression against
-     * the provided context. If evaluation fails, the original placeholder is preserved.
-     *
      * @param message The message template to resolve
      * @param context The SpEL evaluation context containing variable bindings
      * @return The message with all resolvable placeholders replaced by their values
      */
     String resolveMessageTemplate(String message, EvaluationContext context) {
-        if (message == null || context == null) {
-            return message;
-        }
-        
-        // Quick check: if no placeholders, return as-is
-        if (!message.contains("{{#") && !message.contains("#{")) {
-            return message;
-        }
-        
-        String resolved = message;
-        
-        // Resolve {{#expression}} (Handlebars-style) placeholders
-        if (resolved.contains("{{#")) {
-            Matcher hbMatcher = HANDLEBARS_PLACEHOLDER_PATTERN.matcher(resolved);
-            StringBuilder sb = new StringBuilder();
-            while (hbMatcher.find()) {
-                String spelExpr = hbMatcher.group(1); // e.g., "#age" or "#amount"
-                try {
-                    Expression expression = parser.parseExpression(spelExpr);
-                    Object value = expression.getValue(context);
-                    String replacement = value != null ? Matcher.quoteReplacement(value.toString()) : "";
-                    hbMatcher.appendReplacement(sb, replacement);
-                    logger.trace("Resolved message placeholder '{{{{{}}}}}' to '{}'", spelExpr, value);
-                } catch (Exception e) {
-                    // Preserve original placeholder on error
-                    hbMatcher.appendReplacement(sb, Matcher.quoteReplacement(hbMatcher.group(0)));
-                    logger.debug("Could not resolve message placeholder '{}': {}", spelExpr, e.getMessage());
-                }
-            }
-            hbMatcher.appendTail(sb);
-            resolved = sb.toString();
-        }
-        
-        //Resolve #{expression} (SpEL template) placeholders
-        if (resolved.contains("#{")) {
-            Matcher spelMatcher = HASH_PLACEHOLDER_PATTERN.matcher(resolved);
-            StringBuilder sb = new StringBuilder();
-            while (spelMatcher.find()) {
-                String spelExpr = spelMatcher.group(1); // e.g., "age" or "amount"
-                try {
-                    Expression expression = parser.parseExpression(spelExpr);
-                    Object value = expression.getValue(context);
-                    String replacement = value != null ? Matcher.quoteReplacement(value.toString()) : "";
-                    spelMatcher.appendReplacement(sb, replacement);
-                    logger.trace("Resolved message placeholder '#{{{}}}' to '{}'", spelExpr, value);
-                } catch (Exception e) {
-                    spelMatcher.appendReplacement(sb, Matcher.quoteReplacement(spelMatcher.group(0)));
-                    logger.debug("Could not resolve message placeholder '{}': {}", spelExpr, e.getMessage());
-                }
-            }
-            spelMatcher.appendTail(sb);
-            resolved = sb.toString();
-        }
-        
-        if (!resolved.equals(message)) {
-            logger.debug("Resolved message template: '{}' -> '{}'", message, resolved);
-        }
-        
-        return resolved;
+        return messageTemplateResolver.resolve(message, context);
     }
 }
-
-
