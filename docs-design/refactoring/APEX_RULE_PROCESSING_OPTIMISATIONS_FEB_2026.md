@@ -1,8 +1,8 @@
 # APEX Rule Processing Optimisations — February 2026
 
-**Status:** 🟡 PHASES 7-8 COMPLETE — REMAINING PHASES NOT STARTED  
+**Status:** 🟡 PHASES 7-9 COMPLETE — REMAINING PHASES NOT STARTED  
 **Branch:** `refactor/rules-engine-decomposition`  
-**Last Updated:** February 26, 2026  
+**Last Updated:** February 27, 2026  
 **Test Baseline:** apex-core: 2,873 tests, apex-demo: 908 tests — 0 failures, 0 errors  
 **Predecessor:** `APEX_RULE_PROCESSING_OPTIMISATIONS_JAN_2026_COMPLETE.md` (6 phases, all complete)
 
@@ -15,7 +15,7 @@ Following the completion of all 6 phases from the January 2026 optimisation effo
 | Class | Lines | Package | Responsibility |
 |---|---|---|---|
 | `RulesEngine` | 960 | `engine.core` | Public API, factory methods, delegation, sequential orchestration |
-| `UnifiedRuleEvaluator` | 922 | `engine.core` | Canonical SpEL evaluation, error recovery, message templating, router expressions |
+| `UnifiedRuleEvaluator` | 877 | `engine.core` | Canonical SpEL evaluation, error recovery, message templating, router expressions |
 | `ExpressionEvaluatorService` | 227 | `engine.core` | Low-level SpEL parsing, context creation, used by REST API |
 | `SequentialProcessor` | 615 | `engine.execution` | Document-order orchestration, item/section routing, index builders |
 | `RuleGroup` | 426 | `engine.model` | Group AND/OR logic (evaluation delegated to `RuleGroupEvaluationService`) |
@@ -236,17 +236,18 @@ Remove verified dead code with zero callers.
 
 **Net result:** −88 lines removed from 4 files. 9 stale "PeeGeeQ" Javadoc references corrected to "APEX Rules Engine".
 
-### Phase 9: Resolve evaluateRules() Semantic Split
+### Phase 9: Resolve evaluateRules() Semantic Split ✅
 
 **Risk: Medium | Impact: Medium | Effort: Medium**
 
 Eliminate the silent behavioural difference between the two `evaluateRules()` overloads.
 
 **Solution:**
-1. Rename `evaluateRules(List<Rule>, EvaluationContext)` to `evaluateRulesShortCircuit(List<Rule>, EvaluationContext)` to make the short-circuit behaviour explicit in the method name
-2. Or: unify both methods to evaluate-all semantics (the `Map` overload's behaviour), since result-field storage requires all rules to be evaluated. The `EvaluationContext` overload's short-circuit was a pre-Phase-5 optimisation that is no longer correct when result-fields are in use
-3. Add Javadoc to both methods documenting the termination semantics clearly
-4. Audit callers to confirm which semantic each call site actually needs
+1. ✅ Audited all callers: 4 production callers (`RuleChainExecutor` ×2, `RuleGroupExecutor` ×1, `RulesEngine` ×1) and 4 test callers (`UnifiedRuleEvaluatorTest` ×4) — ALL use the `Map<String, Object>` overload
+2. ✅ The `EvaluationContext` overload (short-circuit semantics) has **zero callers** — deleted as dead code
+3. ✅ Improved Javadoc on the remaining `evaluateRules(List<Rule>, Map<String, Object>)` to explicitly document evaluate-all termination semantics
+
+**Net result:** UnifiedRuleEvaluator 922→877 lines (−45). Semantic ambiguity eliminated — only one `evaluateRules()` method remains with clearly documented evaluate-all behaviour.
 
 ### Phase 10: Consolidate evaluateYaml() / evaluateYamlFile()
 
@@ -295,6 +296,6 @@ Phases 7 and 8 are independent and could be executed in parallel. Phase 9 requir
 
 - [x] **Phase 7: Cache EnrichmentGroupFactory** — ✅ Complete (Feb 26, 2026). Enrichment groups, enrichments, and transformations indexed once per evaluation pass. 2 × O(n×m) factory rebuilds and O(n) linear scans eliminated. SequentialProcessor 655→615, RuleChainExecutor 379→352. Tests: 2,873 + 908 = 3,781, 0 failures.
 - [x] **Phase 8: Remove Dead Code** — ✅ Complete (Feb 26, 2026). Removed `extractVariableName()` (49 lines), `updateMessage()` (32 lines), localised `parser` field, consolidated duplicate Javadoc. Fixed 9 "PeeGeeQ" references across codebase. Net −88 lines. Tests: 2,873 + 908 = 3,781, 0 failures.
-- [ ] **Phase 9: Resolve evaluateRules() Split** — Rename or unify the two `evaluateRules()` overloads with silently different semantics
+- [x] **Phase 9: Resolve evaluateRules() Split** — ✅ Complete (Feb 27, 2026). Deleted dead `evaluateRules(List<Rule>, EvaluationContext)` overload (0 callers). Only evaluate-all semantics remain. UnifiedRuleEvaluator 922→877 (−45 lines). Tests: 2,873 + 908 = 3,781, 0 failures.
 - [ ] **Phase 10: Consolidate evaluateYaml** — Extract shared error handling into `safeEvaluate()` helper
 - [ ] **Phase 11: Structural Improvements** — Remove mutable setter, fix double defensive copying, cache transformation processor, downgrade INFO→DEBUG logging
