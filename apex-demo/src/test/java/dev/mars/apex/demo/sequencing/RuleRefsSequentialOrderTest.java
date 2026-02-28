@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
@@ -37,7 +37,7 @@ public class RuleRefsSequentialOrderTest {
         LOGGER.info("=== TESTING: Rules Loaded from External File ===");
 
         // Load configuration
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.loadFromFile(CONFIG_FILE);
 
         // Verify rules from external file were loaded

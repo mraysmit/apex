@@ -1,6 +1,6 @@
 package dev.mars.apex.core.performance;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
@@ -36,11 +36,11 @@ class ErrorHandlingPerformanceBenchmarkTest {
     private static final int MEASUREMENT_ITERATIONS = 1000;
     private static final double MAX_OVERHEAD_MS = 5.0;
     
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
     }
 
     @Test

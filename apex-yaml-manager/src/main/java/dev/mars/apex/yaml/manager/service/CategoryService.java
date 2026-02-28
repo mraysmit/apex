@@ -17,7 +17,7 @@ package dev.mars.apex.yaml.manager.service;
  */
 
 import dev.mars.apex.yaml.manager.model.CategorySummary;
-import dev.mars.apex.yaml.manager.model.YamlConfigMetadata;
+import dev.mars.apex.yaml.manager.model.ConfigMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +64,7 @@ public class CategoryService {
         Map<String, CategorySummary> categoryIndex = new HashMap<>();
         
         // Iterate through all configurations in the catalog
-        for (YamlConfigMetadata config : catalogService.getAllConfigurations()) {
+        for (ConfigMetadata config : catalogService.getAllConfigurations()) {
             if (config.getCategories() != null && !config.getCategories().isEmpty()) {
                 // Parse the YAML file to extract full category details
                 extractCategoriesFromFile(config.getPath(), categoryIndex);

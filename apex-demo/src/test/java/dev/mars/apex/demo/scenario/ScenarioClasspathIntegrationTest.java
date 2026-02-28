@@ -16,8 +16,8 @@
 package dev.mars.apex.demo.scenario;
 
 import dev.mars.apex.core.config.loader.ScenarioRegistryLoader;
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
 import dev.mars.apex.core.service.scenario.ScenarioStage;
 import dev.mars.apex.demo.DemoTestBase;
@@ -96,14 +96,14 @@ public class ScenarioClasspathIntegrationTest extends DemoTestBase {
      * Helper method to load scenarios from classpath.
      * Uses the stream-based API with classpath base for relative path resolution.
      */
-    private Map<String, ScenarioConfiguration> loadScenariosFromClasspath() throws YamlConfigurationException {
+    private Map<String, ScenarioConfiguration> loadScenariosFromClasspath() throws ConfigurationException {
         try (InputStream registryStream = getClass().getClassLoader().getResourceAsStream(CLASSPATH_REGISTRY)) {
             if (registryStream == null) {
-                throw new YamlConfigurationException("Registry not found on classpath: " + CLASSPATH_REGISTRY);
+                throw new ConfigurationException("Registry not found on classpath: " + CLASSPATH_REGISTRY);
             }
             return scenarioLoader.loadRegistry(registryStream, CLASSPATH_BASE);
         } catch (Exception e) {
-            throw new YamlConfigurationException("Failed to load scenarios from classpath: " + e.getMessage(), e);
+            throw new ConfigurationException("Failed to load scenarios from classpath: " + e.getMessage(), e);
         }
     }
 
@@ -178,12 +178,12 @@ public class ScenarioClasspathIntegrationTest extends DemoTestBase {
 
             String nonExistentPath = "non/existent/registry.yaml";
 
-            YamlConfigurationException exception = assertThrows(
-                    YamlConfigurationException.class,
+            ConfigurationException exception = assertThrows(
+                    ConfigurationException.class,
                     () -> {
                         try (InputStream stream = getClass().getClassLoader().getResourceAsStream(nonExistentPath)) {
                             if (stream == null) {
-                                throw new YamlConfigurationException("Registry not found: " + nonExistentPath);
+                                throw new ConfigurationException("Registry not found: " + nonExistentPath);
                             }
                             scenarioLoader.loadRegistry(stream, "non/existent/");
                         }

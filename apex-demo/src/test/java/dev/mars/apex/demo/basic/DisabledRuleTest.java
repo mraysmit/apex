@@ -15,8 +15,8 @@
  */
 package dev.mars.apex.demo.basic;
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.engine.core.RulesEngine;
@@ -76,8 +76,8 @@ class DisabledRuleTest {
 
         @Test
         @DisplayName("Disabled rule should be skipped - not evaluated")
-        void testDisabledRuleIsSkipped() throws YamlConfigurationException {
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        void testDisabledRuleIsSkipped() throws ConfigurationException {
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.loadFromFile(BASE_PATH + "DisabledRuleTest.yaml");
             assertNotNull(config, "YAML configuration should load successfully");
 
@@ -128,8 +128,8 @@ class DisabledRuleTest {
 
         @Test
         @DisplayName("Rule with enabled: true should work normally (non-matching data)")
-        void testEnabledRuleNonMatchingData() throws YamlConfigurationException {
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        void testEnabledRuleNonMatchingData() throws ConfigurationException {
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.loadFromFile(BASE_PATH + "DisabledRuleTest.yaml");
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
@@ -171,8 +171,8 @@ class DisabledRuleTest {
 
         @Test
         @DisplayName("Disabled rule inside AND group should be skipped by pre-filtering")
-        void testDisabledRuleInsideGroup() throws YamlConfigurationException {
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        void testDisabledRuleInsideGroup() throws ConfigurationException {
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.loadFromFile(BASE_PATH + "DisabledRuleTest-rulegroup.yaml");
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
@@ -188,7 +188,7 @@ class DisabledRuleTest {
             logChildResults("Rule group with disabled rule", childResults);
 
             // The AND group should pass because:
-            // - The disabled rule (group-disabled-rule) is pre-filtered by YamlRuleFactory.createRules()
+            // - The disabled rule (group-disabled-rule) is pre-filtered by RuleFactory.createRules()
             //   so it never enters the RuleGroup
             // - The 2 enabled rules both match, so AND is true
             // The group result should appear somewhere in the child results
@@ -209,8 +209,8 @@ class DisabledRuleTest {
 
         @Test
         @DisplayName("Entire disabled rule group should be skipped")
-        void testDisabledRuleGroup() throws YamlConfigurationException {
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        void testDisabledRuleGroup() throws ConfigurationException {
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.loadFromFile(BASE_PATH + "DisabledRuleTest-rulegroup.yaml");
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
@@ -248,8 +248,8 @@ class DisabledRuleTest {
 
         @Test
         @DisplayName("Disabled enrichment should not execute")
-        void testDisabledEnrichmentIsSkipped() throws YamlConfigurationException {
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        void testDisabledEnrichmentIsSkipped() throws ConfigurationException {
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.loadFromFile(BASE_PATH + "DisabledRuleTest-enrichment.yaml");
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
@@ -285,8 +285,8 @@ class DisabledRuleTest {
 
         @Test
         @DisplayName("Disabled Rule via RulesEngine.executeRule() should not trigger")
-        void testDisabledRuleViaRulesEngineApi() throws YamlConfigurationException {
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        void testDisabledRuleViaRulesEngineApi() throws ConfigurationException {
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.loadFromFile(BASE_PATH + "DisabledRuleTest.yaml");
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
 
@@ -329,8 +329,8 @@ class DisabledRuleTest {
 
         @Test
         @DisplayName("Enabled Rule via direct API should work normally")
-        void testEnabledRuleViaDirectApi() throws YamlConfigurationException {
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        void testEnabledRuleViaDirectApi() throws ConfigurationException {
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.loadFromFile(BASE_PATH + "DisabledRuleTest.yaml");
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
 

@@ -16,8 +16,8 @@ package dev.mars.apex.demo.lookup;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.core.RulesEngineConfiguration;
@@ -74,13 +74,13 @@ public class LookupBasicInlineTest {
     
     private static final Logger logger = LoggerFactory.getLogger(LookupBasicInlineTest.class);
 
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
     private YamlRuleConfiguration config;
 
     @BeforeEach
     void setUp() {
         // Initialize APEX services following established patterns
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
         
         try {
             // Load inline lookup configuration
@@ -90,7 +90,7 @@ public class LookupBasicInlineTest {
             logger.info("  - Configuration loaded: {}", config.getMetadata().getName());
             logger.info("  - Lookup enrichments: {}", config.getEnrichments().size());
             
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
@@ -100,7 +100,7 @@ public class LookupBasicInlineTest {
      * Create RulesEngine with EnrichmentService for lookup processing
      * Following the established pattern from previous tests
      */
-    private RulesEngine createRulesEngineWithEnrichmentService(YamlRuleConfiguration config) throws YamlConfigurationException {
+    private RulesEngine createRulesEngineWithEnrichmentService(YamlRuleConfiguration config) throws ConfigurationException {
         // Create basic configuration from YAML using the static factory method
         RulesEngine baseEngine = RulesEngine.fromYamlConfig(config);
         RulesEngineConfiguration rulesConfig = baseEngine.getConfiguration();

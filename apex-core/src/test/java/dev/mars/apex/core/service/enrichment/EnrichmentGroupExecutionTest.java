@@ -1,7 +1,7 @@
 package dev.mars.apex.core.service.enrichment;
 
 import dev.mars.apex.core.cache.ApexCacheManager;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
@@ -22,17 +22,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for enrichment group execution using RulesEngine.
- * Migrated from deprecated YamlEnrichmentProcessor to RulesEngine API.
+ * Migrated from deprecated EnrichmentProcessor to RulesEngine API.
  */
 @ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class EnrichmentGroupExecutionTest {
 
-    private YamlConfigurationLoader loader;
+    private ConfigurationLoader loader;
 
     @BeforeEach
     void setUp() {
         ApexCacheManager.resetInstance();
-        loader = new YamlConfigurationLoader();
+        loader = new ConfigurationLoader();
     }
 
     private String buildAndGroupYaml() {

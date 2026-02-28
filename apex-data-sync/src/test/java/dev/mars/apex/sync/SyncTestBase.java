@@ -19,7 +19,7 @@
 package dev.mars.apex.sync;
 
 import dev.mars.apex.core.cache.ApexCacheManager;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.engine.core.RulesEngineConfiguration;
 import dev.mars.apex.core.service.data.external.database.JdbcTemplateFactory;
 import dev.mars.apex.core.service.data.external.factory.DataSourceFactory;
@@ -65,7 +65,7 @@ public abstract class SyncTestBase {
     protected static final Logger logger = LoggerFactory.getLogger(SyncTestBase.class);
 
     // Real APEX services for testing
-    protected YamlConfigurationLoader yamlLoader;
+    protected ConfigurationLoader yamlLoader;
     protected LookupServiceRegistry serviceRegistry;
     protected ExpressionEvaluatorService expressionEvaluator;
     protected RulesEngineConfiguration rulesEngineConfiguration;
@@ -104,7 +104,7 @@ public abstract class SyncTestBase {
         }
 
         // Initialize real APEX services
-        this.yamlLoader = new YamlConfigurationLoader();
+        this.yamlLoader = new ConfigurationLoader();
         this.serviceRegistry = new LookupServiceRegistry();
         this.expressionEvaluator = new ExpressionEvaluatorService();
         this.rulesEngineConfiguration = new RulesEngineConfiguration();

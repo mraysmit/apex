@@ -18,7 +18,7 @@ package dev.mars.apex.core.service.data.external.database;
 
 import dev.mars.apex.core.config.datasource.ConnectionConfig;
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.service.data.external.DataSourceException;
 import org.junit.jupiter.api.AfterEach;
@@ -346,7 +346,7 @@ class H2ConnectionStringTest {
             """;
 
         // Load YAML configuration
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.loadFromStream(new ByteArrayInputStream(yamlContent.getBytes()));
 
         var yamlDataSource = config.getDataSources().stream()
@@ -500,7 +500,7 @@ class H2ConnectionStringTest {
      */
     private void testH2ConnectionFromYaml(String yamlContent, String dataSourceName) throws Exception {
         // Load YAML configuration
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.loadFromStream(new ByteArrayInputStream(yamlContent.getBytes()));
         
         assertNotNull(config, "Configuration should be loaded");

@@ -26,11 +26,11 @@ class YamlConditionalTransformationTest {
 
     private static final Logger logger = LoggerFactory.getLogger(YamlConditionalTransformationTest.class);
 
-    private YamlTransformationProcessor processor;
+    private TransformationProcessor processor;
 
     @BeforeEach
     void setUp() {
-        processor = new YamlTransformationProcessor();
+        processor = new TransformationProcessor();
     }
 
     @Test

@@ -16,8 +16,8 @@
 
 package dev.mars.apex.demo.basic;
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
@@ -41,13 +41,13 @@ class SimpleBasicYamlRuleGroupProcessingTest {
 
     private static final Logger logger = LoggerFactory.getLogger(SimpleBasicYamlRuleGroupProcessingTest.class);
 
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
         logger.info("Setting up APEX services for simple rule group processing tests...");
 
-        this.yamlLoader = new YamlConfigurationLoader();
+        this.yamlLoader = new ConfigurationLoader();
 
         logger.info("[OK] APEX services initialized successfully");
     }
@@ -110,7 +110,7 @@ class SimpleBasicYamlRuleGroupProcessingTest {
             
             logger.info("[OK] All simple rule group tests passed");
             
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load or process configuration: {}", e.getMessage());
             fail("Failed to load or process configuration: " + e.getMessage());
         }
@@ -153,7 +153,7 @@ class SimpleBasicYamlRuleGroupProcessingTest {
             
             logger.info("[OK] Separate files test passed");
             
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load or process configuration: {}", e.getMessage());
             fail("Failed to load or process configuration: " + e.getMessage());
         }

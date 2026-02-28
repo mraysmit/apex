@@ -70,12 +70,12 @@ class ScenarioRegistryLoaderStreamTest {
     private static final String TEST_REGISTRY_PATH = TEST_RESOURCE_BASE + "test-registry.yaml";
     
     private ScenarioRegistryLoader loader;
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
         logger.info("Setting up ScenarioRegistryLoaderStreamTest");
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
         loader = new ScenarioRegistryLoader(yamlLoader);
     }
 
@@ -150,8 +150,8 @@ class ScenarioRegistryLoaderStreamTest {
 
             try (InputStream inputStream = new ByteArrayInputStream(registryYaml.getBytes(StandardCharsets.UTF_8))) {
                 // ScenarioRegistryLoader requires at least one scenario
-                YamlConfigurationException exception = assertThrows(
-                    YamlConfigurationException.class,
+                ConfigurationException exception = assertThrows(
+                    ConfigurationException.class,
                     () -> loader.loadRegistry(inputStream),
                     "Should throw exception for empty scenarios list"
                 );

@@ -15,7 +15,7 @@
  */
 package dev.mars.apex.sync.schema;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
@@ -126,7 +126,7 @@ public class ReadSchemaDatabasePipelineStageTest_postgresql_shouldEnumerateTable
         logger.info("  Username: {}", postgres.getUsername());
 
         // Load the configuration from YAML file
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration yamlConfig = loader.loadFromFile(
             "src/test/java/dev/mars/apex/sync/schema/ReadSchemaDatabasePipelineStageTest_postgresql_shouldEnumerateTablesAndGenerateReport.yaml");
         RulesEngine engine = RulesEngine.fromYamlConfig(yamlConfig);

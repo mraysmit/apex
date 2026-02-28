@@ -1,9 +1,9 @@
 package dev.mars.apex.core.integration;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
-import dev.mars.apex.core.config.YamlConfigurationMerger;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.ConfigurationMerger;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
-import dev.mars.apex.core.config.YamlRuleFactory;
+import dev.mars.apex.core.config.RuleFactory;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.core.RulesEngineConfiguration;
 import dev.mars.apex.engine.model.RuleGroup;
@@ -42,13 +42,13 @@ public class ExternalDataSourceFileSystemIntegrationTest {
     @TempDir
     Path tempDir;
 
-    private YamlConfigurationLoader configLoader;
-    private YamlRuleFactory ruleFactory;
+    private ConfigurationLoader configLoader;
+    private RuleFactory ruleFactory;
 
     @BeforeEach
     void setUp() {
-        this.configLoader = new YamlConfigurationLoader();
-        this.ruleFactory = new YamlRuleFactory();
+        this.configLoader = new ConfigurationLoader();
+        this.ruleFactory = new RuleFactory();
     }
 
     @Test
@@ -210,10 +210,10 @@ public class ExternalDataSourceFileSystemIntegrationTest {
         YamlRuleConfiguration rulesConfig = configLoader.loadFromFileWithoutValidation(rulesConfigFile.toString());
         YamlRuleConfiguration groupsConfig = configLoader.loadFromFileWithoutValidation(ruleGroupsConfigFile.toString());
         
-        // Merge YAML configurations using YamlConfigurationMerger
+        // Merge YAML configurations using ConfigurationMerger
         YamlRuleConfiguration merged = new YamlRuleConfiguration();
-        YamlConfigurationMerger.merge(merged, rulesConfig);
-        YamlConfigurationMerger.merge(merged, groupsConfig);
+        ConfigurationMerger.merge(merged, rulesConfig);
+        ConfigurationMerger.merge(merged, groupsConfig);
         
         // Process references and validate the merged configuration
         configLoader.processReferencesAndValidate(merged);

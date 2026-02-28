@@ -2,8 +2,8 @@ package dev.mars.apex.demo.transformation;
 
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.config.model.YamlTransformation;
-import dev.mars.apex.core.service.transform.YamlTransformationProcessor;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.service.transform.TransformationProcessor;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,13 +23,13 @@ import static org.junit.jupiter.api.Assertions.*;
 public class NestedConditionalTransformationDemoTest {
 
     private static final Logger logger = LoggerFactory.getLogger(NestedConditionalTransformationDemoTest.class);
-    private YamlConfigurationLoader yamlLoader;
-    private YamlTransformationProcessor transformationProcessor;
+    private ConfigurationLoader yamlLoader;
+    private TransformationProcessor transformationProcessor;
 
     @BeforeEach
     public void setUp() {
-        yamlLoader = new YamlConfigurationLoader();
-        transformationProcessor = new YamlTransformationProcessor();
+        yamlLoader = new ConfigurationLoader();
+        transformationProcessor = new TransformationProcessor();
     }
 
     @Test

@@ -19,7 +19,7 @@
 package dev.mars.apex.sync.schema;
 
 import dev.mars.apex.sync.SyncTestBase;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.ExecutionStep;
@@ -61,7 +61,7 @@ class ReadSchemaDatabasePipelineStageTestH2Enumeration extends SyncTestBase {
     private static final Logger logger = LoggerFactory.getLogger(ReadSchemaDatabasePipelineStageTestH2Enumeration.class);
     private static final String H2_URL = "jdbc:h2:mem:enumeration_test;DB_CLOSE_DELAY=-1;MODE=PostgreSQL";
     
-    private final YamlConfigurationLoader yamlLoader = new YamlConfigurationLoader();
+    private final ConfigurationLoader yamlLoader = new ConfigurationLoader();
     private RulesEngine rulesEngine;
     private Connection testConnection;
     private Path reportPath;

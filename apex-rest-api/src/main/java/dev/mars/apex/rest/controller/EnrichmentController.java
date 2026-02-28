@@ -18,7 +18,7 @@ package dev.mars.apex.rest.controller;
 
 
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
 
@@ -57,7 +57,7 @@ public class EnrichmentController {
     private static final Logger logger = LoggerFactory.getLogger(EnrichmentController.class);
 
     @Autowired
-    private YamlConfigurationLoader yamlConfigurationLoader;
+    private ConfigurationLoader yamlConfigurationLoader;
 
     /**
      * Get predefined enrichment configurations.

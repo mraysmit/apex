@@ -1,5 +1,7 @@
 package dev.mars.apex.core.service.scenario;
 
+import dev.mars.apex.engine.execution.ScenarioStageExecutor;
+
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
  *

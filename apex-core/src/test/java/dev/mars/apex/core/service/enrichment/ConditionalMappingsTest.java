@@ -2,7 +2,7 @@ package dev.mars.apex.core.service.enrichment;
 
 import dev.mars.apex.core.config.model.YamlEnrichment;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.DisplayName;
@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test class forConditional Mappings functionality.
- * Tests the new conditional-mappings syntax in YamlEnrichmentProcessor.
+ * Tests the new conditional-mappings syntax in EnrichmentProcessor.
  */
 public class ConditionalMappingsTest {
 
@@ -59,7 +59,7 @@ public class ConditionalMappingsTest {
                             expression: "'OR_MATCHED'"
                 """;
 
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
             // Verify the structure was created correctly
@@ -133,7 +133,7 @@ public class ConditionalMappingsTest {
                             expression: "'OR_MATCHED'"
                 """;
 
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
             // Process enrichment using RulesEngine
@@ -193,7 +193,7 @@ public class ConditionalMappingsTest {
                             expression: "#systemCode"
                 """;
 
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
             // Process enrichment using RulesEngine
@@ -250,7 +250,7 @@ public class ConditionalMappingsTest {
                             expression: "'OR_MATCHED'"
                 """;
 
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
             // Process enrichment using RulesEngine

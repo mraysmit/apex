@@ -16,7 +16,7 @@
 
 package dev.mars.apex.demo.severity;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleGroup;
@@ -63,13 +63,13 @@ public class SeverityRuleGroupTest {
 
     private static final Logger logger = LoggerFactory.getLogger(SeverityRuleGroupTest.class);
 
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
         logger.info("Setting up APEX services for severity rule group testing...");
 
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
 
         logger.info("APEX services initialized successfully");
     }

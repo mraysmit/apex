@@ -37,7 +37,7 @@ public class TreeNode {
     private boolean isCircular;
     private String circularReference;
     private List<TreeNode> children;
-    private YamlContentSummary contentSummary;
+    private ContentSummary contentSummary;
     private List<String> dependencies;
     private List<String> dependents;
     private List<String> allDependencies;
@@ -142,11 +142,11 @@ public class TreeNode {
         this.childCount = children != null ? children.size() : 0;
     }
 
-    public YamlContentSummary getContentSummary() {
+    public ContentSummary getContentSummary() {
         return contentSummary;
     }
 
-    public void setContentSummary(YamlContentSummary contentSummary) {
+    public void setContentSummary(ContentSummary contentSummary) {
         this.contentSummary = contentSummary;
     }
 

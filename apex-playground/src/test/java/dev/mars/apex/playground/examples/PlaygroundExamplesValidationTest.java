@@ -18,11 +18,11 @@ package dev.mars.apex.playground.examples;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
-import dev.mars.apex.core.config.validation.YamlMetadataValidator;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.validation.MetadataValidator;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
-import dev.mars.apex.core.config.validation.YamlValidationResult;
+import dev.mars.apex.core.config.validation.ValidationResult;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,12 +64,12 @@ public class PlaygroundExamplesValidationTest {
     private static final Logger logger = LoggerFactory.getLogger(PlaygroundExamplesValidationTest.class);
     private static final String EXAMPLES_BASE_PATH = "examples";
     
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
     private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
         objectMapper = new ObjectMapper();
         logger.info("Test setup complete");
     }
@@ -97,7 +97,7 @@ public class PlaygroundExamplesValidationTest {
     /**
      * Helper method to load YAML configuration from file
      */
-    private YamlRuleConfiguration loadYamlConfig(String yamlPath) throws YamlConfigurationException {
+    private YamlRuleConfiguration loadYamlConfig(String yamlPath) throws ConfigurationException {
         Path path = resolveExamplePath(yamlPath);
         return yamlLoader.loadFromFile(path.toString());
     }
@@ -884,7 +884,7 @@ public class PlaygroundExamplesValidationTest {
             logger.info("Scanning for YAML files in: {}", examplesPath);
 
             // Use null base path so we can pass absolute paths
-            YamlMetadataValidator validator = new YamlMetadataValidator(null);
+            MetadataValidator validator = new MetadataValidator(null);
             List<String> errors = new ArrayList<>();
 
             try (Stream<Path> paths = Files.walk(examplesPath)) {
@@ -892,7 +892,7 @@ public class PlaygroundExamplesValidationTest {
                      .filter(p -> p.toString().endsWith(".yaml") || p.toString().endsWith(".yml"))
                      .forEach(path -> {
                          logger.debug("Validating: {}", path);
-                         YamlValidationResult result = validator.validateFile(path.toAbsolutePath().toString());
+                         ValidationResult result = validator.validateFile(path.toAbsolutePath().toString());
                          if (!result.isValid()) {
                              errors.add("Validation failed for " + examplesPath.relativize(path) + ": " + result.getErrors());
                          }

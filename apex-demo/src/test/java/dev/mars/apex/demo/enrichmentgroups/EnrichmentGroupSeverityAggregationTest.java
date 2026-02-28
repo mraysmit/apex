@@ -17,7 +17,7 @@
 package dev.mars.apex.demo.enrichmentgroups;
 
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.config.exception.ConfigurationException;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
@@ -122,7 +122,7 @@ public class EnrichmentGroupSeverityAggregationTest extends DemoTestBase {
 
             logSuccess("AND enrichment group severity aggregation working correctly - all passed as expected");
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logError("Failed to load YAML configuration: " + e.getMessage());
             fail("Failed to load YAML configuration: " + e.getMessage());
         }
@@ -192,7 +192,7 @@ public class EnrichmentGroupSeverityAggregationTest extends DemoTestBase {
 
             logSuccess("AND enrichment group severity aggregation working correctly - all enrichments passed");
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logError("Failed to load YAML configuration: " + e.getMessage());
             fail("Failed to load YAML configuration: " + e.getMessage());
         }
@@ -262,7 +262,7 @@ public class EnrichmentGroupSeverityAggregationTest extends DemoTestBase {
 
             logSuccess("OR enrichment group severity aggregation working correctly - first match logic applied");
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logError("Failed to load YAML configuration: " + e.getMessage());
             fail("Failed to load YAML configuration: " + e.getMessage());
         }
@@ -303,7 +303,7 @@ public class EnrichmentGroupSeverityAggregationTest extends DemoTestBase {
 
             logSuccess("Empty enrichment group behavior working correctly - empty groups pass by default");
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logError("Failed to load YAML configuration: " + e.getMessage());
             fail("Failed to load YAML configuration: " + e.getMessage());
         }

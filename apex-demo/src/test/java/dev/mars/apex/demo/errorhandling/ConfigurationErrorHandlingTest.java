@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * loading failures are handled gracefully through RuleResult instead of
  * throwing raw exceptions.
  * 
- * This addresses the architectural issue where YamlConfigurationException
+ * This addresses the architectural issue where ConfigurationException
  * was being thrown instead of being properly managed and propagated as
  * per APEX's error handling guidelines.
  *
@@ -121,13 +121,13 @@ public class ConfigurationErrorHandlingTest extends DemoTestBase {
         logger.info("=== Demonstrating APEX Error Handling Architecture ===");
         
         logger.info("OLD APPROACH (INCORRECT):");
-        logger.info("  - Raw YamlConfigurationException thrown");
+        logger.info("  - Raw ConfigurationException thrown");
         logger.info("  - Exception bubbles up to test framework");
         logger.info("  - Test fails with stack trace");
         logger.info("  - No graceful error recovery");
         
         logger.info("NEW APPROACH (CORRECT APEX ARCHITECTURE):");
-        logger.info("  - YamlConfigurationException caught and handled");
+        logger.info("  - ConfigurationException caught and handled");
         logger.info("  - Error converted to RuleResult with proper details");
         logger.info("  - Test can continue and handle error gracefully");
         logger.info("  - Follows APEX's error propagation patterns");

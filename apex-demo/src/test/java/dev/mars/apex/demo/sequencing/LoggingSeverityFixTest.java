@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.config.model.YamlEnrichment;
 
@@ -26,7 +26,7 @@ public class LoggingSeverityFixTest {
     
     private static final Logger logger = LoggerFactory.getLogger(LoggingSeverityFixTest.class);
     
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
     private RulesEngine rulesEngine;
 
     @BeforeEach
@@ -34,7 +34,7 @@ public class LoggingSeverityFixTest {
         logger.info("🔧 Initializing APEX services for logging severity fix verification");
 
         // Initialize YAML loader
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
 
         RulesEngineConfiguration config = new RulesEngineConfiguration();
         rulesEngine = new RulesEngine(config);
@@ -124,14 +124,14 @@ public class LoggingSeverityFixTest {
     void testDocumentLoggingSeverityFix() {
         logger.info("=== LOGGING SEVERITY FIX DOCUMENTATION ===");
         logger.info("🎯 CRITICAL IMPROVEMENTS IMPLEMENTED:");
-        logger.info("   YamlEnrichmentProcessor:248 - Enrichment condition evaluation failure → SEVERE");
-        logger.info("   YamlEnrichmentProcessor:1095 - Rule evaluation failure → SEVERE");
-        logger.info("   YamlEnrichmentProcessor:1163 - Rule group evaluation failure → SEVERE");
-        logger.info("   YamlEnrichmentProcessor:1176 - Rules/rule groups processing failure → SEVERE");
-        logger.info("   YamlEnrichmentProcessor:149 - Enrichment processing failure → SEVERE");
-        logger.info("   YamlEnrichmentProcessor:555 - OR condition evaluation failure → SEVERE");
-        logger.info("   YamlEnrichmentProcessor:574 - AND condition evaluation failure → SEVERE");
-        logger.info("   YamlEnrichmentProcessor:605 - General condition evaluation failure → SEVERE");
+        logger.info("   EnrichmentProcessor:248 - Enrichment condition evaluation failure → SEVERE");
+        logger.info("   EnrichmentProcessor:1095 - Rule evaluation failure → SEVERE");
+        logger.info("   EnrichmentProcessor:1163 - Rule group evaluation failure → SEVERE");
+        logger.info("   EnrichmentProcessor:1176 - Rules/rule groups processing failure → SEVERE");
+        logger.info("   EnrichmentProcessor:149 - Enrichment processing failure → SEVERE");
+        logger.info("   EnrichmentProcessor:555 - OR condition evaluation failure → SEVERE");
+        logger.info("   EnrichmentProcessor:574 - AND condition evaluation failure → SEVERE");
+        logger.info("   EnrichmentProcessor:605 - General condition evaluation failure → SEVERE");
         
         logger.info("IMPACT:");
         logger.info("   Business logic failures no longer masked as warnings");

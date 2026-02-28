@@ -3,7 +3,7 @@
  *
  * What it does:
  * - Scans the apex-demo/demo-data/mps-generated folder for all *.yaml/*.yml files.
- * - Tries to load each file using the standard YamlConfigurationLoader used by the engine.
+ * - Tries to load each file using the standard ConfigurationLoader used by the engine.
  * - Fails the test if any file cannot be loaded or is missing required sections.
  * - If the folder is missing or empty, the test exits early (effectively a skip) and prints a note.
  *
@@ -13,7 +13,7 @@
  */
 package dev.mars.apex.demo.validation;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -56,7 +56,7 @@ class MpsGeneratedYamlValidationTest {
 
         System.out.println("[MPS YAML Validation] Validating " + yamlFiles.size() + " file(s) in " + GENERATED_DIR.toAbsolutePath());
 
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
 
         for (Path yamlFile : yamlFiles) {
             try {

@@ -18,7 +18,7 @@ package dev.mars.apex.demo.categories;
 
 import dev.mars.apex.demo.DemoTestBase;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
-import dev.mars.apex.core.config.YamlRuleFactory;
+import dev.mars.apex.core.config.RuleFactory;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.engine.model.Rule;
@@ -49,8 +49,8 @@ public class MetadataInheritanceTest extends DemoTestBase {
         // Load YAML configuration with categories and rules
         YamlRuleConfiguration config = loadAndValidateYaml("dev/mars/apex/demo/categories/MetadataInheritanceTest.yaml");
 
-        // Create YamlRuleFactory to process rules with metadata inheritance
-        YamlRuleFactory ruleFactory = new YamlRuleFactory();
+        // Create RuleFactory to process rules with metadata inheritance
+        RuleFactory ruleFactory = new RuleFactory();
         List<Rule> rules = ruleFactory.createRules(config);
 
         // Verify rules were created

@@ -1,7 +1,7 @@
 package dev.mars.apex.demo.sequencing;
 
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
 
@@ -35,14 +35,14 @@ class UseCase2ValidationFirstTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UseCase2ValidationFirstTest.class);
 
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
         LOGGER.info("🎯 Setting up USE CASE 2: Validation-First Processing test");
 
         // Initialize APEX services for sequential processing
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
 
         LOGGER.info("Sequential processing services initialized");
     }

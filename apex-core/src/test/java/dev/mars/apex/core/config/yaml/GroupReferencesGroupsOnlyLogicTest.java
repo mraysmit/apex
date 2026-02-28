@@ -34,11 +34,11 @@ class GroupReferencesGroupsOnlyLogicTest {
 
     private static final Logger logger = LoggerFactory.getLogger(GroupReferencesGroupsOnlyLogicTest.class);
     
-    private YamlConfigurationLoader loader;
+    private ConfigurationLoader loader;
 
     @BeforeEach
     void setUp() {
-        loader = new YamlConfigurationLoader();
+        loader = new ConfigurationLoader();
     }
 
     @Test

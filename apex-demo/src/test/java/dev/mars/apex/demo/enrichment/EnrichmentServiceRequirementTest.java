@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * EnrichmentServiceRequirementTest - Tests for enrichment functionality
  *
  * This test suite validates enrichment processing with inline datasets.
- * Modern APEX automatically handles enrichments via YamlEnrichmentProcessor,
+ * Modern APEX automatically handles enrichments via EnrichmentProcessor,
  * no external service registration required for inline datasets.
  *
  * TESTS:

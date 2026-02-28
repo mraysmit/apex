@@ -16,7 +16,7 @@
 
 package dev.mars.apex.demo.severity;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.Rule;
@@ -62,13 +62,13 @@ public class SeverityComprehensiveTest {
 
     private static final Logger logger = LoggerFactory.getLogger(SeverityComprehensiveTest.class);
 
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
         logger.info("Setting up APEX services for comprehensive severity testing...");
 
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
 
         logger.info("APEX services initialized successfully");
     }

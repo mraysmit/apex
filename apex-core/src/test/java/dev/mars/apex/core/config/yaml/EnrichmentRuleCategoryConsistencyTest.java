@@ -1,5 +1,5 @@
 package dev.mars.apex.core.config.yaml;
-import dev.mars.apex.core.config.YamlRuleFactory;
+import dev.mars.apex.core.config.RuleFactory;
 import dev.mars.apex.core.config.model.*;
 import dev.mars.apex.core.config.loader.*;
 import dev.mars.apex.core.config.exception.*;
@@ -9,7 +9,7 @@ import dev.mars.apex.engine.model.Enrichment;
 import dev.mars.apex.engine.model.EnrichmentGroup;
 import dev.mars.apex.engine.model.Rule;
 import dev.mars.apex.engine.model.RuleGroup;
-import dev.mars.apex.core.service.enrichment.EnrichmentGroupFactory;
+import dev.mars.apex.core.config.EnrichmentGroupFactory;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -35,13 +35,13 @@ class EnrichmentRuleCategoryConsistencyTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnrichmentRuleCategoryConsistencyTest.class);
 
-    private YamlConfigurationLoader loader;
-    private YamlRuleFactory factory;
+    private ConfigurationLoader loader;
+    private RuleFactory factory;
 
     @BeforeEach
     void setUp() {
-        loader = new YamlConfigurationLoader();
-        factory = new YamlRuleFactory();
+        loader = new ConfigurationLoader();
+        factory = new RuleFactory();
     }
 
     @AfterEach

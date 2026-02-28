@@ -16,7 +16,7 @@ package dev.mars.apex.core.service.lookup;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlEnrichment;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import org.junit.jupiter.api.DisplayName;

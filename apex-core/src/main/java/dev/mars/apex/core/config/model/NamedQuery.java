@@ -1,6 +1,6 @@
 package dev.mars.apex.core.config.model;
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.config.exception.ConfigurationException;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -238,14 +238,14 @@ public class NamedQuery {
     /**
      * Validates that required fields are present.
      * 
-     * @throws YamlConfigurationException if validation fails
+     * @throws ConfigurationException if validation fails
      */
-    public void validate() throws YamlConfigurationException {
+    public void validate() throws ConfigurationException {
         if (name == null || name.trim().isEmpty()) {
-            throw new YamlConfigurationException("Named query must have a 'name' field");
+            throw new ConfigurationException("Named query must have a 'name' field");
         }
         if (query == null || query.trim().isEmpty()) {
-            throw new YamlConfigurationException("Named query '" + name + "' must have a 'query' field");
+            throw new ConfigurationException("Named query '" + name + "' must have a 'query' field");
         }
     }
     

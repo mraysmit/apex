@@ -18,7 +18,7 @@
 
 package dev.mars.apex.sync.pipeline;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.config.model.YamlDataSource;
 import dev.mars.apex.core.config.model.YamlDataSink;
@@ -66,7 +66,7 @@ public class SyncPipelineContainersTest {
     
     private static GenericContainer<?> sqlServer;
     private static GenericContainer<?> postgres;
-    private final YamlConfigurationLoader yamlLoader = new YamlConfigurationLoader();
+    private final ConfigurationLoader yamlLoader = new ConfigurationLoader();
 
     @BeforeAll
     static void checkDockerAndStartContainers() {

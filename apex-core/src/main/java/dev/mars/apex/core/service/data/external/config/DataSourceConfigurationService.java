@@ -19,7 +19,7 @@ package dev.mars.apex.core.service.data.external.config;
 
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
 import dev.mars.apex.core.config.model.YamlDataSource;
-import dev.mars.apex.core.config.loader.YamlDataSourceLoader;
+import dev.mars.apex.core.config.loader.DataSourceLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.service.data.external.DataSourceException;
 import dev.mars.apex.core.service.data.external.ExternalDataSource;
@@ -61,7 +61,7 @@ public class DataSourceConfigurationService implements DataSourceManagerListener
     private static final Object LOCK = new Object();
     
     // Core components
-    private final YamlDataSourceLoader yamlLoader;
+    private final DataSourceLoader yamlLoader;
     private final DataSourceManager dataSourceManager;
     private final DataSourceRegistry dataSourceRegistry;
     
@@ -78,7 +78,7 @@ public class DataSourceConfigurationService implements DataSourceManagerListener
     private DataSourceConfigurationService() {
         this.dataSourceManager = new DataSourceManager();
         this.dataSourceRegistry = DataSourceRegistry.getInstance();
-        this.yamlLoader = new YamlDataSourceLoader(dataSourceManager);
+        this.yamlLoader = new DataSourceLoader(dataSourceManager);
         
         // Register as a manager listener
         dataSourceManager.addListener(this);

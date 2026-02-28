@@ -1,6 +1,6 @@
 package dev.mars.apex.engine.core;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.AfterEach;
@@ -57,12 +57,12 @@ public class EnrichmentGroupDatabaseLookupTest {
 
     private static final Logger logger = LoggerFactory.getLogger(EnrichmentGroupDatabaseLookupTest.class);
 
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
     private Connection h2Connection;
 
     @BeforeEach
     void setUp() throws Exception {
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
         
         // Setup H2 in-memory database with test data
         setupH2Database();

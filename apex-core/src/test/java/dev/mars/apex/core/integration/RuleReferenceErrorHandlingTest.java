@@ -1,7 +1,7 @@
 package dev.mars.apex.core.integration;
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import org.junit.jupiter.api.BeforeEach;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
@@ -28,14 +28,14 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("Rule Reference Error Handling Tests")
 class RuleReferenceErrorHandlingTest {
 
-    private YamlConfigurationLoader configLoader;
+    private ConfigurationLoader configLoader;
     
     @TempDir
     Path tempDir;
 
     @BeforeEach
     void setUp() {
-        configLoader = new YamlConfigurationLoader();
+        configLoader = new ConfigurationLoader();
     }
 
     @Test
@@ -62,9 +62,9 @@ class RuleReferenceErrorHandlingTest {
         Path configFile = tempDir.resolve("config.yaml");
         Files.writeString(configFile, configYaml);
         
-        // Should throw YamlConfigurationException for missing file
-        YamlConfigurationException exception = assertThrows(
-            YamlConfigurationException.class,
+        // Should throw ConfigurationException for missing file
+        ConfigurationException exception = assertThrows(
+            ConfigurationException.class,
             () -> configLoader.loadFromFile(configFile.toString()),
             "Should throw exception for missing rule reference file"
         );
@@ -115,9 +115,9 @@ class RuleReferenceErrorHandlingTest {
         Path configFile = tempDir.resolve("config.yaml");
         Files.writeString(configFile, configYaml);
         
-        // Should throw YamlConfigurationException for invalid YAML
-        YamlConfigurationException exception = assertThrows(
-            YamlConfigurationException.class,
+        // Should throw ConfigurationException for invalid YAML
+        ConfigurationException exception = assertThrows(
+            ConfigurationException.class,
             () -> configLoader.loadFromFile(configFile.toString()),
             "Should throw exception for invalid YAML in referenced file"
         );
@@ -342,9 +342,9 @@ class RuleReferenceErrorHandlingTest {
         Path configFile = tempDir.resolve("config.yaml");
         Files.writeString(configFile, configYaml);
         
-        // Should throw YamlConfigurationException for non-existent rule reference
-        YamlConfigurationException exception = assertThrows(
-            YamlConfigurationException.class,
+        // Should throw ConfigurationException for non-existent rule reference
+        ConfigurationException exception = assertThrows(
+            ConfigurationException.class,
             () -> configLoader.loadFromFile(configFile.toString()),
             "Should throw exception for rule group referencing non-existent rule"
         );

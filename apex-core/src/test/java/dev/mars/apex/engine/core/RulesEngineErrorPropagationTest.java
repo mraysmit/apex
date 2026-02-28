@@ -27,8 +27,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * Comprehensive test suite for RulesEngine Error Propagation
  *
  * Tests that RulesEngine properly propagates errors from:
- * - YamlEnrichmentProcessor.processEnrichmentsWithResult()
- * - YamlTransformationProcessor.processTransformationsWithResult()
+ * - EnrichmentProcessor.processEnrichmentsWithResult()
+ * - TransformationProcessor.processTransformationsWithResult()
  *
  * This verifies the implementation of fail-fast error handling where business logic
  * failures are immediately returned as ERROR results instead of being swallowed.

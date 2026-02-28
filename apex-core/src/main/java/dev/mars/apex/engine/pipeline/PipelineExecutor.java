@@ -116,8 +116,8 @@ public class PipelineExecutor {
                 pipeline.getName(), durationMs);
 
             RuleResult result = RuleResult.match("pipeline:" + pipeline.getName(),
-                    "Pipeline executed successfully", SeverityConstants.INFO);
-            result.setExecutionPath(executionSteps);
+                    "Pipeline executed successfully", SeverityConstants.INFO)
+                    .toBuilder().executionPath(executionSteps).build();
             return result;
 
         } catch (Exception e) {
@@ -129,8 +129,8 @@ public class PipelineExecutor {
             LOGGER.debug("Full exception details for pipeline '{}':", pipeline.getName(), e);
 
             RuleResult result = RuleResult.error("pipeline:" + pipeline.getName(),
-                    "Pipeline execution failed: " + e.getMessage());
-            result.setExecutionPath(executionSteps);
+                    "Pipeline execution failed: " + e.getMessage())
+                    .toBuilder().executionPath(executionSteps).build();
             return result;
 
         } finally {

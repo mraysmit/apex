@@ -19,9 +19,9 @@ package dev.mars.apex.playground.controller;
 
 import dev.mars.apex.playground.model.PlaygroundRequest;
 import dev.mars.apex.playground.model.PlaygroundResponse;
-import dev.mars.apex.playground.model.YamlValidationResponse;
+import dev.mars.apex.playground.model.ValidationResponse;
 import dev.mars.apex.playground.service.PlaygroundService;
-import dev.mars.apex.playground.service.YamlValidationService;
+import dev.mars.apex.playground.service.ValidationService;
 import dev.mars.apex.playground.service.ExampleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -58,11 +58,11 @@ public class ApiController {
     private static final Logger logger = LoggerFactory.getLogger(ApiController.class);
 
     private final PlaygroundService playgroundService;
-    private final YamlValidationService yamlValidationService;
+    private final ValidationService yamlValidationService;
     private final ExampleService exampleService;
 
     @Autowired
-    public ApiController(PlaygroundService playgroundService, YamlValidationService yamlValidationService, ExampleService exampleService) {
+    public ApiController(PlaygroundService playgroundService, ValidationService yamlValidationService, ExampleService exampleService) {
         this.playgroundService = playgroundService;
         this.yamlValidationService = yamlValidationService;
         this.exampleService = exampleService;
@@ -154,7 +154,7 @@ public class ApiController {
         description = "Validate YAML rules configuration syntax and structure."
     )
     @ApiResponse(responseCode = "200", description = "Validation completed")
-    public ResponseEntity<YamlValidationResponse> validateYaml(
+    public ResponseEntity<ValidationResponse> validateYaml(
             @RequestBody Map<String, Object> request) {
 
         logger.info("YAML validation request received");
@@ -162,18 +162,18 @@ public class ApiController {
         try {
             String yamlContent = (String) request.get("yamlContent");
             if (yamlContent == null) {
-                YamlValidationResponse errorResponse = new YamlValidationResponse(false, "YAML content is required");
+                ValidationResponse errorResponse = new ValidationResponse(false, "YAML content is required");
                 errorResponse.addError("Missing 'yamlContent' field in request", 0, 0);
                 return ResponseEntity.ok(errorResponse);
             }
 
-            YamlValidationResponse response = yamlValidationService.validateYaml(yamlContent);
+            ValidationResponse response = yamlValidationService.validateYaml(yamlContent);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             logger.error("Error validating YAML: {}", e.getMessage());
             logger.debug("Full exception details:", e);
-            YamlValidationResponse errorResponse = new YamlValidationResponse(false, "Validation failed: " + e.getMessage());
+            ValidationResponse errorResponse = new ValidationResponse(false, "Validation failed: " + e.getMessage());
             errorResponse.addError("Validation error: " + e.getMessage(), 0, 0);
             return ResponseEntity.ok(errorResponse);
         }
@@ -395,7 +395,7 @@ public class ApiController {
             String content = new String(file.getBytes(), StandardCharsets.UTF_8);
 
             // Validate YAML syntax
-            YamlValidationResponse validationResult = yamlValidationService.validateYaml(content);
+            ValidationResponse validationResult = yamlValidationService.validateYaml(content);
             if (!validationResult.isValid()) {
                 throw new IllegalArgumentException("Invalid YAML syntax: " + validationResult.getMessage());
             }

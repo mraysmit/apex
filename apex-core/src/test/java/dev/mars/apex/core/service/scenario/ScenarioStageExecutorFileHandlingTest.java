@@ -1,5 +1,7 @@
 package dev.mars.apex.core.service.scenario;
 
+import dev.mars.apex.engine.execution.ScenarioStageExecutor;
+
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
  *
@@ -16,7 +18,7 @@ package dev.mars.apex.core.service.scenario;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,7 +63,7 @@ class ScenarioStageExecutorFileHandlingTest {
     private static final Logger logger = LoggerFactory.getLogger(ScenarioStageExecutorFileHandlingTest.class);
     
     private ScenarioStageExecutor stageExecutor;
-    private YamlConfigurationLoader configLoader;
+    private ConfigurationLoader configLoader;
 
     @BeforeAll
     static void classSetUp() {
@@ -75,7 +77,7 @@ class ScenarioStageExecutorFileHandlingTest {
     @BeforeEach
     void setUp() {
         stageExecutor = new ScenarioStageExecutor();
-        configLoader = new YamlConfigurationLoader();
+        configLoader = new ConfigurationLoader();
         logger.info("Initialized ScenarioStageExecutor for file handling testing");
     }
 
@@ -85,7 +87,7 @@ class ScenarioStageExecutorFileHandlingTest {
 
     /**
      * Tests graceful handling of missing stage configuration files.
-     * ScenarioStageExecutor catches YamlConfigurationException and converts to stage failure.
+     * ScenarioStageExecutor catches ConfigurationException and converts to stage failure.
      * This is INTENTIONAL ERROR TEST - missing config files are caught, logged as ERROR with stack trace,
      * and converted to ScenarioExecutionResult with failure status.
      */
@@ -116,7 +118,7 @@ class ScenarioStageExecutorFileHandlingTest {
 
     /**
      * Tests graceful handling of deeply nested missing file paths.
-     * ScenarioStageExecutor catches YamlConfigurationException and converts to stage failure.
+     * ScenarioStageExecutor catches ConfigurationException and converts to stage failure.
      * This is INTENTIONAL ERROR TEST - missing config files are caught, logged as ERROR with stack trace,
      * and converted to ScenarioExecutionResult with failure status.
      */
@@ -194,7 +196,7 @@ class ScenarioStageExecutorFileHandlingTest {
 
     /**
      * Tests graceful handling of file paths with invalid characters (e.g., pipes, colons).
-     * ScenarioStageExecutor catches InvalidPathException or YamlConfigurationException and converts to stage failure.
+     * ScenarioStageExecutor catches InvalidPathException or ConfigurationException and converts to stage failure.
      * This is INTENTIONAL ERROR TEST.
      */
     @Test
@@ -222,7 +224,7 @@ class ScenarioStageExecutorFileHandlingTest {
 
     /**
      * Tests graceful handling of relative paths that reference files outside the project.
-     * ScenarioStageExecutor catches YamlConfigurationException and converts to stage failure.
+     * ScenarioStageExecutor catches ConfigurationException and converts to stage failure.
      * This is INTENTIONAL ERROR TEST.
      */
     @Test
@@ -281,7 +283,7 @@ class ScenarioStageExecutorFileHandlingTest {
 
     /**
      * Tests graceful handling of scenarios with multiple stages where config files are missing.
-     * ScenarioStageExecutor catches YamlConfigurationException for each stage and converts to stage failures.
+     * ScenarioStageExecutor catches ConfigurationException for each stage and converts to stage failures.
      * This is INTENTIONAL ERROR TEST.
      */
     @Test
@@ -315,7 +317,7 @@ class ScenarioStageExecutorFileHandlingTest {
 
     /**
      * Tests graceful handling of file paths with spaces when file doesn't exist.
-     * ScenarioStageExecutor catches YamlConfigurationException and converts to stage failure.
+     * ScenarioStageExecutor catches ConfigurationException and converts to stage failure.
      * This is INTENTIONAL ERROR TEST.
      */
     @Test
@@ -343,7 +345,7 @@ class ScenarioStageExecutorFileHandlingTest {
 
     /**
      * Tests graceful handling of file paths with special characters when file doesn't exist.
-     * ScenarioStageExecutor catches YamlConfigurationException and converts to stage failure.
+     * ScenarioStageExecutor catches ConfigurationException and converts to stage failure.
      * This is INTENTIONAL ERROR TEST.
      */
     @Test

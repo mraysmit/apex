@@ -1,6 +1,6 @@
 package dev.mars.apex.core.dbschema;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
@@ -119,7 +119,7 @@ class EnvironmentPromotionTest {
             + postgres.getMappedPort(5432) + "/apex_env_test";
     }
 
-    private YamlConfigurationLoader yamlLoader = new YamlConfigurationLoader();
+    private ConfigurationLoader yamlLoader = new ConfigurationLoader();
 
     @BeforeEach
     void setupDatabase() throws Exception {

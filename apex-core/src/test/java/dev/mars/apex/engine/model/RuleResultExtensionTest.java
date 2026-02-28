@@ -208,7 +208,7 @@ class RuleResultExtensionTest {
     }
 
     @Test
-    @DisplayName("Test data immutability - returned collections are defensive copies")
+    @DisplayName("Test data immutability - returned collections are unmodifiable")
     void testDataImmutability() {
         Map<String, Object> originalData = new HashMap<>();
         originalData.put("key", "value");
@@ -218,20 +218,20 @@ class RuleResultExtensionTest {
         
         RuleResult result = RuleResult.enrichmentFailure(originalMessages, originalData);
         
-        // Get the returned collections
+        // Collections returned by getters are unmodifiable
         Map<String, Object> returnedData = result.getEnrichedData();
+        assertThrows(UnsupportedOperationException.class,
+                () -> returnedData.put("newKey", "newValue"),
+                "Enriched data should be unmodifiable");
+        
         List<String> returnedMessages = result.getFailureMessages();
+        assertThrows(UnsupportedOperationException.class,
+                () -> returnedMessages.add("new message"),
+                "Failure messages should be unmodifiable");
         
-        // Modify the returned collections
-        returnedData.put("newKey", "newValue");
-        returnedMessages.add("new message");
-        
-        // Verify original result is unchanged
-        Map<String, Object> freshData = result.getEnrichedData();
-        List<String> freshMessages = result.getFailureMessages();
-        
-        assertFalse(freshData.containsKey("newKey"), "Original enriched data should be unchanged");
-        assertEquals(1, freshMessages.size(), "Original failure messages should be unchanged");
-        assertEquals("original message", freshMessages.get(0));
+        // Original data is preserved and accessible
+        assertEquals("value", result.getEnrichedData().get("key"), "Original data should be accessible");
+        assertEquals(1, result.getFailureMessages().size(), "Original messages should be accessible");
+        assertEquals("original message", result.getFailureMessages().get(0));
     }
 }

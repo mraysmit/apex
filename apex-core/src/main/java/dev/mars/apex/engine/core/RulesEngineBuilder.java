@@ -16,7 +16,7 @@
 package dev.mars.apex.engine.core;
 
 import dev.mars.apex.core.config.loader.ScenarioRegistryLoader;
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.config.exception.ConfigurationException;
 import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -236,10 +236,10 @@ public class RulesEngineBuilder {
      * Build the RulesEngine with the configured options.
      *
      * @return A configured RulesEngine instance
-     * @throws YamlConfigurationException if configuration fails
+     * @throws ConfigurationException if configuration fails
      * @throws IllegalStateException if no source is configured
      */
-    public RulesEngine build() throws YamlConfigurationException {
+    public RulesEngine build() throws ConfigurationException {
         if (sourceType == null || sourcePath == null) {
             throw new IllegalStateException(
                 "No source configured. Call fromFile(), fromScenarioRegistry(), or fromYamlConfig() before build()."
@@ -261,7 +261,7 @@ public class RulesEngineBuilder {
     /**
      * Build RulesEngine from scenario registry with configured search paths.
      */
-    private RulesEngine buildFromScenarioRegistry() throws YamlConfigurationException {
+    private RulesEngine buildFromScenarioRegistry() throws ConfigurationException {
         logger.debug("Creating ScenarioRegistryLoader with {} filesystem paths, {} classpath prefixes",
                           filesystemPaths.size(), classpathPrefixes.size());
 
@@ -285,11 +285,11 @@ public class RulesEngineBuilder {
                 logger.info("Loaded {} scenarios from filesystem registry: {}", scenarios.size(), sourcePath);
             }
         } catch (java.io.IOException e) {
-            throw new YamlConfigurationException("Failed to load scenario registry: " + sourcePath, e);
+            throw new ConfigurationException("Failed to load scenario registry: " + sourcePath, e);
         }
 
         if (scenarios == null || scenarios.isEmpty()) {
-            throw new YamlConfigurationException(
+            throw new ConfigurationException(
                 "Scenario registry is empty or failed to load: " + sourcePath
             );
         }
@@ -309,13 +309,13 @@ public class RulesEngineBuilder {
     /**
      * Build RulesEngine from YAML file with configured search paths.
      */
-    private RulesEngine buildFromFile() throws YamlConfigurationException {
+    private RulesEngine buildFromFile() throws ConfigurationException {
         logger.debug("Loading YAML configuration from: {}", sourcePath);
 
         // Resolve the file using search paths
         String resolvedPath = resolveFilePath(sourcePath);
         if (resolvedPath == null) {
-            throw new YamlConfigurationException("Config file not found: " + sourcePath);
+            throw new ConfigurationException("Config file not found: " + sourcePath);
         }
 
         return RulesEngine.fromFile(resolvedPath);

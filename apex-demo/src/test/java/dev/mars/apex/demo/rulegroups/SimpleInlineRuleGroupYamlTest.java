@@ -16,8 +16,8 @@ package dev.mars.apex.demo.rulegroups;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.config.model.YamlRuleGroup;
 
@@ -33,7 +33,7 @@ public class SimpleInlineRuleGroupYamlTest {
         
         try {
             // Load the YAML configuration (without validation to avoid Spring dependencies)
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.loadFromFileWithoutValidation(
                 "src/test/java/dev/mars/apex/demo/rulegroups/SimpleInlineRuleGroupTest-rules.yaml"
             );
@@ -134,7 +134,7 @@ public class SimpleInlineRuleGroupYamlTest {
             System.out.println("   • Composite group references: " + compositeGroup.getRuleGroupReferences());
             System.out.println("\n🚀 YAML structure for inline rule-group references is correct!");
             
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             System.err.println("YAML Configuration Error: " + e.getMessage());
             e.printStackTrace();
             System.exit(1);

@@ -17,8 +17,8 @@ package dev.mars.apex.demo.lookup;
 
 import dev.mars.apex.demo.DemoTestBase;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
-import dev.mars.apex.core.config.loader.YamlDataSourceLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.loader.DataSourceLoader;
 
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.Rule;
@@ -64,16 +64,16 @@ public class RestApiIntegrationTest extends DemoTestBase {
     private RestApiTestableServer testServer;
     private String baseUrl;
     private int serverPort;
-    private YamlConfigurationLoader yamlLoader;
-    private YamlDataSourceLoader dataSourceLoader;
+    private ConfigurationLoader yamlLoader;
+    private DataSourceLoader dataSourceLoader;
 
     @BeforeEach
     void setupRestApiServer() throws IOException {
         logger.info("🌐 Setting up RestApiTestableServer for REST API integration tests...");
 
         // Initialize APEX services directly
-        yamlLoader = new YamlConfigurationLoader();
-        dataSourceLoader = new YamlDataSourceLoader();
+        yamlLoader = new ConfigurationLoader();
+        dataSourceLoader = new DataSourceLoader();
 
         // Create and start the reusable test server
         testServer = new RestApiTestableServer();

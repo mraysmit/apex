@@ -76,7 +76,7 @@ import java.util.Objects;
  * 
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2026-01-08
- * @see dev.mars.apex.core.config.loader.YamlConfigurationLoader
+ * @see dev.mars.apex.core.config.loader.ConfigurationLoader
  * @see dev.mars.apex.core.config.loader.ScenarioRegistryLoader
  */
 public class ResourceResolver {

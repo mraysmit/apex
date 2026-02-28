@@ -1,6 +1,6 @@
 package dev.mars.apex.engine.core;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.engine.model.RuleResult;
@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class RulesEngineRuleGroupErrorHandlingTest {
 
     private static final Logger logger = LoggerFactory.getLogger(RulesEngineRuleGroupErrorHandlingTest.class);
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeAll
     static void classSetUp() {
@@ -54,7 +54,7 @@ class RulesEngineRuleGroupErrorHandlingTest {
     @BeforeEach
     void setUp() {
         logger.info("Setting up RulesEngine for rule group error handling tests");
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
     }
 
     @Test

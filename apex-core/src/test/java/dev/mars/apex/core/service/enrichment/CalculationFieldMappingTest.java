@@ -1,6 +1,6 @@
 package dev.mars.apex.core.service.enrichment;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
@@ -47,7 +47,7 @@ public class CalculationFieldMappingTest {
             """;
 
         // Load configuration
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
         // Create input data

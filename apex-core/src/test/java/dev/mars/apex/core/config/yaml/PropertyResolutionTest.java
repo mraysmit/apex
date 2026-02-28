@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Test for property resolution methods in PropertyResolver.
  * 
  * This test verifies the property resolution functionality that is now centralized
- * in the PropertyResolver utility class, used by YamlConfigurationLoader, 
+ * in the PropertyResolver utility class, used by ConfigurationLoader, 
  * DataSourceResolver, and YamlDataSource.
  */
 public class PropertyResolutionTest {

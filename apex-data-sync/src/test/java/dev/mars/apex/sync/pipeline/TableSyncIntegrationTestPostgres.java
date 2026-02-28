@@ -18,7 +18,7 @@
 
 package dev.mars.apex.sync.pipeline;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.ExecutionStep;
@@ -171,7 +171,7 @@ class TableSyncIntegrationTestPostgres {
         }
 
         // 2. Run Sync via APEX Core (using co-located YAML file)
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration yamlConfig = loader.loadFromFile(
             "src/test/java/dev/mars/apex/sync/pipeline/TableSyncIntegrationTestPostgres.yaml"
         );

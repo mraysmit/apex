@@ -16,7 +16,7 @@ package dev.mars.apex.core.config.component;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.config.exception.ConfigurationException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -166,8 +166,8 @@ class ComponentLoaderTest {
 
         String componentPath = "scenario/invalid-component-no-id.yaml";
 
-        YamlConfigurationException exception = assertThrows(
-            YamlConfigurationException.class,
+        ConfigurationException exception = assertThrows(
+            ConfigurationException.class,
             () -> loader.loadComponent(componentPath),
             "Should throw exception for missing ID"
         );
@@ -184,8 +184,8 @@ class ComponentLoaderTest {
 
         String componentPath = "scenario/invalid-component-wrong-type.yaml";
 
-        YamlConfigurationException exception = assertThrows(
-            YamlConfigurationException.class,
+        ConfigurationException exception = assertThrows(
+            ConfigurationException.class,
             () -> loader.loadComponent(componentPath),
             "Should throw exception for wrong type"
         );
@@ -202,8 +202,8 @@ class ComponentLoaderTest {
 
         String componentPath = "scenario/invalid-component-no-files.yaml";
 
-        YamlConfigurationException exception = assertThrows(
-            YamlConfigurationException.class,
+        ConfigurationException exception = assertThrows(
+            ConfigurationException.class,
             () -> loader.loadComponent(componentPath),
             "Should throw exception for no file references"
         );
@@ -283,8 +283,8 @@ class ComponentLoaderTest {
 
         String componentPath = "scenario/circular-component-a.yaml";
 
-        YamlConfigurationException exception = assertThrows(
-            YamlConfigurationException.class,
+        ConfigurationException exception = assertThrows(
+            ConfigurationException.class,
             () -> loader.loadComponent(componentPath),
             "Should throw exception for circular reference"
         );

@@ -17,8 +17,8 @@
 package dev.mars.apex.demo.rulegroups;
 
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleGroup;
 import dev.mars.apex.engine.model.RuleResult;
@@ -54,11 +54,11 @@ public class RuleGroupSeverityAggregationTest {
 
     private static final Logger logger = LoggerFactory.getLogger(RuleGroupSeverityAggregationTest.class);
 
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
-        this.yamlLoader = new YamlConfigurationLoader();
+        this.yamlLoader = new ConfigurationLoader();
     }
 
     @Test
@@ -122,7 +122,7 @@ public class RuleGroupSeverityAggregationTest {
             
             logSuccess("AND group severity aggregation working correctly - used ERROR from failed rule");
             
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logError("Failed to load YAML configuration: " + e.getMessage());
             fail("Failed to load YAML configuration: " + e.getMessage());
         }
@@ -182,7 +182,7 @@ public class RuleGroupSeverityAggregationTest {
             
             logSuccess("AND group severity aggregation working correctly - used ERROR as highest severity");
             
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logError("Failed to load YAML configuration: " + e.getMessage());
             fail("Failed to load YAML configuration: " + e.getMessage());
         }
@@ -249,7 +249,7 @@ public class RuleGroupSeverityAggregationTest {
             
             logSuccess("OR group severity aggregation working correctly - used WARNING from first match");
             
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logError("Failed to load YAML configuration: " + e.getMessage());
             fail("Failed to load YAML configuration: " + e.getMessage());
         }
@@ -291,7 +291,7 @@ public class RuleGroupSeverityAggregationTest {
 
             logSuccess("Empty group behavior working correctly - empty groups do not pass");
             
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logError("Failed to load YAML configuration: " + e.getMessage());
             fail("Failed to load YAML configuration: " + e.getMessage());
         }

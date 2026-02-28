@@ -408,7 +408,7 @@ public class YamlRuleConfiguration {
 
     /**
      * Set the section order from the YAML document.
-     * This is called by YamlConfigurationLoader after parsing with OrderedYamlParser.
+     * This is called by ConfigurationLoader after parsing with OrderedYamlParser.
      *
      * @param sectionOrder List of section names in document order
      */
@@ -429,7 +429,7 @@ public class YamlRuleConfiguration {
 
     /**
      * Set the item-level order from the YAML document.
-     * This is called by YamlConfigurationLoader after parsing with OrderedYamlParser.
+     * This is called by ConfigurationLoader after parsing with OrderedYamlParser.
      *
      * @param itemOrder List of processing items in document order
      */
@@ -449,7 +449,7 @@ public class YamlRuleConfiguration {
 
     /**
      * Set the enrichment IDs that came from external references.
-     * This is called by YamlConfigurationLoader during reference processing.
+     * This is called by ConfigurationLoader during reference processing.
      *
      * @param referencedEnrichmentIds Set of referenced enrichment IDs
      */
@@ -469,7 +469,7 @@ public class YamlRuleConfiguration {
 
     /**
      * Set the rule IDs that came from external references.
-     * This is called by YamlConfigurationLoader during reference processing.
+     * This is called by ConfigurationLoader during reference processing.
      *
      * @param referencedRuleIds Set of referenced rule IDs
      */
@@ -489,7 +489,7 @@ public class YamlRuleConfiguration {
 
     /**
      * Set the enrichment group IDs that came from external references.
-     * This is called by YamlConfigurationLoader during reference processing.
+     * This is called by ConfigurationLoader during reference processing.
      *
      * @param referencedEnrichmentGroupIds Set of referenced enrichment group IDs
      */
@@ -509,7 +509,7 @@ public class YamlRuleConfiguration {
 
     /**
      * Set the rule group IDs that came from external references.
-     * This is called by YamlConfigurationLoader during reference processing.
+     * This is called by ConfigurationLoader during reference processing.
      *
      * @param referencedRuleGroupIds Set of referenced rule group IDs
      */

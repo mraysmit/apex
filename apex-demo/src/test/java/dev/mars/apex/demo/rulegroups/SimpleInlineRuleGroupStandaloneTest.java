@@ -16,7 +16,7 @@ package dev.mars.apex.demo.rulegroups;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.config.exception.ConfigurationException;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleGroup;
 import dev.mars.apex.engine.model.RuleResult;
@@ -130,7 +130,7 @@ public class SimpleInlineRuleGroupStandaloneTest {
             System.out.println("   • Composite group (OR): PASSED [OK] (expected)");
             System.out.println("\n🚀 Inline rule-group references implementation is working!");
             
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             System.err.println("YAML Configuration Error: " + e.getMessage());
             e.printStackTrace();
             System.exit(1);

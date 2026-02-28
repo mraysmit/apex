@@ -1,6 +1,6 @@
 package dev.mars.apex.core.constants;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.config.model.YamlRule;
 import dev.mars.apex.core.config.model.YamlEnrichment;
@@ -29,7 +29,7 @@ class DefaultValueDemoTest {
     @Test
     void testDefaultValueEnhancementDemo() throws Exception {
         // Load the demo configuration
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.loadFromClasspath("error-handling/demo-default-value.yaml");
         
         assertNotNull(config);
@@ -98,7 +98,7 @@ class DefaultValueDemoTest {
                 # Note: no default-value specified
             """;
         
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
         
         assertNotNull(config);

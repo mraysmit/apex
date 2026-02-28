@@ -1,7 +1,7 @@
 package dev.mars.apex.demo.sequencing;
 
 import dev.mars.apex.core.config.sequential.ProcessingItem;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;

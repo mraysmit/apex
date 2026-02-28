@@ -1,9 +1,9 @@
 package dev.mars.apex.core.integration;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.model.EnrichmentGroup;
-import dev.mars.apex.core.service.enrichment.EnrichmentGroupFactory;
+import dev.mars.apex.core.config.EnrichmentGroupFactory;
 import org.junit.jupiter.api.DisplayName;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
@@ -94,7 +94,7 @@ class EnrichmentGroupsEndToEndIntegrationTest {
     @Test
     @DisplayName("OR: short-circuits on first success; AND: stops on first failure; Parallel OR runs all")
     void endToEnd_or_and_parallel_and_references() throws Exception {
-        YamlRuleConfiguration config = new YamlConfigurationLoader().fromYamlString(yamlConfig());
+        YamlRuleConfiguration config = new ConfigurationLoader().fromYamlString(yamlConfig());
         List<EnrichmentGroup> groups = EnrichmentGroupFactory.buildEnrichmentGroups(config);
 
         // Verify all 5 enrichment groups are properly configured
@@ -131,7 +131,7 @@ class EnrichmentGroupsEndToEndIntegrationTest {
     @Test
     @DisplayName("Composite Parallel AND runs all enrichments and aggregates correctly")
     void compositeParallelAnd_runsAll_andAggregates() throws Exception {
-        YamlRuleConfiguration config = new YamlConfigurationLoader().fromYamlString(yamlConfig());
+        YamlRuleConfiguration config = new ConfigurationLoader().fromYamlString(yamlConfig());
         List<EnrichmentGroup> groups = EnrichmentGroupFactory.buildEnrichmentGroups(config);
         EnrichmentGroup gCompositeParAnd = groups.stream().filter(g -> g.getId().equals("composite_par_and")).findFirst().orElseThrow();
 

@@ -15,7 +15,7 @@
  */
 package dev.mars.apex.demo.database;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
@@ -103,7 +103,7 @@ class VaultPasswordInjectionTest {
             .withUsername("vaultuser")
             .withPassword("vaultsecret");
 
-    private YamlConfigurationLoader loader;
+    private ConfigurationLoader loader;
     private DataSourceFactory factory;
     private ExternalDataSource postgresSource;
 
@@ -111,7 +111,7 @@ class VaultPasswordInjectionTest {
     void setUp() throws Exception {
         logger.info("Setting up Vault Password Injection Test with Testcontainers");
 
-        loader = new YamlConfigurationLoader();
+        loader = new ConfigurationLoader();
         factory = DataSourceFactory.getInstance();
 
         // Get Vault connection details

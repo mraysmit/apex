@@ -1,5 +1,7 @@
 package dev.mars.apex.core.service.scenario;
 
+import dev.mars.apex.engine.execution.ScenarioStageExecutor;
+
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
  *
@@ -16,7 +18,7 @@ package dev.mars.apex.core.service.scenario;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -50,11 +52,11 @@ class CleanEnrichmentDemoTest {
     private static final Logger logger = LoggerFactory.getLogger(CleanEnrichmentDemoTest.class);
 
     private ScenarioStageExecutor executor;
-    private YamlConfigurationLoader configLoader;
+    private ConfigurationLoader configLoader;
 
     @BeforeEach
     void setUp() {
-        configLoader = new YamlConfigurationLoader();
+        configLoader = new ConfigurationLoader();
         executor = new ScenarioStageExecutor(configLoader, null);
     }
 

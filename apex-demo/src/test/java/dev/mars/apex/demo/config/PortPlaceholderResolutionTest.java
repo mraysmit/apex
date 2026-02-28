@@ -4,7 +4,7 @@
  */
 package dev.mars.apex.demo.config;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.config.model.YamlDataSource;
 import org.junit.jupiter.api.*;
@@ -28,14 +28,14 @@ class PortPlaceholderResolutionTest {
 
     private static final Logger logger = LoggerFactory.getLogger(PortPlaceholderResolutionTest.class);
     
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
     private static final String TEST_PORT = "12345";
     private static final String YAML_FILE_PATH = "src/test/java/dev/mars/apex/demo/config/PortPlaceholderResolutionTest.yaml";
 
     @BeforeEach
     void setUp() {
         logger.info("=== Setting up PORT Placeholder Resolution Test ===");
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
     }
 
     @AfterEach

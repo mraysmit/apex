@@ -15,7 +15,7 @@
  */
 
 package dev.mars.apex.core.config.yaml;
-import dev.mars.apex.core.config.YamlRuleFactory;
+import dev.mars.apex.core.config.RuleFactory;
 import dev.mars.apex.core.config.model.*;
 import dev.mars.apex.core.config.loader.*;
 import dev.mars.apex.core.config.exception.*;
@@ -44,13 +44,13 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("Cross-Entity Metadata Inheritance Tests")
 class MetadataInheritanceCrossEntityTest {
 
-    private YamlConfigurationLoader loader;
-    private YamlRuleFactory factory;
+    private ConfigurationLoader loader;
+    private RuleFactory factory;
 
     @BeforeEach
     void setUp() {
-        loader = new YamlConfigurationLoader();
-        factory = new YamlRuleFactory();
+        loader = new ConfigurationLoader();
+        factory = new RuleFactory();
     }
 
     @Test

@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.etl;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
@@ -32,13 +32,13 @@ class SimpleCsvToJsonTest extends DemoTestBase {
     private static final Logger logger = LoggerFactory.getLogger(SimpleCsvToJsonTest.class);
 
     private RulesEngine rulesEngine;
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     public void setUp() {
         super.setUp();
         logger.info("Setting up Simple CSV to JSON Test...");
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
 
         try {
             // Create output directory for JSON files

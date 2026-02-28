@@ -16,7 +16,7 @@ package dev.mars.apex.yaml.manager.controller;
  * limitations under the License.
  */
 
-import dev.mars.apex.yaml.manager.model.YamlConfigMetadata;
+import dev.mars.apex.yaml.manager.model.ConfigMetadata;
 import dev.mars.apex.yaml.manager.service.CatalogScanService;
 import dev.mars.apex.yaml.manager.service.CatalogService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +67,7 @@ public class CatalogController {
     @GetMapping("/configurations")
     public ResponseEntity<Map<String, Object>> getAllConfigurations(
             @RequestParam(required = false) String fields) {
-        Collection<YamlConfigMetadata> configurations = catalogService.getAllConfigurations();
+        Collection<ConfigMetadata> configurations = catalogService.getAllConfigurations();
         Map<String, Object> response = new HashMap<>();
         response.put("total", configurations.size());
 
@@ -85,7 +85,7 @@ public class CatalogController {
      */
     @GetMapping("/configurations/{id}")
     public ResponseEntity<Map<String, Object>> getConfiguration(@PathVariable String id) {
-        YamlConfigMetadata metadata = catalogService.getConfiguration(id);
+        ConfigMetadata metadata = catalogService.getConfiguration(id);
         if (metadata == null) {
             return ResponseEntity.notFound().build();
         }
@@ -104,7 +104,7 @@ public class CatalogController {
     public ResponseEntity<Map<String, Object>> searchByTag(
             @PathVariable String tag,
             @RequestParam(required = false) String fields) {
-        List<YamlConfigMetadata> results = catalogService.findByTag(tag);
+        List<ConfigMetadata> results = catalogService.findByTag(tag);
         Map<String, Object> response = new HashMap<>();
         response.put("tag", tag);
         response.put("count", results.size());
@@ -129,7 +129,7 @@ public class CatalogController {
             @PathVariable String attributeName,
             @PathVariable String value,
             @RequestParam(required = false) String fields) {
-        List<YamlConfigMetadata> results = catalogService.findByMetadataAttribute(attributeName, value);
+        List<ConfigMetadata> results = catalogService.findByMetadataAttribute(attributeName, value);
         Map<String, Object> response = new HashMap<>();
         response.put("attributeName", attributeName);
         response.put("value", value);
@@ -154,7 +154,7 @@ public class CatalogController {
     public ResponseEntity<Map<String, Object>> searchByType(
             @PathVariable String type,
             @RequestParam(required = false) String fields) {
-        List<YamlConfigMetadata> results = catalogService.findByType(type);
+        List<ConfigMetadata> results = catalogService.findByType(type);
         Map<String, Object> response = new HashMap<>();
         response.put("type", type);
         response.put("count", results.size());
@@ -178,7 +178,7 @@ public class CatalogController {
     public ResponseEntity<Map<String, Object>> searchByAuthor(
             @PathVariable String author,
             @RequestParam(required = false) String fields) {
-        List<YamlConfigMetadata> results = catalogService.findByAuthor(author);
+        List<ConfigMetadata> results = catalogService.findByAuthor(author);
         Map<String, Object> response = new HashMap<>();
         response.put("author", author);
         response.put("count", results.size());
@@ -201,7 +201,7 @@ public class CatalogController {
     @GetMapping("/discovery/unused")
     public ResponseEntity<Map<String, Object>> findUnused(
             @RequestParam(required = false) String fields) {
-        List<YamlConfigMetadata> unused = catalogService.findUnused();
+        List<ConfigMetadata> unused = catalogService.findUnused();
         Map<String, Object> response = new HashMap<>();
         response.put("count", unused.size());
 
@@ -223,7 +223,7 @@ public class CatalogController {
     @GetMapping("/discovery/critical")
     public ResponseEntity<Map<String, Object>> findCritical(
             @RequestParam(required = false) String fields) {
-        List<YamlConfigMetadata> critical = catalogService.findCritical();
+        List<ConfigMetadata> critical = catalogService.findCritical();
         Map<String, Object> response = new HashMap<>();
         response.put("count", critical.size());
 
@@ -247,7 +247,7 @@ public class CatalogController {
             @RequestParam(defaultValue = "0") int minScore,
             @RequestParam(defaultValue = "100") int maxScore,
             @RequestParam(required = false) String fields) {
-        List<YamlConfigMetadata> results = catalogService.findByHealthScore(minScore, maxScore);
+        List<ConfigMetadata> results = catalogService.findByHealthScore(minScore, maxScore);
         Map<String, Object> response = new HashMap<>();
         response.put("minScore", minScore);
         response.put("maxScore", maxScore);
@@ -284,13 +284,13 @@ public class CatalogController {
      * Extract only core metadata fields from configurations.
      * Returns a simplified view with just the metadata fields, excluding analysis results.
      *
-     * @param configurations Collection of full YamlConfigMetadata objects
+     * @param configurations Collection of full ConfigMetadata objects
      * @return List of maps containing only metadata fields
      */
-    private List<Map<String, Object>> extractMetadataOnly(Collection<YamlConfigMetadata> configurations) {
+    private List<Map<String, Object>> extractMetadataOnly(Collection<ConfigMetadata> configurations) {
         List<Map<String, Object>> metadataList = new ArrayList<>();
 
-        for (YamlConfigMetadata config : configurations) {
+        for (ConfigMetadata config : configurations) {
             Map<String, Object> metadata = new HashMap<>();
 
             // Core identification

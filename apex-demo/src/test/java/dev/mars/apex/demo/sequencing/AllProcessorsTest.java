@@ -1,7 +1,7 @@
 package dev.mars.apex.demo.sequencing;
 
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.core.RulesEngineConfiguration;
 import dev.mars.apex.engine.model.RuleResult;
@@ -27,23 +27,23 @@ class AllProcessorsTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AllProcessorsTest.class);
 
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
     private RulesEngineConfiguration rulesEngineConfiguration;
 
     @BeforeEach
     void setUp() {
         LOGGER.info("🔧 Initializing ALL APEX processors for comprehensive testing");
 
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
         rulesEngineConfiguration = new RulesEngineConfiguration();
 
         LOGGER.info("All processors initialized");
     }
 
     @Test
-    @DisplayName("PROCESSOR 1: YamlEnrichmentProcessor (Rules → Enrichments)")
-    void testYamlEnrichmentProcessor() {
-        LOGGER.info("=== TESTING: YamlEnrichmentProcessor ===");
+    @DisplayName("PROCESSOR 1: EnrichmentProcessor (Rules → Enrichments)")
+    void testEnrichmentProcessor() {
+        LOGGER.info("=== TESTING: EnrichmentProcessor ===");
         LOGGER.info("Processing Order: Rules FIRST → Enrichments SECOND (hardcoded)");
         
         String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/AllProcessorsTest.yaml";
@@ -69,7 +69,7 @@ class AllProcessorsTest {
             @SuppressWarnings("unchecked")
             Map<String, Object> enrichedData = (Map<String, Object>) result;
             
-            LOGGER.info("YamlEnrichmentProcessor Result: {}", enrichedData);
+            LOGGER.info("EnrichmentProcessor Result: {}", enrichedData);
             
             // Check what was actually calculated
             if (enrichedData.containsKey("riskScore")) {
@@ -84,11 +84,11 @@ class AllProcessorsTest {
                 LOGGER.error("riskCategory NOT set");
             }
             
-            assertNotNull(result, "YamlEnrichmentProcessor should return result");
+            assertNotNull(result, "EnrichmentProcessor should return result");
             
         } catch (Exception e) {
-            LOGGER.error("💥 YamlEnrichmentProcessor failed: {}", e.getMessage());
-            fail("YamlEnrichmentProcessor should not fail: " + e.getMessage());
+            LOGGER.error("💥 EnrichmentProcessor failed: {}", e.getMessage());
+            fail("EnrichmentProcessor should not fail: " + e.getMessage());
         }
     }
 
@@ -144,10 +144,10 @@ class AllProcessorsTest {
     }
 
     @Test
-    @DisplayName("PROCESSOR 3: enrichmentProcessor.processEnrichments() (Delegates to YamlEnrichmentProcessor)")
+    @DisplayName("PROCESSOR 3: enrichmentProcessor.processEnrichments() (Delegates to EnrichmentProcessor)")
     void testEnrichmentService() {
         LOGGER.info("=== TESTING: enrichmentProcessor.processEnrichments() ===");
-        LOGGER.info("Processing Order: Delegates to YamlEnrichmentProcessor (Rules → Enrichments)");
+        LOGGER.info("Processing Order: Delegates to EnrichmentProcessor (Rules → Enrichments)");
         
         String yamlPath = "src/test/java/dev/mars/apex/demo/sequencing/AllProcessorsTest.yaml";
         YamlRuleConfiguration config;

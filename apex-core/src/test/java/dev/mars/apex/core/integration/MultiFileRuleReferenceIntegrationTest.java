@@ -1,7 +1,7 @@
 package dev.mars.apex.core.integration;
 
-import dev.mars.apex.core.config.YamlConfigurationMerger;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.ConfigurationMerger;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
@@ -34,14 +34,14 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("Multi-File Rule Reference Integration Tests")
 class MultiFileRuleReferenceIntegrationTest {
 
-    private YamlConfigurationLoader configLoader;
+    private ConfigurationLoader configLoader;
     
     @TempDir
     Path tempDir;
 
     @BeforeEach
     void setUp() {
-        configLoader = new YamlConfigurationLoader();
+        configLoader = new ConfigurationLoader();
     }
 
     /**
@@ -50,7 +50,7 @@ class MultiFileRuleReferenceIntegrationTest {
     private RulesEngine createRulesEngineFromMultipleFiles(String... filePaths) throws Exception {
         YamlRuleConfiguration merged = new YamlRuleConfiguration();
         for (String filePath : filePaths) {
-            YamlConfigurationMerger.merge(merged, configLoader.loadFromFileWithoutValidation(filePath));
+            ConfigurationMerger.merge(merged, configLoader.loadFromFileWithoutValidation(filePath));
         }
         configLoader.processReferencesAndValidate(merged);
         return RulesEngine.fromYamlConfig(merged);

@@ -4,7 +4,7 @@
  */
 package dev.mars.apex.demo.config;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.config.model.YamlDataSource;
 import dev.mars.apex.core.config.model.YamlEnrichment;
@@ -35,12 +35,12 @@ class ComprehensivePlaceholderResolutionTest {
 
     private static final Logger logger = LoggerFactory.getLogger(ComprehensivePlaceholderResolutionTest.class);
     
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
         logger.info("=== Setting up Comprehensive Placeholder Resolution Test ===");
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
         
         // Clear any existing system properties to ensure clean test state
         clearTestProperties();

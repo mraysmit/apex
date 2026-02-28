@@ -23,7 +23,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import dev.mars.apex.core.config.exception.ResourceNotFoundException;
 import dev.mars.apex.core.config.ResourceResolver;
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.config.exception.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,7 +91,7 @@ public class ComponentLoader {
 
     /**
      * Create and configure the YAML ObjectMapper.
-     * Uses same configuration as YamlConfigurationLoader for compatibility.
+     * Uses same configuration as ConfigurationLoader for compatibility.
      *
      * @return Configured ObjectMapper for YAML processing
      */
@@ -117,9 +117,9 @@ public class ComponentLoader {
      *
      * @param componentFilePath the path to the component YAML file
      * @return the loaded component configuration
-     * @throws YamlConfigurationException if loading fails
+     * @throws ConfigurationException if loading fails
      */
-    public ComponentConfiguration loadComponent(String componentFilePath) throws YamlConfigurationException {
+    public ComponentConfiguration loadComponent(String componentFilePath) throws ConfigurationException {
         return loadComponent(componentFilePath, null);
     }
 
@@ -132,10 +132,10 @@ public class ComponentLoader {
      * @param componentFilePath the path to the component YAML file
      * @param classpathBase optional base path for classpath resolution (e.g., "config/components/")
      * @return the loaded component configuration
-     * @throws YamlConfigurationException if loading fails
+     * @throws ConfigurationException if loading fails
      */
     public ComponentConfiguration loadComponent(String componentFilePath, String classpathBase) 
-            throws YamlConfigurationException {
+            throws ConfigurationException {
         logger.info("Loading component from: {} (classpathBase: {})", componentFilePath, classpathBase);
 
         try {
@@ -154,7 +154,7 @@ public class ComponentLoader {
             return component;
 
         } catch (Exception e) {
-            throw new YamlConfigurationException("Failed to load component from: " + componentFilePath, e);
+            throw new ConfigurationException("Failed to load component from: " + componentFilePath, e);
         }
     }
 
@@ -163,9 +163,9 @@ public class ComponentLoader {
      *
      * @param inputStream the input stream containing the YAML configuration
      * @return the loaded component configuration
-     * @throws YamlConfigurationException if loading fails
+     * @throws ConfigurationException if loading fails
      */
-    public ComponentConfiguration loadComponent(InputStream inputStream) throws YamlConfigurationException {
+    public ComponentConfiguration loadComponent(InputStream inputStream) throws ConfigurationException {
         return loadComponent(inputStream, null);
     }
 
@@ -180,10 +180,10 @@ public class ComponentLoader {
      * @param inputStream the input stream containing the YAML configuration
      * @param classpathBase base path for resolving relative references (e.g., "config/components/")
      * @return the loaded component configuration
-     * @throws YamlConfigurationException if loading fails
+     * @throws ConfigurationException if loading fails
      */
     public ComponentConfiguration loadComponent(InputStream inputStream, String classpathBase) 
-            throws YamlConfigurationException {
+            throws ConfigurationException {
         logger.info("Loading component from InputStream (classpathBase: {})", classpathBase);
 
         try {
@@ -201,7 +201,7 @@ public class ComponentLoader {
             return component;
 
         } catch (IOException e) {
-            throw new YamlConfigurationException("Failed to load component from InputStream", e);
+            throw new ConfigurationException("Failed to load component from InputStream", e);
         }
     }
 
@@ -213,9 +213,9 @@ public class ComponentLoader {
      *
      * @param resourcePath the classpath resource path (e.g., "config/components/validation.yaml")
      * @return the loaded component configuration
-     * @throws YamlConfigurationException if loading fails
+     * @throws ConfigurationException if loading fails
      */
-    public ComponentConfiguration loadComponentFromClasspath(String resourcePath) throws YamlConfigurationException {
+    public ComponentConfiguration loadComponentFromClasspath(String resourcePath) throws ConfigurationException {
         String classpathBase = resourceResolver.getClasspathBase(resourcePath);
         logger.debug("Loading component from classpath: {} (derived classpathBase: {})", resourcePath, classpathBase);
         return loadComponent(resourcePath, classpathBase);
@@ -259,10 +259,10 @@ public class ComponentLoader {
      * @param component the component to resolve
      * @param componentFilePath the path to the component file (for relative path resolution)
      * @return list of all resolved file paths in execution order
-     * @throws YamlConfigurationException if resolution fails
+     * @throws ConfigurationException if resolution fails
      */
     public List<ResolvedFileReference> resolveAllReferences(ComponentConfiguration component, String componentFilePath)
-            throws YamlConfigurationException, IOException {
+            throws ConfigurationException, IOException {
         return resolveAllReferences(component, componentFilePath, null);
     }
 
@@ -277,13 +277,13 @@ public class ComponentLoader {
      * @param componentFilePath the path to the component file (for relative path resolution)
      * @param classpathBase optional base path for classpath resolution
      * @return list of all resolved file paths in execution order
-     * @throws YamlConfigurationException if resolution fails
+     * @throws ConfigurationException if resolution fails
      */
     public List<ResolvedFileReference> resolveAllReferences(
             ComponentConfiguration component, 
             String componentFilePath,
             String classpathBase)
-            throws YamlConfigurationException, IOException {
+            throws ConfigurationException, IOException {
         
         Set<String> visitedComponents = new HashSet<>();
         List<ResolvedFileReference> resolvedFiles = new ArrayList<>();
@@ -304,7 +304,7 @@ public class ComponentLoader {
             String classpathBase,
             Set<String> visitedComponents,
             List<ResolvedFileReference> resolvedFiles,
-            int depth) throws YamlConfigurationException, IOException {
+            int depth) throws ConfigurationException, IOException {
 
         // Skip disabled components
         if (!isComponentEnabled(component)) {
@@ -352,10 +352,10 @@ public class ComponentLoader {
      *
      * @param component the component to check
      * @param componentFilePath the path to the component file
-     * @throws YamlConfigurationException if circular reference detected
+     * @throws ConfigurationException if circular reference detected
      */
     public void detectCircularReferences(ComponentConfiguration component, String componentFilePath) 
-            throws YamlConfigurationException {
+            throws ConfigurationException {
         detectCircularReferences(component, componentFilePath, null);
     }
 
@@ -367,17 +367,17 @@ public class ComponentLoader {
      * @param component the component to check
      * @param componentFilePath the path to the component file
      * @param classpathBase optional base path for classpath resolution
-     * @throws YamlConfigurationException if circular reference detected
+     * @throws ConfigurationException if circular reference detected
      */
     public void detectCircularReferences(ComponentConfiguration component, String componentFilePath, String classpathBase) 
-            throws YamlConfigurationException {
+            throws ConfigurationException {
         
         Set<String> visited = new HashSet<>();
         Set<String> recursionStack = new HashSet<>();
         List<String> path = new ArrayList<>();
         
         if (hasCircularReference(component, componentFilePath, classpathBase, visited, recursionStack, path)) {
-            throw new YamlConfigurationException(
+            throw new ConfigurationException(
                 "Circular component reference detected: " + String.join(" -> ", path)
             );
         }
@@ -392,7 +392,7 @@ public class ComponentLoader {
             String classpathBase,
             Set<String> visited,
             Set<String> recursionStack,
-            List<String> path) throws YamlConfigurationException {
+            List<String> path) throws ConfigurationException {
         
         // Check if we're in a cycle
         if (recursionStack.contains(componentFilePath)) {
@@ -421,7 +421,7 @@ public class ComponentLoader {
                     return true;
                 }
             } catch (IOException e) {
-                throw new YamlConfigurationException("Failed to load component for circular reference check: " + resolvedPath, e);
+                throw new ConfigurationException("Failed to load component for circular reference check: " + resolvedPath, e);
             }
         }
         
@@ -435,9 +435,9 @@ public class ComponentLoader {
     /**
      * Validate nesting depth and issue warnings/errors.
      */
-    private void validateNestingDepth(String componentId, int depth) throws YamlConfigurationException {
+    private void validateNestingDepth(String componentId, int depth) throws ConfigurationException {
         if (depth > MAX_NESTING_DEPTH) {
-            throw new YamlConfigurationException(
+            throw new ConfigurationException(
                 "CRITICAL ERROR: Component nesting depth exceeds maximum of " + MAX_NESTING_DEPTH + 
                 " levels. Component '" + componentId + "' is at depth " + depth + 
                 ". Nesting beyond " + MAX_NESTING_DEPTH + " levels is not supported."

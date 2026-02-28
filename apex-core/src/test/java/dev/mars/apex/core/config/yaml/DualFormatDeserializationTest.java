@@ -47,12 +47,12 @@ class DualFormatDeserializationTest {
     
     private static final Logger logger = LoggerFactory.getLogger(DualFormatDeserializationTest.class);
     
-    private YamlConfigurationLoader loader;
+    private ConfigurationLoader loader;
     
     @BeforeEach
     public void setUp() {
         logger.info("Setting up YAML configuration loader for dual format testing...");
-        this.loader = new YamlConfigurationLoader();
+        this.loader = new ConfigurationLoader();
     }
     
     @Test
@@ -283,7 +283,7 @@ class DualFormatDeserializationTest {
                     query: "SELECT * FROM customers WHERE email = :email"
             """;
         
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             loader.fromYamlString(yaml);
         });
     }
@@ -300,7 +300,7 @@ class DualFormatDeserializationTest {
                     description: "Missing name field"
             """;
         
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             loader.fromYamlString(yaml);
         });
     }
@@ -317,7 +317,7 @@ class DualFormatDeserializationTest {
                     description: "Missing query field"
             """;
         
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             loader.fromYamlString(yaml);
         });
     }
@@ -334,7 +334,7 @@ class DualFormatDeserializationTest {
                   - "SELECT * FROM orders"
             """;
         
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             loader.fromYamlString(yaml);
         });
     }

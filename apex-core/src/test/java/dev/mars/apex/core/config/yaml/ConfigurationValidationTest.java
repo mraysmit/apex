@@ -49,14 +49,14 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class ConfigurationValidationTest {
 
-    private YamlConfigurationLoader loader;
+    private ConfigurationLoader loader;
 
     @TempDir
     Path tempDir;
 
     @BeforeEach
     void setUp() {
-        loader = new YamlConfigurationLoader();
+        loader = new ConfigurationLoader();
     }
 
     // ========================================
@@ -95,7 +95,7 @@ class ConfigurationValidationTest {
             """;
         Files.writeString(configFile, invalidConfig);
 
-        YamlConfigurationException exception = assertThrows(YamlConfigurationException.class, () -> {
+        ConfigurationException exception = assertThrows(ConfigurationException.class, () -> {
             loader.loadFromFile(configFile.toString());
         }, "Should throw exception for non-existent rule references");
         
@@ -174,7 +174,7 @@ class ConfigurationValidationTest {
             """;
         Files.writeString(configFile, invalidConfig);
 
-        YamlConfigurationException exception = assertThrows(YamlConfigurationException.class, () -> {
+        ConfigurationException exception = assertThrows(ConfigurationException.class, () -> {
             loader.loadFromFile(configFile.toString());
         }, "Should throw exception for non-existent rule references in chains");
         
@@ -216,7 +216,7 @@ class ConfigurationValidationTest {
             """;
         Files.writeString(configFile, invalidConfig);
 
-        YamlConfigurationException exception = assertThrows(YamlConfigurationException.class, () -> {
+        ConfigurationException exception = assertThrows(ConfigurationException.class, () -> {
             loader.loadFromFile(configFile.toString());
         }, "Should throw exception for duplicate rule IDs");
         
@@ -260,7 +260,7 @@ class ConfigurationValidationTest {
             """;
         Files.writeString(configFile, invalidConfig);
 
-        YamlConfigurationException exception = assertThrows(YamlConfigurationException.class, () -> {
+        ConfigurationException exception = assertThrows(ConfigurationException.class, () -> {
             loader.loadFromFile(configFile.toString());
         }, "Should throw exception for duplicate data source names");
         
@@ -317,7 +317,7 @@ class ConfigurationValidationTest {
             """;
         Files.writeString(configFile, invalidConfig);
 
-        YamlConfigurationException exception = assertThrows(YamlConfigurationException.class, () -> {
+        ConfigurationException exception = assertThrows(ConfigurationException.class, () -> {
             loader.loadFromFile(configFile.toString());
         }, "Should throw exception for circular dependencies");
         
@@ -351,7 +351,7 @@ class ConfigurationValidationTest {
             """;
         Files.writeString(configFile, invalidConfig);
 
-        YamlConfigurationException exception = assertThrows(YamlConfigurationException.class, () -> {
+        ConfigurationException exception = assertThrows(ConfigurationException.class, () -> {
             loader.loadFromFile(configFile.toString());
         }, "Should throw exception for incomplete database connection");
         
@@ -384,7 +384,7 @@ class ConfigurationValidationTest {
             """;
         Files.writeString(configFile, invalidConfig);
 
-        YamlConfigurationException exception = assertThrows(YamlConfigurationException.class, () -> {
+        ConfigurationException exception = assertThrows(ConfigurationException.class, () -> {
             loader.loadFromFile(configFile.toString());
         }, "Should throw exception for missing base URL in REST API");
         
@@ -417,7 +417,7 @@ class ConfigurationValidationTest {
             """;
         Files.writeString(configFile, invalidConfig);
 
-        YamlConfigurationException exception = assertThrows(YamlConfigurationException.class, () -> {
+        ConfigurationException exception = assertThrows(ConfigurationException.class, () -> {
             loader.loadFromFile(configFile.toString());
         }, "Should throw exception for missing base path in file system data source");
         
@@ -454,7 +454,7 @@ class ConfigurationValidationTest {
             """;
         Files.writeString(configFile, invalidConfig);
 
-        YamlConfigurationException exception = assertThrows(YamlConfigurationException.class, () -> {
+        ConfigurationException exception = assertThrows(ConfigurationException.class, () -> {
             loader.loadFromFile(configFile.toString());
         }, "Should throw exception for missing trigger-rule in conditional-chaining");
         
@@ -485,7 +485,7 @@ class ConfigurationValidationTest {
             """;
         Files.writeString(configFile, invalidConfig);
 
-        YamlConfigurationException exception = assertThrows(YamlConfigurationException.class, () -> {
+        ConfigurationException exception = assertThrows(ConfigurationException.class, () -> {
             loader.loadFromFile(configFile.toString());
         }, "Should throw exception for missing stages in sequential-dependency");
         
@@ -515,7 +515,7 @@ class ConfigurationValidationTest {
             """;
         Files.writeString(configFile, invalidConfig);
 
-        YamlConfigurationException exception = assertThrows(YamlConfigurationException.class, () -> {
+        ConfigurationException exception = assertThrows(ConfigurationException.class, () -> {
             loader.loadFromFile(configFile.toString());
         }, "Should throw exception for missing accumulator configuration");
         
@@ -673,7 +673,7 @@ class ConfigurationValidationTest {
             """;
         Files.writeString(nullConfigFile, nullConfig);
 
-        YamlConfigurationException exception = assertThrows(YamlConfigurationException.class, () -> {
+        ConfigurationException exception = assertThrows(ConfigurationException.class, () -> {
             loader.loadFromFile(nullConfigFile.toString());
         }, "Should throw exception for null values in required fields");
         

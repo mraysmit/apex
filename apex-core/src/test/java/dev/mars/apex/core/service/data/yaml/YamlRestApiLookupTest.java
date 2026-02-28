@@ -18,7 +18,7 @@ package dev.mars.apex.core.service.data.yaml;
 
 
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlDataSource;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.service.data.external.DataSourceException;
@@ -59,14 +59,14 @@ class YamlRestApiLookupTest {
     private static final String MOCK_API_URL = "https://api.example.com";
 
     private DataSourceFactory factory;
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
     private YamlRuleConfiguration yamlConfig;
     private ExternalDataSource restApiSource;
 
     @BeforeEach
     void setUp() throws Exception {
         factory = DataSourceFactory.getInstance();
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
 
         // Set API base URL property for YAML resolution
         System.setProperty("API_BASE_URL", MOCK_API_URL);

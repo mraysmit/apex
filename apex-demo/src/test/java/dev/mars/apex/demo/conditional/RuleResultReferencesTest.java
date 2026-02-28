@@ -208,7 +208,7 @@ public class RuleResultReferencesTest extends DemoTestBase {
 
             // Verify the feature is now implemented
             // The passedRules and failedRules lists are now available in rule group results
-            // They are populated by YamlEnrichmentProcessor when processing rule groups
+            // They are populated by EnrichmentProcessor when processing rule groups
 
             assertTrue(enrichedData.containsKey("validationStatus"),
                       "Should have validation status from rule group 'passed' boolean");

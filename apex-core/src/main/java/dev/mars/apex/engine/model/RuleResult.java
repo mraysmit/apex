@@ -58,8 +58,8 @@ public class RuleResult implements Serializable {
     // Child results for composite evaluations (e.g., evaluateSequential)
     private final List<RuleResult> childResults;
 
-    // New field for execution trace
-    private List<ExecutionStep> executionPath = new ArrayList<>();
+    // Execution trace
+    private final List<ExecutionStep> executionPath;
 
 
     /**
@@ -76,14 +76,14 @@ public class RuleResult implements Serializable {
         this.timestamp = builder.timestamp != null ? builder.timestamp : Instant.now();
         this.resultType = builder.resultType;
         this.performanceMetrics = builder.performanceMetrics;
-        this.enrichedData = builder.enrichedData != null ? new HashMap<>(builder.enrichedData) : new HashMap<>();
-        this.failureMessages = builder.failureMessages != null ? new ArrayList<>(builder.failureMessages) : new ArrayList<>();
+        this.enrichedData = builder.enrichedData != null ? Collections.unmodifiableMap(new HashMap<>(builder.enrichedData)) : Collections.emptyMap();
+        this.failureMessages = builder.failureMessages != null ? Collections.unmodifiableList(new ArrayList<>(builder.failureMessages)) : Collections.emptyList();
         this.success = builder.success;
         this.successCode = builder.successCode;
         this.errorCode = builder.errorCode;
         this.mapToField = builder.mapToField;
-        this.childResults = builder.childResults != null ? new ArrayList<>(builder.childResults) : new ArrayList<>();
-        this.executionPath = builder.executionPath != null ? new ArrayList<>(builder.executionPath) : new ArrayList<>();
+        this.childResults = builder.childResults != null ? Collections.unmodifiableList(new ArrayList<>(builder.childResults)) : Collections.emptyList();
+        this.executionPath = builder.executionPath != null ? Collections.unmodifiableList(new ArrayList<>(builder.executionPath)) : Collections.emptyList();
     }
 
     /**
@@ -632,7 +632,7 @@ public class RuleResult implements Serializable {
      * @return List of child RuleResult objects, or empty list if none
      */
     public List<RuleResult> getChildResults() {
-        return childResults != null ? new ArrayList<>(childResults) : new ArrayList<>();
+        return childResults;
     }
 
     /**
@@ -736,16 +736,7 @@ public class RuleResult implements Serializable {
      * @return List of execution steps
      */
     public List<ExecutionStep> getExecutionPath() {
-        return executionPath != null ? new ArrayList<>(executionPath) : new ArrayList<>();
-    }
-
-    /**
-     * Set the execution path (trace) of the evaluation.
-     *
-     * @param executionPath List of execution steps
-     */
-    public void setExecutionPath(List<ExecutionStep> executionPath) {
-        this.executionPath = executionPath != null ? new ArrayList<>(executionPath) : new ArrayList<>();
+        return executionPath;
     }
 
     /**
@@ -819,7 +810,7 @@ public class RuleResult implements Serializable {
      * @return List of failure messages, empty if no failures
      */
     public List<String> getFailureMessages() {
-        return failureMessages != null ? new ArrayList<>(failureMessages) : new ArrayList<>();
+        return failureMessages;
     }
 
     /**
@@ -829,7 +820,7 @@ public class RuleResult implements Serializable {
      * @return Map of enriched data, empty if no enrichments
      */
     public Map<String, Object> getEnrichedData() {
-        return enrichedData != null ? new HashMap<>(enrichedData) : new HashMap<>();
+        return enrichedData;
     }
 
     @Override

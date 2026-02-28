@@ -18,7 +18,7 @@ package dev.mars.apex.core.service.data.yaml;
 
 
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlDataSource;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.service.data.external.DataSourceException;
@@ -72,7 +72,7 @@ class YamlDataLookupIntegrationTest {
 
     private DataSourceFactory factory;
     private DataSourceConfigurationService configService;
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
     private YamlRuleConfiguration yamlConfig;
     private Map<String, ExternalDataSource> testDataSources;
 
@@ -80,7 +80,7 @@ class YamlDataLookupIntegrationTest {
     void setUp() throws Exception {
         factory = DataSourceFactory.getInstance();
         configService = DataSourceConfigurationService.getInstance();
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
         testDataSources = new HashMap<>();
 
         // Load YAML configuration from file

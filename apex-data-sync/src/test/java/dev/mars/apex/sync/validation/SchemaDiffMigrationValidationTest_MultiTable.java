@@ -19,7 +19,7 @@
 package dev.mars.apex.sync.validation;
 
 import dev.mars.apex.sync.SyncTestBase;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.ExecutionStep;
@@ -63,7 +63,7 @@ class SchemaDiffMigrationValidationTest_MultiTable extends SyncTestBase {
     private static final String H2_SOURCE_URL = "jdbc:h2:mem:migration_source_multitable;DB_CLOSE_DELAY=-1";
     private static final String H2_TARGET_URL = "jdbc:h2:mem:migration_target_multitable;DB_CLOSE_DELAY=-1";
     
-    private final YamlConfigurationLoader yamlLoader = new YamlConfigurationLoader();
+    private final ConfigurationLoader yamlLoader = new ConfigurationLoader();
     private RulesEngine rulesEngine;
 
     @BeforeEach

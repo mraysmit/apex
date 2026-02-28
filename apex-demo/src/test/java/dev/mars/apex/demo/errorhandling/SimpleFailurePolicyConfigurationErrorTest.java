@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - System should continue processing with reasonable defaults
  * - Failure policies should work correctly with configuration errors
  *
- * This test specifically validates the fix for YamlConfigurationException being
+ * This test specifically validates the fix for ConfigurationException being
  * thrown for missing field-mappings in calculation-enrichment configurations.
  */
 @ExtendWith(ColoredTestOutputExtension.class)

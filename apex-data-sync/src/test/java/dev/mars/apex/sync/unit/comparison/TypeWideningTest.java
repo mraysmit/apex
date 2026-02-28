@@ -1,6 +1,6 @@
 package dev.mars.apex.sync.unit.comparison;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.ExecutionStep;
@@ -68,7 +68,7 @@ public class TypeWideningTest extends SyncTestBase {
             + postgres.getMappedPort(5432) + "/apex_widening_test";
     }
 
-    private YamlConfigurationLoader yamlLoader = new YamlConfigurationLoader();
+    private ConfigurationLoader yamlLoader = new ConfigurationLoader();
 
     @BeforeEach
     void setupSchemas() throws Exception {

@@ -1,6 +1,6 @@
 package dev.mars.apex.core.service.enrichment;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
@@ -53,7 +53,7 @@ public class SpelFieldMappingIntegrationTest {
                     target-field: "trade_amount"
             """;
 
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
         // Create input data with nested structure (exactly as in the issue)
@@ -125,7 +125,7 @@ public class SpelFieldMappingIntegrationTest {
                     target-field: "bid_price"
             """;
 
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
         Map<String, Object> inputData = new HashMap<>();
@@ -188,7 +188,7 @@ public class SpelFieldMappingIntegrationTest {
                     target-field: "currency_code"
             """;
 
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
         // Create nested input data - pass trade directly at root level
@@ -253,7 +253,7 @@ public class SpelFieldMappingIntegrationTest {
                     target-field: "nested_value"
             """;
 
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
 
         // Create input data with both simple and nested fields

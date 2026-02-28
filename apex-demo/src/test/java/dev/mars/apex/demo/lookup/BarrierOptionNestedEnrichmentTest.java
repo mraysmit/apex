@@ -16,8 +16,8 @@ package dev.mars.apex.demo.lookup;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.core.RulesEngineConfiguration;
@@ -65,12 +65,12 @@ public class BarrierOptionNestedEnrichmentTest {
 
     private static final Logger logger = LoggerFactory.getLogger(BarrierOptionNestedEnrichmentTest.class);
 
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
         // Initialize APEX services following established patterns
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
 
         logger.info("APEX services initialized for enrichment testing");
     }
@@ -121,7 +121,7 @@ public class BarrierOptionNestedEnrichmentTest {
 
             logger.info("[OK] Level 2 nested field navigation enrichment passed");
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
@@ -171,7 +171,7 @@ public class BarrierOptionNestedEnrichmentTest {
 
             logger.info("[OK] Cross-nested business calculation enrichment passed");
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
@@ -221,7 +221,7 @@ public class BarrierOptionNestedEnrichmentTest {
 
             logger.info("[OK] Level 3 nested conditional processing enrichment passed");
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
@@ -271,7 +271,7 @@ public class BarrierOptionNestedEnrichmentTest {
 
             logger.info("[OK] Nested date calculation with SpEL enrichment passed");
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
@@ -324,7 +324,7 @@ public class BarrierOptionNestedEnrichmentTest {
             logger.info("  - Level 3 Conditional: {} type", enrichments.get(2).getType());
             logger.info("  - Date Calculation: {} type", enrichments.get(3).getType());
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
@@ -334,7 +334,7 @@ public class BarrierOptionNestedEnrichmentTest {
      * Create RulesEngine with EnrichmentService for processing enrichments.
      * Following the pattern from UpdateStageFxTransactionSimplifiedTest.
      */
-    private RulesEngine createRulesEngineWithEnrichmentService(YamlRuleConfiguration config) throws YamlConfigurationException {
+    private RulesEngine createRulesEngineWithEnrichmentService(YamlRuleConfiguration config) throws ConfigurationException {
         // Create basic configuration from YAML using the static factory method
         RulesEngine baseEngine = RulesEngine.fromYamlConfig(config);
         RulesEngineConfiguration rulesConfig = baseEngine.getConfiguration();

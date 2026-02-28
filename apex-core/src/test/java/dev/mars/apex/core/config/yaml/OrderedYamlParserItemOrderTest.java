@@ -54,7 +54,7 @@ class OrderedYamlParserItemOrderTest {
     
     @Test
     @DisplayName("Should extract item order from simple YAML with enrichments and rules")
-    void testSimpleItemOrderExtraction() throws YamlConfigurationException {
+    void testSimpleItemOrderExtraction() throws ConfigurationException {
         LOGGER.info("Testing simple item order extraction...");
         
         String yaml = """
@@ -106,7 +106,7 @@ class OrderedYamlParserItemOrderTest {
     
     @Test
     @DisplayName("Should extract item order with interleaved sections (E1, R1, E2, R2)")
-    void testInterleavedItemOrder() throws YamlConfigurationException {
+    void testInterleavedItemOrder() throws ConfigurationException {
         LOGGER.info("Testing interleaved item order extraction...");
         
         // Note: YAML doesn't allow duplicate keys, so we can't have multiple enrichments/rules sections
@@ -166,7 +166,7 @@ class OrderedYamlParserItemOrderTest {
     
     @Test
     @DisplayName("Should handle empty sections gracefully")
-    void testEmptySections() throws YamlConfigurationException {
+    void testEmptySections() throws ConfigurationException {
         LOGGER.info("Testing empty sections handling...");
         
         String yaml = """
@@ -198,7 +198,7 @@ class OrderedYamlParserItemOrderTest {
     
     @Test
     @DisplayName("Should handle items without IDs gracefully")
-    void testItemsWithoutIds() throws YamlConfigurationException {
+    void testItemsWithoutIds() throws ConfigurationException {
         LOGGER.info("Testing items without IDs handling...");
         
         String yaml = """
@@ -238,7 +238,7 @@ class OrderedYamlParserItemOrderTest {
     
     @Test
     @DisplayName("Should extract all section types correctly")
-    void testAllSectionTypes() throws YamlConfigurationException {
+    void testAllSectionTypes() throws ConfigurationException {
         LOGGER.info("Testing all section types extraction...");
         
         String yaml = """

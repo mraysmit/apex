@@ -37,7 +37,7 @@ public class PropertyResolutionIntegrationTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertyResolutionIntegrationTest.class);
     
-    private YamlConfigurationLoader loader;
+    private ConfigurationLoader loader;
 
     @TempDir
     Path tempDir;
@@ -46,7 +46,7 @@ public class PropertyResolutionIntegrationTest {
     void setUp() {
         LOGGER.info("Setting up PropertyResolutionIntegrationTest");
         
-        loader = new YamlConfigurationLoader();
+        loader = new ConfigurationLoader();
         
         // Set up test environment variables and system properties
         System.setProperty("TEST_DB_HOST", "test-host");
@@ -249,7 +249,7 @@ public class PropertyResolutionIntegrationTest {
                   host: "${DEFINITELY_MISSING_PROPERTY}"
             """;
         
-        Exception exception = assertThrows(YamlConfigurationException.class, () -> {
+        Exception exception = assertThrows(ConfigurationException.class, () -> {
             loader.fromYamlString(yamlContent);
         });
         

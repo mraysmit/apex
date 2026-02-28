@@ -22,7 +22,7 @@ import dev.mars.apex.engine.util.DataCopyUtility;
 import dev.mars.apex.engine.model.EnrichmentGroup;
 import dev.mars.apex.engine.model.EnrichmentGroupResult;
 import dev.mars.apex.engine.model.RuleResult;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
+import dev.mars.apex.core.service.enrichment.EnrichmentProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,14 +52,14 @@ import java.util.concurrent.Future;
 public class EnrichmentGroupExecutor {
     private static final Logger logger = LoggerFactory.getLogger(EnrichmentGroupExecutor.class);
 
-    private final YamlEnrichmentProcessor enrichmentProcessor;
+    private final EnrichmentProcessor enrichmentProcessor;
 
     /**
      * Create a new EnrichmentGroupExecutor with the specified enrichment processor.
      *
      * @param enrichmentProcessor The processor to use for individual enrichments
      */
-    public EnrichmentGroupExecutor(YamlEnrichmentProcessor enrichmentProcessor) {
+    public EnrichmentGroupExecutor(EnrichmentProcessor enrichmentProcessor) {
         this.enrichmentProcessor = enrichmentProcessor;
     }
 

@@ -16,7 +16,7 @@ package dev.mars.apex.yaml.manager.controller;
  * limitations under the License.
  */
 
-import dev.mars.apex.yaml.manager.model.YamlConfigMetadata;
+import dev.mars.apex.yaml.manager.model.ConfigMetadata;
 import dev.mars.apex.yaml.manager.service.CatalogService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -71,8 +71,8 @@ public class CatalogControllerTest {
     @DisplayName("Should retrieve all configurations")
     public void testGetAllConfigurations(@TempDir Path tempDir) throws IOException {
         // Create and add test configurations to catalog
-        YamlConfigMetadata metadata1 = createMetadata("rule-1", "rule-config", "Rule 1");
-        YamlConfigMetadata metadata2 = createMetadata("rule-2", "rule-config", "Rule 2");
+        ConfigMetadata metadata1 = createMetadata("rule-1", "rule-config", "Rule 1");
+        ConfigMetadata metadata2 = createMetadata("rule-2", "rule-config", "Rule 2");
         catalogService.addConfiguration(metadata1);
         catalogService.addConfiguration(metadata2);
 
@@ -91,7 +91,7 @@ public class CatalogControllerTest {
     @DisplayName("Should retrieve specific configuration by id")
     public void testGetConfiguration(@TempDir Path tempDir) throws IOException {
         // Create and add test configuration to catalog
-        YamlConfigMetadata metadata = createMetadata("rule-1", "rule-config", "Rule 1");
+        ConfigMetadata metadata = createMetadata("rule-1", "rule-config", "Rule 1");
         catalogService.addConfiguration(metadata);
 
         // Call actual REST endpoint
@@ -126,7 +126,7 @@ public class CatalogControllerTest {
     @DisplayName("Should search configurations by tag")
     public void testSearchByTag(@TempDir Path tempDir) throws IOException {
         // Create and add test configuration with tags
-        YamlConfigMetadata metadata = createMetadata("rule-1", "rule-config", "Rule 1");
+        ConfigMetadata metadata = createMetadata("rule-1", "rule-config", "Rule 1");
         catalogService.addConfiguration(metadata);
 
         // Call actual REST endpoint
@@ -144,7 +144,7 @@ public class CatalogControllerTest {
     @DisplayName("Should search configurations by business domain")
     public void testSearchByBusinessDomain(@TempDir Path tempDir) throws IOException {
         // Create and add test configuration
-        YamlConfigMetadata metadata = createMetadata("rule-1", "rule-config", "Rule 1");
+        ConfigMetadata metadata = createMetadata("rule-1", "rule-config", "Rule 1");
         catalogService.addConfiguration(metadata);
 
         // Call actual REST endpoint
@@ -162,7 +162,7 @@ public class CatalogControllerTest {
     @DisplayName("Should search configurations by type")
     public void testSearchByType(@TempDir Path tempDir) throws IOException {
         // Create and add test configuration
-        YamlConfigMetadata metadata = createMetadata("rule-1", "rule-config", "Rule 1");
+        ConfigMetadata metadata = createMetadata("rule-1", "rule-config", "Rule 1");
         catalogService.addConfiguration(metadata);
 
         // Call actual REST endpoint
@@ -180,7 +180,7 @@ public class CatalogControllerTest {
     @DisplayName("Should search configurations by author")
     public void testSearchByAuthor(@TempDir Path tempDir) throws IOException {
         // Create and add test configuration
-        YamlConfigMetadata metadata = createMetadata("rule-1", "rule-config", "Rule 1");
+        ConfigMetadata metadata = createMetadata("rule-1", "rule-config", "Rule 1");
         catalogService.addConfiguration(metadata);
 
         // Call actual REST endpoint
@@ -202,7 +202,7 @@ public class CatalogControllerTest {
     @DisplayName("Should find unused configurations")
     public void testFindUnused(@TempDir Path tempDir) throws IOException {
         // Create and add test configuration
-        YamlConfigMetadata metadata = createMetadata("rule-1", "rule-config", "Rule 1");
+        ConfigMetadata metadata = createMetadata("rule-1", "rule-config", "Rule 1");
         catalogService.addConfiguration(metadata);
 
         // Call actual REST endpoint
@@ -220,7 +220,7 @@ public class CatalogControllerTest {
     @DisplayName("Should find critical configurations")
     public void testFindCritical(@TempDir Path tempDir) throws IOException {
         // Create and add test configuration
-        YamlConfigMetadata metadata = createMetadata("rule-1", "rule-config", "Rule 1");
+        ConfigMetadata metadata = createMetadata("rule-1", "rule-config", "Rule 1");
         catalogService.addConfiguration(metadata);
 
         // Call actual REST endpoint
@@ -238,7 +238,7 @@ public class CatalogControllerTest {
     @DisplayName("Should find configurations by health score range")
     public void testFindByHealthScore(@TempDir Path tempDir) throws IOException {
         // Create and add test configuration
-        YamlConfigMetadata metadata = createMetadata("rule-1", "rule-config", "Rule 1");
+        ConfigMetadata metadata = createMetadata("rule-1", "rule-config", "Rule 1");
         catalogService.addConfiguration(metadata);
 
         // Call actual REST endpoint
@@ -260,8 +260,8 @@ public class CatalogControllerTest {
     @DisplayName("Should retrieve catalog statistics")
     public void testGetStatistics(@TempDir Path tempDir) throws IOException {
         // Create and add test configurations
-        YamlConfigMetadata metadata1 = createMetadata("rule-1", "rule-config", "Rule 1");
-        YamlConfigMetadata metadata2 = createMetadata("rule-2", "rule-config", "Rule 2");
+        ConfigMetadata metadata1 = createMetadata("rule-1", "rule-config", "Rule 1");
+        ConfigMetadata metadata2 = createMetadata("rule-2", "rule-config", "Rule 2");
         catalogService.addConfiguration(metadata1);
         catalogService.addConfiguration(metadata2);
 
@@ -280,8 +280,8 @@ public class CatalogControllerTest {
     // Helper Methods
     // ========================================
 
-    private YamlConfigMetadata createMetadata(String id, String type, String name) {
-        YamlConfigMetadata metadata = new YamlConfigMetadata();
+    private ConfigMetadata createMetadata(String id, String type, String name) {
+        ConfigMetadata metadata = new ConfigMetadata();
         metadata.setId(id);
         metadata.setType(type);
         metadata.setName(name);

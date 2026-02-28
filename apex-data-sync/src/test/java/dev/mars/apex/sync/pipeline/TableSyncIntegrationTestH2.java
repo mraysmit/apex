@@ -18,7 +18,7 @@
 
 package dev.mars.apex.sync.pipeline;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.ExecutionStep;
@@ -61,7 +61,7 @@ public class TableSyncIntegrationTestH2 {
         }
 
         // 2. Run Sync via APEX Core (using YAML file)
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration yamlConfig = loader.loadFromFile("src/test/java/dev/mars/apex/sync/pipeline/TableSyncIntegrationTestH2.yaml");
         RulesEngine engine = RulesEngine.fromYamlConfig(yamlConfig);
         RuleResult result = engine.evaluate(new HashMap<>());

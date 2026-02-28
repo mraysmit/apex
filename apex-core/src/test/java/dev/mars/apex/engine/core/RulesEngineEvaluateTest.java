@@ -29,6 +29,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -187,7 +188,7 @@ class RulesEngineEvaluateTest {
     }
 
     @Test
-    @DisplayName("Test evaluate() method returns defensive copies")
+    @DisplayName("Test evaluate() method returns unmodifiable collections")
     void testEvaluateReturnsDefensiveCopies() {
         YamlRuleConfiguration yamlConfig = new YamlRuleConfiguration();
         Map<String, Object> inputData = new HashMap<>();
@@ -195,14 +196,15 @@ class RulesEngineEvaluateTest {
         
         RuleResult result = rulesEngine.evaluate(yamlConfig, inputData);
         
-        // Get the enriched data and try to modify it
+        // Collections returned by getters are unmodifiable — modifications throw
         Map<String, Object> enrichedData = result.getEnrichedData();
-        enrichedData.put("modifiable", "modified");
-        enrichedData.put("newField", "newValue");
+        assertThrows(UnsupportedOperationException.class,
+                () -> enrichedData.put("newField", "newValue"),
+                "Enriched data should be unmodifiable");
         
-        // Get the data again and verify it wasn't modified
-        Map<String, Object> enrichedDataAgain = result.getEnrichedData();
-        assertEquals("original", enrichedDataAgain.get("modifiable"), "Original value should be preserved");
-        assertNull(enrichedDataAgain.get("newField"), "New field should not exist");
+        List<String> failureMessages = result.getFailureMessages();
+        assertThrows(UnsupportedOperationException.class,
+                () -> failureMessages.add("new message"),
+                "Failure messages should be unmodifiable");
     }
 }

@@ -1,8 +1,8 @@
 package dev.mars.apex.rest.config;
 
 import dev.mars.apex.core.api.RulesService;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
-import dev.mars.apex.core.config.YamlRuleFactory;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.RuleFactory;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.core.service.data.external.manager.DataSourceManager;
 import dev.mars.apex.core.service.data.external.ExternalDataSource;
@@ -11,7 +11,7 @@ import dev.mars.apex.core.service.data.external.ConnectionStatus;
 import dev.mars.apex.core.service.data.external.DataSourceMetrics;
 import dev.mars.apex.core.service.data.external.DataSourceException;
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
+import dev.mars.apex.core.service.enrichment.EnrichmentProcessor;
 import dev.mars.apex.engine.execution.RuleGroupEvaluationService;
 import dev.mars.apex.engine.core.UnifiedRuleEvaluator;
 
@@ -77,13 +77,13 @@ public class RulesEngineConfiguration {
 
     
     /**
-     * YamlConfigurationLoader bean for loading YAML configurations.
+     * ConfigurationLoader bean for loading YAML configurations.
      * This is used by the configuration management endpoints.
      */
     @Bean
-    public YamlConfigurationLoader yamlConfigurationLoader() {
-        logger.info("Creating YamlConfigurationLoader bean");
-        return new YamlConfigurationLoader();
+    public ConfigurationLoader yamlConfigurationLoader() {
+        logger.info("Creating ConfigurationLoader bean");
+        return new ConfigurationLoader();
     }
     
     /**
@@ -91,7 +91,7 @@ public class RulesEngineConfiguration {
      * This provides a pre-configured engine for immediate use.
      */
     @Bean("defaultRulesEngine")
-    public RulesEngine defaultRulesEngine(YamlConfigurationLoader loader) {
+    public RulesEngine defaultRulesEngine(ConfigurationLoader loader) {
         try {
             // Create base engine configuration
             dev.mars.apex.engine.core.RulesEngineConfiguration engineConfig =
@@ -199,24 +199,24 @@ public class RulesEngineConfiguration {
     }
 
     /**
-     * YamlEnrichmentProcessor bean for data enrichment operations.
+     * EnrichmentProcessor bean for data enrichment operations.
      */
     @Bean
-    public YamlEnrichmentProcessor yamlEnrichmentProcessor(
+    public EnrichmentProcessor EnrichmentProcessor(
             LookupServiceRegistry lookupServiceRegistry,
             ExpressionEvaluatorService expressionEvaluatorService,
             RuleGroupEvaluationService ruleGroupEvaluationService) {
-        logger.info("Creating YamlEnrichmentProcessor bean");
-        return new YamlEnrichmentProcessor(lookupServiceRegistry, expressionEvaluatorService, null, ruleGroupEvaluationService);
+        logger.info("Creating EnrichmentProcessor bean");
+        return new EnrichmentProcessor(lookupServiceRegistry, expressionEvaluatorService, null, ruleGroupEvaluationService);
     }
 
     /**
-     * YamlRuleFactory bean for creating rules engine configurations.
+     * RuleFactory bean for creating rules engine configurations.
      */
     @Bean
-    public YamlRuleFactory yamlRuleFactory() {
-        logger.info("Creating YamlRuleFactory bean");
-        return new YamlRuleFactory();
+    public RuleFactory RuleFactory() {
+        logger.info("Creating RuleFactory bean");
+        return new RuleFactory();
     }
 
 

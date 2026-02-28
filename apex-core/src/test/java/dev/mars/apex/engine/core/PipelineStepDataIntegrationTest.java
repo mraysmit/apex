@@ -94,7 +94,7 @@ public class PipelineStepDataIntegrationTest {
             null, 3, 0
         );
         
-        result.setExecutionPath(List.of(step1, step2, step3));
+        result = result.toBuilder().executionPath(List.of(step1, step2, step3)).build();
         
         // Verify we can access the execution path
         List<ExecutionStep> executionPath = result.getExecutionPath();
@@ -138,7 +138,7 @@ public class PipelineStepDataIntegrationTest {
             List.of("data1", "data2"), 98, 2
         );
         
-        result.setExecutionPath(List.of(ruleStep, pipelineStep));
+        result = result.toBuilder().executionPath(List.of(ruleStep, pipelineStep)).build();
         
         // Iterate and process only pipeline steps
         int pipelineStepCount = 0;

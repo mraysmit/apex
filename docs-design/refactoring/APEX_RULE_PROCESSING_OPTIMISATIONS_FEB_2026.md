@@ -1,9 +1,9 @@
 # APEX Rule Processing Optimisations — February 2026
 
-**Status:** 🟡 PHASES 7-9 COMPLETE, DECOMPOSITION COMPLETE — PHASES 10-11 NOT STARTED  
+**Status:** � ALL PHASES COMPLETE (7-11 + DECOMPOSITION)  
 **Branch:** `refactor/rules-engine-decomposition`  
 **Last Updated:** February 28, 2026  
-**Test Baseline:** apex-core: 2,873 tests, apex-demo: 908 tests — 0 failures, 0 errors  
+**Test Baseline:** apex-core: 2,873+ tests, apex-demo: 908 tests — 0 failures, 0 errors  
 **Predecessor:** `APEX_RULE_PROCESSING_OPTIMISATIONS_JAN_2026_COMPLETE.md` (6 phases, all complete)
 
 ## Overview
@@ -252,29 +252,29 @@ Eliminate the silent behavioural difference between the two `evaluateRules()` ov
 
 **Net result:** UnifiedRuleEvaluator 922→877 lines (−45). Semantic ambiguity eliminated — only one `evaluateRules()` method remains with clearly documented evaluate-all behaviour.
 
-### Phase 10: Consolidate evaluateYaml() / evaluateYamlFile()
+### Phase 10: Consolidate evaluateYaml() / evaluateYamlFile() ✅
 
 **Risk: Low | Impact: Low | Effort: Small**
 
 Extract shared error-handling pattern into a common helper method.
 
 **Solution:**
-1. Create `private static RuleResult safeEvaluate(Supplier<YamlRuleConfiguration> configLoader, Map<String, Object> inputData)` that encapsulates the parse → create engine → evaluate pattern with both catch blocks
-2. Refactor `evaluateYaml()` to call `safeEvaluate(() -> loader.fromYamlString(yamlString), inputData)`
-3. Refactor `evaluateYamlFile()` to call `safeEvaluate(() -> loader.loadFromFile(yamlFilePath), inputData)`
+1. ✅ Created `private static RuleResult safeEvaluate(Callable<YamlRuleConfiguration> configLoader, Map<String, Object> inputData)` (note: `Callable` not `Supplier` — to propagate checked exceptions from YAML parsing) that encapsulates the parse → create engine → evaluate pattern with both catch blocks (`YamlConfigurationException` → `[APEX-CFG-001]`, `Exception` → `[APEX-RULE-999]`)
+2. ✅ Refactored `evaluateYaml()` to call `safeEvaluate(() -> loader.fromYamlString(yamlString), inputData)`
+3. ✅ Refactored `evaluateYamlFile()` to call `safeEvaluate(() -> loader.loadFromFile(yamlFilePath), inputData)`
 
-**Eliminates:** ~30 lines of near-clone error handling
+**Net result:** ~30 lines of near-clone error handling eliminated. Both methods reduced to 3 lines each (log + create loader + delegate to `safeEvaluate`).
 
-### Phase 11: Structural Improvements
+### Phase 11: Structural Improvements ✅
 
 **Risk: Low | Impact: Low | Effort: Small**
 
 Address remaining code quality items.
 
 **Solution:**
-1. Remove `RuleResult.setExecutionPath()` — replace all callers with `toBuilder().executionPath(path).build()`
-2. Eliminate double defensive copying in `RuleResult`: use `Collections.unmodifiableMap()` / `Collections.unmodifiableList()` wrappers in constructor, return fields directly in getters
-3. Cache `YamlTransformationProcessor` as a field in `SequentialProcessor` (same pattern as `YamlRuleFactory`)
+1. ✅ Removed `RuleResult.setExecutionPath()` — no callers remain in the codebase. The Builder + `toBuilder()` pattern is the only mutation path.
+2. ✅ Eliminated double defensive copying in `RuleResult`: constructor uses `Collections.unmodifiableMap(new HashMap<>(...))` / `Collections.unmodifiableList(new ArrayList<>(...))` wrappers, getters return fields directly (no second copy). Null inputs default to `Collections.emptyMap()` / `Collections.emptyList()`.
+3. ✅ Cached `YamlTransformationProcessor` as a `private final` field in `SequentialProcessor` (line 71), initialized once in constructor (line 100). Used at line 562 via `transformationProcessor.processTransformationsWithResult()`.
 
 ### Decomposition: UnifiedRuleEvaluator → Focused Collaborators ✅
 
@@ -321,5 +321,5 @@ Phases 7 and 8 are independent and could be executed in parallel. Phase 9 requir
 - [x] **Phase 8: Remove Dead Code** — ✅ Complete (Feb 26, 2026). Removed `extractVariableName()` (49 lines), `updateMessage()` (32 lines), localised `parser` field, consolidated duplicate Javadoc. Fixed 9 "PeeGeeQ" references across codebase. Net −88 lines. Tests: 2,873 + 908 = 3,781, 0 failures.
 - [x] **Phase 9: Resolve evaluateRules() Split** — ✅ Complete (Feb 27, 2026). Deleted dead `evaluateRules(List<Rule>, EvaluationContext)` overload (0 callers). Only evaluate-all semantics remain. UnifiedRuleEvaluator 922→877 (−45 lines). Tests: 2,873 + 908 = 3,781, 0 failures.
 - [x] **Decomposition: UnifiedRuleEvaluator** — ✅ Complete (Feb 28, 2026). Extracted 3 collaborator classes: `MessageTemplateResolver` (117 lines), `FieldMappingProcessor` (148 lines), `ErrorRecoveryHandler` (261 lines). Downgraded 13 hot-path `logger.info()` → `logger.debug()`. UnifiedRuleEvaluator 958→481 (−477 lines, −50%). Tests: 2,873 + 908 = 3,781, 0 failures.
-- [ ] **Phase 10: Consolidate evaluateYaml** — Extract shared error handling into `safeEvaluate()` helper
-- [ ] **Phase 11: Structural Improvements** — Remove mutable setter, fix double defensive copying, cache transformation processor
+- [x] **Phase 10: Consolidate evaluateYaml** — ✅ Complete (Feb 28, 2026). Extracted `safeEvaluate(Callable, Map)` helper. Both `evaluateYaml()` and `evaluateYamlFile()` reduced to 3-line delegates. ~30 lines of cloned error handling eliminated.
+- [x] **Phase 11: Structural Improvements** — ✅ Complete (Feb 28, 2026). `setExecutionPath()` removed (no callers). Double defensive copying eliminated (`Collections.unmodifiable*` in constructor, direct return in getters). `YamlTransformationProcessor` cached as field in `SequentialProcessor`.

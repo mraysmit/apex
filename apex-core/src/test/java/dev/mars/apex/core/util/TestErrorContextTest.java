@@ -16,7 +16,7 @@ package dev.mars.apex.core.util;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.config.exception.ConfigurationException;
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
 import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.DisplayName;
@@ -106,11 +106,11 @@ class TestErrorContextTest {
         void shouldCatchCorrectExceptionType() {
             logger.info("=== Testing assertThrowsWithContext with correct type ===");
             
-            YamlConfigurationException caught = TestErrorContext.assertThrowsWithContext(
+            ConfigurationException caught = TestErrorContext.assertThrowsWithContext(
                 "testing YAML parse error",
-                YamlConfigurationException.class,
+                ConfigurationException.class,
                 () -> {
-                    throw new YamlConfigurationException("Invalid YAML");
+                    throw new ConfigurationException("Invalid YAML");
                 }
             );
             

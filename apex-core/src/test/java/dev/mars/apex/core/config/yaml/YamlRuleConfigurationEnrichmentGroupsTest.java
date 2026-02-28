@@ -39,7 +39,7 @@ class YamlRuleConfigurationEnrichmentGroupsTest {
                   - "e1"
             """;
 
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yaml);
 
         assertNotNull(config.getEnrichmentGroups(), "enrichment-groups should be deserialized");

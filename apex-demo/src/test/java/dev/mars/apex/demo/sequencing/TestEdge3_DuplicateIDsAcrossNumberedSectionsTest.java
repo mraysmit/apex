@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.config.exception.ConfigurationException;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - enrichments-2: contains "duplicate-id" (SAME ID!)
  * 
  * Expected Behavior:
- * - Should throw YamlConfigurationException with message about duplicate ID
+ * - Should throw ConfigurationException with message about duplicate ID
  * - Should NOT allow configuration to load
  * 
  * This test verifies that the duplicate ID validation runs AFTER numbered sections are merged.
@@ -37,10 +37,10 @@ public class TestEdge3_DuplicateIDsAcrossNumberedSectionsTest extends DemoTestBa
         LOGGER.info("=== EDGE CASE TEST 3: Duplicate IDs Across Numbered Sections ===");
 
         // Attempt to load YAML with duplicate IDs
-        YamlConfigurationException exception = assertThrows(
-            YamlConfigurationException.class,
+        ConfigurationException exception = assertThrows(
+            ConfigurationException.class,
             () -> RulesEngine.fromClasspath("dev/mars/apex/demo/sequencing/TestEdge3_DuplicateIDsAcrossNumberedSectionsTest.yaml"),
-            "Should throw YamlConfigurationException for duplicate IDs"
+            "Should throw ConfigurationException for duplicate IDs"
         );
 
         // Verify error message

@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * REAL APEX SERVICES TESTED:
  * - EnrichmentService: Real APEX enrichment processor with failure detection
  * - ValidationService: Real APEX validation with field-level error reporting
- * - YamlConfigurationLoader: Real YAML configuration loading and validation
+ * - ConfigurationLoader: Real YAML configuration loading and validation
  * - ExpressionEvaluatorService: Real SpEL expression evaluation for business rules
  *
  * BUSINESS LOGIC VALIDATION:

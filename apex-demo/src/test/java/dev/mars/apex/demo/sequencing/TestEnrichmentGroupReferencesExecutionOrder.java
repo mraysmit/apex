@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TestEnrichmentGroupReferencesExecutionOrder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestEnrichmentGroupReferencesExecutionOrder.class);
-    private final YamlConfigurationLoader yamlLoader = new YamlConfigurationLoader();
+    private final ConfigurationLoader yamlLoader = new ConfigurationLoader();
 
     @BeforeEach
     public void setUp() {

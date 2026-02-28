@@ -4,7 +4,7 @@ import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.util.DataCopyUtility;
 import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
 import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
-import dev.mars.apex.core.service.scenario.ScenarioStageExecutor;
+import dev.mars.apex.engine.execution.ScenarioStageExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

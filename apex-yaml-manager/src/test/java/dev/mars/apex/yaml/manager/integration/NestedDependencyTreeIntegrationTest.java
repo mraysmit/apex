@@ -17,8 +17,8 @@ package dev.mars.apex.yaml.manager.integration;
  */
 
 import dev.mars.apex.yaml.manager.model.TreeNode;
-import dev.mars.apex.yaml.manager.model.YamlContentSummary;
-import dev.mars.apex.yaml.manager.service.YamlContentAnalyzer;
+import dev.mars.apex.yaml.manager.model.ContentSummary;
+import dev.mars.apex.yaml.manager.service.ContentAnalyzer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("Nested Dependency Tree Integration Tests")
 class NestedDependencyTreeIntegrationTest {
 
-    private YamlContentAnalyzer analyzer;
+    private ContentAnalyzer analyzer;
     private static final String NESTED_ROOT = "src/test/resources/nested-yaml-structure/root-scenario.yaml";
     private static final String TRADING_VALIDATION = "src/test/resources/nested-yaml-structure/trading/validation/trade-validation-rules.yaml";
     private static final String TRADING_ENRICHMENT = "src/test/resources/nested-yaml-structure/trading/enrichment/trade-enrichment-rules.yaml";
@@ -50,14 +50,14 @@ class NestedDependencyTreeIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        analyzer = new YamlContentAnalyzer();
+        analyzer = new ContentAnalyzer();
     }
 
     @Test
     @DisplayName("Should navigate subdirectories and build tree from root scenario")
     void testNavigateSubdirectories() {
         TreeNode root = new TreeNode(NESTED_ROOT, 0);
-        YamlContentSummary rootSummary = analyzer.analyzYamlContent(root.getName());
+        ContentSummary rootSummary = analyzer.analyzYamlContent(root.getName());
         root.setContentSummary(rootSummary);
 
         assertNotNull(rootSummary);
@@ -69,7 +69,7 @@ class NestedDependencyTreeIntegrationTest {
     @DisplayName("Should resolve and analyze trading validation rules in subdirectory")
     void testAnalyzeTradeValidationInSubdirectory() {
         TreeNode validationNode = new TreeNode(TRADING_VALIDATION, 1);
-        YamlContentSummary summary = analyzer.analyzYamlContent(validationNode.getName());
+        ContentSummary summary = analyzer.analyzYamlContent(validationNode.getName());
         validationNode.setContentSummary(summary);
 
         assertNotNull(summary);
@@ -83,7 +83,7 @@ class NestedDependencyTreeIntegrationTest {
     @DisplayName("Should resolve and analyze trading enrichment in nested subdirectory")
     void testAnalyzeTradeEnrichmentInNestedSubdirectory() {
         TreeNode enrichmentNode = new TreeNode(TRADING_ENRICHMENT, 1);
-        YamlContentSummary summary = analyzer.analyzYamlContent(enrichmentNode.getName());
+        ContentSummary summary = analyzer.analyzYamlContent(enrichmentNode.getName());
         enrichmentNode.setContentSummary(summary);
 
         assertNotNull(summary);
@@ -96,7 +96,7 @@ class NestedDependencyTreeIntegrationTest {
     @DisplayName("Should resolve and analyze compliance rules in subdirectory")
     void testAnalyzeComplianceInSubdirectory() {
         TreeNode complianceNode = new TreeNode(COMPLIANCE, 1);
-        YamlContentSummary summary = analyzer.analyzYamlContent(complianceNode.getName());
+        ContentSummary summary = analyzer.analyzYamlContent(complianceNode.getName());
         complianceNode.setContentSummary(summary);
 
         assertNotNull(summary);
@@ -113,9 +113,9 @@ class NestedDependencyTreeIntegrationTest {
         TreeNode enrichmentConfigNode = new TreeNode(SHARED_ENRICHMENT_CONFIG, 2);
         TreeNode complianceConfigNode = new TreeNode(SHARED_COMPLIANCE_CONFIG, 2);
 
-        YamlContentSummary tradeSummary = analyzer.analyzYamlContent(tradeConfigNode.getName());
-        YamlContentSummary enrichmentSummary = analyzer.analyzYamlContent(enrichmentConfigNode.getName());
-        YamlContentSummary complianceSummary = analyzer.analyzYamlContent(complianceConfigNode.getName());
+        ContentSummary tradeSummary = analyzer.analyzYamlContent(tradeConfigNode.getName());
+        ContentSummary enrichmentSummary = analyzer.analyzYamlContent(enrichmentConfigNode.getName());
+        ContentSummary complianceSummary = analyzer.analyzYamlContent(complianceConfigNode.getName());
 
         assertEquals("trade-config", tradeSummary.getId());
         assertEquals("enrichment-config", enrichmentSummary.getId());
@@ -200,7 +200,7 @@ class NestedDependencyTreeIntegrationTest {
     @DisplayName("Should extract metadata from files in nested directories")
     void testMetadataExtractionFromNestedFiles() {
         TreeNode validation = new TreeNode(TRADING_VALIDATION, 0);
-        YamlContentSummary summary = analyzer.analyzYamlContent(validation.getName());
+        ContentSummary summary = analyzer.analyzYamlContent(validation.getName());
         validation.setContentSummary(summary);
 
         assertEquals("trade-validation-rules", summary.getId());
@@ -251,7 +251,7 @@ class NestedDependencyTreeIntegrationTest {
     @DisplayName("Should count rules correctly across nested rule groups")
     void testRuleCountingAcrossNestedStructures() {
         TreeNode validation = new TreeNode(TRADING_VALIDATION, 0);
-        YamlContentSummary summary = analyzer.analyzYamlContent(validation.getName());
+        ContentSummary summary = analyzer.analyzYamlContent(validation.getName());
         validation.setContentSummary(summary);
 
         // Verify rule group count
@@ -264,7 +264,7 @@ class NestedDependencyTreeIntegrationTest {
     @DisplayName("Should count enrichments correctly from nested enrichment files")
     void testEnrichmentCountingFromNestedFiles() {
         TreeNode enrichment = new TreeNode(TRADING_ENRICHMENT, 0);
-        YamlContentSummary summary = analyzer.analyzYamlContent(enrichment.getName());
+        ContentSummary summary = analyzer.analyzYamlContent(enrichment.getName());
         enrichment.setContentSummary(summary);
 
         assertEquals(3, summary.getEnrichmentCount());

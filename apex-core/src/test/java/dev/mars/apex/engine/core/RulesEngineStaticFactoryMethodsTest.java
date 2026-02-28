@@ -1,7 +1,7 @@
 package dev.mars.apex.engine.core;
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.DisplayName;
@@ -89,7 +89,7 @@ class RulesEngineStaticFactoryMethodsTest {
         Files.writeString(yamlFile, yamlContent);
 
         // Load configuration
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration yamlConfig = loader.loadFromFile(yamlFile.toString());
 
         // Test: Create engine using static factory method
@@ -237,10 +237,10 @@ class RulesEngineStaticFactoryMethodsTest {
         assertTrue(result.isTriggered());
 
         // Compare with VERBOSE PATTERN (7 lines) - Still works but more complex
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration yamlConfig = loader.loadFromFile(yamlFile.toString());
 
-        dev.mars.apex.core.config.YamlRuleFactory ruleFactory = new dev.mars.apex.core.config.YamlRuleFactory();
+        dev.mars.apex.core.config.RuleFactory ruleFactory = new dev.mars.apex.core.config.RuleFactory();
         RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
 
         RulesEngine verboseEngine = new RulesEngine(config);

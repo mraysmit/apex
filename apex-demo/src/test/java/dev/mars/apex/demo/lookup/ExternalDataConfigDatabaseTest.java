@@ -16,8 +16,8 @@ package dev.mars.apex.demo.lookup;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,12 +56,12 @@ public class ExternalDataConfigDatabaseTest {
     
     private static final Logger logger = LoggerFactory.getLogger(ExternalDataConfigDatabaseTest.class);
 
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
         // Initialize APEX services following established patterns
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
         
         logger.info("APEX services initialized for external data config testing");
     }
@@ -89,7 +89,7 @@ public class ExternalDataConfigDatabaseTest {
             logger.info("  - Type: {}", config.getMetadata().getType());
             logger.info("  - Version: {}", config.getMetadata().getVersion());
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
@@ -119,7 +119,7 @@ public class ExternalDataConfigDatabaseTest {
 
             logger.info("[OK] PostgreSQL data source configuration validation passed");
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
@@ -153,7 +153,7 @@ public class ExternalDataConfigDatabaseTest {
 
             logger.info("[OK] H2 data source configuration validation passed");
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
@@ -183,7 +183,7 @@ public class ExternalDataConfigDatabaseTest {
 
             logger.info("[OK] Cache configuration validation passed");
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
@@ -213,7 +213,7 @@ public class ExternalDataConfigDatabaseTest {
 
             logger.info("[OK] Health check configuration validation passed");
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
@@ -256,7 +256,7 @@ public class ExternalDataConfigDatabaseTest {
             logger.info("  - Connection pooling and retry policy configurations");
             logger.info("  - Security settings (encryption, SSL, certificate validation)");
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }

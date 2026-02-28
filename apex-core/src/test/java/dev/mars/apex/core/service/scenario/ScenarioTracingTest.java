@@ -1,8 +1,10 @@
 package dev.mars.apex.core.service.scenario;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.engine.execution.ScenarioStageExecutor;
+
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
-import dev.mars.apex.core.config.YamlRuleFactory;
+import dev.mars.apex.core.config.RuleFactory;
 import dev.mars.apex.engine.model.ExecutionStep;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -24,11 +26,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class ScenarioTracingTest {
 
     private TestConfigLoader configLoader;
-    private YamlRuleFactory ruleFactory;
+    private RuleFactory ruleFactory;
     private ScenarioStageExecutor executor;
 
     // Test loader that returns in-memory configs
-    private static class TestConfigLoader extends YamlConfigurationLoader {
+    private static class TestConfigLoader extends ConfigurationLoader {
         private final Map<String, YamlRuleConfiguration> configs = new HashMap<>();
 
         public void addSuccess(String path) {
@@ -48,7 +50,7 @@ class ScenarioTracingTest {
     @BeforeEach
     void setUp() {
         configLoader = new TestConfigLoader();
-        ruleFactory = new YamlRuleFactory();
+        ruleFactory = new RuleFactory();
         executor = new ScenarioStageExecutor(configLoader, ruleFactory);
     }
 

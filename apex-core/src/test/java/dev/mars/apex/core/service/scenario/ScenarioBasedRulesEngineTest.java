@@ -17,7 +17,7 @@ package dev.mars.apex.core.service.scenario;
  */
 
 import dev.mars.apex.core.cache.ApexCacheManager;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
@@ -59,12 +59,12 @@ public class ScenarioBasedRulesEngineTest {
 
     private static final Logger logger = LoggerFactory.getLogger(ScenarioBasedRulesEngineTest.class);
     
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
         ApexCacheManager.resetInstance();
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
         logger.info("[OK] Initialized test environment with RulesEngine API");
     }
 

@@ -77,7 +77,7 @@ public class ScenarioRegistryLoader {
     
     private static final Logger logger = LoggerFactory.getLogger(ScenarioRegistryLoader.class);
     
-    private final YamlConfigurationLoader configLoader;
+    private final ConfigurationLoader configLoader;
     private final ScenarioParser scenarioParser;
     
     // Global search paths (can be set programmatically or via environment)
@@ -88,7 +88,7 @@ public class ScenarioRegistryLoader {
      * Create a new ScenarioRegistryLoader with default configuration loader.
      */
     public ScenarioRegistryLoader() {
-        this.configLoader = new YamlConfigurationLoader();
+        this.configLoader = new ConfigurationLoader();
         this.scenarioParser = new ScenarioParser();
         this.globalFilesystemPaths = new ArrayList<>();
         this.globalClasspathPrefixes = new ArrayList<>();
@@ -100,7 +100,7 @@ public class ScenarioRegistryLoader {
      * 
      * @param configLoader The YAML configuration loader to use
      */
-    public ScenarioRegistryLoader(YamlConfigurationLoader configLoader) {
+    public ScenarioRegistryLoader(ConfigurationLoader configLoader) {
         this.configLoader = configLoader;
         this.scenarioParser = new ScenarioParser();
         this.globalFilesystemPaths = new ArrayList<>();
@@ -129,18 +129,18 @@ public class ScenarioRegistryLoader {
      * 
      * @param registryPath The path to the scenario registry YAML file
      * @return A map of scenario configurations indexed by scenario-id
-     * @throws YamlConfigurationException if the registry file cannot be loaded,
+     * @throws ConfigurationException if the registry file cannot be loaded,
      *         if any referenced scenario file cannot be loaded,
      *         or if the registry structure is invalid
      */
-    public Map<String, ScenarioConfiguration> loadRegistry(String registryPath) throws YamlConfigurationException {
+    public Map<String, ScenarioConfiguration> loadRegistry(String registryPath) throws ConfigurationException {
         logger.info("Loading scenario registry from: {}", registryPath);
         
         try {
             // Validate registry file exists
             Path registryFilePath = Paths.get(registryPath);
             if (!Files.exists(registryFilePath)) {
-                throw new YamlConfigurationException("Scenario registry file not found: " + registryPath);
+                throw new ConfigurationException("Scenario registry file not found: " + registryPath);
             }
             
             // Load the registry YAML configuration as a Map
@@ -157,7 +157,7 @@ public class ScenarioRegistryLoader {
             List<Map<String, Object>> scenarioRegistry = (List<Map<String, Object>>) registryConfig.get("scenarios");
             
             if (scenarioRegistry == null || scenarioRegistry.isEmpty()) {
-                throw new YamlConfigurationException(
+                throw new ConfigurationException(
                     "Scenario registry file does not contain a 'scenarios' section or it is empty: " + registryPath
                 );
             }
@@ -177,7 +177,7 @@ public class ScenarioRegistryLoader {
                 }
 
                 if (configFile == null || configFile.trim().isEmpty()) {
-                    throw new YamlConfigurationException(
+                    throw new ConfigurationException(
                         "Scenario '" + scenarioId + "' in registry has missing or empty config-file"
                     );
                 }
@@ -230,10 +230,10 @@ public class ScenarioRegistryLoader {
             logger.info("Successfully loaded {} scenarios from registry: {}", scenarios.size(), registryPath);
             return scenarios;
             
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             throw e;
         } catch (Exception e) {
-            throw new YamlConfigurationException("Failed to load scenario registry from: " + registryPath, e);
+            throw new ConfigurationException("Failed to load scenario registry from: " + registryPath, e);
         }
     }
 
@@ -251,9 +251,9 @@ public class ScenarioRegistryLoader {
      * 
      * @param inputStream The input stream containing the registry YAML content
      * @return A map of scenario configurations indexed by scenario-id
-     * @throws YamlConfigurationException if the registry cannot be loaded or parsed
+     * @throws ConfigurationException if the registry cannot be loaded or parsed
      */
-    public Map<String, ScenarioConfiguration> loadRegistry(InputStream inputStream) throws YamlConfigurationException {
+    public Map<String, ScenarioConfiguration> loadRegistry(InputStream inputStream) throws ConfigurationException {
         return loadRegistry(inputStream, null);
     }
 
@@ -279,13 +279,13 @@ public class ScenarioRegistryLoader {
      * @param classpathBase The base path for resolving relative config-file references
      *                      (e.g., "scenarios/"). Can be null if all paths are absolute.
      * @return A map of scenario configurations indexed by scenario-id
-     * @throws YamlConfigurationException if the registry cannot be loaded or parsed
+     * @throws ConfigurationException if the registry cannot be loaded or parsed
      */
     public Map<String, ScenarioConfiguration> loadRegistry(InputStream inputStream, String classpathBase) 
-            throws YamlConfigurationException {
+            throws ConfigurationException {
         
         if (inputStream == null) {
-            throw new YamlConfigurationException("Input stream cannot be null");
+            throw new ConfigurationException("Input stream cannot be null");
         }
         
         logger.info("Loading scenario registry from input stream (classpathBase: {})", 
@@ -306,7 +306,7 @@ public class ScenarioRegistryLoader {
             List<Map<String, Object>> scenarioRegistry = (List<Map<String, Object>>) registryConfig.get("scenarios");
             
             if (scenarioRegistry == null || scenarioRegistry.isEmpty()) {
-                throw new YamlConfigurationException(
+                throw new ConfigurationException(
                     "Scenario registry does not contain a 'scenarios' section or it is empty"
                 );
             }
@@ -324,7 +324,7 @@ public class ScenarioRegistryLoader {
                 }
 
                 if (configFile == null || configFile.trim().isEmpty()) {
-                    throw new YamlConfigurationException(
+                    throw new ConfigurationException(
                         "Scenario '" + scenarioId + "' in registry has missing or empty config-file"
                     );
                 }
@@ -373,10 +373,10 @@ public class ScenarioRegistryLoader {
             logger.info("Successfully loaded {} scenarios from registry stream", scenarios.size());
             return scenarios;
             
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             throw e;
         } catch (Exception e) {
-            throw new YamlConfigurationException("Failed to load scenario registry from input stream", e);
+            throw new ConfigurationException("Failed to load scenario registry from input stream", e);
         }
     }
 
@@ -396,20 +396,20 @@ public class ScenarioRegistryLoader {
      * 
      * @param resourcePath The classpath resource path to the registry file
      * @return A map of scenario configurations indexed by scenario-id
-     * @throws YamlConfigurationException if the resource is not found or loading fails
+     * @throws ConfigurationException if the resource is not found or loading fails
      */
     public Map<String, ScenarioConfiguration> loadRegistryFromClasspath(String resourcePath) 
-            throws YamlConfigurationException {
+            throws ConfigurationException {
         
         if (resourcePath == null || resourcePath.trim().isEmpty()) {
-            throw new YamlConfigurationException("Resource path cannot be null or empty");
+            throw new ConfigurationException("Resource path cannot be null or empty");
         }
         
         logger.info("Loading scenario registry from classpath: {}", resourcePath);
         
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
             if (inputStream == null) {
-                throw new YamlConfigurationException("Scenario registry resource not found: " + resourcePath);
+                throw new ConfigurationException("Scenario registry resource not found: " + resourcePath);
             }
             
             // Derive classpath base from resource path
@@ -418,7 +418,7 @@ public class ScenarioRegistryLoader {
             return loadRegistry(inputStream, classpathBase);
             
         } catch (IOException e) {
-            throw new YamlConfigurationException("Failed to load scenario registry from classpath: " + resourcePath, e);
+            throw new ConfigurationException("Failed to load scenario registry from classpath: " + resourcePath, e);
         }
     }
 
@@ -427,24 +427,24 @@ public class ScenarioRegistryLoader {
      * 
      * @param resourcePath The classpath resource path to the scenario file
      * @return The loaded ScenarioConfiguration
-     * @throws YamlConfigurationException if the resource is not found or loading fails
+     * @throws ConfigurationException if the resource is not found or loading fails
      */
-    public ScenarioConfiguration loadScenarioFromClasspath(String resourcePath) throws YamlConfigurationException {
+    public ScenarioConfiguration loadScenarioFromClasspath(String resourcePath) throws ConfigurationException {
         if (resourcePath == null || resourcePath.trim().isEmpty()) {
-            throw new YamlConfigurationException("Resource path cannot be null or empty");
+            throw new ConfigurationException("Resource path cannot be null or empty");
         }
         
         logger.debug("Loading scenario from classpath: {}", resourcePath);
         
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
             if (inputStream == null) {
-                throw new YamlConfigurationException("Scenario resource not found: " + resourcePath);
+                throw new ConfigurationException("Scenario resource not found: " + resourcePath);
             }
             
             return loadScenarioFromStream(inputStream);
             
         } catch (IOException e) {
-            throw new YamlConfigurationException("Failed to load scenario from classpath: " + resourcePath, e);
+            throw new ConfigurationException("Failed to load scenario from classpath: " + resourcePath, e);
         }
     }
 
@@ -453,11 +453,11 @@ public class ScenarioRegistryLoader {
      * 
      * @param inputStream The input stream containing the scenario YAML content
      * @return The loaded ScenarioConfiguration
-     * @throws YamlConfigurationException if the stream cannot be parsed
+     * @throws ConfigurationException if the stream cannot be parsed
      */
-    public ScenarioConfiguration loadScenarioFromStream(InputStream inputStream) throws YamlConfigurationException {
+    public ScenarioConfiguration loadScenarioFromStream(InputStream inputStream) throws ConfigurationException {
         if (inputStream == null) {
-            throw new YamlConfigurationException("Input stream cannot be null");
+            throw new ConfigurationException("Input stream cannot be null");
         }
         
         try {
@@ -480,15 +480,15 @@ public class ScenarioRegistryLoader {
                 
                 return scenario;
             } else {
-                throw new YamlConfigurationException(
+                throw new ConfigurationException(
                     "Scenario configuration does not contain a 'scenario' section"
                 );
             }
             
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             throw e;
         } catch (Exception e) {
-            throw new YamlConfigurationException("Failed to load scenario from input stream", e);
+            throw new ConfigurationException("Failed to load scenario from input stream", e);
         }
     }
 
@@ -545,10 +545,10 @@ public class ScenarioRegistryLoader {
      * 
      * @param registryConfig The registry configuration map
      * @param registryPath The registry file path (for error messages)
-     * @throws YamlConfigurationException if metadata is invalid
+     * @throws ConfigurationException if metadata is invalid
      */
     private void validateRegistryMetadata(Map<String, Object> registryConfig, String registryPath) 
-            throws YamlConfigurationException {
+            throws ConfigurationException {
         
         @SuppressWarnings("unchecked")
         Map<String, Object> metadata = (Map<String, Object>) registryConfig.get("metadata");
@@ -636,9 +636,9 @@ public class ScenarioRegistryLoader {
      * 
      * @param configFile The path to the scenario configuration file
      * @return The loaded ScenarioConfiguration
-     * @throws YamlConfigurationException if the file cannot be loaded or parsed
+     * @throws ConfigurationException if the file cannot be loaded or parsed
      */
-    private ScenarioConfiguration loadScenarioFromFile(String configFile) throws YamlConfigurationException {
+    private ScenarioConfiguration loadScenarioFromFile(String configFile) throws ConfigurationException {
         try {
             // Load the YAML file as a Map
             Map<String, Object> config = configLoader.loadAsMap(configFile);
@@ -659,15 +659,15 @@ public class ScenarioRegistryLoader {
                 
                 return scenario;
             } else {
-                throw new YamlConfigurationException(
+                throw new ConfigurationException(
                     "Scenario configuration file does not contain a 'scenario' section: " + configFile
                 );
             }
             
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             throw e;
         } catch (Exception e) {
-            throw new YamlConfigurationException("Failed to load scenario from file: " + configFile, e);
+            throw new ConfigurationException("Failed to load scenario from file: " + configFile, e);
         }
     }
     

@@ -15,8 +15,8 @@
  */
 package dev.mars.apex.demo.conditional;
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.core.RulesEngineConfiguration;
@@ -63,12 +63,12 @@ public class UpdateStageFxTransactionSimplifiedTest {
 
     private static final Logger logger = LoggerFactory.getLogger(UpdateStageFxTransactionSimplifiedTest.class);
 
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
         logger.info("Setting up APEX services for FX transaction processing tests...");
-        this.yamlLoader = new YamlConfigurationLoader();
+        this.yamlLoader = new ConfigurationLoader();
 
         logger.info("APEX services initialized successfully");
     }
@@ -118,7 +118,7 @@ public class UpdateStageFxTransactionSimplifiedTest {
 
             logger.info("SWIFT valid NDF test passed");
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load or process configuration: {}", e.getMessage());
             fail("Failed to load or process configuration: " + e.getMessage());
         }
@@ -330,7 +330,7 @@ public class UpdateStageFxTransactionSimplifiedTest {
      * Load the simplified FX transaction configuration.
      * Centralized configuration loading following APEX patterns.
      */
-    private YamlRuleConfiguration loadConfiguration() throws YamlConfigurationException {
+    private YamlRuleConfiguration loadConfiguration() throws ConfigurationException {
         YamlRuleConfiguration config = yamlLoader.loadFromFile(
             "src/test/java/dev/mars/apex/demo/conditional/UpdateStageFxTransactionApexTest.yaml");
 
@@ -347,7 +347,7 @@ public class UpdateStageFxTransactionSimplifiedTest {
      * Create RulesEngine with EnrichmentService for processing enrichments.
      * Following the pattern from RulesEngineEvaluateTest.
      */
-    private RulesEngine createRulesEngineWithEnrichmentService(YamlRuleConfiguration config) throws YamlConfigurationException {
+    private RulesEngine createRulesEngineWithEnrichmentService(YamlRuleConfiguration config) throws ConfigurationException {
         // Create basic configuration from YAML using the static factory method
         RulesEngine baseEngine = RulesEngine.fromYamlConfig(config);
         RulesEngineConfiguration rulesConfig = baseEngine.getConfiguration();

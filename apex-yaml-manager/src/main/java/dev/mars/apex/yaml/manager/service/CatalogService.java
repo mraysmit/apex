@@ -16,8 +16,8 @@ package dev.mars.apex.yaml.manager.service;
  * limitations under the License.
  */
 
-import dev.mars.apex.yaml.manager.model.YamlCatalog;
-import dev.mars.apex.yaml.manager.model.YamlConfigMetadata;
+import dev.mars.apex.yaml.manager.model.Catalog;
+import dev.mars.apex.yaml.manager.model.ConfigMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -44,17 +44,17 @@ public class CatalogService {
 
     private static final Logger logger = LoggerFactory.getLogger(CatalogService.class);
 
-    private final YamlCatalog catalog;
+    private final Catalog catalog;
 
     public CatalogService() {
-        this.catalog = new YamlCatalog();
+        this.catalog = new Catalog();
         logger.info("CatalogService initialized");
     }
 
     /**
      * Add a configuration to the catalog.
      */
-    public void addConfiguration(YamlConfigMetadata metadata) {
+    public void addConfiguration(ConfigMetadata metadata) {
         logger.debug("Adding configuration to catalog: {}", metadata.getId());
         catalog.addConfiguration(metadata);
     }
@@ -70,14 +70,14 @@ public class CatalogService {
     /**
      * Get a configuration by ID.
      */
-    public YamlConfigMetadata getConfiguration(String id) {
+    public ConfigMetadata getConfiguration(String id) {
         return catalog.getConfiguration(id);
     }
 
     /**
      * Get all configurations.
      */
-    public Collection<YamlConfigMetadata> getAllConfigurations() {
+    public Collection<ConfigMetadata> getAllConfigurations() {
         return catalog.getAllConfigurations();
     }
 
@@ -85,7 +85,7 @@ public class CatalogService {
      * Find configurations by metadata attribute value.
      * Supports: tag, type, author, business-domain, owner
      */
-    public List<YamlConfigMetadata> findByMetadataAttribute(String attributeName, String value) {
+    public List<ConfigMetadata> findByMetadataAttribute(String attributeName, String value) {
         logger.debug("Finding configurations by {}: {}", attributeName, value);
         return catalog.findByMetadataAttribute(attributeName, value);
     }
@@ -93,28 +93,28 @@ public class CatalogService {
     /**
      * Find configurations by tag.
      */
-    public List<YamlConfigMetadata> findByTag(String tag) {
+    public List<ConfigMetadata> findByTag(String tag) {
         return findByMetadataAttribute("tag", tag);
     }
 
     /**
      * Find configurations by type.
      */
-    public List<YamlConfigMetadata> findByType(String type) {
+    public List<ConfigMetadata> findByType(String type) {
         return findByMetadataAttribute("type", type);
     }
 
     /**
      * Find configurations by author.
      */
-    public List<YamlConfigMetadata> findByAuthor(String author) {
+    public List<ConfigMetadata> findByAuthor(String author) {
         return findByMetadataAttribute("author", author);
     }
 
     /**
      * Find unused configurations.
      */
-    public List<YamlConfigMetadata> findUnused() {
+    public List<ConfigMetadata> findUnused() {
         logger.debug("Finding unused configurations");
         return catalog.findUnused();
     }
@@ -122,7 +122,7 @@ public class CatalogService {
     /**
      * Find critical configurations.
      */
-    public List<YamlConfigMetadata> findCritical() {
+    public List<ConfigMetadata> findCritical() {
         logger.debug("Finding critical configurations");
         return catalog.findCritical();
     }
@@ -130,7 +130,7 @@ public class CatalogService {
     /**
      * Find configurations by health score range.
      */
-    public List<YamlConfigMetadata> findByHealthScore(int minScore, int maxScore) {
+    public List<ConfigMetadata> findByHealthScore(int minScore, int maxScore) {
         logger.debug("Finding configurations by health score: {} - {}", minScore, maxScore);
         return catalog.findByHealthScore(minScore, maxScore);
     }
@@ -142,7 +142,7 @@ public class CatalogService {
      * @param query The search query (case-insensitive)
      * @return List of configurations matching the query
      */
-    public List<YamlConfigMetadata> search(String query) {
+    public List<ConfigMetadata> search(String query) {
         logger.debug("Searching configurations with query: {}", query);
         return catalog.search(query);
     }
@@ -150,7 +150,7 @@ public class CatalogService {
     /**
      * Get catalog statistics.
      */
-    public YamlCatalog getCatalog() {
+    public Catalog getCatalog() {
         return catalog;
     }
 

@@ -16,7 +16,7 @@ package dev.mars.apex.demo.lookup;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
@@ -63,14 +63,14 @@ public class ExternalDataSourceWorkingDemoTest {
     // Unique database name for this test class to avoid file locking conflicts
     private static final String DB_NAME = "external_datasource_working_test";
 
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
         logger.info("Setting up APEX services for ExternalDataSourceWorkingDemoTest...");
 
         // Initialize APEX services using modern pattern
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
 
         logger.info("[OK] APEX services initialized successfully");
     }

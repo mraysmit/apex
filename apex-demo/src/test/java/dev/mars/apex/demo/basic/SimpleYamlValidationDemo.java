@@ -16,8 +16,8 @@
 
 package dev.mars.apex.demo.basic;
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
@@ -54,7 +54,7 @@ public class SimpleYamlValidationDemo {
         
         try {
             // Step 1: Load the YAML configuration
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.fromYamlString(getSimpleYamlRule());
 
             assertNotNull(config, "Configuration should be loaded");
@@ -128,7 +128,7 @@ public class SimpleYamlValidationDemo {
 
             logger.info("=== Demo completed successfully! ===");
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Demo failed: {}", e.getMessage());
             fail("Demo failed: " + e.getMessage());
         }

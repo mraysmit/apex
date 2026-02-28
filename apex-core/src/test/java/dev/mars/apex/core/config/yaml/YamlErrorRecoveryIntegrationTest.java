@@ -43,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith({ColoredTestOutputExtension.class, TestClassLoggingExtension.class})
 class YamlErrorRecoveryIntegrationTest {
 
-    private final YamlConfigurationLoader loader = new YamlConfigurationLoader();
+    private final ConfigurationLoader loader = new ConfigurationLoader();
 
     @Test
     void testLoadYamlConfigurationWithErrorRecoverySection() throws Exception {

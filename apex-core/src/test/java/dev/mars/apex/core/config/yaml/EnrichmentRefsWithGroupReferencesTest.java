@@ -35,11 +35,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class EnrichmentRefsWithGroupReferencesTest {
 
     private static final Logger logger = LoggerFactory.getLogger(EnrichmentRefsWithGroupReferencesTest.class);
-    private YamlConfigurationLoader loader;
+    private ConfigurationLoader loader;
 
     @BeforeEach
     void setUp() {
-        loader = new YamlConfigurationLoader();
+        loader = new ConfigurationLoader();
     }
 
     @Test

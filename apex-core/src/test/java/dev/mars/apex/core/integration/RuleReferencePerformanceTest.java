@@ -1,8 +1,8 @@
 package dev.mars.apex.core.integration;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
-import dev.mars.apex.core.config.YamlRuleFactory;
+import dev.mars.apex.core.config.RuleFactory;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.core.RulesEngineConfiguration;
 import dev.mars.apex.engine.model.RuleGroup;
@@ -35,16 +35,16 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("Rule Reference Performance Tests")
 class RuleReferencePerformanceTest {
 
-    private YamlConfigurationLoader configLoader;
-    private YamlRuleFactory ruleFactory;
+    private ConfigurationLoader configLoader;
+    private RuleFactory ruleFactory;
     
     @TempDir
     Path tempDir;
 
     @BeforeEach
     void setUp() {
-        configLoader = new YamlConfigurationLoader();
-        ruleFactory = new YamlRuleFactory();
+        configLoader = new ConfigurationLoader();
+        ruleFactory = new RuleFactory();
     }
 
     @Test

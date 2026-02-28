@@ -44,7 +44,7 @@ class SequentialProcessingIntegrationTest extends DemoTestBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(SequentialProcessingIntegrationTest.class);
 
     private OrderedYamlParser orderedParser;
-    private YamlConfigurationLoader standardLoader;
+    private ConfigurationLoader standardLoader;
     
     @BeforeEach
     void setUpIntegration() {
@@ -52,7 +52,7 @@ class SequentialProcessingIntegrationTest extends DemoTestBase {
 
         // Initialize sequential processing components
         this.orderedParser = new OrderedYamlParser();
-        this.standardLoader = new YamlConfigurationLoader();
+        this.standardLoader = new ConfigurationLoader();
     }
     
     @Test
@@ -127,7 +127,7 @@ class SequentialProcessingIntegrationTest extends DemoTestBase {
             """;
 
         // Process through the production RulesEngine pipeline
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(sequentialYaml);
         RulesEngine engine = RulesEngine.fromYamlConfig(config);
 

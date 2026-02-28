@@ -33,11 +33,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class RuleGroupErrorHandlingConfigTest {
 
     private static final Logger logger = LoggerFactory.getLogger(RuleGroupErrorHandlingConfigTest.class);
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
     }
 
     @Test

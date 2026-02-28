@@ -18,7 +18,7 @@
 
 package dev.mars.apex.sync.pipeline;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.ExecutionStep;
@@ -115,7 +115,7 @@ public class DataTransformationH2Test {
         log.info("\n=== Data Transformation Test: SQL Server → PostgreSQL (H2 Mode) ===\n");
 
         // Load YAML configuration and run pipeline
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration yamlConfig = loader.loadFromFile(
             "src/test/java/dev/mars/apex/sync/pipeline/DataTransformationH2Test.yaml"
         );
@@ -196,7 +196,7 @@ public class DataTransformationH2Test {
         log.info("\n=== String Concatenation Transformation Test ===\n");
 
         // Run the pipeline
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration yamlConfig = loader.loadFromFile(
             "src/test/java/dev/mars/apex/sync/pipeline/DataTransformationH2Test.yaml"
         );
@@ -227,7 +227,7 @@ public class DataTransformationH2Test {
         log.info("\n=== Calculated Field Test (SpEL Expression) ===\n");
 
         // Run the pipeline
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration yamlConfig = loader.loadFromFile(
             "src/test/java/dev/mars/apex/sync/pipeline/DataTransformationH2Test.yaml"
         );

@@ -16,8 +16,8 @@ package dev.mars.apex.yaml.manager.model;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.util.YamlDependencyGraph;
-import dev.mars.apex.core.util.YamlNode;
+import dev.mars.apex.core.util.DependencyGraph;
+import dev.mars.apex.core.util.Node;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 /**
  * Enhanced YAML dependency graph with bidirectional edges and impact analysis.
  *
- * Extends the core YamlDependencyGraph with:
+ * Extends the core DependencyGraph with:
  * - Bidirectional edges (forward: depends-on, reverse: used-by)
  * - Impact analysis (what breaks if I change this file?)
  * - Complexity metrics (depth, breadth, criticality)
@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  * @since 2025-10-18
  * @version 1.0
  */
-public class EnhancedYamlDependencyGraph extends YamlDependencyGraph {
+public class EnhancedYamlDependencyGraph extends DependencyGraph {
 
     private final Map<String, Set<String>> forwardEdges;  // file -> files it depends on
     private final Map<String, Set<String>> reverseEdges;  // file -> files that depend on it
@@ -184,7 +184,7 @@ public class EnhancedYamlDependencyGraph extends YamlDependencyGraph {
 
         // Find orphaned files
         Set<String> orphaned = new HashSet<>();
-        for (YamlNode node : getAllNodes()) {
+        for (Node node : getAllNodes()) {
             if (!node.hasDependencies() && !node.isReferenced()) {
                 orphaned.add(node.getFilePath());
             }
@@ -277,7 +277,7 @@ public class EnhancedYamlDependencyGraph extends YamlDependencyGraph {
     public Set<String> getOrphanedFiles() {
         return getAllNodes().stream()
                 .filter(n -> !n.hasDependencies() && !n.isReferenced())
-                .map(YamlNode::getFilePath)
+                .map(Node::getFilePath)
                 .collect(Collectors.toSet());
     }
 

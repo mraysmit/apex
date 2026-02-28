@@ -16,7 +16,7 @@
 
 package dev.mars.apex.demo.basic;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
@@ -42,7 +42,7 @@ class SimpleValidationRuleTest {
     void testValidAge() {
         try {
             // Load YAML configuration
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.loadFromFile("src/test/java/dev/mars/apex/demo/basic/SimpleValidationRuleTest.yaml");
 
             // Create rules engine using static factory method
@@ -70,7 +70,7 @@ class SimpleValidationRuleTest {
     void testInvalidAge() {
         try {
             // Load YAML configuration
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.loadFromFile("src/test/java/dev/mars/apex/demo/basic/SimpleValidationRuleTest.yaml");
 
             // Create rules engine using static factory method
@@ -97,7 +97,7 @@ class SimpleValidationRuleTest {
     void testMissingAge() {
         try {
             // Load YAML configuration
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.loadFromFile("src/test/java/dev/mars/apex/demo/basic/SimpleValidationRuleTest.yaml");
 
             // Create rules engine using static factory method

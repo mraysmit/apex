@@ -1,8 +1,8 @@
 package dev.mars.apex.rest.controller;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.config.exception.ConfigurationException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -56,7 +56,7 @@ public class ConfigurationController {
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationController.class);
 
     @Autowired
-    private YamlConfigurationLoader yamlConfigurationLoader;
+    private ConfigurationLoader yamlConfigurationLoader;
     
     // Store the current configuration for inspection
     private YamlRuleConfiguration currentConfiguration;
@@ -149,7 +149,7 @@ public class ConfigurationController {
                     )
                 )
             )
-            String yamlContent) throws YamlConfigurationException {
+            String yamlContent) throws ConfigurationException {
 
         logger.info("Loading new YAML configuration");
         logger.debug("YAML content length: {} characters", yamlContent.length());
@@ -205,7 +205,7 @@ public class ConfigurationController {
     })
     public ResponseEntity<Map<String, Object>> uploadConfiguration(
             @Parameter(description = "YAML configuration file to upload")
-            @RequestParam("file") MultipartFile file) throws YamlConfigurationException, java.io.IOException {
+            @RequestParam("file") MultipartFile file) throws ConfigurationException, java.io.IOException {
 
         if (file.isEmpty()) {
             return ResponseEntity.badRequest()
@@ -268,7 +268,7 @@ public class ConfigurationController {
         @ApiResponse(responseCode = "400", description = "Configuration is invalid")
     })
     public ResponseEntity<Map<String, Object>> validateConfiguration(
-            @RequestBody String yamlContent) throws YamlConfigurationException {
+            @RequestBody String yamlContent) throws ConfigurationException {
 
         logger.info("Validating YAML configuration");
 

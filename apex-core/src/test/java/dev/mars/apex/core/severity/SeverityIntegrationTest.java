@@ -16,8 +16,8 @@
 
 package dev.mars.apex.core.severity;
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.engine.core.RulesEngine;
@@ -54,7 +54,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - Enrichment processing with severity
  * - Integration testing (this test)
  *
- * Updated to use YamlEnrichmentProcessor directly instead of deprecated EnrichmentService.
+ * Updated to use EnrichmentProcessor directly instead of deprecated EnrichmentService.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-09-24
@@ -67,7 +67,7 @@ public class SeverityIntegrationTest {
 
     @Test
     @DisplayName("Should validate complete severity workflow with INFO enrichments")
-    void testCompleteWorkflowWithInfoSeverity() throws YamlConfigurationException {
+    void testCompleteWorkflowWithInfoSeverity() throws ConfigurationException {
         logger.info("=== Testing Complete Severity Workflow with INFO Enrichments ===");
         
         // Create YAML configuration with INFO severity enrichments
@@ -116,7 +116,7 @@ public class SeverityIntegrationTest {
             """;
 
         // Load configuration and verify it loads successfully
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
         assertNotNull(config, "Configuration should load successfully");
         assertNotNull(config.getEnrichments(), "Enrichments should be present");
@@ -145,7 +145,7 @@ public class SeverityIntegrationTest {
 
     @Test
     @DisplayName("Should validate complete severity workflow with mixed severities")
-    void testCompleteWorkflowWithMixedSeverities() throws YamlConfigurationException {
+    void testCompleteWorkflowWithMixedSeverities() throws ConfigurationException {
         logger.info("=== Testing Complete Severity Workflow with Mixed Severities ===");
         
         // Create YAML configuration with mixed severity enrichments
@@ -211,7 +211,7 @@ public class SeverityIntegrationTest {
             """;
 
         // Load configuration and verify it loads successfully
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
         assertNotNull(config, "Configuration should load successfully");
         assertNotNull(config.getEnrichments(), "Enrichments should be present");
@@ -275,10 +275,10 @@ public class SeverityIntegrationTest {
             """;
 
         // Verify that loading configuration with invalid severity throws exception
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
-        YamlConfigurationException exception = assertThrows(YamlConfigurationException.class, () -> {
+        ConfigurationLoader loader = new ConfigurationLoader();
+        ConfigurationException exception = assertThrows(ConfigurationException.class, () -> {
             loader.fromYamlString(invalidYamlConfig);
-        }, "Should throw YamlConfigurationException for invalid severity");
+        }, "Should throw ConfigurationException for invalid severity");
 
         assertTrue(exception.getMessage().contains("invalid severity"),
                    "Exception message should mention invalid severity");
@@ -290,7 +290,7 @@ public class SeverityIntegrationTest {
 
     @Test
     @DisplayName("Should handle default severity when not specified")
-    void testDefaultSeverityHandling() throws YamlConfigurationException {
+    void testDefaultSeverityHandling() throws ConfigurationException {
         logger.info("=== Testing Default Severity Handling ===");
         
         // Create YAML configuration without severity specified
@@ -321,7 +321,7 @@ public class SeverityIntegrationTest {
             """;
 
         // Load configuration and verify it loads successfully
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration config = loader.fromYamlString(yamlConfig);
         assertNotNull(config, "Configuration should load successfully");
         assertNotNull(config.getEnrichments(), "Enrichments should be present");

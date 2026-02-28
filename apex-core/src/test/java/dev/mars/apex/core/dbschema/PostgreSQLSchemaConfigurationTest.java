@@ -1,6 +1,6 @@
 package dev.mars.apex.core.dbschema;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
@@ -120,7 +120,7 @@ class PostgreSQLSchemaConfigurationTest {
             .withExposedPorts(5432)
             .waitingFor(Wait.forListeningPort());
 
-    private YamlConfigurationLoader yamlLoader = new YamlConfigurationLoader();
+    private ConfigurationLoader yamlLoader = new ConfigurationLoader();
 
     private String jdbcUrl() {
         return "jdbc:postgresql://" + postgres.getHost() + ":" 

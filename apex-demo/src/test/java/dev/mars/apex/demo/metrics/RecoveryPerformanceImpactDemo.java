@@ -52,7 +52,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * ============================================================================
  *
  * REAL APEX SERVICES USED:
- * - YamlConfigurationLoader: Load recovery configuration from YAML
+ * - ConfigurationLoader: Load recovery configuration from YAML
  * - RulesEngine: Execute rules with recovery enabled/disabled
  * - RulePerformanceMetrics: Collect detailed performance and recovery metrics
  * - ErrorRecoveryService: Handle different recovery strategies

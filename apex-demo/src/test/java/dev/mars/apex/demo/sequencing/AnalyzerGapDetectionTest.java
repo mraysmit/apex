@@ -2,7 +2,7 @@ package dev.mars.apex.demo.sequencing;
 
 import dev.mars.apex.core.config.sequential.ProcessingItem;
 import dev.mars.apex.core.util.ProcessingSequenceReport;
-import dev.mars.apex.core.util.YamlProcessingSequenceAnalyzer;
+import dev.mars.apex.core.util.ProcessingSequenceAnalyzer;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * CRITICAL GAP DETECTION TEST
  * 
- * <p>This test exposes gaps in the YamlProcessingSequenceAnalyzer by testing
+ * <p>This test exposes gaps in the ProcessingSequenceAnalyzer by testing
  * YAML sections that are NOT currently handled by the analyzer.
  * 
  * <p>CRITICAL GAPS:
@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("Analyzer Gap Detection Test")
 public class AnalyzerGapDetectionTest extends DemoTestBase {
 
-    private final YamlProcessingSequenceAnalyzer analyzer = new YamlProcessingSequenceAnalyzer();
+    private final ProcessingSequenceAnalyzer analyzer = new ProcessingSequenceAnalyzer();
 
     @Test
     @DisplayName("GAP 1: Analyzer handles transformations in itemOrder")

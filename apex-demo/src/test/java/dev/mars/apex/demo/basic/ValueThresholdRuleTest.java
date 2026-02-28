@@ -17,7 +17,7 @@
 package dev.mars.apex.demo.basic;
 
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,14 +38,14 @@ public class ValueThresholdRuleTest {
 
     private static final Logger logger = LoggerFactory.getLogger(ValueThresholdRuleTest.class);
 
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
         logger.info("Setting up APEX services for value threshold rule test...");
 
         // Initialize APEX services
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
 
         logger.info("[OK] APEX services initialized successfully");
     }

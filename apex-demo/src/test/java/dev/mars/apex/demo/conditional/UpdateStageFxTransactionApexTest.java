@@ -1,8 +1,8 @@
 package dev.mars.apex.demo.conditional;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
-import dev.mars.apex.core.config.YamlRuleFactory;
+import dev.mars.apex.core.config.RuleFactory;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.core.RulesEngineConfiguration;
 import dev.mars.apex.engine.model.RuleResult;
@@ -34,16 +34,16 @@ public class UpdateStageFxTransactionApexTest {
 
     private static final Logger logger = LoggerFactory.getLogger(UpdateStageFxTransactionApexTest.class);
 
-    private YamlConfigurationLoader yamlLoader;
-    private YamlRuleFactory ruleFactory;
+    private ConfigurationLoader yamlLoader;
+    private RuleFactory ruleFactory;
 
     @BeforeEach
     void setUp() {
         logger.info("Setting up APEX services for FX transaction processing tests...");
 
         // Initialize services following DemoTestBase pattern
-        yamlLoader = new YamlConfigurationLoader();
-        ruleFactory = new YamlRuleFactory();
+        yamlLoader = new ConfigurationLoader();
+        ruleFactory = new RuleFactory();
 
         logger.info("APEX services initialized successfully");
     }

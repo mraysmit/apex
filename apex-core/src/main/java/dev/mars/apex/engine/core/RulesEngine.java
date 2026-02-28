@@ -23,7 +23,7 @@ import dev.mars.apex.core.service.data.external.DataSink;
 import dev.mars.apex.core.service.data.external.ExternalDataSource;
 import dev.mars.apex.core.service.data.external.factory.DataSinkFactory;
 import dev.mars.apex.core.service.data.external.factory.DataSourceFactory;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
+import dev.mars.apex.core.service.enrichment.EnrichmentProcessor;
 import dev.mars.apex.core.service.error.ErrorRecoveryService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.engine.core.ExpressionEvaluatorService;
@@ -39,6 +39,7 @@ import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
 import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
 
 import java.util.*;
+import java.util.concurrent.Callable;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -94,7 +95,7 @@ public class RulesEngine {
     private final RulesEngineConfiguration configuration;
     private final ErrorRecoveryService errorRecoveryService;
     private final RulePerformanceMonitor performanceMonitor;
-    private YamlEnrichmentProcessor enrichmentProcessor;  // Non-final to allow re-initialization with data sources
+    private EnrichmentProcessor enrichmentProcessor;  // Non-final to allow re-initialization with data sources
     private final UnifiedRuleEvaluator unifiedEvaluator;
     private final List<String> initializationErrors = new ArrayList<>();
     private final ScenarioParser scenarioParser;  // For parsing scenario configurations
@@ -191,7 +192,7 @@ public class RulesEngine {
         // to ensure it has access to the data source registry.
         // pass RuleGroupEvaluationService so rule groups within enrichments
         // are evaluated through the canonical UnifiedRuleEvaluator path.
-        this.enrichmentProcessor = new YamlEnrichmentProcessor(
+        this.enrichmentProcessor = new EnrichmentProcessor(
             new LookupServiceRegistry(), this.evaluatorService, null,
             this.ruleGroupExecutor.getGroupEvaluationService());
 
@@ -223,7 +224,7 @@ public class RulesEngine {
 
         // Initialize data sources and sinks if yamlConfig is provided
         if (yamlConfig != null) {
-            YamlEnrichmentProcessor updatedProcessor = pipelineExecutionManager.initializePipelineComponents(yamlConfig);
+            EnrichmentProcessor updatedProcessor = pipelineExecutionManager.initializePipelineComponents(yamlConfig);
             if (updatedProcessor != null) {
                 this.enrichmentProcessor = updatedProcessor;
             }
@@ -264,15 +265,15 @@ public class RulesEngine {
      *
      * @param filePath The path to the YAML configuration file
      * @return A configured RulesEngine ready to evaluate rules
-     * @throws YamlConfigurationException if the file cannot be loaded or parsed
+     * @throws ConfigurationException if the file cannot be loaded or parsed
      */
-    public static RulesEngine fromFile(String filePath) throws YamlConfigurationException {
+    public static RulesEngine fromFile(String filePath) throws ConfigurationException {
         logger.info("Creating RulesEngine from file: {}", filePath);
 
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration yamlConfig = loader.loadFromFile(filePath);
 
-        YamlRuleFactory ruleFactory = new YamlRuleFactory();
+        RuleFactory ruleFactory = new RuleFactory();
         RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
 
         return new RulesEngine(config, yamlConfig);
@@ -299,16 +300,16 @@ public class RulesEngine {
      *
      * @param resourcePath The classpath resource path (e.g., "config/test-config.yaml")
      * @return A configured RulesEngine ready to evaluate rules
-     * @throws YamlConfigurationException if the resource cannot be found or loaded
+     * @throws ConfigurationException if the resource cannot be found or loaded
      * @since 2026-01-18
      */
-    public static RulesEngine fromClasspath(String resourcePath) throws YamlConfigurationException {
+    public static RulesEngine fromClasspath(String resourcePath) throws ConfigurationException {
         logger.info("Creating RulesEngine from classpath resource: {}", resourcePath);
 
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration yamlConfig = loader.loadFromClasspath(resourcePath);
 
-        YamlRuleFactory ruleFactory = new YamlRuleFactory();
+        RuleFactory ruleFactory = new RuleFactory();
         RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
 
         return new RulesEngine(config, yamlConfig);
@@ -321,7 +322,7 @@ public class RulesEngine {
      * <p><b>Example:</b></p>
      * <pre>
      * // Advanced usage with config inspection
-     * YamlConfigurationLoader loader = new YamlConfigurationLoader();
+     * ConfigurationLoader loader = new ConfigurationLoader();
      * YamlRuleConfiguration yamlConfig = loader.loadFromFile("config.yaml");
      *
      * // Inspect or modify config if needed
@@ -335,12 +336,12 @@ public class RulesEngine {
      *
      * @param yamlConfig The YAML configuration object
      * @return A configured RulesEngine ready to evaluate rules
-     * @throws YamlConfigurationException if the configuration cannot be processed
+     * @throws ConfigurationException if the configuration cannot be processed
      */
-    public static RulesEngine fromYamlConfig(YamlRuleConfiguration yamlConfig) throws YamlConfigurationException {
+    public static RulesEngine fromYamlConfig(YamlRuleConfiguration yamlConfig) throws ConfigurationException {
         logger.info("Creating RulesEngine from YamlRuleConfiguration");
 
-        YamlRuleFactory ruleFactory = new YamlRuleFactory();
+        RuleFactory ruleFactory = new RuleFactory();
         RulesEngineConfiguration config = ruleFactory.createRulesEngineConfiguration(yamlConfig);
 
         return new RulesEngine(config, yamlConfig);
@@ -383,39 +384,8 @@ public class RulesEngine {
      */
     public static RuleResult evaluateYaml(String yamlString, Map<String, Object> inputData) {
         logger.info("Starting safe YAML evaluation (no exceptions thrown)");
-        
-        try {
-            // Step 1: Parse and validate YAML
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
-            YamlRuleConfiguration yamlConfig = loader.fromYamlString(yamlString);
-            
-            // Step 2: Create engine
-            RulesEngine engine = fromYamlConfig(yamlConfig);
-            
-            // Step 3: Evaluate (this method already handles runtime errors)
-            return engine.evaluate(inputData);
-            
-        } catch (YamlConfigurationException e) {
-            // YAML parsing or validation error - return as RuleResult
-            logger.error("[APEX-CFG-001] YAML configuration error: {}", e.getMessage());
-            logger.debug("Full exception details for YAML configuration error:", e);
-            List<String> failureMessages = new ArrayList<>();
-            failureMessages.add("[APEX-CFG-001] YAML configuration error: " + e.getMessage());
-            if (e.getCause() != null) {
-                failureMessages.add("Caused by: " + e.getCause().getMessage());
-            }
-            Map<String, Object> data = inputData != null ? new HashMap<>(inputData) : new HashMap<>();
-            return RuleResult.evaluationFailure(failureMessages, data, "yaml-configuration", "YAML configuration error", SeverityConstants.ERROR);
-            
-        } catch (Exception e) {
-            // Any other unexpected error - return as RuleResult
-            logger.error("[APEX-RULE-999] Unexpected error during YAML evaluation: {}", e.getMessage());
-            logger.debug("Full exception details:", e);
-            List<String> failureMessages = new ArrayList<>();
-            failureMessages.add("[APEX-RULE-999] Unexpected error: " + e.getMessage());
-            Map<String, Object> data = inputData != null ? new HashMap<>(inputData) : new HashMap<>();
-            return RuleResult.evaluationFailure(failureMessages, data, "unexpected-error", "Unexpected error during evaluation", SeverityConstants.ERROR);
-        }
+        ConfigurationLoader loader = new ConfigurationLoader();
+        return safeEvaluate(() -> loader.fromYamlString(yamlString), inputData);
     }
 
     /**
@@ -430,21 +400,34 @@ public class RulesEngine {
      */
     public static RuleResult evaluateYamlFile(String yamlFilePath, Map<String, Object> inputData) {
         logger.info("Starting safe YAML file evaluation: {}", yamlFilePath);
-        
+        ConfigurationLoader loader = new ConfigurationLoader();
+        return safeEvaluate(() -> loader.loadFromFile(yamlFilePath), inputData);
+    }
+
+    /**
+     * Shared error-handling helper for safe YAML evaluation methods.
+     * Encapsulates the parse → create engine → evaluate pattern with consistent error handling.
+     *
+     * <p>All errors are captured and returned as {@link RuleResult} — never thrown.</p>
+     *
+     * @param configLoader Callable that loads and parses the YAML configuration (may throw checked exceptions)
+     * @param inputData The input data to evaluate against
+     * @return RuleResult containing either success with enriched data, or failure with error details
+     */
+    private static RuleResult safeEvaluate(Callable<YamlRuleConfiguration> configLoader, Map<String, Object> inputData) {
         try {
-            // Step 1: Parse and validate YAML file
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
-            YamlRuleConfiguration yamlConfig = loader.loadFromFile(yamlFilePath);
-            
+            // Step 1: Parse and validate YAML
+            YamlRuleConfiguration yamlConfig = configLoader.call();
+
             // Step 2: Create engine
             RulesEngine engine = fromYamlConfig(yamlConfig);
-            
+
             // Step 3: Evaluate
             return engine.evaluate(inputData);
-            
-        } catch (YamlConfigurationException e) {
+
+        } catch (ConfigurationException e) {
             logger.error("[APEX-CFG-001] YAML configuration error: {}", e.getMessage());
-            logger.debug("Full exception details for YAML file configuration error:", e);
+            logger.debug("Full exception details for YAML configuration error:", e);
             List<String> failureMessages = new ArrayList<>();
             failureMessages.add("[APEX-CFG-001] YAML configuration error: " + e.getMessage());
             if (e.getCause() != null) {
@@ -452,9 +435,9 @@ public class RulesEngine {
             }
             Map<String, Object> data = inputData != null ? new HashMap<>(inputData) : new HashMap<>();
             return RuleResult.evaluationFailure(failureMessages, data, "yaml-configuration", "YAML configuration error", SeverityConstants.ERROR);
-            
+
         } catch (Exception e) {
-            logger.error("[APEX-RULE-999] Unexpected error during YAML file evaluation: {}", e.getMessage());
+            logger.error("[APEX-RULE-999] Unexpected error during YAML evaluation: {}", e.getMessage());
             logger.debug("Full exception details:", e);
             List<String> failureMessages = new ArrayList<>();
             failureMessages.add("[APEX-RULE-999] Unexpected error: " + e.getMessage());
@@ -498,13 +481,13 @@ public class RulesEngine {
      *
      * @param registryPath The path to the scenario registry YAML file
      * @return A configured RulesEngine ready to evaluate scenarios
-     * @throws YamlConfigurationException if the registry file cannot be loaded or parsed
+     * @throws ConfigurationException if the registry file cannot be loaded or parsed
      * @since 2025-11-03
      * @see #evaluateScenario(String, Map)
      * @see #evaluateWithClassification(Map)
      * @see #asScenario()
      */
-    public static RulesEngine fromScenarioRegistry(String registryPath) throws YamlConfigurationException {
+    public static RulesEngine fromScenarioRegistry(String registryPath) throws ConfigurationException {
         logger.info("Creating RulesEngine from scenario registry: {}", registryPath);
 
         ScenarioRegistryLoader loader = new ScenarioRegistryLoader();
@@ -523,11 +506,11 @@ public class RulesEngine {
                 logger.info("Loaded {} scenarios from filesystem registry: {}", scenarios.size(), registryPath);
             }
         } catch (java.io.IOException e) {
-            throw new YamlConfigurationException("Failed to load scenario registry: " + registryPath, e);
+            throw new ConfigurationException("Failed to load scenario registry: " + registryPath, e);
         }
 
         if (scenarios == null || scenarios.isEmpty()) {
-            throw new YamlConfigurationException(
+            throw new ConfigurationException(
                 "Scenario registry is empty or failed to load: " + registryPath
             );
         }

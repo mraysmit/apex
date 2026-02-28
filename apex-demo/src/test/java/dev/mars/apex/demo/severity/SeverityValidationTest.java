@@ -16,9 +16,9 @@
 
 package dev.mars.apex.demo.severity;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
-import dev.mars.apex.core.config.YamlRuleFactory;
+import dev.mars.apex.core.config.RuleFactory;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.core.RulesEngineConfiguration;
@@ -49,16 +49,16 @@ public class SeverityValidationTest {
 
     private static final Logger logger = LoggerFactory.getLogger(SeverityValidationTest.class);
 
-    private YamlConfigurationLoader configLoader;
-    private YamlRuleFactory ruleFactory;
+    private ConfigurationLoader configLoader;
+    private RuleFactory ruleFactory;
     private RulesEngine engine;
 
     @BeforeEach
     void setUp() {
         logger.info("Setting up APEX services for severity validation test...");
         
-        configLoader = new YamlConfigurationLoader();
-        ruleFactory = new YamlRuleFactory();
+        configLoader = new ConfigurationLoader();
+        ruleFactory = new RuleFactory();
         
         logger.info("APEX services initialized successfully");
     }

@@ -1,8 +1,8 @@
 package dev.mars.apex.engine.core;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.config.exception.ConfigurationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -23,9 +23,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class RulesEngineErrorRecoveryConfigTest {
 
     @Test
-    void testRulesEngineLoadsErrorRecoveryConfigFromYaml() throws YamlConfigurationException {
+    void testRulesEngineLoadsErrorRecoveryConfigFromYaml() throws ConfigurationException {
         // Load YAML configuration with error-recovery section
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration yamlConfig = loader.loadFromClasspath("error-handling/yaml-error-recovery-test.yaml");
         
         assertNotNull(yamlConfig);
@@ -41,9 +41,9 @@ class RulesEngineErrorRecoveryConfigTest {
     }
 
     @Test
-    void testRulesEngineUsesDefaultErrorRecoveryConfigWhenYamlSectionMissing() throws YamlConfigurationException {
+    void testRulesEngineUsesDefaultErrorRecoveryConfigWhenYamlSectionMissing() throws ConfigurationException {
         // Load YAML configuration WITHOUT error-recovery section
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration yamlConfig = loader.loadFromClasspath("rulegroups/customer-rules.yaml");
         
         assertNotNull(yamlConfig);
@@ -57,7 +57,7 @@ class RulesEngineErrorRecoveryConfigTest {
     }
 
     @Test
-    void testRulesEngineFromFileLoadsErrorRecoveryConfig() throws YamlConfigurationException {
+    void testRulesEngineFromFileLoadsErrorRecoveryConfig() throws ConfigurationException {
         // Test the fromFile() static factory method
         String filePath = "src/test/resources/error-handling/yaml-error-recovery-test.yaml";
         
@@ -68,7 +68,7 @@ class RulesEngineErrorRecoveryConfigTest {
     }
 
     @Test
-    void testRulesEngineWithEmptyYamlConfigUsesDefaults() throws YamlConfigurationException {
+    void testRulesEngineWithEmptyYamlConfigUsesDefaults() throws ConfigurationException {
         // Create minimal YAML configuration without error-recovery section
         String yamlContent = """
             metadata:
@@ -83,7 +83,7 @@ class RulesEngineErrorRecoveryConfigTest {
                 message: "Test message"
             """;
         
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration yamlConfig = loader.fromYamlString(yamlContent);
         
         assertNotNull(yamlConfig);
@@ -96,7 +96,7 @@ class RulesEngineErrorRecoveryConfigTest {
     }
 
     @Test
-    void testRulesEngineErrorRecoveryConfigWithPartialYamlSettings() throws YamlConfigurationException {
+    void testRulesEngineErrorRecoveryConfigWithPartialYamlSettings() throws ConfigurationException {
         // Create YAML configuration with partial error-recovery settings
         String yamlContent = """
             metadata:
@@ -115,7 +115,7 @@ class RulesEngineErrorRecoveryConfigTest {
                 message: "Test message"
             """;
         
-        YamlConfigurationLoader loader = new YamlConfigurationLoader();
+        ConfigurationLoader loader = new ConfigurationLoader();
         YamlRuleConfiguration yamlConfig = loader.fromYamlString(yamlContent);
         
         assertNotNull(yamlConfig);

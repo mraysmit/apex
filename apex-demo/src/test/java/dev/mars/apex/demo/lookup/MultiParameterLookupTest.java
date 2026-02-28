@@ -16,7 +16,7 @@ package dev.mars.apex.demo.lookup;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
@@ -50,7 +50,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * ============================================================================
  * REAL APEX SERVICES USED:
  * - EnrichmentService: Real APEX enrichment processor for database lookup
- * - YamlConfigurationLoader: Real YAML configuration loading and validation
+ * - ConfigurationLoader: Real YAML configuration loading and validation
  * - ExpressionEvaluatorService: Real SpEL expression evaluation for lookup keys
  * - LookupServiceRegistry: Real lookup service integration for database lookups
  * ============================================================================
@@ -68,11 +68,11 @@ public class MultiParameterLookupTest {
     // Unique database name for this test class to avoid file locking conflicts
     private static final String DB_NAME = "multi_parameter_lookup_test";
 
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
-        this.yamlLoader = new YamlConfigurationLoader();
+        this.yamlLoader = new ConfigurationLoader();
     }
 
     @AfterEach

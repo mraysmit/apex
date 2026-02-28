@@ -18,13 +18,13 @@ package dev.mars.apex.demo;
 
 import java.io.File;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
-import dev.mars.apex.core.config.YamlConfigurationMerger;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.ConfigurationMerger;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.core.RulesEngineConfiguration;
 import dev.mars.apex.engine.model.RuleResult;
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.config.exception.ConfigurationException;
 import dev.mars.apex.engine.core.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 
@@ -54,7 +54,7 @@ public abstract class DemoTestBase {
     protected static final Logger logger = LoggerFactory.getLogger(DemoTestBase.class);
 
     // Real APEX services for testing
-    protected YamlConfigurationLoader yamlLoader;
+    protected ConfigurationLoader yamlLoader;
     protected LookupServiceRegistry serviceRegistry;
     protected ExpressionEvaluatorService expressionEvaluator;
     protected RulesEngineConfiguration rulesEngineConfiguration;
@@ -73,7 +73,7 @@ public abstract class DemoTestBase {
         logger.info("Cache cleared and statistics reset for test isolation");
 
         // Initialize real APEX services
-        this.yamlLoader = new YamlConfigurationLoader();
+        this.yamlLoader = new ConfigurationLoader();
         this.serviceRegistry = new LookupServiceRegistry();
         this.expressionEvaluator = new ExpressionEvaluatorService();
         this.rulesEngineConfiguration = new RulesEngineConfiguration();
@@ -151,7 +151,7 @@ public abstract class DemoTestBase {
      */
     @Test
     public void testApexServicesInitialization() {
-        assertNotNull(yamlLoader, "YamlConfigurationLoader should be initialized");
+        assertNotNull(yamlLoader, "ConfigurationLoader should be initialized");
         assertNotNull(serviceRegistry, "LookupServiceRegistry should be initialized");
         assertNotNull(expressionEvaluator, "ExpressionEvaluatorService should be initialized");
 
@@ -197,7 +197,7 @@ public abstract class DemoTestBase {
             logger.info("** YAML configuration loaded successfully: {}", filePath);
             return RuleResult.evaluationSuccess(new HashMap<String, Object>(), "configuration-loading", "Configuration loaded successfully");
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("Configuration loading FAILED for file: {} - {}", filePath, e.getMessage());
             List<String> failureMessages = new ArrayList<>();
             failureMessages.add("CRITICAL ERROR: Failed to load configuration from file: " + filePath);
@@ -283,7 +283,7 @@ public abstract class DemoTestBase {
      * Merges rules, rule-groups, data-sources, queries, and enrichment-groups.
      * First metadata encountered is retained.
      */
-    protected YamlRuleConfiguration mergeYamlConfigsForEnrichment(String... filePaths) throws YamlConfigurationException {
+    protected YamlRuleConfiguration mergeYamlConfigsForEnrichment(String... filePaths) throws ConfigurationException {
         YamlRuleConfiguration merged = new YamlRuleConfiguration();
         for (String filePath : filePaths) {
             YamlRuleConfiguration part = yamlLoader.loadFromFileWithoutValidation(filePath);
@@ -298,7 +298,7 @@ public abstract class DemoTestBase {
      * Delegates to the public utility class in apex-core.
      */
     private void mergeYamlForEnrichment(YamlRuleConfiguration target, YamlRuleConfiguration source) {
-        YamlConfigurationMerger.merge(target, source);
+        ConfigurationMerger.merge(target, source);
     }
 
     /**

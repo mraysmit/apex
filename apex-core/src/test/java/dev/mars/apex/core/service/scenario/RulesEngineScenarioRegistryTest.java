@@ -16,7 +16,7 @@ package dev.mars.apex.core.service.scenario;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.config.exception.ConfigurationException;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
 import org.junit.jupiter.api.*;
@@ -84,9 +84,9 @@ class RulesEngineScenarioRegistryTest {
     void testFromScenarioRegistryWithMissingFile() {
         logger.info("TEST: Triggering intentional error - testing scenario loading with missing file");
         
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             RulesEngine.fromScenarioRegistry("nonexistent/path/registry.yaml");
-        }, "Missing registry file should throw YamlConfigurationException");
+        }, "Missing registry file should throw ConfigurationException");
     }
 
     @Test
@@ -104,9 +104,9 @@ class RulesEngineScenarioRegistryTest {
     void testFromScenarioRegistryWithEmptyPath() {
         logger.info("TEST: Testing scenario registry with empty path");
 
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             RulesEngine.fromScenarioRegistry("");
-        }, "Empty registry path should throw YamlConfigurationException");
+        }, "Empty registry path should throw ConfigurationException");
     }
 
     // ========================================
@@ -162,9 +162,9 @@ class RulesEngineScenarioRegistryTest {
         
         String invalidRegistryPath = createInvalidRegistryFile();
         
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             RulesEngine.fromScenarioRegistry(invalidRegistryPath);
-        }, "Invalid YAML syntax should throw YamlConfigurationException");
+        }, "Invalid YAML syntax should throw ConfigurationException");
     }
 
     @Test
@@ -175,7 +175,7 @@ class RulesEngineScenarioRegistryTest {
         String registryPath = createRegistryWithMissingScenarioFile();
 
         // May throw exception or handle gracefully depending on implementation
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             RulesEngine.fromScenarioRegistry(registryPath);
         }, "Registry with missing scenario files should throw exception");
     }

@@ -16,7 +16,7 @@ package dev.mars.apex.core.service.scenario;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.config.exception.ConfigurationException;
 import dev.mars.apex.engine.core.RulesEngine;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -105,7 +105,7 @@ class RulesEngineMalformedRegistryTest {
             """;
         
         // When/Then: Load registry should throw exception for empty registry
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             Path registryFile = createTempRegistryFile(registryContent);
             RulesEngine.fromScenarioRegistry(registryFile.toString());
         }, "Should throw exception for registry with missing scenarios section");
@@ -132,7 +132,7 @@ class RulesEngineMalformedRegistryTest {
             """;
         
         // When/Then: Load registry should throw exception
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             Path registryFile = createTempRegistryFile(registryContent);
             RulesEngine.fromScenarioRegistry(registryFile.toString());
         }, "Should throw exception for registry with empty scenarios list");
@@ -159,7 +159,7 @@ class RulesEngineMalformedRegistryTest {
             """;
         
         // When/Then: Load registry should throw exception
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             Path registryFile = createTempRegistryFile(registryContent);
             RulesEngine.fromScenarioRegistry(registryFile.toString());
         }, "Should throw exception for registry with null scenarios section");
@@ -301,7 +301,7 @@ class RulesEngineMalformedRegistryTest {
             """;
         
         // When/Then: Should throw exception for invalid YAML
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             Path registryFile = createTempRegistryFile(registryContent);
             RulesEngine.fromScenarioRegistry(registryFile.toString());
         }, "Should throw exception for invalid YAML syntax");
@@ -327,7 +327,7 @@ class RulesEngineMalformedRegistryTest {
             """;
         
         // When/Then: Should throw exception for non-existent scenario file
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             Path registryFile = createTempRegistryFile(registryContent);
             RulesEngine.fromScenarioRegistry(registryFile.toString());
         }, "Should throw exception for non-existent scenario file");
@@ -342,7 +342,7 @@ class RulesEngineMalformedRegistryTest {
     void testNonExistentRegistryFile() {
         logger.info("TEST: Triggering intentional error - Non-existent registry file");
         
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             RulesEngine.fromScenarioRegistry("/path/that/does/not/exist/registry.yaml");
         }, "Should throw exception for non-existent registry file");
     }
@@ -362,7 +362,7 @@ class RulesEngineMalformedRegistryTest {
     void testEmptyRegistryPath() {
         logger.info("TEST: Triggering intentional error - Empty registry path");
         
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             RulesEngine.fromScenarioRegistry("");
         }, "Should throw exception for empty registry path");
     }

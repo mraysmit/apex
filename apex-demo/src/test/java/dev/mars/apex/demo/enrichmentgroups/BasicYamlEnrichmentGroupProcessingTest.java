@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.enrichmentgroups;
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.config.exception.ConfigurationException;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
@@ -31,13 +31,13 @@ public class BasicYamlEnrichmentGroupProcessingTest extends DemoTestBase {
 
     @Test
     @DisplayName("RulesEngine processes all enrichment groups with all fields present")
-    void testAllEnrichmentGroupsWithAllFields() throws YamlConfigurationException {
+    void testAllEnrichmentGroupsWithAllFields() throws ConfigurationException {
         logger.info("Testing RulesEngine.evaluate() with all enrichment groups and all required fields");
 
         YamlRuleConfiguration config;
         try {
             config = mergeYamlConfigsForEnrichment(CONFIG_PATH);
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("Failed to load YAML: " + e.getMessage());
             fail("Failed to load YAML: " + e.getMessage());
             return;
@@ -72,19 +72,19 @@ public class BasicYamlEnrichmentGroupProcessingTest extends DemoTestBase {
 
     @Test
     @DisplayName("RulesEngine processes all enrichment groups with missing field 'c'")
-    void testAllEnrichmentGroupsWithMissingC() throws YamlConfigurationException {
+    void testAllEnrichmentGroupsWithMissingC() throws ConfigurationException {
         logger.info("Testing RulesEngine.evaluate() with missing field 'c'");
 
         YamlRuleConfiguration config;
         try {
             config = mergeYamlConfigsForEnrichment(CONFIG_PATH);
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             fail("YAML load failed: " + e.getMessage());
             return;
         }
 
         // DEBUG: Print groups
-        dev.mars.apex.core.service.enrichment.EnrichmentGroupFactory.buildEnrichmentGroups(config).forEach(g -> {
+        dev.mars.apex.core.config.EnrichmentGroupFactory.buildEnrichmentGroups(config).forEach(g -> {
             System.out.println("DEBUG: Group " + g.getId() + " has " + g.getEnrichmentsInOrder().size() + " enrichments");
             g.getEnrichmentsInOrder().forEach(e -> System.out.println("  - " + e.getId()));
         });
@@ -120,13 +120,13 @@ public class BasicYamlEnrichmentGroupProcessingTest extends DemoTestBase {
 
     @Test
     @DisplayName("RulesEngine processes all enrichment groups with only field 'a'")
-    void testAllEnrichmentGroupsWithOnlyA() throws YamlConfigurationException {
+    void testAllEnrichmentGroupsWithOnlyA() throws ConfigurationException {
         logger.info("Testing RulesEngine.evaluate() with only field 'a'");
 
         YamlRuleConfiguration config;
         try {
             config = mergeYamlConfigsForEnrichment(CONFIG_PATH);
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             fail("YAML load failed: " + e.getMessage());
             return;
         }
@@ -156,13 +156,13 @@ public class BasicYamlEnrichmentGroupProcessingTest extends DemoTestBase {
 
     @Test
     @DisplayName("RulesEngine processes all enrichment groups with no fields")
-    void testAllEnrichmentGroupsWithNoFields() throws YamlConfigurationException {
+    void testAllEnrichmentGroupsWithNoFields() throws ConfigurationException {
         logger.info("Testing RulesEngine.evaluate() with no fields");
 
         YamlRuleConfiguration config;
         try {
             config = mergeYamlConfigsForEnrichment(CONFIG_PATH);
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             fail("YAML load failed: " + e.getMessage());
             return;
         }

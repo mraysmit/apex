@@ -1,7 +1,7 @@
 package dev.mars.apex.demo.sequencing;
 
 import dev.mars.apex.core.util.ProcessingSequenceReport;
-import dev.mars.apex.core.util.YamlProcessingSequenceAnalyzer;
+import dev.mars.apex.core.util.ProcessingSequenceAnalyzer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -36,11 +36,11 @@ public class TestALL_ComprehensiveSectionsTest {
 
     private static final Logger LOGGER = Logger.getLogger(TestALL_ComprehensiveSectionsTest.class.getName());
 
-    private YamlProcessingSequenceAnalyzer analyzer;
+    private ProcessingSequenceAnalyzer analyzer;
 
     @BeforeEach
     void setUp() {
-        analyzer = new YamlProcessingSequenceAnalyzer();
+        analyzer = new ProcessingSequenceAnalyzer();
     }
 
     @Test

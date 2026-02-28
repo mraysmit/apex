@@ -21,7 +21,6 @@ import dev.mars.apex.engine.model.RuleBase;
 import dev.mars.apex.engine.model.RuleGroup;
 import dev.mars.apex.engine.model.RuleGroupEvaluationResult;
 import dev.mars.apex.engine.model.RuleResult;
-import dev.mars.apex.engine.execution.RuleGroupEvaluationService;
 import dev.mars.apex.engine.core.UnifiedRuleEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +54,7 @@ public class RuleGroupExecutor {
 
     /**
      * Returns the {@link RuleGroupEvaluationService} used by this executor.
-     * This allows other components (e.g., {@code YamlEnrichmentProcessor}) to route
+     * This allows other components (e.g., {@code EnrichmentProcessor}) to route
      * rule group evaluation through the canonical path.
      *
      * @return the rule group evaluation service

@@ -41,11 +41,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class NestedRefsWithGroupReferencesTest {
 
     private static final Logger logger = LoggerFactory.getLogger(NestedRefsWithGroupReferencesTest.class);
-    private YamlConfigurationLoader loader;
+    private ConfigurationLoader loader;
 
     @BeforeEach
     void setUp() {
-        loader = new YamlConfigurationLoader();
+        loader = new ConfigurationLoader();
     }
 
     @Test

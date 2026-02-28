@@ -18,7 +18,7 @@ package dev.mars.apex.core.service.data.yaml;
 
 
 import dev.mars.apex.core.config.datasource.DataSourceConfiguration;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlDataSource;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.service.data.external.DataSourceException;
@@ -55,7 +55,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class YamlParameterBindingTest {
 
     private DataSourceFactory factory;
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
     private YamlRuleConfiguration yamlConfig;
     private ExternalDataSource databaseSource;
     private ExternalDataSource cacheSource;
@@ -63,7 +63,7 @@ class YamlParameterBindingTest {
     @BeforeEach
     void setUp() throws Exception {
         factory = DataSourceFactory.getInstance();
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
 
         // Load YAML configuration from file
         yamlConfig = yamlLoader.loadFromClasspath("lookups/parameter-binding-test.yaml");

@@ -17,8 +17,8 @@
 package dev.mars.apex.demo.rulegroups;
 
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleGroup;
 import dev.mars.apex.engine.model.RuleResult;
@@ -50,11 +50,11 @@ public class StopOnFirstFailureOrGroupTest {
 
     private static final Logger logger = LoggerFactory.getLogger(StopOnFirstFailureOrGroupTest.class);
 
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
-        this.yamlLoader = new YamlConfigurationLoader();
+        this.yamlLoader = new ConfigurationLoader();
     }
 
     @Test
@@ -107,7 +107,7 @@ public class StopOnFirstFailureOrGroupTest {
         RulesEngine engine;
         try {
             engine = RulesEngine.fromYamlConfig(config);
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logError("Failed to create RulesEngine: " + e.getMessage());
             fail("Failed to create RulesEngine: " + e.getMessage());
             return;
@@ -182,7 +182,7 @@ public class StopOnFirstFailureOrGroupTest {
         RulesEngine engine;
         try {
             engine = RulesEngine.fromYamlConfig(config);
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logError("Failed to create RulesEngine: " + e.getMessage());
             fail("Failed to create RulesEngine: " + e.getMessage());
             return;
@@ -254,7 +254,7 @@ public class StopOnFirstFailureOrGroupTest {
         RulesEngine engine;
         try {
             engine = RulesEngine.fromYamlConfig(config);
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logError("Failed to create RulesEngine: " + e.getMessage());
             fail("Failed to create RulesEngine: " + e.getMessage());
             return;
@@ -326,7 +326,7 @@ public class StopOnFirstFailureOrGroupTest {
         RulesEngine engine;
         try {
             engine = RulesEngine.fromYamlConfig(config);
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logError("Failed to create RulesEngine: " + e.getMessage());
             fail("Failed to create RulesEngine: " + e.getMessage());
             return;
@@ -412,7 +412,7 @@ public class StopOnFirstFailureOrGroupTest {
         RulesEngine engine;
         try {
             engine = RulesEngine.fromYamlConfig(config);
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logError("Failed to create RulesEngine: " + e.getMessage());
             fail("Failed to create RulesEngine: " + e.getMessage());
             return;
@@ -491,7 +491,7 @@ public class StopOnFirstFailureOrGroupTest {
         RulesEngine engine;
         try {
             engine = RulesEngine.fromYamlConfig(config);
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logError("Failed to create RulesEngine: " + e.getMessage());
             fail("Failed to create RulesEngine: " + e.getMessage());
             return;
@@ -517,7 +517,7 @@ public class StopOnFirstFailureOrGroupTest {
     private YamlRuleConfiguration loadConfiguration(String yamlContent) {
         try {
             return yamlLoader.fromYamlString(yamlContent);
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logError("Failed to load YAML configuration: " + e.getMessage());
             fail("Failed to load YAML configuration: " + e.getMessage());
             return null;

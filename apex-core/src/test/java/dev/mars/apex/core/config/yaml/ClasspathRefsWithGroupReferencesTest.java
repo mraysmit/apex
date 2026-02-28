@@ -39,11 +39,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class ClasspathRefsWithGroupReferencesTest {
 
     private static final Logger logger = LoggerFactory.getLogger(ClasspathRefsWithGroupReferencesTest.class);
-    private YamlConfigurationLoader loader;
+    private ConfigurationLoader loader;
 
     @BeforeEach
     void setUp() {
-        loader = new YamlConfigurationLoader();
+        loader = new ConfigurationLoader();
     }
 
     @Test

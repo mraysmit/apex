@@ -15,7 +15,7 @@
  */
 package dev.mars.apex.demo.database;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
@@ -99,13 +99,13 @@ class PostgreSQLPasswordInjectionTest {
             .withUsername("testuser")
             .withPassword("testpass");
 
-    private YamlConfigurationLoader loader;
+    private ConfigurationLoader loader;
 
     @BeforeEach
     void setUp() {
         logger.info("Setting up PostgreSQL Password Injection Test with Testcontainers");
 
-        loader = new YamlConfigurationLoader();
+        loader = new ConfigurationLoader();
 
         // Extract database connection details from running PostgreSQL container
         String jdbcUrl = postgres.getJdbcUrl();

@@ -1,8 +1,8 @@
 package dev.mars.apex.demo.codes;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
-import dev.mars.apex.core.config.YamlRuleFactory;
+import dev.mars.apex.core.config.RuleFactory;
 import dev.mars.apex.engine.model.Rule;
 import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.engine.core.UnifiedRuleEvaluator;
@@ -25,15 +25,15 @@ public class FieldMappingValidation {
 
     private static final Logger logger = LoggerFactory.getLogger(FieldMappingValidation.class);
     private UnifiedRuleEvaluator evaluator;
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
     private YamlRuleConfiguration config;
-    private YamlRuleFactory ruleFactory;
+    private RuleFactory ruleFactory;
 
     @BeforeEach
     public void setUp() throws Exception {
         evaluator = new UnifiedRuleEvaluator();
-        yamlLoader = new YamlConfigurationLoader();
-        ruleFactory = new YamlRuleFactory();
+        yamlLoader = new ConfigurationLoader();
+        ruleFactory = new RuleFactory();
         config = yamlLoader.loadFromFile("src/test/java/dev/mars/apex/demo/codes/FieldMappingValidation-rules.yaml");
         assertNotNull(config, "Configuration should be loaded");
         logger.info("[OK] Configuration loaded: {} rules", config.getRules().size());

@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.core.RulesEngineConfiguration;
@@ -29,7 +29,7 @@ class LoggingSeverityFlawTest {
 
     private static final Logger logger = LoggerFactory.getLogger(LoggingSeverityFlawTest.class);
 
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
     private RulesEngine rulesEngine;
 
     @BeforeEach
@@ -37,7 +37,7 @@ class LoggingSeverityFlawTest {
         logger.info("Initializing APEX services for logging severity demonstration");
 
         // Initialize required services using correct constructors
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
 
         RulesEngineConfiguration config = new RulesEngineConfiguration();
         rulesEngine = new RulesEngine(config);

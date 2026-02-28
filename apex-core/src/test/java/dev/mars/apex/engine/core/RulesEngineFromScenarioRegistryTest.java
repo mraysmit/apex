@@ -16,7 +16,7 @@ package dev.mars.apex.engine.core;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.config.exception.ConfigurationException;
 import org.junit.jupiter.api.DisplayName;
 
 import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
@@ -234,8 +234,8 @@ class RulesEngineFromScenarioRegistryTest {
 
             String nonExistentPath = "non-existent/registry.yaml";
 
-            YamlConfigurationException exception = assertThrows(
-                YamlConfigurationException.class,
+            ConfigurationException exception = assertThrows(
+                ConfigurationException.class,
                 () -> RulesEngine.fromScenarioRegistry(nonExistentPath),
                 "Should throw exception for non-existent resource"
             );

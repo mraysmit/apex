@@ -1,10 +1,10 @@
 package dev.mars.apex.demo.enrichmentgroups;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
-import dev.mars.apex.core.service.enrichment.EnrichmentGroupFactory;
+import dev.mars.apex.core.config.EnrichmentGroupFactory;
 import dev.mars.apex.engine.model.EnrichmentGroup;
 
 import java.util.HashMap;
@@ -17,7 +17,7 @@ public class DebugEnrichment {
             System.out.println("Starting DebugEnrichment...");
             
             String configPath = "apex-demo/src/test/java/dev/mars/apex/demo/enrichmentgroups/BasicYamlEnrichmentGroupProcessingTest-combined-config.yaml";
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.loadFromFile(configPath);
             
             System.out.println("Config loaded.");

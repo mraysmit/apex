@@ -19,7 +19,7 @@ package dev.mars.apex.core.config.service;
 import dev.mars.apex.core.config.ResourceResolver;
 import dev.mars.apex.core.config.component.ComponentConfiguration;
 import dev.mars.apex.core.config.component.ComponentLoader;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlDataSource;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.core.config.loader.ScenarioRegistryLoader;
@@ -90,7 +90,7 @@ public class ConfigurationContext {
     private final ResourceResolver resourceResolver;
 
     // Configuration loaders
-    private final YamlConfigurationLoader yamlLoader;
+    private final ConfigurationLoader yamlLoader;
     private final ScenarioRegistryLoader scenarioLoader;
     private final ComponentLoader componentLoader;
 
@@ -113,7 +113,7 @@ public class ConfigurationContext {
         this.scenariosByName = new ConcurrentHashMap<>();
         this.componentsByName = new ConcurrentHashMap<>();
         
-        this.yamlLoader = new YamlConfigurationLoader();
+        this.yamlLoader = new ConfigurationLoader();
         this.scenarioLoader = new ScenarioRegistryLoader();
         this.componentLoader = new ComponentLoader(resourceResolver);
     }

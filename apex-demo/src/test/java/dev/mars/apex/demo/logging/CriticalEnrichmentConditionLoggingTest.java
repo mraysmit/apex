@@ -16,7 +16,7 @@
 
 package dev.mars.apex.demo.logging;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
@@ -56,14 +56,14 @@ class CriticalEnrichmentConditionLoggingTest {
 
     private static final Logger logger = LoggerFactory.getLogger(CriticalEnrichmentConditionLoggingTest.class);
     
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
         logger.info("🔧 Initializing APEX services for critical enrichment condition logging test");
 
         // Initialize YAML loader
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
 
         logger.info("All services initialized for critical enrichment condition logging test");
     }
@@ -153,10 +153,10 @@ class CriticalEnrichmentConditionLoggingTest {
     void testDocumentLoggingSeverityImprovements() {
         logger.info("=== LOGGING SEVERITY IMPROVEMENTS DOCUMENTATION ===");
         logger.info("🎯 CRITICAL IMPROVEMENTS IMPLEMENTED:");
-        logger.info("   YamlEnrichmentProcessor:251 - Enrichment condition evaluation failure → SEVERE");
-        logger.info("   YamlEnrichmentProcessor:557 - OR condition evaluation failure → SEVERE");
-        logger.info("   YamlEnrichmentProcessor:576 - AND condition evaluation failure → SEVERE");
-        logger.info("   YamlEnrichmentProcessor:607 - General condition evaluation failure → SEVERE");
+        logger.info("   EnrichmentProcessor:251 - Enrichment condition evaluation failure → SEVERE");
+        logger.info("   EnrichmentProcessor:557 - OR condition evaluation failure → SEVERE");
+        logger.info("   EnrichmentProcessor:576 - AND condition evaluation failure → SEVERE");
+        logger.info("   EnrichmentProcessor:607 - General condition evaluation failure → SEVERE");
         logger.info("   Enhanced error messages with 'CRITICAL:' and 'ERROR:' prefixes");
         logger.info("   Full context provided (enrichment ID, condition, error details)");
         logger.info("   Stack traces preserved for debugging");

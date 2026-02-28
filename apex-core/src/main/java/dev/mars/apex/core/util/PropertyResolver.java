@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
  * 
  * This class provides a single source of truth for property placeholder resolution
  * across the APEX framework, ensuring consistent behavior in:
- * - YamlConfigurationLoader
+ * - ConfigurationLoader
  * - YamlDataSource  
  * - DataSourceResolver
  * 

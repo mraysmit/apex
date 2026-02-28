@@ -16,8 +16,8 @@
 
 package dev.mars.apex.demo.basic;
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
@@ -63,7 +63,7 @@ public class SimpleAgeValidationTest {
         
         try {
             // Load YAML configuration
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.loadFromFile("src/test/java/dev/mars/apex/demo/basic/SimpleAgeValidationTest.yaml");
             assertNotNull(config, "Configuration should be loaded");
             assertEquals("Simple Age Validation", config.getMetadata().getName());
@@ -101,7 +101,7 @@ public class SimpleAgeValidationTest {
             
             logger.info("[OK] Valid age scenario test passed");
             
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
@@ -113,7 +113,7 @@ public class SimpleAgeValidationTest {
         
         try {
             // Load YAML configuration
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.loadFromFile("src/test/java/dev/mars/apex/demo/basic/SimpleAgeValidationTest.yaml");
             assertNotNull(config, "Configuration should be loaded");
             
@@ -149,7 +149,7 @@ public class SimpleAgeValidationTest {
             
             logger.info("[OK] Invalid age scenario test passed");
             
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
@@ -161,7 +161,7 @@ public class SimpleAgeValidationTest {
         
         try {
             // Load YAML configuration
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.loadFromFile("src/test/java/dev/mars/apex/demo/basic/SimpleAgeValidationTest.yaml");
             assertNotNull(config, "Configuration should be loaded");
             
@@ -198,7 +198,7 @@ public class SimpleAgeValidationTest {
             
             logger.info("[OK] Missing age scenario test passed");
             
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
@@ -210,7 +210,7 @@ public class SimpleAgeValidationTest {
         
         try {
             // Load YAML configuration
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.loadFromFile("src/test/java/dev/mars/apex/demo/basic/SimpleAgeValidationTest.yaml");
             assertNotNull(config, "Configuration should be loaded");
             
@@ -243,7 +243,7 @@ public class SimpleAgeValidationTest {
             
             logger.info("[OK] No-match-message scenario test passed");
             
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
@@ -255,7 +255,7 @@ public class SimpleAgeValidationTest {
         
         try {
             // Load YAML configuration
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration config = loader.loadFromFile("src/test/java/dev/mars/apex/demo/basic/SimpleAgeValidationTest.yaml");
             
             RulesEngine engine = RulesEngine.fromYamlConfig(config);
@@ -276,7 +276,7 @@ public class SimpleAgeValidationTest {
             
             logger.info("[OK] Match message with no-match-message configured test passed");
             
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             fail("Failed to load configuration: " + e.getMessage());
         }
     }

@@ -16,8 +16,8 @@ package dev.mars.apex.demo.lookup;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.demo.ColoredTestOutputExtension;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,12 +56,12 @@ public class DatasetInlineTest {
     
     private static final Logger logger = LoggerFactory.getLogger(DatasetInlineTest.class);
 
-    private YamlConfigurationLoader yamlLoader;
+    private ConfigurationLoader yamlLoader;
 
     @BeforeEach
     void setUp() {
         // Initialize APEX services following established patterns
-        yamlLoader = new YamlConfigurationLoader();
+        yamlLoader = new ConfigurationLoader();
         
         logger.info("APEX services initialized for dataset testing");
     }
@@ -89,7 +89,7 @@ public class DatasetInlineTest {
             logger.info("  - Type: {}", config.getMetadata().getType());
             logger.info("  - Version: {}", config.getMetadata().getVersion());
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
@@ -120,7 +120,7 @@ public class DatasetInlineTest {
 
             logger.info("[OK] Counterparty data validation passed");
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
@@ -150,7 +150,7 @@ public class DatasetInlineTest {
 
             logger.info("[OK] Currency data validation passed");
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
@@ -180,7 +180,7 @@ public class DatasetInlineTest {
 
             logger.info("[OK] Instrument data validation passed");
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }
@@ -221,7 +221,7 @@ public class DatasetInlineTest {
             logger.info("  - 2 Currency records (USD, EUR)");
             logger.info("  - 2 Instrument records (US Treasury Note, German Government Bond)");
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("X Failed to load configuration: {}", e.getMessage());
             fail("Failed to load configuration: " + e.getMessage());
         }

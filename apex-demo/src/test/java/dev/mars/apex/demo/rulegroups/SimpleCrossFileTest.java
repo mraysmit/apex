@@ -1,8 +1,8 @@
 package dev.mars.apex.demo.rulegroups;
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
-import dev.mars.apex.core.config.YamlConfigurationMerger;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
+import dev.mars.apex.core.config.ConfigurationMerger;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleGroup;
@@ -24,7 +24,7 @@ public class SimpleCrossFileTest {
             System.out.println("Testing Cross-File Rule Group References...");
 
             // Create rules engine from multiple files using manual merge
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            ConfigurationLoader loader = new ConfigurationLoader();
             YamlRuleConfiguration mergedConfig = new YamlRuleConfiguration();
             for (String filePath : new String[]{BASE_GROUPS_PATH, COMPOSITE_GROUPS_PATH}) {
                 YamlRuleConfiguration partialConfig = loader.loadFromFileWithoutValidation(filePath);
@@ -89,7 +89,7 @@ public class SimpleCrossFileTest {
             System.out.println(" Composite group successfully references base group from another file");
             System.out.println(" All 3 rules (1 local + 2 from referenced group) are working correctly");
             System.out.println("\n IMPLEMENTATION SUMMARY:");
-            System.out.println(" Modified YamlRuleFactory to use two-phase rule group creation");
+            System.out.println(" Modified RuleFactory to use two-phase rule group creation");
             System.out.println(" Create all rule groups and register them in global registry");
             System.out.println(" Resolve cross-file rule-group-references using global registry");
             System.out.println(" Cross-file rule-group references now work just like enrichment groups!");
@@ -109,6 +109,6 @@ public class SimpleCrossFileTest {
      * Delegates to the public utility class in apex-core.
      */
     private static void mergeYamlConfigurations(YamlRuleConfiguration target, YamlRuleConfiguration source) {
-        YamlConfigurationMerger.merge(target, source);
+        ConfigurationMerger.merge(target, source);
     }
 }

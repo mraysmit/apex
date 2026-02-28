@@ -1,0 +1,269 @@
+package dev.mars.apex.core.service.yaml;
+
+/*
+ * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+import dev.mars.apex.core.config.validation.MetadataValidator;
+import dev.mars.apex.core.config.validation.ValidationResult;
+import dev.mars.apex.core.config.validation.ValidationSummary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
+
+/**
+ * Service for comprehensive YAML validation across APEX configurations.
+ * 
+ * This service provides a high-level API for validating YAML files used in APEX,
+ * including metadata validation, structure validation, and dependency checking.
+ * 
+ * @author Mark Andrew Ray-Smith Cityline Ltd
+ * @since 2025-08-25
+ * @version 1.0
+ */
+public class ValidationService {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(ValidationService.class);
+    
+    private final MetadataValidator validator;
+    private final String baseResourcePath;
+    
+    /**
+     * Create a validation service with default resource path.
+     */
+    public ValidationService() {
+        this("src/main/resources");
+    }
+    
+    /**
+     * Create a validation service with custom resource path.
+     * 
+     * @param baseResourcePath The base path to search for YAML files
+     */
+    public ValidationService(String baseResourcePath) {
+        this.baseResourcePath = baseResourcePath;
+        this.validator = new MetadataValidator(baseResourcePath);
+    }
+    
+    /**
+     * Validate all YAML files in the configured resource path.
+     * 
+     * @return Validation summary with results for all files
+     */
+    public ValidationSummary validateAllYamlFiles() {
+        LOGGER.info("Starting comprehensive YAML validation in: {}", baseResourcePath);
+        
+        List<String> yamlFiles = discoverYamlFiles(baseResourcePath);
+        LOGGER.info("Discovered {} YAML files for validation", yamlFiles.size());
+        
+        return validator.validateFiles(yamlFiles);
+    }
+    
+    /**
+     * Validate specific YAML files.
+     * 
+     * @param filePaths List of file paths to validate
+     * @return Validation summary with results for specified files
+     */
+    public ValidationSummary validateFiles(List<String> filePaths) {
+        LOGGER.info("Validating {} specified YAML files", filePaths.size());
+        return validator.validateFiles(filePaths);
+    }
+    
+    /**
+     * Validate a single YAML file.
+     * 
+     * @param filePath Path to the YAML file
+     * @return Validation result for the file
+     */
+    public ValidationResult validateFile(String filePath) {
+        LOGGER.debug("Validating single YAML file: {}", filePath);
+        return validator.validateFile(filePath);
+    }
+    
+    /**
+     * Check if all YAML files in the resource path are valid.
+     * 
+     * @return true if all files are valid, false otherwise
+     */
+    public boolean areAllFilesValid() {
+        ValidationSummary summary = validateAllYamlFiles();
+        return summary.isAllValid();
+    }
+    
+    /**
+     * Get validation errors for all YAML files.
+     * 
+     * @return List of validation errors across all files
+     */
+    public List<String> getAllValidationErrors() {
+        ValidationSummary summary = validateAllYamlFiles();
+        List<String> allErrors = new ArrayList<>();
+        
+        for (ValidationResult result : summary.getResults()) {
+            if (!result.getErrors().isEmpty()) {
+                allErrors.add("File: " + result.getFilePath());
+                allErrors.addAll(result.getErrors());
+            }
+        }
+        
+        return allErrors;
+    }
+    
+    /**
+     * Get validation warnings for all YAML files.
+     * 
+     * @return List of validation warnings across all files
+     */
+    public List<String> getAllValidationWarnings() {
+        ValidationSummary summary = validateAllYamlFiles();
+        List<String> allWarnings = new ArrayList<>();
+        
+        for (ValidationResult result : summary.getResults()) {
+            if (!result.getWarnings().isEmpty()) {
+                allWarnings.add("File: " + result.getFilePath());
+                allWarnings.addAll(result.getWarnings());
+            }
+        }
+        
+        return allWarnings;
+    }
+    
+    /**
+     * Validate YAML files and throw exception if any are invalid.
+     * 
+     * @throws ValidationException if any files are invalid
+     */
+    public void validateOrThrow() throws ValidationException {
+        ValidationSummary summary = validateAllYamlFiles();
+        
+        if (!summary.isAllValid()) {
+            List<String> errors = getAllValidationErrors();
+            String errorMessage = String.format(
+                "YAML validation failed: %d invalid files out of %d total files. Errors: %s",
+                summary.getInvalidCount(),
+                summary.getTotalCount(),
+                String.join("; ", errors)
+            );
+            throw new ValidationException(errorMessage, summary);
+        }
+    }
+    
+    /**
+     * Discover all YAML files in a directory recursively.
+     * 
+     * @param basePath The base directory to search
+     * @return List of YAML file paths
+     */
+    public List<String> discoverYamlFiles(String basePath) {
+        List<String> yamlFiles = new ArrayList<>();
+        Path baseDir = Paths.get(basePath);
+        
+        if (!Files.exists(baseDir)) {
+            LOGGER.warn("Base directory does not exist: {}", basePath);
+            return yamlFiles;
+        }
+        
+        try (Stream<Path> paths = Files.walk(baseDir)) {
+            paths.filter(Files::isRegularFile)
+                 .filter(path -> {
+                     String fileName = path.getFileName().toString().toLowerCase();
+                     return fileName.endsWith(".yaml") || fileName.endsWith(".yml");
+                 })
+                 .forEach(path -> {
+                     String relativePath = baseDir.relativize(path).toString().replace('\\', '/');
+                     yamlFiles.add(relativePath);
+                 });
+        } catch (IOException e) {
+            LOGGER.error("Error discovering YAML files in {}: {}", basePath, e.getMessage());
+            LOGGER.debug("Full exception details:", e);
+        }
+        
+        LOGGER.debug("Discovered {} YAML files in {}", yamlFiles.size(), basePath);
+        return yamlFiles;
+    }
+    
+    /**
+     * Get validation statistics for all YAML files.
+     * 
+     * @return Validation statistics
+     */
+    public ValidationStatistics getValidationStatistics() {
+        ValidationSummary summary = validateAllYamlFiles();
+        return new ValidationStatistics(
+            summary.getTotalCount(),
+            summary.getValidCount(),
+            summary.getInvalidCount(),
+            summary.getWarningCount(),
+            summary.isAllValid()
+        );
+    }
+    
+    /**
+     * Statistics about YAML validation results.
+     */
+    public static class ValidationStatistics {
+        private final int totalFiles;
+        private final int validFiles;
+        private final int invalidFiles;
+        private final int filesWithWarnings;
+        private final boolean allValid;
+        
+        public ValidationStatistics(int totalFiles, int validFiles, int invalidFiles, 
+                                  int filesWithWarnings, boolean allValid) {
+            this.totalFiles = totalFiles;
+            this.validFiles = validFiles;
+            this.invalidFiles = invalidFiles;
+            this.filesWithWarnings = filesWithWarnings;
+            this.allValid = allValid;
+        }
+        
+        public int getTotalFiles() { return totalFiles; }
+        public int getValidFiles() { return validFiles; }
+        public int getInvalidFiles() { return invalidFiles; }
+        public int getFilesWithWarnings() { return filesWithWarnings; }
+        public boolean isAllValid() { return allValid; }
+        
+        @Override
+        public String toString() {
+            return String.format("ValidationStatistics{total=%d, valid=%d, invalid=%d, warnings=%d, allValid=%s}",
+                totalFiles, validFiles, invalidFiles, filesWithWarnings, allValid);
+        }
+    }
+    
+    /**
+     * Exception thrown when YAML validation fails.
+     */
+    public static class ValidationException extends Exception {
+        private final ValidationSummary validationSummary;
+        
+        public ValidationException(String message, ValidationSummary summary) {
+            super(message);
+            this.validationSummary = summary;
+        }
+        
+        public ValidationSummary getValidationSummary() {
+            return validationSummary;
+        }
+    }
+}

@@ -85,13 +85,13 @@ public class OrderedYamlParser {
      * 
      * @param filePath Path to YAML file
      * @return OrderedYamlConfiguration with preserved section order
-     * @throws YamlConfigurationException if parsing fails
+     * @throws ConfigurationException if parsing fails
      */
-    public OrderedYamlConfiguration parseFile(String filePath) throws YamlConfigurationException {
+    public OrderedYamlConfiguration parseFile(String filePath) throws ConfigurationException {
         try {
             Path path = Paths.get(filePath);
             if (!Files.exists(path)) {
-                throw new YamlConfigurationException("Configuration file not found: " + filePath);
+                throw new ConfigurationException("Configuration file not found: " + filePath);
             }
             
             logger.info("Parsing YAML file with order preservation: " + filePath);
@@ -100,7 +100,7 @@ public class OrderedYamlParser {
             return parseYamlString(rawContent, filePath);
             
         } catch (IOException e) {
-            throw new YamlConfigurationException("Failed to read YAML file: " + filePath, e);
+            throw new ConfigurationException("Failed to read YAML file: " + filePath, e);
         }
     }
     
@@ -109,9 +109,9 @@ public class OrderedYamlParser {
      * 
      * @param yamlContent YAML content as string
      * @return OrderedYamlConfiguration with preserved section order
-     * @throws YamlConfigurationException if parsing fails
+     * @throws ConfigurationException if parsing fails
      */
-    public OrderedYamlConfiguration parseYamlString(String yamlContent) throws YamlConfigurationException {
+    public OrderedYamlConfiguration parseYamlString(String yamlContent) throws ConfigurationException {
         return parseYamlString(yamlContent, "<string>");
     }
     
@@ -124,9 +124,9 @@ public class OrderedYamlParser {
      * @param yamlContent YAML content as string
      * @param source Source identifier for error reporting
      * @return OrderedYamlConfiguration with preserved section order
-     * @throws YamlConfigurationException if parsing fails
+     * @throws ConfigurationException if parsing fails
      */
-    public OrderedYamlConfiguration parseYamlString(String yamlContent, String source) throws YamlConfigurationException {
+    public OrderedYamlConfiguration parseYamlString(String yamlContent, String source) throws ConfigurationException {
         try {
             logger.debug("Parsing YAML content with order preservation from: " + source);
 
@@ -148,19 +148,19 @@ public class OrderedYamlParser {
 
         } catch (com.fasterxml.jackson.core.JsonParseException e) {
             // Jackson parse errors (malformed JSON/YAML syntax)
-            throw new YamlConfigurationException("YAML syntax error in " + source + ": " + e.getMessage(), e);
+            throw new ConfigurationException("YAML syntax error in " + source + ": " + e.getMessage(), e);
         } catch (com.fasterxml.jackson.databind.JsonMappingException e) {
             // Jackson mapping errors (structure issues)
-            throw new YamlConfigurationException("YAML parsing error in " + source + ": " + e.getMessage(), e);
+            throw new ConfigurationException("YAML parsing error in " + source + ": " + e.getMessage(), e);
         } catch (JsonProcessingException e) {
             // Other Jackson processing errors
-            throw new YamlConfigurationException("YAML parsing error in " + source + ": " + e.getMessage(), e);
+            throw new ConfigurationException("YAML parsing error in " + source + ": " + e.getMessage(), e);
         } catch (IOException e) {
             // IO errors (shouldn't happen for string parsing, but catch anyway)
-            throw new YamlConfigurationException("YAML parsing error in " + source + ": " + e.getMessage(), e);
+            throw new ConfigurationException("YAML parsing error in " + source + ": " + e.getMessage(), e);
         } catch (Exception e) {
             // Catch-all for any other exceptions during deserialization
-            throw new YamlConfigurationException("YAML parsing error in " + source + ": " + e.getMessage(), e);
+            throw new ConfigurationException("YAML parsing error in " + source + ": " + e.getMessage(), e);
         }
     }
     
@@ -332,7 +332,7 @@ public class OrderedYamlParser {
                 }
             } else if (REFERENCE_SECTIONS.contains(normalizedSectionName) && sectionValue instanceof List) {
                 // Insert placeholder for reference sections
-                // These will be expanded later by YamlConfigurationLoader after loading referenced files
+                // These will be expanded later by ConfigurationLoader after loading referenced files
                 itemOrder.add(new ProcessingItem(normalizedSectionName, "*"));
                 logger.debug("Added placeholder for reference section: " + sectionName);
             }
@@ -346,7 +346,7 @@ public class OrderedYamlParser {
     
     /**
      * Create and configure the YAML ObjectMapper.
-     * Uses same configuration as YamlConfigurationLoader for compatibility.
+     * Uses same configuration as ConfigurationLoader for compatibility.
      *
      * @return Configured ObjectMapper for YAML processing
      */

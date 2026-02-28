@@ -1,5 +1,7 @@
 package dev.mars.apex.core.service.scenario;
 
+import dev.mars.apex.engine.execution.ScenarioStageExecutor;
+
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
  *
@@ -16,9 +18,9 @@ package dev.mars.apex.core.service.scenario;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
-import dev.mars.apex.core.config.YamlRuleFactory;
+import dev.mars.apex.core.config.RuleFactory;
 import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -63,7 +65,7 @@ class StageDataPersistenceTest {
     // ========================================
     
     // Test loader that returns in-memory configs (shared across test classes)
-    private static class TestConfigLoader extends YamlConfigurationLoader {
+    private static class TestConfigLoader extends ConfigurationLoader {
         private final Map<String, YamlRuleConfiguration> configs = new HashMap<>();
         private final Map<String, Boolean> failures = new HashMap<>();
 
@@ -271,13 +273,13 @@ class StageDataPersistenceTest {
     class ScenarioStageExecutorTests {
 
         private TestConfigLoader configLoader;
-        private YamlRuleFactory ruleFactory;
+        private RuleFactory ruleFactory;
         private ScenarioStageExecutor executor;
 
         @BeforeEach
         void setUp() {
             configLoader = new TestConfigLoader();
-            ruleFactory = new YamlRuleFactory();
+            ruleFactory = new RuleFactory();
             executor = new ScenarioStageExecutor(configLoader, ruleFactory);
         }
         
@@ -448,13 +450,13 @@ class StageDataPersistenceTest {
         
         private ScenarioStageExecutor executor;
         private TestConfigLoader configLoader;
-        private YamlRuleFactory ruleFactory;
+        private RuleFactory ruleFactory;
         
         @BeforeEach
         void setUp() {
             logger.info("Setting up scenario metadata isolation tests");
             configLoader = new TestConfigLoader();
-            ruleFactory = new YamlRuleFactory();
+            ruleFactory = new RuleFactory();
             executor = new ScenarioStageExecutor(configLoader, ruleFactory);
         }
         

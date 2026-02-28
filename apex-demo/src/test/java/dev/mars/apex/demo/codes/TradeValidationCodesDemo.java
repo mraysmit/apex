@@ -1,7 +1,7 @@
 package dev.mars.apex.demo.codes;
 
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.demo.DemoTestBase;
@@ -57,7 +57,7 @@ public class TradeValidationCodesDemo extends DemoTestBase {
 
         try {
             // Load YAML configuration
-            YamlConfigurationLoader loader = new YamlConfigurationLoader();
+            ConfigurationLoader loader = new ConfigurationLoader();
             config = loader.loadFromFile(CONFIG_FILE);
             assertNotNull(config, "Configuration should not be null");
 

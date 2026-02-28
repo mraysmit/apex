@@ -17,7 +17,7 @@ package dev.mars.apex.core.service.scenario;
  */
 
 import dev.mars.apex.core.config.loader.ScenarioRegistryLoader;
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.config.exception.ConfigurationException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 

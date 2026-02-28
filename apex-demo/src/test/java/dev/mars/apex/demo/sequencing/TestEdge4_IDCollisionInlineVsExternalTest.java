@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.config.exception.ConfigurationException;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.demo.DemoTestBase;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - main.yaml references external.yaml via enrichment-refs
  * 
  * Expected Behavior:
- * - Should throw YamlConfigurationException with message about duplicate ID
+ * - Should throw ConfigurationException with message about duplicate ID
  * - Should NOT allow configuration to load
  * 
  * This test verifies that duplicate ID validation runs AFTER external files are merged.
@@ -38,10 +38,10 @@ public class TestEdge4_IDCollisionInlineVsExternalTest extends DemoTestBase {
         LOGGER.info("=== EDGE CASE TEST 4: ID Collision Between Inline and External Enrichments ===");
 
         // Attempt to load YAML with ID collision
-        YamlConfigurationException exception = assertThrows(
-            YamlConfigurationException.class,
+        ConfigurationException exception = assertThrows(
+            ConfigurationException.class,
             () -> RulesEngine.fromClasspath("dev/mars/apex/demo/sequencing/TestEdge4_IDCollisionInlineVsExternalTest.yaml"),
-            "Should throw YamlConfigurationException for duplicate IDs across inline and external files"
+            "Should throw ConfigurationException for duplicate IDs across inline and external files"
         );
 
         // Verify error message

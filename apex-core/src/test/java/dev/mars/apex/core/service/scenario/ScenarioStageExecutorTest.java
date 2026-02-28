@@ -1,5 +1,7 @@
 package dev.mars.apex.core.service.scenario;
 
+import dev.mars.apex.engine.execution.ScenarioStageExecutor;
+
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
  *
@@ -16,9 +18,9 @@ package dev.mars.apex.core.service.scenario;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
-import dev.mars.apex.core.config.YamlRuleFactory;
+import dev.mars.apex.core.config.RuleFactory;
 import dev.mars.apex.core.util.TestErrorContext;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -70,7 +72,7 @@ class ScenarioStageExecutorTest {
 
     private TestConfigLoader configLoader;
     // Test loader that returns in-memory configs without touching the filesystem
-    private static class TestConfigLoader extends YamlConfigurationLoader {
+    private static class TestConfigLoader extends ConfigurationLoader {
         private final Map<String, YamlRuleConfiguration> configs = new HashMap<>();
         private final Set<String> throwOnLoad = new HashSet<>();
 
@@ -104,14 +106,14 @@ class ScenarioStageExecutorTest {
         return cfg;
     }
 
-    private YamlRuleFactory ruleFactory;
+    private RuleFactory ruleFactory;
 
     private ScenarioStageExecutor executor;
 
     @BeforeEach
     void setUp() {
         configLoader = new TestConfigLoader();
-        ruleFactory = new YamlRuleFactory();
+        ruleFactory = new RuleFactory();
         executor = new ScenarioStageExecutor(configLoader, ruleFactory);
     }
 

@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.enrichmentgroups;
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.config.exception.ConfigurationException;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Multi-file demo showcasing reusability: separate enrichments.yaml and enrichment-groups.yaml.
  *
- * We merge at YAML level (no guessing) using YamlConfigurationLoader's multi-file hooks.
+ * We merge at YAML level (no guessing) using ConfigurationLoader's multi-file hooks.
  */
 @ExtendWith(ColoredTestOutputExtension.class)
 @DisplayName("Multi-file Enrichment Group Processing Tests")
@@ -31,7 +31,7 @@ public class MultiFileYamlEnrichmentGroupProcessingTest extends DemoTestBase {
     private YamlRuleConfiguration loadMergedYaml() {
         try {
             return mergeYamlConfigsForEnrichment(ENRICHMENTS_PATH, GROUPS_PATH);
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             fail("Failed to load/merge YAML: " + e.getMessage());
             return null;
         }
@@ -56,7 +56,7 @@ public class MultiFileYamlEnrichmentGroupProcessingTest extends DemoTestBase {
             Map<String, Object> enrichedData = result.getEnrichedData();
             assertEquals("A", enrichedData.get("a_copy"));
             assertEquals("B", enrichedData.get("b_copy"));
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             fail("Failed to create RulesEngine: " + e.getMessage());
         }
     }
@@ -80,7 +80,7 @@ public class MultiFileYamlEnrichmentGroupProcessingTest extends DemoTestBase {
             Map<String, Object> enrichedData = result.getEnrichedData();
             assertEquals("A", enrichedData.get("a_copy"));
             // Note: OR groups may execute all or short-circuit depending on configuration
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             fail("Failed to create RulesEngine: " + e.getMessage());
         }
     }
@@ -105,7 +105,7 @@ public class MultiFileYamlEnrichmentGroupProcessingTest extends DemoTestBase {
             assertEquals("A", enrichedData.get("a_copy"));
             assertEquals("B", enrichedData.get("b_copy"));
             assertEquals("C", enrichedData.get("c_copy"));
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             fail("Failed to create RulesEngine: " + e.getMessage());
         }
     }
@@ -115,7 +115,7 @@ public class MultiFileYamlEnrichmentGroupProcessingTest extends DemoTestBase {
     void testMissingEnrichmentIdValidation() {
         String enrichmentsPath = "src/test/java/dev/mars/apex/demo/enrichmentgroups/NegativeMissingEnrichmentEnrichments.yaml";
         String groupsPath = "src/test/java/dev/mars/apex/demo/enrichmentgroups/NegativeMissingEnrichmentGroups.yaml";
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             mergeYamlConfigsForEnrichment(enrichmentsPath, groupsPath);
         }, "Expected validation to fail due to missing enrichment id reference");
     }
@@ -145,7 +145,7 @@ public class MultiFileYamlEnrichmentGroupProcessingTest extends DemoTestBase {
             assertEquals("B", enrichedData.get("b_copy"));
             assertEquals("C", enrichedData.get("c_copy"));
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             fail("YAML load/validation failed: " + e.getMessage());
         }
     }
@@ -175,7 +175,7 @@ public class MultiFileYamlEnrichmentGroupProcessingTest extends DemoTestBase {
             assertEquals("B", enrichedData.get("b_copy"));
             assertEquals("C", enrichedData.get("c_copy"));
 
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             fail("YAML load/validation failed: " + e.getMessage());
         }
     }
@@ -189,7 +189,7 @@ public class MultiFileYamlEnrichmentGroupProcessingTest extends DemoTestBase {
         String cycleAPath = "src/test/java/dev/mars/apex/demo/enrichmentgroups/CrossFileCycleAEnrichmentGroups.yaml";
         String cycleBPath = "src/test/java/dev/mars/apex/demo/enrichmentgroups/CrossFileCycleBEnrichmentGroups.yaml";
 
-        assertThrows(YamlConfigurationException.class, () -> {
+        assertThrows(ConfigurationException.class, () -> {
             mergeYamlConfigsForEnrichment(enrichmentsPath, cycleAPath, cycleBPath);
         }, "Expected validation to fail due to cyclic enrichment-group-references across files");
     }

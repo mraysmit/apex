@@ -16,7 +16,7 @@ package dev.mars.apex.core.config.model;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.config.exception.ConfigurationException;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
@@ -165,12 +165,12 @@ public class NamedEndpoint {
         this.deprecationMessage = deprecationMessage;
     }
     
-    public void validate() throws YamlConfigurationException {
+    public void validate() throws ConfigurationException {
         if (name == null || name.trim().isEmpty()) {
-            throw new YamlConfigurationException("Named endpoint must have a 'name' field");
+            throw new ConfigurationException("Named endpoint must have a 'name' field");
         }
         if (endpoint == null || endpoint.trim().isEmpty()) {
-            throw new YamlConfigurationException("Named endpoint '" + name + "' must have an 'endpoint' field");
+            throw new ConfigurationException("Named endpoint '" + name + "' must have an 'endpoint' field");
         }
     }
     

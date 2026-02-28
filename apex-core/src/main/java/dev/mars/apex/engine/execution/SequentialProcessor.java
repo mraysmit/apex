@@ -24,14 +24,14 @@ import dev.mars.apex.engine.model.Rule;
 import dev.mars.apex.engine.model.RuleGroup;
 import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.engine.core.RulesEngineConfiguration;
-import dev.mars.apex.core.config.YamlRuleFactory;
+import dev.mars.apex.core.config.RuleFactory;
 import dev.mars.apex.core.config.pipeline.PipelineConfiguration;
-import dev.mars.apex.core.service.enrichment.EnrichmentGroupFactory;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
+import dev.mars.apex.core.config.EnrichmentGroupFactory;
+import dev.mars.apex.core.service.enrichment.EnrichmentProcessor;
 import dev.mars.apex.engine.core.ExpressionEvaluatorService;
 import dev.mars.apex.engine.core.UnifiedRuleEvaluator;
-import dev.mars.apex.core.service.transform.YamlTransformationProcessor;
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.service.transform.TransformationProcessor;
+import dev.mars.apex.core.config.exception.ConfigurationException;
 import dev.mars.apex.core.util.EnabledFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,12 +62,13 @@ public class SequentialProcessor {
     private static final Logger logger = LoggerFactory.getLogger(SequentialProcessor.class);
 
     private final RulesEngineConfiguration configuration;
-    private final YamlEnrichmentProcessor enrichmentProcessor;
+    private final EnrichmentProcessor enrichmentProcessor;
     private final ExpressionEvaluatorService evaluatorService;
     private final EnrichmentGroupExecutor enrichmentGroupExecutor;
     private final RuleGroupExecutor ruleGroupExecutor;
     private final RuleChainExecutor ruleChainExecutor;
-    private final YamlRuleFactory ruleFactory;
+    private final RuleFactory ruleFactory;
+    private final TransformationProcessor transformationProcessor;
 
     /**
      * Constructs a new SequentialProcessor with required dependencies.
@@ -83,7 +84,7 @@ public class SequentialProcessor {
      */
     public SequentialProcessor(
             RulesEngineConfiguration configuration,
-            YamlEnrichmentProcessor enrichmentProcessor,
+            EnrichmentProcessor enrichmentProcessor,
             UnifiedRuleEvaluator unifiedEvaluator,
             ExpressionEvaluatorService evaluatorService,
             EnrichmentGroupExecutor enrichmentGroupExecutor,
@@ -95,7 +96,8 @@ public class SequentialProcessor {
         this.enrichmentGroupExecutor = enrichmentGroupExecutor;
         this.ruleGroupExecutor = ruleGroupExecutor;
         this.ruleChainExecutor = ruleChainExecutor;
-        this.ruleFactory = new YamlRuleFactory();
+        this.ruleFactory = new RuleFactory();
+        this.transformationProcessor = new TransformationProcessor(evaluatorService);
     }
 
     /**
@@ -175,8 +177,8 @@ public class SequentialProcessor {
                 logger.info("Sequential evaluation completed successfully with {} individual rule results", individualRuleResults.size());
                 logger.debug("Final enriched data keys (success): {}", enrichedData.keySet());
                 logger.debug("Execution path summary: {} steps executed", executionPath.size());
-                RuleResult result = RuleResult.evaluationSuccess(enrichedData, "evaluation", "Sequential evaluation completed successfully", individualRuleResults);
-                result.setExecutionPath(executionPath);
+                RuleResult result = RuleResult.evaluationSuccess(enrichedData, "evaluation", "Sequential evaluation completed successfully", individualRuleResults)
+                        .toBuilder().executionPath(executionPath).build();
                 return result;
             } else {
                 logger.info("Sequential evaluation completed with {} failures", failureMessages.size());
@@ -287,7 +289,7 @@ public class SequentialProcessor {
                 tempConfig.registerRule(r);
             }
             groupIndex = ruleFactory.createRuleGroupIndex(yamlConfig, tempConfig);
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("[APEX-CFG-003] Failed to build rule-group index: {}", e.getMessage());
             logger.debug("Full exception details for rule-group index build failure:", e);
             failureMessages.add("[APEX-CFG-003] Rule-group index build failed: " + e.getMessage());
@@ -557,8 +559,7 @@ public class SequentialProcessor {
 
         logger.debug("processTransformationItem() - found transformation '{}', executing with {} data keys", 
                     transformationId, data.size());
-        YamlTransformationProcessor processor = new YamlTransformationProcessor(this.evaluatorService);
-        RuleResult transformationResult = processor.processTransformationsWithResult(List.of(transformation), data);
+        RuleResult transformationResult = transformationProcessor.processTransformationsWithResult(List.of(transformation), data);
 
         if (transformationResult.isError()) {
             logger.error("Transformation processing failed: {}", transformationResult.getMessage());

@@ -37,11 +37,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class MixedRefsWithGroupReferencesTest {
 
     private static final Logger logger = LoggerFactory.getLogger(MixedRefsWithGroupReferencesTest.class);
-    private YamlConfigurationLoader loader;
+    private ConfigurationLoader loader;
 
     @BeforeEach
     void setUp() {
-        loader = new YamlConfigurationLoader();
+        loader = new ConfigurationLoader();
     }
 
     @Test

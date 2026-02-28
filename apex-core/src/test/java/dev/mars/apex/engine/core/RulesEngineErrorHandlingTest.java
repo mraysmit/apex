@@ -16,7 +16,7 @@ package dev.mars.apex.engine.core;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.config.exception.ConfigurationException;
 import dev.mars.apex.engine.model.RuleResult;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -78,7 +78,7 @@ class RulesEngineErrorHandlingTest {
      * SpEL evaluation fails - but APEX should handle this gracefully.</p>
      */
     @Test
-    void testRulesEngine_MissingFieldsIntentionalError() throws YamlConfigurationException {
+    void testRulesEngine_MissingFieldsIntentionalError() throws ConfigurationException {
         LOGGER.info("=== INTENTIONAL ERROR TEST: RulesEngine with missing input fields ===");
         
         // Step 1: Create engine from YAML with rules that reference multiple fields
@@ -129,7 +129,7 @@ class RulesEngineErrorHandlingTest {
      * and the default value used instead of failing.
      */
     @Test
-    void testRulesEngine_ErrorRecoveryWithDefaultValues() throws YamlConfigurationException {
+    void testRulesEngine_ErrorRecoveryWithDefaultValues() throws ConfigurationException {
         LOGGER.info("=== INTENTIONAL ERROR TEST: Error recovery with default values ===");
         
         // Create engine with error-handling YAML
@@ -165,7 +165,7 @@ class RulesEngineErrorHandlingTest {
      * what it can and report errors for what it cannot.
      */
     @Test
-    void testRulesEngine_PartialDataIntentionalError() throws YamlConfigurationException {
+    void testRulesEngine_PartialDataIntentionalError() throws ConfigurationException {
         LOGGER.info("=== INTENTIONAL ERROR TEST: Partial data with some valid fields ===");
         
         RulesEngine engine = RulesEngine.fromFile(resourcePath("error-handling/yaml-default-value-test.yaml"));
@@ -208,7 +208,7 @@ class RulesEngineErrorHandlingTest {
      * (not ERROR-level stack traces).
      */
     @Test
-    void testRulesEngine_EnrichmentConditionFailuresIntentionalError() throws YamlConfigurationException {
+    void testRulesEngine_EnrichmentConditionFailuresIntentionalError() throws ConfigurationException {
         LOGGER.info("=== INTENTIONAL ERROR TEST: Enrichment condition evaluation failures ===");
         
         RulesEngine engine = RulesEngine.fromFile(resourcePath("error-handling/yaml-default-value-test.yaml"));
@@ -236,7 +236,7 @@ class RulesEngineErrorHandlingTest {
      * Even with errors, the pattern remains simple and clean.
      */
     @Test
-    void testRulesEngine_SimplifiedUsagePattern() throws YamlConfigurationException {
+    void testRulesEngine_SimplifiedUsagePattern() throws ConfigurationException {
         LOGGER.info("=== MODERN APPROACH: Simplified 2-line usage ===");
         
         // Simple 2-line usage - create engine and evaluate
@@ -255,7 +255,7 @@ class RulesEngineErrorHandlingTest {
      * Shows how consumers should check for errors in production code.
      */
     @Test
-    void testRulesEngine_ProperErrorCheckingPattern() throws YamlConfigurationException {
+    void testRulesEngine_ProperErrorCheckingPattern() throws ConfigurationException {
         LOGGER.info("=== BEST PRACTICE: Proper error checking pattern ===");
         
         RulesEngine engine = RulesEngine.fromFile(resourcePath("error-handling/yaml-default-value-test.yaml"));
@@ -288,7 +288,7 @@ class RulesEngineErrorHandlingTest {
      * Test verifying that hasFailures() accurately reflects error state.
      */
     @Test
-    void testRulesEngine_HasFailuresAccuracy() throws YamlConfigurationException {
+    void testRulesEngine_HasFailuresAccuracy() throws ConfigurationException {
         LOGGER.info("=== VERIFICATION: hasFailures() accuracy ===");
         
         RulesEngine engine = RulesEngine.fromFile(resourcePath("error-handling/yaml-default-value-test.yaml"));

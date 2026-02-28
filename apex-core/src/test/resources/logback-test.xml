@@ -25,9 +25,9 @@
     </contextListener>
 
     <!-- Reduce noise from YAML validation during tests -->
-    <logger name="dev.mars.apex.core.config.yaml.YamlConfigurationLoader" level="ERROR"/>
-    <logger name="dev.mars.apex.core.util.YamlDependencyAnalyzer" level="INFO"/>
-    <logger name="dev.mars.apex.core.util.YamlMetadataValidator" level="INFO"/>
+    <logger name="dev.mars.apex.core.config.loader.ConfigurationLoader" level="ERROR"/>
+    <logger name="dev.mars.apex.core.util.DependencyAnalyzer" level="INFO"/>
+    <logger name="dev.mars.apex.core.util.MetadataValidator" level="INFO"/>
     
     <!-- 
         Suppress HikariCP connection pool ERROR logging during tests.

@@ -1,7 +1,7 @@
 package dev.mars.apex.core.integration;
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.exception.ConfigurationException;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -32,14 +32,14 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("Enrichment Reference Error Handling Tests")
 class EnrichmentReferenceErrorHandlingTest {
 
-    private YamlConfigurationLoader configLoader;
+    private ConfigurationLoader configLoader;
     
     @TempDir
     Path tempDir;
 
     @BeforeEach
     void setUp() {
-        configLoader = new YamlConfigurationLoader();
+        configLoader = new ConfigurationLoader();
     }
 
     @Test
@@ -66,9 +66,9 @@ class EnrichmentReferenceErrorHandlingTest {
         Path configFile = tempDir.resolve("config.yaml");
         Files.writeString(configFile, configYaml);
         
-        // Should throw YamlConfigurationException for missing file
-        YamlConfigurationException exception = assertThrows(
-            YamlConfigurationException.class,
+        // Should throw ConfigurationException for missing file
+        ConfigurationException exception = assertThrows(
+            ConfigurationException.class,
             () -> configLoader.loadFromFile(configFile.toString()),
             "Should throw exception for missing enrichment reference file"
         );
@@ -121,9 +121,9 @@ class EnrichmentReferenceErrorHandlingTest {
         Path configFile = tempDir.resolve("config.yaml");
         Files.writeString(configFile, configYaml);
         
-        // Should throw YamlConfigurationException for invalid YAML
-        YamlConfigurationException exception = assertThrows(
-            YamlConfigurationException.class,
+        // Should throw ConfigurationException for invalid YAML
+        ConfigurationException exception = assertThrows(
+            ConfigurationException.class,
             () -> configLoader.loadFromFile(configFile.toString()),
             "Should throw exception for invalid YAML in referenced enrichment file"
         );
@@ -498,9 +498,9 @@ class EnrichmentReferenceErrorHandlingTest {
         Path configFile = tempDir.resolve("config.yaml");
         Files.writeString(configFile, configYaml);
 
-        // Should throw YamlConfigurationException for non-existent enrichment group reference
-        YamlConfigurationException exception = assertThrows(
-            YamlConfigurationException.class,
+        // Should throw ConfigurationException for non-existent enrichment group reference
+        ConfigurationException exception = assertThrows(
+            ConfigurationException.class,
             () -> configLoader.loadFromFile(configFile.toString()),
             "Should throw exception for enrichment group referencing non-existent group"
         );

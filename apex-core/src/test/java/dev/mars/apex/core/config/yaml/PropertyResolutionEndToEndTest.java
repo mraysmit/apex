@@ -32,13 +32,13 @@ public class PropertyResolutionEndToEndTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PropertyResolutionEndToEndTest.class);
     
-    private YamlConfigurationLoader loader;
+    private ConfigurationLoader loader;
 
     @BeforeEach
     void setUp() {
         LOGGER.info("Setting up PropertyResolutionEndToEndTest");
         
-        loader = new YamlConfigurationLoader();
+        loader = new ConfigurationLoader();
         
         // Set up test environment variables and system properties
         System.setProperty("DB_HOST", "production-db.example.com");
@@ -203,7 +203,7 @@ public class PropertyResolutionEndToEndTest {
         System.clearProperty("DB_PASSWORD");
         
         // This should throw an exception because required properties are missing
-        Exception exception = assertThrows(YamlConfigurationException.class, () -> {
+        Exception exception = assertThrows(ConfigurationException.class, () -> {
             loader.loadFromClasspath("lookups/test-config-with-properties.yaml");
         });
         

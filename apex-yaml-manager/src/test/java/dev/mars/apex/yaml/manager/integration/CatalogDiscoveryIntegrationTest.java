@@ -16,10 +16,10 @@ package dev.mars.apex.yaml.manager.integration;
  * limitations under the License.
  */
 
-import dev.mars.apex.yaml.manager.model.YamlConfigMetadata;
+import dev.mars.apex.yaml.manager.model.ConfigMetadata;
 import dev.mars.apex.yaml.manager.service.CatalogScanService;
 import dev.mars.apex.yaml.manager.service.CatalogService;
-import dev.mars.apex.yaml.manager.service.YamlContentAnalyzer;
+import dev.mars.apex.yaml.manager.service.ContentAnalyzer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -56,13 +56,13 @@ public class CatalogDiscoveryIntegrationTest {
 
     private CatalogService catalogService;
     private CatalogScanService catalogScanService;
-    private YamlContentAnalyzer contentAnalyzer;
+    private ContentAnalyzer contentAnalyzer;
     private String testResourcesPath;
 
     @BeforeEach
     public void setUp() {
         catalogService = new CatalogService();
-        contentAnalyzer = new YamlContentAnalyzer();
+        contentAnalyzer = new ContentAnalyzer();
         catalogScanService = new CatalogScanService();
 
         // Inject dependencies into CatalogScanService
@@ -100,7 +100,7 @@ public class CatalogDiscoveryIntegrationTest {
         assertTrue(indexedCount > 0, "Should have indexed at least one YAML file");
 
         // Verify catalog contains configurations
-        Collection<YamlConfigMetadata> allConfigs = catalogService.getAllConfigurations();
+        Collection<ConfigMetadata> allConfigs = catalogService.getAllConfigurations();
         assertNotNull(allConfigs);
         int catalogSize = allConfigs.size();
         logger.info("Catalog contains {} configurations", catalogSize);
@@ -113,7 +113,7 @@ public class CatalogDiscoveryIntegrationTest {
         int withHealthScore = 0, withTimestamps = 0;
 
         // Verify each configuration has required metadata
-        for (YamlConfigMetadata config : allConfigs) {
+        for (ConfigMetadata config : allConfigs) {
             assertNotNull(config.getId(), "Configuration should have an ID");
             assertNotNull(config.getPath(), "Configuration should have a path");
 
@@ -165,7 +165,7 @@ public class CatalogDiscoveryIntegrationTest {
         assertTrue(withDependencies > 0, "Some configurations should have dependencies");
 
         // Find a specific file with tags to verify tag extraction
-        YamlConfigMetadata baseValidation = catalogService.getConfiguration("base-validation-rules");
+        ConfigMetadata baseValidation = catalogService.getConfiguration("base-validation-rules");
         if (baseValidation != null) {
             assertNotNull(baseValidation.getTags(), "base-validation-rules should have tags");
             assertTrue(baseValidation.getTags().contains("validation"), "Should contain 'validation' tag");
@@ -174,7 +174,7 @@ public class CatalogDiscoveryIntegrationTest {
         }
 
         // Find a file with dependencies to verify dependency extraction
-        YamlConfigMetadata tradeScenario = catalogService.getConfiguration("trade-processing-scenario");
+        ConfigMetadata tradeScenario = catalogService.getConfiguration("trade-processing-scenario");
         if (tradeScenario != null) {
             assertNotNull(tradeScenario.getDependencies(), "trade-processing-scenario should have dependencies");
             assertTrue(tradeScenario.getDependencies().size() > 0, "Should have at least one dependency");
@@ -184,7 +184,7 @@ public class CatalogDiscoveryIntegrationTest {
         }
 
         // Verify graph-100 files have tags, business domain, and owner
-        YamlConfigMetadata rulesA = catalogService.getConfiguration("graph100-rules-a");
+        ConfigMetadata rulesA = catalogService.getConfiguration("graph100-rules-a");
         if (rulesA != null) {
             assertNotNull(rulesA.getTags(), "graph100-rules-a should have tags");
             assertTrue(rulesA.getTags().contains("rules"), "Should contain 'rules' tag");
@@ -205,9 +205,9 @@ public class CatalogDiscoveryIntegrationTest {
         scanAndIndexDirectory(new File(testResourcesPath));
         
         // Search for configurations with specific tags
-        List<YamlConfigMetadata> validationConfigs = catalogService.findByTag("validation");
-        List<YamlConfigMetadata> baseRulesConfigs = catalogService.findByTag("base-rules");
-        List<YamlConfigMetadata> reusableConfigs = catalogService.findByTag("reusable");
+        List<ConfigMetadata> validationConfigs = catalogService.findByTag("validation");
+        List<ConfigMetadata> baseRulesConfigs = catalogService.findByTag("base-rules");
+        List<ConfigMetadata> reusableConfigs = catalogService.findByTag("reusable");
         
         logger.info("Found {} configs with 'validation' tag", validationConfigs.size());
         logger.info("Found {} configs with 'base-rules' tag", baseRulesConfigs.size());
@@ -219,7 +219,7 @@ public class CatalogDiscoveryIntegrationTest {
         assertNotNull(reusableConfigs);
         
         // Log found configurations
-        for (YamlConfigMetadata config : validationConfigs) {
+        for (ConfigMetadata config : validationConfigs) {
             logger.debug("Validation config: {}", config.getId());
         }
     }
@@ -235,13 +235,13 @@ public class CatalogDiscoveryIntegrationTest {
         scanAndIndexDirectory(new File(testResourcesPath));
         
         // Search for configurations by author
-        List<YamlConfigMetadata> demoConfigs = catalogService.findByAuthor("apex.demo@company.com");
+        List<ConfigMetadata> demoConfigs = catalogService.findByAuthor("apex.demo@company.com");
         
         logger.info("Found {} configs by author 'apex.demo@company.com'", demoConfigs.size());
         assertNotNull(demoConfigs);
         
         // Verify all results have the correct author
-        for (YamlConfigMetadata config : demoConfigs) {
+        for (ConfigMetadata config : demoConfigs) {
             assertEquals("apex.demo@company.com", config.getAuthor());
             logger.debug("Config by author: id={}, name={}", config.getId(), config.getName());
         }
@@ -257,10 +257,10 @@ public class CatalogDiscoveryIntegrationTest {
         // Index sample files
         scanAndIndexDirectory(new File(testResourcesPath));
         
-        // Search by different types (actual types from YamlContentAnalyzer)
-        List<YamlConfigMetadata> ruleConfigs = catalogService.findByType("rules");
-        List<YamlConfigMetadata> enrichmentConfigs = catalogService.findByType("enrichments");
-        List<YamlConfigMetadata> scenarioConfigs = catalogService.findByType("scenario");
+        // Search by different types (actual types from ContentAnalyzer)
+        List<ConfigMetadata> ruleConfigs = catalogService.findByType("rules");
+        List<ConfigMetadata> enrichmentConfigs = catalogService.findByType("enrichments");
+        List<ConfigMetadata> scenarioConfigs = catalogService.findByType("scenario");
 
         logger.info("Found {} rules files", ruleConfigs.size());
         logger.info("Found {} enrichments files", enrichmentConfigs.size());
@@ -271,7 +271,7 @@ public class CatalogDiscoveryIntegrationTest {
         assertNotNull(scenarioConfigs);
 
         // Verify type consistency
-        for (YamlConfigMetadata config : ruleConfigs) {
+        for (ConfigMetadata config : ruleConfigs) {
             assertEquals("rules", config.getType());
         }
     }
@@ -295,9 +295,9 @@ public class CatalogDiscoveryIntegrationTest {
         });
 
         // Search by specific business domains that we know exist from graph-100 files
-        List<YamlConfigMetadata> tradeValidation = catalogService.findByMetadataAttribute("business-domain", "Trade Validation");
-        List<YamlConfigMetadata> dataEnrichment = catalogService.findByMetadataAttribute("business-domain", "Data Enrichment");
-        List<YamlConfigMetadata> tradeProcessing = catalogService.findByMetadataAttribute("business-domain", "Trade Processing");
+        List<ConfigMetadata> tradeValidation = catalogService.findByMetadataAttribute("business-domain", "Trade Validation");
+        List<ConfigMetadata> dataEnrichment = catalogService.findByMetadataAttribute("business-domain", "Data Enrichment");
+        List<ConfigMetadata> tradeProcessing = catalogService.findByMetadataAttribute("business-domain", "Trade Processing");
 
         logger.info("\n=== Business Domain Search Results ===");
         logger.info("Found {} configs in 'Trade Validation' business domain", tradeValidation.size());
@@ -331,51 +331,51 @@ public class CatalogDiscoveryIntegrationTest {
         logger.info("\n=== Comprehensive Search Tests ===");
 
         // Search by ID fragment
-        List<YamlConfigMetadata> idSearch = catalogService.search("graph100-rules");
+        List<ConfigMetadata> idSearch = catalogService.search("graph100-rules");
         logger.info("Search 'graph100-rules' (ID): {} results", idSearch.size());
         assertTrue(idSearch.size() > 0, "Should find configs with 'graph100-rules' in ID");
 
         // Search by type
-        List<YamlConfigMetadata> typeSearch = catalogService.search("scenario");
+        List<ConfigMetadata> typeSearch = catalogService.search("scenario");
         logger.info("Search 'scenario' (type): {} results", typeSearch.size());
         assertTrue(typeSearch.size() > 0, "Should find configs with 'scenario' in type");
 
         // Search by tag
-        List<YamlConfigMetadata> tagSearch = catalogService.search("validation");
+        List<ConfigMetadata> tagSearch = catalogService.search("validation");
         logger.info("Search 'validation' (tag): {} results", tagSearch.size());
         assertTrue(tagSearch.size() > 0, "Should find configs with 'validation' tag");
 
         // Search by category
-        List<YamlConfigMetadata> categorySearch = catalogService.search("Trade Processing");
+        List<ConfigMetadata> categorySearch = catalogService.search("Trade Processing");
         logger.info("Search 'Trade Processing' (category): {} results", categorySearch.size());
         assertTrue(categorySearch.size() > 0, "Should find configs in 'Trade Processing' category");
 
         // Search by author
-        List<YamlConfigMetadata> authorSearch = catalogService.search("apex.demo");
+        List<ConfigMetadata> authorSearch = catalogService.search("apex.demo");
         logger.info("Search 'apex.demo' (author): {} results", authorSearch.size());
         assertTrue(authorSearch.size() > 0, "Should find configs by 'apex.demo' author");
 
         // Search by description
-        List<YamlConfigMetadata> descSearch = catalogService.search("enrichment");
+        List<ConfigMetadata> descSearch = catalogService.search("enrichment");
         logger.info("Search 'enrichment' (description): {} results", descSearch.size());
         assertTrue(descSearch.size() > 0, "Should find configs with 'enrichment' in description");
 
         // Search by path
-        List<YamlConfigMetadata> pathSearch = catalogService.search("graph-100");
+        List<ConfigMetadata> pathSearch = catalogService.search("graph-100");
         logger.info("Search 'graph-100' (path): {} results", pathSearch.size());
         assertTrue(pathSearch.size() > 0, "Should find configs with 'graph-100' in path");
 
         // Search by dependency
-        List<YamlConfigMetadata> depSearch = catalogService.search("30-rules-a.yaml");
+        List<ConfigMetadata> depSearch = catalogService.search("30-rules-a.yaml");
         logger.info("Search '30-rules-a.yaml' (dependency): {} results", depSearch.size());
 
         // Verify search is case-insensitive
-        List<YamlConfigMetadata> upperSearch = catalogService.search("VALIDATION");
-        List<YamlConfigMetadata> lowerSearch = catalogService.search("validation");
+        List<ConfigMetadata> upperSearch = catalogService.search("VALIDATION");
+        List<ConfigMetadata> lowerSearch = catalogService.search("validation");
         assertEquals(upperSearch.size(), lowerSearch.size(), "Search should be case-insensitive");
 
         // Empty query should return empty list
-        List<YamlConfigMetadata> emptySearch = catalogService.search("");
+        List<ConfigMetadata> emptySearch = catalogService.search("");
         assertEquals(0, emptySearch.size(), "Empty query should return no results");
 
         logger.info("\n=== Search Summary ===");
@@ -505,13 +505,13 @@ public class CatalogDiscoveryIntegrationTest {
         scanAndIndexDirectory(new File(testResourcesPath));
         
         // Find unused configurations
-        List<YamlConfigMetadata> unusedConfigs = catalogService.findUnused();
+        List<ConfigMetadata> unusedConfigs = catalogService.findUnused();
         
         logger.info("Found {} unused/orphaned configurations", unusedConfigs.size());
         assertNotNull(unusedConfigs);
         
         // Log unused configurations
-        for (YamlConfigMetadata config : unusedConfigs) {
+        for (ConfigMetadata config : unusedConfigs) {
             assertTrue(config.isOrphaned(), "Unused config should be marked as orphaned");
             logger.debug("Unused config: id={}, path={}", config.getId(), config.getPath());
         }
@@ -528,13 +528,13 @@ public class CatalogDiscoveryIntegrationTest {
         scanAndIndexDirectory(new File(testResourcesPath));
         
         // Find critical configurations
-        List<YamlConfigMetadata> criticalConfigs = catalogService.findCritical();
+        List<ConfigMetadata> criticalConfigs = catalogService.findCritical();
         
         logger.info("Found {} critical configurations", criticalConfigs.size());
         assertNotNull(criticalConfigs);
         
         // Verify all results are marked as critical
-        for (YamlConfigMetadata config : criticalConfigs) {
+        for (ConfigMetadata config : criticalConfigs) {
             assertTrue(config.isCritical(), "Critical config should be marked as critical");
             logger.debug("Critical config: id={}, path={}", config.getId(), config.getPath());
         }
@@ -551,10 +551,10 @@ public class CatalogDiscoveryIntegrationTest {
         scanAndIndexDirectory(new File(testResourcesPath));
         
         // Query by different health score ranges
-        List<YamlConfigMetadata> excellentHealth = catalogService.findByHealthScore(90, 100);
-        List<YamlConfigMetadata> goodHealth = catalogService.findByHealthScore(75, 89);
-        List<YamlConfigMetadata> fairHealth = catalogService.findByHealthScore(50, 74);
-        List<YamlConfigMetadata> poorHealth = catalogService.findByHealthScore(0, 49);
+        List<ConfigMetadata> excellentHealth = catalogService.findByHealthScore(90, 100);
+        List<ConfigMetadata> goodHealth = catalogService.findByHealthScore(75, 89);
+        List<ConfigMetadata> fairHealth = catalogService.findByHealthScore(50, 74);
+        List<ConfigMetadata> poorHealth = catalogService.findByHealthScore(0, 49);
         
         logger.info("Excellent health (90-100): {} configs", excellentHealth.size());
         logger.info("Good health (75-89): {} configs", goodHealth.size());

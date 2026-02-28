@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.enrichmentgroups;
 
-import dev.mars.apex.core.config.exception.YamlConfigurationException;
+import dev.mars.apex.core.config.exception.ConfigurationException;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
@@ -23,13 +23,13 @@ public class SingularEnrichmentGroupReferenceTest extends DemoTestBase {
 
     @Test
     @DisplayName("RulesEngine processes singular enrichment-group reference")
-    void testSingularEnrichmentGroupReference() throws YamlConfigurationException {
+    void testSingularEnrichmentGroupReference() throws ConfigurationException {
         logger.info("Testing RulesEngine.evaluate() with singular enrichment-group reference");
 
         YamlRuleConfiguration config;
         try {
             config = yamlLoader.loadFromFile(CONFIG_PATH);
-        } catch (YamlConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("Failed to load YAML: " + e.getMessage());
             fail("Failed to load YAML: " + e.getMessage());
             return;

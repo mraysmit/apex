@@ -17,8 +17,8 @@ package dev.mars.apex.yaml.manager;
  */
 
 import dev.mars.apex.yaml.manager.model.TreeNode;
-import dev.mars.apex.yaml.manager.model.YamlContentSummary;
-import dev.mars.apex.yaml.manager.service.YamlContentAnalyzer;
+import dev.mars.apex.yaml.manager.model.ContentSummary;
+import dev.mars.apex.yaml.manager.service.ContentAnalyzer;
 
 /**
  * Standalone runner to display console visualization.
@@ -27,7 +27,7 @@ import dev.mars.apex.yaml.manager.service.YamlContentAnalyzer;
 public class RunConsoleVisualization {
 
     public static void main(String[] args) {
-        YamlContentAnalyzer analyzer = new YamlContentAnalyzer();
+        ContentAnalyzer analyzer = new ContentAnalyzer();
 
         System.out.println("\n" + "=".repeat(100));
         System.out.println("APEX YAML DEPENDENCY TREE - CONSOLE VISUALIZATION WITH CONTENT SUMMARIES");
@@ -42,16 +42,16 @@ public class RunConsoleVisualization {
         TreeNode complianceRules = new TreeNode("src/test/resources/apex-yaml-samples/compliance-rules.yaml", 1);
 
         System.out.println("Analyzing: trade-validation-rules.yaml");
-        YamlContentSummary validationSummary = analyzer.analyzYamlContent(tradeValidation.getName());
+        ContentSummary validationSummary = analyzer.analyzYamlContent(tradeValidation.getName());
         System.out.println("  [OK] Found: " + validationSummary.getRuleGroupCount() + " rule groups, " + 
                           validationSummary.getRuleCount() + " rules");
 
         System.out.println("Analyzing: trade-enrichment.yaml");
-        YamlContentSummary enrichmentSummary = analyzer.analyzYamlContent(tradeEnrichment.getName());
+        ContentSummary enrichmentSummary = analyzer.analyzYamlContent(tradeEnrichment.getName());
         System.out.println("  [OK] Found: " + enrichmentSummary.getEnrichmentCount() + " enrichments");
 
         System.out.println("Analyzing: compliance-rules.yaml");
-        YamlContentSummary complianceSummary = analyzer.analyzYamlContent(complianceRules.getName());
+        ContentSummary complianceSummary = analyzer.analyzYamlContent(complianceRules.getName());
         System.out.println("  [OK] Found: " + complianceSummary.getRuleGroupCount() + " rule groups, " + 
                           complianceSummary.getRuleCount() + " rules");
 
@@ -111,7 +111,7 @@ public class RunConsoleVisualization {
         }
     }
 
-    private static void printContentSummary(YamlContentSummary summary, String prefix, boolean isLast) {
+    private static void printContentSummary(ContentSummary summary, String prefix, boolean isLast) {
         String summaryPrefix = prefix + (isLast ? "    " : "│   ");
         
         StringBuilder sb = new StringBuilder();
@@ -164,7 +164,7 @@ public class RunConsoleVisualization {
         }
     }
 
-    private static void printDetailedSummary(String name, YamlContentSummary summary) {
+    private static void printDetailedSummary(String name, ContentSummary summary) {
         System.out.println("\n" + name + ":");
         System.out.println("  File Type: " + summary.getFileType());
         System.out.println("  ID: " + summary.getId());

@@ -17,9 +17,9 @@ package dev.mars.apex.core.util;
  */
 
 
-import dev.mars.apex.core.config.validation.YamlMetadataValidator;
-import dev.mars.apex.core.config.validation.YamlValidationResult;
-import dev.mars.apex.core.config.validation.YamlValidationSummary;
+import dev.mars.apex.core.config.validation.MetadataValidator;
+import dev.mars.apex.core.config.validation.ValidationResult;
+import dev.mars.apex.core.config.validation.ValidationSummary;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -45,7 +45,7 @@ class YamlValidationIntegrationTest {
     @Test
     void testValidateActualProjectFiles() {
         // Use actual existing test files
-        YamlMetadataValidator validator = new YamlMetadataValidator(
+        MetadataValidator validator = new MetadataValidator(
             "../apex-demo/src/test/java/dev/mars/apex/demo/scenario");
         
         // Test files that actually exist in the project and are known to be valid
@@ -60,7 +60,7 @@ class YamlValidationIntegrationTest {
         System.out.println("=== YAML Validation Integration Test ===");
         System.out.println("Testing actual project files for proper metadata...\n");
         
-        YamlValidationSummary summary = validator.validateFiles(filesToTest);
+        ValidationSummary summary = validator.validateFiles(filesToTest);
         
         // Print results
         System.out.println("Validation Results:");
@@ -73,7 +73,7 @@ class YamlValidationIntegrationTest {
         
         // Show detailed results
         System.out.println("\nDetailed Results:");
-        for (YamlValidationResult result : summary.getResults()) {
+        for (ValidationResult result : summary.getResults()) {
             String status = result.getStatus();
             String indicator = switch (status) {
                 case "VALID" -> "[OK]";
@@ -114,7 +114,7 @@ class YamlValidationIntegrationTest {
     @Test
     void testValidateSpecificScenarioFiles() {
         // Use actual existing test files, not non-existent production files
-        YamlMetadataValidator validator = new YamlMetadataValidator(
+        MetadataValidator validator = new MetadataValidator(
             "../apex-demo/src/test/java/dev/mars/apex/demo/scenario");
         
         // Test actual scenario files that exist and are valid
@@ -132,7 +132,7 @@ class YamlValidationIntegrationTest {
         for (String scenarioFile : scenarioFiles) {
             System.out.println("Validating: " + scenarioFile);
             
-            YamlValidationResult result = validator.validateFile(scenarioFile);
+            ValidationResult result = validator.validateFile(scenarioFile);
             
             if (result.isValid()) {
                 System.out.println("  [OK] VALID");

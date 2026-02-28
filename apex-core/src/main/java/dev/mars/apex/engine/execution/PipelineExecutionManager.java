@@ -18,7 +18,7 @@ import dev.mars.apex.core.service.data.external.manager.ExternalDataSourceManage
 import dev.mars.apex.core.service.data.external.registry.DataSourceRegistry;
 import dev.mars.apex.engine.core.ExpressionEvaluatorService;
 import dev.mars.apex.engine.execution.RuleGroupEvaluationService;
-import dev.mars.apex.core.service.enrichment.YamlEnrichmentProcessor;
+import dev.mars.apex.core.service.enrichment.EnrichmentProcessor;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +69,7 @@ public class PipelineExecutionManager {
     private final RuleGroupEvaluationService ruleGroupEvaluationService;
     
     private PipelineExecutor pipelineExecutor; // Lazy-initialized
-    private YamlEnrichmentProcessor enrichmentProcessor; // Re-initialized with data sources
+    private EnrichmentProcessor enrichmentProcessor; // Re-initialized with data sources
 
     /**
      * Create a new PipelineExecutionManager.
@@ -108,8 +108,8 @@ public class PipelineExecutionManager {
      * @param yamlConfig The YAML configuration containing data source and sink definitions
      * @return Updated enrichment processor if data sources were initialized, null otherwise
      */
-    public YamlEnrichmentProcessor initializePipelineComponents(YamlRuleConfiguration yamlConfig) {
-        YamlEnrichmentProcessor updatedProcessor = null;
+    public EnrichmentProcessor initializePipelineComponents(YamlRuleConfiguration yamlConfig) {
+        EnrichmentProcessor updatedProcessor = null;
         
         try {
             // Initialize data sources using the unified DataSourceRegistry
@@ -132,7 +132,7 @@ public class PipelineExecutionManager {
                 // Re-initialize enrichment processor with data source registry
                 // This ensures enrichments can reuse existing data sources instead of creating duplicates
                 logger.debug("Re-initializing enrichment processor with {} data sources from registry", dataSources.size());
-                updatedProcessor = new YamlEnrichmentProcessor(
+                updatedProcessor = new EnrichmentProcessor(
                     new LookupServiceRegistry(), 
                     this.evaluatorService,
                     this.dataSources,

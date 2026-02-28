@@ -19,7 +19,7 @@
 package dev.mars.apex.sync.schema;
 
 import dev.mars.apex.sync.SyncTestBase;
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.ExecutionStep;
@@ -102,7 +102,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ReadSchemaDatabaseEnumerationPipelineStageTest extends SyncTestBase {
 
     private static final Logger logger = LoggerFactory.getLogger(ReadSchemaDatabaseEnumerationPipelineStageTest.class);
-    private final YamlConfigurationLoader yamlLoader = new YamlConfigurationLoader();
+    private final ConfigurationLoader yamlLoader = new ConfigurationLoader();
     private RulesEngine rulesEngine;
     private Connection testConnection;
     private String dbName;  // Unique per test instance

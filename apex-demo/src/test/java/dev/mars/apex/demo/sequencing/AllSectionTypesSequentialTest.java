@@ -1,6 +1,6 @@
 package dev.mars.apex.demo.sequencing;
 
-import dev.mars.apex.core.config.loader.YamlConfigurationLoader;
+import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.core.config.model.YamlRuleConfiguration;
 import dev.mars.apex.engine.core.RulesEngine;
 import dev.mars.apex.engine.model.RuleResult;
@@ -52,7 +52,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class AllSectionTypesSequentialTest extends DemoTestBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AllSectionTypesSequentialTest.class);
-    private final YamlConfigurationLoader yamlLoader = new YamlConfigurationLoader();
+    private final ConfigurationLoader yamlLoader = new ConfigurationLoader();
 
     @Test
     @DisplayName("Test 1: Verify all section types loaded correctly")

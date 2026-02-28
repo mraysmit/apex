@@ -16,9 +16,9 @@ package dev.mars.apex.rest.service;
  * limitations under the License.
  */
 
-import dev.mars.apex.core.util.YamlDependencyAnalyzer;
-import dev.mars.apex.core.util.YamlDependencyGraph;
-import dev.mars.apex.core.util.YamlNode;
+import dev.mars.apex.core.util.DependencyAnalyzer;
+import dev.mars.apex.core.util.DependencyGraph;
+import dev.mars.apex.core.util.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
  * generating dependency trees, and performing validation operations.
  * 
  * This service acts as a bridge between the REST API layer and the
- * apex-core YamlDependencyAnalyzer.
+ * apex-core DependencyAnalyzer.
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-10-22
@@ -55,7 +55,7 @@ public class DependencyAnalysisService {
     private static final Logger logger = LoggerFactory.getLogger(DependencyAnalysisService.class);
 
     // Cache for dependency graphs to avoid re-analysis
-    private YamlDependencyGraph currentGraph;
+    private DependencyGraph currentGraph;
     private String currentBasePath;
 
     /**
@@ -70,7 +70,7 @@ public class DependencyAnalysisService {
 
         try {
             // Analyze dependencies using apex-core
-            YamlDependencyGraph graph = analyzeDependenciesInternal(rootFile);
+            DependencyGraph graph = analyzeDependenciesInternal(rootFile);
             
             // Convert to tree structure
             Map<String, Object> treeNode = convertToTreeNode(graph, rootFile);
@@ -108,7 +108,7 @@ public class DependencyAnalysisService {
 
         try {
             // Analyze dependencies using apex-core
-            YamlDependencyGraph graph = analyzeDependenciesInternal(filePath);
+            DependencyGraph graph = analyzeDependenciesInternal(filePath);
             
             // Calculate metrics
             Map<String, Object> metrics = calculateMetrics(graph);
@@ -146,7 +146,7 @@ public class DependencyAnalysisService {
 
         try {
             // Analyze dependencies
-            YamlDependencyGraph graph = analyzeDependenciesInternal(rootFile);
+            DependencyGraph graph = analyzeDependenciesInternal(rootFile);
             
             // Perform validation
             Map<String, Object> validation = performValidation(graph);
@@ -183,7 +183,7 @@ public class DependencyAnalysisService {
             throw new RuntimeException("No dependency graph available. Please analyze dependencies first.");
         }
 
-        YamlNode node = currentGraph.getNode(filePath);
+        Node node = currentGraph.getNode(filePath);
         if (node == null) {
             throw new RuntimeException("File not found in dependency graph: " + filePath);
         }
@@ -262,24 +262,24 @@ public class DependencyAnalysisService {
     /**
      * Internal method to analyze dependencies using apex-core.
      */
-    private YamlDependencyGraph analyzeDependenciesInternal(String rootFile) {
+    private DependencyGraph analyzeDependenciesInternal(String rootFile) {
         try {
             Path rootPath = Paths.get(rootFile);
             boolean isAbsolute = rootPath.isAbsolute();
             
-            YamlDependencyAnalyzer analyzer;
+            DependencyAnalyzer analyzer;
             String analyzerRootArg;
             
             if (isAbsolute) {
                 this.currentBasePath = rootPath.getParent().toString();
-                analyzer = new YamlDependencyAnalyzer(this.currentBasePath);
+                analyzer = new DependencyAnalyzer(this.currentBasePath);
                 analyzerRootArg = rootPath.getFileName().toString();
                 logger.debug("Using absolute path analysis with basePath: {} and root: {}", 
                     this.currentBasePath, analyzerRootArg);
             } else {
                 // For relative paths, use current working directory
                 this.currentBasePath = System.getProperty("user.dir");
-                analyzer = new YamlDependencyAnalyzer(this.currentBasePath);
+                analyzer = new DependencyAnalyzer(this.currentBasePath);
                 analyzerRootArg = rootFile;
                 logger.debug("Using relative path analysis with basePath: {} and root: {}", 
                     this.currentBasePath, analyzerRootArg);
@@ -301,11 +301,11 @@ public class DependencyAnalysisService {
     }
 
     /**
-     * Convert YamlDependencyGraph to tree node structure.
+     * Convert DependencyGraph to tree node structure.
      */
-    private Map<String, Object> convertToTreeNode(YamlDependencyGraph graph, String rootFile) {
+    private Map<String, Object> convertToTreeNode(DependencyGraph graph, String rootFile) {
         // First, try to find the root node using the exact path
-        YamlNode rootNode = graph.getNode(rootFile);
+        Node rootNode = graph.getNode(rootFile);
 
         // If not found, try to find it using the graph's root file
         if (rootNode == null) {
@@ -317,7 +317,7 @@ public class DependencyAnalysisService {
         // If still not found, try to find any node that matches the filename
         if (rootNode == null) {
             String fileName = rootFile.substring(rootFile.lastIndexOf('/') + 1);
-            for (YamlNode node : graph.getAllNodes()) {
+            for (Node node : graph.getAllNodes()) {
                 if (node.getFilePath().endsWith(fileName)) {
                     rootNode = node;
                     logger.debug("Found root node by filename match: '{}'", node.getFilePath());
@@ -340,9 +340,9 @@ public class DependencyAnalysisService {
     }
 
     /**
-     * Recursively convert YamlNode to tree structure.
+     * Recursively convert Node to tree structure.
      */
-    private Map<String, Object> convertNodeToTree(YamlNode node, YamlDependencyGraph graph, Set<String> visited) {
+    private Map<String, Object> convertNodeToTree(Node node, DependencyGraph graph, Set<String> visited) {
         Map<String, Object> treeNode = new HashMap<>();
         treeNode.put("name", node.getFilePath());
         treeNode.put("path", node.getFilePath());
@@ -366,7 +366,7 @@ public class DependencyAnalysisService {
                 node.getFilePath(), node.getReferencedFiles().size(), node.getReferencedFiles());
 
             for (String referencedFile : node.getReferencedFiles()) {
-                YamlNode childNode = graph.getNode(referencedFile);
+                Node childNode = graph.getNode(referencedFile);
                 if (childNode != null) {
                     logger.debug("Converting child node: '{}'", referencedFile);
                     children.add(convertNodeToTree(childNode, graph, new HashSet<>(visited)));
@@ -397,7 +397,7 @@ public class DependencyAnalysisService {
     /**
      * Calculate metrics for the dependency graph.
      */
-    private Map<String, Object> calculateMetrics(YamlDependencyGraph graph) {
+    private Map<String, Object> calculateMetrics(DependencyGraph graph) {
         Map<String, Object> metrics = new HashMap<>();
         
         metrics.put("totalFiles", graph.getTotalFiles());
@@ -413,7 +413,7 @@ public class DependencyAnalysisService {
     /**
      * Perform validation on the dependency graph.
      */
-    private Map<String, Object> performValidation(YamlDependencyGraph graph) {
+    private Map<String, Object> performValidation(DependencyGraph graph) {
         Map<String, Object> validation = new HashMap<>();
         
         validation.put("isValid", graph.getStatistics().isHealthy());

@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.mars.apex.playground.model.PlaygroundRequest;
 import dev.mars.apex.playground.model.PlaygroundResponse;
 
-import dev.mars.apex.playground.model.YamlValidationResponse;
+import dev.mars.apex.playground.model.ValidationResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,14 +106,14 @@ class ComprehensiveIntegrationTest {
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
 
         // When
-        ResponseEntity<YamlValidationResponse> response = restTemplate.postForEntity(
-            getBaseUrl() + "/validate", entity, YamlValidationResponse.class);
+        ResponseEntity<ValidationResponse> response = restTemplate.postForEntity(
+            getBaseUrl() + "/validate", entity, ValidationResponse.class);
 
         // Then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         
-        YamlValidationResponse validationResponse = response.getBody();
+        ValidationResponse validationResponse = response.getBody();
         assertTrue(validationResponse.isValid(), "YAML should be valid");
         assertEquals("YAML configuration is valid", validationResponse.getMessage());
         
@@ -161,14 +161,14 @@ class ComprehensiveIntegrationTest {
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
 
         // When
-        ResponseEntity<YamlValidationResponse> response = restTemplate.postForEntity(
-            getBaseUrl() + "/validate", entity, YamlValidationResponse.class);
+        ResponseEntity<ValidationResponse> response = restTemplate.postForEntity(
+            getBaseUrl() + "/validate", entity, ValidationResponse.class);
 
         // Then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         
-        YamlValidationResponse validationResponse = response.getBody();
+        ValidationResponse validationResponse = response.getBody();
         assertFalse(validationResponse.isValid(), "Invalid YAML should be detected");
         // Message might vary depending on parser exception
         assertTrue(validationResponse.getMessage().contains("Validation failed") || 
