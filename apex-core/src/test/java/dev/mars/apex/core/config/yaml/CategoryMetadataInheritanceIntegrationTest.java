@@ -18,20 +18,12 @@ package dev.mars.apex.core.config.yaml;
 import dev.mars.apex.core.config.RuleFactory;
 import dev.mars.apex.core.config.model.*;
 import dev.mars.apex.core.config.loader.*;
-import dev.mars.apex.core.config.exception.*;
-import dev.mars.apex.core.config.service.*;
-
 import dev.mars.apex.engine.model.Rule;
-import dev.mars.apex.engine.model.Category;
 import dev.mars.apex.engine.model.metadata.RuleMetadata;
 
 import org.junit.jupiter.api.BeforeEach;
 
-import dev.mars.apex.core.test.extension.ColoredTestOutputExtension;
-import dev.mars.apex.core.test.extension.TestClassLoggingExtension;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
