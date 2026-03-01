@@ -1,33 +1,33 @@
 # APEX Rule Processing Optimisations — February 2026
 
-**Status:** � ALL PHASES COMPLETE (7-11 + DECOMPOSITION)  
+**Status:** ✅ ALL PHASES COMPLETE (7-11 + DECOMPOSITION)  
 **Branch:** `refactor/rules-engine-decomposition`  
-**Last Updated:** February 28, 2026  
-**Test Baseline:** apex-core: 2,873+ tests, apex-demo: 908 tests — 0 failures, 0 errors  
+**Last Updated:** March 1, 2026  
+**Test Baseline:** apex-core: 2,905 tests, apex-demo: 843 tests — 0 failures, 0 errors  
 **Predecessor:** `APEX_RULE_PROCESSING_OPTIMISATIONS_JAN_2026_COMPLETE.md` (6 phases, all complete)
 
 ## Overview
 
-Following the completion of all 6 phases from the January 2026 optimisation effort, a deep analysis of the post-refactored codebase across 11 classes (~6,012 lines) reveals further opportunities for efficiency improvements. These range from O(n×m) performance bugs in hot paths to ~150 lines of verified dead code and structural hygiene improvements.
+Following the completion of all 6 phases from the January 2026 optimisation effort, a deep analysis of the post-refactored codebase across 11 classes (~6,012 lines) revealed further opportunities for efficiency improvements. These ranged from O(n×m) performance bugs in hot paths to ~150 lines of verified dead code and structural hygiene improvements.
 
-## Pipeline Classes (current state post-Jan 2026 refactoring)
+## Pipeline Classes (current state post-Feb 2026 refactoring)
 
 | Class | Lines | Package | Responsibility |
 |---|---|---|---|
-| `RulesEngine` | 960 | `engine.core` | Public API, factory methods, delegation, sequential orchestration |
-| `UnifiedRuleEvaluator` | ~~877~~ 481 | `engine.core` | Canonical SpEL evaluation, delegates to collaborators for error recovery, message templating, field mapping |
-| `MessageTemplateResolver` | 117 | `engine.core` | Resolves `{{#expr}}` and `#{expr}` placeholders in rule messages (extracted from UnifiedRuleEvaluator) |
-| `FieldMappingProcessor` | 148 | `engine.core` | Evaluates success/error codes and applies map-to-field SpEL mappings (extracted from UnifiedRuleEvaluator) |
-| `ErrorRecoveryHandler` | 261 | `engine.core` | Severity-based error recovery, enhanced error messages, error code classification (extracted from UnifiedRuleEvaluator) |
-| `ExpressionEvaluatorService` | 227 | `engine.core` | Low-level SpEL parsing, context creation, used by REST API |
-| `SequentialProcessor` | 615 | `engine.execution` | Document-order orchestration, item/section routing, index builders |
-| `RuleGroup` | 426 | `engine.model` | Group AND/OR logic (evaluation delegated to `RuleGroupEvaluationService`) |
-| `RuleResult` | 775 | `engine.model` | Result object — 1 private constructor (Builder), 25 factory methods |
-| `RuleGroupExecutor` | 250 | `engine.execution` | Thin wrapper dispatching to RuleGroupEvaluationService/UnifiedRuleEvaluator |
-| `RuleChainExecutor` | 352 | `engine.execution` | Chain pattern routing via `UnifiedRuleEvaluator` |
-| `EnrichmentGroupExecutor` | 268 | `engine.execution` | Enrichment group logic (parallel/sequential) |
-| `YamlRuleFactory` | 1,128 | `core.config` | Rule/group construction from YAML configuration |
-| `EnrichmentGroupFactory` | 277 | `core.service.enrichment` | Enrichment group construction from YAML configuration |
+| `RulesEngine` | 1,030 | `engine.core` | Public API, factory methods, delegation, sequential orchestration |
+| `UnifiedRuleEvaluator` | 536 | `engine.core` | Canonical SpEL evaluation, delegates to collaborators for error recovery, message templating, field mapping |
+| `MessageTemplateResolver` | 126 | `engine.core` | Resolves `{{#expr}}` and `#{expr}` placeholders in rule messages (extracted from UnifiedRuleEvaluator) |
+| `FieldMappingProcessor` | 169 | `engine.core` | Evaluates success/error codes and applies map-to-field SpEL mappings (extracted from UnifiedRuleEvaluator) |
+| `ErrorRecoveryHandler` | 302 | `engine.core` | Severity-based error recovery, enhanced error messages, error code classification (extracted from UnifiedRuleEvaluator) |
+| `ExpressionEvaluatorService` | 255 | `engine.core` | Low-level SpEL parsing, context creation, used by REST API |
+| `SequentialProcessor` | 691 | `engine.execution` | Document-order orchestration, item/section routing, index builders |
+| `RuleGroup` | 476 | `engine.model` | Group AND/OR logic (evaluation delegated to `RuleGroupEvaluationService`) |
+| `RuleResult` | 854 | `engine.model` | Result object — 1 private constructor (Builder), 25 factory methods |
+| `RuleGroupExecutor` | 274 | `engine.execution` | Thin wrapper dispatching to RuleGroupEvaluationService/UnifiedRuleEvaluator |
+| `RuleChainExecutor` | 373 | `engine.execution` | Chain pattern routing via `UnifiedRuleEvaluator` |
+| `EnrichmentGroupExecutor` | 297 | `engine.execution` | Enrichment group logic (parallel/sequential) |
+| `RuleFactory` | 1,283 | `core.config` | Rule/group construction from YAML configuration |
+| `EnrichmentGroupFactory` | 321 | `core.config` | Enrichment group construction from YAML configuration |
 
 ---
 
@@ -84,7 +84,7 @@ for (YamlEnrichmentGroup yamlGroup : yamlConfig.getEnrichmentGroups()) {
 
 Both accumulate `enrichedData`, but the `EvaluationContext` overload stops evaluating after the first significant result, while the `Map` overload continues through all rules. A caller switching from one overload to the other would get different results with no compile-time warning.
 
-This was identified as Problem 8 in the Jan 2026 document but not addressed because it's a correctness concern rather than a structural refactoring.
+This was identified as Problem 8 in the Jan 2026 document (`APEX_RULE_PROCESSING_OPTIMISATIONS_JAN_2026_COMPLETE.md`, Problem 8) but not addressed because it's a correctness concern rather than a structural refactoring. (Note: this is distinct from Problem 8 in *this* document, which concerns SpelExpressionParser instances.)
 
 ## Problem 3: Dead Code — Verified No Callers
 
@@ -154,7 +154,7 @@ This is a candidate for decomposition into smaller, focused methods (e.g., `atte
 | `ScenarioRegistryManager` | Private static |
 | `ErrorRecoveryService` | Private static |
 | `PipelineExecutor` | Instance field |
-| `YamlEnrichmentProcessor` | Instance field |
+| `EnrichmentProcessor` | Instance field |
 | `ExpressionEvaluationService` (REST) | Instance field |
 
 A single shared static instance (or injection via constructor) would reduce allocations and make the codebase clearer about parser lifecycle.
@@ -237,7 +237,9 @@ Remove verified dead code with zero callers.
 4. ✅ Fixed `RuleResult` Javadoc: replaced duplicate block referencing "PeeGeeQ message queue system" with consolidated Javadoc (781→775)
 5. ✅ Fixed "PeeGeeQ" Javadoc in 8 additional source files: `RuleStatus`, `RuleComplexity`, `RuleBase`, `Validator`, `DataLookup`, `ErrorContextService`, `RecordMatcher`, `ErrorRecoveryService`
 
-**Net result:** −88 lines removed from 4 files. 9 stale "PeeGeeQ" Javadoc references corrected to "APEX Rules Engine".
+**Net result:** −88 lines removed from 4 files. 9 stale "PeeGeeQ" Javadoc references corrected to "APEX Rules Engine" in Java source files.
+
+> **Note:** 4 "PeeGeeQ" references remain in shell/PowerShell scripts (`update-java-headers.sh`, `update-java-headers.ps1`, `add-license-headers.sh`) and 1 in `docs-design/design/prompts.txt`. These are build/utility scripts outside the production codebase and were not in scope for this phase.
 
 ### Phase 9: Resolve evaluateRules() Semantic Split ✅
 
@@ -274,7 +276,7 @@ Address remaining code quality items.
 **Solution:**
 1. ✅ Removed `RuleResult.setExecutionPath()` — no callers remain in the codebase. The Builder + `toBuilder()` pattern is the only mutation path.
 2. ✅ Eliminated double defensive copying in `RuleResult`: constructor uses `Collections.unmodifiableMap(new HashMap<>(...))` / `Collections.unmodifiableList(new ArrayList<>(...))` wrappers, getters return fields directly (no second copy). Null inputs default to `Collections.emptyMap()` / `Collections.emptyList()`.
-3. ✅ Cached `YamlTransformationProcessor` as a `private final` field in `SequentialProcessor` (line 71), initialized once in constructor (line 100). Used at line 562 via `transformationProcessor.processTransformationsWithResult()`.
+3. ✅ Cached `TransformationProcessor` as a `private final` field in `SequentialProcessor` (line 71), initialized once in constructor (line 100). Used at line 562 via `transformationProcessor.processTransformationsWithResult()`.
 
 ### Decomposition: UnifiedRuleEvaluator → Focused Collaborators ✅
 
@@ -295,7 +297,18 @@ Decompose the 958-line `UnifiedRuleEvaluator` monolith into three focused collab
 5. ✅ Downgraded 13 `logger.info()` calls to `logger.debug()` in hot evaluation paths (per-rule, per-batch, per-router calls). Recovery logging within `errorRecoveryConfig.isLogRecoveryAttempts()` guards retained at INFO.
 6. ✅ Removed 6 unused imports (`Duration`, `Instant`, `Matcher`, `Pattern`, and constants/patterns moved to collaborators).
 
-**Net result:** UnifiedRuleEvaluator 958→481 lines (−477, −50%). Three new collaborators created. All 3,781 tests pass (2,873 + 908, 0 failures).
+**Net result:** UnifiedRuleEvaluator 958→481 lines (−477, −50%). Three new collaborators created. All 3,748 tests pass (2,905 + 843, 0 failures).
+
+---
+
+## Known Remaining Issues
+
+The following problems were identified in the analysis but intentionally deferred as low-priority:
+
+| Problem | Severity | Status | Notes |
+|---|---|---|---|
+| **#8**: Multiple SpelExpressionParser instances | Low | **Unresolved** | 9 instances across 8 files. `SpelExpressionParser` is thread-safe and stateless; a shared static instance would suffice. Low risk — purely a resource efficiency concern. |
+| **#11**: RuleGroup mutable evaluation state | Low | **Partially addressed** | `RuleGroupEvaluationResult` value object was created and is used by `RuleGroupEvaluationService`/`RuleGroupExecutor`. However, `RuleGroup` itself still carries mutable state fields (`ruleResults`, `groupResult`, `individualRuleResults`). Full cleanup would make `RuleGroup` a pure model/configuration class. |
 
 ---
 
@@ -317,9 +330,11 @@ Phases 7 and 8 are independent and could be executed in parallel. Phase 9 requir
 
 ## Progress Tracker
 
-- [x] **Phase 7: Cache EnrichmentGroupFactory** — ✅ Complete (Feb 26, 2026). Enrichment groups, enrichments, and transformations indexed once per evaluation pass. 2 × O(n×m) factory rebuilds and O(n) linear scans eliminated. SequentialProcessor 655→615, RuleChainExecutor 379→352. Tests: 2,873 + 908 = 3,781, 0 failures.
-- [x] **Phase 8: Remove Dead Code** — ✅ Complete (Feb 26, 2026). Removed `extractVariableName()` (49 lines), `updateMessage()` (32 lines), localised `parser` field, consolidated duplicate Javadoc. Fixed 9 "PeeGeeQ" references across codebase. Net −88 lines. Tests: 2,873 + 908 = 3,781, 0 failures.
-- [x] **Phase 9: Resolve evaluateRules() Split** — ✅ Complete (Feb 27, 2026). Deleted dead `evaluateRules(List<Rule>, EvaluationContext)` overload (0 callers). Only evaluate-all semantics remain. UnifiedRuleEvaluator 922→877 (−45 lines). Tests: 2,873 + 908 = 3,781, 0 failures.
-- [x] **Decomposition: UnifiedRuleEvaluator** — ✅ Complete (Feb 28, 2026). Extracted 3 collaborator classes: `MessageTemplateResolver` (117 lines), `FieldMappingProcessor` (148 lines), `ErrorRecoveryHandler` (261 lines). Downgraded 13 hot-path `logger.info()` → `logger.debug()`. UnifiedRuleEvaluator 958→481 (−477 lines, −50%). Tests: 2,873 + 908 = 3,781, 0 failures.
+- [x] **Phase 7: Cache EnrichmentGroupFactory** — ✅ Complete (Feb 26, 2026). Enrichment groups, enrichments, and transformations indexed once per evaluation pass. 2 × O(n×m) factory rebuilds and O(n) linear scans eliminated. SequentialProcessor 655→615, RuleChainExecutor 379→352.
+- [x] **Phase 8: Remove Dead Code** — ✅ Complete (Feb 26, 2026). Removed `extractVariableName()` (49 lines), `updateMessage()` (32 lines), localised `parser` field, consolidated duplicate Javadoc. Fixed 9 "PeeGeeQ" references in Java source files. Net −88 lines.
+- [x] **Phase 9: Resolve evaluateRules() Split** — ✅ Complete (Feb 27, 2026). Deleted dead `evaluateRules(List<Rule>, EvaluationContext)` overload (0 callers). Only evaluate-all semantics remain. UnifiedRuleEvaluator 922→877 (−45 lines).
+- [x] **Decomposition: UnifiedRuleEvaluator** — ✅ Complete (Feb 28, 2026). Extracted 3 collaborator classes: `MessageTemplateResolver` (117 lines), `FieldMappingProcessor` (148 lines), `ErrorRecoveryHandler` (261 lines). Downgraded 13 hot-path `logger.info()` → `logger.debug()`. UnifiedRuleEvaluator 958→481 (−477 lines, −50%).
 - [x] **Phase 10: Consolidate evaluateYaml** — ✅ Complete (Feb 28, 2026). Extracted `safeEvaluate(Callable, Map)` helper. Both `evaluateYaml()` and `evaluateYamlFile()` reduced to 3-line delegates. ~30 lines of cloned error handling eliminated.
-- [x] **Phase 11: Structural Improvements** — ✅ Complete (Feb 28, 2026). `setExecutionPath()` removed (no callers). Double defensive copying eliminated (`Collections.unmodifiable*` in constructor, direct return in getters). `YamlTransformationProcessor` cached as field in `SequentialProcessor`.
+- [x] **Phase 11: Structural Improvements** — ✅ Complete (Feb 28, 2026). `setExecutionPath()` removed (no callers). Double defensive copying eliminated (`Collections.unmodifiable*` in constructor, direct return in getters). `TransformationProcessor` cached as field in `SequentialProcessor`.
+
+**Final test baseline (March 1, 2026):** apex-core: 2,905 tests, apex-demo: 843 tests = 3,748 total, 0 failures.
