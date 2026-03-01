@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.*;
@@ -60,7 +59,7 @@ public class PipelineExecutor {
         this.dataSinks = new ConcurrentHashMap<>();
         this.pipelineContext = new ConcurrentHashMap<>();
         this.stepResults = new ConcurrentHashMap<>();
-        this.expressionParser = new SpelExpressionParser();
+        this.expressionParser = dev.mars.apex.engine.core.SpelParserHolder.INSTANCE;
         this.schemaReaderService = new SchemaReaderService();
         this.reportGenerator = new SchemaHtmlReportGenerator();
         this.schemaDiffService = new SchemaDiffService();

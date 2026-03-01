@@ -14,7 +14,6 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.SpelEvaluationException;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.List;
@@ -56,7 +55,7 @@ public class UnifiedRuleEvaluator {
      * Create a new UnifiedRuleEvaluator with default components.
      */
     public UnifiedRuleEvaluator() {
-        this.parser = new SpelExpressionParser();
+        this.parser = SpelParserHolder.INSTANCE;
         this.errorRecoveryService = new ErrorRecoveryService();
         this.performanceMonitor = new RulePerformanceMonitor();
         this.errorRecoveryConfig = new ErrorRecoveryConfig();
@@ -91,7 +90,7 @@ public class UnifiedRuleEvaluator {
                                ErrorRecoveryService errorRecoveryService,
                                RulePerformanceMonitor performanceMonitor,
                                ErrorRecoveryConfig errorRecoveryConfig) {
-        this.parser = parser != null ? parser : new SpelExpressionParser();
+        this.parser = parser != null ? parser : SpelParserHolder.INSTANCE;
         this.errorRecoveryService = errorRecoveryService != null ? errorRecoveryService : new ErrorRecoveryService();
         this.performanceMonitor = performanceMonitor != null ? performanceMonitor : new RulePerformanceMonitor();
         this.errorRecoveryConfig = errorRecoveryConfig != null ? errorRecoveryConfig : new ErrorRecoveryConfig();

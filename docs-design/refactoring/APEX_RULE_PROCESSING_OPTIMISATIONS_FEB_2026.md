@@ -1,9 +1,9 @@
 # APEX Rule Processing Optimisations — February 2026
 
-**Status:** ✅ ALL PHASES COMPLETE (7-11 + DECOMPOSITION)  
+**Status:** ✅ ALL PHASES COMPLETE (7-12 + DECOMPOSITION)  
 **Branch:** `refactor/rules-engine-decomposition`  
 **Last Updated:** March 1, 2026  
-**Test Baseline:** apex-core: 2,905 tests, apex-demo: 843 tests — 0 failures, 0 errors  
+**Test Baseline:** apex-core: 2,892 tests, apex-demo: 919 tests — 0 failures, 0 errors  
 **Predecessor:** `APEX_RULE_PROCESSING_OPTIMISATIONS_JAN_2026_COMPLETE.md` (6 phases, all complete)
 
 ## Overview
@@ -14,12 +14,13 @@ Following the completion of all 6 phases from the January 2026 optimisation effo
 
 | Class | Lines | Package | Responsibility |
 |---|---|---|---|
-| `RulesEngine` | 1,030 | `engine.core` | Public API, factory methods, delegation, sequential orchestration |
-| `UnifiedRuleEvaluator` | 536 | `engine.core` | Canonical SpEL evaluation, delegates to collaborators for error recovery, message templating, field mapping |
+| `RulesEngine` | 1,028 | `engine.core` | Public API, factory methods, delegation, sequential orchestration |
+| `UnifiedRuleEvaluator` | 535 | `engine.core` | Canonical SpEL evaluation, delegates to collaborators for error recovery, message templating, field mapping |
 | `MessageTemplateResolver` | 126 | `engine.core` | Resolves `{{#expr}}` and `#{expr}` placeholders in rule messages (extracted from UnifiedRuleEvaluator) |
 | `FieldMappingProcessor` | 169 | `engine.core` | Evaluates success/error codes and applies map-to-field SpEL mappings (extracted from UnifiedRuleEvaluator) |
 | `ErrorRecoveryHandler` | 302 | `engine.core` | Severity-based error recovery, enhanced error messages, error code classification (extracted from UnifiedRuleEvaluator) |
-| `ExpressionEvaluatorService` | 255 | `engine.core` | Low-level SpEL parsing, context creation, used by REST API |
+| `ExpressionEvaluatorService` | 254 | `engine.core` | Low-level SpEL parsing, context creation, used by REST API |
+| `SpelParserHolder` | 49 | `engine.core` | Shared singleton `SpelExpressionParser` instance for the entire system (Phase 12) |
 | `SequentialProcessor` | 691 | `engine.execution` | Document-order orchestration, item/section routing, index builders |
 | `RuleGroup` | 476 | `engine.model` | Group AND/OR logic (evaluation delegated to `RuleGroupEvaluationService`) |
 | `RuleResult` | 854 | `engine.model` | Result object — 1 private constructor (Builder), 25 factory methods |
@@ -303,11 +304,10 @@ Decompose the 958-line `UnifiedRuleEvaluator` monolith into three focused collab
 
 ## Known Remaining Issues
 
-The following problems were identified in the analysis but intentionally deferred as low-priority:
+The following problem was identified in the analysis but intentionally deferred as low-priority:
 
 | Problem | Severity | Status | Notes |
 |---|---|---|---|
-| **#8**: Multiple SpelExpressionParser instances | Low | **Unresolved** | 9 instances across 8 files. `SpelExpressionParser` is thread-safe and stateless; a shared static instance would suffice. Low risk — purely a resource efficiency concern. |
 | **#11**: RuleGroup mutable evaluation state | Low | **Partially addressed** | `RuleGroupEvaluationResult` value object was created and is used by `RuleGroupEvaluationService`/`RuleGroupExecutor`. However, `RuleGroup` itself still carries mutable state fields (`ruleResults`, `groupResult`, `individualRuleResults`). Full cleanup would make `RuleGroup` a pure model/configuration class. |
 
 ---
@@ -321,6 +321,7 @@ The following problems were identified in the analysis but intentionally deferre
 | **Phase 9: Resolve evaluateRules() Split** | Medium | Medium | Medium | None |
 | **Phase 10: Consolidate evaluateYaml** | Low | Low | Small | None |
 | **Phase 11: Structural Improvements** | Low | Low | Small | Phase 8 (dead code first) |
+| **Phase 12: Consolidate SpelExpressionParser** | Low | Low | Small | None |
 
 **Recommended execution order:** Phase 7 → Phase 8 → Phase 9 → Phase 10 → Phase 11
 
@@ -336,5 +337,6 @@ Phases 7 and 8 are independent and could be executed in parallel. Phase 9 requir
 - [x] **Decomposition: UnifiedRuleEvaluator** — ✅ Complete (Feb 28, 2026). Extracted 3 collaborator classes: `MessageTemplateResolver` (117 lines), `FieldMappingProcessor` (148 lines), `ErrorRecoveryHandler` (261 lines). Downgraded 13 hot-path `logger.info()` → `logger.debug()`. UnifiedRuleEvaluator 958→481 (−477 lines, −50%).
 - [x] **Phase 10: Consolidate evaluateYaml** — ✅ Complete (Feb 28, 2026). Extracted `safeEvaluate(Callable, Map)` helper. Both `evaluateYaml()` and `evaluateYamlFile()` reduced to 3-line delegates. ~30 lines of cloned error handling eliminated.
 - [x] **Phase 11: Structural Improvements** — ✅ Complete (Feb 28, 2026). `setExecutionPath()` removed (no callers). Double defensive copying eliminated (`Collections.unmodifiable*` in constructor, direct return in getters). `TransformationProcessor` cached as field in `SequentialProcessor`.
+- [x] **Phase 12: Consolidate SpelExpressionParser** — ✅ Complete (March 1, 2026). Created `SpelParserHolder` with a single shared `public static final ExpressionParser INSTANCE`. Replaced 11 `new SpelExpressionParser()` calls across 8 files. Deleted dead `RulesEngineConfiguration.parser` field. `EnrichmentProcessor` now uses `evaluatorService.getParser()` instead of own parser (field type changed from concrete `SpelExpressionParser` to `ExpressionParser` interface). Removed `SpelExpressionParser` import from 7 files.
 
-**Final test baseline (March 1, 2026):** apex-core: 2,905 tests, apex-demo: 843 tests = 3,748 total, 0 failures.
+**Final test baseline (March 1, 2026):** apex-core: 2,892 tests, apex-demo: 919 tests = 3,811 total, 0 failures.

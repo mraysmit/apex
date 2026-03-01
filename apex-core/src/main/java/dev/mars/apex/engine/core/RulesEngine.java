@@ -29,8 +29,6 @@ import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import dev.mars.apex.core.service.scenario.ScenarioConfiguration;
@@ -162,8 +160,7 @@ public class RulesEngine {
         this.configuration = configuration;
         this.yamlConfig = yamlConfig;
         this.scenarioRegistry = scenarioRegistry;
-        ExpressionParser parser = new SpelExpressionParser();
-        this.evaluatorService = new ExpressionEvaluatorService(parser);
+        this.evaluatorService = new ExpressionEvaluatorService(SpelParserHolder.INSTANCE);
         this.errorRecoveryService = new ErrorRecoveryService();
         this.performanceMonitor = new RulePerformanceMonitor();
         this.scenarioParser = new ScenarioParser();  // Initialize scenario parser
@@ -229,7 +226,7 @@ public class RulesEngine {
         }
 
         logger.info("RulesEngine initialized with configuration: {}", configuration.getClass().getSimpleName());
-        logger.debug("Using parser: {}", parser.getClass().getSimpleName());
+        logger.debug("Using parser: {}", SpelParserHolder.INSTANCE.getClass().getSimpleName());
         logger.debug("Using error recovery service: {}", errorRecoveryService.getClass().getSimpleName());
         logger.debug("Using error recovery config: enabled={}, default-strategy={}",errorRecoveryConfig.isEnabled(), errorRecoveryConfig.getDefaultStrategy());
         logger.debug("Using performance monitor: {}", performanceMonitor.getClass().getSimpleName());

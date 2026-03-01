@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.Map;
@@ -52,7 +51,7 @@ public class ExpressionEvaluatorService {
      * Create a new ExpressionEvaluatorService with the default parser.
      */
     public ExpressionEvaluatorService() {
-        this(new SpelExpressionParser());
+        this(SpelParserHolder.INSTANCE);
     }
 
     /**

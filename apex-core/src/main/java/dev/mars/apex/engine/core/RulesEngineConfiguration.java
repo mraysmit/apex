@@ -5,8 +5,6 @@ import dev.mars.apex.engine.model.EnrichmentGroup;
 import dev.mars.apex.engine.model.Rule;
 import dev.mars.apex.engine.model.RuleBase;
 import dev.mars.apex.engine.model.RuleGroup;
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +47,6 @@ import java.util.*;
  */
 public class RulesEngineConfiguration {
     private static final Logger logger = LoggerFactory.getLogger(RulesEngineConfiguration.class);
-    static final ExpressionParser parser = new SpelExpressionParser();
 
     private final Map<Category, List<RuleBase>> rulesByCategory = new HashMap<>();
     private final Map<String, Rule> rulesById = new HashMap<>();

@@ -17,7 +17,7 @@ import dev.mars.apex.core.config.model.YamlRule;
 import dev.mars.apex.core.config.model.YamlRuleGroup;
 import dev.mars.apex.engine.execution.RuleGroupEvaluationService;
 import org.springframework.expression.Expression;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +64,7 @@ public class EnrichmentProcessor {
 
     private final LookupServiceRegistry serviceRegistry;
     private final ExpressionEvaluatorService evaluatorService;
-    private final SpelExpressionParser parser;
+    private final ExpressionParser parser;
 
     // Unified cache manager for all caching needs
     private final ApexCacheManager cacheManager;
@@ -96,7 +96,7 @@ public class EnrichmentProcessor {
                                    RuleGroupEvaluationService ruleGroupEvaluationService) {
         this.serviceRegistry = serviceRegistry;
         this.evaluatorService = evaluatorService;
-        this.parser = new SpelExpressionParser();
+        this.parser = evaluatorService.getParser();
         this.cacheManager = ApexCacheManager.getInstance();
         this.dataSourceRegistry = dataSourceRegistry != null ? dataSourceRegistry : new java.util.HashMap<>();
         this.ruleGroupEvaluationService = java.util.Objects.requireNonNull(ruleGroupEvaluationService,

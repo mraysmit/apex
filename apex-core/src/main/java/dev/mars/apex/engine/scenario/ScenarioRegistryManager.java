@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.Map;
@@ -46,7 +45,7 @@ import java.util.Map;
  */
 public class ScenarioRegistryManager {
     private static final Logger logger = LoggerFactory.getLogger(ScenarioRegistryManager.class);
-    private static final ExpressionParser parser = new SpelExpressionParser();
+    private static final ExpressionParser parser = dev.mars.apex.engine.core.SpelParserHolder.INSTANCE;
 
     private final Map<String, ScenarioConfiguration> scenarioRegistry;
     private final ExpressionEvaluatorService evaluatorService;

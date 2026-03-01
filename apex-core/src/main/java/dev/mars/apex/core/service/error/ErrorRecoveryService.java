@@ -5,7 +5,6 @@ import dev.mars.apex.engine.model.RuleResult;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ErrorRecoveryService {
     private static final Logger logger = LoggerFactory.getLogger(ErrorRecoveryService.class);
-    private static final ExpressionParser parser = new SpelExpressionParser();
+    private static final ExpressionParser parser = dev.mars.apex.engine.core.SpelParserHolder.INSTANCE;
     
     private final ErrorRecoveryStrategy defaultStrategy;
     

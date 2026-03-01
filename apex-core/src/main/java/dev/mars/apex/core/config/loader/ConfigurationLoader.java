@@ -2661,7 +2661,7 @@ public class ConfigurationLoader {
             }
 
             // Use a simple SpEL parser to validate syntax for regular expressions
-            org.springframework.expression.ExpressionParser parser = new org.springframework.expression.spel.standard.SpelExpressionParser();
+            org.springframework.expression.ExpressionParser parser = dev.mars.apex.engine.core.SpelParserHolder.INSTANCE;
             parser.parseExpression(expression);
             return true;
         } catch (Exception e) {
@@ -2679,7 +2679,7 @@ public class ConfigurationLoader {
             java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("#\\{([^}]+)\\}");
             java.util.regex.Matcher matcher = pattern.matcher(template);
 
-            org.springframework.expression.ExpressionParser parser = new org.springframework.expression.spel.standard.SpelExpressionParser();
+            org.springframework.expression.ExpressionParser parser = dev.mars.apex.engine.core.SpelParserHolder.INSTANCE;
 
             while (matcher.find()) {
                 String expression = matcher.group(1);
