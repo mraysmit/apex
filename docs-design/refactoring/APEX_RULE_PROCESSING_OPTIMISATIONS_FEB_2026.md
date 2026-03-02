@@ -300,6 +300,30 @@ Decompose the 958-line `UnifiedRuleEvaluator` monolith into three focused collab
 
 **Net result:** UnifiedRuleEvaluator 958→481 lines (−477, −50%). Three new collaborators created. All 3,748 tests pass (2,905 + 843, 0 failures).
 
+### Phase 12: Consolidate SpelExpressionParser ✅
+
+**Risk: Low | Impact: Low | Effort: Small**
+
+`SpelExpressionParser` is thread-safe and stateless, yet 11 independent instances existed across 8 production files. Consolidate to a single shared static instance.
+
+**Problems addressed:**
+- Problem 8 (Multiple SpelExpressionParser Instances)
+
+**Solution:**
+1. ✅ Created `SpelParserHolder` (49 lines) — `public static final ExpressionParser INSTANCE = new SpelExpressionParser()` with private constructor.
+2. ✅ Deleted dead `RulesEngineConfiguration.parser` field (zero callers) and removed `ExpressionParser`/`SpelExpressionParser` imports.
+3. ✅ `RulesEngine` constructor — replaced local `new SpelExpressionParser()` with `SpelParserHolder.INSTANCE`.
+4. ✅ `ExpressionEvaluatorService` no-arg constructor — delegates to `SpelParserHolder.INSTANCE`.
+5. ✅ `UnifiedRuleEvaluator` — no-arg constructor and null-guard fallback both use `SpelParserHolder.INSTANCE`.
+6. ✅ `ErrorRecoveryService` — static field now references `SpelParserHolder.INSTANCE`.
+7. ✅ `EnrichmentProcessor` — removed own parser field; now uses `evaluatorService.getParser()`. Field type changed from concrete `SpelExpressionParser` to `ExpressionParser` interface.
+8. ✅ `PipelineExecutor` — field now references `SpelParserHolder.INSTANCE`.
+9. ✅ `ScenarioRegistryManager` — static field now references `SpelParserHolder.INSTANCE`.
+10. ✅ `ConfigurationLoader` — both `isValidSpELExpression()` and `validateTemplateExpression()` use `SpelParserHolder.INSTANCE` instead of creating throwaway locals.
+11. ✅ Removed `SpelExpressionParser` import from 7 files.
+
+**Net result:** 11 `new SpelExpressionParser()` calls consolidated to 1 (in `SpelParserHolder`). One dead field removed. One concrete type widened to interface. Tests: apex-core 2,892 + apex-demo 919 = 3,811, 0 failures.
+
 ---
 
 ## Known Remaining Issues
