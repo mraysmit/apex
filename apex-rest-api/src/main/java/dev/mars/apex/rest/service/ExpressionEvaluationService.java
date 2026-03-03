@@ -21,8 +21,8 @@ import dev.mars.apex.engine.core.ExpressionEvaluatorService;
 import dev.mars.apex.engine.model.RuleResult;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
+import dev.mars.apex.engine.core.SpelParserHolder;
 import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
@@ -50,7 +50,7 @@ public class ExpressionEvaluationService {
      */
     public ExpressionEvaluationService() {
         this.expressionEvaluatorService = new ExpressionEvaluatorService();
-        this.parser = new SpelExpressionParser();
+        this.parser = SpelParserHolder.INSTANCE;
     }
     
     /**

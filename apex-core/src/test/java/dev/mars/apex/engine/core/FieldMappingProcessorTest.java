@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.HashMap;
@@ -43,7 +42,7 @@ class FieldMappingProcessorTest {
 
     @BeforeEach
     void setUp() {
-        processor = new FieldMappingProcessor(new SpelExpressionParser());
+        processor = new FieldMappingProcessor(SpelParserHolder.INSTANCE);
         context = new StandardEvaluationContext();
         context.setVariable("amount", 1500.0);
         context.setVariable("currency", "EUR");

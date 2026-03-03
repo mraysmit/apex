@@ -13,6 +13,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -63,7 +64,7 @@ public class TransformationProcessor {
     public TransformationProcessor(ExpressionEvaluatorService evaluatorService) {
         this.evaluatorService = evaluatorService;
         this.parser = evaluatorService.getParser();
-        this.expressionCache = new HashMap<>();
+        this.expressionCache = new ConcurrentHashMap<>();
         logger.info("TransformationProcessor initialized");
     }
     

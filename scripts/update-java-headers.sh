@@ -15,7 +15,7 @@ set -euo pipefail
 # Configuration
 AUTHOR_NAME="Mark Andrew Ray-Smith Cityline Ltd"
 COPYRIGHT_YEAR=$(date +%Y)
-PROJECT_NAME="PeeGeeQ"
+PROJECT_NAME="APEX Rules Engine"
 
 # Parse command line arguments
 DRY_RUN=false

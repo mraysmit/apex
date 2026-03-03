@@ -36,6 +36,7 @@ import dev.mars.apex.core.service.scenario.ScenarioExecutionResult;
 
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /*
  * Copyright 2025 Mark Andrew Ray-Smith Cityline Ltd
@@ -91,9 +92,9 @@ public class RulesEngine {
     private final RulesEngineConfiguration configuration;
     private final ErrorRecoveryService errorRecoveryService;
     private final RulePerformanceMonitor performanceMonitor;
-    private EnrichmentProcessor enrichmentProcessor;  // Non-final to allow re-initialization with data sources
+    private volatile EnrichmentProcessor enrichmentProcessor;  // volatile: re-assigned after construction during pipeline init
     private final UnifiedRuleEvaluator unifiedEvaluator;
-    private final List<String> initializationErrors = new ArrayList<>();
+    private final List<String> initializationErrors = new CopyOnWriteArrayList<>();
     private final ScenarioParser scenarioParser;  // For parsing scenario configurations
     private final ScenarioEvaluationManager scenarioEvaluationManager;  // For scenario evaluation
     private final ScenarioRegistryManager scenarioRegistryManager;  // For scenario registry operations

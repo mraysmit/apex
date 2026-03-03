@@ -9,7 +9,7 @@ import dev.mars.apex.core.service.error.ErrorRecoveryService;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMonitor;
 import dev.mars.apex.core.service.monitoring.RulePerformanceMetrics;
 import dev.mars.apex.core.service.monitoring.PerformanceSnapshot;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
+import dev.mars.apex.engine.core.SpelParserHolder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -81,7 +81,7 @@ class RecoveryMetricsIntegrationTest {
         ErrorRecoveryService errorRecoveryService = new ErrorRecoveryService();
         
         // Create unified rule evaluator
-        evaluator = new UnifiedRuleEvaluator(new SpelExpressionParser(), errorRecoveryService, performanceMonitor, errorRecoveryConfig);
+        evaluator = new UnifiedRuleEvaluator(SpelParserHolder.INSTANCE, errorRecoveryService, performanceMonitor, errorRecoveryConfig);
     }
 
     @Test
@@ -145,7 +145,7 @@ class RecoveryMetricsIntegrationTest {
         // Create evaluator with metrics disabled
         ErrorRecoveryService errorRecoveryService = new ErrorRecoveryService();
         UnifiedRuleEvaluator evaluatorWithoutMetrics = new UnifiedRuleEvaluator(
-            new SpelExpressionParser(), errorRecoveryService, performanceMonitor, configWithoutMetrics);
+            SpelParserHolder.INSTANCE, errorRecoveryService, performanceMonitor, configWithoutMetrics);
         
         Rule ruleWithDefault = new Rule(
             "test-rule",

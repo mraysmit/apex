@@ -38,7 +38,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -80,7 +79,7 @@ class ConfigurableErrorRecoveryIntegrationTest {
     void setUp() {
         config = new ErrorRecoveryConfig();
         evaluator = new UnifiedRuleEvaluator(
-            new SpelExpressionParser(),
+            SpelParserHolder.INSTANCE,
             new ErrorRecoveryService(),
             new RulePerformanceMonitor(),
             config
@@ -280,7 +279,7 @@ class ConfigurableErrorRecoveryIntegrationTest {
 
         // Create evaluator with comprehensive configuration
         UnifiedRuleEvaluator comprehensiveEvaluator = new UnifiedRuleEvaluator(
-            new SpelExpressionParser(),
+            SpelParserHolder.INSTANCE,
             new ErrorRecoveryService(),
             new RulePerformanceMonitor(),
             comprehensiveConfig
