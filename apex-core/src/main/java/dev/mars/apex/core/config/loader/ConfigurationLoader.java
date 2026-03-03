@@ -8,8 +8,6 @@ import dev.mars.apex.core.config.sequential.ProcessingItem;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import dev.mars.apex.core.config.component.ComponentConfiguration;
-import dev.mars.apex.core.config.component.ComponentLoader;
 import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.service.data.external.DataSourceResolver;
 import dev.mars.apex.core.service.data.external.ExternalDataSourceConfig;
@@ -433,18 +431,6 @@ public class ConfigurationLoader {
             logger.debug("Full exception details:", e);
             return false;
         }
-    }
-
-    /**
-     * Load a component configuration file.
-     *
-     * @param componentFilePath The path to the component YAML file
-     * @return The loaded component configuration
-     * @throws ConfigurationException if loading fails
-     */
-    public ComponentConfiguration loadComponentFile(String componentFilePath) throws ConfigurationException {
-        ComponentLoader loader = new ComponentLoader();
-        return loader.loadComponent(componentFilePath);
     }
 
     /**
@@ -2704,9 +2690,6 @@ public class ConfigurationLoader {
         // Validate rule group references
         validateRuleGroupReferences(config, ruleIds);
 
-        // Note: Rule data source references are not part of current YamlRule API
-        // validateRuleDataSourceReferences(config, dataSourceNames);
-
         // Validate rule chain references
         validateRuleChainReferences(config, ruleIds);
 
@@ -2837,17 +2820,6 @@ public class ConfigurationLoader {
                 }
             }
         }
-    }
-
-    /**
-     * Validate data source references in rules.
-     * Note: Currently disabled as YamlRule doesn't have direct data source references in the API.
-     * Data source references may be in metadata or custom properties.
-     */
-    @SuppressWarnings("unused")
-    private void validateRuleDataSourceReferences(YamlRuleConfiguration config, Set<String> dataSourceNames) throws ConfigurationException {
-        // This validation is currently disabled as YamlRule doesn't have a getDataSource() method
-        // Future implementation could check metadata or custom properties for data source references
     }
 
     /**
@@ -3177,25 +3149,4 @@ public class ConfigurationLoader {
         }
     }
 
-    /**
-     * Check if a property key contains sensitive information.
-     * Delegates to the centralized PropertyResolver utility.
-     *
-     * @param key The property key
-     * @return true if the property is considered sensitive
-     */
-    private boolean isSensitiveProperty(String key) {
-        return PropertyResolver.isSensitiveProperty(key);
-    }
-
-    /**
-     * Mask sensitive values for logging.
-     * Delegates to the centralized PropertyResolver utility.
-     *
-     * @param value The value to potentially mask
-     * @return The masked value if it appears to contain sensitive data
-     */
-    private String maskSensitiveValue(String value) {
-        return PropertyResolver.maskSensitiveValue(value);
-    }
 }
