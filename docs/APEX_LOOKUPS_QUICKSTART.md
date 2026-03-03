@@ -448,6 +448,52 @@ expression: "#trade.legs.^[legType == 'FLOATING']?.notionalAmount"
 
 ---
 
+## Multi-Row Lookups (`rows: "all"`)
+
+By default, lookups return **only the first matching row**. Add `rows: "all"` to the `lookup-dataset` to return **all matching rows** as a `List<Map>`:
+
+```yaml
+enrichments:
+  - id: "all-trades-lookup"
+    type: "lookup-enrichment"
+    condition: "#counterparty != null"
+    lookup-config:
+      lookup-key: "#counterparty"
+      lookup-dataset:
+        type: "inline"
+        key-field: "counterparty"
+        rows: "all"                    # ← returns List<Map> instead of single Map
+        data:
+          - counterparty: "ACME"
+            product: "IRS"
+            notional: 1000000
+          - counterparty: "ACME"
+            product: "FX-FWD"
+            notional: 500000
+    field-mappings:
+      - source-field: "results"        # ignored in multi-row mode
+        target-field: "trades"         # receives the entire List<Map>
+```
+
+### Accessing Multi-Row Results with SpEL
+
+Once `trades` contains the list, use SpEL collection operators in rules or calculations:
+
+```yaml
+# Index access — first row
+condition: "#trades[0]['product'] == 'IRS'"
+
+# Find-first (.^[]) — first match by predicate
+condition: "#trades.^[product == 'FX-FWD']['notional'] > 100000"
+
+# Filter + count (.?[] + .size())
+condition: "#trades.?[notional > 200000].size() > 1"
+```
+
+> Works with all data source types: `inline`, `database`, `rest-api`, `csv-file`, `file-system`, `yaml-file`.
+
+---
+
 ## Processing Flow (Under the Hood)
 
 ```
@@ -483,7 +529,7 @@ RulesEngine.evaluate(data)
 
 | Directory | Content |
 |-----------|---------|
-| `apex-demo/src/test/resources/.../lookup/` | 94 YAML files — inline, database, REST API, file system, caching, nested, multi-param |
+| `apex-demo/src/test/resources/.../lookup/` | 46 YAML files — inline, database, REST API, file system, caching, nested, multi-param |
 | `apex-demo/src/test/resources/.../datasources/inline/` | Inline data source examples |
 | `apex-demo/src/test/resources/.../datasources/database/` | H2 database examples |
 | `apex-demo/src/test/resources/.../datasources/restapi/` | REST API examples |
