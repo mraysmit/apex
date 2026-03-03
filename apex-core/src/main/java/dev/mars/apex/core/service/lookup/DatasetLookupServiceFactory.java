@@ -920,6 +920,12 @@ public class DatasetLookupServiceFactory {
         }
 
         @Override
+        public java.util.List<java.util.Map<String, Object>> transformAll(Object key) {
+            // Delegate multi-row lookup to the database service
+            return databaseService.transformAll(key);
+        }
+
+        @Override
         public java.util.Map<String, java.util.Map<String, Object>> getAllRecords() {
             // Database services don't preload all records
             return java.util.Collections.emptyMap();
@@ -966,6 +972,12 @@ public class DatasetLookupServiceFactory {
             System.out.println("DEBUG: RestApiDatasetLookupService.transform returning: " + result);
             System.out.println("DEBUG: RestApiDatasetLookupService.transform result type: " + (result != null ? result.getClass().getName() : "null"));
             return result;
+        }
+
+        @Override
+        public java.util.List<java.util.Map<String, Object>> transformAll(Object key) {
+            // Delegate multi-row lookup to the REST API service
+            return restApiService.transformAll(key);
         }
 
         @Override

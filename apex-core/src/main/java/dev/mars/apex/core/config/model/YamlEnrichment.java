@@ -633,6 +633,10 @@ public class YamlEnrichment {
         @JsonProperty("parameters")
         private List<ParameterMapping> parameters; // Parameter mappings for the query
 
+        // Result cardinality configuration
+        @JsonProperty("rows")
+        private String rows; // "first" (default) or "all" for multi-row results
+
         // REST API-specific fields
         @JsonProperty("endpoint")
         private String endpoint; // REST API endpoint name or path
@@ -775,6 +779,24 @@ public class YamlEnrichment {
 
         public void setParameters(List<ParameterMapping> parameters) {
             this.parameters = parameters;
+        }
+
+        public String getRows() {
+            return rows;
+        }
+
+        public void setRows(String rows) {
+            this.rows = rows;
+        }
+
+        /**
+         * Check if this dataset is configured for multi-row results.
+         * Returns true when rows="all", false otherwise (default is single-row/first).
+         *
+         * @return true if multi-row mode is enabled
+         */
+        public boolean isMultiRow() {
+            return "all".equalsIgnoreCase(rows);
         }
 
         public String getEndpoint() {

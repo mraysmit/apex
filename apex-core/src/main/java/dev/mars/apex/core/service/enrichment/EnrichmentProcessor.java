@@ -283,6 +283,15 @@ public class EnrichmentProcessor {
         }
         
         // 3. Perform lookup (with caching if enabled)
+        // Check if multi-row mode is configured (rows: "all")
+        boolean isMultiRow = lookupConfig.getLookupDataset() != null && lookupConfig.getLookupDataset().isMultiRow();
+
+        if (isMultiRow) {
+            // MULTI-ROW PATH: Return all matching rows as a List
+            return processMultiRowLookup(enrichment, lookupService, lookupKey, lookupConfig, targetObject);
+        }
+
+        // SINGLE-ROW PATH (default): Return first matching row
         Object lookupResult = performLookup(lookupService, lookupKey, lookupConfig);
 
         logger.debug("Lookup result for key '" + lookupKey + "': " + lookupResult +
@@ -312,6 +321,108 @@ public class EnrichmentProcessor {
         }
 
         return result;
+    }
+
+    /**
+     * Process a multi-row lookup enrichment (rows: "all").
+     * Retrieves all matching rows and maps them onto target fields as a List.
+     *
+     * <p>Field mapping behavior for multi-row results:</p>
+     * <ul>
+     *   <li>Each field-mapping's target-field receives the entire List&lt;Map&lt;String,Object&gt;&gt; result set</li>
+     *   <li>Downstream SpEL expressions can then filter/project the list (e.g., #results.?[status == 'ACTIVE'])</li>
+     * </ul>
+     *
+     * @param enrichment The enrichment configuration
+     * @param lookupService The resolved lookup service
+     * @param lookupKey The evaluated lookup key
+     * @param lookupConfig The lookup configuration
+     * @param targetObject The target object to enrich
+     * @return The enriched target object
+     */
+    private Object processMultiRowLookup(YamlEnrichment enrichment, LookupService lookupService,
+                                         Object lookupKey, YamlEnrichment.LookupConfig lookupConfig,
+                                         Object targetObject) {
+        logger.info("Processing multi-row lookup enrichment '" + enrichment.getId() + "' with key: " + lookupKey);
+
+        // Perform multi-row lookup
+        java.util.List<java.util.Map<String, Object>> allRows = performMultiRowLookup(lookupService, lookupKey, lookupConfig);
+
+        logger.debug("Multi-row lookup for key '" + lookupKey + "' returned " + allRows.size() + " rows");
+
+        // Store result-field if configured (boolean indicating lookup success)
+        boolean lookupSucceeded = !allRows.isEmpty();
+        if (enrichment.getResultField() != null) {
+            setFieldValue(targetObject, enrichment.getResultField(), lookupSucceeded);
+            logger.info("Stored multi-row lookup result in field: " + enrichment.getResultField() + " = " + lookupSucceeded);
+        }
+
+        // Apply field mappings for multi-row: each target-field gets the whole list
+        if (enrichment.getFieldMappings() != null && !enrichment.getFieldMappings().isEmpty()) {
+            for (YamlEnrichment.FieldMapping mapping : enrichment.getFieldMappings()) {
+                String targetField = mapping.getTargetField();
+                if (targetField == null || targetField.trim().isEmpty()) {
+                    continue;
+                }
+
+                // In multi-row mode, place the entire list of rows on the target field
+                boolean setSuccess = setFieldValue(targetObject, targetField, allRows);
+                if (setSuccess) {
+                    logger.debug("Multi-row mapping: set " + allRows.size() + " rows on target field '" + targetField + "'");
+                } else {
+                    boolean isRequired = mapping.getRequired() != null && mapping.getRequired();
+                    if (isRequired) {
+                        String errorMsg = "Multi-row lookup enrichment '" + enrichment.getId() +
+                                        "' failed: could not set target field '" + targetField + "'";
+                        logger.error(errorMsg);
+                        throw new EnrichmentException(errorMsg);
+                    }
+                    logger.warn("Multi-row mapping: failed to set target field '" + targetField + "' (non-required, continuing)");
+                }
+            }
+        }
+
+        return targetObject;
+    }
+
+    /**
+     * Perform a multi-row lookup, returning all matching rows.
+     * Uses the lookup service's transformAll() method.
+     * Supports caching with a distinct cache key prefix.
+     *
+     * @param lookupService The lookup service
+     * @param lookupKey The lookup key
+     * @param lookupConfig The lookup configuration
+     * @return List of all matching rows
+     */
+    @SuppressWarnings("unchecked")
+    private java.util.List<java.util.Map<String, Object>> performMultiRowLookup(
+            LookupService lookupService, Object lookupKey,
+            YamlEnrichment.LookupConfig lookupConfig) {
+
+        String cacheKey = "all:" + lookupService.getName() + ":" + lookupKey.toString();
+
+        // Check cache if enabled
+        if (lookupConfig.getCacheEnabled() != null && lookupConfig.getCacheEnabled()) {
+            Object cached = cacheManager.get(ApexCacheManager.LOOKUP_RESULT_CACHE, cacheKey);
+            if (cached instanceof java.util.List) {
+                logger.trace("Cache hit for multi-row lookup key: " + lookupKey);
+                return (java.util.List<java.util.Map<String, Object>>) cached;
+            }
+        }
+
+        // Perform actual multi-row lookup
+        java.util.List<java.util.Map<String, Object>> results = lookupService.transformAll(lookupKey);
+
+        // Cache result if caching is enabled
+        if (lookupConfig.getCacheEnabled() != null && lookupConfig.getCacheEnabled()) {
+            long ttlSeconds = lookupConfig.getCacheTtlSeconds() != null ?
+                           lookupConfig.getCacheTtlSeconds() : 300L;
+            cacheManager.put(ApexCacheManager.LOOKUP_RESULT_CACHE, cacheKey, results, ttlSeconds);
+            logger.trace("Cached multi-row lookup result for key: " + lookupKey + " (" + results.size() + " rows)");
+        }
+
+        return results;
     }
     
     /**

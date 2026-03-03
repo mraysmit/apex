@@ -37,6 +37,7 @@ public class DatasetLookupService extends LookupService {
     private static final Logger logger = LoggerFactory.getLogger(DatasetLookupService.class);
     
     private final Map<String, Map<String, Object>> datasetMap;
+    private final Map<String, List<Map<String, Object>>> multiRowDatasetMap;
     private final String keyField;
     private final Map<String, Object> defaultValues;
     private final YamlEnrichment.LookupDataset datasetConfig;
@@ -55,6 +56,7 @@ public class DatasetLookupService extends LookupService {
         this.defaultValues = dataset.getDefaultValues() != null ? 
                            new HashMap<>(dataset.getDefaultValues()) : new HashMap<>();
         this.datasetMap = buildDatasetMap(dataset);
+        this.multiRowDatasetMap = buildMultiRowDatasetMap(dataset);
         
         logger.info("Created DatasetLookupService '" + serviceName + "' with " + 
                    datasetMap.size() + " records, key field: " + keyField);
@@ -149,6 +151,39 @@ public class DatasetLookupService extends LookupService {
         }
     }
     
+    /**
+     * Return ALL matching records for the given key as a List.
+     * For inline datasets, multiple records can share the same key-field value.
+     *
+     * @param key The lookup key
+     * @return List of matching records, or empty list if no matches
+     */
+    @Override
+    public List<Map<String, Object>> transformAll(Object key) {
+        if (key == null) {
+            logger.debug("Lookup key is null for transformAll, returning empty list");
+            return new ArrayList<>();
+        }
+
+        String keyString = key.toString();
+        List<Map<String, Object>> records = multiRowDatasetMap.get(keyString);
+
+        if (records != null && !records.isEmpty()) {
+            // Merge each record with default values
+            List<Map<String, Object>> results = new ArrayList<>();
+            for (Map<String, Object> record : records) {
+                Map<String, Object> merged = new HashMap<>(defaultValues);
+                merged.putAll(record);
+                results.add(merged);
+            }
+            logger.debug("Dataset multi-row lookup for key '" + keyString + "' returned " + results.size() + " records");
+            return results;
+        } else {
+            logger.debug("No dataset records found for key '" + keyString + "' in multi-row lookup");
+            return new ArrayList<>();
+        }
+    }
+    
     @Override
     public boolean validate(Object value) {
         if (value == null) {
@@ -196,6 +231,36 @@ public class DatasetLookupService extends LookupService {
      */
     public Map<String, Map<String, Object>> getAllRecords() {
         return new HashMap<>(datasetMap);
+    }
+    
+    /**
+     * Build the multi-row dataset map that accumulates all records per key.
+     *
+     * @param dataset The dataset configuration
+     * @return Map of key -> list of record data
+     */
+    private Map<String, List<Map<String, Object>>> buildMultiRowDatasetMap(YamlEnrichment.LookupDataset dataset) {
+        Map<String, List<Map<String, Object>>> map = new HashMap<>();
+
+        if (dataset.getData() == null || dataset.getData().isEmpty()) {
+            return map;
+        }
+
+        String keyFld = dataset.getKeyField();
+        if (keyFld == null) {
+            return map;
+        }
+
+        for (Map<String, Object> record : dataset.getData()) {
+            Object keyValue = record.get(keyFld);
+            if (keyValue != null) {
+                String key = keyValue.toString();
+                Map<String, Object> recordData = new HashMap<>(record);
+                map.computeIfAbsent(key, k -> new ArrayList<>()).add(recordData);
+            }
+        }
+
+        return map;
     }
     
     /**

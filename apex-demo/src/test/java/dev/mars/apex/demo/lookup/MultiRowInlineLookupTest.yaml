@@ -1,0 +1,123 @@
+# Multi-Row Inline Lookup Test Configuration
+# Demonstrates rows: "all" feature to retrieve multiple matching records
+# Use Case: Settlement instructions lookup where multiple instructions exist per counterparty
+
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: MultiRowInlineLookupTest.java
+# Purpose: Demonstrate multi-row lookup capability with rows: "all" configuration
+#          Returns all matching records as a List instead of just the first row
+# Status: ACTIVE - Tests multi-row inline lookup functionality
+# ============================================================================
+
+metadata:
+  id: "multi-row-inline-lookup-demo"
+  name: "Multi-Row Inline Lookup Demo"
+  version: "1.0.0"
+  description: "Demonstrates rows: all configuration for returning multiple matching records"
+  type: "enrichment"
+  author: "apex.demo.team@company.com"
+  created: "2026-03-03"
+  tags: ["apex-demo", "lookup", "multi-row", "inline"]
+
+enrichments:
+  # Enrichment 1: Multi-row lookup - returns ALL matching settlement instructions
+  - id: "multi-row-settlement-lookup"
+    name: "Multi-Row Settlement Instructions Lookup"
+    description: "Lookup ALL settlement instructions for a counterparty (rows: all)"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#counterpartyId != null"
+
+    lookup-config:
+      lookup-key: "#counterpartyId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "counterpartyId"
+        rows: "all"
+        data:
+          # CP001 has 3 settlement instructions
+          - counterpartyId: "CP001"
+            instructionId: "SI-001"
+            currency: "USD"
+            settlementMethod: "DTC"
+            priority: 1
+
+          - counterpartyId: "CP001"
+            instructionId: "SI-002"
+            currency: "EUR"
+            settlementMethod: "TARGET2"
+            priority: 2
+
+          - counterpartyId: "CP001"
+            instructionId: "SI-003"
+            currency: "GBP"
+            settlementMethod: "CREST"
+            priority: 3
+
+          # CP002 has 2 settlement instructions
+          - counterpartyId: "CP002"
+            instructionId: "SI-004"
+            currency: "USD"
+            settlementMethod: "DTC"
+            priority: 1
+
+          - counterpartyId: "CP002"
+            instructionId: "SI-005"
+            currency: "JPY"
+            settlementMethod: "BOJ-NET"
+            priority: 2
+
+          # CP003 has 1 settlement instruction
+          - counterpartyId: "CP003"
+            instructionId: "SI-006"
+            currency: "CHF"
+            settlementMethod: "SIC"
+            priority: 1
+
+    field-mappings:
+      - source-field: "results"
+        target-field: "settlementInstructions"
+        required: true
+
+  # Enrichment 2: Single-row lookup (default) - verifies default behavior is preserved
+  - id: "single-row-counterparty-lookup"
+    name: "Single-Row Counterparty Details Lookup"
+    description: "Standard single-row lookup (no rows: config, defaults to first row)"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#counterpartyId != null"
+
+    lookup-config:
+      lookup-key: "#counterpartyId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "id"
+        # NOTE: No "rows:" property - defaults to single-row (first match)
+        data:
+          - id: "CP001"
+            name: "Goldman Sachs"
+            region: "North America"
+            status: "ACTIVE"
+
+          - id: "CP002"
+            name: "Deutsche Bank"
+            region: "Europe"
+            status: "ACTIVE"
+
+          - id: "CP003"
+            name: "Nomura"
+            region: "Asia"
+            status: "ACTIVE"
+
+    field-mappings:
+      - source-field: "name"
+        target-field: "counterpartyName"
+        required: true
+      - source-field: "region"
+        target-field: "counterpartyRegion"
+        required: true
+      - source-field: "status"
+        target-field: "counterpartyStatus"
+        required: true

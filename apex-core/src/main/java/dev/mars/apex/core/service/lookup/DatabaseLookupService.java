@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.Map;
 
 /**
  * Database-backed lookup service implementation.
@@ -113,6 +114,57 @@ public class DatabaseLookupService extends LookupService {
             LOGGER.error("Unexpected error during database lookup for key '{}': {}", key, e.getMessage());
             LOGGER.debug("Full exception details:", e);
             return defaultValues.isEmpty() ? null : new HashMap<>(defaultValues);
+        }
+    }
+
+    /**
+     * Perform database lookup and return ALL matching rows.
+     * Uses dataSource.query() instead of queryForObject() to retrieve the full result set.
+     *
+     * @param key The lookup key (can be single value or Map of parameters)
+     * @return List of all matching rows, or empty list if lookup fails
+     */
+    @Override
+    public List<Map<String, Object>> transformAll(Object key) {
+        LOGGER.info("DatabaseLookupService.transformAll called with key: {}", key);
+        if (key == null) {
+            LOGGER.debug("Lookup key is null for transformAll, returning empty list");
+            return new ArrayList<>();
+        }
+
+        try {
+            Map<String, Object> parameters = buildParametersMap(key);
+            LOGGER.info("Executing database multi-row lookup with parameters: {} for query: {}", parameters, query);
+
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> results = (List<Map<String, Object>>) (List<?>) dataSource.query(query, parameters);
+
+            if (results != null && !results.isEmpty()) {
+                LOGGER.debug("Database multi-row lookup for key '{}' returned {} rows", key, results.size());
+                // Merge each row with default values
+                if (!defaultValues.isEmpty()) {
+                    List<Map<String, Object>> merged = new ArrayList<>();
+                    for (Map<String, Object> row : results) {
+                        Map<String, Object> mergedRow = new HashMap<>(defaultValues);
+                        if (row instanceof Map) {
+                            mergedRow.putAll(row);
+                        }
+                        merged.add(mergedRow);
+                    }
+                    return merged;
+                }
+                return results;
+            } else {
+                LOGGER.debug("Database multi-row lookup returned no results for key '{}'", key);
+                return new ArrayList<>();
+            }
+
+        } catch (DataSourceException e) {
+            LOGGER.error("Database multi-row lookup failed for key '{}': {}", key, e.getMessage());
+            return new ArrayList<>();
+        } catch (Exception e) {
+            LOGGER.error("Unexpected error during database multi-row lookup for key '{}': {}", key, e.getMessage());
+            return new ArrayList<>();
         }
     }
     

@@ -149,6 +149,53 @@ public class RestApiLookupService extends LookupService {
             return defaultValues.isEmpty() ? null : new HashMap<>(defaultValues);
         }
     }
+
+    /**
+     * Perform REST API lookup and return ALL matching rows.
+     * Uses dataSource.query() instead of queryForObject() to retrieve the full result set.
+     *
+     * @param key The lookup key (can be single value or Map of parameters)
+     * @return List of all matching rows, or empty list if lookup fails
+     */
+    @Override
+    public List<Map<String, Object>> transformAll(Object key) {
+        LOGGER.info("RestApiLookupService.transformAll called with key: {}", key);
+        if (key == null) {
+            LOGGER.debug("Lookup key is null for transformAll, returning empty list");
+            return new ArrayList<>();
+        }
+
+        try {
+            Map<String, Object> parameters = buildParametersMap(key);
+            LOGGER.info("Executing REST API multi-row lookup with parameters: {} for endpoint: {}", parameters, endpoint);
+
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> results = (List<Map<String, Object>>) (List<?>) dataSource.query(endpoint, parameters);
+
+            if (results != null && !results.isEmpty()) {
+                LOGGER.debug("REST API multi-row lookup for key '{}' returned {} rows", key, results.size());
+                if (!defaultValues.isEmpty()) {
+                    List<Map<String, Object>> merged = new ArrayList<>();
+                    for (Map<String, Object> row : results) {
+                        Map<String, Object> mergedRow = new HashMap<>(defaultValues);
+                        if (row instanceof Map) {
+                            mergedRow.putAll(row);
+                        }
+                        merged.add(mergedRow);
+                    }
+                    return merged;
+                }
+                return results;
+            } else {
+                LOGGER.debug("REST API multi-row lookup returned no results for key '{}'", key);
+                return new ArrayList<>();
+            }
+
+        } catch (Exception e) {
+            LOGGER.error("Unexpected error during REST API multi-row lookup for key '{}': {}", key, e.getMessage());
+            return new ArrayList<>();
+        }
+    }
     
     /**
      * Build parameters map from lookup key.

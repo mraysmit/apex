@@ -2370,12 +2370,14 @@ public class ConfigurationLoader {
             }
         }
 
-        // Check for duplicate keys
-        Set<Object> keyValues = new HashSet<>();
-        for (int i = 0; i < dataset.getData().size(); i++) {
-            Object keyValue = dataset.getData().get(i).get(keyField);
-            if (!keyValues.add(keyValue)) {
-                throw new ConfigurationException("Duplicate key value '" + keyValue + "' found in inline dataset for enrichment: " + enrichmentId);
+        // Check for duplicate keys (skip check when rows: "all" allows multi-row lookups)
+        if (!dataset.isMultiRow()) {
+            Set<Object> keyValues = new HashSet<>();
+            for (int i = 0; i < dataset.getData().size(); i++) {
+                Object keyValue = dataset.getData().get(i).get(keyField);
+                if (!keyValues.add(keyValue)) {
+                    throw new ConfigurationException("Duplicate key value '" + keyValue + "' found in inline dataset for enrichment: " + enrichmentId);
+                }
             }
         }
     }
