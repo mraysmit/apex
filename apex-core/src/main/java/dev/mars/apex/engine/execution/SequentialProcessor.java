@@ -280,6 +280,11 @@ public class SequentialProcessor {
                     .map(i -> i.getItemId() + "(" + i.getSectionType() + ")")
                     .toList());
 
+        // Clear rule results from any previous evaluation to prevent stale state
+        if (enrichmentProcessor != null) {
+            enrichmentProcessor.clearRuleResults();
+        }
+
         // Phase 4 optimisation: build lookup maps once for O(1) access during item processing
         Map<String, Rule> ruleIndex = ruleFactory.createRuleIndex(yamlConfig);
         Map<String, RuleGroup> groupIndex;

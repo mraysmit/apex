@@ -1100,6 +1100,17 @@ public class EnrichmentProcessor {
 
 
     /**
+     * Clear rule results before starting a new evaluation pass.
+     * This must be called at the start of each document-order evaluation to prevent
+     * stale results from previous evaluations affecting conditional mappings.
+     */
+    public void clearRuleResults() {
+        ruleGroupResults.clear();
+        individualRuleResults.clear();
+        logger.debug("Cleared rule results for new evaluation pass");
+    }
+
+    /**
      * Store a rule group result for use in conditional mapping expressions.
      * This method is called by RulesEngine when processing rule groups in document order mode.
      *

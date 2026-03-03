@@ -91,6 +91,7 @@ public class RuleGroupExecutor {
         String highestFailedSeverity = SeverityConstants.INFO;
         String lastFailedGroupName = null;
         String lastFailedGroupMessage = null;
+        RuleGroupEvaluationResult lastFailedEvaluationResult = null;
 
         // Evaluate rule groups in priority order
         for (RuleGroup group : ruleGroups) {
@@ -137,11 +138,13 @@ public class RuleGroupExecutor {
                             .enrichedData(enrichedWithRuleResults)
                             .build();
                 } else {
-                    // Track failed group with highest severity
-                    if (SeverityConstants.getSeverityPriority(aggregatedSeverity) > SeverityConstants.getSeverityPriority(highestFailedSeverity)) {
+                    // Track failed group with highest severity (and its evaluation result)
+                    // Use >= to ensure we capture the first failed group even if severity equals initial INFO
+                    if (SeverityConstants.getSeverityPriority(aggregatedSeverity) >= SeverityConstants.getSeverityPriority(highestFailedSeverity)) {
                         highestFailedSeverity = aggregatedSeverity;
                         lastFailedGroupName = group.getName();
                         lastFailedGroupMessage = group.getMessage();
+                        lastFailedEvaluationResult = evaluationResult;
                     }
                 }
             } catch (Exception e) {
@@ -159,9 +162,21 @@ public class RuleGroupExecutor {
 
         logger.info("No rule groups matched");
 
-        // Return result with highest severity from failed groups
+        // Return result with highest severity from failed groups, including individual rule results
         if (lastFailedGroupName != null) {
-            return RuleResult.noMatch(lastFailedGroupName, lastFailedGroupMessage, highestFailedSeverity);
+            Map<String, Object> enrichedWithRuleResults = new HashMap<>();
+            if (lastFailedEvaluationResult != null) {
+                enrichedWithRuleResults.put("_individualRuleResults", lastFailedEvaluationResult.getRuleResultsMap());
+            }
+            return RuleResult.builder()
+                    .ruleName(lastFailedGroupName)
+                    .message(lastFailedGroupMessage)
+                    .severity(highestFailedSeverity)
+                    .triggered(false)
+                    .resultType(ResultType.NO_MATCH)
+                    .success(true)
+                    .enrichedData(enrichedWithRuleResults)
+                    .build();
         } else {
             return RuleResult.noMatch();
         }
