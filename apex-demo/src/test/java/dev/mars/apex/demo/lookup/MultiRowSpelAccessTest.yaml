@@ -1,0 +1,169 @@
+# ============================================================================
+# APEX YAML Configuration File
+# ============================================================================
+# Used by: MultiRowSpelAccessTest.java
+# Purpose: Demonstrate multi-row lookup (rows: "all") combined with SpEL
+#          collection operators to query, filter, and extract individual rows
+#          from the resulting List<Map<String,Object>>.
+# Status: ACTIVE - Tests multi-row lookup with SpEL row access
+# ============================================================================
+#
+# SpEL Quick Reference for Multi-Row Results:
+#
+#   #list.size()                    → row count
+#   #list[0]                        → first row (Map)
+#   #list[0]['field']               → field from first row
+#   #list.^[condition]              → find-first match
+#   #list.?[condition]              → filter (all matches)
+#   #list.?[condition].size()       → count of matches
+#   #list.^[field == 'X']['other']  → navigate into first match
+#
+# ============================================================================
+
+metadata:
+  id: "multi-row-spel-access-demo"
+  name: "Multi-Row Lookup with SpEL Row Access"
+  version: "1.0.0"
+  description: "Demonstrates rows: all + SpEL collection operators to access individual rows"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created: "2026-03-03"
+  tags: ["apex-demo", "lookup", "multi-row", "spel", "collection-operators"]
+
+enrichments:
+  # ── STEP 1: Multi-row lookup populates #settlementInstructions as a List ──
+  - id: "fetch-all-settlement-instructions"
+    name: "Fetch All Settlement Instructions"
+    description: "Multi-row lookup returning ALL settlement instructions for a counterparty"
+    type: "lookup-enrichment"
+    enabled: true
+    condition: "#counterpartyId != null"
+
+    lookup-config:
+      lookup-key: "#counterpartyId"
+      lookup-dataset:
+        type: "inline"
+        key-field: "counterpartyId"
+        rows: "all"
+        data:
+          # CP001 has 3 settlement instructions across different currencies
+          - counterpartyId: "CP001"
+            instructionId: "SI-001"
+            currency: "USD"
+            settlementMethod: "DTC"
+            priority: 1
+            maxAmount: 5000000
+
+          - counterpartyId: "CP001"
+            instructionId: "SI-002"
+            currency: "EUR"
+            settlementMethod: "TARGET2"
+            priority: 2
+            maxAmount: 3000000
+
+          - counterpartyId: "CP001"
+            instructionId: "SI-003"
+            currency: "GBP"
+            settlementMethod: "CREST"
+            priority: 3
+            maxAmount: 2000000
+
+          # CP002 has 2 settlement instructions
+          - counterpartyId: "CP002"
+            instructionId: "SI-004"
+            currency: "USD"
+            settlementMethod: "DTC"
+            priority: 1
+            maxAmount: 10000000
+
+          - counterpartyId: "CP002"
+            instructionId: "SI-005"
+            currency: "JPY"
+            settlementMethod: "BOJ-NET"
+            priority: 2
+            maxAmount: 500000000
+
+    field-mappings:
+      - source-field: "results"
+        target-field: "settlementInstructions"
+        required: true
+
+  # ── STEP 2: Extract primary (first) settlement method using index [0] ──
+  - id: "extract-primary-method"
+    name: "Extract Primary Settlement Method"
+    description: "SpEL: #settlementInstructions[0]['settlementMethod'] - index into list"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "#settlementInstructions != null && #settlementInstructions.size() > 0"
+    calculation-config:
+      expression: "#settlementInstructions[0]['settlementMethod']"
+      result-field: "primarySettlementMethod"
+
+  # ── STEP 3: Find the USD instruction using SpEL find-first (.^[]) ──
+  - id: "find-usd-instruction"
+    name: "Find USD Settlement Instruction"
+    description: "SpEL: .^[currency == 'USD'] - find first matching element"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "#settlementInstructions != null && #settlementInstructions.?[currency == 'USD'].size() > 0"
+    calculation-config:
+      expression: "#settlementInstructions.^[currency == 'USD']['instructionId']"
+      result-field: "usdInstructionId"
+
+  # ── STEP 4: Count high-priority instructions using filter (.?[]) + .size() ──
+  - id: "count-high-priority"
+    name: "Count High Priority Instructions"
+    description: "SpEL: .?[priority <= 2].size() - filter then count"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "#settlementInstructions != null && #settlementInstructions.size() > 0"
+    calculation-config:
+      expression: "#settlementInstructions.?[priority <= 2].size()"
+      result-field: "highPriorityCount"
+
+  # ── STEP 5: Get max amount from USD instruction using find-first + navigate ──
+  - id: "get-usd-max-amount"
+    name: "Get USD Max Amount"
+    description: "SpEL: .^[currency == 'USD']['maxAmount'] - navigate into matched row"
+    type: "calculation-enrichment"
+    enabled: true
+    condition: "#settlementInstructions != null && #settlementInstructions.?[currency == 'USD'].size() > 0"
+    calculation-config:
+      expression: "#settlementInstructions.^[currency == 'USD']['maxAmount']"
+      result-field: "usdMaxAmount"
+
+rules:
+  # ── STEP 6: Validate using list .size() ──
+  - id: "has-multiple-settlement-options"
+    name: "Has Multiple Settlement Options"
+    condition: "#settlementInstructions != null && #settlementInstructions.size() >= 2"
+    message: "Counterparty has multiple settlement options available (count: {{#settlementInstructions.size()}})"
+    severity: "INFO"
+
+  # ── STEP 7: Validate primary instruction is DTC (uses enriched field from Step 2) ──
+  - id: "primary-instruction-is-dtc"
+    name: "Primary Instruction Is DTC"
+    condition: "#primarySettlementMethod != null && #primarySettlementMethod == 'DTC'"
+    message: "Primary settlement method is DTC (US domestic)"
+    severity: "INFO"
+
+  # ── STEP 8: Validate USD settlement route exists using filter .?[] ──
+  - id: "usd-settlement-available"
+    name: "USD Settlement Available"
+    condition: "#settlementInstructions != null && #settlementInstructions.?[currency == 'USD'].size() > 0"
+    message: "USD settlement route available via instruction {{#usdInstructionId}}"
+    severity: "INFO"
+
+  # ── STEP 9: Validate all instructions have sufficient capacity using none-match ──
+  - id: "all-instructions-have-capacity"
+    name: "All Instructions Have Capacity"
+    condition: "#settlementInstructions != null && #settlementInstructions.?[maxAmount < 1000000].size() == 0"
+    message: "All settlement instructions have capacity >= 1,000,000"
+    severity: "INFO"
+
+  # ── STEP 10: Validate at least 2 high-priority routes using enriched count ──
+  - id: "sufficient-high-priority-routes"
+    name: "Sufficient High Priority Routes"
+    condition: "#highPriorityCount != null && #highPriorityCount >= 2"
+    message: "Sufficient high-priority settlement routes: {{#highPriorityCount}}"
+    severity: "INFO"
