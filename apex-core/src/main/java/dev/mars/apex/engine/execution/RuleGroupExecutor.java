@@ -21,11 +21,13 @@ import dev.mars.apex.engine.model.RuleBase;
 import dev.mars.apex.engine.model.RuleGroup;
 import dev.mars.apex.engine.model.RuleGroupEvaluationResult;
 import dev.mars.apex.engine.model.RuleResult;
+import dev.mars.apex.engine.model.RuleResult.ResultType;
 import dev.mars.apex.engine.core.UnifiedRuleEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -122,7 +124,18 @@ public class RuleGroupExecutor {
 
                 if (result) {
                     logger.info("Rule group matched: {}", group.getName());
-                    return RuleResult.match(group.getName(), group.getMessage(), aggregatedSeverity);
+                    // Include individual rule results in enrichedData for downstream use
+                    Map<String, Object> enrichedWithRuleResults = new HashMap<>();
+                    enrichedWithRuleResults.put("_individualRuleResults", evaluationResult.getRuleResultsMap());
+                    return RuleResult.builder()
+                            .ruleName(group.getName())
+                            .message(group.getMessage())
+                            .severity(aggregatedSeverity)
+                            .triggered(true)
+                            .resultType(ResultType.MATCH)
+                            .success(true)
+                            .enrichedData(enrichedWithRuleResults)
+                            .build();
                 } else {
                     // Track failed group with highest severity
                     if (SeverityConstants.getSeverityPriority(aggregatedSeverity) > SeverityConstants.getSeverityPriority(highestFailedSeverity)) {

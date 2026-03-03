@@ -103,10 +103,6 @@ public class RuleGroupEvaluationService {
 
         groupResult = computeGroupResult(individualResults, group.isAndOperator());
 
-        // propagate individual results back to the group so that
-        // downstream enrichments can reference #ruleResults['rule-id']
-        group.updateEvaluationResults(individualResults, groupResult);
-
         String aggregatedSeverity = severityAggregator.aggregateSeverity(individualResults, group.isAndOperator());
         long duration = System.currentTimeMillis() - startTime;
 

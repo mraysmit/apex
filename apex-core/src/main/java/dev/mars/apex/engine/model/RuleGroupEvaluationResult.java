@@ -20,7 +20,9 @@ import dev.mars.apex.core.constants.SeverityConstants;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Encapsulates complete rule group evaluation results including:
@@ -210,6 +212,24 @@ public class RuleGroupEvaluationResult {
         } else {
             return rulesTriggered > 0; // At least one rule must pass for OR
         }
+    }
+    
+    /**
+     * Convert individual rule results to a map of rule ID/name to triggered status.
+     * This provides the same data that was previously stored on {@code RuleGroup}
+     * via {@code updateEvaluationResults()}.
+     * 
+     * @return Map of rule ID (or name if ID is null) to triggered boolean
+     */
+    public Map<String, Boolean> getRuleResultsMap() {
+        Map<String, Boolean> resultMap = new HashMap<>();
+        for (RuleResult r : individualResults) {
+            String key = r.getRuleId() != null ? r.getRuleId() : r.getRuleName();
+            if (key != null) {
+                resultMap.put(key, r.isTriggered());
+            }
+        }
+        return resultMap;
     }
     
     @Override

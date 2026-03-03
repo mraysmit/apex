@@ -12,6 +12,7 @@ import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import dev.mars.apex.engine.model.Rule;
 import dev.mars.apex.engine.core.RuleBuilder;
 import dev.mars.apex.engine.model.RuleGroup;
+import dev.mars.apex.engine.model.RuleGroupEvaluationResult;
 import dev.mars.apex.engine.model.RuleResult;
 import dev.mars.apex.core.config.model.YamlRule;
 import dev.mars.apex.core.config.model.YamlRuleGroup;
@@ -1239,18 +1240,20 @@ public class EnrichmentProcessor {
                             }
                         }
 
-                        // Evaluate rule group through canonical path
-                        boolean groupResult = ruleGroupEvaluationService.evaluate(ruleGroup, context);
+                        // Evaluate rule group through canonical path with detailed results
+                        RuleGroupEvaluationResult evaluationResult = ruleGroupEvaluationService.evaluateWithDetails(ruleGroup, context);
+                        boolean groupResult = evaluationResult.isGroupResult();
+                        Map<String, Boolean> individualRuleResults = evaluationResult.getRuleResultsMap();
 
                         // Store rule group results
                         Map<String, Object> groupRuleResults = new HashMap<>();
                         groupRuleResults.put("passed", groupResult);
-                        groupRuleResults.putAll(ruleGroup.getRuleResults());
+                        groupRuleResults.putAll(individualRuleResults);
 
                         // Add passedRules and failedRules lists
                         List<String> passedRules = new ArrayList<>();
                         List<String> failedRules = new ArrayList<>();
-                        for (Map.Entry<String, Boolean> entry : ruleGroup.getRuleResults().entrySet()) {
+                        for (Map.Entry<String, Boolean> entry : individualRuleResults.entrySet()) {
                             if (entry.getValue()) {
                                 passedRules.add(entry.getKey());
                             } else {

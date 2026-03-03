@@ -67,12 +67,7 @@ public class RuleGroup implements RuleBase {
     private String effectiveDate;
     private String expirationDate;
 
-    // Rule result tracking for conditional mapping support
-    private final Map<String, Boolean> ruleResults = new HashMap<>();
-    private boolean groupResult = false;
-
-    // Individual rule results for severity aggregation
-    private final List<RuleResult> individualRuleResults = new ArrayList<>();
+    // Severity aggregator for rule group evaluation
     private final RuleGroupSeverityAggregator severityAggregator = new RuleGroupSeverityAggregator();
 
     /**
@@ -366,57 +361,6 @@ public class RuleGroup implements RuleBase {
      */
     public String getMessage() {
         return message;
-    }
-
-    /**
-     * Get the individual rule results from the last evaluation.
-     *
-     * @return Map of rule ID to boolean result
-     */
-    public Map<String, Boolean> getRuleResults() {
-        return new HashMap<>(ruleResults);
-    }
-
-    /**
-     * Update the internal rule results map and individual results from an external evaluation.
-     * Used by {@code RuleGroupEvaluationService} (Phase 2) to propagate results back to the
-     * group so that downstream code (e.g., enrichments referencing {@code #ruleResults['rule-id']})
-     * can access individual outcomes.
-     *
-     * @param results     the individual rule results from the evaluation
-     * @param groupResult the overall group boolean result
-     */
-    public void updateEvaluationResults(List<RuleResult> results, boolean groupResult) {
-        this.ruleResults.clear();
-        this.individualRuleResults.clear();
-        for (RuleResult r : results) {
-            if (r.getRuleId() != null) {
-                this.ruleResults.put(r.getRuleId(), r.isTriggered());
-            } else if (r.getRuleName() != null) {
-                this.ruleResults.put(r.getRuleName(), r.isTriggered());
-            }
-            this.individualRuleResults.add(r);
-        }
-        this.groupResult = groupResult;
-    }
-
-    /**
-     * Get the individual rule results with severity information from the last detailed evaluation.
-     * This method returns results only if evaluateWithDetails() was called.
-     *
-     * @return List of individual rule results with severity information
-     */
-    public List<RuleResult> getIndividualRuleResults() {
-        return new ArrayList<>(individualRuleResults);
-    }
-
-    /**
-     * Get the overall group result from the last evaluation.
-     *
-     * @return True if the group passed, false otherwise
-     */
-    public boolean getGroupResult() {
-        return groupResult;
     }
 
     // Enterprise metadata getters and setters

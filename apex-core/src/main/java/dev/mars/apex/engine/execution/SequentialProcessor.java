@@ -535,9 +535,12 @@ public class SequentialProcessor {
                     groupId, result.isSuccess(), result.getResultType());
 
         // Store rule group results for conditional mapping
+        // Extract individual rule results from the RuleResult's enrichedData
         if (enrichmentProcessor != null) {
             boolean passed = result.isSuccess() && result.isTriggered();
-            Map<String, Boolean> ruleResults = group.getRuleResults();
+            @SuppressWarnings("unchecked")
+            Map<String, Boolean> ruleResults = (Map<String, Boolean>) result.getEnrichedData()
+                    .getOrDefault("_individualRuleResults", new HashMap<>());
             enrichmentProcessor.storeRuleGroupResult(groupId, passed, ruleResults);
             logger.debug("Stored rule group result for '{}': passed={}, ruleResults={}", groupId, passed, ruleResults);
         }
