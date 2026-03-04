@@ -1,0 +1,60 @@
+# ============================================================================
+# Transform Step - Field Additions Test
+# ============================================================================
+# Tests transform step with field-add transformations.
+# Exercises applyFieldAddition() method.
+# USED BY: PipelineExecutorGapCoverageTest.java
+# ============================================================================
+
+metadata:
+  type: "pipeline-config"
+  id: "transform-field-add-test"
+  name: "Transform Field Addition Test"
+  version: "1.0"
+  author: "APEX Test Suite"
+  description: "Tests transform step field additions"
+
+data-sources:
+  - name: "transform-source"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+
+    connection:
+      database: "mem:transform_test"
+      username: "sa"
+      password: ""
+
+    queries:
+      getAllRecords: "SELECT id, item_name, quantity, unit_price FROM transform_records"
+
+pipeline:
+  name: "transform-field-add-pipeline"
+  description: "Pipeline with field addition transforms"
+
+  steps:
+    - name: "extract-for-transform"
+      type: "extract"
+      source: "transform-source"
+      operation: "getAllRecords"
+      description: "Extract records for transformation"
+
+    - name: "add-fields"
+      type: "transform"
+      description: "Add new fields to records"
+      depends-on: ["extract-for-transform"]
+      transformations:
+        - name: "add-timestamp"
+          type: "field-add"
+          field: "processed_at"
+          value: "2025-01-01T12:00:00"
+        
+        - name: "add-status"
+          type: "field-add"
+          field: "status"
+          value: "PROCESSED"
+        
+        - name: "add-version"
+          type: "field-add"
+          field: "version"
+          value: "1"

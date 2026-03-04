@@ -1,0 +1,50 @@
+# ============================================================================
+# Negative Retry Configuration Test
+# ============================================================================
+# Tests that negative retry values are handled gracefully (corrected to 0).
+# This exercises the validation logic in executeStep() method.
+# USED BY: PipelineExecutorGapCoverageTest.java
+# ============================================================================
+
+metadata:
+  type: "pipeline-config"
+  id: "negative-retry-test"
+  name: "Negative Retry Configuration Test"
+  version: "1.0"
+  author: "APEX Test Suite"
+  description: "Tests handling of negative retry values"
+
+data-sources:
+  - name: "retry-test-source"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+
+    connection:
+      database: "mem:retry_test"
+      username: "sa"
+      password: ""
+
+    queries:
+      getAllRecords: "SELECT id, name, status FROM retry_records"
+
+pipeline:
+  name: "negative-retry-pipeline"
+  description: "Pipeline with invalid negative retry values"
+
+  # Pipeline-level with negative values (should be corrected to 0)
+  execution:
+    max-retries: -1
+    retry-delay-ms: -100
+
+  steps:
+    - name: "extract-negative-retry"
+      type: "extract"
+      source: "retry-test-source"
+      operation: "getAllRecords"
+      description: "Extract with negative retry values"
+
+      # Step-level negative values (should be corrected to 0)
+      retry:
+        max-attempts: -5
+        delay-ms: -200

@@ -1,0 +1,61 @@
+# ============================================================================
+# Load Step Success Test
+# ============================================================================
+# Tests successful load step execution with actual data.
+# Exercises executeLoadStep() method with list data.
+# USED BY: PipelineExecutorGapCoverageTest.java
+# ============================================================================
+
+metadata:
+  type: "pipeline-config"
+  id: "load-step-success-test"
+  name: "Load Step Success Test"
+  version: "1.0"
+  author: "APEX Test Suite"
+  description: "Tests successful load step with data"
+
+data-sources:
+  - name: "load-source"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+
+    connection:
+      database: "mem:load_test"
+      username: "sa"
+      password: ""
+
+    queries:
+      getAll: "SELECT id, item_name, quantity FROM load_source"
+
+data-sinks:
+  - name: "load-sink"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+
+    connection:
+      database: "mem:load_test"
+      username: "sa"
+      password: ""
+
+pipeline:
+  name: "load-step-success-pipeline"
+  description: "Pipeline with successful load step"
+  execution:
+    mode: "sequential"
+
+  steps:
+    - name: "extract-for-load"
+      type: "extract"
+      source: "load-source"
+      operation: "getAll"
+      description: "Extract data for loading"
+
+    - name: "load-to-target"
+      type: "load"
+      description: "Load data to target table"
+      depends-on: ["extract-for-load"]
+      sink: "load-sink"
+      operation: "insertRecord"
+      table-name: "load_target"

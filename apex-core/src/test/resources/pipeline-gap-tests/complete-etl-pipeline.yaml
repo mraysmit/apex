@@ -1,0 +1,69 @@
+# ============================================================================
+# Complete ETL Pipeline Test
+# ============================================================================
+# Tests complete Extract → Transform → Load pipeline flow.
+# Exercises executeLoadStep() with list data.
+# USED BY: PipelineExecutorGapCoverageTest.java
+# ============================================================================
+
+metadata:
+  type: "pipeline-config"
+  id: "complete-etl-test"
+  name: "Complete ETL Pipeline Test"
+  version: "1.0"
+  author: "APEX Test Suite"
+  description: "Tests complete ETL pipeline with load step"
+
+data-sources:
+  - name: "etl-source"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+
+    connection:
+      database: "mem:etl_test"
+      username: "sa"
+      password: ""
+
+    queries:
+      getAllRecords: "SELECT id, item_name, quantity, price FROM source_records"
+
+data-sinks:
+  - name: "etl-sink"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+
+    connection:
+      database: "mem:etl_test"
+      username: "sa"
+      password: ""
+
+pipeline:
+  name: "complete-etl-pipeline"
+  description: "Full ETL pipeline: extract, transform, load"
+
+  steps:
+    - name: "extract-data"
+      type: "extract"
+      source: "etl-source"
+      operation: "getAllRecords"
+      description: "Extract source records"
+
+    - name: "transform-data"
+      type: "transform"
+      description: "Add calculated field"
+      depends-on: ["extract-data"]
+      transformations:
+        - name: "calc-total"
+          type: "field-add"
+          field: "total_value"
+          value: "0"
+
+    - name: "load-data"
+      type: "load"
+      description: "Load to target"
+      depends-on: ["transform-data"]
+      sink: "etl-sink"
+      operation: "insertRecord"
+      table-name: "target_records"

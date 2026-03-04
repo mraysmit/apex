@@ -1,0 +1,57 @@
+# ============================================================================
+# Transform Step - Filter Test
+# ============================================================================
+# Tests transform step with filter transformations.
+# Exercises applyTransformation() with filter type.
+# USED BY: PipelineExecutorGapCoverageTest.java
+# ============================================================================
+
+metadata:
+  type: "pipeline-config"
+  id: "transform-filter-test"
+  name: "Transform Filter Test"
+  version: "1.0"
+  author: "APEX Test Suite"
+  description: "Tests transform step filter operations"
+
+data-sources:
+  - name: "filter-source"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+
+    connection:
+      database: "mem:filter_test"
+      username: "sa"
+      password: ""
+
+    queries:
+      getAllRecords: "SELECT id, product_name, is_active, price FROM filter_source"
+
+pipeline:
+  name: "transform-filter-pipeline"
+  description: "Pipeline with filter transforms"
+
+  execution:
+    mode: "sequential"
+    max-retries: 0
+
+  steps:
+    - name: "extract-for-filter"
+      type: "extract"
+      source: "filter-source"
+      operation: "getAllRecords"
+      description: "Extract records for filtering"
+
+    - name: "filter-active-records"
+      type: "transform"
+      description: "Apply filter to keep only active records"
+      depends-on: ["extract-for-filter"]
+      transformations:
+        - name: "keep-active-only"
+          type: "filter"
+          condition: "is_active == true"
+          
+        - name: "filter-high-price"
+          type: "filter"
+          condition: "price >= 15.00"

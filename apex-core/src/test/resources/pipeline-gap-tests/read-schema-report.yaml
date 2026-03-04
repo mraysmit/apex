@@ -1,0 +1,37 @@
+# ============================================================================
+# Read Schema with Report Path Normalization Test
+# ============================================================================
+# Tests that report path with filename only gets normalized to reports/ directory.
+# This exercises the normalizeReportPath() method in PipelineExecutor.
+# USED BY: PipelineExecutorGapCoverageTest.java
+# ============================================================================
+
+metadata:
+  type: "pipeline-config"
+  id: "read-schema-report-test"
+  name: "Read Schema Report Path Test"
+  version: "1.0"
+  author: "APEX Test Suite"
+  description: "Tests report path normalization with filename only"
+
+data-sources:
+  - name: "csv-source"
+    type: "file-system"
+    source-type: "csv"
+    enabled: true
+    connection:
+      base-path: "src/test/resources/test-data"
+
+pipeline:
+  name: "read-schema-report-pipeline"
+  description: "Pipeline with read-schema step and report output"
+  execution:
+    mode: "sequential"
+  steps:
+    - name: "read-csv-schema"
+      type: "read-schema"
+      source: "csv-source"
+      parameters:
+        file: "src/test/resources/test-data/customers.csv"
+        # Filename only - should be normalized to reports/test-schema-report.html
+        report-output: "test-schema-report.html"

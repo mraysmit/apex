@@ -1,0 +1,59 @@
+# ============================================================================
+# Transform Step - CURRENT_TIMESTAMP Field Addition Test
+# ============================================================================
+# Tests field-addition transformation with CURRENT_TIMESTAMP special value.
+# Exercises the timestamp branch in applyFieldAddition().
+# USED BY: PipelineExecutorGapCoverageTest.java
+# ============================================================================
+
+metadata:
+  type: "pipeline-config"
+  id: "transform-timestamp-test"
+  name: "Transform Timestamp Test"
+  version: "1.0"
+  author: "APEX Test Suite"
+  description: "Tests CURRENT_TIMESTAMP field addition"
+
+data-sources:
+  - name: "transform-source"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+
+    connection:
+      database: "mem:transform_test"
+      username: "sa"
+      password: ""
+
+    queries:
+      getAllRecords: "SELECT id, item_name, quantity, unit_price FROM transform_records"
+
+pipeline:
+  name: "transform-timestamp-pipeline"
+  description: "Pipeline with timestamp field addition"
+
+  execution:
+    mode: "sequential"
+    max-retries: 0
+
+  steps:
+    - name: "extract-for-timestamp"
+      type: "extract"
+      source: "transform-source"
+      operation: "getAllRecords"
+      description: "Extract records"
+
+    - name: "add-timestamp"
+      type: "transform"
+      description: "Add timestamp field"
+      depends-on: ["extract-for-timestamp"]
+      transformations:
+        - name: "add-created-at"
+          type: "field-addition"
+          field: "created_at"
+          value: "CURRENT_TIMESTAMP"
+          
+        - name: "add-static-value"
+          type: "field-addition"
+          field: "source_system"
+          value: "APEX"

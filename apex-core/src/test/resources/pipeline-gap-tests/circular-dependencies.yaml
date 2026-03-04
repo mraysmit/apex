@@ -1,0 +1,38 @@
+# ============================================================================
+# Circular Dependencies Test
+# ============================================================================
+# Tests detection of circular dependencies in pipeline steps.
+# Exercises hasCircularDependency() method.
+# USED BY: PipelineExecutorGapCoverageTest.java
+# ============================================================================
+
+metadata:
+  type: "pipeline-config"
+  id: "circular-deps-test"
+  name: "Circular Dependencies Test"
+  version: "1.0"
+  author: "APEX Test Suite"
+  description: "Tests circular dependency detection"
+
+pipeline:
+  name: "circular-dependency-pipeline"
+  description: "Pipeline with circular dependencies (should fail)"
+
+  steps:
+    # Step A depends on Step C
+    - name: "step-a"
+      type: "extract"
+      source: "nonexistent"
+      operation: "get"
+      depends-on: ["step-c"]
+
+    # Step B depends on Step A
+    - name: "step-b"
+      type: "transform"
+      depends-on: ["step-a"]
+
+    # Step C depends on Step B - creates circular: A->C, B->A, C->B
+    - name: "step-c"
+      type: "load"
+      sink: "nonexistent"
+      depends-on: ["step-b"]

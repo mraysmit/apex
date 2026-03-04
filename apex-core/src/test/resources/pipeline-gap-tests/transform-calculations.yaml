@@ -1,0 +1,55 @@
+# ============================================================================
+# Transform Step - Calculations Test
+# ============================================================================
+# Tests transform step with calculation transformations.
+# Exercises applyCalculation() method.
+# USED BY: PipelineExecutorGapCoverageTest.java
+# ============================================================================
+
+metadata:
+  type: "pipeline-config"
+  id: "transform-calculation-test"
+  name: "Transform Calculation Test"
+  version: "1.0"
+  author: "APEX Test Suite"
+  description: "Tests transform step calculations"
+
+data-sources:
+  - name: "transform-source"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+
+    connection:
+      database: "mem:transform_test"
+      username: "sa"
+      password: ""
+
+    queries:
+      getAllRecords: "SELECT id, item_name, quantity, unit_price FROM transform_records"
+
+pipeline:
+  name: "transform-calculation-pipeline"
+  description: "Pipeline with calculation transforms"
+
+  steps:
+    - name: "extract-for-calc"
+      type: "extract"
+      source: "transform-source"
+      operation: "getAllRecords"
+      description: "Extract records for calculation"
+
+    - name: "calculate-totals"
+      type: "transform"
+      description: "Calculate derived fields"
+      depends-on: ["extract-for-calc"]
+      transformations:
+        - name: "calc-line-total"
+          type: "calculation"
+          field: "line_total"
+          expression: "quantity * unit_price"
+        
+        - name: "calc-tax"
+          type: "calculation"
+          field: "tax_amount"
+          expression: "quantity * unit_price * 0.1"

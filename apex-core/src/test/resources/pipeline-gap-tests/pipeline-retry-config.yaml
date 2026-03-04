@@ -1,0 +1,45 @@
+# ============================================================================
+# Pipeline-Level Retry Configuration Test
+# ============================================================================
+# Tests that pipeline-level retry configuration is used as fallback.
+# USED BY: PipelineExecutorGapCoverageTest.java
+# ============================================================================
+
+metadata:
+  type: "pipeline-config"
+  id: "pipeline-retry-test"
+  name: "Pipeline Retry Configuration Test"
+  version: "1.0"
+  author: "APEX Test Suite"
+  description: "Tests pipeline-level retry configuration"
+
+data-sources:
+  - name: "retry-test-source"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+
+    connection:
+      database: "mem:retry_test"
+      username: "sa"
+      password: ""
+
+    queries:
+      getAllRecords: "SELECT id, name, status FROM retry_records"
+
+pipeline:
+  name: "pipeline-retry-pipeline"
+  description: "Pipeline with pipeline-level retry config"
+
+  # Pipeline-level retry config (no step-level override)
+  execution:
+    max-retries: 2
+    retry-delay-ms: 150
+
+  steps:
+    - name: "extract-pipeline-retry"
+      type: "extract"
+      source: "retry-test-source"
+      operation: "getAllRecords"
+      description: "Extract using pipeline-level retry configuration"
+      # No step-level retry - uses pipeline-level

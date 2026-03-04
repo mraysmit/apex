@@ -1,0 +1,30 @@
+# ============================================================================
+# Invalid Step - No Name Test
+# ============================================================================
+# Tests validation of step without name.
+# Exercises validateStep() method.
+# USED BY: PipelineExecutorGapCoverageTest.java
+# ============================================================================
+
+metadata:
+  type: "pipeline-config"
+  id: "invalid-step-no-name-test"
+  name: "Invalid Step No Name Test"
+  version: "1.0"
+  author: "APEX Test Suite"
+  description: "Tests validation when step name is missing"
+
+pipeline:
+  name: "invalid-step-pipeline"
+  description: "Pipeline with invalid step (no name)"
+
+  steps:
+    # Valid step
+    - name: "valid-step"
+      type: "extract"
+      source: "nonexistent"
+      operation: "get"
+
+    # Invalid step - missing name (empty string counts as missing)
+    - name: ""
+      type: "transform"

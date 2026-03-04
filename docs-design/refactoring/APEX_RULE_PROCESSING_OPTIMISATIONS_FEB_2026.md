@@ -2,8 +2,8 @@
 
 **Status:** ✅ ALL PHASES COMPLETE (7-12 + DECOMPOSITION)  
 **Branch:** `refactor/rules-engine-decomposition`  
-**Last Updated:** March 1, 2026  
-**Test Baseline:** apex-core: 2,892 tests, apex-demo: 919 tests — 0 failures, 0 errors  
+**Last Updated:** March 4, 2026  
+**Test Baseline:** apex-core: 2,950 tests, apex-demo: 921 tests — 0 failures, 0 errors  
 **Predecessor:** `APEX_RULE_PROCESSING_OPTIMISATIONS_JAN_2026_COMPLETE.md` (6 phases, all complete)
 
 ## Overview
@@ -601,9 +601,12 @@ Phase 13 should be executed incrementally — one god class at a time, starting 
 - [x] **Phase 10: Consolidate evaluateYaml** — ✅ Complete (Feb 28, 2026). Extracted `safeEvaluate(Callable, Map)` helper. Both `evaluateYaml()` and `evaluateYamlFile()` reduced to 3-line delegates. ~30 lines of cloned error handling eliminated.
 - [x] **Phase 11: Structural Improvements** — ✅ Complete (Feb 28, 2026). `setExecutionPath()` removed (no callers). Double defensive copying eliminated (`Collections.unmodifiable*` in constructor, direct return in getters). `TransformationProcessor` cached as field in `SequentialProcessor`.
 - [x] **Phase 12: Consolidate SpelExpressionParser** — ✅ Complete (March 1, 2026). Created `SpelParserHolder` with a single shared `public static final ExpressionParser INSTANCE`. Replaced 11 `new SpelExpressionParser()` calls across 8 files. Deleted dead `RulesEngineConfiguration.parser` field. `EnrichmentProcessor` now uses `evaluatorService.getParser()` instead of own parser (field type changed from concrete `SpelExpressionParser` to `ExpressionParser` interface). Removed `SpelExpressionParser` import from 7 files.
-- [ ] **Phase 13: God Class Decomposition** — Analysis complete (March 4, 2026). 7 god classes identified (8,376 lines total). Decomposition plans defined for ~26 focused collaborator classes. Implementation not started.
+- [x] **Phase 13: God Class Decomposition** — ✅ Complete (March 4, 2026). 3 god classes decomposed:
+  - **Phase 13d: EnrichmentProcessor** — 1,698→799 lines (−54%). Extracted 6 classes: `LookupEnrichmentHandler`, `MappingEnrichmentHandler`, `TransformationEnrichmentHandler`, `ConditionalEnrichmentHandler`, `DataSourceEnrichmentHandler`, `CompositeEnrichmentHandler`.
+  - **Phase 13e: ConfigurationLoader** — 1,572→537 lines (−66%). Extracted 3 classes: `ConfigurationReferenceResolver`, `ItemOrderProcessor`, `InlineConfigurationValidator`.
+  - **Phase 13f: PipelineExecutor** — 1,399→622 lines (−56%). Extracted 2 classes: `TransformationStepExecutor`, `SchemaStepExecutor`.
 
-**Test baseline (March 4, 2026):** apex-core: 2,899 tests, apex-demo: 921 tests = 3,820 total, 0 failures.
+**Test baseline (March 4, 2026):** apex-core: 2,950 tests, apex-demo: 921 tests = 3,871 total, 0 failures.
 
 ---
 
@@ -967,3 +970,94 @@ Constructor receives `ObjectMapper yamlMapper` and `DataSourceResolver dataSourc
 3. **Package-private visibility** — All 3 extracted classes are package-private (no `public` modifier), keeping them as internal implementation details of the `loader` package.
 
 **Verification:** 2,925 apex-core tests, 0 failures, BUILD SUCCESS.
+
+---
+
+## Phase 13f: PipelineExecutor Decomposition
+
+**Target:** `PipelineExecutor` (package `dev.mars.apex.engine.pipeline`)
+**Priority:** #3 in god class inventory (after EnrichmentProcessor, ConfigurationLoader)
+**Starting line count:** 1,399 lines | 23 methods (6 public + 16 private + constructor) | 10 fields
+**Final line count:** 622 lines (**−777 lines, −56%**)
+
+### JaCoCo Coverage Baseline
+| Metric | Covered | Total | Percentage |
+|--------|---------|-------|------------|
+| Line | 319 | 550 | **58.0%** |
+| Branch | 161 | 348 | **46.3%** |
+
+Below 70% line coverage gate — gap tests required.
+
+### Gap Coverage Testing (Pre-Refactoring Gate)
+
+Created 25 gap coverage tests in `PipelineExecutorGapCoverageTest`:
+
+| Test Category | Tests | Coverage Target |
+|---------------|-------|-----------------|
+| Retry configuration | 3 | `executeStepWithRetry()` retry paths |
+| Step dependencies | 1 | `executeStepsSequentially()` dependency handling |
+| Report paths | 2 | `normalizeReportPath()` edge cases |
+| Validation | 5 | `validatePipeline()`, `validateStep()`, `validateStepDependencies()` |
+| ETL/transform | 8 | `executeTransformStep()`, transformation types |
+| Database/load | 3 | `executeLoadStep()`, database operations |
+| Edge cases | 3 | Empty/null parameter handling |
+
+**Coverage After Gap Tests:**
+| Metric | Before | After | Improvement |
+|--------|--------|-------|-------------|
+| Line | 58.0% | **70.2%** | +12.2% |
+| Branch | 46.3% | **60.2%** | +13.9% |
+
+Target gate (≥70%) achieved — ready for decomposition.
+
+### Decomposition Steps (Chronological)
+
+#### Step 1: Extract TransformationStepExecutor (1,399 → 1,217, −182 lines)
+Created `TransformationStepExecutor.java` (~279 lines) containing:
+- `executeTransformStep(PipelineStep, Object)` — main entry point for transform steps
+- `applyTransformations(List<Map>, PipelineStep)` — iterates records applying transformations
+- `applyTransformation(Map, Map, String)` — single transformation dispatch
+- `applyFieldAddition(Map, String, Object)` — field-add transformation type
+- `applyCalculation(Map, String, String)` — SpEL calculation evaluation
+- `applyValidation(Map, String, String)` — SpEL validation with boolean result
+
+Uses shared `SpelParserHolder.INSTANCE` for expression evaluation.
+
+#### Step 2: Extract SchemaStepExecutor (1,217 → 622, −595 lines)
+Created `SchemaStepExecutor.java` (~455 lines) containing:
+- `executeReadSchemaStep(PipelineStep)` — database table enumeration and single table/file reads
+- `executeSchemaDiffStep(PipelineStep)` — schema comparison with report generation
+- `generateSchemaReportIfRequested(PipelineStep, ExternalDataSource, Object)` — HTML report generation
+- `generateSchemaDiffReports(...)` — JSON/HTML diff report generation
+- `normalizeReportPath(String)` — path normalization with directory creation
+- `buildDataSourceContext(ExternalDataSource, Map)` — context building for reports
+- `buildJdbcUrl(String, ConnectionConfig)` — JDBC URL construction for 5 DB types
+- `retrieveSchemaFromStep(String)` — step result retrieval from stepResults map
+- `buildComparisonOptions(Map)` — comparison options builder from step parameters
+
+Dependencies injected: `ExternalDataSourceManager`, `SchemaReaderService`, `SchemaDiffService`, `SchemaHtmlReportGenerator`, `pipelineContext` map, `stepResults` map.
+
+### Summary
+
+| Metric | Before | After | Delta |
+|---|---|---|---|
+| PipelineExecutor lines | 1,399 | 622 | **−777 lines (−56%)** |
+| Extracted class total | 0 | ~734 | 2 focused classes |
+| Unused imports removed | 12 | 0 | Schema/SpEL imports cleaned |
+
+**Extracted Classes:**
+
+| Class | Lines | Responsibility |
+|---|---|---|
+| `TransformationStepExecutor` | 279 | Transform step execution — field additions, calculations, validations |
+| `SchemaStepExecutor` | 455 | Schema operations — read-schema, schema-diff, report generation |
+
+**Key Design Decisions:**
+1. **Shared context maps** — `SchemaStepExecutor` receives `pipelineContext` and `stepResults` maps via constructor to enable cross-step communication (e.g., DataSourceContext storage for schema-diff reports).
+2. **Dependency injection** — Both executors receive their dependencies via constructor rather than creating instances internally, enabling testability.
+3. **SpelParserHolder.INSTANCE** — `TransformationStepExecutor` uses the singleton SpEL parser added in Phase 12.
+
+**Verification:** 2,950 tests, 0 failures, BUILD SUCCESS.
+- PipelineExecutorGapCoverageTest: 25/25 pass
+- All Pipeline tests: 57/57 pass  
+- All Schema tests: 15/15 pass

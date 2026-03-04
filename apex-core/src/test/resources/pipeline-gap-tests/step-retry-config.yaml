@@ -1,0 +1,49 @@
+# ============================================================================
+# Step-Level Retry Configuration Test
+# ============================================================================
+# Tests that step-level retry configuration takes precedence over pipeline-level.
+# USED BY: PipelineExecutorGapCoverageTest.java
+# ============================================================================
+
+metadata:
+  type: "pipeline-config"
+  id: "step-retry-test"
+  name: "Step Retry Configuration Test"
+  version: "1.0"
+  author: "APEX Test Suite"
+  description: "Tests step-level retry configuration"
+
+data-sources:
+  - name: "retry-test-source"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+
+    connection:
+      database: "mem:retry_test"
+      username: "sa"
+      password: ""
+
+    queries:
+      getAllRecords: "SELECT id, name, status FROM retry_records"
+
+pipeline:
+  name: "step-retry-pipeline"
+  description: "Pipeline with step-level retry config"
+
+  # Pipeline-level defaults (should be overridden by step-level)
+  execution:
+    max-retries: 1
+    retry-delay-ms: 100
+
+  steps:
+    - name: "extract-with-retry"
+      type: "extract"
+      source: "retry-test-source"
+      operation: "getAllRecords"
+      description: "Extract with step-level retry configuration"
+
+      # Step-level retry takes precedence
+      retry:
+        max-attempts: 3
+        delay-ms: 200

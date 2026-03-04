@@ -1,0 +1,26 @@
+# ============================================================================
+# Invalid Load Step - No Sink Test
+# ============================================================================
+# Tests validation of load step without sink.
+# Exercises validateStep() for load step requirement.
+# USED BY: PipelineExecutorGapCoverageTest.java
+# ============================================================================
+
+metadata:
+  type: "pipeline-config"
+  id: "invalid-load-no-sink-test"
+  name: "Invalid Load No Sink Test"
+  version: "1.0"
+  author: "APEX Test Suite"
+  description: "Tests validation when load step missing sink"
+
+pipeline:
+  name: "invalid-load-pipeline"
+  description: "Pipeline with invalid load step (no sink)"
+
+  steps:
+    # Load step without sink - should fail validation
+    - name: "load-without-sink"
+      type: "load"
+      operation: "insert"
+      # Missing required: sink

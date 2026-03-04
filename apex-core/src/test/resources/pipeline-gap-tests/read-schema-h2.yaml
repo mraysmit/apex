@@ -1,0 +1,40 @@
+# ============================================================================
+# Read Schema from H2 Database Test
+# ============================================================================
+# Tests reading schema metadata from an H2 database.
+# Exercises buildDataSourceContext() and buildJdbcUrl() methods.
+# USED BY: PipelineExecutorGapCoverageTest.java
+# ============================================================================
+
+metadata:
+  type: "pipeline-config"
+  id: "read-schema-h2-test"
+  name: "Read Schema H2 Test"
+  version: "1.0"
+  author: "APEX Test Suite"
+  description: "Tests reading schema from H2 database"
+
+data-sources:
+  - name: "h2-schema-source"
+    type: "database"
+    source-type: "h2"
+    enabled: true
+
+    connection:
+      database: "mem:schema_test"
+      username: "sa"
+      password: ""
+
+pipeline:
+  name: "read-schema-h2-pipeline"
+  description: "Pipeline to read schema from H2 database"
+  execution:
+    mode: "sequential"
+
+  steps:
+    - name: "read-h2-schema"
+      type: "read-schema"
+      source: "h2-schema-source"
+      parameters:
+        table: "schema_test_table"
+        report-output: "target/test-reports/h2-schema-report.html"
