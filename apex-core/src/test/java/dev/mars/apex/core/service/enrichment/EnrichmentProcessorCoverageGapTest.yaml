@@ -1,0 +1,241 @@
+# EnrichmentProcessor Coverage Gap Test Configuration
+# Purpose: Close 5 identified coverage gaps before Phase 13 decomposition
+# Date: March 4, 2026
+
+metadata:
+  id: "coverage-gap-tests"
+  name: "EnrichmentProcessor Coverage Gap Tests"
+  version: "1.0.0"
+  description: "Targeted tests for methods with <40% JaCoCo line coverage"
+  type: "rule-config"
+
+enrichments:
+
+  # ========================================
+  # GAP 2: Conditional Mapping Dispatch
+  # Tests applyMappingRule(), applyDirectMapping(), applyLookupMapping()
+  # ========================================
+
+  # Test direct mapping with expression
+  - id: "cond-map-direct-expression"
+    type: "conditional-mapping-enrichment"
+    target-field: "routingResult"
+    mapping-rules:
+      - id: "rule-direct-expr"
+        priority: 1
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#amount > 500"
+        mapping:
+          type: "direct"
+          expression: "'HIGH_VALUE'"
+      - id: "rule-default"
+        priority: 999
+        mapping:
+          type: "direct"
+          expression: "'LOW_VALUE'"
+    execution-settings:
+      stop-on-first-match: true
+      log-matched-rule: true
+
+  # Test direct mapping with source-field (no expression)
+  - id: "cond-map-direct-source"
+    type: "conditional-mapping-enrichment"
+    target-field: "copiedCurrency"
+    mapping-rules:
+      - id: "rule-copy-field"
+        priority: 1
+        mapping:
+          type: "direct"
+          source-field: "currency"
+    execution-settings:
+      stop-on-first-match: true
+
+  # Test lookup mapping type (falls back to expression since lookup not fully implemented)
+  - id: "cond-map-lookup-type"
+    type: "conditional-mapping-enrichment"
+    target-field: "lookupResult"
+    mapping-rules:
+      - id: "rule-lookup"
+        priority: 1
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#currency == 'USD'"
+        mapping:
+          type: "lookup"
+          expression: "'LOOKUP_USD_RESULT'"
+          lookup-config:
+            lookup-dataset:
+              type: "inline"
+              data:
+                - key: "USD"
+                  value: "US Dollar"
+              key-field: "key"
+              value-fields:
+                - "value"
+            lookup-key: "#currency"
+      - id: "rule-lookup-default"
+        priority: 999
+        mapping:
+          type: "direct"
+          expression: "'LOOKUP_DEFAULT'"
+    execution-settings:
+      stop-on-first-match: true
+
+  # Test mapping rule with fallback value (exception during mapping triggers fallback)
+  - id: "cond-map-fallback"
+    type: "conditional-mapping-enrichment"
+    target-field: "fallbackResult"
+    mapping-rules:
+      - id: "rule-with-fallback"
+        priority: 1
+        mapping:
+          type: "direct"
+          expression: "#nonExistentVar.method()"
+          fallback-value: "'FALLBACK_APPLIED'"
+    execution-settings:
+      stop-on-first-match: true
+
+  # Test conditional-mapping with OR conditions
+  - id: "cond-map-or-conditions"
+    type: "conditional-mapping-enrichment"
+    target-field: "orResult"
+    mapping-rules:
+      - id: "rule-or"
+        priority: 1
+        conditions:
+          operator: "OR"
+          rules:
+            - condition: "#currency == 'EUR'"
+            - condition: "#currency == 'GBP'"
+        mapping:
+          type: "direct"
+          expression: "'EUROPEAN'"
+      - id: "rule-or-default"
+        priority: 999
+        mapping:
+          type: "direct"
+          expression: "'NON_EUROPEAN'"
+    execution-settings:
+      stop-on-first-match: true
+
+  # Test conditional-mapping with AND conditions (false case)
+  - id: "cond-map-and-fail"
+    type: "conditional-mapping-enrichment"
+    target-field: "andFailResult"
+    result-field: "andFailMatched"
+    mapping-rules:
+      - id: "rule-and-strict"
+        priority: 1
+        conditions:
+          operator: "AND"
+          rules:
+            - condition: "#amount > 1000"
+            - condition: "#currency == 'JPY'"
+        mapping:
+          type: "direct"
+          expression: "'HIGH_JPY'"
+    execution-settings:
+      stop-on-first-match: true
+
+  # ========================================
+  # GAP 3: Success/Error Code Evaluation
+  # Tests evaluateCode(), applyCodeFieldMappings(), applyCodeFieldMapping()
+  # ========================================
+
+  # Test success-code with constant string
+  - id: "success-code-constant"
+    type: "field-enrichment"
+    condition: "#amount > 0"
+    success-code: "AMOUNT_POSITIVE"
+    map-to-field:
+      - "statusCode = #success_code"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "processed"
+        expression: "'YES'"
+
+  # Test error-code with constant string (condition fails → error code path)
+  - id: "error-code-constant"
+    type: "field-enrichment"
+    condition: "#amount < 0"
+    error-code: "AMOUNT_NOT_NEGATIVE"
+    map-to-field:
+      - "errorField = #error_code"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "negativeProcessed"
+        expression: "'YES'"
+
+  # Test success-code with SpEL expression
+  - id: "success-code-spel"
+    type: "field-enrichment"
+    condition: "#amount > 100"
+    success-code: "#amount > 1000 ? 'HIGH_VALUE' : 'NORMAL_VALUE'"
+    map-to-field:
+      - "spelStatusCode = #success_code"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "spelProcessed"
+        expression: "'YES'"
+
+  # ========================================
+  # GAP 4: Multi-Row Lookup
+  # Tests processMultiRowLookup(), performMultiRowLookup()
+  # ========================================
+
+  - id: "multi-row-inline-lookup"
+    type: "lookup-enrichment"
+    lookup-config:
+      lookup-dataset:
+        type: "inline"
+        data:
+          - key: "USD"
+            account: "ACC001"
+            status: "ACTIVE"
+          - key: "USD"
+            account: "ACC002"
+            status: "PENDING"
+          - key: "EUR"
+            account: "ACC003"
+            status: "ACTIVE"
+        key-field: "key"
+        value-fields:
+          - "account"
+          - "status"
+        rows: "all"
+      lookup-key: "#currency"
+    field-mappings:
+      - source-field: "results"
+        target-field: "allAccounts"
+
+  # ========================================
+  # GAP 5: setFieldValue Edge Cases
+  # Tests nested path creation, SpEL-prefixed fields
+  # ========================================
+
+  # Test setting fields via SpEL expression prefix
+  - id: "set-field-spel-prefix"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "#root['spelSetField']"
+        expression: "'SPEL_SET_VALUE'"
+
+  # Test setting null to non-existent Map field
+  - id: "set-field-null-map"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "nonExistentSource"
+        target-field: "nullableField"
+        required: false
+
+  # Test setting value via dot-path on nested Map
+  - id: "set-field-nested-map"
+    type: "field-enrichment"
+    field-mappings:
+      - source-field: "constant"
+        target-field: "nested"
+        expression: "new java.util.HashMap()"

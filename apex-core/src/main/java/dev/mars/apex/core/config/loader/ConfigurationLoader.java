@@ -4,14 +4,10 @@ import dev.mars.apex.core.config.exception.ConfigurationException;
 import dev.mars.apex.core.config.model.*;
 import dev.mars.apex.core.config.sequential.OrderedYamlConfiguration;
 import dev.mars.apex.core.config.sequential.OrderedYamlParser;
-import dev.mars.apex.core.config.sequential.ProcessingItem;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import dev.mars.apex.core.constants.SeverityConstants;
 import dev.mars.apex.core.service.data.external.DataSourceResolver;
-import dev.mars.apex.core.service.data.external.ExternalDataSourceConfig;
-import dev.mars.apex.core.util.EnabledFilter;
 import dev.mars.apex.core.util.PropertyResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,15 +45,16 @@ import java.util.*;
 /**
  * Service for loading YAML configuration files into rule configuration objects.
  *
-* This class is part of the APEX A powerful expression processor for Java applications.
+ * <p>This class handles the parsing and validation of YAML configuration files.
+ * It delegates reference resolution to {@link ConfigurationReferenceResolver},
+ * item ordering to {@link ItemOrderProcessor}, and inline validation to
+ * {@link InlineConfigurationValidator}.</p>
+ *
+ * <p>This class is part of the APEX, a powerful expression processor for Java applications.</p>
  *
  * @author Mark Andrew Ray-Smith Cityline Ltd
  * @since 2025-07-27
  * @version 1.0
- */
-/**
- * Service for loading YAML configuration files into rule configuration objects.
- * This class handles the parsing and validation of YAML configuration files.
  */
 public class ConfigurationLoader {
 
@@ -71,6 +68,9 @@ public class ConfigurationLoader {
     private final DataSourceValidator dataSourceValidator;
     private final CrossReferenceValidator crossReferenceValidator;
     private final EnrichmentValidator enrichmentValidator;
+    private final ItemOrderProcessor itemOrderProcessor;
+    private final InlineConfigurationValidator inlineValidator;
+    private final ConfigurationReferenceResolver referenceResolver;
 
     /**
      * Constructor that initializes the YAML object mapper and data-source resolver.
@@ -84,6 +84,9 @@ public class ConfigurationLoader {
         this.dataSourceValidator = new DataSourceValidator();
         this.crossReferenceValidator = new CrossReferenceValidator();
         this.enrichmentValidator = new EnrichmentValidator();
+        this.itemOrderProcessor = new ItemOrderProcessor();
+        this.inlineValidator = new InlineConfigurationValidator();
+        this.referenceResolver = new ConfigurationReferenceResolver(this.yamlMapper, this.dataSourceResolver);
     }
 
     /**
@@ -101,46 +104,8 @@ public class ConfigurationLoader {
             }
 
             logger.info("Loading YAML configuration from file: " + filePath);
-
-            // Read raw content and resolve properties before parsing
             String rawContent = Files.readString(path);
-            String resolvedContent = resolveProperties(rawContent);
-
-            // Use OrderedYamlParser to preserve section order
-            OrderedYamlConfiguration orderedConfig = orderedYamlParser.parseYamlString(resolvedContent, filePath);
-            YamlRuleConfiguration config = orderedConfig.getConfiguration();
-
-            // Copy section order and item order into the configuration
-            List<String> sectionOrder = orderedConfig.getSectionOrder();
-            config.setSectionOrder(sectionOrder);
-            logger.debug("Section order from YAML: " + sectionOrder);
-
-            List<ProcessingItem> itemOrder = orderedConfig.getItemOrder();
-            config.setItemOrder(itemOrder);
-            logger.debug("Item order from YAML: " + itemOrder.size() + " items");
-
-            // Process external rule references
-            processRuleReferences(config);
-
-            // Process external enrichment references
-            processEnrichmentReferences(config);
-
-            // Process external data-source references
-            processDataSourceReferences(config);
-
-            // Expand reference placeholders in item order
-            expandReferencePlaceholders(config);
-
-            // Apply groups-only logic to filter itemOrder AFTER expanding references
-            // This ensures that enrichment-groups/rule-groups loaded from external files
-            // are also subject to groups-only filtering if they're referenced by groups in the main file
-            applyGroupsOnlyLogic(config);
-
-            validateConfiguration(config);
-            logger.info("Successfully loaded configuration: " +
-                       (config.getMetadata() != null ? config.getMetadata().getName() : "unnamed"));
-
-            return config;
+            return loadFromResolvedContent(resolveProperties(rawContent), filePath);
 
         } catch (IOException e) {
             throw new ConfigurationException("Failed to load configuration from file: " + filePath, e);
@@ -161,41 +126,8 @@ public class ConfigurationLoader {
             }
 
             logger.info("Loading YAML configuration from file: " + file.getAbsolutePath());
-
-            // Read raw content and resolve properties before parsing
             String rawContent = Files.readString(file.toPath());
-            String resolvedContent = resolveProperties(rawContent);
-
-            // Use OrderedYamlParser to preserve section order
-            OrderedYamlConfiguration orderedConfig = orderedYamlParser.parseYamlString(resolvedContent, file.getAbsolutePath());
-            YamlRuleConfiguration config = orderedConfig.getConfiguration();
-
-            // Copy section order and item order into the configuration
-            config.setSectionOrder(orderedConfig.getSectionOrder());
-            config.setItemOrder(orderedConfig.getItemOrder());
-
-            // Process external rule references
-            processRuleReferences(config);
-
-            // Process external enrichment references
-            processEnrichmentReferences(config);
-
-            // Process external data-source references
-            processDataSourceReferences(config);
-
-            // Expand reference placeholders in item order
-            expandReferencePlaceholders(config);
-
-            // Apply groups-only logic to filter itemOrder AFTER expanding references
-            // This ensures that enrichment-groups/rule-groups loaded from external files
-            // are also subject to groups-only filtering if they're referenced by groups in the main file
-            applyGroupsOnlyLogic(config);
-
-            validateConfiguration(config);
-            logger.info("Successfully loaded configuration: " +
-                       (config.getMetadata() != null ? config.getMetadata().getName() : "unnamed"));
-
-            return config;
+            return loadFromResolvedContent(resolveProperties(rawContent), file.getAbsolutePath());
 
         } catch (IOException e) {
             throw new ConfigurationException("Failed to load configuration from file: " + file.getAbsolutePath(), e);
@@ -212,45 +144,55 @@ public class ConfigurationLoader {
     public YamlRuleConfiguration loadFromStream(InputStream inputStream) throws ConfigurationException {
         try {
             logger.info("Loading YAML configuration from input stream");
-
-            // Read raw content and resolve properties before parsing
             String rawContent = new String(inputStream.readAllBytes());
-            String resolvedContent = resolveProperties(rawContent);
-
-            // Use OrderedYamlParser to preserve section order
-            OrderedYamlConfiguration orderedConfig = orderedYamlParser.parseYamlString(resolvedContent, "<stream>");
-            YamlRuleConfiguration config = orderedConfig.getConfiguration();
-
-            // Copy section order and item order into the configuration
-            config.setSectionOrder(orderedConfig.getSectionOrder());
-            config.setItemOrder(orderedConfig.getItemOrder());
-
-            // Process external rule references
-            processRuleReferences(config);
-
-            // Process external enrichment references
-            processEnrichmentReferences(config);
-
-            // Process external data-source references
-            processDataSourceReferences(config);
-
-            // Expand reference placeholders in item order
-            expandReferencePlaceholders(config);
-
-            // Apply groups-only logic to filter itemOrder AFTER expanding references
-            // This ensures that enrichment-groups/rule-groups loaded from external files
-            // are also subject to groups-only filtering if they're referenced by groups in the main file
-            applyGroupsOnlyLogic(config);
-
-            validateConfiguration(config);
-            logger.info("Successfully loaded configuration: " +
-                       (config.getMetadata() != null ? config.getMetadata().getName() : "unnamed"));
-
-            return config;
+            return loadFromResolvedContent(resolveProperties(rawContent), "<stream>");
 
         } catch (IOException e) {
             throw new ConfigurationException("Failed to load configuration from input stream", e);
         }
+    }
+
+    /**
+     * Common loading pipeline: ordered parse → process references → expand → validate.
+     *
+     * @param resolvedContent The YAML content with properties already resolved
+     * @param sourceName      The source name for logging and ordered parser context
+     * @return The fully loaded and validated configuration
+     * @throws ConfigurationException if any processing or validation step fails
+     */
+    private YamlRuleConfiguration loadFromResolvedContent(String resolvedContent, String sourceName) throws ConfigurationException {
+        // Use OrderedYamlParser to preserve section order
+        OrderedYamlConfiguration orderedConfig = orderedYamlParser.parseYamlString(resolvedContent, sourceName);
+        YamlRuleConfiguration config = orderedConfig.getConfiguration();
+
+        // Copy section order and item order into the configuration
+        config.setSectionOrder(orderedConfig.getSectionOrder());
+        config.setItemOrder(orderedConfig.getItemOrder());
+        logger.debug("Section order from YAML: " + orderedConfig.getSectionOrder());
+        logger.debug("Item order from YAML: " + orderedConfig.getItemOrder().size() + " items");
+
+        // Process external rule references
+        processRuleReferences(config);
+
+        // Process external enrichment references
+        processEnrichmentReferences(config);
+
+        // Process external data-source references
+        processDataSourceReferences(config);
+
+        // Expand reference placeholders in item order
+        expandReferencePlaceholders(config);
+
+        // Apply groups-only logic to filter itemOrder AFTER expanding references
+        // This ensures that enrichment-groups/rule-groups loaded from external files
+        // are also subject to groups-only filtering if they're referenced by groups in the main file
+        applyGroupsOnlyLogic(config);
+
+        validateConfiguration(config);
+        logger.info("Successfully loaded configuration: " +
+                   (config.getMetadata() != null ? config.getMetadata().getName() : "unnamed"));
+
+        return config;
     }
 
     /**
@@ -492,495 +434,24 @@ public class ConfigurationLoader {
     }
 
     /**
-     * Process external data-source references and merge them into the configuration.
-     *
-     * This method resolves external data-source references defined in the 'data-source-refs'
-     * section and merges them with any existing inline data-sources.
-     *
-     * @param config The configuration to process
-     * @throws ConfigurationException if reference resolution fails
+     * Process external data-source references. Delegates to {@link ConfigurationReferenceResolver}.
      */
     private void processDataSourceReferences(YamlRuleConfiguration config) throws ConfigurationException {
-        if (config.getDataSourceRefs() == null || config.getDataSourceRefs().isEmpty()) {
-            logger.debug("No external data-source references to process");
-            return;
-        }
-
-        logger.info("Processing " + config.getDataSourceRefs().size() + " external data-source references");
-
-        // Initialize data-sources list if it doesn't exist
-        if (config.getDataSources() == null) {
-            config.setDataSources(new ArrayList<>());
-        }
-
-        // Process each data-source reference
-        for (YamlDataSourceRef ref : config.getDataSourceRefs()) {
-            if (!EnabledFilter.isEnabled(ref)) {
-                logger.info("Skipping disabled data-source reference: " + ref.getName());
-                continue;
-            }
-
-            try {
-                logger.info("Resolving external data-source reference: " + ref.getName() + " from " + ref.getSource());
-
-                // Resolve the external configuration
-                ExternalDataSourceConfig externalConfig = dataSourceResolver.resolveDataSource(ref.getSource());
-
-                // Convert external configuration to YamlDataSource
-                YamlDataSource yamlDataSource = convertExternalToYamlDataSource(externalConfig, ref);
-
-                // Add to the configuration
-                config.getDataSources().add(yamlDataSource);
-
-                logger.info("Successfully resolved and added data-source: " + ref.getName());
-
-            } catch (Exception e) {
-                throw new ConfigurationException(
-                    "Failed to resolve data-source reference '" + ref.getName() + "' from '" + ref.getSource() + "'", e);
-            }
-        }
-
-        logger.info("Successfully processed all external data-source references");
+        referenceResolver.processDataSourceReferences(config);
     }
 
     /**
-     * Process external rule references in the configuration.
-     *
-     * This method loads external rule files referenced in the rule-refs
-     * section and merges them with any existing inline rules.
-     *
-     * @param config The configuration to process
-     * @throws ConfigurationException if reference resolution fails
+     * Process external rule references. Delegates to {@link ConfigurationReferenceResolver}.
      */
     private void processRuleReferences(YamlRuleConfiguration config) throws ConfigurationException {
-        if (config.getRuleRefs() == null || config.getRuleRefs().isEmpty()) {
-            logger.debug("No external rule references to process");
-            return;
-        }
-
-        logger.info("Processing " + config.getRuleRefs().size() + " external rule references");
-
-        // Track referenced rule IDs and rule group IDs (use LinkedHashSet to preserve order)
-        Set<String> referencedRuleIds = new LinkedHashSet<>();
-        Set<String> referencedRuleGroupIds = new LinkedHashSet<>();
-
-        // Track loaded files to prevent duplicates across all rule-refs
-        Set<String> loadedFiles = new HashSet<>();
-
-        // Process each rule reference
-        for (YamlRuleRef ref : config.getRuleRefs()) {
-            if (!EnabledFilter.isEnabled(ref)) {
-                logger.info("Skipping disabled rule reference: " + ref.getName());
-                continue;
-            }
-
-            try {
-                logger.info("Resolving external rule reference: " + ref.getName() + " from " + ref.getSource());
-
-                // Load the referenced rule file recursively with shared loadedFiles set
-                YamlRuleConfiguration referencedConfig = loadRuleFileRecursive(ref.getSource(), loadedFiles);
-
-                // Check if external file has BOTH rules and rule-groups
-                boolean hasRules = referencedConfig.getRules() != null && !referencedConfig.getRules().isEmpty();
-                boolean hasRuleGroups = referencedConfig.getRuleGroups() != null && !referencedConfig.getRuleGroups().isEmpty();
-
-                // Merge rules from referenced file
-                if (hasRules) {
-                    // Initialize rules list if it doesn't exist and we have rules to add
-                    if (config.getRules() == null) {
-                        config.setRules(new ArrayList<>());
-                    }
-
-                    // Track IDs ONLY if there are NO rule-groups
-                    // When groups exist, rules are DEFINITIONS ONLY
-                    if (!hasRuleGroups) {
-                        for (YamlRule rule : referencedConfig.getRules()) {
-                            if (rule.getId() != null) {
-                                referencedRuleIds.add(rule.getId());
-                            }
-                        }
-                        logger.info("Tracked " + referencedConfig.getRules().size() + " rule IDs for execution (no groups present)");
-                    } else {
-                        logger.info("Skipped tracking rule IDs (rule-groups present - rules are definitions only)");
-                    }
-
-                    config.getRules().addAll(referencedConfig.getRules());
-                    logger.info("Merged " + referencedConfig.getRules().size() + " rules from: " + ref.getName());
-                }
-
-                // Merge rule groups from referenced file
-                if (hasRuleGroups) {
-                    // Initialize rule groups list if it doesn't exist and we have groups to add
-                    if (config.getRuleGroups() == null) {
-                        config.setRuleGroups(new ArrayList<>());
-                    }
-
-                    // Track group IDs for execution
-                    for (YamlRuleGroup group : referencedConfig.getRuleGroups()) {
-                        if (group.getId() != null) {
-                            referencedRuleGroupIds.add(group.getId());
-                        }
-                    }
-
-                    config.getRuleGroups().addAll(referencedConfig.getRuleGroups());
-                    logger.info("Merged " + referencedConfig.getRuleGroups().size() + " rule groups from: " + ref.getName());
-                }
-
-                logger.info("Successfully resolved and merged rules from: " + ref.getName());
-
-            } catch (Exception e) {
-                throw new ConfigurationException(
-                    "Failed to resolve rule reference '" + ref.getName() + "' from '" + ref.getSource() + "'", e);
-            }
-        }
-
-        // Store tracked IDs in configuration
-        config.setReferencedRuleIds(referencedRuleIds);
-        config.setReferencedRuleGroupIds(referencedRuleGroupIds);
-
-        logger.info("Successfully processed all external rule references (tracked " +
-                   referencedRuleIds.size() + " rules, " + referencedRuleGroupIds.size() + " rule groups)");
+        referenceResolver.processRuleReferences(config);
     }
 
     /**
-     * Process external rule references recursively with cycle detection.
-     *
-     * This method loads external rule files referenced in the rule-refs
-     * section and merges them with any existing inline rules. It supports
-     * nested rule-refs by recursively processing referenced files.
-     *
-     * @param config The configuration to process
-     * @param loadedFiles Set of already loaded files to detect cycles
-     * @throws ConfigurationException if reference resolution fails
-     */
-    private void processRuleReferencesRecursive(YamlRuleConfiguration config, Set<String> loadedFiles) throws ConfigurationException {
-        if (config.getRuleRefs() == null || config.getRuleRefs().isEmpty()) {
-            logger.debug("No external rule references to process");
-            return;
-        }
-
-        logger.debug("Processing " + config.getRuleRefs().size() + " external rule references (recursive)");
-
-        // Track referenced rule IDs and rule group IDs (use LinkedHashSet to preserve order)
-        Set<String> referencedRuleIds = new LinkedHashSet<>();
-        Set<String> referencedRuleGroupIds = new LinkedHashSet<>();
-
-        // Process each rule reference
-        for (YamlRuleRef ref : config.getRuleRefs()) {
-            if (!EnabledFilter.isEnabled(ref)) {
-                logger.debug("Skipping disabled rule reference: " + ref.getName());
-                continue;
-            }
-
-            try {
-                logger.debug("Resolving external rule reference (recursive): " + ref.getName() + " from " + ref.getSource());
-
-                // Load the referenced rule file recursively
-                YamlRuleConfiguration referencedConfig = loadRuleFileRecursive(ref.getSource(), loadedFiles);
-
-                // Check if external file has BOTH rules and rule-groups
-                boolean hasRules = referencedConfig.getRules() != null && !referencedConfig.getRules().isEmpty();
-                boolean hasRuleGroups = referencedConfig.getRuleGroups() != null && !referencedConfig.getRuleGroups().isEmpty();
-
-                // Merge rules from referenced file
-                if (hasRules) {
-                    // Initialize rules list if it doesn't exist and we have rules to add
-                    if (config.getRules() == null) {
-                        config.setRules(new ArrayList<>());
-                    }
-
-                    // Track IDs ONLY if there are NO rule-groups
-                    // When groups exist, rules are DEFINITIONS ONLY
-                    if (!hasRuleGroups) {
-                        for (YamlRule rule : referencedConfig.getRules()) {
-                            if (rule.getId() != null) {
-                                referencedRuleIds.add(rule.getId());
-                            }
-                        }
-                        logger.debug("Tracked " + referencedConfig.getRules().size() + " rule IDs for execution (no groups present)");
-                    } else {
-                        logger.debug("Skipped tracking rule IDs (rule-groups present - rules are definitions only)");
-                    }
-
-                    config.getRules().addAll(referencedConfig.getRules());
-                    logger.debug("Merged " + referencedConfig.getRules().size() + " rules from: " + ref.getName());
-                }
-
-                // Merge rule groups from referenced file
-                if (hasRuleGroups) {
-                    // Initialize rule groups list if it doesn't exist and we have groups to add
-                    if (config.getRuleGroups() == null) {
-                        config.setRuleGroups(new ArrayList<>());
-                    }
-
-                    // Track group IDs for execution
-                    for (YamlRuleGroup group : referencedConfig.getRuleGroups()) {
-                        if (group.getId() != null) {
-                            referencedRuleGroupIds.add(group.getId());
-                        }
-                    }
-
-                    config.getRuleGroups().addAll(referencedConfig.getRuleGroups());
-                    logger.debug("Merged " + referencedConfig.getRuleGroups().size() + " rule groups from: " + ref.getName());
-                }
-
-                logger.debug("Successfully resolved and merged rules from: " + ref.getName());
-
-            } catch (Exception e) {
-                throw new ConfigurationException(
-                    "Failed to resolve rule reference '" + ref.getName() + "' from '" + ref.getSource() + "'", e);
-            }
-        }
-
-        // Store tracked IDs in configuration
-        config.setReferencedRuleIds(referencedRuleIds);
-        config.setReferencedRuleGroupIds(referencedRuleGroupIds);
-
-        logger.debug("Successfully processed all external rule references (recursive) (tracked " +
-                   referencedRuleIds.size() + " rules, " + referencedRuleGroupIds.size() + " rule groups)");
-    }
-
-    /**
-     * Process external enrichment file references.
-     *
-     * This method loads external enrichment files referenced in the enrichment-refs
-     * section and merges them with any existing inline enrichments and enrichment groups.
-     *
-     * @param config The configuration to process
-     * @throws ConfigurationException if reference resolution fails
+     * Process external enrichment references. Delegates to {@link ConfigurationReferenceResolver}.
      */
     private void processEnrichmentReferences(YamlRuleConfiguration config) throws ConfigurationException {
-        if (config.getEnrichmentRefs() == null || config.getEnrichmentRefs().isEmpty()) {
-            logger.debug("No external enrichment references to process");
-            return;
-        }
-
-        logger.info("Processing " + config.getEnrichmentRefs().size() + " external enrichment references");
-
-        // Track referenced enrichment IDs and enrichment group IDs (use LinkedHashSet to preserve order)
-        Set<String> referencedEnrichmentIds = new LinkedHashSet<>();
-        Set<String> referencedEnrichmentGroupIds = new LinkedHashSet<>();
-
-        // Track loaded files to prevent duplicates across all enrichment-refs
-        Set<String> loadedFiles = new HashSet<>();
-
-        // Process each enrichment reference
-        for (YamlEnrichmentRef ref : config.getEnrichmentRefs()) {
-            if (!EnabledFilter.isEnabled(ref)) {
-                logger.info("Skipping disabled enrichment reference: " + ref.getName());
-                continue;
-            }
-
-            try {
-                logger.info("Resolving external enrichment reference: " + ref.getName() + " from " + ref.getSource());
-
-                // Load the referenced enrichment file recursively with shared loadedFiles set
-                YamlRuleConfiguration referencedConfig = loadRuleFileRecursive(ref.getSource(), loadedFiles);
-
-                // Check if external file has enrichments and/or enrichment-groups
-                boolean hasEnrichments = referencedConfig.getEnrichments() != null && !referencedConfig.getEnrichments().isEmpty();
-                boolean hasEnrichmentGroups = referencedConfig.getEnrichmentGroups() != null && !referencedConfig.getEnrichmentGroups().isEmpty();
-
-                // Collect enrichment IDs that are referenced by enrichment-groups
-                Set<String> referencedByGroups = new HashSet<>();
-                if (hasEnrichmentGroups) {
-                    for (YamlEnrichmentGroup group : referencedConfig.getEnrichmentGroups()) {
-                        if (group.getEnrichmentIds() != null) {
-                            referencedByGroups.addAll(group.getEnrichmentIds());
-                        }
-                    }
-                    logger.debug("Found " + referencedByGroups.size() + " enrichment IDs referenced by groups: " + referencedByGroups);
-                }
-
-                // Merge enrichments from referenced file
-                if (hasEnrichments) {
-                    // Initialize enrichments list if it doesn't exist and we have enrichments to add
-                    if (config.getEnrichments() == null) {
-                        config.setEnrichments(new ArrayList<>());
-                    }
-
-                    // Track enrichment IDs that are NOT referenced by any enrichment-group
-                    // Enrichments referenced by groups are definitions only (executed by the group)
-                    // Enrichments NOT referenced by groups execute directly
-                    int trackedCount = 0;
-                    int skippedCount = 0;
-                    for (YamlEnrichment enrichment : referencedConfig.getEnrichments()) {
-                        if (enrichment.getId() != null) {
-                            if (!referencedByGroups.contains(enrichment.getId())) {
-                                // Not referenced by any group - track for direct execution
-                                referencedEnrichmentIds.add(enrichment.getId());
-                                trackedCount++;
-                            } else {
-                                // Referenced by a group - skip tracking (definition only)
-                                skippedCount++;
-                            }
-                        }
-                    }
-
-                    if (hasEnrichmentGroups) {
-                        logger.info("Tracked " + trackedCount + " standalone enrichments for execution, " +
-                                   "skipped " + skippedCount + " enrichments (referenced by groups - definitions only)");
-                    } else {
-                        logger.info("Tracked " + trackedCount + " enrichment IDs for execution (no groups present)");
-                    }
-
-                    config.getEnrichments().addAll(referencedConfig.getEnrichments());
-                    logger.info("Merged " + referencedConfig.getEnrichments().size() + " enrichments from: " + ref.getName());
-                }
-
-                // Merge enrichment groups from referenced file
-                if (hasEnrichmentGroups) {
-                    // Initialize enrichment groups list if it doesn't exist and we have groups to add
-                    if (config.getEnrichmentGroups() == null) {
-                        config.setEnrichmentGroups(new ArrayList<>());
-                    }
-
-                    // Track group IDs for execution
-                    for (YamlEnrichmentGroup group : referencedConfig.getEnrichmentGroups()) {
-                        if (group.getId() != null) {
-                            referencedEnrichmentGroupIds.add(group.getId());
-                        }
-                    }
-
-                    config.getEnrichmentGroups().addAll(referencedConfig.getEnrichmentGroups());
-                    logger.info("Merged " + referencedConfig.getEnrichmentGroups().size() + " enrichment groups from: " + ref.getName());
-                }
-
-                logger.info("Successfully resolved and merged enrichments from: " + ref.getName());
-
-            } catch (Exception e) {
-                throw new ConfigurationException(
-                    "Failed to resolve enrichment reference '" + ref.getName() + "' from '" + ref.getSource() + "'", e);
-            }
-        }
-
-        // Store tracked IDs in configuration
-        config.setReferencedEnrichmentIds(referencedEnrichmentIds);
-        config.setReferencedEnrichmentGroupIds(referencedEnrichmentGroupIds);
-
-        logger.info("Successfully processed all external enrichment references (tracked " +
-                   referencedEnrichmentIds.size() + " enrichments, " + referencedEnrichmentGroupIds.size() + " enrichment groups)");
-    }
-
-    /**
-     * Process external enrichment references recursively with cycle detection.
-     *
-     * This method loads external enrichment files referenced in the enrichment-refs
-     * section and merges them with any existing inline enrichments and enrichment groups.
-     * It supports nested enrichment-refs by recursively processing referenced files.
-     *
-     * @param config The configuration to process
-     * @param loadedFiles Set of already loaded files to detect cycles
-     * @throws ConfigurationException if reference resolution fails
-     */
-    private void processEnrichmentReferencesRecursive(YamlRuleConfiguration config, Set<String> loadedFiles) throws ConfigurationException {
-        if (config.getEnrichmentRefs() == null || config.getEnrichmentRefs().isEmpty()) {
-            logger.debug("No external enrichment references to process");
-            return;
-        }
-
-        logger.debug("Processing " + config.getEnrichmentRefs().size() + " external enrichment references (recursive)");
-
-        // Track referenced enrichment IDs and enrichment group IDs (use LinkedHashSet to preserve order)
-        Set<String> referencedEnrichmentIds = new LinkedHashSet<>();
-        Set<String> referencedEnrichmentGroupIds = new LinkedHashSet<>();
-
-        // Process each enrichment reference
-        for (YamlEnrichmentRef ref : config.getEnrichmentRefs()) {
-            if (!EnabledFilter.isEnabled(ref)) {
-                logger.debug("Skipping disabled enrichment reference: " + ref.getName());
-                continue;
-            }
-
-            try {
-                logger.debug("Resolving external enrichment reference (recursive): " + ref.getName() + " from " + ref.getSource());
-
-                // Load the referenced enrichment file recursively
-                YamlRuleConfiguration referencedConfig = loadRuleFileRecursive(ref.getSource(), loadedFiles);
-
-                // Check if external file has enrichments and/or enrichment-groups
-                boolean hasEnrichments = referencedConfig.getEnrichments() != null && !referencedConfig.getEnrichments().isEmpty();
-                boolean hasEnrichmentGroups = referencedConfig.getEnrichmentGroups() != null && !referencedConfig.getEnrichmentGroups().isEmpty();
-
-                // Collect enrichment IDs that are referenced by enrichment-groups
-                Set<String> referencedByGroups = new HashSet<>();
-                if (hasEnrichmentGroups) {
-                    for (YamlEnrichmentGroup group : referencedConfig.getEnrichmentGroups()) {
-                        if (group.getEnrichmentIds() != null) {
-                            referencedByGroups.addAll(group.getEnrichmentIds());
-                        }
-                    }
-                    logger.debug("Found " + referencedByGroups.size() + " enrichment IDs referenced by groups: " + referencedByGroups);
-                }
-
-                // Merge enrichments from referenced file
-                if (hasEnrichments) {
-                    // Initialize enrichments list if it doesn't exist and we have enrichments to add
-                    if (config.getEnrichments() == null) {
-                        config.setEnrichments(new ArrayList<>());
-                    }
-
-                    // Track enrichment IDs that are NOT referenced by any enrichment-group
-                    // Enrichments referenced by groups are definitions only (executed by the group)
-                    // Enrichments NOT referenced by groups execute directly
-                    int trackedCount = 0;
-                    int skippedCount = 0;
-                    for (YamlEnrichment enrichment : referencedConfig.getEnrichments()) {
-                        if (enrichment.getId() != null) {
-                            if (!referencedByGroups.contains(enrichment.getId())) {
-                                // Not referenced by any group - track for direct execution
-                                referencedEnrichmentIds.add(enrichment.getId());
-                                trackedCount++;
-                            } else {
-                                // Referenced by a group - skip tracking (definition only)
-                                skippedCount++;
-                            }
-                        }
-                    }
-
-                    if (hasEnrichmentGroups) {
-                        logger.debug("Tracked " + trackedCount + " standalone enrichments for execution, " +
-                                   "skipped " + skippedCount + " enrichments (referenced by groups - definitions only)");
-                    } else {
-                        logger.debug("Tracked " + trackedCount + " enrichment IDs for execution (no groups present)");
-                    }
-
-                    config.getEnrichments().addAll(referencedConfig.getEnrichments());
-                    logger.debug("Merged " + referencedConfig.getEnrichments().size() + " enrichments from: " + ref.getName());
-                }
-
-                // Merge enrichment groups from referenced file
-                if (hasEnrichmentGroups) {
-                    // Initialize enrichment groups list if it doesn't exist and we have groups to add
-                    if (config.getEnrichmentGroups() == null) {
-                        config.setEnrichmentGroups(new ArrayList<>());
-                    }
-
-                    // Track group IDs for execution
-                    for (YamlEnrichmentGroup group : referencedConfig.getEnrichmentGroups()) {
-                        if (group.getId() != null) {
-                            referencedEnrichmentGroupIds.add(group.getId());
-                        }
-                    }
-
-                    config.getEnrichmentGroups().addAll(referencedConfig.getEnrichmentGroups());
-                    logger.debug("Merged " + referencedConfig.getEnrichmentGroups().size() + " enrichment groups from: " + ref.getName());
-                }
-
-                logger.debug("Successfully resolved and merged enrichments from: " + ref.getName());
-
-            } catch (Exception e) {
-                throw new ConfigurationException(
-                    "Failed to resolve enrichment reference '" + ref.getName() + "' from '" + ref.getSource() + "'", e);
-            }
-        }
-
-        // Store tracked IDs in configuration
-        config.setReferencedEnrichmentIds(referencedEnrichmentIds);
-        config.setReferencedEnrichmentGroupIds(referencedEnrichmentGroupIds);
-
-        logger.debug("Successfully processed all external enrichment references (recursive) (tracked " +
-                   referencedEnrichmentIds.size() + " enrichments, " + referencedEnrichmentGroupIds.size() + " enrichment groups)");
+        referenceResolver.processEnrichmentReferences(config);
     }
 
     /**
@@ -1000,129 +471,7 @@ public class ConfigurationLoader {
      * @param config The configuration with itemOrder to filter
      */
     private void applyGroupsOnlyLogic(YamlRuleConfiguration config) {
-        logger.info("=== APPLYING GROUPS-ONLY LOGIC ===");
-
-        if (config.getItemOrder() == null || config.getItemOrder().isEmpty()) {
-            logger.info("No item order to filter - skipping groups-only logic");
-            return;
-        }
-
-        logger.info("Item order size BEFORE filtering: " + config.getItemOrder().size());
-
-        // Collect enrichment IDs referenced by enrichment-groups (use LinkedHashSet to preserve order)
-        Set<String> referencedEnrichmentIds = new LinkedHashSet<>();
-        if (config.getEnrichmentGroups() != null && !config.getEnrichmentGroups().isEmpty()) {
-            for (YamlEnrichmentGroup group : config.getEnrichmentGroups()) {
-                // Collect from enrichment-ids (simple string list)
-                if (group.getEnrichmentIds() != null) {
-                    referencedEnrichmentIds.addAll(group.getEnrichmentIds());
-                }
-                // Collect from enrichment-references (structured objects with enrichment-id field)
-                if (group.getEnrichmentReferences() != null) {
-                    for (YamlEnrichmentGroup.EnrichmentReference ref : group.getEnrichmentReferences()) {
-                        if (ref.getEnrichmentId() != null) {
-                            referencedEnrichmentIds.add(ref.getEnrichmentId());
-                        }
-                    }
-                }
-            }
-            logger.info("Found " + referencedEnrichmentIds.size() + " enrichment IDs referenced by groups: " + referencedEnrichmentIds);
-        }
-
-        // Collect rule IDs referenced by rule-groups (use LinkedHashSet to preserve order)
-        Set<String> referencedRuleIds = new LinkedHashSet<>();
-        if (config.getRuleGroups() != null && !config.getRuleGroups().isEmpty()) {
-            for (YamlRuleGroup group : config.getRuleGroups()) {
-                // Collect from rule-ids (simple string list)
-                if (group.getRuleIds() != null) {
-                    referencedRuleIds.addAll(group.getRuleIds());
-                }
-                // Collect from rule-references (structured objects with rule-id field)
-                if (group.getRuleReferences() != null) {
-                    for (YamlRuleGroup.RuleReference ref : group.getRuleReferences()) {
-                        if (ref.getRuleId() != null) {
-                            referencedRuleIds.add(ref.getRuleId());
-                        }
-                    }
-                }
-            }
-            logger.info("Found " + referencedRuleIds.size() + " rule IDs referenced by groups: " + referencedRuleIds);
-        }
-
-        // Collect enrichment-group IDs referenced by other enrichment-groups (use LinkedHashSet to preserve order)
-        Set<String> referencedEnrichmentGroupIds = new LinkedHashSet<>();
-        if (config.getEnrichmentGroups() != null && !config.getEnrichmentGroups().isEmpty()) {
-            for (YamlEnrichmentGroup group : config.getEnrichmentGroups()) {
-                if (group.getEnrichmentGroupReferences() != null) {
-                    referencedEnrichmentGroupIds.addAll(group.getEnrichmentGroupReferences());
-                }
-            }
-            logger.info("Found " + referencedEnrichmentGroupIds.size() + " enrichment-group IDs referenced by other groups: " + referencedEnrichmentGroupIds);
-        }
-
-        // Collect rule-group IDs referenced by other rule-groups (use LinkedHashSet to preserve order)
-        Set<String> referencedRuleGroupIds = new LinkedHashSet<>();
-        if (config.getRuleGroups() != null && !config.getRuleGroups().isEmpty()) {
-            for (YamlRuleGroup group : config.getRuleGroups()) {
-                if (group.getRuleGroupReferences() != null) {
-                    referencedRuleGroupIds.addAll(group.getRuleGroupReferences());
-                }
-            }
-            logger.info("Found " + referencedRuleGroupIds.size() + " rule-group IDs referenced by other groups: " + referencedRuleGroupIds);
-        }
-
-        // If no groups exist, no filtering needed
-        if (referencedEnrichmentIds.isEmpty() && referencedRuleIds.isEmpty() &&
-            referencedEnrichmentGroupIds.isEmpty() && referencedRuleGroupIds.isEmpty()) {
-            logger.info("No groups found - skipping groups-only logic (all items execute at definition position)");
-            return;
-        }
-
-        // Filter itemOrder: Remove enrichments/rules/groups referenced by groups
-        List<ProcessingItem> originalOrder = new ArrayList<>(config.getItemOrder());
-        List<ProcessingItem> filteredOrder = new ArrayList<>();
-        int enrichmentsFiltered = 0;
-        int rulesFiltered = 0;
-        int enrichmentGroupsFiltered = 0;
-        int ruleGroupsFiltered = 0;
-
-        for (ProcessingItem item : originalOrder) {
-            boolean shouldRemove = false;
-
-            if ("enrichments".equals(item.getSectionType()) &&
-                referencedEnrichmentIds.contains(item.getItemId())) {
-                shouldRemove = true;  // Skip - will execute via enrichment-group
-                enrichmentsFiltered++;
-                logger.debug("Filtering enrichment '" + item.getItemId() + "' from itemOrder (referenced by group - definition only)");
-            } else if ("rules".equals(item.getSectionType()) &&
-                       referencedRuleIds.contains(item.getItemId())) {
-                shouldRemove = true;  // Skip - will execute via rule-group
-                rulesFiltered++;
-                logger.debug("Filtering rule '" + item.getItemId() + "' from itemOrder (referenced by group - definition only)");
-            } else if ("enrichment-groups".equals(item.getSectionType()) &&
-                       referencedEnrichmentGroupIds.contains(item.getItemId())) {
-                shouldRemove = true;  // Skip - will execute via parent enrichment-group
-                enrichmentGroupsFiltered++;
-                logger.debug("Filtering enrichment-group '" + item.getItemId() + "' from itemOrder (referenced by another group - definition only)");
-            } else if ("rule-groups".equals(item.getSectionType()) &&
-                       referencedRuleGroupIds.contains(item.getItemId())) {
-                shouldRemove = true;  // Skip - will execute via parent rule-group
-                ruleGroupsFiltered++;
-                logger.debug("Filtering rule-group '" + item.getItemId() + "' from itemOrder (referenced by another group - definition only)");
-            }
-
-            if (!shouldRemove) {
-                filteredOrder.add(item);
-            }
-        }
-
-        // Update configuration with filtered order
-        config.setItemOrder(filteredOrder);
-
-        logger.info("Applied groups-only logic: filtered " + enrichmentsFiltered + " enrichments, " +
-                   rulesFiltered + " rules, " + enrichmentGroupsFiltered + " enrichment-groups, and " +
-                   ruleGroupsFiltered + " rule-groups from itemOrder (original: " + originalOrder.size() +
-                   " items, filtered: " + filteredOrder.size() + " items)");
+        itemOrderProcessor.applyGroupsOnlyLogic(config);
     }
 
     /**
@@ -1133,193 +482,7 @@ public class ConfigurationLoader {
      * @param config Configuration with item order and tracked referenced IDs
      */
     private void expandReferencePlaceholders(YamlRuleConfiguration config) {
-        if (config.getItemOrder() == null || config.getItemOrder().isEmpty()) {
-            logger.debug("No item order to expand");
-            return;
-        }
-
-        List<ProcessingItem> expandedOrder = new ArrayList<>();
-        int originalSize = config.getItemOrder().size();
-
-        for (ProcessingItem item : config.getItemOrder()) {
-            String sectionType = item.getSectionType();
-            String itemId = item.getItemId();
-
-            if (sectionType.equals("enrichment-refs") && itemId.equals("*")) {
-                // Expand enrichment references
-                logger.debug("Expanding enrichment-refs placeholder");
-
-                if (config.getReferencedEnrichmentIds() != null) {
-                    for (String enrichmentId : config.getReferencedEnrichmentIds()) {
-                        expandedOrder.add(new ProcessingItem("enrichments", enrichmentId));
-                        logger.debug("  Added enrichment: " + enrichmentId);
-                    }
-                }
-
-                if (config.getReferencedEnrichmentGroupIds() != null) {
-                    for (String groupId : config.getReferencedEnrichmentGroupIds()) {
-                        expandedOrder.add(new ProcessingItem("enrichment-groups", groupId));
-                        logger.debug("  Added enrichment-group: " + groupId);
-                    }
-                }
-            } else if (sectionType.equals("rule-refs") && itemId.equals("*")) {
-                // Expand rule references
-                logger.debug("Expanding rule-refs placeholder");
-
-                if (config.getReferencedRuleIds() != null) {
-                    for (String ruleId : config.getReferencedRuleIds()) {
-                        expandedOrder.add(new ProcessingItem("rules", ruleId));
-                        logger.debug("  Added rule: " + ruleId);
-                    }
-                }
-
-                if (config.getReferencedRuleGroupIds() != null) {
-                    for (String groupId : config.getReferencedRuleGroupIds()) {
-                        expandedOrder.add(new ProcessingItem("rule-groups", groupId));
-                        logger.debug("  Added rule-group: " + groupId);
-                    }
-                }
-            } else {
-                // Keep non-placeholder items as-is
-                expandedOrder.add(item);
-            }
-        }
-
-        config.setItemOrder(expandedOrder);
-        logger.info("Expanded item order from " + originalSize + " to " + expandedOrder.size() + " items");
-    }
-
-    /**
-     * Load a rule file recursively with cycle detection and duplicate prevention.
-     *
-     * @param source The source path (file system or classpath)
-     * @param loadedFiles Set of already loaded files to detect cycles and prevent duplicates
-     * @return The loaded rule configuration
-     * @throws ConfigurationException if loading fails or cycle detected
-     */
-    private YamlRuleConfiguration loadRuleFileRecursive(String source, Set<String> loadedFiles) throws ConfigurationException {
-        // Normalize path for cycle detection and duplicate prevention
-        String normalizedSource = Paths.get(source).normalize().toString();
-
-        // Check if already loaded - if so, return empty config to avoid duplicates
-        if (loadedFiles.contains(normalizedSource)) {
-            logger.debug("Skipping already loaded file: " + source);
-            // Return empty config - rules/enrichments from this file were already merged
-            YamlRuleConfiguration emptyConfig = new YamlRuleConfiguration();
-            emptyConfig.setRules(new ArrayList<>());
-            emptyConfig.setRuleGroups(new ArrayList<>());
-            emptyConfig.setEnrichments(new ArrayList<>());
-            emptyConfig.setEnrichmentGroups(new ArrayList<>());
-            return emptyConfig;
-        }
-
-        // Add to loaded files set (stays in set for entire loading process)
-        loadedFiles.add(normalizedSource);
-
-        try {
-            // Try file system first, then classpath (same pattern as DataSourceResolver)
-            Path path = Paths.get(source);
-            YamlRuleConfiguration config;
-
-            if (Files.exists(path)) {
-                // Load from file system
-                logger.debug("Loading rule file from file system: " + source);
-                config = loadFromFileWithoutProcessing(path.toFile());
-            } else {
-                // Load from classpath
-                logger.debug("Loading rule file from classpath: " + source);
-                config = loadFromClasspathWithoutProcessing(source);
-            }
-
-            // Recursively process rule-refs in the loaded file
-            if (config.getRuleRefs() != null && !config.getRuleRefs().isEmpty()) {
-                logger.debug("Processing " + config.getRuleRefs().size() + " nested rule-refs in: " + source);
-                processRuleReferencesRecursive(config, loadedFiles);
-            }
-
-            // Recursively process enrichment-refs in the loaded file
-            if (config.getEnrichmentRefs() != null && !config.getEnrichmentRefs().isEmpty()) {
-                logger.debug("Processing " + config.getEnrichmentRefs().size() + " nested enrichment-refs in: " + source);
-                processEnrichmentReferencesRecursive(config, loadedFiles);
-            }
-
-            return config;
-
-        } catch (Exception e) {
-            throw new ConfigurationException("Failed to load rule file: " + source, e);
-        }
-    }
-
-    /**
-     * Load configuration from a file without processing rule-refs or data-source-refs.
-     *
-     * This method is used when loading referenced rule files to avoid infinite recursion.
-     *
-     * @param file The file to load
-     * @return The loaded configuration (without processing)
-     * @throws ConfigurationException if loading fails
-     */
-    private YamlRuleConfiguration loadFromFileWithoutProcessing(File file) throws ConfigurationException {
-        try {
-            if (!file.exists()) {
-                throw new ConfigurationException("Configuration file not found: " + file.getAbsolutePath());
-            }
-
-            logger.debug("Loading YAML configuration from file (without processing): " + file.getAbsolutePath());
-
-            // Read raw content and resolve properties before parsing
-            String rawContent = Files.readString(file.toPath());
-            String resolvedContent = resolveProperties(rawContent);
-
-            YamlRuleConfiguration config = yamlMapper.readValue(resolvedContent, YamlRuleConfiguration.class);
-
-            // Skip processRuleReferences() and processDataSourceReferences() to avoid recursion
-            // Skip validateConfiguration() as this will be done on the merged configuration
-
-            logger.debug("Successfully loaded configuration (without processing): " +
-                       (config.getMetadata() != null ? config.getMetadata().getName() : "unnamed"));
-
-            return config;
-
-        } catch (IOException e) {
-            throw new ConfigurationException("Failed to load configuration from file: " + file.getAbsolutePath(), e);
-        }
-    }
-
-    /**
-     * Load configuration from classpath without processing rule-refs or data-source-refs.
-     *
-     * This method is used when loading referenced rule files to avoid infinite recursion.
-     *
-     * @param resourcePath The classpath resource path
-     * @return The loaded configuration (without processing)
-     * @throws ConfigurationException if loading fails
-     */
-    private YamlRuleConfiguration loadFromClasspathWithoutProcessing(String resourcePath) throws ConfigurationException {
-        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
-            if (inputStream == null) {
-                throw new ConfigurationException("Configuration resource not found: " + resourcePath);
-            }
-
-            logger.debug("Loading YAML configuration from classpath (without processing): " + resourcePath);
-
-            // Read raw content and resolve properties before parsing
-            String rawContent = new String(inputStream.readAllBytes());
-            String resolvedContent = resolveProperties(rawContent);
-
-            YamlRuleConfiguration config = yamlMapper.readValue(resolvedContent, YamlRuleConfiguration.class);
-
-            // Skip processRuleReferences() and processDataSourceReferences() to avoid recursion
-            // Skip validateConfiguration() as this will be done on the merged configuration
-
-            logger.debug("Successfully loaded configuration (without processing): " +
-                       (config.getMetadata() != null ? config.getMetadata().getName() : "unnamed"));
-
-            return config;
-
-        } catch (IOException e) {
-            throw new ConfigurationException("Failed to load configuration from classpath: " + resourcePath, e);
-        }
+        itemOrderProcessor.expandReferencePlaceholders(config);
     }
 
     /**
@@ -1333,7 +496,7 @@ public class ConfigurationLoader {
      * @throws ConfigurationException if loading fails
      */
     public YamlRuleConfiguration loadFromFileWithoutValidation(String filePath) throws ConfigurationException {
-        return loadFromFileWithoutProcessing(new File(filePath));
+        return referenceResolver.loadFromFileWithoutProcessing(new File(filePath));
     }
 
     /**
@@ -1365,43 +528,6 @@ public class ConfigurationLoader {
     }
 
     /**
-     * Convert external data-source configuration to YamlDataSource.
-     */
-    private YamlDataSource convertExternalToYamlDataSource(ExternalDataSourceConfig externalConfig, YamlDataSourceRef ref) {
-        YamlDataSource yamlDataSource = new YamlDataSource();
-
-        // Use the reference name, not the external config name
-        yamlDataSource.setName(ref.getName());
-
-        // Map from external config spec
-        if (externalConfig.getSpec() != null) {
-            yamlDataSource.setType(externalConfig.getSpec().getType());
-            yamlDataSource.setSourceType(externalConfig.getSpec().getSourceType());
-            yamlDataSource.setEnabled(externalConfig.getSpec().getEnabled());
-            yamlDataSource.setConnection(externalConfig.getSpec().getConnection());
-            yamlDataSource.setQueries(externalConfig.getSpec().getQueries());
-            yamlDataSource.setCache(externalConfig.getSpec().getCache());
-
-            // Handle parameters - convert from Map to String array if needed
-            if (externalConfig.getSpec().getParameters() != null) {
-                Map<String, Object> params = externalConfig.getSpec().getParameters();
-                if (params.keySet() != null) {
-                    yamlDataSource.setParameterNames(params.keySet().toArray(new String[0]));
-                }
-            }
-        }
-
-        // Use description from reference if available, otherwise from external config
-        String description = ref.getDescription();
-        if (description == null && externalConfig.getMetadata() != null) {
-            description = externalConfig.getMetadata().getDescription();
-        }
-        yamlDataSource.setDescription(description);
-
-        return yamlDataSource;
-    }
-
-    /**
      * Validate the loaded configuration.
      *
      * @param config The configuration to validate
@@ -1412,10 +538,10 @@ public class ConfigurationLoader {
             throw new ConfigurationException("Configuration is null");
         }
 
-        // Step 1: Validate individual components
-        validateRules(config);
-        validateRuleGroups(config);
-        validateCategories(config);
+        // Step 1: Validate individual components (inline validation)
+        inlineValidator.validateRules(config);
+        inlineValidator.validateRuleGroups(config);
+        inlineValidator.validateCategories(config);
         dataSourceValidator.validate(config);
         ruleChainValidator.validate(config);
 
@@ -1433,84 +559,6 @@ public class ConfigurationLoader {
         validateNoUnresolvedPlaceholdersInConfiguration(config);
 
         logger.debug("Configuration validation completed successfully");
-    }
-
-    /**
-     * Validate all rules in the configuration.
-     */
-    private void validateRules(YamlRuleConfiguration config) throws ConfigurationException {
-        if (config.getRules() != null) {
-            for (YamlRule rule : config.getRules()) {
-                validateRule(rule);
-            }
-        }
-    }
-
-    /**
-     * Validate a rule configuration.
-     */
-    private void validateRule(YamlRule rule) throws ConfigurationException {
-        if (rule.getId() == null || rule.getId().trim().isEmpty()) {
-            throw new ConfigurationException("Rule ID is required");
-        }
-        if (rule.getName() == null || rule.getName().trim().isEmpty()) {
-            throw new ConfigurationException("Rule name is required for rule: " + rule.getId());
-        }
-        if (rule.getCondition() == null || rule.getCondition().trim().isEmpty()) {
-            throw new ConfigurationException("Rule condition is required for rule: " + rule.getId());
-        }
-
-        // Validate severity if present
-        if (rule.getSeverity() != null) {
-            String severity = rule.getSeverity().trim().toUpperCase();
-            if (!SeverityConstants.VALID_SEVERITIES.contains(severity)) {
-                throw new ConfigurationException("Rule '" + rule.getId() + "' has invalid severity '" +
-                    rule.getSeverity() + "'. Must be one of: " + String.join(", ", SeverityConstants.VALID_SEVERITIES));
-            }
-        }
-    }
-
-    /**
-     * Validate all rule groups in the configuration.
-     */
-    private void validateRuleGroups(YamlRuleConfiguration config) throws ConfigurationException {
-        if (config.getRuleGroups() != null) {
-            for (YamlRuleGroup group : config.getRuleGroups()) {
-                validateRuleGroup(group);
-            }
-        }
-    }
-
-    /**
-     * Validate a rule group configuration.
-     */
-    private void validateRuleGroup(YamlRuleGroup group) throws ConfigurationException {
-        if (group.getId() == null || group.getId().trim().isEmpty()) {
-            throw new ConfigurationException("Rule group ID is required");
-        }
-        if (group.getName() == null || group.getName().trim().isEmpty()) {
-            throw new ConfigurationException("Rule group name is required for group: " + group.getId());
-        }
-    }
-
-    /**
-     * Validate all categories in the configuration.
-     */
-    private void validateCategories(YamlRuleConfiguration config) throws ConfigurationException {
-        if (config.getCategories() != null) {
-            for (YamlCategory category : config.getCategories()) {
-                validateCategory(category);
-            }
-        }
-    }
-
-    /**
-     * Validate a category configuration.
-     */
-    private void validateCategory(YamlCategory category) throws ConfigurationException {
-        if (category.getName() == null || category.getName().trim().isEmpty()) {
-            throw new ConfigurationException("Category name is required");
-        }
     }
 
     // ========================================================================
