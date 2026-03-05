@@ -94,6 +94,12 @@ public class RuleChainExecutor {
         } else if ("result-based-routing".equals(chain.getPattern())) {
             logger.debug("processRuleChain() - executing result-based-routing pattern");
             return executeResultBasedRoutingPattern(chain, yamlConfig, data, contextFactory, enrichmentGroupIndex);
+        } else if ("sequential-dependency".equals(chain.getPattern())) {
+            logger.debug("processRuleChain() - executing sequential-dependency pattern");
+            return executeSequentialDependencyPattern(chain, yamlConfig, data, contextFactory);
+        } else if ("accumulative-chaining".equals(chain.getPattern())) {
+            logger.debug("processRuleChain() - executing accumulative-chaining pattern");
+            return executeAccumulativeChainingPattern(chain, yamlConfig, data, contextFactory);
         } else {
             logger.warn("Rule chain pattern '{}' not yet supported", chain.getPattern());
             return RuleResult.noMatch(chainId, "Pattern not supported: " + chain.getPattern(), SeverityConstants.INFO);
@@ -312,6 +318,210 @@ public class RuleChainExecutor {
         }
     }
     
+    /**
+     * Execute a rule chain with the 'sequential-dependency' pattern.
+     *
+     * <p>Processes stages in order, where each stage evaluates a rule and stores
+     * the result in an output-variable. Subsequent stages can reference output
+     * variables from earlier stages in their conditions.</p>
+     *
+     * @param chain The rule chain to execute
+     * @param yamlConfig The YAML configuration containing rule definitions
+     * @param data The data to evaluate
+     * @param contextFactory Function to create evaluation context
+     * @return RuleResult from execution
+     */
+    @SuppressWarnings("unchecked")
+    private RuleResult executeSequentialDependencyPattern(YamlRuleChain chain,
+                                                         YamlRuleConfiguration yamlConfig,
+                                                         Map<String, Object> data,
+                                                         java.util.function.Function<Map<String, Object>, StandardEvaluationContext> contextFactory) {
+        Map<String, Object> config = chain.getConfiguration();
+        if (config == null) {
+            return RuleResult.error(chain.getId(), "Missing configuration for rule chain");
+        }
+
+        List<Map<String, Object>> stages = (List<Map<String, Object>>) config.get("stages");
+        if (stages == null || stages.isEmpty()) {
+            return RuleResult.error(chain.getId(), "Missing or empty 'stages' for sequential-dependency pattern");
+        }
+
+        logger.info("Executing sequential-dependency chain '{}' with {} stages", chain.getName(), stages.size());
+
+        for (int i = 0; i < stages.size(); i++) {
+            Map<String, Object> stage = stages.get(i);
+            String ruleRef = (String) stage.get("rule");
+            String outputVariable = (String) stage.get("output-variable");
+
+            if (ruleRef == null || ruleRef.isEmpty()) {
+                return RuleResult.error(chain.getId(), "Stage " + (i + 1) + " missing 'rule' reference");
+            }
+
+            // Find the referenced rule in the YAML config rules section
+            Rule rule = findRuleInConfig(yamlConfig, ruleRef);
+            if (rule == null) {
+                return RuleResult.error(chain.getId(), "Rule not found for stage " + (i + 1) + ": " + ruleRef);
+            }
+
+            logger.info("Executing stage {} of {}: rule '{}'{}", 
+                        i + 1, stages.size(), ruleRef,
+                        outputVariable != null ? " → " + outputVariable : "");
+
+            // Evaluate the rule against current data (which includes output-variables from prior stages)
+            RuleResult stageResult = unifiedEvaluator.evaluateRule(rule, data);
+
+            // Store result in output-variable if configured
+            if (outputVariable != null && !outputVariable.isEmpty()) {
+                data.put(outputVariable, stageResult.isTriggered());
+                logger.debug("Stored output-variable '{}' = {}", outputVariable, stageResult.isTriggered());
+            }
+
+            // If a stage fails, stop the chain (sequential dependency semantics)
+            if (!stageResult.isTriggered()) {
+                logger.info("Sequential-dependency chain '{}' stopped at stage {} (rule '{}')", 
+                           chain.getName(), i + 1, ruleRef);
+                return RuleResult.noMatch(chain.getId(), 
+                    "Sequential dependency stopped at stage " + (i + 1) + ": " + ruleRef, 
+                    SeverityConstants.INFO);
+            }
+        }
+
+        logger.info("Sequential-dependency chain '{}' completed all {} stages successfully", 
+                    chain.getName(), stages.size());
+        return RuleResult.match(chain.getId(), "All " + stages.size() + " stages completed successfully");
+    }
+
+    /**
+     * Execute a rule chain with the 'accumulative-chaining' pattern.
+     *
+     * <p>Evaluates each accumulation rule and accumulates a score based on configured
+     * weights. If a rule matches, its weight is added to the accumulator. The final
+     * accumulated score is stored in the accumulator-variable. An optional decision-rule
+     * is evaluated against the final score to produce the chain outcome.</p>
+     *
+     * @param chain The rule chain to execute
+     * @param yamlConfig The YAML configuration containing rule definitions
+     * @param data The data to evaluate
+     * @param contextFactory Function to create evaluation context
+     * @return RuleResult from execution
+     */
+    @SuppressWarnings("unchecked")
+    private RuleResult executeAccumulativeChainingPattern(YamlRuleChain chain,
+                                                         YamlRuleConfiguration yamlConfig,
+                                                         Map<String, Object> data,
+                                                         java.util.function.Function<Map<String, Object>, StandardEvaluationContext> contextFactory) {
+        Map<String, Object> config = chain.getConfiguration();
+        if (config == null) {
+            return RuleResult.error(chain.getId(), "Missing configuration for rule chain");
+        }
+
+        // Support both "accumulator-variable" (validator) and "accumulator" (YAML Reference) keys
+        String accumulatorVariable = (String) config.get("accumulator-variable");
+        if (accumulatorVariable == null) {
+            accumulatorVariable = "accumulatedScore";
+        }
+
+        // Parse initial accumulator value (defaults to 0)
+        double accumulator = 0.0;
+        Object initialValue = config.get("accumulator");
+        if (initialValue != null) {
+            try {
+                accumulator = Double.parseDouble(initialValue.toString());
+            } catch (NumberFormatException e) {
+                logger.warn("Invalid accumulator initial value '{}', defaulting to 0", initialValue);
+            }
+        }
+
+        List<Map<String, Object>> accumulationRules = (List<Map<String, Object>>) config.get("accumulation-rules");
+        if (accumulationRules == null || accumulationRules.isEmpty()) {
+            return RuleResult.error(chain.getId(), "Missing or empty 'accumulation-rules' for accumulative-chaining pattern");
+        }
+
+        logger.info("Executing accumulative-chaining chain '{}' with {} rules, initial score: {}",
+                    chain.getName(), accumulationRules.size(), accumulator);
+
+        for (int i = 0; i < accumulationRules.size(); i++) {
+            Map<String, Object> accRule = accumulationRules.get(i);
+            String ruleRef = (String) accRule.get("rule");
+            Number weightNum = (Number) accRule.get("weight");
+            double weight = weightNum != null ? weightNum.doubleValue() : 0.0;
+
+            if (ruleRef == null || ruleRef.isEmpty()) {
+                return RuleResult.error(chain.getId(), "Accumulation rule " + (i + 1) + " missing 'rule' reference");
+            }
+
+            Rule rule = findRuleInConfig(yamlConfig, ruleRef);
+            if (rule == null) {
+                return RuleResult.error(chain.getId(), "Rule not found for accumulation rule " + (i + 1) + ": " + ruleRef);
+            }
+
+            RuleResult ruleResult = unifiedEvaluator.evaluateRule(rule, data);
+
+            if (ruleResult.isTriggered()) {
+                accumulator += weight;
+                logger.info("Rule '{}' matched: weight {} applied, accumulated score: {}", ruleRef, weight, accumulator);
+            } else {
+                logger.info("Rule '{}' did not match: weight {} not applied, score remains: {}", ruleRef, weight, accumulator);
+            }
+        }
+
+        // Store accumulated score in data for decision-rule and enrichments
+        data.put(accumulatorVariable, accumulator);
+        logger.info("Final accumulated score stored in '{}': {}", accumulatorVariable, accumulator);
+
+        // Evaluate optional decision-rule
+        String decisionRuleRef = (String) config.get("decision-rule");
+        if (decisionRuleRef != null && !decisionRuleRef.isEmpty()) {
+            Rule decisionRule = findRuleInConfig(yamlConfig, decisionRuleRef);
+            if (decisionRule == null) {
+                return RuleResult.error(chain.getId(), "Decision rule not found: " + decisionRuleRef);
+            }
+
+            RuleResult decisionResult = unifiedEvaluator.evaluateRule(decisionRule, data);
+            if (decisionResult.isTriggered()) {
+                logger.info("Decision rule '{}' passed with accumulated score {}", decisionRuleRef, accumulator);
+                return RuleResult.match(chain.getId(), "Accumulative score " + accumulator + " — decision rule passed");
+            } else {
+                logger.info("Decision rule '{}' failed with accumulated score {}", decisionRuleRef, accumulator);
+                return RuleResult.noMatch(chain.getId(),
+                    "Accumulative score " + accumulator + " — decision rule failed", SeverityConstants.INFO);
+            }
+        }
+
+        // No decision-rule: return match with the accumulated score as the result
+        return RuleResult.match(chain.getId(), "Accumulated score: " + accumulator);
+    }
+
+    /**
+     * Find a Rule object by ID from the YAML configuration's rules section.
+     *
+     * @param yamlConfig The YAML configuration
+     * @param ruleId The rule ID to find
+     * @return The Rule object if found, null otherwise
+     */
+    private Rule findRuleInConfig(YamlRuleConfiguration yamlConfig, String ruleId) {
+        if (yamlConfig.getRules() != null) {
+            for (var yamlRule : yamlConfig.getRules()) {
+                if (ruleId.equals(yamlRule.getId())) {
+                    return new Rule(
+                        yamlRule.getId(),
+                        Collections.singleton(new Category("default", 100)),
+                        yamlRule.getName() != null ? yamlRule.getName() : "Rule-" + yamlRule.getId(),
+                        yamlRule.getCondition(),
+                        yamlRule.getMessage(),
+                        yamlRule.getMessage(),
+                        100,
+                        yamlRule.getSeverity() != null ? yamlRule.getSeverity() : SeverityConstants.INFO,
+                        null, null, null, null, null,
+                        yamlRule.getResultField(),
+                        null, true
+                    );
+                }
+            }
+        }
+        return null;
+    }
+
     /**
      * Find an enrichment group by ID using the pre-built index.
      *

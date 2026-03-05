@@ -1,0 +1,86 @@
+# ==================================================================================
+# ACCUMULATIVE CHAINING PATTERN TEST CONFIGURATION
+# ==================================================================================
+# This configuration demonstrates the "Accumulative Chaining" rule chain pattern.
+#
+# The pattern evaluates multiple rules and accumulates a score based on configured
+# weights. If a rule matches, its weight is added to the accumulator. An optional
+# decision-rule evaluates the final score to produce the chain outcome.
+#
+# Business Scenario: Credit Risk Scoring
+# ----------------------------------------
+# A counterparty is scored across multiple risk factors:
+#   +30  High credit rating (AAA/AA)
+#   +20  Low debt-to-income ratio (< 0.3)
+#   +15  Long trading history (> 5 years)
+#   -25  Recent default event
+#   -10  High exposure concentration (> 50%)
+#
+# Decision: Approve if accumulated score >= 30
+# ==================================================================================
+metadata:
+  name: "Accumulative Chaining Pattern Test"
+  description: "Verifies the accumulative-chaining rule chain pattern with weighted scoring"
+  version: "1.0"
+  type: "rule-config"
+  author: "apex.demo.team@company.com"
+  created: "2026-03-05"
+
+# Rules referenced by the accumulative-chaining stages
+rules:
+  - id: "high-credit-rating"
+    name: "High Credit Rating Check"
+    condition: "#creditRating == 'AAA' || #creditRating == 'AA'"
+    message: "Counterparty has high credit rating"
+    severity: "INFO"
+
+  - id: "low-debt-ratio"
+    name: "Low Debt-to-Income Ratio"
+    condition: "#debtToIncomeRatio < 0.3"
+    message: "Counterparty has low debt-to-income ratio"
+    severity: "INFO"
+
+  - id: "long-trading-history"
+    name: "Long Trading History"
+    condition: "#tradingYears > 5"
+    message: "Counterparty has long trading history"
+    severity: "INFO"
+
+  - id: "recent-default"
+    name: "Recent Default Event"
+    condition: "#hasRecentDefault == true"
+    message: "Counterparty has a recent default event"
+    severity: "WARNING"
+
+  - id: "high-exposure"
+    name: "High Exposure Concentration"
+    condition: "#exposureConcentration > 0.5"
+    message: "Counterparty has high exposure concentration"
+    severity: "WARNING"
+
+  - id: "approve-counterparty"
+    name: "Approve Counterparty"
+    condition: "#riskScore >= 30"
+    message: "Counterparty approved with sufficient risk score"
+    severity: "INFO"
+
+rule-chains:
+  - id: "credit-risk-scoring"
+    name: "Credit Risk Scoring Chain"
+    description: "Accumulates a risk score from multiple factors and makes approval decision"
+    pattern: "accumulative-chaining"
+    configuration:
+      accumulator: "0"
+      accumulator-variable: "riskScore"
+      accumulation-rules:
+        - rule: "high-credit-rating"
+          weight: 30
+        - rule: "low-debt-ratio"
+          weight: 20
+        - rule: "long-trading-history"
+          weight: 15
+        - rule: "recent-default"
+          weight: -25
+        - rule: "high-exposure"
+          weight: -10
+      decision-rule: "approve-counterparty"
