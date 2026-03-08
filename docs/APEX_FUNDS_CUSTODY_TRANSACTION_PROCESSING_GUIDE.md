@@ -1,4 +1,4 @@
-![APEX System Logo](APEX%20System%20logo.png)
+<img src="APEX%20System%20logo.png" alt="APEX System Logo" width="200">
 
 # APEX Funds and Custody Transaction Processing Business Requirements and Implementation_Guide
 
