@@ -33,6 +33,9 @@ pipeline:
 
   # Pipeline-level retry config (no step-level override)
   execution:
+    mode: "sequential"
+    error-handling: "stop-on-error"
+    # max-retries is retries AFTER initial attempt (2 => up to 3 total attempts)
     max-retries: 2
     retry-delay-ms: 150
 
@@ -41,5 +44,6 @@ pipeline:
       type: "extract"
       source: "retry-test-source"
       operation: "getAllRecords"
+      optional: false
       description: "Extract using pipeline-level retry configuration"
       # No step-level retry - uses pipeline-level
