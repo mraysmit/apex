@@ -4824,7 +4824,29 @@
                 const retryDelayMs = parseInt(block.getFieldValue('RETRY_DELAY_MS'));
                 const collectMetrics = block.getFieldValue('COLLECT_METRICS') === 'TRUE';
 
-                const pipelineObj = {
+                let metadata = null;
+                if (block.data) {
+                    try {
+                        const parsedData = JSON.parse(block.data);
+                        if (parsedData && parsedData.metadata && typeof parsedData.metadata === 'object') {
+                            metadata = parsedData.metadata;
+                        }
+                    } catch (e) {
+                        console.warn('Failed to parse pipeline block metadata from block.data', e);
+                    }
+                }
+
+                const pipelineObj = metadata ? {
+                    metadata: metadata,
+                    pipeline: {
+                        id: id,
+                        mode: mode,
+                        "error-handling": errorHandling,
+                        "max-retries": maxRetries,
+                        "retry-delay-ms": retryDelayMs,
+                        "collect-metrics": collectMetrics
+                    }
+                } : {
                     pipeline: {
                         id: id,
                         mode: mode,
@@ -7459,7 +7481,7 @@
                         createPipelineConfigBlock(config);
                     } else {
                         const configType = config.metadata.type || 'rule-config';
-                        if (configType === 'data-source-config') {
+                        if (configType === 'data-source-config' || configType === 'external-data-config') {
                             createDataSourceConfigBlock(config);
                         } else if (configType === 'scenario') {
                             createScenarioConfigBlock(config);
@@ -7969,6 +7991,11 @@
             function createPipelineConfigBlock(config) {
                 const pipeline = config.pipeline || {};
                 const block = workspace.newBlock('apex_pipeline_config');
+                const metadata = config.metadata || {};
+
+                // Preserve pipeline metadata for round-trip export even though
+                // apex_pipeline_config fields model execution settings only.
+                block.data = JSON.stringify({ metadata: metadata });
 
                 block.setFieldValue(pipeline.id || 'imported-pipeline', 'ID');
                 block.setFieldValue(pipeline.mode || 'sequential', 'MODE');

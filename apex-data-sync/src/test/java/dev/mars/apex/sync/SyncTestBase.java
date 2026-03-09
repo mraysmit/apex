@@ -23,6 +23,7 @@ import dev.mars.apex.core.config.loader.ConfigurationLoader;
 import dev.mars.apex.engine.core.RulesEngineConfiguration;
 import dev.mars.apex.core.service.data.external.database.JdbcTemplateFactory;
 import dev.mars.apex.core.service.data.external.factory.DataSourceFactory;
+import dev.mars.apex.core.service.data.external.registry.DataSourceRegistry;
 import dev.mars.apex.engine.core.ExpressionEvaluatorService;
 import dev.mars.apex.core.service.lookup.LookupServiceRegistry;
 import org.junit.jupiter.api.AfterEach;
@@ -103,6 +104,14 @@ public abstract class SyncTestBase {
             logger.warn("Error clearing JdbcTemplateFactory cache", e);
         }
 
+        // Clear DataSourceRegistry singleton to avoid cross-test datasource type/config bleed.
+        try {
+            DataSourceRegistry.getInstance().clear();
+            logger.info("DataSourceRegistry cleared for test isolation");
+        } catch (Exception e) {
+            logger.warn("Error clearing DataSourceRegistry", e);
+        }
+
         // Initialize real APEX services
         this.yamlLoader = new ConfigurationLoader();
         this.serviceRegistry = new LookupServiceRegistry();
@@ -135,6 +144,14 @@ public abstract class SyncTestBase {
             logger.info("DataSourceFactory cache cleared for test isolation");
         } catch (Exception e) {
             logger.warn("Error clearing DataSourceFactory cache", e);
+        }
+
+        // Also clear DataSourceRegistry after each test to ensure clean singleton state.
+        try {
+            DataSourceRegistry.getInstance().clear();
+            logger.info("DataSourceRegistry cleared for test isolation");
+        } catch (Exception e) {
+            logger.warn("Error clearing DataSourceRegistry", e);
         }
 
         // Shutdown H2 database to release locks and close connections

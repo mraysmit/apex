@@ -7,13 +7,26 @@ metadata:
   author: "APEX Demo Team"
 
 error-recovery:
-  default-action: "CONTINUE"
+  enabled: true
+  log-recovery-attempts: true
+  metrics-enabled: false
+  default-strategy: "CONTINUE_WITH_DEFAULT"
   severity-policies:
-    - severity: "ERROR"
-      action: "FAIL"
-      max-errors: 0
-    
-    - severity: "WARNING"
-      action: "CONTINUE"
-      max-errors: 10
-      log-level: "WARN"
+    ERROR:
+      recovery-enabled: false
+      strategy: "FAIL_FAST"
+      max-retries: 0
+      retry-delay: 0
+
+    WARNING:
+      recovery-enabled: true
+      strategy: "CONTINUE_WITH_DEFAULT"
+      max-retries: 1
+      retry-delay: 100
+
+rules:
+  - id: "error-recovery-placeholder"
+    name: "Error Recovery Placeholder"
+    condition: "#amount != null"
+    message: "Amount field is present"
+    severity: "INFO"

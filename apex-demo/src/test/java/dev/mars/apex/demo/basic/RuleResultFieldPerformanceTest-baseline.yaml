@@ -1,0 +1,59 @@
+# Baseline configuration for result-field performance comparison
+# Same logical rules as RuleResultFieldPerformanceTest.yaml, but without result-field assignments
+
+metadata:
+  name: "Rule Result Field Performance Baseline Configuration"
+  version: "1.0.0"
+  description: "Baseline performance validation without result-field feature"
+  type: "rule-config"
+  author: "apex-demo"
+
+rules:
+  - id: "check-high-value"
+    name: "Check High Value Trade"
+    condition: "#notionalAmount != null && #notionalAmount > 10000000"
+    message: "Trade is high value"
+    severity: "INFO"
+
+  - id: "check-region"
+    name: "Check Region"
+    condition: "#region != null && (#region == 'APAC' || #region == 'EMEA' || #region == 'AMER')"
+    message: "Valid region"
+    severity: "INFO"
+
+  - id: "check-counterparty"
+    name: "Check Counterparty"
+    condition: "#counterparty != null && #counterparty.length() > 0"
+    message: "Counterparty present"
+    severity: "INFO"
+
+  # Keep this rule independent in baseline (no dependency on result-field)
+  - id: "check-approval-required"
+    name: "Check Approval Required"
+    condition: "#notionalAmount != null && #notionalAmount > 10000000"
+    message: "Trade requires approval"
+    severity: "WARNING"
+
+  - id: "check-credit-rating"
+    name: "Check Credit Rating"
+    condition: "#creditRating != null && (#creditRating == 'AAA' || #creditRating == 'AA' || #creditRating == 'A')"
+    message: "Good credit rating"
+    severity: "INFO"
+
+  - id: "check-trade-type"
+    name: "Check Trade Type"
+    condition: "#tradeType != null"
+    message: "Trade type present"
+    severity: "INFO"
+
+  - id: "check-amount-positive"
+    name: "Check Amount Positive"
+    condition: "#notionalAmount != null && #notionalAmount > 0"
+    message: "Amount is positive"
+    severity: "INFO"
+
+  - id: "check-region-not-empty"
+    name: "Check Region Not Empty"
+    condition: "#region != null && #region.length() > 0"
+    message: "Region is not empty"
+    severity: "INFO"

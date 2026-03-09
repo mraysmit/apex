@@ -306,7 +306,7 @@ public class YamlImportComprehensiveTest extends BaseYamlImportSeleniumTest {
 
         importYamlContent(yamlContent);
 
-        verifyBlockExists("apex_rule_config", 1, "Should have 1 Rule Configuration block");
+        verifyBlockExists("apex_pipeline_config", 1, "Should have 1 Pipeline Configuration block");
     }
 
     // ========== RULE GROUP TESTS (Tests 21-25) ==========
@@ -373,7 +373,7 @@ public class YamlImportComprehensiveTest extends BaseYamlImportSeleniumTest {
 
         importYamlContent(yamlContent);
 
-        verifyBlockExists("apex_rule_config", 1, "Should have 1 Rule Configuration block");
+        verifyBlockExists("apex_pipeline_config", 1, "Should have 1 Pipeline Configuration block");
     }
 
     // ========== CONDITIONAL LOGIC TESTS (Tests 26-30) ==========

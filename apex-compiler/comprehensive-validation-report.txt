@@ -3,17 +3,17 @@ COMPREHENSIVE APEX YAML VALIDATION REPORT
 
 OVERALL STATISTICS:
   Total YAML files: 247
-  Fully valid files: 185
-  Structurally valid: 185
+  Fully valid files: 186
+  Structurally valid: 186
   Dependency issues only: 0
-  Invalid files: 62
+  Invalid files: 61
 
 SUCCESS RATES:
-  Overall success rate: 74.9%
-  Structural success rate: 74.9%
+  Overall success rate: 75.3%
+  Structural success rate: 75.3%
 
 ERROR BREAKDOWN:
-  Other Issues: 33 occurrences
+  Other Issues: 32 occurrences
   Document Type Issues: 20 occurrences
   Missing Required Fields: 11 occurrences
 
@@ -30,18 +30,18 @@ SAMPLE VALID FILES:
   • enrichment-references.yaml
 
 SAMPLE INVALID FILES:
-  • circular-classpath-a.yaml - ..\apex-core\src\test\resources\component-classpath-test\circular-classpath-a.yaml: Invalid document type: component. Valid types: [scenario, rule-chain, rule-config, enrichment, external-data-config, dataset, scenario-registry, pipeline-config]
-  • circular-classpath-b.yaml - ..\apex-core\src\test\resources\component-classpath-test\circular-classpath-b.yaml: Invalid document type: component. Valid types: [scenario, rule-chain, rule-config, enrichment, external-data-config, dataset, scenario-registry, pipeline-config]
-  • nested-child.yaml - ..\apex-core\src\test\resources\component-classpath-test\nested-child.yaml: Invalid document type: component. Valid types: [scenario, rule-chain, rule-config, enrichment, external-data-config, dataset, scenario-registry, pipeline-config]
-  • nested-parent.yaml - ..\apex-core\src\test\resources\component-classpath-test\nested-parent.yaml: Invalid document type: component. Valid types: [scenario, rule-chain, rule-config, enrichment, external-data-config, dataset, scenario-registry, pipeline-config]
-  • stream-load-component.yaml - ..\apex-core\src\test\resources\component-classpath-test\stream-load-component.yaml: Invalid document type: component. Valid types: [scenario, rule-chain, rule-config, enrichment, external-data-config, dataset, scenario-registry, pipeline-config]
-  • circular-a.yaml - ..\apex-core\src\test\resources\config\circular-a.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
-  • circular-b.yaml - ..\apex-core\src\test\resources\config\circular-b.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
-  • classpath-external.yaml - ..\apex-core\src\test\resources\config\classpath-external.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
-  • classpath-main.yaml - ..\apex-core\src\test\resources\config\classpath-main.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
-  • mixed-classpath.yaml - ..\apex-core\src\test\resources\config\mixed-classpath.yaml: Document type 'external-data-config' requires at least one of: [configuration, dataSources]
+  • circular-classpath-a.yaml - ..\apex-core\src\test\resources\component-classpath-test\circular-classpath-a.yaml: Invalid document type: component. Valid types: [external-data-config, enrichment, rule-config, rule-chain, scenario, pipeline-config, scenario-registry, dataset]
+  • circular-classpath-b.yaml - ..\apex-core\src\test\resources\component-classpath-test\circular-classpath-b.yaml: Invalid document type: component. Valid types: [external-data-config, enrichment, rule-config, rule-chain, scenario, pipeline-config, scenario-registry, dataset]
+  • nested-child.yaml - ..\apex-core\src\test\resources\component-classpath-test\nested-child.yaml: Invalid document type: component. Valid types: [external-data-config, enrichment, rule-config, rule-chain, scenario, pipeline-config, scenario-registry, dataset]
+  • nested-parent.yaml - ..\apex-core\src\test\resources\component-classpath-test\nested-parent.yaml: Invalid document type: component. Valid types: [external-data-config, enrichment, rule-config, rule-chain, scenario, pipeline-config, scenario-registry, dataset]
+  • stream-load-component.yaml - ..\apex-core\src\test\resources\component-classpath-test\stream-load-component.yaml: Invalid document type: component. Valid types: [external-data-config, enrichment, rule-config, rule-chain, scenario, pipeline-config, scenario-registry, dataset]
+  • circular-a.yaml - ..\apex-core\src\test\resources\config\circular-a.yaml: Document type 'external-data-config' requires at least one of: [dataSources, configuration]
+  • circular-b.yaml - ..\apex-core\src\test\resources\config\circular-b.yaml: Document type 'external-data-config' requires at least one of: [dataSources, configuration]
+  • classpath-external.yaml - ..\apex-core\src\test\resources\config\classpath-external.yaml: Document type 'external-data-config' requires at least one of: [dataSources, configuration]
+  • classpath-main.yaml - ..\apex-core\src\test\resources\config\classpath-main.yaml: Document type 'external-data-config' requires at least one of: [dataSources, configuration]
+  • mixed-classpath.yaml - ..\apex-core\src\test\resources\config\mixed-classpath.yaml: Document type 'external-data-config' requires at least one of: [dataSources, configuration]
 
 BULK FIX IMPACT ASSESSMENT:
   Previous estimated rate: 21.3%
-  Current actual rate: 74.9%
-  Improvement: +53.6 percentage points
+  Current actual rate: 75.3%
+  Improvement: +54.0 percentage points
